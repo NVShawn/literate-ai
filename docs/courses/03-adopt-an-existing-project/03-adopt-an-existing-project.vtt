@@ -1,0 +1,145 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:04.134
+Sam: You're going to rewrite a popular C plus plus library
+automatically?
+
+00:00:04.292 --> 00:00:07.819
+LitAI: This course shows phased adoption of an existing repository.
+
+00:00:07.969 --> 00:00:14.831
+LitAI: The goal is useful evidence now, with no fiction that old
+source instantly becomes specification-led or safe to discard.
+
+00:00:14.981 --> 00:00:19.728
+LitAI: These are edited transcript replays of real sessions, not raw
+screen recordings.
+
+00:00:19.898 --> 00:00:22.030
+LitAI: Remote-worker steps are a walkthrough.
+
+00:00:22.190 --> 00:00:27.244
+LitAI: Before converting, preserve a recovery point and identify any
+sensitive material.
+
+00:00:27.398 --> 00:00:34.979
+LitAI: Conversion is a real repository mutation, so inspect the plan
+first and authorize the apply only after reviewing its effects.
+
+00:00:35.148 --> 00:00:37.579
+Sam: I already have a Makefile and CMake.
+
+00:00:37.731 --> 00:00:39.069
+Sam: What will you discover?
+
+00:00:39.231 --> 00:00:49.027
+LitAI: Our actual demo uses TinyXML2, a public C plus plus XML parser,
+pinned at Git commit 8224e427.
+
+00:00:49.190 --> 00:00:56.116
+LitAI: Read-only adopt detected C plus plus, Python, CMake, CTest, and
+no catalog gaps.
+
+00:00:56.273 --> 00:00:59.509
+LitAI: It also proposed the source moves before writing anything.
+
+00:00:59.659 --> 00:01:03.894
+LitAI: After acknowledgement, the harness wraps the tree and records
+what it preserved.
+
+00:01:04.044 --> 00:01:05.623
+LitAI: The first stage is wrapped.
+
+00:01:05.794 --> 00:01:11.642
+LitAI: Original source remains release authority; the new
+specification surface is not yet a replacement.
+
+00:01:11.794 --> 00:01:18.853
+LitAI: The conversion harness actually ran TinyXML2's existing CMake
+build and CTest command in disposable custody.
+
+00:01:19.003 --> 00:01:23.415
+LitAI: The library and xmltest built, and CTest reported one passing
+test.
+
+00:01:23.565 --> 00:01:27.371
+LitAI: This preserves a concrete baseline, not just a diagram.
+
+00:01:27.523 --> 00:01:28.963
+Sam: CTest passed.
+
+00:01:29.113 --> 00:01:31.089
+Sam: Why won't you mark it retained?
+
+00:01:31.239 --> 00:01:38.039
+LitAI: Our first retained run failed even though CTest passed: the old
+parser did not recognize the newer all-passed summary.
+
+00:01:38.198 --> 00:01:44.086
+LitAI: We fixed the framework adapter and tested both summary formats,
+including zero and unknown counts.
+
+00:01:44.239 --> 00:01:48.756
+LitAI: The real TinyXML2 rerun now produces an exact one-test receipt.
+
+00:01:48.906 --> 00:01:51.206
+Sam: Couldn't you just ignore that counting error?
+
+00:01:51.364 --> 00:01:53.410
+LitAI: We did not ignore the counting error.
+
+00:01:53.573 --> 00:02:03.101
+LitAI: After fixing it, we reran the actual CMake and CTest harness,
+published its finalized receipt, and advanced TinyXML2 from wrapped to
+retained.
+
+00:02:03.251 --> 00:02:05.756
+LitAI: Original source remains release authority.
+
+00:02:05.918 --> 00:02:10.645
+LitAI: We have not claimed drafted, qualified, or specification-led
+shipping.
+
+00:02:10.795 --> 00:02:17.199
+LitAI: Next, derive candidate specifications from the existing source,
+then review them as product intent.
+
+00:02:17.349 --> 00:02:19.437
+LitAI: This is a draft, not proof.
+
+00:02:19.599 --> 00:02:25.420
+LitAI: Move one Component boundary at a time and keep the original
+implementation available for parity checks.
+
+00:02:25.570 --> 00:02:30.049
+LitAI: Qualification compares clean regenerations against the retained
+baseline.
+
+00:02:30.199 --> 00:02:33.806
+LitAI: Historical clean runs alone do not transfer release authority.
+
+00:02:33.956 --> 00:02:40.288
+LitAI: Only current, trusted lifecycle evidence bound to the exact
+lock can authorize specification authority.
+
+00:02:40.456 --> 00:02:49.895
+LitAI: The first benefits arrive before any rewrite: a visible
+baseline, explicit catalog gaps, and a precise explanation when test
+evidence is incomplete.
+
+00:02:50.045 --> 00:02:55.479
+LitAI: Teams can review intent and agent changes without losing the
+ability to run the old application.
+
+00:02:55.629 --> 00:02:59.100
+Sam: So when do I actually get to ship from the specification?
+
+00:02:59.254 --> 00:03:05.044
+LitAI: Adoption is not an automatic source-to-specification rewrite,
+nor a promise of instant speedups.
+
+00:03:05.212 --> 00:03:13.862
+LitAI: The pragmatic path is to retain working behavior, build
+evidence one boundary at a time, and promote authority only when the
+independent gates pass.
+

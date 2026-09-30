@@ -123,6 +123,10 @@ litai config channel-parse
 litai work record
 litai work close
 litai document verify
+litai video init
+litai video plan
+litai video build
+litai video verify
 litai worker verify-model
 litai worker resolve-nvidia
 litai worker probe
@@ -439,6 +443,10 @@ root-integration acceptance still remain.
 | `work close ID [--project PATH]` | Close one work item only after every implementation and evidence checkbox is complete. |
 | `worker resolve-nvidia --compatibility FILE --worker-id ID --python-abi ABI [--observations FILE] [--toolkit VERSION] [--package NAME==VERSION]` | Select the oldest compatible exact stack from retained primary-source authority and a typed worker observation; never fetch or infer compatibility. |
 | `document verify --manifest FILE --component FILE` | Run the packaged independent document-pair structural, access, credential, geometry, notes, and placeholder acceptance oracle. |
+| `video init MANIFEST` | Create an editable two-speaker course manifest without overwriting an existing file. |
+| `video plan MANIFEST` | Validate scenes and bind referenced local media and evidence without running demo commands. |
+| `video build MANIFEST --output DIR --font FILE [--narration recorded\|say\|espeak]` | Render a new MP4, embedded subtitles, SRT, VTT, and integrity receipt; see [instructional videos](instructional-videos.md). |
+| `video verify RECEIPT [--manifest MANIFEST]` | Verify media integrity, caption timing, and optionally current source identity. |
 | `skills evaluate CORPUS [--project PATH] [--fire-threshold N] [--fragile-threshold N]` | Run a synthetic prompt corpus against the real skill catalog and classify each outcome as correct/misroute/over_greedy/fragile_pass -- a behavioral check that a skill's own description would distinguish it, distinct from validate's structural checks. |
 | `catalog graph [--project PATH]` | Inspect the repository provenance DAG rooted at Literate AI. |
 | `catalog copy SOURCE ITEM [ITEM ...] [--project PATH]` | Copy selected Flavor, Skill, or Component catalog items from another Literate AI project. |

@@ -95,6 +95,7 @@ _TOP_LEVEL_COMMANDS = frozenset(
         "prompt",
         "flavor",
         "design",
+        "video",
     }
 )
 _CLI_CATALOG_EPILOG = """
@@ -123,6 +124,7 @@ SDLC catalog (verbs unchanged; grouped for flow):
     litai rebuild
     litai build | test | run
     litai package plan | build | verify
+    litai video init | plan | build | verify
     litai clean | really-clean
 
   Release
@@ -260,6 +262,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         from .work import work_from_args
 
         return work_from_args(args)
+    if args.command == "video":
+        from .video import video_from_args
+
+        return video_from_args(args)
     if args.command == "document":
         from .document import document_from_args
 
@@ -822,6 +828,30 @@ def _parser() -> JsonArgumentParser:
     work_close = work_commands.add_parser("close")
     work_close.add_argument("work_id")
     work_close.add_argument("--project", default=".")
+    video = commands.add_parser(
+        "video", help="author, rebuild, and verify narrated instructional courses"
+    )
+    video_commands = video.add_subparsers(
+        dest="video_command", required=True, parser_class=JsonArgumentParser
+    )
+    for action in ("init", "plan", "build"):
+        video_action = video_commands.add_parser(action)
+        video_action.add_argument("manifest")
+        if action == "build":
+            video_action.add_argument("--output", required=True)
+            video_action.add_argument(
+                "--font",
+                required=True,
+                help="installed font file used for slide rendering",
+            )
+            video_action.add_argument(
+                "--narration", choices=("say", "espeak", "recorded"), default="recorded"
+            )
+    video_verify = video_commands.add_parser("verify")
+    video_verify.add_argument("receipt")
+    video_verify.add_argument(
+        "--manifest", help="also reject stale source and evidence"
+    )
     document = commands.add_parser(
         "document", help="inspect and verify deterministic document artifacts"
     )

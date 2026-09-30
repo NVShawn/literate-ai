@@ -1,0 +1,228 @@
+{
+  "schema": "literate-ai/video-course@1",
+  "id": "03-adopt-an-existing-project",
+  "title": "Adopt an existing project",
+  "speakers": {
+    "litai": {
+      "name": "LitAI",
+      "voice": "Samantha",
+      "portrait": "assets/litai-guide.png"
+    },
+    "sam": {
+      "name": "Sam",
+      "voice": "Daniel",
+      "portrait": "assets/sam-engineer.png"
+    }
+  },
+  "evidence": [
+    "EVIDENCE.md",
+    "evidence/tinyxml2-retained.json"
+  ],
+  "scenes": [
+    {
+      "title": "The outcome",
+      "points": [
+        "Wrap existing source without erasing it",
+        "Establish a retained baseline",
+        "Real session excerpts; edited transcript replay"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "You're going to rewrite a popular C plus plus library automatically?"
+        },
+        {
+          "speaker": "litai",
+          "text": "This course shows phased adoption of an existing repository. The goal is useful evidence now, with no fiction that old source instantly becomes specification-led or safe to discard. These are edited transcript replays of real sessions, not raw screen recordings. Remote-worker steps are a walkthrough."
+        }
+      ]
+    },
+    {
+      "title": "Before conversion",
+      "points": [
+        "Confirm a Git or equivalent recovery point",
+        "Keep unrelated changes and credentials safe",
+        "Inspect before authorizing mutation"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Before converting, preserve a recovery point and identify any sensitive material. Conversion is a real repository mutation, so inspect the plan first and authorize the apply only after reviewing its effects."
+        }
+      ]
+    },
+    {
+      "title": "Phase zero: inspect",
+      "points": [
+        "TinyXML2 at Git commit 8224e427",
+        "Detected C++, Python, CMake, and CTest",
+        "Readiness: ready; no catalog gaps"
+      ],
+      "terminal": [
+        "$ litai onboard adopt tinyxml2",
+        "ready | cpp, python | CMake, CTest"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "I already have a Makefile and CMake. What will you discover?"
+        },
+        {
+          "speaker": "litai",
+          "text": "Our actual demo uses TinyXML2, a public C plus plus XML parser, pinned at Git commit 8224e427. Read-only adopt detected C plus plus, Python, CMake, CTest, and no catalog gaps. It also proposed the source moves before writing anything."
+        }
+      ]
+    },
+    {
+      "title": "Phase one: wrapped",
+      "points": [
+        "Apply only after reviewing the plan",
+        "Legacy source remains release authority",
+        "The framework adds wrappers and parity evidence"
+      ],
+      "terminal": [
+        "$ litai onboard adopt tinyxml2 \\",
+        "    --apply --acknowledge",
+        "status: wrapped | original-source"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "After acknowledgement, the harness wraps the tree and records what it preserved. The first stage is wrapped. Original source remains release authority; the new specification surface is not yet a replacement."
+        }
+      ]
+    },
+    {
+      "title": "Live C++ baseline",
+      "points": [
+        "Original build and test commands still run",
+        "CMake built the library and xmltest",
+        "CTest reported one passing test"
+      ],
+      "terminal": [
+        "$ cmake -S . -B build && cmake --build build",
+        "$ ctest --test-dir build -C Release",
+        "100% tests passed out of 1"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The conversion harness actually ran TinyXML2's existing CMake build and CTest command in disposable custody. The library and xmltest built, and CTest reported one passing test. This preserves a concrete baseline, not just a diagram."
+        }
+      ]
+    },
+    {
+      "title": "A production gap, reproduced",
+      "points": [
+        "CTest 4.4 reports a newer all-passed summary",
+        "Old parser rejected the exact count",
+        "New regression covers both CTest summary formats"
+      ],
+      "terminal": [
+        "Before: retained_receipt.test_count_unreported",
+        "After: tests: 1 | classification: retained-legacy-parity"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "CTest passed. Why won't you mark it retained?"
+        },
+        {
+          "speaker": "litai",
+          "text": "Our first retained run failed even though CTest passed: the old parser did not recognize the newer all-passed summary. We fixed the framework adapter and tested both summary formats, including zero and unknown counts. The real TinyXML2 rerun now produces an exact one-test receipt."
+        }
+      ]
+    },
+    {
+      "title": "Publish proof, advance the stage",
+      "points": [
+        "Real retained harness rerun: 1 passed, 0 failed",
+        "Publish the finalized receipt before advancing",
+        "Stage: retained; authority: original-source"
+      ],
+      "terminal": [
+        "$ litai project test-receipt update retained.json",
+        "$ litai project convert-stage advance --to retained",
+        "stage: retained | release_authority: original-source"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Couldn't you just ignore that counting error?"
+        },
+        {
+          "speaker": "litai",
+          "text": "We did not ignore the counting error. After fixing it, we reran the actual CMake and CTest harness, published its finalized receipt, and advanced TinyXML2 from wrapped to retained. Original source remains release authority. We have not claimed drafted, qualified, or specification-led shipping."
+        }
+      ]
+    },
+    {
+      "title": "Phase three: drafted",
+      "points": [
+        "Translate source into reviewable intent",
+        "Review behavior and target choices with humans",
+        "Move one boundary at a time"
+      ],
+      "terminal": [
+        "$ litai spec derive --help"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Next, derive candidate specifications from the existing source, then review them as product intent. This is a draft, not proof. Move one Component boundary at a time and keep the original implementation available for parity checks."
+        }
+      ]
+    },
+    {
+      "title": "Phase four: qualified",
+      "points": [
+        "Clean spec-only regeneration",
+        "Build, current tests, and independent parity",
+        "Authority changes only with current trusted proof"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Qualification compares clean regenerations against the retained baseline. Historical clean runs alone do not transfer release authority. Only current, trusted lifecycle evidence bound to the exact lock can authorize specification authority."
+        }
+      ]
+    },
+    {
+      "title": "What improves early",
+      "points": [
+        "Known baseline and explicit gaps",
+        "Repeatable build and test evidence",
+        "Safer agent changes and easier handoffs"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The first benefits arrive before any rewrite: a visible baseline, explicit catalog gaps, and a precise explanation when test evidence is incomplete. Teams can review intent and agent changes without losing the ability to run the old application."
+        }
+      ]
+    },
+    {
+      "title": "What takes longer",
+      "points": [
+        "Not an automatic native rewrite",
+        "No guarantee of immediate speed or quality gains",
+        "Release authority changes last, not first"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So when do I actually get to ship from the specification?"
+        },
+        {
+          "speaker": "litai",
+          "text": "Adoption is not an automatic source-to-specification rewrite, nor a promise of instant speedups. The pragmatic path is to retain working behavior, build evidence one boundary at a time, and promote authority only when the independent gates pass."
+        }
+      ]
+    }
+  ]
+}

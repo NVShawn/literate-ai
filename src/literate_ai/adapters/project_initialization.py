@@ -1404,6 +1404,9 @@ _TEMPLATE_FILES = {
     "skills/agent/author-presentations-and-documents/SKILL.md": (
         "skills/agent/author-presentations-and-documents/SKILL.md"
     ),
+    "skills/agent/author-instructional-videos/SKILL.md": (
+        "skills/agent/author-instructional-videos/SKILL.md"
+    ),
     "skills/agent/record-user-directed-work/SKILL.md": (
         "skills/agent/record-user-directed-work/SKILL.md"
     ),
@@ -1577,17 +1580,11 @@ def _write_starter_acceptance_oracle(target: Path) -> str:
                 "arguments": [
                     {
                         "name": "Ada Lovelace",
-                        "messages": [
-                            "Build portable software",
-                            "Ship with confidence",
-                        ],
                     }
                 ],
                 "expected_result": {
                     "greeting": "Hello, Ada Lovelace!",
-                    "recipient_id": "ada-lovelace",
-                    "message_count": 2,
-                    "word_count": 6,
+                    "name": "Ada Lovelace",
                 },
             },
             {
@@ -1595,18 +1592,11 @@ def _write_starter_acceptance_oracle(target: Path) -> str:
                 "arguments": [
                     {
                         "name": "Grace Hopper",
-                        "messages": [
-                            "Debug boldly",
-                            "Build once",
-                            "Run everywhere safely",
-                        ],
                     }
                 ],
                 "expected_result": {
                     "greeting": "Hello, Grace Hopper!",
-                    "recipient_id": "grace-hopper",
-                    "message_count": 3,
-                    "word_count": 7,
+                    "name": "Grace Hopper",
                 },
             },
         ],

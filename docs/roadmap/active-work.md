@@ -23058,3 +23058,29 @@ GitHub CI failure without relaxing identity checks.
   public-mirror qualification branch records the resulting lifecycle-driver and
   documentation authority identities and passes the complete managed Python suite,
   including the absorbed attached update, rollback/custody, and native Bazel cases.
+
+### [ ] COURSE-001 — Rebuildable instructional videos and onboarding demo repairs
+
+- **Priority:** P1
+- **Owner:** onboarding, retained test evidence, instructional video CLI
+- **Direction:** Fix defects exposed by the real course sessions, support repeatable course creation in Literate AI, and publish the courses publicly.
+- **Conclusion:** Repair starter acceptance authority and exact CTest summaries; add a portable course manifest, narration providers, captions, evidence verification and a documented CLI, then refresh the public examples.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Fix starter oracle and CTest summary parsing with regression coverage.
+  - [x] Add reusable video authoring, build, verify, and refresh commands and packaged skill.
+  - [ ] Refresh and publish the course bundle with current demo evidence.
+- **Evidence:**
+  - [ ] Regression tests, installed CLI checks, real greenfield and TinyXML2 demos, and media verification pass.
+
+### [ ] COURSE-002 — Accepted-source continuation after an onboarding rebuild
+
+- **Priority:** P1
+- **Owner:** source cache continuation
+- **Direction:** Investigate the runtime_absent result observed during the greenfield course despite a passing rebuild.
+- **Conclusion:** Reproduce against the release candidate and compare exact admission keys before proposing a fix; do not weaken cache membership checks.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Reproduce and classify missing membership versus a framework lookup defect.
+- **Evidence:**
+  - [ ] Same-model accepted-source continuation passes or yields an actionable exact mismatch diagnosis.

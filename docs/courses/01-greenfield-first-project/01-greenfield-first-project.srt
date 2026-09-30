@@ -1,0 +1,275 @@
+1
+00:00:00,000 --> 00:00:03,091
+Sam: I've shipped C plus plus code with Make for years.
+
+2
+00:00:03,250 --> 00:00:04,924
+Sam: Why would I need a harness?
+
+3
+00:00:05,083 --> 00:00:10,688
+LitAI: In this course, we create a new Literate AI project and prove
+that its starter application runs.
+
+4
+00:00:10,838 --> 00:00:15,807
+LitAI: The specification is durable authority; generated source is
+disposable output.
+
+5
+00:00:15,963 --> 00:00:20,709
+LitAI: These are edited transcript replays of real sessions, not raw
+screen recordings.
+
+6
+00:00:20,879 --> 00:00:23,011
+LitAI: Remote-worker steps are a walkthrough.
+
+7
+00:00:23,171 --> 00:00:25,322
+Sam: A Makefile tells me how to build.
+
+8
+00:00:25,472 --> 00:00:26,590
+Sam: Isn't that enough?
+
+9
+00:00:26,740 --> 00:00:34,801
+LitAI: Your Makefile compiles code, but it does not define the
+specification, acceptance evidence, packaging, or release policy.
+
+10
+00:00:34,951 --> 00:00:39,332
+LitAI: Literate AI separates what the application must do from how and
+where it is built.
+
+11
+00:00:39,493 --> 00:00:47,791
+LitAI: A Component describes observable behavior; Flavors select
+implementation targets; receipts bind the accepted result to exact
+inputs.
+
+12
+00:00:47,951 --> 00:00:52,005
+LitAI: Start with Python, Git, and an authenticated coding CLI.
+
+13
+00:00:52,159 --> 00:00:57,358
+LitAI: Install a published Literate AI wheel in a virtual environment,
+then run litai doctor.
+
+14
+00:00:57,508 --> 00:01:00,835
+LitAI: Resolve reported blockers before requesting generation.
+
+15
+00:01:00,985 --> 00:01:03,575
+LitAI: The first onboard create command is read-only.
+
+16
+00:01:03,735 --> 00:01:09,292
+LitAI: Review its proposed project type, target Flavors, blockers, and
+plan identity.
+
+17
+00:01:09,444 --> 00:01:11,424
+LitAI: No project tree is written yet.
+
+18
+00:01:11,574 --> 00:01:14,589
+LitAI: Apply the reviewed plan with explicit acknowledgement.
+
+19
+00:01:14,741 --> 00:01:22,068
+LitAI: For automation or a long pause between planning and applying,
+use the printed plan identity to fail closed if the plan has changed.
+
+20
+00:01:22,218 --> 00:01:29,161
+LitAI: The scaffold contains project goals, agent onboarding, catalog
+entries, and an executable hello Component.
+
+21
+00:01:29,311 --> 00:01:36,163
+LitAI: Status shows the next step; project validate checks authored
+structure without claiming that an application has been built.
+
+22
+00:01:36,313 --> 00:01:39,944
+LitAI: A lock binds the exact specification and selected Flavors.
+
+23
+00:01:40,105 --> 00:01:44,213
+LitAI: Planning exposes the recipe before a coding agent generates
+source.
+
+24
+00:01:44,363 --> 00:01:48,818
+LitAI: If either check fails, fix the authored inputs rather than
+bypassing the gate.
+
+25
+00:01:48,988 --> 00:01:52,486
+Sam: If make succeeds, I've shipped the product, right?
+
+26
+00:01:52,655 --> 00:01:53,242
+LitAI: No.
+
+27
+00:01:53,405 --> 00:02:00,328
+LitAI: You have never really decided how to package and release this
+software, or how to prove the shipped artifact is the one you tested.
+
+28
+00:02:00,488 --> 00:02:05,789
+LitAI: Rebuild invokes the coding agent and then runs the generated
+application through independent gates.
+
+29
+00:02:05,946 --> 00:02:12,874
+LitAI: It may call a paid model and execute generated code, so
+acknowledge host execution only on a trusted machine.
+
+30
+00:02:13,030 --> 00:02:18,380
+LitAI: This is an edited excerpt from the actual Codex generation
+session, not a screen capture.
+
+31
+00:02:18,530 --> 00:02:22,441
+LitAI: The agent produced the entrypoint and three native behavior
+tests.
+
+32
+00:02:22,591 --> 00:02:26,630
+LitAI: They cover a normal name, a one-character boundary, and
+Unicode.
+
+33
+00:02:26,799 --> 00:02:32,874
+LitAI: We show the resulting behavior here; source is still only a
+candidate until independent acceptance passes.
+
+34
+00:02:33,024 --> 00:02:34,464
+Sam: The code looks fine.
+
+35
+00:02:34,614 --> 00:02:36,450
+Sam: Why did your rebuild fail?
+
+36
+00:02:36,614 --> 00:02:40,519
+LitAI: Because the independent verifier protects us from our own
+assumptions.
+
+37
+00:02:40,669 --> 00:02:42,365
+LitAI: The first live rebuild failed.
+
+38
+00:02:42,515 --> 00:02:50,975
+LitAI: Its generated application matched the written greeting
+contract, but the scaffold's independent oracle expected extra fields
+absent from that contract.
+
+39
+00:02:51,140 --> 00:02:55,192
+LitAI: The gate rejected the candidate instead of issuing a false
+passing receipt.
+
+40
+00:02:55,348 --> 00:02:58,518
+Sam: You didn't just edit generated code to make it green?
+
+41
+00:02:58,681 --> 00:03:06,358
+LitAI: We corrected the demo verifier to match the specification and
+reran the lifecycle: three tests passed and a current receipt was
+committed.
+
+42
+00:03:06,515 --> 00:03:10,844
+LitAI: Then we fixed the framework starter oracle itself and added
+regression coverage.
+
+43
+00:03:10,994 --> 00:03:14,216
+LitAI: New scaffolds no longer inherit the incorrect fields.
+
+44
+00:03:14,369 --> 00:03:19,080
+LitAI: This is a framework defect repair, not editing generated code
+to fake a pass.
+
+45
+00:03:19,244 --> 00:03:21,821
+Sam: So is the wheel now on a package registry?
+
+46
+00:03:21,971 --> 00:03:22,559
+LitAI: No.
+
+47
+00:03:22,721 --> 00:03:25,725
+LitAI: A verified local wheel is not a published release.
+
+48
+00:03:25,888 --> 00:03:30,163
+LitAI: We then verified the project and built a pip wheel from the
+accepted artifact.
+
+49
+00:03:30,313 --> 00:03:33,819
+LitAI: Package verification passed using the same model selection.
+
+50
+00:03:33,979 --> 00:03:41,629
+LitAI: This gives a real, locally verified product; publishing it or
+cutting a release remains a separate, explicitly authorized gate.
+
+51
+00:03:41,779 --> 00:03:46,738
+LitAI: For the next feature, change the Component specification and
+repeat the evidence loop.
+
+52
+00:03:46,904 --> 00:03:50,035
+LitAI: Avoid treating generated source as the durable design.
+
+53
+00:03:50,195 --> 00:03:56,059
+LitAI: The project becomes easier to review because intent, target
+choices, and proof stay separate.
+
+54
+00:03:56,209 --> 00:04:00,763
+Sam: If Agentis can organize the work, why do I need all these extra
+gates?
+
+55
+00:04:00,917 --> 00:04:04,718
+LitAI: Because organizing a task is not proof that its product is
+correct.
+
+56
+00:04:04,876 --> 00:04:16,832
+LitAI: This is the division of responsibility we want with Agentis: it
+coordinates work, while I keep specifications, exact build inputs,
+tests, packaging, and release evidence explicit.
+
+57
+00:04:17,001 --> 00:04:20,987
+LitAI: You have spent years on the code and too little thought on what
+actually ships.
+
+58
+00:04:21,137 --> 00:04:23,387
+LitAI: These gates make that missing work visible.
+
+59
+00:04:23,554 --> 00:04:28,010
+LitAI: This course proves the local harness; it does not claim an
+Agentis deployment.
+

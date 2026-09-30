@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add rebuildable instructional courses through `litai video init`, `plan`,
+  `build`, and `verify`: two-speaker narration, recordings, captions, and
+  source-bound media receipts, with a packaged video-authoring skill.
+- Repair two defects exposed by live course demos: starter independent acceptance
+  now matches its greeting specification, and retained test receipts recognize
+  CTest's newer exact all-passed summary without accepting zero or unknown counts.
+
 - Preserve an adopted project's repository parent selection when signed source
   promotion creates its nested native project. This keeps promotion usable from
   clean public checkouts without relying on unrelated local release tags.

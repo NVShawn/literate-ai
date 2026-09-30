@@ -5,6 +5,8 @@
 
 ## User documentation
 
+- [Rebuildable instructional videos](user/instructional-videos.md)
+- [Watch the introductory courses](courses/README.md)
 - [Native gRPC oracle declarations and qualification boundary](user/native-grpc-oracles.md)
 - [Independent child repository lifecycle commands](user/repository-lifecycle.md)
 

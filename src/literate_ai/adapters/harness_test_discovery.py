@@ -28,6 +28,10 @@ _CTEST_OUTCOME = re.compile(
     r"\b(\d+)% tests passed,\s+(\d+) tests failed out of\s+(\d+)\b",
     re.IGNORECASE,
 )
+_CTEST_ALL_PASSED = re.compile(
+    r"^\s*100% tests passed out of\s+(\d+)\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
 _UNITTEST_TOTAL = re.compile(r"\bRan\s+(\d+)\s+tests?\b")
 _UNITTEST_FAILED = re.compile(r"\b(?:failures|errors)=(\d+)\b", re.IGNORECASE)
 _UNITTEST_SKIPPED = re.compile(r"\bskipped=(\d+)\b", re.IGNORECASE)
@@ -117,6 +121,13 @@ def observe_test_collection(phase: str, stdout: bytes, stderr: bytes) -> dict[st
         failed = int(ctest.group(2))
         total = int(ctest.group(3))
         return _counted_observation(total - failed, failed, 0, 0)
+
+    # CTest 4.4 omits the redundant zero-failures clause on an all-pass run.
+    # Only 100% proves an exact passed count; never infer failures by rounding
+    # a partial percentage, and keep a zero-test summary empty.
+    ctest_passed = _CTEST_ALL_PASSED.search(text)
+    if ctest_passed is not None:
+        return _counted_observation(int(ctest_passed.group(1)), 0, 0, 0)
 
     pytest_counts: dict[str, int] = {}
     for match in _PYTEST_OUTCOME.finditer(text):
