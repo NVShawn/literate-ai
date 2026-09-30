@@ -47,6 +47,7 @@ from literate_ai.adapters.builders import (
     run_bounded_process,
 )
 from literate_ai.adapters.builders.python import discover_python_toolchain
+from literate_ai.adapters.compiler_cache import compiler_cache_session
 from literate_ai.adapters.dependencies import (
     CycloneDxBomError,
     CycloneDxLifecycleResolver,
@@ -90,6 +91,7 @@ from literate_ai.adapters.models.coding_cli import (
     _acceptance_result_shape,
 )
 from literate_ai.adapters.packaging import DirectoryPackageAdapter
+from literate_ai.adapters.shared_cache_config import BoundSharedCache
 from literate_ai.application.artifact_graph import (
     create_artifact_build_graph,
     create_composite_build_request,
@@ -862,9 +864,13 @@ class LocalStandardLifecyclePorts:
         independent_acceptance_oracle: object | None = None,
         browser_driver: object | None = None,
         ipc_surface_probe: object | None = None,
+        shared_cache: BoundSharedCache | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         self.source_trees = source_trees
+        if shared_cache is not None and not isinstance(shared_cache, BoundSharedCache):
+            raise TypeError("shared cache must bind private configuration")
+        self.shared_cache = shared_cache
         self.object_root = object_root.resolve()
         self.object_root.mkdir(parents=True, exist_ok=True)
         if any(not isinstance(item, ComponentCommandContract) for item in contracts):
@@ -1510,7 +1516,7 @@ class LocalStandardLifecyclePorts:
         controlled = {
             name: value
             for name, value in environment.items()
-            if name.casefold() != "pythonpath"
+            if name.casefold() not in {"pythonpath", "litai_compiler_cache_tool"}
         }
         return controlled_node_environment(controlled)
 
@@ -1580,12 +1586,15 @@ class LocalStandardLifecyclePorts:
         providers: tuple[ArtifactExport, ...],
         binding: LocalComponentToolBinding | None = None,
         timeout_seconds: float = 60.0,
+        extra_environment: Mapping[str, str] | None = None,
     ) -> subprocess.CompletedProcess[str]:
         if not command:
             raise LocalStandardLifecycleError("local command cannot be empty")
         environment = self._environment(providers)
         if binding is not None:
             environment = self._binding_environment(environment, binding)
+        if extra_environment is not None:
+            environment.update(extra_environment)
         environment = inherited_verbose_environment(environment)
         return self._run_with_environment(
             command, cwd=cwd, environment=environment, timeout_seconds=timeout_seconds
@@ -1621,9 +1630,11 @@ class LocalStandardLifecyclePorts:
             started_at=_started,
         )
         if completed.returncode != 0:
+            from literate_ai.diagnostics import redact_secrets
+
             raise LocalStandardLifecycleError(
                 f"local command failed ({completed.returncode}): "
-                f"{completed.stderr.strip()}"
+                f"{redact_secrets(completed.stderr.strip(), environment)}"
             )
         return completed
 
@@ -1673,6 +1684,9 @@ class LocalStandardLifecyclePorts:
         sdk_build = getattr(result, "native_sdk_build_identity", None)
         if sdk_build is not None:
             document["native_sdk_build_identity"] = sdk_build.uri
+        cache = getattr(result, "compiler_cache_observation", None)
+        if cache is not None:
+            document["compiler_cache"] = cache
         return self._record_evidence(document)
 
     def _npm_process_identity(
@@ -2262,9 +2276,41 @@ class LocalStandardLifecyclePorts:
             binding = self.tool_bindings[phase_binding.toolchain_identity.uri]
             binding.require_unchanged()
             try:
-                result = self._run(
-                    argv, cwd=artifact_root, providers=providers, binding=binding
+                from literate_ai.adapters.standard_project import (
+                    native_cpp_cache_contract,
                 )
+
+                if (
+                    phase is ComponentCommandPhase.BUILD
+                    and self.shared_cache is not None
+                    and self.shared_cache.compiler_tool is not None
+                    and native_cpp_cache_contract(contract)
+                ):
+                    with compiler_cache_session(
+                        self.shared_cache,
+                        environment=self._binding_environment(
+                            self._environment(providers), binding
+                        ),
+                        workspace=artifact_root,
+                    ) as session:
+                        environment = dict(session.environment)
+                        environment["LITAI_COMPILER_CACHE_TOOL"] = (
+                            self.shared_cache.compiler_tool.executable
+                            if session.observation["available"]
+                            else ""
+                        )
+                        result = self._run_with_environment(
+                            argv, cwd=artifact_root, environment=environment
+                        )
+                        token = self.shared_cache.credential()
+                        if token is not None:
+                            result.stdout = result.stdout.replace(token, "<redacted>")
+                            result.stderr = result.stderr.replace(token, "<redacted>")
+                    result.compiler_cache_observation = session.observation
+                else:
+                    result = self._run(
+                        argv, cwd=artifact_root, providers=providers, binding=binding
+                    )
             except LocalStandardLifecycleError as exc:
                 code = {
                     ComponentCommandPhase.BUILD: "builder.generated-source-rejected",
@@ -3448,6 +3494,11 @@ class LocalStandardLifecyclePorts:
             "source_tree_identity": plan.request.source_tree_identity.uri,
             "provider_materials": provider_materials,
         }
+        if (
+            self.shared_cache is not None
+            and self.shared_cache.compiler_tool is not None
+        ):
+            cache_key["compiler_cache_identity"] = self.shared_cache.identity.uri
         if plan.materialization.native_sdk_input_identities:
             cache_key["native_sdk_input_identities"] = [
                 value.uri for value in plan.materialization.native_sdk_input_identities

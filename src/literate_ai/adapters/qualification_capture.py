@@ -13,6 +13,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, fields, replace
 from threading import Lock
 
+from literate_ai.adapters.compiler_cache import validate_compiler_cache_observation
 from literate_ai.adapters.component_acceptance import LibraryAcceptance
 from literate_ai.contracts import ComponentLock
 from literate_ai.contracts.blobs import BlobRef
@@ -1490,6 +1491,15 @@ def verify_qualification_build(
                 "stdout_identity": stdout.uri,
                 "stderr_identity": stderr.uri,
                 **sdk_process_fields(reader, plan=plan, process=value, phase=phase),
+                **(
+                    {
+                        "compiler_cache": validate_compiler_cache_observation(
+                            value["compiler_cache"]
+                        )
+                    }
+                    if phase == "build" and "compiler_cache" in value
+                    else {}
+                ),
             },
         )
         if not isinstance(reader.read_json(stdout), str) or not isinstance(

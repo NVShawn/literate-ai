@@ -5217,12 +5217,26 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ## Open pull-request landing queue
 
-### Current review inventory (2026-09-16 UTC)
+### Current 1.2 review inventory
 
-The current snapshot contains 31 open reviews and 22 open issues. Every review has
+The forge currently has four open reviews. RELEASE-INTEGRATION-002 must reconcile
+their current-cycle dispositions before publication; observed CI is not release
+acceptance. PR #513 is an incomplete integration draft and does not authorize a
+merge-only release or defer the remaining 1.2 program.
+
+| Review | Observed head | Owner | Remaining acceptance |
+| --- | --- | --- | --- |
+| [#513](https://github.com/NVIDIA-dev/literate-ai/pull/513) — Lifecycle scheduling and shared-cache execution | `d5a499afc52c` | RELEASE-INTEGRATION-002 / RELEASE-INTEGRATION-003 | Complete production phase dispatch, remote custody, LAN/cache qualification, merge-repair integration, and exact-revision release gates. |
+| [#511](https://github.com/NVIDIA-dev/literate-ai/pull/511) — Dynamic worker provisioning roadmap | `37b77cea4c2b` | RELEASE-INTEGRATION-002 | Reconcile scope with the existing worker program and its later provisioning obligations; hosted CI remains in progress. |
+| [#508](https://github.com/NVIDIA-dev/literate-ai/pull/508) — setup-uv 10.2.0 | `666a3eaa38ee` | RELEASE-INTEGRATION-002 / AUD-CI-001 | Resolve the failed Windows test and cancelled matrix; verify the exact action update before landing. |
+| [#501](https://github.com/NVIDIA-dev/literate-ai/pull/501) — Public-export hardening draft | `0d17bf29322d` | RELEASE-INTEGRATION-002 / PUBLIC-EXPORT-001 | Reconcile the draft against landed export work and retain an explicit include or defer disposition. |
+
+### Historical review inventory (2026-09-16 UTC)
+
+That snapshot contained 31 open reviews and 22 open issues. Every review has
 an owner below; newly received issues are cited under REL-442, MATRIX-002, CACHE-007
 CONVERSION-DIAGNOSTICS-002 and RETAINED-READMISSION-001. PR #450 belongs to RELEASE-INTEGRATION-001.
-This replaces the earlier review snapshots.
+It is superseded by the current 1.2 inventory above.
 An included stack is not merged or closed until its final head or exact inclusion
 has been qualified. Refresh after scope changes and immediately before release planning.
 
@@ -22836,13 +22850,82 @@ GitHub CI failure without relaxing identity checks.
 
 ### [ ] RELEASE-INTEGRATION-003 — Compose production DAG dispatch and shared LAN caches
 
-- **Release target:** 1.3.0
-- **Priority:** P1
+- **Release target:** 1.2.0
+- **Priority:** P0
 - **GitHub issue:** [#498](https://github.com/NVIDIA-dev/literate-ai/issues/498)
 - **Owner:** production lifecycle scheduling and shared-cache qualification
 - **Direction:** Route production command and SSH lifecycle actions through the accepted
   DAG, then qualify real cross-worker Bazel/sccache and verified immutable artifact reuse.
-- **Depends on:** RELEASE-INTEGRATION-002
+- **Depends on:** accepted ADR 0044 and the existing scheduler/cache primitives;
+  this work blocks RELEASE-INTEGRATION-002.
+- **Maintainer direction (2026-09-29):** Complete the full existing 1.2 program
+  before releasing. The earlier 1.3 deferral is superseded.
+- **Next action (in progress):** Split lifecycle phases into serializable dispatch
+  with remote custody, preserving accepted-provider artifact admission. The action
+  projection previously released build/toolchain/runtime consumers after provider
+  BUILD, allowing rejected provider artifacts to reach consumers. ADR 0044 requires
+  exact accepted exports: those consuming phases now depend on provider ACCEPT while
+  public-interface generation stays independent. The new rejection regression failed
+  for all three dependency kinds before the repair; 62 action planning, scheduler,
+  Component planning, and lifecycle checks now pass, including independent-branch
+  continuation. This projection repair does not complete production phase dispatch.
+  The next production boundary separates source generation from provider-dependent
+  compilation in the same bounded pool. Locked public interfaces permit consumer
+  generation while provider build/acceptance continues; exact accepted artifact
+  imports still gate build intent. Preserve original generation evidence, source-cache
+  admission, bounded fresh-candidate repairs, and the global slot limit. Existing
+  complete-node transport remains explicit until phase requests have remote custody;
+  do not execute an assigned remote generation callback on the controller.
+  This first production split now passes 95 lifecycle, candidate-repair, worker,
+  factory, and service checks. A held provider build overlaps its consumer's source
+  generation with exactly two occupied slots; consumer build still waits for provider
+  acceptance. The regression failed against the previous implementation. Dependency
+  failure now retains already-produced source evidence while cancelling its build;
+  invalid cached-source custody still refuses the owning source action and all
+  dependent builds. Later phases and real phase transport remain unfinished.
+- **Transport progress:** The HTTP/local-layer adapter is implemented. Nineteen
+  focused cache checks pass, including real HTTP concurrent writers, read-only
+  readers, partial/corrupt entries, redirect refusal, and unavailable-service
+  fallback. Source consistency and full integration qualification remain pending;
+  this evidence does not complete production multi-worker or compiler-cache proof.
+- **Scheduler progress:** Production complete-node scheduling now keeps one bounded
+  pool and releases a consumer when its own dependencies finish. Forty-six lifecycle
+  and planning tests pass, including a held unrelated branch that no longer delays
+  a ready consumer. This preserves whole-node repair and evidence contracts; distinct
+  phase dispatch, dynamic compatible-worker admission, and real remote custody remain
+  required before this item can close.
+- **Production cache progress:** Private shared-cache configuration now binds into
+  Standard rebuild identity and Bazel invocation, with exact configuration rechecks,
+  early credential validation, temporary private credential files, and redacted
+  diagnostics. Fifty-one focused configuration, Bazel execution, rebuild, and user
+  path checks pass. A further 34-check slice includes a real Bazel 9.2 cold/warm
+  action: its disposable read-only view reports a disk-cache hit, preserves output
+  bytes, and leaves shared file contents and modification times unchanged. The
+  small-fixture copy took 6 ms; this is not compiler or large-cache performance
+  qualification. Shared writer-retention enforcement and LAN measurements remain
+  required.
+- **Compiler-cache progress:** Cargo builds now bind sccache executable identity,
+  own a private bounded server, use a locked stable disposable workspace, and
+  retain strictly parsed advisory cache observations in captured build evidence.
+  Real C and Cargo library compilations demonstrate warm hits and identical
+  output bytes; read-only compiler storage also uses a disposable view because
+  sccache otherwise updates entry timestamps. Process cleanup and captured Cargo
+  evidence reopening pass. Standard native C++ command drivers now compile separate
+  objects through the exact cache wrapper and link with the selected compiler;
+  real single/multiple-entrypoint cold/warm builds produce identical runnable
+  binaries in fresh workspaces. The 137-check projection, adapter, capture, and
+  compiler slice passes (two existing platform skips). Recursive cache-tool native
+  dependencies now enter the cache identity and build dependency graph. Lifecycle
+  entry/exit and compiler-session guards reject loader or dependency drift, including
+  artifact-cache reuse. Forty-five focused dependency, factory, configuration, and
+  rebuild checks pass (one platform skip); real macOS cold/warm C compilation still
+  produces identical bytes and a measured warm hit, and exceptional server cleanup
+  passes with inspector processes present. All five native cache cases pass across
+  the combined run and corrected cleanup rerun, including Cargo, multiple-entrypoint
+  C++, and read-only preservation. This repair evidence is not a fresh release run.
+  Native inspection adds per-build cost;
+  throughput, LAN failure/concurrency, and cross-platform qualification remain required
+  before this item can close.
 - **Implementation:**
   - [ ] Compose the complete production lifecycle through deterministic bounded dispatch.
   - [ ] Exercise configured LAN transports and retain exact cache decision evidence.
@@ -22960,6 +23043,8 @@ GitHub CI failure without relaxing identity checks.
   worker identity, exit status, stable cause classification, and safe stderr while
   preserving BatchMode, host-key policy, output bounds, and credential redaction.
 - **Depends on:** WORKER-HEALTH-001
+- **Next action (in progress):** Complete consistency and installed/hosted qualification
+  before landing the diagnostic repair.
 - **Implementation:**
   - [ ] Carry worker ID, SSH exit status, bounded stderr, and redacted transport cause
         through individual and `--all` probe results.
@@ -22970,6 +23055,16 @@ GitHub CI failure without relaxing identity checks.
         exit-255 diagnostic without secrets or unbounded output.
   - [ ] Real first-contact and registered-host probes demonstrate that host-key setup
         is not misreported as failure of unrelated workers.
+
+- **Local evidence:** Seventeen focused capability/CLI tests pass. A real SSH probe
+  with an isolated empty known-hosts file reports host-key refusal, and the same
+  Linux worker succeeds with its ordinary registered key. The all-worker probe
+  correctly names a different worker whose GPU observation reports zero memory;
+  that invalid inventory remains refused and is not evidence of an authentication
+  failure. No host-key policy or saved observation was changed by these dry runs.
+- **Qualification follow-up:** Resolve or explicitly exclude the zero-memory GPU
+  observation under RELEASE-INTEGRATION-003 capability admission; do not silently
+  substitute invented capacity in order to admit that worker.
 
 ### [ ] QUALIFICATION-ECONOMY-001 — Make exact qualification affordable and observable
 

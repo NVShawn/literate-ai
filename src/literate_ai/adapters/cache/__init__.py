@@ -12,6 +12,8 @@ from .filesystem import (
     project_source_cache_protected_paths,
 )
 from .generated_source import CachedCodingCliSourceGenerator, GeneratedSourceCacheError
+from .http_artifacts import HttpSharedArtifactCache
+from .layered_artifacts import LayeredSharedArtifactCache, SharedArtifactLookup
 from .project_publication import (
     RUNTIME_SOURCE_CACHE_TARGET_ID,
     FilesystemProjectSourceCachePublicationAdapter,
@@ -66,6 +68,9 @@ __all__ = [
     "FinalPathSourceIntelligenceVerifier",
     "FilesystemProjectSourceCachePublicationAdapter",
     "GeneratedSourceCacheError",
+    "HttpSharedArtifactCache",
+    "LayeredSharedArtifactCache",
+    "SharedArtifactLookup",
     "MaterializedCachedSource",
     "LocalSharedArtifactCache",
     "ProtocolDirectoryIdentity",

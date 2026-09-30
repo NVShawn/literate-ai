@@ -18,7 +18,7 @@ from ._validation import (
     optional_string,
     string_value,
 )
-from .identity import ContentIdentity, contract_identity
+from .identity import ContentIdentity, canonical_identity, contract_identity
 
 SHARED_CACHE_CONFIGURATION_SCHEMA = (
     "urn:literate-ai:schema:v2:shared-cache-configuration"
@@ -186,6 +186,22 @@ class SharedCacheConfiguration:
     @property
     def identity(self) -> ContentIdentity:
         return contract_identity(self)
+
+    @property
+    def storage_identity(self) -> ContentIdentity:
+        """Bind shared content to its scope without binding consumer permissions.
+
+        Transport, credentials, local placement, retention, and access mode remain
+        part of the full configuration identity used for dispatch. They cannot
+        change the identity of bytes shared between writers and read-only readers.
+        """
+        return canonical_identity(
+            {
+                "schema": "literate-ai/shared-cache-storage@1",
+                "scope": self.scope.value,
+                "namespace": self.namespace,
+            }
+        )
 
     def policy(self, namespace: SharedCacheNamespace) -> SharedCacheNamespacePolicy:
         if not isinstance(namespace, SharedCacheNamespace):

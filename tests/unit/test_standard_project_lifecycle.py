@@ -6,6 +6,7 @@ import hashlib
 import json
 import threading
 import unittest
+from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from unittest.mock import PropertyMock, patch
@@ -64,6 +65,7 @@ from literate_ai.contracts import (
     StandardSourceTestResult,
 )
 from literate_ai.contracts.blobs import BlobRef
+from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.executable_components import (
     ArtifactExport,
     ArtifactMaterializationPlan,
@@ -1664,20 +1666,20 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         event_positions = {event: index for index, event in enumerate(ports.events)}
         self.assertLess(
             event_positions[("accept", "money")],
-            event_positions[("generate", "pricing")],
+            event_positions[("intent", "pricing")],
         )
 
         self.assertLess(
             event_positions[("accept", "money")],
-            event_positions[("generate", "reporting")],
+            event_positions[("intent", "reporting")],
         )
         self.assertLess(
             event_positions[("accept", "pricing")],
-            event_positions[("generate", "invoice-cli")],
+            event_positions[("intent", "invoice-cli")],
         )
         self.assertLess(
             event_positions[("accept", "reporting")],
-            event_positions[("generate", "invoice-cli")],
+            event_positions[("intent", "invoice-cli")],
         )
 
         self.assertEqual(
@@ -1920,6 +1922,115 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         self.assertTrue(ports.plans)
         self.assertTrue(
             all(not plan.provider_artifact_identities for plan in ports.plans.values())
+        )
+
+    def test_ready_consumer_runs_while_unrelated_previous_layer_is_busy(self):
+        lock = _diamond_lock(independent_reporting=True)
+        names = _names(lock)
+        execution, requests = _prepared_execution(lock)
+        nodes = _prepared_nodes(execution, requests)
+        consumer_started = threading.Event()
+        reporting_started = threading.Event()
+
+        class OverlapPorts(LifecyclePorts):
+            overlapped = False
+
+            def build(self, plan, provider_artifacts):
+                name = names[plan.component_revision.uri]
+                if name == "reporting":
+                    reporting_started.set()
+                    self.overlapped = consumer_started.wait(5)
+                elif name == "money":
+                    if not reporting_started.wait(5):
+                        raise AssertionError("independent worker did not start")
+                elif name == "pricing":
+                    consumer_started.set()
+                return super().build(plan, provider_artifacts)
+
+        ports = OverlapPorts(execution, names)
+        result = _service(ports).execute(
+            execution,
+            component_lock=lock,
+            invalidation=_decision(execution, names, "money", tuple(names.values())),
+            prepared_nodes=nodes,
+            max_parallelism=2,
+        )
+        self.assertTrue(result.successful)
+        self.assertTrue(ports.overlapped, "consumer waited for an unrelated layer peer")
+
+    def test_consumer_generation_overlaps_provider_build_but_import_waits(self):
+        consumer_generated = threading.Event()
+        provider_build_started = threading.Event()
+        provider_accepted = threading.Event()
+        slot_lock = threading.Lock()
+        occupancy = {"active": 0, "peak": 0}
+
+        @contextmanager
+        def occupy_slot():
+            with slot_lock:
+                occupancy["active"] += 1
+                occupancy["peak"] = max(occupancy.values())
+            try:
+                yield
+            finally:
+                with slot_lock:
+                    occupancy["active"] -= 1
+
+        lock = _diamond_lock(dependency_kind=DependencyKind.BUILD)
+        execution, requests = _prepared_execution(lock)
+        nodes = _prepared_nodes(execution, requests)
+        names = _names(lock)
+
+        class OverlapPorts(LifecyclePorts):
+            overlapped = False
+
+            def __call__(self, prepared):
+                with occupy_slot():
+                    name = names[prepared.plan.component_revision.uri]
+                    if name == "pricing" and not provider_build_started.wait(5):
+                        raise AssertionError(
+                            "provider build never overlapped generation"
+                        )
+                    output = super().__call__(prepared)
+                    if name == "pricing":
+                        consumer_generated.set()
+                    return output
+
+            def build(self, plan, provider_artifacts):
+                with occupy_slot():
+                    name = names[plan.component_revision.uri]
+                    if name == "money":
+                        provider_build_started.set()
+                        self.overlapped = consumer_generated.wait(5)
+                    elif name == "pricing":
+                        if not provider_accepted.is_set():
+                            raise AssertionError("consumer used an unaccepted provider")
+                    return super().build(plan, provider_artifacts)
+
+            def accept(self, plan, test_identity, execution_identity):
+                result = super().accept(plan, test_identity, execution_identity)
+                if names[plan.component_revision.uri] == "money":
+                    provider_accepted.set()
+                return result
+
+        ports = OverlapPorts(execution, names)
+        result = _service(ports).execute(
+            execution,
+            component_lock=lock,
+            invalidation=_decision(execution, names, "money", tuple(names.values())),
+            prepared_nodes=nodes,
+            max_parallelism=2,
+        )
+        self.assertTrue(result.successful)
+        self.assertTrue(
+            ports.overlapped, "consumer generation waited for provider build"
+        )
+        self.assertEqual(occupancy, {"active": 0, "peak": 2})
+        self.assertEqual(
+            [name for stage, name in ports.events if stage == "generate"].count(
+                "pricing"
+            ),
+            1,
         )
 
     def test_run_scoped_diagnostics_propagate_to_parallel_component_nodes(self):
@@ -2751,7 +2862,7 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         )
         self.assertEqual(
             by_name["invoice-cli"].disposition,
-            SourceGenerationDisposition.CANCELLED,
+            SourceGenerationDisposition.GENERATED,
         )
         self.assertEqual(
             by_name["invoice-cli"].failure_evidence.phase,
@@ -3389,7 +3500,8 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         )
 
         self.assertFalse(result.successful)
-        self.assertFalse(any(stage == "generate" for stage, _name in ports.events))
+        self.assertNotIn(("generate", "money"), ports.events)
+        self.assertFalse(any(stage == "build" for stage, _name in ports.events))
         money = next(
             item
             for item in result.node_results
@@ -3399,7 +3511,9 @@ class StandardProjectLifecycleTests(unittest.TestCase):
             money.failure_code,
             "standard_lifecycle.cache_custody_lock_mismatch",
         )
-        self.assertIs(money.failure_evidence.phase, StandardNodeFailurePhase.LIFECYCLE)
+        self.assertIs(
+            money.failure_evidence.phase, StandardNodeFailurePhase.SOURCE_GENERATION
+        )
 
     def test_generation_key_mismatch_is_rejected_before_cache_reuse(self):
         accepted = self._accepted_baseline()

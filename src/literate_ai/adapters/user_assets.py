@@ -13,6 +13,7 @@ from .user_paths import UserPathError, UserPaths, resolve_user_paths
 WORKER_CONFIG_ENVIRONMENT = "LITAI_WORKER_CONFIG"
 WORKER_OBSERVATIONS_ENVIRONMENT = "LITAI_WORKER_OBSERVATIONS"
 TEST_CONFIG_ENVIRONMENT = "LITAI_TEST_CONFIG"
+SHARED_CACHE_CONFIG_ENVIRONMENT = "LITAI_SHARED_CACHE_CONFIG"
 
 LEGACY_WORKER_CONFIG = "literate.workers.json"
 LEGACY_WORKER_OBSERVATIONS = "literate.worker-observations.json"
@@ -26,6 +27,21 @@ class UserAssetPathError(ValueError):
         self.code = code
         self.message = message
         super().__init__(message)
+
+
+def resolve_shared_cache_config_path(
+    *,
+    explicit: str | Path | None = None,
+    environment: Mapping[str, str] | None = None,
+    paths: UserPaths | None = None,
+) -> Path:
+    configured = os.environ if environment is None else environment
+    override = _override(explicit, configured, SHARED_CACHE_CONFIG_ENVIRONMENT)
+    return (
+        override
+        if override is not None
+        else Path(_paths(paths, configured).shared_cache_config)
+    )
 
 
 def resolve_worker_config_path(

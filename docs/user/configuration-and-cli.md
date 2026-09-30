@@ -314,6 +314,46 @@ writing. Run `litai config migrate --apply` to validate and move them. Migration
 symlinks and differing destinations, never prints file contents, and removes a legacy
 source only after the private destination is durable.
 
+### Shared Bazel cache
+
+Standard Bazel rebuilds read optional private `shared-cache.json`, reported by
+`litai config paths`. Set `LITAI_SHARED_CACHE_CONFIG` to an absolute path to select
+another file. Its [shared-cache contract](../../schemas/v2/shared-cache.schema.json)
+selects scope, namespace, access mode, local placement, size/retention policy, and an
+optional HTTPS endpoint. Keep endpoint settings and credentials outside project
+authority. Credential references use `env:NAME`; the environment variable contains
+the bearer token. Missing or invalid explicitly selected configuration is refused.
+
+Read-only builds reuse a bounded disposable copy of local entries and disable remote
+uploads, so Bazel cannot modify the shared directory. Expired entries are omitted;
+an unavailable or over-budget local copy falls back to an ordinary build. The copy
+cost depends on cache size. Shared writer-retention qualification remains tracked
+by RELEASE-INTEGRATION-003.
+
+### Native compiler cache
+
+A `compiler` policy in the same private configuration enables sccache for Cargo
+and the Standard native C++ command drivers. Install sccache 0.18.0 or newer on
+`PATH`, or select its absolute executable
+with `LITAI_SCCACHE`. The executable and recursive native dependency identities are
+frozen before rebuild and included in build dependency evidence. Dependency resolution
+is repeated before and after each cached build, using its loader environment; drift
+or unsupported loader controls refuse the build. Each build owns a private server
+and ignores ambient sccache settings.
+Cargo incremental compilation is disabled for this mode. Link steps remain normal
+compiler work; supported library compilations can reuse cached objects.
+
+An exact Cargo target uses a locked, stable disposable build directory because
+sccache's Rust key includes the working directory and Cargo settings. Read-only
+compiler caching uses a disposable local copy to preserve shared-file timestamps.
+Native C++ drivers compile each translation unit separately through the cache tool,
+then link each executable with the selected compiler. Multiple entrypoints use the
+same compilation boundary; linking does not go through sccache.
+Cache counters are retained as diagnostics with captured build evidence and never
+replace tests or independent acceptance. Native dependency inspection adds per-build
+cost; throughput, LAN, and cross-platform qualification remain tracked under
+RELEASE-INTEGRATION-003.
+
 ### Generated-application settings
 
 This is Literate AI's own configuration. Applications that Literate AI generates or

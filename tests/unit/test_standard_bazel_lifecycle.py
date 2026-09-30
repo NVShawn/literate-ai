@@ -24,6 +24,7 @@ from literate_ai.adapters.lifecycle.standard_local import (
     LocalStandardLifecycleError,
     local_generated_source_tree_identity,
 )
+from literate_ai.adapters.shared_cache_config import load_shared_cache
 from literate_ai.contracts import (
     ComponentArtifactExportShape,
     ComponentCommandContract,
@@ -40,6 +41,7 @@ from literate_ai.contracts import (
 )
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.unit.test_shared_cache import _configuration
 from tests.unit.test_standard_local_command_adapter import (
     copy_digest_cache_without_sidecars,
     rewrite_self_authenticating_artifact,
@@ -194,6 +196,7 @@ class StandardBazelLifecycleTests(unittest.TestCase):
         *,
         cpp_library: bool = False,
         bazel_cache_arguments: tuple[str, ...] = (),
+        shared_cache=None,
     ):
         snapshot, execution = _fixture()
         generation_plan = execution.generation_plans[0]
@@ -295,6 +298,7 @@ class StandardBazelLifecycleTests(unittest.TestCase):
             tool_bindings=(bazel, python),
             bazel_targets=(target,),
             bazel_cache_arguments=bazel_cache_arguments,
+            shared_cache=shared_cache,
         )
         intent = ports.create(execution, generation_plan, candidate, (), ())
         index = ports.index(candidate.component_revision, candidate.tree_identity)
@@ -439,6 +443,68 @@ class StandardBazelLifecycleTests(unittest.TestCase):
             self.assertIn("--remote_upload_local_results=false", actual_build)
             info = next(command for command in commands if "info" in command)
             self.assertNotIn("--disk_cache=/private/cache", info)
+
+    def test_private_cache_configuration_reaches_build_and_cleans_credentials(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            config = root / "shared-cache.json"
+            config.write_text(json.dumps(_configuration().to_dict()))
+            binding = load_shared_cache(
+                environment={
+                    "LITAI_CONFIG_DIR": str(root),
+                    "LITAI_CACHE_DIR": str(root / "cache"),
+                    "CACHE_TOKEN": "private-token",
+                }
+            )
+            ports, plan, *_ = self._system(root, shared_cache=binding)
+            credential_files = []
+            observed_logs = []
+            original_run = ports._run
+
+            def run(command, **kwargs):
+                private_rc = [
+                    Path(arg.split("=", 1)[1])
+                    for arg in command
+                    if arg.startswith("--bazelrc=") and "cache-auth-" in arg
+                ]
+                self.assertEqual(len(private_rc), 1)
+                self.assertIn("private-token", private_rc[0].read_text())
+                self.assertNotIn("private-token", str(command))
+                credential_files.extend(private_rc)
+                result = original_run(command, **kwargs)
+                output_base = next(
+                    Path(arg.split("=", 1)[1])
+                    for arg in command
+                    if arg.startswith("--output_base=")
+                )
+                observed_logs.append(
+                    (output_base.parent / "fake-bazel.log").read_text()
+                )
+                return result
+
+            with mock.patch.object(ports, "_run", side_effect=run) as invoked:
+                built = ports.build(plan, ())
+            self.assertTrue(built.exports)
+            self.assertTrue(credential_files)
+            self.assertTrue(all(not path.exists() for path in credential_files))
+            actual_build = next(
+                call.args[0]
+                for call in invoked.call_args_list
+                if "build" in call.args[0] and "--nobuild" not in call.args[0]
+            )
+            for argument in binding.bazel_arguments():
+                if argument.startswith("--disk_cache="):
+                    continue
+                self.assertIn(argument, actual_build)
+            disk_cache = next(
+                Path(argument.split("=", 1)[1])
+                for argument in actual_build
+                if argument.startswith("--disk_cache=")
+            )
+            self.assertEqual(disk_cache.name, "cache-view")
+            self.assertFalse(disk_cache.exists())
+            self.assertTrue(observed_logs)
+            self.assertTrue(all("private-token" not in log for log in observed_logs))
 
     def test_bazel_cache_arguments_cannot_change_output_custody(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

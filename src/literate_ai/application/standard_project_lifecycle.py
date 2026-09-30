@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable, Mapping
-from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from contextvars import copy_context
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
@@ -30,6 +30,7 @@ from literate_ai.application.component_workers import (
     validate_component_worker_routing,
 )
 from literate_ai.application.source_generation_scheduling import (
+    ComponentSourceGenerationExecution,
     ComponentSourceGenerationRunner,
     execute_component_source_generation_node,
     source_generation_terminal_result,
@@ -1753,37 +1754,70 @@ class StandardProjectLifecycleService:
                 for item in component_worker_routing.assignments
             }
         )
-        for layer in _layers(execution_plan):
-            futures: dict[
-                Future[
-                    tuple[
-                        SourceGenerationNodeResult,
-                        StandardComponentBuildPlan | None,
-                        StandardNodeLifecycleResult,
-                        PreparedComponentGenerationNode[object, object],
-                        CandidateAttemptChain | None,
-                    ]
-                ],
-                str,
-            ] = {}
-            with ThreadPoolExecutor(max_workers=max_parallelism) as pool:
-                for uri in layer:
-                    if any(
+        _layers(execution_plan)  # Validate the entire graph before running a node.
+        # Generation consumes locked interfaces and can precede provider acceptance.
+        # Both stages share one pool and slot bound. Explicit complete-node routing
+        # keeps its transport custody until that transport supports separate phases.
+        futures: dict[
+            Future[
+                tuple[
+                    SourceGenerationNodeResult,
+                    StandardComponentBuildPlan | None,
+                    StandardNodeLifecycleResult,
+                    PreparedComponentGenerationNode[object, object],
+                    CandidateAttemptChain | None,
+                ]
+                | ComponentSourceGenerationExecution
+            ],
+            tuple[str, str],
+        ] = {}
+        source_executions: dict[str, ComponentSourceGenerationExecution] = {}
+        pending_generation = (
+            set(expected) if component_worker_routing is None else set()
+        )
+        pending = set(expected)
+        with ThreadPoolExecutor(max_workers=max_parallelism) as pool:
+            while pending or futures:
+                ready = sorted(
+                    (
+                        uri
+                        for uri in pending
+                        if dependencies[uri] <= results.keys()
+                        and (
+                            component_worker_routing is not None
+                            or uri in source_executions
+                        )
+                    ),
+                    key=lambda uri: generation_plans[uri].identity.uri,
+                )
+                for uri in ready:
+                    failed_parent = any(
                         results[parent].failure_code is not None
                         for parent in dependencies[uri]
-                    ):
-                        generation = self._cancelled_generation(nodes[uri])
+                    )
+                    if len(futures) >= max_parallelism and not failed_parent:
+                        continue
+                    pending.remove(uri)
+                    if failed_parent:
+                        source_execution = source_executions.get(uri)
+                        generation = (
+                            source_execution.result
+                            if source_execution is not None
+                            else self._cancelled_generation(nodes[uri])
+                        )
                         generated[uri] = generation
                         results[uri] = self._cancelled(
                             generation_plans[uri].component_revision,
                             generation,
-                            None,
+                            source_execution.output
+                            if source_execution is not None
+                            else None,
                             None,
                             _failure(
                                 generation_plans[uri].component_revision,
                                 StandardNodeFailurePhase.DEPENDENCY,
                                 generation_plans[uri].identity,
-                                generation.failure_code,
+                                "required provider did not pass acceptance",
                                 "dependency.failed",
                             ),
                         )
@@ -1834,6 +1868,7 @@ class StandardProjectLifecycleService:
                             copy_context().run,
                             self._run_complete_node,
                             *run_arguments,
+                            source_executions[uri],
                         )
                     else:
                         assert component_node_dispatcher is not None
@@ -1892,9 +1927,44 @@ class StandardProjectLifecycleService:
                             cancellation,
                             partial(self._run_complete_node, *run_arguments),
                         )
-                    futures[future] = uri
-                for future in as_completed(futures):
-                    uri = futures[future]
+                    futures[future] = (uri, "lifecycle")
+                for uri in sorted(
+                    pending_generation,
+                    key=lambda item: generation_plans[item].identity.uri,
+                ):
+                    if len(futures) >= max_parallelism:
+                        break
+                    pending_generation.remove(uri)
+                    future = pool.submit(
+                        copy_context().run,
+                        self._generate_component_source,
+                        execution_plan,
+                        generation_plans[uri],
+                        nodes[uri],
+                        supplied.get(uri),
+                        cached.get(uri),
+                        source_resumes.get(uri),
+                        uri in regenerate,
+                    )
+                    futures[future] = (uri, "generation")
+                if not futures:
+                    if pending and not ready:
+                        raise StandardProjectLifecycleError(
+                            "standard_lifecycle.dependency_deadlock",
+                            "Component dependencies cannot make progress",
+                        )
+                    continue
+                completed, _ = wait(tuple(futures), return_when=FIRST_COMPLETED)
+                for future in sorted(completed, key=lambda item: futures[item]):
+                    uri, phase = futures.pop(future)
+                    if phase == "generation":
+                        try:
+                            source_executions[uri] = future.result()
+                        except Exception as exc:
+                            source_executions[uri] = ComponentSourceGenerationExecution(
+                                self._failed_generation(nodes[uri], exc), None, exc
+                            )
+                        continue
                     try:
                         generation, plan, result, evidence_prepared, repair_chain = (
                             future.result()
@@ -2403,6 +2473,7 @@ class StandardProjectLifecycleService:
         provider_artifacts: tuple[ArtifactExport, ...],
         package_artifacts: tuple[ArtifactExport, ...],
         regenerate: bool,
+        source_execution: ComponentSourceGenerationExecution | None = None,
     ) -> tuple[
         SourceGenerationNodeResult,
         StandardComponentBuildPlan | None,
@@ -2429,6 +2500,7 @@ class StandardProjectLifecycleService:
                 provider_artifacts,
                 package_artifacts,
                 regenerate if attempt_index == 0 else True,
+                source_execution if attempt_index == 0 else None,
             )
             output = result.source_output
             if output is None:
@@ -2545,6 +2617,58 @@ class StandardProjectLifecycleService:
             )
         raise AssertionError("bounded repair loop must return")
 
+    def _generate_component_source(
+        self,
+        execution_plan: ComponentExecutionPlan,
+        generation_plan: ComponentGenerationPlan,
+        prepared: PreparedComponentGenerationNode[object, object],
+        candidate: StandardNodeAcceptedCandidate | None,
+        source_cache_membership: (
+            StandardSourceCacheMembership | StandardSourceAdmissionMembership | None
+        ),
+        source_generation_resume: SourceGenerationResumeCandidate | None,
+        regenerate: bool,
+    ) -> ComponentSourceGenerationExecution:
+        if source_cache_membership is None and candidate is not None:
+            source_cache_membership = candidate.source_cache_membership
+        if regenerate:
+            candidate = None
+            source_cache_membership = None
+            source_generation_resume = None
+        generation_candidate = None
+        if candidate is not None:
+            generation_candidate = candidate.generation
+        elif source_cache_membership is not None:
+            generation_candidate = (
+                rebind_standard_source_admission_generation(
+                    execution_plan, prepared, source_cache_membership
+                )
+                if isinstance(
+                    source_cache_membership, StandardSourceAdmissionMembership
+                )
+                else rebind_standard_source_cache_generation(
+                    execution_plan, prepared, source_cache_membership
+                )
+            )
+        elif source_generation_resume is not None:
+            generation_candidate = source_generation_resume
+        execution = execute_component_source_generation_node(
+            prepared,
+            candidate=generation_candidate,
+            explicitly_invalid=regenerate,
+            runner=self.generator,
+        )
+        if execution.output is not None:
+            self._record_stage(
+                execution_plan,
+                generation_plan,
+                prepared,
+                execution.output,
+                StandardLifecycleStage.SOURCE_GENERATION,
+                execution.output.identity,
+            )
+        return execution
+
     def _run_complete_node_once(
         self,
         execution_plan: ComponentExecutionPlan,
@@ -2558,6 +2682,7 @@ class StandardProjectLifecycleService:
         provider_artifacts: tuple[ArtifactExport, ...],
         package_artifacts: tuple[ArtifactExport, ...],
         regenerate: bool,
+        source_execution: ComponentSourceGenerationExecution | None = None,
     ) -> tuple[
         SourceGenerationNodeResult,
         StandardComponentBuildPlan | None,
@@ -2569,33 +2694,16 @@ class StandardProjectLifecycleService:
             candidate = None
             source_cache_membership = None
             source_generation_resume = None
-        generation_candidate = None
-        if candidate is not None:
-            generation_candidate = candidate.generation
-        elif source_cache_membership is not None:
-            generation_candidate = (
-                rebind_standard_source_admission_generation(
-                    execution_plan,
-                    prepared,
-                    source_cache_membership,
-                )
-                if isinstance(
-                    source_cache_membership, StandardSourceAdmissionMembership
-                )
-                else rebind_standard_source_cache_generation(
-                    execution_plan,
-                    prepared,
-                    source_cache_membership,
-                )
+        if source_execution is None:
+            source_execution = self._generate_component_source(
+                execution_plan,
+                generation_plan,
+                prepared,
+                candidate,
+                source_cache_membership,
+                source_generation_resume,
+                regenerate,
             )
-        elif source_generation_resume is not None:
-            generation_candidate = source_generation_resume
-        source_execution = execute_component_source_generation_node(
-            prepared,
-            candidate=generation_candidate,
-            explicitly_invalid=regenerate,
-            runner=self.generator,
-        )
         generation = source_execution.result
         if generation.disposition in {
             SourceGenerationDisposition.FAILED,
@@ -2625,14 +2733,6 @@ class StandardProjectLifecycleService:
             )
         output = source_execution.output
         assert output is not None
-        self._record_stage(
-            execution_plan,
-            generation_plan,
-            prepared,
-            output,
-            StandardLifecycleStage.SOURCE_GENERATION,
-            output.identity,
-        )
         if generation.disposition in {
             SourceGenerationDisposition.GENERATED,
             SourceGenerationDisposition.RETAINED,

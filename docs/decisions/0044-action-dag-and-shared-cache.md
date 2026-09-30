@@ -153,3 +153,83 @@ It adds server security, namespace, eviction, poisoning, and credential-manageme
 concerns; the design contains those in private configuration and verifier-owned
 admission. Network cache failure may reduce performance but cannot make a valid build
 or release depend on the cache being online.
+
+## Artifact transport implementation
+
+The HTTP artifact adapter publishes payloads before manifests using conditional
+`PUT` (`If-None-Match: *`) and verifies each published entry with a bounded `GET`.
+The operator provisions the namespace directories on a server that honors conditional
+writes. Redirects are refused, including redirects to the same host. Private bearer
+credentials are resolved outside project authority and are never included in error
+text. Every read verifies the full expected manifest and the payload digest and size.
+Missing partial entries are misses; conflicting or corrupt entries are typed refusals.
+The local-first adapter reports remote unavailability as a miss and retains successful
+local publications when the network is unavailable.
+
+Manifest cache identity now accepts a storage projection of scope and namespace.
+Access mode, credential reference, endpoint, local placement, and retention remain bound
+by the full dispatch configuration, but do not change shared content identity. This
+allows read-only consumers to verify writer entries and allows verified local mirrors.
+Exact legacy configuration-bound manifests remain readable with their original
+configuration. Product authority, provider, target/ABI, SBOM, payload identity, and
+mode remain mandatory verification inputs; the storage projection grants no acceptance.
+Production action composition, compiler measurements, and platform qualification remain
+release-blocking work under RELEASE-INTEGRATION-003.
+
+## Private production configuration and read-only Bazel custody
+
+Standard rebuild loads `shared-cache.json` from the private configuration directory
+reported by `litai config paths`; `LITAI_SHARED_CACHE_CONFIG` may select an absolute
+alternative. An absent default file leaves caching unconfigured. Explicit missing,
+unsafe, malformed, duplicate-key, or changed configuration is refused. The cache
+contract binds the rebuild identity, and credential references resolve through
+`env:NAME`. Bearer credentials live in a temporary private Bazel RC for each
+invocation and are excluded from command arguments and diagnostics.
+
+Bazel's remote read-only flag does not prevent disk-cache writes. Read-only builds
+therefore use a disposable copy of local cache entries, independently of the shared
+storage directory, with remote uploads disabled. The copy excludes expired entries
+and is bounded by configured bytes, 100,000 entries, and 30 seconds; unavailable,
+changing, or over-budget contents become an empty view. No writable hard links are
+used. Bazel verifies restored content, and ordinary staging cleanup removes the view.
+Planning without an execution workspace disables the disk cache for read-only mode.
+This preserves cache correctness at the cost of copying; large-cache measurements and
+shared writer retention enforcement remain qualification work.
+
+## Cargo compiler-cache composition
+
+Cargo compiler caching binds the selected sccache executable's content identity
+into the private cache binding before rebuilding. Each build owns its foreground
+server and private configuration, bounded startup, statistics, and shutdown calls;
+an unavailable server falls back to the compiler. The caller's ambient sccache
+settings and compiler wrappers do not select a different cache process. Credentials
+remain private, and retained process output is redacted.
+
+Rust cache keys include working-directory and Cargo-environment paths. Exact Cargo
+targets therefore use stable disposable staging under the runtime object root,
+protected by the existing cross-process cache lock. Staging is rebuilt from the
+admitted source and removed after use. Incremental Rust compilation is disabled;
+link steps are not claimed as cacheable. Read-only sccache disk storage also requires
+a disposable view because the native reader updates file modification times.
+
+Captured Cargo build observations may include strictly validated cache-tool and
+configuration identities and advisory counters. These counters do not establish
+acceptance or replace the exact compiler/source/dependency and independent acceptance
+contracts. Cache-tool native dependency observation now binds recursive native image,
+inspector, and loader-resolution evidence into cache identity and the Standard build
+dependency graph. The runtime revalidates it at lifecycle entry/exit (including
+artifact-cache reuse) and around each compiler-cache session with that process's
+loader environment. Unsupported loader controls and identity drift refuse execution;
+they are not availability fallbacks. Observation uses immutable canonical bytes and
+preserves distinct cache-runtime roles when a compiler also uses the same library.
+Full recursive observation has measurable per-build cost; throughput and platform/LAN
+qualification remain open under RELEASE-INTEGRATION-003.
+
+Standard native C++ command drivers share a stdlib-only compilation helper: each
+translation unit produces one disposable object through the selected cache tool,
+and the locked compiler links those objects without a cache wrapper. The helper
+is embedded in the exact command authority, with documentation removed and bytes
+compressed to preserve the existing command-token size limit. Single and multiple
+entrypoints use the same boundary. Only recognized framework command drivers receive
+the private wrapper; an ambient wrapper variable does not select a tool. Captured
+native build observations retain the same advisory cache fields as Cargo.

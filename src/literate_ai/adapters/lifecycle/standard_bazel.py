@@ -15,6 +15,7 @@ import stat
 import tempfile
 import time
 from collections.abc import Callable, Mapping
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
@@ -28,6 +29,7 @@ from literate_ai.adapters.builders.bazel import (
     collect_bzlmod_dependency_evidence,
 )
 from literate_ai.adapters.dependencies import HostDependencyObservation
+from literate_ai.adapters.shared_cache_config import BoundSharedCache
 from literate_ai.application.standard_project_lifecycle import (
     StandardBuildOutput,
     StandardComponentBuildPlan,
@@ -277,6 +279,7 @@ class StandardBazelLifecyclePorts(LocalStandardLifecyclePorts):
         browser_driver: object | None = None,
         native_sdk_inputs: object | None = None,
         bazel_cache_arguments: tuple[str, ...] = (),
+        shared_cache: BoundSharedCache | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         super().__init__(
@@ -310,6 +313,9 @@ class StandardBazelLifecyclePorts(LocalStandardLifecyclePorts):
         ):
             raise ValueError("Bazel cache arguments cannot change output custody")
         self.bazel_cache_arguments = bazel_cache_arguments
+        if shared_cache is not None and not isinstance(shared_cache, BoundSharedCache):
+            raise TypeError("shared cache must bind private configuration")
+        self.shared_cache = shared_cache
         self.bazel_targets = {
             item.component_revision.uri: item for item in bazel_targets
         }
@@ -593,14 +599,38 @@ class StandardBazelLifecyclePorts(LocalStandardLifecyclePorts):
                 if compiler_binding is not None:
                     compiler_binding.require_unchanged()
                 try:
-                    return self._run(
-                        (*binding.command, *startup, *arguments),
-                        cwd=bazel_workspace,
-                        providers=provider_artifacts,
-                        binding=compiler_binding or binding,
-                        timeout_seconds=DEFAULT_BAZEL_COMMAND_TIMEOUT_SECONDS,
+                    credentials = (
+                        self.shared_cache.bazel_credentials(object_workspace)
+                        if self.shared_cache is not None
+                        else nullcontext(())
                     )
+                    with credentials as private_startup:
+                        token = (
+                            self.shared_cache.credential() if private_startup else None
+                        )
+                        result = self._run(
+                            (*binding.command, *startup, *private_startup, *arguments),
+                            cwd=bazel_workspace,
+                            providers=provider_artifacts,
+                            binding=compiler_binding or binding,
+                            timeout_seconds=DEFAULT_BAZEL_COMMAND_TIMEOUT_SECONDS,
+                            **(
+                                {
+                                    "extra_environment": {
+                                        "LITAI_SHARED_CACHE_SECRET": token
+                                    }
+                                }
+                                if token is not None
+                                else {}
+                            ),
+                        )
+                        if token is not None:
+                            result.stdout = result.stdout.replace(token, "<redacted>")
+                            result.stderr = result.stderr.replace(token, "<redacted>")
+                        return result
                 finally:
+                    if self.shared_cache is not None:
+                        self.shared_cache.require_unchanged()
                     binding.require_unchanged()
                     if compiler_binding is not None:
                         compiler_binding.require_unchanged()
@@ -629,6 +659,11 @@ class StandardBazelLifecyclePorts(LocalStandardLifecyclePorts):
                     "--symlink_prefix=/",
                     *self.bazel_cache_arguments,
                     *target.build_options,
+                    *(
+                        self.shared_cache.bazel_arguments(workspace=staging)
+                        if self.shared_cache is not None
+                        else ()
+                    ),
                     target.target_label,
                 ),
             )

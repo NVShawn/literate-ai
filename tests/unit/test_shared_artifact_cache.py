@@ -65,7 +65,7 @@ def _manifest(
     )
     return SharedCacheArtifactManifest(
         namespace,
-        configuration.identity,
+        configuration.storage_identity,
         canonical_identity({"action": "package", "input": "accepted-closure"}),
         _raw_identity(payload),
         len(payload),
@@ -135,6 +135,10 @@ class SharedArtifactCacheTests(unittest.TestCase):
 
         other_configuration = _configuration(SharedCacheAccessMode.READ_ONLY)
         other = LocalSharedArtifactCache(other_configuration, self.root)
+        self.assertEqual(other.get(self.manifest), self.payload)
+        other = LocalSharedArtifactCache(
+            replace(other_configuration, scope=SharedCacheScope.ORGANIZATION), self.root
+        )
         with self.assertRaisesRegex(SharedArtifactCacheError, "another cache"):
             other.get(self.manifest)
 

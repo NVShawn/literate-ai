@@ -52,6 +52,10 @@ class UserPaths:
         return self.config_root / "workers.json"
 
     @property
+    def shared_cache_config(self) -> PurePath:
+        return self.config_root / "shared-cache.json"
+
+    @property
     def mcp_catalog(self) -> PurePath:
         return self.config_root / "mcps.json"
 

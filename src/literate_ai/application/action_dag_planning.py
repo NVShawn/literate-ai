@@ -182,10 +182,10 @@ def plan_lifecycle_action_dag(
         consumer = edge.consumer_revision
         if edge.kind in {DependencyKind.BUILD, DependencyKind.TOOLCHAIN}:
             consumer_kind = LifecycleActionKind.BUILD
-            provider_kind = LifecycleActionKind.BUILD
+            provider_kind = LifecycleActionKind.ACCEPT
         elif edge.kind is DependencyKind.RUNTIME:
             consumer_kind = LifecycleActionKind.EXECUTE
-            provider_kind = LifecycleActionKind.BUILD
+            provider_kind = LifecycleActionKind.ACCEPT
         elif edge.kind is DependencyKind.VALIDATION:
             consumer_kind = LifecycleActionKind.TEST
             provider_kind = LifecycleActionKind.TEST

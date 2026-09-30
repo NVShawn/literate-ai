@@ -256,7 +256,7 @@ class LocalSharedArtifactCache:
                     / f"{manifest.key_identity.digest}.json"
                 )
                 if object_path.exists():
-                    if self._read_regular(object_path) != payload:
+                    if self._read_regular(object_path, len(payload)) != payload:
                         raise SharedArtifactCacheError(
                             "shared_cache.object_collision",
                             "content-addressed object contains different bytes",
@@ -268,7 +268,7 @@ class LocalSharedArtifactCache:
                     self._atomic_write(object_path, payload, 0o600)
                 encoded = canonical_json_bytes(manifest.to_dict())
                 if manifest_path.exists():
-                    if self._read_regular(manifest_path) != encoded:
+                    if self._read_regular(manifest_path, 1024 * 1024) != encoded:
                         raise SharedArtifactCacheError(
                             "shared_cache.key_collision",
                             "cache key already binds another manifest",
@@ -290,7 +290,7 @@ class LocalSharedArtifactCache:
             return None
         try:
             observed = SharedCacheArtifactManifest.from_dict(
-                json.loads(self._read_regular(manifest_path))
+                json.loads(self._read_regular(manifest_path, 1024 * 1024))
             )
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise SharedArtifactCacheError(
@@ -302,7 +302,7 @@ class LocalSharedArtifactCache:
                 "cached manifest does not match current complete authority",
             )
         object_path = namespace_root / "objects" / observed.payload_identity.digest
-        payload = self._read_regular(object_path)
+        payload = self._read_regular(object_path, observed.size_bytes)
         if (
             len(payload) != observed.size_bytes
             or _bytes_identity(payload) != observed.payload_identity
@@ -316,21 +316,37 @@ class LocalSharedArtifactCache:
     def _require_manifest(self, manifest: SharedCacheArtifactManifest) -> None:
         if not isinstance(manifest, SharedCacheArtifactManifest):
             raise TypeError("shared cache manifest must be typed")
-        if manifest.cache_configuration_identity != self.configuration.identity:
+        if manifest.cache_configuration_identity not in {
+            self.configuration.storage_identity,
+            self.configuration.identity,  # Retain exact legacy local entries.
+        }:
             raise SharedArtifactCacheError(
                 "shared_cache.configuration_mismatch",
                 "artifact manifest binds another cache configuration",
             )
         self.configuration.policy(manifest.namespace)
+        if manifest.size_bytes > self.configuration.maximum_bytes:
+            raise SharedArtifactCacheError(
+                "shared_cache.payload_oversized", "artifact exceeds cache size policy"
+            )
 
     @staticmethod
-    def _read_regular(path: Path) -> bytes:
+    def _read_regular(path: Path, maximum_bytes: int) -> bytes:
         try:
             require_safe_directory(path.parent)
             before = path.lstat()
             if path_is_link_or_reparse(path) or not stat.S_ISREG(before.st_mode):
                 raise OSError
-            content = path.read_bytes()
+            if before.st_size > maximum_bytes:
+                raise SharedArtifactCacheError(
+                    "shared_cache.entry_oversized", "cache entry exceeds bound"
+                )
+            with path.open("rb") as stream:
+                content = stream.read(maximum_bytes + 1)
+            if len(content) > maximum_bytes:
+                raise SharedArtifactCacheError(
+                    "shared_cache.entry_oversized", "cache entry exceeds bound"
+                )
             after = path.lstat()
         except (OSError, UnsafeFilesystemPathError) as exc:
             raise SharedArtifactCacheError(

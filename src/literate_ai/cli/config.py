@@ -58,6 +58,7 @@ def _paths_from_args(args: Any) -> dict[str, object]:
             "config_root": str(paths.config_root),
             "state_root": str(paths.state_root),
             "worker_config": str(paths.worker_config),
+            "shared_cache_config": str(paths.shared_cache_config),
             "test_config": str(
                 paths.project_test_config(project.definition.project_id)
             ),

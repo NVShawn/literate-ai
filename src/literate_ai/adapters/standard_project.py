@@ -98,6 +98,8 @@ from literate_ai.adapters.models.coding_cli import (
     DEFAULT_MAXIMUM_GENERATION_CLI_STDERR_BYTES,
 )
 from literate_ai.adapters.multi_entrypoint_build import standalone_driver_source
+from literate_ai.adapters.native_cpp_build import compiler_driver_source
+from literate_ai.adapters.shared_cache_config import BoundSharedCache
 from literate_ai.adapters.source_generation import (
     CachedCodingCliSourceGenerationRunner,
     CodingCliSourceGenerationInvocation,
@@ -477,7 +479,7 @@ class StandardAcceptedSourceContinuationError(RuntimeError):
         super().__init__(message)
 
 
-_STANDARD_BUILD_DRIVER = (
+_STANDARD_BUILD_DRIVER = compiler_driver_source(
     "import base64,json,os,pathlib,shutil,subprocess,sys,zlib;"
     "strategy,compiler_json,compiler_environment_encoded,root,relative,obj,export="
     "sys.argv[1:8];"
@@ -519,18 +521,25 @@ _STANDARD_BUILD_DRIVER = (
     "if strategy=='go-executable' else "
     "([*compiler,str(source),'-o',str(out)] "
     "if strategy=='swift-executable' else "
-    "([*compiler,'/nologo','/std:c++17','/EHsc','/I'+str(cpproot),"
-    "*cppsources,'/Fe'+str(out)] "
-    "if strategy=='cpp-executable' and pathlib.Path(compiler[0]).name.lower() in "
-    "('cl','cl.exe','clang-cl','clang-cl.exe') else "
-    "([*compiler,'-std=c++17','-O2','-I',str(cpproot),*cppsources,'-o',str(out)] "
-    "if strategy=='cpp-executable' else None))))));"
-    "built=subprocess.run(cmd,capture_output=True,env=environment) if cmd else None;"
+    "None))));"
+    "built=(compile_cpp(compiler,cppsources,cpproot,pathlib.Path(obj),out,environment) "
+    "if strategy=='cpp-executable' else "
+    "subprocess.run(cmd,capture_output=True,env=environment) if cmd else None);"
     "sys.stdout.buffer.write(built.stdout) if built else None;"
     "sys.stderr.buffer.write(built.stderr) if built else None;"
     "raise SystemExit((bad.returncode if bad else 0) or "
     "(built.returncode if built else 0))"
 )
+
+
+def native_cpp_cache_contract(contract: ComponentCommandContract) -> bool:
+    command = contract.command(ComponentCommandPhase.BUILD).argv
+    return (
+        len(command) >= 4
+        and command[:2] == ("{tool}", "-c")
+        and command[2] in {_STANDARD_BUILD_DRIVER, standalone_driver_source()}
+        and command[3] == "cpp-executable"
+    )
 
 
 def _inline_python_driver(source: str) -> str:
@@ -2775,6 +2784,10 @@ class FilesystemStandardProjectRuntime:
             raise TypeError("snapshot must provide locked generation authority")
         if not isinstance(request, StandardProjectExecutionRequest):
             raise TypeError("request must be a StandardProjectExecutionRequest")
+        cache = self.lifecycle_ports.shared_cache
+        if cache is not None and cache.compiler_tool is not None:
+            cache.require_unchanged()
+            cache.require_compiler_dependencies(cache.environment)
         snapshot.require_unchanged()
         request.planned.coding_cli.require_unchanged()
         if (
@@ -2908,6 +2921,9 @@ class FilesystemStandardProjectRuntime:
             )
         snapshot.require_unchanged()
         request.planned.coding_cli.require_unchanged()
+        if cache is not None and cache.compiler_tool is not None:
+            cache.require_unchanged()
+            cache.require_compiler_dependencies(cache.environment)
         return ExecutedStandardProject(
             request.planned,
             prepared,
@@ -3025,6 +3041,7 @@ def assemble_filesystem_standard_project_runtime(
     browser_driver: object | None = None,
     native_sdk_inputs=None,
     bazel_cache_arguments: tuple[str, ...] = (),
+    shared_cache: BoundSharedCache | None = None,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
 ) -> FilesystemStandardProjectRuntime:
     """Wire an explicit component-scoped host runtime, never a default CLI claim."""
@@ -3034,6 +3051,20 @@ def assemble_filesystem_standard_project_runtime(
             "public Standard runtime requires a projected toolchain closure"
         )
     toolchain_closure.require_unchanged()
+    if shared_cache is not None and shared_cache.compiler_tool is not None:
+        if shared_cache.compiler_dependencies is None:
+            raise ValueError("compiler cache lacks native dependency evidence")
+        observation = shared_cache.compiler_dependencies.include_in(
+            toolchain_closure.dependency_observation
+        )
+        toolchain_closure = replace(
+            toolchain_closure,
+            record=replace(
+                toolchain_closure.record,
+                dependency_graph_identity=_dependency_observation_identity(observation),
+            ),
+            dependency_observation=observation,
+        )
     if toolchain_closure.python_targets and python_wheelhouse is None:
         raise StandardCommandProjectionError(
             "standard_command.python_wheelhouse_missing",
@@ -3100,14 +3131,16 @@ def assemble_filesystem_standard_project_runtime(
             **port_arguments,
             bazel_targets=toolchain_closure.bazel_targets,
             bazel_cache_arguments=bazel_cache_arguments,
+            shared_cache=shared_cache,
         )
     elif toolchain_closure.cargo_targets:
         ports = StandardCargoLifecyclePorts(
             **port_arguments,
             cargo_targets=toolchain_closure.cargo_targets,
+            shared_cache=shared_cache,
         )
     else:
-        ports = LocalStandardLifecyclePorts(**port_arguments)
+        ports = LocalStandardLifecyclePorts(**port_arguments, shared_cache=shared_cache)
     from literate_ai.adapters.candidate_repair import (
         FilesystemStandardCandidateRepairAdapter,
     )

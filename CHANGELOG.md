@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Overlap local consumer source generation with provider build work while preserving
+  accepted artifact imports and one shared concurrency limit.
+
+- Make action-DAG plans wait for provider acceptance before consuming build,
+  toolchain, or runtime artifacts, while keeping interface-only generation independent.
+
+- Include the compiler-cache tool's recursive native dependencies in build evidence
+  and cache identity, refusing dependency changes before and after compilation.
+
+- Cache native C++ translation units through sccache while linking each declared
+  executable normally, including Components with multiple entrypoints.
+
+- Run configured Cargo compiler caching through an identity-bound sccache tool
+  and an owned private server, retaining cache counters with build observations.
+
+- Bind private shared-cache configuration into Standard Bazel builds, with
+  temporary credential custody and disposable read-only disk-cache views.
+
+- Preserve bounded, redacted SSH probe diagnostics with the failing worker, exit
+  status, and actionable cause; retain worker identity on invalid observations.
+
+- Start ready Component lifecycles as soon as their own dependencies finish,
+  without waiting for unrelated work in a previous dependency layer.
+
+- Add bounded HTTP shared-artifact transport with immutable publication checks,
+  verified local fallback, and read-only access to writer entries. Production
+  lifecycle integration remains part of the 1.2 qualification program.
+
 - Preserve an adopted project's repository parent selection when signed source
   promotion creates its nested native project. This keeps promotion usable from
   clean public checkouts without relying on unrelated local release tags.

@@ -26,6 +26,7 @@ from literate_ai.adapters.mcp_runtime import (
 )
 from literate_ai.adapters.models import CodingCliError
 from literate_ai.adapters.project_update_work_items import DEFAULT_QUEUE_PATH
+from literate_ai.adapters.shared_cache_config import SharedCacheConfigurationError
 from literate_ai.adapters.standard_project import StandardCommandProjectionError
 from literate_ai.adapters.user_config import (
     UserConfigError,
@@ -3306,6 +3307,7 @@ def main(
         CodingCliError,
         LocalStandardLifecycleError,
         SourceCacheError,
+        SharedCacheConfigurationError,
         SourceToSpecificationError,
         StandardCommandProjectionError,
         UserConfigError,

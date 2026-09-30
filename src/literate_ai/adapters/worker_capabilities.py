@@ -6,6 +6,7 @@ import base64
 import json
 import os
 import platform
+import re
 import shlex
 import subprocess
 import tempfile
@@ -17,6 +18,7 @@ from typing import Protocol
 from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.ssh_transport import SshTransportError, ssh_arguments
 from literate_ai.contracts import (
+    ContractValidationError,
     ExecutionWorker,
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
@@ -26,16 +28,73 @@ from literate_ai.contracts import (
     WorkerHardwareObservationCatalog,
     canonical_json_bytes,
 )
+from literate_ai.diagnostics import redact_secrets
 
 MAX_PROBE_OUTPUT_BYTES = 256 * 1024
 DEFAULT_PROBE_TIMEOUT_SECONDS = 20
+MAX_PROBE_DIAGNOSTIC_CHARS = 4096
 
 
 class WorkerCapabilityProbeError(RuntimeError):
-    def __init__(self, code: str, message: str) -> None:
+    def __init__(
+        self, code: str, message: str, *, worker_id: str | None = None
+    ) -> None:
         self.code = code
-        self.message = message
-        super().__init__(f"{code}: {message}")
+        self.worker_id = worker_id
+        self.message = (
+            message if worker_id is None else f"worker {worker_id}: {message}"
+        )
+        super().__init__(f"{code}: {self.message}")
+
+
+def _ssh_failure(stderr: bytes) -> str:
+    if len(stderr) > MAX_PROBE_OUTPUT_BYTES:
+        return "SSH exited 255; diagnostic exceeded the probe output limit"
+    diagnostic = redact_secrets(stderr.decode("utf-8", errors="replace"))
+    diagnostic = re.sub(r"(?i)(https?://)[^/\s@]+@", r"\1<redacted>@", diagnostic)
+    diagnostic = re.sub(
+        r"(?i)(\b(?:password|token|secret|authorization)\s*[:=]\s*)(?:Bearer\s+)?[^\s]+",
+        r"\1<redacted>",
+        diagnostic,
+    )
+    diagnostic = "".join(
+        char for char in diagnostic if char in "\n\t" or char.isprintable()
+    )
+    lowered = diagnostic.casefold()
+    if "remote host identification has changed" in lowered:
+        cause, remedy = (
+            "changed-host-key",
+            "Verify the host key change before updating known_hosts.",
+        )
+    elif "host key verification failed" in lowered or "host key is known" in lowered:
+        cause, remedy = (
+            "host-key-verification",
+            "Verify and register the host key in known_hosts.",
+        )
+    elif "permission denied" in lowered:
+        cause, remedy = (
+            "authentication",
+            "Check the configured SSH user and non-interactive credentials.",
+        )
+    elif (
+        "could not resolve hostname" in lowered
+        or "name or service not known" in lowered
+    ):
+        cause, remedy = "name-resolution", "Check the configured host name and DNS."
+    elif "connection refused" in lowered:
+        cause, remedy = (
+            "connection-refused",
+            "Check the SSH service and configured port.",
+        )
+    elif "timed out" in lowered or "timeout" in lowered:
+        cause, remedy = "timeout", "Check network reachability and the SSH timeout."
+    else:
+        cause, remedy = "transport", "Check the SSH diagnostic and configured route."
+    excerpt = diagnostic[:MAX_PROBE_DIAGNOSTIC_CHARS].strip()
+    if len(diagnostic) > MAX_PROBE_DIAGNOSTIC_CHARS:
+        excerpt += "\n[diagnostic truncated]"
+    detail = excerpt or "No SSH diagnostic was returned."
+    return f"SSH exited 255 ({cause}). {remedy}\n{detail}"
 
 
 class ProbeRunner(Protocol):
@@ -102,12 +161,21 @@ def _invoke(
             if result.returncode == 255:
                 raise WorkerCapabilityProbeError(
                     "worker.probe_transport_failed",
-                    "SSH transport or non-interactive authentication failed",
+                    _ssh_failure(result.stderr),
+                    worker_id=worker.worker_id,
                 )
             return result
+    except WorkerCapabilityProbeError as exc:
+        if exc.worker_id is not None:
+            raise
+        raise WorkerCapabilityProbeError(
+            exc.code, exc.message, worker_id=worker.worker_id
+        ) from exc
     except (OSError, SshTransportError, subprocess.TimeoutExpired) as exc:
         raise WorkerCapabilityProbeError(
-            "worker.probe_transport_failed", "worker probe transport failed"
+            "worker.probe_transport_failed",
+            "worker probe transport failed",
+            worker_id=worker.worker_id,
         ) from exc
     raise WorkerCapabilityProbeError(
         "worker.probe_protocol_unsupported",
@@ -208,6 +276,32 @@ def probe_worker_capabilities(
     runner: ProbeRunner = _run,
     timeout_seconds: int = DEFAULT_PROBE_TIMEOUT_SECONDS,
     observed_at: str | None = None,
+) -> WorkerHardwareObservation:
+    try:
+        return _probe_worker_capabilities(
+            worker,
+            runner=runner,
+            timeout_seconds=timeout_seconds,
+            observed_at=observed_at,
+        )
+    except WorkerCapabilityProbeError as exc:
+        if exc.worker_id is not None:
+            raise
+        raise WorkerCapabilityProbeError(
+            exc.code, exc.message, worker_id=worker.worker_id
+        ) from exc
+    except ContractValidationError as exc:
+        raise WorkerCapabilityProbeError(
+            "worker.probe_invalid", str(exc), worker_id=worker.worker_id
+        ) from exc
+
+
+def _probe_worker_capabilities(
+    worker: ExecutionWorker,
+    *,
+    runner: ProbeRunner,
+    timeout_seconds: int,
+    observed_at: str | None,
 ) -> WorkerHardwareObservation:
     family = worker.requirements.os_family
     if family is None:

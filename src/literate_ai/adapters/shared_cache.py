@@ -59,14 +59,30 @@ def _remote(configuration: SharedCacheConfiguration, suffix: str) -> str | None:
 
 
 def bazel_cache_plan(
-    configuration: SharedCacheConfiguration, *, local_root: Path
+    configuration: SharedCacheConfiguration,
+    *,
+    local_root: Path,
+    read_only_view: Path | None = None,
 ) -> BazelCachePlan:
     if not isinstance(configuration, SharedCacheConfiguration):
         raise TypeError("Bazel cache planning requires typed configuration")
     policy = configuration.policy(SharedCacheNamespace.BAZEL)
     root = _root(local_root) / configuration.namespace / "bazel"
+    if policy.mode is SharedCacheAccessMode.READ_ONLY:
+        # Bazel's remote-upload flag does not disable disk-cache writes. A caller
+        # may supply a disposable copy; never give Bazel the shared read-only root.
+        if read_only_view is not None and (
+            read_only_view == root
+            or read_only_view.is_relative_to(root)
+            or root.is_relative_to(read_only_view)
+        ):
+            raise SharedCacheAdapterError(
+                "shared_cache.view_overlaps_storage",
+                "read-only Bazel view must be separate from shared storage",
+            )
+        root = _root(read_only_view) if read_only_view is not None else None
     arguments = [
-        f"--disk_cache={root}",
+        f"--disk_cache={root if root is not None else ''}",
         f"--experimental_disk_cache_gc_max_size={configuration.maximum_bytes}",
         (f"--experimental_disk_cache_gc_max_age={configuration.retention_seconds}s"),
     ]

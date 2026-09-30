@@ -106,6 +106,7 @@ def worker_from_args(args: Any) -> tuple[dict[str, object], int]:
         raise CliFailure(
             getattr(exc, "code", "worker.probe_invalid"),
             getattr(exc, "message", str(exc)),
+            message_limit=8192 if isinstance(exc, WorkerCapabilityProbeError) else 512,
         ) from exc
     replacements = {
         item.worker_id: item for item in _existing(observation_path).workers

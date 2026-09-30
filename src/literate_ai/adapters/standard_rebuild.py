@@ -48,6 +48,7 @@ from .lifecycle import (
 )
 from .project_validation import validated_project_authority_identity
 from .retained_source import RetainedSourceInput
+from .shared_cache_config import BoundSharedCache, load_shared_cache
 from .standard_lifecycle_binding import (
     ResolvedStandardProjectLifecycleDriver,
     resolve_standard_project_lifecycle_driver,
@@ -63,6 +64,7 @@ from .standard_project import (
     assemble_filesystem_standard_project_runtime,
     compose_filesystem_standard_lifecycle_checkpoints,
     compose_filesystem_standard_source_cache,
+    native_cpp_cache_contract,
     project_locked_standard_toolchain_closure,
 )
 
@@ -147,6 +149,7 @@ class FilesystemStandardRebuildAdapter:
         ),
         retained_source: RetainedSourceInput | None = None,
         retained_source_authorization: str | None = None,
+        shared_cache: BoundSharedCache | None = None,
     ) -> None:
         if not isinstance(project, LoadedProject):
             raise TypeError("project must be a LoadedProject")
@@ -173,6 +176,9 @@ class FilesystemStandardRebuildAdapter:
         self.source_cache_configuration = source_cache_configuration
         self.authority_validator = authority_validator
         self.retained_source = retained_source
+        if shared_cache is not None and not isinstance(shared_cache, BoundSharedCache):
+            raise TypeError("shared cache must bind private configuration")
+        self.shared_cache = shared_cache
         if retained_source is not None:
             retained_source.require_authorization(retained_source_authorization)
 
@@ -197,6 +203,8 @@ class FilesystemStandardRebuildAdapter:
                 "generated source runtime must remain outside project authority",
             )
         self.binding.require_unchanged()
+        if self.shared_cache is not None:
+            self.shared_cache.require_unchanged()
         snapshot.require_unchanged()
         validated = self.authority_validator(self.project.root)
         if self.retained_source is not None:
@@ -242,6 +250,11 @@ class FilesystemStandardRebuildAdapter:
                     self.binding.distribution.identity.uri
                 ),
                 "max_parallelism": request.max_parallelism,
+                **(
+                    {"shared_cache_identity": self.shared_cache.identity.uri}
+                    if self.shared_cache is not None
+                    else {}
+                ),
                 "accepted_source_only": request.accepted_source_only,
                 **(
                     {"retained_source_identity": self.retained_source.identity.uri}
@@ -316,6 +329,8 @@ class FilesystemStandardRebuildAdapter:
                 "Standard lifecycle did not produce an accepted project"
                 + (f": {detail}" if detail else ""),
             )
+        if self.shared_cache is not None:
+            self.shared_cache.require_unchanged()
         self.binding.require_unchanged()
         snapshot.require_unchanged()
         if self.authority_validator(self.project.root) != validated:
@@ -571,6 +586,12 @@ def assemble_filesystem_standard_rebuild_adapter(
     generator.retained_source = retained_source
     source_trees = LocalSourceTreeRegistry()
     indexer = DisabledGenerationIndexer(source_trees)
+    shared_cache = load_shared_cache()
+    if shared_cache is not None and (
+        closure.cargo_targets
+        or any(native_cpp_cache_contract(item) for item in closure.contracts)
+    ):
+        shared_cache = shared_cache.bind_compiler_tool()
     runtime = assemble_filesystem_standard_project_runtime(
         generator=generator,
         object_root=object_root,
@@ -590,6 +611,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         indexer=indexer,
         independent_acceptance_oracle=independent_acceptance_oracle,
         native_sdk_inputs=prepared.native_sdk_inputs,
+        shared_cache=shared_cache,
     )
     configuration, caches = _resolved_source_cache(project, source_cache_root)
     resolver = SourceCacheResolver(configuration, caches)
@@ -613,6 +635,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         authority_validator=authority_validator,
         retained_source=retained_source,
         retained_source_authorization=retained_source_authorization,
+        shared_cache=shared_cache,
     )
 
 

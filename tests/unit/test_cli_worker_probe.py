@@ -7,6 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from literate_ai.adapters.worker_capabilities import WorkerCapabilityProbeError
 from literate_ai.cli.dispatch import main
 from literate_ai.contracts import (
     ExecutionRequirements,
@@ -21,6 +22,40 @@ from literate_ai.contracts import (
 
 
 class WorkerProbeCliTests(unittest.TestCase):
+    def test_probe_error_keeps_bounded_ssh_diagnostic_in_json(self):
+        message = (
+            "SSH exited 255 (host-key-verification). "
+            + "x" * 700
+            + " Host key verification failed."
+        )
+        error = WorkerCapabilityProbeError(
+            "worker.probe_transport_failed", message, worker_id="unreachable"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            output = io.StringIO()
+            with (
+                patch("literate_ai.cli.worker.load_execution_worker_catalog"),
+                patch("literate_ai.cli.worker.probe_worker_catalog", side_effect=error),
+            ):
+                status = main(
+                    [
+                        "worker",
+                        "probe",
+                        "--all",
+                        "--json",
+                        "--worker-config",
+                        str(Path(directory) / "workers.json"),
+                        "--output",
+                        str(Path(directory) / "observations.json"),
+                    ],
+                    stdout=output,
+                    stderr=output,
+                )
+            self.assertNotEqual(status, 0)
+            observed = json.loads(output.getvalue())["error"]
+            self.assertEqual(observed["message"], error.message)
+            self.assertFalse((Path(directory) / "observations.json").exists())
+
     def test_scoped_help_is_available(self) -> None:
         output = io.StringIO()
         self.assertEqual(main(["worker", "probe", "help"], stdout=output), 0)

@@ -215,13 +215,24 @@ normalizes a directory export into a deterministic stored ZIP byte stream, so bo
 have retrievable immutable blob custody without confusing an operational host path with
 artifact identity.
 
-All lifecycle dependency edges are conservatively combined into provider-first layers.
-One layer runs each independent node end to end—generation, planning, indexing,
-authorization, build, tests, execution, and acceptance—before the next layer starts.
-Consequently every provider reaches an accepted artifact before a dependent consumer
-even starts source generation. Completion order inside a parallel layer remains
-operational only; result and aggregate-plan evidence use canonical Component-revision
-order.
+The local production lifecycle schedules source generation separately from subsequent
+build work. Generation consumes locked public interfaces, so a consumer can generate
+while its provider is building or awaiting acceptance. Build intent still waits for
+accepted providers before importing their exact exports; the remaining lifecycle
+phases currently execute together. Both stages use one bounded pool, so generation
+does not create extra capacity outside `--jobs`. Original generation evidence and
+checkpoints survive the handoff, including source produced before a later dependency
+failure. Candidate repairs retain fresh workspaces and their existing bounded retry
+contract. Explicit complete-node worker routes retain their transport custody until
+the transport supports separate phases. Completion order remains operational only;
+result and aggregate-plan evidence use canonical Component-revision order.
+
+The finer action-DAG projection in ADR 0044 preserves that artifact-admission boundary:
+build/toolchain consumers wait at BUILD for provider ACCEPT; runtime consumers wait
+at EXECUTE for provider ACCEPT. Interface-only generation remains independent of
+provider execution. A rejected provider cancels artifact-consuming descendants while
+unrelated branches continue. Production phase dispatch and remote custody remain
+open under RELEASE-INTEGRATION-003; the projection alone does not establish them.
 
 Accepted node candidates are reusable only when both their bounded generation evidence
 and complete typed build-plan identity remain current. Independent accepted nodes stay

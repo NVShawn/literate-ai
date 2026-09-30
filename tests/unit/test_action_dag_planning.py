@@ -11,7 +11,11 @@ from literate_ai.application.action_dag_planning import (
     lifecycle_action_id,
     plan_lifecycle_action_dag,
 )
-from literate_ai.application.action_dag_scheduler import LifecycleActionKind
+from literate_ai.application.action_dag_scheduler import (
+    LifecycleActionDagScheduler,
+    LifecycleActionDisposition,
+    LifecycleActionKind,
+)
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
@@ -26,6 +30,11 @@ from literate_ai.contracts.worker_capabilities import (
     NvidiaProbeStatus,
     WorkerHardwareObservation,
     WorkerHardwareObservationCatalog,
+)
+from tests.unit.test_action_dag_scheduler import (
+    _identity,
+    _RecordingDispatcher,
+    _worker,
 )
 from tests.unit.test_component_execution_planning import _diamond_lock, _models
 
@@ -79,7 +88,7 @@ class ActionDagPlanningTests(unittest.TestCase):
             pricing_build.predecessor_ids,
         )
 
-    def test_build_and_toolchain_consumers_wait_for_provider_build_only(self):
+    def test_build_and_toolchain_consumers_wait_for_provider_acceptance(self):
         for kind in (DependencyKind.BUILD, DependencyKind.TOOLCHAIN):
             with self.subTest(kind=kind):
                 _, nodes, revisions = self._plan(kind)
@@ -87,15 +96,15 @@ class ActionDagPlanningTests(unittest.TestCase):
                     lifecycle_action_id(revisions["pricing"], LifecycleActionKind.BUILD)
                 ]
                 self.assertIn(
-                    lifecycle_action_id(revisions["money"], LifecycleActionKind.BUILD),
-                    pricing_build.predecessor_ids,
-                )
-                self.assertNotIn(
                     lifecycle_action_id(revisions["money"], LifecycleActionKind.ACCEPT),
                     pricing_build.predecessor_ids,
                 )
+                self.assertNotIn(
+                    lifecycle_action_id(revisions["money"], LifecycleActionKind.BUILD),
+                    pricing_build.predecessor_ids,
+                )
 
-    def test_runtime_consumer_build_overlaps_and_execute_waits_for_provider_build(self):
+    def test_runtime_consumer_build_overlaps_and_execute_waits_for_acceptance(self):
         _, nodes, revisions = self._plan(DependencyKind.RUNTIME)
         pricing_build = nodes[
             lifecycle_action_id(revisions["pricing"], LifecycleActionKind.BUILD)
@@ -103,11 +112,11 @@ class ActionDagPlanningTests(unittest.TestCase):
         pricing_execute = nodes[
             lifecycle_action_id(revisions["pricing"], LifecycleActionKind.EXECUTE)
         ]
-        provider_build = lifecycle_action_id(
-            revisions["money"], LifecycleActionKind.BUILD
+        provider_accept = lifecycle_action_id(
+            revisions["money"], LifecycleActionKind.ACCEPT
         )
-        self.assertNotIn(provider_build, pricing_build.predecessor_ids)
-        self.assertIn(provider_build, pricing_execute.predecessor_ids)
+        self.assertNotIn(provider_accept, pricing_build.predecessor_ids)
+        self.assertIn(provider_accept, pricing_execute.predecessor_ids)
 
     def test_package_dependency_waits_at_link_not_generation_or_build(self):
         _, nodes, revisions = self._plan(packaging=True)
@@ -125,6 +134,42 @@ class ActionDagPlanningTests(unittest.TestCase):
                     lifecycle_action_id(revisions["invoice-cli"], kind)
                 ].predecessor_ids,
             )
+
+    def test_failed_provider_acceptance_cancels_artifact_consumption_only(self):
+        for dependency_kind, consuming_phase in (
+            (DependencyKind.BUILD, LifecycleActionKind.BUILD),
+            (DependencyKind.TOOLCHAIN, LifecycleActionKind.BUILD),
+            (DependencyKind.RUNTIME, LifecycleActionKind.EXECUTE),
+        ):
+            with self.subTest(kind=dependency_kind):
+                _, nodes, revisions = self._plan(dependency_kind)
+                rejected = lifecycle_action_id(
+                    revisions["pricing"], LifecycleActionKind.ACCEPT
+                )
+                consumer = lifecycle_action_id(
+                    revisions["invoice-cli"], consuming_phase
+                )
+                dispatcher = _RecordingDispatcher({rejected: "acceptance.rejected"})
+                outcome = LifecycleActionDagScheduler().run(
+                    tuple(nodes.values()),
+                    (_worker("alpha"), _worker("beta")),
+                    dispatcher,
+                    deadline_identity=_identity("deadline"),
+                )
+                results = {result.action_id: result for result in outcome.results}
+                self.assertEqual(
+                    results[consumer].disposition, LifecycleActionDisposition.CANCELLED
+                )
+                self.assertNotIn(
+                    consumer, {item.action.action_id for item in dispatcher.requests}
+                )
+                independent = lifecycle_action_id(
+                    revisions["reporting"], LifecycleActionKind.ACCEPT
+                )
+                self.assertEqual(
+                    results[independent].disposition,
+                    LifecycleActionDisposition.ACCEPTED,
+                )
 
     def test_narrows_eligibility_and_affinity_without_admitting_unknown_workers(self):
         execution, _, revisions = self._plan()

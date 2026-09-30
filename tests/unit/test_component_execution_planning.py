@@ -53,6 +53,7 @@ def _diamond_lock(
     invoice_spec: str = "invoice-specification",
     include_invoice_money_packaging_edge: bool = False,
     dependency_kind: DependencyKind = DependencyKind.GENERATION,
+    independent_reporting: bool = False,
 ) -> ComponentLock:
     money_authoring = component_authoring(
         "money", interface=("money-api", "unused-selector-label")
@@ -65,7 +66,11 @@ def _diamond_lock(
     reporting_authoring = component_authoring(
         "reporting",
         interface=("reporting-api", "unused-selector-label"),
-        requirements=(_requirement("money", "money-api", dependency_kind),),
+        requirements=(
+            ()
+            if independent_reporting
+            else (_requirement("money", "money-api", dependency_kind),)
+        ),
     )
     invoice_requirements = (
         _requirement("pricing", "pricing-api", dependency_kind),
@@ -161,6 +166,8 @@ def _diamond_lock(
         ("pricing", "money", "money", "money-api"),
         ("reporting", "money", "money", "money-api"),
     )
+    if independent_reporting:
+        relationships = relationships[:-1]
     if include_invoice_money_packaging_edge:
         relationships = (
             *relationships,
