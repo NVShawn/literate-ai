@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- CLI: identify Git/source builds and their exact revision in version output,
+  without treating package metadata as published-release evidence. Explicit
+  `litai update` now checks for and applies a newer stable release in an enrolled
+  prefix before continuing project reconciliation; opt-outs remain effective.
+
 - Preserve an adopted project's repository parent selection when signed source
   promotion creates its nested native project. This keeps promotion usable from
   clean public checkouts without relying on unrelated local release tags.

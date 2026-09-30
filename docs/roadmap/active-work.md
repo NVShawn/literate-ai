@@ -23095,3 +23095,23 @@ GitHub CI failure without relaxing identity checks.
 - **Evidence:**
   - [ ] Negative tests reject missing or wrong release branches, invalid versions, missing or mismatched tags and incomplete publication; valid derived-project release succeeds.
   - [ ] Fresh public wheel installation runs bare litai init in an empty directory with no private credentials or explicit parent override.
+
+### [ ] CLI-BUILD-IDENTITY-001 — Distinguish source builds and verify explicit CLI self-update
+
+- **Priority:** P0
+- **Owner:** CLI version reporting and prefix self-update
+- **Direction:** Git main installations must not masquerade as a published release; verify that litai update applies a newer release.
+- **Conclusion:** Goals 1 and 4: report immutable installed Git provenance and unverified publication separately from package compatibility version. Explicit update performs bounded release discovery before applying an enrolled-prefix update; preserve project planning, opt-outs, installation custody and offline operation.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add source-aware offline CLI version reporting without changing protocol or lifecycle version authorities.
+  - [x] Make explicit update synchronously discover and apply eligible release wheels before re-executing the original command.
+- **Evidence:**
+  - [ ] Regression tests cover source provenance, newer release selection, original argv re-execution, opt-outs and failure behavior; disposable installed-prefix smoke demonstrates the real upgrade.
+- **Current verification:** 13 focused build-identity/explicit-update tests pass,
+  including real pip installation of a newer fixture wheel and execution of the
+  refreshed prefix launcher with unchanged arguments. Release discovery alone is
+  synthetic; no live public-release upgrade is claimed. The 17 existing updater
+  regressions and 12 version-authority tests pass. Lint, format, public-export,
+  reviewed driver identity and documentation authority checks pass. Broader CLI
+  regression and non-editable Git-install verification remain in progress.

@@ -114,13 +114,28 @@ replaced or upgraded. Ensure `$HOME/.local/bin` is on `PATH`.
 
 A successful `make install` enrolls that prefix for GitHub Release self-update
 ([ADR 0037](../decisions/0037-prefix-installed-cli-self-update.md)). Later invocations
-of that launcher check for a newer stable wheel in the background and never delay the
-current command for GitHub. The next enrolled invocation may install the staged wheel
+of that launcher normally check for a newer stable wheel in the background without
+delaying the current command for GitHub. The next enrolled invocation may install the staged wheel
 into the private environment, refresh the launcher, and re-exec the same arguments.
 Checkout copies, CI, evidence runs, and `LITAI_NO_SELF_UPDATE=1` stay inert. Existing
 installs keep the previous manifest until you run `make install` again.
-`litai update` still means project-file reconciliation, not upgrading the installed
-CLI.
+An explicit `litai update` first performs a bounded, foreground release check,
+bypassing the background check's daily cache. If a newer stable wheel is available,
+the enrolled prefix installs it and re-executes the original arguments before
+project-file reconciliation. Help and invalid arguments do not trigger this explicit
+check. Network failure leaves the current CLI available and reports the skipped
+check; self-update does not silently apply project changes or rebind lifecycle pins.
+Pip, editable and otherwise unenrolled installations are not automatically modified;
+use their installation manager to upgrade. Opt-outs above still apply to explicit
+updates.
+
+`litai --version` shows the declared compatibility version together with source
+provenance. Git/source installations are identified as development builds and include
+the exact commit when available. Wheels retain their embedded Git revision. The
+offline display says publication is unverified rather than claiming that package
+metadata, a local Git tag, or a commit proves a published release. Use release
+publication verification for that proof. Protocol and lifecycle version pins are
+unchanged by this display.
 
 `PREFIX` is authoritative when supplied:
 

@@ -21,6 +21,7 @@ from literate_ai.adapters.standard_lifecycle_binding import (
     StandardLifecycleBindingError,
     resolve_standard_project_lifecycle_driver,
 )
+from literate_ai.build_version import cli_version_label
 from literate_ai.contracts import SemanticVersion, StandardProjectLifecycleDriver
 from literate_ai.projects import PROJECT_FILENAME, ProjectError, discover_project
 from literate_ai.schema_catalog import (
@@ -407,7 +408,7 @@ def check_versions(
             "authority_version": DISTRIBUTION_VERSION,
             "package_version": DISTRIBUTION_VERSION,
             "wheel_metadata_version": metadata_version,
-            "cli_version": DISTRIBUTION_VERSION,
+            "cli_version": cli_version_label(),
             "install_kind": "editable" if editable_install else "non-editable",
             "metadata_matches_authority": metadata_matches,
             "diagnostic": distribution_diagnostic,

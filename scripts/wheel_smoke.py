@@ -1703,8 +1703,11 @@ def _main() -> int:
         ):
             raise RuntimeError("installed CLI does not expose command-path help")
         cli_version = run(str(litai), "--version", cwd=root).stdout.strip()
-        if cli_version != f"litai {declared_version}":
-            raise RuntimeError("installed CLI version differs from its authority")
+        expected_cli_version = (
+            f"litai {declared_version} (publication unverified; git {git_revision})"
+        )
+        if cli_version != expected_cli_version:
+            raise RuntimeError("installed CLI build identity differs from its origin")
         version = run(
             str(python),
             "-c",

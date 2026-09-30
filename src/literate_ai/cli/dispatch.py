@@ -55,6 +55,16 @@ from .errors import (
 from .source_to_specification import add_spec_parser, spec_from_args
 
 _GLOBAL_BOOL_FLAGS = frozenset({"--json", "-v", "--verbose", "--discover-mcps"})
+
+
+class _BuildVersionAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        from literate_ai.build_version import cli_version_label
+
+        print(f"{parser.prog} {cli_version_label()}")
+        parser.exit()
+
+
 _DEBUG_PATH_SUFFIXES = (".json", ".ndjson", ".log", ".txt", ".out")
 _TOP_LEVEL_COMMANDS = frozenset(
     {
@@ -468,10 +478,11 @@ def _parser() -> JsonArgumentParser:
         epilog=_CLI_CATALOG_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    from literate_ai.version import DISTRIBUTION_VERSION
-
     parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {DISTRIBUTION_VERSION}"
+        "--version",
+        action=_BuildVersionAction,
+        nargs=0,
+        help="show build version and exit",
     )
     parser.add_argument(
         "--json",
@@ -3133,7 +3144,7 @@ def main(
         )
     )
     if (
-        command not in {"verify", "lock", "plan"}
+        command not in {"verify", "lock", "plan", "update"}
         and not scoped_orchestration
         and not scoped_evidence
         and not scoped_retained_cargo
@@ -3142,6 +3153,8 @@ def main(
     try:
         parser = _parser()
         args = parser.parse_args(arguments)
+        if args.command == "update":
+            maybe_host_self_update(raw, check_now=True)
         scoped_orchestration = (
             scoped_orchestration
             or scoped_retained_cargo
