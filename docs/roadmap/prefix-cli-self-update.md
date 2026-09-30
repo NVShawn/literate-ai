@@ -19,7 +19,7 @@
 ## Global Constraints
 
 - Only enrolled prefix installs (`LITAI_HOST_INSTALL=1`, matching `@2` manifest with `self_update: true`, interpreter inside that venv).
-- Update source is `https://api.github.com/repos/NVIDIA-dev/literate-ai/releases/latest` and its wheel asset `literate_ai-<PEP440>-py3-none-any.whl`.
+- Update source is `https://api.github.com/repos/jordanhubbard/literate-ai/releases/latest` and its wheel asset `literate_ai-<PEP440>-py3-none-any.whl`.
 - Never downgrade; never use PyPI or git; never replace the live venv from the background worker.
 - Fail open: warn on stderr, run the current command. GitHub timeout 10s; pip timeout 120s.
 - Success cache 24h; failed-check retry 15 minutes. Foreground never waits on GitHub.

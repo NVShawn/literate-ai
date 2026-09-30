@@ -22662,7 +22662,7 @@ GitHub CI failure without relaxing identity checks.
 
 - **Design review:** [ADR 0046](../decisions/0046-project-scoped-worktree-lifecycle.md), Accepted 2026-09-25.
 - **Priority:** P1 (partial placement slice in 1.2; remaining migration contract deferred to 1.3)
-- **GitHub issue:** [#483](https://github.com/NVIDIA-dev/literate-ai/issues/483)
+- **GitHub issue:** [#7](https://github.com/jordanhubbard/literate-ai/issues/7) (migrated from NVIDIA-dev/literate-ai#483)
 - **Owner:** project worktree placement, peer survey, and evidence-preserving retirement
 - **Direction:** Define one discoverable in-repository worktree location and migrate legacy peer-directory worktrees without losing useful commits, untracked data, locks, sessions, submodule state, or qualification evidence.
 - **Conclusion:** The completed 1.1 sibling-cleanup slice does not establish the complete reusable lifecycle contract. Add provider-neutral placement, exhaustive audit, resumable migration, and Git-aware removal while retaining fail-closed ambiguity handling.
@@ -22720,7 +22720,7 @@ GitHub CI failure without relaxing identity checks.
 
 - **Design review:** [ADR 0047](../decisions/0047-native-cli-component-acceptance.md), Accepted 2026-09-25.
 - **Priority:** P1 (partial taxonomy and verifier slice in 1.2; complete lifecycle qualification deferred to 1.3)
-- **GitHub issue:** [#492](https://github.com/NVIDIA-dev/literate-ai/issues/492)
+- **GitHub issue:** [#6](https://github.com/jordanhubbard/literate-ai/issues/6) (migrated from NVIDIA-dev/literate-ai#492)
 - **GitHub pull request:** [#484](https://github.com/NVIDIA-dev/literate-ai/pull/484)
 - **Owner:** Component kinds, Standard lifecycle dispatch, and verifier-owned native CLI acceptance
 - **Direction:** Support native-cli-application Components whose ordinary argv, exit-status, file, and output contracts must not be forced through the portable JSON application protocol.
@@ -22820,7 +22820,7 @@ GitHub CI failure without relaxing identity checks.
 
 - **Release target:** 1.3.0
 - **Priority:** P1
-- **GitHub issue:** [#497](https://github.com/NVIDIA-dev/literate-ai/issues/497)
+- **GitHub issue:** [#5](https://github.com/jordanhubbard/literate-ai/issues/5) (migrated from NVIDIA-dev/literate-ai#497)
 - **Owner:** remote native-package worker and controller custody
 - **Direction:** Serialize the exact accepted package plan and projection to a compatible
   worker, return exact artifact bytes plus independent inspection evidence, and verify
@@ -22838,7 +22838,7 @@ GitHub CI failure without relaxing identity checks.
 
 - **Release target:** 1.3.0
 - **Priority:** P1
-- **GitHub issue:** [#498](https://github.com/NVIDIA-dev/literate-ai/issues/498)
+- **GitHub issue:** [#4](https://github.com/jordanhubbard/literate-ai/issues/4) (migrated from NVIDIA-dev/literate-ai#498)
 - **Owner:** production lifecycle scheduling and shared-cache qualification
 - **Direction:** Route production command and SSH lifecycle actions through the accepted
   DAG, then qualify real cross-worker Bazel/sccache and verified immutable artifact reuse.
@@ -22951,7 +22951,7 @@ GitHub CI failure without relaxing identity checks.
 
 - **Release target:** 1.2.0
 - **Priority:** P0
-- **GitHub issue:** [#505](https://github.com/NVIDIA-dev/literate-ai/issues/505)
+- **GitHub issue:** [#3](https://github.com/jordanhubbard/literate-ai/issues/3) (migrated from NVIDIA-dev/literate-ai#505)
 - **Owner:** worker capability probes, SSH transport diagnostics, and CLI rendering
 - **Direction:** A failed worker probe must name the worker and preserve the bounded,
   redacted SSH cause instead of collapsing host-key, authentication, DNS, refusal,

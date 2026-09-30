@@ -76,6 +76,6 @@
   "remote": "origin",
   "provider": {
     "kind": "github",
-    "repository": "NVIDIA-dev/literate-ai"
+    "repository": "jordanhubbard/literate-ai"
   }
 }

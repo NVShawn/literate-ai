@@ -44,9 +44,9 @@ def _git(root: Path, *arguments: str) -> None:
 class ClassifyRemoteUrlTests(unittest.TestCase):
     def test_github_https_ssh_and_enterprise_hosts(self) -> None:
         for url in (
-            "https://github.com/NVIDIA-dev/literate-ai.git",
-            "git@github.com:NVIDIA-dev/literate-ai.git",
-            "ssh://git@github.com/NVIDIA-dev/literate-ai.git",
+            "https://github.com/jordanhubbard/literate-ai.git",
+            "git@github.com:jordanhubbard/literate-ai.git",
+            "ssh://git@github.com/jordanhubbard/literate-ai.git",
             "https://github.example.com/org/repo.git",
             "git@gist.github.com:123.git",
         ):
@@ -204,7 +204,7 @@ class TrackerInspectCliTests(unittest.TestCase):
                 "remote",
                 "add",
                 "origin",
-                "https://github.com/NVIDIA-dev/literate-ai.git",
+                "https://github.com/jordanhubbard/literate-ai.git",
             )
             (root / "README.md").write_text("tracker fixture\n", encoding="utf-8")
             _git(root, "add", "README.md")

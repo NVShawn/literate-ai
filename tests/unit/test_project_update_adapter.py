@@ -250,7 +250,7 @@ class FilesystemProjectUpdateAdapterTests(unittest.TestCase):
 
     def test_github_ssh_and_https_initialization_origins_are_equivalent(self) -> None:
         previous = ProjectInitializationOrigin(
-            "https://github.com/NVIDIA-dev/literate-ai",
+            "https://github.com/jordanhubbard/literate-ai",
             "a" * 40,
             "literate-ai",
             "0.9.0",
@@ -267,10 +267,10 @@ class FilesystemProjectUpdateAdapterTests(unittest.TestCase):
                 empty=True,
             )
             for repository_url in (
-                "git@github.com:NVIDIA-dev/literate-ai.git",
-                "ssh://git@github.com/NVIDIA-dev/literate-ai.git",
-                "ssh://git@github.com:22/NVIDIA-dev/literate-ai/",
-                "https://github.com:443/NVIDIA-dev/literate-ai.git",
+                "git@github.com:jordanhubbard/literate-ai.git",
+                "ssh://git@github.com/jordanhubbard/literate-ai.git",
+                "ssh://git@github.com:22/jordanhubbard/literate-ai/",
+                "https://github.com:443/jordanhubbard/literate-ai.git",
             ):
                 with self.subTest(repository_url=repository_url):
                     upstream = ProjectInitializationOrigin(
@@ -286,14 +286,14 @@ class FilesystemProjectUpdateAdapterTests(unittest.TestCase):
                     self.assertEqual(plan.upstream_origin, upstream)
 
     def test_repository_origin_equivalence_remains_conservative(self) -> None:
-        official = "https://github.com/NVIDIA-dev/literate-ai.git"
+        official = "https://github.com/jordanhubbard/literate-ai.git"
         for different in (
-            "https://gitlab.com/NVIDIA-dev/literate-ai.git",
+            "https://gitlab.com/jordanhubbard/literate-ai.git",
             "https://github.com/other/literate-ai.git",
             "https://github.com/example-org/other.git",
-            "http://github.com/NVIDIA-dev/literate-ai.git",
-            "ssh://root@github.com/NVIDIA-dev/literate-ai.git",
-            "ssh://git@github.com:2222/NVIDIA-dev/literate-ai.git",
+            "http://github.com/jordanhubbard/literate-ai.git",
+            "ssh://root@github.com/jordanhubbard/literate-ai.git",
+            "ssh://git@github.com:2222/jordanhubbard/literate-ai.git",
             "https://github.com/example-org/literate%2Dai.git",
             "https://github.com/example-org/literate ai.git",
             "file:///tmp/literate-ai.git",

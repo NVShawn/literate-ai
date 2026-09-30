@@ -156,7 +156,7 @@ def native_metadata_resource(
         body = (
             f"class {class_name} < Formula\n"
             f'  desc "Flavor-selected native package"\n'
-            f'  homepage "https://github.com/NVIDIA-dev/literate-ai"\n'
+            f'  homepage "https://github.com/jordanhubbard/literate-ai"\n'
             f'  version "{version}"\n'
             "end\n"
         )

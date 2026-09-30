@@ -54,7 +54,7 @@ def distribution(
 
 def origin(version: str = "0.10.0") -> ProjectInitializationOrigin:
     return ProjectInitializationOrigin(
-        repository_url="https://github.com/NVIDIA-dev/literate-ai.git",
+        repository_url="https://github.com/jordanhubbard/literate-ai.git",
         git_revision="a" * 40,
         distribution_name="literate-ai",
         distribution_version=version,

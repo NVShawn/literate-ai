@@ -115,7 +115,7 @@ class ProjectGuidanceTests(unittest.TestCase):
                     "remote",
                     "add",
                     "origin",
-                    "https://github.com/NVIDIA-dev/literate-ai.git",
+                    "https://github.com/jordanhubbard/literate-ai.git",
                 ),
                 check=True,
             )
