@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:component-execution-planning-contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/generationKey" },
+    { "$ref": "#/$defs/generationPlan" },
+    { "$ref": "#/$defs/topologicalLayer" },
+    { "$ref": "#/$defs/actionPlan" },
+    { "$ref": "#/$defs/executionPlan" }
+  ],
+  "$defs": {
+    "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+    "identityArray": {
+      "type": "array",
+      "maxItems": 4096,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+    },
+    "generationKey": {
+      "$id": "urn:literate-ai:schema:v2:component-generation-key",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "specification_set_identity", "specification_identities",
+        "flavor_selection_identity", "flavor_identities", "skill_identities",
+        "workflow_identity", "routing_identity", "model_identity",
+        "asset_identities", "exported_public_interface_identities",
+        "direct_public_interface_identities"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-generation-key" },
+        "specification_set_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "specification_identities": {
+          "type": "array", "minItems": 1, "maxItems": 4096, "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "flavor_selection_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "flavor_identities": { "$ref": "urn:literate-ai:schema:v2:component-execution-planning-contracts#/$defs/identityArray" },
+        "skill_identities": { "$ref": "urn:literate-ai:schema:v2:component-execution-planning-contracts#/$defs/identityArray" },
+        "workflow_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "routing_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "model_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "asset_identities": { "$ref": "urn:literate-ai:schema:v2:component-execution-planning-contracts#/$defs/identityArray" },
+        "exported_public_interface_identities": { "$ref": "urn:literate-ai:schema:v2:component-execution-planning-contracts#/$defs/identityArray" },
+        "direct_public_interface_identities": { "$ref": "urn:literate-ai:schema:v2:component-execution-planning-contracts#/$defs/identityArray" },
+        "provider_resolution_identities": { "$ref": "urn:literate-ai:schema:v2:component-execution-planning-contracts#/$defs/identityArray" },
+        "native_sdk_input_identities": { "$ref": "urn:literate-ai:schema:v2:component-execution-planning-contracts#/$defs/identityArray" }
+      }
+    },
+    "generationPlan": {
+      "$id": "urn:literate-ai:schema:v2:component-generation-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component_graph_identity", "component_revision", "generation_key", "direct_generation_edges"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-generation-plan" },
+        "component_graph_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_key": { "$ref": "urn:literate-ai:schema:v2:component-generation-key" },
+        "direct_generation_edges": {
+          "type": "array", "maxItems": 16384, "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:executable-component-edge" }
+        }
+      }
+    },
+    "topologicalLayer": {
+      "$id": "urn:literate-ai:schema:v2:component-topological-layer",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "index", "component_revisions"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-topological-layer" },
+        "index": { "type": "integer", "minimum": 0, "maximum": 4095 },
+        "component_revisions": {
+          "type": "array", "minItems": 1, "maxItems": 4096, "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        }
+      }
+    },
+    "actionPlan": {
+      "$id": "urn:literate-ai:schema:v2:component-action-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component_graph_identity", "phase", "component_revisions", "dependency_edges", "layers"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-action-plan" },
+        "component_graph_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "phase": { "enum": ["generate", "validate", "build", "run", "package", "deploy"] },
+        "component_revisions": {
+          "type": "array", "minItems": 1, "maxItems": 4096, "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "dependency_edges": {
+          "type": "array", "maxItems": 16384, "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:executable-component-edge" }
+        },
+        "layers": {
+          "type": "array", "minItems": 1, "maxItems": 4096,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-topological-layer" }
+        }
+      }
+    },
+    "executionPlan": {
+      "$id": "urn:literate-ai:schema:v2:component-execution-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component_lock_identity", "root_revision", "planner_identity", "generation_plans", "action_plans"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-execution-plan" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "root_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "planner_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_plans": {
+          "type": "array", "minItems": 1, "maxItems": 4096,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-generation-plan" }
+        },
+        "action_plans": {
+          "type": "array", "minItems": 6, "maxItems": 6,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-action-plan" }
+        }
+      }
+    }
+  }
+}

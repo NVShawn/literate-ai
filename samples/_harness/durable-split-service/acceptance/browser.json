@@ -1,0 +1,31 @@
+{
+  "schema": "literate-ai/browser-interaction-acceptance@1",
+  "specification_set_identity": "sha256:17c1a2821118c30f5d158d536b42192b9722f0906f71cf8bd6cd777ee4c919fd",
+  "process": {
+    "arguments": ["{port}", "http://127.0.0.1:9"],
+    "startup_timeout_seconds": 15,
+    "timeout_seconds": 30,
+    "shutdown_timeout_seconds": 5,
+    "stdout_limit_bytes": 65536,
+    "stderr_limit_bytes": 65536
+  },
+  "readiness_path": "/health",
+  "viewports": [
+    {"label": "desktop", "width": 1280, "height": 800},
+    {"label": "mobile", "width": 390, "height": 844}
+  ],
+  "steps": [],
+  "postconditions": [],
+  "required_roles": [
+    {"role": "region", "name": "Snapshot metrics"}
+  ],
+  "required_landmarks": ["main"],
+  "rejection_classes": [
+    "console-error",
+    "failed-request",
+    "http-error",
+    "page-error"
+  ],
+  "reject_horizontal_overflow": false,
+  "expected_request_count": 0
+}

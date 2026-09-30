@@ -1,0 +1,9 @@
+{
+  "schema": "literate-ai/tool-source-lock@1",
+  "tool": "skillevaluator",
+  "version": "0.1.0",
+  "repository": "https://github.com/NVIDIA/SkillEvaluator.git",
+  "commit": "0827e0fab5ca93d525cb8ff1ec2af3d7dfcf6d5d",
+  "python": ">=3.12,<3.14",
+  "checks": "schema,pii,license,quality,unicode,lint"
+}

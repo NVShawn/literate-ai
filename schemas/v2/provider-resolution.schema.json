@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:provider-resolution-contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/capabilitySet" },
+    { "$ref": "#/$defs/declaration" },
+    { "$ref": "#/$defs/overrideDeclaration" },
+    { "$ref": "#/$defs/request" },
+    { "$ref": "#/$defs/resolution" }
+  ],
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"
+    },
+    "capabilitySet": {
+      "$id": "urn:literate-ai:schema:v2:provider-capability-set",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "provider_id", "capabilities"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:provider-capability-set" },
+        "provider_id": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" }
+        }
+      }
+    },
+    "overrideDeclaration": {
+      "$id": "urn:literate-ai:schema:v2:provider-override-declaration",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "resolution_id", "provider_id"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:provider-override-declaration" },
+        "resolution_id": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" },
+        "provider_id": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" }
+      }
+    },
+    "declaration": {
+      "$id": "urn:literate-ai:schema:v2:provider-resolution-declaration",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "resolution_id",
+        "preferred_provider",
+        "required_capabilities",
+        "fallback_order",
+        "capability_sets"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:provider-resolution-declaration" },
+        "resolution_id": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" },
+        "preferred_provider": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" },
+        "required_capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" }
+        },
+        "fallback_order": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" }
+        },
+        "capability_sets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-capability-set" }
+        }
+      }
+    },
+    "request": {
+      "$id": "urn:literate-ai:schema:v2:provider-resolution-request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "preferred_provider",
+        "required_capabilities",
+        "fallback_order",
+        "override_provider",
+        "override_declaration_identity",
+        "override_provenance_identity"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:provider-resolution-request" },
+        "resolution_id": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" },
+        "preferred_provider": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" },
+        "required_capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" }
+        },
+        "fallback_order": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" }
+        },
+        "override_provider": {
+          "oneOf": [{ "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" }, { "type": "null" }]
+        },
+        "override_declaration_identity": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+            { "type": "null" }
+          ]
+        },
+        "override_provenance_identity": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "resolution": {
+      "$id": "urn:literate-ai:schema:v2:provider-resolution",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request",
+        "selected_provider",
+        "evaluated_capability_set_identities",
+        "catalog_identity",
+        "resolver_policy_identity",
+        "fallback_reason",
+        "override_declaration_identity",
+        "override_provenance_identity"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:provider-resolution" },
+        "request": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-request" },
+        "selected_provider": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-contracts#/$defs/name" },
+        "evaluated_capability_set_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "catalog_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "resolver_policy_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "fallback_reason": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 4096 },
+            { "type": "null" }
+          ]
+        },
+        "override_declaration_identity": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+            { "type": "null" }
+          ]
+        },
+        "override_provenance_identity": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  }
+}

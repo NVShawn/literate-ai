@@ -1,0 +1,140 @@
+{
+  "schema": "literate-ai/durable-split-service-portfolio@1",
+  "roles": {
+    "api": "component://samples/durable-split-api",
+    "cache": "component://samples/durable-snapshot-cache",
+    "collector": "component://samples/durable-split-collector",
+    "frontend": "component://samples/durable-split-service"
+  },
+  "roots": [
+    "component://samples/durable-split-service",
+    "component://samples/durable-split-collector"
+  ],
+  "edges": [
+    {
+      "capability": "literate-ai.durable-snapshot-api",
+      "consumer": "component://samples/durable-split-service",
+      "provider": "component://samples/durable-split-api"
+    },
+    {
+      "capability": "literate-ai.durable-snapshot-read",
+      "consumer": "component://samples/durable-split-api",
+      "provider": "component://samples/durable-snapshot-cache"
+    },
+    {
+      "capability": "literate-ai.durable-snapshot-write",
+      "consumer": "component://samples/durable-split-collector",
+      "provider": "component://samples/durable-snapshot-cache"
+    }
+  ],
+  "upstream_fixture": {
+    "kind": "verifier-fixture",
+    "uri": "acceptance/upstream.json",
+    "identity": {
+      "schema": "urn:literate-ai:schema:v1:content-identity",
+      "algorithm": "sha256",
+      "digest": "0c74e763da3a730938c7d8e8a27fb4eaa8364c88646a875194d375b1a09d9071"
+    },
+    "schema": "urn:literate-ai:schema:v1:content-reference"
+  },
+  "browser_acceptance": {
+    "kind": "browser-acceptance",
+    "uri": "acceptance/browser.json",
+    "identity": {
+      "schema": "urn:literate-ai:schema:v1:content-identity",
+      "algorithm": "sha256",
+      "digest": "cca3d2106ddf56860d0a787e15f76b405784272037aaa08815d74b5a0455b5ca"
+    },
+    "schema": "urn:literate-ai:schema:v1:content-reference"
+  },
+  "component_harnesses": {
+    "frontend": {
+      "execution": {
+        "kind": "sample-execution-interface",
+        "uri": "durable-split-service/acceptance/execution.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "382eb1b08386bab6a3279bcf1bf9504af92b257143951bd3603f16fd38b770e6"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      },
+      "oracle": {
+        "kind": "acceptance-oracle",
+        "uri": "durable-split-service/acceptance/oracle.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "e11dab3794246d99d2bc81f5532e3cbc0f4ea8791423f07460335ea66220aced"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      }
+    },
+    "api": {
+      "execution": {
+        "kind": "sample-execution-interface",
+        "uri": "durable-split-api/acceptance/execution.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "c6d109abe7fae64ac259c423d61f58a04077876acbfe2d478414de199ec3a385"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      },
+      "oracle": {
+        "kind": "acceptance-oracle",
+        "uri": "durable-split-api/acceptance/oracle.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "7581bf5ab6e1dc5fa96bd009a14bb12e1fba216dd61d3affce0240863e3c2853"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      }
+    },
+    "collector": {
+      "execution": {
+        "kind": "sample-execution-interface",
+        "uri": "durable-split-collector/acceptance/execution.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "96eb5cf99796c722f043c43d095f199d78331d99add2babb4393371b87bbc969"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      },
+      "oracle": {
+        "kind": "acceptance-oracle",
+        "uri": "durable-split-collector/acceptance/oracle.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "095fa2eaa7231b344d7666a5d5b54301ee48f60a9d54e05ec20b34559ece58e4"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      }
+    },
+    "cache": {
+      "execution": {
+        "kind": "sample-execution-interface",
+        "uri": "durable-snapshot-cache/acceptance/execution.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "d26f15707a22a62cccc76ad6552a87efcd3afc648b77e316796b2ff7c6f5dddd"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      },
+      "oracle": {
+        "kind": "acceptance-oracle",
+        "uri": "durable-snapshot-cache/acceptance/oracle.json",
+        "identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "ce7d5af99bd1c35a4286e0e3f57e3f6a586829cef15b88530ddf2f7c6b6fc741"
+        },
+        "schema": "urn:literate-ai:schema:v1:content-reference"
+      }
+    }
+  }
+}

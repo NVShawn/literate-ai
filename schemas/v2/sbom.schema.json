@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:cyclonedx-contracts",
+  "title": "Literate AI CycloneDX identity bindings",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-component"},
+    {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-edge"},
+    {"$ref": "urn:literate-ai:schema:v2:cyclonedx-managed-graph"},
+    {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-graph"},
+    {"$ref": "urn:literate-ai:schema:v1:cyclonedx-repository-source-resolution"},
+    {"$ref": "urn:literate-ai:schema:v2:cyclonedx-bom-binding"},
+    {"$ref": "urn:literate-ai:schema:v1:cyclonedx-bom-binding"}
+  ],
+  "$defs": {
+    "managedComponent": {
+      "$id": "urn:literate-ai:schema:v1:cyclonedx-managed-component",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "bom_ref", "kind", "identity", "name", "version", "scopes", "version_range"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:cyclonedx-managed-component"},
+        "bom_ref": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["root-component", "component", "repository-source"]},
+        "identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": ["string", "null"], "minLength": 1},
+        "version_range": {"type": ["string", "null"], "minLength": 1},
+        "scopes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["generation", "build", "runtime", "validation", "toolchain", "packaging", "deployment", "test", "system"]
+          }
+        }
+      }
+    },
+    "managedEdge": {
+      "$id": "urn:literate-ai:schema:v1:cyclonedx-managed-edge",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "source_ref", "target_ref", "kind", "optional", "relationship_identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:cyclonedx-managed-edge"},
+        "source_ref": {"type": "string", "minLength": 1},
+        "target_ref": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["generation", "build", "runtime", "validation", "toolchain", "packaging", "deployment"]},
+        "optional": {"type": "boolean"},
+        "relationship_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "managedGraph": {
+      "$id": "urn:literate-ai:schema:v2:cyclonedx-managed-graph",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "root_ref", "components", "edges", "resolved_graph_identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:cyclonedx-managed-graph"},
+        "root_ref": {"type": "string", "minLength": 1, "description": "Root Component of this exact whole-lock or selected-revision dependency projection."},
+        "resolved_graph_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity", "description": "Identity of the complete immutable resolution authority, retained unchanged when this document projects a selected Component closure."},
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-component"}
+        },
+        "edges": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-edge"}
+        }
+      }
+    },
+    "legacyManagedGraph": {
+      "$id": "urn:literate-ai:schema:v1:cyclonedx-managed-graph",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "root_ref", "components", "edges", "composition_identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:cyclonedx-managed-graph"},
+        "root_ref": {"type": "string", "minLength": 1},
+        "composition_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-component"}
+        },
+        "edges": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-edge"}
+        }
+      }
+    },
+    "repositorySourceResolution": {
+      "$id": "urn:literate-ai:schema:v1:cyclonedx-repository-source-resolution",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "dependency_identity", "resolved_commit", "source_lock_identity", "source_snapshot_identity", "source_tree_identity", "resolver_identity", "index_identity", "admission_identity", "cache_record_identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:cyclonedx-repository-source-resolution"},
+        "dependency_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "resolved_commit": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "source_lock_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_snapshot_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "resolver_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "index_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "admission_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "cache_record_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "bomBinding": {
+      "$id": "urn:literate-ai:schema:v2:cyclonedx-bom-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "lifecycle", "bom_identity", "graph_identity", "managed_graph_identity", "resolved_graph_identity", "source_bom_identity", "root_ref", "component_count", "edge_count"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:cyclonedx-bom-binding"},
+        "lifecycle": {"enum": ["pre-build", "post-build"]},
+        "bom_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "graph_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "managed_graph_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "resolved_graph_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_bom_identity": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        },
+        "root_ref": {"type": "string", "minLength": 1},
+        "component_count": {"type": "integer", "minimum": 1},
+        "edge_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "legacyBomBinding": {
+      "$id": "urn:literate-ai:schema:v1:cyclonedx-bom-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "lifecycle", "bom_identity", "graph_identity", "managed_graph_identity", "composition_identity", "source_bom_identity", "root_ref", "component_count", "edge_count"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:cyclonedx-bom-binding"},
+        "lifecycle": {"enum": ["pre-build", "post-build"]},
+        "bom_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "graph_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "managed_graph_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "composition_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_bom_identity": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        },
+        "root_ref": {"type": "string", "minLength": 1},
+        "component_count": {"type": "integer", "minimum": 1},
+        "edge_count": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

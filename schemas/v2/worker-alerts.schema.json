@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:worker-alert-contracts",
+  "oneOf": [
+    {
+      "$ref": "literate-ai/private-worker-alert-history@1"
+    },
+    {
+      "$ref": "literate-ai/worker-health-event@1"
+    }
+  ],
+  "$defs": {
+    "history": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "worker_id",
+        "policy_identity",
+        "job_identity",
+        "observation_identity",
+        "started_at_ms",
+        "completed_at_ms",
+        "recorded_at_ms",
+        "metrics"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/private-worker-alert-history@1"
+        },
+        "worker_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+          "maxLength": 64
+        },
+        "policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "job_identity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_identity": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "started_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "completed_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "recorded_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 80,
+          "items": {
+            "$ref": "#/$defs/metric"
+          }
+        }
+      },
+      "$id": "literate-ai/private-worker-alert-history@1",
+      "$defs": {
+        "metric": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "resource",
+            "health",
+            "reasons"
+          ],
+          "properties": {
+            "role": {
+              "type": "string",
+              "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+              "maxLength": 64
+            },
+            "resource": {
+              "enum": [
+                "bytes",
+                "cpu",
+                "gpu",
+                "inodes",
+                "memory",
+                "paging",
+                "quota",
+                "quota-inodes",
+                "observation"
+              ]
+            },
+            "health": {
+              "enum": [
+                "healthy",
+                "warning",
+                "unknown",
+                "critical"
+              ]
+            },
+            "reasons": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+                "maxLength": 64
+              }
+            }
+          }
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "worker_id",
+        "policy_identity",
+        "job_identity",
+        "observation_identity",
+        "role",
+        "resource",
+        "health",
+        "previous_health",
+        "transition",
+        "reasons",
+        "impact",
+        "next_action",
+        "findings"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/worker-health-event@1"
+        },
+        "worker_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+          "maxLength": 64
+        },
+        "policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "job_identity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observation_identity": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "role": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+          "maxLength": 64
+        },
+        "resource": {
+          "enum": [
+            "bytes",
+            "cpu",
+            "gpu",
+            "inodes",
+            "memory",
+            "paging",
+            "quota",
+            "quota-inodes",
+            "observation"
+          ]
+        },
+        "health": {
+          "enum": [
+            "healthy",
+            "warning",
+            "unknown",
+            "critical"
+          ]
+        },
+        "previous_health": {
+          "anyOf": [
+            {
+              "enum": [
+                "healthy",
+                "warning",
+                "unknown",
+                "critical"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "transition": {
+          "enum": [
+            "initial",
+            "escalated",
+            "improved",
+            "recovered",
+            "changed"
+          ]
+        },
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+            "maxLength": 64
+          }
+        },
+        "impact": {
+          "enum": [
+            "proceed",
+            "hold",
+            "retry-after-recheck"
+          ]
+        },
+        "next_action": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "findings": {
+          "type": "array",
+          "maxItems": 1024,
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/finding"
+              },
+              {
+                "$ref": "urn:literate-ai:schema:v1:worker-alert-contracts#/$defs/pressure-finding"
+              }
+            ]
+          }
+        }
+      },
+      "$id": "literate-ai/worker-health-event@1"
+    },
+    "pressure-finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource",
+        "health",
+        "reason",
+        "required",
+        "measured",
+        "threshold"
+      ],
+      "properties": {
+        "resource": {
+          "enum": ["cpu", "memory", "paging", "gpu"]
+        },
+        "health": {
+          "enum": ["healthy", "warning", "unknown", "critical"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "measured": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "threshold": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

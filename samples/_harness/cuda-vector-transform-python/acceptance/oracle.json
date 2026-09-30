@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:af03c406e666eb1630ab17052d8b087d25bfdde8261587f307b44a7689a27c95",
+  "oracle_results": [
+    {
+      "case_id": "rectangular",
+      "expected_result": {
+        "backend": "cupy-cuda",
+        "device_executed": true,
+        "rows": 2,
+        "columns": 2,
+        "values": [[11, 9], [32, -3]],
+        "checksum": 49
+      }
+    },
+    {
+      "case_id": "signed",
+      "expected_result": {
+        "backend": "cupy-cuda",
+        "device_executed": true,
+        "rows": 3,
+        "columns": 3,
+        "values": [[-9, 15, -10], [38, -1, 12], [-12, -24, 8]],
+        "checksum": 17
+      }
+    }
+  ]
+}

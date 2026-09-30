@@ -1,0 +1,24 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:a0d3d42b546c3c773e0bfe7cf44c7972dd3ffb79be2522cc80745384c65f39ad",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "age": 22,
+        "income": 25000,
+        "risk_category": "high",
+        "score_band": "starter"
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "age": 40,
+        "income": 80000,
+        "risk_category": "low",
+        "score_band": "prime"
+      }
+    }
+  ]
+}

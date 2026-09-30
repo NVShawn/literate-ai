@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-command-profile-contracts",
+  "title": "Literate AI Standard command profiles",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:standard-language-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-build-system-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-repo-man-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-make-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-cmake-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-cargo-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-npm-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-python-wheel-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-platform-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-accelerator-command-profile" }
+  ],
+  "$defs": {
+    "portableName": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,126}$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?!/)(?!.*\\\\)(?!\\.{1,2}(?:/|$))(?!.*\\/\\.{1,2}(?:/|$))(?!.*//)[^\\u0000]+$"
+    },
+    "language": {
+      "$id": "urn:literate-ai:schema:v2:standard-language-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "target",
+        "toolchain",
+        "source_entrypoint",
+        "generated_test_entrypoint",
+        "artifact_layout",
+        "artifact_entrypoint",
+        "bazel_output_path",
+        "build_strategy",
+        "runtime_strategy",
+        "media_type"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-language-command-profile" },
+        "target": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" },
+        "toolchain": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" },
+        "source_entrypoint": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+        "generated_test_entrypoint": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+        "artifact_layout": { "enum": ["file", "tree"] },
+        "artifact_entrypoint": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+        "bazel_output_path": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+        "build_strategy": {
+          "enum": ["python-tree", "javascript-tree", "rust-executable", "cpp-executable", "swift-executable", "go-executable"]
+        },
+        "runtime_strategy": { "enum": ["python", "javascript", "native-executable"] },
+        "media_type": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "cpp_library_kind": { "enum": ["static", "shared"] }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["cpp_library_kind"] },
+          "then": { "properties": { "target": { "const": "cpp" }, "build_strategy": { "const": "cpp-executable" } } }
+        },
+        {
+          "if": { "properties": { "build_strategy": { "enum": ["python-tree", "javascript-tree"] } } },
+          "then": { "properties": { "artifact_layout": { "const": "tree" } } },
+          "else": { "properties": { "artifact_layout": { "const": "file" } } }
+        }
+      ]
+    },
+    "buildSystem": {
+      "$id": "urn:literate-ai:schema:v2:standard-build-system-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "target_label"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-build-system-command-profile" },
+        "target": { "const": "bazel" },
+        "toolchain": { "const": "bazel" },
+        "target_label": { "type": "string", "pattern": "^//:[A-Za-z0-9._+-]+$" }
+      }
+    },
+    "repoMan": {
+      "$id": "urn:literate-ai:schema:v2:standard-repo-man-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "entrypoint", "build_target"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-repo-man-command-profile" },
+        "target": { "const": "repo-man" },
+        "toolchain": { "const": "repo.sh" },
+        "entrypoint": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+            { "pattern": "^(?:[^/]+/)*(?:repo\\.sh|repo\\.bat)$" }
+          ]
+        },
+        "build_target": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" }
+      }
+    },
+    "make": {
+      "$id": "urn:literate-ai:schema:v2:standard-make-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "makefile", "build_target"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-make-command-profile" },
+        "target": { "const": "make" },
+        "toolchain": { "const": "make" },
+        "makefile": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+        "build_target": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" }
+      }
+    },
+    "cmake": {
+      "$id": "urn:literate-ai:schema:v2:standard-cmake-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "cmakelists", "build_target"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-cmake-command-profile" },
+        "target": { "const": "cmake" },
+        "toolchain": { "const": "cmake" },
+        "cmakelists": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+        "build_target": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" }
+      }
+    },
+    "cargo": {
+      "$id": "urn:literate-ai:schema:v2:standard-cargo-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "manifest", "binary"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-cargo-command-profile" },
+        "target": { "const": "cargo" },
+        "toolchain": { "const": "cargo" },
+        "manifest": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+            { "pattern": "^(?:[^/]+/)*Cargo\\.toml$" }
+          ]
+        },
+        "binary": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" }
+      }
+    },
+    "npm": {
+      "$id": "urn:literate-ai:schema:v2:standard-npm-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "manifest", "lockfile"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-npm-command-profile" },
+        "target": { "const": "npm" },
+        "toolchain": { "const": "npm" },
+        "manifest": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+            { "pattern": "^(?:[^/]+/)*package\\.json$" }
+          ]
+        },
+        "lockfile": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+            { "pattern": "^(?:[^/]+/)*package-lock\\.json$" }
+          ]
+        }
+      }
+    },
+    "pythonWheel": {
+      "$id": "urn:literate-ai:schema:v2:standard-python-wheel-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "manifest", "lockfile"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-python-wheel-command-profile" },
+        "target": { "const": "pip" },
+        "toolchain": { "const": "python" },
+        "manifest": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+            { "pattern": "^(?:[^/]+/)*(?:requirements\\.(?:txt|in)|pyproject\\.toml)$" }
+          ]
+        },
+        "lockfile": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+            { "pattern": "^(?:[^/]+/)*python-wheel-lock\\.json$" }
+          ]
+        }
+      }
+    },
+    "platform": {
+      "$id": "urn:literate-ai:schema:v2:standard-platform-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "executable_suffix"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-platform-command-profile" },
+        "target": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" },
+        "executable_suffix": { "enum": ["", ".exe"] }
+      }
+    },
+    "accelerator": {
+      "$id": "urn:literate-ai:schema:v2:standard-accelerator-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "applies_to_languages"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-accelerator-command-profile" },
+        "target": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" },
+        "toolchain": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" },
+        "applies_to_languages": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" }
+        }
+      }
+    }
+  }
+}

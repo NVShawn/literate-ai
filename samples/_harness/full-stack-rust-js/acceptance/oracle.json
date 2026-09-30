@@ -1,0 +1,47 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:80be3d9df946e7df543f6dd0f2162f7e884b765c12aab4d78b817878a63b2668",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "headline": "BLOCKED: aurora-42 (1 service)",
+        "release": "aurora-42",
+        "release_status": "blocked",
+        "services": [
+          {"name": "api", "risk_points": 114, "status": "blocked"},
+          {"name": "web", "risk_points": 42, "status": "review"},
+          {"name": "worker", "risk_points": 16, "status": "ready"}
+        ],
+        "summary": {
+          "blocked_services": 1,
+          "failed_checks": 2,
+          "pass_rate_basis_points": 9932,
+          "review_services": 1,
+          "total_risk_points": 172
+        },
+        "top_risk_service": "api"
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "headline": "REVIEW: atlas-7 (1 service)",
+        "release": "atlas-7",
+        "release_status": "review",
+        "services": [
+          {"name": "ledger", "risk_points": 20, "status": "review"},
+          {"name": "gateway", "risk_points": 1, "status": "ready"}
+        ],
+        "summary": {
+          "blocked_services": 0,
+          "failed_checks": 0,
+          "pass_rate_basis_points": 10000,
+          "review_services": 1,
+          "total_risk_points": 21
+        },
+        "top_risk_service": "ledger"
+      }
+    }
+  ]
+}

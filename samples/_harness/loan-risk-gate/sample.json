@@ -1,0 +1,24 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "9822ac1bca0e672e5b212bbf3518e23f6f25190bb3188f84eb8035a97d426368",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:310a510578ae7c12d9dceb17f8dcaa9856452c540e4747a234d838e5a623b8b1",
+  "execution_interface_identity": "sha256:a0d3d42b546c3c773e0bfe7cf44c7972dd3ffb79be2522cc80745384c65f39ad",
+  "expected_assertions": [
+    "workflow-completes",
+    "restart-reuses-exact-stages"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "loan-risk-gate",
+  "scenario": "hello",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:c878093b1bb245b298d5a8e6eafbe4485773cb6989d1202bf206bd0a146ef8d9"
+}

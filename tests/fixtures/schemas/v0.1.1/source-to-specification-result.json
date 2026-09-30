@@ -1,0 +1,106 @@
+{
+  "request": {
+    "request_id": "request-v011",
+    "source_snapshot_id": "snapshot-v011",
+    "source_content_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "origin_attestation_id": "attestation-v011",
+    "mode": "bootstrap",
+    "output_provider": "openspec",
+    "skill_set_id": "skill-set-v011",
+    "routing_policy_id": "routing-v011",
+    "redaction_policy_id": "redaction-v011",
+    "egress_policy_id": "egress-v011",
+    "included_paths": ["src/main.py"],
+    "excluded_paths": [],
+    "facets": ["behavior"],
+    "previous_specification_set_id": null
+  },
+  "observations": [
+    {
+      "observation_id": "observation-v011",
+      "surface_ids": ["surface:cli"],
+      "facet": "behavior",
+      "claim_kind": "observed-current-behavior",
+      "statement": "The command prints a deterministic greeting.",
+      "evidence": [
+        {
+          "evidence_id": "evidence-v011",
+          "source_snapshot_id": "snapshot-v011",
+          "content_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "path": "src/main.py",
+          "symbol": "main"
+        }
+      ],
+      "skill": {
+        "skill_id": "python-source-to-specification",
+        "version": "1.0.0",
+        "content_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      "confidence": 1.0,
+      "model_call_id": "model-call-v011"
+    }
+  ],
+  "draft": {
+    "draft_id": "draft-v011",
+    "request_id": "request-v011",
+    "source_snapshot_id": "snapshot-v011",
+    "output_provider": "openspec",
+    "skill_set_identity": "skill-set-v011",
+    "statements": [
+      {
+        "statement_id": "statement-v011",
+        "capability": "deterministic-greeting",
+        "requirement": "The application shall print the greeting exactly once.",
+        "scenarios": [
+          {
+            "name": "Run the application",
+            "when": "the executable starts",
+            "then": "standard output contains the deterministic greeting"
+          }
+        ],
+        "observation_ids": ["observation-v011"]
+      }
+    ],
+    "artifacts": [
+      {
+        "path": "openspec/spec.md",
+        "content": "# Deterministic greeting\n\nThe application prints a stable greeting.\n"
+      }
+    ],
+    "validation": {
+      "provider": "openspec",
+      "provider_version": "1.0.0",
+      "valid": true,
+      "diagnostics": []
+    }
+  },
+  "coverage": {
+    "request_id": "request-v011",
+    "entries": [
+      {
+        "surface_id": "surface:cli",
+        "state": "covered",
+        "observation_ids": ["observation-v011"],
+        "statement_ids": ["statement-v011"],
+        "reason": "Observed source behavior is represented by one requirement."
+      }
+    ]
+  },
+  "uncertainty": {
+    "request_id": "request-v011",
+    "items": []
+  },
+  "run": {
+    "run_id": "run-v011",
+    "request_identity": "request-v011",
+    "skill_set_identity": "skill-set-v011",
+    "observation_ids": ["observation-v011"],
+    "draft_identity": "draft-v011"
+  },
+  "component_definition_draft": {
+    "coordinate": "sample/deterministic-greeting",
+    "title": "Deterministic greeting",
+    "provided_capabilities": ["deterministic-greeting"],
+    "source_snapshot_id": "snapshot-v011"
+  }
+}

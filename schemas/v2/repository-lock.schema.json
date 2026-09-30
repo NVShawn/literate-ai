@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:repository-lock",
+  "description": "Portable root authority and exact independent repository declarations. Input revalidation, graph derivation and identity computation belong to the producer; this document is not execution or publication evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "project_id", "project_identity", "authority_identity", "authority_graph_identity", "repository_orchestration"],
+  "properties": {
+    "schema": {"const": "literate-ai/repository-lock@1"},
+    "project_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "project_identity": {"$ref": "#/$defs/identity"},
+    "authority_identity": {"$ref": "#/$defs/identity"},
+    "authority_graph_identity": {"$ref": "#/$defs/identity"},
+    "repository_orchestration": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/repositoryOrchestration"}
+  },
+  "$defs": {
+    "identity": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

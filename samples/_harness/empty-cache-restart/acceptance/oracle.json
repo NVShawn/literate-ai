@@ -1,0 +1,42 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:0285cf3d9dfa09aae1cab4d1cd6d8ed2aec8dc1c7985546962e9fb35ea140e6c",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "identities": [
+          "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8",
+          "f44e64e75f3948e9f73f8dfa94721c4ce8cbb4f265c4790c702b2d41cfbf2753",
+          "8ed3f6ad685b959ead7022518e1af76cd816f8e8ec7ccdda1ed4018e8f2223f8"
+        ],
+        "object_count": 2,
+        "recovered": [
+          "alpha",
+          "beta",
+          "alpha"
+        ],
+        "restart_verified": true
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "identities": [
+          "be9d587defa1f0c09ef49eb17e206983a5f8f8289e4281860bd0ee5a19592c67",
+          "4f4a9410ffcdf895c4adb880659e9b5c0dd1f23a30790684340b3eaacb045398",
+          "6ebf3c8d63ef6b217bcee69e31f77f3634bbbef1346de27e229c17122974e27b",
+          "4f4a9410ffcdf895c4adb880659e9b5c0dd1f23a30790684340b3eaacb045398"
+        ],
+        "object_count": 3,
+        "recovered": [
+          "gamma",
+          "delta",
+          "epsilon",
+          "delta"
+        ],
+        "restart_verified": true
+      }
+    }
+  ]
+}

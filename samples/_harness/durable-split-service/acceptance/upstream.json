@@ -1,0 +1,8 @@
+{
+  "schema": "literate-ai/durable-split-upstream-fixture@1",
+  "snapshots": {
+    "first": {"cpu": 1.25, "memory": 2.5},
+    "replacement": {"cpu": 3.75, "memory": 4.5},
+    "recovery": {"cpu": 5.5, "memory": 6.25}
+  }
+}

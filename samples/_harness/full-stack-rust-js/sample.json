@@ -1,0 +1,32 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "4b6dd36e2aecba2344048f412d8a9cead821815cead462badfd6013a5b63b2f2",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:e4941ef724e5c362f3bddc9be3c8d9bc6081deb9ac6f985fa4f9ea2275a1a37a",
+  "execution_interface_identity": "sha256:80be3d9df946e7df543f6dd0f2162f7e884b765c12aab4d78b817878a63b2668",
+  "expected_assertions": [
+    "both-language-flavors-are-pinned",
+    "rust-backend-performs-risk-analysis",
+    "trusted-runner-invokes-backend-then-frontend",
+    "frontend-receives-canonical-backend-json",
+    "full-stack-result-is-deterministic"
+  ],
+  "expected_failures": [
+    "missing Rust or JavaScript toolchain",
+    "backend or frontend stage protocol failure",
+    "duplicate service identity",
+    "unacknowledged unsandboxed host build or execution"
+  ],
+  "proof_level": "executed",
+  "sample_id": "full-stack-rust-js",
+  "scenario": "full-stack-rust-js",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:ad23c8b7729001e705f363375ac3a931cfc10bbffa515462333519d439f6f743"
+}

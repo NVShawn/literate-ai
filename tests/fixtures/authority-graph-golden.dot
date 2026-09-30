@@ -1,0 +1,8 @@
+digraph literate_ai {
+  rankdir=LR;
+  "component:app" [label="App"];
+  "repository:child" [label="Child"];
+  "repository:root" [label="Root"];
+  "repository:child" -> "component:app" [label="defines: components/app/component.md"];
+  "repository:root" -> "repository:child" [label="repository-parent"];
+}

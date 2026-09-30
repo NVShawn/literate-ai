@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "literate-ai/private-worker-health@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "worker_id",
+    "os_family",
+    "paths",
+    "python_executable",
+    "health_command",
+    "capacity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "literate-ai/private-worker-health@1"
+    },
+    "worker_id": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+    },
+    "os_family": {
+      "enum": [
+        "linux",
+        "macos",
+        "windows"
+      ]
+    },
+    "paths": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 16,
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "prefixItems": [
+          {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+          },
+          {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        ],
+        "items": false
+      }
+    },
+    "python_executable": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "health_command": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "command",
+            "environment"
+          ],
+          "properties": {
+            "schema": {
+              "const": "literate-ai/private-worker-storage-command@1"
+            },
+            "command": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 128,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              }
+            },
+            "environment": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "urn:literate-ai:schema:v1:execution-worker-environment"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "capacity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roles",
+        "write_heavy",
+        "maximum_age_ms",
+        "probe_timeout_ms",
+        "maximum_retries",
+        "warning_headroom_bytes"
+      ],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 16,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/role"
+          }
+        },
+        "write_heavy": {
+          "type": "boolean"
+        },
+        "maximum_age_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "probe_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000
+        },
+        "maximum_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "warning_headroom_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "pressure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sustained_samples",
+        "sample_interval_ms",
+        "cpu_warning_basis_points",
+        "minimum_available_memory_bytes",
+        "maximum_paging_bytes_per_second",
+        "minimum_gpu_free_memory_bytes",
+        "require_cpu",
+        "require_memory",
+        "require_gpu"
+      ],
+      "properties": {
+        "sustained_samples": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 32
+        },
+        "sample_interval_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5000
+        },
+        "cpu_warning_basis_points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "minimum_available_memory_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "maximum_paging_bytes_per_second": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "minimum_gpu_free_memory_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "require_cpu": {"type": "boolean"},
+        "require_memory": {"type": "boolean"},
+        "require_gpu": {"type": "boolean"}
+      }
+    },
+    "cleanup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roots",
+        "deadline_ms",
+        "maximum_entries",
+        "maximum_depth",
+        "minimum_candidate_bytes"
+      ],
+      "properties": {
+        "roots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "alias",
+              "path",
+              "ownership",
+              "recovery",
+              "active_markers",
+              "inactive_markers",
+              "cleanup_command"
+            ],
+            "properties": {
+              "alias": {
+                "type": "string",
+                "maxLength": 64,
+                "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "ownership": {
+                "const": "task-owned"
+              },
+              "recovery": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "active_markers": {
+                "type": "array",
+                "maxItems": 32,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "inactive_markers": {
+                "type": "array",
+                "maxItems": 32,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 128
+                }
+              },
+              "cleanup_command": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 128,
+                "contains": {
+                  "const": "{target}"
+                },
+                "minContains": 1,
+                "maxContains": 1,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4096
+                }
+              }
+            }
+          }
+        },
+        "deadline_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000
+        },
+        "maximum_entries": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "maximum_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "minimum_candidate_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
+    }
+  },
+  "$defs": {
+    "cleanup_authorization": {
+      "$id": "literate-ai/worker-cleanup-authorization@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "worker_id",
+        "policy_identity",
+        "proposal_identity",
+        "proposal_created_at_ms",
+        "target_ids",
+        "operation",
+        "expires_at_ms"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/worker-cleanup-authorization@1"},
+        "worker_id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "proposal_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "proposal_created_at_ms": {"type": "integer", "minimum": 0},
+        "target_ids": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "operation": {"const": "configured-cleanup-tool"},
+        "expires_at_ms": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

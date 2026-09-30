@@ -1,0 +1,12 @@
+{
+  "schema": "literate-ai/lint-render-acceptance@1",
+  "specification_set_identity": "sha256:610593b3ebc644ee102a7103f54c04b3b687d1bebde06da357aaf72053a01d26",
+  "source_root": "lib",
+  "lint": {
+    "arguments": ["{python}", "lint.py"]
+  },
+  "render": {
+    "arguments": ["{python}", "render.py"],
+    "snapshot_identity": "sha256:af429266fe206334118d5504a92832dbb421ebcecbdab7a527a4ab1f7a49eafa"
+  }
+}

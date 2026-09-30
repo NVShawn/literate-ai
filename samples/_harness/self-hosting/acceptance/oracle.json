@@ -1,0 +1,34 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:0a718b9c4db044ce6cde3f0e04eba078bd7f6ba0302528ad419561ec93293ec0",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "framework_version": "0.2.0",
+        "operation": "framework-compatibility-readiness",
+        "packaged_skills": [
+          "api-surface",
+          "architecture",
+          "behavior-state",
+          "operations",
+          "security",
+          "tests"
+        ],
+        "public_api_ready": true
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "framework_version": "0.2.0",
+        "operation": "framework-compatibility-readiness",
+        "packaged_skills": [
+          "architecture",
+          "security"
+        ],
+        "public_api_ready": true
+      }
+    }
+  ]
+}

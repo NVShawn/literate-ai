@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:evidence-verification-plan-contracts",
+  "$defs": {
+    "plan": {
+      "$id": "urn:literate-ai:schema:v2:evidence-verification-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_authority",
+        "root",
+        "requirements"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-verification-plan"
+        },
+        "project_authority": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+        },
+        "root": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+        },
+        "requirements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "envelope",
+              "expectation",
+              "children",
+              "artifacts"
+            ],
+            "properties": {
+              "envelope": {
+                "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+              },
+              "expectation": {
+                "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/expectation"
+              },
+              "children": {
+                "type": "array",
+                "maxItems": 1024,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "name",
+                    "blob"
+                  ],
+                  "properties": {
+                    "name": {
+                      "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/name"
+                    },
+                    "blob": {
+                      "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+                    }
+                  }
+                }
+              },
+              "artifacts": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1026,
+                "items": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "string",
+                      "pattern": "^(subject|journal|environment|(input|check)/[a-zA-Z0-9][a-zA-Z0-9._-]{0,127})$"
+                    },
+                    {
+                      "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+                    }
+                  ],
+                  "items": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "result": {
+      "$id": "literate-ai/evidence-verification-result@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authenticated",
+        "retained",
+        "receipt_updated",
+        "execution_authorized",
+        "project_authority",
+        "plan_identity",
+        "policy_identity",
+        "verification_identity",
+        "revocations_identity",
+        "checked_at",
+        "root",
+        "run_count",
+        "object_count",
+        "retention_count"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/evidence-verification-result@1"
+        },
+        "authenticated": {
+          "const": true
+        },
+        "retained": {
+          "const": true
+        },
+        "receipt_updated": {
+          "const": false
+        },
+        "execution_authorized": {
+          "const": false
+        },
+        "project_authority": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "verification_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "revocations_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "checked_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "root": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+        },
+        "run_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "object_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "retention_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "current_map_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "current_receipt_path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "current_map": {
+      "$id": "urn:literate-ai:schema:v2:current-evidence-map",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_authority",
+        "trust_policy",
+        "receipt",
+        "plan",
+        "matrix",
+        "retention_roots"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:current-evidence-map"
+        },
+        "project_authority": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+        },
+        "trust_policy": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+        },
+        "receipt": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/json"
+                }
+              }
+            }
+          ]
+        },
+        "plan": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/vnd.literate-ai.evidence-verification-plan.v2+json"
+                }
+              }
+            }
+          ]
+        },
+        "matrix": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/vnd.dsse.envelope.v1+json"
+                }
+              }
+            }
+          ]
+        },
+        "retention_roots": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+              },
+              {
+                "properties": {
+                  "media_type": {
+                    "const": "application/vnd.dsse.envelope.v1+json"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "publication_result": {
+      "$id": "literate-ai/evidence-publication-result@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "path",
+        "current_map_identity",
+        "verification_identity",
+        "updated",
+        "authenticated",
+        "execution_authorized"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/evidence-publication-result@1"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_map_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "verification_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "updated": {
+          "type": "boolean"
+        },
+        "authenticated": {
+          "const": true
+        },
+        "execution_authorized": {
+          "const": false
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-verification-plan"
+    },
+    {
+      "$ref": "literate-ai/evidence-verification-result@1"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:current-evidence-map"
+    },
+    {
+      "$ref": "literate-ai/evidence-publication-result@1"
+    }
+  ]
+}

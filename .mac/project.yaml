@@ -1,0 +1,47 @@
+schema: mac.repository_contract.v1
+project: literate-ai
+canonical_remote_url: git@github.com:NVIDIA-dev/literate-ai.git
+default_branch: main
+contract_path: .mac/project.yaml
+
+# Platform families this repository's gates are actually routed to. CI additionally
+# exercises Windows, but MAC runner routing is darwin and linux only.
+platforms:
+  - darwin
+  - linux
+
+toolchain:
+  # What a runner needs on the host to check out this repository and run the
+  # commands below. `make python-check` provisions its own session venv under
+  # $(OBJ_DIR)/python-envs via the runtime stamp, so no host-level `litai`,
+  # virtualenv, or package set is required. Deliberately does NOT list a sample
+  # Component's native closure: projecting from a resolved sample BOM yields
+  # dyld_info/xcrun/python3.14, which are that sample's build tools, not this
+  # repository's.
+  required_commands:
+    - git
+    - make
+    - python3
+  minimum_versions:
+    python3: "3.11"
+
+bootstrap:
+  # `make bootstrap` is the maintainer first-time setup and chains
+  # install + dev-install + tools-install + validate, which is far heavier than a
+  # runner needs. The test target self-provisions, so bootstrap is a no-op.
+  command: "true"
+  creates: []
+
+test:
+  # The canonical Python gate, per the repository's own SKILL.md: "When verifying
+  # this repository's Python package, use `make python-check` (session venv under
+  # $(OBJ_DIR)/python-envs/$(LITAI_SESSION_KEY)), not an ad hoc venv."
+  command: make python-check
+
+evidence:
+  required:
+    - repo.head_sha
+    - repo.pushed
+    - repo.dirty
+    - repo.files_changed
+    - tests

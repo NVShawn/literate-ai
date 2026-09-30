@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:repository-commands",
+  "description": "Root-only lock and plan reports. Schema validation does not establish currency, identity correctness, child acceptance or publication.",
+  "oneOf": [
+    {"$ref": "#/$defs/command"},
+    {"$ref": "#/$defs/plan"},
+    {"$ref": "#/$defs/repositoryCheck"}
+  ],
+  "$defs": {
+    "identity": {"$ref": "urn:literate-ai:schema:v2:repository-lock#/$defs/identity"},
+    "nullableIdentity": {"anyOf": [{"$ref": "#/$defs/identity"}, {"type": "null"}]},
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "current_identity", "expected_identity"],
+      "properties": {
+        "state": {"enum": ["missing", "current", "stale"]},
+        "current_identity": {"$ref": "#/$defs/nullableIdentity"},
+        "expected_identity": {"$ref": "#/$defs/identity"}
+      }
+    },
+    "repositoryCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "path", "state", "current_identity", "expected_identity"],
+      "properties": {
+        "schema": {"const": "literate-ai/repository-lock-check@1"},
+        "path": {"const": ".literate/repository.lock.json"},
+        "state": {"enum": ["missing", "current", "stale"]},
+        "current_identity": {"$ref": "#/$defs/nullableIdentity"},
+        "expected_identity": {"$ref": "#/$defs/identity"}
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["component", "target", "component_lock_identity", "catalog_audit_identity", "resolution_plan_identity", "lock", "catalog_audit"],
+        "properties": {
+          "component": {"type": "string", "minLength": 1},
+          "target": {"type": "string", "minLength": 1},
+          "component_lock_identity": {"$ref": "#/$defs/identity"},
+          "catalog_audit_identity": {"$ref": "#/$defs/identity"},
+          "resolution_plan_identity": {"$ref": "#/$defs/identity"},
+          "lock": {"$ref": "#/$defs/observation"},
+          "catalog_audit": {"$ref": "#/$defs/observation"}
+        }
+      }
+    },
+    "oid": {"type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+    "inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "gitmodules_identity", "children"],
+      "properties": {
+        "schema": {"const": "literate-ai/gitlink-inventory@1"},
+        "gitmodules_identity": {"$ref": "#/$defs/nullableIdentity"},
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "path", "url", "commit", "branch", "state", "checked_out_commit"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1},
+              "path": {"type": "string", "minLength": 1},
+              "url": {"type": "string", "minLength": 1},
+              "commit": {"$ref": "#/$defs/oid"},
+              "branch": {"type": ["string", "null"]},
+              "state": {"enum": ["initialized", "uninitialized"]},
+              "checked_out_commit": {"anyOf": [{"$ref": "#/$defs/oid"}, {"type": "null"}]}
+            }
+          }
+        }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "mode", "read_only", "current", "repository_lock", "repository_lock_identity", "repository_lock_updated", "lock", "components", "inventory", "child_authority", "execution", "publication"],
+      "properties": {
+        "schema": {"const": "literate-ai/repository-lock-command@1"},
+        "mode": {"enum": ["update", "check", "diff"]},
+        "read_only": {"type": "boolean"},
+        "current": {"type": "boolean"},
+        "repository_lock": {"$ref": "urn:literate-ai:schema:v2:repository-lock"},
+        "repository_lock_identity": {"$ref": "#/$defs/identity"},
+        "repository_lock_updated": {"type": "boolean"},
+        "lock": {"$ref": "#/$defs/repositoryCheck"},
+        "components": {"$ref": "#/$defs/components"},
+        "inventory": {"$ref": "#/$defs/inventory"},
+        "child_authority": {"const": "independent"},
+        "execution": {"const": false},
+        "publication": {"const": "not-checked"},
+        "previous_repository_lock": {"anyOf": [{"$ref": "urn:literate-ai:schema:v2:repository-lock"}, {"type": "null"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"mode": {"enum": ["check", "diff"]}}},
+          "then": {"properties": {"read_only": {"const": true}, "repository_lock_updated": {"const": false}}},
+          "else": {"properties": {"read_only": {"const": false}}}
+        },
+        {
+          "if": {"properties": {"mode": {"const": "diff"}}},
+          "then": {"required": ["previous_repository_lock"]},
+          "else": {"not": {"required": ["previous_repository_lock"]}}
+        }
+      ]
+    },
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "repository_lock", "repository_lock_identity", "inventory", "inventory_identity", "writes", "execution", "execution_order", "child_authority", "publication", "components", "lock_state", "plan_identity"],
+      "properties": {
+        "schema": {"const": "literate-ai/repository-plan@1"},
+        "repository_lock": {"$ref": "urn:literate-ai:schema:v2:repository-lock"},
+        "repository_lock_identity": {"$ref": "#/$defs/identity"},
+        "inventory": {"$ref": "#/$defs/inventory"},
+        "inventory_identity": {"$ref": "#/$defs/identity"},
+        "writes": {"const": false},
+        "execution": {"const": false},
+        "execution_order": {"const": "not-inferred"},
+        "child_authority": {"const": "independent"},
+        "publication": {"const": "not-checked"},
+        "components": {"$ref": "#/$defs/components"},
+        "lock_state": {"const": "current"},
+        "plan_identity": {"$ref": "#/$defs/identity"}
+      }
+    }
+  }
+}

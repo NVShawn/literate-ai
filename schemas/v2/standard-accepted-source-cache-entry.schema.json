@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-accepted-source-cache-entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "derivation",
+    "source_files",
+    "managed_sbom_graph",
+    "source_sbom",
+    "resolved_sbom",
+    "generated_test_suite",
+    "build_evidence",
+    "test_evidence",
+    "acceptance_evidence",
+    "provenance_evidence",
+    "repository_resolutions",
+    "standard_source_membership"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:standard-accepted-source-cache-entry"
+    },
+    "derivation": {
+      "$ref": "urn:literate-ai:schema:v2:accepted-source-derivation"
+    },
+    "source_files": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "urn:literate-ai:schema:v2:cached-source-file"}
+    },
+    "managed_sbom_graph": {
+      "$ref": "urn:literate-ai:schema:v2:cyclonedx-managed-graph"
+    },
+    "source_sbom": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+    "resolved_sbom": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+    "generated_test_suite": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+    "build_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+    "test_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+    "acceptance_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+    "provenance_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+    "repository_resolutions": {
+      "type": "array",
+      "maxItems": 256,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v1:cyclonedx-repository-source-resolution"
+      }
+    },
+    "standard_source_membership": {
+      "$ref": "urn:literate-ai:schema:v2:standard-source-cache-membership"
+    }
+  }
+}

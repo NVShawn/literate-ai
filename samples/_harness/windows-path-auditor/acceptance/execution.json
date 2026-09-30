@@ -1,0 +1,44 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.audit-windows-native-paths",
+  "scenario_id": "audit-windows-native-paths.the-compiled-windows-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "mixed-paths",
+      "arguments": [
+        {
+          "paths": [
+            "C:/Program Files//LitAI/bin",
+            "\\\\server\\share\\\\releases/1",
+            "tools/litai"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "rooted-path",
+      "arguments": [
+        {
+          "paths": ["\\Windows//System32"]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "paths": [
+      {
+        "original": "string",
+        "normalized": "string",
+        "kind": "string",
+        "root": "string"
+      }
+    ]
+  },
+  "target": {
+    "platform.os": "flavor://literate-ai/os-windows",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-cpp"],
+    "packaging": "flavor://literate-ai/package-conan"
+  },
+  "dependencies": []
+}

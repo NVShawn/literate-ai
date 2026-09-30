@@ -1,0 +1,6 @@
+flowchart LR
+    n_component_app["App"]
+    n_repository_child["Child"]
+    n_repository_root["Root"]
+    n_repository_child -->|"defines: components/app/component.md"| n_component_app
+    n_repository_root -->|"repository-parent"| n_repository_child

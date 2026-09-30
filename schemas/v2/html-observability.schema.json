@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:html-observability-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-view"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-source-binding"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-external-asset"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-renderer-binding"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-provenance"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-artifact"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-staleness-report"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-surface"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-render-request"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-render-refusal"},
+    {"$ref": "urn:literate-ai:schema:v1:html-observability-render-result"}
+  ],
+  "$defs": {
+    "portableId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+    },
+    "schemaUrn": {
+      "type": "string",
+      "pattern": "^urn:literate-ai:schema:v[0-9]+:[a-z0-9][a-z0-9-]{0,126}$"
+    },
+    "artifactPath": {
+      "type": "string",
+      "pattern": "^(?!.*(?:^|/)\\.\\.?(?:/|$))[^/\\\\]+(?:/[^/\\\\]+)*\\.html$"
+    },
+    "instant": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "subresourceIntegrity": {
+      "type": "string",
+      "pattern": "^sha(?:256|384|512)-[A-Za-z0-9+/]{43,171}={0,2}$"
+    },
+    "httpsUrl": {
+      "type": "string",
+      "pattern": "^https://[^\\s\"'<>]{1,2040}$"
+    },
+    "view": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-view",
+      "description": "The named view a renderer was asked to produce. Views are open identifiers, not a closed enumeration, so project-declared views and the standard views in #296 Phase 2 share one contract.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "view_id", "view_version", "scope_kind", "scope_identifier"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-view"},
+        "view_id": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"},
+        "view_version": {"$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"},
+        "scope_kind": {"enum": ["project", "component"]},
+        "scope_identifier": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"}
+      }
+    },
+    "sourceBinding": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-source-binding",
+      "description": "One canonical JSON surface an artifact was rendered from. JSON stays authoritative; the HTML is a derived view of exactly these identities.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "source_label", "source_schema", "source_identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-source-binding"},
+        "source_label": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"},
+        "source_schema": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/schemaUrn"},
+        "source_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "externalAsset": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-external-asset",
+      "description": "A charting/graph/3D library loaded from CDN rather than inlined. Pinned by Subresource Integrity so library versions fall under the same pinning discipline as the rest of the artifact.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "asset_id", "url", "integrity", "crossorigin", "asset_kind"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-external-asset"},
+        "asset_id": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"},
+        "url": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/httpsUrl"},
+        "integrity": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/subresourceIntegrity"},
+        "crossorigin": {"const": "anonymous"},
+        "asset_kind": {"enum": ["script", "stylesheet"]}
+      }
+    },
+    "rendererBinding": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-renderer-binding",
+      "description": "The exact framework distribution and rendering skill that produced an artifact. This is what makes mixed-version panes detectable instead of silently inconsistent.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "renderer_id",
+        "renderer_version",
+        "framework_distribution_identity",
+        "schema_catalog_release",
+        "template_identity"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-renderer-binding"},
+        "renderer_id": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"},
+        "renderer_version": {"$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"},
+        "framework_distribution_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "schema_catalog_release": {"$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"},
+        "template_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "provenance": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-provenance",
+      "description": "The block embedded in every artifact as <script type=\"application/json\" id=\"litai-provenance\">. It deliberately excludes the rendered file's own digest, which cannot be known while the file is still being written; the digest lives in the enclosing artifact record.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "view",
+        "source_bindings",
+        "renderer",
+        "external_assets",
+        "generated_at",
+        "render_inputs_identity",
+        "provenance_identity"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-provenance"},
+        "view": {"$ref": "urn:literate-ai:schema:v1:html-observability-view"},
+        "source_bindings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {"$ref": "urn:literate-ai:schema:v1:html-observability-source-binding"}
+        },
+        "renderer": {"$ref": "urn:literate-ai:schema:v1:html-observability-renderer-binding"},
+        "external_assets": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {"$ref": "urn:literate-ai:schema:v1:html-observability-external-asset"}
+        },
+        "generated_at": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/instant"},
+        "render_inputs_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "provenance_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "artifact": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-artifact",
+      "description": "One emitted single-file HTML5 artifact, recorded as derived cache output. Regenerable on demand; never a source of truth.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "artifact_path",
+        "media_type",
+        "artifact_identity",
+        "byte_size",
+        "provenance",
+        "embedding"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-artifact"},
+        "artifact_path": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/artifactPath"},
+        "media_type": {"const": "text/html"},
+        "artifact_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "byte_size": {"type": "integer", "minimum": 1},
+        "provenance": {"$ref": "urn:literate-ai:schema:v1:html-observability-provenance"},
+        "embedding": {
+          "description": "Fail-closed attestation of the single-file constraint: no companion asset tree, no bundler step, no local dev server.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "single_file",
+            "companion_asset_count",
+            "inline_script_count",
+            "inline_style_count",
+            "external_reference_count"
+          ],
+          "properties": {
+            "single_file": {"const": true},
+            "companion_asset_count": {"const": 0},
+            "inline_script_count": {"type": "integer", "minimum": 0},
+            "inline_style_count": {"type": "integer", "minimum": 0},
+            "external_reference_count": {"type": "integer", "minimum": 0, "maximum": 32}
+          }
+        }
+      }
+    },
+    "surface": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-surface",
+      "description": "One registered JSON-producing surface a renderer may render, and the views it supports. Every future HTML5-emitting surface declares itself here instead of rolling its own renderer.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "surface_id", "source_schema", "view_ids"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-surface"},
+        "surface_id": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"},
+        "source_schema": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/schemaUrn"},
+        "view_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"}
+        }
+      }
+    },
+    "renderRequest": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-render-request",
+      "description": "The single rendering entrypoint contract: a registered JSON surface plus a named view in, one .html file out. Carries no model, provider, or network authority of its own.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "surface_id",
+        "view",
+        "output_path",
+        "cache_mode",
+        "external_asset_policy"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-render-request"},
+        "surface_id": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"},
+        "view": {"$ref": "urn:literate-ai:schema:v1:html-observability-view"},
+        "output_path": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/artifactPath"},
+        "cache_mode": {"enum": ["off", "read-only", "write-only", "read-write"]},
+        "external_asset_policy": {"enum": ["inline-only", "pinned-cdn"]}
+      }
+    },
+    "renderRefusal": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-render-refusal",
+      "description": "Typed refusal for a render that must not proceed. Rendering fails closed rather than emitting a partial or unpinned artifact.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "code", "message"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-render-refusal"},
+        "code": {
+          "enum": [
+            "render.unknown_view",
+            "render.unsupported_surface",
+            "render.surface_unavailable",
+            "render.external_asset_unpinned",
+            "render.external_asset_forbidden",
+            "render.output_outside_project",
+            "render.cache_write_forbidden"
+          ]
+        },
+        "message": {"type": "string", "minLength": 1, "maxLength": 2048}
+      }
+    },
+    "renderResult": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-render-result",
+      "description": "The outcome of one render request. Exactly one of artifact or refusal is present.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "status", "artifact", "refusal"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-render-result"},
+        "status": {"enum": ["rendered", "cached", "refused"]},
+        "artifact": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v1:html-observability-artifact"}
+          ]
+        },
+        "refusal": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v1:html-observability-render-refusal"}
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"enum": ["rendered", "cached"]}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "artifact": {"$ref": "urn:literate-ai:schema:v1:html-observability-artifact"},
+              "refusal": {"type": "null"}
+            }
+          },
+          "else": {
+            "properties": {
+              "artifact": {"type": "null"},
+              "refusal": {"$ref": "urn:literate-ai:schema:v1:html-observability-render-refusal"}
+            }
+          }
+        }
+      ]
+    },
+    "stalenessReport": {
+      "$id": "urn:literate-ai:schema:v1:html-observability-staleness-report",
+      "description": "The verify-gate observation for one committed artifact, mirroring the existing lock-currency gate.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "artifact_path",
+        "status",
+        "expected_render_inputs_identity",
+        "observed_render_inputs_identity",
+        "stale_source_labels"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:html-observability-staleness-report"},
+        "artifact_path": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/artifactPath"},
+        "status": {"enum": ["current", "stale", "missing", "unreadable", "unpinned"]},
+        "expected_render_inputs_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "observed_render_inputs_identity": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+          ]
+        },
+        "stale_source_labels": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 256,
+          "items": {"$ref": "urn:literate-ai:schema:v1:html-observability-contracts#/$defs/portableId"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"status": {"enum": ["current", "stale"]}},
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "observed_render_inputs_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+            }
+          },
+          "else": {
+            "properties": {
+              "observed_render_inputs_identity": {"type": "null"},
+              "stale_source_labels": {"maxItems": 0}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "current"}},
+            "required": ["status"]
+          },
+          "then": {"properties": {"stale_source_labels": {"maxItems": 0}}}
+        },
+        {
+          "if": {
+            "properties": {"status": {"const": "stale"}},
+            "required": ["status"]
+          },
+          "then": {"properties": {"stale_source_labels": {"minItems": 1}}}
+        }
+      ]
+    }
+  }
+}

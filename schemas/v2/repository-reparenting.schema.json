@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:repository-reparenting-contracts",
+  "$defs": {
+    "change": {
+      "$id": "urn:literate-ai:schema:v1:repository-reparent-change",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "repository_url", "disposition", "previous_node", "prospective_node"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-reparent-change" },
+        "repository_url": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "disposition": { "enum": ["added", "removed", "updated", "unchanged"] },
+        "previous_node": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "urn:literate-ai:schema:v1:repository-lineage-node" }
+          ]
+        },
+        "prospective_node": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "urn:literate-ai:schema:v1:repository-lineage-node" }
+          ]
+        }
+      }
+    },
+    "plan": {
+      "$id": "urn:literate-ai:schema:v1:repository-reparent-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "mode", "identity", "project_identity", "previous_selection", "previous_lineage", "previous_evidence_present", "prospective_selection", "prospective_lineage", "changes", "counts", "changed", "apply_supported", "authority_review_required"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-reparent-plan" },
+        "mode": { "const": "read-only-plan" },
+        "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "project_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "previous_selection": { "$ref": "urn:literate-ai:schema:v1:repository-parent-selection" },
+        "previous_lineage": { "$ref": "urn:literate-ai:schema:v1:repository-lineage" },
+        "previous_evidence_present": { "type": "boolean" },
+        "prospective_selection": { "$ref": "urn:literate-ai:schema:v1:repository-parent-selection" },
+        "prospective_lineage": { "$ref": "urn:literate-ai:schema:v1:repository-lineage" },
+        "changes": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:repository-reparent-change" }
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["added", "removed", "updated", "unchanged"],
+          "properties": {
+            "added": { "type": "integer", "minimum": 0 },
+            "removed": { "type": "integer", "minimum": 0 },
+            "updated": { "type": "integer", "minimum": 0 },
+            "unchanged": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "changed": { "type": "boolean" },
+        "apply_supported": { "const": true },
+        "authority_review_required": { "type": "boolean" }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:repository-reparent-change" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-reparent-plan" }
+  ]
+}

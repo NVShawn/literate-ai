@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:project-verify",
+  "$ref": "literate-ai/project-verify@1",
+  "$defs": {
+    "report": {
+      "$id": "literate-ai/project-verify@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project",
+        "gates",
+        "counts",
+        "ok"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/project-verify@1"
+        },
+        "project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "pass",
+            "fail",
+            "skipped"
+          ],
+          "properties": {
+            "pass": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "fail": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "skipped": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "gates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "gate",
+              "state",
+              "detail"
+            ],
+            "properties": {
+              "gate": {
+                "enum": [
+                  "authority",
+                  "locks",
+                  "source-intelligence",
+                  "html-observability",
+                  "receipt"
+                ]
+              },
+              "state": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "skipped"
+                ]
+              },
+              "detail": {
+                "type": "string"
+              },
+              "artifacts": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "Producer-owned HTML staleness diagnostics retained verbatim."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

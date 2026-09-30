@@ -1,0 +1,24 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:f4c882241d3a19a9234faab7a99a022b5bceda89043653115e28baf3d37fff1e",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "has_more": true,
+        "item_count": 2,
+        "next_cursor": "beta",
+        "unknown_cluster_status": 404
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "has_more": true,
+        "item_count": 1,
+        "next_cursor": "west-1",
+        "unknown_cluster_status": 404
+      }
+    }
+  ]
+}

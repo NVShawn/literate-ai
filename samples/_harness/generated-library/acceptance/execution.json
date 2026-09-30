@@ -1,0 +1,54 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "values": [
+            7,
+            3,
+            11,
+            4
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "values": [
+            1,
+            2,
+            7,
+            13
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "count": "integer",
+    "maximum": "integer",
+    "mean": {
+      "denominator": "integer",
+      "numerator": "integer"
+    },
+    "median": {
+      "denominator": "integer",
+      "numerator": "integer"
+    },
+    "minimum": "integer",
+    "total": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": [],
+    "packaging": "flavor://literate-ai/package-pip"
+  },
+  "dependencies": []
+}

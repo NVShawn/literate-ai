@@ -1,0 +1,46 @@
+{
+  "$schema": "litai-scxml-trace-sidecar/v1",
+  "scxml": "connection_handshake.scxml",
+  "traces": [
+    {
+      "id": "deep-history-resumes-partial-negotiation",
+      "description": "A network drop occurs after caps has already finished but auth is still pending. Reconnecting must resume exactly that partial atomic sub-configuration via the deep <history id=conn_history> -- NOT restart both regions from their default entry (which would incorrectly re-enter caps_pending). This is the case the design spike's Finding 4 identified as requiring a real stateful history tracker, not the default-entry algorithm used for reachability checks.",
+      "steps": [
+        {
+          "event": "connect",
+          "expect_active": ["auth_pending", "caps_pending"],
+          "via_history": "conn_history",
+          "note": "first-ever visit: conn_history has nothing stored yet, so it resolves via its own default <transition target=negotiating>, which is default-entry (fans into both regions' initial sub-states)."
+        },
+        {
+          "event": "caps_ok",
+          "expect_active": ["auth_pending", "caps_done"]
+        },
+        {
+          "event": "drop",
+          "expect_active": ["suspended"],
+          "note": "on exiting the connecting/negotiating subtree, conn_history must record the exact pre-drop sub-configuration {auth_pending, caps_done}, not just that 'negotiating' was active."
+        },
+        {
+          "event": "connect",
+          "expect_active": ["auth_pending", "caps_done"],
+          "via_history": "conn_history",
+          "note": "re-entry must restore the RECORDED sub-configuration {auth_pending, caps_done}, not the chart's default entry configuration {auth_pending, caps_pending} -- a history-blind implementation would incorrectly restart caps from caps_pending here. This is the assertion this trace exists to make."
+        },
+        {
+          "event": "auth_ok",
+          "expect_active": ["auth_done", "caps_done"]
+        },
+        {
+          "event": "done.state.negotiating",
+          "auto": true,
+          "expect_active": ["established"]
+        },
+        {
+          "event": "disconnect",
+          "expect_active": ["closed"]
+        }
+      ]
+    }
+  ]
+}

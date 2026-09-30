@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:component-command-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:component-lifecycle-command"},
+    {"$ref": "urn:literate-ai:schema:v2:component-command-contract"},
+    {"$ref": "urn:literate-ai:schema:v2:multi-entrypoint-component-semantics@1"},
+    {"$ref": "urn:literate-ai:schema:v2:library-capability-import@1"},
+    {"$ref": "urn:literate-ai:schema:v2:library-import-surface@1"},
+    {"$ref": "urn:literate-ai:schema:v2:library-consumer-binding@1"}
+  ],
+  "$defs": {
+    "argv": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+    },
+    "artifactExportShape": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "export_id",
+        "role",
+        "abi_identity",
+        "target_identity",
+        "media_type",
+        "producer_identity"
+      ],
+      "properties": {
+        "export_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"},
+        "role": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"},
+        "abi_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "target_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 255},
+        "producer_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "toolBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase", "toolchain_identity"],
+      "properties": {
+        "phase": {"enum": ["build", "test", "execute"]},
+        "toolchain_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "libraryCapabilityImport": {
+      "$id": "urn:literate-ai:schema:v2:library-capability-import@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "capability", "interface_identity", "module", "symbols"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:library-capability-import@1"},
+        "capability": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"},
+        "interface_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "module": {"type": "string", "minLength": 1, "maxLength": 512},
+        "symbols": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {"type": "string", "maxLength": 512, "anyOf": [{"pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,126}$"}, {"pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"}]}
+        }
+      }
+    },
+    "libraryImportSurface": {
+      "$id": "urn:literate-ai:schema:v2:library-import-surface@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "language", "package", "capabilities"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:library-import-surface@1"},
+        "language": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"},
+        "package": {"type": "string", "minLength": 1, "maxLength": 255},
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v2:library-capability-import@1"}
+        }
+      },
+      "if": {"properties": {"language": {"const": "cpp"}}},
+      "then": {"properties": {"capabilities": {"items": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"}}}}}}},
+      "else": {"properties": {"capabilities": {"items": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,126}$"}}}}}}}
+    },
+    "libraryConsumerBinding": {
+      "$id": "urn:literate-ai:schema:v2:library-consumer-binding@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "consumer_component_revision", "provider_component_revision",
+        "capability", "interface_identity", "artifact_identity",
+        "import_surface_identity", "target_identity", "dependency_artifact_identities"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:library-consumer-binding@1"},
+        "consumer_component_revision": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "provider_component_revision": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "capability": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"},
+        "interface_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "artifact_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "import_surface_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "target_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "dependency_artifact_identities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        }
+      }
+    },
+    "entrypointCommandContract": {
+      "$id": "urn:literate-ai:schema:v2:multi-entrypoint-component-semantics@1",
+      "description": "ADR-0026 additive per-entrypoint TEST/EXECUTE authority and export shape for one entrypoint of a multi-entrypoint Component, keyed by entrypoint identity and bound to a deployment unit.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "entrypoint_identity",
+        "deployment_unit",
+        "commands",
+        "tool_bindings",
+        "artifact_export"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:multi-entrypoint-component-semantics@1"},
+        "entrypoint_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "deployment_unit": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "commands": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-lifecycle-command"},
+                {"properties": {"phase": {"const": "test"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-lifecycle-command"},
+                {"properties": {"phase": {"const": "execute"}}}
+              ]
+            }
+          ],
+          "items": false
+        },
+        "tool_bindings": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/toolBinding"},
+                {"properties": {"phase": {"const": "test"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/toolBinding"},
+                {"properties": {"phase": {"const": "execute"}}}
+              ]
+            }
+          ],
+          "items": false
+        },
+        "artifact_export": {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/artifactExportShape"}
+      }
+    },
+    "lifecycleCommand": {
+      "$id": "urn:literate-ai:schema:v2:component-lifecycle-command",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "argv"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:component-lifecycle-command"},
+        "phase": {"enum": ["build", "test", "execute"]},
+        "argv": {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/argv"}
+      }
+    },
+    "commandContract": {
+      "$id": "urn:literate-ai:schema:v2:component-command-contract",
+      "description": "Locked Flavor/build authority for shell-free build, test, and execute commands for one exact Component revision.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "locked_build_authority_identity",
+        "build_system_resolver_identity",
+        "build_system_toolchain_identity",
+        "language_compiler_identity",
+        "language_runtime_identity",
+        "commands",
+        "tool_bindings",
+        "artifact_export"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:component-command-contract"},
+        "component_revision": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "locked_build_authority_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build_system_resolver_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build_system_toolchain_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "language_compiler_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "language_runtime_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "commands": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-lifecycle-command"},
+                {"properties": {"phase": {"const": "build"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-lifecycle-command"},
+                {"properties": {"phase": {"const": "test"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-lifecycle-command"},
+                {"properties": {"phase": {"const": "execute"}}}
+              ]
+            }
+          ],
+          "items": false
+        },
+        "tool_bindings": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/toolBinding"},
+                {"properties": {"phase": {"const": "build"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/toolBinding"},
+                {"properties": {"phase": {"const": "test"}}}
+              ]
+            },
+            {
+              "allOf": [
+                {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/toolBinding"},
+                {"properties": {"phase": {"const": "execute"}}}
+              ]
+            }
+          ],
+          "items": false
+        },
+        "artifact_export": {"$ref": "urn:literate-ai:schema:v2:component-command-contracts#/$defs/artifactExportShape"},
+        "entrypoint_contracts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v2:multi-entrypoint-component-semantics@1"}
+        },
+        "library_import_surface": {"$ref": "urn:literate-ai:schema:v2:library-import-surface@1"},
+        "native_layout": {"$ref": "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/cpp_library_layout"}
+      },
+      "if": {"required": ["library_import_surface"], "properties": {"library_import_surface": {"properties": {"language": {"const": "cpp"}}, "required": ["language"]}}},
+      "then": {"required": ["native_layout"]},
+      "else": {"not": {"required": ["native_layout"]}}
+    }
+  }
+}

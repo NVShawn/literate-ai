@@ -1,0 +1,24 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "595f016e764642316d7b198be4ad3e7a6d8b40fa6dc3f092ea1332fa20044c15",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:98e16aef6aa40c1705df91634fdcd5e6bea897f440c0bfd021d1ac2e04c7767b",
+  "execution_interface_identity": "sha256:3bc31f2765d6fc05b2e069c4b03c01ef0e0f4a4a2975af589a46cbaf89a3b832",
+  "expected_assertions": [
+    "workflow-completes",
+    "restart-reuses-exact-stages"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "windows-path-auditor",
+  "scenario": "hello",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:1557a4a434af0d7f6e2196f6ab2b4b1a644c708057c9c466d77abcf1918c5f21"
+}

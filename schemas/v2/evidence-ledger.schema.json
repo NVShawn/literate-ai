@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:evidence-ledger-contracts",
+  "title": "Release evidence ledger contracts",
+  "oneOf": [
+    {"$ref": "literate-ai/evidence-ledger@1"},
+    {"$ref": "literate-ai/evidence-ledger-node@1"}
+  ],
+  "$defs": {
+    "state": {
+      "enum": ["pending", "running", "passed", "failed", "skipped", "unavailable"]
+    },
+    "retention": {
+      "enum": ["retained", "pruned", "host-only", "imported"]
+    },
+    "pointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "path", "bytes", "digest", "media_type", "retention"],
+      "properties": {
+        "role": {"type": "string", "minLength": 1, "maxLength": 256},
+        "path": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "bytes": {
+          "oneOf": [
+            {"type": "integer", "minimum": 0},
+            {"type": "null"}
+          ]
+        },
+        "digest": {
+          "oneOf": [
+            {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+            {"type": "null"}
+          ]
+        },
+        "media_type": {"type": "string", "minLength": 1, "maxLength": 256},
+        "retention": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-ledger-contracts#/$defs/retention"
+        }
+      }
+    },
+    "error": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["code", "message", "excerpt"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1, "maxLength": 256},
+        "message": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "excerpt": {"type": "string", "maxLength": 4096}
+      }
+    },
+    "ledger": {
+      "$id": "literate-ai/evidence-ledger@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "run_id", "operation", "root", "created_at", "state"],
+      "properties": {
+        "schema": {"const": "literate-ai/evidence-ledger@1"},
+        "run_id": {"type": "string", "pattern": "^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{6}$"},
+        "operation": {"type": "string", "minLength": 1, "maxLength": 256},
+        "root": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "created_at": {"type": "string", "minLength": 1, "maxLength": 64},
+        "closed_at": {"type": "string", "minLength": 1, "maxLength": 64},
+        "state": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-ledger-contracts#/$defs/state"
+        },
+        "node_count": {"type": "integer", "minimum": 0},
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-ledger-contracts#/$defs/node"
+          }
+        }
+      }
+    },
+    "node": {
+      "$id": "literate-ai/evidence-ledger-node@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "run_id",
+        "node_id",
+        "path",
+        "operation",
+        "parent_id",
+        "host",
+        "pins",
+        "outputs",
+        "state",
+        "started_at",
+        "ended_at",
+        "error"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/evidence-ledger-node@1"},
+        "run_id": {"type": "string", "pattern": "^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{6}$"},
+        "node_id": {"type": "string", "pattern": "^n[0-9]{4,}$"},
+        "path": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "operation": {"type": "string", "minLength": 1, "maxLength": 256},
+        "parent_id": {
+          "oneOf": [
+            {"type": "string", "pattern": "^n[0-9]{4,}$"},
+            {"type": "null"}
+          ]
+        },
+        "host": {"type": "object", "additionalProperties": true},
+        "pins": {"type": "object", "additionalProperties": true},
+        "outputs": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-ledger-contracts#/$defs/pointer"
+          }
+        },
+        "state": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-ledger-contracts#/$defs/state"
+        },
+        "started_at": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 64},
+            {"type": "null"}
+          ]
+        },
+        "ended_at": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 64},
+            {"type": "null"}
+          ]
+        },
+        "error": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-ledger-contracts#/$defs/error"
+        },
+        "children": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^n[0-9]{4,}$"}
+        }
+      }
+    }
+  }
+}

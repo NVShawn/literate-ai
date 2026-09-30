@@ -1,0 +1,53 @@
+{
+  "schema": "literate-ai/source-to-specification-case@1",
+  "case_id": "library-consumer",
+  "source_root": "source",
+  "surfaces": [
+    {
+      "surface_id": "internal-cache",
+      "facet": "architecture",
+      "description": "Private memoization cache",
+      "declared_state": "implementation-detail",
+      "reason": "The private cache is below the public specification boundary."
+    },
+    {"surface_id": "normalize-api", "facet": "public-api", "description": "Public normalize function"}
+  ],
+  "evidence": [
+    {"evidence_id": "library-source", "path": "library.py", "symbol": "normalize"},
+    {"evidence_id": "consumer-source", "path": "consumer.py", "symbol": "display_name"}
+  ],
+  "observations": [
+    {
+      "observation_id": "cache-private",
+      "surface_ids": ["internal-cache"],
+      "facet": "architecture",
+      "claim_kind": "observed-current-behavior",
+      "statement": "Normalization results are memoized in a private module cache.",
+      "evidence_ids": ["library-source"],
+      "skill_id": "architecture",
+      "confidence": 1.0,
+      "draft_scope": "none"
+    },
+    {
+      "observation_id": "normalize-contract",
+      "surface_ids": ["normalize-api"],
+      "facet": "public-api",
+      "claim_kind": "observed-current-behavior",
+      "statement": "normalize strips surrounding whitespace and lowercases text.",
+      "evidence_ids": ["library-source", "consumer-source"],
+      "skill_id": "api-surface",
+      "confidence": 1.0
+    }
+  ],
+  "expected": {
+    "claim_kinds": {
+      "cache-private": "observed-current-behavior",
+      "normalize-contract": "observed-current-behavior"
+    },
+    "coverage": {"internal-cache": "implementation-detail", "normalize-api": "covered"},
+    "uncertainty_ids": [],
+    "statement_ids": ["statement:normalize-contract"],
+    "flavor_ids": [],
+    "invalidated_surface_ids": []
+  }
+}

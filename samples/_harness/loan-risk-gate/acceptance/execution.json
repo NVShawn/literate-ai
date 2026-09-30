@@ -1,0 +1,38 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "dmn.b950b8a965bc63628baec35f12f7157d0389c0e453d3c1c50cd90ef17cd36ffd",
+  "scenario_id": "dmn.b950b8a965bc63628baec35f12f7157d0389c0e453d3c1c50cd90ef17cd36ffd.73eca93df7ab1bebcc9871e0c40c2e3226b2f2a9b328b57aa18ce5f16a4b1038",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "age": 22,
+          "income": 25000
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "age": 40,
+          "income": 80000
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "age": "integer",
+    "income": "integer",
+    "risk_category": "string",
+    "score_band": "string"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": [],
+    "packaging": "flavor://literate-ai/package-pip"
+  },
+  "dependencies": []
+}

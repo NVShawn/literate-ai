@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:7805ae006345721b8abf7fd0d9ccb12e051224d4d696f203a7cbf0f09c437600",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "decision": "blocked",
+        "maximum_severity": "critical",
+        "requested_privileges": [
+          "compiler"
+        ],
+        "warning": null
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "decision": "constrained",
+        "maximum_severity": "high",
+        "requested_privileges": [
+          "compiler"
+        ],
+        "warning": null
+      }
+    }
+  ]
+}

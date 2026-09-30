@@ -1,0 +1,214 @@
+{
+  "schema": "literate-ai/wire-compatibility-golden@1",
+  "publication": {
+    "historical_manifest": {
+      "schema_version": 2,
+      "component_id": "demo-component",
+      "revision": "sha256:53698984c5970e219e395f25bb3079e14794bfd803b598813cc213413f3e4c56",
+      "component_ref": {
+        "schema": "urn:literate-ai:schema:v1:component-revision-reference",
+        "coordinate": {"namespace": "test", "name": "demo-component"},
+        "version": "1.0.0",
+        "revision_identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "53698984c5970e219e395f25bb3079e14794bfd803b598813cc213413f3e4c56"
+        }
+      },
+      "roots": {
+        "provenance": {
+          "algorithm": "sha256",
+          "digest": "22aed5f0452e1351145b83b3d039a4859983ca32c484880b03f8554348b84d91",
+          "size": 30,
+          "media_type": "application/json"
+        },
+        "source": {
+          "algorithm": "sha256",
+          "digest": "03e693d9f2f687e0f40e36a8df7fcb4d1c22974012b7c2a55c000eb30f305824",
+          "size": 15,
+          "media_type": "text/x-python"
+        }
+      },
+      "blobs": [
+        {
+          "algorithm": "sha256",
+          "digest": "03e693d9f2f687e0f40e36a8df7fcb4d1c22974012b7c2a55c000eb30f305824",
+          "size": 15,
+          "media_type": "text/x-python"
+        },
+        {
+          "algorithm": "sha256",
+          "digest": "22aed5f0452e1351145b83b3d039a4859983ca32c484880b03f8554348b84d91",
+          "size": 30,
+          "media_type": "application/json"
+        }
+      ],
+      "created_at": "2026-08-05T00:00:00+00:00"
+    },
+    "verified_v2_manifest_context": {
+      "schema": "urn:literate-ai:schema:v2:publication-manifest",
+      "schema_version": 4,
+      "request": {
+        "schema": "urn:literate-ai:schema:v2:publication-request",
+        "component_ref": {
+          "schema": "urn:literate-ai:schema:v1:component-revision-reference",
+          "coordinate": {"namespace": "test", "name": "demo-component"},
+          "version": "1.0.0",
+          "revision_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "53698984c5970e219e395f25bb3079e14794bfd803b598813cc213413f3e4c56"
+          }
+        },
+        "effective_revision_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "source_bundle": {
+          "algorithm": "sha256",
+          "digest": "03e693d9f2f687e0f40e36a8df7fcb4d1c22974012b7c2a55c000eb30f305824",
+          "size": 15,
+          "media_type": "text/x-python"
+        },
+        "roots": {
+          "provenance": {
+            "algorithm": "sha256",
+            "digest": "22aed5f0452e1351145b83b3d039a4859983ca32c484880b03f8554348b84d91",
+            "size": 30,
+            "media_type": "application/json"
+          },
+          "source": {
+            "algorithm": "sha256",
+            "digest": "03e693d9f2f687e0f40e36a8df7fcb4d1c22974012b7c2a55c000eb30f305824",
+            "size": 15,
+            "media_type": "text/x-python"
+          }
+        },
+        "blobs": [
+          {
+            "algorithm": "sha256",
+            "digest": "03e693d9f2f687e0f40e36a8df7fcb4d1c22974012b7c2a55c000eb30f305824",
+            "size": 15,
+            "media_type": "text/x-python"
+          },
+          {
+            "algorithm": "sha256",
+            "digest": "22aed5f0452e1351145b83b3d039a4859983ca32c484880b03f8554348b84d91",
+            "size": 30,
+            "media_type": "application/json"
+          }
+        ],
+        "provenance": [
+          {
+            "algorithm": "sha256",
+            "digest": "22aed5f0452e1351145b83b3d039a4859983ca32c484880b03f8554348b84d91",
+            "size": 30,
+            "media_type": "application/json"
+          }
+        ],
+        "security_classification_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "security_profile": "constrained",
+        "publisher_id": "publisher:filesystem@1",
+        "target_id": "team-cache",
+        "target_identity_digest": "sha256:b86aad8fcaf3dca402fe7c47410e19d631ac52669972f8ee9b10872b5e6be258",
+        "policy_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "actor": "release-manager"
+      },
+      "authorization": {
+        "schema": "urn:literate-ai:schema:v2:publication-authorization",
+        "authorization_id": "publication-auth:a86b6371ab11f4bf1cd509a1",
+        "request_digest": "sha256:52b3d4eaf07d34c0bbcdef218a6542c936829e020186bd37e784b868b8e151b4",
+        "policy_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "actor": "release-manager",
+        "reason": "publish fixture",
+        "decision": "allow",
+        "issued_at": "2026-08-05T00:00:00+00:00",
+        "expires_at": "2026-08-05T00:05:00+00:00",
+        "revoked": false
+      },
+      "created_at": "2026-08-05T00:00:00+00:00"
+    },
+    "historical_receipt": {
+      "schema_version": 2,
+      "operation_id": "publish_e68191af23d086a801389029",
+      "direction": "publish",
+      "target_id": "team-cache",
+      "publication_manifest": {
+        "algorithm": "sha256",
+        "digest": "c1f9fe67cf09f17b06702bbdea69bd6ba62a5b87df41fcfc0b0fabd6e09796ef",
+        "size": 2447,
+        "media_type": "application/vnd.literate-ai.publication-manifest+json"
+      },
+      "component_id": "demo-component",
+      "revision": "sha256:53698984c5970e219e395f25bb3079e14794bfd803b598813cc213413f3e4c56",
+      "component_ref": {
+        "schema": "urn:literate-ai:schema:v1:component-revision-reference",
+        "coordinate": {"namespace": "test", "name": "demo-component"},
+        "version": "1.0.0",
+        "revision_identity": {
+          "schema": "urn:literate-ai:schema:v1:content-identity",
+          "algorithm": "sha256",
+          "digest": "53698984c5970e219e395f25bb3079e14794bfd803b598813cc213413f3e4c56"
+        }
+      },
+      "blob_count": 3,
+      "transferred_count": 3,
+      "reused_count": 0,
+      "started_at": "2026-08-05T00:01:00+00:00",
+      "completed_at": "2026-08-05T00:01:00+00:00"
+    }
+  },
+  "security": {
+    "historical_classification_supported": {
+      "effective_revision_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_digests": ["sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+      "dependency_classification_digests": [],
+      "origin_attestation_digests": ["sha256:71db746328c6425168f964080c4a2b0c776dbf0ced89407bf5c19d830440ed3b"],
+      "finding_ids": ["finding:test"],
+      "policy_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "profile": "constrained",
+      "maximum_severity": 1,
+      "permitted_privileges": ["compiler", "processes"],
+      "decision_reason": "verified source closure is allowed under constrained policy"
+    },
+    "historical_classification_empty_evidence": {
+      "effective_revision_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_digests": [],
+      "dependency_classification_digests": [],
+      "origin_attestation_digests": [],
+      "finding_ids": ["finding:test"],
+      "policy_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "profile": "constrained",
+      "maximum_severity": 1,
+      "permitted_privileges": ["compiler", "processes"],
+      "decision_reason": "verified source closure is allowed under constrained policy"
+    },
+    "historical_observation_request_supported": {
+      "effective_revision_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_digests": ["sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+      "runner_id": "runner:test@1",
+      "harness_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "sandbox_profile": "constrained",
+      "requested_privileges": [],
+      "allowed_outputs": ["report"]
+    },
+    "historical_observation_request_empty_scope": {
+      "effective_revision_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "source_digests": [],
+      "runner_id": "runner:test@1",
+      "harness_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "sandbox_profile": "constrained",
+      "requested_privileges": [],
+      "allowed_outputs": []
+    },
+    "historical_observation_execution_authorization": {
+      "authorization_id": "observe-auth:574e78bc317fe65c096b5fd3",
+      "classification_digest": "sha256:826cbc9bdaf8ed696a349ae6d4da5e96033e6c971bbac32472e66f6e74244c34",
+      "request_digest": "sha256:0c7fc70bb1326f5ce510e47bc9ed0c6e9cdfbfb15fc7e2e951e579060e015546",
+      "actor": "reviewer",
+      "reason": "verified fixture",
+      "privileges": [],
+      "issued_at": "2026-08-05T00:00:00+00:00",
+      "expires_at": "2026-08-05T00:05:00+00:00",
+      "warning": null,
+      "revoked": false
+    }
+  }
+}

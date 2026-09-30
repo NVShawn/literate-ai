@@ -1,0 +1,39 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.framework-compatibility-readiness",
+  "scenario_id": "framework-compatibility-readiness.requested-capabilities-are-reported",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {}
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "expected_framework_version": "0.2.0",
+          "required_skill_ids": [
+            "security",
+            "architecture"
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "framework_version": "string",
+    "operation": "string",
+    "packaged_skills": [
+      "string"
+    ],
+    "public_api_ready": "boolean"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

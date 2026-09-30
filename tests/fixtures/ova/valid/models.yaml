@@ -1,0 +1,21 @@
+schema_version: 1
+endpoints:
+  local-code:
+    endpoint_id: local-code
+    provider: local
+    model_id: test/code-model
+    base_url: http://127.0.0.1:11434/v1
+    capabilities: [code-generation, reasoning, structured-output, long-context]
+    context_tokens: 65536
+    cost_class: low
+    locality: local
+    enabled: true
+groups:
+  implementation:
+    group_id: implementation
+    version: 1
+    description: Local implementation models.
+    endpoint_ids: [local-code]
+    routing: ordered
+future_settings:
+  selection_trace: enabled

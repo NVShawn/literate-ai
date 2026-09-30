@@ -1,0 +1,24 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:6a1c39e4df2087dcbbdaa64c8198ae8bbe5d2b75bcd105867f398e0550ff9dfd",
+  "oracle_results": [
+    {
+      "case_id": "limited",
+      "expected_result": {
+        "mount": "/sys/fs/cgroup",
+        "cpu_quota_millicores": 2000,
+        "memory_limit_bytes": 536870912,
+        "constrained": true
+      }
+    },
+    {
+      "case_id": "unlimited",
+      "expected_result": {
+        "mount": "/sys/fs/cgroup/user.slice",
+        "cpu_quota_millicores": -1,
+        "memory_limit_bytes": -1,
+        "constrained": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.execute-the-affine-transform-on-an-nvidia-device",
+  "scenario_id": "execute-the-affine-transform-on-an-nvidia-device.the-compiled-cuda-c-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "mixed",
+      "arguments": [
+        {
+          "values": [3, -2, 0, 11, 7],
+          "multiplier": 4,
+          "bias": -1
+        }
+      ]
+    },
+    {
+      "case_id": "negative-scale",
+      "arguments": [
+        {
+          "values": [-8, 5, 12],
+          "multiplier": -3,
+          "bias": 2
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "backend": "string",
+    "device_executed": "boolean",
+    "count": "integer",
+    "values": ["integer"],
+    "checksum": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "accelerator": "nvidia-cuda",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-cpp"],
+    "build.system": "flavor://literate-ai/build-make"
+  },
+  "dependencies": []
+}

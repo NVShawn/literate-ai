@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Prototype SCXML sample for docs/history/roadmap/0.6.0-scxml-provider-design.md's
+  "Maturity / next-action assessment" step 1.
+
+  Deliberately non-trivial: a compound "on" state containing both a shallow
+  <history> pseudostate (to resume the previous sub-configuration on
+  power-on) and a <parallel> state with two independently-progressing
+  regions (playback, volume). Also exercises SCXML's ancestor-transition
+  inheritance ("event bubbling"): the "power" and "standby" transitions are
+  declared once on <state id="on"> and apply to every descendant
+  configuration, not just "on"'s immediate children.
+-->
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" initial="off" name="media_player">
+
+  <state id="off">
+    <!-- First power-on has no stored history yet, so on_history's own
+         default <transition> (declared below) resolves to "running". -->
+    <transition event="power" target="on_history"/>
+    <transition event="decommission" target="shutdown"/>
+  </state>
+
+  <state id="on" initial="running">
+    <!-- Inherited by every descendant leaf/region below: "power" and
+         "standby" fire regardless of which sub-configuration is active. -->
+    <transition event="power" target="off"/>
+    <transition event="standby" target="suspended"/>
+
+    <history id="on_history" type="shallow">
+      <transition target="running"/>
+    </history>
+
+    <parallel id="running">
+      <state id="playback" initial="playing">
+        <state id="playing">
+          <transition event="pause" target="paused"/>
+        </state>
+        <state id="paused">
+          <transition event="play" target="playing"/>
+        </state>
+      </state>
+      <state id="volume" initial="unmuted">
+        <state id="unmuted">
+          <transition event="mute" target="muted"/>
+        </state>
+        <state id="muted">
+          <transition event="unmute" target="unmuted"/>
+        </state>
+      </state>
+    </parallel>
+
+    <state id="suspended">
+      <transition event="wake" target="running"/>
+    </state>
+  </state>
+
+  <final id="shutdown"/>
+
+</scxml>

@@ -1,0 +1,45 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.series-selection-independent-of-fetched-data",
+  "scenario_id": "series-selection-independent-of-fetched-data.toggling-a-series-does-not-re-fetch",
+  "entrypoint": "dashboard",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "dataset": [
+            {"cluster_id": "alpha", "cpu_utilization": 40, "memory_utilization": 70},
+            {"cluster_id": "beta", "cpu_utilization": 40, "memory_utilization": 90}
+          ],
+          "selected": ["cpu_utilization", "memory_utilization"],
+          "deselect": "cpu_utilization"
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "dataset": [
+            {"cluster_id": "west", "cpu_utilization": 10, "memory_utilization": 20},
+            {"cluster_id": "east", "cpu_utilization": 80, "memory_utilization": 15}
+          ],
+          "selected": ["memory_utilization"],
+          "deselect": "memory_utilization"
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "fetch_count": "integer",
+    "retained_row_count": "integer",
+    "selected": ["string"]
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-javascript"],
+    "implementation.ui-framework": "flavor://literate-ai/ui-react"
+  },
+  "dependencies": []
+}

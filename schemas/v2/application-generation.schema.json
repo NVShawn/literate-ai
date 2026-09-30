@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:application-generation-contracts",
+  "$ref": "urn:literate-ai:schema:v2:generation-provenance",
+  "$defs": {
+    "provenance": {
+      "$id": "urn:literate-ai:schema:v2:generation-provenance",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_input_identity",
+        "component_lock_identity",
+        "root_revision_identity",
+        "readiness_identity",
+        "route_decision_digests",
+        "model_stage_outputs",
+        "lifecycle_outputs",
+        "accepted_tree_identity"
+      ],
+      "properties": {
+        "run_input_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "root_revision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "readiness_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "route_decision_digests": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+        },
+        "model_stage_outputs": {
+          "type": "array",
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "lifecycle_outputs": {
+          "type": "array",
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "accepted_tree_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    }
+  }
+}

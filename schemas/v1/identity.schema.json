@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:identity-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+    { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+    { "$ref": "urn:literate-ai:schema:v1:versioned-content-reference" },
+    { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" }
+  ],
+  "$defs": {
+    "contentIdentity": {
+      "$id": "urn:literate-ai:schema:v1:content-identity",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "algorithm", "digest"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:content-identity" },
+        "algorithm": { "const": "sha256" },
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "contentReference": {
+      "$id": "urn:literate-ai:schema:v1:content-reference",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "kind", "uri", "identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:content-reference" },
+        "kind": { "type": "string", "minLength": 1 },
+        "uri": { "type": "string", "minLength": 1 },
+        "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "versionedContentReference": {
+      "$id": "urn:literate-ai:schema:v1:versioned-content-reference",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "kind", "identifier", "version", "content_identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:versioned-content-reference" },
+        "kind": { "type": "string", "minLength": 1 },
+        "identifier": { "type": "string", "minLength": 1 },
+        "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" },
+        "content_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "componentRevisionReference": {
+      "$id": "urn:literate-ai:schema:v1:component-revision-reference",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "coordinate", "version", "revision_identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:component-revision-reference" },
+        "coordinate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["namespace", "name"],
+          "properties": {
+            "namespace": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$" },
+            "name": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$" }
+          }
+        },
+        "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" },
+        "revision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    }
+  }
+}

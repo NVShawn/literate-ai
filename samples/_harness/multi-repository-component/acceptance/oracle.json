@@ -1,0 +1,54 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:18ba16be6c391fbe673b63a939b0e8963e182765ebc28ebee8d322dd6c112bd7",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "completed": 2,
+        "results": [
+          {
+            "characters": 25,
+            "digest": "79575d1ae958",
+            "id": "api",
+            "words": 3
+          },
+          {
+            "characters": 19,
+            "digest": "96cb04dd52bc",
+            "id": "worker",
+            "words": 2
+          }
+        ],
+        "total_characters": 44
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "completed": 3,
+        "results": [
+          {
+            "characters": 3,
+            "digest": "8b12507783d5",
+            "id": "one",
+            "words": 1
+          },
+          {
+            "characters": 9,
+            "digest": "623c900e09e5",
+            "id": "two",
+            "words": 2
+          },
+          {
+            "characters": 18,
+            "digest": "0b2dfc9a7677",
+            "id": "punctuation",
+            "words": 2
+          }
+        ],
+        "total_characters": 30
+      }
+    }
+  ]
+}

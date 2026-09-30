@@ -1,0 +1,81 @@
+{
+  "schema": "literate-ai/release-policy@2",
+  "version_scheme": "pep440",
+  "version_authority": {
+    "path": "src/literate_ai/version.py",
+    "format": "python-constant",
+    "selectors": ["DISTRIBUTION_VERSION"]
+  },
+  "version_mirrors": [
+    {
+      "path": "literate.project.json",
+      "format": "json-pointer",
+      "selectors": [
+        "/version",
+        "/lifecycle_driver/version",
+        "/test_receipt_policy/suite_version"
+      ]
+    },
+    {
+      "path": "schemas/v2/index.json",
+      "format": "json-pointer",
+      "selectors": ["/release"]
+    },
+    {
+      "path": "schemas/v2/compatibility.json",
+      "format": "json-pointer",
+      "selectors": ["/distribution"]
+    },
+    {
+      "path": "packaging/homebrew/literate-ai.rb",
+      "format": "quoted-constant",
+      "selectors": ["LITERATE_AI_VERSION"]
+    }
+  ],
+  "documentation_authority": ["docs/architecture/design-traceability.md"],
+  "contributions": {
+    "current_milestone": "1.1"
+  },
+  "collateral": [
+    {
+      "kind": "document-pair",
+      "name": "literate-ai-manager-overview",
+      "ecosystem": "google-workspace",
+      "required_for": ["minor", "major"],
+      "artifacts": {
+        "presentation": "docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.pptx",
+        "narrative": "docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.docx"
+      },
+      "verification_report": "_build/literate-ai-manager-overview/acceptance.json",
+      "publication_receipt": "_build/literate-ai-manager-overview/publish-receipt.json",
+      "resources": {
+        "presentation": "1V9mt1JpEst_2ucC0eJIIw7dff64MrtFRfut8MSiukeE",
+        "narrative": "1fMxy0NTT54MV4T9AwmA8F0VahNet93Xhp0d0pszI6GA"
+      }
+    }
+  ],
+  "allowed_transitions": ["patch", "minor", "major", "prerelease", "explicit"],
+  "gate": {
+    "argv": ["make", "release-check"],
+    "timeout_seconds": 172800
+  },
+  "artifact_gate": {
+    "argv": ["make", "release-artifacts"],
+    "timeout_seconds": 7200,
+    "manifest": "_build/qualified-release/manifest.json",
+    "required_roles": ["wheel", "codex-plugin", "claude-plugin"]
+  },
+  "changelog": {
+    "path": "CHANGELOG.md",
+    "unreleased_heading": "## Unreleased"
+  },
+  "tag": {
+    "prefix": "v",
+    "signed": false
+  },
+  "remote": "origin",
+  "provider": {
+    "kind": "github",
+    "repository": "NVIDIA-dev/literate-ai"
+  }
+}

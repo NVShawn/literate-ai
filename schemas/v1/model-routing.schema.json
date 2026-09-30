@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:model-routing-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:model-endpoint" },
+    { "$ref": "urn:literate-ai:schema:v1:model-group" },
+    { "$ref": "urn:literate-ai:schema:v1:stage-model-policy" },
+    { "$ref": "urn:literate-ai:schema:v1:model-route-decision" }
+  ],
+  "$defs": {
+    "endpoint": {
+      "$id": "urn:literate-ai:schema:v1:model-endpoint", "type": "object", "additionalProperties": false,
+      "required": ["endpoint_id", "provider", "model", "base_url", "locality", "capabilities", "context_tokens", "input_cost_per_million", "output_cost_per_million", "available", "credential_ref", "model_revision", "version"],
+      "properties": {
+        "endpoint_id": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "provider": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "model": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "base_url": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" },
+        "locality": { "enum": ["local", "remote"] }, "capabilities": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/stringArray" }, "context_tokens": { "type": "integer", "minimum": 1 },
+        "input_cost_per_million": { "type": "number", "minimum": 0 }, "output_cost_per_million": { "type": "number", "minimum": 0 }, "available": { "type": "boolean" },
+        "credential_ref": { "type": ["string", "null"] }, "model_revision": { "type": ["string", "null"] }, "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" }
+      }
+    },
+    "group": {
+      "$id": "urn:literate-ai:schema:v1:model-group", "type": "object", "additionalProperties": false,
+      "required": ["group_id", "version", "endpoint_ids", "endpoint_refs"],
+      "properties": { "group_id": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" }, "endpoint_ids": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/nonemptyStringArray" }, "endpoint_refs": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:versioned-content-reference" } } }
+    },
+    "policy": {
+      "$id": "urn:literate-ai:schema:v1:stage-model-policy", "type": "object", "additionalProperties": false,
+      "required": ["policy_id", "stage_type", "group_id", "required_capabilities", "required_locality", "minimum_context_tokens", "maximum_input_cost_per_million", "allowed_providers", "fallback_allowed", "data_egress", "version", "group_ref"],
+      "properties": {
+        "policy_id": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "stage_type": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "group_id": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" },
+        "required_capabilities": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/stringArray" }, "required_locality": { "enum": ["local", "remote", null] }, "minimum_context_tokens": { "type": "integer", "minimum": 1 },
+        "maximum_input_cost_per_million": { "type": ["number", "null"], "minimum": 0 }, "allowed_providers": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/stringArray" }, "fallback_allowed": { "type": "boolean" },
+        "data_egress": { "enum": ["none", "metadata-only", "source-allowed"] }, "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" }, "group_ref": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:versioned-content-reference" }, { "type": "null" }] }
+      }
+    },
+    "decision": {
+      "$id": "urn:literate-ai:schema:v1:model-route-decision", "type": "object", "additionalProperties": false,
+      "required": ["policy_id", "group_digest", "selected_endpoint_id", "selected_endpoint_digest", "considered_endpoint_ids", "rejection_reasons", "fallback_used", "data_egress", "group_ref", "selected_endpoint_ref"],
+      "properties": {
+        "policy_id": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "group_digest": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/digest" }, "selected_endpoint_id": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, "selected_endpoint_digest": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/digest" },
+        "considered_endpoint_ids": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/nonemptyStringArray" },
+        "rejection_reasons": { "type": "array", "items": { "type": "array", "prefixItems": [{ "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" }, { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/stringArray" }], "items": false, "minItems": 2, "maxItems": 2 } },
+        "fallback_used": { "type": "boolean" }, "data_egress": { "enum": ["none", "metadata-only", "source-allowed"] }, "group_ref": { "$ref": "urn:literate-ai:schema:v1:versioned-content-reference" }, "selected_endpoint_ref": { "$ref": "urn:literate-ai:schema:v1:versioned-content-reference" }
+      }
+    },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "text": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" } },
+    "nonemptyStringArray": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:model-routing-contracts#/$defs/text" } }
+  }
+}

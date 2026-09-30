@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+launcher_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+prefix=$(CDPATH= cd -- "$launcher_dir/.." && pwd)
+LITAI_PREFIX=$prefix
+LITAI_HOST_INSTALL=1
+export LITAI_PREFIX LITAI_HOST_INSTALL
+if [ -n "${LITAI_EVIDENCE_RUN-}" ]; then
+    exec "$prefix/share/literate-ai/venv/bin/python" -m literate_ai.step_harness \
+        --name launcher -- "$prefix/share/literate-ai/venv/bin/litai" "$@"
+fi
+exec "$prefix/share/literate-ai/venv/bin/litai" "$@"

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:component-generation-scheduling-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:component-generation-runtime-observation" },
+    { "$ref": "urn:literate-ai:schema:v2:component-generation-resume-candidate" },
+    { "$ref": "urn:literate-ai:schema:v2:component-generation-run-output" },
+    { "$ref": "urn:literate-ai:schema:v2:component-generation-node-result" },
+    { "$ref": "urn:literate-ai:schema:v2:component-generation-schedule-result" }
+  ],
+  "$defs": {
+    "nullableIdentity": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      ]
+    },
+    "nullableCount": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "integer", "minimum": 0, "maximum": 9223372036854775807 }
+      ]
+    },
+    "runtimeObservation": {
+      "$id": "urn:literate-ai:schema:v2:component-generation-runtime-observation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "model_attempts", "wall_time_ms", "model_tokens", "cost_microunits"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-generation-runtime-observation" },
+        "model_attempts": { "$ref": "urn:literate-ai:schema:v2:component-generation-scheduling-contracts#/$defs/nullableCount" },
+        "wall_time_ms": { "$ref": "urn:literate-ai:schema:v2:component-generation-scheduling-contracts#/$defs/nullableCount" },
+        "model_tokens": { "$ref": "urn:literate-ai:schema:v2:component-generation-scheduling-contracts#/$defs/nullableCount" },
+        "cost_microunits": { "$ref": "urn:literate-ai:schema:v2:component-generation-scheduling-contracts#/$defs/nullableCount" }
+      }
+    },
+    "resumeCandidate": {
+      "$id": "urn:literate-ai:schema:v2:component-generation-resume-candidate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "generation_key_identity", "context_manifest_identity", "complexity_budget_identity", "complexity_decision_identity", "prompt_identity", "accepted_result_identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-generation-resume-candidate" },
+        "generation_key_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "context_manifest_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_budget_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_decision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prompt_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "accepted_result_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "runOutput": {
+      "$id": "urn:literate-ai:schema:v2:component-generation-run-output",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "accepted_result_identity", "runtime_observation"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-generation-run-output" },
+        "accepted_result_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "runtime_observation": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "urn:literate-ai:schema:v2:component-generation-runtime-observation" }
+          ]
+        }
+      }
+    },
+    "nodeResult": {
+      "$id": "urn:literate-ai:schema:v2:component-generation-node-result",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component_revision", "generation_plan_identity", "generation_key_identity", "context_manifest_identity", "complexity_budget_identity", "complexity_decision_identity", "prompt_identity", "disposition", "accepted_result_identity", "runtime_observation", "failure_code"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-generation-node-result" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_key_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "context_manifest_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_budget_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_decision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prompt_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "disposition": { "enum": ["reused", "generated", "failed", "cancelled"] },
+        "accepted_result_identity": { "$ref": "urn:literate-ai:schema:v2:component-generation-scheduling-contracts#/$defs/nullableIdentity" },
+        "runtime_observation": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "urn:literate-ai:schema:v2:component-generation-runtime-observation" }
+          ]
+        },
+        "failure_code": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$" }
+          ]
+        }
+      }
+    },
+    "scheduleResult": {
+      "$id": "urn:literate-ai:schema:v2:component-generation-schedule-result",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "execution_plan_identity", "invalidation_decision_identity", "max_parallelism", "node_results"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-generation-schedule-result" },
+        "execution_plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "invalidation_decision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "max_parallelism": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "node_results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-generation-node-result" }
+        }
+      }
+    }
+  }
+}

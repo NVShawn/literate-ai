@@ -1,0 +1,445 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:testing-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v1:project-test-receipt"},
+    {"$ref": "urn:literate-ai:schema:v1:project-test-receipt-provisional"},
+    {"$ref": "urn:literate-ai:schema:v1:project-test-receipt-finalized-candidate"},
+    {"$ref": "urn:literate-ai:schema:v1:project-test-receipt-policy"},
+    {"$ref": "urn:literate-ai:schema:v1:generated-test-suite"},
+    {"$ref": "urn:literate-ai:schema:v2:known-test-failure-annotation"},
+    {"$ref": "urn:literate-ai:schema:v2:known-test-failure-report"},
+    {"$ref": "literate-ai/external-test-events@1"}
+  ],
+  "$defs": {
+    "text": {"type": "string", "minLength": 1, "maxLength": 4096},
+    "identityUri": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "testSuiteReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "revision"],
+      "properties": {
+        "id": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/text"},
+        "version": {"$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"},
+        "revision": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"}
+      }
+    },
+    "knownFailureAnnotation": {
+      "$id": "urn:literate-ai:schema:v2:known-test-failure-annotation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "pin_identity",
+        "test_key",
+        "cause",
+        "context_identity",
+        "universal_authority",
+        "failure_identity",
+        "evidence_run_identity",
+        "evidence_node_id",
+        "reason",
+        "policy",
+        "expires_at",
+        "tracker"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:known-test-failure-annotation"},
+        "pin_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "test_key": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "cause": {
+          "enum": [
+            "environment.authentication-required",
+            "environment.service-unavailable",
+            "product.known-defect"
+          ]
+        },
+        "context_identity": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        },
+        "universal_authority": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        },
+        "failure_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "evidence_run_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "evidence_node_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "reason": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "policy": {"enum": ["manual-revalidation", "expires-at"]},
+        "expires_at": {"oneOf": [{"type": "string", "format": "date-time"}, {"type": "null"}]},
+        "tracker": {"oneOf": [{"type": "string", "format": "uri"}, {"type": "null"}]}
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "context_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+                "universal_authority": {"type": "null"}
+              }
+            },
+            {
+              "properties": {
+                "context_identity": {"type": "null"},
+                "universal_authority": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+              }
+            }
+          ]
+        },
+        {
+          "if": {"properties": {"policy": {"const": "expires-at"}}},
+          "then": {"properties": {"expires_at": {"type": "string", "format": "date-time"}}},
+          "else": {"properties": {"expires_at": {"type": "null"}}}
+        }
+      ]
+    },
+    "knownFailureOutcome": {
+      "$id": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "test_key", "status", "failure_identity", "annotation_identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:known-test-failure-outcome"},
+        "test_key": {"type": "string", "minLength": 1, "maxLength": 2048},
+        "status": {"enum": ["passed", "failed", "known-failure", "skipped"]},
+        "failure_identity": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        },
+        "annotation_identity": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "knownFailureSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected", "executed", "passed", "failed", "known_failed", "skipped"],
+      "properties": {
+        "selected": {"type": "integer", "minimum": 0},
+        "executed": {"type": "integer", "minimum": 0},
+        "passed": {"type": "integer", "minimum": 0},
+        "failed": {"type": "integer", "minimum": 0},
+        "known_failed": {"type": "integer", "minimum": 0},
+        "skipped": {"type": "integer", "minimum": 0}
+      }
+    },
+    "knownFailureReport": {
+      "$id": "urn:literate-ai:schema:v2:known-test-failure-report",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "suite",
+        "pin_identity",
+        "context_identity",
+        "release_evidence",
+        "summary",
+        "outcomes"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:known-test-failure-report"},
+        "suite": {"type": "string", "minLength": 1, "maxLength": 256},
+        "pin_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "context_identity": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        },
+        "release_evidence": {"type": "boolean"},
+        "summary": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/knownFailureSummary"},
+        "outcomes": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v2:known-test-failure-outcome"}
+        }
+      }
+    },
+    "externalTestEvents": {
+      "$id": "literate-ai/external-test-events@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "suite",
+        "pin_identity",
+        "context_identity",
+        "selected_tests",
+        "events"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/external-test-events@1"},
+        "suite": {"type": "string", "minLength": 1, "maxLength": 256},
+        "pin_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "context_identity": {
+          "oneOf": [
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+            {"type": "null"}
+          ]
+        },
+        "selected_tests": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 2048}
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["test_key", "event", "failure_identity", "annotation_identity"],
+            "properties": {
+              "test_key": {"type": "string", "minLength": 1, "maxLength": 2048},
+              "event": {"enum": ["start", "passed", "failed", "skipped", "known-failure"]},
+              "failure_identity": {
+                "oneOf": [
+                  {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+                  {"type": "null"}
+                ]
+              },
+              "annotation_identity": {
+                "oneOf": [
+                  {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+                  {"type": "null"}
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "receiptPolicy": {
+      "$id": "urn:literate-ai:schema:v1:project-test-receipt-policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "suite_id",
+        "suite_version",
+        "runner_identity",
+        "required_evidence_kinds",
+        "minimum_test_count"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:project-test-receipt-policy"},
+        "suite_id": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/text"},
+        "suite_version": {"$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"},
+        "runner_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "required_evidence_kinds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "contains": {"const": "test-runner"},
+          "items": {
+            "enum": [
+              "acceptance-result",
+              "build-result",
+              "source-intelligence",
+              "deployment-result",
+              "generation-provenance",
+              "lifecycle-command",
+              "lifecycle-plan",
+              "lifecycle-request",
+              "observation-result",
+              "package-result",
+              "artifact-publication-result",
+              "publication-result",
+              "resolved-sbom",
+              "security-scan-report",
+              "source-cache-decision",
+              "source-cache-lifecycle",
+              "source-cache-publication-result",
+              "source-sbom",
+              "test-report",
+              "test-runner",
+              "workspace-admission"
+            ]
+          }
+        },
+        "minimum_test_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "generatedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "category",
+        "specification_refs",
+        "arguments",
+        "expected_result"
+      ],
+      "properties": {
+        "case_id": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/text"},
+        "category": {"enum": ["example", "boundary", "invariant"]},
+        "specification_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/text"}
+        },
+        "arguments": {"type": "array"},
+        "expected_result": {}
+      }
+    },
+    "generatedSuite": {
+      "$id": "urn:literate-ai:schema:v1:generated-test-suite",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "recipe_identity", "generation_mode", "cases"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:generated-test-suite"},
+        "recipe_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "generation_mode": {"const": "major-rebuild"},
+        "cases": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 256,
+          "items": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/generatedCase"}
+        }
+      }
+    },
+    "receipt": {
+      "$id": "urn:literate-ai:schema:v1:project-test-receipt",
+      "description": "A deliberately compact, passing-only text receipt. Failure detail remains outside Git.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project",
+        "project_revision",
+        "subject",
+        "suite",
+        "tests",
+        "result",
+        "evidence"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:project-test-receipt"},
+        "project": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/text"},
+        "project_revision": {
+          "description": "Identity of the complete current project authority-review input graph.",
+          "$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"
+        },
+        "subject": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "suite": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/testSuiteReference"},
+        "tests": {"type": "integer", "minimum": 1},
+        "result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "evidence": {
+          "description": "At most one compact content identity per typed evidence role.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "acceptance-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "build-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "cache-directory-custody": {
+              "description": "Exact host generated-source/object cache roots this lifecycle used. Absent in receipts written before cache custody was recorded.",
+              "$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"
+            },
+            "source-intelligence": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "deployment-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "generation-provenance": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "lifecycle-command": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "lifecycle-plan": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "lifecycle-request": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "observation-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "package-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "artifact-publication-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "publication-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "resolved-sbom": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "security-scan-report": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "source-cache-decision": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "source-cache-lifecycle": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "source-cache-publication-result": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "source-sbom": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "test-report": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "test-runner": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+            "workspace-admission": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"}
+          }
+        }
+      }
+    },
+    "provisionalReceipt": {
+      "$id": "urn:literate-ai:schema:v1:project-test-receipt-provisional",
+      "description": "A lifecycle-driver assertion that is structurally ineligible for test-receipt promotion until the outer CLI completes finalization.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "lifecycle_request_identity",
+        "lifecycle_command_identity",
+        "source_cache_control_identity",
+        "component_lock_identities",
+        "receipt_identity",
+        "receipt"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:project-test-receipt-provisional"},
+        "lifecycle_request_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "lifecycle_command_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "source_cache_control_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "component_lock_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"}
+        },
+        "receipt_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "receipt": {"$ref": "urn:literate-ai:schema:v1:project-test-receipt"}
+      }
+    },
+    "finalizedCandidate": {
+      "$id": "urn:literate-ai:schema:v1:project-test-receipt-finalized-candidate",
+      "description": "A supported-API TCB finalization envelope written by the outer CLI after side effects. It is not a cryptographic operator attestation.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "finalization_boundary",
+        "provisional_identity",
+        "lifecycle_request_identity",
+        "lifecycle_command_identity",
+        "source_cache_control_identity",
+        "component_lock_identities",
+        "source_cache_decision_identity",
+        "source_cache_lifecycle_identity",
+        "receipt_identity",
+        "receipt"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:project-test-receipt-finalized-candidate"},
+        "finalization_boundary": {"const": "supported-api-tcb"},
+        "provisional_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "lifecycle_request_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "lifecycle_command_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "source_cache_control_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "component_lock_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"}
+        },
+        "source_cache_decision_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "source_cache_lifecycle_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "receipt_identity": {"$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/identityUri"},
+        "receipt": {"$ref": "urn:literate-ai:schema:v1:project-test-receipt"}
+      }
+    }
+  }
+}

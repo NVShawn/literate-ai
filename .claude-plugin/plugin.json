@@ -1,0 +1,5 @@
+{
+  "name": "literate-ai",
+  "description": "Specification-led software lifecycle: lock, generate, rebuild, and catalog composition for Literate AI projects.",
+  "version": "0.8.0"
+}

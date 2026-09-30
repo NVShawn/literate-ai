@@ -1,0 +1,25 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "0d05ff734ec01b65d85994162365b4fd46a4c3c261ad2b145b8b1639f32c9a03",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:17603d021ad12ffe42eaccf2e348d2e27836c9f414c36f03d9537ccd64d752cf",
+  "execution_interface_identity": "sha256:e552776b50bff40f952cd06adf28f02745e6010bc9cfd4675435f2b91bf04584",
+  "expected_assertions": [
+    "cuda-contract-oracle-is-exact",
+    "device-execution-is-required",
+    "cpu-fallback-is-rejected"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "cuda-vector-transform-cpp",
+  "scenario": "cuda-foundation",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:ca3eb254403e67ff798b8597142b23c80529ed743d28ed7ea3b5c671100b9c99"
+}

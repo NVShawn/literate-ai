@@ -1,0 +1,491 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v4:source-generation-boundary-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v4:generated-source-candidate" },
+    { "$ref": "urn:literate-ai:schema:v3:source-generation-run-output" },
+    { "$ref": "urn:literate-ai:schema:v3:source-generation-resume-candidate" },
+    { "$ref": "urn:literate-ai:schema:v3:source-generation-node-result" },
+    { "$ref": "urn:literate-ai:schema:v3:source-generation-schedule-result" },
+    { "$ref": "urn:literate-ai:schema:v5:source-generation-provenance" },
+    { "$ref": "urn:literate-ai:schema:v4:source-generation-checkpoint" },
+    { "$ref": "urn:literate-ai:schema:v1:component-source-workspace-custody" },
+    { "$ref": "urn:literate-ai:schema:v1:project-source-generation-custody" }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "algorithm", "digest"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:content-identity" },
+        "algorithm": { "const": "sha256" },
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "identityArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/identity" }
+    },
+    "runtimeObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "model_attempts",
+        "wall_time_ms",
+        "model_tokens",
+        "cost_microunits"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:component-generation-runtime-observation"
+        },
+        "model_attempts": { "type": ["integer", "null"], "minimum": 0, "maximum": 9223372036854775807 },
+        "wall_time_ms": { "type": ["integer", "null"], "minimum": 0, "maximum": 9223372036854775807 },
+        "model_tokens": { "type": ["integer", "null"], "minimum": 0, "maximum": 9223372036854775807 },
+        "cost_microunits": { "type": ["integer", "null"], "minimum": 0, "maximum": 9223372036854775807 }
+      }
+    },
+    "nullableIdentity": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/identity" }
+      ]
+    },
+    "generatedSourceCandidate": {
+      "$id": "urn:literate-ai:schema:v4:generated-source-candidate",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        }
+      },
+      "required": [
+        "schema",
+        "component_revision",
+        "source_generation_request_identity",
+        "planned_coding_cli_request_identity",
+        "component_generation_plan_identity",
+        "generation_key_identity",
+        "context_manifest_identity",
+        "prompt_identity",
+        "recipe_identity",
+        "workspace_allocation_identity",
+        "tree_identity",
+        "source_bundle_identity",
+        "source_manifest_identity",
+        "source_bom_identity",
+        "generated_test_suite_identity"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v4:generated-source-candidate" },
+        "component_revision": { "$ref": "#/$defs/identity" },
+        "source_generation_request_identity": { "$ref": "#/$defs/identity" },
+        "planned_coding_cli_request_identity": { "$ref": "#/$defs/identity" },
+        "component_generation_plan_identity": { "$ref": "#/$defs/identity" },
+        "generation_key_identity": { "$ref": "#/$defs/identity" },
+        "context_manifest_identity": { "$ref": "#/$defs/identity" },
+        "prompt_identity": { "$ref": "#/$defs/identity" },
+        "recipe_identity": { "$ref": "#/$defs/identity" },
+        "workspace_allocation_identity": { "$ref": "#/$defs/identity" },
+        "tree_identity": { "$ref": "#/$defs/identity" },
+        "source_bundle_identity": { "$ref": "#/$defs/identity" },
+        "source_manifest_identity": { "$ref": "#/$defs/identity" },
+        "source_bom_identity": { "$ref": "#/$defs/identity" },
+        "generated_test_suite_identity": { "$ref": "#/$defs/identity" }
+      }
+    },
+    "sourceGenerationRunOutput": {
+      "$id": "urn:literate-ai:schema:v3:source-generation-run-output",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        },
+        "runtimeObservation": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/runtimeObservation"
+        }
+      },
+      "required": [
+        "schema",
+        "candidate",
+        "candidate_identity",
+        "provenance",
+        "provenance_identity",
+        "runtime_observation"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v3:source-generation-run-output" },
+        "candidate": { "$ref": "urn:literate-ai:schema:v4:generated-source-candidate" },
+        "candidate_identity": { "$ref": "#/$defs/identity" },
+        "provenance": { "$ref": "urn:literate-ai:schema:v5:source-generation-provenance" },
+        "provenance_identity": { "$ref": "#/$defs/identity" },
+        "runtime_observation": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/runtimeObservation" }
+          ]
+        }
+      }
+    },
+    "sourceGenerationResumeCandidate": {
+      "$id": "urn:literate-ai:schema:v3:source-generation-resume-candidate",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        }
+      },
+      "required": [
+        "schema",
+        "output",
+        "output_identity",
+        "complexity_budget_identity",
+        "complexity_decision_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v3:source-generation-resume-candidate"
+        },
+        "output": { "$ref": "urn:literate-ai:schema:v3:source-generation-run-output" },
+        "output_identity": { "$ref": "#/$defs/identity" },
+        "complexity_budget_identity": { "$ref": "#/$defs/identity" },
+        "complexity_decision_identity": { "$ref": "#/$defs/identity" }
+      }
+    },
+    "sourceGenerationNodeResult": {
+      "$id": "urn:literate-ai:schema:v3:source-generation-node-result",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        },
+        "nullableIdentity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/nullableIdentity"
+        },
+        "runtimeObservation": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/runtimeObservation"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "disposition": { "enum": ["reused", "generated", "retained"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "candidate_identity": { "$ref": "#/$defs/identity" },
+              "provenance_identity": { "$ref": "#/$defs/identity" },
+              "failure_code": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "candidate_identity": { "type": "null" },
+              "provenance_identity": { "type": "null" },
+              "failure_code": { "type": "string" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "disposition": { "enum": ["reused", "cancelled"] }
+            }
+          },
+          "then": {
+            "properties": { "runtime_observation": { "type": "null" } }
+          }
+        }
+      ],
+      "required": [
+        "schema",
+        "component_revision",
+        "generation_plan_identity",
+        "generation_key_identity",
+        "context_manifest_identity",
+        "complexity_budget_identity",
+        "complexity_decision_identity",
+        "prompt_identity",
+        "recipe_identity",
+        "workspace_allocation_identity",
+        "disposition",
+        "candidate_identity",
+        "provenance_identity",
+        "runtime_observation",
+        "failure_code"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v3:source-generation-node-result" },
+        "component_revision": { "$ref": "#/$defs/identity" },
+        "generation_plan_identity": { "$ref": "#/$defs/identity" },
+        "generation_key_identity": { "$ref": "#/$defs/identity" },
+        "context_manifest_identity": { "$ref": "#/$defs/identity" },
+        "complexity_budget_identity": { "$ref": "#/$defs/identity" },
+        "complexity_decision_identity": { "$ref": "#/$defs/identity" },
+        "prompt_identity": { "$ref": "#/$defs/identity" },
+        "recipe_identity": { "$ref": "#/$defs/identity" },
+        "workspace_allocation_identity": { "$ref": "#/$defs/identity" },
+        "disposition": { "enum": ["reused", "generated", "retained", "failed", "cancelled"] },
+        "candidate_identity": { "$ref": "#/$defs/nullableIdentity" },
+        "provenance_identity": { "$ref": "#/$defs/nullableIdentity" },
+        "runtime_observation": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/$defs/runtimeObservation" }
+          ]
+        },
+        "failure_code": {
+          "type": ["string", "null"],
+          "maxLength": 127,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        }
+      }
+    },
+    "sourceGenerationScheduleResult": {
+      "$id": "urn:literate-ai:schema:v3:source-generation-schedule-result",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        }
+      },
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "invalidation_decision_identity",
+        "max_parallelism",
+        "node_results"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v3:source-generation-schedule-result" },
+        "execution_plan_identity": { "$ref": "#/$defs/identity" },
+        "invalidation_decision_identity": { "$ref": "#/$defs/identity" },
+        "max_parallelism": { "type": "integer", "minimum": 1, "maximum": 256 },
+        "node_results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v3:source-generation-node-result" }
+        }
+      }
+    },
+    "sourceGenerationProvenance": {
+      "$id": "urn:literate-ai:schema:v5:source-generation-provenance",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        },
+        "identityArray": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identity" }
+        }
+      },
+      "required": [
+        "schema",
+        "source_generation_request_identity",
+        "planned_coding_cli_request_identity",
+        "component_lock_identity",
+        "application_root_revision_identity",
+        "generated_component_revision_identity",
+        "component_generation_plan_identity",
+        "generation_key_identity",
+        "context_manifest_identity",
+        "prompt_identity",
+        "recipe_identity",
+        "workspace_allocation_identity",
+        "readiness_identity",
+        "route_decision_identities",
+        "model_stage_output_identities",
+        "candidate_identity"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v5:source-generation-provenance" },
+        "source_generation_request_identity": { "$ref": "#/$defs/identity" },
+        "planned_coding_cli_request_identity": { "$ref": "#/$defs/identity" },
+        "component_lock_identity": { "$ref": "#/$defs/identity" },
+        "application_root_revision_identity": { "$ref": "#/$defs/identity" },
+        "generated_component_revision_identity": { "$ref": "#/$defs/identity" },
+        "component_generation_plan_identity": { "$ref": "#/$defs/identity" },
+        "generation_key_identity": { "$ref": "#/$defs/identity" },
+        "context_manifest_identity": { "$ref": "#/$defs/identity" },
+        "prompt_identity": { "$ref": "#/$defs/identity" },
+        "recipe_identity": { "$ref": "#/$defs/identity" },
+        "workspace_allocation_identity": { "$ref": "#/$defs/identity" },
+        "readiness_identity": { "$ref": "#/$defs/identity" },
+        "route_decision_identities": {
+          "$ref": "#/$defs/identityArray"
+        },
+        "model_stage_output_identities": {
+          "$ref": "#/$defs/identityArray"
+        },
+        "retained_source_identity": { "$ref": "#/$defs/identity" },
+        "provider_evidence_identities": { "$ref": "#/$defs/identityArray" },
+        "candidate_identity": { "$ref": "#/$defs/identity" }
+      },
+      "if": { "required": ["retained_source_identity"] },
+      "then": { "properties": {
+        "route_decision_identities": { "maxItems": 0 },
+        "model_stage_output_identities": { "maxItems": 0 },
+        "provider_evidence_identities": { "maxItems": 0 }
+      } },
+      "else": { "properties": {
+        "route_decision_identities": { "minItems": 1 },
+        "model_stage_output_identities": { "minItems": 1 }
+      } }
+    },
+    "componentSourceWorkspaceCustody": {
+      "$id": "urn:literate-ai:schema:v1:component-source-workspace-custody",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        }
+      },
+      "required": [
+        "schema",
+        "component_revision",
+        "generation_plan_identity",
+        "generation_key_identity",
+        "workspace_identity",
+        "workspace_locator",
+        "result",
+        "output"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:component-source-workspace-custody" },
+        "component_revision": { "$ref": "#/$defs/identity" },
+        "generation_plan_identity": { "$ref": "#/$defs/identity" },
+        "generation_key_identity": { "$ref": "#/$defs/identity" },
+        "workspace_identity": { "$ref": "#/$defs/identity" },
+        "workspace_locator": { "type": "string", "minLength": 1, "maxLength": 32768 },
+        "result": { "$ref": "urn:literate-ai:schema:v3:source-generation-node-result" },
+        "output": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "urn:literate-ai:schema:v3:source-generation-run-output" }
+          ]
+        }
+      }
+    },
+    "projectSourceGenerationCustody": {
+      "$id": "urn:literate-ai:schema:v1:project-source-generation-custody",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        }
+      },
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "invalidation_decision_identity",
+        "root_revision",
+        "components"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:project-source-generation-custody" },
+        "execution_plan_identity": { "$ref": "#/$defs/identity" },
+        "invalidation_decision_identity": { "$ref": "#/$defs/identity" },
+        "root_revision": { "$ref": "#/$defs/identity" },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:component-source-workspace-custody" }
+        }
+      }
+    },
+    "sourceGenerationCheckpoint": {
+      "$id": "urn:literate-ai:schema:v4:source-generation-checkpoint",
+      "type": "object",
+      "additionalProperties": false,
+      "$defs": {
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v4:source-generation-boundary-contracts#/$defs/identity"
+        },
+        "identityArray": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/identity" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "candidate-ready" } } },
+          "then": {
+            "properties": {
+              "candidate_identity": { "$ref": "#/$defs/identity" },
+              "provenance_identity": { "$ref": "#/$defs/identity" },
+              "failure_code": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "candidate_identity": { "type": "null" },
+              "provenance_identity": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "failed" } } },
+          "then": { "properties": { "failure_code": { "type": "string" } } },
+          "else": { "properties": { "failure_code": { "type": "null" } } }
+        }
+      ],
+      "required": [
+        "schema",
+        "run_id",
+        "source_generation_request_identity",
+        "status",
+        "event_stream_identity",
+        "completed_model_stage_ids",
+        "completed_model_output_identities",
+        "candidate_identity",
+        "provenance_identity",
+        "failure_code"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v4:source-generation-checkpoint" },
+        "run_id": { "type": "string", "minLength": 1 },
+        "source_generation_request_identity": { "$ref": "#/$defs/identity" },
+        "status": {
+          "enum": ["running", "paused", "failed", "candidate-ready"]
+        },
+        "event_stream_identity": { "$ref": "#/$defs/identity" },
+        "completed_model_stage_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" }
+        },
+        "completed_model_output_identities": { "$ref": "#/$defs/identityArray" },
+        "candidate_identity": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/identity" }]
+        },
+        "provenance_identity": {
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/identity" }]
+        },
+        "failure_code": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+        }
+      }
+    }
+  }
+}

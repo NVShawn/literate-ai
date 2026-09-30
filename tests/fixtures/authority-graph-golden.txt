@@ -1,0 +1,7 @@
+project child
+  repository Root [inherited, inheritable] <- https://example.test/root.git
+  repository Child [local, inheritable] <- https://example.test/child.git
+  component App [local, inheritable] <- components/app
+edges
+  repository:child -defines-> component:app (components/app/component.md)
+  repository:root -repository-parent-> repository:child

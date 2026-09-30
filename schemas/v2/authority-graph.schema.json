@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:authority-graph",
+  "description": "The existing AuthorityGraph JSON document, not the graph CLI wrapper. Ordering, endpoint closure, cycle rejection and identity computation remain owned by the existing graph producer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "project_id", "acyclic", "topological_order", "nodes", "edges", "identity"],
+  "properties": {
+    "schema": {"const": "literate-ai/authority-graph@2"},
+    "project_id": {"type": "string"},
+    "acyclic": {"const": true},
+    "topological_order": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string"}
+    },
+    "nodes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "edges": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/edge"}
+    },
+    "identity": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "label", "project_id", "provenance", "inherited", "inheritable", "properties"],
+      "properties": {
+        "id": {"type": "string"},
+        "kind": {"type": "string"},
+        "label": {"type": "string"},
+        "project_id": {"type": "string"},
+        "provenance": {"type": "string"},
+        "inherited": {"type": "boolean"},
+        "inheritable": {"type": ["boolean", "null"]},
+        "properties": {"type": "object", "additionalProperties": {"type": "string"}}
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "target", "kind", "label"],
+      "properties": {
+        "source": {"type": "string"},
+        "target": {"type": "string"},
+        "kind": {"type": "string"},
+        "label": {"type": "string"}
+      }
+    }
+  }
+}

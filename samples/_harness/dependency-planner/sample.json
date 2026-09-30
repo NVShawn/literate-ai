@@ -1,0 +1,27 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "8771a4a1cd84541c2125498f6d5db7d243d9086830e7c04700cabc7a28cf2a55",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:113b4bdb9a038d7147f8cf945fd5629948f39bdf8a296fdef09c8e8cc925e717",
+  "execution_interface_identity": "sha256:bb53e4f1baec965c8deb9a993f5ad179b573f2d3aabecc686361731916b656a9",
+  "expected_assertions": [
+    "task-graph-validates",
+    "topological-order-is-deterministic",
+    "critical-path-respects-parallelism"
+  ],
+  "expected_failures": [
+    "unknown dependency, duplicate task, or cyclic task graph"
+  ],
+  "proof_level": "executed",
+  "sample_id": "dependency-planner",
+  "scenario": "dependency-planner",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:84ab6d8821f90ef759bf40edc895abe6fec3a3e02fbe7072f3f80d11e910d384"
+}

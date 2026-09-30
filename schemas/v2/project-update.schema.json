@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:project-update-contracts",
+  "title": "Initialized-project update planning contracts",
+  "$defs": {
+    "file": {
+      "$id": "urn:literate-ai:schema:v2:project-update-file",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "path", "classification", "baseline_identity", "local_identity", "upstream_identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:project-update-file"},
+        "path": {"type": "string", "minLength": 1},
+        "classification": {
+          "enum": ["unchanged", "already-current", "upstream-only", "local-only", "conflict", "upstream-added", "preserved-dynamic"]
+        },
+        "baseline_identity": {"anyOf": [{"$ref": "urn:literate-ai:schema:v1:content-identity"}, {"type": "null"}]},
+        "local_identity": {"anyOf": [{"$ref": "urn:literate-ai:schema:v1:content-identity"}, {"type": "null"}]},
+        "upstream_identity": {"anyOf": [{"$ref": "urn:literate-ai:schema:v1:content-identity"}, {"type": "null"}]}
+      }
+    },
+    "plan": {
+      "$id": "urn:literate-ai:schema:v2:project-update-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "identity", "mode", "apply_supported", "project_identity", "baseline_identity", "previous_origin", "upstream_origin", "files", "counts", "limitations"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:project-update-plan"},
+        "identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "mode": {"const": "read-only-plan"},
+        "apply_supported": {"const": false},
+        "project_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "baseline_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "previous_origin": {"$ref": "urn:literate-ai:schema:v1:project-initialization-origin"},
+        "upstream_origin": {"$ref": "urn:literate-ai:schema:v1:project-initialization-origin"},
+        "files": {"type": "array", "items": {"$ref": "urn:literate-ai:schema:v2:project-update-file"}},
+        "counts": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  },
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:project-update-file"},
+    {"$ref": "urn:literate-ai:schema:v2:project-update-plan"}
+  ]
+}

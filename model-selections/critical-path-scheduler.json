@@ -1,0 +1,6 @@
+{
+  "schema": "literate-ai/coding-model-selection@1",
+  "models": {
+    "claude": "sonnet"
+  }
+}

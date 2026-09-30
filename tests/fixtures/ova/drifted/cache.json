@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "component_id": "sample.compatibility",
+  "source_packages": {
+    "src_demo": {
+      "package_id": "src_demo",
+      "component_id": "sample.compatibility",
+      "source_identity": "sha256:source",
+      "files": ["main.py"],
+      "dependencies": [],
+      "spec_files": ["openspec/specs/sample-compatibility/spec.md"],
+      "skill_ids": ["component-authoring"],
+      "model_selector_digest": "sha256:selector",
+      "content_digest": "sha256:source-package",
+      "created_at": "2026-08-02T12:00:00Z"
+    }
+  },
+  "object_packages": {},
+  "latest_source_package_id": "src_missing",
+  "latest_object_package_id": null
+}

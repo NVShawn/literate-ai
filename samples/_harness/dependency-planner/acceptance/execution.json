@@ -1,0 +1,84 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.emit-a-stable-machine-result",
+  "scenario_id": "emit-a-stable-machine-result.native-executable-is-verified",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "tasks": [
+            {
+              "id": "schema",
+              "duration_minutes": 8,
+              "depends_on": []
+            },
+            {
+              "id": "api",
+              "duration_minutes": 13,
+              "depends_on": ["schema"]
+            },
+            {
+              "id": "ui",
+              "duration_minutes": 11,
+              "depends_on": ["schema"]
+            },
+            {
+              "id": "release",
+              "duration_minutes": 5,
+              "depends_on": ["api", "ui"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "tasks": [
+            {
+              "id": "ingest",
+              "duration_minutes": 4,
+              "depends_on": []
+            },
+            {
+              "id": "normalize",
+              "duration_minutes": 6,
+              "depends_on": ["ingest"]
+            },
+            {
+              "id": "index",
+              "duration_minutes": 9,
+              "depends_on": ["normalize"]
+            },
+            {
+              "id": "audit",
+              "duration_minutes": 7,
+              "depends_on": ["ingest"]
+            },
+            {
+              "id": "publish",
+              "duration_minutes": 3,
+              "depends_on": ["index", "audit"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "critical_path": ["string"],
+    "edge_count": "integer",
+    "minimum_completion_minutes": "integer",
+    "task_count": "integer",
+    "topological_order": ["string"]
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-rust"],
+    "packaging": "flavor://literate-ai/package-conan"
+  },
+  "dependencies": []
+}

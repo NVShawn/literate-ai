@@ -1,0 +1,45 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "name": "Ada Lovelace",
+          "messages": [
+            "Build portable software",
+            "Ship with confidence"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "name": "Grace Hopper",
+          "messages": [
+            "Debug boldly",
+            "Build once",
+            "Run everywhere safely"
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "greeting": "string",
+    "message_count": "integer",
+    "recipient_id": "string",
+    "word_count": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": [],
+    "packaging": "flavor://literate-ai/package-pip"
+  },
+  "dependencies": []
+}

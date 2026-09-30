@@ -1,0 +1,31 @@
+{
+  "host": "127.0.0.1",
+  "port": 8000,
+  "ova_home": "/Users/example/.ova",
+  "ova_env_file": "/Users/example/.ova/.env",
+  "runtime_mode": "mock",
+  "sidecar_host": "127.0.0.1",
+  "sidecar_port": 8765,
+  "sidecar_timeout_seconds": 2.0,
+  "native_operation_timeout_seconds": 600.0,
+  "webrtc_signal_port": 49100,
+  "webrtc_public_host": "127.0.0.1",
+  "stream_fps": 30,
+  "cuda_device": 0,
+  "start_sidecar": true,
+  "catalog_path": "lib.yaml",
+  "project_id": "default",
+  "workspace_id": "default",
+  "model_catalog": "/Users/example/.ova/models.yaml",
+  "runtime_id": "runtime-default",
+  "session_id": "default",
+  "nvidia_api_base_url": "https://inference-api.nvidia.com/v1",
+  "nvidia_model": "nvidia/nvidia/nemotron-3-super-v3",
+  "nvidia_models": [
+    "nvidia/nvidia/nemotron-3-super-v3"
+  ],
+  "nvidia_timeout_seconds": 300.0,
+  "future_runtime_setting": {
+    "retained": true
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:common",
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "hexDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "blobRef": {
+      "$id": "urn:literate-ai:schema:v1:blob-ref",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "digest", "size", "media_type"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "digest": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/hexDigest" },
+        "size": { "type": "integer", "minimum": 0 },
+        "media_type": { "type": "string", "minLength": 1 }
+      }
+    },
+    "jsonValue": {
+      "oneOf": [
+        { "type": "null" }, { "type": "boolean" }, { "type": "integer" },
+        { "type": "number" }, { "type": "string" },
+        { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/jsonValue" } },
+        { "type": "object", "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/jsonValue" } }
+      ]
+    }
+  }
+}

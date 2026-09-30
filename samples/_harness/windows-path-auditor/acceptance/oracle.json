@@ -1,0 +1,44 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:3bc31f2765d6fc05b2e069c4b03c01ef0e0f4a4a2975af589a46cbaf89a3b832",
+  "oracle_results": [
+    {
+      "case_id": "mixed-paths",
+      "expected_result": {
+        "paths": [
+          {
+            "original": "C:/Program Files//LitAI/bin",
+            "normalized": "C:\\Program Files\\LitAI\\bin",
+            "kind": "drive",
+            "root": "C:\\"
+          },
+          {
+            "original": "\\\\server\\share\\\\releases/1",
+            "normalized": "\\\\server\\share\\releases\\1",
+            "kind": "unc",
+            "root": "\\\\server\\share"
+          },
+          {
+            "original": "tools/litai",
+            "normalized": "tools\\litai",
+            "kind": "relative",
+            "root": ""
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "rooted-path",
+      "expected_result": {
+        "paths": [
+          {
+            "original": "\\Windows//System32",
+            "normalized": "\\Windows\\System32",
+            "kind": "rooted",
+            "root": "\\"
+          }
+        ]
+      }
+    }
+  ]
+}

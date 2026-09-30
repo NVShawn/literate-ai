@@ -1,0 +1,20 @@
+{
+  "schema": "literate-ai/snapshot-replication-proof@1",
+  "proof_id": "literate-ai-exact-snapshot-two-generation",
+  "classification": "deterministic-offline-conformance-replay",
+  "coding_cli_involved": false,
+  "claim": "An already frozen package snapshot traverses concrete lifecycle adapters twice with byte-stable source and stable semantic identities.",
+  "dependencies": [
+    "literate-ai-framework-checkout"
+  ],
+  "skill_set": {
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "kind": "snapshot-replication-skill-set",
+    "uri": "../skills/self-hosting.json",
+    "identity": {
+      "schema": "urn:literate-ai:schema:v1:content-identity",
+      "algorithm": "sha256",
+      "digest": "fbd2e07b187fc84f40f5d48d0f8b7db73f356b7ad89dde415b0388586e73386c"
+    }
+  }
+}

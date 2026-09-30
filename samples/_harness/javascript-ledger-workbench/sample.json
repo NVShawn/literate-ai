@@ -1,0 +1,29 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "0b40fc46493942ae2f7d662e7aac5d9f17130659f20f7812c8404e7c8131edb5",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:03699e57de56104d134a86cead29c8f6e192caf0f38ba5650332aceaad9ebcaa",
+  "execution_interface_identity": "sha256:376930962e551e987f24655a5c61de393661515c2e450251e8316c12307c8a07",
+  "expected_assertions": [
+    "ledger-reconciles",
+    "budget-statuses-are-deterministic",
+    "javascript-toolchain-is-exact"
+  ],
+  "expected_failures": [
+    "duplicate transaction or budget identity",
+    "debit category without a declared budget",
+    "missing exact Node.js toolchain"
+  ],
+  "proof_level": "executed",
+  "sample_id": "javascript-ledger-workbench",
+  "scenario": "javascript-ledger-workbench",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:7d5c9c009a228b89a44eb8d5c23a1d16e18c7b1f016f3709478053d817d79739"
+}

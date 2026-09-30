@@ -1,0 +1,24 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "5577e97e2b2ef062ee43cb4dceb30343f911b45bf974a0ea977fa251f42dd279",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:0d86f9d7d2dd5b3017e5862574f8a28f4018d28178bf1410c76108b8b10c3bb0",
+  "execution_interface_identity": "sha256:41c19cd7f1e5ab18893b5d519115cc61a260e1828911a7a133d8c1f5746caae0",
+  "expected_assertions": [
+    "workflow-completes",
+    "restart-reuses-exact-stages"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "react-dashboard-example",
+  "scenario": "hello",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:70b51564deac9033d892737ca7a0751bef840f7d4beb08184b55c2f38837a155"
+}

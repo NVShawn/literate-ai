@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:semantic-comparison-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:semantic-requirement-graph" },
+    { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-model-output" },
+    { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-result" }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 65536 },
+    "identity": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "stringArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "when", "then"],
+      "properties": {
+        "name": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" },
+        "when": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" },
+        "then": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" }
+      }
+    },
+    "dimension": {
+      "enum": [
+        "inputs", "outputs", "invariants", "normalization", "aggregation",
+        "ordering", "tie-breaking", "errors", "invalid-inputs"
+      ]
+    },
+    "requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement_id", "dimension", "statement", "scenarios"],
+      "properties": {
+        "requirement_id": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" },
+        "dimension": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/dimension" },
+        "statement": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" },
+        "scenarios": {
+          "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/scenario" }
+        }
+      }
+    },
+    "requirementGraph": {
+      "$id": "urn:literate-ai:schema:v1:semantic-requirement-graph",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "graph_id", "requirements"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:semantic-requirement-graph" },
+        "graph_id": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" },
+        "requirements": {
+          "type": "array",
+          "minItems": 9,
+          "items": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/requirement" },
+          "allOf": [
+            { "contains": { "properties": { "dimension": { "const": "inputs" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "outputs" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "invariants" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "normalization" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "aggregation" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "ordering" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "tie-breaking" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "errors" } }, "required": ["dimension"] } },
+            { "contains": { "properties": { "dimension": { "const": "invalid-inputs" } }, "required": ["dimension"] } }
+          ]
+        }
+      }
+    },
+    "match": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requirement_id", "disposition", "inverse_statement_ids", "rationale"],
+      "properties": {
+        "requirement_id": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" },
+        "disposition": { "enum": ["equivalent", "missing", "conflict"] },
+        "inverse_statement_ids": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/stringArray" },
+        "rationale": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/text" }
+      }
+    },
+    "modelOutput": {
+      "$id": "urn:literate-ai:schema:v1:semantic-comparison-model-output",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "reference_graph_identity", "inverse_draft_identity", "matches"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:semantic-comparison-model-output" },
+        "reference_graph_identity": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/identity" },
+        "inverse_draft_identity": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/identity" },
+        "matches": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/match" } }
+      }
+    },
+    "result": {
+      "$id": "urn:literate-ai:schema:v1:semantic-comparison-result",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "reference_graph_identity", "inverse_draft_identity", "comparator_identity", "matches", "complete"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:semantic-comparison-result" },
+        "reference_graph_identity": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/identity" },
+        "inverse_draft_identity": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/identity" },
+        "comparator_identity": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/identity" },
+        "matches": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:semantic-comparison-contracts#/$defs/match" } },
+        "complete": { "type": "boolean" }
+      }
+    }
+  }
+}

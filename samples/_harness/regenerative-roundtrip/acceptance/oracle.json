@@ -1,0 +1,54 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:553160e940695a9697ad5c4b3249f8f662579344db12df9c069ccf5c68eb3105",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "warehouse": "North Hub / West",
+        "manifest_id": "north-hub-west-2-574",
+        "dominant_sku": "A-1",
+        "line_count": 2,
+        "gross_cents": 620,
+        "discount_cents": 46,
+        "net_cents": 574,
+        "lines": [
+          {"sku": "A-1", "quantity": 3, "subtotal_cents": 380},
+          {"sku": "B-2", "quantity": 3, "subtotal_cents": 240}
+        ]
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "warehouse": "Depot_42",
+        "manifest_id": "depot-42-2-387",
+        "dominant_sku": "A-0",
+        "line_count": 2,
+        "gross_cents": 400,
+        "discount_cents": 13,
+        "net_cents": 387,
+        "lines": [
+          {"sku": "A-0", "quantity": 2, "subtotal_cents": 202},
+          {"sku": "Z-9", "quantity": 2, "subtotal_cents": 198}
+        ]
+      }
+    },
+    {
+      "case_id": "unicode-ordering",
+      "expected_result": {
+        "warehouse": "Unicode Depot",
+        "manifest_id": "unicode-depot-2-24",
+        "dominant_sku": "\uE000",
+        "line_count": 2,
+        "gross_cents": 24,
+        "discount_cents": 0,
+        "net_cents": 24,
+        "lines": [
+          {"sku": "\uE000", "quantity": 2, "subtotal_cents": 14},
+          {"sku": "😀", "quantity": 2, "subtotal_cents": 10}
+        ]
+      }
+    }
+  ]
+}

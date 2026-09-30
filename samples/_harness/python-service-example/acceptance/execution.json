@@ -1,0 +1,46 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.sample-host-json-probe",
+  "scenario_id": "sample-host-json-probe.first-page-of-three-clusters-is-two-items",
+  "entrypoint": "service",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "clusters": [
+            {"cluster_id": "alpha", "health": "healthy"},
+            {"cluster_id": "beta", "health": "degraded"},
+            {"cluster_id": "gamma", "health": "healthy"}
+          ],
+          "page_size": 2,
+          "unknown_cluster_id": "missing"
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "clusters": [
+            {"cluster_id": "west-1", "health": "healthy"},
+            {"cluster_id": "west-2", "health": "unhealthy"}
+          ],
+          "page_size": 1,
+          "unknown_cluster_id": "east-9"
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "has_more": "boolean",
+    "item_count": "integer",
+    "next_cursor": "null|string",
+    "unknown_cluster_status": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

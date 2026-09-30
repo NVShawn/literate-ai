@@ -1,0 +1,22 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:d33646874776e8f231782b56f987b0f02859d8117d91e4f147665b558960400c",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "discount_cents": 125,
+        "subtotal_cents": 999,
+        "total_cents": 874
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "discount_cents": 410,
+        "subtotal_cents": 4095,
+        "total_cents": 3685
+      }
+    }
+  ]
+}

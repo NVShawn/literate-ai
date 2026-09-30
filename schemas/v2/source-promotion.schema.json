@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:source-promotion-contracts",
+  "$ref": "urn:literate-ai:schema:v2:generation-input-audit",
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))(?!.*\\\\).+$"
+    },
+    "auditEntry": {
+      "$id": "urn:literate-ai:schema:v2:generation-input-audit-entry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "kind",
+        "source_root_label",
+        "source_path",
+        "target_path",
+        "content_identity",
+        "byte_count"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:generation-input-audit-entry"
+        },
+        "kind": {
+          "enum": [
+            "specification",
+            "component-intent",
+            "reviewed-flavor",
+            "forward-skill",
+            "workflow",
+            "routing-policy",
+            "project-configuration"
+          ]
+        },
+        "source_root_label": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$"
+        },
+        "source_path": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/path"
+        },
+        "target_path": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/path"
+        },
+        "content_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "audit": {
+      "$id": "urn:literate-ai:schema:v2:generation-input-audit",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "entries", "materialized_tree_identity"],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:generation-input-audit"
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:generation-input-audit-entry"
+          }
+        },
+        "materialized_tree_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        }
+      }
+    },
+    "provenance": {
+      "$id": "urn:literate-ai:schema:v2:source-promotion-provenance",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "source_snapshot_identity",
+        "specification_set_identity",
+        "review_identity",
+        "component_graph_identity",
+        "translation_identity",
+        "generation_input_audit_references"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:source-promotion-provenance"
+        },
+        "source_snapshot_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "specification_set_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "review_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "component_graph_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "translation_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+            },
+            {"type": "null"}
+          ]
+        },
+        "generation_input_audit_references": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "identity", "path"],
+            "properties": {
+              "kind": {"const": "generation-input-audit"},
+              "identity": {
+                "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+              },
+              "path": {
+                "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/path"
+              }
+            }
+          }
+        }
+      }
+    },
+    "provenanceV3": {
+      "$id": "urn:literate-ai:schema:v3:source-promotion-provenance",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "source_snapshot_identity",
+        "specification_set_identity",
+        "review_identity",
+        "component_graph_identity",
+        "translation_identity",
+        "inverse_evidence_reference",
+        "generation_input_audit_references"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v3:source-promotion-provenance"
+        },
+        "source_snapshot_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "specification_set_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "review_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "component_graph_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "translation_identity": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity" },
+            { "type": "null" }
+          ]
+        },
+        "inverse_evidence_reference": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["kind", "identity", "path"],
+              "properties": {
+                "kind": { "const": "inverse-evidence-custody" },
+                "identity": {
+                  "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+                },
+                "path": { "const": "inverse-evidence.json" }
+              }
+            }
+          ]
+        },
+        "generation_input_audit_references": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "identity", "path"],
+            "properties": {
+              "kind": { "const": "generation-input-audit" },
+              "identity": {
+                "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+              },
+              "path": {
+                "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/path"
+              }
+            }
+          }
+        }
+      }
+    },
+    "migration": {
+      "$id": "urn:literate-ai:schema:v2:legacy-source-promotion-journal-migration",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "journal_identity",
+        "destination_relative_path",
+        "byte_count",
+        "legacy_retired"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:legacy-source-promotion-journal-migration"
+        },
+        "journal_identity": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/identity"
+        },
+        "destination_relative_path": {
+          "$ref": "urn:literate-ai:schema:v2:source-promotion-contracts#/$defs/path"
+        },
+        "byte_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "legacy_retired": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

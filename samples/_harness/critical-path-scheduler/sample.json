@@ -1,0 +1,30 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "59d838de49f2241a442aeeff7691c4d22877e8c9ab8ad51cdc2654f94ec6ae29",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:d027a5d4ade1e8bd5d68cc339d9176bc75417cca9ba86480e6c218ce4d071d2a",
+  "execution_interface_identity": "sha256:7e58ecb48f1cc4dd58b5441e5330489dc169d5cfe86c6ea40ad566d58f519d1f",
+  "expected_assertions": [
+    "accepts-shuffled-forward-reference-dag",
+    "computes-exact-forward-and-backward-passes",
+    "orders-ready-tasks-by-ascii-id",
+    "selects-stable-critical-path-on-ties"
+  ],
+  "expected_failures": [
+    "duplicate or unknown dependency",
+    "cyclic dependency graph",
+    "duration outside portable bounds"
+  ],
+  "proof_level": "executed",
+  "sample_id": "critical-path-scheduler",
+  "scenario": "critical-path-scheduler",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:c6665366bbaa625dac8717e7ec5357f6229999edeb1abbbe441b6b7f5618ba61"
+}

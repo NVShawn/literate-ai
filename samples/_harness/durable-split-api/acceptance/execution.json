@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.deterministic-boundary-description",
+  "scenario_id": "deterministic-boundary-description.api-identifies-its-least-privilege-role",
+  "entrypoint": "api",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [{"action": "capabilities"}]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [{"action": "describe"}]
+    }
+  ],
+  "result_shape": {
+    "cache_mode": "string",
+    "request": "string",
+    "role": "string",
+    "upstream_access": "boolean"
+  },
+  "target": {
+    "build.system": "flavor://literate-ai/build-make",
+    "platform.os": "host",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-python"]
+  },
+  "dependencies": ["literate-ai.durable-snapshot-read"]
+}

@@ -1,0 +1,16 @@
+{
+  "_comment": "Prototype declared-trace sidecar for docs/history/roadmap/0.6.0-scxml-provider-design.md's next-action step 2/3. Candidate format: a SEPARATE file alongside the .scxml document (not inline in authoring Markdown, not an XML processing instruction inside the .scxml itself -- see the design doc's updated Maturity section for the reasoning). JSON chosen over YAML for this prototype only to avoid a new stdlib-adjacent dependency (PyYAML is not a literate-ai dependency today); a real implementation could reasonably choose YAML for authoring ergonomics -- that is a separate, smaller decision from the placement decision this file is prototyping.",
+  "scxml": "media_player.scxml",
+  "traces": [
+    {
+      "name": "power-on, adjust playback and volume independently (parallel), power-off, power-on again (shallow history re-entry)",
+      "steps": [
+        {"event": "power", "expect": ["playing", "unmuted"]},
+        {"event": "pause", "expect": ["paused", "unmuted"]},
+        {"event": "mute", "expect": ["paused", "muted"]},
+        {"event": "power", "expect": ["off"]},
+        {"event": "power", "expect": ["paused", "muted"]}
+      ]
+    }
+  ]
+}

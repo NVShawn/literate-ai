@@ -1,0 +1,61 @@
+{
+  "schema": "urn:literate-ai:schema:v2:standard-lifecycle-policy",
+  "policy_id": "literate-ai-standard",
+  "policy_version": "1.0.0",
+  "phases": [
+    "compose-and-plan",
+    "resolve-source-cache",
+    "generate-source-and-tests-or-use-cache",
+    "derive-source-intelligence",
+    "validate-classify-and-authorize",
+    "resolve-and-prepare-dependencies",
+    "native-build",
+    "verify-resolved-sbom",
+    "run-generated-tests",
+    "execute-application",
+    "independent-acceptance",
+    "admit-workspace",
+    "write-candidate-receipt"
+  ],
+  "required_evidence_kinds": [
+    "acceptance-result",
+    "build-result",
+    "generation-provenance",
+    "lifecycle-command",
+    "lifecycle-plan",
+    "lifecycle-request",
+    "observation-result",
+    "resolved-sbom",
+    "security-scan-report",
+    "source-cache-decision",
+    "source-cache-lifecycle",
+    "source-intelligence",
+    "source-sbom",
+    "test-report",
+    "test-runner",
+    "workspace-admission"
+  ],
+  "extension_evidence": [
+    {
+      "schema": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence",
+      "phase": "package-artifacts",
+      "evidence_kind": "package-result"
+    },
+    {
+      "schema": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence",
+      "phase": "publish-source-cache",
+      "evidence_kind": "source-cache-publication-result"
+    },
+    {
+      "schema": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence",
+      "phase": "publish-artifacts",
+      "evidence_kind": "artifact-publication-result"
+    },
+    {
+      "schema": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence",
+      "phase": "deploy",
+      "evidence_kind": "deployment-result"
+    }
+  ],
+  "minimum_test_count": 1
+}

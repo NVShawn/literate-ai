@@ -1,0 +1,41 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.execute-matrix-multiplication-through-cupy-cuda",
+  "scenario_id": "execute-matrix-multiplication-through-cupy-cuda.the-generated-python-cuda-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "rectangular",
+      "arguments": [
+        {
+          "left": [[2, -1, 3], [0, 4, 5]],
+          "right": [[1, 2], [3, -2], [4, 1]]
+        }
+      ]
+    },
+    {
+      "case_id": "signed",
+      "arguments": [
+        {
+          "left": [[-3, 2], [7, 1], [0, -4]],
+          "right": [[5, -1, 2], [3, 6, -2]]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "backend": "string",
+    "device_executed": "boolean",
+    "rows": "integer",
+    "columns": "integer",
+    "values": [["integer"]],
+    "checksum": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "accelerator": "nvidia-cuda",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-python"],
+    "build.system": "flavor://literate-ai/build-make"
+  },
+  "dependencies": []
+}

@@ -1,0 +1,27 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "85663b3afde708f03ebad1dd5a5719d61f6e52ab9e20728326232e46682f617f",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:6f126a56fefbc59923db5279e4b15e7d87a6024ff9055da398ccf7e47dc4a998",
+  "execution_interface_identity": "sha256:0285cf3d9dfa09aae1cab4d1cd6d8ed2aec8dc1c7985546962e9fb35ea140e6c",
+  "expected_assertions": [
+    "cache-starts-empty",
+    "object-faults-in-by-identity",
+    "cache-and-workspace-survive-restart"
+  ],
+  "expected_failures": [
+    "unresolved cache identity or broken workspace reference"
+  ],
+  "proof_level": "executed",
+  "sample_id": "empty-cache-restart",
+  "scenario": "empty-cache-restart",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:96f17eddc4a26002baf4663ad94db3d7e1037c6f320936a35e1350aa10004467"
+}

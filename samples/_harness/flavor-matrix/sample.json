@@ -1,0 +1,32 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "9dde61aa4eaf79b9328612e206b3f14a0301609090bf4ca2ae39b7dd57d38935",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:54e892ab9266e5e3b4a79b7d46bf14fe24701ff85d4af90c83d17216279f08bf",
+  "execution_interface_identity": "sha256:dadb251d990bf821dcfde891407b64079516828a3db31ae9a63da298f5242fb3",
+  "expected_assertions": [
+    "windows-linux-resolve-independently",
+    "cpu-cuda-resolve-independently",
+    "python-rust-resolve-independently",
+    "flavor-conflict-is-explicit",
+    "effective-revision-caches-are-isolated",
+    "flavor-publication-import-roundtrips"
+  ],
+  "expected_failures": [
+    "Windows and CUDA conflict",
+    "missing exactly-one Flavor",
+    "ambiguous Flavor candidate"
+  ],
+  "proof_level": "executed",
+  "sample_id": "flavor-matrix",
+  "scenario": "flavor-matrix",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:1f21425e018e32e3bbacbd9cead5c877f8c74eddb7150d51285b8493c450cc3d"
+}

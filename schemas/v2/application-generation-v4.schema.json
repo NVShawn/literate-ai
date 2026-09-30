@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v4:application-generation-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:component-source-evidence-readiness" },
+    { "$ref": "urn:literate-ai:schema:v3:generation-context-binding" },
+    { "$ref": "urn:literate-ai:schema:v4:generation-provenance" }
+  ],
+  "$defs": {
+    "generationProvenance": {
+      "$id": "urn:literate-ai:schema:v4:generation-provenance",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "run_input_identity",
+        "component_lock_identity",
+        "root_revision_identity",
+        "generated_component_revision_identity",
+        "component_generation_plan_identity",
+        "generation_key_identity",
+        "context_manifest_identity",
+        "prompt_identity",
+        "generation_recipe_identity",
+        "workspace_allocation_identity",
+        "build_request_declaration_identity",
+        "realized_build_request_identity",
+        "readiness_identity",
+        "route_decision_digests",
+        "model_stage_outputs",
+        "lifecycle_outputs",
+        "accepted_tree_identity"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v4:generation-provenance" },
+        "run_input_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "root_revision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generated_component_revision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "component_generation_plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_key_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "context_manifest_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prompt_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_recipe_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "workspace_allocation_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "build_request_declaration_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "realized_build_request_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "readiness_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "route_decision_digests": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+        },
+        "model_stage_outputs": {
+          "type": "array",
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "lifecycle_outputs": {
+          "type": "array",
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "accepted_tree_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    }
+  }
+}

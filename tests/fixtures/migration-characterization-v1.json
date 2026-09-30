@@ -1,0 +1,537 @@
+{
+  "schema": "literate-ai/test-migration-characterization@1",
+  "status": "observed-current-behavior-not-endorsed-architecture",
+  "capture": {
+    "source_revision": "8e4ebdb806ae3aa53287853e4dbed7453fbd9cb4",
+    "source_tree": "99dd662d6cfbae8967b39885e51f71784594aae7",
+    "tool": {
+      "identity": "sha256:286baa72bf49ec25c1cab56f1f97b87edb0ed2d37bbae3958c0f4a90c64eb319",
+      "descriptor": {
+        "schema": "literate-ai/migration-characterization-capture-tool@1",
+        "name": "wave-0-migration-characterization",
+        "version": "1.0.0",
+        "protocol": "canonical-json-observations-v1",
+        "surfaces": [
+          "sample-component-manifests",
+          "representative-component-composition",
+          "sample-generation-recipes",
+          "cache-sbom-receipt-wires",
+          "sample-runner-ast"
+        ]
+      }
+    }
+  },
+  "observations_identity": "sha256:08fcf606292b40b975584ee1d1bbb6180df833e7817d8d5a51cecaa68d399c4f",
+  "complete_wire_fixture": {
+    "path": "tests/fixtures/migration-characterization-pre-fnd-002-wires.json",
+    "identity": "sha256:76978c3783fd77391484ea77dbcf117776fcde1a7978c5275b8ea8dcfd14614c"
+  },
+  "characterization_identity": "sha256:6fcbe39685ba89b31b66da22385af967146590d82b8628783dac4f262de0caf4",
+  "observations": {
+    "sample_manifests": {
+      "paths": [
+        "samples/components/invoice-service/component.json",
+        "samples/components/money-calculation/component.json",
+        "samples/critical-path-scheduler/component.json",
+        "samples/dependency-planner/component.json",
+        "samples/empty-cache-restart/component.json",
+        "samples/flavor-matrix/component.json",
+        "samples/full-stack-rust-js/component.json",
+        "samples/generated-library/component.json",
+        "samples/hello-component/component.json",
+        "samples/javascript-ledger-workbench/component.json",
+        "samples/model-routing/component.json",
+        "samples/multi-repository-component/component.json",
+        "samples/publication-import/component.json",
+        "samples/regenerative-roundtrip/component.json",
+        "samples/security-policies/component.json",
+        "samples/self-hosting/component.json",
+        "samples/service-stack/component.json"
+      ],
+      "content_identities": [
+        "sha256:d4686483c25b6f2c087585e4229419e8a03366c64ed2c50ae03f67ea8f308dd4",
+        "sha256:b5f099cfecd21517c629878d946bf9e1fe2c04e1bd1c0089893100547ac70a37",
+        "sha256:198450c543f853c565c54c5c0537edf2bda4f9865d31895258eb11ed55334040",
+        "sha256:035f950fee7b849b873fd26263060c35b99acf2e6d876e4b29dbc4185d45985f",
+        "sha256:d625842a27aff977d21b952e84b67d441950d9b7b484a20e4c3a11da26c016bf",
+        "sha256:95a332f9ad61776464cb7cb1fc7c60634dea23a0357a643d99fbab6390620249",
+        "sha256:75c02db9e28f5f00611b33d226c77ad3a789633eb3e153987503a60d109044fc",
+        "sha256:1581b14ba97537b1bcd218bf7008787674c7054a862202f055e52ca4bd12743e",
+        "sha256:121c88611068719da381305012352a2be16df77f59ce74be3c39ddbd44ac89ef",
+        "sha256:3c3ba07a7594a9d48c016569013fcff6aee6e2faeee7a5ece19978d8c51fe398",
+        "sha256:b23a81a58a87a533935c2f89d55b7ec8f553a08da8de2597de70cbab855b5f1e",
+        "sha256:264e691d7888f24e778ba293fb76b59478604cdc578db07dd6e0d0a1a781a64b",
+        "sha256:896b84a401a1f170db47bf93e5c695d57b51e33f467c99a42e2ef799e6fc5040",
+        "sha256:ba24f9c7540c6a8ba88ba99f67fbaefbf7396a03ba87a48dae15b9c470db23ee",
+        "sha256:f9e87ce553124c8df4ced70caf5eb325e0e2878af90d552d007a99488cf4356c",
+        "sha256:ad7eaefbc8687bdc7fe0323626d053cd8677968867b65a03265cdc7af6f4de88",
+        "sha256:e7d13ae336ffff04e9a45887e02edd09542011a57c1fad93c0c08d08d29d9c44"
+      ],
+      "top_level_fields": [
+        "acceptance_contracts",
+        "authoring_inputs",
+        "coordinate",
+        "description",
+        "display_name",
+        "entrypoints",
+        "flavor_slots",
+        "profiles",
+        "provides",
+        "requires",
+        "routing_policy",
+        "sample",
+        "schema",
+        "specification_provider",
+        "specification_roots",
+        "version",
+        "workflow_definition"
+      ],
+      "authored_intent_fields": [
+        "coordinate",
+        "description",
+        "display_name",
+        "entrypoints",
+        "flavor_slots",
+        "profiles",
+        "provides",
+        "requires",
+        "sample",
+        "specification_provider",
+        "specification_roots",
+        "version"
+      ],
+      "embedded_resolved_identity_fields": [
+        "acceptance_contracts",
+        "authoring_inputs",
+        "routing_policy",
+        "workflow_definition"
+      ],
+      "envelope_fields": [
+        "schema"
+      ]
+    },
+    "sample_component_graph": {
+      "sample": "service-stack",
+      "composition_identity": "sha256:f6f8acd38bcf3115042d525f4553a77baf8c15029a4a8e6214c7cd4eb85a8dee",
+      "root": "component://samples/service-stack",
+      "revision_order": [
+        "component://samples/service-stack",
+        "component://samples/invoice-service",
+        "component://samples/money-calculation"
+      ],
+      "revision_identities": {
+        "component://samples/invoice-service": "sha256:ecf50a9b51cd18133291e9ac4e0185bc7e64a294ea3c0b8e0720150bee853d7c",
+        "component://samples/money-calculation": "sha256:66771498befae503ec5cec80c8319219551162753ebccb0a11c550d5363037c2",
+        "component://samples/service-stack": "sha256:8194aabbf0c00a443b8aa857a063189e76f26468eb919fb8ced12c58b0538ceb"
+      },
+      "decisions": [
+        {
+          "decision_identity": "sha256:96518db913a1c84ddea1f7fddd08e27811aef81e48009bdf034b8e35db7deba0",
+          "source": "component://samples/service-stack",
+          "requirement_id": "invoice-service",
+          "capability": "sample.invoice-service",
+          "dependency_kind": "runtime",
+          "optional": false,
+          "policy_identity": "sha256:b35017e10f149b32b84b9de4b25f8e5c8d81a1301c4b54e6bc37d9269f084b69",
+          "candidates": [
+            {
+              "coordinate": "component://samples/invoice-service",
+              "revision_identity": "sha256:ecf50a9b51cd18133291e9ac4e0185bc7e64a294ea3c0b8e0720150bee853d7c",
+              "eligible": true,
+              "reasons": [
+                "eligible"
+              ]
+            }
+          ],
+          "selected": "component://samples/invoice-service"
+        },
+        {
+          "decision_identity": "sha256:f5ef3ed46c9b9e4200d3d9b5e94ef5c48e36706cca28b296d72cab921db03e33",
+          "source": "component://samples/invoice-service",
+          "requirement_id": "money-calculation",
+          "capability": "sample.money-calculation",
+          "dependency_kind": "runtime",
+          "optional": false,
+          "policy_identity": "sha256:b35017e10f149b32b84b9de4b25f8e5c8d81a1301c4b54e6bc37d9269f084b69",
+          "candidates": [
+            {
+              "coordinate": "component://samples/money-calculation",
+              "revision_identity": "sha256:66771498befae503ec5cec80c8319219551162753ebccb0a11c550d5363037c2",
+              "eligible": true,
+              "reasons": [
+                "eligible"
+              ]
+            }
+          ],
+          "selected": "component://samples/money-calculation"
+        }
+      ],
+      "edges": [
+        {
+          "source": "component://samples/service-stack",
+          "target": "component://samples/invoice-service",
+          "requirement_id": "invoice-service",
+          "capability": "sample.invoice-service",
+          "decision_identity": "sha256:96518db913a1c84ddea1f7fddd08e27811aef81e48009bdf034b8e35db7deba0"
+        },
+        {
+          "source": "component://samples/invoice-service",
+          "target": "component://samples/money-calculation",
+          "requirement_id": "money-calculation",
+          "capability": "sample.money-calculation",
+          "decision_identity": "sha256:f5ef3ed46c9b9e4200d3d9b5e94ef5c48e36706cca28b296d72cab921db03e33"
+        }
+      ]
+    },
+    "sample_recipe_plans": {
+      "variant_keys": [
+        "critical-path-scheduler|python",
+        "critical-path-scheduler|cpp",
+        "dependency-planner|rust",
+        "empty-cache-restart|python",
+        "empty-cache-restart|cpp",
+        "flavor-matrix|python",
+        "flavor-matrix|cpp",
+        "full-stack-rust-js|rust-javascript-full-stack",
+        "generated-library|python",
+        "generated-library|cpp",
+        "hello-component|python",
+        "hello-component|cpp",
+        "javascript-ledger-workbench|javascript",
+        "model-routing|python",
+        "model-routing|cpp",
+        "multi-repository-component|python",
+        "multi-repository-component|cpp",
+        "publication-import|python",
+        "publication-import|cpp",
+        "regenerative-roundtrip|python",
+        "regenerative-roundtrip|cpp",
+        "regenerative-roundtrip|rust",
+        "regenerative-roundtrip|javascript",
+        "security-policies|python",
+        "security-policies|cpp",
+        "self-hosting|python",
+        "self-hosting|cpp",
+        "service-stack|python",
+        "service-stack|cpp"
+      ],
+      "platforms": {
+        "linux": {
+          "plan_set_identity": "sha256:0afdc49675bf34c3f8e7880dea5bac3c89b4fedcea1237fde4b5219878f5a5c8",
+          "representative_recipe_identities": {
+            "full-stack-rust-js|rust-javascript-full-stack": "sha256:444a95e603163af91dcb0bba8ce3c7a5f7d31a2342aa8549cd531eb9568e4142",
+            "hello-component|python": "sha256:13b6190f753379127810b41704e2a905b2daa4d62007bc022a5f1c8074e28228",
+            "regenerative-roundtrip|cpp": "sha256:0677a58a61c70fc256c4ce9cd911ded3399ce945ea15ffced4415a456f24fb8f",
+            "regenerative-roundtrip|javascript": "sha256:bc97d4c5261c14d3406f8c110d33ef3f303ebe0ae5a044e38f02cdca2f8c43d8",
+            "regenerative-roundtrip|python": "sha256:14229c911858ab6a7c11bddd7dfb0311edfaa84b5f7f95d6844e73585baf390a",
+            "regenerative-roundtrip|rust": "sha256:c6972f3039a1aa2d38252149a1e961899d17b5126c1f2e021e8e3fdabc04a864",
+            "service-stack|cpp": "sha256:eb97b14ec4dc9f6de99f6322e2379e49926c3ae46797d402074d277c783afbc6",
+            "service-stack|python": "sha256:bf0b7d2d8eab59ae544faaa6d27a9af3a8e8a98ee1a94f6d668cc1cad82e10c6"
+          }
+        },
+        "macos": {
+          "plan_set_identity": "sha256:05370a1191a053ad334d8cd8d5a6e89abb30a8e2445827d3aa0475f99d8aafaa",
+          "representative_recipe_identities": {
+            "full-stack-rust-js|rust-javascript-full-stack": "sha256:9c17e436aca3d9bf9519785dbe8fb269c67df78a386742430ec7417aa35f63cb",
+            "hello-component|python": "sha256:96fedcd996752d25cb89a6b9dd43bd3782c2132018266f0531d657aa36d9e5a9",
+            "regenerative-roundtrip|cpp": "sha256:10f50ae4d856f1af5a2d014919bfda049fd57997fe17c1f7b2e79806244a7c80",
+            "regenerative-roundtrip|javascript": "sha256:5d38bc80251eebe42ef421765238070090f13dad98f7657ed68e1e4de2ef27b0",
+            "regenerative-roundtrip|python": "sha256:f6e98be94049cd4eaf87c890c472919a7d98a3dfc1ec0719c7052f5aa0d392eb",
+            "regenerative-roundtrip|rust": "sha256:cd2e9fc9786c91536cc3cd3cf524de664ab715139bb8c8ef48a84b641a8e47ee",
+            "service-stack|cpp": "sha256:76bad0bfcf30a18bd39146f390999ab106fd54acbf3bbeb28742a6dd58e030ed",
+            "service-stack|python": "sha256:6b0fa15d2f3d11d4efa9f584ac388bf93cbf5f7ea51134adf8a2beb24438f590"
+          }
+        },
+        "windows": {
+          "plan_set_identity": "sha256:1325f60c290386b158997f1821de97ea8e86bd87e8ef26ab5da2c3e00d7f5f80",
+          "representative_recipe_identities": {
+            "full-stack-rust-js|rust-javascript-full-stack": "sha256:cb1991c81151512f25b804b57037bcf672ed958a15faa96b6487606a7c348743",
+            "hello-component|python": "sha256:6299e9d950457926b24d6921047381582729caeffb72f0eff90f16d9480d5238",
+            "regenerative-roundtrip|cpp": "sha256:ebb0ced6f1346b37e7dc6ecaaa4624d8106b935e7d4f1ce647bf8d1d3b65082a",
+            "regenerative-roundtrip|javascript": "sha256:e0fb2e1d85daf6240e4e263655fd7b00d8815f2ba2548fe6fc5edf97495407b2",
+            "regenerative-roundtrip|python": "sha256:2735bf53df951ebfa9726205bb39a94639213d2c2eaf7f4b3338cf5a8672da7e",
+            "regenerative-roundtrip|rust": "sha256:6ef40f6327384e29a2fadef80caf7acddb4cf9902c2c681911c6dfad8e7db3f8",
+            "service-stack|cpp": "sha256:69c174d86f4bc7c5619672723feb9d102949f2da390d438c6670e3c9a99dcde5",
+            "service-stack|python": "sha256:5f81134a78ca34489352b88cdbb9cd1a4437fab5a2da64b8e05c4ecb0b3858a3"
+          }
+        }
+      }
+    },
+    "wire_shapes": {
+      "accepted_source_derivation": {
+        "schema": "urn:literate-ai:schema:v1:accepted-source-derivation",
+        "keys": [
+          "acceptance_identity",
+          "build_evidence_identity",
+          "cache_key",
+          "generated_test_suite_identity",
+          "managed_sbom_graph_identity",
+          "provenance_identity",
+          "resolved_sbom_binding",
+          "resolved_sbom_identity",
+          "schema",
+          "source_index_identity",
+          "source_sbom_binding",
+          "source_sbom_identity",
+          "source_tree_identity",
+          "test_evidence_identity"
+        ]
+      },
+      "bundle_manifest": {
+        "schema_version": 2,
+        "keys": [
+          "authorization_digest",
+          "component_ref",
+          "component_revision_digest",
+          "dependencies",
+          "effective_revision_digest",
+          "flavor_set_digest",
+          "kind",
+          "provenance",
+          "roots",
+          "schema_version",
+          "toolchain_digest"
+        ]
+      },
+      "cyclonedx_bom_binding": {
+        "schema": "urn:literate-ai:schema:v1:cyclonedx-bom-binding",
+        "keys": [
+          "bom_identity",
+          "component_count",
+          "composition_identity",
+          "edge_count",
+          "graph_identity",
+          "lifecycle",
+          "managed_graph_identity",
+          "root_ref",
+          "schema",
+          "source_bom_identity"
+        ]
+      },
+      "cyclonedx_source_bom": {
+        "constants": {
+          "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+          "bomFormat": "CycloneDX",
+          "lifecycle_phase": "pre-build",
+          "specVersion": "1.7",
+          "version": 1
+        },
+        "keys": [
+          "$schema",
+          "bomFormat",
+          "components",
+          "compositions",
+          "dependencies",
+          "metadata",
+          "specVersion",
+          "version"
+        ],
+        "metadata_keys": [
+          "component",
+          "lifecycles",
+          "properties"
+        ],
+        "metadata_component_keys": [
+          "bom-ref",
+          "isExternal",
+          "name",
+          "properties",
+          "type",
+          "version"
+        ],
+        "dependency_entry_keys": [
+          "dependsOn",
+          "ref"
+        ],
+        "composition_entry_keys": [
+          "aggregate",
+          "dependencies"
+        ]
+      },
+      "managed_sbom_graph": {
+        "schema": "urn:literate-ai:schema:v1:cyclonedx-managed-graph",
+        "keys": [
+          "components",
+          "composition_identity",
+          "edges",
+          "root_ref",
+          "schema"
+        ]
+      },
+      "project_test_receipt": {
+        "schema": "urn:literate-ai:schema:v1:project-test-receipt",
+        "keys": [
+          "evidence",
+          "project",
+          "project_revision",
+          "result",
+          "schema",
+          "subject",
+          "suite",
+          "tests"
+        ]
+      },
+      "project_test_receipt_finalized_candidate": {
+        "schema": "urn:literate-ai:schema:v1:project-test-receipt-finalized-candidate",
+        "keys": [
+          "finalization_boundary",
+          "lifecycle_command_identity",
+          "lifecycle_request_identity",
+          "provisional_identity",
+          "receipt",
+          "receipt_identity",
+          "schema",
+          "source_cache_control_identity",
+          "source_cache_decision_identity",
+          "source_cache_lifecycle_identity"
+        ]
+      },
+      "project_test_receipt_provisional": {
+        "schema": "urn:literate-ai:schema:v1:project-test-receipt-provisional",
+        "keys": [
+          "lifecycle_command_identity",
+          "lifecycle_request_identity",
+          "receipt",
+          "receipt_identity",
+          "schema",
+          "source_cache_control_identity"
+        ]
+      },
+      "source_derivation_cache_key": {
+        "schema": "urn:literate-ai:schema:v1:source-derivation-cache-key",
+        "keys": [
+          "coding_cli_tool_binding_identity",
+          "execution_plan_identity",
+          "model_binding",
+          "recipe_identity",
+          "request_identity",
+          "schema"
+        ]
+      }
+    },
+    "sample_runner": {
+      "private_framework_imports": [
+        "literate_ai.cli.generation:_component_catalog",
+        "literate_ai.cli.generation:_dependency_documents"
+      ],
+      "orchestrator_ports": [
+        "component_composer",
+        "flavor_resolver",
+        "readiness_provider",
+        "model_provider",
+        "validator",
+        "classifier",
+        "build_authorizer",
+        "builder",
+        "dependency_resolver",
+        "generated_test_runner",
+        "acceptance_runner",
+        "workspace",
+        "event_store"
+      ],
+      "execute_method": "execute",
+      "model_stage_order": [
+        "plan",
+        "generate"
+      ],
+      "lifecycle_steps": [
+        "validate",
+        "classify",
+        "authorize-build",
+        "build",
+        "resolve-dependencies",
+        "test-generated",
+        "verify-independent",
+        "prepare-tree",
+        "commit-tree"
+      ]
+    },
+    "identity_migration": {
+      "changed_roots": [
+        "component-definition-wire-layout",
+        "lifecycle-driver-contract"
+      ],
+      "dependency_graph": {
+        "accepted-source-derivation-identity": [
+          "managed-sbom-graph-identity",
+          "resolved-sbom-identity",
+          "source-derivation-cache-key-identity",
+          "source-sbom-identity"
+        ],
+        "bundle-manifest-bytes": [
+          "component-revision-identity",
+          "effective-revision-identity",
+          "flavor-set-lock-identity"
+        ],
+        "component-composition-identity": [
+          "component-revision-identity",
+          "requirement-resolution-decision-identity"
+        ],
+        "component-definition-identity": [
+          "component-definition-wire-layout"
+        ],
+        "component-revision-identity": [
+          "component-definition-identity"
+        ],
+        "effective-revision-identity": [
+          "component-revision-identity",
+          "flavor-set-lock-identity"
+        ],
+        "flavor-set-lock-identity": [
+          "component-revision-identity"
+        ],
+        "generation-recipe-identity": [
+          "component-composition-identity",
+          "effective-revision-identity",
+          "flavor-set-lock-identity"
+        ],
+        "managed-sbom-graph-identity": [
+          "component-composition-identity"
+        ],
+        "project-test-receipt-wire-and-identity": [
+          "lifecycle-driver-contract",
+          "sample-test-runner-identity",
+          "source-derivation-cache-key-identity"
+        ],
+        "requirement-resolution-decision-identity": [
+          "component-revision-identity"
+        ],
+        "resolved-sbom-identity": [
+          "source-sbom-identity"
+        ],
+        "sample-test-runner-identity": [
+          "lifecycle-driver-contract"
+        ],
+        "source-derivation-cache-key-identity": [
+          "generation-recipe-identity"
+        ],
+        "source-sbom-identity": [
+          "managed-sbom-graph-identity"
+        ]
+      },
+      "cannot_preserve_exactly": [
+        "accepted-source-derivation-identity",
+        "bundle-manifest-bytes",
+        "component-composition-identity",
+        "component-definition-identity",
+        "component-revision-identity",
+        "effective-revision-identity",
+        "flavor-set-lock-identity",
+        "generation-recipe-identity",
+        "managed-sbom-graph-identity",
+        "project-test-receipt-wire-and-identity",
+        "requirement-resolution-decision-identity",
+        "resolved-sbom-identity",
+        "sample-test-runner-identity",
+        "source-derivation-cache-key-identity",
+        "source-sbom-identity"
+      ],
+      "preserve_semantics_or_content": [
+        "acceptance-contract-content-identity",
+        "capability-requirement-semantics",
+        "component-coordinate-and-version",
+        "specification-artifact-content-identity"
+      ]
+    }
+  }
+}

@@ -1,0 +1,330 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:evidence-contracts",
+  "description": "Closed evidence predicates carried by standard in-toto statements and DSSE envelopes. Typed decoding additionally checks ordered unique artifact names, exact matrix coverage and time ordering. Signatures do not prove context admission, retained bytes, complete transitive closure, or successful execution.",
+  "$defs": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$(?![\\s\\S])",
+      "maxLength": 128
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "algorithm",
+        "digest"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "algorithm": {
+          "const": "sha256"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      }
+    },
+    "blob": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "digest",
+        "size",
+        "media_type"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "media_type": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$(?![\\s\\S])"
+        }
+      }
+    },
+    "envelope": {
+      "allOf": [
+        {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        },
+        {
+          "properties": {
+            "media_type": {
+              "const": "application/vnd.dsse.envelope.v1+json"
+            }
+          }
+        }
+      ]
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "invocation_id",
+        "repository",
+        "revision",
+        "workflow",
+        "target",
+        "started_at",
+        "finished_at"
+      ],
+      "properties": {
+        "invocation_id": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/name"
+        },
+        "repository": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "^(?!\\s)[^\\u0000-\\u001f]*\\S$(?![\\s\\S])"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$(?![\\s\\S])",
+          "minLength": 40,
+          "maxLength": 64
+        },
+        "workflow": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/identity"
+        },
+        "target": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/identity"
+        },
+        "started_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "finished_at": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "blob"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/name"
+        },
+        "blob": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "blob"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/name"
+        },
+        "blob": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/envelope"
+        }
+      }
+    },
+    "derivation": {
+      "$id": "urn:literate-ai:schema:v2:evidence-derivation-run",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "context",
+        "subject",
+        "inputs",
+        "journal",
+        "status"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-derivation-run"
+        },
+        "context": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/context"
+        },
+        "subject": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/artifact"
+          }
+        },
+        "journal": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "incomplete"
+          ]
+        }
+      }
+    },
+    "platform": {
+      "$id": "urn:literate-ai:schema:v2:evidence-platform-run",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "context",
+        "subject",
+        "derivation",
+        "environment",
+        "checks",
+        "status"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-platform-run"
+        },
+        "context": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/context"
+        },
+        "subject": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        },
+        "derivation": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/envelope"
+        },
+        "environment": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        },
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/artifact"
+          }
+        },
+        "status": {
+          "enum": [
+            "passed",
+            "failed",
+            "incomplete"
+          ]
+        }
+      }
+    },
+    "matrix": {
+      "$id": "urn:literate-ai:schema:v2:evidence-matrix",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "context",
+        "subject",
+        "required_cells",
+        "cells"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-matrix"
+        },
+        "context": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/context"
+        },
+        "subject": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        },
+        "required_cells": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/name"
+          }
+        },
+        "cells": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/cell"
+          }
+        }
+      }
+    },
+    "locator": {
+      "$id": "urn:literate-ai:schema:v2:evidence-locator",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "store_id",
+        "subject",
+        "retained_until"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-locator"
+        },
+        "store_id": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/name"
+        },
+        "subject": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/blob"
+        },
+        "retained_until": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/derivation"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/platform"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/matrix"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-contracts#/$defs/locator"
+    }
+  ]
+}

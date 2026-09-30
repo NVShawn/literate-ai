@@ -1,0 +1,44 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.catalog-a-macos-launchagent",
+  "scenario_id": "catalog-a-macos-launchagent.the-compiled-macos-swift-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "menu-agent",
+      "arguments": [
+        {
+          "bundle_id": "com.example.litai",
+          "label": "com.example.litai.menu",
+          "arguments": ["/usr/local/bin/litai-menu", "--foreground"],
+          "run_at_load": true
+        }
+      ]
+    },
+    {
+      "case_id": "sync-agent",
+      "arguments": [
+        {
+          "bundle_id": "com.example.sync",
+          "label": "com.example.sync.hourly",
+          "arguments": ["/opt/example/bin/sync"],
+          "run_at_load": false
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "bundle_id": "string",
+    "label": "string",
+    "plist_file": "string",
+    "program": "string",
+    "argument_count": "integer",
+    "run_at_load": "boolean"
+  },
+  "target": {
+    "platform.os": "flavor://literate-ai/os-macos",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-swift"],
+    "packaging": "flavor://literate-ai/package-brew"
+  },
+  "dependencies": []
+}

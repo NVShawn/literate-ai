@@ -1,0 +1,26 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "ea0d9ff6abed819b5f75555a5a693e6f3069bf9336b9f0d5bf3ded0dbb5a6c8a",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:3c15497ba7638fb0569ef6b7c35169fb1b2fcf664e723e9073f71bf24718d156",
+  "execution_interface_identity": "sha256:18ba16be6c391fbe673b63a939b0e8963e182765ebc28ebee8d322dd6c112bd7",
+  "expected_assertions": [
+    "aggregate-identity-is-order-independent",
+    "member-identities-are-retained"
+  ],
+  "expected_failures": [
+    "duplicate aggregate member or mount"
+  ],
+  "proof_level": "executed",
+  "sample_id": "multi-repository-component",
+  "scenario": "multi-repository",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:8ab30774d1874733ff1b3878bc76d8a85338143c858f0657a9655cf7f4994a93"
+}

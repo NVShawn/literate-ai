@@ -1,0 +1,1100 @@
+{
+  "schema": "literate-ai/test-migration-characterization@3",
+  "status": "observed-post-lock-200-current-contracts",
+  "baseline_observations_identity": "sha256:a485b4cf246cc4abfe1c044c7be0b91c414a6ee50d21e1545ebcf5382a9af840",
+  "observations_identity": "sha256:4cae64639a234dfab4ea7e69e17cd52a59f51ffe4ac177f1af6b6760a9d9984c",
+  "observations": {
+    "sample_manifests": {
+      "paths": [
+        "samples/components/invoice-service/component.json",
+        "samples/components/money-calculation/component.json",
+        "samples/critical-path-scheduler/component.json",
+        "samples/dependency-planner/component.json",
+        "samples/empty-cache-restart/component.json",
+        "samples/flavor-matrix/component.json",
+        "samples/full-stack-rust-js/component.json",
+        "samples/generated-library/component.json",
+        "samples/hello-component/component.json",
+        "samples/javascript-ledger-workbench/component.json",
+        "samples/model-routing/component.json",
+        "samples/multi-repository-component/component.json",
+        "samples/publication-import/component.json",
+        "samples/regenerative-roundtrip/component.json",
+        "samples/security-policies/component.json",
+        "samples/self-hosting/component.json",
+        "samples/service-stack/component.json"
+      ],
+      "content_identities": [
+        "sha256:4b0f9440ca38fbe43f98e548b5a5ffbf15a3b0e2988056b932813b60c16cea97",
+        "sha256:cd4c83fe55eac01761557605807081924d83ff949724de25da807e8e4ce47490",
+        "sha256:a89301180d6175f25a1966eb25d528c66f8491955d8682b1a13b5397dc9ffd5c",
+        "sha256:23dccbd4111dac45980156d12b72d604cd5e0a65f844193b345883a46316693b",
+        "sha256:51f8357fe33de08fa217bc617cfad267fa5ebfaf5ddba684b1708bb01a99b6a9",
+        "sha256:2066c51ac5b42a341a0b909db00aa31b759fb9fb4073f1939f152352b6853ec4",
+        "sha256:572a0ebfcb98b693942ada2185cb0c301c47b359ecede3d68b77f51c2d4725d3",
+        "sha256:f6fa0687208d8dec17683dcff849012d7c8f1409d71b111235f8d2b97292db1e",
+        "sha256:585b7836cf215ebe7aba10b8418fae3bcba45dfea76cea0c42c387bc65725939",
+        "sha256:6698bee4e177993599c8523635c2c88a1ab9eb7611b35be879149f4f6ac1a15b",
+        "sha256:60538268304150ccaeb8c13b561b4affce0c77ad78aaf206c91d009bdc5ddc3e",
+        "sha256:ce03fba5f1266b09998b6d65b2f8ea429ec2895def025c27b2d3ef8123436c16",
+        "sha256:ade87fcad201fab384e68de70ab84e070e4280f828b88574c4b78eb55f09345e",
+        "sha256:e4632f28e278acc29555a3267a359d45505dc0795da13c9d01978fe9841721f0",
+        "sha256:5b6778be8f7a58ee5c9ddf7d9f5e3af63116459804fd85b750c446848cfe7f8a",
+        "sha256:d3b8d5fa9bccd391a442efce502bb1e3ff1d248af2b2b9a12f1fadbbfc5d0c83",
+        "sha256:28e59c5a471d0da63038c44aa54ab408468b1089401b24a7fe56e7f299722c94"
+      ],
+      "top_level_fields": [
+        "acceptance_contracts",
+        "authoring_inputs",
+        "coordinate",
+        "description",
+        "display_name",
+        "entrypoints",
+        "flavor_slots",
+        "profiles",
+        "provides",
+        "requires",
+        "routing_policy",
+        "sample",
+        "schema",
+        "specification_provider",
+        "specification_roots",
+        "version",
+        "workflow_definition"
+      ],
+      "authored_intent_fields": [
+        "coordinate",
+        "description",
+        "display_name",
+        "entrypoints",
+        "flavor_slots",
+        "profiles",
+        "provides",
+        "requires",
+        "sample",
+        "specification_provider",
+        "specification_roots",
+        "version"
+      ],
+      "embedded_resolved_identity_fields": [
+        "acceptance_contracts",
+        "authoring_inputs",
+        "routing_policy",
+        "workflow_definition"
+      ],
+      "envelope_fields": [
+        "schema"
+      ]
+    },
+    "representative_sample_component_graph": {
+      "sample": "service-stack",
+      "composition_identity": "sha256:1c7bc88b721af7905c49cf2b6dd9fd5fdfd1435c727871818064a2938ad69952",
+      "root": "component://samples/service-stack",
+      "revision_order": [
+        "component://samples/service-stack",
+        "component://samples/invoice-service",
+        "component://samples/money-calculation"
+      ],
+      "revision_identities": {
+        "component://samples/invoice-service": "sha256:2c93f80658ae65c36381bc05c1a4f4529163bd21aa1a7c18a035f3a115fb357a",
+        "component://samples/money-calculation": "sha256:921427098c25ce4baaf466eeeed885bf5ad350553a79711d201a4d0c70daae78",
+        "component://samples/service-stack": "sha256:6d500d1493e72d90f634f60f7ead0a1095c2f4297ba8bd8cfb50fb5d241c742b"
+      },
+      "decisions": [
+        {
+          "decision_identity": "sha256:87e3c277a7b1850048d254a33643390986603e10685c0e9d2cce82c05a321f62",
+          "source": "component://samples/service-stack",
+          "requirement_id": "invoice-service-interface",
+          "capability": "sample.invoice-service",
+          "dependency_kind": "generation",
+          "optional": false,
+          "policy_identity": "sha256:b35017e10f149b32b84b9de4b25f8e5c8d81a1301c4b54e6bc37d9269f084b69",
+          "candidates": [
+            {
+              "coordinate": "component://samples/invoice-service",
+              "revision_identity": "sha256:2c93f80658ae65c36381bc05c1a4f4529163bd21aa1a7c18a035f3a115fb357a",
+              "eligible": true,
+              "reasons": [
+                "eligible"
+              ]
+            }
+          ],
+          "selected": "component://samples/invoice-service"
+        },
+        {
+          "decision_identity": "sha256:1221ade85406dfff39aa502b956761df0c08b898edeaa42b562c4f9b3f9de4cb",
+          "source": "component://samples/invoice-service",
+          "requirement_id": "money-calculation-interface",
+          "capability": "sample.money-calculation",
+          "dependency_kind": "generation",
+          "optional": false,
+          "policy_identity": "sha256:b35017e10f149b32b84b9de4b25f8e5c8d81a1301c4b54e6bc37d9269f084b69",
+          "candidates": [
+            {
+              "coordinate": "component://samples/money-calculation",
+              "revision_identity": "sha256:921427098c25ce4baaf466eeeed885bf5ad350553a79711d201a4d0c70daae78",
+              "eligible": true,
+              "reasons": [
+                "eligible"
+              ]
+            }
+          ],
+          "selected": "component://samples/money-calculation"
+        },
+        {
+          "decision_identity": "sha256:fd8b095bab442279db2948d74c48d17e3ba2fed4001f618a4847e4eedc318a6a",
+          "source": "component://samples/invoice-service",
+          "requirement_id": "money-calculation",
+          "capability": "sample.money-calculation",
+          "dependency_kind": "runtime",
+          "optional": false,
+          "policy_identity": "sha256:b35017e10f149b32b84b9de4b25f8e5c8d81a1301c4b54e6bc37d9269f084b69",
+          "candidates": [
+            {
+              "coordinate": "component://samples/money-calculation",
+              "revision_identity": "sha256:921427098c25ce4baaf466eeeed885bf5ad350553a79711d201a4d0c70daae78",
+              "eligible": true,
+              "reasons": [
+                "eligible"
+              ]
+            }
+          ],
+          "selected": "component://samples/money-calculation"
+        },
+        {
+          "decision_identity": "sha256:ab5eba249677fb39f9e031ef38fa1628730b6ad7de007b2e626223a34db887cd",
+          "source": "component://samples/service-stack",
+          "requirement_id": "invoice-service",
+          "capability": "sample.invoice-service",
+          "dependency_kind": "runtime",
+          "optional": false,
+          "policy_identity": "sha256:b35017e10f149b32b84b9de4b25f8e5c8d81a1301c4b54e6bc37d9269f084b69",
+          "candidates": [
+            {
+              "coordinate": "component://samples/invoice-service",
+              "revision_identity": "sha256:2c93f80658ae65c36381bc05c1a4f4529163bd21aa1a7c18a035f3a115fb357a",
+              "eligible": true,
+              "reasons": [
+                "eligible"
+              ]
+            }
+          ],
+          "selected": "component://samples/invoice-service"
+        }
+      ],
+      "edges": [
+        {
+          "source": "component://samples/service-stack",
+          "target": "component://samples/invoice-service",
+          "requirement_id": "invoice-service-interface",
+          "capability": "sample.invoice-service",
+          "decision_identity": "sha256:87e3c277a7b1850048d254a33643390986603e10685c0e9d2cce82c05a321f62"
+        },
+        {
+          "source": "component://samples/invoice-service",
+          "target": "component://samples/money-calculation",
+          "requirement_id": "money-calculation-interface",
+          "capability": "sample.money-calculation",
+          "decision_identity": "sha256:1221ade85406dfff39aa502b956761df0c08b898edeaa42b562c4f9b3f9de4cb"
+        },
+        {
+          "source": "component://samples/invoice-service",
+          "target": "component://samples/money-calculation",
+          "requirement_id": "money-calculation",
+          "capability": "sample.money-calculation",
+          "decision_identity": "sha256:fd8b095bab442279db2948d74c48d17e3ba2fed4001f618a4847e4eedc318a6a"
+        },
+        {
+          "source": "component://samples/service-stack",
+          "target": "component://samples/invoice-service",
+          "requirement_id": "invoice-service",
+          "capability": "sample.invoice-service",
+          "decision_identity": "sha256:ab5eba249677fb39f9e031ef38fa1628730b6ad7de007b2e626223a34db887cd"
+        }
+      ]
+    },
+    "sample_recipe_plans": {
+      "variant_keys": [
+        "critical-path-scheduler|python",
+        "critical-path-scheduler|cpp",
+        "dependency-planner|rust",
+        "empty-cache-restart|python",
+        "empty-cache-restart|cpp",
+        "flavor-matrix|python",
+        "flavor-matrix|cpp",
+        "full-stack-rust-js|rust-javascript-full-stack",
+        "generated-library|python",
+        "generated-library|cpp",
+        "hello-component|python",
+        "hello-component|cpp",
+        "javascript-ledger-workbench|javascript",
+        "model-routing|python",
+        "model-routing|cpp",
+        "multi-repository-component|python",
+        "multi-repository-component|cpp",
+        "publication-import|python",
+        "publication-import|cpp",
+        "regenerative-roundtrip|python",
+        "regenerative-roundtrip|cpp",
+        "regenerative-roundtrip|rust",
+        "regenerative-roundtrip|javascript",
+        "security-policies|python",
+        "security-policies|cpp",
+        "self-hosting|python",
+        "self-hosting|cpp",
+        "service-stack|python",
+        "service-stack|cpp"
+      ],
+      "platforms": {
+        "linux": {
+          "plan_set_identity": "sha256:a8548f04d4e1c4506dd028b29f516480bcbb081951ceaf0d1d42f9d3756e57ce",
+          "representative_recipe_identities": {
+            "full-stack-rust-js|rust-javascript-full-stack": "sha256:e563090aa27c563bbfa5d0c2af207d00ba2795d4af6f6c602a2d65a9fddcdd7d",
+            "hello-component|python": "sha256:ec6e1152680f48e662f5676e43634eb1851f1916a1034d3bdfaeeac7d0e40106",
+            "regenerative-roundtrip|cpp": "sha256:e57d16965f39f4b1df5e5b6b49b43538969788c5f49e59ad8934875d03056487",
+            "regenerative-roundtrip|javascript": "sha256:9ad0ecd0f271985cd80315036e31c6767318f71ba664303556a944cb89c7527f",
+            "regenerative-roundtrip|python": "sha256:b2cfbb27ac45f86f95336c4724f3eabfad2ad42eaef14063148bba674eb24246",
+            "regenerative-roundtrip|rust": "sha256:8d2b218ade9de7c8c4d27b97654638666e0f17f41b4d3041b659459911514299",
+            "service-stack|cpp": "sha256:0eda8e36191cb849aab20ed8aae269af6afe0368aed67484ca809c33a55a69a0",
+            "service-stack|python": "sha256:d8034855130702b30edc4dbaca9318bb114b6a18508ad48d90815e7ab6ce9a56"
+          }
+        },
+        "macos": {
+          "plan_set_identity": "sha256:13231aae49ff80b8a83646a84f3c7a6da9c66e2885c91fdf1175172beb457177",
+          "representative_recipe_identities": {
+            "full-stack-rust-js|rust-javascript-full-stack": "sha256:7063512a3bf7d994afe25d5cce15bf08e0fd5d5f481631681fe916bfd4d6920b",
+            "hello-component|python": "sha256:7e86d1c2796a8e270304c8b0599638626f357b58d47487f4006080fe34286a3b",
+            "regenerative-roundtrip|cpp": "sha256:3c7963c5e46ce3ebe19e68d920af43c2fc9ee08e294e7ba877aeebb47f16914f",
+            "regenerative-roundtrip|javascript": "sha256:20b4980fe29cecff174a191b6767458816ea5ec97b26abc1789e67d5f8270ee2",
+            "regenerative-roundtrip|python": "sha256:d9b43ba536f70836544412a995e076f91fa1dbb8927f3ab77e6baaf9920f60c6",
+            "regenerative-roundtrip|rust": "sha256:7974f241e2a8bde3f82dffdc4f686ab3f26bce4e1cb7dd463e04357d5006b208",
+            "service-stack|cpp": "sha256:c71a2b5c5d851d159af75d44992963ce6319a6279d353594ce35392f1f9bd04a",
+            "service-stack|python": "sha256:39e44fc3b9df5b91a1deb19ebbf6f84bef741d1cf63f48bbf2caea46a4a6a3fe"
+          }
+        },
+        "windows": {
+          "plan_set_identity": "sha256:9447dd1931df22a67710bed7643721da5cde003d7fd248b35db01ad8bc4e55d2",
+          "representative_recipe_identities": {
+            "full-stack-rust-js|rust-javascript-full-stack": "sha256:5ad01232c47de94286354707d692888456e66aa37a2ae230851dcc91f76f0035",
+            "hello-component|python": "sha256:ecd918419d0be37024f703aa7677c8060a756eeb1e89a580217e2858dabd0dfe",
+            "regenerative-roundtrip|cpp": "sha256:28b07d00223ade82912ff07bd930c8c145bbad697f4c6be6f9b9a77ee430328c",
+            "regenerative-roundtrip|javascript": "sha256:621be4518869f6bc4ca5881e4bb5cee067e1a4d65a7da813422a72c328e4e704",
+            "regenerative-roundtrip|python": "sha256:d15b6677832b4a1f5556ef84b7602d2967ebe20be70943f08aedeea5b294a141",
+            "regenerative-roundtrip|rust": "sha256:4cf71b3930d4036606c39c9ee85b391d5088deef3eee02499733179c4e5265c6",
+            "service-stack|cpp": "sha256:edd4eb9b4358978c835c1021c19497512c3a999b1bb5f26c8ca4b86f06f61efd",
+            "service-stack|python": "sha256:adc6f78597170ce53ac0d55a5a0152e811ec2977f64c8b75efd60a0c9889f0d3"
+          }
+        }
+      }
+    },
+    "wire_shapes": {
+      "accepted_source_derivation": {
+        "wire_identity": "sha256:dabbad251e5b1fdac6926b926b255b29cc3b8f3f1d2e0c788b68c93bf3284579",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v2:accepted-source-derivation",
+          "cache_key": {
+            "schema": "urn:literate-ai:schema:v2:source-derivation-cache-key",
+            "recipe_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "c4cf80678894052aff0a9e35806cf02854fedac745fc4e27257ef23564b9feae"
+            },
+            "execution_plan_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "e757021d7b1560b94bf257598fea0606ff81a2f235f747d1434004e45cde8e26"
+            },
+            "coding_cli_tool_binding_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "cc0899751e78b019850f5ac3f1d8ff8af5ab0bca21dfd83d0075c3bf8055eba2"
+            },
+            "model_binding": {
+              "schema": "urn:literate-ai:schema:v2:source-cache-model-binding",
+              "provider_id": "fixture-provider",
+              "model_selector": "fixture-model",
+              "exact_revision_identity": null
+            },
+            "request_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "08d535b26e845511d9034f4be47a0704052d3689efa9b0d77ff63754c6d5518b"
+            },
+            "source_semantics_identity": null
+          },
+          "component_lock_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+          },
+          "source_tree_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "31dd417f1c10456cefec6f5476c340c056d82c183980fc90581f12a85c73cee9"
+          },
+          "managed_sbom_graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "bcb6d71701e8a75e7bd4493ad96776caa77231d14d74cdbe1e241c98d2bee225"
+          },
+          "source_sbom_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "1df7090be2a2d71f226ddff95213b4f4a7b35871b771fad435e1f4dc2b9f0897"
+          },
+          "resolved_sbom_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "37bf43602283f39c869e88fe619536672691317e593bb02d35cd504b66465875"
+          },
+          "source_sbom_binding": {
+            "schema": "urn:literate-ai:schema:v2:cyclonedx-bom-binding",
+            "lifecycle": "pre-build",
+            "bom_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "1df7090be2a2d71f226ddff95213b4f4a7b35871b771fad435e1f4dc2b9f0897"
+            },
+            "graph_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "e5de4095db6a25c0f1a7156ba7b505327fd5e20d1fe5b7f1a8387794ce9989e5"
+            },
+            "managed_graph_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "bcb6d71701e8a75e7bd4493ad96776caa77231d14d74cdbe1e241c98d2bee225"
+            },
+            "resolved_graph_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+            },
+            "source_bom_identity": null,
+            "root_ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+            "component_count": 2,
+            "edge_count": 1
+          },
+          "resolved_sbom_binding": {
+            "schema": "urn:literate-ai:schema:v2:cyclonedx-bom-binding",
+            "lifecycle": "post-build",
+            "bom_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "37bf43602283f39c869e88fe619536672691317e593bb02d35cd504b66465875"
+            },
+            "graph_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "f44ae516b6132b5b2a763495fb0627cff6dd502f0708af1b390ca1689c3b4483"
+            },
+            "managed_graph_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "bcb6d71701e8a75e7bd4493ad96776caa77231d14d74cdbe1e241c98d2bee225"
+            },
+            "resolved_graph_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+            },
+            "source_bom_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "1df7090be2a2d71f226ddff95213b4f4a7b35871b771fad435e1f4dc2b9f0897"
+            },
+            "root_ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+            "component_count": 2,
+            "edge_count": 1
+          },
+          "generated_test_suite_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "0afa578e4f60589e3839bd4b1a55224a4a38c33e108d6b9168f0b420450cfba8"
+          },
+          "build_evidence_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "fc236033fdcc1993be735dcfa09902f2f01a01be8ed9df1c450577acc4b00ffd"
+          },
+          "test_evidence_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "e2529f7baa512a4d3e14f6398dcc127b5554285a53adda3ab78841b796dd72ef"
+          },
+          "acceptance_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "75c80498a7993da0a4b9fd78edd5f65523a983149db29e1754805f181702fa00"
+          },
+          "provenance_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "e7a62b454e507131fe4a9d6edfb31937cfa7899ec51b330b79ea61913a5a5f94"
+          }
+        }
+      },
+      "bundle_manifest": {
+        "wire_identity": "sha256:053507c30d0232968bf5a02e119e8259573912410e4dbdd8bc41aba570246e84",
+        "wire": {
+          "schema_version": 2,
+          "kind": "source",
+          "component_revision_digest": "sha256:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+          "component_ref": {
+            "schema": "urn:literate-ai:schema:v1:component-revision-reference",
+            "coordinate": {
+              "namespace": "fixture",
+              "name": "root"
+            },
+            "version": "1.0.0",
+            "revision_identity": {
+              "schema": "urn:literate-ai:schema:v1:content-identity",
+              "algorithm": "sha256",
+              "digest": "fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+            }
+          },
+          "effective_revision_digest": "sha256:7f8846b1304e884644d52d8f95e5e30d23bc4d8c855365bd75597ee5f74c740b",
+          "flavor_set_digest": null,
+          "roots": {
+            "source": {
+              "algorithm": "sha256",
+              "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "size": 4,
+              "media_type": "text/plain"
+            }
+          },
+          "dependencies": [],
+          "provenance": [
+            {
+              "algorithm": "sha256",
+              "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+              "size": 4,
+              "media_type": "text/plain"
+            }
+          ],
+          "authorization_digest": null,
+          "toolchain_digest": null
+        }
+      },
+      "cyclonedx_resolved_bom": {
+        "wire_identity": "sha256:37bf43602283f39c869e88fe619536672691317e593bb02d35cd504b66465875",
+        "wire": {
+          "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+          "bomFormat": "CycloneDX",
+          "components": [
+            {
+              "bom-ref": "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a",
+              "name": "component://fixture/dependency",
+              "properties": [
+                {
+                  "name": "literate-ai:component-revision",
+                  "value": "sha256:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a"
+                },
+                {
+                  "name": "literate-ai:dependency-kind",
+                  "value": "component"
+                },
+                {
+                  "name": "literate-ai:dependency-scope",
+                  "value": "runtime"
+                }
+              ],
+              "type": "library",
+              "version": "2.0.0"
+            }
+          ],
+          "compositions": [
+            {
+              "aggregate": "complete",
+              "dependencies": [
+                "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+              ]
+            }
+          ],
+          "dependencies": [
+            {
+              "dependsOn": [],
+              "ref": "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a"
+            },
+            {
+              "dependsOn": [
+                "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a"
+              ],
+              "ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+            }
+          ],
+          "metadata": {
+            "component": {
+              "bom-ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+              "isExternal": false,
+              "name": "component://fixture/root",
+              "properties": [
+                {
+                  "name": "literate-ai:component-revision",
+                  "value": "sha256:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+                },
+                {
+                  "name": "literate-ai:dependency-kind",
+                  "value": "root-component"
+                },
+                {
+                  "name": "literate-ai:dependency-edge",
+                  "value": "{\"kind\":\"runtime\",\"optional\":false,\"relationship\":\"sha256:59faba2b8325bcb0a1938cd464d5554cbf493093c064be7ab7d330f5303647e1\",\"target\":\"urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a\"}"
+                }
+              ],
+              "type": "application",
+              "version": "1.0.0"
+            },
+            "lifecycles": [
+              {
+                "phase": "post-build"
+              }
+            ],
+            "properties": [
+              {
+                "name": "literate-ai:resolved-graph-identity",
+                "value": "sha256:34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+              },
+              {
+                "name": "literate-ai:source-bom-identity",
+                "value": "sha256:1df7090be2a2d71f226ddff95213b4f4a7b35871b771fad435e1f4dc2b9f0897"
+              }
+            ]
+          },
+          "specVersion": "1.7",
+          "version": 1
+        }
+      },
+      "cyclonedx_resolved_bom_binding": {
+        "wire_identity": "sha256:07c07912377d7cfae01b4f0874c7c5e2a6162c6eb402fb60e939aea27d690082",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v2:cyclonedx-bom-binding",
+          "lifecycle": "post-build",
+          "bom_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "37bf43602283f39c869e88fe619536672691317e593bb02d35cd504b66465875"
+          },
+          "graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "f44ae516b6132b5b2a763495fb0627cff6dd502f0708af1b390ca1689c3b4483"
+          },
+          "managed_graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "bcb6d71701e8a75e7bd4493ad96776caa77231d14d74cdbe1e241c98d2bee225"
+          },
+          "resolved_graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+          },
+          "source_bom_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "1df7090be2a2d71f226ddff95213b4f4a7b35871b771fad435e1f4dc2b9f0897"
+          },
+          "root_ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+          "component_count": 2,
+          "edge_count": 1
+        }
+      },
+      "cyclonedx_source_bom": {
+        "wire_identity": "sha256:1df7090be2a2d71f226ddff95213b4f4a7b35871b771fad435e1f4dc2b9f0897",
+        "wire": {
+          "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+          "bomFormat": "CycloneDX",
+          "components": [
+            {
+              "bom-ref": "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a",
+              "name": "component://fixture/dependency",
+              "properties": [
+                {
+                  "name": "literate-ai:component-revision",
+                  "value": "sha256:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a"
+                },
+                {
+                  "name": "literate-ai:dependency-kind",
+                  "value": "component"
+                },
+                {
+                  "name": "literate-ai:dependency-scope",
+                  "value": "runtime"
+                }
+              ],
+              "type": "library",
+              "version": "2.0.0"
+            }
+          ],
+          "compositions": [
+            {
+              "aggregate": "complete",
+              "dependencies": [
+                "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+              ]
+            }
+          ],
+          "dependencies": [
+            {
+              "dependsOn": [],
+              "ref": "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a"
+            },
+            {
+              "dependsOn": [
+                "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a"
+              ],
+              "ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+            }
+          ],
+          "metadata": {
+            "component": {
+              "bom-ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+              "isExternal": false,
+              "name": "component://fixture/root",
+              "properties": [
+                {
+                  "name": "literate-ai:component-revision",
+                  "value": "sha256:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+                },
+                {
+                  "name": "literate-ai:dependency-kind",
+                  "value": "root-component"
+                },
+                {
+                  "name": "literate-ai:dependency-edge",
+                  "value": "{\"kind\":\"runtime\",\"optional\":false,\"relationship\":\"sha256:59faba2b8325bcb0a1938cd464d5554cbf493093c064be7ab7d330f5303647e1\",\"target\":\"urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a\"}"
+                }
+              ],
+              "type": "application",
+              "version": "1.0.0"
+            },
+            "lifecycles": [
+              {
+                "phase": "pre-build"
+              }
+            ],
+            "properties": [
+              {
+                "name": "literate-ai:resolved-graph-identity",
+                "value": "sha256:34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+              }
+            ]
+          },
+          "specVersion": "1.7",
+          "version": 1
+        }
+      },
+      "cyclonedx_source_bom_binding": {
+        "wire_identity": "sha256:c56e922de8351bd97c418d063302d31588d6924ed5aec01bd1610b2e47e22d87",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v2:cyclonedx-bom-binding",
+          "lifecycle": "pre-build",
+          "bom_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "1df7090be2a2d71f226ddff95213b4f4a7b35871b771fad435e1f4dc2b9f0897"
+          },
+          "graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "e5de4095db6a25c0f1a7156ba7b505327fd5e20d1fe5b7f1a8387794ce9989e5"
+          },
+          "managed_graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "bcb6d71701e8a75e7bd4493ad96776caa77231d14d74cdbe1e241c98d2bee225"
+          },
+          "resolved_graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+          },
+          "source_bom_identity": null,
+          "root_ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+          "component_count": 2,
+          "edge_count": 1
+        }
+      },
+      "managed_sbom_graph": {
+        "wire_identity": "sha256:bcb6d71701e8a75e7bd4493ad96776caa77231d14d74cdbe1e241c98d2bee225",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v2:cyclonedx-managed-graph",
+          "root_ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+          "components": [
+            {
+              "schema": "urn:literate-ai:schema:v1:cyclonedx-managed-component",
+              "bom_ref": "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a",
+              "kind": "component",
+              "identity": {
+                "schema": "urn:literate-ai:schema:v1:content-identity",
+                "algorithm": "sha256",
+                "digest": "e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a"
+              },
+              "name": "component://fixture/dependency",
+              "version": "2.0.0",
+              "scopes": [
+                "runtime"
+              ],
+              "version_range": null
+            },
+            {
+              "schema": "urn:literate-ai:schema:v1:cyclonedx-managed-component",
+              "bom_ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+              "kind": "root-component",
+              "identity": {
+                "schema": "urn:literate-ai:schema:v1:content-identity",
+                "algorithm": "sha256",
+                "digest": "fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8"
+              },
+              "name": "component://fixture/root",
+              "version": "1.0.0",
+              "scopes": [],
+              "version_range": null
+            }
+          ],
+          "edges": [
+            {
+              "schema": "urn:literate-ai:schema:v1:cyclonedx-managed-edge",
+              "source_ref": "urn:literate-ai:component:fae37e02a332b1301d886d29801d8d8fc35505669cd1e8f475095bee8332e4c8",
+              "target_ref": "urn:literate-ai:component:e5aece31fa15b69e7fdc1ffdb558d3ca5c14b0ca099de0aa9bd56d799121131a",
+              "kind": "runtime",
+              "optional": false,
+              "relationship_identity": {
+                "schema": "urn:literate-ai:schema:v1:content-identity",
+                "algorithm": "sha256",
+                "digest": "59faba2b8325bcb0a1938cd464d5554cbf493093c064be7ab7d330f5303647e1"
+              }
+            }
+          ],
+          "resolved_graph_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "34fa3c8113ae820a517c7d8e99e64af41c31be03421eeddc365a92dc6f87dd9f"
+          }
+        }
+      },
+      "project_test_receipt": {
+        "wire_identity": "sha256:877daeb410d537f6a925481a467d238a7720871495e5a2a4d59517c11df9bbf3",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v1:project-test-receipt",
+          "project": "fixture-project",
+          "project_revision": "sha256:b2eacba9401b1a9de1e11d5fc7a787d5cd5e4ba326dc7ab14aacbd420548914e",
+          "subject": "sha256:08c37cfd80cc832b072f6eba8394c52439b8c5c28073e1e4d2868d94b7648680",
+          "suite": {
+            "id": "portable-e2e",
+            "version": "1.0.0",
+            "revision": "sha256:873d2f182ded3a4b688c39f22c19663cdd42abdc969b4d16595d2a758abb390a"
+          },
+          "tests": 5,
+          "result": "sha256:d57eeafbac63ec7ce39c9bf12d2025138d4ad9b7ced56187c90fb21374cddd44",
+          "evidence": {
+            "lifecycle-command": "sha256:60a6ec3a782219b65122ce9afc85e3afa451a71baf3aea5ee656b2e752a7912d",
+            "lifecycle-request": "sha256:34d5a1ea2dd38d38b58152edf4032b8ddb0ac6ebba1229634f4c7d2957231e2c",
+            "source-cache-decision": "sha256:61ae76081d0b87cca65092b29220d003074c55f0322aa9ac465402e2e49e9ebb",
+            "source-cache-lifecycle": "sha256:44b5419158469f6578c1b86d5ef36c9a58b1c55e7a0ed59d6c3d2f3cac68cd31",
+            "test-report": "sha256:4015c5376eb4ce5d804d2e1d826cb3679b69dabd92aa6179a17f5a8dc464e324"
+          }
+        }
+      },
+      "project_test_receipt_finalized_candidate": {
+        "wire_identity": "sha256:9bfd3b544e1587aaae9fb096e550d481d13bcfe2fac22a4e34911b3f194f8c13",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v1:project-test-receipt-finalized-candidate",
+          "finalization_boundary": "supported-api-tcb",
+          "provisional_identity": "sha256:b79fb6b114912525e85afa78aff9b69a97e9af668ca05053aa9a2746e320bc93",
+          "lifecycle_request_identity": "sha256:34d5a1ea2dd38d38b58152edf4032b8ddb0ac6ebba1229634f4c7d2957231e2c",
+          "lifecycle_command_identity": "sha256:60a6ec3a782219b65122ce9afc85e3afa451a71baf3aea5ee656b2e752a7912d",
+          "source_cache_control_identity": "sha256:ab1cd8f26a21a1bfbe89532d4f4922ba557bba8c0a7f4d5b1c154b393479abcd",
+          "component_lock_identities": [
+            "sha256:650eb9ee7a9f8d714354659db925a51d7f761845be562afe284e3ee96f253328"
+          ],
+          "source_cache_decision_identity": "sha256:61ae76081d0b87cca65092b29220d003074c55f0322aa9ac465402e2e49e9ebb",
+          "source_cache_lifecycle_identity": "sha256:44b5419158469f6578c1b86d5ef36c9a58b1c55e7a0ed59d6c3d2f3cac68cd31",
+          "receipt_identity": "sha256:877daeb410d537f6a925481a467d238a7720871495e5a2a4d59517c11df9bbf3",
+          "receipt": {
+            "schema": "urn:literate-ai:schema:v1:project-test-receipt",
+            "project": "fixture-project",
+            "project_revision": "sha256:b2eacba9401b1a9de1e11d5fc7a787d5cd5e4ba326dc7ab14aacbd420548914e",
+            "subject": "sha256:08c37cfd80cc832b072f6eba8394c52439b8c5c28073e1e4d2868d94b7648680",
+            "suite": {
+              "id": "portable-e2e",
+              "version": "1.0.0",
+              "revision": "sha256:873d2f182ded3a4b688c39f22c19663cdd42abdc969b4d16595d2a758abb390a"
+            },
+            "tests": 5,
+            "result": "sha256:d57eeafbac63ec7ce39c9bf12d2025138d4ad9b7ced56187c90fb21374cddd44",
+            "evidence": {
+              "lifecycle-command": "sha256:60a6ec3a782219b65122ce9afc85e3afa451a71baf3aea5ee656b2e752a7912d",
+              "lifecycle-request": "sha256:34d5a1ea2dd38d38b58152edf4032b8ddb0ac6ebba1229634f4c7d2957231e2c",
+              "source-cache-decision": "sha256:61ae76081d0b87cca65092b29220d003074c55f0322aa9ac465402e2e49e9ebb",
+              "source-cache-lifecycle": "sha256:44b5419158469f6578c1b86d5ef36c9a58b1c55e7a0ed59d6c3d2f3cac68cd31",
+              "test-report": "sha256:4015c5376eb4ce5d804d2e1d826cb3679b69dabd92aa6179a17f5a8dc464e324"
+            }
+          }
+        }
+      },
+      "project_test_receipt_provisional": {
+        "wire_identity": "sha256:b79fb6b114912525e85afa78aff9b69a97e9af668ca05053aa9a2746e320bc93",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v1:project-test-receipt-provisional",
+          "lifecycle_request_identity": "sha256:34d5a1ea2dd38d38b58152edf4032b8ddb0ac6ebba1229634f4c7d2957231e2c",
+          "lifecycle_command_identity": "sha256:60a6ec3a782219b65122ce9afc85e3afa451a71baf3aea5ee656b2e752a7912d",
+          "source_cache_control_identity": "sha256:ab1cd8f26a21a1bfbe89532d4f4922ba557bba8c0a7f4d5b1c154b393479abcd",
+          "component_lock_identities": [
+            "sha256:650eb9ee7a9f8d714354659db925a51d7f761845be562afe284e3ee96f253328"
+          ],
+          "receipt_identity": "sha256:877daeb410d537f6a925481a467d238a7720871495e5a2a4d59517c11df9bbf3",
+          "receipt": {
+            "schema": "urn:literate-ai:schema:v1:project-test-receipt",
+            "project": "fixture-project",
+            "project_revision": "sha256:b2eacba9401b1a9de1e11d5fc7a787d5cd5e4ba326dc7ab14aacbd420548914e",
+            "subject": "sha256:08c37cfd80cc832b072f6eba8394c52439b8c5c28073e1e4d2868d94b7648680",
+            "suite": {
+              "id": "portable-e2e",
+              "version": "1.0.0",
+              "revision": "sha256:873d2f182ded3a4b688c39f22c19663cdd42abdc969b4d16595d2a758abb390a"
+            },
+            "tests": 5,
+            "result": "sha256:d57eeafbac63ec7ce39c9bf12d2025138d4ad9b7ced56187c90fb21374cddd44",
+            "evidence": {
+              "lifecycle-command": "sha256:60a6ec3a782219b65122ce9afc85e3afa451a71baf3aea5ee656b2e752a7912d",
+              "lifecycle-request": "sha256:34d5a1ea2dd38d38b58152edf4032b8ddb0ac6ebba1229634f4c7d2957231e2c",
+              "source-cache-decision": "sha256:61ae76081d0b87cca65092b29220d003074c55f0322aa9ac465402e2e49e9ebb",
+              "source-cache-lifecycle": "sha256:44b5419158469f6578c1b86d5ef36c9a58b1c55e7a0ed59d6c3d2f3cac68cd31",
+              "test-report": "sha256:4015c5376eb4ce5d804d2e1d826cb3679b69dabd92aa6179a17f5a8dc464e324"
+            }
+          }
+        }
+      },
+      "source_derivation_cache_key": {
+        "wire_identity": "sha256:085a5053e0a1448cd94bf1dc59a7b52e2c75cb122a7f874fb181ddc61b65cbba",
+        "wire": {
+          "schema": "urn:literate-ai:schema:v2:source-derivation-cache-key",
+          "recipe_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "c4cf80678894052aff0a9e35806cf02854fedac745fc4e27257ef23564b9feae"
+          },
+          "execution_plan_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "e757021d7b1560b94bf257598fea0606ff81a2f235f747d1434004e45cde8e26"
+          },
+          "coding_cli_tool_binding_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "cc0899751e78b019850f5ac3f1d8ff8af5ab0bca21dfd83d0075c3bf8055eba2"
+          },
+          "model_binding": {
+            "schema": "urn:literate-ai:schema:v2:source-cache-model-binding",
+            "provider_id": "fixture-provider",
+            "model_selector": "fixture-model",
+            "exact_revision_identity": null
+          },
+          "request_identity": {
+            "schema": "urn:literate-ai:schema:v1:content-identity",
+            "algorithm": "sha256",
+            "digest": "08d535b26e845511d9034f4be47a0704052d3689efa9b0d77ff63754c6d5518b"
+          },
+          "source_semantics_identity": null
+        }
+      }
+    },
+    "sample_behavior_scope": {
+      "all_discovered_samples": [
+        "component-manifest-bytes",
+        "authored-intent-projection",
+        "host-platform-generation-recipe"
+      ],
+      "component_composition": {
+        "coverage": "representative-only",
+        "samples": [
+          "service-stack"
+        ]
+      },
+      "claim": "wave-0-characterization-not-repository-wide-behavioral-coverage"
+    },
+    "identity_impact_model": {
+      "scope": "wave-0-observed-sample-planning-cache-sbom-receipt",
+      "completeness": "complete-for-declared-scope-not-global-framework-closure",
+      "excluded_surfaces": [
+        "deployment-identities",
+        "packaging-identities",
+        "publication-identities",
+        "unobserved-component-compositions"
+      ],
+      "changed_roots": [
+        "component-definition-wire-layout",
+        "component-revision-wire-layout",
+        "effective-revision-wire-layout",
+        "effective-specification-set-wire-layout",
+        "flavor-definition-wire-layout",
+        "flavor-revision-wire-layout",
+        "flavor-set-lock-wire-layout",
+        "lifecycle-driver-contract",
+        "target-profile-wire-layout",
+        "toolchain-constraint-wire-layout"
+      ],
+      "stable_inputs": [
+        "acceptance-contract-content-identity",
+        "capability-requirement-semantics",
+        "component-coordinate-and-version",
+        "flavor-resolution-policy-identity",
+        "flavor-specification-fragment-identities",
+        "generation-recipe-document-content",
+        "resolver-contribution-identities",
+        "specification-artifact-content-identity",
+        "specification-set-identity"
+      ],
+      "dependency_graph": {
+        "accepted-source-derivation-identity": [
+          "managed-sbom-graph-identity",
+          "resolved-sbom-identity",
+          "source-derivation-cache-key-identity",
+          "source-sbom-identity"
+        ],
+        "bundle-manifest-bytes": [
+          "component-revision-identity",
+          "effective-revision-identity",
+          "flavor-set-lock-identity"
+        ],
+        "component-composition-identity": [
+          "component-revision-identity",
+          "requirement-resolution-decision-identity"
+        ],
+        "component-definition-identity": [
+          "component-definition-wire-layout"
+        ],
+        "component-revision-identity": [
+          "component-definition-identity",
+          "component-revision-wire-layout",
+          "specification-set-identity"
+        ],
+        "effective-revision-identity": [
+          "component-revision-identity",
+          "effective-revision-wire-layout",
+          "effective-specification-set-identity",
+          "flavor-resolution-policy-identity",
+          "flavor-set-lock-identity",
+          "resolver-contribution-identities",
+          "target-profile-identity"
+        ],
+        "effective-specification-set-identity": [
+          "effective-specification-set-wire-layout",
+          "flavor-set-lock-identity",
+          "flavor-specification-fragment-identities",
+          "specification-set-identity"
+        ],
+        "flavor-definition-identity": [
+          "flavor-definition-wire-layout",
+          "toolchain-constraint-identity"
+        ],
+        "flavor-revision-identity": [
+          "flavor-definition-identity",
+          "flavor-revision-wire-layout"
+        ],
+        "flavor-set-lock-identity": [
+          "component-revision-identity",
+          "flavor-resolution-policy-identity",
+          "flavor-revision-identity",
+          "flavor-set-lock-wire-layout",
+          "target-profile-identity"
+        ],
+        "generation-recipe-identity": [
+          "component-composition-identity",
+          "component-revision-identity",
+          "effective-revision-identity",
+          "effective-specification-set-identity",
+          "flavor-set-lock-identity",
+          "generation-recipe-document-content",
+          "target-profile-identity"
+        ],
+        "managed-sbom-graph-identity": [
+          "component-composition-identity"
+        ],
+        "project-test-receipt-wire-and-identity": [
+          "lifecycle-driver-contract",
+          "sample-test-runner-identity",
+          "source-derivation-cache-key-identity"
+        ],
+        "requirement-resolution-decision-identity": [
+          "component-revision-identity",
+          "capability-requirement-semantics"
+        ],
+        "resolved-sbom-identity": [
+          "source-sbom-identity"
+        ],
+        "sample-test-runner-identity": [
+          "lifecycle-driver-contract"
+        ],
+        "source-derivation-cache-key-identity": [
+          "generation-recipe-identity"
+        ],
+        "source-sbom-identity": [
+          "managed-sbom-graph-identity"
+        ],
+        "target-profile-identity": [
+          "target-profile-wire-layout"
+        ],
+        "toolchain-constraint-identity": [
+          "toolchain-constraint-wire-layout"
+        ]
+      },
+      "cannot_preserve_exactly": [
+        "accepted-source-derivation-identity",
+        "bundle-manifest-bytes",
+        "component-composition-identity",
+        "component-definition-identity",
+        "component-revision-identity",
+        "effective-revision-identity",
+        "effective-specification-set-identity",
+        "flavor-definition-identity",
+        "flavor-revision-identity",
+        "flavor-set-lock-identity",
+        "generation-recipe-identity",
+        "managed-sbom-graph-identity",
+        "project-test-receipt-wire-and-identity",
+        "requirement-resolution-decision-identity",
+        "resolved-sbom-identity",
+        "sample-test-runner-identity",
+        "source-derivation-cache-key-identity",
+        "source-sbom-identity",
+        "target-profile-identity",
+        "toolchain-constraint-identity"
+      ]
+    },
+    "sample_runner": {
+      "private_framework_imports": [],
+      "orchestrator_ports": [
+        "readiness_provider",
+        "model_provider",
+        "validator",
+        "classifier",
+        "build_authorizer",
+        "builder",
+        "dependency_resolver",
+        "generated_test_runner",
+        "acceptance_runner",
+        "workspace",
+        "event_store"
+      ],
+      "execute_method": "execute",
+      "model_stage_order": [
+        "plan",
+        "generate"
+      ],
+      "lifecycle_steps": [
+        "validate",
+        "classify",
+        "authorize-build",
+        "build",
+        "resolve-dependencies",
+        "test-generated",
+        "verify-independent",
+        "prepare-tree",
+        "commit-tree"
+      ]
+    }
+  }
+}

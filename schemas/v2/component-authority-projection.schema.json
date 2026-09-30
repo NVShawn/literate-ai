@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:component-authority-projection-contracts",
+  "$ref": "urn:literate-ai:schema:v2:component-authority-projection",
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generationClosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "flavor_set_identity",
+        "skill_set_identity",
+        "workflow_identity",
+        "routing_policy_identity",
+        "promotion_input_audit_identity",
+        "promotion_tree_identity",
+        "qualification_evidence_identity"
+      ],
+      "properties": {
+        "flavor_set_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "skill_set_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "workflow_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "routing_policy_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "promotion_input_audit_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "promotion_tree_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "qualification_evidence_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        }
+      }
+    },
+    "projection": {
+      "$id": "urn:literate-ai:schema:v2:component-authority-projection",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_coordinate",
+        "component_revision_identity",
+        "state",
+        "transition",
+        "source_snapshot_identity",
+        "specification_set_identity",
+        "target_lock_identity",
+        "generation_closure",
+        "verifier_identity",
+        "policy_identity",
+        "evidence_identities",
+        "provenance_reference_identity",
+        "prior_projection_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:component-authority-projection"
+        },
+        "component_coordinate": {
+          "type": "string",
+          "pattern": "^component://[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*$"
+        },
+        "component_revision_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Exact Component revision for this authority state, or null before a draft revision exists."
+        },
+        "state": {
+          "enum": [
+            "source-authoritative",
+            "spec-assisted",
+            "derived-source-retained",
+            "regeneratively-qualified-fungible"
+          ]
+        },
+        "transition": {
+          "enum": [
+            "source-inventory",
+            "spec-derivation",
+            "human-acceptance",
+            "regenerative-qualification",
+            "qualification-invalidation"
+          ]
+        },
+        "source_snapshot_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "specification_set_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "target_lock_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Exact canonical ComponentLock identity authorizing qualification, or null in source-authoritative, spec-assisted, and derived-source-retained states."
+        },
+        "generation_closure": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/generationClosure"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verifier_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "policy_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence_identities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+          }
+        },
+        "provenance_reference_identity": {
+          "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+        },
+        "prior_projection_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "source-authoritative"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "transition": {
+                "const": "source-inventory"
+              },
+              "specification_set_identity": {
+                "type": "null"
+              },
+              "component_revision_identity": {
+                "type": "null"
+              },
+              "target_lock_identity": {
+                "type": "null"
+              },
+              "generation_closure": {
+                "type": "null"
+              },
+              "verifier_identity": {
+                "type": "null"
+              },
+              "policy_identity": {
+                "type": "null"
+              },
+              "prior_projection_identity": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "spec-assisted"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "transition": {
+                "const": "spec-derivation"
+              },
+              "specification_set_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "component_revision_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "target_lock_identity": {
+                "type": "null"
+              },
+              "generation_closure": {
+                "type": "null"
+              },
+              "verifier_identity": {
+                "type": "null"
+              },
+              "policy_identity": {
+                "type": "null"
+              },
+              "prior_projection_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "derived-source-retained"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "transition": {
+                "enum": [
+                  "human-acceptance",
+                  "qualification-invalidation"
+                ]
+              },
+              "specification_set_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "component_revision_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "target_lock_identity": {
+                "type": "null"
+              },
+              "generation_closure": {
+                "type": "null"
+              },
+              "verifier_identity": {
+                "type": "null"
+              },
+              "policy_identity": {
+                "type": "null"
+              },
+              "prior_projection_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "regeneratively-qualified-fungible"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          "then": {
+            "properties": {
+              "transition": {
+                "const": "regenerative-qualification"
+              },
+              "specification_set_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "component_revision_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "target_lock_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "generation_closure": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/generationClosure"
+              },
+              "verifier_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "policy_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              },
+              "prior_projection_identity": {
+                "$ref": "urn:literate-ai:schema:v2:component-authority-projection-contracts#/$defs/identity"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

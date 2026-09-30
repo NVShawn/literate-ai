@@ -1,0 +1,82 @@
+[
+  {
+    "case_id": "go-portable-app",
+    "prompt": "Generate a portable Go application that reads JSON on stdin and writes JSON on stdout",
+    "expected_skill_id": "go-portable-application"
+  },
+  {
+    "case_id": "rust-portable-app",
+    "prompt": "Generate a portable Rust application that reads JSON on stdin and writes JSON on stdout",
+    "expected_skill_id": "rust-portable-json-application"
+  },
+  {
+    "case_id": "swift-portable-app",
+    "prompt": "Generate a portable Swift application that reads JSON on stdin and writes JSON on stdout",
+    "expected_skill_id": "swift-portable-json-application"
+  },
+  {
+    "case_id": "javascript-portable-app",
+    "prompt": "Generate a portable JavaScript application that reads JSON on stdin and writes JSON on stdout",
+    "expected_skill_id": "javascript-portable-json-application"
+  },
+  {
+    "case_id": "cpp17-portable-app",
+    "prompt": "Generate a portable C++17 application that reads JSON on stdin and writes JSON on stdout",
+    "expected_skill_id": "cpp17-portable-json-application"
+  },
+  {
+    "case_id": "python-service",
+    "prompt": "Generate a long-running Python service with an embedded MCP server and scheduled background workers",
+    "expected_skill_id": "python-service-application"
+  },
+  {
+    "case_id": "react-dashboard",
+    "prompt": "Build an interactive React dashboard with toggleable time-series charts and a sortable ranking table",
+    "expected_skill_id": "react-dashboard-application"
+  },
+  {
+    "case_id": "cuda-application",
+    "prompt": "Generate and test a CUDA application for GPU vector transforms",
+    "expected_skill_id": "generate-nvidia-cuda-application"
+  },
+  {
+    "case_id": "document-pair",
+    "prompt": "Construct an ecosystem document-pair for a presentation deck",
+    "expected_skill_id": "document-pair"
+  },
+  {
+    "case_id": "repository-layout",
+    "prompt": "Design the portable repository layout for a new generated Component",
+    "expected_skill_id": "repository-layout"
+  },
+  {
+    "case_id": "python-repository-layout",
+    "prompt": "Design the Python-specific repository layout, including src/ and a session-scoped virtual environment",
+    "expected_skill_id": "python-repository-layout"
+  },
+  {
+    "case_id": "specification-planning",
+    "prompt": "Plan the portable specification before implementation begins",
+    "expected_skill_id": "portable-specification-planning"
+  },
+  {
+    "case_id": "portable-implementation",
+    "prompt": "Implement the approved portable application plan as complete deterministic source",
+    "expected_skill_id": "portable-application-implementation"
+  },
+  {
+    "case_id": "unrelated-prose",
+    "prompt": "Write a short poem about autumn leaves falling from the trees",
+    "expected_skill_id": null
+  },
+  {
+    "case_id": "unrelated-cooking",
+    "prompt": "Explain how to properly season a cast iron skillet",
+    "expected_skill_id": null
+  },
+  {
+    "case_id": "vague-build-request",
+    "prompt": "I need to configure the build for this project",
+    "expected_skill_id": "cmake-build-system"
+  }
+]

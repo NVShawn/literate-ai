@@ -1,0 +1,72 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.checked-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "account_id": "north-42",
+          "opening_balance_cents": 125000,
+          "transactions": [
+            {"id": "payroll", "kind": "credit", "amount_cents": 300000, "category": "income"},
+            {"id": "rent", "kind": "debit", "amount_cents": 145000, "category": "housing"},
+            {"id": "groceries-1", "kind": "debit", "amount_cents": 23840, "category": "food"},
+            {"id": "train", "kind": "debit", "amount_cents": 7600, "category": "transport"},
+            {"id": "freelance", "kind": "credit", "amount_cents": 45000, "category": "income"},
+            {"id": "groceries-2", "kind": "debit", "amount_cents": 16160, "category": "food"}
+          ],
+          "category_budgets": [
+            {"category": "transport", "limit_cents": 10000},
+            {"category": "food", "limit_cents": 35000},
+            {"category": "housing", "limit_cents": 145000}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "account_id": "studio-7",
+          "opening_balance_cents": 50000,
+          "transactions": [
+            {"id": "client", "kind": "credit", "amount_cents": 120000, "category": "income"},
+            {"id": "tools", "kind": "debit", "amount_cents": 25000, "category": "business"},
+            {"id": "hotel", "kind": "debit", "amount_cents": 65000, "category": "travel"},
+            {"id": "flight", "kind": "debit", "amount_cents": 65000, "category": "travel"}
+          ],
+          "category_budgets": [
+            {"category": "travel", "limit_cents": 120000},
+            {"category": "business", "limit_cents": 30000}
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "account_id": "string",
+    "category_spend": [
+      {
+        "category": "string",
+        "limit_cents": "integer",
+        "remaining_cents": "integer",
+        "spent_cents": "integer",
+        "status": "string"
+      }
+    ],
+    "closing_balance_cents": "integer",
+    "credit_cents": "integer",
+    "debit_cents": "integer",
+    "largest_debit_id": "null|string",
+    "over_budget_categories": ["string"],
+    "transaction_count": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-javascript"]
+  },
+  "dependencies": []
+}

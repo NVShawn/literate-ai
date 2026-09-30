@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-release-contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/standardReleaseDeclaration" },
+    { "$ref": "#/$defs/standardProjectReleaseReceipt" }
+  ],
+  "$defs": {
+    "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+    "destination": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        { "type": "string", "minLength": 1, "maxLength": 4096 },
+        { "type": "string", "minLength": 1, "maxLength": 4096 }
+      ],
+      "items": false
+    },
+    "standardReleaseDeclaration": {
+      "$id": "urn:literate-ai:schema:v2:standard-release-declaration",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "component_lock_identity",
+        "root_component_revision",
+        "target_identity",
+        "root_artifact_identity",
+        "package_kind",
+        "packager_identity",
+        "destinations",
+        "entrypoints",
+        "resource_inputs",
+        "runtime_requirements"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-release-declaration" },
+        "execution_plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "root_component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "target_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "root_artifact_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "package_kind": { "enum": ["standalone-executable", "runtime-bundle", "directory", "archive", "installer", "container-image"] },
+        "packager_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "destinations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:standard-release-contracts#/$defs/destination" }
+        },
+        "entrypoints": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/packageEntrypoint" }
+        },
+        "resource_inputs": {
+          "type": "array",
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/packageInput" }
+        },
+        "runtime_requirements": {
+          "type": "array",
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/runtimeRequirement" }
+        }
+      }
+    },
+    "standardProjectReleaseReceipt": {
+      "$id": "urn:literate-ai:schema:v2:standard-project-release-receipt",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_lock_identity",
+        "execution_plan_identity",
+        "lifecycle_receipt_identity",
+        "artifact_graph_identity",
+        "release_declaration_identities",
+        "release_artifact_set_identity",
+        "publication_request_identity",
+        "transfer_receipt_identity",
+        "root_component_revision",
+        "target_identity"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-project-release-receipt" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "execution_plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "lifecycle_receipt_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "artifact_graph_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "release_declaration_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "release_artifact_set_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "publication_request_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "transfer_receipt_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "root_component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "target_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    }
+  }
+}

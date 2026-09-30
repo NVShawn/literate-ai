@@ -1,0 +1,2 @@
+recursive-include tools/build_backend *.py
+include src/literate_ai/_distribution_origin.json

@@ -1,0 +1,44 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:f2f3f9d2e4560b25574035cf92d7ff6e28aec7325036516317cd482893c0b903",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "file_count": 2,
+        "files": [
+          {
+            "digest": "b56da016cdc24e6bdc0757485a45c6c5e6e210f2047c8c5aa87d82017458c2ce",
+            "path": "README.txt",
+            "size": 17
+          },
+          {
+            "digest": "1dfa2f67596a8ac05dcc3919fe9bde2c813b0ce2978f3c5e887522dd23241ebb",
+            "path": "config.json",
+            "size": 19
+          }
+        ],
+        "release_digest": "cac53ea46f86c551760e3dcf8bac9bbcd9b84978a2026a4cba3ad53f8db29b03"
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "file_count": 2,
+        "files": [
+          {
+            "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "path": "notes/empty.txt",
+            "size": 0
+          },
+          {
+            "digest": "7997236379f21263537894baf700c87b29ccb2dd1f5f3390aedae5df698cca6c",
+            "path": "notes/release.txt",
+            "size": 17
+          }
+        ],
+        "release_digest": "f0d60455f1923f4f013a68722b9a78ce7b7c327ba19117923f193835acd8bb74"
+      }
+    }
+  ]
+}

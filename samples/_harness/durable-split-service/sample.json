@@ -1,0 +1,45 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "e11dab3794246d99d2bc81f5532e3cbc0f4ea8791423f07460335ea66220aced",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:2df46a9cdebfafc468342249eae094b1a5b78152d5f977a3751981de351c9735",
+  "execution_interface_identity": "sha256:382eb1b08386bab6a3279bcf1bf9504af92b257143951bd3603f16fd38b770e6",
+  "expected_assertions": [
+    "four-boundary-public-capability-portfolio",
+    "collector-only-upstream-access",
+    "reader-restart-serves-persisted-snapshot",
+    "partial-write-preserves-prior-snapshot",
+    "single-winner-lease-and-expiry-recovery",
+    "bounded-retry-and-freshness-progress",
+    "component-locks-preserve-four-boundary-composition",
+    "cyclonedx-preserves-four-boundary-composition",
+    "generated-independent-flow-passes"
+  ],
+  "expected_failures": [
+    "reader reaches upstream or cache write authority",
+    "partial snapshot becomes current",
+    "more than one collector invokes upstream for one window"
+  ],
+  "portfolio_manifest": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "f6451052356e465ec088cfd357d0041c9c87333c8cd6e5b92ab69f6b52ac9685",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "sample-portfolio",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "portfolio.json"
+  },
+  "proof_level": "executed",
+  "sample_id": "durable-split-service",
+  "scenario": "durable-split-service",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:b10e63f51cf1a04556403f19dfb697421127f981809ea059b8bcaf1830426e18"
+}

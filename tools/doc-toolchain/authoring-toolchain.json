@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/document-pair-authoring-toolchain@1",
+  "backend": "python-ooxml",
+  "packages": [
+    {
+      "name": "python-pptx",
+      "version": "1.0.2",
+      "import": "pptx"
+    },
+    {
+      "name": "python-docx",
+      "version": "1.2.0",
+      "import": "docx"
+    },
+    {
+      "name": "lxml",
+      "version": "5.4.0",
+      "import": "lxml"
+    },
+    {
+      "name": "Pillow",
+      "version": "11.3.0",
+      "import": "PIL"
+    }
+  ],
+  "bootstrap_root": "_build/doc-toolchain",
+  "plugin_backend": "codex-artifact-tool-fallback-only"
+}

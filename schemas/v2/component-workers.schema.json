@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:component-worker-contracts",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v1:component-worker-assignment"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:component-worker-routing"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:component-worker-product"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:component-artifact-handoff"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:component-artifact-import-receipt"
+    }
+  ],
+  "$defs": {
+    "component-worker-assignment": {
+      "$id": "urn:literate-ai:schema:v1:component-worker-assignment",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "worker_id",
+        "worker_identity",
+        "target_profile",
+        "target_flavor_selection_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:component-worker-assignment"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "worker_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+          "maxLength": 64
+        },
+        "worker_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "target_profile": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$",
+          "maxLength": 64
+        },
+        "target_flavor_selection_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    },
+    "component-worker-routing": {
+      "$id": "urn:literate-ai:schema:v1:component-worker-routing",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "component_lock_identity",
+        "catalog_identity",
+        "assignments"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:component-worker-routing"
+        },
+        "execution_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "component_lock_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "catalog_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "assignments": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:component-worker-assignment"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "component-worker-product": {
+      "$id": "urn:literate-ai:schema:v1:component-worker-product",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "worker_identity",
+        "acceptance_identity",
+        "exports"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:component-worker-product"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "worker_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "acceptance_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "exports": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:artifact-export"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "component-artifact-handoff": {
+      "$id": "urn:literate-ai:schema:v1:component-artifact-handoff",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "routing_identity",
+        "consumer",
+        "predecessors"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:component-artifact-handoff"
+        },
+        "routing_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "consumer": {
+          "$ref": "urn:literate-ai:schema:v1:component-worker-assignment"
+        },
+        "predecessors": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:component-worker-product"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      }
+    },
+    "component-artifact-import-receipt": {
+      "$id": "urn:literate-ai:schema:v1:component-artifact-import-receipt",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "handoff_identity",
+        "worker_identity",
+        "export_identities"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:component-artifact-import-receipt"
+        },
+        "handoff_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "worker_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "export_identities": {
+          "type": "array",
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          },
+          "minItems": 0,
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

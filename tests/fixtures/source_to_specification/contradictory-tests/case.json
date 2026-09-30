@@ -1,0 +1,42 @@
+{
+  "schema": "literate-ai/source-to-specification-case@1",
+  "case_id": "contradictory-tests",
+  "source_root": "source",
+  "surfaces": [
+    {"surface_id": "division-by-zero", "facet": "tests", "description": "Division by zero behavior"}
+  ],
+  "evidence": [
+    {"evidence_id": "calculator-source", "path": "calculator.py", "symbol": "divide"},
+    {"evidence_id": "calculator-tests", "path": "test_calculator.py", "symbol": "test_division_by_zero_contract_is_unsettled"}
+  ],
+  "observations": [
+    {
+      "observation_id": "zero-return-claim",
+      "surface_ids": ["division-by-zero"],
+      "facet": "tests",
+      "claim_kind": "conflict",
+      "statement": "One retained assertion treats division by zero as returning zero.",
+      "evidence_ids": ["calculator-source", "calculator-tests"],
+      "skill_id": "tests",
+      "confidence": 0.5
+    },
+    {
+      "observation_id": "zero-error-claim",
+      "surface_ids": ["division-by-zero"],
+      "facet": "tests",
+      "claim_kind": "conflict",
+      "statement": "A contradictory retained expectation requires ZeroDivisionError.",
+      "evidence_ids": ["calculator-tests"],
+      "skill_id": "tests",
+      "confidence": 0.5
+    }
+  ],
+  "expected": {
+    "claim_kinds": {"zero-return-claim": "conflict", "zero-error-claim": "conflict"},
+    "coverage": {"division-by-zero": "conflicting"},
+    "uncertainty_ids": ["uncertainty:zero-return-claim", "uncertainty:zero-error-claim"],
+    "statement_ids": [],
+    "flavor_ids": [],
+    "invalidated_surface_ids": []
+  }
+}

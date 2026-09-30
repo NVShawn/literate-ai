@@ -1,0 +1,217 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:7e58ecb48f1cc4dd58b5441e5330489dc169d5cfe86c6ea40ad566d58f519d1f",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "critical_path": [
+          "research",
+          "design",
+          "backend",
+          "integrate",
+          "qa",
+          "launch"
+        ],
+        "execution_order": [
+          "research",
+          "design",
+          "backend",
+          "frontend",
+          "prototype",
+          "integrate",
+          "qa",
+          "launch"
+        ],
+        "project_duration": 21,
+        "schedule": [
+          {
+            "critical": true,
+            "depends_on": ["design"],
+            "duration": 6,
+            "earliest_finish": 13,
+            "earliest_start": 7,
+            "id": "backend",
+            "latest_finish": 13,
+            "latest_start": 7,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": ["research"],
+            "duration": 3,
+            "earliest_finish": 7,
+            "earliest_start": 4,
+            "id": "design",
+            "latest_finish": 7,
+            "latest_start": 4,
+            "slack": 0
+          },
+          {
+            "critical": false,
+            "depends_on": ["design"],
+            "duration": 4,
+            "earliest_finish": 11,
+            "earliest_start": 7,
+            "id": "frontend",
+            "latest_finish": 13,
+            "latest_start": 9,
+            "slack": 2
+          },
+          {
+            "critical": true,
+            "depends_on": ["backend", "frontend", "prototype"],
+            "duration": 3,
+            "earliest_finish": 16,
+            "earliest_start": 13,
+            "id": "integrate",
+            "latest_finish": 16,
+            "latest_start": 13,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": ["qa"],
+            "duration": 1,
+            "earliest_finish": 21,
+            "earliest_start": 20,
+            "id": "launch",
+            "latest_finish": 21,
+            "latest_start": 20,
+            "slack": 0
+          },
+          {
+            "critical": false,
+            "depends_on": ["design"],
+            "duration": 5,
+            "earliest_finish": 12,
+            "earliest_start": 7,
+            "id": "prototype",
+            "latest_finish": 13,
+            "latest_start": 8,
+            "slack": 1
+          },
+          {
+            "critical": true,
+            "depends_on": ["integrate"],
+            "duration": 4,
+            "earliest_finish": 20,
+            "earliest_start": 16,
+            "id": "qa",
+            "latest_finish": 20,
+            "latest_start": 16,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": [],
+            "duration": 4,
+            "earliest_finish": 4,
+            "earliest_start": 0,
+            "id": "research",
+            "latest_finish": 4,
+            "latest_start": 0,
+            "slack": 0
+          }
+        ],
+        "task_count": 8
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "critical_path": ["brief", "api", "integration", "release"],
+        "execution_order": [
+          "brief",
+          "api",
+          "data",
+          "security",
+          "ui",
+          "integration",
+          "release"
+        ],
+        "project_duration": 9,
+        "schedule": [
+          {
+            "critical": true,
+            "depends_on": ["brief"],
+            "duration": 4,
+            "earliest_finish": 6,
+            "earliest_start": 2,
+            "id": "api",
+            "latest_finish": 6,
+            "latest_start": 2,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": [],
+            "duration": 2,
+            "earliest_finish": 2,
+            "earliest_start": 0,
+            "id": "brief",
+            "latest_finish": 2,
+            "latest_start": 0,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": ["brief"],
+            "duration": 4,
+            "earliest_finish": 6,
+            "earliest_start": 2,
+            "id": "data",
+            "latest_finish": 6,
+            "latest_start": 2,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": ["api", "data", "ui"],
+            "duration": 2,
+            "earliest_finish": 8,
+            "earliest_start": 6,
+            "id": "integration",
+            "latest_finish": 8,
+            "latest_start": 6,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": ["integration", "security"],
+            "duration": 1,
+            "earliest_finish": 9,
+            "earliest_start": 8,
+            "id": "release",
+            "latest_finish": 9,
+            "latest_start": 8,
+            "slack": 0
+          },
+          {
+            "critical": true,
+            "depends_on": ["api"],
+            "duration": 2,
+            "earliest_finish": 8,
+            "earliest_start": 6,
+            "id": "security",
+            "latest_finish": 8,
+            "latest_start": 6,
+            "slack": 0
+          },
+          {
+            "critical": false,
+            "depends_on": ["brief"],
+            "duration": 3,
+            "earliest_finish": 5,
+            "earliest_start": 2,
+            "id": "ui",
+            "latest_finish": 6,
+            "latest_start": 3,
+            "slack": 1
+          }
+        ],
+        "task_count": 7
+      }
+    }
+  ]
+}

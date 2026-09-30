@@ -1,0 +1,46 @@
+{
+  "schema": "literate-ai/source-to-specification-case@1",
+  "case_id": "two-revision-refresh-v2",
+  "origin_id": "two-revision-refresh",
+  "source_root": "source",
+  "previous_case": "../revision-1/case.json",
+  "changed_source_paths": ["a.py"],
+  "surfaces": [
+    {"surface_id": "retry-limit", "facet": "behavior", "description": "Retry limit"},
+    {"surface_id": "service-name", "facet": "behavior", "description": "Stable service name"}
+  ],
+  "evidence": [
+    {"evidence_id": "retry-source", "path": "a.py", "symbol": "retry_limit"},
+    {"evidence_id": "name-source", "path": "b.py", "symbol": "service_name"}
+  ],
+  "observations": [
+    {
+      "observation_id": "retry-observation",
+      "surface_ids": ["retry-limit"],
+      "facet": "behavior",
+      "claim_kind": "observed-current-behavior",
+      "statement": "The service attempts an operation at most three times.",
+      "evidence_ids": ["retry-source"],
+      "skill_id": "behavior-state",
+      "confidence": 1.0
+    },
+    {
+      "observation_id": "name-observation",
+      "surface_ids": ["service-name"],
+      "facet": "behavior",
+      "claim_kind": "observed-current-behavior",
+      "statement": "The service name is stable-service.",
+      "evidence_ids": ["name-source"],
+      "skill_id": "behavior-state",
+      "confidence": 1.0
+    }
+  ],
+  "expected": {
+    "claim_kinds": {"retry-observation": "observed-current-behavior", "name-observation": "observed-current-behavior"},
+    "coverage": {"retry-limit": "covered", "service-name": "covered"},
+    "uncertainty_ids": [],
+    "statement_ids": ["statement:retry-observation", "statement:name-observation"],
+    "flavor_ids": [],
+    "invalidated_surface_ids": ["retry-limit"]
+  }
+}

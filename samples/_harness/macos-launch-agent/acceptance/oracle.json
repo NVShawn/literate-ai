@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:b7fba7b49c1ccf3eb7da7078a8ed58c49b8fe5bb86c2079b33d87f1d27fb6864",
+  "oracle_results": [
+    {
+      "case_id": "menu-agent",
+      "expected_result": {
+        "bundle_id": "com.example.litai",
+        "label": "com.example.litai.menu",
+        "plist_file": "com.example.litai.menu.plist",
+        "program": "/usr/local/bin/litai-menu",
+        "argument_count": 2,
+        "run_at_load": true
+      }
+    },
+    {
+      "case_id": "sync-agent",
+      "expected_result": {
+        "bundle_id": "com.example.sync",
+        "label": "com.example.sync.hourly",
+        "plist_file": "com.example.sync.hourly.plist",
+        "program": "/opt/example/bin/sync",
+        "argument_count": 1,
+        "run_at_load": false
+      }
+    }
+  ]
+}

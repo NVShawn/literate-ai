@@ -1,0 +1,36 @@
+schema: spec-driven
+
+context: |
+  literate-ai is a software-neutral Component lifecycle framework extracted from the
+  source-grounded AI development model first implemented in OVA. The domain core must
+  not depend on OVA, Omniverse, Isaac, CodeGraph, a model provider, a build system, a
+  web framework, a programming language, or a particular storage backend.
+
+  Canonical concepts include Component definitions and revisions, spec bundles,
+  capability resolution, exact source snapshots, knowledge indices and evidence,
+  model portfolios/groups/selectors, generation runs, validation and security gates,
+  immutable source/artifact packages, publication records, settings profiles, event
+  history, living samples, self-hosting, skill-directed source-to-specification
+  authoring, and composable target-specific Flavors.
+
+  The initial reference kernel is Python 3.11+ with a minimal reviewed runtime dependency
+  surface. Node.js is isolated contributor tooling for OpenSpec validation and is not a
+  framework runtime requirement. Wire contracts remain language-neutral.
+
+  The migration has exactly two phases: first build and shadow-validate literate-ai
+  while OVA remains authoritative; then rebase OVA and retire duplicates after parity,
+  migration, rollback, and release gates pass.
+
+rules:
+  proposal:
+    - State which behavior is software-neutral and which remains in an application adapter.
+    - Never describe planned security controls as implemented.
+  design:
+    - Keep domain objects separate from mutable cache projections and infrastructure adapters.
+    - Define identity, provenance, failure, migration, and rollback semantics.
+  specs:
+    - Every requirement must have at least one observable scenario.
+    - Use SHALL for normative behavior and name the authoritative output object.
+  tasks:
+    - Organize implementation work under Phase 1 or Phase 2.
+    - Leave tasks unchecked until code and verification evidence exist in this repository.

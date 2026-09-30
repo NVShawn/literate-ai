@@ -1,0 +1,937 @@
+{
+  "schema_version": 2,
+  "catalog_id": "urn:literate-ai:schema-catalog:v2",
+  "release": "1.1.0",
+  "dialect": "https://json-schema.org/draft/2020-12/schema",
+  "compatibility": "compatibility.json",
+  "schemas": [
+    {
+      "file": "shared-cache.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:shared-cache-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:shared-cache-namespace-policy",
+        "urn:literate-ai:schema:v2:shared-cache-configuration"
+      ]
+    },
+    {
+      "file": "native-cli-acceptance.schema.json",
+      "root_id": "literate-ai/native-cli-acceptance@2",
+      "public_ids": []
+    },
+    {
+      "file": "component-workers.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:component-worker-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:component-worker-assignment",
+        "urn:literate-ai:schema:v1:component-worker-routing",
+        "urn:literate-ai:schema:v1:component-worker-product",
+        "urn:literate-ai:schema:v1:component-artifact-handoff",
+        "urn:literate-ai:schema:v1:component-artifact-import-receipt"
+      ]
+    },
+    {
+      "file": "repository-commands.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:repository-commands",
+      "public_ids": []
+    },
+    {
+      "file": "repository-lock.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:repository-lock",
+      "public_ids": []
+    },
+    {
+      "file": "authority-graph.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:authority-graph",
+      "public_ids": []
+    },
+    {
+      "file": "inherited-session.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:inherited-session-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:inherited-session-context-bundle",
+        "urn:literate-ai:schema:v1:inherited-session-request",
+        "urn:literate-ai:schema:v1:inherited-session-response",
+        "urn:literate-ai:schema:v1:inherited-session-handoff-evidence",
+        "urn:literate-ai:schema:v1:inherited-session-directory-request",
+        "urn:literate-ai:schema:v1:inherited-session-directory-response",
+        "urn:literate-ai:schema:v1:inherited-session-source-payload"
+      ]
+    },
+    {
+      "file": "standard-source-admission.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-source-admission-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:standard-source-selector",
+        "urn:literate-ai:schema:v1:standard-source-selector-set",
+        "urn:literate-ai:schema:v1:standard-source-test-result",
+        "urn:literate-ai:schema:v2:standard-source-admission-evidence",
+        "urn:literate-ai:schema:v2:standard-source-admission-membership",
+        "urn:literate-ai:schema:v2:standard-source-admission-cache-entry",
+        "urn:literate-ai:schema:v1:standard-source-admission-receipt-composition"
+      ]
+    },
+    {
+      "file": "model-scope.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:model-scope-binding",
+      "public_ids": []
+    },
+    {
+      "file": "project-release.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:project-release-contracts",
+      "public_ids": [
+        "literate-ai/release-policy@1",
+        "literate-ai/release-policy@2",
+        "literate-ai/release-plan@1",
+        "literate-ai/prepared-release@1",
+        "literate-ai/prepared-release@2",
+        "literate-ai/release-publication-receipt@1",
+        "literate-ai/release-published-verification@1"
+      ]
+    },
+    {
+      "file": "evidence-ledger.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:evidence-ledger-contracts",
+      "public_ids": [
+        "literate-ai/evidence-ledger@1",
+        "literate-ai/evidence-ledger-node@1"
+      ]
+    },
+    {
+      "file": "execution-dispatch.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:execution-dispatch-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:gpu-requirement",
+        "urn:literate-ai:schema:v1:execution-requirements",
+        "urn:literate-ai:schema:v1:execution-worker-parameter",
+        "urn:literate-ai:schema:v1:execution-worker-parameter-value",
+        "urn:literate-ai:schema:v1:execution-worker-environment",
+        "urn:literate-ai:schema:v1:execution-worker",
+        "urn:literate-ai:schema:v1:execution-worker-catalog",
+        "urn:literate-ai:schema:v1:observed-gpu-device",
+        "urn:literate-ai:schema:v1:worker-hardware-observation",
+        "urn:literate-ai:schema:v1:worker-hardware-observation-catalog",
+        "urn:literate-ai:schema:v2:execution-source-materialization",
+        "urn:literate-ai:schema:v2:execution-dispatch-request",
+        "urn:literate-ai:schema:v2:observed-execution-environment",
+        "urn:literate-ai:schema:v2:execution-dispatch-result",
+        "urn:literate-ai:schema:v1:remote-evidence-file",
+        "urn:literate-ai:schema:v1:remote-failure-diagnostic",
+        "urn:literate-ai:schema:v1:remote-lifecycle-evidence-manifest",
+        "urn:literate-ai:schema:v1:remote-execution-control-result",
+        "urn:literate-ai:schema:v1:remote-evidence-custody-receipt"
+      ]
+    },
+    {
+      "file": "worker-wheelhouse.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:worker-wheelhouse-contracts",
+      "public_ids": [
+        "literate-ai/worker-wheelhouse-manifest@1",
+        "literate-ai/worker-bootstrap-evidence@1",
+        "literate-ai/worker-bootstrap-evidence@2"
+      ]
+    },
+    {
+      "file": "behavioral-surface-inventory.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:behavioral-surface-inventory",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:behavioral-surface-inventory-item"
+      ]
+    },
+    {
+      "file": "inverse-evidence-partition-manifest.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:inverse-evidence-partition-manifest",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:inverse-evidence-partition-item"
+      ]
+    },
+    {
+      "file": "inverse-evidence-custody.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:inverse-evidence-custody",
+      "public_ids": []
+    },
+    {
+      "file": "inverse-model-evidence-batch-plan.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:inverse-model-evidence-batch-plan",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:inverse-model-evidence-batch"
+      ]
+    },
+    {
+      "file": "application-generation-v4.schema.json",
+      "root_id": "urn:literate-ai:schema:v4:application-generation-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v4:generation-provenance"
+      ]
+    },
+    {
+      "file": "application-generation-v3.schema.json",
+      "root_id": "urn:literate-ai:schema:v3:application-generation-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-source-evidence-readiness",
+        "urn:literate-ai:schema:v3:generation-context-binding",
+        "urn:literate-ai:schema:v3:generation-provenance"
+      ]
+    },
+    {
+      "file": "application-generation.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:application-generation-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:generation-provenance"
+      ]
+    },
+    {
+      "file": "component-authority-projection.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-authority-projection-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-authority-projection"
+      ]
+    },
+    {
+      "file": "component-authoring-locks.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-authoring-lock-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-content-selector",
+        "urn:literate-ai:schema:v2:component-asset-selector",
+        "urn:literate-ai:schema:v2:resolved-component-asset",
+        "urn:literate-ai:schema:v2:locked-flavor-requirement",
+        "urn:literate-ai:schema:v2:component-authoring",
+        "urn:literate-ai:schema:v2:locked-component-revision",
+        "urn:literate-ai:schema:v2:component-lock-node",
+        "urn:literate-ai:schema:v2:component-lock",
+        "urn:literate-ai:schema:v2:component-resolution-audit"
+      ]
+    },
+    {
+      "file": "component-artifacts.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-artifact-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:generated-text-tree",
+        "urn:literate-ai:schema:v2:assembled-source-tree-manifest",
+        "urn:literate-ai:schema:v2:artifact-export-declaration",
+        "urn:literate-ai:schema:v2:artifact-export",
+        "urn:literate-ai:schema:v2:component-build-action-request",
+        "urn:literate-ai:schema:v2:component-build-manifest",
+        "urn:literate-ai:schema:v2:exact-link-plan",
+        "urn:literate-ai:schema:v2:artifact-materialization-plan",
+        "urn:literate-ai:schema:v2:composite-build-request",
+        "urn:literate-ai:schema:v2:artifact-build-graph",
+        "urn:literate-ai:schema:v2:package-plan",
+        "urn:literate-ai:schema:v2:package-result",
+        "urn:literate-ai:schema:v2:release-artifact-set"
+      ]
+    },
+    {
+      "file": "component-commands.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-command-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-lifecycle-command",
+        "urn:literate-ai:schema:v2:component-command-contract",
+        "urn:literate-ai:schema:v2:multi-entrypoint-component-semantics@1",
+        "urn:literate-ai:schema:v2:library-capability-import@1",
+        "urn:literate-ai:schema:v2:library-import-surface@1",
+        "urn:literate-ai:schema:v2:library-consumer-binding@1"
+      ]
+    },
+    {
+      "file": "component-execution-planning.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-execution-planning-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-generation-key",
+        "urn:literate-ai:schema:v2:component-generation-plan",
+        "urn:literate-ai:schema:v2:component-topological-layer",
+        "urn:literate-ai:schema:v2:component-action-plan",
+        "urn:literate-ai:schema:v2:component-execution-plan"
+      ]
+    },
+    {
+      "file": "provider-resolution.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:provider-resolution-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:provider-capability-set",
+        "urn:literate-ai:schema:v2:provider-override-declaration",
+        "urn:literate-ai:schema:v2:provider-resolution",
+        "urn:literate-ai:schema:v2:provider-resolution-declaration",
+        "urn:literate-ai:schema:v2:provider-resolution-request"
+      ]
+    },
+    {
+      "file": "component-generation-context.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-generation-context-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-generation-context-manifest",
+        "urn:literate-ai:schema:v2:generation-complexity-budget",
+        "urn:literate-ai:schema:v2:generation-complexity-decision",
+        "urn:literate-ai:schema:v2:bounded-component-generation-request"
+      ]
+    },
+    {
+      "file": "candidate-repair.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:candidate-repair-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:candidate-repair-diagnostic",
+        "urn:literate-ai:schema:v2:candidate-repair-request",
+        "urn:literate-ai:schema:v2:candidate-attempt",
+        "urn:literate-ai:schema:v2:candidate-attempt-chain"
+      ]
+    },
+    {
+      "file": "forward-generation-context-evidence.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:forward-generation-context-segment-binding",
+        "urn:literate-ai:schema:v2:direct-interface-context-binding",
+        "urn:literate-ai:schema:v2:forward-generation-prompt-journal",
+        "urn:literate-ai:schema:v2:component-context-benchmark-record",
+        "urn:literate-ai:schema:v2:forward-generation-context-cache-entry",
+        "urn:literate-ai:schema:v2:forward-generation-context-cache-report"
+      ]
+    },
+    {
+      "file": "learning.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:learning-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:learning-evidence-binding",
+        "urn:literate-ai:schema:v2:learning-signal-evidence",
+        "urn:literate-ai:schema:v2:learning-observation",
+        "urn:literate-ai:schema:v2:learning-classification",
+        "urn:literate-ai:schema:v2:learning-plan-input",
+        "urn:literate-ai:schema:v2:learning-proposal"
+      ]
+    },
+    {
+      "file": "repository-lineage.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:repository-lineage-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:repository-fetch-deadline-policy",
+        "urn:literate-ai:schema:v1:repository-parent-reference",
+        "urn:literate-ai:schema:v1:repository-parent-selection",
+        "urn:literate-ai:schema:v1:repository-lineage-node",
+        "urn:literate-ai:schema:v1:repository-lineage"
+      ]
+    },
+    {
+      "file": "repository-reparenting.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:repository-reparenting-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:repository-reparent-change",
+        "urn:literate-ai:schema:v1:repository-reparent-plan"
+      ]
+    },
+    {
+      "file": "repository-updates.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:repository-update-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:repository-lineage-update-plan",
+        "urn:literate-ai:schema:v1:repository-lineage-update-apply",
+        "urn:literate-ai:schema:v2:repository-lineage-update-apply"
+      ]
+    },
+    {
+      "file": "component-generation-scheduling.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-generation-scheduling-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-generation-runtime-observation",
+        "urn:literate-ai:schema:v2:component-generation-resume-candidate",
+        "urn:literate-ai:schema:v2:component-generation-run-output",
+        "urn:literate-ai:schema:v2:component-generation-node-result",
+        "urn:literate-ai:schema:v2:component-generation-schedule-result"
+      ]
+    },
+    {
+      "file": "executable-components.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:executable-component-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:public-interface-contract",
+        "urn:literate-ai:schema:v2:component-interface-binding",
+        "urn:literate-ai:schema:v2:executable-component-edge",
+        "urn:literate-ai:schema:v2:node-target-flavor-selection",
+        "urn:literate-ai:schema:v2:authored-binary-asset",
+        "urn:literate-ai:schema:v2:candidate-replacement-policy",
+        "urn:literate-ai:schema:v2:lifecycle-driver-trust-binding",
+        "urn:literate-ai:schema:v2:component-invalidation-decision",
+        "urn:literate-ai:schema:v2:component-invalidation-table"
+      ]
+    },
+    {
+      "file": "components.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:component-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:component-definition",
+        "urn:literate-ai:schema:v2:component-revision"
+      ]
+    },
+    {
+      "file": "literate-specifications.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:literate-specification-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:specification-node-authoring",
+        "urn:literate-ai:schema:v2:specification-node",
+        "urn:literate-ai:schema:v2:effective-specification-context"
+      ]
+    },
+    {
+      "file": "flavors.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:flavor-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:flavor-axis",
+        "urn:literate-ai:schema:v2:toolchain-constraint",
+        "urn:literate-ai:schema:v2:flavor-definition",
+        "urn:literate-ai:schema:v2:flavor-revision",
+        "urn:literate-ai:schema:v2:target-profile",
+        "urn:literate-ai:schema:v2:flavor-set-lock",
+        "urn:literate-ai:schema:v2:effective-specification-set",
+        "urn:literate-ai:schema:v2:effective-revision"
+      ]
+    },
+    {
+      "file": "generation-cache-v1.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:generation-cache-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:source-cache-model-binding",
+        "urn:literate-ai:schema:v1:source-derivation-cache-key",
+        "urn:literate-ai:schema:v1:accepted-source-derivation",
+        "urn:literate-ai:schema:v1:source-cache-target",
+        "urn:literate-ai:schema:v1:source-cache-configuration",
+        "urn:literate-ai:schema:v1:cached-source-file",
+        "urn:literate-ai:schema:v1:accepted-source-cache-entry",
+        "urn:literate-ai:schema:v1:generated-source-index-binding"
+      ]
+    },
+    {
+      "file": "generation-cache.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:generation-cache-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:source-cache-model-binding",
+        "urn:literate-ai:schema:v1:accepted-source-lookup-key",
+        "urn:literate-ai:schema:v2:source-derivation-cache-key",
+        "urn:literate-ai:schema:v2:accepted-source-derivation",
+        "urn:literate-ai:schema:v2:source-cache-target",
+        "urn:literate-ai:schema:v2:source-cache-configuration",
+        "urn:literate-ai:schema:v2:cached-source-file",
+        "urn:literate-ai:schema:v1:source-intelligence-artifact",
+        "urn:literate-ai:schema:v1:source-intelligence-attachment",
+        "urn:literate-ai:schema:v2:accepted-source-cache-entry"
+      ]
+    },
+    {
+      "file": "standard-accepted-source-cache-entry.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-accepted-source-cache-entry",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-accepted-source-cache-entry"
+      ]
+    },
+    {
+      "file": "model-routing-v2.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:model-routing-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:model-endpoint",
+        "urn:literate-ai:schema:v2:model-group",
+        "urn:literate-ai:schema:v2:stage-model-policy",
+        "urn:literate-ai:schema:v2:model-route-decision"
+      ]
+    },
+    {
+      "file": "publication-v2.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:publication-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:publication-request",
+        "urn:literate-ai:schema:v2:publication-authorization",
+        "urn:literate-ai:schema:v2:publication-manifest",
+        "urn:literate-ai:schema:v2:import-request",
+        "urn:literate-ai:schema:v2:import-authorization",
+        "urn:literate-ai:schema:v2:transfer-receipt"
+      ]
+    },
+    {
+      "file": "project-initialization.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:project-initialization-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:project-initialization-origin",
+        "urn:literate-ai:schema:v1:project-initialization-baseline-file",
+        "urn:literate-ai:schema:v1:project-initialization-baseline"
+      ]
+    },
+    {
+      "file": "project-update.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:project-update-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:project-update-file",
+        "urn:literate-ai:schema:v2:project-update-plan"
+      ]
+    },
+    {
+      "file": "projects-v1.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:project-skill-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:project-definition",
+        "urn:literate-ai:schema:v1:project-lifecycle-driver",
+        "urn:literate-ai:schema:v1:project-source-index-requirement"
+      ]
+    },
+    {
+      "file": "projects-skills.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:project-skill-contracts",
+      "public_ids": [
+        "literate-ai/repository-policy@1",
+        "urn:literate-ai:schema:v2:project-definition",
+        "urn:literate-ai:schema:v2:project-lifecycle-driver",
+        "urn:literate-ai:schema:v2:ci-target-preference",
+        "urn:literate-ai:schema:v1:project-source-intelligence-policy",
+        "literate-ai/source-intelligence-stage-status@1",
+        "urn:literate-ai:schema:v1:skill-reference",
+        "urn:literate-ai:schema:v1:specification-to-source-skill"
+      ]
+    },
+    {
+      "file": "rebuild-cache-v1.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:rebuild-source-cache-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:rebuild-source-cache-operator-root",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-derivation-manifest",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-control",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-decision-item",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-decision",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-lifecycle-member",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-lifecycle-binding",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-publication-member",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-publication-offer",
+        "urn:literate-ai:schema:v1:rebuild-source-cache-publication-result"
+      ]
+    },
+    {
+      "file": "rebuild-cache.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:rebuild-source-cache-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:rebuild-source-cache-operator-root",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-derivation-manifest",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-control",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-decision-item",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-decision",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-member",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-binding",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-publication-member",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-publication-offer",
+        "urn:literate-ai:schema:v2:rebuild-source-cache-publication-result"
+      ]
+    },
+    {
+      "file": "repository-sources.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:repository-source-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:repository-source-dependency",
+        "urn:literate-ai:schema:v1:repository-source-lock",
+        "urn:literate-ai:schema:v1:repository-build-plan",
+        "urn:literate-ai:schema:v1:repository-source-admission"
+      ]
+    },
+    {
+      "file": "sbom.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:cyclonedx-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:cyclonedx-managed-component",
+        "urn:literate-ai:schema:v1:cyclonedx-managed-edge",
+        "urn:literate-ai:schema:v2:cyclonedx-managed-graph",
+        "urn:literate-ai:schema:v1:cyclonedx-managed-graph",
+        "urn:literate-ai:schema:v1:cyclonedx-repository-source-resolution",
+        "urn:literate-ai:schema:v2:cyclonedx-bom-binding",
+        "urn:literate-ai:schema:v1:cyclonedx-bom-binding"
+      ]
+    },
+    {
+      "file": "security-v2.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:security-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:security-origin-attestation",
+        "urn:literate-ai:schema:v2:security-finding",
+        "urn:literate-ai:schema:v2:security-classification",
+        "urn:literate-ai:schema:v2:build-request-declaration",
+        "urn:literate-ai:schema:v2:build-request",
+        "urn:literate-ai:schema:v2:observation-request",
+        "urn:literate-ai:schema:v2:build-authorization",
+        "urn:literate-ai:schema:v2:observation-execution-authorization",
+        "urn:literate-ai:schema:v2:security-scan-report",
+        "urn:literate-ai:schema:v2:authorization-revocation-set"
+      ]
+    },
+    {
+      "file": "semantic-refinement.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:semantic-refinement-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:semantic-conflict",
+        "urn:literate-ai:schema:v2:semantic-refinement-proposal",
+        "urn:literate-ai:schema:v2:semantic-refinement-review",
+        "urn:literate-ai:schema:v2:semantic-refinement-request",
+        "urn:literate-ai:schema:v2:semantic-refinement-resolution"
+      ]
+    },
+    {
+      "file": "standard-command-profiles.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-command-profile-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-language-command-profile",
+        "urn:literate-ai:schema:v2:standard-build-system-command-profile",
+        "urn:literate-ai:schema:v2:standard-repo-man-command-profile",
+        "urn:literate-ai:schema:v2:standard-make-command-profile",
+        "urn:literate-ai:schema:v2:standard-cmake-command-profile",
+        "urn:literate-ai:schema:v2:standard-cargo-command-profile",
+        "urn:literate-ai:schema:v2:standard-npm-command-profile",
+        "urn:literate-ai:schema:v2:standard-python-wheel-command-profile",
+        "urn:literate-ai:schema:v2:standard-platform-command-profile",
+        "urn:literate-ai:schema:v2:standard-accelerator-command-profile"
+      ]
+    },
+    {
+      "file": "standard-lifecycle-checkpoint.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-lifecycle-checkpoint-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-lifecycle-attempt-evidence",
+        "urn:literate-ai:schema:v2:standard-lifecycle-stage-evidence",
+        "urn:literate-ai:schema:v2:standard-lifecycle-checkpoint"
+      ]
+    },
+    {
+      "file": "standard-lifecycle-membership.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-lifecycle-membership-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-node-failure-evidence",
+        "urn:literate-ai:schema:v2:standard-planned-lifecycle-node",
+        "urn:literate-ai:schema:v2:standard-node-cache-decision",
+        "urn:literate-ai:schema:v2:standard-project-lifecycle-membership",
+        "urn:literate-ai:schema:v2:standard-aggregate-receipt"
+      ]
+    },
+    {
+      "file": "standard-lifecycle-policy.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-lifecycle-policy",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-lifecycle-policy",
+        "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence"
+      ]
+    },
+    {
+      "file": "standard-root-integration.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:standard-root-integration-evidence",
+      "public_ids": []
+    },
+    {
+      "file": "qualification-lifecycle.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:qualification-lifecycle-result",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:qualification-case-surface-binding",
+        "urn:literate-ai:schema:v2:qualification-verifier-case-map",
+        "urn:literate-ai:schema:v2:qualification-parity-case-evidence",
+        "urn:literate-ai:schema:v2:qualification-parity-evidence",
+        "urn:literate-ai:schema:v2:qualification-lifecycle-run-evidence"
+      ]
+    },
+    {
+      "file": "standard-toolchain-closure.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-toolchain-closure",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-component-command-authority",
+        "urn:literate-ai:schema:v2:standard-provider-artifact-binding",
+        "urn:literate-ai:schema:v2:standard-toolchain-closure"
+      ]
+    },
+    {
+      "file": "standard-post-source-lifecycle.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-component-build-intent",
+        "urn:literate-ai:schema:v2:standard-build-authorization",
+        "urn:literate-ai:schema:v2:standard-component-build-plan",
+        "urn:literate-ai:schema:v2:standard-source-cache-membership"
+      ]
+    },
+    {
+      "file": "standard-release.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-release-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-release-declaration",
+        "urn:literate-ai:schema:v2:standard-project-release-receipt"
+      ]
+    },
+    {
+      "file": "standard-post-source-evidence.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-post-source-evidence-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-component-build-evidence",
+        "urn:literate-ai:schema:v2:standard-generated-test-case-evidence",
+        "urn:literate-ai:schema:v2:standard-entrypoint-generated-test-evidence",
+        "urn:literate-ai:schema:v2:standard-generated-test-execution-evidence",
+        "urn:literate-ai:schema:v2:standard-entrypoint-execution-evidence",
+        "urn:literate-ai:schema:v2:standard-component-execution-evidence",
+        "urn:literate-ai:schema:v2:standard-component-acceptance-evidence"
+      ]
+    },
+    {
+      "file": "source-generation-boundary.schema.json",
+      "root_id": "urn:literate-ai:schema:v4:source-generation-boundary-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v4:generated-source-candidate",
+        "urn:literate-ai:schema:v3:source-generation-run-output",
+        "urn:literate-ai:schema:v3:source-generation-resume-candidate",
+        "urn:literate-ai:schema:v3:source-generation-node-result",
+        "urn:literate-ai:schema:v3:source-generation-schedule-result",
+        "urn:literate-ai:schema:v5:source-generation-provenance",
+        "urn:literate-ai:schema:v4:source-generation-checkpoint",
+        "urn:literate-ai:schema:v1:component-source-workspace-custody",
+        "urn:literate-ai:schema:v1:project-source-generation-custody"
+      ]
+    },
+    {
+      "file": "source-promotion.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:source-promotion-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:generation-input-audit-entry",
+        "urn:literate-ai:schema:v2:generation-input-audit",
+        "urn:literate-ai:schema:v2:source-promotion-provenance",
+        "urn:literate-ai:schema:v3:source-promotion-provenance",
+        "urn:literate-ai:schema:v2:legacy-source-promotion-journal-migration"
+      ]
+    },
+    {
+      "file": "source-qualification.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:source-qualification-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:regenerative-qualification-policy",
+        "urn:literate-ai:schema:v2:clean-regeneration-evidence",
+        "urn:literate-ai:schema:v2:regenerative-qualification-decision",
+        "urn:literate-ai:schema:v2:operational-qualification-attestation",
+        "urn:literate-ai:schema:v1:qualification-run-checkpoint",
+        "urn:literate-ai:schema:v1:qualification-run-checkpoint-key",
+        "urn:literate-ai:schema:v2:local-regenerative-qualification-profile",
+        "urn:literate-ai:schema:v2:local-qualification-signature",
+        "urn:literate-ai:schema:v3:regenerative-qualification-evidence"
+      ]
+    },
+    {
+      "file": "semantic-comparison.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:semantic-comparison-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:semantic-requirement-graph",
+        "urn:literate-ai:schema:v1:semantic-comparison-model-output",
+        "urn:literate-ai:schema:v1:semantic-comparison-result"
+      ]
+    },
+    {
+      "file": "source-translation-semantics.schema.json",
+      "root_id": "urn:literate-ai:schema:v5:source-translation-semantics-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:source-to-specification-model-output",
+        "urn:literate-ai:schema:v3:source-to-specification-model-call-journal",
+        "urn:literate-ai:schema:v5:source-to-specification-translation-run"
+      ]
+    },
+    {
+      "file": "source-translation.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:source-translation-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:source-to-specification-model-output",
+        "urn:literate-ai:schema:v1:source-to-specification-intelligence",
+        "urn:literate-ai:schema:v1:source-to-specification-model-call-journal",
+        "urn:literate-ai:schema:v1:source-to-specification-translation-run"
+      ]
+    },
+    {
+      "file": "source-translation-batching.schema.json",
+      "root_id": "urn:literate-ai:schema:v4:source-translation-batching-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:source-to-specification-model-call-journal",
+        "urn:literate-ai:schema:v4:source-to-specification-translation-run"
+      ]
+    },
+    {
+      "file": "source-translation-evidence.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:source-translation-evidence-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:source-to-specification-intelligence",
+        "urn:literate-ai:schema:v2:source-to-specification-translation-run"
+      ]
+    },
+    {
+      "file": "source-translation-evidence-v3.schema.json",
+      "root_id": "urn:literate-ai:schema:v3:source-translation-evidence-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v3:source-to-specification-intelligence",
+        "urn:literate-ai:schema:v3:source-to-specification-translation-run"
+      ]
+    },
+    {
+      "file": "source-to-specification-v3.schema.json",
+      "root_id": "urn:literate-ai:schema:v3:source-to-specification-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v3:component-graph-draft",
+        "urn:literate-ai:schema:v3:source-to-specification-result"
+      ]
+    },
+    {
+      "file": "source-to-specification.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:source-to-specification-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:spec-authoring-skill",
+        "urn:literate-ai:schema:v2:spec-authoring-skill-set",
+        "urn:literate-ai:schema:v2:source-to-specification-request",
+        "urn:literate-ai:schema:v2:behavior-observation",
+        "urn:literate-ai:schema:v2:specification-draft-set",
+        "urn:literate-ai:schema:v2:source-specification-coverage-map",
+        "urn:literate-ai:schema:v2:uncertainty-ledger",
+        "urn:literate-ai:schema:v2:component-graph-draft",
+        "urn:literate-ai:schema:v2:source-to-specification-result"
+      ]
+    },
+    {
+      "file": "testing.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:testing-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:project-test-receipt-policy",
+        "urn:literate-ai:schema:v1:generated-test-suite",
+        "urn:literate-ai:schema:v1:project-test-receipt",
+        "urn:literate-ai:schema:v1:project-test-receipt-provisional",
+        "urn:literate-ai:schema:v1:project-test-receipt-finalized-candidate",
+        "urn:literate-ai:schema:v2:known-test-failure-annotation",
+        "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "urn:literate-ai:schema:v2:known-test-failure-report",
+        "literate-ai/external-test-events@1"
+      ]
+    },
+    {
+      "file": "target-matrix.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:target-matrix-contracts",
+      "public_ids": [
+        "literate-ai/target-matrix-cell@1",
+        "literate-ai/target-matrix@1",
+        "literate-ai/target-matrix-stage-evidence@1",
+        "literate-ai/target-matrix-cell-receipt@1",
+        "literate-ai/target-matrix-aggregate-receipt@1"
+      ]
+    },
+    {
+      "file": "html-observability.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:html-observability-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:html-observability-view",
+        "urn:literate-ai:schema:v1:html-observability-source-binding",
+        "urn:literate-ai:schema:v1:html-observability-external-asset",
+        "urn:literate-ai:schema:v1:html-observability-renderer-binding",
+        "urn:literate-ai:schema:v1:html-observability-provenance",
+        "urn:literate-ai:schema:v1:html-observability-artifact",
+        "urn:literate-ai:schema:v1:html-observability-surface",
+        "urn:literate-ai:schema:v1:html-observability-render-request",
+        "urn:literate-ai:schema:v1:html-observability-render-refusal",
+        "urn:literate-ai:schema:v1:html-observability-render-result",
+        "urn:literate-ai:schema:v1:html-observability-staleness-report"
+      ]
+    },
+    {
+      "file": "isolation.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:isolation-contracts",
+      "public_ids": [
+        "literate-ai/isolation-policy@1",
+        "literate-ai/isolation-request@1",
+        "literate-ai/isolation-observation@1",
+        "literate-ai/isolation-decision@1"
+      ]
+    },
+    {
+      "file": "evidence.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:evidence-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:evidence-derivation-run",
+        "urn:literate-ai:schema:v2:evidence-platform-run",
+        "urn:literate-ai:schema:v2:evidence-matrix",
+        "urn:literate-ai:schema:v2:evidence-locator"
+      ]
+    },
+    {
+      "file": "evidence-trust.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:evidence-trust-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:evidence-signer-rule",
+        "urn:literate-ai:schema:v2:evidence-revocations",
+        "urn:literate-ai:schema:v2:evidence-trust-policy",
+        "urn:literate-ai:schema:v2:run-evidence-expectation"
+      ]
+    },
+    {
+      "file": "evidence-verification.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:evidence-verification-plan-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:evidence-verification-plan",
+        "literate-ai/evidence-verification-result@1",
+        "literate-ai/evidence-publication-result@1",
+        "urn:literate-ai:schema:v2:current-evidence-map"
+      ]
+    },
+    {
+      "file": "retained-libraries.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-library-contracts",
+      "public_ids": [
+        "literate-ai/retained-library-export-set@1",
+        "literate-ai/retained-library-binding@1",
+        "literate-ai/retained-cargo-workspace-plan@1"
+      ]
+    },
+    {
+      "file": "version-check.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:version-check",
+      "public_ids": [
+        "literate-ai/version-check@1"
+      ]
+    },
+    {
+      "file": "project-lock-health.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:project-lock-health",
+      "public_ids": []
+    },
+    {
+      "file": "project-verify.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:project-verify",
+      "public_ids": [
+        "literate-ai/project-verify@1"
+      ]
+    },
+    {
+      "file": "native-sdks.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:native-sdk-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:native-sdk-snapshot",
+        "urn:literate-ai:schema:v2:native-sdk-build-layout",
+        "urn:literate-ai:schema:v2:native-sdk-build-recipe"
+      ]
+    },
+    {
+      "file": "worker-capacity.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:worker-capacity-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:worker-capacity-policy",
+        "urn:literate-ai:schema:v1:worker-capacity-observation",
+        "literate-ai/worker-capacity-assessment@1"
+      ]
+    },
+    {
+      "file": "worker-health-configuration.schema.json",
+      "root_id": "literate-ai/private-worker-health@1",
+      "public_ids": [
+        "literate-ai/worker-cleanup-authorization@1"
+      ]
+    },
+    {
+      "file": "worker-alerts.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:worker-alert-contracts",
+      "public_ids": [
+        "literate-ai/private-worker-alert-history@1",
+        "literate-ai/worker-health-event@1"
+      ]
+    },
+    {
+      "file": "html-observability-sources.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:html-observability-sources",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:html-performance-history",
+        "urn:literate-ai:schema:v2:html-workflow-routing-catalog",
+        "urn:literate-ai:schema:v1:html-observability-dashboard"
+      ]
+    }
+  ]
+}

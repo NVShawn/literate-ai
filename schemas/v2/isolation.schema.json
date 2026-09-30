@@ -1,0 +1,1219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:isolation-contracts",
+  "description": "Non-authorizing isolation policy and local enforcement reports. Typed decoding also validates canonical control ordering and unique stage rules; consumers must recompute decisions over the exact input closure. No record authenticates a runner or grants execution.",
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$"
+    },
+    "level": {
+      "enum": [
+        "host-yolo",
+        "process-limited",
+        "os-sandboxed",
+        "vm-isolated"
+      ]
+    },
+    "controls": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "minimal-environment",
+          "network-denied",
+          "network-egress-restricted",
+          "no-credentials",
+          "no-devices",
+          "output-limit",
+          "process-tree-termination",
+          "read-only-inputs",
+          "resource-limits",
+          "separate-outputs",
+          "wall-time-limit"
+        ]
+      }
+    },
+    "stage": {
+      "enum": [
+        "application-execution",
+        "build",
+        "dependency-resolution",
+        "generated-test",
+        "source-acquisition",
+        "source-generation",
+        "source-observation"
+      ]
+    },
+    "stageRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "minimum_level",
+        "required_controls"
+      ],
+      "properties": {
+        "stage": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/stage"
+        },
+        "minimum_level": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/level"
+        },
+        "required_controls": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/controls"
+        }
+      }
+    },
+    "policy": {
+      "$id": "literate-ai/isolation-policy@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "policy_id",
+        "rules",
+        "allow_host_yolo"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/isolation-policy@1"
+        },
+        "policy_id": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/name"
+        },
+        "rules": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/stageRule"
+          }
+        },
+        "allow_host_yolo": {
+          "type": "boolean"
+        }
+      }
+    },
+    "request": {
+      "$id": "literate-ai/isolation-request@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "operation_id",
+        "stage",
+        "subject_identity",
+        "target_os",
+        "target_architecture",
+        "requested_level",
+        "required_controls",
+        "host_yolo_acknowledged"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/isolation-request@1"
+        },
+        "operation_id": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/name"
+        },
+        "stage": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/stage"
+        },
+        "subject_identity": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+        },
+        "target_os": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/name"
+        },
+        "target_architecture": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/name"
+        },
+        "requested_level": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/level"
+        },
+        "required_controls": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/controls"
+        },
+        "host_yolo_acknowledged": {
+          "type": "boolean"
+        }
+      }
+    },
+    "observation": {
+      "$id": "literate-ai/isolation-observation@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_identity",
+        "policy_identity",
+        "backend_id",
+        "backend_version",
+        "backend_identity",
+        "execution_identity",
+        "target_os",
+        "target_architecture",
+        "achieved_level",
+        "enforced_controls",
+        "complete"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/isolation-observation@1"
+        },
+        "request_identity": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+        },
+        "policy_identity": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+        },
+        "backend_id": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/name"
+        },
+        "backend_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "backend_identity": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+        },
+        "execution_identity": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+        },
+        "target_os": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/name"
+        },
+        "target_architecture": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/name"
+        },
+        "achieved_level": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/level"
+        },
+        "enforced_controls": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/controls"
+        },
+        "complete": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "achieved_level": {
+                "const": "process-limited"
+              },
+              "complete": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "enforced_controls": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "output-limit"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "process-tree-termination"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "resource-limits"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "wall-time-limit"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "achieved_level": {
+                "const": "os-sandboxed"
+              },
+              "complete": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "enforced_controls": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "minimal-environment"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-credentials"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-devices"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "output-limit"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "process-tree-termination"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "read-only-inputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "resource-limits"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "separate-outputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "wall-time-limit"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "achieved_level": {
+                "const": "vm-isolated"
+              },
+              "complete": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "enforced_controls": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "minimal-environment"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-credentials"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-devices"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "output-limit"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "process-tree-termination"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "read-only-inputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "resource-limits"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "separate-outputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "wall-time-limit"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "achieved_level": {
+                "const": "host-yolo"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "enforced_controls": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "decision": {
+      "$id": "literate-ai/isolation-decision@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_identity",
+        "policy_identity",
+        "observation_identity",
+        "status",
+        "required_level",
+        "achieved_level",
+        "required_controls",
+        "missing_controls",
+        "reason_code",
+        "authentication"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/isolation-decision@1"
+        },
+        "request_identity": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+        },
+        "policy_identity": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+        },
+        "observation_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "enum": [
+            "reported-sufficient",
+            "rejected",
+            "unsupported"
+          ]
+        },
+        "required_level": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/level"
+        },
+        "achieved_level": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/level"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required_controls": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/controls"
+        },
+        "missing_controls": {
+          "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/controls"
+        },
+        "reason_code": {
+          "enum": [
+            "containment.reported-sufficient",
+            "containment.host-yolo-reported-only",
+            "containment.host-yolo-policy-denied",
+            "containment.host-yolo-acknowledgement-required",
+            "containment.observation-binding-mismatch",
+            "containment.observation-target-mismatch",
+            "containment.enforcement-incomplete",
+            "containment.stage-unconfigured",
+            "containment.backend-unavailable",
+            "containment.isolation-level-unavailable",
+            "containment.controls-unavailable"
+          ]
+        },
+        "authentication": {
+          "const": "unauthenticated-local"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "process-limited"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "output-limit"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "process-tree-termination"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "resource-limits"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "wall-time-limit"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "os-sandboxed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "minimal-environment"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-credentials"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-devices"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "output-limit"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "process-tree-termination"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "read-only-inputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "resource-limits"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "separate-outputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "wall-time-limit"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "vm-isolated"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "allOf": [
+                  {
+                    "contains": {
+                      "const": "minimal-environment"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-credentials"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "no-devices"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "output-limit"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "process-tree-termination"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "read-only-inputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "resource-limits"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "separate-outputs"
+                    }
+                  },
+                  {
+                    "contains": {
+                      "const": "wall-time-limit"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "reported-sufficient"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "enum": [
+                  "containment.reported-sufficient",
+                  "containment.host-yolo-reported-only"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "rejected"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "enum": [
+                  "containment.host-yolo-policy-denied",
+                  "containment.host-yolo-acknowledgement-required",
+                  "containment.observation-binding-mismatch",
+                  "containment.observation-target-mismatch",
+                  "containment.enforcement-incomplete"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "unsupported"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "enum": [
+                  "containment.stage-unconfigured",
+                  "containment.backend-unavailable",
+                  "containment.isolation-level-unavailable",
+                  "containment.controls-unavailable"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reason_code": {
+                "enum": [
+                  "containment.stage-unconfigured",
+                  "containment.backend-unavailable",
+                  "containment.host-yolo-policy-denied",
+                  "containment.host-yolo-acknowledgement-required"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "observation_identity": {
+                "type": "null"
+              },
+              "achieved_level": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "observation_identity": {
+                "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/identity"
+              },
+              "achieved_level": {
+                "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/level"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reason_code": {
+                "const": "containment.controls-unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "missing_controls": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "missing_controls": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "reason_code": {
+                "enum": [
+                  "containment.host-yolo-reported-only",
+                  "containment.host-yolo-policy-denied",
+                  "containment.host-yolo-acknowledgement-required"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_level": {
+                "const": "host-yolo"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "host-yolo"
+              },
+              "reason_code": {
+                "enum": [
+                  "containment.reported-sufficient",
+                  "containment.host-yolo-reported-only",
+                  "containment.controls-unavailable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "achieved_level": {
+                "enum": [
+                  "host-yolo",
+                  "process-limited",
+                  "os-sandboxed",
+                  "vm-isolated"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "host-yolo"
+              },
+              "reason_code": {
+                "const": "containment.isolation-level-unavailable"
+              }
+            }
+          },
+          "then": false
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "process-limited"
+              },
+              "reason_code": {
+                "enum": [
+                  "containment.reported-sufficient",
+                  "containment.host-yolo-reported-only",
+                  "containment.controls-unavailable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "achieved_level": {
+                "enum": [
+                  "process-limited",
+                  "os-sandboxed",
+                  "vm-isolated"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "process-limited"
+              },
+              "reason_code": {
+                "const": "containment.isolation-level-unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "achieved_level": {
+                "enum": [
+                  "host-yolo"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "os-sandboxed"
+              },
+              "reason_code": {
+                "enum": [
+                  "containment.reported-sufficient",
+                  "containment.host-yolo-reported-only",
+                  "containment.controls-unavailable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "achieved_level": {
+                "enum": [
+                  "os-sandboxed",
+                  "vm-isolated"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "os-sandboxed"
+              },
+              "reason_code": {
+                "const": "containment.isolation-level-unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "achieved_level": {
+                "enum": [
+                  "host-yolo",
+                  "process-limited"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "vm-isolated"
+              },
+              "reason_code": {
+                "enum": [
+                  "containment.reported-sufficient",
+                  "containment.host-yolo-reported-only",
+                  "containment.controls-unavailable"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "achieved_level": {
+                "enum": [
+                  "vm-isolated"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "required_level": {
+                "const": "vm-isolated"
+              },
+              "reason_code": {
+                "const": "containment.isolation-level-unavailable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "achieved_level": {
+                "enum": [
+                  "host-yolo",
+                  "process-limited",
+                  "os-sandboxed"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "minimal-environment"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "minimal-environment"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "network-denied"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "network-denied"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "network-egress-restricted"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "network-egress-restricted"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "no-credentials"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "no-credentials"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "no-devices"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "no-devices"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "output-limit"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "output-limit"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "process-tree-termination"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "process-tree-termination"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "read-only-inputs"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "read-only-inputs"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "resource-limits"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "resource-limits"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "separate-outputs"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "separate-outputs"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "missing_controls": {
+                "contains": {
+                  "const": "wall-time-limit"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_controls": {
+                "contains": {
+                  "const": "wall-time-limit"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "reported-sufficient"
+              },
+              "required_level": {
+                "const": "host-yolo"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "reason_code": {
+                "const": "containment.host-yolo-reported-only"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/policy"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/request"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/observation"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:isolation-contracts#/$defs/decision"
+    }
+  ]
+}

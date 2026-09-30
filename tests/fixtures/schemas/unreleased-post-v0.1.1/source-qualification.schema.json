@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:source-qualification-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:regenerative-qualification-policy" },
+    { "$ref": "urn:literate-ai:schema:v1:clean-regeneration-evidence" },
+    { "$ref": "urn:literate-ai:schema:v1:regenerative-qualification-decision" },
+    { "$ref": "urn:literate-ai:schema:v1:operational-qualification-attestation" },
+    { "$ref": "urn:literate-ai:schema:v1:local-regenerative-qualification-profile" },
+    { "$ref": "urn:literate-ai:schema:v1:local-qualification-signature" }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stringArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" }
+    },
+    "nonemptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" }
+    },
+    "commandArray": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" }
+    },
+    "identityArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" }
+    },
+    "nonemptyIdentityArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" }
+    },
+    "policy": {
+      "$id": "urn:literate-ai:schema:v1:regenerative-qualification-policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "policy_id",
+        "minimum_clean_runs",
+        "required_target_profile_ids",
+        "required_surface_ids",
+        "allow_skipped_tests"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:regenerative-qualification-policy" },
+        "policy_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" },
+        "minimum_clean_runs": { "type": "integer", "minimum": 2 },
+        "required_target_profile_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/nonemptyIdentityArray" },
+        "required_surface_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/nonemptyStringArray" },
+        "allow_skipped_tests": { "type": "boolean" }
+      }
+    },
+    "evidence": {
+      "$id": "urn:literate-ai:schema:v1:clean-regeneration-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "run_id",
+        "run_attestation_id",
+        "source_snapshot_id",
+        "specification_set_id",
+        "target_profile_id",
+        "flavor_lock_id",
+        "generation_recipe_id",
+        "generated_tree_id",
+        "build_result_id",
+        "generated_test_result_id",
+        "independent_parity_result_id",
+        "covered_surface_ids",
+        "source_excluded_from_generation",
+        "empty_workspace",
+        "generated_source_cache_hit",
+        "build_passed",
+        "generated_tests_passed",
+        "independent_parity_passed",
+        "generated_tests_total",
+        "generated_tests_succeeded",
+        "generated_tests_failed",
+        "generated_tests_skipped"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:clean-regeneration-evidence" },
+        "run_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "run_attestation_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "specification_set_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "target_profile_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "flavor_lock_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "generation_recipe_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "generated_tree_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "build_result_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "generated_test_result_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "independent_parity_result_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "covered_surface_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/stringArray" },
+        "source_excluded_from_generation": { "type": "boolean" },
+        "empty_workspace": { "type": "boolean" },
+        "generated_source_cache_hit": { "type": "boolean" },
+        "build_passed": { "type": "boolean" },
+        "generated_tests_passed": { "type": "boolean" },
+        "independent_parity_passed": { "type": "boolean" },
+        "generated_tests_total": { "type": "integer", "minimum": 1 },
+        "generated_tests_succeeded": { "type": "integer", "minimum": 0 },
+        "generated_tests_failed": { "type": "integer", "minimum": 0 },
+        "generated_tests_skipped": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "decision": {
+      "$id": "urn:literate-ai:schema:v1:regenerative-qualification-decision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "source_snapshot_id",
+        "specification_set_id",
+        "policy_id",
+        "policy_identity",
+        "evidence_ids",
+        "authority",
+        "blockers"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:regenerative-qualification-decision" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "specification_set_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "policy_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" },
+        "policy_identity": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "evidence_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identityArray" },
+        "authority": { "enum": ["source-baseline", "specification"] },
+        "blockers": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/stringArray" }
+      }
+    },
+    "runPlan": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run_id", "specification_set_id", "target_profile_id", "flavor_lock_id", "generation_recipe_id", "covered_surface_ids"],
+      "properties": {
+        "run_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "specification_set_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "target_profile_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "flavor_lock_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "generation_recipe_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "covered_surface_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/nonemptyStringArray" }
+      }
+    },
+    "regenerationOutcome": {
+      "type": "object", "additionalProperties": false,
+      "required": ["generation_input_ids", "generated_tree_id", "build_result_id", "generated_test_result_id", "generated_source_cache_hit", "build_passed", "generated_tests_total", "generated_tests_succeeded", "generated_tests_failed", "generated_tests_skipped"],
+      "properties": {
+        "generation_input_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/nonemptyIdentityArray" },
+        "generated_tree_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "build_result_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "generated_test_result_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "generated_source_cache_hit": { "type": "boolean" },
+        "build_passed": { "type": "boolean" },
+        "generated_tests_total": { "type": "integer", "minimum": 1 },
+        "generated_tests_succeeded": { "type": "integer", "minimum": 0 },
+        "generated_tests_failed": { "type": "integer", "minimum": 0 },
+        "generated_tests_skipped": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "parityRequest": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run_id", "source_snapshot_id", "specification_set_id", "target_profile_id", "generated_tree_id", "covered_surface_ids"],
+      "properties": {
+        "run_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "specification_set_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "target_profile_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "generated_tree_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "covered_surface_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/nonemptyStringArray" }
+      }
+    },
+    "parityOutcome": {
+      "type": "object", "additionalProperties": false,
+      "required": ["result_id", "passed", "covered_surface_ids"],
+      "properties": {
+        "result_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "passed": { "type": "boolean" },
+        "covered_surface_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/nonemptyStringArray" }
+      }
+    },
+    "operationalAttestation": {
+      "$id": "urn:literate-ai:schema:v1:operational-qualification-attestation",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "plan", "source_snapshot_id", "regenerator_identity", "regeneration", "parity_verifier_identity", "parity_request", "parity", "attestor_identity", "empty_workspace", "exact_generation_inputs"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:operational-qualification-attestation" },
+        "plan": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/runPlan" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "regenerator_identity": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "regeneration": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/regenerationOutcome" },
+        "parity_verifier_identity": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "parity_request": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/parityRequest" },
+        "parity": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/parityOutcome" },
+        "attestor_identity": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "empty_workspace": { "type": "boolean" },
+        "exact_generation_inputs": { "type": "boolean" }
+      }
+    },
+    "localProfile": {
+      "$id": "urn:literate-ai:schema:v1:local-regenerative-qualification-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "profile_id", "build_command", "test_commands", "source_command", "generated_command", "cases", "covered_surface_ids", "generated_root", "minimum_clean_runs", "timeout_seconds", "maximum_output_bytes"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:local-regenerative-qualification-profile" },
+        "profile_id": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" },
+        "build_command": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/commandArray" },
+        "test_commands": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/commandArray" }
+        },
+        "source_command": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/commandArray" },
+        "generated_command": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/commandArray" },
+        "cases": { "type": "array", "minItems": 1 },
+        "covered_surface_ids": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/nonemptyStringArray" },
+        "generated_root": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" },
+        "minimum_clean_runs": { "type": "integer", "minimum": 2 },
+        "timeout_seconds": { "type": "integer", "minimum": 1 },
+        "maximum_output_bytes": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "localSignature": {
+      "$id": "urn:literate-ai:schema:v1:local-qualification-signature",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "identity", "signer", "payload_identity", "signature"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:local-qualification-signature" },
+        "identity": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "signer": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/text" },
+        "payload_identity": { "$ref": "urn:literate-ai:schema:v1:source-qualification-contracts#/$defs/identity" },
+        "signature": { "type": "string", "pattern": "^hmac-sha256:[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

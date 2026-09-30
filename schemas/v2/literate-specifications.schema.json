@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:literate-specification-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:specification-node-authoring" },
+    { "$ref": "urn:literate-ai:schema:v2:specification-node" },
+    { "$ref": "urn:literate-ai:schema:v2:effective-specification-context" }
+  ],
+  "$defs": {
+    "dottedId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*(\\.[a-z0-9][a-z0-9_-]*)*$"
+    },
+    "authoring": {
+      "$id": "urn:literate-ai:schema:v2:specification-node-authoring",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "summary", "kind"],
+      "properties": {
+        "id": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "kind": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "parent": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" },
+        "references": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" }
+        },
+        "status": {
+          "enum": ["draft", "review", "approved", "deprecated"]
+        }
+      }
+    },
+    "node": {
+      "$id": "urn:literate-ai:schema:v2:specification-node",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "id",
+        "name",
+        "summary",
+        "kind",
+        "path",
+        "parent",
+        "references",
+        "status",
+        "content_identity"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:specification-node" },
+        "id": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "summary": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "kind": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "path": { "type": "string", "minLength": 1 },
+        "parent": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" },
+            { "type": "null" }
+          ]
+        },
+        "references": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" }
+        },
+        "status": {
+          "oneOf": [
+            { "enum": ["draft", "review", "approved", "deprecated"] },
+            { "type": "null" }
+          ]
+        },
+        "content_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "effectiveContext": {
+      "$id": "urn:literate-ai:schema:v2:effective-specification-context",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "root_id", "nodes", "effective_documents"],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:effective-specification-context"
+        },
+        "root_id": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "urn:literate-ai:schema:v2:specification-node" }
+        },
+        "effective_documents": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["node_id", "document_ids"],
+            "properties": {
+              "node_id": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" },
+              "document_ids": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "$ref": "urn:literate-ai:schema:v2:literate-specification-contracts#/$defs/dottedId" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

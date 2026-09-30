@@ -1,0 +1,67 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "targets": [
+            {
+              "os": "linux",
+              "accelerator": "cpu",
+              "language": "python"
+            },
+            {
+              "os": "macos",
+              "accelerator": "cpu",
+              "language": "rust"
+            },
+            {
+              "os": "windows",
+              "accelerator": "cuda",
+              "language": "rust"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "targets": [
+            {
+              "os": "windows",
+              "accelerator": "cpu",
+              "language": "python"
+            },
+            {
+              "os": "linux",
+              "accelerator": "cuda",
+              "language": "rust"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "plan_count": "integer",
+    "plans": [
+      {
+        "artifact": "string",
+        "target": "string",
+        "toolchain": "string"
+      }
+    ]
+  },
+  "target": {
+    "platform.os": "host",
+    "accelerator": "cpu",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

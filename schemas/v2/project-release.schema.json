@@ -1,0 +1,732 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:project-release-contracts",
+  "oneOf": [
+    {"$ref": "literate-ai/release-policy@1"},
+    {"$ref": "literate-ai/release-policy@2"},
+    {"$ref": "literate-ai/release-plan@1"},
+    {"$ref": "literate-ai/prepared-release@1"},
+    {"$ref": "literate-ai/prepared-release@2"},
+    {"$ref": "literate-ai/release-publication-receipt@1"},
+    {"$ref": "literate-ai/release-published-verification@1"}
+  ],
+  "$defs": {
+    "authenticated_receipt": {
+      "type": "object", "additionalProperties": false,
+      "required": ["plan_path", "plan_identity", "policy_path", "policy_identity", "revocations_path", "bundle_store", "stores"],
+      "properties": {
+        "plan_path": {"type": "string", "minLength": 1},
+        "plan_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "policy_path": {"type": "string", "minLength": 1},
+        "policy_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "revocations_path": {"type": "string", "minLength": 1},
+        "bundle_store": {"type": "string", "minLength": 1},
+        "stores": {
+          "type": "array", "minItems": 1, "maxItems": 1024,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["id", "kind", "location"],
+            "properties": {
+              "id": {"type": "string", "minLength": 1},
+              "kind": {"enum": ["filesystem", "monorepo", "https"]},
+              "location": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    },
+    "artifact_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "argv",
+        "timeout_seconds",
+        "manifest",
+        "required_roles"
+      ],
+      "properties": {
+        "argv": {
+          "$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/argv"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800
+        },
+        "manifest": {
+          "$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"
+        },
+        "required_roles": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "qualified_release_files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "revision",
+        "version",
+        "files",
+        "identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/qualified-release-files@1"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40,64}$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "path",
+              "size",
+              "identity"
+            ],
+            "properties": {
+              "role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "path": {
+                "$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "identity": {
+                "$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"
+              }
+            }
+          }
+        }
+      }
+    },
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9._/-]+$"
+    },
+    "argv": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+    },
+    "version_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "format", "selectors"],
+      "properties": {
+        "path": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"},
+        "format": {"enum": ["json-pointer", "python-constant", "quoted-constant", "cargo-lock-package"]},
+        "selectors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+        }
+      }
+    },
+    "gate_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["argv", "timeout_seconds"],
+      "properties": {
+        "argv": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/argv"},
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 604800
+        }
+      }
+    },
+    "changelog_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "unreleased_heading"],
+      "properties": {
+        "path": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"},
+        "unreleased_heading": {
+          "type": "string",
+          "pattern": "^## .+",
+          "maxLength": 256
+        }
+      }
+    },
+    "provider": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["kind", "repository"],
+      "properties": {
+        "kind": {"const": "github"},
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        }
+      }
+    },
+    "github_release_evidence": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["url", "draft", "prerelease", "notes_present", "assets"],
+      "properties": {
+        "url": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "draft": {"const": false},
+        "prerelease": {"const": false},
+        "notes_present": {"const": true},
+        "assets": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "size", "state"],
+            "properties": {
+              "name": {"type": "string", "minLength": 1, "maxLength": 512},
+              "size": {"type": "integer", "minimum": 0},
+              "state": {"type": "string", "minLength": 1, "maxLength": 64},
+              "digest": {"type": "string", "minLength": 1, "maxLength": 256}
+            }
+          }
+        }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor", "mode", "reason"],
+      "properties": {
+        "actor": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]{0,38}$"},
+        "mode": {"enum": ["strict", "loose", "break-glass"]},
+        "reason": {"type": ["string", "null"], "minLength": 1, "maxLength": 4096}
+      }
+    },
+    "contributions_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_milestone"],
+      "properties": {
+        "current_milestone": {
+          "type": "string",
+          "pattern": "^[^{}]*(?:\\{version\\}[^{}]*)?$",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    },
+    "collateral_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind", "name", "ecosystem", "required_for", "artifacts",
+        "verification_report", "publication_receipt", "resources"
+      ],
+      "properties": {
+        "kind": {"const": "document-pair"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 256},
+        "ecosystem": {"type": "string", "minLength": 1, "maxLength": 256},
+        "required_for": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["initial", "minor", "major"]}
+        },
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["presentation", "narrative"],
+          "properties": {
+            "presentation": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"},
+            "narrative": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"}
+          }
+        },
+        "verification_report": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"},
+        "publication_receipt": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"},
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["presentation", "narrative"],
+          "properties": {
+            "presentation": {"type": "string", "pattern": "^[A-Za-z0-9_-]{10,256}$"},
+            "narrative": {"type": "string", "pattern": "^[A-Za-z0-9_-]{10,256}$"}
+          }
+        }
+      }
+    },
+    "contribution_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "identity", "release", "current_milestone", "issue_count",
+        "review_count", "branch_count", "worktree_count", "ready"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/release-contributions@1"},
+        "identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "release": {"type": "string", "minLength": 1, "maxLength": 128},
+        "current_milestone": {"type": "string", "minLength": 1, "maxLength": 256},
+        "issue_count": {"type": "integer", "minimum": 0},
+        "review_count": {"type": "integer", "minimum": 0},
+        "branch_count": {"type": "integer", "minimum": 0},
+        "worktree_count": {"type": "integer", "minimum": 0},
+        "ready": {"const": true}
+      }
+    },
+    "collateral_summary": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind", "name", "ecosystem", "release_class", "account",
+          "source_revision", "verification_identity", "publication_identity",
+          "artifacts"
+        ],
+        "properties": {
+          "kind": {"const": "document-pair"},
+          "name": {"type": "string", "minLength": 1, "maxLength": 256},
+          "ecosystem": {"type": "string", "minLength": 1, "maxLength": 256},
+          "release_class": {"enum": ["initial", "minor", "major"]},
+          "account": {"type": "string", "minLength": 1, "maxLength": 320},
+          "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+          "verification_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+          "publication_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+          "artifacts": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["presentation", "narrative"],
+            "properties": {
+              "presentation": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_artifact"},
+              "narrative": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_artifact"}
+            }
+          }
+        }
+      }
+    },
+    "collateral_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "bytes", "sha256", "resource_id", "export_sha256"],
+      "properties": {
+        "path": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"},
+        "bytes": {"type": "integer", "minimum": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "resource_id": {"type": "string", "pattern": "^[A-Za-z0-9_-]{10,256}$"},
+        "export_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "release_policy": {
+      "$id": "literate-ai/release-policy@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "version_scheme",
+        "version_authority",
+        "version_mirrors",
+        "allowed_transitions",
+        "gate",
+        "changelog",
+        "tag",
+        "remote",
+        "provider"
+      ],
+      "properties": {
+        "artifact_gate": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/artifact_gate"},
+        "authenticated_receipt": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/authenticated_receipt"},
+        "schema": {"const": "literate-ai/release-policy@1"},
+        "version_scheme": {"enum": ["semver", "pep440"]},
+        "version_authority": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/version_binding"},
+        "version_mirrors": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/version_binding"}
+        },
+        "allowed_transitions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["patch", "minor", "major", "prerelease", "explicit"]}
+        },
+        "gate": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/gate_policy"},
+        "changelog": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/changelog_policy"},
+        "tag": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["prefix", "signed"],
+          "properties": {
+            "prefix": {"type": "string", "pattern": "^[A-Za-z0-9._-]*$", "maxLength": 64},
+            "signed": {"type": "boolean"}
+          }
+        },
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "provider": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/provider"},
+        "documentation_authority": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"}
+        },
+        "contributions": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/contributions_policy"},
+        "collateral": {"type": "array", "items": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_policy"}}
+      }
+    },
+    "release_policy_v2": {
+      "$id": "literate-ai/release-policy@2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "version_scheme", "version_authority", "version_mirrors",
+        "allowed_transitions", "gate", "changelog", "tag", "remote", "provider"
+      ],
+      "properties": {
+        "artifact_gate": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/artifact_gate"},
+        "authenticated_receipt": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/authenticated_receipt"},
+        "schema": {"const": "literate-ai/release-policy@2"},
+        "version_scheme": {"enum": ["semver", "pep440"]},
+        "version_authority": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/version_binding"},
+        "version_mirrors": {"type": "array", "maxItems": 128, "items": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/version_binding"}},
+        "allowed_transitions": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["patch", "minor", "major", "prerelease", "explicit"]}},
+        "gate": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/gate_policy"},
+        "changelog": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/changelog_policy"},
+        "tag": {"type": "object", "additionalProperties": false, "required": ["prefix", "signed"], "properties": {"prefix": {"type": "string", "pattern": "^[A-Za-z0-9._-]*$", "maxLength": 64}, "signed": {"type": "boolean"}}},
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "provider": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/provider"},
+        "documentation_authority": {"type": "array", "maxItems": 128, "uniqueItems": true, "items": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/relative_path"}},
+        "default_branch": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*$"},
+        "contributions": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/contributions_policy"},
+        "collateral": {"type": "array", "items": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_policy"}}
+      }
+    },
+    "release_plan": {
+      "$id": "literate-ai/release-plan@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "policy_identity",
+        "source_revision",
+        "source_branch",
+        "source_clean",
+        "source_changes",
+        "transition",
+        "current_version",
+        "next_version",
+        "tag",
+        "version_bindings",
+        "gate",
+        "changelog",
+        "remote",
+        "provider",
+        "identity"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/release-plan@1"},
+        "policy_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "source_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "source_branch": {"type": "string", "minLength": 1, "maxLength": 256},
+        "source_clean": {"type": "boolean"},
+        "source_changes": {"type": "array", "items": {"type": "string", "maxLength": 4096}},
+        "transition": {"enum": ["patch", "minor", "major", "prerelease", "explicit"]},
+        "release_class": {"enum": ["initial", "patch", "minor", "major"]},
+        "stable_predecessor": {"type": ["string", "null"], "maxLength": 128},
+        "current_version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "next_version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "tag": {"type": "string", "minLength": 1, "maxLength": 320},
+        "version_bindings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 129,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/version_binding"}
+        },
+        "gate": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/gate_policy"},
+        "changelog": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/changelog_policy"},
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "provider": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/provider"},
+        "contributions": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/contribution_summary"},
+        "collateral": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_summary"},
+        "release_line": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "create"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "pattern": "^release/[0-9]+\\.[0-9]+\\.x$"
+            },
+            "create": {"type": "boolean"}
+          }
+        },
+        "identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "authorization": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/authorization"}
+      }
+    },
+    "prepared_release": {
+      "$id": "literate-ai/prepared-release@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "plan_identity",
+        "policy_identity",
+        "base_revision",
+        "prepared_revision",
+        "branch",
+        "version",
+        "tag",
+        "remote",
+        "provider",
+        "gate",
+        "target",
+        "identity"
+      ],
+      "properties": {
+        "artifacts": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/qualified_release_files"},
+        "authenticated_receipt_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "schema": {"const": "literate-ai/prepared-release@1"},
+        "plan_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "policy_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "base_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "prepared_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "branch": {"type": "string", "minLength": 1, "maxLength": 256},
+        "version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "transition": {"enum": ["patch", "minor", "major", "prerelease", "explicit"]},
+        "release_class": {"type": ["string", "null"], "enum": ["initial", "patch", "minor", "major", null]},
+        "stable_predecessor": {"type": ["string", "null"], "maxLength": 128},
+        "tag": {"type": "string", "minLength": 1, "maxLength": 320},
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "provider": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/provider"},
+        "gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["argv", "exit_status", "stdout_digest", "stderr_digest"],
+          "properties": {
+            "argv": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/argv"},
+            "exit_status": {"const": 0},
+            "stdout_digest": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+            "stderr_digest": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"}
+          }
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {"enum": ["legacy-local", "local", "github"]},
+            "worker_id": {"type": "string", "minLength": 1, "maxLength": 256},
+            "endpoint": {"type": "string", "minLength": 1, "maxLength": 320},
+            "run_id": {"type": ["integer", "string"]},
+            "run_url": {"type": "string", "minLength": 1, "maxLength": 2048},
+            "conclusion": {"type": "string", "minLength": 1, "maxLength": 64}
+          }
+        },
+        "identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "authorization": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/authorization"}
+        ,"contributions": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/contribution_summary"}
+        ,"collateral": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_summary"}
+      }
+    },
+    "prepared_release_v2": {
+      "$id": "literate-ai/prepared-release@2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "plan_identity",
+        "policy_identity",
+        "base_revision",
+        "prepared_revision",
+        "branch",
+        "version",
+        "transition",
+        "tag",
+        "remote",
+        "provider",
+        "gate",
+        "target",
+        "evidence",
+        "identity"
+      ],
+      "properties": {
+        "artifacts": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/qualified_release_files"},
+        "authenticated_receipt_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "schema": {"const": "literate-ai/prepared-release@2"},
+        "plan_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "policy_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "base_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "prepared_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "branch": {"type": "string", "minLength": 1, "maxLength": 256},
+        "version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "transition": {"enum": ["patch", "minor", "major", "prerelease", "explicit"]},
+        "release_class": {"type": ["string", "null"], "enum": ["initial", "patch", "minor", "major", null]},
+        "stable_predecessor": {"type": ["string", "null"], "maxLength": 128},
+        "tag": {"type": "string", "minLength": 1, "maxLength": 320},
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "provider": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/provider"},
+        "gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["argv", "exit_status", "stdout_digest", "stderr_digest"],
+          "properties": {
+            "argv": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/argv"},
+            "exit_status": {"const": 0},
+            "stdout_digest": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+            "stderr_digest": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+            "stdout_path": {"type": "string", "minLength": 1, "maxLength": 4096},
+            "stderr_path": {"type": "string", "minLength": 1, "maxLength": 4096},
+            "evidence_node_id": {"type": "string", "pattern": "^n[0-9]{4,}$"}
+          }
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {"enum": ["legacy-local", "local", "github"]},
+            "worker_id": {"type": "string", "minLength": 1, "maxLength": 256},
+            "endpoint": {"type": "string", "minLength": 1, "maxLength": 320},
+            "run_id": {"type": ["integer", "string"]},
+            "run_url": {"type": "string", "minLength": 1, "maxLength": 2048},
+            "conclusion": {"type": "string", "minLength": 1, "maxLength": 64}
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["run_id", "root", "index_path", "node_id"],
+          "properties": {
+            "run_id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "root": {"type": "string", "minLength": 1, "maxLength": 4096},
+            "index_path": {"type": "string", "minLength": 1, "maxLength": 4096},
+            "node_id": {"type": "string", "pattern": "^n[0-9]{4,}$"}
+          }
+        },
+        "identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "authorization": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/authorization"}
+        ,"contributions": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/contribution_summary"}
+        ,"collateral": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_summary"}
+      }
+    },
+    "publication_receipt": {
+      "$id": "literate-ai/release-publication-receipt@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "prepared_release_identity",
+        "revision",
+        "version",
+        "tag",
+        "remote",
+        "provider",
+        "provider_url",
+        "identity",
+        "default_branch_advance"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/release-publication-receipt@1"},
+        "prepared_release_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "tag": {"type": "string", "minLength": 1, "maxLength": 320},
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "provider": {"type": ["string", "null"], "enum": ["github", null]},
+        "provider_url": {"type": ["string", "null"], "maxLength": 4096},
+        "provider_release": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/github_release_evidence"},
+        "identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "default_branch_advance": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["branch", "action"],
+          "properties": {
+            "branch": {"type": "string", "minLength": 1, "maxLength": 255},
+            "action": {"enum": ["advanced", "skipped", "failed"]},
+            "previous_version": {"type": "string", "minLength": 1, "maxLength": 128},
+            "next_version": {"type": "string", "minLength": 1, "maxLength": 128},
+            "revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 4096            }
+          }
+        },
+        "authorization": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/authorization"},
+        "wheel": {"type": ["string", "null"], "maxLength": 4096}
+        ,"release_class": {"type": ["string", "null"], "enum": ["initial", "patch", "minor", "major", null]}
+        ,"stable_predecessor": {"type": ["string", "null"], "maxLength": 128}
+        ,"contributions": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/contribution_summary"}
+        ,"collateral": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_summary"}
+      }
+    },
+    "published_verification": {
+      "$id": "literate-ai/release-published-verification@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "prepared_release_identity",
+        "revision",
+        "version",
+        "tag",
+        "branch",
+        "remote",
+        "remote_tag_revision",
+        "remote_tag_annotated",
+        "remote_branch_revision",
+        "provider",
+        "provider_url",
+        "identity"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/release-published-verification@1"},
+        "prepared_release_identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"},
+        "revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "tag": {"type": "string", "minLength": 1, "maxLength": 320},
+        "branch": {"type": "string", "minLength": 1, "maxLength": 255},
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "remote_tag_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "remote_tag_annotated": {"type": "boolean"},
+        "remote_branch_revision": {"type": "string", "pattern": "^[0-9a-f]{40,64}$"},
+        "provider": {"type": ["string", "null"], "enum": ["github", null]},
+        "provider_url": {"type": ["string", "null"], "maxLength": 4096},
+        "provider_release": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/github_release_evidence"},
+        "identity": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/identity"}
+        ,"release_class": {"type": ["string", "null"], "enum": ["initial", "patch", "minor", "major", null]}
+        ,"stable_predecessor": {"type": ["string", "null"], "maxLength": 128}
+        ,"contributions": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/contribution_summary"}
+        ,"collateral": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/collateral_summary"}
+      }
+    }
+  }
+}

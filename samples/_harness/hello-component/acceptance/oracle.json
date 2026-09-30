@@ -1,0 +1,24 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:dc92ae10269a2545ed32f8ea86f078287167d0d9f2d8fd1b06fad42f17b9f99a",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "greeting": "Hello, Ada Lovelace!",
+        "message_count": 2,
+        "recipient_id": "ada-lovelace",
+        "word_count": 6
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "greeting": "Hello, Grace Hopper!",
+        "message_count": 3,
+        "recipient_id": "grace-hopper",
+        "word_count": 7
+      }
+    }
+  ]
+}

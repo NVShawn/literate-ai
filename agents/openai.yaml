@@ -1,0 +1,7 @@
+interface:
+  display_name: "Literate AI"
+  short_description: "Build software from exact specifications"
+  default_prompt: "Use $literate-ai to plan and implement this Component from its exact specifications, Flavors, and skills. Prefer `litai` and the bundled agent skills over improvising lifecycle steps."
+mcp_servers:
+  - name: literate-ai
+    command: litai-mcp

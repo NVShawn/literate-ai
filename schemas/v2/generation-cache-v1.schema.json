@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:generation-cache-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v1:source-cache-model-binding"},
+    {"$ref": "urn:literate-ai:schema:v1:source-derivation-cache-key"},
+    {"$ref": "urn:literate-ai:schema:v1:accepted-source-derivation"},
+    {"$ref": "urn:literate-ai:schema:v1:source-cache-target"},
+    {"$ref": "urn:literate-ai:schema:v1:source-cache-configuration"},
+    {"$ref": "urn:literate-ai:schema:v1:cached-source-file"},
+    {"$ref": "urn:literate-ai:schema:v1:accepted-source-cache-entry"},
+    {"$ref": "urn:literate-ai:schema:v1:generated-source-index-binding"}
+  ],
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "portableId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+    },
+    "modelBinding": {
+      "$id": "urn:literate-ai:schema:v1:source-cache-model-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "provider_id",
+        "model_selector",
+        "exact_revision_identity"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:source-cache-model-binding"},
+        "provider_id": {"type": "string", "minLength": 1},
+        "model_selector": {"type": "string", "minLength": 1},
+        "exact_revision_identity": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+          ]
+        }
+      }
+    },
+    "cacheKey": {
+      "$id": "urn:literate-ai:schema:v1:source-derivation-cache-key",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "recipe_identity",
+        "execution_plan_identity",
+        "coding_cli_tool_binding_identity",
+        "model_binding",
+        "request_identity"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:source-derivation-cache-key"},
+        "recipe_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "execution_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "coding_cli_tool_binding_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "model_binding": {"$ref": "urn:literate-ai:schema:v1:source-cache-model-binding"},
+        "request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "accepted": {
+      "$id": "urn:literate-ai:schema:v1:accepted-source-derivation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "cache_key",
+        "source_tree_identity",
+        "source_index_identity",
+        "managed_sbom_graph_identity",
+        "source_sbom_identity",
+        "resolved_sbom_identity",
+        "source_sbom_binding",
+        "resolved_sbom_binding",
+        "generated_test_suite_identity",
+        "build_evidence_identity",
+        "test_evidence_identity",
+        "acceptance_identity",
+        "provenance_identity"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:accepted-source-derivation"},
+        "cache_key": {"$ref": "urn:literate-ai:schema:v1:source-derivation-cache-key"},
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_index_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "managed_sbom_graph_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_sbom_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "resolved_sbom_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_sbom_binding": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-bom-binding"},
+        "resolved_sbom_binding": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-bom-binding"},
+        "generated_test_suite_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "test_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "acceptance_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "provenance_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "target": {
+      "$id": "urn:literate-ai:schema:v1:source-cache-target",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target_id", "format", "root_kind", "root_reference"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:source-cache-target"},
+        "target_id": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/portableId"},
+        "format": {"const": "filesystem-v1"},
+        "root_kind": {"enum": ["project-relative", "operator-bound"]},
+        "root_reference": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"root_kind": {"const": "operator-bound"}}, "required": ["root_kind"]},
+          "then": {
+            "properties": {
+              "root_reference": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/portableId"}
+            }
+          }
+        }
+      ]
+    },
+    "configuration": {
+      "$id": "urn:literate-ai:schema:v1:source-cache-configuration",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "mode", "targets", "write_target_id", "require_unique"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:source-cache-configuration"},
+        "mode": {"enum": ["off", "read-only", "write-only", "read-write"]},
+        "targets": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v1:source-cache-target"}
+        },
+        "write_target_id": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/portableId"}
+          ]
+        },
+        "require_unique": {"type": "boolean", "default": true}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"mode": {"enum": ["write-only", "read-write"]}},
+            "required": ["mode"]
+          },
+          "then": {"properties": {"write_target_id": {"type": "string"}}},
+          "else": {"properties": {"write_target_id": {"type": "null"}}}
+        }
+      ]
+    },
+    "sourceFile": {
+      "$id": "urn:literate-ai:schema:v1:cached-source-file",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "path", "blob"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:cached-source-file"},
+        "path": {"type": "string", "pattern": "^source/(?!.*(?:^|/)\\.\\.?(?:/|$))[^/\\\\]+(?:/[^/\\\\]+)*$"},
+        "blob": {"$ref": "urn:literate-ai:schema:v1:blob-ref"}
+      }
+    },
+    "generatedIndex": {
+      "$id": "urn:literate-ai:schema:v1:generated-source-index-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "provider_id",
+        "provider_version",
+        "runtime_version",
+        "executable_identity",
+        "source_tree_identity",
+        "source_snapshot_identity",
+        "logical_index_identity",
+        "index_binding",
+        "index_identity",
+        "index_path",
+        "built_with_version",
+        "extraction_version",
+        "database_identity",
+        "document_count",
+        "node_count",
+        "edge_count"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:generated-source-index-binding"},
+        "provider_id": {"type": "string", "minLength": 1},
+        "provider_version": {"type": "string", "minLength": 1},
+        "runtime_version": {"type": "string", "minLength": 1},
+        "executable_identity": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/digest"},
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/digest"},
+        "source_snapshot_identity": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/digest"},
+        "logical_index_identity": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/digest"},
+        "index_binding": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/digest"},
+        "index_identity": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/digest"},
+        "index_path": {"const": ".codegraph/codegraph.db"},
+        "built_with_version": {"type": ["string", "null"]},
+        "extraction_version": {"type": ["integer", "null"], "minimum": 0},
+        "database_identity": {"$ref": "urn:literate-ai:schema:v1:generation-cache-contracts#/$defs/digest"},
+        "document_count": {"type": "integer", "minimum": 0},
+        "node_count": {"type": "integer", "minimum": 0},
+        "edge_count": {"type": "integer", "minimum": 0}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"document_count": {"const": 0}}, "required": ["document_count"]},
+          "then": {
+            "properties": {
+              "built_with_version": {"type": "null"},
+              "extraction_version": {"type": "null"},
+              "node_count": {"const": 0},
+              "edge_count": {"const": 0}
+            }
+          },
+          "else": {
+            "properties": {
+              "built_with_version": {"type": "string", "minLength": 1},
+              "extraction_version": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      ]
+    },
+    "entry": {
+      "$id": "urn:literate-ai:schema:v1:accepted-source-cache-entry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "derivation",
+        "source_files",
+        "source_index",
+        "managed_sbom_graph",
+        "codegraph_database",
+        "source_sbom",
+        "resolved_sbom",
+        "generated_test_suite",
+        "build_evidence",
+        "test_evidence",
+        "acceptance_evidence",
+        "provenance_evidence",
+        "repository_resolutions"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:accepted-source-cache-entry"},
+        "derivation": {"$ref": "urn:literate-ai:schema:v1:accepted-source-derivation"},
+        "source_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v1:cached-source-file"}
+        },
+        "source_index": {"$ref": "urn:literate-ai:schema:v1:generated-source-index-binding"},
+        "managed_sbom_graph": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-managed-graph"},
+        "codegraph_database": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "source_sbom": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "resolved_sbom": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "generated_test_suite": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "build_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "test_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "acceptance_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "provenance_evidence": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "repository_resolutions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {"$ref": "urn:literate-ai:schema:v1:cyclonedx-repository-source-resolution"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts",
+  "$defs": {
+    "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+    "count": { "type": "integer", "minimum": 0, "maximum": 9223372036854775807 },
+    "segment": {
+      "$id": "urn:literate-ai:schema:v2:forward-generation-context-segment-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "index", "authority_kind", "source_component_revision", "content_identity", "byte_count", "estimated_tokens", "visibility"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:forward-generation-context-segment-binding" },
+        "index": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "authority_kind": { "enum": ["framework-envelope", "local-specification", "local-flavor", "local-skill", "local-workflow", "local-routing-policy", "local-public-interface", "local-asset-metadata", "local-native-sdk-metadata", "direct-public-interface"] },
+        "source_component_revision": { "oneOf": [{ "type": "null" }, { "$ref": "urn:literate-ai:schema:v1:content-identity" }] },
+        "content_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "byte_count": { "type": "integer", "minimum": 0, "maximum": 1099511627776 },
+        "estimated_tokens": { "type": "integer", "minimum": 0, "maximum": 1099511627776 },
+        "visibility": { "enum": ["framework", "local-authority", "direct-public-interface"] }
+      }
+    },
+    "interface": {
+      "$id": "urn:literate-ai:schema:v2:direct-interface-context-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "prompt_index", "provider_component_revision", "public_interface_identity", "byte_count", "estimated_tokens"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:direct-interface-context-binding" },
+        "prompt_index": { "type": "integer", "minimum": 0, "maximum": 65535 },
+        "provider_component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "public_interface_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "byte_count": { "type": "integer", "minimum": 0, "maximum": 1099511627776 },
+        "estimated_tokens": { "type": "integer", "minimum": 0, "maximum": 1099511627776 }
+      }
+    },
+    "journal": {
+      "$id": "urn:literate-ai:schema:v2:forward-generation-prompt-journal",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component_revision", "generation_plan_identity", "generation_key_identity", "bounded_request_identity", "context_manifest_identity", "complexity_budget_identity", "complexity_decision_identity", "prompt_identity", "complexity_budget", "complexity_decision", "segment_bindings", "direct_interface_bindings", "node_result_identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:forward-generation-prompt-journal" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_key_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "bounded_request_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "context_manifest_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_budget_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_decision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prompt_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_budget": { "$ref": "urn:literate-ai:schema:v2:generation-complexity-budget" },
+        "complexity_decision": { "$ref": "urn:literate-ai:schema:v2:generation-complexity-decision" },
+        "segment_bindings": { "type": "array", "minItems": 1, "maxItems": 4096, "items": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-segment-binding" } },
+        "direct_interface_bindings": { "type": "array", "maxItems": 4096, "items": { "$ref": "urn:literate-ai:schema:v2:direct-interface-context-binding" } },
+        "node_result_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "benchmark": {
+      "$id": "urn:literate-ai:schema:v2:component-context-benchmark-record",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "prompt_journal_identity", "component_revision", "node_result_identity", "context_manifest_identity", "complexity_budget_identity", "complexity_decision_identity", "disposition", "framework_context_bytes", "local_authority_bytes", "delivered_dependency_context_bytes", "selected_direct_public_interface_bytes", "private_transitive_leakage_bytes", "prompt_bytes", "estimated_tokens", "actual_model_tokens", "document_count", "dependency_fan_in"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-context-benchmark-record" },
+        "prompt_journal_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "node_result_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "context_manifest_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_budget_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_decision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "disposition": { "enum": ["generated", "reused", "failed", "cancelled"] },
+        "framework_context_bytes": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "local_authority_bytes": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "delivered_dependency_context_bytes": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "selected_direct_public_interface_bytes": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "private_transitive_leakage_bytes": { "const": 0 },
+        "prompt_bytes": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "estimated_tokens": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "actual_model_tokens": { "oneOf": [{ "type": "null" }, { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" }] },
+        "document_count": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "dependency_fan_in": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" }
+      }
+    },
+    "cacheEntry": {
+      "$id": "urn:literate-ai:schema:v2:forward-generation-context-cache-entry",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "component_revision", "cache_key_identity", "prompt_journal_identity", "context_manifest_identity", "complexity_budget_identity", "complexity_decision_identity", "direct_interface_binding_identity", "outcome"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:forward-generation-context-cache-entry" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "cache_key_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prompt_journal_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "context_manifest_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_budget_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complexity_decision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "direct_interface_binding_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "outcome": { "enum": ["hit", "miss", "bypass"] }
+      }
+    },
+    "cacheReport": {
+      "$id": "urn:literate-ai:schema:v2:forward-generation-context-cache-report",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "entries", "hits", "misses", "bypasses"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:forward-generation-context-cache-report" },
+        "entries": { "type": "array", "maxItems": 16384, "items": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-cache-entry" } },
+        "hits": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "misses": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" },
+        "bypasses": { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-evidence-contracts#/$defs/count" }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-segment-binding" },
+    { "$ref": "urn:literate-ai:schema:v2:direct-interface-context-binding" },
+    { "$ref": "urn:literate-ai:schema:v2:forward-generation-prompt-journal" },
+    { "$ref": "urn:literate-ai:schema:v2:component-context-benchmark-record" },
+    { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-cache-entry" },
+    { "$ref": "urn:literate-ai:schema:v2:forward-generation-context-cache-report" }
+  ]
+}

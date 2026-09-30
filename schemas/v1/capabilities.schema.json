@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:capability-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:capability" },
+    { "$ref": "urn:literate-ai:schema:v1:capability-requirement" },
+    { "$ref": "urn:literate-ai:schema:v1:dependency-edge" }
+  ],
+  "$defs": {
+    "constraint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["key", "operator", "values"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "operator": { "type": "string", "minLength": 1 },
+        "values": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "capability": {
+      "$id": "urn:literate-ai:schema:v1:capability",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "name", "version", "contract"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:capability" },
+        "name": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "contract": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:content-identity" }, { "type": "null" }] }
+      }
+    },
+    "requirement": {
+      "$id": "urn:literate-ai:schema:v1:capability-requirement",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "requirement_id", "capability", "version_range", "dependency_kind", "optional", "constraints"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:capability-requirement" },
+        "requirement_id": { "type": "string", "minLength": 1 },
+        "capability": { "type": "string", "minLength": 1 },
+        "version_range": { "type": "string", "minLength": 1 },
+        "dependency_kind": { "enum": ["generation", "build", "runtime", "validation", "toolchain", "packaging", "deployment"] },
+        "optional": { "type": "boolean" },
+        "constraints": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:capability-contracts#/$defs/constraint" } }
+      }
+    },
+    "edge": {
+      "$id": "urn:literate-ai:schema:v1:dependency-edge",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "source_revision", "target_revision", "requirement", "provided_capability", "resolution_decision"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:dependency-edge" },
+        "source_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "target_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "requirement": { "$ref": "urn:literate-ai:schema:v1:capability-requirement" },
+        "provided_capability": { "$ref": "urn:literate-ai:schema:v1:capability" },
+        "resolution_decision": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    }
+  }
+}

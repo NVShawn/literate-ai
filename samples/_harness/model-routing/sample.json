@@ -1,0 +1,26 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "ff521ce2dd6a52fe074991c7c45b23b0500beb7086b98727a7721ecf268af617",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:fd44cfc156a1b079b69badd823d0e5ecc7ee058a5508f211c9fce1b9f85fc7dc",
+  "execution_interface_identity": "sha256:c4a16d444ab6d4f25b4f3c5c3409dc3aec8fefe47394979e9fb35d7284dc7e87",
+  "expected_assertions": [
+    "offline-fallback-is-deterministic",
+    "request-egress-remains-none"
+  ],
+  "expected_failures": [
+    "fallback disabled or no policy-compatible endpoint"
+  ],
+  "proof_level": "executed",
+  "sample_id": "model-routing",
+  "scenario": "model-routing",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:a643231df40062b739776e37834564e9387265f5aae743e88318e97be9f50897"
+}

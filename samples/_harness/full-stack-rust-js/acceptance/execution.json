@@ -1,0 +1,61 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.full-stack-runs-end-to-end",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "release_id": "aurora-42",
+          "services": [
+            {"name": "worker", "passed_checks": 120, "failed_checks": 0, "critical_incidents": 0, "warning_incidents": 1, "changed_lines": 80},
+            {"name": "api", "passed_checks": 98, "failed_checks": 2, "critical_incidents": 1, "warning_incidents": 0, "changed_lines": 321},
+            {"name": "web", "passed_checks": 76, "failed_checks": 0, "critical_incidents": 0, "warning_incidents": 2, "changed_lines": 1120}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "release_id": "atlas-7",
+          "services": [
+            {"name": "gateway", "passed_checks": 200, "failed_checks": 0, "critical_incidents": 0, "warning_incidents": 0, "changed_lines": 99},
+            {"name": "ledger", "passed_checks": 150, "failed_checks": 0, "critical_incidents": 0, "warning_incidents": 1, "changed_lines": 401}
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "headline": "string",
+    "release": "string",
+    "release_status": "string",
+    "services": [
+      {
+        "name": "string",
+        "risk_points": "integer",
+        "status": "string"
+      }
+    ],
+    "summary": {
+      "blocked_services": "integer",
+      "failed_checks": "integer",
+      "pass_rate_basis_points": "integer",
+      "review_services": "integer",
+      "total_risk_points": "integer"
+    },
+    "top_risk_service": "string"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": {
+      "backend-language": "flavor://literate-ai/lang-rust",
+      "frontend-language": "flavor://literate-ai/lang-javascript"
+    }
+  },
+  "dependencies": []
+}

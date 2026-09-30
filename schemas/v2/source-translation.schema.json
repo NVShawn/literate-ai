@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:source-translation-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:source-to-specification-model-output" },
+    { "$ref": "urn:literate-ai:schema:v1:source-to-specification-model-call-journal" },
+    { "$ref": "urn:literate-ai:schema:v1:source-to-specification-intelligence" },
+    { "$ref": "urn:literate-ai:schema:v1:source-to-specification-translation-run" }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1 },
+    "identity": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "language": { "enum": ["cpp", "javascript", "python", "rust"] },
+    "stringArray": { "type": "array", "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" } },
+    "scenario": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "when", "then"],
+      "properties": {
+        "name": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "when": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "then": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" }
+      }
+    },
+    "modelObservation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["skill_id", "facet", "claim_kind", "requirement", "capability", "scenario", "evidence_ids", "confidence_basis_points", "scope", "component_coordinate"],
+      "properties": {
+        "skill_id": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "facet": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "claim_kind": { "enum": ["observed-current-behavior", "inferred-intent", "suspected-defect", "compatibility-quirk", "conflict", "unknown"] },
+        "requirement": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "capability": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "scenario": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/scenario" },
+        "evidence_ids": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" },
+        "confidence_basis_points": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "scope": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "component_coordinate": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" }
+      }
+    },
+    "modelComponentNode": {
+      "type": "object", "additionalProperties": false,
+      "required": ["coordinate", "title", "provided_capabilities", "source_paths", "observation_indexes", "evidence_ids"],
+      "properties": {
+        "coordinate": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "title": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "provided_capabilities": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" },
+        "source_paths": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" },
+        "observation_indexes": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "integer", "minimum": 0 } },
+        "evidence_ids": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" }
+      }
+    },
+    "modelComponentEdge": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_coordinate", "target_coordinate", "requirement_id", "capability", "version_range", "dependency_kind", "optional", "evidence_ids"],
+      "properties": {
+        "source_coordinate": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "target_coordinate": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "requirement_id": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "capability": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "version_range": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "dependency_kind": { "enum": ["build", "documentation", "generation", "runtime", "validation"] },
+        "optional": { "type": "boolean" },
+        "evidence_ids": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" }
+      }
+    },
+    "modelComponentGraph": {
+      "type": "object", "additionalProperties": false,
+      "required": ["root_coordinate", "nodes", "edges"],
+      "properties": {
+        "root_coordinate": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "nodes": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/modelComponentNode" } },
+        "edges": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/modelComponentEdge" } }
+      }
+    },
+    "modelOutput": {
+      "$id": "urn:literate-ai:schema:v1:source-to-specification-model-output",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "language", "observations", "component_graph"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:source-to-specification-model-output" },
+        "language": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/language" },
+        "observations": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/modelObservation" } },
+        "component_graph": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/modelComponentGraph" }
+      }
+    },
+    "modelEvidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["reference", "language", "kind", "start_line", "end_line", "call_path"],
+      "properties": {
+        "reference": { "$ref": "urn:literate-ai:schema:v1:source-to-specification-contracts#/$defs/evidenceReference" },
+        "language": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/language" },
+        "kind": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "start_line": { "type": "integer", "minimum": 1 },
+        "end_line": { "type": "integer", "minimum": 1 },
+        "call_path": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" },
+        "content": { "type": "string", "minLength": 1 }
+      }
+    },
+    "query": {
+      "type": "object", "additionalProperties": false,
+      "required": ["query_id", "language", "text", "evidence_ids"],
+      "properties": {
+        "query_id": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "language": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/language" },
+        "text": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "evidence_ids": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" }
+      }
+    },
+    "intelligence": {
+      "$id": "urn:literate-ai:schema:v1:source-to-specification-intelligence",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "source_snapshot_id", "provider_id", "provider_version", "runtime_version", "executable_identity", "database_identity", "built_with_version", "extraction_version", "document_count", "node_count", "edge_count", "languages", "evidence", "queries"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:source-to-specification-intelligence" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "provider_id": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "provider_version": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "runtime_version": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "executable_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "database_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "built_with_version": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "extraction_version": { "type": "integer", "minimum": 0 },
+        "document_count": { "type": "integer", "minimum": 0 },
+        "node_count": { "type": "integer", "minimum": 0 },
+        "edge_count": { "type": "integer", "minimum": 0 },
+        "languages": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/language" } },
+        "evidence": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/modelEvidence" } },
+        "queries": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/query" } }
+      }
+    },
+    "isolation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile", "clean_configuration", "filesystem_boundary", "hermetic", "limitations"],
+      "properties": {
+        "profile": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "clean_configuration": { "type": "boolean" },
+        "filesystem_boundary": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "hermetic": { "type": "boolean" },
+        "limitations": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" }
+      }
+    },
+    "journal": {
+      "$id": "urn:literate-ai:schema:v1:source-to-specification-model-call-journal",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "call_id", "language", "coding_cli", "executable", "executable_identity", "model", "command", "prompt", "response", "response_text", "stdout", "stderr", "request_identity", "response_identity", "command_identity", "selection_identity", "tool_binding_identity", "isolation", "environment_keys", "skill_refs", "intelligence_identity", "egress_policy_id"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:source-to-specification-model-call-journal" },
+        "call_id": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "language": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/language" },
+        "coding_cli": { "enum": ["codex", "claude", "cursor-agent", "opencode"] },
+        "executable": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "executable_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "model": { "type": ["string", "null"], "minLength": 1 },
+        "command": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" } },
+        "prompt": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "response": {
+          "$ref": "urn:literate-ai:schema:v1:source-to-specification-model-output"
+        },
+        "response_text": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" },
+        "stdout": { "type": "string" },
+        "stderr": { "type": "string" },
+        "request_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "response_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "command_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "selection_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "tool_binding_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "isolation": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/isolation" },
+        "environment_keys": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/stringArray" },
+        "skill_refs": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:source-to-specification-contracts#/$defs/skillRef" } },
+        "intelligence_identity": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/identity" },
+        "egress_policy_id": { "$ref": "urn:literate-ai:schema:v1:source-translation-contracts#/$defs/text" }
+      }
+    },
+    "translationRun": {
+      "$id": "urn:literate-ai:schema:v1:source-to-specification-translation-run",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "mode", "intelligence", "journals"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:source-to-specification-translation-run" },
+        "mode": { "enum": ["deterministic-static", "coding-cli"] },
+        "intelligence": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:source-to-specification-intelligence" }, { "type": "null" }] },
+        "journals": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:source-to-specification-model-call-journal" } }
+      }
+    }
+  }
+}

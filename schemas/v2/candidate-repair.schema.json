@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:candidate-repair-contracts",
+  "$defs": {
+    "diagnostic": {
+      "$id": "urn:literate-ai:schema:v2:candidate-repair-diagnostic",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "component_revision", "phase", "code", "sanitized_text", "classification", "failure_evidence_identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:candidate-repair-diagnostic" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "phase": { "enum": ["source-generation", "build-intent", "source-index", "build-authorization", "build-plan", "build", "test", "execute", "accept", "source-cache-publication", "dependency", "lifecycle"] },
+        "code": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$" },
+        "sanitized_text": { "type": "string", "minLength": 1, "maxLength": 8192 },
+        "classification": { "enum": ["retryable", "terminal"] },
+        "failure_evidence_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "repairRequest": {
+      "$id": "urn:literate-ai:schema:v2:candidate-repair-request",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "component_revision", "attempt_index", "original_recipe_identity", "predecessor_attempt_identities", "diagnostic_identity", "bounded_generation_request_identity", "workspace_allocation_identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:candidate-repair-request" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "attempt_index": { "type": "integer", "minimum": 1, "maximum": 2 },
+        "original_recipe_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "predecessor_attempt_identities": { "type": "array", "minItems": 1, "maxItems": 2, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } },
+        "diagnostic_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "bounded_generation_request_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "workspace_allocation_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "attempt": {
+      "$id": "urn:literate-ai:schema:v2:candidate-attempt",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "component_revision", "attempt_index", "generation_request_identity", "generation_response_identity", "complete_tree_identity", "source_bundle_identity", "workspace_allocation_identity", "lifecycle_result_identity", "predecessor_attempt_identities", "disposition", "diagnostic", "repair_request"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:candidate-attempt" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "attempt_index": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "generation_request_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_response_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "complete_tree_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "source_bundle_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "workspace_allocation_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "lifecycle_result_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "predecessor_attempt_identities": { "type": "array", "maxItems": 2, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } },
+        "disposition": { "enum": ["accepted", "retryable-rejected", "terminal-rejected"] },
+        "diagnostic": { "oneOf": [{ "type": "null" }, { "$ref": "urn:literate-ai:schema:v2:candidate-repair-diagnostic" }] },
+        "repair_request": { "oneOf": [{ "type": "null" }, { "$ref": "urn:literate-ai:schema:v2:candidate-repair-request" }] }
+      }
+    },
+    "chain": {
+      "$id": "urn:literate-ai:schema:v2:candidate-attempt-chain",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "component_revision", "attempts", "disposition"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:candidate-attempt-chain" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "attempts": { "type": "array", "minItems": 1, "maxItems": 3, "items": { "$ref": "urn:literate-ai:schema:v2:candidate-attempt" } },
+        "disposition": { "enum": ["accepted", "terminal", "exhausted"] }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:candidate-repair-diagnostic" },
+    { "$ref": "urn:literate-ai:schema:v2:candidate-repair-request" },
+    { "$ref": "urn:literate-ai:schema:v2:candidate-attempt" },
+    { "$ref": "urn:literate-ai:schema:v2:candidate-attempt-chain" }
+  ]
+}

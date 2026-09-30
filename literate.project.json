@@ -1,0 +1,184 @@
+{
+  "schema": "urn:literate-ai:schema:v2:project-definition",
+  "project_id": "literate-ai",
+  "version": "1.1.0",
+  "profile": "canonical",
+  "agent_skill": "SKILL.md",
+  "component_roots": [
+    "components",
+    "samples"
+  ],
+  "flavor_roots": [
+    "flavors"
+  ],
+  "skill_roots": [
+    "skills"
+  ],
+  "workflow_roots": [
+    "workflows"
+  ],
+  "routing_roots": [
+    "routing"
+  ],
+  "documentation_roots": [
+    "docs"
+  ],
+  "source_intelligence": {
+    "schema": "urn:literate-ai:schema:v1:project-source-intelligence-policy",
+    "provider_id": "none",
+    "command": null,
+    "minimum_version": null,
+    "artifact_path": null,
+    "stages": {
+      "project-maintenance": "off",
+      "source-generation": "off",
+      "cache-consumption": "off",
+      "source-to-specification": "off",
+      "repository-source-admission": "off",
+      "structural-review": "off"
+    },
+    "artifact_publication": "metadata-only"
+  },
+  "lifecycle_driver": {
+    "schema": "urn:literate-ai:schema:v2:project-lifecycle-driver",
+    "driver_id": "sample-host-conformance",
+    "version": "1.1.0",
+    "implementation_paths": [
+      "scripts/run_samples.py",
+      "src/literate_ai",
+      "tests/conformance/support/durable_split_service.py",
+      "tests/conformance/support/runtime_oracles.py",
+      "tests/conformance/support/sample_runner.py",
+      "tests/conformance/support/standard_service_stack.py"
+    ],
+    "implementation_identity": {
+      "schema": "urn:literate-ai:schema:v1:content-identity",
+      "algorithm": "sha256",
+      "digest": "440fbf86729a38972355ba43932a1067c3864cefc9186b6c2de028505913402d"
+    },
+    "argv": [
+      "{python}",
+      "scripts/run_samples.py",
+      "--runtime-root",
+      "{runtime_root}",
+      "--test-receipt",
+      "{candidate_receipt}",
+      "--lifecycle-project",
+      "{project}",
+      "--lifecycle-specification",
+      "{specification}",
+      "--lifecycle-project-revision",
+      "{project_revision_identity}",
+      "--lifecycle-request-identity",
+      "{lifecycle_request_identity}",
+      "{allow_host_execution}"
+    ],
+    "environment_keys": [
+      "ANTHROPIC_API_KEY",
+      "ANTHROPIC_AUTH_TOKEN",
+      "BAZEL_SH",
+      "BUILD_DIR",
+      "CC",
+      "CLAUDE_CODE_OAUTH_TOKEN",
+      "CODEX_ACCESS_TOKEN",
+      "CODEX_API_KEY",
+      "CODING_CLI",
+      "CXX",
+      "CURSOR_API_KEY",
+      "HOME",
+      "LITAI_CODEX_SANDBOX",
+      "LITAI_CODING_PROVIDER",
+      "LITAI_INHERITED_SESSION_AUTH_KEY",
+      "LITAI_INHERITED_SESSION_AUTH_KEY_ID",
+      "LITAI_INHERITED_SESSION_CHANNEL",
+      "LITAI_INHERITED_SESSION_IDENTITY",
+      "LITAI_INHERITED_SESSION_PROVIDER_IDENTITY",
+      "LITAI_INHERITED_SESSION_TIMEOUT_SECONDS",
+      "LITAI_LIVE_MODEL",
+      "LITAI_REMOTE_LIVE_GATE",
+      "OBJ_DIR",
+      "OPENAI_API_KEY",
+      "PATH",
+      "PATHEXT",
+      "SystemDrive",
+      "SystemRoot",
+      "TEMP",
+      "TMP",
+      "TMPDIR",
+      "USERPROFILE",
+      "WINDIR"
+    ],
+    "phases": [
+      "compose-and-plan",
+      "resolve-source-cache",
+      "generate-source-and-tests-or-use-cache",
+      "derive-source-intelligence",
+      "validate-classify-and-authorize",
+      "resolve-and-prepare-dependencies",
+      "native-build",
+      "verify-resolved-sbom",
+      "run-generated-tests",
+      "execute-application",
+      "independent-acceptance",
+      "admit-workspace",
+      "write-candidate-receipt"
+    ],
+    "specification_scope": "project",
+    "timeout_seconds": 21600
+  },
+  "test_receipt": "verification/current.json",
+  "test_receipt_policy": {
+    "schema": "urn:literate-ai:schema:v1:project-test-receipt-policy",
+    "suite_id": "sample-host-e2e",
+    "suite_version": "1.1.0",
+    "runner_identity": {
+      "schema": "urn:literate-ai:schema:v1:content-identity",
+      "algorithm": "sha256",
+      "digest": "39bb2e44349b3579e4b816bdb5bab75d3f804a3f27e4852c6f7ac90a071e8459"
+    },
+    "required_evidence_kinds": [
+      "acceptance-result",
+      "build-result",
+      "generation-provenance",
+      "lifecycle-command",
+      "lifecycle-plan",
+      "lifecycle-request",
+      "observation-result",
+      "resolved-sbom",
+      "security-scan-report",
+      "source-cache-decision",
+      "source-cache-lifecycle",
+      "source-intelligence",
+      "source-sbom",
+      "test-report",
+      "test-runner",
+      "workspace-admission"
+    ],
+    "minimum_test_count": 100
+  },
+  "default_flavor_selectors": [
+    "+flavor://literate-ai/build-make",
+    "+flavor://literate-ai/doc-google-workspace"
+  ],
+  "repository_policy": {
+    "schema": "literate-ai/repository-policy@1",
+    "default_branch": "main",
+    "main_state": "pre-release",
+    "pre_release_version": "1.1",
+    "default_component": "samples/hello-component",
+    "sample_component_roots": [
+      "samples"
+    ],
+    "work_queue": "docs/roadmap/active-work.md",
+    "remote": "origin",
+    "merge_method": "merge",
+    "pull_request_labels": [],
+    "release_engineer_source": "README.md#release-engineers",
+    "release_ci_workflow": "CI",
+    "patch_authority": "strict",
+    "writers": [
+      "jordanhubbard"
+    ],
+    "branch_gc_minimum_age_days": 7
+  }
+}

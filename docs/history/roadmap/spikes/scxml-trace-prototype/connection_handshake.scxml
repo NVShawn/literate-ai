@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hand-authored SCXML sample for the SPEC-HIERARCHY-SCXML-001 declared-trace
+  sidecar design pass (docs/history/roadmap/0.6.0-scxml-provider-design.md's "Next
+  action"). Deliberately a different domain from the sibling
+  docs/roadmap/0.6.0-scxml-prototype/media_player.scxml sample (which already
+  validated the two static structural-soundness checks) so this spike proves
+  the trace-sidecar format against a second, independently-authored chart
+  rather than re-using the same fixture the format might have been
+  unconsciously fitted to.
+
+  Scenario: a connection-handshake protocol. On "connect", the peer runs two
+  independent sub-negotiations concurrently: authentication and capability
+  negotiation, modeled as a <parallel> state with two regions. A transient
+  network drop mid-handshake suspends the connection; reconnecting resumes
+  the negotiation via a deep <history> pseudostate rather than restarting
+  both regions from scratch. This exercises exactly the two constructs the
+  design spike's "Next action" calls for: <parallel> (two or more concurrent
+  orthogonal regions) and <history> (deep, re-entry after leaving and
+  re-entering its parent).
+
+  14 declared state/parallel/final/history nodes: within the "reason about
+  by hand" size the task calls for.
+-->
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" initial="disconnected" name="connection_handshake">
+
+  <state id="disconnected">
+    <transition event="connect" target="conn_history"/>
+  </state>
+
+  <state id="connecting" initial="negotiating">
+    <!-- Declared once on the compound ancestor; inherited by every
+         descendant configuration underneath it, including both parallel
+         regions: the same ancestor-transition ("event bubbling") pattern
+         the sibling media_player.scxml sample already exercises. -->
+    <transition event="drop" target="suspended"/>
+    <transition event="abort" target="closed"/>
+    <!-- SCXML auto-raises "done.state.negotiating" once every region of the
+         <parallel id="negotiating"> below reaches its own <final>; this
+         ancestor transition is how the chart advances past the parallel
+         state without either region needing to know about the other. -->
+    <transition event="done.state.negotiating" target="established"/>
+
+    <history id="conn_history" type="deep">
+      <!-- First connect ever has nothing stored yet, so this default target
+           is what resolves the very first "connect". -->
+      <transition target="negotiating"/>
+    </history>
+
+    <parallel id="negotiating">
+      <state id="auth" initial="auth_pending">
+        <state id="auth_pending">
+          <transition event="auth_ok" target="auth_done"/>
+          <transition event="auth_fail" target="auth_failed"/>
+        </state>
+        <state id="auth_failed">
+          <transition event="retry_auth" target="auth_pending"/>
+        </state>
+        <final id="auth_done"/>
+      </state>
+      <state id="caps" initial="caps_pending">
+        <state id="caps_pending">
+          <transition event="caps_ok" target="caps_done"/>
+        </state>
+        <final id="caps_done"/>
+      </state>
+    </parallel>
+  </state>
+
+  <state id="suspended">
+    <!-- Reconnecting after a drop resumes via the same deep history:
+         if one region had already finished (e.g. caps_done) before the
+         drop, re-entry restores exactly that sub-configuration rather than
+         re-running caps negotiation from caps_pending. -->
+    <transition event="connect" target="conn_history"/>
+    <transition event="abort" target="closed"/>
+  </state>
+
+  <state id="established">
+    <transition event="disconnect" target="closed"/>
+  </state>
+
+  <final id="closed"/>
+
+</scxml>

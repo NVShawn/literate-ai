@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:component-contracts",
+  "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:component-definition" }, { "$ref": "urn:literate-ai:schema:v1:component-revision" }],
+  "$defs": {
+    "coordinate": { "type": "object", "additionalProperties": false, "required": ["namespace", "name"], "properties": { "namespace": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$|^[a-z0-9]$" }, "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*[a-z0-9]$|^[a-z0-9]$" } } },
+    "entrypoint": { "type": "object", "additionalProperties": false, "required": ["name", "kind", "path"], "properties": { "name": { "type": "string", "minLength": 1 }, "kind": { "type": "string", "minLength": 1 }, "path": { "type": "string", "minLength": 1 } } },
+    "flavorSlot": { "type": "object", "additionalProperties": false, "required": ["slot_id", "axis", "cardinality", "capability_contract", "minimum", "maximum"], "properties": { "slot_id": { "type": "string", "minLength": 1 }, "axis": { "$ref": "urn:literate-ai:schema:v1:flavor-axis" }, "cardinality": { "enum": ["exactly-one", "zero-or-one", "one-or-more", "bounded"] }, "capability_contract": { "type": "string", "minLength": 1 }, "minimum": { "type": ["integer", "null"], "minimum": 0 }, "maximum": { "type": ["integer", "null"], "minimum": 0 } } },
+    "definition": {
+      "$id": "urn:literate-ai:schema:v1:component-definition", "type": "object", "additionalProperties": false,
+      "required": ["schema", "coordinate", "version", "display_name", "description", "profiles", "sample", "provides", "requires", "specification_provider", "specification_roots", "authoring_inputs", "workflow_definition", "routing_policy", "flavor_slots", "entrypoints", "acceptance_contracts"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:component-definition" }, "coordinate": { "$ref": "urn:literate-ai:schema:v1:component-contracts#/$defs/coordinate" }, "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" }, "display_name": { "type": "string", "minLength": 1 }, "description": { "type": "string" },
+        "profiles": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }, "sample": { "type": "boolean" }, "provides": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:capability" } }, "requires": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:capability-requirement" } },
+        "specification_provider": { "type": "string", "minLength": 1 }, "specification_roots": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }, "authoring_inputs": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:content-reference" } }, "workflow_definition": { "$ref": "urn:literate-ai:schema:v1:content-reference" }, "routing_policy": { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        "flavor_slots": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:component-contracts#/$defs/flavorSlot" } }, "entrypoints": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:component-contracts#/$defs/entrypoint" } }, "acceptance_contracts": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:content-reference" } }
+      }
+    },
+    "revision": {
+      "$id": "urn:literate-ai:schema:v1:component-revision", "type": "object", "additionalProperties": false,
+      "required": ["schema", "definition", "specifications", "source_snapshot", "parent_revisions", "parent_runs"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:component-revision" }, "definition": { "$ref": "urn:literate-ai:schema:v1:component-definition" }, "specifications": { "$ref": "urn:literate-ai:schema:v1:specification-set" },
+        "source_snapshot": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:content-identity" }, { "type": "null" }] }, "parent_revisions": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }, "parent_runs": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }
+      }
+    }
+  }
+}

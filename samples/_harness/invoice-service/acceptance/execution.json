@@ -1,0 +1,29 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.delegate-money-arithmetic",
+  "scenario_id": "delegate-money-arithmetic.transitive-money-component-is-used",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [{"items": [{"sku": "widget", "quantity": 2, "unit_price_cents": 1299}, {"sku": "cable", "quantity": 3, "unit_price_cents": 499}], "discount_basis_points": 1000}]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [{"items": [{"sku": "adapter", "quantity": 3, "unit_price_cents": 333}], "discount_basis_points": 1250}]
+    }
+  ],
+  "result_shape": {
+    "discount_cents": "integer",
+    "line_count": "integer",
+    "subtotal_cents": "integer",
+    "total_cents": "integer",
+    "unit_count": "integer"
+  },
+  "target": {
+    "build.system": "flavor://literate-ai/build-bazel",
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": ["literate-ai.money-calculation"]
+}

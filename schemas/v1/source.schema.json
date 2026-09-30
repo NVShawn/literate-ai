@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:source-contracts",
+  "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:origin-attestation" }, { "$ref": "urn:literate-ai:schema:v1:source-snapshot" }],
+  "$defs": {
+    "fact": { "type": "object", "additionalProperties": false, "required": ["name", "value"], "properties": { "name": { "type": "string", "minLength": 1 }, "value": { "type": "string", "minLength": 1 } } },
+    "attestation": {
+      "$id": "urn:literate-ai:schema:v1:origin-attestation", "type": "object", "additionalProperties": false,
+      "required": ["schema", "signer", "trust_root", "verification_method", "tree_identity", "source_provider", "source_facts", "revocation_status", "result"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:origin-attestation" }, "signer": { "type": "string", "minLength": 1 }, "trust_root": { "type": "string", "minLength": 1 },
+        "verification_method": { "type": "string", "minLength": 1 }, "tree_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }, "source_provider": { "type": "string", "minLength": 1 },
+        "source_facts": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:source-contracts#/$defs/fact" } }, "revocation_status": { "enum": ["good", "revoked", "unknown", "not-applicable"] }, "result": { "enum": ["verified", "rejected", "indeterminate"] }
+      }
+    },
+    "entry": {
+      "type": "object", "additionalProperties": false, "required": ["path", "entry_type", "mode", "size", "identity"],
+      "properties": { "path": { "type": "string", "minLength": 1 }, "entry_type": { "enum": ["file", "symlink", "submodule", "lfs-object", "archive-member"] }, "mode": { "type": "integer", "minimum": 0, "maximum": 4095 }, "size": { "type": "integer", "minimum": 0 }, "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }
+    },
+    "member": {
+      "type": "object", "additionalProperties": false, "required": ["member_id", "mount_path", "snapshot_identity"],
+      "properties": { "member_id": { "type": "string", "minLength": 1 }, "mount_path": { "type": "string", "minLength": 1 }, "snapshot_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }
+    },
+    "snapshot": {
+      "$id": "urn:literate-ai:schema:v1:source-snapshot", "type": "object", "additionalProperties": false,
+      "required": ["schema", "source_provider", "provider_configuration", "resolved_revision", "entries", "aggregate_members", "tree_identity", "dirty", "dirty_policy_decision", "origin_attestations"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:source-snapshot" }, "source_provider": { "type": "string", "minLength": 1 }, "provider_configuration": { "$ref": "urn:literate-ai:schema:v1:content-identity" }, "resolved_revision": { "type": "string", "minLength": 1 },
+        "entries": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:source-contracts#/$defs/entry" } }, "aggregate_members": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:source-contracts#/$defs/member" } }, "tree_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }, "dirty": { "type": "boolean" },
+        "dirty_policy_decision": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:content-identity" }, { "type": "null" }] }, "origin_attestations": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:origin-attestation" } }
+      }
+    }
+  }
+}

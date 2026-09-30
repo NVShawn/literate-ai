@@ -1,0 +1,24 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:41c19cd7f1e5ab18893b5d519115cc61a260e1828911a7a133d8c1f5746caae0",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "fetch_count": 1,
+        "retained_row_count": 2,
+        "selected": [
+          "memory_utilization"
+        ]
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "fetch_count": 1,
+        "retained_row_count": 2,
+        "selected": []
+      }
+    }
+  ]
+}

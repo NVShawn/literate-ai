@@ -1,0 +1,217 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:inherited-session-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v1:inherited-session-request"},
+    {"$ref": "urn:literate-ai:schema:v1:inherited-session-context-bundle"},
+    {"$ref": "urn:literate-ai:schema:v1:inherited-session-response"},
+    {"$ref": "urn:literate-ai:schema:v1:inherited-session-handoff-evidence"},
+    {"$ref": "urn:literate-ai:schema:v1:inherited-session-directory-request"},
+    {"$ref": "urn:literate-ai:schema:v1:inherited-session-directory-response"},
+    {"$ref": "urn:literate-ai:schema:v1:inherited-session-source-payload"}
+  ],
+  "$defs": {
+    "identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+    "context_bundle": {
+      "$id": "urn:literate-ai:schema:v1:inherited-session-context-bundle",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "bounded_prompt",
+        "workspace_locator",
+        "context_manifest_identity",
+        "prompt_identity",
+        "writable_boundary_identity",
+        "component_lock_identity",
+        "recipe_identity",
+        "model_name",
+        "model_binding_identity",
+        "output_contract_identity",
+        "allowed_output_paths"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:inherited-session-context-bundle"},
+        "bounded_prompt": {"type": "string", "contentEncoding": "base64", "minLength": 1},
+        "workspace_locator": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "context_manifest_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "prompt_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "writable_boundary_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "component_lock_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "recipe_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "model_name": {"type": "string", "minLength": 1, "maxLength": 256},
+        "model_binding_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "output_contract_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "allowed_output_paths": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["source", "source/**"]}
+        }
+      }
+    },
+    "request": {
+      "$id": "urn:literate-ai:schema:v1:inherited-session-request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "provider_identity",
+        "session_identity",
+        "generation_request_identity",
+        "generation_plan_identity",
+        "context_manifest_identity",
+        "prompt_identity",
+        "writable_boundary_identity",
+        "component_lock_identity",
+        "recipe_identity",
+        "model_binding_identity",
+        "output_contract_identity",
+        "context_bundle_identity",
+        "issued_at",
+        "expires_at",
+        "nonce"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:inherited-session-request"},
+        "provider_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "session_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generation_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generation_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "context_manifest_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "prompt_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "writable_boundary_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "component_lock_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "recipe_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "model_binding_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "output_contract_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "context_bundle_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "issued_at": {"type": "string", "format": "date-time", "pattern": "^.*Z$"},
+        "expires_at": {"type": "string", "format": "date-time", "pattern": "^.*Z$"},
+        "nonce": {"type": "string", "minLength": 1, "maxLength": 128}
+      }
+    },
+    "response": {
+      "$id": "urn:literate-ai:schema:v1:inherited-session-response",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request_identity",
+        "provider_identity",
+        "session_identity",
+        "sequence",
+        "outcome"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:inherited-session-response"},
+        "request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "provider_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "session_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "sequence": {"const": 1},
+        "outcome": {
+          "enum": ["succeeded", "timed-out", "user-cancelled", "runner-cancelled"]
+        },
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_payload_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "transcript_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "provider_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "reason_code": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"outcome": {"const": "succeeded"}}},
+          "then": {
+            "required": [
+              "source_tree_identity",
+              "source_payload_identity",
+              "transcript_identity",
+              "provider_evidence_identity"
+            ],
+            "not": {"required": ["reason_code"]}
+          },
+          "else": {
+            "required": ["reason_code"],
+            "not": {
+              "anyOf": [
+                {"required": ["source_tree_identity"]},
+                {"required": ["source_payload_identity"]},
+                {"required": ["transcript_identity"]},
+                {"required": ["provider_evidence_identity"]}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "$id": "urn:literate-ai:schema:v1:inherited-session-handoff-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "request",
+        "response",
+        "authentication_key_identity",
+        "evidence_identity"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:inherited-session-handoff-evidence"},
+        "request": {"$ref": "urn:literate-ai:schema:v1:inherited-session-request"},
+        "response": {"$ref": "urn:literate-ai:schema:v1:inherited-session-response"},
+        "authentication_key_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "directory_request": {
+      "$id": "urn:literate-ai:schema:v1:inherited-session-directory-request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "request", "context_bundle", "authentication_tag"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:inherited-session-directory-request"},
+        "request": {"type": "string", "contentEncoding": "base64", "minLength": 1},
+        "context_bundle": {"type": "string", "contentEncoding": "base64", "minLength": 1},
+        "authentication_tag": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "directory_response": {
+      "$id": "urn:literate-ai:schema:v1:inherited-session-directory-response",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "response", "source_payload", "authentication_tag"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:inherited-session-directory-response"},
+        "response": {"type": "string", "contentEncoding": "base64", "minLength": 1},
+        "source_payload": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "contentEncoding": "base64", "minLength": 1}
+          ]
+        },
+        "authentication_tag": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "source_payload": {
+      "$id": "urn:literate-ai:schema:v1:inherited-session-source-payload",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "files"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:inherited-session-source-payload"},
+        "files": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1024,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+          },
+          "additionalProperties": {"type": "string"}
+        }
+      }
+    }
+  }
+}

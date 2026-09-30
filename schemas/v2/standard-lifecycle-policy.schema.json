@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-lifecycle-policy",
+  "$defs": {
+    "extensionEvidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "phase", "evidence_kind"],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence"
+        },
+        "phase": {
+          "enum": [
+            "package-artifacts",
+            "publish-source-cache",
+            "publish-artifacts",
+            "deploy"
+          ]
+        },
+        "evidence_kind": {
+          "enum": [
+            "acceptance-result",
+            "artifact-publication-result",
+            "build-result",
+            "deployment-result",
+            "generation-provenance",
+            "lifecycle-command",
+            "lifecycle-plan",
+            "lifecycle-request",
+            "observation-result",
+            "package-result",
+            "publication-result",
+            "resolved-sbom",
+            "security-scan-report",
+            "source-cache-decision",
+            "source-cache-lifecycle",
+            "source-cache-publication-result",
+            "source-intelligence",
+            "source-sbom",
+            "test-report",
+            "test-runner",
+            "workspace-admission"
+          ]
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "policy_id",
+    "policy_version",
+    "phases",
+    "required_evidence_kinds",
+    "extension_evidence",
+    "minimum_test_count"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:standard-lifecycle-policy"
+    },
+    "policy_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$"
+    },
+    "policy_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 17,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "compose-and-plan",
+          "resolve-source-cache",
+          "generate-source-and-tests-or-use-cache",
+          "derive-source-intelligence",
+          "validate-classify-and-authorize",
+          "resolve-and-prepare-dependencies",
+          "native-build",
+          "verify-resolved-sbom",
+          "run-generated-tests",
+          "execute-application",
+          "independent-acceptance",
+          "admit-workspace",
+          "package-artifacts",
+          "publish-source-cache",
+          "publish-artifacts",
+          "deploy",
+          "write-candidate-receipt"
+        ]
+      },
+      "allOf": [
+        { "contains": { "const": "compose-and-plan" } },
+        { "contains": { "const": "resolve-source-cache" } },
+        { "contains": { "const": "generate-source-and-tests-or-use-cache" } },
+        { "contains": { "const": "derive-source-intelligence" } },
+        { "contains": { "const": "validate-classify-and-authorize" } },
+        { "contains": { "const": "resolve-and-prepare-dependencies" } },
+        { "contains": { "const": "native-build" } },
+        { "contains": { "const": "verify-resolved-sbom" } },
+        { "contains": { "const": "run-generated-tests" } },
+        { "contains": { "const": "execute-application" } },
+        { "contains": { "const": "independent-acceptance" } },
+        { "contains": { "const": "admit-workspace" } },
+        { "contains": { "const": "write-candidate-receipt" } }
+      ]
+    },
+    "required_evidence_kinds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "acceptance-result",
+          "artifact-publication-result",
+          "build-result",
+          "deployment-result",
+          "generation-provenance",
+          "lifecycle-command",
+          "lifecycle-plan",
+          "lifecycle-request",
+          "observation-result",
+          "package-result",
+          "publication-result",
+          "resolved-sbom",
+          "security-scan-report",
+          "source-cache-decision",
+          "source-cache-lifecycle",
+          "source-cache-publication-result",
+          "source-intelligence",
+          "source-sbom",
+          "test-report",
+          "test-runner",
+          "workspace-admission"
+        ]
+      },
+      "contains": { "const": "test-runner" }
+    },
+    "extension_evidence": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence" },
+            { "properties": { "phase": { "const": "package-artifacts" } } }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence" },
+            { "properties": { "phase": { "const": "publish-source-cache" } } }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence" },
+            { "properties": { "phase": { "const": "publish-artifacts" } } }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence" },
+            { "properties": { "phase": { "const": "deploy" } } }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "minimum_test_count": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

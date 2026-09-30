@@ -1,0 +1,81 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "required_capabilities": [
+            "code"
+          ],
+          "endpoints": [
+            {
+              "id": "preferred",
+              "available": false,
+              "locality": "local",
+              "capabilities": [
+                "code"
+              ]
+            },
+            {
+              "id": "fallback",
+              "available": true,
+              "locality": "local",
+              "capabilities": [
+                "code",
+                "structured-output"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "required_capabilities": [
+            "code"
+          ],
+          "endpoints": [
+            {
+              "id": "preferred",
+              "available": true,
+              "locality": "local",
+              "capabilities": [
+                "code"
+              ]
+            },
+            {
+              "id": "fallback",
+              "available": true,
+              "locality": "local",
+              "capabilities": [
+                "code"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "considered": [
+      "string"
+    ],
+    "data_egress": "string",
+    "fallback_used": "boolean",
+    "rejected": [
+      "string"
+    ],
+    "selected": "string"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

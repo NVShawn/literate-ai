@@ -1,0 +1,401 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:evidence-trust-contracts",
+  "description": "Trusted verifier inputs for pinned Ed25519 evidence assertions. Issuer/key associations come from configuration, not OIDC or payload claims. Typed decoding additionally checks ordering, unique signer keys, valid intervals and attainable signature thresholds. Assertion checks do not establish retained closure or receipt admission.",
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "algorithm",
+        "digest"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "algorithm": {
+          "const": "sha256"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])",
+          "minLength": 64,
+          "maxLength": 64
+        }
+      }
+    },
+    "blob": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "digest",
+        "size",
+        "media_type"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$(?![\\s\\S])",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "media_type": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^[a-z0-9][a-z0-9!#$&^_.+-]*/[a-z0-9][a-z0-9!#$&^_.+-]*$(?![\\s\\S])"
+        }
+      }
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$(?![\\s\\S])",
+      "maxLength": 128
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!\\s)[^\\u0000-\\u001f]*\\S$(?![\\s\\S])"
+    },
+    "integer": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "positive": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
+    "signer": {
+      "$id": "urn:literate-ai:schema:v2:evidence-signer-rule",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "public_key",
+        "issuer",
+        "repositories",
+        "workflows",
+        "targets",
+        "predicate_types",
+        "store_ids",
+        "valid_from",
+        "valid_until"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-signer-rule"
+        },
+        "public_key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "issuer": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/text"
+        },
+        "repositories": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/text"
+          }
+        },
+        "workflows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+          }
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+          }
+        },
+        "predicate_types": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "urn:literate-ai:schema:v2:evidence-derivation-run",
+              "urn:literate-ai:schema:v2:evidence-platform-run",
+              "urn:literate-ai:schema:v2:evidence-matrix",
+              "urn:literate-ai:schema:v2:evidence-locator"
+            ]
+          }
+        },
+        "store_ids": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/name"
+          }
+        },
+        "valid_from": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/integer"
+        },
+        "valid_until": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/positive"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "predicate_types": {
+                "contains": {
+                  "const": "urn:literate-ai:schema:v2:evidence-locator"
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "store_ids": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "store_ids": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    },
+    "revocations": {
+      "$id": "urn:literate-ai:schema:v2:evidence-revocations",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "issued_at",
+        "expires_at",
+        "key_identities",
+        "issuers",
+        "invocation_ids"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-revocations"
+        },
+        "issued_at": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/integer"
+        },
+        "expires_at": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/positive"
+        },
+        "key_identities": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+          }
+        },
+        "issuers": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/text"
+          }
+        },
+        "invocation_ids": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/name"
+          }
+        }
+      }
+    },
+    "policy": {
+      "$id": "urn:literate-ai:schema:v2:evidence-trust-policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "signers",
+        "minimum_signatures",
+        "maximum_run_age_seconds",
+        "maximum_run_duration_seconds",
+        "maximum_revocation_age_seconds",
+        "minimum_retention_seconds",
+        "maximum_clock_skew_seconds"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:evidence-trust-policy"
+        },
+        "signers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/signer"
+          }
+        },
+        "minimum_signatures": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "maximum_run_age_seconds": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/positive"
+        },
+        "maximum_run_duration_seconds": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/positive"
+        },
+        "maximum_revocation_age_seconds": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/positive"
+        },
+        "minimum_retention_seconds": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/positive"
+        },
+        "maximum_clock_skew_seconds": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/integer"
+        }
+      }
+    },
+    "expectation": {
+      "$id": "urn:literate-ai:schema:v2:run-evidence-expectation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "predicate_type",
+        "subject",
+        "invocation_id",
+        "repository",
+        "revision",
+        "workflow",
+        "target",
+        "earliest_start",
+        "latest_finish",
+        "required_cells"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:run-evidence-expectation"
+        },
+        "predicate_type": {
+          "enum": [
+            "urn:literate-ai:schema:v2:evidence-derivation-run",
+            "urn:literate-ai:schema:v2:evidence-platform-run",
+            "urn:literate-ai:schema:v2:evidence-matrix"
+          ]
+        },
+        "subject": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/blob"
+        },
+        "invocation_id": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/name"
+        },
+        "repository": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/text"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$(?![\\s\\S])",
+          "minLength": 40,
+          "maxLength": 64
+        },
+        "workflow": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+        },
+        "target": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/identity"
+        },
+        "earliest_start": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/integer"
+        },
+        "latest_finish": {
+          "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/integer"
+        },
+        "required_cells": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/name"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "predicate_type": {
+                "const": "urn:literate-ai:schema:v2:evidence-matrix"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "required_cells": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "required_cells": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/signer"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/revocations"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/policy"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:evidence-trust-contracts#/$defs/expectation"
+    }
+  ]
+}

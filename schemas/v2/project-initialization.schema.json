@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:project-initialization-contracts",
+  "title": "Project initialization origin and baseline contracts",
+  "$defs": {
+    "origin": {
+      "$id": "urn:literate-ai:schema:v1:project-initialization-origin",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "repository_url",
+        "git_revision",
+        "distribution_name",
+        "distribution_version"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:project-initialization-origin"
+        },
+        "repository_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f]+$"
+        },
+        "git_revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"
+        },
+        "distribution_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f]+$"
+        },
+        "distribution_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^[^\\u0000-\\u001f]+$"
+        }
+      }
+    },
+    "file": {
+      "$id": "urn:literate-ai:schema:v1:project-initialization-baseline-file",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "path", "size", "identity"],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:project-initialization-baseline-file"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?!.*//).+$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    },
+    "baseline": {
+      "$id": "urn:literate-ai:schema:v1:project-initialization-baseline",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "origin_identity", "template_protocol", "files"],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:project-initialization-baseline"
+        },
+        "origin_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "template_protocol": {
+          "const": "literate-ai/project-template@1"
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:project-initialization-baseline-file"
+          }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v1:project-initialization-origin"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:project-initialization-baseline-file"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:project-initialization-baseline"
+    }
+  ]
+}

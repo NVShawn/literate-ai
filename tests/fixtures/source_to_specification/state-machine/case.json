@@ -1,0 +1,45 @@
+{
+  "schema": "literate-ai/source-to-specification-case@1",
+  "case_id": "state-machine",
+  "source_root": "source",
+  "surfaces": [
+    {"surface_id": "door-errors", "facet": "errors", "description": "Invalid transitions"},
+    {"surface_id": "door-state", "facet": "state", "description": "Door state transitions"}
+  ],
+  "evidence": [
+    {"evidence_id": "door-source", "path": "machine.py", "symbol": "Door"}
+  ],
+  "observations": [
+    {
+      "observation_id": "door-invalid-transition",
+      "surface_ids": ["door-errors"],
+      "facet": "errors",
+      "claim_kind": "observed-current-behavior",
+      "statement": "An invalid door transition raises ValueError.",
+      "evidence_ids": ["door-source"],
+      "skill_id": "api-surface",
+      "confidence": 1.0
+    },
+    {
+      "observation_id": "door-transition",
+      "surface_ids": ["door-state"],
+      "facet": "state",
+      "claim_kind": "observed-current-behavior",
+      "statement": "A door transitions only between closed and open states.",
+      "evidence_ids": ["door-source"],
+      "skill_id": "behavior-state",
+      "confidence": 1.0
+    }
+  ],
+  "expected": {
+    "claim_kinds": {
+      "door-invalid-transition": "observed-current-behavior",
+      "door-transition": "observed-current-behavior"
+    },
+    "coverage": {"door-errors": "covered", "door-state": "covered"},
+    "uncertainty_ids": [],
+    "statement_ids": ["statement:door-invalid-transition", "statement:door-transition"],
+    "flavor_ids": [],
+    "invalidated_surface_ids": []
+  }
+}

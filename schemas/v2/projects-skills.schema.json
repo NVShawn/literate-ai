@@ -1,0 +1,531 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:project-skill-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:project-definition"},
+    {"$ref": "urn:literate-ai:schema:v2:project-lifecycle-driver"},
+    {"$ref": "urn:literate-ai:schema:v2:ci-target-preference"},
+    {"$ref": "literate-ai/repository-policy@1"},
+    {"$ref": "urn:literate-ai:schema:v1:project-source-intelligence-policy"},
+    {"$ref": "literate-ai/source-intelligence-stage-status@1"},
+    {"$ref": "urn:literate-ai:schema:v1:skill-reference"},
+    {"$ref": "urn:literate-ai:schema:v1:specification-to-source-skill"}
+  ],
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "semver": {"$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"},
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(/|$))[^\\\\]+$"
+    },
+    "relativePaths": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"}
+    },
+    "repositoryPin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "path", "url", "commit", "branch"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 256, "pattern": "^[^\u0000-\u001f\u007f]+$"},
+        "path": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"},
+        "url": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\u0000-\u001f\u007f]+$"},
+        "commit": {"type": "string", "pattern": "^(?!0+$)(?:[0-9a-f]{40}|[0-9a-f]{64})$"},
+        "branch": {"type": ["string", "null"], "minLength": 1, "maxLength": 256}
+      }
+    },
+    "repositoryRelationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consumer", "provider"],
+      "properties": {
+        "consumer": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"},
+        "provider": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"}
+      }
+    },
+    "repositoryOrchestration": {
+      "description": "Persistent child pins and declared dependencies, not local checkout state, child authority copies, or publication proof. Python enforces unique names/portable paths, known relationship endpoints and disjoint root catalogs.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gitmodules_identity", "repositories", "relationships"],
+      "properties": {
+        "gitmodules_identity": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "repositories": {
+          "type": "array", "minItems": 1, "maxItems": 128, "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/repositoryPin"}
+        },
+        "relationships": {
+          "type": "array", "maxItems": 1024, "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/repositoryRelationship"}
+        }
+      }
+    },
+    "project": {
+      "$id": "urn:literate-ai:schema:v2:project-definition",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "version",
+        "profile",
+        "agent_skill",
+        "component_roots",
+        "flavor_roots",
+        "skill_roots",
+        "workflow_roots",
+        "routing_roots",
+        "documentation_roots",
+        "source_intelligence"
+      ],
+      "dependentRequired": {
+        "test_receipt_policy": ["test_receipt"]
+      },
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:project-definition"},
+        "project_id": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+        "version": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/semver"},
+        "profile": {"const": "canonical"},
+        "agent_skill": {"const": "SKILL.md"},
+        "component_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
+        "flavor_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
+        "skill_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
+        "workflow_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
+        "routing_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
+        "documentation_roots": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"}
+        },
+        "source_intelligence": {
+          "$ref": "urn:literate-ai:schema:v1:project-source-intelligence-policy"
+        },
+        "repository_policy": {"$ref": "literate-ai/repository-policy@1"},
+        "repository_orchestration": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/repositoryOrchestration"},
+        "html_render_requests": {
+          "description": "Declared derived HTML artifacts to verify. Output paths must be unique ignoring case; verification never applies the requests' cache or publication policy. Omitted or empty means no declared artifacts.",
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:html-observability-render-request"}
+        },
+        "project_type": {
+          "enum": ["application", "library", "component-only", "full-stack", "document-generator", "firmware", "open-ended"]
+        },
+        "log_dir": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"},
+        "source_cache": {
+          "$ref": "urn:literate-ai:schema:v2:source-cache-configuration"
+        },
+        "lifecycle_driver": {
+          "$ref": "urn:literate-ai:schema:v2:project-lifecycle-driver"
+        },
+        "test_receipt": {
+          "description": "A normalized receipt path outside the project manifest, agent skill, and declared catalog roots.",
+          "$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"
+        },
+        "test_receipt_policy": {
+          "$ref": "urn:literate-ai:schema:v1:project-test-receipt-policy"
+        },
+        "default_flavor_selectors": {
+          "description": "Ordered project preferences applied before explicit command selectors, and only on axes declared by a Component.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[+-](?:(?:[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?|flavor://[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?)|[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?:(?:[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?|flavor://[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?))$"
+          }
+        },
+        "agent_development_workflow": {
+          "description": "The agent-side development posture this project expects (see skills/agent/develop-in-{dev,staging,production}-workflow). Defaults to 'dev' when omitted.",
+          "enum": ["dev", "staging", "production"]
+        },
+        "ci_targets": {
+          "description": "Ordered CI target preference (first is most preferred). github and gitlab are mutually exclusive; local may combine with either. Defaults to empty (no explicit preference) when omitted.",
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v2:ci-target-preference"}
+        },
+        "mcp_roots": {
+          "description": "Optional catalog roots for project-owned MCP servers (mcp.md sentinels). Omitted or empty means this project does not ship MCP servers.",
+          "$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"
+        },
+        "institutional_channels": {
+          "description": "Optional Slack channel, Outlook mailboxes, and Jira issue ids. Tokens and webhooks stay in the operator-local MCP catalog, not git.",
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "slack_channel": {"type": "string", "minLength": 1},
+            "outlook_from": {"type": "string", "minLength": 1},
+            "outlook_to": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            },
+            "jira_issue": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
+    "repositoryPolicy": {
+      "$id": "literate-ai/repository-policy@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema"],
+      "properties": {
+        "schema": {"const": "literate-ai/repository-policy@1"},
+        "default_branch": {"type": "string", "pattern": "^(?!.*(?:\\.\\.|//|@\\{|\\.lock$))[A-Za-z0-9](?:[A-Za-z0-9._/-]{0,253}[A-Za-z0-9])?$"},
+        "main_state": {"enum": ["free", "pre-release"]},
+        "pre_release_version": {"oneOf": [{"type": "null"}, {"type": "string", "pattern": "^(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)$"}]},
+        "default_component": {"oneOf": [{"type": "null"}, {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"}, {"type": "string", "pattern": "^component://[a-z0-9][a-z0-9._-]*/[a-z0-9][a-z0-9._-]*$"}]},
+        "sample_component_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
+        "work_queue": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"},
+        "remote": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
+        "merge_method": {"enum": ["merge", "squash", "rebase"]},
+        "pull_request_labels": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "release_engineer_source": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(/|$))[^\\\\#]+#[^#]+$"},
+        "release_ci_workflow": {"type": "string", "minLength": 1},
+        "patch_authority": {"enum": ["strict", "loose"]},
+        "writers": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^(?:[A-Za-z0-9][A-Za-z0-9._-]{0,62}[:/])?[A-Za-z0-9](?:[A-Za-z0-9._-]{0,62}[A-Za-z0-9])?$"}},
+        "branch_gc_minimum_age_days": {"type": "integer", "minimum": 1}
+      },
+      "allOf": [{"if": {"properties": {"main_state": {"const": "pre-release"}}, "required": ["main_state"]}, "then": {"required": ["pre_release_version"], "properties": {"pre_release_version": {"type": "string"}}}, "else": {"properties": {"pre_release_version": {"type": "null"}}}}]
+    },
+    "ciTargetPreference": {
+      "$id": "urn:literate-ai:schema:v2:ci-target-preference",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "mode"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:ci-target-preference"},
+        "target": {"enum": ["local", "github", "gitlab"]},
+        "mode": {"enum": ["serial", "parallel"]}
+      }
+    },
+    "projectLifecycleDriver": {
+      "$id": "urn:literate-ai:schema:v2:project-lifecycle-driver",
+      "description": "Either the built-in Standard lifecycle bound to an installed framework artifact and policy, or a content-pinned external argv driver.",
+      "oneOf": [
+        {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "driver_id",
+        "version",
+        "implementation_paths",
+        "implementation_identity",
+        "argv",
+        "environment_keys",
+        "phases",
+        "specification_scope",
+        "timeout_seconds"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:project-lifecycle-driver"},
+        "binding": {"const": "external"},
+        "driver_id": {
+          "$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"
+        },
+        "version": {
+          "$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/semver"
+        },
+        "implementation_paths": {
+          "description": "Sorted project-relative file or directory roots forming the trusted lifecycle-driver implementation closure.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*//).+$"
+          }
+        },
+        "implementation_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {"type": "string", "minLength": 1, "maxLength": 4096}
+        },
+        "environment_keys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
+          }
+        },
+        "phases": {
+          "description": "The complete minimum lifecycle, optionally followed by ordered packaging, publication, or deployment phases before the receipt phase.",
+          "type": "array",
+          "minItems": 13,
+          "uniqueItems": true,
+          "prefixItems": [
+            {"const": "compose-and-plan"},
+            {"const": "resolve-source-cache"},
+            {"const": "generate-source-and-tests-or-use-cache"},
+            {"const": "derive-source-intelligence"},
+            {"const": "validate-classify-and-authorize"},
+            {"const": "resolve-and-prepare-dependencies"},
+            {"const": "native-build"},
+            {"const": "verify-resolved-sbom"},
+            {"const": "run-generated-tests"},
+            {"const": "execute-application"},
+            {"const": "independent-acceptance"},
+            {"const": "admit-workspace"}
+          ],
+          "contains": {"const": "write-candidate-receipt"},
+          "items": {
+            "enum": [
+              "compose-and-plan",
+              "resolve-source-cache",
+              "generate-source-and-tests-or-use-cache",
+              "derive-source-intelligence",
+              "validate-classify-and-authorize",
+              "resolve-and-prepare-dependencies",
+              "native-build",
+              "verify-resolved-sbom",
+              "run-generated-tests",
+              "execute-application",
+              "independent-acceptance",
+              "admit-workspace",
+              "package-artifacts",
+              "publish-source-cache",
+              "publish-artifacts",
+              "deploy",
+              "write-candidate-receipt"
+            ]
+          }
+        },
+        "specification_scope": {"enum": ["component", "project"]},
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        }
+      }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "binding",
+            "framework_distribution_identity",
+            "policy_identity"
+          ],
+          "properties": {
+            "schema": {"const": "urn:literate-ai:schema:v2:project-lifecycle-driver"},
+            "binding": {"const": "standard"},
+            "framework_distribution_identity": {
+              "$ref": "urn:literate-ai:schema:v1:content-identity"
+            },
+            "policy_identity": {
+              "$ref": "urn:literate-ai:schema:v1:content-identity"
+            }
+          }
+        }
+      ]
+    },
+    "projectSourceIntelligencePolicy": {
+      "$id": "urn:literate-ai:schema:v1:project-source-intelligence-policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "provider_id",
+        "command",
+        "minimum_version",
+        "artifact_path",
+        "stages",
+        "artifact_publication"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:project-source-intelligence-policy"
+        },
+        "provider_id": {
+          "$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"
+        },
+        "command": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^[^/\\\\\\s]+$"}
+          ]
+        },
+        "minimum_version": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/semver"}
+          ]
+        },
+        "artifact_path": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"}
+          ]
+        },
+        "stages": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "project-maintenance",
+            "source-generation",
+            "cache-consumption",
+            "source-to-specification",
+            "repository-source-admission",
+            "structural-review"
+          ],
+          "properties": {
+            "project-maintenance": {"enum": ["required", "preferred", "off"]},
+            "source-generation": {"enum": ["required", "preferred", "off"]},
+            "cache-consumption": {"enum": ["required", "preferred", "off"]},
+            "source-to-specification": {"enum": ["required", "preferred", "off"]},
+            "repository-source-admission": {"enum": ["required", "preferred", "off"]},
+            "structural-review": {"enum": ["required", "preferred", "off"]}
+          }
+        },
+        "artifact_publication": {
+          "enum": ["metadata-only", "include-artifact"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"provider_id": {"const": "none"}}, "required": ["provider_id"]},
+          "then": {
+            "properties": {
+              "command": {"type": "null"},
+              "minimum_version": {"type": "null"},
+              "artifact_path": {"type": "null"},
+              "artifact_publication": {"const": "metadata-only"},
+              "stages": {
+                "properties": {
+                  "project-maintenance": {"const": "off"},
+                  "source-generation": {"const": "off"},
+                  "cache-consumption": {"const": "off"},
+                  "source-to-specification": {"const": "off"},
+                  "repository-source-admission": {"const": "off"},
+                  "structural-review": {"const": "off"}
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "command": {"type": "string"},
+              "minimum_version": {"type": "string"},
+              "artifact_path": {"type": "string"}
+            }
+          }
+        }
+      ]
+    },
+    "sourceIntelligenceStageStatus": {
+      "$id": "literate-ai/source-intelligence-stage-status@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "stage", "mode", "state", "provider_id"],
+      "properties": {
+        "schema": {"const": "literate-ai/source-intelligence-stage-status@1"},
+        "stage": {
+          "enum": [
+            "project-maintenance",
+            "source-generation",
+            "cache-consumption",
+            "source-to-specification",
+            "repository-source-admission",
+            "structural-review"
+          ]
+        },
+        "mode": {"enum": ["required", "preferred", "off"]},
+        "state": {"enum": ["current", "unavailable", "off"]},
+        "provider_id": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+        "reason_code": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"mode": {"const": "required"}}, "required": ["mode"]},
+          "then": {"properties": {"state": {"const": "current"}}, "not": {"required": ["reason_code"]}}
+        },
+        {
+          "if": {"properties": {"mode": {"const": "preferred"}}, "required": ["mode"]},
+          "then": {
+            "if": {"properties": {"state": {"const": "unavailable"}}, "required": ["state"]},
+            "then": {"required": ["reason_code"]},
+            "else": {"properties": {"state": {"const": "current"}}, "not": {"required": ["reason_code"]}}
+          }
+        },
+        {
+          "if": {"properties": {"mode": {"const": "off"}}, "required": ["mode"]},
+          "then": {"properties": {"state": {"const": "off"}}, "not": {"required": ["reason_code"]}}
+        }
+      ]
+    },
+    "skillReference": {
+      "$id": "urn:literate-ai:schema:v1:skill-reference",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "skill_id", "version", "identity"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:skill-reference"},
+        "skill_id": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+        "version": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/semver"},
+        "identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "specificationToSourceSkill": {
+      "$id": "urn:literate-ai:schema:v1:specification-to-source-skill",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "skill_id",
+        "version",
+        "title",
+        "stages",
+        "dependencies",
+        "instructions",
+        "limitations",
+        "trust"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:specification-to-source-skill"},
+        "skill_id": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+        "version": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/semver"},
+        "title": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+        "stages": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"}
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v1:skill-reference"}
+        },
+        "instructions": {"type": "string", "minLength": 1, "maxLength": 65536},
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"}
+        },
+        "models": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "codex": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+            "claude": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+            "cursor-agent": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
+            "opencode": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"}
+          },
+          "minProperties": 1
+        },
+        "trust": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"}
+      }
+    }
+  }
+}

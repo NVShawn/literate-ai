@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:project-skill-contracts",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v1:project-definition"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:project-lifecycle-driver"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:project-source-index-requirement"
+    }
+  ],
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semver": {
+      "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(/|$))[^\\\\]+$"
+    },
+    "relativePaths": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePath"
+      }
+    },
+    "project": {
+      "$id": "urn:literate-ai:schema:v1:project-definition",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "project_id",
+        "version",
+        "profile",
+        "agent_skill",
+        "component_roots",
+        "flavor_roots",
+        "skill_roots",
+        "workflow_roots",
+        "routing_roots",
+        "documentation_roots",
+        "source_index"
+      ],
+      "dependentRequired": {
+        "test_receipt_policy": [
+          "test_receipt"
+        ]
+      },
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:project-definition"
+        },
+        "project_id": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/text"
+        },
+        "version": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/semver"
+        },
+        "profile": {
+          "const": "canonical"
+        },
+        "agent_skill": {
+          "const": "SKILL.md"
+        },
+        "component_roots": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePaths"
+        },
+        "flavor_roots": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePaths"
+        },
+        "skill_roots": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePaths"
+        },
+        "workflow_roots": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePaths"
+        },
+        "routing_roots": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePaths"
+        },
+        "documentation_roots": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePath"
+          }
+        },
+        "source_index": {
+          "$ref": "urn:literate-ai:schema:v1:project-source-index-requirement"
+        },
+        "source_cache": {
+          "$ref": "urn:literate-ai:schema:v1:source-cache-configuration"
+        },
+        "lifecycle_driver": {
+          "$ref": "urn:literate-ai:schema:v1:project-lifecycle-driver"
+        },
+        "test_receipt": {
+          "description": "A normalized receipt path outside the project manifest, agent skill, and declared catalog roots.",
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePath"
+        },
+        "test_receipt_policy": {
+          "$ref": "urn:literate-ai:schema:v1:project-test-receipt-policy"
+        },
+        "default_flavor_selectors": {
+          "description": "Ordered project preferences applied before explicit command selectors, and only on axes declared by a Component.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[+-](?:(?:[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?|flavor://[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?)|[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?:(?:[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?|flavor://[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?/[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?))$"
+          }
+        },
+        "log_dir": {
+          "description": "Project-relative directory for operation logs (default: logs/).",
+          "type": "string",
+          "minLength": 1,
+          "default": "logs"
+        }
+      }
+    },
+    "projectLifecycleDriver": {
+      "$id": "urn:literate-ai:schema:v1:project-lifecycle-driver",
+      "description": "A project-authorized, shell-free argv driver for a complete host rebuild.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "driver_id",
+        "version",
+        "implementation_paths",
+        "implementation_identity",
+        "argv",
+        "environment_keys",
+        "phases",
+        "specification_scope",
+        "timeout_seconds"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:project-lifecycle-driver"
+        },
+        "driver_id": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/text"
+        },
+        "version": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/semver"
+        },
+        "implementation_paths": {
+          "description": "Sorted project-relative file or directory roots forming the trusted lifecycle-driver implementation closure.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*//).+$"
+          }
+        },
+        "implementation_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        },
+        "environment_keys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,127}$"
+          }
+        },
+        "phases": {
+          "description": "The complete minimum lifecycle, optionally followed by ordered packaging, publication, or deployment phases before the receipt phase.",
+          "type": "array",
+          "minItems": 13,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "compose-and-plan"
+            },
+            {
+              "const": "resolve-source-cache"
+            },
+            {
+              "const": "generate-source-and-tests-or-use-cache"
+            },
+            {
+              "const": "index-source"
+            },
+            {
+              "const": "validate-classify-and-authorize"
+            },
+            {
+              "const": "resolve-and-prepare-dependencies"
+            },
+            {
+              "const": "native-build"
+            },
+            {
+              "const": "verify-resolved-sbom"
+            },
+            {
+              "const": "run-generated-tests"
+            },
+            {
+              "const": "execute-application"
+            },
+            {
+              "const": "independent-acceptance"
+            },
+            {
+              "const": "admit-workspace"
+            }
+          ],
+          "contains": {
+            "const": "write-candidate-receipt"
+          },
+          "items": {
+            "enum": [
+              "compose-and-plan",
+              "resolve-source-cache",
+              "generate-source-and-tests-or-use-cache",
+              "index-source",
+              "validate-classify-and-authorize",
+              "resolve-and-prepare-dependencies",
+              "native-build",
+              "verify-resolved-sbom",
+              "run-generated-tests",
+              "execute-application",
+              "independent-acceptance",
+              "admit-workspace",
+              "package-artifacts",
+              "publish-source-cache",
+              "publish-artifacts",
+              "deploy",
+              "write-candidate-receipt"
+            ]
+          }
+        },
+        "specification_scope": {
+          "enum": [
+            "component",
+            "project"
+          ]
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 86400
+        }
+      }
+    },
+    "projectSourceIndexRequirement": {
+      "$id": "urn:literate-ai:schema:v1:project-source-index-requirement",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "provider_id",
+        "command",
+        "minimum_version",
+        "index_path"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:project-source-index-requirement"
+        },
+        "provider_id": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/text"
+        },
+        "command": {
+          "type": "string",
+          "pattern": "^[^/\\\\\\s]+$"
+        },
+        "minimum_version": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/semver"
+        },
+        "index_path": {
+          "$ref": "urn:literate-ai:schema:v1:project-skill-contracts#/$defs/relativePath"
+        }
+      }
+    }
+  }
+}

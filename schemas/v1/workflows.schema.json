@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:workflow-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:workflow-definition" }, { "$ref": "urn:literate-ai:schema:v1:workflow-stage-result" },
+    { "$ref": "urn:literate-ai:schema:v1:workflow-event" }, { "$ref": "urn:literate-ai:schema:v1:workflow-run" }, { "$ref": "urn:literate-ai:schema:v1:event-record" }
+  ],
+  "$defs": {
+    "stageDefinition": {
+      "$id": "urn:literate-ai:schema:v1:workflow-stage-definition", "type": "object", "additionalProperties": false,
+      "required": ["stage_id", "stage_type", "dependencies", "maximum_attempts", "model_policy_id"],
+      "properties": { "stage_id": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "stage_type": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "dependencies": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/stringArray" }, "maximum_attempts": { "type": "integer", "minimum": 1 }, "model_policy_id": { "type": ["string", "null"] } }
+    },
+    "definition": {
+      "$id": "urn:literate-ai:schema:v1:workflow-definition", "type": "object", "additionalProperties": false,
+      "required": ["workflow_id", "version", "stages"],
+      "properties": { "workflow_id": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" }, "stages": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:workflow-stage-definition" } } }
+    },
+    "stageResult": {
+      "$id": "urn:literate-ai:schema:v1:workflow-stage-result", "type": "object", "additionalProperties": false,
+      "required": ["stage_id", "attempt", "input_digest", "output_digest", "output"],
+      "properties": { "stage_id": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "attempt": { "type": "integer", "minimum": 1 }, "input_digest": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/digest" }, "output_digest": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/digest" }, "output": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/jsonObject" } }
+    },
+    "event": {
+      "$id": "urn:literate-ai:schema:v1:workflow-event", "type": "object", "additionalProperties": false,
+      "required": ["event_id", "run_id", "sequence", "event_type", "stage_id", "payload"],
+      "properties": { "event_id": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "run_id": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "sequence": { "type": "integer", "minimum": 1 }, "event_type": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "stage_id": { "type": ["string", "null"] }, "payload": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/jsonObject" } }
+    },
+    "run": {
+      "$id": "urn:literate-ai:schema:v1:workflow-run", "type": "object", "additionalProperties": false,
+      "required": ["run_id", "input_digest", "workflow_digest", "status", "stage_results", "events"],
+      "properties": { "run_id": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "input_digest": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/digest" }, "workflow_digest": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/digest" }, "status": { "enum": ["pending", "running", "complete", "failed"] }, "stage_results": { "type": "object", "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:workflow-stage-result" } }, "events": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:workflow-event" } } }
+    },
+    "eventRecord": {
+      "$id": "urn:literate-ai:schema:v1:event-record", "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "event_id", "stream", "sequence", "event_type", "occurred_at", "previous_digest", "data", "digest"],
+      "properties": { "schema_version": { "const": 1 }, "event_id": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "stream": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "sequence": { "type": "integer", "minimum": 1 }, "event_type": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "occurred_at": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" }, "previous_digest": { "type": ["string", "null"] }, "data": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/jsonObject" }, "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" } }
+    },
+    "text": { "type": "string", "minLength": 1 }, "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "stringArray": { "type": "array", "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:workflow-contracts#/$defs/text" } },
+    "jsonObject": { "type": "object", "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/jsonValue" } }
+  }
+}

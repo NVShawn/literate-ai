@@ -1,0 +1,151 @@
+[build-system]
+requires = ["setuptools==83.0.0"]
+build-backend = "literate_ai_build_backend"
+backend-path = ["tools/build_backend"]
+
+[project]
+name = "literate-ai"
+dynamic = ["version"]
+description = "Software-neutral lifecycle framework for spec-led AI development"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+classifiers = [
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows :: Windows 11",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+  "certifi==2026.7.22",
+  "cryptography==50.0.1",
+  "PyJWT==2.14.0",
+  "cyclonedx-python-lib[json-validation]==11.11.0",
+  "jsonschema==4.26.0",
+  "packaging==26.3",
+  "semantic-version==2.10.0",
+  "univers==32.0.1",
+]
+
+[project.optional-dependencies]
+grpc-acceptance = [
+  "protobuf==7.36.2",
+  "grpcio==1.84.0",
+  "grpcio-reflection==1.84.0",
+  "grpcio-status==1.84.0",
+]
+# The isolated wheel-install driver loads this exact tool from verified wheel
+# bytes. Declare its imports for source-BOM closure; never use ambient pip as
+# installer authority merely because this optional distribution is installed.
+python-wheel-installer = [
+  "pip==26.2.1",
+]
+mcp = [
+  "mcp==2.1.1",
+]
+dev = [
+  "protobuf==7.36.2",
+  "grpcio==1.84.0",
+  "grpcio-reflection==1.84.0",
+  "grpcio-status==1.84.0",
+  "conan==2.32.0",
+  "ruff==0.15.22",
+  "pytest-xdist>=3.6",
+  "pytest-randomly>=3.15",
+  "pytest-split>=0.10",
+]
+impact = [
+  "pytest-testmon==2.2.0",
+]
+# Acceptance-time only (ADR-0028). Browser-interaction acceptance for served
+# frontends drives a real browser engine; Playwright is imported lazily inside
+# literate_ai.adapters.browser_acceptance, so it is never a core runtime
+# dependency. Install with `pip install literate-ai[browser]` plus
+# `playwright install chromium` on the verifier host/CI.
+browser = [
+  "playwright==1.62.0",
+]
+
+[project.scripts]
+litai = "literate_ai.cli:main"
+litai-mcp = "literate_ai.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+literate_ai = ["py.typed", "_distribution_origin.json"]
+"literate_ai.project_template" = [
+  "project.gitignore",
+  "CHANGELOG.md",
+  "literate.test.example.json",
+  "literate.release.json",
+  "literate.workers.example.json",
+  "SKILL.md",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "agents/*.yaml",
+  "docs/roadmap/*.md",
+  "docs/user/*.md",
+  "orchestration/*.md",
+  "cursor/*.mdc",
+  "flavors/*/*.md",
+  "flavors/*/*.json",
+  "flavors/*/openspec/*.md",
+  "flavors/*/host-install/*/*/*.json",
+  "components/*/*.md",
+  "components/*/interfaces/*.md",
+  "components/*/acceptance/*.md",
+  "samples/*/*.md",
+  "samples/*/*.json",
+  "samples/*/interfaces/*.md",
+  "samples/*/acceptance/*.md",
+  "skills/specification-to-source/*/*.md",
+  "skills/specification-to-source/*/*/*.md",
+  "skills/specification-to-source/*/agents/*.yaml",
+  "skills/agent/*.md",
+  "skills/agent/*/*.md",
+  "skills/agent/*/*/*.md",
+  "skills/agent/*/*/*/*.md",
+  "skills/agent/*/*/*/*/*.md",
+  "skills/agent/*/LICENSE*",
+  "skills/agent/*/references/*.md",
+  "workflows/*.md",
+  "workflows/*/*.md",
+  "workflows/*/*/*.md",
+  "workflows/*/*/*/*.md",
+  "routing/*.json",
+  "routing/*/*.json",
+  "routing/*/*/*.json",
+  "routing/*/*/*/*.json",
+]
+"literate_ai.source_to_specification.builtin_skills" = ["*/SKILL.md"]
+"literate_ai.standard_policies" = ["*.json"]
+
+[tool.setuptools.data-files]
+"share/literate-ai/schemas/v1" = ["schemas/v1/*.json"]
+"share/literate-ai/schemas/v2" = ["schemas/v2/*.json"]
+
+[tool.setuptools.dynamic]
+version = {attr = "literate_ai.version.DISTRIBUTION_VERSION"}
+
+[tool.pytest.ini_options]
+addopts = "-n auto --dist=loadfile --randomly-seed=12345"
+testpaths = ["tests/unit"]
+
+[tool.smoke_tests]
+budget_seconds = 600
+durations_path = ".test_durations"
+testpaths = ["tests/unit", "tests/conformance", "tests/test_package.py"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["literate_ai"]

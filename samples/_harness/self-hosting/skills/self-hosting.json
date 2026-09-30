@@ -1,0 +1,42 @@
+{
+  "schema": "literate-ai/snapshot-replication-skill-set@1",
+  "skill_set_id": "literate-ai-exact-snapshot-replication",
+  "version": "1.0.0",
+  "stages": [
+    {
+      "stage_id": "plan",
+      "produces_tree": false,
+      "instructions": "Inventory the already frozen literate-ai package snapshot and bind every path to the conformance fixture identities. Do not invent or omit files. This deterministic replay is not coding-CLI or model authorship.",
+      "response_schema_name": "snapshot_replication_inventory",
+      "response_schema": {
+        "type": "object",
+        "required": [
+          "source_snapshot_id",
+          "specification_id",
+          "skill_set_id",
+          "package_tree_id",
+          "file_manifest"
+        ]
+      },
+      "content_kind": "metadata",
+      "max_output_tokens": 200000
+    },
+    {
+      "stage_id": "generate",
+      "produces_tree": true,
+      "instructions": "Replay the exact frozen files into the candidate tree byte-for-byte. This stage exercises lifecycle plumbing; it does not synthesize, redesign, or attribute the copied source to a coding CLI or model.",
+      "response_schema_name": "snapshot_replication_tree",
+      "response_schema": {
+        "type": "object",
+        "required": [
+          "files",
+          "source_snapshot_id",
+          "specification_id",
+          "skill_set_id"
+        ]
+      },
+      "content_kind": "source",
+      "max_output_tokens": 2000000
+    }
+  ]
+}

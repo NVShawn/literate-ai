@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:semantic-refinement-contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/conflict" },
+    { "$ref": "#/$defs/proposal" },
+    { "$ref": "#/$defs/review" },
+    { "$ref": "#/$defs/request" },
+    { "$ref": "#/$defs/resolution" }
+  ],
+  "$defs": {
+    "text": { "type": "string", "minLength": 1, "maxLength": 4096 },
+    "longText": { "type": "string", "minLength": 1, "maxLength": 65536 },
+    "reviewBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposal_identity",
+        "document_identities",
+        "model_identity",
+        "evidence_identities"
+      ],
+      "properties": {
+        "proposal_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "document_identities": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "model_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "evidence_identities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        }
+      }
+    },
+    "acceptedRefinement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conflict_id",
+        "conflict_identity",
+        "proposal_id",
+        "proposal_identity",
+        "review_id",
+        "review_identity"
+      ],
+      "properties": {
+        "conflict_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "conflict_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "proposal_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "proposal_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "review_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "review_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "conflict": {
+      "$id": "urn:literate-ai:schema:v2:semantic-conflict",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "conflict_id",
+        "documents",
+        "model",
+        "evidence",
+        "description",
+        "verification"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:semantic-conflict" },
+        "conflict_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "documents": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-reference" }
+        },
+        "model": { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-reference" }
+        },
+        "description": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/longText" },
+        "verification": { "const": "unverified" }
+      }
+    },
+    "proposal": {
+      "$id": "urn:literate-ai:schema:v2:semantic-refinement-proposal",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "proposal_id",
+        "conflict_id",
+        "conflict_identity",
+        "replacement",
+        "verification"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:semantic-refinement-proposal" },
+        "proposal_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "conflict_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "conflict_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "replacement": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/longText" },
+        "verification": { "const": "unverified" }
+      }
+    },
+    "review": {
+      "$id": "urn:literate-ai:schema:v2:semantic-refinement-review",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "review_id",
+        "conflict_id",
+        "proposal_id",
+        "binding",
+        "reviewer",
+        "decision",
+        "rationale"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:semantic-refinement-review" },
+        "review_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "conflict_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "proposal_id": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/text" },
+        "binding": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/reviewBinding" },
+        "reviewer": { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        "decision": { "enum": ["accept", "reject"] },
+        "rationale": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/longText" }
+      }
+    },
+    "request": {
+      "$id": "urn:literate-ai:schema:v2:semantic-refinement-request",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "documents", "conflicts", "proposals", "reviews"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:semantic-refinement-request" },
+        "documents": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-reference" }
+        },
+        "conflicts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:semantic-conflict" }
+        },
+        "proposals": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-proposal" }
+        },
+        "reviews": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-review" }
+        }
+      }
+    },
+    "resolution": {
+      "$id": "urn:literate-ai:schema:v2:semantic-refinement-resolution",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "request_identity", "document_closure", "accepted"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:semantic-refinement-resolution" },
+        "request_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "document_closure": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "accepted": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:semantic-refinement-contracts#/$defs/acceptedRefinement" }
+        }
+      }
+    }
+  }
+}

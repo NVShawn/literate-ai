@@ -1,0 +1,40 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.interpret-a-cgroup-v2-resource-budget",
+  "scenario_id": "interpret-a-cgroup-v2-resource-budget.the-compiled-linux-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "limited",
+      "arguments": [
+        {
+          "mount": " /sys/fs/cgroup ",
+          "cpu_max": "200000 100000",
+          "memory_max": "536870912"
+        }
+      ]
+    },
+    {
+      "case_id": "unlimited",
+      "arguments": [
+        {
+          "mount": "/sys/fs/cgroup/user.slice",
+          "cpu_max": "max 100000",
+          "memory_max": "max"
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "mount": "string",
+    "cpu_quota_millicores": "integer",
+    "memory_limit_bytes": "integer",
+    "constrained": "boolean"
+  },
+  "target": {
+    "platform.os": "flavor://literate-ai/os-linux",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-cpp"],
+    "packaging": "flavor://literate-ai/package-conan"
+  },
+  "dependencies": []
+}

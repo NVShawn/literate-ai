@@ -1,0 +1,60 @@
+{
+  "schema": "urn:literate-ai:schema:v1:semantic-requirement-graph",
+  "graph_id": "regenerative-roundtrip/warehouse-manifest@1",
+  "requirements": [
+    {
+      "requirement_id": "01-inputs",
+      "dimension": "inputs",
+      "statement": "Accept one JSON object containing a non-empty warehouse string, discount_basis_points from 0 through 10000, and a non-empty orders array whose entries contain sku, quantity, and unit_cents.",
+      "scenarios": [{"name": "complete manifest", "when": "All required fields and at least one order are supplied", "then": "The manifest is accepted for processing"}]
+    },
+    {
+      "requirement_id": "02-outputs",
+      "dimension": "outputs",
+      "statement": "Return exactly the trimmed warehouse, manifest_id, dominant_sku, line_count, gross_cents, discount_cents, net_cents, and aggregated lines as one JSON object; do not echo discount_basis_points or unaggregated orders.",
+      "scenarios": [{"name": "observable result", "when": "A valid request is processed", "then": "Every named output field is present with its computed value"}]
+    },
+    {
+      "requirement_id": "03-invariants",
+      "dimension": "invariants",
+      "statement": "All monetary values and basis-point calculations use exact integers; discount_cents is gross_cents multiplied by discount_basis_points divided by 10000 using integer truncation, and net_cents is gross_cents minus discount_cents.",
+      "scenarios": [{"name": "integer totals", "when": "A valid manifest has a non-zero discount", "then": "Gross, discount, and net totals obey the exact integer formulas"}]
+    },
+    {
+      "requirement_id": "04-normalization",
+      "dimension": "normalization",
+      "statement": "Trim surrounding whitespace from warehouse and sku values before validation, grouping, output, and manifest identifier construction.",
+      "scenarios": [{"name": "whitespace normalization", "when": "Warehouse and SKU strings contain surrounding whitespace", "then": "The output and all computations use their trimmed values"}]
+    },
+    {
+      "requirement_id": "05-aggregation",
+      "dimension": "aggregation",
+      "statement": "Combine orders with the same normalized sku by summing quantity and by summing each input order's quantity multiplied by its own unit_cents into subtotal_cents, including when duplicate SKU prices differ; line_count is the number of distinct aggregated lines.",
+      "scenarios": [{"name": "duplicate sku with different prices", "when": "Two orders normalize to the same SKU but have different unit_cents values", "then": "One line is returned with summed quantity and the sum of both extended cent values"}]
+    },
+    {
+      "requirement_id": "06-ordering",
+      "dimension": "ordering",
+      "statement": "Return normalized orders in ascending lexicographic sku order by Unicode code point, independent of input order.",
+      "scenarios": [{"name": "stable order", "when": "Orders arrive in descending SKU order", "then": "The normalized orders are emitted in ascending SKU order"}]
+    },
+    {
+      "requirement_id": "07-tie-breaking",
+      "dimension": "tie-breaking",
+      "statement": "Select dominant_sku by greatest aggregated quantity and break equal-quantity ties with the lexicographically smallest sku by Unicode code-point order; quantity is compared descending while sku is compared ascending, so equal quantities for A-1 and Z-9 select A-1.",
+      "scenarios": [{"name": "dominant tie", "when": "A-1 and Z-9 have equal greatest quantities", "then": "A-1 is dominant_sku"}]
+    },
+    {
+      "requirement_id": "08-errors",
+      "dimension": "errors",
+      "statement": "Reject malformed requests deterministically and never emit a partial manifest or mixed diagnostic text on standard output.",
+      "scenarios": [{"name": "deterministic failure", "when": "A malformed request is submitted", "then": "Processing fails without emitting a partial result"}]
+    },
+    {
+      "requirement_id": "09-invalid-inputs",
+      "dimension": "invalid-inputs",
+      "statement": "Reject missing or incorrectly typed fields, empty normalized warehouse or sku values, an empty orders array, non-positive quantity, negative unit_cents, and discount_basis_points outside 0 through 10000.",
+      "scenarios": [{"name": "invalid boundary", "when": "Any required input constraint is violated", "then": "Processing fails rather than returning a manifest"}]
+    }
+  ]
+}

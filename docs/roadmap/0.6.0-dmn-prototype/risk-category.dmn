@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hand-authored prototype artifact for the 0.6.0 DMN specification_provider design
+  spike's follow-on prototype (docs/history/roadmap/0.6.0-dmn-provider-design.md,
+  "Maturity / next-action assessment", item 1).
+
+  A small, realistic decision table: given an applicant's age and annual income,
+  classify their loan risk category. UNIQUE hit policy (HitPolicy="UNIQUE"): at
+  most one rule may match any input combination, i.e. no two rules' input ranges
+  may overlap. 2 input columns (Age, Income), 1 output column (RiskCategory),
+  5 rules.
+
+  This is throwaway prototype content, not a production Component specification.
+-->
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             id="risk-category-definitions"
+             name="RiskCategoryDefinitions"
+             namespace="https://literate-ai.dev/prototype/0.6.0-dmn/risk-category">
+
+  <inputData id="Age" name="Age">
+    <variable id="AgeVar" name="Age" typeRef="number"/>
+  </inputData>
+
+  <inputData id="Income" name="Income">
+    <variable id="IncomeVar" name="Income" typeRef="number"/>
+  </inputData>
+
+  <decision id="RiskCategoryDecision" name="RiskCategory">
+    <variable id="RiskCategoryVar" name="RiskCategory" typeRef="string"/>
+    <informationRequirement>
+      <requiredInput href="#Age"/>
+    </informationRequirement>
+    <informationRequirement>
+      <requiredInput href="#Income"/>
+    </informationRequirement>
+    <decisionTable id="RiskCategoryTable" hitPolicy="UNIQUE">
+      <input id="RiskCategoryTable_Input1" label="Age">
+        <inputExpression id="RiskCategoryTable_Input1Expr" typeRef="number">
+          <text>Age</text>
+        </inputExpression>
+      </input>
+      <input id="RiskCategoryTable_Input2" label="Income">
+        <inputExpression id="RiskCategoryTable_Input2Expr" typeRef="number">
+          <text>Income</text>
+        </inputExpression>
+      </input>
+      <output id="RiskCategoryTable_Output1" label="RiskCategory" name="RiskCategory" typeRef="string"/>
+
+      <!-- Rule 1: young applicants with low income -> high risk -->
+      <rule id="RiskCategoryTable_Rule1">
+        <inputEntry id="RiskCategoryTable_Rule1_In1"><text>[18..25]</text></inputEntry>
+        <inputEntry id="RiskCategoryTable_Rule1_In2"><text>[0..30000]</text></inputEntry>
+        <outputEntry id="RiskCategoryTable_Rule1_Out1"><text>"high"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 2: young applicants with moderate-to-high income -> medium risk -->
+      <rule id="RiskCategoryTable_Rule2">
+        <inputEntry id="RiskCategoryTable_Rule2_In1"><text>[18..25]</text></inputEntry>
+        <inputEntry id="RiskCategoryTable_Rule2_In2"><text>[30001..999999]</text></inputEntry>
+        <outputEntry id="RiskCategoryTable_Rule2_Out1"><text>"medium"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 3: mid-career applicants with low income -> medium risk -->
+      <rule id="RiskCategoryTable_Rule3">
+        <inputEntry id="RiskCategoryTable_Rule3_In1"><text>[26..55]</text></inputEntry>
+        <inputEntry id="RiskCategoryTable_Rule3_In2"><text>[0..40000]</text></inputEntry>
+        <outputEntry id="RiskCategoryTable_Rule3_Out1"><text>"medium"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 4: mid-career applicants with solid income -> low risk -->
+      <rule id="RiskCategoryTable_Rule4">
+        <inputEntry id="RiskCategoryTable_Rule4_In1"><text>[26..55]</text></inputEntry>
+        <inputEntry id="RiskCategoryTable_Rule4_In2"><text>[40001..999999]</text></inputEntry>
+        <outputEntry id="RiskCategoryTable_Rule4_Out1"><text>"low"</text></outputEntry>
+      </rule>
+
+      <!-- Rule 5: applicants over 55, any income -> low risk (retirement-stable) -->
+      <rule id="RiskCategoryTable_Rule5">
+        <inputEntry id="RiskCategoryTable_Rule5_In1"><text>[56..120]</text></inputEntry>
+        <inputEntry id="RiskCategoryTable_Rule5_In2"><text>-</text></inputEntry>
+        <outputEntry id="RiskCategoryTable_Rule5_Out1"><text>"low"</text></outputEntry>
+      </rule>
+
+    </decisionTable>
+  </decision>
+
+</definitions>

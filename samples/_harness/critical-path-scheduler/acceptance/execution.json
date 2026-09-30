@@ -1,0 +1,125 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-scheduler-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "tasks": [
+            {
+              "id": "launch",
+              "duration": 1,
+              "depends_on": ["qa"]
+            },
+            {
+              "id": "frontend",
+              "duration": 4,
+              "depends_on": ["design"]
+            },
+            {
+              "id": "research",
+              "duration": 4,
+              "depends_on": []
+            },
+            {
+              "id": "integrate",
+              "duration": 3,
+              "depends_on": ["prototype", "frontend", "backend"]
+            },
+            {
+              "id": "prototype",
+              "duration": 5,
+              "depends_on": ["design"]
+            },
+            {
+              "id": "qa",
+              "duration": 4,
+              "depends_on": ["integrate"]
+            },
+            {
+              "id": "design",
+              "duration": 3,
+              "depends_on": ["research"]
+            },
+            {
+              "id": "backend",
+              "duration": 6,
+              "depends_on": ["design"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "tasks": [
+            {
+              "id": "release",
+              "duration": 1,
+              "depends_on": ["security", "integration"]
+            },
+            {
+              "id": "ui",
+              "duration": 3,
+              "depends_on": ["brief"]
+            },
+            {
+              "id": "data",
+              "duration": 4,
+              "depends_on": ["brief"]
+            },
+            {
+              "id": "brief",
+              "duration": 2,
+              "depends_on": []
+            },
+            {
+              "id": "security",
+              "duration": 2,
+              "depends_on": ["api"]
+            },
+            {
+              "id": "integration",
+              "duration": 2,
+              "depends_on": ["ui", "data", "api"]
+            },
+            {
+              "id": "api",
+              "duration": 4,
+              "depends_on": ["brief"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "critical_path": ["string"],
+    "execution_order": ["string"],
+    "project_duration": "integer",
+    "schedule": [
+      {
+        "critical": "boolean",
+        "depends_on": ["string"],
+        "duration": "integer",
+        "earliest_finish": "integer",
+        "earliest_start": "integer",
+        "id": "string",
+        "latest_finish": "integer",
+        "latest_start": "integer",
+        "slack": "integer"
+      }
+    ],
+    "task_count": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

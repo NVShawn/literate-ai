@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:target-matrix-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/matrix"},
+    {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/cell"},
+    {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/stage"},
+    {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/cellReceipt"},
+    {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/aggregateReceipt"}
+  ],
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "cell": {
+      "$id": "literate-ai/target-matrix-cell@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component", "target", "flavors"],
+      "properties": {
+        "schema": {"const": "literate-ai/target-matrix-cell@1"},
+        "component": {
+          "type": "string",
+          "pattern": "^(components|samples)/[a-z0-9](?:[a-z0-9._/-]*[a-z0-9])?$"
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "flavors": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {"type": "string", "minLength": 1, "maxLength": 512}
+        }
+      }
+    },
+    "matrix": {
+      "$id": "literate-ai/target-matrix@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "cells"],
+      "properties": {
+        "schema": {"const": "literate-ai/target-matrix@1"},
+        "cells": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/cell"}
+        }
+      }
+    },
+    "stage": {
+      "$id": "literate-ai/target-matrix-stage-evidence@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "cell_identity",
+        "stage",
+        "evidence_identity",
+        "predecessor_identity",
+        "accepted"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/target-matrix-stage-evidence@1"},
+        "cell_identity": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"},
+        "stage": {"enum": ["plan", "lock", "source-admission", "lifecycle"]},
+        "evidence_identity": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"},
+        "predecessor_identity": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"}
+          ]
+        },
+        "accepted": {"type": "boolean"}
+      }
+    },
+    "cellReceipt": {
+      "$id": "literate-ai/target-matrix-cell-receipt@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "cell",
+        "status",
+        "component_authority_identity",
+        "plan_identity",
+        "lock_identity",
+        "source_admission_identity",
+        "stages",
+        "error"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/target-matrix-cell-receipt@1"},
+        "cell": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/cell"},
+        "status": {"enum": ["passed", "failed", "partial"]},
+        "component_authority_identity": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"}
+          ]
+        },
+        "plan_identity": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"}
+          ]
+        },
+        "lock_identity": {
+          "description": "Exact target-scoped Component lock whose path and canonical bytes are selected atomically before this cell's rebuild, captured in its locked-input closure, revalidated through later stages, and consumed by that rebuild.",
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"}
+          ]
+        },
+        "source_admission_identity": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"}
+          ]
+        },
+        "stages": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/stage"}
+        },
+        "error": {"type": ["string", "null"], "maxLength": 512}
+      }
+    },
+    "aggregateReceipt": {
+      "$id": "literate-ai/target-matrix-aggregate-receipt@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "matrix_identity",
+        "cell_identities",
+        "receipt_identities",
+        "receipts",
+        "status",
+        "accepted"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/target-matrix-aggregate-receipt@1"},
+        "matrix_identity": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"},
+        "cell_identities": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"}
+        },
+        "receipt_identities": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/identity"}
+        },
+        "receipts": {
+          "type": "array",
+          "items": {"$ref": "urn:literate-ai:schema:v2:target-matrix-contracts#/$defs/cellReceipt"}
+        },
+        "status": {"enum": ["passed", "failed", "partial"]},
+        "accepted": {"type": "boolean"}
+      }
+    }
+  }
+}

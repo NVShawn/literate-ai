@@ -1,0 +1,535 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:component-authoring-lock-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:component-content-selector" },
+    { "$ref": "urn:literate-ai:schema:v2:component-asset-selector" },
+    { "$ref": "urn:literate-ai:schema:v2:resolved-component-asset" },
+    { "$ref": "urn:literate-ai:schema:v2:locked-flavor-requirement" },
+    { "$ref": "urn:literate-ai:schema:v2:component-authoring" },
+    { "$ref": "urn:literate-ai:schema:v2:locked-component-revision" },
+    { "$ref": "urn:literate-ai:schema:v2:component-lock-node" },
+    { "$ref": "urn:literate-ai:schema:v2:component-lock" },
+    { "$ref": "urn:literate-ai:schema:v2:component-resolution-audit" }
+  ],
+  "$defs": {
+    "selector": {
+      "$id": "urn:literate-ai:schema:v2:component-content-selector",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "kind", "uri", "pin"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-content-selector" },
+        "kind": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "uri": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*\\\\)(?!.*://)\\S+$"
+        },
+        "pin": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "publicInterfaceSelector": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v2:component-content-selector" },
+        { "properties": { "kind": { "const": "public-interface-contract" } } }
+      ]
+    },
+    "assetSelector": {
+      "$id": "urn:literate-ai:schema:v2:component-asset-selector",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "asset_id", "source", "path", "role", "media_type", "pin"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-asset-selector" },
+        "asset_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 8192,
+          "oneOf": [
+            { "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*\\\\)(?!.*:)\\S+$" },
+            { "pattern": "^project:///(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)\\S+$" },
+            { "pattern": "^https?://[^/@\\s]+(?:/[^\\s#]*)?(?:\\?[^\\s#]*)?$" }
+          ]
+        },
+        "path": { "type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*\\\\)\\S+$" },
+        "role": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "media_type": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "pin": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:content-identity" }, { "type": "null" }] }
+      }
+    },
+    "resolvedAsset": {
+      "$id": "urn:literate-ai:schema:v2:resolved-component-asset",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "selector", "blob"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:resolved-component-asset" },
+        "selector": { "$ref": "urn:literate-ai:schema:v2:component-asset-selector" },
+        "blob": { "$ref": "urn:literate-ai:schema:v1:blob-ref" }
+      }
+    },
+    "lockedFlavorRequirement": {
+      "$id": "urn:literate-ai:schema:v2:locked-flavor-requirement",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "flavor_revision", "requirement"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:locked-flavor-requirement" },
+        "flavor_revision": { "$ref": "urn:literate-ai:schema:v2:flavor-revision" },
+        "requirement": { "$ref": "urn:literate-ai:schema:v1:capability-requirement" }
+      }
+    },
+    "workflowSelector": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v2:component-content-selector" },
+        { "properties": { "kind": { "const": "workflow" } } }
+      ]
+    },
+    "routingSelector": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v2:component-content-selector" },
+        { "properties": { "kind": { "const": "routing-policy" } } }
+      ]
+    },
+    "acceptanceSelector": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v2:component-content-selector" },
+        { "properties": { "kind": { "const": "acceptance-contract" } } }
+      ]
+    },
+    "integrationSelector": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v2:component-content-selector" },
+        { "properties": { "kind": { "const": "integration-contract" } } }
+      ]
+    },
+    "specificationReference": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        { "properties": { "kind": { "const": "specification" } } }
+      ]
+    },
+    "workflowReference": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        { "properties": { "kind": { "const": "workflow" } } }
+      ]
+    },
+    "routingReference": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        { "properties": { "kind": { "const": "routing-policy" } } }
+      ]
+    },
+    "acceptanceReference": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        { "properties": { "kind": { "const": "acceptance-contract" } } }
+      ]
+    },
+    "publicInterfaceReference": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v1:content-reference" },
+        { "properties": { "kind": { "const": "public-interface-contract" } } }
+      ]
+    },
+    "providedCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version", "interface"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" },
+        "interface": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/publicInterfaceSelector" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "authoredRequirement": {
+      "allOf": [
+        { "$ref": "urn:literate-ai:schema:v1:capability-requirement" },
+        {
+          "properties": {
+            "requirement_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+            "capability": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" }
+          }
+        }
+      ]
+    },
+    "authoredRepositorySource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dependency_id", "repository_url", "revision_selector", "dependency_kind", "optional", "integration_contract"],
+      "properties": {
+        "dependency_id": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$" },
+        "repository_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?:https|ssh)://[^?#\\s]+/[^?#\\s]+$"
+        },
+        "revision_selector": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/selector" },
+        "dependency_kind": { "enum": ["generation", "build", "runtime", "validation", "toolchain", "packaging", "deployment"] },
+        "optional": { "type": "boolean" },
+        "integration_contract": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/integrationSelector" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "authoring": {
+      "$id": "urn:literate-ai:schema:v2:component-authoring",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "coordinate",
+        "version",
+        "display_name",
+        "description",
+        "profiles",
+        "sample",
+        "provides",
+        "requires",
+        "specification_provider",
+        "specification_roots",
+        "authoring_inputs",
+        "workflow_definition",
+        "routing_policy",
+        "flavor_slots",
+        "entrypoints",
+        "acceptance_contracts",
+        "source_dependencies"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-authoring" },
+        "kind": { "enum": ["component", "cli-application", "native-cli-application", "library", "persistent-service", "packaged-module", "ui", "schema-only"] },
+        "coordinate": { "$ref": "urn:literate-ai:schema:v2:component-contracts#/$defs/coordinate" },
+        "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" },
+        "display_name": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "description": { "type": "string", "maxLength": 16384 },
+        "profiles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" }
+        },
+        "sample": { "type": "boolean" },
+        "inheritable": { "type": "boolean" },
+        "provides": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/providedCapability" }
+        },
+        "requires": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/authoredRequirement" }
+        },
+        "specification_provider": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "specification_roots": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*\\\\)(?!.*://)\\S+$"
+          }
+        },
+        "authoring_inputs": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-content-selector" }
+        },
+        "workflow_definition": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/workflowSelector" },
+        "routing_policy": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/routingSelector" },
+        "flavor_slots": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-contracts#/$defs/flavorSlot" }
+        },
+        "entrypoints": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-contracts#/$defs/entrypoint" }
+        },
+        "acceptance_contracts": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/acceptanceSelector" }
+        },
+        "source_dependencies": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/authoredRepositorySource" }
+        },
+        "assets": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-asset-selector" }
+        },
+        "library_imports": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "language",
+              "package",
+              "capability",
+              "module",
+              "symbols"
+            ],
+            "properties": {
+              "language": {
+                "enum": [
+                  "python",
+                  "javascript",
+                  "rust",
+                  "cpp"
+                ]
+              },
+              "package": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
+              },
+              "capability": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "module": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              },
+              "symbols": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 256,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"
+                }
+              }
+            },
+            "if": {"properties": {"language": {"const": "cpp"}}},
+            "then": {"properties": {"symbols": {"items": {"maxLength": 512}}}},
+            "else": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"}}}}
+          }
+        },
+        "provider_resolutions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-resolution-declaration" }
+        }
+      }
+    },
+    "lockedRevision": {
+      "$id": "urn:literate-ai:schema:v2:locked-component-revision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "coordinate",
+        "version",
+        "authoring_identity",
+        "specification_set_identity",
+        "specifications",
+        "selected_flavor_revisions",
+        "authoring_inputs",
+        "workflow_definition",
+        "routing_policy",
+        "acceptance_contracts",
+        "repository_sources",
+        "public_interfaces"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:locked-component-revision" },
+        "coordinate": { "$ref": "urn:literate-ai:schema:v2:component-contracts#/$defs/coordinate" },
+        "version": { "$ref": "urn:literate-ai:schema:v1:identity-contracts#/$defs/semver" },
+        "authoring_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "specification_set_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "specifications": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/specificationReference" }
+        },
+        "selected_flavor_revisions": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "authoring_inputs": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-reference" }
+        },
+        "workflow_definition": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/workflowReference" },
+        "routing_policy": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/routingReference" },
+        "acceptance_contracts": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/acceptanceReference" }
+        },
+        "repository_sources": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v1:repository-source-lock" }
+        },
+        "public_interfaces": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/publicInterfaceReference" }
+        },
+        "assets": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:resolved-component-asset" }
+        },
+        "flavor_requirements": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:locked-flavor-requirement" }
+        }
+      }
+    },
+    "requirementConstraintSatisfaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "consumer_revision",
+        "provider_revision",
+        "requirement_id",
+        "constraints",
+        "target_name",
+        "target_profile_identity",
+        "selection_policy_identity",
+        "target_flavor_selection_identity",
+        "satisfaction_evidence_identity"
+      ],
+      "properties": {
+        "schema": { "const": "literate-ai/requirement-constraint-satisfaction@1" },
+        "consumer_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "provider_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "requirement_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "constraints": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v1:capability-contracts#/$defs/constraint" }
+        },
+        "target_name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "target_profile_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "selection_policy_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "target_flavor_selection_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "satisfaction_evidence_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "lockNode": {
+      "$id": "urn:literate-ai:schema:v2:component-lock-node",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "revision", "target_flavor_selection", "interface_bindings", "requirement_constraint_satisfactions"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-lock-node" },
+        "revision": { "$ref": "urn:literate-ai:schema:v2:locked-component-revision" },
+        "target_flavor_selection": { "$ref": "urn:literate-ai:schema:v2:node-target-flavor-selection" },
+        "interface_bindings": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-interface-binding" }
+        },
+        "requirement_constraint_satisfactions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/requirementConstraintSatisfaction" }
+        }
+      }
+    },
+    "lock": {
+      "$id": "urn:literate-ai:schema:v2:component-lock",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target_name", "target_profile_identity", "selection_policy_identity", "resolver_identity", "root_revision", "nodes", "edges"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-lock" },
+        "target_name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "target_profile_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "selection_policy_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "resolver_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "root_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "nodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-lock-node" }
+        },
+        "edges": {
+          "type": "array",
+          "maxItems": 16384,
+          "items": { "$ref": "urn:literate-ai:schema:v2:executable-component-edge" }
+        },
+        "provider_resolutions": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:provider-resolution" }
+        }
+      }
+    },
+    "candidateAudit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component_revision", "slot_id", "flavor_revision", "status", "reasons"],
+      "properties": {
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "slot_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$" },
+        "flavor_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "status": { "enum": ["selected", "rejected", "conflict", "unavailable"] },
+        "reasons": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 4096 }
+        }
+      }
+    },
+    "resolutionAudit": {
+      "$id": "urn:literate-ai:schema:v2:component-resolution-audit",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component_lock_identity", "catalog_identity", "resolver_identity", "candidates"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:component-resolution-audit" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "catalog_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "resolver_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "candidates": {
+          "type": "array",
+          "maxItems": 16384,
+          "items": { "$ref": "urn:literate-ai:schema:v2:component-authoring-lock-contracts#/$defs/candidateAudit" }
+        }
+      }
+    }
+  }
+}

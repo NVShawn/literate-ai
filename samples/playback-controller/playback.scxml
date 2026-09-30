@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" initial="on">
+  <parallel id="on">
+    <history id="last" type="deep"><transition target="transport audio"/></history>
+    <state id="transport" initial="stopped">
+      <state id="stopped"><transition event="play" target="playing"/></state>
+      <state id="playing"/>
+    </state>
+    <state id="audio" initial="audible">
+      <state id="audible"><transition event="mute" target="muted"/></state>
+      <state id="muted"/>
+    </state>
+    <transition event="power" target="off"/>
+  </parallel>
+  <state id="off"><transition event="resume" target="last"/></state>
+</scxml>

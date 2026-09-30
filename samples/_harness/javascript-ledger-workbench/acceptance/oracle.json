@@ -1,0 +1,39 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:376930962e551e987f24655a5c61de393661515c2e450251e8316c12307c8a07",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "account_id": "north-42",
+        "category_spend": [
+          {"category": "food", "limit_cents": 35000, "remaining_cents": -5000, "spent_cents": 40000, "status": "over-budget"},
+          {"category": "housing", "limit_cents": 145000, "remaining_cents": 0, "spent_cents": 145000, "status": "at-limit"},
+          {"category": "transport", "limit_cents": 10000, "remaining_cents": 2400, "spent_cents": 7600, "status": "within-budget"}
+        ],
+        "closing_balance_cents": 277400,
+        "credit_cents": 345000,
+        "debit_cents": 192600,
+        "largest_debit_id": "rent",
+        "over_budget_categories": ["food"],
+        "transaction_count": 6
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "account_id": "studio-7",
+        "category_spend": [
+          {"category": "business", "limit_cents": 30000, "remaining_cents": 5000, "spent_cents": 25000, "status": "within-budget"},
+          {"category": "travel", "limit_cents": 120000, "remaining_cents": -10000, "spent_cents": 130000, "status": "over-budget"}
+        ],
+        "closing_balance_cents": 15000,
+        "credit_cents": 120000,
+        "debit_cents": 155000,
+        "largest_debit_id": "flight",
+        "over_budget_categories": ["travel"],
+        "transaction_count": 4
+      }
+    }
+  ]
+}

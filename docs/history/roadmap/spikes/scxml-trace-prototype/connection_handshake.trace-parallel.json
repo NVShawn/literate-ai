@@ -1,0 +1,45 @@
+{
+  "$schema": "litai-scxml-trace-sidecar/v1",
+  "scxml": "connection_handshake.scxml",
+  "traces": [
+    {
+      "id": "parallel-regions-progress-independently",
+      "description": "Proves the two <parallel> regions (auth, caps) advance independently of each other: caps reaches its <final> while auth is still pending, and auth then fails and retries without disturbing caps' already-final state, before both regions are simultaneously final.",
+      "steps": [
+        {
+          "event": "connect",
+          "expect_active": ["auth_pending", "caps_pending"],
+          "expect_regions": {"auth": "auth_pending", "caps": "caps_pending"}
+        },
+        {
+          "event": "caps_ok",
+          "expect_active": ["auth_pending", "caps_done"],
+          "expect_regions": {"auth": "auth_pending", "caps": "caps_done"},
+          "note": "caps region reaches its own <final> while auth is still mid-negotiation -- the two regions are not lockstepped."
+        },
+        {
+          "event": "auth_fail",
+          "expect_active": ["auth_failed", "caps_done"],
+          "expect_regions": {"auth": "auth_failed", "caps": "caps_done"},
+          "note": "auth region fails independently; caps' already-final leaf is untouched by this event."
+        },
+        {
+          "event": "retry_auth",
+          "expect_active": ["auth_pending", "caps_done"],
+          "expect_regions": {"auth": "auth_pending", "caps": "caps_done"}
+        },
+        {
+          "event": "auth_ok",
+          "expect_active": ["auth_done", "caps_done"],
+          "expect_regions": {"auth": "auth_done", "caps": "caps_done"},
+          "note": "both regions now simultaneously final -- this is the configuration that triggers done.state.negotiating."
+        },
+        {
+          "event": "done.state.negotiating",
+          "auto": true,
+          "expect_active": ["established"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:security-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:security-origin-attestation" }, { "$ref": "urn:literate-ai:schema:v1:security-finding" },
+    { "$ref": "urn:literate-ai:schema:v1:security-classification" }, { "$ref": "urn:literate-ai:schema:v1:build-request" },
+    { "$ref": "urn:literate-ai:schema:v1:observation-request" }, { "$ref": "urn:literate-ai:schema:v1:build-authorization" },
+    { "$ref": "urn:literate-ai:schema:v1:observation-execution-authorization" }, { "$ref": "urn:literate-ai:schema:v1:security-scan-report" },
+    { "$ref": "urn:literate-ai:schema:v1:authorization-revocation-set" }
+  ],
+  "$defs": {
+    "attestation": {
+      "$id": "urn:literate-ai:schema:v1:security-origin-attestation", "type": "object", "additionalProperties": false,
+      "required": ["source_digest", "signer", "trust_root", "signature_identity", "verified", "revoked"],
+      "properties": { "source_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "signer": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "trust_root": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "signature_identity": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "verified": { "type": "boolean" }, "revoked": { "type": "boolean" } }
+    },
+    "finding": {
+      "$id": "urn:literate-ai:schema:v1:security-finding", "type": "object", "additionalProperties": false,
+      "required": ["finding_id", "source_digest", "category", "severity", "scanner_identity", "message"],
+      "properties": { "finding_id": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "source_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "category": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "severity": { "type": "integer", "minimum": 0, "maximum": 4 }, "scanner_identity": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "message": { "type": "string" } }
+    },
+    "classification": {
+      "$id": "urn:literate-ai:schema:v1:security-classification", "type": "object", "additionalProperties": false,
+      "required": ["effective_revision_digest", "source_digests", "dependency_classification_digests", "origin_attestation_digests", "finding_ids", "policy_digest", "profile", "maximum_severity", "permitted_privileges", "decision_reason"],
+      "properties": {
+        "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "source_digests": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digestArray" },
+        "dependency_classification_digests": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digestArray" }, "origin_attestation_digests": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digestArray" }, "finding_ids": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/stringArray" },
+        "policy_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "profile": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/profile" }, "maximum_severity": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "permitted_privileges": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/stringArray" }, "decision_reason": { "type": "string" }
+      }
+    },
+    "buildRequest": {
+      "$id": "urn:literate-ai:schema:v1:build-request", "type": "object", "additionalProperties": false,
+      "required": ["effective_revision_digest", "source_bundle_digest", "builder_id", "toolchain_digest", "sandbox_profile", "requested_privileges", "allowed_outputs"],
+      "properties": { "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "source_bundle_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "builder_id": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "toolchain_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "sandbox_profile": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "requested_privileges": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/stringArray" }, "allowed_outputs": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/nonemptyStringArray" } }
+    },
+    "observationRequest": {
+      "$id": "urn:literate-ai:schema:v1:observation-request", "type": "object", "additionalProperties": false,
+      "required": ["effective_revision_digest", "source_digests", "runner_id", "harness_digest", "sandbox_profile", "requested_privileges", "allowed_outputs"],
+      "properties": { "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "source_digests": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digestArray" }, "runner_id": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "harness_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "sandbox_profile": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "requested_privileges": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/stringArray" }, "allowed_outputs": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/stringArray" } }
+    },
+    "buildAuthorization": {
+      "$id": "urn:literate-ai:schema:v1:build-authorization", "type": "object", "additionalProperties": false,
+      "required": ["authorization_id", "classification_digest", "request_digest", "effective_revision_digest", "actor", "reason", "profile", "privileges", "issued_at", "expires_at", "warning", "revoked"],
+      "properties": { "authorization_id": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "classification_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "request_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "actor": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "reason": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "profile": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/profile" }, "privileges": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/stringArray" }, "issued_at": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "expires_at": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "warning": { "type": ["string", "null"] }, "revoked": { "type": "boolean" } }
+    },
+    "observationAuthorization": {
+      "$id": "urn:literate-ai:schema:v1:observation-execution-authorization", "type": "object", "additionalProperties": false,
+      "required": ["authorization_id", "classification_digest", "request_digest", "actor", "reason", "privileges", "issued_at", "expires_at", "warning", "revoked"],
+      "properties": { "authorization_id": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "classification_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "request_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "actor": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "reason": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "privileges": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/stringArray" }, "issued_at": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "expires_at": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "warning": { "type": ["string", "null"] }, "revoked": { "type": "boolean" } }
+    },
+    "scanReport": {
+      "$id": "urn:literate-ai:schema:v1:security-scan-report", "type": "object", "additionalProperties": false,
+      "required": ["scanner_identity", "module_digests", "rule_set_digest", "findings"],
+      "properties": { "scanner_identity": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "module_digests": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digestArray" }, "rule_set_digest": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" }, "findings": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:security-finding" } } }
+    },
+    "revocation": { "type": "object", "additionalProperties": false, "required": ["authorization_id", "actor", "reason"], "properties": { "authorization_id": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "actor": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" }, "reason": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/text" } } },
+    "revocations": { "$id": "urn:literate-ai:schema:v1:authorization-revocation-set", "type": "object", "additionalProperties": false, "required": ["entries"], "properties": { "entries": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/revocation" } } } },
+    "text": { "type": "string", "minLength": 1 }, "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }, "profile": { "enum": ["constrained", "reviewed", "privileged-review", "blocked", "yolo"] },
+    "stringArray": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }, "nonemptyStringArray": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }, "digestArray": { "type": "array", "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:security-contracts#/$defs/digest" } }
+  }
+}

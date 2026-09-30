@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:worker-wheelhouse-contracts",
+  "oneOf": [
+    {"$ref": "literate-ai/worker-wheelhouse-manifest@1"},
+    {"$ref": "literate-ai/worker-bootstrap-evidence@1"},
+    {"$ref": "literate-ai/worker-bootstrap-evidence@2"}
+  ],
+  "$defs": {
+    "wheel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "filename",
+        "sha256",
+        "size",
+        "distribution_name",
+        "distribution_version",
+        "requires_dist"
+      ],
+      "properties": {
+        "filename": {"type": "string", "pattern": "^[A-Za-z0-9_.!+-]+\\.whl$"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "size": {"type": "integer", "minimum": 1},
+        "distribution_name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "distribution_version": {"type": "string", "minLength": 1},
+        "requires_dist": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "manifest": {
+      "$id": "literate-ai/worker-wheelhouse-manifest@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "framework",
+        "framework_distribution_identity",
+        "target",
+        "wheels"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/worker-wheelhouse-manifest@1"},
+        "framework": {"type": "string", "pattern": "^[A-Za-z0-9_.!+-]+\\.whl$"},
+        "framework_distribution_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["abi", "implementation", "platform", "python_version"],
+          "properties": {
+            "abi": {"type": ["string", "null"], "minLength": 1},
+            "implementation": {"type": ["string", "null"], "minLength": 1},
+            "platform": {"type": ["string", "null"], "minLength": 1},
+            "python_version": {"type": ["string", "null"], "minLength": 1}
+          }
+        },
+        "wheels": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:worker-wheelhouse-contracts#/$defs/wheel"
+          }
+        }
+      }
+    },
+    "evidence": {
+      "$id": "literate-ai/worker-bootstrap-evidence@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "distribution_identity",
+        "dependency_closure_identity",
+        "installed_distributions"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/worker-bootstrap-evidence@1"},
+        "distribution_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "dependency_closure_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "installed_distributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "distribution_name",
+              "distribution_version",
+              "installed_identity"
+            ],
+            "properties": {
+              "distribution_name": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "distribution_version": {"type": "string", "minLength": 1},
+              "installed_identity": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidence-v2": {
+      "$id": "literate-ai/worker-bootstrap-evidence@2",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "distribution_identity",
+        "dependency_closure_identity",
+        "installed_distributions",
+        "capabilities"
+      ],
+      "properties": {
+        "schema": {"const": "literate-ai/worker-bootstrap-evidence@2"},
+        "distribution_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "dependency_closure_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "installed_distributions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "distribution_name",
+              "distribution_version",
+              "installed_identity"
+            ],
+            "properties": {
+              "distribution_name": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "distribution_version": {"type": "string", "minLength": 1},
+              "installed_identity": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "maxItems": 0
+        }
+      }
+    }
+  }
+}

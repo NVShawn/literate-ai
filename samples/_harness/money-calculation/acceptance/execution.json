@@ -1,0 +1,27 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.exact-integer-discount-calculation",
+  "scenario_id": "exact-integer-discount-calculation.half-up-discount-rounding",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [999, 1250]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [4095, 1000]
+    }
+  ],
+  "result_shape": {
+    "discount_cents": "integer",
+    "subtotal_cents": "integer",
+    "total_cents": "integer"
+  },
+  "target": {
+    "build.system": "flavor://literate-ai/build-bazel",
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

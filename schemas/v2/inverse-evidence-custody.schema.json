@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:inverse-evidence-custody",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "translation_identity",
+    "source_inventory",
+    "behavioral_surface_inventory",
+    "evidence_partition_manifest",
+    "evidence_batch_plan"
+  ],
+  "properties": {
+    "schema": { "const": "urn:literate-ai:schema:v1:inverse-evidence-custody" },
+    "translation_identity": { "$ref": "#/$defs/identity" },
+    "source_inventory": { "$ref": "#/$defs/sourceInventory" },
+    "behavioral_surface_inventory": {
+      "$ref": "urn:literate-ai:schema:v1:behavioral-surface-inventory"
+    },
+    "evidence_partition_manifest": {
+      "$ref": "urn:literate-ai:schema:v1:inverse-evidence-partition-manifest"
+    },
+    "evidence_batch_plan": {
+      "$ref": "urn:literate-ai:schema:v1:inverse-model-evidence-batch-plan"
+    }
+  },
+  "$defs": {
+    "identity": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "flavorSignal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["flavor_id", "axis"],
+      "properties": {
+        "flavor_id": { "type": "string", "minLength": 1 },
+        "axis": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "content_digest",
+        "size",
+        "classification",
+        "language",
+        "symbols",
+        "flavor_signals",
+        "prompt_injection"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "content_digest": { "$ref": "#/$defs/identity" },
+        "size": { "type": "integer", "minimum": 0 },
+        "classification": {
+          "enum": [
+            "source",
+            "test",
+            "configuration",
+            "documentation",
+            "generated",
+            "minified",
+            "sensitive",
+            "binary",
+            "large",
+            "other"
+          ]
+        },
+        "language": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "minLength": 1 }
+          ]
+        },
+        "symbols": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "flavor_signals": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/flavorSignal" }
+        },
+        "prompt_injection": { "type": "boolean" }
+      }
+    },
+    "sourceInventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entries", "excluded_directories", "inventory_policy_id"],
+      "properties": {
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/sourceEntry" }
+        },
+        "excluded_directories": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "inventory_policy_id": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

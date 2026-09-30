@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:version-check",
+  "description": "The existing version-check report. Nested component and schema-catalog diagnostics remain producer-owned; consumers preserve them verbatim. Overall ok remains the producer decision.",
+  "$ref": "literate-ai/version-check@1",
+  "$defs": {
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "ok",
+        "distribution",
+        "tag",
+        "schema_catalogs",
+        "project"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/version-check@1"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "distribution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "authority",
+            "authority_version",
+            "package_version",
+            "wheel_metadata_version",
+            "cli_version",
+            "install_kind",
+            "metadata_matches_authority",
+            "diagnostic",
+            "ok"
+          ],
+          "properties": {
+            "authority": {
+              "const": "literate_ai.version:DISTRIBUTION_VERSION"
+            },
+            "authority_version": {
+              "type": "string"
+            },
+            "package_version": {
+              "type": "string"
+            },
+            "wheel_metadata_version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "cli_version": {
+              "type": "string"
+            },
+            "install_kind": {
+              "enum": [
+                "editable",
+                "non-editable"
+              ]
+            },
+            "metadata_matches_authority": {
+              "type": "boolean"
+            },
+            "diagnostic": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              ]
+            },
+            "ok": {
+              "type": "boolean"
+            }
+          }
+        },
+        "tag": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "expected_tag",
+            "head",
+            "tags_at_head",
+            "state",
+            "ok"
+          ],
+          "properties": {
+            "expected_tag": {
+              "type": "string"
+            },
+            "head": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "tags_at_head": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "state": {
+              "enum": [
+                "unavailable",
+                "released",
+                "mismatched-release-tag",
+                "unreleased"
+              ]
+            },
+            "ok": {
+              "type": "boolean"
+            }
+          }
+        },
+        "schema_catalogs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "v1",
+            "v2"
+          ],
+          "properties": {
+            "v1": {
+              "type": "object"
+            },
+            "v2": {
+              "type": "object"
+            }
+          }
+        },
+        "project": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "project_id",
+            "protocol_schema",
+            "project_version",
+            "lifecycle_driver",
+            "test_suite",
+            "component_contracts",
+            "derived_identities",
+            "ok"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "loaded",
+                "unavailable"
+              ]
+            },
+            "project_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "protocol_schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "project_version": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "lifecycle_driver": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "test_suite": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "component_contracts": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "derived_identities": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "ok": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "$id": "literate-ai/version-check@1"
+    }
+  }
+}

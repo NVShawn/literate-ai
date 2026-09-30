@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:literate-ai:schema:v1:settings-contracts",
+  "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:secret-reference" }, { "$ref": "urn:literate-ai:schema:v1:settings-document" }, { "$ref": "urn:literate-ai:schema:v1:setting-resolution" }, { "$ref": "urn:literate-ai:schema:v1:settings-snapshot" }],
+  "$defs": {
+    "secret": {
+      "$id": "urn:literate-ai:schema:v1:secret-reference", "type": "object", "additionalProperties": false, "required": ["$secret"],
+      "properties": { "$secret": { "type": "object", "additionalProperties": false, "required": ["provider", "name"], "properties": { "provider": { "$ref": "urn:literate-ai:schema:v1:settings-contracts#/$defs/text" }, "name": { "$ref": "urn:literate-ai:schema:v1:settings-contracts#/$defs/text" } } } }
+    },
+    "document": {
+      "$id": "urn:literate-ai:schema:v1:settings-document", "type": "object", "additionalProperties": false, "required": ["schema_version", "scope", "values"],
+      "properties": { "schema_version": { "const": 1 }, "scope": { "$ref": "urn:literate-ai:schema:v1:settings-contracts#/$defs/scope" }, "values": { "type": "object", "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/jsonValue" } } }
+    },
+    "contribution": {
+      "$id": "urn:literate-ai:schema:v1:setting-contribution", "type": "object", "additionalProperties": false, "required": ["scope", "value", "value_digest"],
+      "properties": { "scope": { "$ref": "urn:literate-ai:schema:v1:settings-contracts#/$defs/scope" }, "value": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/jsonValue" }, "value_digest": { "$ref": "urn:literate-ai:schema:v1:settings-contracts#/$defs/digest" } }
+    },
+    "resolution": {
+      "$id": "urn:literate-ai:schema:v1:setting-resolution", "type": "object", "additionalProperties": false, "required": ["key", "value", "effective_scope", "history"],
+      "properties": { "key": { "$ref": "urn:literate-ai:schema:v1:settings-contracts#/$defs/text" }, "value": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/jsonValue" }, "effective_scope": { "$ref": "urn:literate-ai:schema:v1:settings-contracts#/$defs/scope" }, "history": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:setting-contribution" } } }
+    },
+    "snapshot": {
+      "$id": "urn:literate-ai:schema:v1:settings-snapshot", "type": "object", "additionalProperties": false, "required": ["schema_version", "settings"],
+      "properties": { "schema_version": { "const": 1 }, "settings": { "type": "object", "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:setting-resolution" } } }
+    },
+    "text": { "type": "string", "minLength": 1 }, "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }, "scope": { "enum": ["framework-default", "repository", "workspace", "user", "machine", "run"] }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:publication-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:publication-request" },
+    { "$ref": "urn:literate-ai:schema:v2:publication-authorization" },
+    { "$ref": "urn:literate-ai:schema:v2:publication-manifest" },
+    { "$ref": "urn:literate-ai:schema:v2:import-request" },
+    { "$ref": "urn:literate-ai:schema:v2:import-authorization" },
+    { "$ref": "urn:literate-ai:schema:v2:transfer-receipt" }
+  ],
+  "$defs": {
+    "request": {
+      "$id": "urn:literate-ai:schema:v2:publication-request", "type": "object", "additionalProperties": false,
+      "required": ["schema", "component_ref", "component_lock_identity", "effective_revision_digest", "source_bundle", "roots", "blobs", "provenance", "security_classification_digest", "security_profile", "publisher_id", "target_id", "target_identity_digest", "policy_digest", "actor"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:publication-request" },
+        "component_ref": { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "source_bundle": { "$ref": "urn:literate-ai:schema:v1:blob-ref" },
+        "roots": { "type": "object", "minProperties": 1, "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "blobs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "provenance": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "security_classification_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "security_profile": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/profile" },
+        "publisher_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" },
+        "target_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" },
+        "target_identity_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "policy_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "actor": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }
+      }
+    },
+    "authorization": {
+      "$id": "urn:literate-ai:schema:v2:publication-authorization", "type": "object", "additionalProperties": false,
+      "required": ["schema", "authorization_id", "request_digest", "policy_digest", "actor", "reason", "decision", "issued_at", "expires_at", "revoked"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:publication-authorization" },
+        "authorization_id": { "type": "string", "pattern": "^publication-auth:[0-9a-f]{24}$" },
+        "request_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "policy_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "actor": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" },
+        "reason": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "decision": { "const": "allow" },
+        "issued_at": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "expires_at": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "revoked": { "type": "boolean" }
+      }
+    },
+    "manifest": {
+      "$id": "urn:literate-ai:schema:v2:publication-manifest", "type": "object", "additionalProperties": false,
+      "required": ["schema", "schema_version", "request", "authorization", "created_at"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:publication-manifest" }, "schema_version": { "const": 5 },
+        "request": { "$ref": "urn:literate-ai:schema:v2:publication-request" },
+        "authorization": { "$ref": "urn:literate-ai:schema:v2:publication-authorization" },
+        "created_at": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }
+      }
+    },
+    "importRequest": {
+      "$id": "urn:literate-ai:schema:v2:import-request", "type": "object", "additionalProperties": false,
+      "required": ["schema", "publication_manifest", "publication_request_digest", "publication_authorization_id", "publication_policy_digest", "component_ref", "component_lock_identity", "effective_revision_digest", "source_bundle", "provenance", "security_classification_digest", "security_profile", "source_target_id", "source_target_identity_digest", "importer_id", "destination_identity_digest", "policy_digest", "actor"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:import-request" }, "publication_manifest": { "$ref": "urn:literate-ai:schema:v1:blob-ref" },
+        "publication_request_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "publication_authorization_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "publication_policy_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "component_ref": { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" }, "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }, "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "source_bundle": { "$ref": "urn:literate-ai:schema:v1:blob-ref" },
+        "provenance": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "security_classification_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "security_profile": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/profile" },
+        "source_target_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "source_target_identity_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "importer_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "destination_identity_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "policy_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "actor": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }
+      }
+    },
+    "importAuthorization": {
+      "$id": "urn:literate-ai:schema:v2:import-authorization", "type": "object", "additionalProperties": false,
+      "required": ["schema", "authorization_id", "request_digest", "policy_digest", "actor", "reason", "decision", "issued_at", "expires_at", "revoked"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:import-authorization" },
+        "authorization_id": { "type": "string", "pattern": "^import-auth:[0-9a-f]{24}$" },
+        "request_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "policy_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "actor": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "reason": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "decision": { "const": "allow" },
+        "issued_at": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "expires_at": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "revoked": { "type": "boolean" }
+      }
+    },
+    "receipt": {
+      "$id": "urn:literate-ai:schema:v2:transfer-receipt", "type": "object", "additionalProperties": false,
+      "required": ["schema", "schema_version", "operation_id", "direction", "target_id", "target_identity_digest", "publication_manifest", "component_id", "revision", "component_ref", "component_lock_identity", "effective_revision_digest", "source_bundle", "provenance", "security_classification_digest", "security_profile", "publication_request_digest", "publication_authorization_id", "publication_policy_digest", "import_request_digest", "import_authorization_id", "import_policy_digest", "blob_count", "transferred_count", "reused_count", "started_at", "completed_at"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:transfer-receipt" }, "schema_version": { "const": 5 },
+        "operation_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "direction": { "enum": ["publish", "import"] }, "target_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "target_identity_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "publication_manifest": { "$ref": "urn:literate-ai:schema:v1:blob-ref" }, "component_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "revision": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "component_ref": { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" }, "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "source_bundle": { "$ref": "urn:literate-ai:schema:v1:blob-ref" },
+        "provenance": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "security_classification_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "security_profile": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/profile" },
+        "publication_request_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, "publication_authorization_id": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "publication_policy_digest": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" },
+        "import_request_digest": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, { "type": "null" }] }, "import_authorization_id": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, { "type": "null" }] }, "import_policy_digest": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/digest" }, { "type": "null" }] },
+        "blob_count": { "type": "integer", "minimum": 1 }, "transferred_count": { "type": "integer", "minimum": 0 }, "reused_count": { "type": "integer", "minimum": 0 },
+        "started_at": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }, "completed_at": { "$ref": "urn:literate-ai:schema:v2:publication-contracts#/$defs/text" }
+      }
+    },
+    "text": { "type": "string", "minLength": 1 }, "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }, "profile": { "enum": ["constrained", "reviewed", "privileged-review", "blocked", "yolo"] }
+  }
+}

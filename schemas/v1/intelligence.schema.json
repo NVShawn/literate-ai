@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:intelligence-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:intelligence-index-binding" }, { "$ref": "urn:literate-ai:schema:v1:intelligence-query" },
+    { "$ref": "urn:literate-ai:schema:v1:stored-intelligence-index" }, { "$ref": "urn:literate-ai:schema:v1:intelligence-evidence" },
+    { "$ref": "urn:literate-ai:schema:v1:stored-intelligence-result" }
+  ],
+  "$defs": {
+    "binding": {
+      "$id": "urn:literate-ai:schema:v1:intelligence-index-binding", "type": "object", "additionalProperties": false,
+      "required": ["schema", "index_id", "source_snapshot_id", "source_tree_id", "provider_id", "provider_version", "configuration_id", "engine_index_key", "artifact_ref", "document_count"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:intelligence-index-binding" }, "index_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "source_tree_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "provider_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "provider_version": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "configuration_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "engine_index_key": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "artifact_ref": { "$ref": "urn:literate-ai:schema:v1:blob-ref" }, "document_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "query": {
+      "$id": "urn:literate-ai:schema:v1:intelligence-query", "type": "object", "additionalProperties": false,
+      "required": ["schema", "query_id", "source_snapshot_id", "index_id", "text", "purpose", "required", "selected", "max_results"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:intelligence-query" }, "query_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "index_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "text": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "purpose": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "required": { "type": "boolean" }, "selected": { "type": "boolean" }, "max_results": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "storedIndex": {
+      "$id": "urn:literate-ai:schema:v1:stored-intelligence-index", "type": "object", "additionalProperties": false,
+      "required": ["schema", "binding", "binding_ref"],
+      "properties": { "schema": { "const": "urn:literate-ai:schema:v1:stored-intelligence-index" }, "binding": { "$ref": "urn:literate-ai:schema:v1:intelligence-index-binding" }, "binding_ref": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } }
+    },
+    "location": {
+      "type": "object", "additionalProperties": false, "required": ["path", "start_line", "end_line", "symbol"],
+      "properties": { "path": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "start_line": { "type": "integer", "minimum": 1 }, "end_line": { "type": "integer", "minimum": 1 }, "symbol": { "type": "string" } }
+    },
+    "evidence": {
+      "$id": "urn:literate-ai:schema:v1:intelligence-evidence", "type": "object", "additionalProperties": false,
+      "required": ["schema", "evidence_id", "source_snapshot_id", "index_id", "query_id", "kind", "summary", "content", "locations", "call_path", "required", "selected"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:intelligence-evidence" }, "evidence_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "source_snapshot_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "index_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "query_id": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "kind": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "summary": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" }, "content": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/text" },
+        "locations": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/location" } }, "call_path": { "$ref": "urn:literate-ai:schema:v1:intelligence-contracts#/$defs/stringArray" }, "required": { "type": "boolean" }, "selected": { "type": "boolean" }
+      }
+    },
+    "result": {
+      "$id": "urn:literate-ai:schema:v1:stored-intelligence-result", "type": "object", "additionalProperties": false,
+      "required": ["schema", "query", "evidence", "evidence_refs", "raw_result_ref", "normalized_result_ref"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:stored-intelligence-result" }, "query": { "$ref": "urn:literate-ai:schema:v1:intelligence-query" },
+        "evidence": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:intelligence-evidence" } }, "evidence_refs": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "raw_result_ref": { "$ref": "urn:literate-ai:schema:v1:blob-ref" }, "normalized_result_ref": { "$ref": "urn:literate-ai:schema:v1:blob-ref" }
+      }
+    },
+    "text": { "type": "string", "minLength": 1 }, "stringArray": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  }
+}

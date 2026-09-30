@@ -1,0 +1,13 @@
+{
+  "package_id": "src_demo",
+  "component_id": "sample.compatibility",
+  "source_identity": "sha256:source",
+  "files": ["main.py", "openspec/specs/sample-compatibility/spec.md"],
+  "dependencies": ["ovstage"],
+  "spec_files": ["openspec/specs/sample-compatibility/spec.md"],
+  "skill_ids": ["component-authoring"],
+  "model_selector_digest": "sha256:selector",
+  "content_digest": "sha256:source-package",
+  "created_at": "2026-08-02T12:00:00Z",
+  "future_source_package_field": {"retained": true}
+}

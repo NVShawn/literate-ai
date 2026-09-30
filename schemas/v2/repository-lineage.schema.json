@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:repository-lineage-contracts",
+  "$defs": {
+    "fetchDeadlinePolicy": {
+      "$id": "urn:literate-ai:schema:v1:repository-fetch-deadline-policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "total_seconds", "no_progress_seconds", "connect_seconds"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-fetch-deadline-policy" },
+        "total_seconds": { "type": "integer", "minimum": 30, "maximum": 14400 },
+        "no_progress_seconds": { "type": "integer", "minimum": 15, "maximum": 1800 },
+        "connect_seconds": { "type": "integer", "minimum": 5, "maximum": 120 }
+      }
+    },
+    "parentReference": {
+      "$id": "urn:literate-ai:schema:v1:repository-parent-reference",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "repository_url", "requested_revision"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-parent-reference" },
+        "repository_url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?:file|git|https?|ssh)://.+$"
+        },
+        "requested_revision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^[^-\\x00-\\x20~^:?*\\\\\\[][^\\x00-\\x20~^:?*\\\\\\[]*$"
+        }
+      }
+    },
+    "parentSelection": {
+      "$id": "urn:literate-ai:schema:v1:repository-parent-selection",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "mode", "parents"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-parent-selection" },
+        "mode": { "enum": ["root", "inherit"] },
+        "parents": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:repository-parent-reference" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "root" } }, "required": ["mode"] },
+          "then": { "properties": { "parents": { "maxItems": 0 } } },
+          "else": { "properties": { "parents": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "lineageNode": {
+      "$id": "urn:literate-ai:schema:v1:repository-lineage-node",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "project_id", "project_identity", "repository_url", "requested_revision", "resolved_revision", "parent_selection", "parents"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-lineage-node" },
+        "project_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "project_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "repository_url": { "$ref": "urn:literate-ai:schema:v2:repository-lineage-contracts#/$defs/parentReference/properties/repository_url" },
+        "requested_revision": { "$ref": "urn:literate-ai:schema:v2:repository-lineage-contracts#/$defs/parentReference/properties/requested_revision" },
+        "resolved_revision": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" },
+        "parent_selection": { "$ref": "urn:literate-ai:schema:v1:repository-parent-selection" },
+        "parents": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        }
+      }
+    },
+    "lineage": {
+      "$id": "urn:literate-ai:schema:v1:repository-lineage",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "selection", "nodes", "selected_parents"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-lineage" },
+        "selection": { "$ref": "urn:literate-ai:schema:v1:repository-parent-selection" },
+        "nodes": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:repository-lineage-node" }
+        },
+        "selected_parents": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:repository-fetch-deadline-policy" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-parent-reference" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-parent-selection" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-lineage-node" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-lineage" }
+  ]
+}

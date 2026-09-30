@@ -1,0 +1,26 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:e552776b50bff40f952cd06adf28f02745e6010bc9cfd4675435f2b91bf04584",
+  "oracle_results": [
+    {
+      "case_id": "mixed",
+      "expected_result": {
+        "backend": "cuda",
+        "device_executed": true,
+        "count": 5,
+        "values": [11, -9, -1, 43, 27],
+        "checksum": 71
+      }
+    },
+    {
+      "case_id": "negative-scale",
+      "expected_result": {
+        "backend": "cuda",
+        "device_executed": true,
+        "count": 3,
+        "values": [26, -13, -34],
+        "checksum": -21
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "records": [
+            "alpha",
+            "beta",
+            "alpha"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "records": [
+            "gamma",
+            "delta",
+            "epsilon",
+            "delta"
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "identities": [
+      "sha256-hex"
+    ],
+    "object_count": "integer",
+    "recovered": [
+      "string"
+    ],
+    "restart_verified": "boolean"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

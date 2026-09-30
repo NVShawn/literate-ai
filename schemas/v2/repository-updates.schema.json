@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:repository-update-contracts",
+  "$defs": {
+    "plan": {
+      "$id": "urn:literate-ai:schema:v1:repository-lineage-update-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "mode", "project_identity", "previous_lineage", "prospective_lineage", "files", "identity", "counts", "changed", "apply_supported", "limitations"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-lineage-update-plan" },
+        "mode": { "const": "read-only-plan" },
+        "project_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "previous_lineage": { "$ref": "urn:literate-ai:schema:v1:repository-lineage" },
+        "prospective_lineage": { "$ref": "urn:literate-ai:schema:v1:repository-lineage" },
+        "files": {
+          "type": "array",
+          "maxItems": 16384,
+          "items": { "$ref": "urn:literate-ai:schema:v2:project-update-file" }
+        },
+        "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["unchanged", "already-current", "upstream-only", "local-only", "conflict", "upstream-added", "preserved-dynamic"],
+          "properties": {
+            "unchanged": { "type": "integer", "minimum": 0 },
+            "already-current": { "type": "integer", "minimum": 0 },
+            "upstream-only": { "type": "integer", "minimum": 0 },
+            "local-only": { "type": "integer", "minimum": 0 },
+            "conflict": { "type": "integer", "minimum": 0 },
+            "upstream-added": { "type": "integer", "minimum": 0 },
+            "preserved-dynamic": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "changed": { "type": "boolean" },
+        "apply_supported": { "const": true },
+        "limitations": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 512 }
+        }
+      }
+    },
+    "apply_v1": {
+      "$id": "urn:literate-ai:schema:v1:repository-lineage-update-apply",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "plan_identity", "previous_lineage_identity", "prospective_lineage_identity", "provenance_identity", "applied", "adopted", "refused", "authority_review_required"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-lineage-update-apply" },
+        "plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "previous_lineage_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prospective_lineage_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "provenance_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "applied": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "adopted": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "refused": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "unchanged": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "already-current": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "upstream-only": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "local-only": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "conflict": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "upstream-added": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "preserved-dynamic": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "authority_review_required": { "type": "boolean" }
+      }
+    },
+    "apply": {
+      "$id": "urn:literate-ai:schema:v2:repository-lineage-update-apply",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "plan_identity", "previous_lineage_identity", "prospective_lineage_identity", "provenance_identity", "applied", "adopted", "taken_upstream", "kept_local", "refused", "authority_review_required"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:repository-lineage-update-apply" },
+        "plan_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "previous_lineage_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prospective_lineage_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "provenance_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "applied": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "adopted": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "taken_upstream": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "kept_local": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "refused": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "unchanged": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "already-current": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "upstream-only": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "local-only": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "conflict": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "upstream-added": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+            "preserved-dynamic": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+          }
+        },
+        "authority_review_required": { "type": "boolean" }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:repository-lineage-update-plan" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-lineage-update-apply" },
+    { "$ref": "urn:literate-ai:schema:v2:repository-lineage-update-apply" }
+  ]
+}

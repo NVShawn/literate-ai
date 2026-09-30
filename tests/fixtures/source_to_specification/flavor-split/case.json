@@ -1,0 +1,82 @@
+{
+  "schema": "literate-ai/source-to-specification-case@1",
+  "case_id": "base-os-gpu-language-flavors",
+  "source_root": "source",
+  "surfaces": [
+    {"surface_id": "process-contract", "facet": "behavior", "description": "Target-neutral processing"},
+    {"surface_id": "linux-runtime", "facet": "configuration", "description": "Linux runtime selection", "declared_state": "implementation-detail", "reason": "Target-specific behavior belongs to an OS Flavor."},
+    {"surface_id": "gpu-backend", "facet": "deployment", "description": "GPU backend", "declared_state": "implementation-detail", "reason": "Accelerator behavior belongs to a GPU Flavor."},
+    {"surface_id": "python-runtime", "facet": "public-api", "description": "Language runtime", "declared_state": "implementation-detail", "reason": "Language binding belongs to a language Flavor."}
+  ],
+  "evidence": [
+    {"evidence_id": "runtime-source", "path": "runtime.py", "symbol": "process"}
+  ],
+  "observations": [
+    {
+      "observation_id": "python-observation",
+      "surface_ids": ["python-runtime"],
+      "facet": "public-api",
+      "claim_kind": "observed-current-behavior",
+      "statement": "The implementation exposes a Python language runtime.",
+      "evidence_ids": ["runtime-source"],
+      "skill_id": "api-surface",
+      "confidence": 1.0,
+      "draft_scope": "flavor:python"
+    },
+    {
+      "observation_id": "process-observation",
+      "surface_ids": ["process-contract"],
+      "facet": "behavior",
+      "claim_kind": "observed-current-behavior",
+      "statement": "Processing doubles every input value while preserving order.",
+      "evidence_ids": ["runtime-source"],
+      "skill_id": "behavior-state",
+      "confidence": 1.0
+    },
+    {
+      "observation_id": "linux-observation",
+      "surface_ids": ["linux-runtime"],
+      "facet": "configuration",
+      "claim_kind": "observed-current-behavior",
+      "statement": "Linux target selection enables the Linux runtime path.",
+      "evidence_ids": ["runtime-source"],
+      "skill_id": "operations",
+      "confidence": 1.0,
+      "draft_scope": "flavor:linux"
+    },
+    {
+      "observation_id": "cuda-observation",
+      "surface_ids": ["gpu-backend"],
+      "facet": "deployment",
+      "claim_kind": "observed-current-behavior",
+      "statement": "The CUDA Flavor selects the GPU compute backend.",
+      "evidence_ids": ["runtime-source"],
+      "skill_id": "operations",
+      "confidence": 1.0,
+      "draft_scope": "flavor:cuda"
+    }
+  ],
+  "flavor_drafts": [
+    {"flavor_id": "linux", "axis": "platform.os"},
+    {"flavor_id": "cuda", "axis": "accelerator"},
+    {"flavor_id": "python", "axis": "implementation.language-ecosystem"}
+  ],
+  "expected": {
+    "claim_kinds": {
+      "python-observation": "observed-current-behavior",
+      "process-observation": "observed-current-behavior",
+      "linux-observation": "observed-current-behavior",
+      "cuda-observation": "observed-current-behavior"
+    },
+    "coverage": {
+      "process-contract": "covered",
+      "linux-runtime": "implementation-detail",
+      "gpu-backend": "implementation-detail",
+      "python-runtime": "implementation-detail"
+    },
+    "uncertainty_ids": [],
+    "statement_ids": ["statement:process-observation"],
+    "flavor_ids": ["linux", "cuda", "python"],
+    "invalidated_surface_ids": []
+  }
+}

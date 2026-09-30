@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:repository-source-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:repository-source-dependency" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-source-lock" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-build-plan" },
+    { "$ref": "urn:literate-ai:schema:v1:repository-source-admission" }
+  ],
+  "$defs": {
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value"],
+      "properties": {
+        "kind": { "enum": ["commit", "branch", "default"] },
+        "value": { "type": ["string", "null"], "maxLength": 255 }
+      },
+      "allOf": [
+        { "if": { "properties": { "kind": { "const": "default" } } }, "then": { "properties": { "value": { "type": "null" } } } },
+        { "if": { "properties": { "kind": { "const": "commit" } } }, "then": { "properties": { "value": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" } } } },
+        { "if": { "properties": { "kind": { "const": "branch" } } }, "then": { "properties": { "value": { "type": "string", "minLength": 1 } } } }
+      ]
+    },
+    "dependency": {
+      "$id": "urn:literate-ai:schema:v1:repository-source-dependency",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "dependency_id", "repository_url", "revision_selector", "dependency_kind", "optional", "integration_contract"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-source-dependency" },
+        "dependency_id": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$" },
+        "repository_url": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "revision_selector": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/selector" },
+        "dependency_kind": { "enum": ["generation", "build", "runtime", "validation", "toolchain", "packaging", "deployment"] },
+        "optional": { "type": "boolean" },
+        "integration_contract": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:content-reference" }, { "type": "null" }] }
+      }
+    },
+    "lock": {
+      "$id": "urn:literate-ai:schema:v1:repository-source-lock",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "dependency", "resolved_commit", "source_snapshot", "source_tree", "resolver"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-source-lock" },
+        "dependency": { "$ref": "urn:literate-ai:schema:v1:repository-source-dependency" },
+        "resolved_commit": { "type": "string", "pattern": "^(?:[0-9a-f]{40}|[0-9a-f]{64})$" },
+        "source_snapshot": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "source_tree": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "resolver": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "value"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[A-Z_][A-Z0-9_]{0,126}$" },
+        "value": { "type": "string", "maxLength": 4096, "pattern": "^[^\\u0000]*$" }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["step_id", "argv", "working_directory", "environment", "network"],
+      "properties": {
+        "step_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[^\\u0000]*$" },
+        "argv": { "type": "array", "minItems": 1, "maxItems": 128, "items": { "type": "string", "minLength": 1, "maxLength": 8192, "pattern": "^[^\\u0000]*$" } },
+        "working_directory": { "type": "string", "minLength": 1, "maxLength": 1024, "pattern": "^[^\\u0000]*$" },
+        "environment": { "type": "array", "maxItems": 128, "items": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/environment" } },
+        "network": { "type": "boolean" }
+      }
+    },
+    "outputPath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "^(?!/)(?!.*//)(?!.*(?:^|/)\\.\\.?(?:/|$))[^/\\u0000](?:[^\\u0000]*[^/\\u0000])?$"
+    },
+    "outputPathArray": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/outputPath" }
+    },
+    "buildOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "identity"],
+      "properties": {
+        "path": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/outputPath" },
+        "identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "buildOutputArray": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/buildOutput" }
+    },
+    "plan": {
+      "$id": "urn:literate-ai:schema:v1:repository-build-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "source_lock", "effective_revision", "flavor_set", "evidence", "model_decision", "toolchains", "commands", "expected_outputs"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-build-plan" },
+        "source_lock": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "effective_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "flavor_set": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "evidence": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/identityArray" },
+        "model_decision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "toolchains": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/identityArray" },
+        "commands": { "type": "array", "minItems": 1, "maxItems": 64, "items": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/command" } },
+        "expected_outputs": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/outputPathArray" }
+      }
+    },
+    "admission": {
+      "$id": "urn:literate-ai:schema:v1:repository-source-admission",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "dependency_id", "source_lock", "source_snapshot", "source_tree", "effective_revision", "flavor_set", "index_binding", "build_plan", "classification", "authorization", "build_result", "expected_outputs", "build_outputs", "cache_key"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:repository-source-admission" },
+        "dependency_id": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$" },
+        "source_lock": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "source_snapshot": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "source_tree": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "effective_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "flavor_set": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "index_binding": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "build_plan": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "classification": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "authorization": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "build_result": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "expected_outputs": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/outputPathArray" },
+        "build_outputs": { "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/buildOutputArray" },
+        "cache_key": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "identityArray": { "type": "array", "minItems": 1, "maxItems": 256, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }
+  }
+}

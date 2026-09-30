@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:standard-root-integration-evidence",
+  "title": "Standard Root Integration Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "component_lock_identity",
+    "execution_plan_identity",
+    "project_build_plan_identity",
+    "artifact_graph",
+    "link_plan",
+    "package_plan",
+    "package_result",
+    "root_generated_integration_test_identity",
+    "packaged_execution_identity",
+    "independent_acceptance_identity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v1:standard-root-integration-evidence"
+    },
+    "component_lock_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "execution_plan_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "project_build_plan_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "artifact_graph": {
+      "$ref": "urn:literate-ai:schema:v2:artifact-build-graph"
+    },
+    "link_plan": {
+      "$ref": "urn:literate-ai:schema:v2:exact-link-plan"
+    },
+    "package_plan": {
+      "$ref": "urn:literate-ai:schema:v2:package-plan"
+    },
+    "package_result": {
+      "$ref": "urn:literate-ai:schema:v2:package-result"
+    },
+    "root_generated_integration_test_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "packaged_execution_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "independent_acceptance_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    }
+  }
+}

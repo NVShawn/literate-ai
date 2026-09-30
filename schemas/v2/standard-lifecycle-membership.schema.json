@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-lifecycle-membership-contracts",
+  "$defs": {
+    "optionalIdentity": {
+      "oneOf": [
+        { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        { "type": "null" }
+      ]
+    },
+    "failureEvidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-node-failure-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "component_revision", "phase", "code", "subject_identity", "diagnostic"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-node-failure-evidence" },
+        "component_revision": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "phase": {
+          "enum": [
+            "dependency", "source-generation", "build-intent", "source-index",
+            "build-authorization", "build-plan", "build", "test", "execute",
+            "accept", "source-cache-publication", "lifecycle"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$"
+        },
+        "subject_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "diagnostic": {"type": ["string", "null"], "minLength": 1, "maxLength": 8192}
+      }
+    },
+    "plannedNode": {
+      "$id": "urn:literate-ai:schema:v2:standard-planned-lifecycle-node",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "generation_plan_identity",
+        "generation_key_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-planned-lifecycle-node"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation_key_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    },
+    "cacheDecision": {
+      "$id": "urn:literate-ai:schema:v2:standard-node-cache-decision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "generation_plan_identity",
+        "generation_key_identity",
+        "outcome",
+        "input_membership_identity",
+        "lifecycle_result_identity",
+        "accepted_membership_identity",
+        "publication_identity",
+        "failure_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-node-cache-decision"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation_key_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "outcome": {
+          "enum": ["hit", "miss", "forced-regeneration"]
+        },
+        "input_membership_identity": {
+          "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-membership-contracts#/$defs/optionalIdentity"
+        },
+        "lifecycle_result_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "accepted_membership_identity": {
+          "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-membership-contracts#/$defs/optionalIdentity"
+        },
+        "publication_identity": {
+          "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-membership-contracts#/$defs/optionalIdentity"
+        },
+        "failure_identity": {
+          "$ref": "urn:literate-ai:schema:v2:standard-lifecycle-membership-contracts#/$defs/optionalIdentity"
+        }
+      }
+    },
+    "projectMembership": {
+      "$id": "urn:literate-ai:schema:v2:standard-project-lifecycle-membership",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "planned_nodes",
+        "cache_decisions"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-project-lifecycle-membership"
+        },
+        "execution_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "planned_nodes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:standard-planned-lifecycle-node"
+          }
+        },
+        "cache_decisions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:standard-node-cache-decision"
+          }
+        }
+      }
+    },
+    "aggregateReceipt": {
+      "$id": "urn:literate-ai:schema:v2:standard-aggregate-receipt",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "lifecycle_membership_identity",
+        "lifecycle_result_identities",
+        "admission_identity",
+        "context_prompt_journal_identities",
+        "context_benchmark_record_identities",
+        "context_cache_report_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-aggregate-receipt"
+        },
+        "execution_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "lifecycle_membership_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "lifecycle_result_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          }
+        },
+        "admission_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "context_prompt_journal_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "context_benchmark_record_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+        },
+        "context_cache_report_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "root_integration_evidence_identity": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+            { "type": "null" }
+          ]
+        }
+      }
+    }
+  },
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:standard-node-failure-evidence" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-planned-lifecycle-node" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-node-cache-decision" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-project-lifecycle-membership" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-aggregate-receipt" }
+  ]
+}

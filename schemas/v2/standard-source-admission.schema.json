@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-source-admission-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:standard-source-admission-evidence"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-source-admission-membership"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-source-admission-cache-entry"},
+    {"$ref": "urn:literate-ai:schema:v1:standard-source-admission-receipt-composition"}
+  ],
+  "$defs": {
+    "identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+    "selector": {
+      "$id": "urn:literate-ai:schema:v1:standard-source-selector",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "axis", "value"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:standard-source-selector"},
+        "axis": {"type": "string", "minLength": 1},
+        "value": {"type": "string", "minLength": 1}
+      }
+    },
+    "selectorSet": {
+      "$id": "urn:literate-ai:schema:v1:standard-source-selector-set",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "scope", "selectors"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:standard-source-selector-set"},
+        "scope": {"enum": ["target-independent", "target-specific"]},
+        "selectors": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {"$ref": "urn:literate-ai:schema:v2:standard-source-admission-contracts#/$defs/selector"}
+        }
+      }
+    },
+    "testResult": {
+      "$id": "urn:literate-ai:schema:v1:standard-source-test-result",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "oracle_identity",
+        "result_identity",
+        "case_count",
+        "passed_count",
+        "failed_count",
+        "skipped_count"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v1:standard-source-test-result"},
+        "oracle_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "result_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "case_count": {"type": "integer", "minimum": 1},
+        "passed_count": {"type": "integer", "minimum": 1},
+        "failed_count": {"const": 0},
+        "skipped_count": {"const": 0}
+      }
+    },
+    "evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-source-admission-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision_identity",
+        "component_lock_identity",
+        "generation_plan_identity",
+        "generation_key_identity",
+        "recipe_identity",
+        "orchestration_request_identity",
+        "planned_coding_cli_request_identity",
+        "flavor_set_identity",
+        "skill_closure_identity",
+        "source_tree_identity",
+        "source_bundle_identity",
+        "source_manifest_identity",
+        "source_bom_identity",
+        "generated_test_suite_identity",
+        "coding_cli_tool_binding_identity",
+        "coding_cli_transcript_identity",
+        "generation_provenance_identity",
+        "test_plan_identity",
+        "test_results",
+        "source_selectors",
+        "framework_distribution_identity",
+        "verifier_identity",
+        "admitted_at",
+        "evidence_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-source-admission-evidence"
+        },
+        "component_revision_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "component_lock_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generation_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generation_key_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "recipe_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "orchestration_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "planned_coding_cli_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "flavor_set_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "skill_closure_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_bundle_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_manifest_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_bom_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generated_test_suite_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "coding_cli_tool_binding_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "coding_cli_transcript_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generation_provenance_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "test_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "test_results": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {"$ref": "urn:literate-ai:schema:v2:standard-source-admission-contracts#/$defs/testResult"}
+        },
+        "source_selectors": {"$ref": "urn:literate-ai:schema:v2:standard-source-admission-contracts#/$defs/selectorSet"},
+        "framework_distribution_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "verifier_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "admitted_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^.*Z$"
+        },
+        "evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "membership": {
+      "$id": "urn:literate-ai:schema:v2:standard-source-admission-membership",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "generation", "evidence"],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-source-admission-membership"
+        },
+        "generation": {
+          "$ref": "urn:literate-ai:schema:v3:source-generation-resume-candidate"
+        },
+        "evidence": {
+          "$ref": "urn:literate-ai:schema:v2:standard-source-admission-evidence"
+        }
+      }
+    },
+    "cacheEntry": {
+      "$id": "urn:literate-ai:schema:v2:standard-source-admission-cache-entry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "cache_key",
+        "membership",
+        "source_files",
+        "source_manifest",
+        "source_bom",
+        "generated_test_suite",
+        "provenance_evidence",
+        "admission_evidence"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-source-admission-cache-entry"
+        },
+        "cache_key": {
+          "$ref": "urn:literate-ai:schema:v2:source-derivation-cache-key"
+        },
+        "membership": {
+          "$ref": "urn:literate-ai:schema:v2:standard-source-admission-membership"
+        },
+        "source_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v2:cached-source-file"}
+        },
+        "source_manifest": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "source_bom": {"$ref": "urn:literate-ai:schema:v1:blob-ref"},
+        "generated_test_suite": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        "provenance_evidence": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        "admission_evidence": {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        }
+      }
+    },
+    "receiptComposition": {
+      "$id": "urn:literate-ai:schema:v1:standard-source-admission-receipt-composition",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "source_admission_identities",
+        "downstream_lifecycle_result_identities",
+        "project_admission_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:standard-source-admission-receipt-composition"
+        },
+        "execution_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_admission_identities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "downstream_lifecycle_result_identities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "project_admission_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    }
+  }
+}

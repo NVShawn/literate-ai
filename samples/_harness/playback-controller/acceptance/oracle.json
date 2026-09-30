@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:c91b37d6c56e513c7cc33931da6298ef0f788cf84a596bcdffb878e3c36e850c",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "active": [
+          "audible",
+          "playing"
+        ],
+        "event_count": 1,
+        "powered": true
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "active": [
+          "muted",
+          "playing"
+        ],
+        "event_count": 4,
+        "powered": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,504 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:worker-capacity-contracts",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v1:worker-capacity-policy"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v1:worker-capacity-observation"
+    },
+    {
+      "$ref": "literate-ai/worker-capacity-assessment@1"
+    }
+  ],
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "value"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "measured",
+            "not-applicable",
+            "unknown",
+            "denied",
+            "unavailable",
+            "unsupported",
+            "timed-out",
+            "unreachable",
+            "malformed"
+          ]
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "status": {
+              "const": "measured"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9223372036854775807
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {
+              "enum": [
+                "not-applicable",
+                "unknown",
+                "denied",
+                "unavailable",
+                "unsupported",
+                "timed-out",
+                "unreachable",
+                "malformed"
+              ]
+            },
+            "value": {
+              "type": "null"
+            }
+          }
+        }
+      ]
+    },
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "kind",
+        "additional_bytes",
+        "reserve_bytes",
+        "minimum_free_basis_points",
+        "additional_inodes",
+        "reserve_inodes",
+        "require_quota",
+        "require_inodes"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "kind": {
+          "enum": [
+            "workspace",
+            "temp",
+            "cache",
+            "output"
+          ]
+        },
+        "additional_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "reserve_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "minimum_free_basis_points": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "additional_inodes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "reserve_inodes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "require_quota": {
+          "type": "boolean"
+        },
+        "require_inodes": {
+          "type": "boolean"
+        }
+      }
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "volume",
+        "total_bytes",
+        "available_bytes",
+        "available_inodes",
+        "quotas"
+      ],
+      "properties": {
+        "role": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "volume": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "total_bytes": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "available_bytes": {
+          "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/metric"
+        },
+        "available_inodes": {
+          "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/metric"
+        },
+        "quotas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/quota"
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "roles",
+        "write_heavy",
+        "maximum_age_ms",
+        "probe_timeout_ms",
+        "maximum_retries",
+        "warning_headroom_bytes",
+        "storage_bindings_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:worker-capacity-policy"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 16,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/role"
+          }
+        },
+        "write_heavy": {
+          "type": "boolean"
+        },
+        "maximum_age_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600000
+        },
+        "probe_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000
+        },
+        "maximum_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "warning_headroom_bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "storage_bindings_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      },
+      "$id": "urn:literate-ai:schema:v1:worker-capacity-policy"
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "worker_id",
+        "policy_identity",
+        "job_identity",
+        "os_family",
+        "started_at_ms",
+        "completed_at_ms",
+        "expires_at_ms",
+        "samples"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v1:worker-capacity-observation"
+        },
+        "worker_id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "policy_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "job_identity": {
+          "anyOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:content-identity"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "os_family": {
+          "enum": [
+            "linux",
+            "macos",
+            "windows"
+          ]
+        },
+        "started_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "completed_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "expires_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "samples": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/sample"
+          }
+        }
+      },
+      "$id": "urn:literate-ai:schema:v1:worker-capacity-observation"
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "roles",
+        "resource",
+        "health",
+        "reason",
+        "required",
+        "available",
+        "minimum",
+        "deficit"
+      ],
+      "properties": {
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+          }
+        },
+        "resource": {
+          "enum": [
+            "observation",
+            "bytes",
+            "inodes",
+            "quota",
+            "quota-inodes"
+          ]
+        },
+        "health": {
+          "enum": [
+            "healthy",
+            "warning",
+            "unknown",
+            "critical"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "available": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "minimum": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "deficit": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "worker_id",
+        "policy_identity",
+        "observation_identity",
+        "job_identity",
+        "health",
+        "decision",
+        "attempt",
+        "findings",
+        "assessed_at_ms",
+        "observation_expires_at_ms"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/worker-capacity-assessment@1"
+        },
+        "worker_id": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "policy_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "observation_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "job_identity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "health": {
+          "enum": [
+            "healthy",
+            "warning",
+            "unknown",
+            "critical"
+          ]
+        },
+        "decision": {
+          "enum": [
+            "proceed",
+            "hold",
+            "retry-after-recheck"
+          ]
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "findings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/finding"
+          }
+        },
+        "assessed_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        },
+        "observation_expires_at_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9223372036854775807
+        }
+      },
+      "$id": "literate-ai/worker-capacity-assessment@1"
+    },
+    "quota": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "domain",
+        "available_bytes",
+        "available_inodes"
+      ],
+      "properties": {
+        "domain": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+        },
+        "available_bytes": {
+          "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/metric"
+        },
+        "available_inodes": {
+          "$ref": "urn:literate-ai:schema:v1:worker-capacity-contracts#/$defs/metric"
+        }
+      }
+    }
+  }
+}

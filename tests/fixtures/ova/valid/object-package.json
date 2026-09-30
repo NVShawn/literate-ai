@@ -1,0 +1,18 @@
+{
+  "package_id": "obj_demo",
+  "component_id": "sample.compatibility",
+  "source_package_id": "src_demo",
+  "artifacts": [
+    {
+      "path": "main.pyc",
+      "kind": "python-bytecode",
+      "content_digest": "sha256:object"
+    }
+  ],
+  "dependency_packages": ["obj_stage"],
+  "dependency_components": {"ovstage": "obj_stage"},
+  "depending_components": ["sample.factory-stack"],
+  "content_digest": "sha256:object-package",
+  "built_at": "2026-08-02T12:01:00Z",
+  "future_object_package_field": ["retained"]
+}

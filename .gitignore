@@ -1,0 +1,48 @@
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+# Literate AI's own object root. `build/` is setuptools' intermediate tree: the
+# packaging backend writes there regardless of OBJ_DIR, and any file left in it
+# makes the checkout dirty, which the distribution build refuses.
+_build/
+build/
+dist/
+/reports/
+/logs/
+
+# User/session-owned remote worker assignments. Commit only the example schema.
+/literate.test.json
+/literate.workers.json
+/literate.worker-observations.json
+
+# Derived cache by default. Projects may explicitly unignore or force-add BUILD_DIR.
+/generated/
+/.litai-cache-locks/
+.component.*.write.lock
+.literate.project.json.write.lock
+.literate.project.json.write.lock
+
+# pytest-testmon maps are local skip evidence, never Git authority.
+.testmondata
+.testmondata-journal
+.testmondata.identity.json
+
+# Remote-worker dispatch runtime state, written directly under a worker's
+# repo workspace root by ssh_execution.py (content-addressable cache and
+# staged request payloads). Left untracked and ungitignored, these make a
+# worker's tree permanently dirty, which fails wheel_smoke.py's exact
+# clean-revision check on any worker that has ever run remote dispatch.
+/cache/
+/requests/
+/runs/
+
+# Primary sample application sources are generated from OpenSpec at runtime.
+/samples/*/source/
+
+# Agent working-copy junk and local export scratch (never authority).
+/.worktrees/
+/ap-export/
+/.claude/worktrees/
+/.claude/settings.local.json

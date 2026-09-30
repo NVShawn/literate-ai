@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts",
+  "$defs": {
+    "identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "providerArtifactIdentities": {
+      "type": "array",
+      "maxItems": 16384,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v1:content-identity"
+      }
+    },
+    "sourceCacheMembership": {
+      "$id": "urn:literate-ai:schema:v2:standard-source-cache-membership",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "generation_key_identity",
+        "generation",
+        "acceptance_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-source-cache-membership"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation_key_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation": {
+          "$ref": "urn:literate-ai:schema:v3:source-generation-resume-candidate"
+        },
+        "acceptance_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        }
+      }
+    },
+    "buildIntent": {
+      "$id": "urn:literate-ai:schema:v2:standard-component-build-intent",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "source_tree_identity",
+        "source_bundle_identity",
+        "build_request",
+        "provider_artifact_identities"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-component-build-intent"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "source_tree_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "source_bundle_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "build_request": {
+          "$ref": "urn:literate-ai:schema:v2:build-request"
+        },
+        "provider_artifact_identities": {
+          "$ref": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts#/$defs/providerArtifactIdentities"
+        },
+        "native_sdk_input_identities": {
+          "$ref": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts#/$defs/providerArtifactIdentities"
+        },
+        "package_artifact_identities": {
+          "$ref": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts#/$defs/providerArtifactIdentities"
+        }
+      }
+    },
+    "buildAuthorization": {
+      "$id": "urn:literate-ai:schema:v2:standard-build-authorization",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "build_intent_identity",
+        "build_request_identity",
+        "index_identity",
+        "grant"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-build-authorization"
+        },
+        "build_intent_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "build_request_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "index_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "grant": {
+          "$ref": "urn:literate-ai:schema:v2:build-authorization"
+        }
+      }
+    },
+    "buildPlan": {
+      "$id": "urn:literate-ai:schema:v2:standard-component-build-plan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "manifest",
+        "materialization",
+        "request",
+        "provider_artifact_identities"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-component-build-plan"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "manifest": {
+          "$ref": "urn:literate-ai:schema:v2:component-build-manifest"
+        },
+        "materialization": {
+          "$ref": "urn:literate-ai:schema:v2:artifact-materialization-plan"
+        },
+        "request": {
+          "$ref": "urn:literate-ai:schema:v2:composite-build-request"
+        },
+        "provider_artifact_identities": {
+          "$ref": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts#/$defs/providerArtifactIdentities"
+        },
+        "package_artifact_identities": {
+          "$ref": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts#/$defs/providerArtifactIdentities"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:standard-source-cache-membership"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:standard-component-build-intent"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:standard-build-authorization"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:standard-component-build-plan"
+    }
+  ]
+}

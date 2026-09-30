@@ -1,0 +1,38 @@
+schema_version: 2
+component:
+  id: sample.compatibility
+  name: Compatibility Sample
+  kind: component
+  version: 1.0.0
+  summary: Current OVA v2 component shape, with portable metadata.
+  provides: [sample.compatibility]
+openspec:
+  schema_name: spec-driven
+  root: openspec
+  capabilities: [sample-compatibility]
+spec_files: [openspec/specs/sample-compatibility/spec.md]
+skills:
+  - skill_id: component-authoring
+    source: skills/component-authoring.md
+    content_digest: sha256:skill
+model_selector:
+  strategy: stage-capability
+  allow_fallback: true
+  stages:
+    - {stage: api_contracts, required_capabilities: [reasoning, structured-output], preferred_model_groups: [source-analysis]}
+    - {stage: file_plan, required_capabilities: [reasoning, structured-output], preferred_model_groups: [architecture]}
+    - {stage: generate, required_capabilities: [code-generation, structured-output], preferred_model_groups: [implementation]}
+    - {stage: repair, required_capabilities: [code-generation, reasoning, structured-output], preferred_model_groups: [repair]}
+requirements:
+  - id: stage
+    capability: scene.openusd.author
+    purpose: Author one source-grounded scene.
+sample:
+  tier: simple
+  scenarios: [empty-cache fault-in, immutable package publication]
+  learning_goals: [component anatomy, exact source binding]
+acceptance: [The portable entrypoint emits JSON.]
+entrypoints: {portable: main.py}
+future_component_metadata:
+  retained: true
+  labels: [alpha, beta]

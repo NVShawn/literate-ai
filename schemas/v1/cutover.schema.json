@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:cutover-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v1:observation-decision" },
+    { "$ref": "urn:literate-ai:schema:v1:rollback-rehearsal" },
+    { "$ref": "urn:literate-ai:schema:v1:seam-cutover" },
+    { "$ref": "urn:literate-ai:schema:v1:final-cutover-manifest" }
+  ],
+  "$defs": {
+    "observationDecision": {
+      "$id": "urn:literate-ai:schema:v1:observation-decision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disposition", "decided_by", "reason", "evidence_identity", "directive_reference"],
+      "properties": {
+        "disposition": { "enum": ["completed", "user-directed-without-elapsed-window"] },
+        "decided_by": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "evidence_identity": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:content-identity" }, { "type": "null" }] },
+        "directive_reference": { "type": ["string", "null"] }
+      }
+    },
+    "rollbackRehearsal": {
+      "$id": "urn:literate-ai:schema:v1:rollback-rehearsal",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline_state_identity", "migrated_copy_identity", "evidence_identity", "prior_release_restore_verified", "compatibility_reader_verified", "baseline_unchanged", "passed"],
+      "properties": {
+        "baseline_state_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "migrated_copy_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "evidence_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "prior_release_restore_verified": { "type": "boolean" },
+        "compatibility_reader_verified": { "type": "boolean" },
+        "baseline_unchanged": { "type": "boolean" },
+        "passed": { "type": "boolean" }
+      }
+    },
+    "seamCutover": {
+      "$id": "urn:literate-ai:schema:v1:seam-cutover",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["seam", "comparison_evidence_identity", "framework_write_authority", "downstream_legacy_write_removed", "compatibility_read_retained", "passed"],
+      "properties": {
+        "seam": { "enum": ["source-identity", "intelligence", "composition", "generation", "validation", "security-build", "packaging-linking", "publication", "settings"] },
+        "comparison_evidence_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "framework_write_authority": { "type": "boolean" },
+        "downstream_legacy_write_removed": { "type": "boolean" },
+        "compatibility_read_retained": { "type": "boolean" },
+        "passed": { "type": "boolean" }
+      }
+    },
+    "finalCutoverManifest": {
+      "$id": "urn:literate-ai:schema:v1:final-cutover-manifest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "framework_release_identity", "compatible_release_identities", "seams", "compatibility_reader_identity", "compatibility_reader_support_term", "dependency_audit_identity", "duplicate_general_lifecycle_implementation_removed", "rollback", "observation", "ready", "blockers", "warnings"],
+      "properties": {
+        "schema": { "const": "literate-ai-final-cutover@1" },
+        "framework_release_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "compatible_release_identities": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } },
+        "seams": { "type": "array", "minItems": 9, "maxItems": 9, "items": { "$ref": "urn:literate-ai:schema:v1:seam-cutover" } },
+        "compatibility_reader_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "compatibility_reader_support_term": { "type": "string", "minLength": 1 },
+        "dependency_audit_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "duplicate_general_lifecycle_implementation_removed": { "type": "boolean" },
+        "rollback": { "$ref": "urn:literate-ai:schema:v1:rollback-rehearsal" },
+        "observation": { "$ref": "urn:literate-ai:schema:v1:observation-decision" },
+        "ready": { "type": "boolean" },
+        "blockers": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "warnings": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      }
+    }
+  }
+}

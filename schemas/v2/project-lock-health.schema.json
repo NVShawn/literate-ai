@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:project-lock-health",
+  "description": "Current verifier lock observations. Nested lock-command reports are retained verbatim; their currentness and diagnostics remain owned by the shared lock operations. Empty Component observations after a repository failure do not imply Component health.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_id",
+    "gate",
+    "repository",
+    "components"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:project-lock-health"
+    },
+    "project_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gate",
+        "state",
+        "detail"
+      ],
+      "properties": {
+        "gate": {
+          "const": "locks"
+        },
+        "state": {
+          "enum": [
+            "pass",
+            "fail",
+            "skipped"
+          ]
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "repository": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "component",
+          "state",
+          "report",
+          "error"
+        ],
+        "properties": {
+          "component": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "enum": [
+              "current",
+              "not-current",
+              "error"
+            ]
+          },
+          "report": {
+            "type": [
+              "object",
+              "null"
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "code",
+                  "message"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "error"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "report": {
+                  "type": "null"
+                },
+                "error": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "code",
+                    "message"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "report": {
+                  "type": "object",
+                  "required": [
+                    "schema",
+                    "current"
+                  ],
+                  "description": "An open retained command report; these required discriminators do not remove producer-owned diagnostics.",
+                  "additionalProperties": true,
+                  "patternProperties": {
+                    "^schema$": {
+                      "enum": [
+                        "literate-ai/component-lock-command@1",
+                        "literate-ai/repository-lock-command@1"
+                      ]
+                    },
+                    "^current$": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "error": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "current"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "report": {
+                  "patternProperties": {
+                    "^current$": {
+                      "const": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "not-current"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "report": {
+                  "patternProperties": {
+                    "^current$": {
+                      "const": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

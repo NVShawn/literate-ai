@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-post-source-evidence-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:standard-component-build-evidence"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-generated-test-case-evidence"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-entrypoint-generated-test-evidence"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-generated-test-execution-evidence"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-component-execution-evidence"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-entrypoint-execution-evidence"},
+    {"$ref": "urn:literate-ai:schema:v2:standard-component-acceptance-evidence"}
+  ],
+  "$defs": {
+    "standard_component_build_evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-component-build-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "build_plan_identity",
+        "source_tree_identity",
+        "source_custody_identity",
+        "source_sbom",
+        "resolved_sbom",
+        "exports",
+        "resolved_sbom_export_identities",
+        "build_observation_identity",
+        "artifact_custody_identity",
+        "outcome"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:standard-component-build-evidence"},
+        "component_revision": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_custody_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_sbom": {"$ref": "urn:literate-ai:schema:v2:cyclonedx-bom-binding"},
+        "resolved_sbom": {"$ref": "urn:literate-ai:schema:v2:cyclonedx-bom-binding"},
+        "exports": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v2:artifact-export"}
+        },
+        "resolved_sbom_export_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "build_observation_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "artifact_custody_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "outcome": {"const": "passed"}
+      }
+    },
+    "standard_generated_test_case_evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-generated-test-case-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "case_id", "case_identity", "observation_identity", "outcome"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:standard-generated-test-case-evidence"},
+        "case_id": {"type": "string", "minLength": 1, "maxLength": 255},
+        "case_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "observation_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "outcome": {"const": "passed"}
+      }
+    },
+    "standard_generated_test_execution_evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-generated-test-execution-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "generated_test_suite_identity",
+        "build_evidence_identity",
+        "export_identities",
+        "runner_identity",
+        "test_custody_identity",
+        "selected_case_identities",
+        "cases",
+        "selected_count",
+        "executed_count",
+        "passed_count",
+        "outcome"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:standard-generated-test-execution-evidence"},
+        "component_revision": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generated_test_suite_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "export_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "runner_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "test_custody_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "selected_case_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v2:standard-generated-test-case-evidence"}
+        },
+        "selected_count": {"type": "integer", "minimum": 1, "maximum": 16384},
+        "executed_count": {"type": "integer", "minimum": 1, "maximum": 16384},
+        "passed_count": {"type": "integer", "minimum": 1, "maximum": 16384},
+        "entrypoint_evidence": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v2:standard-entrypoint-generated-test-evidence"}
+        },
+        "outcome": {"const": "passed"}
+      }
+    },
+    "standard_entrypoint_generated_test_evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-entrypoint-generated-test-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "entrypoint_identity", "deployment_unit", "export_identity", "command_identity", "runner_identity", "process_observation_identity", "test_custody_identity", "selected_case_identities", "cases", "selected_count", "executed_count", "passed_count", "outcome"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:standard-entrypoint-generated-test-evidence"},
+        "entrypoint_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "deployment_unit": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "export_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "command_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "runner_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "process_observation_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "test_custody_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "selected_case_identities": {"type": "array", "minItems": 1, "maxItems": 256, "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}},
+        "cases": {"type": "array", "minItems": 1, "maxItems": 256, "items": {"$ref": "urn:literate-ai:schema:v2:standard-generated-test-case-evidence"}},
+        "selected_count": {"type": "integer", "minimum": 1, "maximum": 256},
+        "executed_count": {"type": "integer", "minimum": 1, "maximum": 256},
+        "passed_count": {"type": "integer", "minimum": 1, "maximum": 256},
+        "outcome": {"const": "passed"}
+      }
+    },
+    "standard_component_execution_evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-component-execution-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "build_evidence_identity",
+        "export_identities",
+        "root_export_identity",
+        "execution_contract_identity",
+        "runtime_identity",
+        "artifact_custody_identity",
+        "observation_identity",
+        "stdout_identity",
+        "stderr_identity",
+        "exit_code",
+        "outcome"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:standard-component-execution-evidence"},
+        "component_revision": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "export_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "root_export_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "execution_contract_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "runtime_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "artifact_custody_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "observation_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "stdout_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "stderr_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "exit_code": {"const": 0},
+        "entrypoint_evidence": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16384,
+          "items": {"$ref": "urn:literate-ai:schema:v2:standard-entrypoint-execution-evidence"}
+        },
+        "outcome": {"const": "passed"}
+      }
+    },
+    "standard_entrypoint_execution_evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-entrypoint-execution-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "entrypoint_identity", "deployment_unit", "export_identity", "execution_contract_identity", "runtime_identity", "observation_identity", "stdout_identity", "stderr_identity", "exit_code", "outcome"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:standard-entrypoint-execution-evidence"},
+        "entrypoint_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "deployment_unit": {"type": "string", "minLength": 1, "maxLength": 4096},
+        "export_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "execution_contract_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "runtime_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "observation_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "stdout_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "stderr_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "exit_code": {"const": 0},
+        "outcome": {"const": "passed"}
+      }
+    },
+    "standard_component_acceptance_evidence": {
+      "$id": "urn:literate-ai:schema:v2:standard-component-acceptance-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "source_generation_identity",
+        "generated_test_suite_identity",
+        "build",
+        "generated_tests",
+        "execution",
+        "acceptance_policy_identity",
+        "outcome"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:standard-component-acceptance-evidence"},
+        "component_revision": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_generation_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "generated_test_suite_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build": {"$ref": "urn:literate-ai:schema:v2:standard-component-build-evidence"},
+        "generated_tests": {"$ref": "urn:literate-ai:schema:v2:standard-generated-test-execution-evidence"},
+        "execution": {"$ref": "urn:literate-ai:schema:v2:standard-component-execution-evidence"},
+        "acceptance_policy_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "outcome": {"const": "passed"}
+      }
+    }
+  }
+}

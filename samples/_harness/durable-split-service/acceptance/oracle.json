@@ -1,0 +1,14 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:382eb1b08386bab6a3279bcf1bf9504af92b257143951bd3603f16fd38b770e6",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {"cache_access": false, "request": "capabilities", "role": "frontend", "transport": "http", "upstream_access": false}
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {"cache_access": false, "request": "describe", "role": "frontend", "transport": "http", "upstream_access": false}
+    }
+  ]
+}

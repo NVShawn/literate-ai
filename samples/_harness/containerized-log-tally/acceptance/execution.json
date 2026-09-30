@@ -1,0 +1,62 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.full-stack-runs-end-to-end",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "access_log": [
+            "10.0.0.1 - - [22/Aug/2026:10:00:00 +0000] \"GET /a HTTP/1.1\" 200 100",
+            "10.0.0.2 - - [22/Aug/2026:10:00:01 +0000] \"GET /b HTTP/1.1\" 200 50",
+            "10.0.0.3 - - [22/Aug/2026:10:00:02 +0000] \"POST /a HTTP/1.1\" 404 -",
+            "10.0.0.4 - - [22/Aug/2026:10:00:03 +0000] \"GET /c HTTP/1.1\" 301 300"
+          ],
+          "top_count": 2
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "access_log": [
+            "10.1.0.1 - - [22/Aug/2026:11:00:00 +0000] \"DELETE /z HTTP/1.1\" 500 7",
+            "not a log line at all",
+            "10.1.0.2 - - [22/Aug/2026:11:00:02 +0000] \"GET /z HTTP/1.1\" 200 -"
+          ],
+          "top_count": 5
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "total_lines": "integer",
+    "parsed_lines": "integer",
+    "malformed_lines": "integer",
+    "status_2xx": "integer",
+    "status_3xx": "integer",
+    "status_4xx": "integer",
+    "status_5xx": "integer",
+    "bytes_total": "integer",
+    "top_paths": [
+      {
+        "path": "string",
+        "hits": "integer"
+      }
+    ],
+    "report_version": "string"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": [],
+    "packaging": "flavor://literate-ai/package-pip",
+    "deployment": [
+      "flavor://literate-ai/container-python",
+      "flavor://literate-ai/deploy-docker"
+    ]
+  },
+  "dependencies": []
+}

@@ -1,0 +1,50 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:099136c9fbbea02cd520dbc8fdf9173bd13aeb73e9010a45c83c7c95a992d4b7",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "total_lines": 4,
+        "parsed_lines": 4,
+        "malformed_lines": 0,
+        "status_2xx": 2,
+        "status_3xx": 1,
+        "status_4xx": 1,
+        "status_5xx": 0,
+        "bytes_total": 450,
+        "top_paths": [
+          {
+            "path": "/a",
+            "hits": 2
+          },
+          {
+            "path": "/b",
+            "hits": 1
+          }
+        ],
+        "report_version": "1.0"
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "total_lines": 3,
+        "parsed_lines": 2,
+        "malformed_lines": 1,
+        "status_2xx": 1,
+        "status_3xx": 0,
+        "status_4xx": 0,
+        "status_5xx": 1,
+        "bytes_total": 7,
+        "top_paths": [
+          {
+            "path": "/z",
+            "hits": 2
+          }
+        ],
+        "report_version": "1.0"
+      }
+    }
+  ]
+}

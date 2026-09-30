@@ -1,0 +1,63 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "jobs": [
+            {
+              "id": "api",
+              "text": "Portable processing works"
+            },
+            {
+              "id": "worker",
+              "text": "Across repositories"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "jobs": [
+            {
+              "id": "one",
+              "text": "One"
+            },
+            {
+              "id": "two",
+              "text": "Two words"
+            },
+            {
+              "id": "punctuation",
+              "text": "Punctuation stays."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "completed": "integer",
+    "results": [
+      {
+        "characters": "integer",
+        "digest": "sha256-prefix-12",
+        "id": "string",
+        "words": "integer"
+      }
+    ],
+    "total_characters": "integer"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

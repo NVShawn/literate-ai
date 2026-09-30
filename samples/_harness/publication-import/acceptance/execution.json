@@ -1,0 +1,46 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "files": {
+            "README.txt": "portable release\n",
+            "config.json": "{\"mode\":\"offline\"}\n"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "files": {
+            "notes/empty.txt": "",
+            "notes/release.txt": "portable v2\nnext\n"
+          }
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "file_count": "integer",
+    "files": [
+      {
+        "digest": "sha256-hex",
+        "path": "string",
+        "size": "integer"
+      }
+    ],
+    "release_digest": "sha256-hex"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": ["flavor://literate-ai/lang-javascript"]
+  },
+  "dependencies": []
+}

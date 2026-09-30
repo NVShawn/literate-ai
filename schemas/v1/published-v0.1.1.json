@@ -1,0 +1,27 @@
+{
+  "schema": "literate-ai/published-schema-digests@1",
+  "release": "0.1.1",
+  "source_tag": "v0.1.1",
+  "source_commit": "465260cb450dc1c386e257f93ff0277a28f8666b",
+  "algorithm": "sha256",
+  "catalog_index": {"path":"index.json","bytes":5499,"digest":"11addba086c94d85370692d1d7817d4d055f48bc55a75fdeb98e559e868297b8"},
+  "files": [
+    {"path":"application-generation.schema.json","bytes":3220,"digest":"b3a7d2caaae4e9a9fa0b14366f1e8b4e7645323d0b85b8974339b3b51ba4153b"},
+    {"path":"bundles.schema.json","bytes":2544,"digest":"729b8ad7f762fe72844eb79ddb13284250b1e9c344d7487ee8f042d1cfed2af2"},
+    {"path":"capabilities.schema.json","bytes":2929,"digest":"dccb00ffe974e5f2c1a717359317401826ac821f07ad72f6bd00db7d605024e0"},
+    {"path":"common.schema.json","bytes":1134,"digest":"7f03f36cc5611ee0c994969e4d8ce81f582e2c3c25ef9d88221f24041c6fb44e"},
+    {"path":"components.schema.json","bytes":4231,"digest":"0e65c0b0944e1bd20fd008d3edee4527ae4c8cdd5939221fe2f73ec3d2529f52"},
+    {"path":"cutover.schema.json","bytes":4551,"digest":"394397ab4a9e685de8d1a754fabb3fce66115aac11abc4fe5f71afd3f9a9885d"},
+    {"path":"flavors.schema.json","bytes":8555,"digest":"ac1bd4b7dab4acd4252f9f9409f65a7f5eca82d83e3da089be6669ff1d5be6e5"},
+    {"path":"identity.schema.json","bytes":3157,"digest":"ddac4d9f49bb4e408bc76a17a718115a86d8515783654b856eeb50fd82fd32c9"},
+    {"path":"intelligence.schema.json","bytes":5848,"digest":"73f164e7a5c96d4ab252b7fcab598ff965912e3320b373426ab8859d788d08a1"},
+    {"path":"model-routing.schema.json","bytes":5724,"digest":"50bdafaf96369175fa4818daae95e736e7bdae7059f620c2666bf3cb4f00c3c7"},
+    {"path":"publication.schema.json","bytes":2541,"digest":"65cf944b8cd8751244b5b88b0037dec4d70f3fd21648c221bb7656b79d918f0b"},
+    {"path":"security.schema.json","bytes":9931,"digest":"f1fa7b90942f80aaa415e331b0698cee28f726efd320f17b2526edad710cf4e7"},
+    {"path":"settings.schema.json","bytes":2883,"digest":"3b76dae005c20c2cffc11132e580a24571a5e1ba2e49172516fcb0da0ece70d7"},
+    {"path":"source-to-specification.schema.json","bytes":15737,"digest":"35f41432900a6adc87a4efcc64c9c89df794e19b85e0f2ff53cb83fd0b144305"},
+    {"path":"source.schema.json","bytes":3504,"digest":"b72607e5b19771f371510e1add5d0837af019dbc743ab7fd43ece84abbafdfcd"},
+    {"path":"specifications.schema.json","bytes":2144,"digest":"d859013437e5f6bf06b6b2310c8e6f2751b29193608f3432cb65eff44868255c"},
+    {"path":"workflows.schema.json","bytes":5041,"digest":"fb266abcfbf8e46bc4224a5cce5805c744e61dfd9f0f7dbda4a54d24ee30091f"}
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.expose-the-manifest-calculation",
+  "scenario_id": "expose-the-manifest-calculation.the-compiled-entrypoint-runs-on-the-host",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "warehouse": " North Hub / West ",
+          "discount_basis_points": 750,
+          "orders": [
+            {"sku": " A-1 ", "quantity": 2, "unit_cents": 125},
+            {"sku": "B-2", "quantity": 3, "unit_cents": 80},
+            {"sku": "A-1", "quantity": 1, "unit_cents": 130}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "warehouse": "Depot_42",
+          "discount_basis_points": 333,
+          "orders": [
+            {"sku": "Z-9", "quantity": 2, "unit_cents": 99},
+            {"sku": "A-0", "quantity": 2, "unit_cents": 101}
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "unicode-ordering",
+      "arguments": [
+        {
+          "warehouse": "Unicode Depot",
+          "discount_basis_points": 0,
+          "orders": [
+            {"sku": "😀", "quantity": 2, "unit_cents": 5},
+            {"sku": "\uE000", "quantity": 2, "unit_cents": 7}
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "warehouse": "string",
+    "manifest_id": "string",
+    "dominant_sku": "string",
+    "line_count": "integer",
+    "gross_cents": "integer",
+    "discount_cents": "integer",
+    "net_cents": "integer",
+    "lines": [
+      {"sku": "string", "quantity": "integer", "subtotal_cents": "integer"}
+    ]
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": [
+      "flavor://literate-ai/lang-python",
+      "flavor://literate-ai/lang-cpp",
+      "flavor://literate-ai/lang-rust",
+      "flavor://literate-ai/lang-javascript"
+    ],
+    "build.system": "flavor://literate-ai/build-bazel"
+  },
+  "dependencies": []
+}

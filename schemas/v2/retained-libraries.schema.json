@@ -1,0 +1,491 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:retained-library-contracts",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-library-contracts#/$defs/export_set"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-library-contracts#/$defs/binding"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:retained-library-contracts#/$defs/cargoWorkspacePlan"
+    }
+  ],
+  "$defs": {
+    "export_set": {
+      "$id": "literate-ai/retained-library-export-set@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "graph",
+        "link_plan_identity",
+        "libraries"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-library-export-set@1"
+        },
+        "graph": {
+          "$ref": "urn:literate-ai:schema:v2:artifact-build-graph"
+        },
+        "link_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "libraries": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/library_product"
+          }
+        }
+      }
+    },
+    "binding": {
+      "$id": "literate-ai/retained-library-binding@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "importer_project_id",
+        "source_store_id",
+        "exports",
+        "qualification_archive",
+        "workspace_plan",
+        "qualification_identity",
+        "run_identity",
+        "verifier_identity",
+        "policy_identity",
+        "destinations"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-library-binding@1"
+        },
+        "importer_project_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "source_store_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+        },
+        "exports": {
+          "$ref": "urn:literate-ai:schema:v2:retained-library-contracts#/$defs/export_set"
+        },
+        "qualification_archive": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "properties": {
+                "size": {
+                  "minimum": 1
+                },
+                "media_type": {
+                  "const": "application/zip"
+                }
+              }
+            }
+          ]
+        },
+        "workspace_plan": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "properties": {
+                "size": {
+                  "minimum": 1
+                },
+                "media_type": {
+                  "const": "application/json"
+                }
+              }
+            }
+          ]
+        },
+        "qualification_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "run_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "verifier_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "policy_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "destinations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "export_identity",
+              "path"
+            ],
+            "properties": {
+              "export_identity": {
+                "$ref": "urn:literate-ai:schema:v1:content-identity"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              }
+            }
+          },
+          "description": "Domain validation additionally requires every graph export in identity order and portable, nonoverlapping paths."
+        }
+      },
+      "description": "Reviewed importer intent. Parsing is structural validation, never consumer admission."
+    },
+    "cargoWorkspacePlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "workspace_root",
+        "graph",
+        "manifests",
+        "cargo_identity",
+        "rustc_identity",
+        "target",
+        "features",
+        "all_features",
+        "no_default_features",
+        "gates"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-cargo-workspace-plan@1"
+        },
+        "workspace_root": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "graph": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "packages",
+            "dependencies",
+            "members",
+            "default_members",
+            "root_package",
+            "output_directory"
+          ],
+          "properties": {
+            "packages": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4096,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "root",
+                  "name",
+                  "version",
+                  "features",
+                  "targets"
+                ],
+                "properties": {
+                  "root": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "version": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "features": {
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 4096,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "targets": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4096,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": [
+                        "name",
+                        "kinds",
+                        "crate_types",
+                        "source",
+                        "edition",
+                        "test",
+                        "doctest",
+                        "required_features"
+                      ],
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "kinds": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 4096,
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "crate_types": {
+                          "type": "array",
+                          "minItems": 1,
+                          "maxItems": 4096,
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        },
+                        "source": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "edition": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "test": {
+                          "type": "boolean"
+                        },
+                        "doctest": {
+                          "type": "boolean"
+                        },
+                        "required_features": {
+                          "type": "array",
+                          "minItems": 0,
+                          "maxItems": 4096,
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "dependencies": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 4096,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "consumer",
+                  "provider",
+                  "alias",
+                  "resolved_name",
+                  "kind",
+                  "target",
+                  "features",
+                  "uses_default_features",
+                  "optional",
+                  "version_requirement",
+                  "resolved"
+                ],
+                "properties": {
+                  "consumer": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "provider": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "alias": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "resolved_name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "enum": [
+                      null,
+                      "dev",
+                      "build"
+                    ]
+                  },
+                  "target": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "features": {
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 4096,
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  },
+                  "uses_default_features": {
+                    "type": "boolean"
+                  },
+                  "optional": {
+                    "type": "boolean"
+                  },
+                  "version_requirement": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "resolved": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "members": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 4096,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "default_members": {
+              "type": "array",
+              "minItems": 0,
+              "maxItems": 4096,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "root_package": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "output_directory": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "manifests": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "before",
+              "after"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "before": {
+                "anyOf": [
+                  {
+                    "$ref": "urn:literate-ai:schema:v1:blob-ref"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "after": {
+                "anyOf": [
+                  {
+                    "$ref": "urn:literate-ai:schema:v1:blob-ref"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "cargo_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "rustc_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        },
+        "features": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 4096,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        "all_features": {
+          "type": "boolean"
+        },
+        "no_default_features": {
+          "type": "boolean"
+        },
+        "gates": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:repository-source-contracts#/$defs/command"
+          }
+        }
+      },
+      "$id": "literate-ai/retained-cargo-workspace-plan@1"
+    }
+  }
+}

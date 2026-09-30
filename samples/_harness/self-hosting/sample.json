@@ -1,0 +1,37 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "660e130e44ed3fa23e466f2d87d39aaa8d3593eb1b4d0d51a183bb47a09433f9",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:dad3b2c21e66ec9ecc7cef11b6e50b3335ed31c620d65b203cb3e04ae8e35aaa",
+  "conformance_proofs": [
+    {
+      "identity": {
+        "algorithm": "sha256",
+        "digest": "e7ab080f6d1ed660b1e8ff4bbc6aad3dc8297746c5f0b724f9d9e2b21604677e",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      },
+      "kind": "conformance-proof",
+      "schema": "urn:literate-ai:schema:v1:content-reference",
+      "uri": "conformance/snapshot-replication.json"
+    }
+  ],
+  "execution_interface_identity": "sha256:0a718b9c4db044ce6cde3f0e04eba078bd7f6ba0302528ad419561ec93293ec0",
+  "expected_assertions": [
+    "generated-readiness-artifact-executes",
+    "framework-version-compatibility-is-evaluated",
+    "packaged-skill-readiness-is-evaluated"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "self-hosting",
+  "scenario": "framework-readiness",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:7b35355ca2acae2d83cf3aa7ac61d06f9eafa1c3358483f9e99e5ca3caf60081"
+}

@@ -1,0 +1,26 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "28da92086897725cc54c2b1fac790eaa151c68579a4d0d36da43652bb4794f78",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:8ca8f1ac8e3d4b055c243057f4a5e74bfb4763b63388e80d1bde134cbc9cc485",
+  "execution_interface_identity": "sha256:f2f3f9d2e4560b25574035cf92d7ff6e28aec7325036516317cd482893c0b903",
+  "expected_assertions": [
+    "publication-is-idempotent",
+    "import-verifies-identical-bytes"
+  ],
+  "expected_failures": [
+    "overlapping publication target or tampered blob"
+  ],
+  "proof_level": "executed",
+  "sample_id": "publication-import",
+  "scenario": "publication",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:1145244278210316cca62eee1f750a8e859a1b44d1ff8439e67e5d46ede42722"
+}

@@ -1,0 +1,646 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:executable-component-contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/publicInterfaceContract" },
+    { "$ref": "#/$defs/componentInterfaceBinding" },
+    { "$ref": "#/$defs/executableComponentEdge" },
+    { "$ref": "#/$defs/nodeTargetFlavorSelection" },
+    { "$ref": "#/$defs/authoredBinaryAsset" },
+    { "$ref": "#/$defs/candidateReplacementPolicy" },
+    { "$ref": "#/$defs/lifecycleDriverTrustBinding" },
+    { "$ref": "#/$defs/componentInvalidationDecision" },
+    { "$ref": "#/$defs/componentInvalidationTable" }
+  ],
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "algorithm", "digest"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v1:content-identity" },
+        "algorithm": { "const": "sha256" },
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "blobRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "digest", "size", "media_type"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "size": { "type": "integer", "minimum": 0 },
+        "media_type": { "type": "string", "minLength": 1 }
+      }
+    },
+    "portableName": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"
+    },
+    "text": { "type": "string", "minLength": 1, "maxLength": 4096 },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "compatibilityPromise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy", "compatible_versions", "statement"],
+      "properties": {
+        "policy": {
+          "enum": ["semver-stable", "explicit-migration", "fixed-revision"]
+        },
+        "compatible_versions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "statement": { "$ref": "#/$defs/text" }
+      }
+    },
+    "exportedType": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "contract"],
+      "properties": {
+        "name": { "$ref": "#/$defs/portableName" },
+        "contract": { "type": "string", "minLength": 1, "maxLength": 16384 }
+      }
+    },
+    "exportedProtocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "operations"],
+      "properties": {
+        "name": { "$ref": "#/$defs/portableName" },
+        "operations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/text" }
+        }
+      }
+    },
+    "interfaceError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "condition", "caller_obligation"],
+      "properties": {
+        "code": { "$ref": "#/$defs/portableName" },
+        "condition": { "$ref": "#/$defs/text" },
+        "caller_obligation": { "$ref": "#/$defs/text" }
+      }
+    },
+    "intentionalInterfaceReExport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability",
+        "version",
+        "interface_identity",
+        "symbols"
+      ],
+      "properties": {
+        "capability": { "$ref": "#/$defs/portableName" },
+        "version": { "$ref": "#/$defs/semver" },
+        "interface_identity": { "$ref": "#/$defs/identity" },
+        "symbols": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/portableName" }
+        }
+      }
+    },
+    "publicInterfaceContract": {
+      "$id": "urn:literate-ai:schema:v2:public-interface-contract",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "capability",
+        "version",
+        "exported_types",
+        "exported_protocols",
+        "preconditions",
+        "postconditions",
+        "errors",
+        "compatibility",
+        "re_exports"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:public-interface-contract"
+        },
+        "capability": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "version": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/semver"
+        },
+        "exported_types": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/exportedType"
+          }
+        },
+        "exported_protocols": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/exportedProtocol"
+          }
+        },
+        "preconditions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/text"
+          }
+        },
+        "postconditions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/text"
+          }
+        },
+        "errors": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/interfaceError"
+          }
+        },
+        "compatibility": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/compatibilityPromise"
+        },
+        "re_exports": {
+          "type": "array",
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/intentionalInterfaceReExport"
+          }
+        }
+      },
+      "anyOf": [
+        { "properties": { "exported_types": { "minItems": 1 } } },
+        { "properties": { "exported_protocols": { "minItems": 1 } } },
+        { "properties": { "re_exports": { "minItems": 1 } } }
+      ]
+    },
+    "componentInterfaceBinding": {
+      "$id": "urn:literate-ai:schema:v2:component-interface-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "capability",
+        "interface_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:component-interface-binding"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "capability": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "interface_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        }
+      }
+    },
+    "executableComponentEdge": {
+      "$id": "urn:literate-ai:schema:v2:executable-component-edge",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "semantics_version",
+        "consumer_revision",
+        "provider_revision",
+        "requirement_id",
+        "capability",
+        "kind",
+        "public_interface_identity",
+        "optional"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:executable-component-edge"
+        },
+        "semantics_version": {
+          "const": "executable-component-edge-semantics@1"
+        },
+        "consumer_revision": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "provider_revision": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "requirement_id": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "capability": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "kind": {
+          "enum": [
+            "generation",
+            "build",
+            "runtime",
+            "validation",
+            "toolchain",
+            "packaging",
+            "deployment"
+          ]
+        },
+        "public_interface_identity": {
+          "oneOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+            },
+            { "type": "null" }
+          ]
+        },
+        "optional": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "kind": { "const": "generation" } },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "public_interface_identity": {
+                "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "public_interface_identity": { "type": "null" }
+            }
+          }
+        }
+      ]
+    },
+    "flavorSlot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot_id",
+        "axis",
+        "cardinality",
+        "capability_contract",
+        "minimum",
+        "maximum"
+      ],
+      "properties": {
+        "slot_id": { "type": "string", "minLength": 1 },
+        "axis": {
+          "enum": [
+            "platform.os",
+            "platform.architecture",
+            "accelerator",
+            "implementation.language-ecosystem",
+            "implementation.ui-framework",
+            "build.system",
+            "toolchain",
+            "packaging",
+            "deployment"
+          ]
+        },
+        "cardinality": {
+          "enum": ["exactly-one", "zero-or-one", "one-or-more", "bounded"]
+        },
+        "capability_contract": { "type": "string", "minLength": 1 },
+        "minimum": { "type": ["integer", "null"], "minimum": 0 },
+        "maximum": { "type": ["integer", "null"], "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "cardinality": { "const": "bounded" } },
+            "required": ["cardinality"]
+          },
+          "then": {
+            "properties": {
+              "minimum": { "type": "integer", "minimum": 0 },
+              "maximum": { "type": "integer", "minimum": 0 }
+            }
+          },
+          "else": {
+            "properties": {
+              "minimum": { "type": "null" },
+              "maximum": { "type": "null" }
+            }
+          }
+        }
+      ]
+    },
+    "selectedNodeFlavor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "flavor_revision"],
+      "properties": {
+        "value": { "type": "string", "minLength": 1 },
+        "flavor_revision": { "$ref": "#/$defs/identity" }
+      }
+    },
+    "nodeFlavorSlotResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot", "selected"],
+      "properties": {
+        "slot": { "$ref": "#/$defs/flavorSlot" },
+        "selected": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/selectedNodeFlavor" }
+        }
+      }
+    },
+    "nodeTargetFlavorSelection": {
+      "$id": "urn:literate-ai:schema:v2:node-target-flavor-selection",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "target_name",
+        "target_profile_identity",
+        "selection_policy_identity",
+        "slots"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:node-target-flavor-selection"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "target_name": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "target_profile_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "selection_policy_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "slots": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/nodeFlavorSlotResolution"
+          }
+        }
+      }
+    },
+    "authoredBinaryAsset": {
+      "$id": "urn:literate-ai:schema:v2:authored-binary-asset",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "asset_id",
+        "path",
+        "role",
+        "target_identity",
+        "blob",
+        "authorization_identity",
+        "assembly_mode",
+        "model_writable"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:authored-binary-asset" },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "asset_id": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*(?:^|/)(?:\\.{1,2})(?:/|$))(?!.*\\\\).+$"
+        },
+        "role": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "target_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "blob": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/blobRef"
+        },
+        "authorization_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "assembly_mode": { "const": "authored-immutable-overlay" },
+        "model_writable": { "const": false }
+      }
+    },
+    "candidateReplacementPolicy": {
+      "$id": "urn:literate-ai:schema:v2:candidate-replacement-policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "maximum_repairs",
+        "replacement_scope",
+        "workspace",
+        "authored_assets",
+        "failed_candidates"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:candidate-replacement-policy"
+        },
+        "maximum_repairs": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "replacement_scope": { "const": "complete-tree" },
+        "workspace": { "const": "fresh-empty" },
+        "authored_assets": { "const": "authored-immutable-overlay" },
+        "failed_candidates": { "const": "external-evidence-only" }
+      }
+    },
+    "lifecycleDriverTrustBinding": {
+      "$id": "urn:literate-ai:schema:v2:lifecycle-driver-trust-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "trust",
+        "driver_identity",
+        "policy_identity",
+        "framework_distribution_identity",
+        "project_authorization_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:lifecycle-driver-trust-binding"
+        },
+        "trust": { "enum": ["standard", "external"] },
+        "driver_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "policy_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "framework_distribution_identity": {
+          "oneOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+            },
+            { "type": "null" }
+          ]
+        },
+        "project_authorization_identity": {
+          "oneOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+            },
+            { "type": "null" }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "trust": { "const": "standard" } },
+            "required": ["trust"]
+          },
+          "then": {
+            "properties": {
+              "framework_distribution_identity": {
+                "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+              },
+              "project_authorization_identity": { "type": "null" }
+            }
+          },
+          "else": {
+            "properties": {
+              "framework_distribution_identity": { "type": "null" },
+              "project_authorization_identity": {
+                "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "identityArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/identity" }
+    },
+    "componentInvalidationDecision": {
+      "$id": "urn:literate-ai:schema:v2:component-invalidation-decision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "case_id",
+        "changed_component",
+        "surface",
+        "regenerate",
+        "rebuild",
+        "retest"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:component-invalidation-decision"
+        },
+        "case_id": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/portableName"
+        },
+        "changed_component": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "surface": {
+          "enum": [
+            "local-authority",
+            "target-or-flavor",
+            "public-interface",
+            "source-replacement",
+            "authored-asset"
+          ]
+        },
+        "regenerate": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identityArray"
+        },
+        "rebuild": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identityArray"
+            },
+            { "minItems": 1 }
+          ]
+        },
+        "retest": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identityArray"
+            },
+            { "minItems": 1 }
+          ]
+        }
+      }
+    },
+    "componentInvalidationTable": {
+      "$id": "urn:literate-ai:schema:v2:component-invalidation-table",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_graph_identity",
+        "component_revisions",
+        "decisions"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:component-invalidation-table"
+        },
+        "component_graph_identity": {
+          "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identity"
+        },
+        "component_revisions": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:executable-component-contracts#/$defs/identityArray"
+            },
+            { "minItems": 1 }
+          ]
+        },
+        "decisions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:component-invalidation-decision"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v1:inverse-evidence-partition-manifest",
+  "title": "Inverse evidence partition manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "source_snapshot_identity",
+    "collector_identity",
+    "items",
+    "excluded_directories"
+  ],
+  "properties": {
+    "schema": { "const": "urn:literate-ai:schema:v1:inverse-evidence-partition-manifest" },
+    "source_snapshot_identity": { "$ref": "#/$defs/identity" },
+    "collector_identity": { "$ref": "#/$defs/identity" },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 65536,
+      "items": { "$ref": "urn:literate-ai:schema:v1:inverse-evidence-partition-item" }
+    },
+    "excluded_directories": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "item": {
+      "$id": "urn:literate-ai:schema:v1:inverse-evidence-partition-item",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "source_content_identity",
+        "source_byte_count",
+        "language",
+        "classification",
+        "disposition",
+        "evidence_ids",
+        "admitted_byte_count",
+        "partition_ordinal",
+        "duplicate_of"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "source_content_identity": { "$ref": "urn:literate-ai:schema:v1:inverse-evidence-partition-manifest#/$defs/identity" },
+        "source_byte_count": { "type": "integer", "minimum": 0 },
+        "language": { "type": ["string", "null"], "minLength": 1 },
+        "classification": { "type": "string", "minLength": 1 },
+        "disposition": {
+          "enum": [
+            "full",
+            "sliced",
+            "empty",
+            "sensitive-excluded",
+            "unsupported",
+            "duplicate",
+            "budget-partitioned",
+            "blocking-omitted"
+          ]
+        },
+        "evidence_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "admitted_byte_count": { "type": "integer", "minimum": 0 },
+        "partition_ordinal": { "type": ["integer", "null"], "minimum": 0 },
+        "duplicate_of": { "type": ["string", "null"], "minLength": 1 }
+      }
+    }
+  }
+}

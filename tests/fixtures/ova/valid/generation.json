@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "transaction_id": "gen_demo",
+  "parent_transaction_id": null,
+  "model_selections": [
+    {
+      "stage": "generate",
+      "provider": "local",
+      "model_id": "test/code-model",
+      "endpoint_id": "local-code",
+      "model_group_id": "implementation",
+      "model_group_digest": "sha256:group",
+      "portfolio_digest": "sha256:portfolio",
+      "selector_digest": "sha256:selector",
+      "required_capabilities": ["code-generation", "structured-output"],
+      "fallback_rank": 0,
+      "selected_at": "2026-08-02T11:59:00Z"
+    }
+  ],
+  "prompt_template_digest": "sha256:prompt",
+  "dependency_lock_digest": "sha256:lock",
+  "vocabulary_digest": "sha256:vocabulary",
+  "specification_digest": "sha256:specification",
+  "spec_artifacts": [
+    {"path": "openspec/specs/sample-compatibility/spec.md", "content_digest": "sha256:spec"}
+  ],
+  "queries": [
+    {
+      "query_id": "query-stage",
+      "component_id": "ovstage",
+      "purpose": "generation",
+      "question": "How is a stage authored?",
+      "expected_evidence": ["source"],
+      "max_files": 8
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "evidence-stage",
+      "component_id": "ovstage",
+      "source_identity": "sha256:source-stage",
+      "index_identity": "sha256:index-stage",
+      "query_id": "query-stage",
+      "content_digest": "sha256:evidence",
+      "sources": [{"path": "src/stage.py", "symbols": ["open_stage"]}]
+    }
+  ],
+  "files": [
+    {
+      "path": "main.py",
+      "content_digest": "sha256:main",
+      "api_contract_ids": ["contract-stage"],
+      "component_evidence": {"ovstage": ["evidence-stage"]}
+    }
+  ],
+  "validation": [{"ok": true, "validator": "portable-syntax", "diagnostics": []}],
+  "repair_attempts": 0,
+  "accepted_at": "2026-08-02T12:02:00Z",
+  "future_provenance_field": {"retained": true}
+}

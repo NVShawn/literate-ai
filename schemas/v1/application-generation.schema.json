@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:literate-ai:schema:v1:application-generation-contracts",
+  "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:source-evidence-readiness" }, { "$ref": "urn:literate-ai:schema:v1:generation-event" }, { "$ref": "urn:literate-ai:schema:v1:generation-provenance" }],
+  "$defs": {
+    "readiness": {
+      "$id": "urn:literate-ai:schema:v1:source-evidence-readiness", "type": "object", "additionalProperties": false,
+      "required": ["component_revisions", "source_snapshot_ids", "evidence_ids", "source_ready", "evidence_ready", "missing"],
+      "properties": { "component_revisions": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }, "source_snapshot_ids": { "$ref": "urn:literate-ai:schema:v1:application-generation-contracts#/$defs/stringArray" }, "evidence_ids": { "$ref": "urn:literate-ai:schema:v1:application-generation-contracts#/$defs/stringArray" }, "source_ready": { "type": "boolean" }, "evidence_ready": { "type": "boolean" }, "missing": { "$ref": "urn:literate-ai:schema:v1:application-generation-contracts#/$defs/stringArray" } }
+    },
+    "event": {
+      "$id": "urn:literate-ai:schema:v1:generation-event", "type": "object", "additionalProperties": false,
+      "required": ["event_id", "sequence", "event_type", "stage_id", "data"],
+      "properties": { "event_id": { "$ref": "urn:literate-ai:schema:v1:application-generation-contracts#/$defs/text" }, "sequence": { "type": "integer", "minimum": 1 }, "event_type": { "$ref": "urn:literate-ai:schema:v1:application-generation-contracts#/$defs/text" }, "stage_id": { "type": ["string", "null"] }, "data": { "type": "object", "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:common#/$defs/jsonValue" } } }
+    },
+    "provenance": {
+      "$id": "urn:literate-ai:schema:v1:generation-provenance", "type": "object", "additionalProperties": false,
+      "required": ["run_input_identity", "component_composition_identity", "effective_revision_identity", "readiness_identity", "route_decision_digests", "model_stage_outputs", "lifecycle_outputs", "accepted_tree_identity"],
+      "properties": {
+        "run_input_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }, "component_composition_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }, "effective_revision_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }, "readiness_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "route_decision_digests": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:application-generation-contracts#/$defs/digest" } }, "model_stage_outputs": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }, "lifecycle_outputs": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" } }, "accepted_tree_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
+    "text": { "type": "string", "minLength": 1 }, "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }, "stringArray": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+  }
+}

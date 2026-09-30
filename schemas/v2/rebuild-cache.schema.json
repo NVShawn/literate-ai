@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-operator-root"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-derivation-manifest"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-control"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-decision-item"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-decision"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-member"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-binding"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-member"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-offer"},
+    {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-result"}
+  ],
+  "$defs": {
+    "identityOrNull": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      ]
+    },
+    "operatorRoot": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-operator-root",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "reference", "path"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-operator-root"},
+        "reference": {"type": "string", "minLength": 1},
+        "path": {"type": "string", "minLength": 1}
+      }
+    },
+    "derivationManifest": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-derivation-manifest",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "planning_request_identity",
+        "project_revision_identity",
+        "lifecycle_driver_identity",
+        "lifecycle_plan_identity",
+        "component_lock_identities",
+        "cache_keys"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-derivation-manifest"},
+        "planning_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "project_revision_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "lifecycle_driver_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "lifecycle_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "component_lock_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "cache_keys": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:source-derivation-cache-key"}
+        }
+      }
+    },
+    "control": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-control",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "lifecycle_request_identity",
+        "project_revision_identity",
+        "configuration",
+        "derivation_manifest",
+        "component_lock_identities",
+        "force_regeneration",
+        "requested_entry_identities",
+        "operator_roots"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-control"},
+        "lifecycle_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "project_revision_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "configuration": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "urn:literate-ai:schema:v2:source-cache-configuration"}
+          ]
+        },
+        "derivation_manifest": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-derivation-manifest"},
+        "component_lock_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "force_regeneration": {"type": "boolean"},
+        "requested_entry_identities": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "operator_roots": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-operator-root"}
+        }
+      }
+    },
+    "decisionItem": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-decision-item",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "cache_key",
+        "outcome",
+        "candidate_identities",
+        "selected_entry_identity",
+        "source_tree_identity",
+        "current_acceptance_trusted",
+        "generation_skipped"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-decision-item"},
+        "cache_key": {"$ref": "urn:literate-ai:schema:v2:source-derivation-cache-key"},
+        "outcome": {"enum": ["cache-unconfigured", "forced-regeneration", "cache-read-disabled", "miss", "hit"]},
+        "candidate_identities": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "selected_entry_identity": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-contracts#/$defs/identityOrNull"},
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-contracts#/$defs/identityOrNull"},
+        "current_acceptance_trusted": {"const": false},
+        "generation_skipped": {"type": "boolean"}
+      }
+    },
+    "decision": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-decision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "control_identity",
+        "lifecycle_request_identity",
+        "configuration_identity",
+        "mode",
+        "fresh_generation_required",
+        "items"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-decision"},
+        "control_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "lifecycle_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "configuration_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "mode": {"enum": ["unconfigured", "off", "read-only", "write-only", "read-write"]},
+        "fresh_generation_required": {"type": "boolean"},
+        "items": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-decision-item"}
+        }
+      }
+    },
+    "lifecycleMember": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-member",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "cache_key",
+        "accepted_entry_identity",
+        "source_tree_identity",
+        "source_intelligence_identity",
+        "build_evidence_identity",
+        "test_evidence_identity",
+        "acceptance_evidence_identity",
+        "workspace_admission_identity",
+        "provenance_evidence_identity",
+        "source_sbom_identity",
+        "resolved_sbom_identity"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-member"},
+        "cache_key": {"$ref": "urn:literate-ai:schema:v2:source-derivation-cache-key"},
+        "accepted_entry_identity": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-contracts#/$defs/identityOrNull"},
+        "source_tree_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_intelligence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "build_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "test_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "acceptance_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "workspace_admission_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "provenance_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "source_sbom_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "resolved_sbom_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+      }
+    },
+    "lifecycleBinding": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "control_identity",
+        "decision_identity",
+        "lifecycle_request_identity",
+        "lifecycle_plan_identity",
+        "receipt_subject_identity",
+        "component_lock_identities",
+        "derivation_key_identities",
+        "members"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-binding"},
+        "control_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "decision_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "lifecycle_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "lifecycle_plan_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "receipt_subject_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "component_lock_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "derivation_key_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "members": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-member"}
+        }
+      }
+    },
+    "publicationMember": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-member",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "entry", "caller_cas_path", "intelligence_attachments"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-member"},
+        "entry": {"$ref": "urn:literate-ai:schema:v2:accepted-source-cache-entry"},
+        "caller_cas_path": {"type": "string", "minLength": 1},
+        "intelligence_attachments": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:source-intelligence-attachment"}
+        }
+      }
+    },
+    "publicationOffer": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-offer",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "control_identity",
+        "decision_identity",
+        "lifecycle_request_identity",
+        "component_lock_identities",
+        "receipt_subject_identity",
+        "acceptance_evidence_identity",
+        "workspace_admission_identity",
+        "target_id",
+        "members"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-offer"},
+        "control_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "decision_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "lifecycle_request_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "component_lock_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
+        "receipt_subject_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "acceptance_evidence_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "workspace_admission_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "target_id": {"type": "string", "minLength": 1},
+        "members": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-member"}
+        }
+      }
+    },
+    "publicationResult": {
+      "$id": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-result",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "control_identity",
+        "decision_identity",
+        "lifecycle_request_identity",
+        "component_lock_identities",
+        "target_id",
+        "entry_identities"
+      ],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-result"},
+        "control_identity": {"$ref": "urn:literate-ai:schema:v2:generation-cache-contracts#/$defs/digest"},
+        "decision_identity": {"$ref": "urn:literate-ai:schema:v2:generation-cache-contracts#/$defs/digest"},
+        "lifecycle_request_identity": {"$ref": "urn:literate-ai:schema:v2:generation-cache-contracts#/$defs/digest"},
+        "component_lock_identities": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:generation-cache-contracts#/$defs/digest"}
+        },
+        "target_id": {"type": "string", "minLength": 1},
+        "entry_identities": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v2:generation-cache-contracts#/$defs/digest"}
+        }
+      }
+    }
+  }
+}

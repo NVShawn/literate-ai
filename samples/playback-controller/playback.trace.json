@@ -1,0 +1,41 @@
+{
+  "$schema": "litai-scxml-trace-sidecar/v1",
+  "scxml": "playback.scxml",
+  "traces": [
+    {
+      "id": "play-keeps-audio-audible",
+      "steps": [
+        {
+          "event": "play",
+          "expect_active": ["playing", "audible"]
+        }
+      ]
+    },
+    {
+      "id": "parallel-and-deep-history",
+      "steps": [
+        {
+          "event": "play",
+          "expect_active": ["playing", "audible"]
+        },
+        {
+          "event": "mute",
+          "expect_active": ["playing", "muted"]
+        },
+        {
+          "event": "power",
+          "expect_active": ["off"]
+        },
+        {
+          "event": "resume",
+          "expect_active": ["playing", "muted"],
+          "via_history": "last",
+          "expect_regions": {
+            "audio": "muted",
+            "transport": "playing"
+          }
+        }
+      ]
+    }
+  ]
+}

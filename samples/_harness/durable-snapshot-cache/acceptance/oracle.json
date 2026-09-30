@@ -1,0 +1,14 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:d26f15707a22a62cccc76ad6552a87efcd3afc648b77e316796b2ff7c6f5dddd",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {"engine": "sqlite", "read_capability": "literate-ai.durable-snapshot-read", "request": "capabilities", "role": "cache", "write_capability": "literate-ai.durable-snapshot-write"}
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {"engine": "sqlite", "read_capability": "literate-ai.durable-snapshot-read", "request": "describe", "role": "cache", "write_capability": "literate-ai.durable-snapshot-write"}
+    }
+  ]
+}

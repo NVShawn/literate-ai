@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v4:source-translation-batching-contracts",
+  "oneOf": [
+    { "$ref": "urn:literate-ai:schema:v2:source-to-specification-model-call-journal" },
+    { "$ref": "urn:literate-ai:schema:v4:source-to-specification-translation-run" }
+  ],
+  "$defs": {
+    "identity": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "text": { "type": "string", "minLength": 1 },
+    "stringArray": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/text" } },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "clean_configuration", "filesystem_boundary", "hermetic", "limitations"],
+      "properties": {
+        "profile": { "$ref": "#/$defs/text" },
+        "clean_configuration": { "type": "boolean" },
+        "filesystem_boundary": { "$ref": "#/$defs/text" },
+        "hermetic": { "type": "boolean" },
+        "limitations": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "journal": {
+      "$id": "urn:literate-ai:schema:v2:source-to-specification-model-call-journal",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "call_id", "language", "coding_cli", "executable", "executable_identity", "model", "command", "prompt", "response", "response_text", "stdout", "stderr", "request_identity", "response_identity", "command_identity", "selection_identity", "tool_binding_identity", "isolation", "environment_keys", "skill_refs", "intelligence_identity", "egress_policy_id", "evidence_ids", "partition_ordinal", "partition_count"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:source-to-specification-model-call-journal" },
+        "call_id": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "language": { "enum": ["cpp", "javascript", "python", "rust"] },
+        "coding_cli": { "enum": ["codex", "claude", "cursor-agent", "opencode"] },
+        "executable": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/text" },
+        "executable_identity": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "model": { "type": ["string", "null"], "minLength": 1 },
+        "command": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/text" } },
+        "prompt": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/text" },
+        "response": { "$ref": "urn:literate-ai:schema:v1:source-to-specification-model-output" },
+        "response_text": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/text" },
+        "stdout": { "type": "string" },
+        "stderr": { "type": "string" },
+        "request_identity": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "response_identity": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "command_identity": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "selection_identity": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "tool_binding_identity": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "isolation": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/isolation" },
+        "environment_keys": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/stringArray" },
+        "skill_refs": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:source-to-specification-contracts#/$defs/skillRef" } },
+        "intelligence_identity": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/identity" },
+        "egress_policy_id": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/text" },
+        "evidence_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v4:source-translation-batching-contracts#/$defs/text" } },
+        "partition_ordinal": { "type": "integer", "minimum": 0 },
+        "partition_count": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "run": {
+      "$id": "urn:literate-ai:schema:v4:source-to-specification-translation-run",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "mode", "intelligence", "journals"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v4:source-to-specification-translation-run" },
+        "mode": { "enum": ["deterministic-static", "source-intelligence-coding-cli"] },
+        "intelligence": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v3:source-to-specification-intelligence" }, { "type": "null" }] },
+        "journals": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v2:source-to-specification-model-call-journal" } }
+      }
+    }
+  }
+}

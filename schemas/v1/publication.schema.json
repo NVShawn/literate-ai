@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:literate-ai:schema:v1:publication-contracts",
+  "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:publication-manifest" }, { "$ref": "urn:literate-ai:schema:v1:transfer-receipt" }],
+  "$defs": {
+    "manifest": {
+      "$id": "urn:literate-ai:schema:v1:publication-manifest", "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "component_id", "revision", "component_ref", "roots", "blobs", "created_at"],
+      "properties": { "schema_version": { "const": 2 }, "component_id": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" }, "revision": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" }, "component_ref": { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" }, "roots": { "type": "object", "minProperties": 1, "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } }, "blobs": { "type": "array", "minItems": 1, "items": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } }, "created_at": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" } }
+    },
+    "receipt": {
+      "$id": "urn:literate-ai:schema:v1:transfer-receipt", "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "operation_id", "direction", "target_id", "publication_manifest", "component_id", "revision", "component_ref", "blob_count", "transferred_count", "reused_count", "started_at", "completed_at"],
+      "properties": { "schema_version": { "const": 2 }, "operation_id": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" }, "direction": { "enum": ["publish", "import"] }, "target_id": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" }, "publication_manifest": { "$ref": "urn:literate-ai:schema:v1:blob-ref" }, "component_id": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" }, "revision": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" }, "component_ref": { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" }, "blob_count": { "type": "integer", "minimum": 1 }, "transferred_count": { "type": "integer", "minimum": 0 }, "reused_count": { "type": "integer", "minimum": 0 }, "started_at": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" }, "completed_at": { "$ref": "urn:literate-ai:schema:v1:publication-contracts#/$defs/text" } }
+    },
+    "text": { "type": "string", "minLength": 1 }
+  }
+}

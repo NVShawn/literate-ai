@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:qualification-lifecycle-result",
+  "title": "Lifecycle-backed regenerative qualification contracts",
+  "$defs": {
+    "identityArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+    },
+    "canonicalTextArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "caseSurfaceBinding": {
+      "$id": "urn:literate-ai:schema:v2:qualification-case-surface-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "case_id", "case_identity", "surface_ids"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:qualification-case-surface-binding" },
+        "case_id": { "type": "string", "minLength": 1 },
+        "case_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "surface_ids": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/canonicalTextArray" },
+            { "minItems": 1 }
+          ]
+        }
+      }
+    },
+    "verifierCaseMap": {
+      "$id": "urn:literate-ai:schema:v2:qualification-verifier-case-map",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "verifier_identity", "cases"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:qualification-verifier-case-map" },
+        "verifier_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:qualification-case-surface-binding" }
+        }
+      }
+    },
+    "parityCaseEvidence": {
+      "$id": "urn:literate-ai:schema:v2:qualification-parity-case-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "case_id", "case_identity", "baseline_observation_identity",
+        "generated_observation_identity", "passed"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:qualification-parity-case-evidence" },
+        "case_id": { "type": "string", "minLength": 1 },
+        "case_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "baseline_observation_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generated_observation_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "passed": { "type": "boolean" }
+      }
+    },
+    "parityEvidence": {
+      "$id": "urn:literate-ai:schema:v2:qualification-parity-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "run_identity", "source_snapshot_identity",
+        "generated_tree_identities", "verifier_identity", "case_map_identity", "cases"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:qualification-parity-evidence" },
+        "run_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "source_snapshot_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generated_tree_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "verifier_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "case_map_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "urn:literate-ai:schema:v2:qualification-parity-case-evidence" }
+        }
+      }
+    },
+    "runEvidence": {
+      "$id": "urn:literate-ai:schema:v2:qualification-lifecycle-run-evidence",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema", "run_identity", "target_profile_identity", "component_lock_identity", "specification_set_identity",
+        "source_snapshot_identity", "generation_input_audit_identity", "promotion_tree_identity",
+        "workspace_allocation_identity", "driver_identity", "lifecycle_policy_identity",
+        "framework_distribution_identity", "lifecycle_request_identity",
+        "lifecycle_invocation_identity", "lifecycle_result_identity", "project_receipt_identity",
+        "source_tree_identities", "source_index_identities", "build_evidence_identities",
+        "resolved_sbom_identities", "generated_test_suite_identities",
+        "generated_test_evidence_identities", "generated_test_case_identities",
+        "acceptance_evidence_identities", "cache_decision_identities",
+        "node_workspace_identities", "parity_evidence_identity", "generated_test_total",
+        "covered_surface_ids"
+      ],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:qualification-lifecycle-run-evidence" },
+        "run_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "target_profile_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "component_lock_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "specification_set_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "source_snapshot_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generation_input_audit_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "promotion_tree_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "workspace_allocation_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "driver_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "lifecycle_policy_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "framework_distribution_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "lifecycle_request_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "lifecycle_invocation_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "lifecycle_result_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "project_receipt_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "source_tree_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "source_index_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "build_evidence_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "resolved_sbom_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "generated_test_suite_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "generated_test_evidence_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "generated_test_case_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "acceptance_evidence_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "cache_decision_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "node_workspace_identities": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/identityArray" },
+        "parity_evidence_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "generated_test_total": { "type": "integer", "minimum": 1 },
+        "covered_surface_ids": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-result#/$defs/canonicalTextArray" }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "runs", "case_map", "parity_evidence"],
+  "properties": {
+    "schema": { "const": "urn:literate-ai:schema:v2:qualification-lifecycle-result" },
+    "runs": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v2:qualification-lifecycle-run-evidence" }
+    },
+    "case_map": {
+      "$ref": "urn:literate-ai:schema:v2:qualification-verifier-case-map"
+    },
+    "parity_evidence": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": { "$ref": "urn:literate-ai:schema:v2:qualification-parity-evidence" }
+    }
+  }
+}

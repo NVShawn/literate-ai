@@ -1,0 +1,28 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "be651baaf3a53211e5e678e526dda98a25442dddc0d8b384c5ebb743957fc96a",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:30a4eb1c78574a9a229e8fc9e75cc46b916fc415b6f461af1250984ecc9dab17",
+  "execution_interface_identity": "sha256:7805ae006345721b8abf7fd0d9ccb12e051224d4d696f203a7cbf0f09c437600",
+  "expected_assertions": [
+    "critical-source-is-blocked",
+    "yolo-requires-explicit-acknowledgement",
+    "yolo-warning-is-persisted"
+  ],
+  "expected_failures": [
+    "blocked build without explicit yolo acknowledgement",
+    "partial maximum-privilege request"
+  ],
+  "proof_level": "executed",
+  "sample_id": "security-policies",
+  "scenario": "security",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:0258090897e014e668e1dc14771666c0076b40e25d2793ccfaee67aad864afb6"
+}

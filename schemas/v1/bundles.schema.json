@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "urn:literate-ai:schema:v1:bundle-contracts",
+  "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:bundle-dependency" }, { "$ref": "urn:literate-ai:schema:v1:bundle-manifest" }],
+  "$defs": {
+    "dependency": {
+      "$id": "urn:literate-ai:schema:v1:bundle-dependency", "type": "object", "additionalProperties": false,
+      "required": ["component_revision_digest", "kind", "required", "bundle_manifest", "component_ref"],
+      "properties": { "component_revision_digest": { "$ref": "urn:literate-ai:schema:v1:bundle-contracts#/$defs/digest" }, "kind": { "enum": ["direct", "transitive", "build", "runtime", "optional", "capability", "provider-generated"] }, "required": { "type": "boolean" }, "bundle_manifest": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:blob-ref" }, { "type": "null" }] }, "component_ref": { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" } }
+    },
+    "manifest": {
+      "$id": "urn:literate-ai:schema:v1:bundle-manifest", "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "kind", "component_revision_digest", "component_ref", "effective_revision_digest", "flavor_set_digest", "roots", "dependencies", "provenance", "authorization_digest", "toolchain_digest"],
+      "properties": {
+        "schema_version": { "const": 2 }, "kind": { "enum": ["source", "build", "artifact"] }, "component_revision_digest": { "$ref": "urn:literate-ai:schema:v1:bundle-contracts#/$defs/digest" }, "component_ref": { "$ref": "urn:literate-ai:schema:v1:component-revision-reference" }, "effective_revision_digest": { "$ref": "urn:literate-ai:schema:v1:bundle-contracts#/$defs/digest" },
+        "flavor_set_digest": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:bundle-contracts#/$defs/digest" }, { "type": "null" }] }, "roots": { "type": "object", "minProperties": 1, "additionalProperties": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "dependencies": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:bundle-dependency" } }, "provenance": { "type": "array", "items": { "$ref": "urn:literate-ai:schema:v1:blob-ref" } },
+        "authorization_digest": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:bundle-contracts#/$defs/digest" }, { "type": "null" }] }, "toolchain_digest": { "oneOf": [{ "$ref": "urn:literate-ai:schema:v1:bundle-contracts#/$defs/digest" }, { "type": "null" }] }
+      }
+    },
+    "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

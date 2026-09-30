@@ -1,0 +1,62 @@
+{
+  "schema": "literate-ai/unreleased-schema-drift-evidence@1",
+  "captured_from_commit": "8e4ebdb",
+  "published_baseline": "v0.1.1",
+  "status": "deferred-until-new-wire-identities-are-designed",
+  "files": [
+    {
+      "path": "components.schema.json",
+      "published_digest": "0e65c0b0944e1bd20fd008d3edee4527ae4c8cdd5939221fe2f73ec3d2529f52",
+      "unreleased_digest": "12fc5df0c1cb4fc1d9cedb629f1536f961e73d5c9f138a2739bf3d2bb2d03df1",
+      "unreleased_bytes": 4364,
+      "reused_uris": ["urn:literate-ai:schema:v1:component-definition"],
+      "unreleased_only_uris": [],
+      "change_classes": ["added-source-dependencies-field"]
+    },
+    {
+      "path": "flavors.schema.json",
+      "published_digest": "ac1bd4b7dab4acd4252f9f9409f65a7f5eca82d83e3da089be6669ff1d5be6e5",
+      "unreleased_digest": "17e115abb05fadfc349114f33363d6524613a91bae4604a46285f5b0d042e031",
+      "unreleased_bytes": 9494,
+      "reused_uris": ["urn:literate-ai:schema:v1:flavor-axis", "urn:literate-ai:schema:v1:flavor-definition", "urn:literate-ai:schema:v1:target-profile"],
+      "unreleased_only_uris": ["urn:literate-ai:schema:v1:toolchain-constraint"],
+      "change_classes": ["added-axis-and-slot-semantics", "changed-cardinality", "added-toolchain-contract"]
+    },
+    {
+      "path": "model-routing.schema.json",
+      "published_digest": "50bdafaf96369175fa4818daae95e736e7bdae7059f620c2666bf3cb4f00c3c7",
+      "unreleased_digest": "d0f9f7d7bf53ae52dfcabe0e92a8c501d35458b78a14d90535a247f37baa164b",
+      "unreleased_bytes": 5735,
+      "reused_uris": ["urn:literate-ai:schema:v1:model-endpoint"],
+      "unreleased_only_uris": [],
+      "change_classes": ["expanded-locality-enum"]
+    },
+    {
+      "path": "publication.schema.json",
+      "published_digest": "65cf944b8cd8751244b5b88b0037dec4d70f3fd21648c221bb7656b79d918f0b",
+      "unreleased_digest": "4a1e4f406ce78033936a1156864f7812dec55c9e562ce3d5a00c11a326d9cb4a",
+      "unreleased_bytes": 11673,
+      "reused_uris": ["urn:literate-ai:schema:v1:publication-manifest", "urn:literate-ai:schema:v1:transfer-receipt"],
+      "unreleased_only_uris": ["urn:literate-ai:schema:v1:publication-request", "urn:literate-ai:schema:v1:publication-authorization", "urn:literate-ai:schema:v1:import-request", "urn:literate-ai:schema:v1:import-authorization"],
+      "change_classes": ["changed-published-record-shapes", "added-publication-and-import-contracts"]
+    },
+    {
+      "path": "security.schema.json",
+      "published_digest": "f1fa7b90942f80aaa415e331b0698cee28f726efd320f17b2526edad710cf4e7",
+      "unreleased_digest": "31c0fa0bcb4bfcb536248cd7754fc976ececd7cc4f4bb54e7ce9f209937d0a5d",
+      "unreleased_bytes": 10397,
+      "reused_uris": ["urn:literate-ai:schema:v1:security-classification", "urn:literate-ai:schema:v1:observation-request", "urn:literate-ai:schema:v1:observation-execution-authorization"],
+      "unreleased_only_uris": [],
+      "change_classes": ["strengthened-array-cardinality", "changed-observation-authorization-shape"]
+    },
+    {
+      "path": "source-to-specification.schema.json",
+      "published_digest": "35f41432900a6adc87a4efcc64c9c89df794e19b85e0f2ff53cb83fd0b144305",
+      "unreleased_digest": "9f544aeb30340917d446eeee2f1eecf071a083e8e61efc5f351066053d5a78b9",
+      "unreleased_bytes": 18542,
+      "reused_uris": ["urn:literate-ai:schema:v1:source-to-specification-result"],
+      "unreleased_only_uris": [],
+      "change_classes": ["added-required-component-graph-draft"]
+    }
+  ]
+}

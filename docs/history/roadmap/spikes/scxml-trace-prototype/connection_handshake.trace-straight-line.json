@@ -1,0 +1,17 @@
+{
+  "$schema": "litai-scxml-trace-sidecar/v1",
+  "scxml": "connection_handshake.scxml",
+  "traces": [
+    {
+      "id": "straight-line-happy-path",
+      "description": "No drop, no history re-entry: connect, both parallel regions complete in document order, parallel-completion auto-event fires, disconnect.",
+      "steps": [
+        {"event": "connect", "expect_active": ["auth_pending", "caps_pending"]},
+        {"event": "auth_ok", "expect_active": ["auth_done", "caps_pending"]},
+        {"event": "caps_ok", "expect_active": ["auth_done", "caps_done"]},
+        {"event": "done.state.negotiating", "auto": true, "note": "SCXML auto-raises this once every region of <parallel id=negotiating> is final; not sent by an external caller.", "expect_active": ["established"]},
+        {"event": "disconnect", "expect_active": ["closed"]}
+      ]
+    }
+  ]
+}

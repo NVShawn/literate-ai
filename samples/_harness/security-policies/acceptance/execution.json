@@ -1,0 +1,59 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "component-md.executable-host-outcome",
+  "scenario_id": "executable-host-outcome.compiled-entrypoint-runs",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "findings": [
+            {
+              "id": "unsafe-input",
+              "severity": "critical"
+            }
+          ],
+          "requested_privileges": [
+            "compiler"
+          ],
+          "yolo_acknowledged": false
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "findings": [
+            {
+              "id": "style",
+              "severity": "low"
+            },
+            {
+              "id": "review",
+              "severity": "high"
+            }
+          ],
+          "requested_privileges": [
+            "compiler"
+          ],
+          "yolo_acknowledged": false
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "decision": "string",
+    "maximum_severity": "string",
+    "requested_privileges": [
+      "string"
+    ],
+    "warning": "null|string"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": []
+  },
+  "dependencies": []
+}

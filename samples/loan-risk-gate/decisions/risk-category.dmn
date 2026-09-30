@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="loan-risk-definitions" name="LoanRiskDefinitions" namespace="https://literate-ai.dev/samples/loan-risk-gate">
+  <inputData id="Age" name="Age">
+    <variable id="AgeVar" name="Age" typeRef="number"/>
+  </inputData>
+  <inputData id="Income" name="Income">
+    <variable id="IncomeVar" name="Income" typeRef="number"/>
+  </inputData>
+  <decision id="RiskCategoryDecision" name="RiskCategory">
+    <variable id="RiskCategoryVar" name="RiskCategory" typeRef="string"/>
+    <informationRequirement>
+      <requiredInput href="#Age"/>
+    </informationRequirement>
+    <informationRequirement>
+      <requiredInput href="#Income"/>
+    </informationRequirement>
+    <decisionTable id="RiskCategoryTable" hitPolicy="UNIQUE">
+      <input id="AgeInput" label="Age">
+        <inputExpression id="AgeExpression" typeRef="number">
+          <text>Age</text>
+        </inputExpression>
+      </input>
+      <input id="IncomeInput" label="Income">
+        <inputExpression id="IncomeExpression" typeRef="number">
+          <text>Income</text>
+        </inputExpression>
+      </input>
+      <output id="RiskOutput" label="RiskCategory" name="RiskCategory" typeRef="string"/>
+      <rule id="young-low-income">
+        <inputEntry><text>[18..25]</text></inputEntry>
+        <inputEntry><text>[0..30000]</text></inputEntry>
+        <outputEntry><text>"high"</text></outputEntry>
+      </rule>
+      <rule id="young-higher-income">
+        <inputEntry><text>[18..25]</text></inputEntry>
+        <inputEntry><text>[30001..999999]</text></inputEntry>
+        <outputEntry><text>"medium"</text></outputEntry>
+      </rule>
+      <rule id="mid-low-income">
+        <inputEntry><text>[26..55]</text></inputEntry>
+        <inputEntry><text>[0..40000]</text></inputEntry>
+        <outputEntry><text>"medium"</text></outputEntry>
+      </rule>
+      <rule id="mid-higher-income">
+        <inputEntry><text>[26..55]</text></inputEntry>
+        <inputEntry><text>[40001..999999]</text></inputEntry>
+        <outputEntry><text>"low"</text></outputEntry>
+      </rule>
+      <rule id="later-life">
+        <inputEntry><text>[56..120]</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"low"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

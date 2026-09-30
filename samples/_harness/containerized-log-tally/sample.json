@@ -1,0 +1,27 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "3dee58668a42ef1bee8ec83827f245c63835358849e67fb7f24f148f201bf8bc",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:a1c62a9c657c54e0f0eb618d9b454a40befc5ccfe0ff99f34a7f0dbcb3bd6ec6",
+  "execution_interface_identity": "sha256:099136c9fbbea02cd520dbc8fdf9173bd13aeb73e9010a45c83c7c95a992d4b7",
+  "expected_assertions": [
+    "workflow-completes",
+    "report-shape-matches-boundary-contract",
+    "malformed-lines-isolated-from-totals",
+    "top-paths-rank-deterministically",
+    "container-image-inputs-traceable-to-flavor"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "containerized-log-tally",
+  "scenario": "containerized-log-tally",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:53c9e83070b6370476ba7d51dc7a241378d5273d76eaec4017003f0babb0e4b1"
+}

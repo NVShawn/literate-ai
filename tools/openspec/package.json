@@ -1,0 +1,25 @@
+{
+  "name": "literate-ai-openspec-tooling",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Pinned OpenSpec and documentation tooling for Literate AI",
+  "allowScripts": {
+    "@fission-ai/openspec@1.7.0": true,
+    "puppeteer@25.10.0": true
+  },
+  "devDependencies": {
+    "@fission-ai/openspec": "1.7.0",
+    "@mermaid-js/mermaid-cli": "11.16.0",
+    "puppeteer": "25.10.0"
+  },
+  "scripts": {
+    "dependencies:check": "npm audit --audit-level=high",
+    "documentation:check": "npm run dependencies:check && npm run mermaid:test && npm run mermaid:render --",
+    "mermaid:render": "node scripts/check-mermaid.mjs",
+    "mermaid:test": "node --test test/*.test.mjs",
+    "openspec:check": "openspec validate --all --strict --no-interactive"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

@@ -1,0 +1,623 @@
+{
+  "schema": "literate-ai/wire-compatibility-matrix@1",
+  "distribution": "1.1.0",
+  "current_catalog": "v2",
+  "write_contracts": [
+    "urn:literate-ai:schema:v1:html-observability-artifact",
+    "urn:literate-ai:schema:v1:html-observability-external-asset",
+    "urn:literate-ai:schema:v1:html-observability-provenance",
+    "urn:literate-ai:schema:v1:html-observability-render-request",
+    "urn:literate-ai:schema:v1:html-observability-render-refusal",
+    "urn:literate-ai:schema:v1:html-observability-render-result",
+    "urn:literate-ai:schema:v1:html-observability-renderer-binding",
+    "urn:literate-ai:schema:v1:html-observability-source-binding",
+    "urn:literate-ai:schema:v1:html-observability-staleness-report",
+    "urn:literate-ai:schema:v1:html-observability-view",
+    "urn:literate-ai:schema:v1:inherited-session-context-bundle",
+    "urn:literate-ai:schema:v1:inherited-session-request",
+    "urn:literate-ai:schema:v1:inherited-session-response",
+    "urn:literate-ai:schema:v1:inherited-session-handoff-evidence",
+    "urn:literate-ai:schema:v2:component-authority-projection",
+    "urn:literate-ai:schema:v2:component-content-selector",
+    "urn:literate-ai:schema:v2:component-asset-selector",
+    "urn:literate-ai:schema:v2:resolved-component-asset",
+    "urn:literate-ai:schema:v2:locked-flavor-requirement",
+    "urn:literate-ai:schema:v2:component-authoring",
+    "urn:literate-ai:schema:v2:locked-component-revision",
+    "urn:literate-ai:schema:v2:component-lock-node",
+    "urn:literate-ai:schema:v2:component-lock",
+    "urn:literate-ai:schema:v2:component-resolution-audit",
+    "urn:literate-ai:schema:v2:provider-capability-set",
+    "urn:literate-ai:schema:v2:provider-override-declaration",
+    "urn:literate-ai:schema:v2:provider-resolution",
+    "urn:literate-ai:schema:v2:provider-resolution-declaration",
+    "urn:literate-ai:schema:v2:provider-resolution-request",
+    "urn:literate-ai:schema:v2:public-interface-contract",
+    "urn:literate-ai:schema:v2:component-interface-binding",
+    "urn:literate-ai:schema:v2:executable-component-edge",
+    "urn:literate-ai:schema:v2:node-target-flavor-selection",
+    "urn:literate-ai:schema:v2:authored-binary-asset",
+    "urn:literate-ai:schema:v2:candidate-replacement-policy",
+    "urn:literate-ai:schema:v2:lifecycle-driver-trust-binding",
+    "urn:literate-ai:schema:v2:component-invalidation-decision",
+    "urn:literate-ai:schema:v2:component-invalidation-table",
+    "urn:literate-ai:schema:v2:candidate-repair-diagnostic",
+    "urn:literate-ai:schema:v2:candidate-repair-request",
+    "urn:literate-ai:schema:v2:candidate-attempt",
+    "urn:literate-ai:schema:v2:candidate-attempt-chain",
+    "urn:literate-ai:schema:v2:learning-evidence-binding",
+    "urn:literate-ai:schema:v2:learning-signal-evidence",
+    "urn:literate-ai:schema:v2:learning-observation",
+    "urn:literate-ai:schema:v2:learning-classification",
+    "urn:literate-ai:schema:v2:learning-plan-input",
+    "urn:literate-ai:schema:v2:learning-proposal",
+    "urn:literate-ai:schema:v2:component-generation-context-manifest",
+    "urn:literate-ai:schema:v2:generation-complexity-budget",
+    "urn:literate-ai:schema:v2:generation-complexity-decision",
+    "urn:literate-ai:schema:v2:bounded-component-generation-request",
+    "urn:literate-ai:schema:v2:forward-generation-context-segment-binding",
+    "urn:literate-ai:schema:v2:direct-interface-context-binding",
+    "urn:literate-ai:schema:v2:forward-generation-prompt-journal",
+    "urn:literate-ai:schema:v2:component-context-benchmark-record",
+    "urn:literate-ai:schema:v2:forward-generation-context-cache-entry",
+    "urn:literate-ai:schema:v2:forward-generation-context-cache-report",
+    "urn:literate-ai:schema:v2:component-generation-runtime-observation",
+    "urn:literate-ai:schema:v2:component-generation-resume-candidate",
+    "urn:literate-ai:schema:v2:component-generation-run-output",
+    "urn:literate-ai:schema:v2:component-generation-node-result",
+    "urn:literate-ai:schema:v2:component-generation-schedule-result",
+    "urn:literate-ai:schema:v2:component-definition",
+    "urn:literate-ai:schema:v2:component-revision",
+    "urn:literate-ai:schema:v2:effective-revision",
+    "urn:literate-ai:schema:v2:effective-specification-set",
+    "urn:literate-ai:schema:v2:flavor-definition",
+    "urn:literate-ai:schema:v2:flavor-revision",
+    "urn:literate-ai:schema:v2:flavor-set-lock",
+    "urn:literate-ai:schema:v2:model-endpoint",
+    "urn:literate-ai:schema:v2:model-group",
+    "urn:literate-ai:schema:v2:stage-model-policy",
+    "urn:literate-ai:schema:v2:model-route-decision",
+    "urn:literate-ai:schema:v2:publication-request",
+    "urn:literate-ai:schema:v2:publication-authorization",
+    "urn:literate-ai:schema:v2:publication-manifest",
+    "urn:literate-ai:schema:v2:import-request",
+    "urn:literate-ai:schema:v2:import-authorization",
+    "urn:literate-ai:schema:v2:transfer-receipt",
+    "urn:literate-ai:schema:v2:security-origin-attestation",
+    "urn:literate-ai:schema:v2:security-finding",
+    "urn:literate-ai:schema:v2:security-classification",
+    "urn:literate-ai:schema:v2:build-request-declaration",
+    "urn:literate-ai:schema:v2:build-request",
+    "urn:literate-ai:schema:v2:observation-request",
+    "urn:literate-ai:schema:v2:build-authorization",
+    "urn:literate-ai:schema:v2:observation-execution-authorization",
+    "urn:literate-ai:schema:v2:security-scan-report",
+    "urn:literate-ai:schema:v2:authorization-revocation-set",
+    "urn:literate-ai:schema:v3:source-to-specification-intelligence",
+    "urn:literate-ai:schema:v3:source-to-specification-translation-run",
+    "urn:literate-ai:schema:v2:source-to-specification-model-output",
+    "urn:literate-ai:schema:v3:source-to-specification-model-call-journal",
+    "urn:literate-ai:schema:v5:source-to-specification-translation-run",
+    "urn:literate-ai:schema:v2:source-to-specification-result",
+    "urn:literate-ai:schema:v2:component-graph-draft",
+    "urn:literate-ai:schema:v3:source-to-specification-result",
+    "urn:literate-ai:schema:v3:component-graph-draft",
+    "urn:literate-ai:schema:v2:regenerative-qualification-policy",
+    "urn:literate-ai:schema:v2:clean-regeneration-evidence",
+    "urn:literate-ai:schema:v2:regenerative-qualification-decision",
+    "urn:literate-ai:schema:v2:operational-qualification-attestation",
+    "urn:literate-ai:schema:v1:qualification-run-checkpoint",
+    "urn:literate-ai:schema:v1:qualification-run-checkpoint-key",
+    "urn:literate-ai:schema:v2:local-regenerative-qualification-profile",
+    "urn:literate-ai:schema:v2:local-qualification-signature",
+    "urn:literate-ai:schema:v3:regenerative-qualification-evidence",
+    "urn:literate-ai:schema:v2:generation-input-audit-entry",
+    "urn:literate-ai:schema:v2:generation-input-audit",
+    "urn:literate-ai:schema:v2:source-promotion-provenance",
+    "urn:literate-ai:schema:v3:source-promotion-provenance",
+    "urn:literate-ai:schema:v1:inverse-evidence-custody",
+    "urn:literate-ai:schema:v1:semantic-requirement-graph",
+    "urn:literate-ai:schema:v1:semantic-comparison-model-output",
+    "urn:literate-ai:schema:v1:semantic-comparison-result",
+    "urn:literate-ai:schema:v2:legacy-source-promotion-journal-migration",
+    "urn:literate-ai:schema:v2:specification-node-authoring",
+    "urn:literate-ai:schema:v2:specification-node",
+    "urn:literate-ai:schema:v2:effective-specification-context",
+    "urn:literate-ai:schema:v2:target-profile",
+    "urn:literate-ai:schema:v2:toolchain-constraint",
+    "urn:literate-ai:schema:v2:source-cache-model-binding",
+    "urn:literate-ai:schema:v1:accepted-source-lookup-key",
+    "urn:literate-ai:schema:v2:source-derivation-cache-key",
+    "urn:literate-ai:schema:v2:accepted-source-derivation",
+    "urn:literate-ai:schema:v2:source-cache-target",
+    "urn:literate-ai:schema:v2:source-cache-configuration",
+    "urn:literate-ai:schema:v2:cached-source-file",
+    "urn:literate-ai:schema:v2:accepted-source-cache-entry",
+    "urn:literate-ai:schema:v2:standard-accepted-source-cache-entry",
+    "urn:literate-ai:schema:v1:source-intelligence-artifact",
+    "urn:literate-ai:schema:v1:source-intelligence-attachment",
+    "urn:literate-ai:schema:v2:project-definition",
+    "urn:literate-ai:schema:v1:project-initialization-origin",
+    "urn:literate-ai:schema:v1:project-initialization-baseline-file",
+    "urn:literate-ai:schema:v1:project-initialization-baseline",
+    "urn:literate-ai:schema:v2:project-update-file",
+    "urn:literate-ai:schema:v2:project-update-plan",
+    "urn:literate-ai:schema:v1:repository-fetch-deadline-policy",
+    "urn:literate-ai:schema:v1:repository-parent-reference",
+    "urn:literate-ai:schema:v1:repository-parent-selection",
+    "urn:literate-ai:schema:v1:repository-lineage-node",
+    "urn:literate-ai:schema:v1:repository-lineage",
+    "urn:literate-ai:schema:v1:repository-reparent-change",
+    "urn:literate-ai:schema:v1:repository-reparent-plan",
+    "urn:literate-ai:schema:v1:repository-lineage-update-plan",
+    "urn:literate-ai:schema:v1:repository-lineage-update-apply",
+    "urn:literate-ai:schema:v2:repository-lineage-update-apply",
+    "urn:literate-ai:schema:v2:project-lifecycle-driver",
+    "urn:literate-ai:schema:v2:component-lifecycle-command",
+    "urn:literate-ai:schema:v2:component-command-contract",
+    "urn:literate-ai:schema:v2:multi-entrypoint-component-semantics@1",
+    "urn:literate-ai:schema:v2:library-capability-import@1",
+    "urn:literate-ai:schema:v2:library-import-surface@1",
+    "urn:literate-ai:schema:v2:library-consumer-binding@1",
+    "urn:literate-ai:schema:v1:project-source-intelligence-policy",
+    "literate-ai/source-intelligence-stage-status@1",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-operator-root",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-derivation-manifest",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-control",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-decision-item",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-decision",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-member",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-binding",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-publication-member",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-publication-offer",
+    "urn:literate-ai:schema:v2:rebuild-source-cache-publication-result",
+    "urn:literate-ai:schema:v2:standard-component-build-intent",
+    "urn:literate-ai:schema:v2:standard-build-authorization",
+    "urn:literate-ai:schema:v2:standard-component-build-plan",
+    "urn:literate-ai:schema:v2:standard-source-cache-membership",
+    "urn:literate-ai:schema:v2:standard-planned-lifecycle-node",
+    "urn:literate-ai:schema:v2:standard-node-cache-decision",
+    "urn:literate-ai:schema:v2:standard-node-failure-evidence",
+    "urn:literate-ai:schema:v2:standard-project-lifecycle-membership",
+    "urn:literate-ai:schema:v2:standard-aggregate-receipt",
+    "urn:literate-ai:schema:v2:standard-component-build-evidence",
+    "urn:literate-ai:schema:v2:standard-generated-test-case-evidence",
+    "urn:literate-ai:schema:v2:known-test-failure-annotation",
+    "urn:literate-ai:schema:v2:known-test-failure-outcome",
+    "urn:literate-ai:schema:v2:known-test-failure-report",
+    "urn:literate-ai:schema:v2:standard-entrypoint-generated-test-evidence",
+    "urn:literate-ai:schema:v2:standard-generated-test-execution-evidence",
+    "urn:literate-ai:schema:v2:standard-entrypoint-execution-evidence",
+    "urn:literate-ai:schema:v2:standard-component-execution-evidence",
+    "urn:literate-ai:schema:v2:standard-component-acceptance-evidence",
+    "urn:literate-ai:schema:v1:standard-root-integration-evidence",
+    "urn:literate-ai:schema:v1:component-source-workspace-custody",
+    "urn:literate-ai:schema:v1:project-source-generation-custody",
+    "urn:literate-ai:schema:v2:qualification-case-surface-binding",
+    "urn:literate-ai:schema:v2:qualification-verifier-case-map",
+    "urn:literate-ai:schema:v2:qualification-parity-case-evidence",
+    "urn:literate-ai:schema:v2:qualification-parity-evidence",
+    "urn:literate-ai:schema:v2:qualification-lifecycle-run-evidence",
+    "urn:literate-ai:schema:v2:qualification-lifecycle-result",
+    "literate-ai/evidence-ledger@1",
+    "literate-ai/evidence-ledger-node@1",
+    "literate-ai/isolation-policy@1",
+    "literate-ai/isolation-request@1",
+    "literate-ai/isolation-observation@1",
+    "literate-ai/isolation-decision@1",
+    "urn:literate-ai:schema:v2:evidence-derivation-run",
+    "urn:literate-ai:schema:v2:evidence-platform-run",
+    "urn:literate-ai:schema:v2:evidence-matrix",
+    "urn:literate-ai:schema:v2:evidence-locator",
+    "urn:literate-ai:schema:v2:evidence-signer-rule",
+    "urn:literate-ai:schema:v2:evidence-revocations",
+    "urn:literate-ai:schema:v2:evidence-trust-policy",
+    "urn:literate-ai:schema:v2:run-evidence-expectation",
+    "urn:literate-ai:schema:v2:evidence-verification-plan",
+    "literate-ai/evidence-verification-result@1",
+    "literate-ai/evidence-publication-result@1",
+    "urn:literate-ai:schema:v2:current-evidence-map",
+    "literate-ai/retained-library-export-set@1",
+    "literate-ai/version-check@1",
+    "urn:literate-ai:schema:v2:project-lock-health",
+    "literate-ai/project-verify@1",
+    "literate-ai/retained-library-binding@1",
+    "literate-ai/retained-cargo-workspace-plan@1",
+    "urn:literate-ai:schema:v2:native-sdk-snapshot",
+    "urn:literate-ai:schema:v2:native-sdk-build-layout",
+    "urn:literate-ai:schema:v2:native-sdk-build-recipe"
+  ],
+  "read_paths": [
+    {
+      "input": "urn:literate-ai:schema:v2:source-to-specification-intelligence",
+      "status": "frozen-v2-adapter",
+      "adapter": "source_intelligence_from_dict",
+      "output": "urn:literate-ai:schema:v3:source-to-specification-intelligence"
+    },
+    {
+      "input": "urn:literate-ai:schema:v2:source-to-specification-translation-run",
+      "status": "frozen-v2-adapter",
+      "adapter": "validate_model_translation_record",
+      "output": "urn:literate-ai:schema:v3:source-to-specification-translation-run"
+    },
+    {
+      "input": "literate-ai/prepared-release@1",
+      "status": "unreleased-development-compatibility",
+      "adapter": "_load_record(..., (prepared-release@2, prepared-release@1))",
+      "output": "literate-ai/prepared-release@2"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:component-definition",
+      "status": "published-plus-known-unreleased-extension",
+      "adapter": "ComponentDefinition.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:component-definition"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:component-revision",
+      "status": "published-envelope",
+      "adapter": "ComponentRevision.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:component-revision"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:flavor-definition",
+      "status": "published-plus-known-unreleased-extension",
+      "adapter": "FlavorDefinition.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:flavor-definition"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:flavor-revision",
+      "status": "published-envelope",
+      "adapter": "FlavorRevision.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:flavor-revision"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:target-profile",
+      "status": "published-plus-known-unreleased-extension",
+      "adapter": "TargetProfile.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:target-profile"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:flavor-set-lock",
+      "status": "published-envelope",
+      "adapter": "FlavorSetLock.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:flavor-set-lock"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:effective-specification-set",
+      "status": "published-envelope",
+      "adapter": "EffectiveSpecificationSet.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:effective-specification-set"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:effective-revision",
+      "status": "published-envelope",
+      "adapter": "EffectiveRevision.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:effective-revision"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:toolchain-constraint",
+      "status": "unreleased-development-compatibility",
+      "adapter": "ToolchainConstraint.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:toolchain-constraint"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:model-endpoint",
+      "status": "published-plus-known-unreleased-extension",
+      "adapter": "ModelEndpoint.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:model-endpoint"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:model-group",
+      "status": "published",
+      "adapter": "ModelGroup.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:model-group"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:stage-model-policy",
+      "status": "published",
+      "adapter": "StageModelPolicy.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:stage-model-policy"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:model-route-decision",
+      "status": "published",
+      "adapter": "ModelRouteDecision.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:model-route-decision"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:publication-request",
+      "status": "unreleased-development-compatibility",
+      "adapter": "PublicationRequest.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:publication-request"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:publication-authorization",
+      "status": "unreleased-development-compatibility",
+      "adapter": "PublicationAuthorization.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:publication-authorization"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:publication-manifest",
+      "status": "published-context-required",
+      "adapter": "PublicationManifest.from_dict(..., legacy_request=..., legacy_authorization=...).to_dict",
+      "output": "urn:literate-ai:schema:v2:publication-manifest",
+      "required_context": [
+        "verified-v2-publication-request",
+        "verified-v2-publication-authorization"
+      ]
+    },
+    {
+      "input": "literate-ai/unreleased-post-v0.1.1-publication-manifest@3",
+      "status": "unreleased-development-compatibility",
+      "adapter": "PublicationManifest.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:publication-manifest"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:import-request",
+      "status": "unreleased-development-compatibility",
+      "adapter": "ImportRequest.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:import-request"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:import-authorization",
+      "status": "unreleased-development-compatibility",
+      "adapter": "ImportAuthorization.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:import-authorization"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:transfer-receipt",
+      "status": "published-context-required",
+      "adapter": "TransferReceipt.from_dict(..., legacy_manifest=...).to_dict",
+      "output": "urn:literate-ai:schema:v2:transfer-receipt",
+      "required_context": [
+        "verified-v2-publication-manifest-bytes"
+      ]
+    },
+    {
+      "input": "literate-ai/unreleased-post-v0.1.1-transfer-receipt@3",
+      "status": "unreleased-development-compatibility",
+      "adapter": "TransferReceipt.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:transfer-receipt"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:security-origin-attestation",
+      "status": "published",
+      "adapter": "OriginAttestation.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:security-origin-attestation"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:security-finding",
+      "status": "published",
+      "adapter": "SecurityFinding.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:security-finding"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:security-classification",
+      "status": "published-supported-subset",
+      "adapter": "SecurityClassification.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:security-classification",
+      "condition": "source-digests-and-origin-attestation-digests-nonempty"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:build-request",
+      "status": "published",
+      "adapter": "BuildRequest.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:build-request"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:observation-request",
+      "status": "published-supported-subset",
+      "adapter": "ObservationRequest.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:observation-request",
+      "condition": "source-digests-and-allowed-outputs-nonempty"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:build-authorization",
+      "status": "published",
+      "adapter": "BuildAuthorization.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:build-authorization"
+    },
+    {
+      "input": "literate-ai/unreleased-post-v0.1.1-observation-execution-authorization",
+      "status": "unreleased-development-compatibility",
+      "adapter": "ObservationExecutionAuthorization.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:observation-execution-authorization"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:security-scan-report",
+      "status": "published",
+      "adapter": "SecurityScanReport.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:security-scan-report"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:authorization-revocation-set",
+      "status": "published",
+      "adapter": "AuthorizationRevocationSet.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:authorization-revocation-set"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:source-to-specification-result",
+      "status": "published",
+      "adapter": "migrate_v1_source_to_specification_result",
+      "output": "urn:literate-ai:schema:v2:source-to-specification-result",
+      "missing_graph": "blocking-uncertainty"
+    },
+    {
+      "input": "literate-ai/unreleased-post-v0.1.1-source-to-specification-result",
+      "status": "unreleased-development-compatibility",
+      "adapter": "adapt_unreleased_post_v011_source_to_specification_result",
+      "output": "urn:literate-ai:schema:v2:source-to-specification-result",
+      "missing_graph": "blocking-uncertainty"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:regenerative-qualification-policy",
+      "status": "unreleased-development-compatibility",
+      "adapter": "adapt_unreleased_post_v011_qualification_document",
+      "output": "urn:literate-ai:schema:v2:regenerative-qualification-policy"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:clean-regeneration-evidence",
+      "status": "unreleased-development-compatibility",
+      "adapter": "adapt_unreleased_post_v011_qualification_document",
+      "output": "urn:literate-ai:schema:v2:clean-regeneration-evidence"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:regenerative-qualification-decision",
+      "status": "unreleased-development-compatibility",
+      "adapter": "adapt_unreleased_post_v011_qualification_document",
+      "output": "urn:literate-ai:schema:v2:regenerative-qualification-decision",
+      "authority_semantics": "historical-claim-effective-source-baseline"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:operational-qualification-attestation",
+      "status": "unreleased-development-compatibility",
+      "adapter": "adapt_unreleased_post_v011_qualification_document",
+      "output": "urn:literate-ai:schema:v2:operational-qualification-attestation"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:local-qualification-signature",
+      "status": "unreleased-development-compatibility",
+      "adapter": "adapt_unreleased_post_v011_qualification_document",
+      "output": "urn:literate-ai:schema:v2:local-qualification-signature"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:generated-source-index",
+      "status": "unreleased-development-compatibility",
+      "adapter": "SourceIntelligenceArtifact.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v1:source-intelligence-artifact"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:source-cache-model-binding",
+      "status": "unreleased-development-compatibility",
+      "adapter": "SourceCacheModelBinding.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:source-cache-model-binding"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:source-derivation-cache-key",
+      "status": "unreleased-development-compatibility",
+      "adapter": "SourceDerivationCacheKey.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:source-derivation-cache-key"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:accepted-source-derivation",
+      "status": "unreleased-development-compatibility",
+      "adapter": "AcceptedSourceDerivation.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:accepted-source-derivation"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:source-cache-target",
+      "status": "unreleased-development-compatibility",
+      "adapter": "SourceCacheTarget.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:source-cache-target"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:source-cache-configuration",
+      "status": "unreleased-development-compatibility",
+      "adapter": "SourceCacheConfiguration.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:source-cache-configuration"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:cached-source-file",
+      "status": "unreleased-development-compatibility",
+      "adapter": "CachedSourceFile.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:cached-source-file"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:accepted-source-cache-entry",
+      "status": "unreleased-development-compatibility",
+      "adapter": "AcceptedSourceCacheEntry.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:accepted-source-cache-entry"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:project-definition",
+      "status": "unreleased-development-compatibility",
+      "adapter": "ProjectDefinition.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:project-definition"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:project-lifecycle-driver",
+      "status": "unreleased-development-compatibility",
+      "adapter": "ProjectLifecycleDriver.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:project-lifecycle-driver"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-operator-root",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCacheOperatorRoot.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-operator-root"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-derivation-manifest",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCacheDerivationManifest.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-derivation-manifest"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-control",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCacheControl.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-control"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-decision-item",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCacheDecisionItem.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-decision-item"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-decision",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCacheDecision.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-decision"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-lifecycle-member",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCacheLifecycleMember.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-member"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-lifecycle-binding",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCacheLifecycleBinding.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-lifecycle-binding"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-publication-member",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCachePublicationMember.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-member"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:rebuild-source-cache-publication-offer",
+      "status": "unreleased-development-compatibility",
+      "adapter": "RebuildSourceCachePublicationOffer.from_dict(...).to_dict",
+      "output": "urn:literate-ai:schema:v2:rebuild-source-cache-publication-offer"
+    }
+  ],
+  "incompatible_inputs": [
+    {
+      "input": "literate-ai/accepted-specification-set@1",
+      "reason": "legacy acceptance asserted intent authority but did not bind the evidence closure required by a ComponentAuthorityProjection",
+      "migration": "fail-closed-until-AUTH-100-evidence-is-supplied"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:security-classification",
+      "condition": "source_digests or origin_attestation_digests is empty",
+      "reason": "the published record lacks the source and origin evidence required by the v2 security decision",
+      "migration": "fail-closed-missing-required-security-evidence"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:observation-request",
+      "condition": "source_digests or allowed_outputs is empty",
+      "reason": "the published record does not identify a non-empty observed source and output scope",
+      "migration": "fail-closed-missing-observation-scope"
+    },
+    {
+      "input": "urn:literate-ai:schema:v1:observation-execution-authorization",
+      "reason": "the published record has neither effective_revision_digest nor security profile and no local field can reconstruct them",
+      "migration": "fail-closed-missing-effective-revision-and-security-profile"
+    }
+  ],
+  "unknown_versions": "fail-closed"
+}

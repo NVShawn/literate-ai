@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:shared-cache-contracts",
+  "title": "Literate AI shared cache contracts",
+  "oneOf": [
+    {"$ref": "urn:literate-ai:schema:v2:shared-cache-contracts#/$defs/namespacePolicy"},
+    {"$ref": "urn:literate-ai:schema:v2:shared-cache-contracts#/$defs/configuration"}
+  ],
+  "$defs": {
+    "namespacePolicy": {
+      "$id": "urn:literate-ai:schema:v2:shared-cache-namespace-policy",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "namespace", "mode"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:shared-cache-namespace-policy"},
+        "namespace": {"enum": ["bazel", "compiler", "test", "package", "container"]},
+        "mode": {"enum": ["read-only", "read-write"]}
+      }
+    },
+    "configuration": {
+      "$id": "urn:literate-ai:schema:v2:shared-cache-configuration",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "scope", "namespace", "local_root_reference", "policies", "maximum_bytes", "retention_seconds", "endpoint", "tls_required", "credential_reference"],
+      "properties": {
+        "schema": {"const": "urn:literate-ai:schema:v2:shared-cache-configuration"},
+        "scope": {"enum": ["user", "team", "organization", "company"]},
+        "namespace": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"},
+        "local_root_reference": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"},
+        "policies": {"type": "array", "minItems": 1, "maxItems": 5, "items": {"$ref": "urn:literate-ai:schema:v2:shared-cache-contracts#/$defs/namespacePolicy"}},
+        "maximum_bytes": {"type": "integer", "minimum": 1},
+        "retention_seconds": {"type": "integer", "minimum": 1},
+        "endpoint": {"type": ["string", "null"], "maxLength": 4096, "pattern": "^https?://[^?#]+$"},
+        "tls_required": {"type": "boolean"},
+        "credential_reference": {"type": ["string", "null"], "maxLength": 256, "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._:/-]{0,254}[A-Za-z0-9])?$"}
+      }
+    }
+  }
+}

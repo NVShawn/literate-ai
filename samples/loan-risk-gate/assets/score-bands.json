@@ -1,0 +1,19 @@
+{
+  "bands": [
+    {
+      "id": "starter",
+      "max": 30000,
+      "min": 0
+    },
+    {
+      "id": "established",
+      "max": 40000,
+      "min": 30001
+    },
+    {
+      "id": "prime",
+      "max": 999999,
+      "min": 40001
+    }
+  ]
+}

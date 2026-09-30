@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-toolchain-closure",
+  "$defs": {
+    "componentAuthority": {
+      "$id": "urn:literate-ai:schema:v2:standard-component-command-authority",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "generation_key_identity",
+        "flavor_selection_identity",
+        "command_contract_identity",
+        "build_target_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-component-command-authority"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "generation_key_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "flavor_selection_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "command_contract_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "build_target_identity": {
+          "oneOf": [
+            { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "providerBinding": {
+      "$id": "urn:literate-ai:schema:v2:standard-provider-artifact-binding",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "export_id", "environment_name", "relative_path"],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-provider-artifact-binding"
+        },
+        "export_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,126}$"
+        },
+        "environment_name": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{0,126}$"
+        },
+        "relative_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*//).+$"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "component_lock_identity",
+    "execution_plan_identity",
+    "component_authorities",
+    "toolchain_identities",
+    "provider_bindings",
+    "dependency_graph_identity",
+    "observer_identity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:standard-toolchain-closure"
+    },
+    "component_lock_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "execution_plan_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "component_authorities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4096,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:standard-component-command-authority"
+      }
+    },
+    "toolchain_identities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v1:content-identity"
+      }
+    },
+    "provider_bindings": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:standard-provider-artifact-binding"
+      }
+    },
+    "dependency_graph_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "observer_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    }
+  }
+}

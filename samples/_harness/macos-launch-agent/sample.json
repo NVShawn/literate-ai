@@ -1,0 +1,24 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "3bafbafcadcf6e228cb3bcbfc33c916e3c6d5ff1c01f351d132b8cb0f96a81d8",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:32055cd4b259a306792f904a451c1b796b872cafae65045ecae544d669442271",
+  "execution_interface_identity": "sha256:b7fba7b49c1ccf3eb7da7078a8ed58c49b8fe5bb86c2079b33d87f1d27fb6864",
+  "expected_assertions": [
+    "workflow-completes",
+    "restart-reuses-exact-stages"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "macos-launch-agent",
+  "scenario": "hello",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:3d7ee8510e8a25fde28dfe8a3baf16998d25a40a0b08de02b11af84c690453d2"
+}

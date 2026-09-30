@@ -1,0 +1,47 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:dadb251d990bf821dcfde891407b64079516828a3db31ae9a63da298f5242fb3",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "plan_count": 3,
+        "plans": [
+          {
+            "artifact": "sample",
+            "target": "linux-cpu-python",
+            "toolchain": "cpython"
+          },
+          {
+            "artifact": "sample.app",
+            "target": "macos-cpu-rust",
+            "toolchain": "cargo"
+          },
+          {
+            "artifact": "sample.exe",
+            "target": "windows-cuda-rust",
+            "toolchain": "cargo"
+          }
+        ]
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "plan_count": 2,
+        "plans": [
+          {
+            "artifact": "sample.exe",
+            "target": "windows-cpu-python",
+            "toolchain": "cpython"
+          },
+          {
+            "artifact": "sample",
+            "target": "linux-cuda-rust",
+            "toolchain": "cargo"
+          }
+        ]
+      }
+    }
+  ]
+}

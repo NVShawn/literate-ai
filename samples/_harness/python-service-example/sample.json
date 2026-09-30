@@ -1,0 +1,24 @@
+{
+  "acceptance_oracle": {
+    "identity": {
+      "algorithm": "sha256",
+      "digest": "1e6eca7707be48aef2a7bb89b9340c943cfd40a421116bf66c65f2eb4f55721c",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "kind": "acceptance-oracle",
+    "schema": "urn:literate-ai:schema:v1:content-reference",
+    "uri": "acceptance/oracle.json"
+  },
+  "component_authoring_identity": "sha256:6b5c94c7363e660eb23b15bf2601635b50527bc76feabca4fd9bcab2dda74777",
+  "execution_interface_identity": "sha256:f4c882241d3a19a9234faab7a99a022b5bceda89043653115e28baf3d37fff1e",
+  "expected_assertions": [
+    "workflow-completes",
+    "restart-reuses-exact-stages"
+  ],
+  "expected_failures": [],
+  "proof_level": "executed",
+  "sample_id": "python-service-example",
+  "scenario": "hello",
+  "schema": "literate-ai/conformance-sample@5",
+  "specification_identity": "sha256:a2246c8397aef094f3aacf57aedc91797c4456eda495b4e9b7c5d0ccd0dd4cca"
+}

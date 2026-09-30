@@ -1,0 +1,33 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:c4a16d444ab6d4f25b4f3c5c3409dc3aec8fefe47394979e9fb35d7284dc7e87",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "considered": [
+          "preferred",
+          "fallback"
+        ],
+        "data_egress": "none",
+        "fallback_used": true,
+        "rejected": [
+          "preferred"
+        ],
+        "selected": "fallback"
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "considered": [
+          "preferred"
+        ],
+        "data_egress": "none",
+        "fallback_used": false,
+        "rejected": [],
+        "selected": "preferred"
+      }
+    }
+  ]
+}

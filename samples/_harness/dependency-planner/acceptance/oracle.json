@@ -1,0 +1,46 @@
+{
+  "schema": "literate-ai/sample-execution-oracle@1",
+  "execution_interface_identity": "sha256:bb53e4f1baec965c8deb9a993f5ad179b573f2d3aabecc686361731916b656a9",
+  "oracle_results": [
+    {
+      "case_id": "primary",
+      "expected_result": {
+        "critical_path": [
+          "schema",
+          "api",
+          "release"
+        ],
+        "edge_count": 4,
+        "minimum_completion_minutes": 26,
+        "task_count": 4,
+        "topological_order": [
+          "schema",
+          "api",
+          "ui",
+          "release"
+        ]
+      }
+    },
+    {
+      "case_id": "generalization",
+      "expected_result": {
+        "critical_path": [
+          "ingest",
+          "normalize",
+          "index",
+          "publish"
+        ],
+        "edge_count": 5,
+        "minimum_completion_minutes": 22,
+        "task_count": 5,
+        "topological_order": [
+          "ingest",
+          "audit",
+          "normalize",
+          "index",
+          "publish"
+        ]
+      }
+    }
+  ]
+}

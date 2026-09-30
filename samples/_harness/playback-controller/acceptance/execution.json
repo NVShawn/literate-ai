@@ -1,0 +1,44 @@
+{
+  "schema": "literate-ai/sample-execution-interface@3",
+  "requirement_id": "scxml-artifact-08f242f14825c1bd",
+  "scenario_id": "scxml-artifact-08f242f14825c1bd-trace-706fa67d6e3f22a1",
+  "entrypoint": "run",
+  "invocations": [
+    {
+      "case_id": "primary",
+      "arguments": [
+        {
+          "events": [
+            "play"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "generalization",
+      "arguments": [
+        {
+          "events": [
+            "play",
+            "mute",
+            "power",
+            "resume"
+          ]
+        }
+      ]
+    }
+  ],
+  "result_shape": {
+    "active": [
+      "string"
+    ],
+    "event_count": "integer",
+    "powered": "boolean"
+  },
+  "target": {
+    "platform.os": "host",
+    "implementation.language-ecosystem": [],
+    "packaging": "flavor://literate-ai/package-pip"
+  },
+  "dependencies": []
+}

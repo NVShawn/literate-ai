@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "auto_publish": false,
+  "targets": {
+    "team-cache": {
+      "target_id": "team-cache",
+      "transport": "filesystem",
+      "location": "/var/tmp/ova-team-cache",
+      "enabled": true
+    }
+  },
+  "future_publication_policy": {"retained": true}
+}
