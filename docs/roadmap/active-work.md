@@ -23113,5 +23113,9 @@ GitHub CI failure without relaxing identity checks.
   refreshed prefix launcher with unchanged arguments. Release discovery alone is
   synthetic; no live public-release upgrade is claimed. The 17 existing updater
   regressions and 12 version-authority tests pass. Lint, format, public-export,
-  reviewed driver identity and documentation authority checks pass. Broader CLI
-  regression and non-editable Git-install verification remain in progress.
+  reviewed driver identity and documentation authority checks pass. The broader
+  CLI slice also passes all 258 tests, including the new focused tests. A separate
+  non-editable Git-install probe was stopped after recursive shallow local-clone
+  fetches exhausted file descriptors; it is not passing installation evidence.
+  Full installed-wheel qualification was started separately and remains pending
+  at this handoff. No user's installed CLI, release tag or release branch changed.
