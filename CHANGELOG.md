@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Instructional media: replace the short-course viewing path with one continuous,
+  two-voice feedback-edition video play, character introductions, fresh recorded
+  greenfield/TinyXML2 execution, visible captions, and an updates/lineage closing.
+  Keep the discovered inherited-starter oracle defect and demo-local correction
+  explicit; this does not claim a framework release or an upstream defect repair.
+
+- Separate inheritable video-production craft from project-owned narrative:
+  neutral course initialization, project-selected presenters and voices, visual
+  shots, and a quality-review skill that calls for an audition before full production.
 - Add rebuildable instructional courses through `litai video init`, `plan`,
   `build`, and `verify`: two-speaker narration, recordings, captions, and
   source-bound media receipts, with a packaged video-authoring skill.

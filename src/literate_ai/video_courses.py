@@ -62,14 +62,19 @@ def _text(value: Any, label: str, maximum: int = 1000) -> str:
 def plan_course(manifest: Path) -> dict[str, Any]:
     """Validate authored intent and bind every referenced local asset."""
     document = _json(manifest)
+    if not isinstance(document.get("embed_subtitles", True), bool):
+        raise VideoError("embed_subtitles must be a boolean")
+    bitrate = document.get("audio_bitrate_kbps", 160)
+    if type(bitrate) is not int or not 64 <= bitrate <= 320:
+        raise VideoError("audio_bitrate_kbps must be an integer from 64 to 320")
     if document.get("schema") != SCHEMA:
         raise VideoError(f"schema must be {SCHEMA}")
     if not _ID.fullmatch(_text(document.get("id"), "id", 70)):
         raise VideoError("course id must be lowercase words separated by hyphens")
     _text(document.get("title"), "title", 70)
     speakers = document.get("speakers")
-    if not isinstance(speakers, dict) or not 1 <= len(speakers) <= 2:
-        raise VideoError("declare one or two speakers")
+    if not isinstance(speakers, dict) or not 1 <= len(speakers) <= 16:
+        raise VideoError("declare 1..16 speakers; presentation format is project-owned")
     assets: dict[str, str] = {}
 
     def bind(name: str) -> None:
@@ -79,7 +84,8 @@ def plan_course(manifest: Path) -> dict[str, Any]:
         if not _ID.fullmatch(key) or not isinstance(speaker, dict):
             raise VideoError("invalid speaker")
         _text(speaker.get("name"), "speaker name", 24)
-        _text(speaker.get("voice"), "speaker voice", 100)
+        if "voice" in speaker:
+            _text(speaker["voice"], "speaker voice", 100)
         if speaker.get("portrait"):
             bind(speaker["portrait"])
     scenes = document.get("scenes")
@@ -97,6 +103,10 @@ def plan_course(manifest: Path) -> dict[str, Any]:
                 _text(line, field, width)
         if scene.get("recording"):
             bind(scene["recording"])
+        if scene.get("visual"):
+            bind(scene["visual"])
+        if scene.get("recording") and scene.get("visual"):
+            raise VideoError("choose a scene recording or a still visual, not both")
         turns = scene.get("dialogue")
         if not isinstance(turns, list) or not 1 <= len(turns) <= 20:
             raise VideoError("each scene needs 1..20 dialogue turns")
@@ -106,6 +116,10 @@ def plan_course(manifest: Path) -> dict[str, Any]:
             _text(turn.get("text"), "dialogue")
             if turn.get("audio"):
                 bind(turn["audio"])
+            if turn.get("visual"):
+                bind(turn["visual"])
+                if scene.get("recording"):
+                    raise VideoError("turn visuals cannot override a scene recording")
     evidence = document.get("evidence", [])
     if not isinstance(evidence, list):
         raise VideoError("evidence must be a list of local files")
@@ -129,22 +143,18 @@ def init_course(path: Path) -> dict[str, Any]:
     value = {
         "schema": SCHEMA,
         "id": "first-project",
-        "title": "Your first project",
-        "speakers": {
-            "guide": {"name": "Guide", "voice": "Samantha"},
-            "engineer": {"name": "Engineer", "voice": "Daniel"},
-        },
+        "title": "Your project tutorial",
+        "speakers": {"narrator": {"name": "Narrator"}},
         "evidence": [],
         "scenes": [
             {
-                "title": "Inspect before applying",
-                "points": ["Review the proposed changes"],
-                "terminal": ["litai onboard create my-project"],
+                "title": "Show the useful outcome",
+                "points": [],
+                "terminal": [],
                 "dialogue": [
-                    {"speaker": "engineer", "text": "Will this change my project?"},
                     {
-                        "speaker": "guide",
-                        "text": "Review this plan before applying it.",
+                        "speaker": "narrator",
+                        "text": "Show what your viewer will accomplish.",
                     },
                 ],
             }
@@ -208,6 +218,10 @@ def _stamp(seconds: float, *, vtt: bool = False) -> str:
 
 def _slide(scene: dict, title: str, position: int, total: int) -> str:
     def text(x: int, y: int, size: int, value: str, color: str = "#e5edf7") -> str:
+        value = value.expandtabs(4)
+        # ImageMagick's SVG delegate may collapse leading spaces despite xml:space.
+        x += round((len(value) - len(value.lstrip(" "))) * size * 0.4)
+        value = value.lstrip(" ")
         return (
             f'<text x="{x}" y="{y}" font-size="{size}" fill="{color}" '
             'xml:space="preserve">'
@@ -257,6 +271,13 @@ def build_course(
         for turn in scene["dialogue"]
     ):
         raise VideoError("recorded narration requires audio on every dialogue turn")
+    if backend != "recorded" and any(
+        not document["speakers"][turn["speaker"]].get("voice")
+        for scene in document["scenes"]
+        for turn in scene["dialogue"]
+        if not turn.get("audio")
+    ):
+        raise VideoError("select a voice for every synthesized speaker")
     output.mkdir(parents=True, exist_ok=True)
     stage = Path(tempfile.mkdtemp(prefix=document["id"] + "-", dir=output))
     clips: list[Path] = []
@@ -271,8 +292,24 @@ def build_course(
                 scene, document["title"], number, len(document["scenes"])
             ),
         )
+        if scene.get("visual"):
+            _run(
+                [
+                    "magick",
+                    str(_asset(manifest.parent, scene["visual"])),
+                    "-resize",
+                    "1280x720",
+                    "-background",
+                    "#101827",
+                    "-gravity",
+                    "center",
+                    "-extent",
+                    "1280x720",
+                    str(slide),
+                ]
+            )
         for speaker_index, speaker in enumerate(document["speakers"].values()):
-            if speaker.get("portrait"):
+            if speaker.get("portrait") and not scene.get("visual"):
                 portrait = stage / f"portrait-{speaker_index}.png"
                 _run(
                     [
@@ -289,13 +326,17 @@ def build_course(
                         str(slide),
                         str(portrait),
                         "-geometry",
-                        f"+{1000 + speaker_index * 110}+85",
+                        f"+{1000 + speaker_index % 2 * 110}"
+                        f"+{85 + speaker_index // 2 * 70}",
                         "-composite",
                         str(slide),
                     ]
                 )
         for turn_index, turn in enumerate(scene["dialogue"]):
             speaker = document["speakers"][turn["speaker"]]
+            turn_slide = slide
+            if turn.get("visual"):
+                turn_slide = _asset(manifest.parent, turn["visual"])
             # Recorded narration is timed as a whole turn. Synthesized narration
             # is timed per sentence: caption timing never estimates word ratios.
             chunks = (
@@ -352,7 +393,14 @@ def build_course(
                     ]
                     video_filter = f"trim=start={scene_elapsed},setpts=PTS-STARTPTS,"
                 else:
-                    video_input = ["-loop", "1", "-framerate", "24", "-i", str(slide)]
+                    video_input = [
+                        "-loop",
+                        "1",
+                        "-framerate",
+                        "24",
+                        "-i",
+                        str(turn_slide),
+                    ]
                     video_filter = ""
                 _run(
                     [
@@ -390,7 +438,7 @@ def build_course(
                         "-ar",
                         "48000",
                         "-b:a",
-                        "160k",
+                        f"{document.get('audio_bitrate_kbps', 160)}k",
                         str(clip),
                     ]
                 )
@@ -438,6 +486,20 @@ def build_course(
             "\n".join(lines) + "\n", encoding="utf-8"
         )
     video = stage / f"{document['id']}.mp4"
+    subtitle_args = (
+        [
+            "-map",
+            "1:0",
+            "-c:s",
+            "mov_text",
+            "-metadata:s:s:0",
+            "language=eng",
+            "-disposition:s:0",
+            "default",
+        ]
+        if document.get("embed_subtitles", True)
+        else []
+    )
     _run(
         [
             "ffmpeg",
@@ -452,18 +514,11 @@ def build_course(
             "0:v:0",
             "-map",
             "0:a:0",
-            "-map",
-            "1:0",
+            *subtitle_args,
             "-c:v",
             "copy",
             "-c:a",
             "copy",
-            "-c:s",
-            "mov_text",
-            "-metadata:s:s:0",
-            "language=eng",
-            "-disposition:s:0",
-            "default",
             "-movflags",
             "+faststart",
             str(video),
@@ -485,6 +540,7 @@ def build_course(
         "narration_backend": backend,
         "duration_seconds": _duration(video),
         "caption_count": len(cues),
+        "embed_subtitles": document.get("embed_subtitles", True),
         "publication_authorized": False,
         "artifacts": {
             f"{document['id']}.{suffix}": _digest(stage / f"{document['id']}.{suffix}")
@@ -520,14 +576,11 @@ def verify_course(receipt: Path, *, manifest: Path | None = None) -> dict[str, A
             raise VideoError(f"artifact digest mismatch: {name}")
     video = _asset(receipt.parent, f"{course_id}.mp4")
     media = _probe(video)
-    if {stream["codec_type"] for stream in media["streams"]} != {
-        "video",
-        "audio",
-        "subtitle",
-    }:
-        raise VideoError(
-            "video must contain picture, narration, and embedded subtitles"
-        )
+    expected_streams = {"video", "audio"}
+    if result.get("embed_subtitles", True):
+        expected_streams.add("subtitle")
+    if {stream["codec_type"] for stream in media["streams"]} != expected_streams:
+        raise VideoError("video streams differ from the declared caption mode")
     seconds = _duration(video)
     if abs(seconds - result.get("duration_seconds", -1)) > 0.1:
         raise VideoError("receipt duration differs from media")

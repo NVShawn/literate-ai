@@ -1,5 +1,32 @@
 # Literate AI instructional courses
 
+## Start here: the continuous video play
+
+**[Watch or download: It Builds. Can We Ship It?](https://github.com/jordanhubbard/literate-ai/raw/refs/heads/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)**
+
+Sam and LitAI introduce themselves, argue about agents and engineering habits,
+work through real greenfield and TinyXML2 sessions, and finish with updates,
+repository inheritance and orchestration. One continuous film, two neural voices,
+visible captions, and SRT/VTT sidecars. This is the **public feedback edition**.
+Running time: **13:38**. [Chapter timestamps](play/CHAPTERS.md).
+
+[SRT](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.srt) · [WebVTT](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.vtt) ·
+[Production and limitations](play/README.md) · [Script](play/story.json) ·
+[Rebuildable manifest](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/package/course.json) · [Session excerpts](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/package/sessions.json) ·
+[Media receipt](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/video-result.json)
+
+The coding sections are edited terminal replays of actual execution, not raw screen
+recordings. Installation and remote-worker setup are labeled walkthroughs. An
+inherited-starter acceptance defect is shown honestly, including its demo-local
+correction; the framework-level repair is still open. Report timestamped feedback
+in the public repository's issue tracker.
+
+## Earlier cuts, retained for comparison
+
+The cuts below are superseded creative drafts, not the recommended viewing path.
+The [creative brief](creative-brief.md) and [accepted audition package](preview/README.md)
+record how the project-owned story evolved without prescribing a cast to children.
+
 Three short lessons pair LitAI, a female guide, with Sam, a skeptical C++/Make
 engineer. Each includes two-voice narration, embedded English subtitles, and
 downloadable SRT/WebVTT captions.

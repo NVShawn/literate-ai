@@ -1,0 +1,22 @@
+{
+  "schema": "literate-ai/video-course-result@1",
+  "course_id": "sam-meets-literate-ai",
+  "source_identity": "1014a00e21047fe11672020bdfe660daa189b627401f47aed2ec437b6f6dd154",
+  "renderer_sha256": "098bd698c75000ef39445a08f96a52e133f2c533613d1d350ab61b89d74101cd",
+  "font_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+  "narration_backend": "recorded",
+  "duration_seconds": 818.096355,
+  "caption_count": 85,
+  "embed_subtitles": false,
+  "publication_authorized": false,
+  "artifacts": {
+    "sam-meets-literate-ai.mp4": "d23c1a39f8ee27423638caee670687c98f498af03c16bcb9cc3fc017f472f822",
+    "sam-meets-literate-ai.srt": "0f3d6b17f9f73548a441d73aa6f1d072b92d57eb781fe59c994b55d736af30ab",
+    "sam-meets-literate-ai.vtt": "7295282bf8fea45835eeb0951a9539be9ea80e647b597439feacff3277f89155"
+  },
+  "tools": {
+    "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 9.0.1 Copyright (c) 2007-2026 the FFmpeg developers",
+    "magick": "Version: ImageMagick 7.1.2-31 Q16-HDRI aarch64 8309dc92a:20260903 https://imagemagick.org"
+  }
+}

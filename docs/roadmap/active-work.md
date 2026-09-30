@@ -23065,11 +23065,20 @@ GitHub CI failure without relaxing identity checks.
 - **Owner:** onboarding, retained test evidence, instructional video CLI
 - **Direction:** Fix defects exposed by the real course sessions, support repeatable course creation in Literate AI, and publish the courses publicly.
 - **Conclusion:** Repair starter acceptance authority and exact CTest summaries; add a portable course manifest, narration providers, captions, evidence verification and a documented CLI, then refresh the public examples.
+- **Review correction:** The first draft failed the viewing experience: robotic speech,
+  lecture-like dialogue, text-heavy visuals, and missing first-time setup. Goals 1 and
+  6 require a visual-first, engaging instructional method that children can inherit,
+  while this repository alone owns its two-character comedy and cast.
 - **Depends on:** none
 - **Implementation:**
   - [x] Fix starter oracle and CTest summary parsing with regression coverage.
   - [x] Add reusable video authoring, build, verify, and refresh commands and packaged skill.
   - [ ] Refresh and publish the course bundle with current demo evidence.
+  - [x] Replace stock system speech with auditioned natural narration and produce a short review cut before full rendering. User accepted the improved direction after watching the 94-second neural cut.
+  - [ ] Rewrite greenfield with real dialogue, a complete acquisition/install/authentication path, and visual demonstrations rather than bullet slides.
+  - [x] Make the inherited skill and starter narrative-neutral; retain cast, tone, and two-character choices only in this course package. Nine video regressions pass.
+  - [x] Produce one continuous video play with character introductions, respectful skeptical-engineer humor, real coding in the middle, and an updates/repository-lineage closing. The 13:38 feedback cut contains 85 turns, visible captions and labeled edited execution replays. Fresh installed-wheel generation, demo-local oracle recovery, 3-pass/2-skip verification, wheel build/verify, and TinyXML2 retained advancement passed; COURSE-003 preserves the discovered framework defect.
+  - [ ] Publish the continuous feedback edition to the authorized public GitHub repository with captions, regeneration sources, provenance and explicit limitations; do not imply a framework release or upstream OSS adoption.
 - **Evidence:**
   - [ ] Regression tests, installed CLI checks, real greenfield and TinyXML2 demos, and media verification pass.
 
@@ -23084,3 +23093,16 @@ GitHub CI failure without relaxing identity checks.
   - [ ] Reproduce and classify missing membership versus a framework lookup defect.
 - **Evidence:**
   - [ ] Same-model accepted-source continuation passes or yields an actionable exact mismatch diagnosis.
+
+### [ ] COURSE-003 — Bind inherited starter acceptance to its actual contract
+
+- **Priority:** P1
+- **Owner:** project initialization and inherited acceptance authority
+- **Direction:** The continuous-course fresh run inherited the public parent's richer greeting-card Component but received the simple template's acceptance cases.
+- **Conclusion:** Selecting a starter by name is not enough to select its oracle. The generator correctly followed the inherited contract; independent acceptance failed with missing `messages`. Correcting the disposable demonstration oracle proves only local recovery, not a framework repair. Preserve verifier isolation and refuse unsupported assumptions rather than synthesizing expectations from generated code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Define explicit inherited acceptance ownership and bind it to the selected starter contract.
+  - [ ] Cover simple template, rich inherited starter, custom same-name starter and conflict/refusal cases.
+- **Evidence:**
+  - [ ] Fresh public-parent installed-CLI onboarding completes without hand-editing its oracle, with independent acceptance intact.

@@ -51,6 +51,48 @@ class VideoCourseTests(unittest.TestCase):
             init_course(self.manifest)
         self.assertEqual(before, self.manifest.read_bytes())
 
+    def test_embed_subtitles_requires_boolean(self):
+        document = json.loads(self.manifest.read_text())
+        document["embed_subtitles"] = "false"
+        self.save(document)
+        with self.assertRaisesRegex(VideoError, "embed_subtitles"):
+            plan_course(self.manifest)
+
+    def test_audio_bitrate_is_bounded(self):
+        document = json.loads(self.manifest.read_text())
+        for value in (True, "80", 0, 321):
+            document["audio_bitrate_kbps"] = value
+            self.save(document)
+            with self.assertRaisesRegex(VideoError, "audio_bitrate_kbps"):
+                plan_course(self.manifest)
+
+    def test_starter_does_not_impose_cast_voice_or_framework_story(self):
+        document = plan_course(self.manifest)["document"]
+        self.assertEqual(list(document["speakers"]), ["narrator"])
+        self.assertNotIn("voice", document["speakers"]["narrator"])
+        self.assertEqual(document["scenes"][0]["terminal"], [])
+
+    def test_project_can_choose_three_presenters_and_visuals(self):
+        document = json.loads(self.manifest.read_text())
+        document["speakers"] = {name: {"name": name} for name in ("a", "b", "c")}
+        visual = self.root / "visual.svg"
+        visual.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
+        document["scenes"][0]["dialogue"] = [
+            {
+                "speaker": name,
+                "text": "Project-owned presentation.",
+                "visual": visual.name,
+            }
+            for name in document["speakers"]
+        ]
+        self.save(document)
+        self.assertIn(visual.name, plan_course(self.manifest)["assets"])
+        identity = plan_course(self.manifest)["source_identity"]
+        visual.write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg"><title>New</title></svg>'
+        )
+        self.assertNotEqual(identity, plan_course(self.manifest)["source_identity"])
+
     def test_evidence_and_narration_drift_change_identity(self):
         document = json.loads(self.manifest.read_text())
         evidence = self.root / "evidence.txt"
@@ -134,13 +176,41 @@ class VideoCourseTests(unittest.TestCase):
         document = json.loads(self.manifest.read_text())
         for turn in document["scenes"][0]["dialogue"]:
             turn["audio"] = audio.name
+        document["embed_subtitles"] = False
+        document["audio_bitrate_kbps"] = 80
         self.save(document)
         result = build_course(
             self.manifest, self.root / "renders", font=font, backend="recorded"
         )
         receipt = Path(result["receipt"])
         self.assertTrue(verify_course(receipt, manifest=self.manifest)["accepted"])
-        self.assertEqual(result["caption_count"], 2)
+        self.assertEqual(result["caption_count"], 1)
+        probe = subprocess.run(
+            [
+                "ffprobe",
+                "-v",
+                "error",
+                "-show_streams",
+                "-of",
+                "json",
+                str(receipt.parent / "first-project.mp4"),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        self.assertNotIn(
+            "subtitle", {s["codec_type"] for s in json.loads(probe.stdout)["streams"]}
+        )
+        document["embed_subtitles"] = True
+        self.save(document)
+        embedded = build_course(
+            self.manifest, self.root / "embedded", font=font, backend="recorded"
+        )
+        self.assertTrue(
+            verify_course(Path(embedded["receipt"]), manifest=self.manifest)["accepted"]
+        )
         document["title"] = "Changed tutorial"
         self.save(document)
         with self.assertRaisesRegex(VideoError, "source or evidence changed"):
