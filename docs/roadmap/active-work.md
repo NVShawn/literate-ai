@@ -25641,3 +25641,52 @@ This includes real provider-dependent BUILD and directory/blob cleanup but exclu
 later configured-provider child, three-node Standard factory and data-only controller
 changes. It does not establish full sample readiness or explain the hosted hardware
 probe failures. No native job from this qualification remains running.
+
+### [x] WORKER-QUAL-002 — Qualify integrated worker and remote PLAN behavior on native hosts
+
+- **Priority:** P1
+- **Owner:** Framework worker transport and native qualification
+- **Direction:** Continue the worker CLI work after all twenty workers pass SSH, using the current published integration and existing issue/PR repairs.
+- **Conclusion:** Verify the integrated schema/catalog and Windows cache repairs, exercise typed PLAN through real Linux and Windows SSH, and fix only reproduced gaps. Preserve exact revisions and report incomplete release gates separately.
+- **Discovered gap:** Native Windows fails before the twelve-membership regression reaches production code: fixture setup uses ordinary paths beyond MAX_PATH. Preserve the long-path challenge and use the existing native path boundary for fixture creation and cleanup.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Reconcile merged PR 514 and current integration evidence; record the repaired fleet.
+  - [x] Run current worker, catalog, cache and remote execution checks on native Linux and Windows.
+  - [x] Repair and rerun the native Windows long-path fixture setup.
+  - [x] Exercise real SSH PLAN requests and refusals without weakening authorization or silently falling back.
+- **Evidence:**
+  - [x] Targeted repository-managed tests pass with exact source identities on selected native hosts.
+  - [x] Real SSH PLAN succeeds on Linux and Windows and malformed or unauthorized requests remain refused.
+  - [x] Record discovered defects and qualification limits, with no release-readiness claim.
+
+- **Qualification evidence:** Published integration `4c3539b1493d343daa8ef54c880fad91425adf38`
+  (tree `c6589047a219db691ee576541a65bb2c6b9c47f8`) includes merged PR 514
+  (`63a4a4c6e5b1c87a45525a236d30f27ad0041ae0`). The private fleet contains
+  ten Linux and ten Windows 11 workers; all twenty passed CLI SSH testing after
+  replacement of the previously failing Windows instance. Provisioning remains
+  disabled unless locally configured. No provider-specific implementation was added.
+- **Native source checks:** Repository-managed `make python-check` on Linux passed
+  248 worker, 12 version/catalog, 11 cache-roundtrip, 19 remote-execution and six
+  PLAN tests. Windows passed the 248 worker (four skips), 12 version/catalog
+  (one skip), and 11 cache-roundtrip tests before exposing the fixture defect.
+- **Live transport evidence:** Production capability probing and
+  `CommandLifecycleActionDispatcher` over actual SSH succeeded on native Linux
+  and Windows. Each receiver used an independently configured worker identity,
+  returned the fixture's exact canonical plan bytes, refused revoked grants and
+  changed generation identities with `action_plan.invalid`, and left its build
+  workspace empty. No SSH subprocess was mocked. Private result artifact SHA-256:
+  `598440909f5829b988dba13810cccee1d96d86d6dcfe6b993e0721dc88936370`.
+- **Limits:** This is focused worker/transport qualification, not the full release
+  ladder, all-phase scheduling proof, generated application acceptance, or proof
+  that an organization-specific dynamic provisioner has been configured. Native
+  identities and logs remain private. End-of-cycle peer survey found no green
+  reviews to absorb; the integration PR remains independently owned.
+- **Repository verification:** `litai verify` passed authority, skipped three undeclared/inapplicable gates, and refused the existing stale project test receipt (`project.test_receipt_stale`). This focused repair does not replace the project-wide receipt.
+- **Repair validation:** macOS and native Windows each passed all 19 remote-execution
+  tests after the fixture repair; Windows also passed all six PLAN tests. The
+  native rerun used the published integration above plus only the revised
+  `tests/unit/test_remote_execution.py`, SHA-256
+  `aaca7479fd370366c7af81ca40f62c9703fed46e77de4f46db2a9b5d00d3c4a4`.
+  The long-path assertion, twelve distinct cache memberships, receiver short-root
+  assertions, and cleanup assertions remain enabled. Production code is unchanged.

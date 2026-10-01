@@ -67,6 +67,11 @@
   inputs, rejecting mismatched candidate and generation-plan bindings. Local source
   admission, live SDK checks and library-import custody remain enforced.
 
+- Test qualification: preserve the long coordinator-path regression on native
+  Windows by creating its fixture through the existing native filesystem boundary.
+  Real SSH PLAN checks now confirm exact results and authorization refusals on
+  Linux and Windows without executing a build.
+
 - Add opt-in local worker provisioning through an organization-owned command, with
   credential bindings, help discovery, bounded request/response validation, durable
   duplicate-allocation protection, and registration recovery. Static worker CRUD
