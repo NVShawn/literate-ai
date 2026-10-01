@@ -23069,6 +23069,34 @@ GitHub CI failure without relaxing identity checks.
   lecture-like dialogue, text-heavy visuals, and missing first-time setup. Goals 1 and
   6 require a visual-first, engaging instructional method that children can inherit,
   while this repository alone owns its two-character comedy and cast.
+- **Second audience correction:** The continuous cut still gives Sam explanatory
+  lines rather than consequential objections. Rewrite as a ten-minute contested
+  pitch: Sam already has C++, Make and tests; LitAI must earn adoption by showing
+  contract/implementation separation, selective Flavors and skills, pinned repo
+  inheritance, brownfield preservation and reviewed updates. Keep product limits
+  visible. Audition more expressive local speech with explicit acronym pronunciation
+  before replacing the existing public film. Obtain the latest available Opus
+  model's independent narrative critique and address it before rendering.
+- **Second-revision progress:** Opus 5.5 (`claude-opus-5-5`, confirmed by the
+  provider usage record) reviewed the complete 1,512-word draft and returned
+  **revise**. Its critique is retained in `docs/courses/play/OPUS-REVIEW.md`.
+  The revised 1,247-word/54-turn script moves taxonomy to relevant objections,
+  explicitly concedes a lenient oracle can pass wrong code, lets Sam count both
+  framework bugs, aligns capture/narration and ends with a limited trial.
+  This is not a second Opus approval. Local Qwen3-TTS voices and acronym-specific
+  speech text are being auditioned; the existing public movie is preserved.
+  Two narrative/pronunciation regressions and eleven video regressions pass.
+- **Audition evidence:** A six-turn, 75.76-second captioned Qwen3-TTS audition
+  renders and verifies locally; output SHA-256
+  `d80d0b01b40341eae223e860c7a5af75ba386cc7c51689cccfb9a9640a76382a`.
+  Local lint and formatting pass. Human listening/voice approval, final pacing,
+  complete shot review and full-film replacement remain required; no claim of
+  improved perceived voice quality is inferred from the media receipt.
+- **Migration handoff:** Preserve the revised source, independent review and
+  verified audition package on the public contribution branch, then consolidate
+  the owning video and CI branches into the operator-selected main. Keep original
+  feedback media and incomplete review/qualification states explicit. Do not move
+  private Git history, raw logs, credentials, model weights or disposable tools.
 - **Depends on:** none
 - **Implementation:**
   - [x] Fix starter oracle and CTest summary parsing with regression coverage.

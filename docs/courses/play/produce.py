@@ -9,6 +9,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import re
 import shutil
 import sys
 import textwrap
@@ -33,7 +34,28 @@ def caption(value):
     return value.replace("Literate A I", "Literate AI").replace("A I slop", "AI slop")
 
 
+def spoken_text(value):
+    """Pronunciation is a speech concern, never a mutation of commands/captions."""
+    value = re.sub(r"\bLitai\b", "Lit A. I.", value, flags=re.IGNORECASE)
+    value = re.sub(r"\bAI\b", "A. I.", value)
+    for written, spoken in (
+        ("C++", "C plus plus"),
+        ("CLI", "C. L. I."),
+        ("SSH", "S. S. H."),
+        ("YAML", "yaml"),
+        ("CTest", "C test"),
+        ("CMake", "C make"),
+        ("TinyXML2", "Tiny X. M. L. two"),
+    ):
+        value = value.replace(written, spoken)
+    return value
+
+
 TITLES = {
+    "challenge": "Ten minutes. Keep your Makefile.",
+    "contract": "Component: the promise, not the implementation",
+    "flavors": "Flavors: choose how that promise is built",
+    "skills": "A catalog is not a prompt",
     "workers": "The machine you already own",
     "worker-config": "Private execution, portable intent",
     "updates": "Change without losing your decisions",
@@ -47,11 +69,31 @@ def custom_art(shot, active):
     parts = [
         '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">',
         '<rect width="1280" height="720" fill="#10192d"/>',
-        text(40, 45, "IT BUILDS. CAN WE SHIP IT?", 18, "#37d8b7"),
+        text(40, 45, "TEN MINUTES. KEEP YOUR MAKEFILE.", 18, "#37d8b7"),
         text(40, 115, TITLES[shot], 37),
         '<rect y="600" width="1280" height="120" fill="#080e1c"/>',
     ]
     labels = {
+        "challenge": [
+            ("LITAI", "Show the proof"),
+            ("10:00", "Earn the overhead"),
+            ("SAM", "C++ • Make • Tests"),
+        ],
+        "contract": [
+            ("INPUT", "Name + messages"),
+            ("CONTRACT", "Normalization rules"),
+            ("OUTPUT", "Greeting + counts"),
+        ],
+        "flavors": [
+            ("BEHAVIOR", "Greeting Component"),
+            ("TARGET", "Python + Make"),
+            ("TECHNIQUE", "Pinned skill recipe"),
+        ],
+        "skills": [
+            ("AGENT TASK", "Adopt / release"),
+            ("RECIPE", "Selected skills"),
+            ("CATALOG", "Not all loaded"),
+        ],
         "workers": [
             ("LOCAL", "Start here"),
             ("SSH", "Your machines"),
@@ -90,9 +132,13 @@ def custom_art(shot, active):
             text(x + 15, 315, label, 27, "#37d8b7"),
             text(x + 15, 365, detail, 21),
         ]
-        if index < 2:
+        if index < 2 and shot not in {"skills", "challenge"}:
             parts.append(arrow(x + 237, 333, 15))
     note = {
+        "challenge": "Keep the tools. Challenge the claims.",
+        "contract": "Same observable behavior • Independent acceptance",
+        "flavors": "C++ + Make is another choice, not a free automatic port",
+        "skills": "Nested SKILL.md: parent guidance + focused child delta",
         "workers": "REMOTE STEPS: WALKTHROUGH, NOT SSH EXECUTION",
         "worker-config": "litai config paths  →  private configuration",
         "updates": "PLAN → REVIEW → APPLY → REBUILD → VERIFY",
@@ -196,6 +242,7 @@ def main():
     parser.add_argument("--repository-image", type=Path, required=True)
     parser.add_argument("--evidence", type=Path, required=True)
     parser.add_argument("--audio-only", action="store_true")
+    parser.add_argument("--limit-turns", type=int)
     args = parser.parse_args()
     import numpy as np
     import soundfile as sf
@@ -209,10 +256,12 @@ def main():
     if not args.audio_only:
         shutil.copy2(args.evidence, root / "sessions.json")
     shutil.copy2(args.repository_image, assets / "repository.png")
-    model = load_model(args.model.resolve(), model_type="kokoro")
+    engine = story.get("speech", {}).get("engine", "kokoro")
+    model = load_model(args.model.resolve(), model_type=engine)
     scenes, chapters = [], []
     elapsed = 0.0
-    for i, turn in enumerate(story["turns"], 1):
+    turns = story["turns"][: args.limit_turns] if args.limit_turns else story["turns"]
+    for i, turn in enumerate(turns, 1):
         print(f"Preparing {i}/{len(story['turns'])} {turn['shot']}", flush=True)
         if turn.get("chapter"):
             chapters.append(
@@ -224,26 +273,43 @@ def main():
             )
         stem = f"shot-{i:02}"
         audio = assets / f"{stem}.wav"
-        voice = (
-            args.model / "voices" / f"{story['voices'][turn['speaker']]}.safetensors"
+        voice_name = story["voices"][turn["speaker"]]
+        voice = args.model / "voices" / f"{voice_name}.safetensors"
+        speech = spoken_text(turn["text"])
+        direction = (
+            story.get("speech", {}).get("directions", {}).get(turn["speaker"], "")
         )
         key = hashlib.sha256(
             (
-                turn["text"]
-                + digest(voice)
+                speech
+                + (digest(voice) if engine == "kokoro" else voice_name)
+                + direction
                 + args.model.name
                 + version("mlx-audio")
-                + "speed=1.0;kokoro;norm=-16"
+                + engine
+                + ";speed=1.0;seed=42;norm=-16;temperature=0.7"
             ).encode()
         ).hexdigest()
         cache = assets / f"{stem}.audio-key"
         if not audio.exists() or not cache.exists() or cache.read_text() != key:
+            import mlx.core as mx
+
+            mx.random.seed(42)
+            settings = (
+                {"voice": str(voice.absolute()), "speed": 1.0, "lang_code": "a"}
+                if engine == "kokoro"
+                else {
+                    "voice": voice_name,
+                    "instruct": direction,
+                    "lang_code": "english",
+                    "temperature": 0.7,
+                    "max_tokens": 1800,
+                }
+            )
             results = list(
                 model.generate(
-                    text=turn["text"],
-                    voice=str(voice.absolute()),
-                    speed=1.0,
-                    lang_code="a",
+                    text=speech,
+                    **settings,
                 )
             )
             raw = root / "raw.wav"
@@ -332,7 +398,8 @@ def main():
                 else art.artwork(turn["shot"], turn["speaker"])
             )
             source = source.replace(
-                "LITERATE AI   /   GREENFIELD REVIEW CUT", "IT BUILDS. CAN WE SHIP IT?"
+                "LITERATE AI   /   GREENFIELD REVIEW CUT",
+                "TEN MINUTES. KEEP YOUR MAKEFILE.",
             ).replace(
                 "Next: your first real coding session.",
                 "Keep the skepticism. Make it repeatable.",
@@ -388,8 +455,13 @@ def main():
         scenes.append(scene)
     if args.audio_only:
         return
+    if not args.limit_turns and elapsed > story.get("target_seconds", float("inf")):
+        raise ValueError(
+            f"Narration alone takes {elapsed:.1f}s; trim the script before rendering "
+            f"the {story['target_seconds']}s film. Audio cache is retained."
+        )
     production = {
-        "model": "mlx-community/Kokoro-82M-bf16",
+        "model": story.get("speech", {}).get("model", "mlx-community/Kokoro-82M-bf16"),
         "snapshot": args.model.name,
         "voices": story["voices"],
         "mlx_audio": version("mlx-audio"),
@@ -399,17 +471,17 @@ def main():
         "producer_sha256": digest(Path(__file__)),
         "chapters": chapters,
         "edition": "public feedback; not framework release qualification",
-        "review": (
-            "94-second voice/style audition accepted by user; "
-            "full-cut audience review pending"
-        ),
+        "speech_directions": story.get("speech", {}).get("directions", {}),
+        "spoken_text": [spoken_text(turn["text"]) for turn in turns],
+        "review": "Revised Qwen voice audition: human listening approval pending",
+        "audition": bool(args.limit_turns),
     }
     (root / "production.json").write_text(json.dumps(production, indent=2) + "\n")
     (root / "course.json").write_text(
         json.dumps(
             {
                 "schema": "literate-ai/video-course@1",
-                "id": story["id"],
+                "id": story["id"] + ("-audition" if args.limit_turns else ""),
                 "title": story["title"],
                 "embed_subtitles": False,
                 "audio_bitrate_kbps": 80,

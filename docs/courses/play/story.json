@@ -1,92 +1,320 @@
 {
-  "id": "sam-meets-literate-ai",
-  "title": "It Builds. Can We Ship It?",
-  "voices": {"litai":"af_heart","sam":"am_fenrir"},
+  "id": "sam-meets-literate-ai-ten-minutes",
+  "title": "Ten Minutes. Keep Your Makefile.",
+  "target_seconds": 600,
+  "voices": {
+    "litai": "Serena",
+    "sam": "Ryan"
+  },
+  "speech": {
+    "engine": "qwen3_tts",
+    "model": "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit",
+    "directions": {
+      "litai": "Speak in clear natural American English, as an experienced female engineer making a persuasive live demonstration to a skeptical colleague. Warm, brisk, direct, dry humor. Respond to the objection, never sound like an announcer. Do not laugh unless the words call for it.",
+      "sam": "Speak in natural American English, as an experienced male software engineer cross-examining a vendor's demonstration. Wry, skeptical, concise, alert. Real questions, not a narrator. Not hostile, not theatrical."
+    }
+  },
   "turns": [
-    {"speaker":"sam","shot":"zip","chapter":"Meet the travelers","text":"Hello. I'm Sam. I write C plus plus, I use Make, and I trust tools more after they've disappointed me in a predictable way."},
-    {"speaker":"litai","shot":"bridge","text":"And I'm LitAI, your personification of Literate A I. I bring specifications, tests, and an unreasonable interest in what actually reaches the user."},
-    {"speaker":"sam","shot":"proof","text":"We're taking a small adventure from it builds on my machine to someone else can use it. There may be disagreements."},
-    {"speaker":"litai","shot":"pipeline","text":"There will definitely be evidence. We'll set up, build a new project, adopt an existing C plus plus library, and discuss life after the demo."},
-    {"speaker":"sam","shot":"zip","text":"For the record, I know what best practices are. I've read several postmortems in which we rediscovered them."},
-    {"speaker":"litai","shot":"proof","text":"Exactly. This isn't remedial software engineering. It's making the practices you already value happen reliably, even when your new colleague types at industrial speed."},
-    {"speaker":"sam","shot":"shrug","text":"Ah, agents. Amazingly fast. Occasionally an artisanal producer of A I slop. Now available in enterprise quantities."},
-    {"speaker":"litai","shot":"bridge","text":"Speed multiplies whatever process surrounds it. Give an agent vague intent and no independent checks, and it can industrialize your misunderstanding."},
-    {"speaker":"sam","shot":"proof","text":"So agents need oversight. Unlike experienced engineers, who have evolved beyond checklists."},
-    {"speaker":"litai","shot":"shrug","text":"Yes. That explains why production incidents stopped happening when senior titles were invented."},
-    {"speaker":"sam","shot":"zip","text":"Fine. We all need it. I'd prefer the oversight to be executable, rather than another document everyone agrees to ignore."},
-    {"speaker":"litai","shot":"pipeline","text":"That's the point. The harness gives your agent a structured route from intent to proof. It doesn't replace engineering judgment, or make every generated answer correct."},
-    {"speaker":"sam","shot":"where","chapter":"Acquire and prepare","text":"First obstacle: where do I get it? Please don't begin with a machine you configured three months ago."},
-    {"speaker":"litai","shot":"repo","text":"The public repository is on screen. This film uses a development checkout; follow its installation documentation and choose a reviewed revision, not a mysterious package name."},
-    {"speaker":"sam","shot":"tools","text":"And on this Mac, the starting kit?"},
-    {"speaker":"litai","shot":"clone","text":"Python three eleven or newer, Git, and Make. Clone the repository, enter it, then make install. These setup panels are a walkthrough, not a recording of installation."},
-    {"speaker":"sam","shot":"consent","text":"Does make install install every compiler I've ever offended?"},
-    {"speaker":"litai","shot":"consent","text":"Read its prerequisite prompts and approve only the intended changes. It selects prerequisites for your platform. Windows has its own documented setup path."},
-    {"speaker":"sam","shot":"path","text":"Installation finished. My shell says command not found. A classic welcome ceremony."},
-    {"speaker":"litai","shot":"doctor","text":"Check the prefix the installer reported, then your PATH. Run litai dash dash version and litai doctor. A diagnostic is useful information, not an invitation to ignore it."},
-    {"speaker":"sam","shot":"login","text":"And installing the harness logs me into the coding agent?"},
-    {"speaker":"litai","shot":"login","text":"Separate step. Authenticate your selected supported coding CLI. This session uses Codex with an explicit model selector. Credentials stay off camera, and model usage can cost money."},
-    {"speaker":"sam","shot":"next","text":"Good. Now let's do something real before our onboarding develops a sequel."},
-    {"speaker":"litai","shot":"terminal","capture":"create-plan","chapter":"A real greenfield coding session","text":"Here begins recorded execution, edited into a terminal replay. Waiting is compressed; results aren't invented. First, a read-only create plan for a disposable application."},
-    {"speaker":"sam","shot":"terminal","capture":"create-plan","text":"It tells me what it will create before touching the project. Python and Make for this first run. The language choice isn't the specification."},
-    {"speaker":"litai","shot":"terminal","capture":"create-apply","text":"Right. Review the target and parent, then apply with acknowledgement. For automation, bind apply to the printed plan identity so a changed proposal cannot slip through."},
-    {"speaker":"sam","shot":"terminal","capture":"specification","text":"Here's the inherited greeting-card contract: a name and messages go in; a greeting, normalized recipient identifier, message count and word count come out. Let's inspect that promise."},
-    {"speaker":"litai","shot":"terminal","capture":"specification","text":"The Component owns observable behavior. Flavors select language, build system and platform. Skills guide technique. We haven't outsourced the definition of correct to the agent."},
-    {"speaker":"sam","shot":"terminal","capture":"generation","text":"Let's ask it to implement that promise. And explicitly allow it to compile and execute here. This is a disposable demo, not a production deployment."},
-    {"speaker":"litai","shot":"terminal","capture":"generation","text":"Rebuild drives the lifecycle. Generation is only one stage: current tests, execution and independent acceptance still have to pass. The model selector is visible in the command."},
-    {"speaker":"sam","shot":"terminal","capture":"source","text":"Now we're looking at code the agent actually generated in this run. Not a hand-written example disguised as an agent success story."},
-    {"speaker":"litai","shot":"terminal","capture":"source","text":"Read it. Does recipient normalization match the contract? Does counting handle Unicode whitespace? Fluency isn't evidence. The implementation must survive those questions."},
-    {"speaker":"sam","shot":"terminal","capture":"tests","text":"And these are the generated tests. Useful, but the author grading its own homework isn't our entire quality department."},
-    {"speaker":"litai","shot":"terminal","capture":"tests","text":"Exactly. Native tests and independent acceptance have different jobs. Passing a self-written test suite doesn't automatically prove the written product contract."},
-    {"speaker":"sam","shot":"terminal","capture":"rebuild-failed","text":"And it failed. Missing messages. The specification requires messages, but this acceptance invocation supplied only a name. That's not the agent ignoring the contract."},
-    {"speaker":"litai","shot":"terminal","capture":"oracle","text":"Correct. We found an inheritance defect: the richer parent Component got the simple starter's verifier. Here are our independently calculated acceptance cases for the actual written contract."},
-    {"speaker":"sam","shot":"terminal","capture":"oracle","text":"Two messages, six words. The expected recipient follows the specified normalization. We changed the verifier to match intent, not to flatter the generated code."},
-    {"speaker":"litai","shot":"terminal","capture":"rebuild","text":"This is a demo-local correction, not a framework fix. The inheritance defect is tracked for repair. We rerun the complete lifecycle before claiming success."},
-    {"speaker":"sam","shot":"terminal","capture":"verify","text":"So this is a current result, with its actual passes and skips visible. Not a green screenshot borrowed from a different revision."},
-    {"speaker":"litai","shot":"terminal","capture":"verify","text":"Keep the inputs and model selection consistent. A receipt is evidence about exact work, not a lifetime warranty on everything named hello."},
-    {"speaker":"sam","shot":"terminal","capture":"package","text":"Now packaging. The part of my old workflow described by a folder named release stuff."},
-    {"speaker":"litai","shot":"terminal","capture":"package","text":"We build a local wheel from the accepted application. Packaging, package verification, publishing and releasing are distinct decisions. No registry upload happens in this film."},
-    {"speaker":"sam","shot":"terminal","capture":"package-verify","text":"A verified package is better than a confidently named zip. I remain emotionally attached to the zip."},
-    {"speaker":"litai","shot":"pipeline","text":"You may keep the attachment. For your next feature, change observable intent, review it, then regenerate and re-run the gates. Don't make generated source your hidden specification."},
-    {"speaker":"sam","shot":"workers","chapter":"Use the machines you already own","text":"Do I need to buy a fleet to get started? I already own several computers that contribute mainly fan noise."},
-    {"speaker":"litai","shot":"workers","text":"Start here, locally. The session just used this machine. Existing compatible machines can be workers; you don't need a new hosted service merely to begin."},
-    {"speaker":"sam","shot":"workers","text":"So target means what I want to build, and worker means where it happens?"},
-    {"speaker":"litai","shot":"worker-config","text":"Yes. Keep worker addresses and credentials out of project authority. Use the synthetic worker and test examples, and let litai config paths locate your private configuration."},
-    {"speaker":"sam","shot":"worker-config","text":"Then verify the selected model and probe the machine before I send it a long job. Start with one compatible cell, not the entire matrix."},
-    {"speaker":"litai","shot":"workers","text":"Exactly. This section is a remote-worker walkthrough, not proof of an SSH run. Check the toolchain and separate agent login on each actual worker."},
-    {"speaker":"sam","shot":"bridge","chapter":"Adopt a real C++ project","text":"The new project was deliberately tiny. What about code that already earns its keep? Preferably C plus plus, so I can recognize my own anxiety."},
-    {"speaker":"litai","shot":"terminal","capture":"adopt-plan","text":"Let's use TinyXML2, a public XML library, at the recorded commit. This is our disposable demonstration, not an upstream adoption or an endorsement by its maintainers."},
-    {"speaker":"sam","shot":"terminal","capture":"adopt-plan","text":"Read-only inspection first. It discovers the existing language and build tools. And there's a Git recovery point before any source moves."},
-    {"speaker":"litai","shot":"terminal","capture":"adopt-apply","text":"Apply wraps the existing project and runs the authorized baseline and parity work. Watch the actual build evidence. We are not replacing the C plus plus implementation."},
-    {"speaker":"sam","shot":"terminal","capture":"cpp-source","text":"There's the existing source in its retained implementation location. The library didn't disappear into a Markdown file."},
-    {"speaker":"litai","shot":"terminal","capture":"retained","text":"Now run the retained harness. It rebuilds and tests the preserved implementation in disposable custody. The recorded result tells us what passed, not what we hoped."},
-    {"speaker":"sam","shot":"terminal","capture":"ctest","text":"CMake, the actual C plus plus targets, and CTest. Familiar tools. The new thing is the explicit evidence around them."},
-    {"speaker":"litai","shot":"terminal","capture":"ctest","text":"The rehearsal exposed another framework bug: a new CTest summary format wasn't counted. We fixed the parser, not the test result, and reran the real harness."},
-    {"speaker":"sam","shot":"terminal","capture":"retained-publish","text":"Then publish the finalized test receipt to this local project. Publish here doesn't mean upload TinyXML2 anywhere."},
-    {"speaker":"litai","shot":"terminal","capture":"retained-stage","text":"Correct. Now advance to retained. Original source remains release authority. A recorded baseline is valuable already, without pretending we completed a native rewrite."},
-    {"speaker":"sam","shot":"adoption","text":"And the later stages? I suspect there's a catch called actually understanding the software."},
-    {"speaker":"litai","shot":"adoption","text":"A good catch. Draft specifications, review them, then qualify clean regeneration against independent behavior evidence. Move one boundary at a time. These later stages aren't demonstrated as complete here."},
-    {"speaker":"sam","shot":"adoption","text":"So early adoption buys me repeatable evidence and clearer handoffs. Specification-led shipping comes later, when we've earned it. That sounds considerably less magical. Thank you."},
-    {"speaker":"litai","shot":"bridge","text":"You're welcome. Magic makes an excellent demo and an awkward incident report."},
-    {"speaker":"sam","shot":"pipeline","text":"And Agentis? If it coordinates the agents, why have another layer?"},
-    {"speaker":"litai","shot":"pipeline","text":"Coordination and product proof are different jobs. An orchestrator can assign the work; Literate A I structures the product lifecycle. This film proves the local harness, not a deployed Agentis integration."},
-    {"speaker":"sam","shot":"updates","chapter":"The morning after the demo","text":"All right. Reluctantly, I'm convinced. It's not asking me to learn engineering again. It's asking me and my very fast colleagues to stop skipping it."},
-    {"speaker":"litai","shot":"updates","text":"I'll accept reluctantly. What worries you now?"},
-    {"speaker":"sam","shot":"updates","text":"Tomorrow the framework changes. Next week my project changes. Six months later nobody remembers which copied instructions are stale. How does this stay useful?"},
-    {"speaker":"litai","shot":"terminal","capture":"update","text":"Start with litai update as a read-only plan. It compares recorded inheritance, current local files and upstream authority. Review the classifications before applying anything."},
-    {"speaker":"sam","shot":"updates","text":"So it isn't git pull followed by a cheerful overwrite of my decisions."},
-    {"speaker":"litai","shot":"updates","text":"No. Safe upstream-only changes and local conflicts are different cases. Apply deliberately; review conflicting choices explicitly. This demonstrated revision doesn't promise automatic merging of arbitrary competing edits."},
-    {"speaker":"sam","shot":"updates","text":"And an updated framework executable is another authority change, not the same as refreshing inherited documents."},
-    {"speaker":"litai","shot":"updates","text":"Right. Standard-bound projects use the documented reviewed rebind after an intentional wheel upgrade. Then rebuild and verify current evidence. Old receipts don't become fresh because the version number did."},
-    {"speaker":"sam","shot":"lineage","text":"Can I put our team's conventions in one repository and let several projects inherit them? Please say the answer doesn't involve synchronized copy and paste."},
-    {"speaker":"litai","shot":"lineage","text":"That's repository lineage. The framework can feed a team parent, which feeds applications. Components, Flavors and skills compose through recorded parent revisions; projects can add their own intent."},
-    {"speaker":"sam","shot":"lineage","text":"And our team can choose different presenters for its tutorial. I wasn't planning to become an inherited dependency."},
-    {"speaker":"litai","shot":"lineage","text":"The video craft is reusable. We are this repository's story. Pin and review parent changes; use explicit reparenting when changing parent authority, rather than quietly pointing somewhere else."},
-    {"speaker":"sam","shot":"orchestration","text":"What about a product made of several independent repositories? That's a dependency graph, not necessarily an inheritance family."},
-    {"speaker":"litai","shot":"orchestration","text":"Precisely. Orchestration keeps declared child repositories, exact pins and dependency order explicit. Review the plan, acknowledge execution, and keep each child's evidence. Inheritance and orchestration solve different problems."},
-    {"speaker":"sam","shot":"zip","text":"So we keep the good old tools, add a visible process, and let the fast agents do the repetitive work without appointing them sole judges of success."},
-    {"speaker":"litai","shot":"bridge","text":"That's the adventure. Start with one useful boundary and one machine. Review the intent, run the work, inspect the evidence, then expand."},
-    {"speaker":"sam","shot":"zip","text":"I'm renaming final, final, really final dot zip. Apparently we can identify a release with something stronger than increasingly urgent adjectives."},
-    {"speaker":"litai","shot":"repo","text":"The public repository has the source, commands and limitations for this film. Tell us where you got stuck, what remained unclear, and what your real project needs."},
-    {"speaker":"sam","shot":"end","text":"I'm still skeptical. But now I have a repeatable way to be skeptical. That's an upgrade I can ship."}
-  ]
+    {
+      "speaker": "sam",
+      "shot": "challenge",
+      "chapter": "Ten minutes. No faith required.",
+      "text": "I'm Sam. C++, make, tests. They work. You've got ten minutes to convince me I need another tool. The clock includes buzzwords."
+    },
+    {
+      "speaker": "litai",
+      "shot": "challenge",
+      "text": "I'm Litai, from Literate AI. Keep your tools; I'm selling a harness, not a religion. The interesting part is between an agent saying done and a product being ready."
+    },
+    {
+      "speaker": "sam",
+      "shot": "challenge",
+      "text": "My tests already tell me that. Are we adding YAML so a chatbot can feel supervised?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "contract",
+      "text": "If your pipeline already proves every step, keep it. The gap is when an agent implements the wrong promise, tests that same misunderstanding, and calls the package shipped. Let's inspect one promise before generating anything."
+    },
+    {
+      "speaker": "sam",
+      "shot": "contract",
+      "text": "You get one small example. Not a cathedral of configuration."
+    },
+    {
+      "speaker": "litai",
+      "shot": "contract",
+      "chapter": "One promise, two layers",
+      "text": "One promise. A greeting card: a name and messages in; a greeting, a recipient identifier and counts out. That promise is the Component, Unicode whitespace included. It says nothing about how it's built."
+    },
+    {
+      "speaker": "sam",
+      "shot": "contract",
+      "text": "So, a requirements file. We've had those since before the coffee machine had firmware."
+    },
+    {
+      "speaker": "litai",
+      "shot": "flavors",
+      "text": "Yes, except this one is bound to the work. Flavors are the build choices: language, build system, platform, packaging. Swap a Flavor and you still need a real toolchain and new tests. No magic porting. The promise stays put."
+    },
+    {
+      "speaker": "sam",
+      "shot": "flavors",
+      "text": "And your recorded example is Python. You brought Python to a C++ interview."
+    },
+    {
+      "speaker": "litai",
+      "shot": "flavors",
+      "text": "Guilty. The smallest recorded run is Python plus Make. Your kind of code shows up in a few minutes: C++, CMake, CTest."
+    },
+    {
+      "speaker": "sam",
+      "shot": "clone",
+      "chapter": "Recorded greenfield session",
+      "text": "Then stop drawing and run something. Starting with where I get it."
+    },
+    {
+      "speaker": "litai",
+      "shot": "clone",
+      "text": "Repository and commands are on screen. On macOS: Python three eleven or newer, Git and Make, then make install. This panel is a walkthrough. The terminal sessions are a recorded development build, revisions beside the film."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "capture": "create-plan",
+      "text": "A development build. So, tomorrow's features on loan."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "create-plan",
+      "text": "Possibly, which is why it's labeled. This is its real read-only create plan, pinned to a public parent commit. Destination and choices are reviewable; nothing applies until you acknowledge it."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "text": "Fine. Where's the actual agent writing code?",
+      "capture": "create-apply"
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "text": "Here. Rebuild invokes the selected coding agent, with explicit permission to run generated code in this disposable project. Edited replay; the waiting is compressed.",
+      "capture": "generation"
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "text": "A greeting card doesn't prove it can maintain my parser.",
+      "capture": "generation"
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "source",
+      "text": "It doesn't. It makes the mechanism inspectable before we touch your parser. This generated code normalizes the recipient and counts words."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "tests",
+      "text": "These generated tests are useful, but they're not our independent definition of correct."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "text": "There. Red. Missing messages. Your ten-minute sales pitch appears to have developed a warranty claim.",
+      "capture": "rebuild-failed"
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "rebuild-failed",
+      "text": "Fair. The Component requires messages; the inherited acceptance case got that wrong. That's a defect in our starter, not the agent's. That recorded defect is tracked for an upstream fix."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "capture": "oracle",
+      "text": "Hold on. Your independent check, the thing meant to catch the agent, was the broken part. And then you edited it until it went green."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "oracle",
+      "text": "Then judge my edit against the written contract, not the generated code: two messages, six words, this identifier. We corrected this disposable project's acceptance cases and reran. Local recovery, disclosed. That recorded parent still needs repair."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "capture": "rebuild",
+      "text": "And if it had been wrong the other way, too lenient, you'd be green and smiling."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "verify",
+      "text": "Yes. A lenient oracle passes bad code, and so does a wrong specification; the harness can't detect either on its own. It puts the contract, the acceptance cases and the results where a reviewer can challenge them. Recorded results, skips included."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "capture": "package",
+      "text": "Green on your machine. My release checklist is longer than that."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "package-verify",
+      "text": "Agreed. Local wheel and package verification; no registry upload. Publishing is a separate decision. Tests of one revision don't qualify another, and a green build doesn't prove the installed package works."
+    },
+    {
+      "speaker": "sam",
+      "shot": "adoption",
+      "chapter": "Brownfield without a rewrite",
+      "text": "My real project already has years of C++. I'm not replacing that with an optimistic paragraph."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "text": "Don't. Here is TinyXML2, pinned to the recorded public commit. The adoption plan inspects the existing project before mutation. We preserve the original implementation, establish a recovery point, and wrap its real build and tests.",
+      "capture": "adopt-plan"
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "text": "Which tests? If you replace CTest with an agent congratulating itself, we're finished.",
+      "capture": "adopt-apply"
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "ctest",
+      "text": "Its own CMake targets and CTest, run on the preserved source. In rehearsal we also hit a bug in our CTest-summary parser; it was repaired and the harness run repeated."
+    },
+    {
+      "speaker": "sam",
+      "shot": "adoption",
+      "text": "That's two bugs in your own tool in one demo. Why does it go anywhere near my CI?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "retained",
+      "text": "Fair count. It shouldn't, until a trial earns it. What a trial gets you: a repeatable baseline, recorded build and test evidence, and a written account of what's authoritative. Wrapped: the harness surrounds your code. Retained: that preserved code has its required baseline evidence."
+    },
+    {
+      "speaker": "sam",
+      "shot": "adoption",
+      "text": "And then comes the upsell to a rewrite."
+    },
+    {
+      "speaker": "litai",
+      "shot": "adoption",
+      "text": "There are later stages: draft specifications, regenerate, and qualify against independent evidence before authority moves. None of that is complete in this demo. You can stop at retained; your original source still governs releases."
+    },
+    {
+      "speaker": "sam",
+      "shot": "lineage",
+      "chapter": "Shared practice, workers, and two kinds of orchestration",
+      "text": "Fine. Now there's a framework-shaped pile of files beside my code, times every repository. Does my agent read that whole grab bag to fix a typo?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "skills",
+      "text": "No. Agent skills guide tasks like adoption or release; generation skills guide building one Component with its Flavors. Nested skills add focused guidance to their parents; a generation recipe pins its selected instructions. Shared rules come through tracked inheritance: framework, your team's conventions, then each product. This part is a diagram, not a run."
+    },
+    {
+      "speaker": "sam",
+      "shot": "lineage",
+      "text": "Inherited means Tuesday's upstream cleverness rewrites Monday's release."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "update",
+      "text": "Not silently. A recorded revision isn't a live subscription. An update plan, like this recorded one, compares what you inherited, what you changed and what's new upstream. Conflicts wait for a decision. Upgrading the tool itself is separate, and an old receipt isn't fresh proof."
+    },
+    {
+      "speaker": "sam",
+      "shot": "lineage",
+      "text": "And when two parents disagree?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "lineage",
+      "text": "Ambiguous definitions are rejected. A product can override deliberately, with provenance. Prefer a narrow project rule to copying a whole policy. Inheritance shares practice; it doesn't remove review."
+    },
+    {
+      "speaker": "sam",
+      "shot": "skills",
+      "text": "Including this video? Every project inherits two talking heads?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "skills",
+      "text": "No. The video-production skill is reusable; this cast belongs to this repository. Your payment library is not contractually obliged to include a sarcastic man."
+    },
+    {
+      "speaker": "sam",
+      "shot": "workers",
+      "text": "I supply that service free. Now the bill: a cluster, a platform team, another subscription?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "workers",
+      "text": "One machine, as this recording used. Compatible machines you already have can become workers: addresses and credentials in private configuration, then probe toolchains and agent access. Walkthrough, not an SSH run."
+    },
+    {
+      "speaker": "sam",
+      "shot": "pipeline",
+      "text": "And Agentis, the orchestrator? Two systems supervising one agent sounds like two managers in one meeting."
+    },
+    {
+      "speaker": "litai",
+      "shot": "pipeline",
+      "text": "Different jobs. The orchestrator assigns work. Literate AI structures specification, generation, checks and release evidence. A prompt saying be careful isn't a gate. No deployed Agentis integration is shown here."
+    },
+    {
+      "speaker": "sam",
+      "shot": "orchestration",
+      "text": "My product is three repositories that depend on each other. Is that inheritance, or more orchestration?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "orchestration",
+      "text": "Repository orchestration, a different one from Agentis; sorry about the word. It records child pins and dependency order. Inheritance shares practice; Agentis assigns agent work. Three graphs. Each child still needs its own evidence. Diagram, not a deployment."
+    },
+    {
+      "speaker": "sam",
+      "shot": "pipeline",
+      "text": "AI slop with a receipt is still AI slop."
+    },
+    {
+      "speaker": "litai",
+      "shot": "pipeline",
+      "text": "Yes. A receipt records checks; it doesn't certify taste, usefulness or requirements. Independent acceptance is how you challenge the output. Humans need that too. We've just been better at declining supervision."
+    },
+    {
+      "speaker": "sam",
+      "shot": "challenge",
+      "text": "Time. I won't migrate everything. I'll try one library at retained, compare the overhead, and keep my Makefile. If it's busywork, it goes."
+    },
+    {
+      "speaker": "litai",
+      "shot": "challenge",
+      "text": "That's a fair trial. Start with one useful boundary, inspect the plan, keep a baseline, and judge the result. The pitch isn't trust the agent. It's make the claims testable, including mine."
+    },
+    {
+      "speaker": "sam",
+      "shot": "challenge",
+      "text": "Don't look pleased. You've earned a trial, not a convert."
+    }
+  ],
+  "review": {
+    "model": "claude-opus-5-5",
+    "reviewed_draft_sha256": "91e2a902538bb089518ab98be6ab2aac0ac0cc6a8a27f451be1723332c230b26",
+    "verdict": "revise",
+    "status": "First review changes incorporated; not a second Opus approval"
+  }
 }

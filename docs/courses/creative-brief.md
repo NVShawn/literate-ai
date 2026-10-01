@@ -7,6 +7,28 @@ the production craft; this document owns LitAI and Sam.
 
 ## Creative direction
 
+### Current revision: ten minutes to earn a trial
+
+The continuous feedback cut was rejected as alternating exposition. Sam starts
+with a legitimate working toolchain: C++, Make and tests. He is not a straw man
+who thinks compilation equals shipping, and he must not explain LitAI's features
+for her. LitAI leads the demonstration and responds to his actual objection.
+Every major beat follows objection, visible evidence, counter-objection, bounded
+answer. She concedes real limits without hiding them in a closing disclaimer.
+
+The value ladder is an inspectable behavior contract, target-specific technique,
+real generation challenged by independent acceptance, retained brownfield adoption,
+shared team practice through repository inheritance, and controlled evolution.
+The ending earns a small measurable trial, not a conversion speech. Target ten
+minutes including reaction beats and readable demo holds; do not achieve this by
+speeding up voices beyond comfortable comprehension. Opus reviews the complete
+script before the next voice audition is considered for a full render.
+
+Speech text and display text are separate. Pronounce AI as individual letters,
+likewise CLI and SSH; say C plus plus. Preserve literal commands in captions and
+visuals. New expressive local voices require a fresh audition: acceptance of the
+previous Kokoro opening does not approve either these voices or this script.
+
 LitAI is a capable, warm female instructor with dry wit. Sam is a competent male
 C++/Make engineer whose habits leave packaging and release proof under-specified.
 Neither is a lecture delivery device. Sam makes choices, tries commands, notices

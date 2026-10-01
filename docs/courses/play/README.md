@@ -1,5 +1,38 @@
 # It Builds. Can We Ship It?
 
+## Revision in progress: Ten Minutes. Keep Your Makefile.
+
+The existing 13:38 public film below is preserved, but its dialogue and voices
+have not met the owner's latest review. `story.json` now contains the replacement
+ten-minute pitch. Sam defends working C++/Make/tests and presses consequential
+objections; LitAI presents and answers with inspectable evidence and explicit
+limits. Its recorded execution references still identify the original session,
+not a fresh run against today's release. Do not publish this script as a verified
+new film merely because the older media receipt passes.
+
+Read the [revised script](SCRIPT.md) and [Opus 5.5 critique with dispositions](OPUS-REVIEW.md).
+The [preserved voice audition](https://github.com/jordanhubbard/literate-ai/tree/docs/publish-video-courses/media/courses/ten-minute-audition)
+includes its recorded audio, visuals and integrity receipt for migration.
+The post-review draft has 1,247 spoken words in 54 turns; measured delivery, pauses
+and readable evidence holds still determine the final running time. The two skipped
+gates in the recorded verification are source intelligence (provider `none`) and
+HTML observability (no declared HTML artifacts), not hidden passing tests. Those
+reasons come from the retained raw verification record and must be displayed when
+that result appears in the full replacement film.
+
+The replacement producer separates spoken pronunciations from captions and accepts
+directed local Qwen3-TTS voices. `--limit-turns 6` builds the opening audition;
+omit the limit only after the new voices and dialogue have passed human review.
+The original Kokoro approval does not transfer to these voices. The public weights
+are [Qwen3-TTS CustomVoice](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice),
+using the [MLX conversion](https://huggingface.co/mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit).
+No real person's voice is cloned and no narration text goes to a cloud TTS service.
+The independent script review uses the explicitly requested Opus model through
+[review.py](review.py); only the supplied narrative and factual constraints are sent for that
+authorized review. The reviewer has no tools. Private output stays under `_build`.
+
+## Existing feedback edition
+
 One continuous video play, published as a **feedback edition**, not a framework
 release or a claim of production qualification. Sam is an experienced C++/Make
 developer; LitAI personifies the harness. Their argument becomes a practical

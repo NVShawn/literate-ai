@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Instructional narrative: add an Opus-reviewed ten-minute skeptical-adopter
+  script and a new local expressive-voice audition with separate acronym
+  pronunciation text. The existing public film remains unchanged pending human
+  listening review and full replacement production.
+
 - Instructional media: replace the short-course viewing path with one continuous,
   two-voice feedback-edition video play, character introductions, fresh recorded
   greenfield/TinyXML2 execution, visible captions, and an updates/lineage closing.
