@@ -1817,7 +1817,7 @@ See [active work](roadmap/active-work.md) for current development status.
 
 ## Development
 
-This project is built with [Literate AI](https://github.com/NVIDIA-dev/literate-ai).
+This project is built with [Literate AI](https://github.com/jordanhubbard/literate-ai).
 The [framework flow](user/framework-flow.md) explains the specification-led lifecycle,
 and the [project map](user/project-layout.md) identifies the authority for a change.
 
@@ -1886,7 +1886,7 @@ explicit parent change.
 
 ## Development workflow
 
-This project uses [Literate AI](https://github.com/NVIDIA-dev/literate-ai) to
+This project uses [Literate AI](https://github.com/jordanhubbard/literate-ai) to
 keep specifications as durable authority and generate source, current tests, and a
 CycloneDX source SBOM into a disposable workspace. The commands below are for
 contributors, not end users.
