@@ -215,7 +215,7 @@ def select_github_release_wheel(
     if parsed is None:
         return None
     latest, installed = parsed
-    if latest <= installed:
+    if latest <= installed or latest.is_prerelease or latest.is_devrelease:
         return None
     assets = payload.get("assets")
     if not isinstance(assets, list):
@@ -229,6 +229,7 @@ def select_github_release_wheel(
             isinstance(name, str)
             and isinstance(url, str)
             and WHEEL_NAME.fullmatch(name)
+            and name == f"literate_ai-{latest}-py3-none-any.whl"
         ):
             return HostSelfUpdatePlan(raw_tag, version_text, name, url)
     return None
@@ -423,12 +424,15 @@ def stage_github_wheel(
     installed_version: str,
     environ: Mapping[str, str],
     releases_url: str | None = None,
+    force_check: bool = False,
 ) -> None:
     cache_path = enrollment.staging_root / "cache.json"
     cache = _read_cache(cache_path)
     staged = _staged_plan(enrollment)
     staged_newer = staged is not None and _is_newer(staged.version, installed_version)
-    if not cache_allows_github_check(cache, now=now, staged_newer=staged_newer):
+    if not force_check and not cache_allows_github_check(
+        cache, now=now, staged_newer=staged_newer
+    ):
         return
     headers = _github_headers(environ)
     try:
@@ -632,6 +636,7 @@ def maybe_host_self_update(
     runner: CommandRunner | None = None,
     exec_fn: ExecFn | None = None,
     spawn: Callable[..., object] | None = None,
+    check_now: bool = False,
 ) -> None:
     configured = os.environ if environ is None else environ
     errors = sys.stderr if stderr is None else stderr
@@ -641,7 +646,36 @@ def maybe_host_self_update(
             environ=configured, executable=python
         )
         if enrollment is None:
+            if check_now and not _flag(configured, REEXEC_ENVIRONMENT):
+                print(
+                    "litai: CLI self-update is not enabled for this invocation; "
+                    "continuing with project update",
+                    file=errors,
+                )
             return
+        if check_now:
+            import time
+
+            lock = try_exclusive_lock(enrollment.staging_root / "worker.lock")
+            if lock is None:
+                print("litai: self-update check already in progress", file=errors)
+                return
+            try:
+                stage_github_wheel(
+                    enrollment,
+                    now=time.time() if now is None else now,
+                    installed_version=DISTRIBUTION_VERSION,
+                    environ=configured,
+                    force_check=True,
+                )
+            finally:
+                release_exclusive_lock(lock)
+            cache = _read_cache(enrollment.staging_root / "cache.json")
+            if cache.get("ok") is not True:
+                print(
+                    "litai: release check unavailable; continuing with installed CLI",
+                    file=errors,
+                )
         apply_staged_wheel(
             enrollment,
             argv=argv,
@@ -651,11 +685,12 @@ def maybe_host_self_update(
             stderr=errors,
             environ=configured,
         )
-        spawn_self_update_worker(
-            enrollment,
-            argv_executable=python,
-            popen=spawn,
-        )
+        if not check_now:
+            spawn_self_update_worker(
+                enrollment,
+                argv_executable=python,
+                popen=spawn,
+            )
     except Exception as exc:  # noqa: BLE001 — fail open
         print(f"litai: self-update skipped: {exc}", file=errors)
 

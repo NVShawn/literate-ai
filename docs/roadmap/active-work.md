@@ -23058,3 +23058,64 @@ GitHub CI failure without relaxing identity checks.
   public-mirror qualification branch records the resulting lifecycle-driver and
   documentation authority identities and passes the complete managed Python suite,
   including the absorbed attached update, rollback/custody, and native Bazel cases.
+
+### [ ] RELEASE-INVARIANTS-001 — Require SemVer release branches and verified public tags
+
+- **Release blocker:** yes; applies equally to the framework and derived projects.
+- **Observed failure:** The public repository advertises no tags, so default
+  installed-CLI parent selection fails with `repository_lineage.release_unavailable`.
+  Explicit-parent tutorial sessions did not exercise this first-run path.
+- **Enforcement findings:** Release policy accepts `pep440`; branch ownership has
+  an exemption when no default branch is configured. Published verification checks
+  remote branch/tag revision equality but does not itself require the branch to
+  be the version's release line. Remove exemptions, including legacy-policy paths.
+  Canonical release identity must be SemVer; ecosystem-specific package spelling
+  may only be a checked projection, not a competing release-version authority.
+- **Publication distinction:** Development builds may exist without release tags,
+  but neither an installer, migration, nor release receipt may represent such a
+  build as a verified published release. Framework-managed release paths must fail
+  closed; direct out-of-band Git/forge writes require forge protections and cannot
+  be made impossible by a client CLI alone.
+- **Dependency evidence:** Public PR #11 owns canonical-destination corrections
+  and remains unmerged with CI pending at inspection. Do not duplicate its edits
+  or treat its pre-merge checks as exact merged-source qualification. The public
+  source snapshot still carries the old provider destination until that repair lands.
+- **Next action:** Implement and test release invariants before publication;
+  retain default-parent fail-closed behavior. Use source-matched tooling because
+  the ambient 1.0.1 CLI cannot parse this checkout's `artifact_gate` policy.
+
+- **Priority:** P0
+- **Owner:** framework release core, inherited release policy, publication acceptance
+- **Direction:** Every Literate AI project must use SemVer and release from a release branch with a tag on that branch; repair public bare init failure.
+- **Conclusion:** Goals 1, 4 and 6: package metadata is not a published release. Remove branch-policy exemptions, require semantic release identity and remote branch/tag proof, and qualify fresh public installation without an explicit parent. Preserve private-history isolation and do not tag an unqualified snapshot.
+- **Depends on:** PUBLIC-MIRROR-001
+- **Implementation:**
+  - [ ] Enforce SemVer and release-line ownership across plan, prepare, check, publish and published verification, including legacy and derived policies.
+  - [ ] Integrate the canonical public destination repair after qualified landing; publish the qualified release branch and annotated version tag through the release workflow.
+- **Evidence:**
+  - [ ] Negative tests reject missing or wrong release branches, invalid versions, missing or mismatched tags and incomplete publication; valid derived-project release succeeds.
+  - [ ] Fresh public wheel installation runs bare litai init in an empty directory with no private credentials or explicit parent override.
+
+### [ ] CLI-BUILD-IDENTITY-001 — Distinguish source builds and verify explicit CLI self-update
+
+- **Priority:** P0
+- **Owner:** CLI version reporting and prefix self-update
+- **Direction:** Git main installations must not masquerade as a published release; verify that litai update applies a newer release.
+- **Conclusion:** Goals 1 and 4: report immutable installed Git provenance and unverified publication separately from package compatibility version. Explicit update performs bounded release discovery before applying an enrolled-prefix update; preserve project planning, opt-outs, installation custody and offline operation.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add source-aware offline CLI version reporting without changing protocol or lifecycle version authorities.
+  - [x] Make explicit update synchronously discover and apply eligible release wheels before re-executing the original command.
+- **Evidence:**
+  - [ ] Regression tests cover source provenance, newer release selection, original argv re-execution, opt-outs and failure behavior; disposable installed-prefix smoke demonstrates the real upgrade.
+- **Current verification:** 13 focused build-identity/explicit-update tests pass,
+  including real pip installation of a newer fixture wheel and execution of the
+  refreshed prefix launcher with unchanged arguments. Release discovery alone is
+  synthetic; no live public-release upgrade is claimed. The 17 existing updater
+  regressions and 12 version-authority tests pass. Lint, format, public-export,
+  reviewed driver identity and documentation authority checks pass. The broader
+  CLI slice also passes all 258 tests, including the new focused tests. A separate
+  non-editable Git-install probe was stopped after recursive shallow local-clone
+  fetches exhausted file descriptors; it is not passing installation evidence.
+  Full installed-wheel qualification was started separately and remains pending
+  at this handoff. No user's installed CLI, release tag or release branch changed.
