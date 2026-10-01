@@ -214,6 +214,7 @@
         "urn:literate-ai:schema:v2:exact-link-plan",
         "urn:literate-ai:schema:v2:artifact-materialization-plan",
         "urn:literate-ai:schema:v2:composite-build-request",
+        "urn:literate-ai:schema:v2:artifact-assembly-dependency",
         "urn:literate-ai:schema:v2:artifact-build-graph",
         "urn:literate-ai:schema:v2:package-plan",
         "urn:literate-ai:schema:v2:package-result",
@@ -640,7 +641,9 @@
         "urn:literate-ai:schema:v2:standard-component-build-intent",
         "urn:literate-ai:schema:v2:standard-build-authorization",
         "urn:literate-ai:schema:v2:standard-component-build-plan",
-        "urn:literate-ai:schema:v2:standard-source-cache-membership"
+        "urn:literate-ai:schema:v2:standard-source-cache-membership",
+        "urn:literate-ai:schema:v2:standard-execution-input-scope",
+        "urn:literate-ai:schema:v2:standard-execution-authority"
       ]
     },
     {
@@ -931,6 +934,44 @@
         "urn:literate-ai:schema:v2:html-performance-history",
         "urn:literate-ai:schema:v2:html-workflow-routing-catalog",
         "urn:literate-ai:schema:v1:html-observability-dashboard"
+      ]
+    },
+    {
+      "file": "update-merge.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:update-merge-contracts",
+      "public_ids": [
+        "literate-ai/update-bases@1",
+        "literate-ai/project-update-conflict-review@1"
+      ]
+    },
+    {
+      "file": "worker-provisioning.schema.json",
+      "root_id": "urn:literate-ai:schema:v1:worker-provisioning-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v1:worker-provisioner",
+        "urn:literate-ai:schema:v1:worker-provision-request",
+        "urn:literate-ai:schema:v1:worker-provision-response"
+      ]
+    },
+    {
+      "file": "standard-plan-action.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-plan-action-inputs",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-plan-action-inputs"
+      ]
+    },
+    {
+      "file": "standard-build-intent-action.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-build-intent-action-inputs",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-build-intent-action-inputs"
+      ]
+    },
+    {
+      "file": "standard-authorization-action.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:standard-authorization-action-inputs",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:standard-authorization-action-inputs"
       ]
     }
   ]

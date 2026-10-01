@@ -29,6 +29,15 @@ class CliHelpTests(unittest.TestCase):
             status = main(arguments, stdout=stdout, stderr=stderr)
         return status, stdout.getvalue(), stderr.getvalue()
 
+    def test_lifecycle_commands_preserve_automatic_parallelism(self):
+        parser = _parser()
+        for command in ("build", "test", "rebuild", "profile"):
+            with self.subTest(command=command):
+                self.assertIsNone(parser.parse_args([command, "sample"]).jobs)
+                self.assertEqual(
+                    parser.parse_args([command, "sample", "--jobs", "3"]).jobs, 3
+                )
+
     def test_help_lists_the_discoverable_top_level_commands(self) -> None:
         status, stdout, stderr = self.invoke("help")
 

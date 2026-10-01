@@ -7,7 +7,7 @@ orchestration module so adapters can keep importing one service surface.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from literate_ai.application.component_generation_preparation import (
     PreparedComponentGenerationNode,
@@ -31,6 +31,7 @@ from literate_ai.contracts.executable_components import (
     SourceGenerationRunOutput,
 )
 from literate_ai.contracts.identity import ContentIdentity
+from literate_ai.contracts.standard_execution_inputs import StandardExecutionInputScope
 from literate_ai.contracts.standard_lifecycle_checkpoint import (
     StandardLifecycleStageEvidence,
 )
@@ -90,6 +91,52 @@ class GenerationIndexer(Protocol):
     ) -> ContentIdentity: ...
 
 
+class ReservedLifecycleOperation(Protocol):
+    """One owned worker slot; release is idempotent and execution is single-use."""
+
+    def run(self) -> object: ...
+
+    def release(self) -> None: ...
+
+
+@runtime_checkable
+class AdmittedGenerationIndexer(Protocol):
+    """Reserve capacity without blocking the lifecycle's shared executor."""
+
+    def try_reserve_index(
+        self, component_revision: ContentIdentity, source: ContentIdentity
+    ) -> ReservedLifecycleOperation | None: ...
+
+
+class AdmittedBuildIntentDispatcher(Protocol):
+    def try_reserve_intent(
+        self,
+        execution_plan: ComponentExecutionPlan,
+        generation_plan: ComponentGenerationPlan,
+        candidate: GeneratedSourceCandidate,
+        index_identity: ContentIdentity,
+        provider_artifacts: tuple[ArtifactExport, ...],
+        package_artifacts: tuple[ArtifactExport, ...],
+        accepted_providers: tuple[StandardComponentAcceptanceEvidence, ...],
+    ) -> ReservedLifecycleOperation | None: ...
+
+
+@runtime_checkable
+class AdmittedBuildPlanFinalizer(Protocol):
+    def try_reserve_plan(
+        self,
+        intent: StandardComponentBuildIntent,
+        authorization: StandardBuildAuthorization,
+    ) -> ReservedLifecycleOperation | None: ...
+
+
+@runtime_checkable
+class AdmittedBuildAuthorizer(Protocol):
+    def try_reserve_authorization(
+        self, intent: StandardComponentBuildIntent, index: ContentIdentity
+    ) -> ReservedLifecycleOperation | None: ...
+
+
 class BuildAuthorizer(Protocol):
     def authorize(
         self, intent: StandardComponentBuildIntent, index: ContentIdentity
@@ -104,16 +151,84 @@ class ComponentBuilder(Protocol):
     ) -> StandardBuildOutput: ...
 
 
+@runtime_checkable
+class BuildProviderEvidenceReceiver(Protocol):
+    """Retain accepted dependency receipts before BUILD capacity is reserved."""
+
+    def retain_build_provider_evidence(
+        self,
+        plan: StandardComponentBuildPlan,
+        receipts: tuple[StandardComponentAcceptanceEvidence, ...],
+    ) -> None: ...
+
+
+@runtime_checkable
+class AdmittedComponentBuilder(Protocol):
+    """Reserve BUILD capacity before occupying the lifecycle executor."""
+
+    def try_reserve_build(
+        self,
+        plan: StandardComponentBuildPlan,
+        provider_artifacts: tuple[ArtifactExport, ...],
+    ) -> ReservedLifecycleOperation | None: ...
+
+
+@runtime_checkable
+class AdmittedComponentTester(Protocol):
+    """Reserve TEST capacity before occupying the lifecycle executor."""
+
+    def try_reserve_test(
+        self,
+        plan: StandardComponentBuildPlan,
+        exports: tuple[ArtifactExport, ...],
+    ) -> ReservedLifecycleOperation | None: ...
+
+
 class ComponentTester(Protocol):
     def test(
         self, plan: StandardComponentBuildPlan, exports: tuple[ArtifactExport, ...]
     ) -> ContentIdentity | StandardGeneratedTestExecutionEvidence: ...
 
 
+@runtime_checkable
+class ExecutionProviderEvidenceReceiver(Protocol):
+    """Retain the full accepted runtime closure before EXECUTE reservation."""
+
+    def retain_execution_provider_evidence(
+        self,
+        plan: StandardComponentBuildPlan,
+        scope: StandardExecutionInputScope,
+        receipts: tuple[StandardComponentAcceptanceEvidence, ...],
+    ) -> None: ...
+
+
+@runtime_checkable
+class AdmittedComponentExecutor(Protocol):
+    """Reserve EXECUTE capacity before occupying a lifecycle executor thread."""
+
+    def try_reserve_execute(
+        self,
+        plan: StandardComponentBuildPlan,
+        exports: tuple[ArtifactExport, ...],
+        scope: StandardExecutionInputScope | None,
+        provider_artifacts: tuple[ArtifactExport, ...],
+    ) -> ReservedLifecycleOperation | None: ...
+
+
 class ComponentExecutor(Protocol):
     def execute(
         self, plan: StandardComponentBuildPlan, exports: tuple[ArtifactExport, ...]
     ) -> ContentIdentity | StandardExecutionEvidence: ...
+
+
+class ScopedComponentExecutor(Protocol):
+    def execute_scoped(
+        self,
+        plan: StandardComponentBuildPlan,
+        exports: tuple[ArtifactExport, ...],
+        scope: StandardExecutionInputScope,
+        provider_artifacts: tuple[ArtifactExport, ...],
+    ) -> StandardExecutionEvidence: ...
 
 
 class ComponentAcceptor(Protocol):

@@ -28,6 +28,7 @@ class ActionDagPlanningError(ValueError):
 _COMPONENT_ACTIONS = (
     LifecycleActionKind.GENERATE,
     LifecycleActionKind.INDEX,
+    LifecycleActionKind.BUILD_INTENT,
     LifecycleActionKind.AUTHORIZE,
     LifecycleActionKind.PLAN,
     LifecycleActionKind.BUILD,
@@ -120,6 +121,37 @@ def _canonical_workers(values: Sequence[str], *, label: str) -> tuple[str, ...]:
     return result
 
 
+def lifecycle_action_payload(
+    execution_plan_identity: ContentIdentity,
+    component_revision: ContentIdentity,
+    kind: LifecycleActionKind,
+    generation_plan_identity: ContentIdentity | None = None,
+) -> dict[str, str]:
+    """Return the static record whose identity the production DAG binds."""
+    if (
+        not isinstance(execution_plan_identity, ContentIdentity)
+        or not isinstance(component_revision, ContentIdentity)
+        or not isinstance(kind, LifecycleActionKind)
+        or (
+            kind in _COMPONENT_ACTIONS
+            and not isinstance(generation_plan_identity, ContentIdentity)
+        )
+        or (kind not in _COMPONENT_ACTIONS and generation_plan_identity is not None)
+    ):
+        raise ActionDagPlanningError(
+            "action_dag_plan.payload_invalid", "action payload authority is not typed"
+        )
+    result = {
+        "schema": "literate-ai/lifecycle-action-payload@1",
+        "execution_plan_identity": execution_plan_identity.uri,
+        "component_revision": component_revision.uri,
+        "kind": kind.value,
+    }
+    if generation_plan_identity is not None:
+        result["generation_plan_identity"] = generation_plan_identity.uri
+    return result
+
+
 def plan_lifecycle_action_dag(
     execution_plan: ComponentExecutionPlan,
     *,
@@ -181,7 +213,7 @@ def plan_lifecycle_action_dag(
         provider = edge.provider_revision
         consumer = edge.consumer_revision
         if edge.kind in {DependencyKind.BUILD, DependencyKind.TOOLCHAIN}:
-            consumer_kind = LifecycleActionKind.BUILD
+            consumer_kind = LifecycleActionKind.BUILD_INTENT
             provider_kind = LifecycleActionKind.ACCEPT
         elif edge.kind is DependencyKind.RUNTIME:
             consumer_kind = LifecycleActionKind.EXECUTE
@@ -231,13 +263,12 @@ def plan_lifecycle_action_dag(
                     revision,
                     kind,
                     canonical_identity(
-                        {
-                            "schema": "literate-ai/lifecycle-action-payload@1",
-                            "execution_plan_identity": execution_plan.identity.uri,
-                            "generation_plan_identity": generation_plan.identity.uri,
-                            "component_revision": revision.uri,
-                            "kind": kind.value,
-                        }
+                        lifecycle_action_payload(
+                            execution_plan.identity,
+                            revision,
+                            kind,
+                            generation_plan.identity,
+                        )
                     ),
                     tuple(sorted(predecessors[action_id])),
                     action_workers,
@@ -268,12 +299,9 @@ def plan_lifecycle_action_dag(
                 execution_plan.root_revision,
                 kind,
                 canonical_identity(
-                    {
-                        "schema": "literate-ai/lifecycle-action-payload@1",
-                        "execution_plan_identity": execution_plan.identity.uri,
-                        "component_revision": execution_plan.root_revision.uri,
-                        "kind": kind.value,
-                    }
+                    lifecycle_action_payload(
+                        execution_plan.identity, execution_plan.root_revision, kind
+                    )
                 ),
                 tuple(sorted(predecessors[action_id])),
                 action_workers,

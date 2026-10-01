@@ -70,15 +70,26 @@ class LayeredSharedArtifactCache:
         # Read-only mode covers both tiers. Do not silently populate a local tier
         # where the operator did not authorize writes.
         if self.local.configuration.policy(expected.namespace).mode.can_write:
-            self.local.put(expected, payload)
+            try:
+                self.local.put(expected, payload)
+            except SharedArtifactCacheError as exc:
+                if exc.code != "shared_cache.quota_exhausted":
+                    raise
+                return SharedArtifactLookup(
+                    expected.identity, payload, "remote", exc.code
+                )
         return SharedArtifactLookup(expected.identity, payload, "remote")
 
     def get(self, expected: SharedCacheArtifactManifest) -> bytes | None:
         return self.lookup(expected).payload
 
     def put(self, manifest: SharedCacheArtifactManifest, payload: bytes) -> bool:
-        """Retain locally; report whether optional remote publication succeeded."""
-        self.local.put(manifest, payload)
+        """Publish where capacity permits; report remote publication success."""
+        try:
+            self.local.put(manifest, payload)
+        except SharedArtifactCacheError as exc:
+            if exc.code != "shared_cache.quota_exhausted":
+                raise
         if self.remote is None:
             return False
         try:

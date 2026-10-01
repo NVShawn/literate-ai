@@ -55,7 +55,7 @@ class ActionDagPlanningTests(unittest.TestCase):
 
     def test_projects_every_component_stage_and_global_tail(self):
         execution, nodes, revisions = self._plan()
-        self.assertEqual(len(nodes), len(revisions) * 9 + 2)
+        self.assertEqual(len(nodes), len(revisions) * 10 + 2)
         root = execution.root_revision
         package = nodes[lifecycle_action_id(root, LifecycleActionKind.PACKAGE)]
         finalize = nodes[lifecycle_action_id(root, LifecycleActionKind.FINALIZE)]
@@ -88,21 +88,39 @@ class ActionDagPlanningTests(unittest.TestCase):
             pricing_build.predecessor_ids,
         )
 
-    def test_build_and_toolchain_consumers_wait_for_provider_acceptance(self):
+    @staticmethod
+    def _ancestors(nodes, action_id):
+        ancestors = set()
+        pending = list(nodes[action_id].predecessor_ids)
+        while pending:
+            predecessor = pending.pop()
+            if predecessor not in ancestors:
+                ancestors.add(predecessor)
+                pending.extend(nodes[predecessor].predecessor_ids)
+        return ancestors
+
+    def test_build_and_toolchain_intent_waits_for_provider_acceptance(self):
         for kind in (DependencyKind.BUILD, DependencyKind.TOOLCHAIN):
             with self.subTest(kind=kind):
                 _, nodes, revisions = self._plan(kind)
-                pricing_build = nodes[
-                    lifecycle_action_id(revisions["pricing"], LifecycleActionKind.BUILD)
-                ]
-                self.assertIn(
-                    lifecycle_action_id(revisions["money"], LifecycleActionKind.ACCEPT),
-                    pricing_build.predecessor_ids,
+                intent = lifecycle_action_id(
+                    revisions["pricing"], LifecycleActionKind.BUILD_INTENT
                 )
-                self.assertNotIn(
-                    lifecycle_action_id(revisions["money"], LifecycleActionKind.BUILD),
-                    pricing_build.predecessor_ids,
+                provider_accept = lifecycle_action_id(
+                    revisions["money"], LifecycleActionKind.ACCEPT
                 )
+                self.assertIn(provider_accept, nodes[intent].predecessor_ids)
+                for phase in (LifecycleActionKind.AUTHORIZE, LifecycleActionKind.BUILD):
+                    self.assertIn(
+                        provider_accept,
+                        self._ancestors(
+                            nodes, lifecycle_action_id(revisions["pricing"], phase)
+                        ),
+                    )
+                index = lifecycle_action_id(
+                    revisions["pricing"], LifecycleActionKind.INDEX
+                )
+                self.assertNotIn(provider_accept, self._ancestors(nodes, index))
 
     def test_runtime_consumer_build_overlaps_and_execute_waits_for_acceptance(self):
         _, nodes, revisions = self._plan(DependencyKind.RUNTIME)
@@ -115,7 +133,9 @@ class ActionDagPlanningTests(unittest.TestCase):
         provider_accept = lifecycle_action_id(
             revisions["money"], LifecycleActionKind.ACCEPT
         )
-        self.assertNotIn(provider_accept, pricing_build.predecessor_ids)
+        self.assertNotIn(
+            provider_accept, self._ancestors(nodes, pricing_build.action_id)
+        )
         self.assertIn(provider_accept, pricing_execute.predecessor_ids)
 
     def test_package_dependency_waits_at_link_not_generation_or_build(self):
@@ -127,18 +147,22 @@ class ActionDagPlanningTests(unittest.TestCase):
             lifecycle_action_id(revisions["invoice-cli"], LifecycleActionKind.LINK)
         ]
         self.assertIn(provider_link, invoice_link.predecessor_ids)
-        for kind in (LifecycleActionKind.GENERATE, LifecycleActionKind.BUILD):
+        for kind in (
+            LifecycleActionKind.GENERATE,
+            LifecycleActionKind.BUILD_INTENT,
+            LifecycleActionKind.BUILD,
+        ):
             self.assertNotIn(
                 provider_link,
-                nodes[
-                    lifecycle_action_id(revisions["invoice-cli"], kind)
-                ].predecessor_ids,
+                self._ancestors(
+                    nodes, lifecycle_action_id(revisions["invoice-cli"], kind)
+                ),
             )
 
     def test_failed_provider_acceptance_cancels_artifact_consumption_only(self):
         for dependency_kind, consuming_phase in (
-            (DependencyKind.BUILD, LifecycleActionKind.BUILD),
-            (DependencyKind.TOOLCHAIN, LifecycleActionKind.BUILD),
+            (DependencyKind.BUILD, LifecycleActionKind.BUILD_INTENT),
+            (DependencyKind.TOOLCHAIN, LifecycleActionKind.BUILD_INTENT),
             (DependencyKind.RUNTIME, LifecycleActionKind.EXECUTE),
         ):
             with self.subTest(kind=dependency_kind):

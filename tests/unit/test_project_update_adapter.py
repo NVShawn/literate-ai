@@ -506,7 +506,7 @@ class FilesystemProjectUpdateAdapterTests(unittest.TestCase):
                 }
                 self.assertEqual(
                     current_by_path["docs/README.md"],
-                    ProjectUpdateClassification.ALREADY_CURRENT,
+                    ProjectUpdateClassification.UNCHANGED,
                 )
 
                 (target / "docs/README.md").write_text(
@@ -518,7 +518,7 @@ class FilesystemProjectUpdateAdapterTests(unittest.TestCase):
                 local_by_path = {item.path: item.classification for item in local.files}
                 self.assertEqual(
                     local_by_path["docs/README.md"],
-                    ProjectUpdateClassification.CONFLICT,
+                    ProjectUpdateClassification.LOCAL_ONLY,
                 )
 
     def test_qualified_conversion_shim_authority_survives_update(self) -> None:

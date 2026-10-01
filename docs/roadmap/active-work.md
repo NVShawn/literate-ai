@@ -5219,15 +5219,17 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ### Current 1.2 review inventory
 
-The forge currently has four open reviews. RELEASE-INTEGRATION-002 must reconcile
+The forge currently has six open reviews. RELEASE-INTEGRATION-002 must reconcile
 their current-cycle dispositions before publication; observed CI is not release
 acceptance. PR #513 is an incomplete integration draft and does not authorize a
 merge-only release or defer the remaining 1.2 program.
 
 | Review | Observed head | Owner | Remaining acceptance |
 | --- | --- | --- | --- |
-| [#513](https://github.com/NVIDIA-dev/literate-ai/pull/513) — Lifecycle scheduling and shared-cache execution | `d5a499afc52c` | RELEASE-INTEGRATION-002 / RELEASE-INTEGRATION-003 | Complete production phase dispatch, remote custody, LAN/cache qualification, merge-repair integration, and exact-revision release gates. |
-| [#511](https://github.com/NVIDIA-dev/literate-ai/pull/511) — Dynamic worker provisioning roadmap | `37b77cea4c2b` | RELEASE-INTEGRATION-002 | Reconcile scope with the existing worker program and its later provisioning obligations; hosted CI remains in progress. |
+| [#515](https://github.com/NVIDIA-dev/literate-ai/pull/515) — Instructional videos and onboarding demo repairs | `f419abc6ae40` | RELEASE-INTEGRATION-002 | Newly observed draft; hosted checks are incomplete. Reconcile the new video commands/courses and overlapping onboarding/retained-harness fixes with the existing 1.2 scope before recording an include/defer disposition. No landing or release qualification is assumed. |
+| [#514](https://github.com/NVIDIA-dev/literate-ai/pull/514) — Worker management and opt-in generic provisioning | `f452be65b8e3` | RELEASE-INTEGRATION-002 / WORKER-CLI-001 | Earlier `d6d003eb` is integrated. Review the advanced head separately; its failed/cancelled hosted checks do not establish inclusion or qualification of the new changes. |
+| [#513](https://github.com/NVIDIA-dev/literate-ai/pull/513) — Three-way updates, lifecycle scheduling and shared caches | `d71e894b0211` | RELEASE-INTEGRATION-002 / RELEASE-INTEGRATION-003 | Hosted run `36769187297` is live. Scoped executor authority and the remote build-order fixture repair are published. Runtime scheduling is integrated locally at `8fa16e67`; complete remote phase dispatch, capacity routing, LAN/cache qualification, verified reuse and release gates remain required. |
+| [#511](https://github.com/NVIDIA-dev/literate-ai/pull/511) — Dynamic worker provisioning roadmap | `37b77cea4c2b` | RELEASE-INTEGRATION-002 | Hosted checks are green; ancestry proves this head is already included in the local 1.2 integration through the worker branch. Forge landing/disposition remains required; later provisioning obligations retain their declared scope. |
 | [#508](https://github.com/NVIDIA-dev/literate-ai/pull/508) — setup-uv 10.2.0 | `666a3eaa38ee` | RELEASE-INTEGRATION-002 / AUD-CI-001 | Resolve the failed Windows test and cancelled matrix; verify the exact action update before landing. |
 | [#501](https://github.com/NVIDIA-dev/literate-ai/pull/501) — Public-export hardening draft | `0d17bf29322d` | RELEASE-INTEGRATION-002 / PUBLIC-EXPORT-001 | Reconcile the draft against landed export work and retain an explicit include or defer disposition. |
 
@@ -12070,13 +12072,34 @@ the reported failure.
   system such as `mac` can consume that request without moving its intelligence into
   `litai`. The existing generation/lock target concept still converges with the selected
   worker: explicit Flavor constraints and target requirements must agree before dispatch.
+  Dynamic provisioners require a distinct two-stage handoff: send a bounded provisioning
+  request before final worker identity binding, validate the returned exact SSH worker,
+  then construct the canonical lifecycle request for that worker. Cleanup authority is
+  released only after controller-side artifact and evidence import verifies exact bytes,
+  identities, and custody; ambiguous transfer or cleanup retains a recoverable lease.
+- **Static and dynamic configuration boundary (user clarification):** Static machines
+  already provisioned by the user or an administrator are a complete supported mode.
+  The private `workers.json` catalog may contain any number of these, including zero.
+  Dynamic allocation is separately opt-in and disabled by default. Its enabled setting,
+  organization-specific executable/arguments, and user-supplied credential bindings
+  belong only in local user configuration, never project authority or built-in provider
+  code. A configured command must expose `--help` or `help` for usage discovery.
+  Neither a configured command nor missing static capacity implicitly enables it.
+  No provider command, credential acquisition, or allocation may run while disabled.
+  Literate AI delegates allocation and validates the returned worker; it does not know
+  cloud vendors or organization-specific VM APIs. The generic opt-in configuration and
+  provisioning handoff below remain unimplemented acceptance work, independent of the
+  static registration/SSH-test delivery in WORKER-CLI-001.
 - **Scope boundary:** Provide local, SSH, and synchronous command-dispatch adapters plus
   request/result protocols—not an internal capability matcher, provisioner, fleet
   inventory, priority engine, allocator, lease manager, cloud/Kubernetes/VM/GPU API, or
   retry scheduler. Keep hostnames, usernames, credentials, private dispatcher commands,
   and operational task/lease state outside Git. Hardware requirements are declarative
   payload forwarded to the selected dispatcher, not an instruction for Literate AI to
-  choose a machine.
+  choose a machine. The framework may coordinate the two-stage provision/execute/cleanup
+  protocol, but matching, allocation, readiness, lease persistence, and cloud mutation
+  remain external-dispatcher responsibilities. Never rebind a command-worker request to
+  an SSH worker or relabel a result identity.
 - **Depends on:** current exact target/Flavor locking, artifact exports, CodeGraph build
   prerequisite, source-cache identities, and the bounded parallel sample fan-out
 - **GitHub issue:** [#131](https://github.com/NVIDIA-dev/literate-ai/issues/131)
@@ -12127,6 +12150,27 @@ the reported failure.
         execute it synchronously with bounded output and application arguments, and
         successful results must publish immutable artifact references plus observed
         toolchain identities.
+  - [ ] Add a provider-neutral pre-binding provisioning protocol for dynamic workers.
+        First add local-only enablement (default false), provisioner command and
+        credential-reference configuration, with `--help`/`help` discovery. Prove that
+        disabled or missing enablement makes no provider invocation, including when
+        the static catalog is empty. Reject a missing command or required credential bindings
+        before allocation; do not bake provider-specific arguments into Literate AI.
+        A configured provisioner receives exact target profile, declarative requirements,
+        source-authority inputs, total deadline, and an idempotency key before an
+        `ExecutionDispatchRequest` is created. Its bounded response returns one exact
+        SSH worker descriptor plus opaque lease/recovery identity. Validate the returned
+        worker and requirements, then construct and execute the existing canonical SSH
+        lifecycle request without identity rewriting. Persist no private endpoint or
+        lease data in project authority.
+  - [ ] Add verified evidence-custody and cleanup handoff for provisioned workers.
+        Import the out-of-band artifact/evidence manifest and bundle under controller
+        custody, verify declared identities, byte sizes, worker/request binding, and
+        immutable references, and emit a typed custody receipt before authorizing stop.
+        Missing, corrupt, oversized, timed-out, or ambiguous evidence retains the lease
+        and a recoverable operator status; delete remains a separate explicit action.
+        One total timeout budget must cover provisioning, readiness, execution, transfer,
+        verification, and cleanup.
   - [x] Adapt local execution and the current bounded SSH transfer/command lane behind the
         same exact worker interface without duplicating their lifecycle machinery.
         A live `litai test samples/cuda-vector-transform-cpp --worker
@@ -12171,6 +12215,14 @@ the reported failure.
         execute the lifecycle through project source-intelligence synchronization and
         Standard distribution resolution, asserting the exact 16-cell failure classes
         cannot recur; import/bootstrap smoke alone is insufficient.
+  - [ ] Qualify the dynamic-provisioning handoff with a synthetic provider and one
+        authorized live disposable worker. Contract tests must reject mismatched worker,
+        request, lease, artifact, evidence, and custody identities; prove retry does not
+        duplicate allocation or destructive cleanup; prove unknown SSH keys and
+        insufficient observed hardware block execution; and prove evidence is imported
+        and verified before default stop. The installed-wheel public CLI proof must run
+        one LitAI project lifecycle through the provisioned SSH worker and leave no
+        unclassified residual. Synthetic fixtures alone do not establish cloud support.
   - [ ] Repair Windows-native tests and behavior for source executable intent, accepted
         manifest identity, working-tree guard discovery, diagnostic-tail preservation,
         and projected C++ execution without weakening digest, path, or rollback checks.
@@ -14450,8 +14502,8 @@ the reported failure.
   on, though not a hard technical dependency); ADR 0007 reaching `Accepted` status via
   its planning cycle before implementation begins, per
   `skills/agent/release-project/SKILL.md`'s significant-feature-request sequence.
-- **Next action:** none; `--review-conflicts` is plan-only. Applying a merge
-      proposal remains a later explicit apply mode.
+- **Historical scope:** the August implementation completed plan-only review.
+      Actual merge application was deferred; UPDATE-MERGE-002 below owns its completion.
 - **Evidence:**
   - [x] ADR 0007 `Status` reaches `Accepted`. Flag is `--review-conflicts`;
         per-conflict JSON is `literate-ai/project-update-conflict-review@1`;
@@ -22811,6 +22863,10 @@ GitHub CI failure without relaxing identity checks.
   - [ ] Cold/warm/corrupt cache tests prove correct test/build/package/container reuse with local and configured network endpoints.
   - [ ] All project, package, installed-wheel, platform-worker, documentation, and hosted CI gates pass on one exact main revision.
   - [ ] The remote release branch, annotated tag, GitHub release, assets, receipts, and advanced main agree with that prepared identity.
+- **Maintainer direction (2026-09-29):** Complete the full existing 1.2 program
+  before release, including production worker scheduling and shared-cache qualification.
+  Do not narrow this release to UPDATE-MERGE-002 or defer the program's remaining
+  production-composition requirements merely to ship the merge repair early.
 - **Progress (2026-09-25):** The first scheduler/cache slice now projects exact
   generate/index/authorize/plan/build/test/execute/accept/link/package/finalize nodes,
   dispatches newly ready work through bounded identity-bound worker slots, isolates
@@ -22862,6 +22918,268 @@ GitHub CI failure without relaxing identity checks.
   before releasing. The earlier 1.3 deferral is superseded.
 - **Next action (in progress):** Split lifecycle phases into serializable dispatch
   with remote custody, preserving accepted-provider artifact admission. The action
+  transport must encode existing typed action/worker requests, an exact finite
+  deadline, and hash-verified payload/predecessor records. Command dispatch must use
+  the selected private worker's argv/environment, own cancellation and process-tree
+  cleanup, and admit only a response bound to that exact request and worker with
+  verified result bytes. Qualify real subprocess actuation, corruption/replay refusal,
+  cancellation, expiry, output limits, and credential isolation. This transport is a
+  prerequisite to worker-side phase execution and CLI composition, not their completion.
+  Reuse the host-tool bounded pipe runner for command transport; extend it with an
+  explicit finite input allowance, an interrupt guard, and owned-descendant cleanup.
+  Keep its existing caller defaults while avoiding unbounded temporary output files.
+  The command action boundary now passes 41 wire, scheduler, planner, and bounded
+  process checks. Real subprocesses prove stdin/file input, 128 KiB input, two-worker
+  overlap, cancellation with owned-child termination, deadline enforcement, private
+  environment isolation, and no result admission after corruption or worker drift.
+  The first worker-side phase now invokes the production source-index policy against
+  the exact generated candidate and its portable CAS file manifest. Reuse streaming
+  `FileSystemCAS.copy_to` to avoid serializing source bytes inside the action wire.
+  Require the candidate predecessor, component and full source-tree identity before
+  indexing; reject missing/corrupt blobs, unsafe or colliding paths, changed worker
+  identity and expired deadlines. Run the receiver as an installed Python module
+  with private CAS/workspace bindings and remove its per-action workspace on success
+  or refusal. This first handler does not implement generation/build/test/acceptance
+  handlers or automatic CLI routing; those remain release requirements.
+  Integration review exposed a payload mismatch: the production planner fixes action
+  payloads before source generation, while the first index handler placed generated
+  file references in that payload. Move candidate/file custody into the generated
+  predecessor result, retain the planner's exact static payload, and require matching
+  execution-plan, generation-plan and Component identities. Qualify a node emitted by
+  the real planner and refusal of a predecessor from another plan. Do not count an
+  isolated handcrafted action as proof of production planner compatibility.
+  The handler now consumes the planner's unchanged static payload and obtains source
+  custody from the exact generation-result record. Tests use real production-planned
+  INDEX nodes, including execution through the command receiver and rejection of a
+  generation result bound to another execution/generation plan. Replacement source
+  retains the same planned action identity while producing distinct predecessor and
+  index evidence. All 40 focused tests and repository lint pass. Full lifecycle
+  composition remains open.
+  Source handoff now uses the controller CAS's read-only HTTP(S) blob layout
+  from a privately configured worker endpoint. Fetch only manifest-declared missing
+  blobs, under the existing action deadline and byte limits; verify size/digest before
+  local CAS publication, reject redirects and corrupted existing custody, and keep
+  endpoint/credential details out of results. Prove an actual worker process with
+  separate controller/worker stores and a real HTTP service, including corrupt and
+  missing responses. This is transport custody, not automatic worker routing or source
+  acceptance; remote credentials remain private operator configuration.
+  The command-backed adapter now implements the production `GenerationIndexer` port
+  with command dispatch. Resolve the exact registered candidate and current source,
+  capture a bounded immutable snapshot before publishing any source blob, then use
+  the static production INDEX node and verified generation predecessor. Reserve only
+  admitted worker slots, retain the existing qualification recorder, and independently
+  require the exact disabled-index result before returning it to the lifecycle.
+  Source publication occurs at dispatch so restored source uses the same path. This
+  port must not claim that automatic CLI worker selection or other phases are complete.
+  Next in progress: load private action-execution configuration from the user
+  configuration root (or an explicit environment override) and compose command INDEX
+  admission automatically in Standard rebuild. Bind source CAS, finite deadline,
+  hardware observation freshness and per-worker health policy paths; preserve exact
+  configuration/policy custody and redact private diagnostics. Missing default config
+  keeps local execution, while an explicit missing/invalid config or no admitted
+  worker refuses. Reuse existing catalog/observation paths and health assessment;
+  neither execute legacy commands as probes nor claim other remote phases are done.
+  Qualify default/override paths, bounded no-follow parsing, live composition, changed
+  inputs, unavailable workers, and the public rebuild selection boundary.
+  Nine initial configuration checks pass, including real command health and capability
+  receivers followed by actual HTTP-backed indexing through the automatically selected
+  public factory. Further coverage requires enough remaining action budget for each
+  nested bounded health probe and refuses symlink/FIFO configuration without blocking.
+  Command-worker hardware observation is now implemented through an explicit
+  `--describe-hardware` challenge on the opted-in one-shot receiver. Platform facts
+  originate at that worker; request, private worker, receiver code, deadline and
+  typed response are verified before the controller stores its conservative probe
+  start time. Both stdin and private request-file transport pass. Public CLI failure
+  leaves no observation file; verified success persists the typed catalog. All 34
+  hardware, capability, existing platform and CLI checks pass, including replay,
+  malformed/oversized/duplicate documents, binding mismatch, legacy command refusal,
+  and finite output/deadline/process ownership on both transport and collection.
+  Live collection is now composed into automatic INDEX admission. Only opted-in,
+  matching-target candidates with private health policy are probed. The admission
+  caches verified observations only while fresh and bound to the same worker identity;
+  expiry re-probes and unavailable candidates are excluded. Revalidation rejects
+  changed hardware facts while allowing a fresh timestamp for unchanged facts.
+  Persisted observation files are no longer a routing prerequisite. Catalog custody
+  is checked again after collection and the hardware probe cannot extend the action
+  deadline. The initial 35 focused checks pass; all 51 final composed checks pass,
+  covering missing/stale disk observations, real unavailable-worker exclusion,
+  freshness refresh, changed facts, catalog drift during collection, outer deadline,
+  public probing, Standard factory integration and actual HTTP-backed indexing.
+  Full-suite and installed-wheel qualification remain pending; other remote lifecycle
+  phases and full automatic capacity scheduling remain mandatory 1.2 work.
+  All 78 configuration, user-path, factory, rebuild and CLI checks pass, including
+  real health/capability subprocesses and automatic HTTP-backed index execution.
+  Source CAS publication remains outside authority, and the loader rejects duplicate,
+  unknown, oversized, symbolic and non-regular configuration. Per-probe action budget
+  is checked before starting health measurements. Retained-source authorization must
+  precede automatic worker admission and source-CAS allocation.
+  All twelve final configuration checks pass, including that authorization ordering;
+  lint, host-path policy, formatting, and authority reviews also pass. Installed and
+  consolidated checks remain required, followed by command hardware-probe integration.
+  The completed factory integration connects to an admitted
+  command INDEX pool and an explicit source publication CAS. The factory must obtain
+  candidates from verified source evidence custody, share the same indexer across
+  fresh generation and cache restoration, and bind admission into invocation identity.
+  Missing/partial worker inputs must refuse rather than fall back to local indexing.
+  Qualify real command execution through the assembled factory, strict source evidence,
+  changed or missing custody, and unchanged local defaults. Automatic private CLI
+  configuration remains the next integration step.
+  Forty-three factory, rebuild, admission and command-index checks pass, followed
+  by a separate real-probe check rejecting a mismatched locked target. The factory
+  test executes an actual command worker against HTTP source custody, retains the
+  index result, and rejects missing strict evidence or changed files before dispatch.
+  The capability wheel at `ca6fc552` passes with artifact
+  `sha256:1527de144861718c9dfb3ce24bf7b0cb00e6879885947adfb5b9f2c096bd54c6`.
+  Consolidated run three stopped after 201 selected checks (13 skips) at the real
+  two-command-worker overlap assertion; the exact test passed unchanged in isolation,
+  returning two accepted actions. The failed consolidated run remains non-passing
+  evidence and does not authorize landing.
+  The overlap fixture used a separate 10-second startup barrier inside a 60-second
+  action. Use the existing action deadline for the rendezvous while still requiring
+  both real subprocesses to overlap and return accepted results. Preserve finite
+  cancellation and include bounded failure codes in future assertion diagnostics.
+  All six final factory checks pass, including invocation identity separation between
+  local and admitted command indexing without changing project revision identity.
+  All ten real command-transport checks pass with the deadline-bound overlap barrier.
+  Next source-custody integration must avoid the registry's existing unbounded
+  rehash before the command indexer's bounded snapshot: retain strict evidence while
+  bounding the complete pre-publication read, including candidate lookup and resolver
+  revalidation. Automatic CLI configuration and full-phase routing remain open.
+  Bounded custody now reads immutable registration metadata and verifies source bytes
+  inside the command indexer's own bounded capture, both before publication and after
+  worker execution. The new regression first exposed a remaining unbounded final
+  rehash; replacing it with the bounded verifier preserves result-time drift refusal.
+  Thirty-six factory/indexer/rebuild/runtime checks pass, plus a real-worker growth
+  regression: a sparse file exceeding the source limit after execution is rejected
+  before qualification retention. The successful real HTTP factory test forbids any
+  legacy unbounded rehash. Oversized capture refuses before dispatch or CAS writes.
+  The existing local-command and qualification suites also pass: 82 checks with two
+  skips, preserving existing registry resolve/evidence verification for other callers.
+  The admitted-worker wheel at `b8db54bb` passes, artifact
+  `sha256:ffd147fa6b1d71c210ff9761b27f01e9d7b2a3cac188fd02de5be4fa4c05d323`.
+  Live command-worker admission now composes into the production index
+  port; installed and consolidated qualification is in progress. Select only explicitly opted-in, fresh hardware-compatible workers that prove
+  the required phase and source handoff. Require a health admission identity and bind
+  those facts into scheduler admission. Re-read route and hardware authority, health,
+  and live capability facts before dispatch and before retaining results; changed
+  runtime, route or stale hardware must refuse. This does not close automatic CLI
+  routing or the remaining lifecycle phase handlers.
+  Ten admission checks pass within a 49-check composed batch; its only error was
+  an existing HTTP-capability probe deadline expiry. A real HTTP-backed index action
+  rechecks health four times across initial admission, source publication, dispatch,
+  and result acceptance. Route/hardware/runtime drift and unsupported capability
+  refuse; health rejection after execution retains no qualification record. A rejected
+  candidate is excluded while an eligible worker remains, with sanitized diagnostics.
+  This batch is not a clean integration pass.
+  The same HTTP-capability expiry repeated in the focused rerun. Inspection found
+  that endpoint validation eagerly creates urllib transport/proxy handlers even for
+  a read-only capability description. Defer that setup until the first actual fetch;
+  prove constructor validation never initializes transport. This removes unnecessary
+  host proxy discovery from probing without extending the deadline.
+  With lazy transport setup, all 56 admission, command-indexer, capability, wire,
+  action-planner and HTTP-source checks pass together. This includes the repeated
+  HTTP-capability failure and real HTTP fetches after constructor-only validation.
+  Full-suite and installed-wheel qualification remain pending.
+  Automatic admission next needs a live phase-capability probe. Add an optional
+  action-protocol declaration to private worker records, preserving legacy identities
+  when absent; never run an unmarked legacy command as a capability probe. Bind a
+  finite challenge to the configured worker, return only supported phases and current
+  receiver/runtime identities, reject replay and mismatches, and preserve private
+  command environment isolation. This probe is necessary admission evidence, not
+  automatic CLI routing or completion of build/test/acceptance handlers.
+  The 103-check capability, legacy contract/schema, source, command-port, planner and
+  scheduler batch passes, plus a separate real-process regression proves the probe
+  caps its own budget at 30 seconds even when the action deadline is longer. Its
+  first run expired while hashing receiver code; an unchanged isolated rerun passed.
+  The consolidated suite at `0490a003` completed 2,847 checks with one native-SDK
+  setup authorization expiry and 30 skips; that run is not passing release evidence.
+  The native-SDK failure passes unchanged in isolation. A subsequent focused batch
+  also reached an action deadline before its semantic-result assertion; the exact
+  semantic test passes unchanged in isolation. Deadline enforcement remains intact;
+  fresh combined qualification is still required. The subsequent 100-test batch had
+  one large-source dispatch expiry; all 11 capability and large-source checks then
+  passed together unchanged. Lint and authority reviews pass. These focused passes
+  do not replace a clean consolidated run.
+  The command-indexer installed-wheel check passes at `1c77b3ba`, artifact
+  `sha256:5af4fe6b97d3e2fb557e58a66a2f5b9dae1b453f2891928e4849ca8838959ff0`. Real
+  stdin/file probes bind fresh challenges and stable capability facts; file mode also
+  executes an actual index action. Legacy documents retain their original identity,
+  unmarked commands are never invoked, and stale/future/changed-route observations,
+  replay, receiver drift and unsupported phase claims refuse. HTTP handoff is described
+  only with valid private configuration; this read-only probe performs no source fetch.
+  Seventy-one index-port, source, transport, planner, scheduler and runtime-factory
+  checks pass. The assembled Standard runtime invokes a real command worker through
+  the port, retrieves controller-published CAS files over HTTP, and retains the exact
+  result in its qualification recorder. Wrong candidates, changed source, byte/count
+  bounds and semantically incorrect worker results refuse. Concurrent index calls share
+  one admitted worker slot without overlapping dispatch. Installed/full integration and
+  automatic CLI admission remain required.
+  Fifty focused source, wire, planner and scheduler checks pass. A real command
+  receiver fetches from separate controller/worker CAS directories, including a
+  17 MiB source tree with a control message below 8 KiB. Warm verified worker reuse
+  makes no HTTP request, and controller blob bytes/modification times are unchanged.
+  Corruption, truncation, excess bytes, duplicate length headers, encoded bodies,
+  redirects, missing blobs and expired requests refuse. Existing corrupt worker
+  custody is preserved and refused without remote repair. HTTP failure responses and
+  redirects close their sockets; network hydration precedes workspace allocation.
+  This loopback HTTP evidence does not qualify cross-host LAN throughput, automatic
+  worker routing or the remaining lifecycle handlers.
+  Thirty-nine source-index, wire, scheduler and planner tests pass. Real command
+  subprocesses return the production disabled-index policy's exact evidence for
+  ordinary source and a 17 MiB tree whose control message remains below 8 KiB.
+  Missing/corrupt blobs, unsafe manifests, unrelated predecessors, component/worker
+  drift, unsupported phases and byte/file limits refuse without result admission.
+  Success and refusal remove temporary source workspaces. Remote CAS staging,
+  interruption cleanup, remaining phase handlers and integrated CLI use are still open.
+  SSH action transport now accepts an explicit private receiver argv, sends bounded
+  requests through SSH stdin, and uses the same exact receiver/worker probes and
+  result verification as command workers. Legacy SSH definitions remain ineligible.
+  Eighty-five transport, capability, hardware, admission, configuration, source-index
+  and dispatch-contract checks pass on frozen source. The production indexer also
+  admits these SSH workers: ten focused indexer/SSH checks pass, including a real
+  receiver subprocess through the application port and refusal of wrong worker
+  identity or failed receiver. Twenty-five SSH/schema checks pass. POSIX argument
+  execution and Windows encoded-command shape are covered locally. Exact source
+  `3855a3287323c60d735bbe582260e131a641fee6` also passes real cross-host SSH to a
+  native Windows receiver: challenged capabilities, worker-owned hardware collection,
+  and source-index execution return independently verified identities. This qualifies
+  those receiver operations, not automatic health admission, other phases, Linux SSH,
+  interrupted remote cleanup or sample readiness. The Windows unit cohort exposed a
+  fixture that invoked POSIX Bash on Windows; it now selects each host's native shell
+  and passes five local checks. The native rerun at `84662464` exposes a controller
+  environment defect: copying Windows environment variables into a plain dict loses
+  case-insensitive lookup, dropping SYSTEMROOT/COMSPEC from the runtime allowlist.
+  PowerShell fails before receiver startup (8009001d); real SSH still passes because
+  its remote environment is independently owned. Correct the lookup without expanding
+  ambient forwarding. The transport fixture must separately model the remote host's
+  native environment, not reuse the controller's filtered SSH-client environment.
+  A controlled native run with that environment and a 60-second probe cap passes
+  all three receiver operations in 52.658 seconds; the previous cap left only about
+  16 seconds after controller identity reads. Adopt the finite 60-second cap while
+  preserving any earlier outer action deadline. Sixty composed action/environment,
+  capability, hardware, indexing and admission checks pass; a real sleeping-receiver
+  regression confirms a one-second action deadline still stops the probe (1.038
+  seconds observed). Exact-source native `866cbbf2` passes two environment and
+  five SSH checks; the capability cohort then expires its shared 60-second fixture
+  deadline on the second real probe. Give this multi-operation fixture a three-minute
+  outer budget, including the subsequent dispatch, while retaining the production
+  per-probe 60-second cap and explicit short-deadline regression. Exact-source native
+  requalification remains required. The combined worker/environment, capability,
+  admission, configuration, lifecycle, repair and dependency-planning regression
+  cohort passes 143 checks in 89.150 seconds on the integrated candidate.
+  Exact source `e3a8e1b0` passes two environment, five SSH and eleven capability
+  checks on Windows. The hardware cohort then exposes the same shared fixture
+  deadline during a probe followed by direct collection; give its multi-operation
+  scenario three minutes while retaining the independent 60-second probe and
+  collector bounds. All nine hardware checks pass locally and on native Windows at
+  exact source `5f35ff0c95d1a6d388bc187d4568fc12fd441203` (337.375 seconds).
+  Together with the environment/SSH/capability cohorts at `e3a8e1b0`, this qualifies
+  the receiver unit boundaries; sample readiness, complete phase dispatch and final
+  integrated platform release qualification remain open. An earlier mixed-
+  source run correctly refused receiver identity drift and is not passing evidence.
+  Production phase handlers, transitive artifact custody, SSH actuation, remote cleanup,
+  and automatic CLI routing remain mandatory; these process fixtures do not close them.
+  The action
   projection previously released build/toolchain/runtime consumers after provider
   BUILD, allowing rejected provider artifacts to reach consumers. ADR 0044 requires
   exact accepted exports: those consuming phases now depend on provider ACCEPT while
@@ -22869,6 +23187,173 @@ GitHub CI failure without relaxing identity checks.
   for all three dependency kinds before the repair; 62 action planning, scheduler,
   Component planning, and lifecycle checks now pass, including independent-branch
   continuation. This projection repair does not complete production phase dispatch.
+  The static projection now includes an explicit BUILD_INTENT action between indexing
+  and authorization. Build/toolchain accepted-export prerequisites gate that action.
+  Production inspection also found that toolchain edges waited for provider
+  acceptance but omitted the accepted provider exports from build intent, because
+  their input kind is `toolchain` rather than `artifact-export`. Include those exact
+  exports in build-input custody and verify the complete diamond's intent, build
+  action, and realized export dependencies before continuing late-phase binding.
+  The new diamond regression fails before the repair with missing provider identities;
+  88 lifecycle/repair/planning tests and 40 worker/cache/checkpoint retention tests pass
+  after the correction. The complete-node worker handoff has the same omitted
+  toolchain input kind; include it in exact direct-provider imports, with real CAS
+  transfer checks and routed lifecycle receipt coverage. Both automatic command
+  projection and explicit toolchain-closure admission must also include the toolchain
+  provider's process binding; otherwise the real local adapter cannot consume the
+  newly retained artifact. Transfer and routed-lifecycle cases both fail before the
+  handoff correction; explicit closure admission rejects required toolchain bindings
+  before the projection correction. All 139 focused lifecycle, worker handoff,
+  cache/checkpoint, factory and command-projection checks pass after both repairs.
+  Runtime/package late binding remains unfinished. The next custody boundary adds
+  explicit canonical provider artifact identities to execution evidence, records them
+  for single/multiple entrypoints, and refuses omitted or substituted execution
+  inputs. Empty-input legacy identities remain stable. This is a prerequisite for
+  moving runtime providers out of build intent, not completion of phase scheduling.
+  The field is now emitted by local execution and checked at lifecycle admission
+  and independent reopening. A substituted-provider reopening regression fails before
+  the verifier repair; the corrected execution/schema/local-adapter/qualification
+  cohort passes 162 checks (two platform-dependent skips), and 17 source-cache,
+  checkpoint and input-rejection checks pass. Runtime providers still wait at build
+  intent until phase-specific artifact assembly and scheduling are composed.
+  Next, retain runtime/package links as explicit assembly dependencies,
+  binding locked edges and accepted provider evidence without changing compilation
+  manifests or export identities. Verify transitive closure, unchanged entrypoints,
+  canonical serialization, missing endpoints, duplicate/cyclic edges and substitutions;
+  compose the same derivation into Standard local and release graph assembly before
+  changing runtime/package scheduling barriers. The explicit assembly dependency
+  contract and both assembly paths now bind exact locked runtime/package edges and
+  accepted provider exports. Graph closure rejects absent endpoints, duplicates,
+  cycles and substitutions; empty-edge legacy serialization remains unchanged.
+  The 205-check artifact/lifecycle/local-adapter/package/schema/cache/checkpoint/
+  qualification cohort passes with two platform-dependent skips. Sixteen additional
+  graph/package checks pass, including actual package input membership, one retained
+  application entrypoint, and refusal of incomplete/duplicate accepted node sets.
+  Deployment evidence is deliberately excluded from artifact-input semantics.
+  Hosted integration exposed an omitted public schema identifier in the v2 catalog.
+  The catalog registration is repaired; all 12 version-authority checks pass through
+  `make python-check PYTHON_TEST_PATTERN=test_version_authority.py`. Hosted CI must
+  qualify the corrected revision before this integration can land.
+  The corrected revision also passes the 341-test t–z shard (one platform skip).
+  Hosted run `36760944035` then exposed formatting drift in the capability deadline
+  fixture. The fixture is normalized; whole-tree Ruff lint and formatting pass
+  across 1,307 Python files. Cancelled jobs are not qualification evidence.
+  Hosted run `36761508242` reached 1,650 checks in the first macOS shard and
+  found the assembly-dependency contract missing from the public-schema fixture
+  inventory. Runtime and packaging samples are now present; all five executable
+  schema checks pass through Make, and whole-tree lint/format checks pass for
+  1,310 files. Fresh exact-revision hosted qualification remains required.
+  Hosted run `36763559593` exposes a stale remote parallel-build fixture: it
+  requires provider acceptance before consumer build intent while declaring
+  generation-only public-interface edges. Qualify the intended artifact-dependent
+  ordering with explicit build edges, preserving the concurrency barrier and exact
+  worker-CAS assertions. Generation-only edges must remain free of that barrier.
+  The repaired remote-execution module passes all 19 checks through Make; project
+  authority and CI-scoped lint/format checks pass across 1,310 Python files.
+  Runtime providers still block build intent; next compose late executor inputs
+  with the execution custody records before removing that barrier.
+  The next implementation must also replace build-plan-only accepted-node reuse:
+  bind the execution request to the locked runtime edges, exact accepted provider
+  artifacts, and provider acceptance identities. Validate this scope before process
+  authorization and in independent evidence reopening; changing only a runtime
+  provider must retain compiled outputs while invalidating execution/acceptance.
+  `ComponentExecutor.execute`, local single/multi-entrypoint execution, accepted-node
+  resume, and `verify_qualification_execution` must consume the same current scope.
+  A bounded canonical execution-input scope now derives from locked runtime edges,
+  exact consumer build/exports, and accepted provider results. Input/acceptance
+  substitutions change its identity without rewriting compilation; missing, duplicate,
+  foreign and failed providers are rejected. A regression first exposed inconsistent
+  acceptance through two edges to the same artifact and now verifies its rejection.
+  Next compose this scope into execution authorization, independent reopening and
+  accepted-node resume before removing the runtime gate; deriving a scope alone
+  neither grants process authority nor completes production scheduling.
+  Local `execute_scoped` now grants exact input/source/command/runtime authority,
+  checks it before and after each entrypoint, and binds every process observation.
+  Live file/directory bytes and transitive provider closure are verified independently
+  of cached blobs. A real process reads a late provider while compile identities stay
+  unchanged; corrupt files/directories, expired grants, mismatched inputs and swapped
+  entrypoint outputs are rejected. All 213 lifecycle/cache/checkpoint/qualification/
+  schema/version checks pass (two platform skips), with authority, lint and formatting
+  gates current. Legacy unscoped wire identities remain unchanged.
+  The combined integration passes 218 checks (two platform skips), including the
+  public executable schema inventory, plus project authority and whole-tree lint
+  and formatting across 1,310 Python files.
+  The local service now selects scoped execution, removes runtime-only compilation
+  inputs/barriers, and waits for accepted runtime providers at execution. Opaque
+  accepted-node resume cannot bypass current scope/grant validation; source and build
+  caches remain eligible while execution and acceptance are revalidated. A scheduling
+  regression first exposed an indirect provider missing after runtime edges stopped
+  entering compilation provenance. The complete runtime/build/toolchain closure now
+  supplies it, preserving original locked edge endpoints and compile identities.
+  All 359 Standard lifecycle checks pass (four platform skips); 14 scope checks also
+  pass with explicit indirect-cycle and missing compiled-provenance rejection.
+  Another 59 qualification custody, authority and capture checks pass. Project
+  authority and CI-scoped lint/format gates pass. This branch still requires the
+  integration branch's existing public assembly-schema fixture repair; its omitted
+  inventory fixture is not treated as a pass here.
+  The controller fixture proves overlap, failure containment, scope substitution
+  rejection and changed-runtime resume. Existing real-process adapter checks prove
+  scoped launch and byte/grant custody. Native integrated runtime graphs, complete
+  remote phase dispatch, one production DAG queue and phase-specific cache reuse
+  remain required before the full scheduling program is complete.
+  Integration with the schema inventory and remote build-order repairs passes all
+  361 Standard checks (four platform skips) and 36 executable-schema, remote-execution
+  and version checks. Project authority and lint/format gates pass across 1,311
+  Python files. Exact-head hosted and native release qualification remain open.
+  Local generation and lifecycle continuations now share one ready queue ordered by
+  canonical planned action identity, including replacement candidate phases. The new
+  ready-order regression fails before the change and passes afterward. Broader checks
+  exposed a cached-source refusal misclassified as a lifecycle failure; queued source
+  generation now retains the original source-generation phase and diagnostic.
+  All 362 Standard checks pass (four platform skips), plus 40 planner, scheduler,
+  remote-execution and command-indexer checks. The dispatch-count proof now requires
+  generation as a separate pool operation for every Component. Dependency gates,
+  held-provider overlap, shared slot bounds and bounded repairs remain covered.
+  Next compose admitted worker-slot placement into this queue and the remaining
+  production phase handlers. The indexer's internal slot wait and legacy complete-node
+  routing do not yet provide complete cross-worker action scheduling.
+  The frozen `c9123830` full suite terminates after 4,815 tests (35 skips) with one
+  retained-receiver ZIP import failure. The C++ driver generator reads its module
+  through a physical `__file__` path inside the ZIP. The focused receiver regression
+  reproduces on current integration. Load that source through package resources;
+  preserve the emitted standalone driver's semantics and qualify both real native
+  driver behavior and isolated ZIP receiver import. The failed run is not release
+  attestation and has not been silently restarted.
+  The package-resource repair passes all 14 retained receiver checks, including the
+  isolated ZIP import, and 20 native C++ cache/factory checks, including compilation
+  and execution of a real multi-file C++ program. The currently published CI candidate
+  contains the same reproduced ZIP defect and requires the repaired revision.
+  All 113 execution-input/lifecycle/wire/post-source/schema/version checks pass.
+  Scope schemas use the installed Draft 2020-12 validator, including rejection of
+  packaging inputs, because the lightweight catalog fixture does not evaluate
+  `allOf`. Current project authority, scoped lint and formatting checks also pass.
+  With assembly custody available, remove the local packaging-only intent barrier
+  and compile inputs. Prove overlap with a held package provider, retained package
+  membership after acceptance, and no project receipt when that provider fails.
+  The existing complete-node transport remains pending conversion to phase custody;
+  this local scheduling slice does not complete remote phase dispatch.
+  Both new regressions fail before the local repair: a held package provider prevents
+  consumer compilation, and provider failure cancels that otherwise independent
+  compilation. They pass after removing local package inputs/barriers, alongside 156
+  lifecycle/worker/graph/package/local-adapter checks (two platform-dependent skips).
+  Another 56 cache/checkpoint/qualification checks pass, including an exact identity
+  regression: rotating only the package provider changes package/assembly identity
+  and selects its new artifact, while retaining the consumer build plan and export.
+  Complete-node transport keeps its existing handoff until phase dispatch replaces it.
+  Forty-four action planner, scheduler, wire, and source-index checks pass, including
+  transitive readiness: runtime/package providers do not block intent or compilation,
+  and rejected build providers cancel intent before authorization. Another 48 worker
+  admission, capability, configuration, and hardware checks pass. Late binding in
+  production and the complete remote lifecycle remain outstanding.
+  Production readiness now removes the all-provider barrier for purely public-
+  interface dependencies. Their immutable inputs are already admitted by the lock.
+  Two regressions failed before the repair and now prove consumer build overlaps a
+  held provider and independent consumers continue after provider failure while the
+  overall project is rejected. Artifact-ordering fixtures now declare BUILD edges;
+  authorization checks select the node actually reaching the queued phase instead
+  of assuming a serialized provider order. Eighty-seven lifecycle, repair, service,
+  factory and planner checks plus 40 worker/cache/checkpoint checks pass. Runtime/
+  package late binding and full phase dispatch remain required.
   The next production boundary separates source generation from provider-dependent
   compilation in the same bounded pool. Locked public interfaces permit consumer
   generation while provider build/acceptance continues; exact accepted artifact
@@ -22882,12 +23367,60 @@ GitHub CI failure without relaxing identity checks.
   acceptance. The regression failed against the previous implementation. Dependency
   failure now retains already-produced source evidence while cancelling its build;
   invalid cached-source custody still refuses the owning source action and all
-  dependent builds. Later phases and real phase transport remain unfinished.
-- **Transport progress:** The HTTP/local-layer adapter is implemented. Nineteen
-  focused cache checks pass, including real HTTP concurrent writers, read-only
+  dependent builds. Build intent, index, authorization, plan, build, test, execution,
+  and acceptance now dispatch as distinct local operations through that same pool.
+  Each returned value passes its existing typed predecessor checks before the next
+  step; repairs retain their complete fresh-candidate chain. Ninety-eight lifecycle,
+  repair, worker, factory, and service checks pass, including separate pool dispatch,
+  rejection of a malformed build response before subsequent phases, and grant-expiry
+  refusal at each queued host phase's actual execution boundary. Local continuations
+  are not a remote protocol: full phase-specific predecessor readiness, serializable
+  request/result custody, and dynamic worker routing remain mandatory before closure.
+  The next readiness correction moves source indexing ahead of the accepted-provider
+  barrier. Indexing consumes only the current Component source; build intent still
+  binds all exact accepted provider/package exports. Qualify held-provider overlap,
+  rejected-provider cancellation, fresh indexing during candidate repair, and unchanged
+  authorization/receipt custody. This does not establish remote phase execution.
+  Hosted run `36678365665` at `a1aff322` exposed an obsolete whole-node ordering
+  assertion in the remote build/CAS fixture: it required provider acceptance before
+  consumer generation. Update that assertion to the actual accepted-export boundary,
+  consumer build intent, while retaining the real parallel build barrier and exact
+  worker CAS execution checks. The failed matrix is not landing evidence.
+  The indexing/readiness and corrected remote fixture now pass 124 lifecycle,
+  repair, checkpoint, factory, worker, service, and remote/CAS tests. The held-provider
+  regression failed against the prior implementation. Independent work survives a
+  rejected provider; cancelled consumers retain passed indexing without invoking
+  intent, authorization, or repair; replacement candidates are indexed again.
+  Full integrated and installed-worker qualification remains open.
+- **Transport progress:** The HTTP/local-layer adapter is implemented.
+  Local artifact writer policy still limits individual payloads only. Enforce the
+  aggregate payload-plus-manifest quota for each artifact namespace under a shared
+  writer lock, collecting expired and then oldest entries with bounded inventory.
+  Preserve shared payloads until their final manifest is removed; refuse unsafe
+  inventory before deletion. Read-only lookup must not change bytes or timestamps.
+  Qualify concurrent distinct writers, deduplication, expiry, quota pressure,
+  corruption, unsafe paths, and interrupted publication. Native compiler/Bazel and
+  remote service retention are separate policies and remain required.
+  Forty-three focused cache/configuration checks now pass, including real HTTP
+  concurrent writers, read-only
   readers, partial/corrupt entries, redirect refusal, and unavailable-service
   fallback. Source consistency and full integration qualification remain pending;
   this evidence does not complete production multi-worker or compiler-cache proof.
+  Local retention now enforces payload-plus-manifest quota per artifact namespace,
+  counts shared objects once, expires reads without mutation, collects publication
+  orphans, and preserves verified remote reuse when local hydration cannot fit.
+  Four regression cases failed against the prior implementation. Concurrent distinct
+  writers, including four independent Python processes, remain within quota;
+  collision, hardlink, unsafe-inventory and inventory-budget
+  refusals preserve existing custody. Expired exact republication retains payload bytes
+  and modification time. Native cache/service retention, LAN performance, and installed
+  worker qualification remain open.
+  Retention review found that a writer must also reserve inventory capacity for its
+  own incoming entry: otherwise repeated valid publications can exceed the next
+  writer's scan bound. Bound each new manifest by the reader's limit and evict before
+  aggregate manifest bytes or entry count exceed the inventory budget; qualify both
+  limits at small deterministic boundaries.
+  All 45 focused cache/configuration tests pass after these admission-bound repairs.
 - **Scheduler progress:** Production complete-node scheduling now keeps one bounded
   pool and releases a consumer when its own dependencies finish. Forty-six lifecycle
   and planning tests pass, including a held unrelated branch that no longer delays
@@ -23153,3 +23686,1958 @@ GitHub CI failure without relaxing identity checks.
   public-mirror qualification branch records the resulting lifecycle-driver and
   documentation authority identities and passes the complete managed Python suite,
   including the absorbed attached update, rollback/custody, and native Bazel cases.
+
+### [x] WORKER-CLI-001 — Manage and test private worker registrations through the CLI
+
+- **Priority:** P0
+- **Owner:** worker catalog, CLI, SSH diagnostics and native qualification
+- **Direction:** Provide worker CRUD and SSH connectivity testing, then use the Linux and Windows pool to qualify Literate AI against current open issue and PR scenarios.
+- **Conclusion:** Local registrations are durable private configuration. Add validated atomic CRUD and independent bounded connectivity results without VM provisioning or host-key policy mutation; integrate relevant current review changes in an isolated test branch and retain truthful per-platform evidence.
+- **Depends on:** WORKER-PROBE-DIAGNOSTICS-001; published PR #513 diagnostic foundation
+- **Implementation:**
+  - [x] Add list/show/add/update/remove commands with canonical validation, private atomic writes, conflict protection, and actionable errors.
+  - [x] Add worker test selection/all with separate DNS, connection, host-key, authentication, timeout and unsupported results; preserve successful peers.
+  - [x] Reconcile all six open issues and four PRs into an explicit qualification matrix, integrating applicable changes and recording unsupported or deferred scope.
+- **Evidence:**
+  - [x] Focused CRUD/concurrency/negative diagnostic regressions and scoped lint, format, layout, skill and authority checks pass; broader gate failures remain explicitly recorded.
+  - [x] Real Linux and Windows worker CLI and issue/PR-derived tests execute the exact changed framework; retain source identities and per-worker outcomes.
+
+
+- **WORKER-CLI-001 progress:** 229 worker-focused tests pass on the isolated
+  PR #513 published baseline plus this change. The first real 20-worker connectivity
+  run returns 18 successful handshakes and independent authentication/changed-key
+  failures; those are readiness findings, not native framework test qualification.
+- **Current tracker qualification matrix (2026-09-30):**
+  - Issue [#505](https://github.com/NVIDIA-dev/literate-ai/issues/505): include its
+    published diagnostic repair from PR #513, extend peer aggregation and SSH-only
+    testing, and exercise actual first-contact and authentication failures.
+  - Issues [#497](https://github.com/NVIDIA-dev/literate-ai/issues/497) and
+    [#498](https://github.com/NVIDIA-dev/literate-ai/issues/498): use native package,
+    scheduling and cache regression suites from PR #513 as real-world worker load.
+    Their full production feature acceptance remains owned by their existing items.
+  - Issue [#492](https://github.com/NVIDIA-dev/literate-ai/issues/492): include
+    native-CLI contract and lifecycle tests; record unsupported cases as such.
+  - Issue [#483](https://github.com/NVIDIA-dev/literate-ai/issues/483): include
+    worktree placement/refresh regressions. The installed location command refuses
+    the current legacy registrations; no cleanup is authorized by this test cycle.
+  - Issue [#512](https://github.com/NVIDIA-dev/literate-ai/issues/512): include
+    project update/merge regression scenarios and retain the unresolved three-way
+    application boundary rather than claiming its feature complete.
+  - PR [#513](https://github.com/NVIDIA-dev/literate-ai/pull/513), published
+    `a1aff322`: integrated as the starting test baseline. Its failing hosted assertion
+    and unpublished follow-ups remain explicit; this branch does not modify its
+    owner's worktree.
+  - PR [#511](https://github.com/NVIDIA-dev/literate-ai/pull/511): include the
+    dynamic-worker roadmap contract; provisioning and VM deletion remain external.
+  - PR [#508](https://github.com/NVIDIA-dev/literate-ai/pull/508): include the pinned
+    CI action update, with no claim that native workers prove GitHub action execution.
+  - PR [#501](https://github.com/NVIDIA-dev/literate-ai/pull/501): conflicting stale
+    export branch overlaps public-export work already on main. The export checker,
+    self-update implementation and export tests are identical at the compared tips;
+    native public-export groups pass on both platforms. Defer the stale branch
+    rather than replaying its historical roadmap over newer authority.
+
+### [x] REFRESH-MODE-001 — Validate refresh against admitted physical permissions
+
+- **Priority:** P1
+- **Owner:** framework core: repository refresh application
+- **Direction:** Use native workers to exercise current issues and PRs; a Linux worker exposed a legitimate group-writable checkout rejected as changed.
+- **Conclusion:** Git tree modes encode executable intent, not exact physical permissions. Compare previous and unchanged files against captured physical modes; newly applied changes retain declared output modes. Preserve race and rollback custody checks.
+- **Integration finding:** The 85-test composed run had one error: the new real-Git fixture advanced its child commit but left the declared parent pin stale. The fixture now updates its manifest and records the exact authority review before testing refresh. Its isolated real-Git regression passes (151.746 seconds), preserving unchanged group-writable permissions and normal changed-file output modes. The other 84 composed checks passed, including permission drift refusals; native Linux qualification remains required.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Use staged member permission observations for previous and unchanged regular files.
+  - [x] Add real-Git regression with group-writable changed and unchanged files.
+- **Evidence:**
+  - [x] Focused repository refresh permission regression suite passes locally and on a native Linux worker with a group-writable checkout.
+
+### [ ] CACHE-WINPATH-001 — Qualify CAS publication beyond Windows path limits
+
+- **Priority:** P1
+- **Owner:** framework storage CAS and cache roundtrip qualification
+- **Direction:** Native Windows testing of the published integration baseline exposed a long-path cache publication failure.
+- **Conclusion:** The portable archive roundtrip fixture exceeds the default Windows path limit at CAS hardlink publication. Preserve the failure as an issue-498 qualification finding; determine whether to support extended paths or bound fixture placement without weakening immutable publication.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Reproduce test_twelve_published_keys_round_trip_through_portable_archive on Windows without assuming long-path host policy.
+  - [x] Resolve native path handling without shortening the fixture.
+- **Evidence:**
+  - [x] Native Windows cache tests pass at `15f94afc`: three CAS, 11 round-trip and 232 broader cache tests (nine skips); release-head qualification remains open.
+
+- **WORKER-CLI-001 native checkpoint:** source `ee78fa0b6cf8ef1d66debebef9f6b8d230268432`,
+  tree `5267127f8d0d1ed464949231c073eeb21dbade16`, passes 232 worker-focused
+  tests on Linux and 232 on Windows (four documented platform skips). An actual
+  twenty-worker SSH test returns nineteen handshakes and one independent
+  authentication failure, with nonzero command status. No host-key verification
+  was disabled. Repository layout, public-export audit, Ruff lint/format, changed
+  skill checks and authority review pass. Full frozen-source qualification remains
+  pending; initial mutable-checkout proof runs were correctly rejected when source
+  changed during execution and are not pass evidence.
+- **Peer survey:** the end-of-cycle CLI survey found no additional green reviews
+  or collectable worktrees. Historical/dirty worktrees and unpublished peer work
+  are retained untouched. The integration baseline remains a draft with red CI;
+  native scenario coverage does not claim completion of its entire 1.2 program.
+
+- **Installed CLI qualification:** the wheel built from `d6d003eb` has SHA-256
+  `db8aa7f28539c44c16927f08ad9b5c60928640b49dc85df01e9b25ec5cf03f5e`.
+  Its embedded distribution origin matches that revision. Eight external-checkout
+  CLI steps pass: empty list, add, update, show, unsupported-transport test exit,
+  remove, empty list, and real Linux/Windows SSH handshakes. The broader frozen
+  `ee78fa0b` installed-wheel smoke also passes; it is evidence for that exact earlier
+  wheel, not a claim that every later refresh edge case passed.
+- **Additional native findings:** the published integration baseline reproduces
+  PR #513's remote-execution call-count assertion on Linux. On Windows, 23 worktree
+  tests pass; the subsequent refresh group reports Git inspection failure in
+  `test_complete_commit_is_manifest_last_and_cleans_terminal_journal` after 19 tests
+  near the configured deadline. The controller wait and remote runner then expire;
+  a separate process inspection confirms no qualification processes remain. This is
+  an incomplete refresh qualification, not a passing Windows refresh result.
+- **REFRESH-MODE-001 repair checkpoint:** the first native repair exposed absent
+  physical inventories for no-op plans. `d6d003eb` admits and retains exact no-op
+  permissions while validating Git executable intent; five focused filesystem tests
+  pass, including file/directory permission drift and foreign content refusal.
+  The repaired source passes 232 worker tests on each native platform (four Windows
+  skips). Its longer Linux real-Git application suite remains in progress.
+
+- **1.2 worker integration:** local integration of PR #514 (`d6d003eb`) with live
+  command hardware admission (`92d91173`) is under qualification. The peer's hosted
+  failure is missing worker CRUD/test verbs in the canonical command-reference block;
+  repair that reference and retain both feature sets. Preserve verified partial probe
+  successes and stale-failure removal while avoiding a newly created empty catalog
+  when every probe fails. The repaired worker integration is committed as `23ad740a`;
+  cache, action-intent and SSH changes through `84662464` pass 149 composed checks
+  spanning worker CRUD/probes/help, schemas, action admission, SSH/indexing, DAG
+  planning, CAS paths and source-cache round trips. Authority validation passes.
+  Native cache and Windows SSH receiver results are recorded below and under the
+  scheduler program. Neither the failed/cancelled hosted run nor local integration
+  substitutes for qualification of the final release head.
+
+- **1.2 Windows CAS path repair (CACHE-WINPATH-001 / issue #498):** peer native
+  evidence reproduces WinError 3 at immutable publication in the twelve-key portable
+  archive test: the temporary blob exists but the longer digest destination exceeds
+  MAX_PATH. Qualify extended-length native hardlink arguments without shortening the
+  fixture, assuming registry policy, changing CAS identities, or permitting overwrite.
+  Local path-form, long-path, concurrent publication and corruption checks precede
+  required native Windows cache-suite evidence. This item remains release-blocking.
+
+  Native Windows evidence at `367dea50` disproves the hardlink-only repair: a
+  competing immutable writer correctly sees FileExistsError, but ordinary-path
+  verification cannot reopen that long destination. Extend native blob paths through
+  read, metadata and enumeration operations, retaining namespace-consistent custody
+  checks. The broad sample-worker detector also reports package-manager provenance
+  and coding-agent failures; this run is scoped to separately probed CAS/cache unit
+  prerequisites and is not sample readiness or release attestation.
+
+  At `81a10165`, all three native Windows CAS tests pass, including long-path
+  concurrent publication, verified reads, enumeration, copy and corruption refusal.
+  The original twelve-key archive regression now reaches source-cache membership
+  publication and fails at the long key-directory mkdir. Extend metadata I/O and
+  archive capture consistently; preserve the unchanged long fixture and its check
+  against borrowing the original checkout after restoration. Native qualification
+  remains open, and the broader cache suite continues on its frozen prior snapshot.
+
+  The frozen `81a10165` native cache run terminates with 232 tests, nine skips and
+  exactly the long membership-directory error; the native CAS tests pass separately.
+  The metadata/archive repair preserves logical roots, derives native I/O roots and
+  performs containment checks in that namespace. Twenty targeted storage/roundtrip
+  checks and 64 broader source-cache, hardening and source-materialization checks
+  pass locally. Native Windows requalification at exact revision
+  `15f94afcae9090dd7a0148bb76f35105feb2f0f9` passes all three CAS tests, all 11
+  source-cache round-trip tests, and 232 broader cache tests (nine skips). The original
+  long-path fixture passes without shortening or weakening immutable publication.
+  This completes native cache-unit qualification; integration into the release head
+  and the full release gates remain required. The host's broader sample-readiness
+  failures remain unresolved and are not overridden by these unit results.
+
+### [ ] UPDATE-MERGE-002 — Complete three-way update migration and release it
+
+- **GitHub issue:** [#512](https://github.com/NVIDIA-dev/literate-ai/issues/512)
+
+- **Priority:** P0
+- **Owner:** Framework update adapters and CLI; UX-275 and ADR 0007
+- **Direction:** Finish the originally specified three-way merge behavior and publish a verified release.
+- **Conclusion:** Hash classification and plan-only reviews do not fulfill migration. Recover verified bases, merge disjoint edits, explicitly apply reviewed conflicts, advance upstream baselines transactionally, and qualify the release without closing unrelated UX-275 obligations.
+- **Depends on:** Accepted ADR 0007; existing lineage and framework rollback boundaries; complete RELEASE-INTEGRATION-002 before release
+- **Implementation:**
+  - [ ] Implement verified baseline custody and recovery, deterministic clean merges, and identity-bound reviewed resolution application for framework and inherited files.
+  - [ ] Document the completed behavior and reconcile UX-275 and UPDATE-MERGE-001 truthfully.
+  - [ ] Land through hosted CI and execute release plan, prepare, check, publish, and published verification.
+- **Evidence:**
+  - [ ] Regression proofs cover non-overlap, overlap, identical edits, binary/missing/tampered bases, stale review, repeated updates, mode preservation and complete rollback.
+  - [ ] Installed CLI migration and required local and hosted gates pass; published release artifacts are verified.
+
+  UPDATE-MERGE-002 progress: 52 focused update/lineage/follow tests pass, followed by
+  27 merge/adapter checks after roadmap-owner preservation was extended to clean merges.
+  Proofs include real exact-commit Git base retrieval, repeated framework/catalog
+  updates, reviewed keep-local/take-upstream/merge decisions, unchanged file modes,
+  stale checkpoint refusal, and complete composite rollback. Full local, installed,
+  hosted, and release qualification remains open. No release completion is claimed.
+  The full local run reached 3,292 tests (24 platform skips) and exposed one stale
+  initialization assertion: merge-base custody metadata is deliberately outside the
+  framework-owned file baseline. Its inventory assertion now recognizes that second
+  metadata file; the initialization and three-way merge regression modules pass.
+
+  The repaired full local run passes: 5,933 tests with 34 platform skips, no failures
+  (`make python-check`, retained log `/tmp/litai-merge-full3.log`). Installed-wheel
+  validation also passes at `9ca019e7`, producing wheel identity
+  `sha256:4026cf4427988b1c122f1fa7d3e2e265e0122765f22a4b911b864e60c5465f43`.
+  That repair now passes 157 composed update, initialization, CLI, worker/SSH and
+  schema checks with the worker/cache/SSH tree at `8d06db87`. Authority validation
+  passes. The integrated `880cc25b` wheel gate passes with artifact identity
+  `sha256:5b16fabbfb99c73992735082483799af1eda132c31f65c17682d8b724db11a76`.
+  Final full-suite, hosted CI and release qualification remain required before
+  publication; the tested wheel is not a versioned 1.2 release artifact.
+
+### [x] WORKER-PROVISION-001 — Configure and invoke a local provider-neutral worker provisioner
+
+- **Priority:** P0
+- **Owner:** framework worker CLI, private configuration and provisioning contracts
+- **Direction:** Implement the generic hook in this change: support static workers independently, and launch an organization-supplied command only when dynamic provisioning is explicitly enabled in local user settings.
+- **Conclusion:** Add local opt-in command configuration, help discovery and explicit on-demand worker provisioning. Use a versioned provider-neutral request/response boundary, user-supplied environment credential bindings, bounded process execution and private recovery state. Validate the returned worker before registration; keep cloud APIs, provider flags and credential acquisition outside Literate AI.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add local provisioner configuration CRUD, enabled-by-default-false policy, and help/--help discovery.
+  - [x] Add bounded on-demand provisioning with request identity, duplicate-allocation protection, response validation and private registration/recovery.
+  - [x] Document the adapter protocol and the complete static-only and dynamic-enabled CLI flows.
+- **Evidence:**
+  - [x] Disabled/missing configuration and missing credentials invoke no command; malformed output, timeout, identity drift and concurrent requests fail safely without unintended registration or retries.
+  - [x] Public CLI synthetic provisioner flow passes on native Linux and Windows and the returned worker can pass independent SSH testing.
+
+- **Generic-hook implementation:** Added local configuration/show/enable/disable/remove,
+  provider help discovery, bounded explicit provisioning, credential environment
+  bindings, schema-validated SSH registration and durable per-worker recovery state.
+  The 245 worker-focused tests pass locally, including 13 real-process hook tests.
+  Lint, formatting, changed-skill evaluation, layout, public export, lifecycle-driver
+  review and documentation authority review pass. Native hook qualification follows.
+- **Refresh qualification correction:** Final native no-op checks passed before the
+  broad application run reached a new test fixture with mismatched manifest pins.
+  Corrected that fixture to commit both Gitlink and manifest authority together;
+  rerunning its application coverage. No full-suite pass is claimed.
+
+- **Final generic-hook qualification:** Framework code at `bb19f82c` passes 248
+  worker-focused tests on macOS, Linux and Windows (four Windows platform skips),
+  including 16 real-process provisioning regressions. A noneditable wheel with
+  SHA-256 `207a2a600d3efd8f458e5c2346f1595baebcb29f1bd1dad4b9ddfb6804f41c6f`
+  passes 13 CLI smoke steps outside the checkout, including local opt-in settings,
+  a synthetic provider response, private registration/recovery, and real SSH to
+  existing Linux and Windows endpoints. This verifies the generic handoff, not a
+  provider-specific resource allocation. The repeated pool test reports 19/20 SSH
+  successes; the remaining Windows worker independently reports authentication
+  failure. Forty private user-path/configuration tests also pass.
+- **Qualification boundary:** The broad refresh reruns were stopped in favor of
+  the focused physical-permission regression group. Their partial progress is not
+  a full-suite pass. The new Git fixture now adds its unchanged member before the
+  initial root authority/pins are constructed; it does not rewrite an admitted
+  root manifest without its documentation review. No provisioner is enabled in the
+  operator's real local configuration. The unrelated cache path and remote-call
+  count failures, stale receipt, and Windows broad-refresh failure remain reported.
+- **Final peer survey:** No eligible cleanup candidates; stale, dirty or unmerged
+  peer branches remain retained. No peer checkout was removed or rewritten.
+
+- **Focused refresh proof:** Six physical-permission regressions pass on native
+  Linux at `142120a2`, including a complete real-Git refresh with group-writable
+  changed and unchanged members, plus no-op admission and drift rejection. The
+  macOS run of the same focused group also passes (six tests, 168 seconds). Framework runtime source
+  is unchanged from the three-platform worker and installed-wheel proofs above.
+
+- **Completion boundary:** Worker CRUD, SSH diagnostics and the generic local
+  provisioning hook are implemented and qualified in draft PR #514. The six focused
+  refresh permission regressions pass on macOS and native Linux. This closes the
+  implementation/test tasks, not the integration release: `verify` still reports
+  its stale receipt, and broader baseline failures remain owned by their recorded
+  work items. The published wheel proof binds runtime code `bb19f82c`; subsequent
+  commits only reorganize the regression fixture and record this evidence.
+
+- **1.2 advanced worker integration:** PR #514 head `f452be65` adds the opt-in
+  provisioning hook and native qualification beyond already-integrated `d6d003eb`.
+  Review preserves disabled-by-default configuration, explicit credential bindings,
+  bounded real processes, durable duplicate-allocation refusal and recovery without
+  a second allocation. Include this contribution with the existing worker program;
+  its hosted failure is the unregistered provisioning schema in the version catalog.
+  Version checking reproduces the omitted resource. Move the new schema to the
+  current v2 catalog and register its existing wire identifiers, preserving frozen
+  published v1 bytes. Qualify schema closure and the combined CLI.
+  The wire regression also reproduces a non-SSH response accepted by the public
+  schema but rejected by the adapter. Constrain the response schema to the existing
+  SSH-only contract; preserve closed records and NUL-command rejection.
+  The physical-permission fixture moved to the focused modes module; retain its
+  coherent initial Git/manifest authority and unchanged permission assertions.
+  Native evidence remains bound to the peer's revisions until integrated qualification.
+
+- **Integrated provisioning checks:** All 248 worker tests and six real-Git physical
+  permission regressions pass. Changed-skill checks pass. The combined CLI/catalog
+  check additionally found nine provisioning verbs omitted from the canonical
+  command inventory. With those entries restored, all 55 combined CLI/catalog,
+  version-authority and user-path checks pass. Ruff checks and formatting pass
+  for 1,316 files. These focused checks do not replace full release qualification.
+
+- **Ready-queue worker admission:** Remote source indexing must reserve one exact
+  admitted worker slot before consuming a shared lifecycle executor slot. When no
+  remote slot is free, leave the action pending and continue other ready phases.
+  The reservation must release on successful indexing, guard or dispatch failure,
+  and executor submission failure. Slot exhaustion and deadline failures remain
+  distinct: exhaustion waits without occupying an executor, while an expired
+  admission fails the source-index phase. Direct index callers retain bounded
+  blocking behavior using the same slot accounting. Qualification must prove
+  unrelated ready work progresses while index capacity is exhausted, and a failed
+  or completed reservation cannot leak capacity or execute twice.
+
+  Implementation now gives the ready queue a single-use index reservation backed
+  by the same occupied-slot set as direct callers. Guard/operation/submission
+  failures release ownership; source-index failures retain their phase. Bounded
+  retries observe capacity released by callers outside the shared executor.
+  The capacity-progress regression fails against `63a4a4c6` and passes after the
+  repair. Ten focused queue/real-command-index checks, 365 Standard lifecycle
+  tests (four skips), and 48 scheduler/catalog/version checks pass. Ruff checks
+  and formatting pass. This qualifies INDEX admission only; all-phase remote
+  dispatch, automatic whole-pool sizing, and the remaining release gates stay open.
+
+- **Automatic admitted-pool sizing:** Omitted `--jobs` on build, test, rebuild and
+  profile must reach Standard composition as an automatic policy rather than an
+  implicit serial cap. Resolve it from the live admitted worker slots, bounded
+  at 256; an explicit limit caps admitted capacity. With no admitted pool, preserve
+  the one-slot default and explicit local limits. Bind the resolved limit into the
+  lifecycle request identity. Legacy complete-node dispatch retains its existing
+  integer wire default until all-phase worker composition replaces that path.
+
+  The CLI and Standard rebuild now preserve automatic selection, derive the shared
+  executor limit from the admitted slots, cap explicit requests, and record the
+  effective count in lifecycle authority. Expired admission retains its structured
+  error and starts no runtime execution. The adapter regression fails against
+  `62c9e33f` (including a requested 12 jobs incorrectly escaping a five-slot pool)
+  and passes after the repair. Seventy combined CLI rebuild, execution dispatch,
+  action configuration and adapter tests pass; 12 CLI help/profile checks and 12
+  version-authority checks also pass. The final expired-admission regression passes
+  with all nine adapter tests. This advances the existing INDEX composition; it
+  does not close all-phase remote scheduling or native/LAN release qualification.
+
+- **Portable phase finalization:** Separate deterministic build-plan construction
+  from controller-local intent/provider maps. A phase must receive the exact typed
+  intent, authorization, command contract, provider and package artifact records,
+  and admitted dependency-resolution mode. Check exact input bindings before
+  producing a plan. The pure operation preserves historical plan reconstruction;
+  current grant validity remains enforced at the execution/dispatch boundary.
+  Local finalization retains live SDK admission
+  and plan registration; the pure operation must round-trip its public inputs and
+  preserve the existing plan identity for each supported resolution mode. This is
+  preparation for production remote phase requests, not remote-execution evidence.
+
+  `finalize_standard_component_plan` now takes those explicit inputs, checks the
+  intent/request references, compiler and SDK-bound builder identity, output set,
+  resolution privileges, and exact provider/package records. Local ports retain
+  their SDK custody and registration duties. Serialized records reconstruct plans
+  after source/object directories and local maps are discarded; substitution tests
+  reject mismatched inputs. A separate comparison against `40d14d6e` preserves
+  exact plan documents and identities for none/npm/Python resolution. All 368
+  Standard tests pass (four skips), as do 32 catalog/version checks and Ruff checks
+  for 1,318 files. The command receiver still supports INDEX only; remote PLAN
+  transport and remaining production phases are not claimed by this refactor.
+
+- **Remote PLAN receiver:** Extend the one-shot action protocol with a closed,
+  bounded plan-input record binding execution/generation plans, intent, current
+  authorization, command contract, exact provider/package records and resolution
+  mode. PLAN consumes exactly one authorized predecessor record and its canonical
+  action payload. Refuse changed worker/deadline/phase/plan/component bindings,
+  missing or extra records, invalid grants and substituted input identities. Return
+  the existing typed build-plan document without running host build commands.
+  Advertise PLAN only once the real command receiver implements it. Qualification
+  must dispatch a real child process and cover malformed, expired, changed and
+  oversized inputs; production queue composition remains a separate required step.
+
+  The command receiver now advertises INDEX and PLAN and implements exact PLAN
+  finalization. The v2 catalog publishes the closed input-record schema while
+  preserving frozen v1. Real child-process dispatch returns the expected plan;
+  real refusal responses cover revoked grants and substituted generation plans.
+  The action suite passes (124 executions in the first run, including imported
+  source-index fixture tests subsequently removed from duplicate discovery). The
+  final 17 PLAN/capability checks cover duplicate keys, changed bytes, expired and
+  future valid-shaped grants, extra/missing records, worker/phase/deadline mismatch,
+  and bounds. Forty schema/catalog/version/immutability checks and Ruff checks for
+  1,320 files pass. Real SSH PLAN execution and production ready-queue composition
+  remain required; the existing CLI still composes only remote INDEX.
+
+- **Production PLAN composition:** Standard rebuild must dispatch PLAN to admitted
+  capable workers through the existing bounded ready queue. INDEX and PLAN share
+  one per-worker occupied-slot set and global cap. Capacity exhaustion leaves the
+  action pending; unsupported remote phases retain the explicit local path. Once
+  admitted, transport, capability, deadline or response failures must fail the phase,
+  never silently retry locally. Before build uses a returned plan, the controller
+  must independently recompute it from current local intent/provider/SDK authority,
+  verify exact equality, and register it using the existing local custody path.
+
+  Production composition now installs `CommandBuildPlanFinalizer` after durable
+  source-cache/checkpoint setup and preserves that port through later composition.
+  Real child-process proofs verify factory dispatch and local registration, shared
+  INDEX/PLAN slot exclusion, and refusal/release of substituted results. The ready
+  queue reserves PLAN without bypassing its final identity checks. All 372 Standard
+  tests pass (four skips), plus 47 index/admission/configuration/version checks.
+  Hosted candidate `e985d512` separately failed run `36772772259`: Ubuntu Python 3.14
+  ran 4,904 tests with 38 skips and one malformed artifact-graph error path. Two
+  calls pass three arguments to the two-argument validation helper. Removing every
+  manifest in turn reproduces that TypeError locally; repair is required before
+  advancing the published candidate. Native PLAN SSH and all remaining phases stay open.
+
+- **Hosted artifact-graph refusal repair:** Both missing-export and missing-action
+  dependency branches passed an accidental extra label to `fail(path, message)`.
+  Restore the two-argument calls. Expand retained-library truncation coverage to
+  remove every manifest in turn, and exercise an unrealized action whose provider
+  is absent from the graph. Both paths reproduce TypeError before the repair;
+  the intended outcome remains a typed contract refusal, with no accepted graph.
+
+  The repaired graph contract passes all 16 artifact-graph tests and seven retained
+  library export tests, including every manifest truncation and the unrealized
+  action dependency. Both pre-fix reproductions are retained as failed evidence.
+
+- **Portable build intent:** Separate deterministic post-source build-request and
+  intent construction from local source/SDK admission and retained library bindings.
+  Explicit typed inputs bind the generated candidate to its generation plan and
+  command contract, exact provider/package artifacts, SDK identities and dependency
+  mode. Preserve existing request/intent identities and privileges; refuse mismatched
+  candidate/contract/plan inputs. The local adapter retains source validation, live SDK
+  lock checks, evidence recording and library binding custody. Prove reconstruction
+  from serialized inputs after the original filesystem/maps are gone before adding
+  a remote BUILD_INTENT handler. This refactor alone does not enable that phase.
+
+  Portable construction now preserves the prior serialized intent and identity in
+  six comparisons covering none/npm/Python dependency modes with and without SDK
+  inputs, including provider and package records. Serialized inputs reconstruct
+  after local custody is discarded, and candidate/contract/plan substitutions are
+  refused. The existing library-import fixture now supplies its exact candidate
+  revision and generation-plan identity; its original two-hash stub failed the new
+  binding check. The SDK authority fixture likewise supplies its candidate-bound
+  generation-plan identity. The nine SDK consumer checks initially confirmed eight
+  passes and one linked-provider stub missing the same identity. With that second
+  stub bound to its candidate, both closure checks pass (423.079 seconds), retaining
+  the failed run as evidence. All three SDK authority checks also pass. All 374
+  Standard tests pass (four skips). Remote BUILD_INTENT composition and complete
+  release qualification remain open.
+
+- **Current contribution survey:** PR #515 advanced to `eb309658` with 229 changed
+  files. Hosted run `36779999437`, macOS Python 3.11 shard 3, fails the version
+  authority check because configured and computed lifecycle-driver identities differ;
+  the remaining cancelled jobs are not passing evidence. This draft remains under
+  review and is not yet included in the qualified integration candidate.
+
+- **Native PLAN qualification:** Exact revision `4c3539b1493d343daa8ef54c880fad91425adf38`
+  passes 36 receiver/composition checks each on native Windows and Linux: runtime
+  environment, SSH transport, capabilities, hardware, PLAN records and production
+  shared-slot composition. Both hosts then pass a real controller-to-worker SSH PLAN
+  dispatch, returning the independently expected plan bytes and refusing revoked
+  grants and substituted generation-plan identities with `action_plan.invalid`.
+  Receiver identity is `sha256:c9178e6bc57f87e58c97044eae81d705cfc1e2ce2ae127e6a53aceaf210350e0`.
+  Private evidence retains exact source/tree custody, detected prerequisites, native
+  logs and structured results; no private endpoint or credential enters the repository.
+  This qualifies INDEX/PLAN receiver boundaries and PLAN composition/SSH custody,
+  not generated build execution, other lifecycle phases, samples or final release.
+
+- **Build-intent result admission:** Expose an immutable portable-input snapshot
+  separately from local intent registration so a worker result can be checked before
+  it becomes controller authority. Recompute against current source/SDK/command and
+  dependency inputs on return, refuse substituted results, validate library-import
+  bindings before registering any intent maps, and retain the existing evidence path.
+  Local construction uses the same admission and registration boundary. Qualify
+  no registration during input capture, no partial registration on refusal, exact
+  result admission, and changed library/SDK authority before remote dispatch is added.
+
+  The prior implementation reproduces partial registration on a refused library
+  target. Separating input capture and result admission passes 377 Standard checks
+  (four skips). A subsequent injected evidence-write refusal reproduces another
+  partial-registration path; defer all intent-map writes until both library validation
+  and required evidence recording succeed. Cover both refusal boundaries explicitly.
+
+  Final admission now recomputes returned intents against current inputs, validates
+  library imports, records required evidence, and only then registers intent maps.
+  Input capture performs no intent registration. All 378 Standard checks pass (four
+  skips), including substituted results, changed SDK inputs and evidence refusal;
+  all three SDK authority checks pass. Both prior partial-registration reproductions
+  remain failed evidence. Remote BUILD_INTENT dispatch remains unimplemented: its
+  request must carry the current index result and typed provider acceptance evidence
+  matching the canonical INDEX/ACCEPT predecessors, not merely export hashes.
+
+- **Remote BUILD_INTENT receiver:** Carry an index handoff containing the exact
+  execution plan, generated candidate, command contract, SDK identities, dependency
+  mode and actual index record. The current receiver admits its existing disabled-index
+  policy only. Each additional canonical ACCEPT predecessor carries the provider's
+  typed acceptance evidence, including exact built/tested/executed exports. Recompute
+  the canonical DAG, require one correctly bound record per ordered predecessor, derive
+  provider artifacts exclusively from those acceptance records, and refuse omitted,
+  extra, changed or reordered custody. Packaging-only inputs remain absent at this
+  phase. Bound aggregate bytes and record counts, preserve worker/deadline checks,
+  and return a typed intent without source materialization or host execution. Qualify
+  real subprocess execution for a build-dependency diamond and tampered predecessors
+  before advertising this receiver phase. Production queue composition stays separate.
+
+  The receiver now implements BUILD_INTENT and advertises it alongside INDEX and
+  PLAN. The v2 catalog publishes the closed index-handoff schema; accepted provider
+  records reuse existing typed acceptance contracts. A real command process returns
+  the exact intent for a build-dependency diamond and for interface-only edges, and
+  refuses changed index or foreign-provider custody. The 120-check action cohort
+  passes; final eight receiver checks also cover omitted/reordered predecessors,
+  changed generation/contract/export records, duplicate JSON, bounds, expiry and
+  worker binding. Eleven production INDEX/PLAN composition checks and 20 schema
+  checks pass. This is receiver qualification; production BUILD_INTENT reservation,
+  predecessor capture, independent returned-intent admission and native SSH proof
+  remain required before claiming that phase's production composition.
+
+- **Production BUILD_INTENT composition:** Add an explicit queued dispatch port
+  carrying the completed index identity and typed acceptance records for exact build
+  and toolchain providers. Capture predecessors only after the existing acceptance
+  barrier; verify each receipt against its result's identity and exports. Reserve
+  from the same admitted slots as INDEX/PLAN before executor submission, revalidate
+  worker capability and deadline, dispatch the canonical request and independently
+  compare returned bytes. Retain result evidence before local intent admission so
+  recording failures cannot register state. Preserve the dispatch port through cache
+  and checkpoint composition. Refuse missing/substituted provider evidence or remote
+  failures without local retry. Keep the legacy complete-node path explicit until
+  its separate phase conversion; this step qualifies the shared ready queue.
+
+  Production composition now installs the explicit BUILD_INTENT dispatcher and
+  preserves it through cache/checkpoint assembly. Four real command-dispatch checks
+  pass, including shared INDEX/PLAN capacity, substituted results, evidence-write
+  refusal before registration, and foreign index refusal. The Standard cohort ran
+  384 tests successfully with four skips; eight final ready-queue checks pass,
+  including exact typed build-provider receipts captured after acceptance and
+  refusal of providers represented only by a scalar acceptance identity. Native
+  BUILD_INTENT SSH qualification and the remaining remote phases remain open.
+
+- **PLAN result retention before admission:** Match BUILD_INTENT's failure semantics.
+  Retain verified remote PLAN bytes before registering the returned plan or SDK
+  authorization locally. An evidence-store refusal must leave both maps unchanged
+  and release the reserved worker slot; it must not trigger a local retry.
+
+  The injected evidence-store refusal reproduced a partially registered plan before
+  the repair. Retention now precedes local admission; all four production PLAN
+  checks pass, including unchanged registration maps and released slot capacity.
+  Native BUILD_INTENT qualification is running independently at exact d3229715;
+  those receipts will not qualify this later PLAN ordering repair.
+
+- **Portable authorization inputs:** Separate deterministic Standard grant
+  construction from controller admission. The immutable input binds the exact
+  intent, completed index and controller-selected issuance time. Preserve the
+  existing constrained profile, requested privileges, actor/reason, grant ID and
+  thirty-minute lifetime byte-for-byte. Local SDK validation and evidence recording
+  remain at the local port. This is preparation for AUTHORIZE transport, not
+  permission for a worker to choose policy, privileges or extend the grant.
+
+  The immutable authorization input now constructs the same grant without accessing
+  host state. Two exact previous/new document and identity comparisons pass. Three
+  focused checks cover serialized intent, expiry, SDK refusal before construction,
+  controller time and both retained documents. The Standard cohort passes 389 tests
+  with four skips. AUTHORIZE receiver and production composition remain open.
+
+- **BUILD_INTENT Linux qualification at d3229715:** Native Linux ran 47 checks
+  successfully: environment (2), SSH transport (5), capabilities (11), hardware (9),
+  BUILD_INTENT receiver (8), production composition (4), ready queue (8). The
+  exact-source tree is e9de70db247cfb2cbc66f8b2922277c340e17c01. A real controller-to-
+  Linux SSH request returned the exact intent for a build-dependency diamond and
+  rejected changed-index and foreign-provider records as action_intent.invalid.
+  Receiver identity is sha256:b82b120e8451097d56919fe4a6d836aff79ccbb22d314e1ea44502706b3efbd5.
+  This qualifies that receiver/composition scope only, without generated build
+  execution or later source changes. Windows qualification remains live. Its full
+  sample-worker bootstrap reports missing Codex; required receiver-test tools were
+  detected, so that run does not establish full sample-worker readiness.
+
+- **Hosted candidate 4c3539b1 failure:** Run 36780861550 completed with failure in
+  Windows Python 3.12 test shard 3 (job 110110475273). Five action-execution-
+  configuration tests reject worker admission as lacking a current compatible
+  observation. Root cause and native reproduction remain required; this candidate
+  is not landing or release evidence.
+
+- **Worker hardware admission diagnostics:** When all eligible probe attempts fail,
+  retain the bounded error codes in the admission refusal instead of replacing them
+  with generic hardware incompatibility. Do not include raw exception messages,
+  private endpoints or environment values. A healthy candidate must still proceed
+  when another candidate fails; refused admission must not allocate source CAS.
+
+  All 17 action-execution-configuration checks pass, including sanitized transport/OS
+  error reporting, source-CAS nonallocation on refusal, and mixed healthy/unavailable
+  candidates. The missing-disk-observation CI case passes on registered Windows at
+  d3229715 with a successful actual hardware probe; this does not reproduce or
+  resolve the hosted failure. Candidate 4c's final matrix has 11 successful jobs,
+  one failed Windows shard and seven cancelled jobs. Further hosted diagnosis is
+  required; cancelled checks are not passing evidence.
+
+- **Bounded AUTHORIZE receiver:** Accept the controller's exact intent, completed
+  disabled-index record, execution/generation identities and issuance time in a
+  closed, size-bounded BUILD_INTENT handoff. Bind the canonical AUTHORIZE action
+  and payload to that predecessor. Reconstruct only the existing constrained grant
+  policy with its fixed lifetime; refuse future or expired grants, changed source
+  indexing and substituted payloads. No host execution, policy selection or clock
+  renewal is delegated. Controller SDK admission, independent returned-result
+  comparison and evidence retention remain required for production composition.
+
+  The one-shot receiver now implements AUTHORIZE and advertises it with INDEX,
+  BUILD_INTENT and PLAN. The v2 schema publishes its closed handoff; v1 is unchanged.
+  All 126 action checks pass, including real grant return, changed-index refusal,
+  future/expired/controller-time checks, payload binding, duplicate fields and
+  oversized records. This is receiver qualification only; production AUTHORIZE
+  reservation and independent controller admission remain open.
+
+- **Production AUTHORIZE composition:** Reserve the existing shared worker pool
+  before dispatch. Capture issuance time only once capacity is owned and current
+  local SDK admission succeeds; bind the completed index and exact intent.
+  Independently reconstruct returned grant bytes, retain them before local evidence
+  admission, and recheck SDK custody and grant validity without renewing issuance.
+  Queue consumers keep their exact authorization checks; no remote failure invokes
+  local authorization as a retry. Cache/checkpoint recomposition preserves this port.
+
+  Native Windows qualification at d3229715 completed with an expired-deadline error
+  in the combined BUILD_INTENT fault-injection test's slot-release assertion.
+  The environment (2), transport (5), capabilities (11), hardware (9) and receiver
+  (8) groups passed. Split substituted-result and evidence-store refusals into
+  separate fixture lifetimes for BUILD_INTENT and AUTHORIZE, and assert the exact
+  intended error so deadline expiry cannot satisfy a generic refusal assertion.
+  Preserve production time bounds; native requalification remains required.
+
+  Production AUTHORIZE now composes through the shared pool and preserves its port
+  across cache/checkpoint reconstruction. All 395 Standard tests pass (four skips).
+  After splitting fault scenarios, all 31 production action/queue checks pass.
+  Real subprocess checks cover unchanged grant return, slot exclusion, deferred
+  time capture, substituted or unretained results before admission and SDK drift.
+  Queue tests reject malformed authorization before finalization; local admission
+  refuses renewed issuance and expired grants before recording evidence. Native
+  AUTHORIZE and repaired Windows BUILD_INTENT qualification remain required.
+
+- **Portable BUILD contract preflight:** Reuse the existing locked-command export
+  and provider-artifact checks independently of controller paths and mutable local
+  registries. Preserve exact declared export IDs, Component, role, ABI, target,
+  media type, producer and compiler identities, plus ordered provider identities.
+  The local adapter retains its existing refusal behavior before commands execute.
+  Qualify deserialized inputs after removing local source custody and changed
+  export/provider refusals. This is a prerequisite for the BUILD receiver; worker
+  toolchain observation, source/provider materialization, SDK/package custody and
+  retained build-result admission remain separate required work.
+
+  The pure preflight now validates typed, deserialized plan/contract/provider
+  records without source directories or host bindings. Three focused checks pass,
+  covering source-independent validation and changed export ID, role, ABI, target,
+  media type, producer, compiler and extra-provider refusal. The local adapter
+  preserves its error type and refuses before command execution. All 400 Standard
+  tests pass with four skips. Work is retained in the temporary BUILD checkout
+  because the original local repository is currently read-only.
+
+- **Worker-local toolchain selection for BUILD:** Retain a bounded immutable registry
+  of actual local tool bindings supplied by worker startup discovery. Requests
+  select exact canonical identity tuples only; they cannot supply executable paths,
+  environment values or aliases. Refuse duplicate or unavailable identities and
+  revalidate selected launchers and observed runtime guards at use. An opaque
+  authority identity without a drift guard is not a worker observation. Keep
+  private invocation details out of exported inventory. This prepares the BUILD
+  receiver's local execution boundary; wire discovery, scheduling and BUILD
+  execution remain required before claiming remote build support.
+
+  The worker registry now retains a bounded immutable identity-to-binding map.
+  Five focused cases cover a real discovered Python toolchain, independent worker
+  paths, launcher drift, observed-runtime guard drift, unguarded aliases, duplicate
+  or missing IDs, changed arguments/environment, and identity-only inventory.
+  All 131 action checks pass. Worker startup discovery and BUILD integration are
+  still required; the registry alone does not advertise a host-execution phase.
+
+- **Linux AUTHORIZE SSH qualification at d25ef141:** Native qualification completed
+  all 59 checks successfully, including BUILD_INTENT/AUTHORIZE receivers, production
+  composition and the ready queue. A separate real controller-to-Linux SSH request
+  returned the exact authorization and refused expired controller time, changed
+  source-index custody and changed generation-plan identity as
+  action_authorization.invalid. Receiver identity is
+  sha256:0e86ec74e9a069b9548832539003336d45f5d2b750d6b785bd6d83b1888019d7.
+  This is exact-revision phase evidence, without generated build execution.
+  Windows native qualification also completed all 59 checks at d25ef141, including
+  production BUILD_INTENT (five checks in 1087.632 seconds), production AUTHORIZE
+  (five in 1187.548 seconds) and the ready queue (nine in 3.767 seconds). The exact
+  revision and successful terminal report were retrieved with the full native log.
+  This qualification covers receiver and composition behavior, without generated
+  build execution or the subsequent BUILD preparation commits.
+  The separate controller-to-Windows SSH AUTHORIZE proof also passed: the exact
+  authorization record was returned, while expired controller time, changed source
+  index and changed generation-plan identity were refused as
+  action_authorization.invalid without a result. Its receiver code identity matches
+  the Linux proof above; the accepted authorization record is
+  sha256:a53a9706758a984e831144c13380475109821bf8cca587c8fd7dd6fe2c964626.
+
+- **Phase-scoped local BUILD runtime:** Permit an explicit canonical command-phase
+  scope while preserving the full lifecycle default. Require every and only actual
+  tool dependency for the selected phases; npm BUILD retains its Node dependency.
+  Reject out-of-scope test, execution and independent acceptance before side effects,
+  including SDK and packaged execution branches. This prepares worker execution
+  without advertising BUILD before its custody and authorization integration.
+
+  The adapter now enforces explicit command scopes before dispatch and retains the
+  full lifecycle default. Five focused checks cover a real BUILD with unavailable
+  TEST/EXECUTE tools, early refusals including SDK/package dispatch entry points,
+  malformed scopes, a shared launcher that cannot bypass phase restrictions, and
+  npm BUILD's Node dependency. All 405 Standard tests pass with four skips. Remote
+  BUILD source/provider custody, authorization and result transfer remain pending.
+
+- **Portable BUILD authorization admission:** Extract a shared current-grant and
+  exact-plan check for BUILD worker admission. Reuse it in local admission of a
+  remote PLAN result, preserving live SDK validation and local error semantics.
+  Verify serialized input admission without source custody, expired/revoked/future
+  grants, altered index/privileges and substituted plans before any local retention.
+  Receiver wiring and actual BUILD transfers remain part of the open 1.2 program.
+
+  The portable admission check is now shared with local remote-plan admission. Six
+  focused checks pass, including serialized authority after controller source removal,
+  revoked/expired/future grants, index/privilege substitution, changed commands and
+  providers, and refusal before local plan retention. Four production PLAN-dispatch
+  tests pass. This validates authority admission; it does not yet execute remote BUILD.
+
+- **Portable generated-source validation for BUILD:** Capture recipe-derived SBOM
+  and generated-suite validation inputs in a path-free, immutable transport value.
+  Use the same validators during ordinary registration and transferred registration,
+  reject mixed recipe/transport authority, and retain the exact existing custody
+  identity. Prove transfer after controller source removal, changed evidence refusal
+  without registration, and actual BUILD from the worker copy. Binding these inputs
+  into BUILD's action envelope remains required before enabling remote dispatch.
+
+  The registry now captures and exports immutable recipe-derived validation inputs,
+  revalidates worker-local SBOM/suite bytes with the existing validators, and refuses
+  competing validation authority without replacing retained state. Six focused
+  checks pass: a real BUILD after controller source deletion preserves the exact
+  custody record; altered recipe/reference/result-shape/dependency-graph authority,
+  changed worker bytes, malformed or oversized documents and mixed/replaced authority
+  are refused. All 417 Standard tests pass with four skips. BUILD action-envelope
+  binding, provider materialization and receiver dispatch remain open.
+
+- **Shared CAS source materialization for BUILD:** Reuse INDEX's bounded manifest,
+  digest, deadline and temporary-workspace rules for BUILD source preparation. Bind
+  the admitted candidate and exact strict source-custody identity to the current
+  plan/grant and captured validation inputs. Prove HTTP transfer into an independent
+  worker CAS after controller source removal, actual build from that registry,
+  pre-fetch authority refusals, interrupted/changed transfers and cleanup. Keep
+  source preparation distinct from the still-required bounded BUILD receiver.
+
+  INDEX now uses the shared source materializer. BUILD source preparation rechecks
+  its exact plan/grant and candidate before transfer, reconstructs strict source
+  evidence on the worker and compares the expected custody identity before yielding.
+  Five focused cases pass, including real HTTP transfer to an independent worker CAS
+  followed by BUILD after controller source deletion, expiry during transfer, corrupt
+  fetch refusal and cleanup after an interrupted body. All 136 action tests pass.
+  Host-execution bounds, provider materialization and BUILD result transfer remain
+  required before enabling remote BUILD.
+
+- **Bounded BUILD worker supervision:** Add a worker-side child supervisor using the
+  existing bounded process-tree owner. Bind its private launcher and exact admitted
+  input bytes, cap execution by both the current grant and action deadline, check
+  cancellation during execution, bound outputs and refuse private diagnostic leakage.
+  Prove real-child interruption on authorization expiry/cancellation, output overflow
+  refusal and descendant cleanup. BUILD wire admission and worker composition remain
+  required; the supervisor alone must not advertise remote BUILD capability.
+
+  The worker supervisor now binds a private launcher and exact admitted input bytes,
+  uses the shared bounded process-tree owner, checks grant/deadline/cancellation
+  during execution and rechecks authority and launcher custody before returning.
+  Seven real-child tests pass, including both real-time deadline orderings, running
+  cancellation and expiry, input mismatch/overflow and changed launcher refusal,
+  stdout/stderr limits, private diagnostic suppression and descendant cleanup after
+  successful parent exit. All 143 action tests pass. BUILD record decoding, worker
+  composition, signal/cancellation routing and artifact/evidence verification remain
+  required before this supervisor can enable remote BUILD.
+
+- **BUILD child record admission:** Replace the supervisor's opaque input assumption
+  with a closed, bounded record binding execution/generation identity, exact plan,
+  current authorization, command contract, provider/package declarations, generated
+  candidate, source manifest and captured validation/custody identities. Reconstruct
+  the intent from those inputs and the plan from its authorization before launch.
+  The child consumes the same verified record; private executables and environment
+  remain worker-owned. Prove changed authority and malformed records refuse before
+  launch, while the accepted record reconstructs strict source custody. Receiver
+  dispatch, provider materialization and result transfer remain open.
+
+  The supervisor now derives authority solely from the exact decoded record before
+  launcher access. Five decoder checks cover changed candidate/generation/plan,
+  malformed/duplicate/oversized JSON, revoked/expired grants and real source custody.
+  Eight process tests retain interruption/output/descendant checks and add a real
+  child which repeats admission and builds from worker CAS after controller source
+  removal. All 149 action tests pass locally. The final process assertion accepts
+  native text line endings; exact source and artifact bytes remain verified by the
+  existing custody checks. This is not production remote BUILD qualification.
+
+- **Hosted qualification follow-up:** Run 36794916017 at b776e9d3 finished with
+  Windows shard two failing two tests: the real Bazel shared-product test received
+  HTTP 500 fetching pybind11_bazel, and the hardware bounds test exceeded its
+  60-second probe deadline. The shard reports 1095 passed and 39 skipped; sibling
+  cancellation is not qualification. Native d25ef141 hardware checks passed, but
+  that does not supersede this hosted failure. Artifact retrieval is currently
+  unavailable, so the probe's cause remains unresolved. Preserve execution bounds
+  and require successful exact-head hosted qualification before release.
+
+- **Transferred BUILD result admission:** Revalidate a transferred artifact tree
+  against the exact retained plan, current authorization, provider materials and
+  expected Standard build evidence before registering local export custody. Stage
+  export registrations until SBOM/evidence validation and final authority/tree
+  checks succeed, including the ordinary local build path. Prove real transfer and
+  subsequent use after producer artifact removal, changed exports/SBOM/evidence,
+  expired grants and failed validation without partial registrations. This prepares
+  controller acceptance; remote transport and evidence-record retention remain open.
+  Admission now requires the existing bounded qualification reader and build
+  process/artifact-tree verifier before filesystem reopening. Export registrations
+  are staged until exact evidence, current authority and unchanged source/provider/
+  artifact custody pass. The broad Standard suite passes 426 tests with four skips.
+  After adding the final proof-record gate, ten focused tests and all 26 BUILD action
+  checks pass. These prove BUILD-to-TEST use after producer artifact deletion,
+  refusal of altered exports/evidence/SBOM and missing supporting records, grant
+  expiry and tree mutation during admission, foreign roots/links, and preservation
+  of prior registrations after a failed replacement. Existing real process
+  observations remain evidence of execution even when later artifact admission fails.
+  Production worker result encoding, transport, record retention and controller
+  composition remain required before advertising remote BUILD.
+
+- **BUILD result CAS transfer:** Carry a bounded closed result record binding the
+  exact BUILD input, Standard evidence, whole artifact archive and supporting record
+  references. Reuse canonical directory archives and private staged-tree custody;
+  preserve file modes and bind all bytes to verified build observations. Verify
+  controller CAS contents, retain supporting records before artifact registration,
+  and remove failed stages while preserving prior admissions. Prove real HTTP CAS
+  transfer after producer artifact deletion, corruption/substitution/bounds refusal,
+  and retention/authority failure without partial registration. Production child and
+  dispatcher composition remain required; do not advertise remote BUILD yet.
+
+  The result adapter now captures canonical archives and proof records into worker
+  CAS, transfers and verifies them through an independent controller CAS, retains
+  records before admission, and owns the received stage through final registration.
+  All 160 action tests pass. Eleven result cases include real HTTP transfer and
+  subsequent TEST after worker artifact deletion, corrupt cached/remote bytes,
+  archive substitution, control bounds, retention/expiry failures, read-only modes,
+  changed producer/staged files, and preservation of a replaced foreign stage.
+  Eleven transferred-admission checks also pass, including expiry during the final
+  tree recheck. All 37 final BUILD action checks pass after binding result decoding directly to
+  the exact input bytes.
+  Production receiver/dispatcher wiring and custody-only admission on controllers
+  or TEST-only workers without BUILD tools remain open; native mixed-profile and
+  directory-export qualification is still required before release.
+
+- **Post-BUILD artifact admission across phase scopes:** Treat verified artifact
+  admission as data custody, not compiler execution. A TEST-only worker must accept
+  the exact completed BUILD result without possessing its compiler binding, then
+  run its own locked TEST command. Keep current plan/grant, source/provider/SBOM,
+  supporting-record and staged-tree checks intact, and prove BUILD still refuses
+  before process access. A controller with no execution adapter remains a separate
+  required integration step; do not advertise complete remote lifecycle support.
+
+  Artifact admission no longer requires BUILD scope; every host-execution guard
+  remains in place. A real BUILD using a distinct compiler invocation transfers its
+  archived artifact and proof through separate worker/receiver CAS stores after the
+  producer artifact tree is deleted. The TEST-only receiver has no compiler binding,
+  retains and admits the exact evidence, runs its own locked TEST, and refuses BUILD
+  before compiler access. All 12 admission tests, five command-scope checks and
+  37 BUILD action checks pass locally. Zero-execution controller custody and full
+  production phase dispatch remain required.
+
+### BUILD child generation context
+
+Carry and verify the actual Component generation plan in the BUILD input so
+worker-side intent registration can preserve direct library interface edges.
+Identity-only context cannot implement that registration faithfully. This does
+not by itself complete provider material transfer, private toolchain composition,
+or production BUILD dispatch.
+
+Outcome: BUILD records now retain the complete generation plan and verify its
+identity, Component revision, and generation key against the candidate before
+launch. Missing plans, substituted plan bytes, internally consistent replacement
+plans, and changed candidate generation keys are refused. All 38 focused BUILD
+checks pass, including supervised child execution and CAS result transfer; the
+12 artifact-admission checks also pass. This remains preparation for production
+BUILD dispatch, not completion of that phase or the 1.2 program.
+
+### BUILD child lifecycle registration
+
+Retain the full execution plan as well as its selected generation plan in child
+input, verify their relationship, and exercise ordinary intent/plan admission in
+the real supervised child before BUILD. This supplies the Component lock context
+needed by SDK admission and avoids bypassing lifecycle registration. Production
+worker configuration and provider material transfer remain open.
+
+Outcome: the real supervised BUILD child now admits the transferred intent and
+finalized plan through the ordinary lifecycle methods before running BUILD from
+worker CAS after controller source removal. The input retains and verifies the
+full execution plan and exact generation membership. All 39 BUILD checks and
+12 transferred-artifact checks pass; specialized provider/SDK worker composition
+and production dispatch remain required.
+
+### Production BUILD execution operation
+
+Move the supervised-child fixture's admission and BUILD sequence into production
+code and finish it with verified result capture. Require an already configured
+evidence recorder so provider custody can be admitted before consumer BUILD
+without rebinding or losing evidence. Qualify the actual production operation in
+a supervised process against worker CAS after controller source deletion.
+
+The production operation is exercised by the bounded subprocess test and returns
+a CAS-backed verified artifact result. Its worker Python launcher uses observed
+toolchain custody to preserve virtual-environment semantics; resolving a venv
+symlink as an unobserved binary lost installed runtime dependencies. Missing
+recording, changed source custody, and divergent runtime plan inputs must refuse
+before BUILD. Worker CLI composition and dispatcher wiring remain unfinished.
+
+### Shared Standard adapter composition for workers
+
+Extract the existing Standard lifecycle-port composition from the full project
+runtime factory. Both call paths must retain projected-toolchain drift checks,
+Python wheelhouse requirements, specialized adapter selection, native SDK inputs,
+and shared-cache dependency evidence. This enables private worker composition
+without requiring generation or running an entire lifecycle for one BUILD action.
+
+### Phase-scoped shared port construction
+
+Centralize exact command-tool requirements and let the shared port factory select
+a canonical phase scope. Preserve npm BUILD dependencies, entrypoint bindings,
+full-scope independent acceptance, and every execution guard. This selects host
+execution bindings from a currently observed closure; observation of a partial
+remote worker inventory remains a separate integration requirement.
+
+### Python lifecycle qualification of worker composition foundations
+
+At revision `55a14d1f9f5c6cdf4191f7284302f8759edf8a8e`, the managed macOS
+Python 3.14 environment passed all 12 `test_standard_python_lifecycle.py` checks
+in 62.111 seconds and all 13 `test_python_install.py` checks in 13.618 seconds,
+without skips. The previously absent installer fixture was supplied as the
+existing pinned `pip-26.2.1-py3-none-any.whl`, verified against SHA-256
+`71138adf1f4ca900cdb7d289c21b7494329f2332b6d85f0e1c42108c0384ed3e` before
+execution. Tests use the wheel offline; installer authority was not changed.
+
+Coverage includes actual offline installation, build/test/launch, sealed-cache
+reopening, package relocation, changed payload and SBOM refusal, installer hash
+refusal, and cleanup after failed installation. This supersedes the earlier
+skipped local Python run for these composition changes. It does not qualify
+remote Python worker dispatch, cross-host transfer, or the full 1.2 release.
+
+### Integrated CAS-backed worker execution
+
+Connect strict source materialization to the production BUILD operation using a
+worker-startup-owned runtime context. Keep specialized adapter construction in
+the shared factory and retain provider/SDK resource lifetime through capture.
+Exercise the complete source-to-result path in the supervised child; verify
+cleanup when composition or execution fails. Worker CLI configuration and
+provider/SDK wire admission remain outstanding.
+
+Outcome: all 43 focused BUILD checks pass. The actual supervised child calls
+`execute_worker_build_from_cas`, composes BUILD-only ports with the shared
+Standard factory and complete startup-owned fixture contracts, and returns a
+verified CAS result after both source and object directories are removed.
+The fixture now supplies actual local tool identities and classified, versioned
+dependency evidence; no production SBOM checks were weakened. Runtime-entry and
+execution exceptions both unwind temporary source custody. This covers normal
+context lifetime; abrupt child termination remains supervisor/recovery work.
+The worker CLI and specialized provider/SDK transfer are still open.
+
+### Production BUILD child stdio boundary
+
+Move bounded input reading and completed-result emission into a production child
+entry point. Bind expected input identity and deadline from the supervisor, not
+stale inherited environment. Keep runtime factory selection entirely in trusted
+startup composition; an unconfigured child refuses and advertises no capability.
+The full worker receiver configuration and specialized custody remain open.
+
+Outcome: five child-boundary tests and all 44 focused BUILD tests pass. The real
+supervised child calls `literate_ai.build_worker.main` through measured startup
+composition, with logging isolated from result stdout. Tests cover a missing
+runtime factory, bounded oversized input, malformed records, fixed error output,
+relative paths, expired deadlines, and replacement of reserved environment values
+from both caller and launcher (including case variants). The standalone module
+intentionally refuses without a private runtime factory; this is not yet the
+configured production action receiver or complete 1.2 dispatch support.
+
+### Windows hardware challenge: receiver hash allocation overhead
+
+Hosted run `36804231273` failed Windows shard 3 in two action-execution configuration
+tests because hardware admission expired. Native Windows diagnosis on the
+previously qualified `d25ef141` checkout measured imports at 4.141 seconds, one
+receiver hash at 16.811 seconds, and actual hardware collection at 8.526 seconds.
+The challenge hashes receiver code on both sides, consuming substantial margin
+inside the existing 60-second bound. This identifies a contributor, not proof
+that it is the only cause of the hosted failures.
+
+The shared regular-file reader requested the remaining 64 MiB package budget for
+each file. A 212-byte local file produced a 67,242,310-byte traced allocation peak.
+A native Windows comparison over 655 files / 11,939,451 bytes took 16.513 seconds
+with the current reader (15.880 seconds in file reads), versus 0.343 seconds with
+reads bounded to descriptor size plus one byte; both produced the identical
+receiver identity. Fix that allocation behavior and refuse changing file sizes.
+Do not widen probe deadlines, skip real hardware admission, cache stale facts,
+or replace file-content hashing with metadata-only identity checks.
+
+Local validation of the implemented reader change passes three allocation/size
+checks, all 36 source-cache tests, and all 167 action tests (125.658 seconds).
+The same 212-byte file now peaks at 133,478 traced bytes rather than 67,242,310.
+The reader preserves the exact maximum-size admission and content bytes, and
+rejects growth or truncation after descriptor metadata capture. Exact-revision
+Windows hardware/configuration qualification and hosted CI remain required before
+claiming the hardware-admission failures resolved.
+
+Native Windows qualification at `cd399ee0` passes 39 tests with one POSIX-only
+FIFO skip: bounded regular files (3), action capabilities (11), hardware (9),
+and action execution configuration (16 passed / 1 skipped). Both configuration
+tests that failed the hosted run pass with their original deadlines. A separate
+qualification on the same frozen revision passes all five BUILD child boundary
+tests and all 44 BUILD tests, including the real supervised child and read-only
+artifact cleanup. These are native regression results; current-head hosted CI,
+complete worker readiness and the full 1.2 release qualification remain open.
+
+### Portable artifact-tree ordering
+
+Remaining BUILD transfer qualification exposed native `Path` sorting in the local
+artifact-tree identity. Windows compares path components without case; POSIX uses
+case-sensitive components. Identical portable trees containing `Z.txt` and `a.txt`
+therefore receive different custody identities. Define ordering as case-sensitive
+relative path components on every platform, preserving the existing POSIX identity
+and file-content verification. Do not silently accept historical alternative tree
+hashes: affected Windows artifacts must be rebuilt with current custody. Prove the
+ordering on native Windows and keep cross-worker lifecycle qualification open.
+
+Local evidence: the portable-order test checks mixed-case names, directory-prefix
+ordering, reversed creation order and changed content against one exact custody
+identity. It passes alongside all 12 transferred-build tests, all 44 BUILD tests,
+12 version-authority tests, project validation and Ruff. Native Windows proof is
+still required for this change.
+
+### Specialized adapter command scope propagation
+
+Hosted run `36813937631` at `8ac528f1` failed the native C++ job before
+compilation: the shared port factory passes `command_phases`, but the Bazel
+adapter constructor did not accept it. Cargo has the same defect. Forward the
+explicit phase scope through both specialized adapters to the common execution
+guards, preserving the existing full-phase default. Add constructor/scope
+regression coverage without depending on installed native compilers, then repeat
+the specialized lifecycle and native C++ qualification. Cancelled hosted jobs are
+not passing evidence.
+
+Local repair evidence: six command-scope tests, 19 Bazel lifecycle tests, ten Cargo
+lifecycle tests and 19 shared-factory tests pass. Both specialized adapters accept
+the full default, preserve BUILD-only refusal of TEST/EXECUTE before custody access,
+and reject an empty scope. Twelve version-authority tests, project validation,
+Ruff and diff checks pass. Native C++ compilation and fresh hosted CI remain open.
+
+### Native qualification of ordering and specialized composition
+
+On native Windows at `cbac605d`, all 57 checks pass without skips: the portable
+artifact-order identity case, 12 transferred-build cases and 44 BUILD cases.
+The exact committed tree is `8cd987d7d41fc2a8adfc6e78bfe472c766f47f7a`.
+This proves the regression on both host path implementations; full cross-worker
+lifecycle qualification remains open.
+
+On macOS at `689146aa`, all ten `test_cpp_bazel_outputs.py` tests pass without
+skips in 226.060 seconds through the Make-managed environment. This includes the
+complete filesystem runtime case that failed hosted CI, static/shared Bazel and
+Conan consumers, and real product restoration after producer source/object
+disposal. Incremental evidence reports zero actions for no-op and unrelated edits,
+and rebuild actions for implementation/header edits. This establishes native
+compilation after the constructor fix; hosted Linux/Windows qualification and the
+full 1.2 program remain required.
+
+Hosted run `36814563382` subsequently passes its native C++ Ubuntu job at
+`689146aa`; the Windows native C++ job and the overall run are still in progress.
+This is one passing job, not a complete hosted qualification.
+
+### BUILD action envelope admission
+
+Connect the existing supervised BUILD operation to lifecycle dispatch authority.
+Before launching the private child, require the selected worker, current deadline,
+canonical BUILD action/component/payload and its single PLAN predecessor to match
+the exact admitted BUILD input. Reject missing, extra, oversized or substituted
+records before process creation. Re-admit the returned BUILD result against that
+same input before emitting it. Exercise this path with the real supervised child.
+This is the receiver operation prerequisite; configured tool inventory, advertised
+capability and shared-queue controller installation remain subsequent work.
+
+Outcome: `execute_build_action` admits the exact dispatch envelope, invokes the
+existing bounded supervisor and re-admits returned BUILD result bytes. All 48
+BUILD tests pass, including a real child using the shared specialized port factory
+through this receiver operation. Four new tests cover worker/phase/predecessor/
+deadline mismatch, missing/extra/corrupt/oversized records, validly rehashed foreign
+payloads, and an actual child echoing input instead of a result. Eleven architecture
+and 12 version-authority tests, project validation and Ruff pass. The default action
+CLI still does not advertise BUILD: private configuration, tool inventory admission,
+source hydration and controller queue composition remain open.
+
+### BUILD reservations in the production ready queue
+
+The BUILD receiver operation is available, but the lifecycle currently submits all
+BUILD calls directly to its executor. Add the same nonblocking reservation port
+used by INDEX/AUTHORIZE/PLAN so an admitted BUILD adapter can share worker slots
+without occupying threads while waiting for capacity. Preserve the current grant
+guard immediately before reserved execution, release every reservation on success
+or failure, and validate the returned Standard build output before TEST readiness.
+Prove that exhausted BUILD capacity leaves other ready phases runnable. Installing
+the configured command adapter remains required; this queue contract alone is not
+remote BUILD support.
+
+Outcome: the production BUILD stage recognizes `AdmittedComponentBuilder` and
+reserves before entering the shared executor. Eleven readiness tests pass,
+including exhausted BUILD capacity with other phases progressing and invalid
+reserved output releasing its slot without reaching TEST. All 55 lifecycle,
+19 shared-factory and 12 version-authority tests also pass; project validation,
+Ruff and diff checks pass. The configured command builder and worker capability
+admission remain uninstalled, so this is readiness plumbing, not a claim of
+complete remote BUILD or 1.2 acceptance.
+
+### Retain exact controller BUILD inputs
+
+The controller stores finalized plans but retains full grants only for native SDK
+builds. Remote BUILD requires the actual `StandardPlanFinalizationInputs`, not a
+grant reconstructed from its identity. Retain the latest exact inputs alongside
+each registered Component plan, whether finalized locally or accepted remotely.
+Expose a data-only getter that rejects unregistered or superseded plans, changed
+current contracts/providers/SDK custody and expired grants before yielding inputs.
+Use this custody for subsequent command BUILD composition; do not relax execution
+phase or tool binding checks.
+
+Outcome: local and remotely accepted plans retain `StandardPlanFinalizationInputs`
+by Component revision. `build_execution_inputs` checks the current plan, current
+input projection and grant validity before returning the stored value. Four new
+custody tests pass, including superseded plans, contract drift, grant expiry and
+TEST-only data access without BUILD permission. All 48 BUILD tests, four native
+SDK consumer-build tests (140.209 seconds), 19 factory tests and 12 version-authority
+tests pass, along with project validation and Ruff. Command builder installation
+and real remote handoff qualification remain open.
+
+### Command BUILD controller adapter
+
+Implement the controller builder over the already admitted worker pool and shared
+slots. Capture bounded current source bytes into the source CAS, construct the
+exact BUILD input from retained plan/source custody, retain the handoff before
+dispatch, and use the existing action transport. Fetch returned artifacts and
+proofs through an explicitly supplied worker result-CAS source (or existing shared
+CAS), retain verified records before admission, and revalidate worker admission
+immediately before local artifact registration. Refuse missing evidence recording,
+provider mismatch, unavailable BUILD capability and changed inputs; never fall
+back to controller compilation. Production capability/configuration installation
+remains a separate prerequisite before automatic selection.
+
+Outcome: `CommandComponentBuilder` uses the INDEX capacity owner, exact retained
+plan inputs and bounded source capture, then dispatches the BUILD handoff and
+imports its verified CAS result. Controller evidence retention is mandatory;
+worker admission is rechecked before artifact registration and staged files are
+rechecked after that potentially blocking admission check. Seven controller tests
+pass through actual command transport, including a retained exact-input build
+result followed by generated TEST, shared-slot ownership, missing capability,
+provider/recorder refusal, retention bounds, changed admission and corrupt blobs.
+The fixture supplies BUILD admission and an already-built result explicitly; it
+is not proof of automatic worker capability discovery or SSH child compilation.
+All 48 BUILD, 11 architecture and 12 version-authority checks also pass, with
+project validation and Ruff. Private worker startup configuration, result-CAS
+configuration and automatic factory installation remain required.
+
+### Configured BUILD receiver execution
+
+Wire the BUILD action operation into the one-shot receiver through a typed trusted
+startup configuration, never a request-selected import or command. Require current
+privately observed launcher/tool bindings and exact compiler/BUILD tool selection
+before fetching source or allocating job custody. Hydrate only the bounded verified
+source manifest into CAS, then supervise a child in one owned job directory. Bind
+CAS/workspace locations through supervisor-owned controls, refuse conflicting child
+CLI locations, and remove still-owned job custody after normal completion or child
+failure. Recheck current authorization and tool observations around the operation.
+Default receivers remain unconfigured for BUILD; capability/inventory advertising
+and automatic composition follow separately. Receiver parent death and recovery
+remain explicit unfinished release obligations.
+
+Outcome: the typed configured receiver now hydrates verified source blobs, selects
+exact observed tools and supervises BUILD in an owned job directory. The real-child
+fixture downloads source through HTTP after controller source removal and returns
+verified build artifacts; its outer receiver is invoked in-process, so this is not
+yet SSH qualification. Failure and cancellation remove read-only partial job files.
+Supervisor path controls override inherited values, conflicting child CLI paths
+refuse before input reads, and external or root-level artifact paths refuse before
+BUILD while source/runtime contexts close. Four configured-worker, six child,
+172 action, seven controller, 11 architecture and 12 version-authority tests pass,
+along with project validation and Ruff. Default receivers explicitly report BUILD
+as unconfigured. Next: bind configured capability discovery to the observed tool
+inventory, then select compatible BUILD workers and install the controller adapter
+with explicit result-CAS access. Full remote runtime composition and recovery remain
+open.
+
+### BUILD capability and tool placement
+
+Expose BUILD only for a trusted configured receiver, with its configuration
+identity and canonical observed tool identities bound into capability facts.
+Keep unconfigured capability documents unchanged. Bound the extended document to
+32 KiB and its inventory to the existing 256-tool limit. Reject missing, duplicate,
+noncanonical or inconsistent BUILD facts. Select only workers that advertise all
+exact tools required by a Component's current BUILD inputs before reserving capacity;
+refuse an empty compatible set instead of waiting indefinitely or compiling locally.
+Revalidate the complete capability identity before dispatch and artifact admission.
+
+Outcome: configured receivers advertise BUILD with the measured startup profile
+and observed tool inventory; unconfigured responses retain their prior shape.
+Controller placement and receiver admission share the exact tool requirement
+projection. Missing compatible tools refuse before slot reservation, while occupied
+compatible capacity still yields to the ready queue. Real command discovery,
+256-tool round-trip, malformed inventory refusal, profile drift and controller
+refusal tests pass. The complete selected action run passes 175 tests; eight
+controller, four configured-worker, 11 architecture and 12 version-authority tests
+also pass, with project validation and Ruff. Next: explicit worker result-CAS
+configuration and automatic standard factory installation, followed by complete
+runtime composition and remote qualification. This capability observation does
+not establish provider/SDK readiness or result transport availability.
+
+### BUILD result transport and standard composition
+
+Bind result transport explicitly per worker in private action configuration: either
+the existing shared CAS or an HTTP CAS endpoint with optional named credential and
+explicit insecure-HTTP policy. Validate configuration without network access; refuse
+unconfigured BUILD result transport before standard runtime composition. Bind fetches
+to the admitted worker identity and unchanged private configuration, then reuse
+bounded digest-verified CAS reads and artifact admission. Automatically install the
+command builder when BUILD is advertised and its result transport is configured.
+Keep result endpoints independent of source publication and never infer or provision
+a server. Complete provider/SDK runtime composition and remote proof remain required.
+
+Outcome: private `result_sources` entries now bind explicit shared or HTTP CAS reads,
+including named bearer credentials and endpoint policy. Reads verify exact worker
+binding and unchanged configuration around transfer. The standard factory validates
+BUILD result transport before runtime composition and installs the command builder
+after source-cache/checkpoint wrapping, sharing INDEX capacity. Twenty-one
+configuration, nine factory, eight builder, 11 architecture and 12 version-authority
+tests pass, with project validation and Ruff. Tests include real authenticated HTTP
+reads, explicit shared reads, worker/configuration drift, invalid endpoint/credential
+refusal and automatic factory installation. The factory fixture supplies admitted
+BUILD facts; it does not prove general worker runtime composition or SSH BUILD.
+Next: complete provider/SDK and specialized target runtime custody, then qualify the
+configured command/SSH BUILD path and receiver recovery before continuing the
+remaining lifecycle phases.
+
+Dependency-transfer inspection: the lifecycle already supplies exact accepted-provider
+receipts to BUILD_INTENT (`accepted_build_providers`), but `BuildWorkerInput` carries
+only provider/package export descriptors. Worker BUILD still depends on private
+runtime composition to populate provider contracts, artifact paths, transitive export
+custody and SDK/specialized-target inputs. Do not import historical provider builds
+through the current-build admission path: that path requires the original execution
+grant to remain current, whereas consuming an already accepted provider is a separate
+data operation under the consumer's current authority. The next implementation must
+retain the lifecycle's accepted receipts for BUILD, transfer bounded verified artifact
+and proof records, and register provider custody without executing provider commands
+or replacing acceptance with a fresh build claim. Library contract/import-surface and
+transitive dependency identities must survive that transfer.
+
+Native integration qualification completed for `3b8738c864469d0bf790041533420d8c73d54af3`
+(tree `88f91d9228396dbc07f1f10ae45c2c96f7742070`) on Windows from a frozen Git
+bundle and managed Make environment: 109 tests passed, one POSIX FIFO test skipped.
+The seven groups cover 49 BUILD, six child, four configured-worker, 13 capability,
+eight controller, 21 result-configuration and nine standard-factory cases. The
+configuration group includes the skip. Unit prerequisites passed; full sample
+readiness was not established. This qualifies that exact revision, not the later
+provider-receipt/artifact-transfer work or a complete SSH BUILD/release path.
+
+Accepted-provider receipt handoff: add a data-only builder port through which the
+lifecycle passes its already accepted provider receipts before reserving BUILD.
+The command builder must retain the exact receipts per current plan, bind their
+complete export set to the finalized provider descriptors, and include them in the
+bounded BUILD record. The worker revalidates canonical, unique receipts and exact
+exports before preparing a runtime. This transfers receipt custody only; artifact
+bytes, proof-record closure, provider contracts and package-only dependencies remain
+separate required transfer work. Local builders retain their existing interface.
+
+Outcome: the lifecycle's receipt-custody port now runs before BUILD reservation,
+and the command builder retains a current-plan receipt set per Component revision.
+The bounded BUILD wire record carries typed receipts; controller and child admission
+reject missing, extra, duplicate, noncanonical or export-mismatched provider receipt
+sets. Twelve queue tests include a typed accepted-provider BUILD diamond; 50 BUILD,
+nine controller, 12 transferred-build, 55 lifecycle, 11 architecture and 12
+version-authority tests pass, with project validation and Ruff. This is receipt
+descriptor custody, not verification of the referenced proof closure or provider
+artifact bytes. Transfer and reopen those records and bytes next.
+
+Historical provider-build transfer: capture an accepted provider's artifact archive
+and bounded build-proof records under the consumer's current guard. Bind the transfer
+to the exact accepted receipt and original build plan; reopen the existing build
+proof and verify every archived file/export before returning data to a worker.
+Historical provider execution grants are not renewed or required to remain current.
+The caller must supply the accepted receipt from lifecycle custody, never from the
+transfer itself. This establishes build/artifact byte custody; acceptance-proof
+closure, contracts, transitive registration and BUILD wire integration remain open.
+
+Outcome: `ProviderBuildTransfer` captures bounded artifact/proof CAS references tied
+to an externally supplied accepted receipt. Capture/read reopen the original plan
+and build proof, verify every archived file/export, and repeatedly check the supplied
+consumer guard and deadline. Four tests use actual generated TEST, EXECUTE and ACCEPT
+evidence, remove the provider artifact before reopening, move the consumer clock past
+the provider grant's expiry, and refuse receipt substitution, corrupt blobs or consumer
+revocation. Eleven BUILD-result, 11 architecture and 12 version-authority checks also
+pass, with validation and Ruff. The returned verified data is not yet registered as
+worker dependency custody or included in BUILD wire inputs; those integrations and
+acceptance-proof closure remain the next required work.
+
+Provider archive handoff: include one closed transfer descriptor per accepted BUILD
+provider receipt, in the same canonical order. Bound all unique provider archives to
+256 MiB and unique evidence records to 64 MiB/4096 records across the action. Capture
+provider bytes from controller artifact custody under the current consumer grant;
+verify/hydrate them in the configured receiver before allocating a child job. Exact
+receipt membership and descriptor identity conflicts refuse before IO. Dependency
+registration, provider contracts, transitive custody and acceptance proof remain
+required before provider-dependent BUILD is complete.
+
+Outcome: BUILD inputs now carry closed provider-transfer descriptors matched to
+accepted receipts. The controller captures provider archives and proof references;
+the configured receiver verifies and hydrates them before child-job allocation.
+Shared digest metadata must agree across archive/proof roles and across providers.
+The initial regression run passed 57 BUILD-related, nine controller, four configured
+worker, 11 architecture and 12 version checks. After tightening shared-digest bounds,
+all seven provider-transfer and nine BUILD-record tests pass, with the version gate,
+project validation and Ruff. Tests cover descriptor round-trip, foreign descriptors,
+aggregate record limits and conflicting metadata refusing before fetch. A complete
+provider-dependent BUILD is not yet proven: worker dependency registration and
+acceptance-proof closure remain next, with contract/transitive/SDK custody still open.
+
+Provider acceptance process proof: reopen exact retained receipt, generated-test and
+execution evidence, the Standard acceptance policy, and source-custody links before
+accepting a provider archive. Apply existing generated-test and execution-process
+verifiers after build verification. Missing or substituted supporting records must
+refuse capture/read without provider execution. This validates the retained process
+chain; current recipe/oracle authority, contracts and dependency registration remain
+separate required checks.
+
+Outcome: provider capture/read now requires the exact retained receipt, BUILD,
+generated-test and execution records, Standard acceptance policy and matching source
+generation/tree/suite custody. Existing TEST and EXECUTE verifiers reopen their
+underlying process observations. New negative cases remove the accepted execution
+record, policy, generated-test case observation or execution observation and refuse
+the transfer. All 60 BUILD-related, nine controller, four configured-worker, 11
+architecture and 12 version-authority tests pass, with project validation and Ruff.
+Current recipe/oracle authority and worker dependency registration remain unfinished;
+process-proof verification does not claim to complete those obligations.
+
+Provider source authority: carry the controller's recipe-derived source-validation
+snapshot with each provider transfer. Bind the retained candidate to the provider's
+generation plan in the current execution plan; revalidate source/resolved SBOMs and
+generated-suite membership against that snapshot. Required context comes from the
+current controller/worker plan, not from a transfer-selected generation plan. This is
+a prerequisite to worker dependency registration; standalone library/oracle and
+transitive dependency checks remain required.
+
+Outcome: provider transfer now carries the recipe-derived validation snapshot and
+checks candidate membership against the current execution plan's provider generation
+plan. Source/resolved SBOMs and generated-suite case membership are revalidated.
+Ten provider, 51 BUILD, 59 qualification, nine controller, 11 architecture and 12
+version-authority tests pass, with project validation. Changed provider-plan and
+recipe identities refuse. Dependency registration and independent oracle/library
+and transitive dependency checks remain open.
+
+Hosted follow-up: run 36814563382 at 689146aa completed with 13 successful jobs,
+one failed Windows shard and five cancelled jobs. Both failures concern command
+hardware observation: the bounds case explicitly expires its 60-second action
+deadline; the CLI observation case reports transport/verification failure. Native
+passing probes do not explain the hosted failures. Retrieve available profiling
+artifacts and measure receiver startup, code verification and hardware collection
+before choosing a repair; preserve the existing execution bound.
+
+Provider dependency closure: BUILD receipt custody must include every accepted
+receipt reached through a direct provider's artifact dependency identities. Include
+complete exports for each reached receipt, reject missing dependencies, cycles and
+unrelated receipt injection, and retain canonical receipt order. BUILD_INTENT keeps
+its exact direct-provider receipt contract. Derive the closure from completed
+lifecycle results before dispatch so a worker receives the same dependency bytes
+used by the controller. Registration remains gated by contract and oracle checks.
+
+Outcome: a shared receipt selector derives the exact transitive artifact dependency
+closure from accepted results. BUILD wire admission rejects incomplete, extra,
+duplicate, substituted or noncanonical inventories. The queue passes the complete
+closure to BUILD and only direct receipts to BUILD_INTENT. Five closure, 12 queue,
+55 lifecycle, nine BUILD-record, nine controller, 11 architecture and 12 version
+checks pass. The diamond queue test proves all three ancestor receipts reach the
+root builder. Worker artifact registration remains open.
+
+Registration boundary clarification: `LocalStandardLifecyclePorts.accept` retains
+the Standard per-component BUILD/generated-TEST/EXECUTE policy. Independent library
+oracle verification in `verify_qualification_library_acceptance` binds standalone
+root package/integration evidence. In-plan dependency registration must preserve
+the component acceptance boundary and verify current contracts and all transitive
+bytes; it must not introduce a dependency on a later root-package receipt. Standalone
+library qualification and final independent package acceptance remain required in
+their existing release/retained-library flows.
+
+Worker provider registration: stage each verified accepted provider archive beneath
+the worker object root, retain its proof records, and admit the complete dependency
+set against current locked contracts before consumer BUILD. Keep imported paths and
+blob custody scoped to that BUILD, check current consumer authorization and staged
+file custody around execution, and remove owned stages on failure or completion.
+Historical provider grants remain evidence, not new execution permission. Prove
+artifact access after controller removal, contract/drift refusal and cleanup.
+
+Outcome: worker BUILD now stages and registers the verified provider dependency set
+under current consumer authority, checks current export/command contracts, retains
+proof and exposes portable file/directory blobs through local artifact custody.
+Provider paths and registrations are scoped to the operation and removed afterward.
+Seven focused tests pass, including an actual consumer BUILD after original provider
+artifact and consumer source removal, directory-export blob preservation, changed
+contract/revoked authority/file mutation refusal, and both new-consumer and preexisting
+shared-blob cleanup. The broader run passed 57 BUILD-related, four configured-worker,
+12 transferred-build, 11 architecture and 12 version-authority tests; the final cleanup
+repair passed all seven focused tests and the version gate again. This proves the
+in-process CAS-to-BUILD path, not the remaining full SSH/native/SDK/package program.
+
+Configured provider BUILD qualification: exercise the accepted provider transfer
+through the configured receiver and its actual supervised child, with private
+startup contracts and observed tools. Remove original source/provider files before
+dispatch, verify the returned artifact from CAS after owned job cleanup, and retain
+separate exact-commit Windows evidence for the provider/closure/worker regressions.
+This complements the direct CAS operation proof; full SSH deployment remains open.
+
+Outcome: all eight provider materialization tests pass, including actual configured
+receiver dispatch into a supervised child after original consumer source and provider
+artifact removal. The result archive remains readable from CAS after job cleanup.
+The test uses explicitly measured Python startup authority to preserve the managed
+interpreter environment. Twelve version-authority checks and project validation pass.
+This proves receiver/child transport with private runtime composition; complete
+projected Standard factory and real SSH provider-dependent dispatch still require
+qualification. Exact-commit Windows regressions at b103f93b are running separately;
+no result is claimed until their terminal report is retrieved.
+
+Standard factory provider qualification: use an actual BUILD dependency chain,
+accepted intermediate artifacts and the complete locked command/tool/provider
+projection in the worker child. Transfer both direct and transitive receipts, remove
+controller files before dispatch and verify the final artifact from worker CAS.
+This must exercise `project_standard_toolchain_closure` and
+`assemble_standard_lifecycle_ports`, not only a directly constructed local runtime.
+
+Outcome: a three-Component BUILD chain now has an end-to-end Standard factory proof.
+The controller builds, tests, executes and accepts the two providers, transfers both
+receipts and their archives, then removes its entire source/artifact directory. The
+configured receiver hydrates a separate CAS and launches a supervised child using
+`project_standard_toolchain_closure` and `assemble_standard_lifecycle_ports`. The
+root artifact has the expected bytes after worker job cleanup. The chain test, eight
+preparation-fixture tests, twelve version checks, project validation and Ruff pass.
+Actual cross-host SSH provider dispatch remains unproven by this local process test.
+
+Controller artifact custody without execution: permit an explicitly empty command
+scope with no local tool bindings. It may retain source/plan authority and verify
+returned BUILD artifacts, but must refuse BUILD, TEST, EXECUTE and independent
+acceptance before host/custody access. It must not report local command authority as
+execution-ready. Preserve default/full and existing phase scopes. Prove admission
+of a real transferred artifact without any compiler/runtime binding; integration of
+remote observations into the production controller factory remains separate.
+
+Outcome: an explicit empty command scope now admits verified artifact data without
+local tool bindings and reports local command readiness false. A real transferred
+BUILD retains exact evidence and readable artifact bytes while mocked process/tool
+access remains unused. BUILD, TEST, EXECUTE and independent acceptance refuse before
+execution. Bazel/Cargo preserve the empty scope and reject supplied unrelated tools.
+Seven scope/custody, twelve transferred-build, one Standard provider factory chain,
+eleven architecture and twelve version tests pass, with project validation and Ruff.
+The production controller factory still needs remote-observation integration; this
+adapter change does not alone establish a complete remote-only controller.
+
+Command BUILD custody qualification: exercise the production command dispatcher
+from a controller with zero local tool bindings, through the configured action
+receiver and supervised Standard factory child, back to verified artifact custody.
+Require actual output bytes and empty worker job custody after completion; local
+BUILD/TEST/EXECUTE must remain unavailable. Use an explicit shared CAS and private
+worker startup configuration. This local process proof does not establish remote
+observation discovery or cross-host SSH support.
+
+Outcome: the command controller now has a real configured-receiver integration
+proof with zero local tool bindings. Explicit private environment bindings carry
+the receiver identity and runtime configuration; the receiver launches the Standard
+factory child, builds the expected artifact and cleans its job directory. The
+controller verifies and registers the returned bytes, releases capacity and still
+refuses local command execution. A guard fails any controller-side tool observation.
+The fixture supplies admitted worker metadata and an explicit shared CAS; worker
+discovery, remote-only production composition and cross-host transport remain open.
+All ten command BUILD tests and twelve version-authority checks pass, along with
+project validation and Ruff.
+
+Scoped Standard projection: carry the explicit local command scope through
+toolchain projection and assembly so a controller can retain complete contracts
+and observed toolchain guards without local launchers. Preserve all observed
+authority coverage and temporal checks; refuse assembly that widens the scope.
+Remove the Python wheel constructor's unconditional interpreter lookup and
+wheelhouse requirement only for empty command scope. Prove missing/changed
+authority refusal, scope widening refusal and default/full compatibility before
+using this projection in remote-only production composition.
+
+Outcome: projected Standard closures now retain their explicit local command scope
+and require every and only its launchers, while preserving the complete observed
+authority set and portable closure identity. Assembly refuses widening, including
+when BUILD and TEST share an interpreter. Empty Python scope preserves exact target
+authority without a local interpreter or wheelhouse; executing scopes retain both
+prerequisites. Seven scoped-projection, nineteen factory, thirty-two command
+projection, seven command-scope, twelve actual Python wheel lifecycle, one provider
+factory, one command BUILD, eleven architecture and twelve version checks pass
+(102 total), with project validation and Ruff. Remote discovery, controller routing
+and cross-host SSH integration still require implementation/qualification.
+
+Live command BUILD admission qualification: replace fixture-supplied capability and
+hardware metadata in the data-only controller proof with the configured receiver's
+bounded hardware and capability probes and `CommandActionWorkerPool`. Feed exact
+observed tool identities and temporal admission guards through scoped Standard
+projection and assembly. Dispatch must revalidate the admitted receiver before
+publishing results. This remains a local command/shared-CAS qualification, not a
+claim of cross-host SSH or automatic remote command-contract discovery.
+
+Outcome: the command BUILD proof now obtains hardware and capabilities from the
+actual configured action receiver and uses the production admission pool and
+indexer composition. Observed BUILD tools feed explicit scoped Standard projection
+and assembly; the controller has no local launcher bindings. The real supervised
+child returns verified artifact bytes and leaves no job custody. Changing the
+private child profile while retaining its interpreter invalidates both projected
+tool authority and subsequent BUILD dispatch, preserving prior artifact custody
+and releasing capacity. The integration scenario and twelve version checks pass,
+with project validation and Ruff. Health policy and command contracts remain
+explicit fixture inputs; the earlier fixture-only capability admission is replaced.
+
+Lock-derived remote projection: carry local phase scope through
+`project_locked_standard_toolchain_closure`, constructing launchers only for scoped
+commands. Empty scope must require explicit target platform, tool discovery,
+dependency observation and observer identity, with explicit npm discovery when
+selected. Preserve lock/Flavor derivation, SDK checks and all observed guards.
+Prove projection from commands absent on the controller and refusal of implicit
+host discovery before invoking any observer. Automatic remote observation transport
+remains separate from this production projection boundary.
+
+Outcome: lock-based projection now constructs only scoped launchers and carries
+the explicit observer identity into the unchanged portable closure record. Empty
+scope projects plain Python, Python wheels, npm, CMake, Bazel and Cargo from tool
+commands absent on the controller, while retaining live guards. Missing observation
+inputs and implicit npm discovery refuse before invoking discoverers. Full and
+empty scopes produce equal locked contracts and closure identity for identical
+observations. Four lock-scope, thirty-two command projection, seven scoped
+projection, nineteen factory, eleven architecture and twelve version checks pass
+(85 total), with project validation and Ruff. The observation callbacks are still
+explicit; command/SSH transport for complete role and target observations remains
+open.
+
+Complete worker tool observation records: preserve role, command, identity,
+explicit environment, version and npm/Node authority in one bounded canonical
+document. Capture only guarded worker-owned observations, validating before and
+after capture; never construct a controller-local executable from received paths.
+Reject malformed or ambiguous inventories before projection. The subsequent
+observation transport must bind worker/challenge/profile/receiver/deadline and keep
+these data records distinct from executable authority.
+
+Outcome: closed Standard tool observations now preserve role, identity, command,
+explicit environment, raw and structured versions and exact npm/Node relationship
+under a 64 KiB document bound. Worker capture rechecks tool and caller guards before
+returning; raw compiler banners retain an unknown structured version instead of
+guessing. Duplicate keys/roles/environment names, contradictory metadata for one
+identity, malformed fields and oversized/noncanonical documents refuse. Six
+observation tests (including the real managed Python toolchain), eleven architecture
+and twelve version checks pass (29 total), with project validation and Ruff. This
+record layer is not yet connected to receiver transport or production discovery.
+
+Stable worker profile across receiver modes: remove the dispatcher-owned protocol
+marker from the validated private BUILD environment and profile. Probe modes must
+not create a different build identity or leak observation context into the child.
+Preserve all actual build settings, reject malformed environments before filtering,
+and prove ordinary environment drift still changes the profile.
+
+Outcome: configured BUILD workers now remove the receiver protocol marker after
+environment validation, including case variants, so it neither reaches the child
+nor changes the build profile across probe/action modes. Actual private settings
+still change the profile and malformed reserved values still refuse. Five
+configured-worker, one live command BUILD, thirteen capability and twelve version
+checks pass (31 total), with project validation and Ruff. This repairs a prerequisite
+for comparing admitted profiles across the forthcoming tool-observation endpoint;
+it does not itself add that endpoint.
+
+Bind Standard observations to configured BUILD startup: require every and only
+registered tool identities with exact commands/environments, capture the actual
+worker platform and retain the inventory identity in its profile. Revalidate
+metadata as well as registry/transport guards before observation and BUILD; refuse
+unconfigured observation requests. Preserve existing profiles when observations
+are absent. Qualify real interpreter binding and metadata/registry mismatch before
+exposing this authority through the observation endpoint.
+
+Outcome: configured BUILD startup can now bind guarded Standard observations to
+its exact registered tool set, commands and explicit environments. The actual
+worker platform and initial inventory identity join its profile; uncaptured
+observations remain unavailable. Repeated capture detects metadata drift even
+when the original tool guard stays current. BUILD refuses that drift before source
+fetch or job allocation. Five binding, six configured-worker, one live command
+BUILD, eleven architecture and twelve version checks pass (35 total), with project
+validation and Ruff. Receiver transport and controller consumption remain open.
+
+Worker tool observation transport: commit optional inventory identity in BUILD
+capability facts and expose an explicitly configured `--describe-tools` operation
+over existing command/SSH transport. Bind canonical bounded response bytes to the
+challenge, admitted stable capabilities, worker, receiver, profile and inventory;
+revalidate current tools around capture. Preserve unconfigured capability shape
+and refuse unavailable observations. Prove real command discovery and substitution,
+drift and deadline refusal before adding controller projection consumption.
+
+Outcome: BUILD capabilities now optionally commit the Standard inventory identity,
+including it in stable admission facts. Configured `--describe-tools` captures guarded
+metadata with the challenged capability response under a total 64 KiB bound. The
+controller probe requires current prior admission, caps the operation at the earlier
+of the action deadline and 60 seconds, and checks complete stable facts, receiver,
+worker, inventory hash and registry membership. Real command stdin/request-file
+round trips pass; changed private profiles, unavailable inventory, replayed
+challenges, stale admission, tampered/noncanonical/oversized responses refuse.
+Four observation transport, thirteen capability, thirteen admission, five SSH
+transport regression, eleven architecture and twelve version checks pass (58 total),
+with project validation and Ruff. The SSH checks cover the existing transport seam,
+not actual cross-host observation. Controller projection consumption and native
+cross-host qualification remain required.
+
+Controller tool observation consumer: bind received inventories to live admitted
+workers, expose data-only tool discoverers with exact role/command/version checks,
+and retain stable capability/inventory authority across fresh challenges. Preserve
+minimum/default runtime floors, required prefixes and exclusive upper bounds; reject
+unknown structured versions and unverified relative command aliases. Include the
+existing Zig/Zig-CC roles. Complete npm constraint handoff, target-side alias
+resolution, projection composition and actual SSH qualification remain part of the
+same 1.2 program, not deferred release scope.
+
+Outcome: received tool discoverers now bind through the live command admission
+pool, retain the exact inventory and stable capability identity, and expose worker
+commands as data. Exact roles/commands, default runtime floors, required version
+prefixes, minimums and exclusive maxima are enforced; unknown bounded versions and
+unverified aliases refuse. npm requires a bounded constraint and retains its exact
+Node observation. Zig/Zig-CC roles are included. A real configured receiver proves
+discovery and live profile-drift refusal without controller tool access. Six consumer,
+six record, eleven architecture and twelve version checks pass (35 total), with
+project validation and Ruff. Projection composition, npm constraint handoff and
+target-side alias resolution remain open.
+
+Remote npm constraint handoff: allow empty-scope locked projection to use its
+required explicit generic discoverer for npm, passing the merged bounded Flavor
+constraint. Preserve dedicated npm callbacks and local execution discovery. Prove
+that received npm versions satisfy the actual locked bounds, Node linkage stays
+exact, and controller npm discovery is never invoked.
+
+Outcome: empty-scope locked projection now passes npm's merged constraint to the
+explicit generic discoverer when no dedicated npm callback is supplied. Received
+worker inventories with npm 11 project under the locked >=9,<13 range; npm 99
+refuses. The test forbids both controller npm discovery and launcher construction.
+Dedicated npm callbacks and executing scopes retain their existing paths. Four
+scoped-lock, thirty-two command-projection, six remote-consumer, eleven architecture
+and twelve version tests pass (65 total), with project validation and Ruff. Full
+remote closure composition still requires worker-derived dependency evidence;
+inventory names and versions alone must not replace the observed dependency graph.
+
+Worker dependency evidence: capture complete native graphs for exact selected
+registered tools under private effective environments. Retain bounded immutable
+canonical records, preserve separate loader contexts, and reject graph or library
+drift. Qualify real native interpreter observation before wiring challenged
+transport and remote closure assembly.
+
+Outcome: configured workers can now capture native dependency graphs for exact
+registered tool selections under private effective loader environments. Canonical
+immutable records have a 4 MiB bound; each selected tool requires a nonempty,
+connected graph with unique references and valid edges. Separate tool contexts keep
+separate image references. Reobservation with a retained graph identity refuses
+changed libraries. Seven focused tests include real local interpreter/native-library
+observation, malformed graph refusal, selection refusal, environment overrides,
+missing per-tool evidence and library drift. Six configured-worker, eleven
+architecture and twelve version regressions also pass (36 total), with project
+validation and Ruff. Challenged dependency transport, controller composition and
+native Windows/Linux qualification of this addition remain required.
+
+Dependency observation transport: add a challenged read-only receiver operation
+for exact selected registered tools and an optional retained dependency identity.
+Bind the complete request and admitted capability/profile to the graph, retain
+existing operation bounds, and prove real command/request-file transfer plus
+selection, replay, profile and retained-graph drift refusal.
+
+Outcome: `--describe-tool-dependencies` carries a closed canonical selection and
+challenge under the existing request bound. Its response binds the full request,
+admitted capability/profile/inventory, graph root, selected identities and optional
+retained graph identity. Only this mode permits the 4 MiB graph plus bounded
+envelope; prior observation limits remain unchanged. Real stdin/request-file
+transfers, retained graphs, profile/selection mismatch, replay, stale admission,
+malformed responses and bounds pass. Real transport exposed a symlink-launcher
+capture defect: tools now use native command resolution against an empty artifact
+directory, rather than being misclassified as produced native artifacts. Three
+transport, seven native-graph, four inventory-transport, thirteen capability, five
+SSH-seam, eleven architecture and twelve version checks pass (55 total), with
+project validation and Ruff. Controller closure composition and cross-host
+qualification remain open.
+
+Native observation outcome: exact commit
+`a9f5b454553af03dbf2e474d43fd1004239f0cc3`, tree
+`04f33056ff184848be1ea544b1582059e44b8854`, passes all 67 Windows tests across
+twelve observation, scoped projection, command/provider BUILD and transport groups.
+Terminal report/log retrieval succeeded. This excludes the subsequent npm handoff
+and native dependency work; it is not full sample or cross-host BUILD qualification.
+Hosted run 36827768651 at `e706c0c8` separately failed the Windows health-policy
+admission test with `action_execution.hardware_probe_failed: action_wire.expired`.
+That failure remains unresolved and is not overridden by the native result.
+
+Remote closure composition: connect locked scoped discovery to challenged worker
+dependency capture, retain a live graph guard on the resulting closure, and dedupe
+tool identity aliases without dropping role guards or accepting conflicting command
+metadata. Prove graph drift refusal and absence of controller launchers.
+
+Outcome: `project_remote_standard_toolchain_closure` now composes actual admitted
+tool discovery and challenged native dependency evidence with locked empty-scope
+projection. It checks the exact selected command sequence, requests unique tool
+identities and retains a graph guard that reobserves the expected identity once per
+closure validation. Fresh capability checks preserve the admitted profile and
+inventory. Aliased tool identities retain every role guard and reject conflicting
+commands/environments. A real configured receiver projects and revalidates a locked
+Python closure without controller launchers, then refuses private profile drift.
+Two guard/alias, six remote-consumer, four locked-scope, thirty-two command-projection,
+nineteen factory, eleven architecture and twelve version checks pass (86 total),
+with project validation and Ruff. Production rebuild still needs coherent worker
+placement and the remaining remote lifecycle phases; the new helper is not yet
+automatic production routing or cross-host qualification.
+
+Hosted hardware-expiry diagnosis: distinguish controller code-observation,
+transport and response-validation expiry without extending deadlines or changing
+non-expiration refusal codes. Isolated Windows measurements at a9f5b454 were 8.55s
+for first receiver-code hashing, 0.53s for repeated hashing and 10.97s for hardware
+collection; these do not reproduce the hosted failure. Existing coordinator-only
+pytest profiling does not capture xdist test-body stages.
+
+Outcome: hardware observation now reports bounded `code_identity_expired`,
+`transport_expired` or `response_expired` errors when those controller stages
+exhaust the existing deadline. Earlier caller deadlines and non-expiration codes
+are preserved. Ten hardware, twenty-one execution-configuration, eleven architecture
+and twelve version checks pass (54 total), with project validation and Ruff.
+This improves failure attribution; the prior hosted expiry is not yet reproduced
+or repaired, and no deadline was extended.
+
+Structured compiler observation: expose numeric versions from recognized existing
+compiler banners without changing their raw version or tool identity. Cover Clang,
+GCC, Swift, normalized MSVC and CUDA; preserve refusal for unknown or inconsistent
+banners. This enables remote version constraints without controller probes.
+
+Outcome: compiler observations now expose numeric versions for recognized Clang,
+GCC, Swift, normalized MSVC and CUDA banners while preserving raw versions and
+tool identities. CUDA release/version disagreement and unknown or unbounded numeric
+formats remain unstructured. Capture respects an explicit unknown structured
+version instead of reinterpreting a numeric-looking banner. Four focused, six
+observation-record, forty-three guarded-builder, eleven architecture and twelve
+version checks pass (76 total), with project validation and Ruff. Worker-side
+authored command resolution and native qualification of this addition remain open.
+
+Worker command selectors: verify authored command vectors against registered tools
+using private PATH/suffix authority and each adapter's invocation-path semantics.
+Reject shadowing, argument changes and ambient/current-directory fallback. Prove
+worker-side resolution and drift refusal before exposing challenged verification
+transport to remote discovery.
+
+Outcome: configured workers can verify a selected role's command vector using
+private PATH and Windows PATHEXT authority without executing the incoming selector.
+Exact argument tails, shadowing, missing/relative search authority and changes
+between checks refuse. Invocation-sensitive tools retain lexical invocation paths;
+the C++ adapter alone uses its existing canonicalized compiler-path semantics.
+Inventory, tool and private-profile guards surround verification. Five selector,
+five configured-observation, six configured-worker, eleven architecture and twelve
+version checks pass (39 total), including real configured Python selection, with
+project validation and Ruff. Challenged selector transport, remote-consumer use and
+native qualification remain open.
+
+Selector observation transport: carry unique bounded role/command batches through
+challenged receiver transport, bind results to prior admitted inventory and full
+request identity, and make remote command constraints retain live selector guards.
+Prove actual transfer, mismatch/replay refusal and changed-resolution refusal.
+
+Outcome: bounded selector requests and responses bind a fresh challenge, full
+request identity, admitted capability/profile/inventory and exact role identities.
+Real stdin and request-file receivers verify private command resolution without
+executing supplied selectors. Remote discovery retains and rechecks accepted
+selectors; a real admitted consumer refuses a newly shadowing executable even
+when the registered inventory is unchanged. Retained role selectors cannot be
+replaced. Four selector-transport, seven consumer, thirteen capability, five SSH,
+eleven architecture and twelve version checks pass (52 total), with project
+validation and Ruff. These are local receiver and transport-seam checks; native
+selector qualification, coherent production placement and remaining remote phases
+are still required.
+
+Native closure qualification at `adfa28c9` passed its first fifteen checks but
+refused dependency observation because the qualification process inherited an
+empty trailing PATH entry. Read-only diagnostics confirmed that every nonempty
+entry was absolute. The repeated qualification retains the same frozen revision,
+uses fresh checkpoints and an explicit process PATH without empty entries, and
+preserves production refusal of invalid search authority. Its terminal result is
+pending; the failed run remains evidence and is not reported as passing.
+
+Remote TEST admission: add a controller custody boundary that reopens
+transferred successful process/case records against current plan, BUILD, validated
+suite and locked single/multiple-entrypoint TEST authority. Require bounded record
+retention and a final live guard before registration. Prove actual test evidence
+transfer into a controller with no TEST command scope, malformed or substituted
+authority refusal and no registration on retention/guard failure. Receiver TEST
+execution, transport and production queue composition follow this boundary.
+
+Outcome: controller TEST admission now verifies retained successful process/case
+records against current BUILD, validated suite, source custody and locked TEST
+runner authority. Multi-entrypoint admission binds every unit's export, deployment
+unit, command and runner. All bounded records are retained before a final authority
+and worker guard, and only then is test evidence registered. Five transfer checks
+prove actual process evidence enters a controller with no command phases, and
+reject missing records, substituted runner/custody/suite, unregistered plans and
+retention/guard failures. Twelve transferred-build, thirty-nine qualification,
+eleven architecture and twelve version checks also pass. The existing command
+adapter suite runs 43 checks with 41 passing and two existing platform skips,
+including actual multi-entrypoint verification and changed-unit refusal. Total:
+120 passing, two skipped, with project validation and Ruff. Worker TEST execution,
+transport and production queue wiring remain open.
+
+The corrected native `adfa28c9` retry also failed after the first fifteen checks.
+A focused receiver diagnostic identifies the next missing prerequisite: neither
+`dumpbin` nor `llvm-readobj` is discoverable for Windows PE dependency inspection.
+The terminal log/report were retrieved. No native closure success is claimed;
+prepare and verify the required inspector before another exact-revision run.
+
+Worker TEST handoff: bind the exact BUILD input and result into one
+bounded canonical TEST input; validate current authorization and complete existing
+source/plan/provider authority before artifact access. Bind returned test evidence
+and bounded record references to that complete handoff. Then execute the locked
+TEST phase over verified transferred artifacts, preserving controller admission.
+
+Outcome: canonical bounded TEST input binds the exact admitted BUILD input/result;
+returned TEST records bind the full handoff, exact build/exports/suite and bounded
+unique evidence references. Current grants and deadlines are rechecked. The worker
+operation admits source and plan context, materializes provider custody, imports
+verified BUILD artifacts and runs only the locked TEST phase, then reopens process
+and suite evidence before exporting records. Its CAS entry point reconstructs and
+cleans exact source through private runtime composition. A real TEST-only runtime
+passes after original controller source and artifact removal without rebuilding.
+Seven focused, five BUILD-execution, eleven BUILD-result, ten provider-transfer,
+five controller TEST-admission, eleven architecture and twelve version checks pass
+(61 total), with project validation and Ruff. These prove the operation and handoff;
+supervised TEST child/receiver transport, controller result fetch, queue wiring,
+provider-dependent TEST and native cross-host qualification remain open.
+
+Controller TEST result transfer: fetch only the exact bounded record
+references in an admitted TEST result from explicit worker return transport or
+verified CAS. Revalidate live worker/plan authority, retain the result envelope,
+then invoke current controller TEST admission. Prove real returned process evidence
+enters a command-free controller and corrupt/missing data, identity substitution,
+retention failure and changed worker authority leave TEST unregistered.
+
+Outcome: TEST result import now verifies explicit return-source or cached record
+bytes against admitted sizes and hashes, preserves current plan/grant context,
+and rechecks worker admission before transfer and registration. It retains the
+bounded response before invoking controller TEST admission; no command is run.
+Nine real-result tests cover command-free controller admission, verified cache
+reuse, missing/corrupt remote data, corrupt cached data without refetch, substituted
+response authority, plan drift, response-retention failure and worker drift before
+and after retention. Seven worker TEST, five controller-admission, eleven BUILD
+result, eleven architecture and twelve version checks also pass (55 total), with
+project validation and Ruff. Supervised TEST child/receiver dispatch, shared queue
+integration and native cross-host proof remain required.
+
+Supervised TEST child: share admitted BUILD/TEST process bounds while
+preserving existing BUILD behavior. Add supervisor-owned TEST controls and a private
+child entry point. Prove actual TEST execution through child stdio, cancellation,
+grant/action expiry, output limits, authoritative environment/path controls and
+unchanged BUILD regressions before configured receiver/queue integration.
+
+Outcome: BUILD and TEST now share bounded process supervision after their respective
+input admission. TEST owns separate authoritative input/deadline/CAS/workspace
+controls, preserves earlier grant/action expiry, cancellation and descendant
+cleanup, and bounds both streams. The private TEST child re-admits the handoff,
+keeps logging on stderr and runs the CAS operation beneath owned workspace custody.
+A measured Python launcher preserves its environment for actual child execution;
+the real TEST child succeeds after original source removal and cleans its workspace.
+Six TEST-process, six TEST-child, nine BUILD-process, six BUILD-child, seven worker
+TEST, nine TEST-result, six configured-BUILD, eleven architecture and twelve version
+checks pass (72 total), with project validation and Ruff. Configured TEST receiver,
+capability/action transport, shared queue and native qualification remain open;
+receiver-parent-death recovery is still required by the full program.
+
+TEST action binding: validate selected worker, deadline, canonical
+TEST node/predecessors and exact execution/generation payload before supervising
+the prepared TEST handoff. Preserve validation edges in canonical metadata;
+controller readiness remains scheduler-owned. Re-admit child results against the
+same handoff and prove altered authority cannot launch a child.
+
+Outcome: TEST action admission now binds the selected worker and deadline, exact
+bounded handoff/payload records and canonical TEST node/predecessors from the full
+execution plan. Child result bytes are re-admitted against that same handoff.
+Six action checks reject substituted authority before launch, reject an actual
+child echoing its input as a result, and accept actual previously produced TEST
+evidence returned through child stdio. An isolated metadata check preserves
+validation predecessors; it is not cross-component execution proof. Four BUILD
+action, six TEST-process, nine TEST-result, nine DAG-planning, eleven architecture
+and twelve version checks also pass (57 total), with project validation and Ruff.
+Configured TEST receiver/capabilities, controller readiness/queue integration and
+cross-host execution remain open.
+
+Configured TEST receiver: shared startup tool/profile observations preserve BUILD
+identities and give TEST a distinct profile. Every selected entrypoint's TEST runner
+is required, without adding BUILD-only requirements. Source, provider and completed
+BUILD custody are verified before allocating a job. The supervised TEST child runs
+beneath the owned workspace; profile/grant/deadline checks and owned cleanup surround
+transfer and execution. Seven focused checks cover real TEST execution after removing
+controller source, exact runner selection, missing tools, corrupt source/archive,
+profile drift and failed/cancelled child cleanup. Receiver capability advertising,
+wire routing and controller readiness/queue integration remain open. Six configured
+BUILD, eleven BUILD-result, seven TEST-execution, nine TEST-result, six TEST-action,
+eleven architecture and twelve version checks pass as well (69 total).
+
+TEST discovery and routing outcome: the one-shot receiver advertises TEST only with
+its private TEST profile and canonical runner inventory, rejects missing/malformed
+phase facts and routes TEST to the startup-configured worker. Absent TEST settings
+preserve the previous BUILD-only facts. Combined workers retain TEST facts across
+BUILD tool-observation, selector and native dependency probes, with a final profile
+recheck. Real receiver TEST execution and unconfigured refusal pass; the combined
+worker stdio/request-file observation, selector and dependency checks pass. Nine
+configured TEST, sixteen capability, six configured BUILD, four tool-observation,
+four selector, three dependency, eleven architecture and twelve version tests pass
+(65 unique checks), plus Ruff and project validation. Controller TEST capacity
+reservation, readiness/queue integration and cross-host qualification remain open.
+
+TEST ready-queue reservation outcome: an optional admitted TEST port now reserves
+capacity before occupying an executor. Exhausted TEST capacity leaves other ready
+phases runnable, and invalid reserved TEST output releases its slot and cannot
+reach execution. Existing local TEST ports retain their behavior. Fourteen ready-queue
+checks, eleven architecture and twelve version checks pass (37 total), with Ruff
+and project validation. The command TEST controller must still prepare the exact
+BUILD/result handoff, select admitted TEST runners and share the INDEX/BUILD pool;
+this queue interface alone does not establish remote dispatch or release readiness.
+
+Command TEST controller outcome: successful command BUILD imports now retain an
+exact typed TEST handoff. The TEST controller binds it to current registered BUILD,
+plan, source and exports, selects every admitted TEST runner, and reserves shared
+INDEX/BUILD capacity. Source publication checks current authority before/after
+transfer and the deadline per file. Requests retain exact handoff/payload records;
+returned proof is imported with live worker/context guards and no local fallback.
+Seven controller tests cover real command transport returning previously produced
+TEST evidence, shared capacity, missing runner/BUILD, changed worker, wrong handoff
+and corrupt returned records. Ten BUILD-controller, fourteen admission, nine
+TEST-result, fourteen ready-queue, eleven architecture and twelve version tests
+also pass (77 total), with Ruff and project validation. Production composition,
+local-BUILD-to-remote-TEST handoff and complete cross-host execution remain open;
+the command fixture's returned proof is not newly executed TEST work on that route.
+
+Hosted Windows diagnosis: run `36839967781` at published `adfa28c9` terminated
+with two failures: the health-policy admission test exhausted its hardware probe
+inside transport (`action_hardware.transport_expired`), and the real interpreter
+native graph exceeded the 4 MiB worker dependency record limit. This run does not
+qualify the release. Native graph refusals now include serialized byte counts and
+component/edge counts without paths or graph contents; oversized incoming JSON is
+not parsed for diagnostics. The size limit and complete dependency evidence remain
+required. This is diagnostic coverage, not a fix or waiver of either Windows failure.
+
+Production TEST composition outcome: the Standard factory now installs command TEST
+when admitted, with explicit return transport for both BUILD and TEST workers. Local
+BUILD keeps its implementation and captures a verified completed artifact plus source,
+plan and accepted provider closure for remote TEST; command BUILD shares that capture
+logic. Three local-handoff tests include real BUILD followed by isolated TEST from CAS
+after original source/artifact removal. A controller without execution tools now
+runs actual BUILD and TEST children through a configured receiver, sharing capacity
+and importing evidence. Twenty-four configuration checks include local/remote BUILD
+composition and missing TEST return-transport refusal. Ten BUILD-controller, seven
+TEST-controller, eight provider materialization, one two-level provider-chain, eleven
+architecture and twelve version checks also pass (77 total), plus project validation
+and Ruff. This is command-process coverage; full cross-host lifecycle, remote closure
+selection and the remaining phases/caches still require qualification.
+
+Hosted run `36852207423` at `313e7ec1` stopped in macOS Python 3.11 before release
+qualification: two provider tests still patched the pre-refactor BUILD-only process
+module. Both now patch shared process supervision, and both actual provider scenarios
+pass locally. No stale reference remains. The earlier Windows hardware timeout and
+oversized native graph remain unresolved; cancelled hosted jobs are not evidence.
+
+Native TEST-child outcome: frozen revision
+`fe1b96f78ef49f7350494515caafe0d46de73688`, tree
+`494f4f0034c4a34bd9b5e4c2544bd4f3e9fa789b`, completed its Windows run:
+72 tests run, 71 passed and one platform skip. The terminal log and report were
+retrieved. Coverage includes supervised TEST/BUILD children, TEST execution/result
+import, configured BUILD and architecture/version checks. It excludes later TEST
+action binding and configured TEST changes, cross-host action dispatch, PE dependency
+closure and full sample readiness. No native job from this run remains active.
+
+Native provider BUILD outcome: exact commit
+`b103f93b47dae81995891ba415107fb6d29519f9`, tree
+`47cc633be77a17dd28b4d04b9815620b5efd8a53`, passes 155 tests on Windows with one
+POSIX-only FIFO skip (156 run). The groups cover 58 BUILD, ten provider-transfer,
+five receipt-closure, twelve queue, six child, four configured-receiver, thirteen
+capability, nine hardware, nine controller, twenty-one configuration and nine
+Standard-factory tests. The terminal report and log were retrieved successfully.
+This includes real provider-dependent BUILD and directory/blob cleanup but excludes
+later configured-provider child, three-node Standard factory and data-only controller
+changes. It does not establish full sample readiness or explain the hosted hardware
+probe failures. No native job from this qualification remains running.

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from literate_ai.adapters.user_assets import (
     UserAssetPathError,
+    resolve_action_execution_config_path,
     resolve_test_config_path,
     resolve_worker_config_path,
     resolve_worker_observations_path,
@@ -14,6 +15,24 @@ from literate_ai.adapters.user_paths import UserPaths
 
 
 class UserAssetPathTests(unittest.TestCase):
+    def test_action_execution_uses_user_config_and_explicit_override(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            paths = UserPaths(root / "config", root / "state")
+            self.assertEqual(
+                resolve_action_execution_config_path(environment={}, paths=paths),
+                root / "config" / "action-execution.json",
+            )
+            selected = root / "selected.json"
+            self.assertEqual(
+                resolve_action_execution_config_path(
+                    environment={"LITAI_ACTION_EXECUTION_CONFIG": str(selected)},
+                    paths=paths,
+                ),
+                selected,
+            )
+            self.assertFalse(selected.exists())
+
     def setUp(self) -> None:
         self.repository = Path(__file__).resolve().parents[2]
 
@@ -36,6 +55,7 @@ class UserAssetPathTests(unittest.TestCase):
 
     def test_explicit_and_environment_overrides_must_be_absolute(self) -> None:
         for resolver, name in (
+            (resolve_action_execution_config_path, "LITAI_ACTION_EXECUTION_CONFIG"),
             (resolve_worker_config_path, "LITAI_WORKER_CONFIG"),
             (resolve_worker_observations_path, "LITAI_WORKER_OBSERVATIONS"),
             (resolve_test_config_path, "LITAI_TEST_CONFIG"),

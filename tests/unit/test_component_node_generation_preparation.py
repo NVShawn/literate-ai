@@ -98,6 +98,7 @@ def _fixture(
     flavor_model: str | None = None,
     skill_model: str | None = None,
     library_names: frozenset[str] = frozenset(),
+    dependency_kind: DependencyKind = DependencyKind.GENERATION,
 ):
     component_models = component_models or {}
     implementation_skill_content = (
@@ -166,14 +167,10 @@ def _fixture(
     names = ("application", "service", "storage")
     requirements = {
         "application": (
-            CapabilityRequirement(
-                "service", "service-api", ">=1,<2", DependencyKind.GENERATION
-            ),
+            CapabilityRequirement("service", "service-api", ">=1,<2", dependency_kind),
         ),
         "service": (
-            CapabilityRequirement(
-                "storage", "storage-api", ">=1,<2", DependencyKind.GENERATION
-            ),
+            CapabilityRequirement("storage", "storage-api", ">=1,<2", dependency_kind),
         ),
         "storage": (),
     }
@@ -360,8 +357,10 @@ def _fixture(
             provider.revision.identity,
             provider_name,
             requirement.capability,
-            DependencyKind.GENERATION,
-            provider.interface_bindings[0].interface_identity,
+            dependency_kind,
+            provider.interface_bindings[0].interface_identity
+            if dependency_kind is DependencyKind.GENERATION
+            else None,
         )
         edges.append(edge)
         selection = consumer.target_flavor_selection

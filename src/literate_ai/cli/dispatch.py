@@ -845,6 +845,12 @@ def _parser() -> JsonArgumentParser:
     worker_commands = worker.add_subparsers(
         dest="worker_command", required=True, parser_class=JsonArgumentParser
     )
+    from .worker_registry import add_registry_arguments
+
+    add_registry_arguments(worker_commands)
+    from .worker_provisioning import add_provisioning_arguments
+
+    add_provisioning_arguments(worker_commands)
     worker_health = worker_commands.add_parser(
         "health", help="inspect bounded storage health without dispatch or cleanup"
     )
@@ -1458,7 +1464,7 @@ def _parser() -> JsonArgumentParser:
         "--model",
         help="pipeline-default coding-CLI model; narrower scopes may override it",
     )
-    build.add_argument("--jobs", type=int, default=1)
+    build.add_argument("--jobs", type=int, default=None)
     build.add_argument(
         "--force-regeneration",
         action="store_true",
@@ -1500,7 +1506,7 @@ def _parser() -> JsonArgumentParser:
         "--model",
         help="pipeline-default coding-CLI model; narrower scopes may override it",
     )
-    test_command.add_argument("--jobs", type=int, default=1)
+    test_command.add_argument("--jobs", type=int, default=None)
     test_command.add_argument(
         "--target",
         default="host",
@@ -1596,20 +1602,27 @@ def _parser() -> JsonArgumentParser:
             "Components, Flavors, skills, workflows, and routing policies, and compare "
             "them plus framework-owned scaffold files with their previous provenance "
             "and current local bytes. "
-            "Planning is read-only. --apply updates only upstream-only files; new "
-            "files require --adopt-added. Local changes and conflicts are preserved "
-            "unless an inherited-catalog conflict is explicitly selected with "
-            "--take-upstream; a retired path needed by local authority can be kept "
-            "with --keep-local."
+            "Planning is read-only. --apply writes upstream-only and clean merges. "
+            "New files require --adopt-added. Overlapping conflicts require "
+            "--resolutions or an explicit inherited --take-upstream choice; "
+            "--keep-local retains a retired dependency."
         ),
     )
     update.add_argument("path", nargs="?", default=".")
     update.add_argument(
+        "--resolutions",
+        metavar="FILE",
+        help=(
+            "with --apply, apply explicitly reviewed identity-bound "
+            "conflict_reviews from update JSON"
+        ),
+    )
+    update.add_argument(
         "--apply",
         action="store_true",
         help=(
-            "write the mechanically safe subset: upstream-only changes to files this "
-            "project never touched. Conflicts and local changes are never written"
+            "apply upstream-only changes and clean three-way text merges; "
+            "overlapping conflicts require explicitly reviewed resolutions"
         ),
     )
     update.add_argument(
@@ -2370,8 +2383,8 @@ def _parser() -> JsonArgumentParser:
     rebuild.add_argument(
         "--jobs",
         type=int,
-        default=1,
-        help="maximum parallel Component lifecycle operations (default: 1)",
+        default=None,
+        help="cap parallel Component operations (default: admitted worker capacity)",
     )
     rebuild.add_argument(
         "--flavor",
@@ -2474,8 +2487,8 @@ def _parser() -> JsonArgumentParser:
     profile.add_argument(
         "--jobs",
         type=int,
-        default=1,
-        help="maximum parallel Component lifecycle operations",
+        default=None,
+        help="cap parallel Component operations (default: admitted worker capacity)",
     )
     profile.add_argument("--flavor", action="append", default=[])
     profile.add_argument("--force-regeneration", action="store_true")
@@ -2612,7 +2625,7 @@ def _update_moving_counts(counts: object) -> dict[str, int]:
     if not isinstance(counts, dict):
         return {}
     moving: dict[str, int] = {}
-    for key in ("conflict", "upstream-added", "upstream-only"):
+    for key in ("conflict", "mergeable", "upstream-added", "upstream-only"):
         value = counts.get(key)
         if isinstance(value, int) and value:
             moving[key] = value
@@ -2665,7 +2678,7 @@ def _human_update_movement_lines(
     if not moving:
         lines.append("  Nothing in this half has moved.")
     else:
-        for key in ("conflict", "upstream-added", "upstream-only"):
+        for key in ("conflict", "mergeable", "upstream-added", "upstream-only"):
             if moving.get(key):
                 lines.append(f"  {moving[key]} {key}")
         lines.extend(_human_update_conflict_lines(files, diffs))
@@ -2687,7 +2700,7 @@ def _human_update_text(result: dict[str, Any]) -> str:
         lines.append("Nothing upstream has moved.")
     else:
         lines.append("Upstream movement:")
-        for key in ("conflict", "upstream-added", "upstream-only"):
+        for key in ("conflict", "mergeable", "upstream-added", "upstream-only"):
             if moving.get(key):
                 lines.append(f"  {moving[key]} {key}")
         lines.extend(
@@ -3261,6 +3274,17 @@ def main(
             if isinstance(result, dict) and result.get("coding_cli") is not None:
                 perf_outcome["coding_cli"] = result["coding_cli"]
         renderer = _HUMAN_RENDERERS.get(command)
+        if command in {
+            "worker.list",
+            "worker.show",
+            "worker.add",
+            "worker.update",
+            "worker.remove",
+            "worker.test",
+        }:
+            from .worker_registry import human_registry_result
+
+            renderer = human_registry_result
         if command == "worker.health":
             from .worker_health import human_worker_health
 

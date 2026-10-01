@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Mapping
+import time
+from collections.abc import Callable, Generator, Mapping
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from contextvars import copy_context
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime
 from functools import partial
 
+from literate_ai.application.action_dag_planning import plan_lifecycle_action_dag
+from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.application.artifact_graph import (
     ArtifactAssemblyError,
     realize_manifest,
@@ -42,7 +45,15 @@ from literate_ai.application.standard_lifecycle_membership import (
 )
 from literate_ai.application.standard_lifecycle_ports import (
     AcceptedSourceCachePublisher,
+    AdmittedBuildAuthorizer,
+    AdmittedBuildIntentDispatcher,
+    AdmittedBuildPlanFinalizer,
+    AdmittedComponentBuilder,
+    AdmittedComponentExecutor,
+    AdmittedComponentTester,
+    AdmittedGenerationIndexer,
     BuildAuthorizer,
+    BuildProviderEvidenceReceiver,
     CompleteAcceptedSourceCachePublisher,
     ComponentAcceptor,
     ComponentBuilder,
@@ -50,6 +61,7 @@ from literate_ai.application.standard_lifecycle_ports import (
     ComponentBuildPlanFinalizer,
     ComponentExecutor,
     ComponentTester,
+    ExecutionProviderEvidenceReceiver,
     GenerationIndexer,
     IndependentProjectAcceptor,
     PackagedProjectExecutor,
@@ -58,6 +70,7 @@ from literate_ai.application.standard_lifecycle_ports import (
     ProjectPackageCreator,
     ProjectReceiptIssuer,
     ProjectValidator,
+    ReservedLifecycleOperation,
     RootIntegrationTester,
     StandardCandidateRepairPort,
     StandardContextEvidenceRecorder,
@@ -69,6 +82,7 @@ from literate_ai.authority_graph import (
     AuthorityGraphError,
     AuthorityGraphNode,
 )
+from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.component_locking import ComponentLock
 from literate_ai.contracts.component_workers import (
     ComponentArtifactHandoff,
@@ -110,6 +124,7 @@ from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
 )
+from literate_ai.contracts.standard_execution_inputs import StandardExecutionInputScope
 from literate_ai.contracts.standard_lifecycle import (
     StandardBuildAuthorizationDocument,
     StandardComponentBuildIntentDocument,
@@ -279,6 +294,12 @@ class StandardComponentBuildPlan:
             document.provider_artifact_identities,
             document.package_artifact_identities,
         )
+
+
+_ExecutionInputResolver = Callable[
+    [StandardComponentBuildPlan, tuple[ArtifactExport, ...]],
+    tuple[StandardExecutionInputScope, tuple[ArtifactExport, ...]],
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -1423,6 +1444,21 @@ def _layers(execution_plan: ComponentExecutionPlan) -> tuple[tuple[str, ...], ..
         raise StandardProjectLifecycleError(exc.code, exc.message) from exc
 
 
+@dataclass(frozen=True, slots=True)
+class _LifecycleStep:
+    """One local operation; a continuation is never a serializable worker request."""
+
+    stage: StandardLifecycleStage
+    operation: Callable[[], object]
+    guard: Callable[[], None] | None = None
+    reserve: Callable[[], ReservedLifecycleOperation | None] | None = None
+
+    def execute(self) -> object:
+        if self.guard is not None:
+            self.guard()
+        return self.operation()
+
+
 class StandardProjectLifecycleService:
     def __init__(
         self,
@@ -1445,6 +1481,7 @@ class StandardProjectLifecycleService:
         independent_project_acceptor: IndependentProjectAcceptor,
         admitter: ProjectAdmitter,
         receipt_issuer: ProjectReceiptIssuer,
+        build_intent_dispatcher: AdmittedBuildIntentDispatcher | None = None,
         checkpoint_recorder: StandardLifecycleCheckpointRecorder | None = None,
         context_evidence_recorder: StandardContextEvidenceRecorder | None = None,
         candidate_repair_port: StandardCandidateRepairPort | None = None,
@@ -1452,6 +1489,7 @@ class StandardProjectLifecycleService:
     ) -> None:
         self.validator = validator
         self.build_intent_factory = build_intent_factory
+        self.build_intent_dispatcher = build_intent_dispatcher
         self.build_plan_finalizer = build_plan_finalizer
         self.generator = generator
         self.indexer = indexer
@@ -1720,22 +1758,49 @@ class StandardProjectLifecycleService:
         validation = _require_identity(
             self.validator.validate(execution_plan), "validation"
         )
+        scoped_execution = component_worker_routing is None and callable(
+            getattr(self.executor, "execute_scoped", None)
+        )
+        runtime_providers = {uri: set() for uri in expected}
         dependencies = {uri: set() for uri in expected}
         build_providers = {uri: set() for uri in expected}
         package_providers = {uri: set() for uri in expected}
         for action in execution_plan.action_plans:
             for edge in action.dependency_edges:
-                dependencies[edge.consumer_revision.uri].add(edge.provider_revision.uri)
+                if edge.kind is DependencyKind.RUNTIME and scoped_execution:
+                    runtime_providers[edge.consumer_revision.uri].add(
+                        edge.provider_revision.uri
+                    )
+                    continue
+                if (
+                    edge.semantics.consumed_input
+                    is not DependencyInputKind.PUBLIC_INTERFACE
+                    and (
+                        edge.semantics.consumed_input is not DependencyInputKind.PACKAGE
+                        or component_worker_routing is not None
+                    )
+                ):
+                    dependencies[edge.consumer_revision.uri].add(
+                        edge.provider_revision.uri
+                    )
                 # Packaging edges carry exact package provenance into package
                 # assembly/acceptance elsewhere (create_package_plan draws on the
                 # accepted lifecycle's own artifact graph); they must never require
                 # a build-time process environment binding for a Component that
                 # only consumes the provider for packaging (issue #110).
-                if edge.semantics.consumed_input is DependencyInputKind.ARTIFACT_EXPORT:
+                if edge.semantics.consumed_input in {
+                    DependencyInputKind.ARTIFACT_EXPORT,
+                    DependencyInputKind.TOOLCHAIN,
+                }:
                     build_providers[edge.consumer_revision.uri].add(
                         edge.provider_revision.uri
                     )
-                elif edge.semantics.consumed_input is DependencyInputKind.PACKAGE:
+                elif (
+                    edge.semantics.consumed_input is DependencyInputKind.PACKAGE
+                    and component_worker_routing is not None
+                ):
+                    # Complete-node transports retain their legacy input handoff.
+                    # Local phases bind these inputs only at project assembly.
                     package_providers[edge.consumer_revision.uri].add(
                         edge.provider_revision.uri
                     )
@@ -1756,62 +1821,215 @@ class StandardProjectLifecycleService:
         )
         _layers(execution_plan)  # Validate the entire graph before running a node.
         # Generation consumes locked interfaces and can precede provider acceptance.
-        # Both stages share one pool and slot bound. Explicit complete-node routing
+        # Indexing also consumes only this Component's exact source. Build intent
+        # waits for accepted providers before resolving their export identities.
+        # All phases share one pool and slot bound. Explicit complete-node routing
         # keeps its transport custody until that transport supports separate phases.
-        futures: dict[
-            Future[
-                tuple[
-                    SourceGenerationNodeResult,
-                    StandardComponentBuildPlan | None,
-                    StandardNodeLifecycleResult,
-                    PreparedComponentGenerationNode[object, object],
-                    CandidateAttemptChain | None,
-                ]
-                | ComponentSourceGenerationExecution
-            ],
-            tuple[str, str],
-        ] = {}
-        source_executions: dict[str, ComponentSourceGenerationExecution] = {}
-        pending_generation = (
-            set(expected) if component_worker_routing is None else set()
+        futures: dict[Future[object], tuple[str, str]] = {}
+        step_runs: dict[str, Generator[_LifecycleStep, object, object]] = {}
+        pending_steps: dict[str, _LifecycleStep] = {}
+
+        def advance_step(uri: str, completed: Future[object] | None = None) -> None:
+            steps = step_runs[uri]
+            try:
+                if completed is None:
+                    step = next(steps)
+                else:
+                    try:
+                        value = completed.result()
+                    except Exception as exc:
+                        step = steps.throw(exc)
+                    else:
+                        step = steps.send(value)
+                if not isinstance(step, _LifecycleStep):
+                    raise TypeError("lifecycle continuation returned an invalid step")
+                pending_steps[uri] = step
+            except StopIteration as finished:
+                terminal: Future[object] = Future()
+                terminal.set_result(finished.value)
+                futures[terminal] = (uri, "lifecycle")
+                del step_runs[uri]
+            except Exception as exc:
+                terminal = Future()
+                terminal.set_exception(exc)
+                futures[terminal] = (uri, "lifecycle")
+                del step_runs[uri]
+
+        def artifact_inputs(
+            uri: str,
+        ) -> tuple[tuple[ArtifactExport, ...], tuple[ArtifactExport, ...]]:
+            # Artifact-export and toolchain providers become process
+            # environment bindings for this node's build. Packaging-only
+            # providers carry package result/plan provenance into package
+            # assembly and acceptance separately (see create_package_plan /
+            # create_standard_artifact_build_graph) and must not require a
+            # runtime binding here (issue #110).
+            provider_artifacts = tuple(
+                sorted(
+                    (
+                        export
+                        for parent in build_providers[uri]
+                        for export in results[parent].exports
+                    ),
+                    key=lambda item: item.identity.uri,
+                )
+            )
+            package_artifacts = tuple(
+                sorted(
+                    (
+                        export
+                        for parent in package_providers[uri]
+                        for export in results[parent].exports
+                    ),
+                    key=lambda item: item.identity.uri,
+                )
+            )
+            return provider_artifacts, package_artifacts
+
+        def accepted_build_providers(uri):
+            evidence = []
+            from literate_ai.application.standard_provider_receipts import (
+                select_build_provider_receipts,
+            )
+
+            for parent in sorted(results):
+                result = results[parent]
+                if result.acceptance_evidence is None:
+                    continue
+                receipt = result.acceptance_evidence
+                if (
+                    receipt is None
+                    or receipt.identity != result.acceptance_identity
+                    or receipt.component_revision != result.component_revision
+                    or receipt.build.exports != result.exports
+                ):
+                    raise StandardProjectLifecycleError(
+                        "standard_lifecycle.provider_acceptance_missing",
+                        "remote build intent requires exact accepted provider evidence",
+                    )
+                evidence.append(receipt)
+            try:
+                return select_build_provider_receipts(
+                    artifact_inputs(uri)[0], tuple(evidence)
+                )
+            except ValueError as exc:
+                raise StandardProjectLifecycleError(
+                    "standard_lifecycle.provider_acceptance_missing",
+                    "BUILD requires exact accepted provider evidence "
+                    "for its complete dependency closure",
+                ) from exc
+
+        def execution_inputs(uri, plan, exports):
+            from literate_ai.application.standard_execution_inputs import (
+                plan_standard_execution_inputs,
+                standard_execution_provider_revisions,
+            )
+
+            revisions = standard_execution_provider_revisions(
+                execution_plan, plan.component_revision
+            )
+            providers = tuple(results[revision.uri] for revision in revisions)
+            scope = plan_standard_execution_inputs(
+                execution_plan, plan, exports, providers
+            )
+            if isinstance(self.executor, ExecutionProviderEvidenceReceiver):
+                from literate_ai.application.standard_execution_inputs import (
+                    plan_standard_execution_receipts,
+                )
+
+                receipts = []
+                for provider in providers:
+                    receipt = provider.acceptance_evidence
+                    if (
+                        not isinstance(receipt, StandardComponentAcceptanceEvidence)
+                        or receipt.identity != provider.acceptance_identity
+                        or receipt.component_revision != provider.component_revision
+                        or receipt.build.exports != provider.exports
+                        or receipt.build.build_plan_identity
+                        != provider.build_plan_identity
+                        or receipt.build.identity != provider.build_identity
+                        or receipt.generated_tests.identity != provider.test_identity
+                        or receipt.execution.identity != provider.execution_identity
+                    ):
+                        raise StandardProjectLifecycleError(
+                            "standard_lifecycle.execution_provider_acceptance_missing",
+                            "EXECUTE requires exact accepted runtime provider evidence",
+                        )
+                    receipts.append(receipt)
+                receipts = tuple(receipts)
+                if (
+                    plan_standard_execution_receipts(
+                        execution_plan, plan, exports, receipts
+                    )
+                    != scope
+                ):
+                    raise StandardProjectLifecycleError(
+                        "standard_lifecycle.execution_provider_scope_mismatch",
+                        "runtime receipts differ from current execution scope",
+                    )
+                self.executor.retain_execution_provider_evidence(plan, scope, receipts)
+            all_inputs = {
+                item.identity.uri: item
+                for provider in providers
+                for item in provider.exports
+            }
+            return scope, tuple(all_inputs[key] for key in sorted(all_inputs))
+
+        stage_kinds = {
+            StandardLifecycleStage.SOURCE_GENERATION: LifecycleActionKind.GENERATE,
+            StandardLifecycleStage.SOURCE_INDEX: LifecycleActionKind.INDEX,
+            StandardLifecycleStage.BUILD_INTENT: LifecycleActionKind.BUILD_INTENT,
+            StandardLifecycleStage.BUILD_AUTHORIZATION: LifecycleActionKind.AUTHORIZE,
+            StandardLifecycleStage.BUILD_PLAN: LifecycleActionKind.PLAN,
+            StandardLifecycleStage.BUILD: LifecycleActionKind.BUILD,
+            StandardLifecycleStage.TEST: LifecycleActionKind.TEST,
+            StandardLifecycleStage.EXECUTE: LifecycleActionKind.EXECUTE,
+            StandardLifecycleStage.ACCEPT: LifecycleActionKind.ACCEPT,
+        }
+        local_action_order = (
+            {
+                (action.component_revision.uri, action.kind): action.identity.uri
+                for action in plan_lifecycle_action_dag(
+                    execution_plan, worker_ids=("local",)
+                )
+            }
+            if component_worker_routing is None
+            else {}
         )
         pending = set(expected)
         with ThreadPoolExecutor(max_workers=max_parallelism) as pool:
-            while pending or futures:
+            while pending or futures or pending_steps:
                 ready = sorted(
                     (
                         uri
                         for uri in pending
-                        if dependencies[uri] <= results.keys()
-                        and (
-                            component_worker_routing is not None
-                            or uri in source_executions
+                        if (
+                            dependencies[uri] <= results.keys()
+                            if component_worker_routing is not None
+                            else True
                         )
                     ),
                     key=lambda uri: generation_plans[uri].identity.uri,
                 )
                 for uri in ready:
-                    failed_parent = any(
+                    failed_parent = component_worker_routing is not None and any(
                         results[parent].failure_code is not None
                         for parent in dependencies[uri]
                     )
-                    if len(futures) >= max_parallelism and not failed_parent:
+                    if (
+                        component_worker_routing is not None
+                        and len(futures) >= max_parallelism
+                        and not failed_parent
+                    ):
                         continue
                     pending.remove(uri)
                     if failed_parent:
-                        source_execution = source_executions.get(uri)
-                        generation = (
-                            source_execution.result
-                            if source_execution is not None
-                            else self._cancelled_generation(nodes[uri])
-                        )
+                        generation = self._cancelled_generation(nodes[uri])
                         generated[uri] = generation
                         results[uri] = self._cancelled(
                             generation_plans[uri].component_revision,
                             generation,
-                            source_execution.output
-                            if source_execution is not None
-                            else None,
+                            None,
                             None,
                             _failure(
                                 generation_plans[uri].component_revision,
@@ -1826,31 +2044,10 @@ class StandardProjectLifecycleService:
                                 nodes[uri], generation
                             )
                         continue
-                    # Only artifact-export (build/runtime) providers become process
-                    # environment bindings for this node's build. Packaging-only
-                    # providers carry package result/plan provenance into package
-                    # assembly and acceptance separately (see create_package_plan /
-                    # create_standard_artifact_build_graph) and must not require a
-                    # runtime binding here (issue #110).
-                    provider_artifacts = tuple(
-                        sorted(
-                            (
-                                export
-                                for parent in build_providers[uri]
-                                for export in results[parent].exports
-                            ),
-                            key=lambda item: item.identity.uri,
-                        )
-                    )
-                    package_artifacts = tuple(
-                        sorted(
-                            (
-                                export
-                                for parent in package_providers[uri]
-                                for export in results[parent].exports
-                            ),
-                            key=lambda item: item.identity.uri,
-                        )
+                    provider_artifacts, package_artifacts = (
+                        artifact_inputs(uri)
+                        if component_worker_routing is not None
+                        else ((), ())
                     )
                     run_arguments = (
                         execution_plan,
@@ -1864,12 +2061,17 @@ class StandardProjectLifecycleService:
                         uri in regenerate,
                     )
                     if component_worker_routing is None:
-                        future = pool.submit(
-                            copy_context().run,
-                            self._run_complete_node,
+                        step_runs[uri] = self._run_complete_node_steps(
                             *run_arguments,
-                            source_executions[uri],
+                            None,
+                            partial(artifact_inputs, uri),
+                            partial(execution_inputs, uri)
+                            if scoped_execution
+                            else None,
+                            partial(accepted_build_providers, uri),
                         )
+                        advance_step(uri)
+                        continue
                     else:
                         assert component_node_dispatcher is not None
                         handoff = component_artifact_handoff(
@@ -1928,42 +2130,85 @@ class StandardProjectLifecycleService:
                             partial(self._run_complete_node, *run_arguments),
                         )
                     futures[future] = (uri, "lifecycle")
+                waiting_for_capacity = False
                 for uri in sorted(
-                    pending_generation,
-                    key=lambda item: generation_plans[item].identity.uri,
+                    pending_steps,
+                    key=lambda item: local_action_order[
+                        (item, stage_kinds[pending_steps[item].stage])
+                    ],
                 ):
                     if len(futures) >= max_parallelism:
                         break
-                    pending_generation.remove(uri)
-                    future = pool.submit(
-                        copy_context().run,
-                        self._generate_component_source,
-                        execution_plan,
-                        generation_plans[uri],
-                        nodes[uri],
-                        supplied.get(uri),
-                        cached.get(uri),
-                        source_resumes.get(uri),
-                        uri in regenerate,
+                    step = pending_steps[uri]
+                    required = (
+                        dependencies[uri]
+                        if step.stage is StandardLifecycleStage.BUILD_INTENT
+                        else runtime_providers[uri]
+                        if step.stage is StandardLifecycleStage.EXECUTE
+                        else set()
                     )
-                    futures[future] = (uri, "generation")
+                    if required:
+                        if not required <= results.keys():
+                            continue
+                        if any(
+                            results[parent].failure_code is not None
+                            for parent in required
+                        ):
+                            del pending_steps[uri]
+                            failure: Future[object] = Future()
+                            failure.set_exception(
+                                StandardProjectLifecycleError(
+                                    "dependency.failed",
+                                    "required provider did not pass acceptance",
+                                )
+                            )
+                            advance_step(uri, failure)
+                            continue
+                    reservation = None
+                    try:
+                        if step.reserve is not None:
+                            reservation = step.reserve()
+                            if reservation is None:
+                                waiting_for_capacity = True
+                                continue
+                        future = pool.submit(
+                            copy_context().run,
+                            self._run_reserved_step
+                            if reservation is not None
+                            else self._run_step,
+                            step,
+                            *(() if reservation is None else (reservation,)),
+                        )
+                    except Exception as exc:
+                        if reservation is not None:
+                            reservation.release()
+                        del pending_steps[uri]
+                        failure = Future()
+                        failure.set_exception(exc)
+                        advance_step(uri, failure)
+                        continue
+                    del pending_steps[uri]
+                    futures[future] = (uri, "step")
                 if not futures:
                     if pending and not ready:
                         raise StandardProjectLifecycleError(
                             "standard_lifecycle.dependency_deadlock",
                             "Component dependencies cannot make progress",
                         )
+                    if pending_steps:
+                        # Capacity can be held by direct port callers outside this pool.
+                        # Admission rechecks its finite deadline on each bounded retry.
+                        time.sleep(0.01)
                     continue
-                completed, _ = wait(tuple(futures), return_when=FIRST_COMPLETED)
+                completed, _ = wait(
+                    tuple(futures),
+                    timeout=0.05 if waiting_for_capacity else None,
+                    return_when=FIRST_COMPLETED,
+                )
                 for future in sorted(completed, key=lambda item: futures[item]):
                     uri, phase = futures.pop(future)
-                    if phase == "generation":
-                        try:
-                            source_executions[uri] = future.result()
-                        except Exception as exc:
-                            source_executions[uri] = ComponentSourceGenerationExecution(
-                                self._failed_generation(nodes[uri], exc), None, exc
-                            )
+                    if phase == "step":
+                        advance_step(uri, future)
                         continue
                     try:
                         generation, plan, result, evidence_prepared, repair_chain = (
@@ -2084,6 +2329,8 @@ class StandardProjectLifecycleService:
                 "standard_lifecycle.project_plan_incomplete",
                 "root integration requires every exact Component build plan",
             )
+        from .release_artifacts import plan_standard_assembly_dependencies
+
         artifact_graph, link_plan = self.artifact_assembler.assemble_project_artifacts(
             component_lock,
             execution_plan,
@@ -2101,6 +2348,14 @@ class StandardProjectLifecycleService:
             raise StandardProjectLifecycleError(
                 "standard_lifecycle.artifact_link_mismatch",
                 "project link plan must belong to the exact artifact graph",
+            )
+        if artifact_graph.assembly_dependencies != plan_standard_assembly_dependencies(
+            execution_plan, ordered
+        ):
+            raise StandardProjectLifecycleError(
+                "standard_lifecycle.assembly_dependencies_mismatch",
+                "artifact graph must bind exact locked late dependencies "
+                "and accepted providers",
             )
         package_plan, package_result = self.package_creator.create_project_package(
             component_lock,
@@ -2460,7 +2715,35 @@ class StandardProjectLifecycleService:
             disposition=disposition,
         )
 
-    def _run_complete_node(
+    def _run_complete_node(self, *args, **kwargs):
+        """Drive the steps inside an explicitly selected complete-node transport."""
+        steps = self._run_complete_node_steps(*args, **kwargs)
+        try:
+            step = next(steps)
+            while True:
+                try:
+                    value = self._run_step(step)
+                except Exception as exc:
+                    step = steps.throw(exc)
+                else:
+                    step = steps.send(value)
+        except StopIteration as completed:
+            return completed.value
+
+    def _run_reserved_step(
+        self, step: _LifecycleStep, reservation: ReservedLifecycleOperation
+    ) -> object:
+        try:
+            if step.guard is not None:
+                step.guard()
+            return reservation.run()
+        finally:
+            reservation.release()
+
+    def _run_step(self, step: _LifecycleStep) -> object:
+        return step.execute()
+
+    def _run_complete_node_steps(
         self,
         execution_plan: ComponentExecutionPlan,
         generation_plan: ComponentGenerationPlan,
@@ -2474,12 +2757,25 @@ class StandardProjectLifecycleService:
         package_artifacts: tuple[ArtifactExport, ...],
         regenerate: bool,
         source_execution: ComponentSourceGenerationExecution | None = None,
-    ) -> tuple[
-        SourceGenerationNodeResult,
-        StandardComponentBuildPlan | None,
-        StandardNodeLifecycleResult,
-        PreparedComponentGenerationNode[object, object],
-        CandidateAttemptChain | None,
+        artifact_inputs: Callable[
+            [], tuple[tuple[ArtifactExport, ...], tuple[ArtifactExport, ...]]
+        ]
+        | None = None,
+        execution_inputs: _ExecutionInputResolver | None = None,
+        accepted_build_providers: Callable[
+            [], tuple[StandardComponentAcceptanceEvidence, ...]
+        ]
+        | None = None,
+    ) -> Generator[
+        _LifecycleStep,
+        object,
+        tuple[
+            SourceGenerationNodeResult,
+            StandardComponentBuildPlan | None,
+            StandardNodeLifecycleResult,
+            PreparedComponentGenerationNode[object, object],
+            CandidateAttemptChain | None,
+        ],
     ]:
         """Run one candidate plus at most two exact, fresh replacement attempts."""
 
@@ -2490,7 +2786,7 @@ class StandardProjectLifecycleService:
             getattr(prepared.recipe, "identity", None), "prepared recipe identity"
         )
         for attempt_index in range(3):
-            generation, plan, result = self._run_complete_node_once(
+            generation, plan, result = yield from self._run_complete_node_once_steps(
                 execution_plan,
                 generation_plan,
                 current,
@@ -2501,7 +2797,15 @@ class StandardProjectLifecycleService:
                 package_artifacts,
                 regenerate if attempt_index == 0 else True,
                 source_execution if attempt_index == 0 else None,
+                artifact_inputs,
+                execution_inputs,
+                accepted_build_providers,
             )
+            if (
+                result.failure_evidence is not None
+                and result.failure_evidence.phase is StandardNodeFailurePhase.DEPENDENCY
+            ):
+                return generation, plan, result, current, None
             output = result.source_output
             if output is None:
                 return generation, plan, result, current, None
@@ -2669,7 +2973,7 @@ class StandardProjectLifecycleService:
             )
         return execution
 
-    def _run_complete_node_once(
+    def _run_complete_node_once_steps(
         self,
         execution_plan: ComponentExecutionPlan,
         generation_plan: ComponentGenerationPlan,
@@ -2683,10 +2987,23 @@ class StandardProjectLifecycleService:
         package_artifacts: tuple[ArtifactExport, ...],
         regenerate: bool,
         source_execution: ComponentSourceGenerationExecution | None = None,
-    ) -> tuple[
-        SourceGenerationNodeResult,
-        StandardComponentBuildPlan | None,
-        StandardNodeLifecycleResult,
+        artifact_inputs: Callable[
+            [], tuple[tuple[ArtifactExport, ...], tuple[ArtifactExport, ...]]
+        ]
+        | None = None,
+        execution_inputs: _ExecutionInputResolver | None = None,
+        accepted_build_providers: Callable[
+            [], tuple[StandardComponentAcceptanceEvidence, ...]
+        ]
+        | None = None,
+    ) -> Generator[
+        _LifecycleStep,
+        object,
+        tuple[
+            SourceGenerationNodeResult,
+            StandardComponentBuildPlan | None,
+            StandardNodeLifecycleResult,
+        ],
     ]:
         if source_cache_membership is None and candidate is not None:
             source_cache_membership = candidate.source_cache_membership
@@ -2695,15 +3012,23 @@ class StandardProjectLifecycleService:
             source_cache_membership = None
             source_generation_resume = None
         if source_execution is None:
-            source_execution = self._generate_component_source(
-                execution_plan,
-                generation_plan,
-                prepared,
-                candidate,
-                source_cache_membership,
-                source_generation_resume,
-                regenerate,
-            )
+            try:
+                source_execution = yield _LifecycleStep(
+                    StandardLifecycleStage.SOURCE_GENERATION,
+                    lambda: self._generate_component_source(
+                        execution_plan,
+                        generation_plan,
+                        prepared,
+                        candidate,
+                        source_cache_membership,
+                        source_generation_resume,
+                        regenerate,
+                    ),
+                )
+            except Exception as exc:
+                source_execution = ComponentSourceGenerationExecution(
+                    self._failed_generation(prepared, exc), None, exc
+                )
         generation = source_execution.result
         if generation.disposition in {
             SourceGenerationDisposition.FAILED,
@@ -2742,12 +3067,92 @@ class StandardProjectLifecycleService:
         source_candidate = output.candidate
         source = source_candidate.tree_identity
         try:
-            intent = self.build_intent_factory.create(
+            index = _require_identity(
+                (
+                    yield _LifecycleStep(
+                        StandardLifecycleStage.SOURCE_INDEX,
+                        lambda: self.indexer.index(
+                            generation_plan.component_revision, source
+                        ),
+                        reserve=partial(
+                            self.indexer.try_reserve_index,
+                            generation_plan.component_revision,
+                            source,
+                        )
+                        if isinstance(self.indexer, AdmittedGenerationIndexer)
+                        else None,
+                    )
+                ),
+                "source index",
+            )
+        except Exception as exc:
+            return (
+                generation,
+                None,
+                self._cancelled(
+                    generation_plan.component_revision,
+                    generation,
+                    output,
+                    None,
+                    _failure(
+                        generation_plan.component_revision,
+                        StandardNodeFailurePhase.SOURCE_INDEX,
+                        source_candidate.identity,
+                        exc,
+                        "source-index.failed",
+                    ),
+                ),
+            )
+        self._record_stage(
+            execution_plan,
+            generation_plan,
+            prepared,
+            output,
+            StandardLifecycleStage.SOURCE_INDEX,
+            index,
+        )
+
+        def create_intent() -> StandardComponentBuildIntent:
+            nonlocal provider_artifacts, package_artifacts
+            if artifact_inputs is not None:
+                provider_artifacts, package_artifacts = artifact_inputs()
+            return self.build_intent_factory.create(
                 execution_plan,
                 generation_plan,
                 source_candidate,
                 provider_artifacts,
                 package_artifacts,
+            )
+
+        def reserve_intent():
+            nonlocal provider_artifacts, package_artifacts
+            if artifact_inputs is not None:
+                provider_artifacts, package_artifacts = artifact_inputs()
+            assert self.build_intent_dispatcher is not None
+            assert accepted_build_providers is not None
+            return self.build_intent_dispatcher.try_reserve_intent(
+                execution_plan,
+                generation_plan,
+                source_candidate,
+                index,
+                provider_artifacts,
+                package_artifacts,
+                tuple(
+                    receipt
+                    for receipt in accepted_build_providers()
+                    if receipt.component_revision
+                    in {item.component_revision for item in provider_artifacts}
+                ),
+            )
+
+        try:
+            intent = yield _LifecycleStep(
+                StandardLifecycleStage.BUILD_INTENT,
+                create_intent,
+                reserve=reserve_intent
+                if self.build_intent_dispatcher is not None
+                and accepted_build_providers is not None
+                else None,
             )
             if not isinstance(intent, StandardComponentBuildIntent):
                 raise StandardProjectLifecycleError(
@@ -2789,11 +3194,15 @@ class StandardProjectLifecycleService:
                     None,
                     _failure(
                         generation_plan.component_revision,
-                        StandardNodeFailurePhase.BUILD_INTENT,
+                        StandardNodeFailurePhase.DEPENDENCY
+                        if isinstance(exc, StandardProjectLifecycleError)
+                        and exc.code == "dependency.failed"
+                        else StandardNodeFailurePhase.BUILD_INTENT,
                         source_candidate.identity,
                         exc,
                         "build-intent.failed",
                     ),
+                    index_identity=index,
                 ),
             )
         self._record_stage(
@@ -2806,38 +3215,15 @@ class StandardProjectLifecycleService:
         )
 
         try:
-            index = _require_identity(
-                self.indexer.index(intent.component_revision, source), "source index"
+            authorization = yield _LifecycleStep(
+                StandardLifecycleStage.BUILD_AUTHORIZATION,
+                lambda: self.authorizer.authorize(intent, index),
+                reserve=partial(
+                    self.authorizer.try_reserve_authorization, intent, index
+                )
+                if isinstance(self.authorizer, AdmittedBuildAuthorizer)
+                else None,
             )
-        except Exception as exc:
-            return (
-                generation,
-                None,
-                self._cancelled(
-                    generation_plan.component_revision,
-                    generation,
-                    output,
-                    None,
-                    _failure(
-                        generation_plan.component_revision,
-                        StandardNodeFailurePhase.SOURCE_INDEX,
-                        source_candidate.identity,
-                        exc,
-                        "source-index.failed",
-                    ),
-                ),
-            )
-        self._record_stage(
-            execution_plan,
-            generation_plan,
-            prepared,
-            output,
-            StandardLifecycleStage.SOURCE_INDEX,
-            index,
-        )
-
-        try:
-            authorization = self.authorizer.authorize(intent, index)
             if not isinstance(authorization, StandardBuildAuthorization):
                 raise StandardProjectLifecycleError(
                     "standard_lifecycle.authorization_invalid",
@@ -2884,8 +3270,21 @@ class StandardProjectLifecycleService:
             authorization.identity,
         )
 
+        def require_current_authorization() -> None:
+            authorization.grant.require_valid(intent.build_request, now=self.clock())
+
         try:
-            plan = self._finalize_build_plan(intent, authorization)
+            plan = yield _LifecycleStep(
+                StandardLifecycleStage.BUILD_PLAN,
+                lambda: self._finalize_build_plan(intent, authorization),
+                require_current_authorization,
+                reserve=partial(
+                    self.build_plan_finalizer.try_reserve_plan, intent, authorization
+                )
+                if isinstance(self.build_plan_finalizer, AdmittedBuildPlanFinalizer)
+                else None,
+            )
+            plan = self._validate_build_plan(intent, authorization, plan)
         except Exception as exc:
             return (
                 generation,
@@ -2914,28 +3313,37 @@ class StandardProjectLifecycleService:
             StandardLifecycleStage.BUILD_PLAN,
             plan.identity,
         )
-        if candidate is not None and self._resume_matches(candidate, plan):
+        if (
+            execution_inputs is None
+            and candidate is not None
+            and self._resume_matches(candidate, plan)
+        ):
             return generation, plan, self._reused(plan, candidate, generation, output)
         return (
             generation,
             plan,
-            self._run_node(
-                plan,
-                source,
-                provider_artifacts,
-                generation,
-                output,
-                index,
-                authorization.authorization_identity,
-                source_cache_membership,
-                lambda stage, subject: self._record_stage(
-                    execution_plan,
-                    generation_plan,
-                    prepared,
+            (
+                yield from self._run_node_steps(
+                    plan,
+                    source,
+                    provider_artifacts,
+                    generation,
                     output,
-                    stage,
-                    subject,
-                ),
+                    index,
+                    authorization.authorization_identity,
+                    source_cache_membership,
+                    require_current_authorization,
+                    lambda stage, subject: self._record_stage(
+                        execution_plan,
+                        generation_plan,
+                        prepared,
+                        output,
+                        stage,
+                        subject,
+                    ),
+                    execution_inputs,
+                    accepted_build_providers,
+                )
             ),
         )
 
@@ -2945,6 +3353,10 @@ class StandardProjectLifecycleService:
         authorization: StandardBuildAuthorization,
     ) -> StandardComponentBuildPlan:
         plan = self.build_plan_finalizer.finalize(intent, authorization)
+        return self._validate_build_plan(intent, authorization, plan)
+
+    @staticmethod
+    def _validate_build_plan(intent, authorization, plan) -> StandardComponentBuildPlan:
         if not isinstance(plan, StandardComponentBuildPlan):
             raise StandardProjectLifecycleError(
                 "standard_lifecycle.plan_invalid",
@@ -3064,7 +3476,7 @@ class StandardProjectLifecycleService:
             source_admission_identity=source_admission_identity,
         )
 
-    def _run_node(
+    def _run_node_steps(
         self,
         plan: StandardComponentBuildPlan,
         source: ContentIdentity | None,
@@ -3076,8 +3488,14 @@ class StandardProjectLifecycleService:
         source_cache_membership: (
             StandardSourceCacheMembership | StandardSourceAdmissionMembership | None
         ),
+        require_current_authorization: Callable[[], None],
         record_stage: Callable[[StandardLifecycleStage, ContentIdentity], None],
-    ) -> StandardNodeLifecycleResult:
+        execution_inputs: _ExecutionInputResolver | None = None,
+        accepted_build_providers: Callable[
+            [], tuple[StandardComponentAcceptanceEvidence, ...]
+        ]
+        | None = None,
+    ) -> Generator[_LifecycleStep, object, StandardNodeLifecycleResult]:
         source_admission_identity = (
             source_cache_membership.identity
             if isinstance(source_cache_membership, StandardSourceAdmissionMembership)
@@ -3094,7 +3512,21 @@ class StandardProjectLifecycleService:
                 "authorization does not match the composite build request",
             )
         try:
-            build = self.builder.build(plan, provider_artifacts)
+            if isinstance(self.builder, BuildProviderEvidenceReceiver):
+                require_current_authorization()
+                self.builder.retain_build_provider_evidence(
+                    plan, accepted_build_providers() if accepted_build_providers else ()
+                )
+            build = yield _LifecycleStep(
+                StandardLifecycleStage.BUILD,
+                lambda: self.builder.build(plan, provider_artifacts),
+                require_current_authorization,
+                reserve=partial(
+                    self.builder.try_reserve_build, plan, provider_artifacts
+                )
+                if isinstance(self.builder, AdmittedComponentBuilder)
+                else None,
+            )
             if not isinstance(build, StandardBuildOutput):
                 raise StandardProjectLifecycleError(
                     "standard_lifecycle.build_output_invalid",
@@ -3126,7 +3558,14 @@ class StandardProjectLifecycleService:
             )
         record_stage(StandardLifecycleStage.BUILD, build.build_identity)
         try:
-            raw_test = self.tester.test(plan, build.exports)
+            raw_test = yield _LifecycleStep(
+                StandardLifecycleStage.TEST,
+                lambda: self.tester.test(plan, build.exports),
+                require_current_authorization,
+                reserve=partial(self.tester.try_reserve_test, plan, build.exports)
+                if isinstance(self.tester, AdmittedComponentTester)
+                else None,
+            )
             generated_test_evidence = (
                 raw_test
                 if isinstance(raw_test, StandardGeneratedTestExecutionEvidence)
@@ -3167,8 +3606,54 @@ class StandardProjectLifecycleService:
                 source_admission_identity=source_admission_identity,
             )
         record_stage(StandardLifecycleStage.TEST, test)
+        execution_providers = provider_artifacts
+
+        def current_execution_scope():
+            nonlocal execution_providers
+            if execution_inputs is None:
+                return None
+            scope, execution_providers = execution_inputs(plan, build.exports)
+            return scope
+
+        def execute_current():
+            scope = current_execution_scope()
+            if scope is None:
+                return self.executor.execute(plan, build.exports)
+            return self.executor.execute_scoped(
+                plan, build.exports, scope, execution_providers
+            )
+
+        def reserve_execution():
+            scope = current_execution_scope()
+            return self.executor.try_reserve_execute(
+                plan, build.exports, scope, execution_providers
+            )
+
         try:
-            raw_execution = self.executor.execute(plan, build.exports)
+            raw_execution = yield _LifecycleStep(
+                StandardLifecycleStage.EXECUTE,
+                execute_current,
+                require_current_authorization,
+                reserve=reserve_execution
+                if isinstance(self.executor, AdmittedComponentExecutor)
+                else None,
+            )
+            # Reservations replace operation(), so admission must apply equally
+            # to local and reserved execution, against the current runtime scope.
+            if execution_inputs is not None:
+                scope = current_execution_scope()
+                if (
+                    not isinstance(raw_execution, StandardExecutionEvidence)
+                    or raw_execution.execution_authority is None
+                    or raw_execution.execution_authority.input_scope != scope
+                    or raw_execution.execution_authority.source_tree_identity
+                    != plan.request.source_tree_identity
+                ):
+                    raise StandardProjectLifecycleError(
+                        "standard_lifecycle.execution_scope_mismatch",
+                        "execution must bind the current admitted runtime scope",
+                    )
+                raw_execution.execution_authority.require_valid(now=self.clock())
             execution_evidence = (
                 raw_execution
                 if isinstance(raw_execution, StandardExecutionEvidence)
@@ -3179,10 +3664,13 @@ class StandardProjectLifecycleService:
                 or execution_evidence.build_evidence_identity != build.evidence.identity
                 or execution_evidence.export_identities
                 != build.evidence.export_identities
+                or execution_evidence.provider_artifact_identities
+                != tuple(item.identity for item in execution_providers)
             ):
                 raise StandardProjectLifecycleError(
                     "standard_lifecycle.execution_evidence_mismatch",
-                    "strict builds require execution evidence for the exact build",
+                    "strict builds require execution evidence for the exact build "
+                    "and provider inputs",
                 )
             execution = _require_identity(
                 (
@@ -3214,7 +3702,11 @@ class StandardProjectLifecycleService:
             )
         record_stage(StandardLifecycleStage.EXECUTE, execution)
         try:
-            raw_acceptance = self.acceptor.accept(plan, test, execution)
+            raw_acceptance = yield _LifecycleStep(
+                StandardLifecycleStage.ACCEPT,
+                lambda: self.acceptor.accept(plan, test, execution),
+                require_current_authorization,
+            )
             acceptance_evidence = (
                 raw_acceptance
                 if isinstance(raw_acceptance, StandardComponentAcceptanceEvidence)

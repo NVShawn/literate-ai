@@ -145,6 +145,111 @@
           "$ref": "urn:literate-ai:schema:v2:standard-post-source-lifecycle-contracts#/$defs/providerArtifactIdentities"
         }
       }
+    },
+    "executionInputScope": {
+      "$id": "urn:literate-ai:schema:v2:standard-execution-input-scope",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "execution_plan_identity",
+        "component_revision",
+        "build_plan_identity",
+        "export_identities",
+        "build_provider_artifact_identities",
+        "runtime_dependencies"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-execution-input-scope"
+        },
+        "execution_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "component_revision": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "build_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "export_identities": {
+          "type": "array",
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          },
+          "minItems": 1
+        },
+        "build_provider_artifact_identities": {
+          "type": "array",
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          }
+        },
+        "runtime_dependencies": {
+          "type": "array",
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v2:artifact-assembly-dependency"
+              },
+              {
+                "properties": {
+                  "dependency_kind": {
+                    "const": "runtime"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "transitive_provider_artifact_identities": {
+          "type": "array",
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          }
+        }
+      }
+    },
+    "executionAuthority": {
+      "$id": "urn:literate-ai:schema:v2:standard-execution-authority",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "input_scope",
+        "source_tree_identity",
+        "command_contract_identity",
+        "runtime_identity",
+        "grant"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:standard-execution-authority"
+        },
+        "input_scope": {
+          "$ref": "urn:literate-ai:schema:v2:standard-execution-input-scope"
+        },
+        "source_tree_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "command_contract_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "runtime_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "grant": {
+          "$ref": "urn:literate-ai:schema:v2:build-authorization"
+        }
+      }
     }
   },
   "oneOf": [
@@ -159,6 +264,12 @@
     },
     {
       "$ref": "urn:literate-ai:schema:v2:standard-component-build-plan"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:standard-execution-input-scope"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:standard-execution-authority"
     }
   ]
 }

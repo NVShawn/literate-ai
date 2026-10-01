@@ -303,8 +303,12 @@ class ComponentWorkerTests(unittest.TestCase):
         self._import()
         self.assertFalse(self.destination.contains(unrelated.exports[0].blob))
 
-    def test_build_and_runtime_handoffs_select_both_direct_diamond_providers(self):
-        for kind in (DependencyKind.BUILD, DependencyKind.RUNTIME):
+    def test_build_runtime_toolchain_handoffs_select_direct_diamond_providers(self):
+        for kind in (
+            DependencyKind.BUILD,
+            DependencyKind.RUNTIME,
+            DependencyKind.TOOLCHAIN,
+        ):
             with self.subTest(kind=kind):
                 self.lock = _diamond_lock(dependency_kind=kind)
                 self.plan = plan_component_execution(
@@ -463,8 +467,10 @@ class ComponentWorkerTests(unittest.TestCase):
         validate_component_artifact_import(handoff, receipt)
         self.assertEqual(receipt.export_identities, ())
 
-    def _distributed_lifecycle(self, *, corrupt_worker=False):
-        lock = _diamond_lock(dependency_kind=DependencyKind.BUILD)
+    def _distributed_lifecycle(
+        self, *, corrupt_worker=False, kind=DependencyKind.BUILD
+    ):
+        lock = _diamond_lock(dependency_kind=kind)
         execution, requests = _prepared_execution(lock)
         nodes = _prepared_nodes(execution, requests)
         names = _names(lock)
@@ -513,24 +519,28 @@ class ComponentWorkerTests(unittest.TestCase):
     def test_standard_scheduler_overlaps_two_transports_and_imports_exact_products(
         self,
     ):
-        execution, names, _, handler, ports, arguments = self._distributed_lifecycle()
-        result = _service(ports).execute(execution, **arguments)
+        for kind in (DependencyKind.BUILD, DependencyKind.TOOLCHAIN):
+            with self.subTest(kind=kind):
+                execution, names, _, handler, ports, arguments = (
+                    self._distributed_lifecycle(kind=kind)
+                )
+                result = _service(ports).execute(execution, **arguments)
 
-        self.assertTrue(result.successful)
-        by_name = {name: uri for uri, name in names.items()}
-        invoice = handler.outcomes[by_name["invoice-cli"]]
-        expected = tuple(
-            sorted(
-                (
-                    ports.realized_exports[by_name["pricing"]][0].identity,
-                    ports.realized_exports[by_name["reporting"]][0].identity,
-                ),
-                key=lambda item: item.uri,
-            )
-        )
-        self.assertEqual(invoice.import_receipt.export_identities, expected)
-        self.assertIn(by_name["pricing"], handler.started)
-        self.assertIn(by_name["reporting"], handler.started)
+                self.assertTrue(result.successful)
+                by_name = {name: uri for uri, name in names.items()}
+                invoice = handler.outcomes[by_name["invoice-cli"]]
+                expected = tuple(
+                    sorted(
+                        (
+                            ports.realized_exports[by_name["pricing"]][0].identity,
+                            ports.realized_exports[by_name["reporting"]][0].identity,
+                        ),
+                        key=lambda item: item.uri,
+                    )
+                )
+                self.assertEqual(invoice.import_receipt.export_identities, expected)
+                self.assertIn(by_name["pricing"], handler.started)
+                self.assertIn(by_name["reporting"], handler.started)
 
     def test_wrong_worker_result_blocks_downstream_dispatch(self):
         execution, names, _, handler, ports, arguments = self._distributed_lifecycle(

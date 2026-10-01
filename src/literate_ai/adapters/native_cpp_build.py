@@ -6,13 +6,16 @@ import ast
 import base64
 import subprocess
 import zlib
+from importlib.resources import files
 from pathlib import Path
 
 
 def compiler_driver_source(
     tail: str = "", *, filename: str = "<literate-ai-native-build>"
 ) -> str:
-    module = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    module = ast.parse(
+        files(__package__).joinpath("native_cpp_build.py").read_text(encoding="utf-8")
+    )
     function = next(
         node
         for node in module.body

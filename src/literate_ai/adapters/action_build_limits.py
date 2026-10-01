@@ -1,0 +1,6 @@
+"""Shared bounds for current BUILD and historical provider artifact custody."""
+
+MAX_BUILD_ARCHIVE_BYTES = 256 * 1024 * 1024
+MAX_BUILD_ARCHIVE_FILES = 65534
+MAX_BUILD_EVIDENCE_RECORDS = 4096
+MAX_BUILD_EVIDENCE_BYTES = 64 * 1024 * 1024

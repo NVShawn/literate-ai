@@ -21,7 +21,9 @@ from literate_ai.application.component_execution_planning import (
 from literate_ai.application.component_generation_context import (
     prepare_component_generation_context,
 )
+from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.executable_components.artifacts import (
+    ArtifactAssemblyDependency,
     ArtifactExportDeclaration,
     ArtifactMaterializationPlan,
     BuildPrivilege,
@@ -142,6 +144,21 @@ def _artifact_contracts() -> tuple[object, ...]:
         package_plan,
         package_result,
         release_artifacts,
+        *(
+            ArtifactAssemblyDependency(
+                root_export.identity,
+                next(
+                    export.identity
+                    for item in manifests
+                    for export in item.exports
+                    if export.identity != root_export.identity
+                ),
+                kind,
+                artifact_fixtures.identity("schema-late-edge"),
+                artifact_fixtures.identity("schema-provider-acceptance"),
+            )
+            for kind in (DependencyKind.RUNTIME, DependencyKind.PACKAGING)
+        ),
     )
 
 

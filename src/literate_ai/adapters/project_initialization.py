@@ -3392,6 +3392,20 @@ class FilesystemProjectInitializationAdapter:
         baseline = _initialization_baseline(resolved_target, origin, created)
         baseline_path.write_bytes(canonical_json_bytes(baseline.to_dict()) + b"\n")
         created.append(INITIALIZATION_BASELINE_FILE)
+        from literate_ai.contracts import CatalogImportsFile
+
+        from .update_merge import CHECKPOINT, UpdateBases
+
+        bases = UpdateBases(resolved_target)
+        for relative in created:
+            if not relative.startswith(".literate/"):
+                path = resolved_target / relative
+                if path.is_file():
+                    bases.retain(path.read_bytes())
+        if (resolved_target / CatalogImportsFile.PATH).is_file():
+            bases.remember_catalog(CatalogImportsFile.load(resolved_target).imports)
+        bases.write()
+        created.append(CHECKPOINT)
         try:
             finalized_project = self._validation.validate(
                 resolved_target,

@@ -192,9 +192,14 @@ class FilesystemProjectInitializationAdapterTests(unittest.TestCase):
             files = {item.path: item for item in baseline.files}
             self.assertIn(".literate/initialization-origin.json", files)
             self.assertNotIn(".literate/initialization-baseline.json", files)
+            self.assertNotIn(".literate/update-bases.json", files)
             self.assertEqual(
                 set(files),
-                set(result["created"]) - {".literate/initialization-baseline.json"},
+                set(result["created"])
+                - {
+                    ".literate/initialization-baseline.json",
+                    ".literate/update-bases.json",
+                },
             )
             for relative, record in files.items():
                 content = target.joinpath(*Path(relative).parts).read_bytes()

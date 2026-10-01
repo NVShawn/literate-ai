@@ -33,6 +33,7 @@ from typing import TYPE_CHECKING, Protocol
 from literate_ai._filesystem import (
     name_or_magic_is_native_or_wasm,
     path_is_link_or_reparse,
+    require_safe_directory,
 )
 from literate_ai.adapters._processes import (
     ProcessTreeOwnership,
@@ -86,17 +87,27 @@ from literate_ai.adapters.lifecycle.standard_python import (
 from literate_ai.adapters.lifecycle.standard_runtime import (
     direct_service_process_argv,
 )
-from literate_ai.adapters.models.coding_cli import (
-    _acceptance_argument_vectors,
-    _acceptance_result_shape,
-)
 from literate_ai.adapters.packaging import DirectoryPackageAdapter
 from literate_ai.adapters.shared_cache_config import BoundSharedCache
+from literate_ai.adapters.source_evidence_validation import (
+    SourceEvidenceValidationInputs,
+)
 from literate_ai.application.artifact_graph import (
     create_artifact_build_graph,
-    create_composite_build_request,
     create_package_plan,
     realize_manifest,
+)
+from literate_ai.application.standard_authorization import StandardAuthorizationInputs
+from literate_ai.application.standard_build_inputs import (
+    StandardBuildInputError,
+    validate_standard_build_authority,
+    validate_standard_build_inputs,
+)
+from literate_ai.application.standard_build_intent import (
+    StandardBuildIntentInputs,
+)
+from literate_ai.application.standard_plan_finalization import (
+    StandardPlanFinalizationInputs,
 )
 from literate_ai.application.standard_project_lifecycle import (
     StandardBuildAuthorization,
@@ -130,11 +141,8 @@ from literate_ai.contracts.component_locking import ComponentLock
 from literate_ai.contracts.executable_components import (
     ArtifactBuildGraph,
     ArtifactExport,
-    ArtifactMaterializationPlan,
-    BuildActionRequest,
     BuildPrivilege,
     BuildSubActionKind,
-    ComponentBuildManifest,
     ComponentCommandContract,
     ComponentCommandPhase,
     ComponentCommandRole,
@@ -164,6 +172,12 @@ from literate_ai.contracts.product_json import (
     product_json_identity,
     product_json_values_equal,
 )
+from literate_ai.contracts.standard_execution_inputs import (
+    StandardExecutionAuthority,
+    StandardExecutionInputScope,
+    standard_execution_request,
+    standard_execution_runtime_identity,
+)
 from literate_ai.diagnostics import (
     inherited_verbose_environment,
     log_operation,
@@ -174,7 +188,6 @@ from literate_ai.evidence_ledger import EvidenceNode, attach_run
 from literate_ai.generated_tests import (
     GENERATED_TEST_SUITE_PATH,
     ValidatedGeneratedTestSuite,
-    validate_generated_test_suite,
 )
 from literate_ai.ports import BuildDependencyObservation
 from literate_ai.security import (
@@ -395,13 +408,15 @@ def _local_tree_identity(
 def _local_tree_document(
     root: Path, *, excluded: frozenset[str] = frozenset()
 ) -> dict[str, object]:
-    """The existing tree identity payload, available for portable custody."""
+    """Tree custody with case-sensitive component ordering on every host."""
 
     root = root.resolve(strict=True)
     entries: list[dict[str, str]] = []
-    for path in sorted(root.rglob("*")):
-        if path.is_symlink():
+    for path in sorted(root.rglob("*"), key=lambda path: path.relative_to(root).parts):
+        if path_is_link_or_reparse(path):
             raise LocalStandardLifecycleError("generated trees cannot contain links")
+        if not path.is_file() and not path.is_dir():
+            raise LocalStandardLifecycleError("artifact trees require regular files")
         if path.is_file():
             relative = path.relative_to(root).as_posix()
             if relative in excluded:
@@ -455,6 +470,7 @@ class LocalSourceTreeRegistry:
     def __init__(self) -> None:
         self._paths: dict[str, Path] = {}
         self._evidence: dict[str, LocalGeneratedSourceCustody] = {}
+        self._validation_inputs: dict[str, SourceEvidenceValidationInputs] = {}
 
     def register(
         self,
@@ -463,7 +479,16 @@ class LocalSourceTreeRegistry:
         *,
         source_generation_identity: ContentIdentity | None = None,
         recipe: object | None = None,
+        validation_inputs: SourceEvidenceValidationInputs | None = None,
     ) -> None:
+        if recipe is not None and validation_inputs is not None:
+            raise LocalStandardLifecycleError(
+                "source validation authority is ambiguous"
+            )
+        if validation_inputs is not None and not isinstance(
+            validation_inputs, SourceEvidenceValidationInputs
+        ):
+            raise TypeError("source validation inputs must be typed")
         path = root.resolve(strict=True)
         if local_generated_source_tree_identity(path) != candidate.tree_identity:
             raise LocalStandardLifecycleError(
@@ -476,11 +501,15 @@ class LocalSourceTreeRegistry:
             )
         custody = None
         if recipe is not None:
-            managed_graph = getattr(recipe, "managed_sbom_graph", None)
-            if not isinstance(managed_graph, CycloneDxManagedGraph):
+            if not isinstance(
+                getattr(recipe, "managed_sbom_graph", None), CycloneDxManagedGraph
+            ):
                 raise LocalStandardLifecycleError(
                     "generated source custody requires its managed SBOM graph"
                 )
+            validation_inputs = SourceEvidenceValidationInputs.from_recipe(recipe)
+        if validation_inputs is not None:
+            managed_graph = validation_inputs.managed_graph
             source_bom_path = path.joinpath(*Path(CYCLONEDX_SOURCE_SBOM_PATH).parts)
             suite_path = path.joinpath(*Path(GENERATED_TEST_SUITE_PATH).parts)
             if (
@@ -493,20 +522,9 @@ class LocalSourceTreeRegistry:
                     "generated source custody requires its source SBOM and test suite"
                 )
             source_bom_content = source_bom_path.read_bytes()
-            source_bom = validate_cyclonedx_bom(
-                source_bom_content,
-                lifecycle=CycloneDxLifecycle.SOURCE,
-                managed_graph=managed_graph,
-            )
             suite_content = suite_path.read_bytes()
-            suite = validate_generated_test_suite(
-                suite_content,
-                recipe_identity=str(recipe.identity),
-                specification_references=getattr(
-                    recipe, "non_acceptance_document_paths", ()
-                ),
-                acceptance_arguments=_acceptance_argument_vectors(recipe),
-                result_shape=_acceptance_result_shape(recipe),
+            source_bom, suite = validation_inputs.validate(
+                source_bom_content, suite_content
             )
             suite_identity = ContentIdentity.parse_uri(suite.content_identity)
             if (
@@ -526,6 +544,11 @@ class LocalSourceTreeRegistry:
                 generated_test_suite=suite,
                 generated_test_suite_content=suite_content,
             )
+            existing_inputs = self._validation_inputs.get(candidate.tree_identity.uri)
+            if existing_inputs is not None and existing_inputs != validation_inputs:
+                raise LocalStandardLifecycleError(
+                    "source identity has competing validation authority"
+                )
             existing_evidence = self._evidence.get(candidate.tree_identity.uri)
             if existing_evidence is not None and existing_evidence != custody:
                 raise LocalStandardLifecycleError(
@@ -534,20 +557,43 @@ class LocalSourceTreeRegistry:
         self._paths[candidate.tree_identity.uri] = path
         if custody is not None:
             self._evidence[candidate.tree_identity.uri] = custody
+            self._validation_inputs[candidate.tree_identity.uri] = validation_inputs
 
-    def resolve(self, identity: ContentIdentity) -> Path:
+    def validation_inputs(
+        self, identity: ContentIdentity
+    ) -> SourceEvidenceValidationInputs:
+        """Export captured authority while registered source remains current."""
+        self.resolve(identity)
         try:
-            path = self._paths[identity.uri]
+            return self._validation_inputs[identity.uri]
+        except KeyError as exc:
+            raise LocalStandardLifecycleError(
+                "generated source has no validation authority"
+            ) from exc
+
+    def registered_root(self, identity: ContentIdentity) -> Path:
+        """Return registration metadata; callers must verify current source bytes."""
+        try:
+            return self._paths[identity.uri]
         except KeyError as exc:
             raise LocalStandardLifecycleError(
                 "generated source tree is not registered"
             ) from exc
+
+    def resolve(self, identity: ContentIdentity) -> Path:
+        path = self.registered_root(identity)
         if local_generated_source_tree_identity(path) != identity:
             raise LocalStandardLifecycleError("registered generated source changed")
         return path
 
     def evidence(self, identity: ContentIdentity) -> LocalGeneratedSourceCustody:
         self.resolve(identity)
+        return self.registered_evidence(identity)
+
+    def registered_evidence(
+        self, identity: ContentIdentity
+    ) -> LocalGeneratedSourceCustody:
+        """Read registration evidence; verify current bytes separately."""
         try:
             return self._evidence[identity.uri]
         except KeyError as exc:
@@ -845,6 +891,46 @@ if TYPE_CHECKING:
     )
 
 
+def required_command_toolchains(
+    contracts: tuple[ComponentCommandContract, ...],
+    command_phases: tuple[ComponentCommandPhase, ...],
+    npm_targets: tuple[StandardNpmTarget, ...] = (),
+) -> frozenset[str]:
+    """Exact host command identities for one canonical execution scope."""
+    if (
+        not isinstance(command_phases, tuple)
+        or any(not isinstance(phase, ComponentCommandPhase) for phase in command_phases)
+        or command_phases
+        != tuple(phase for phase in ComponentCommandPhase if phase in command_phases)
+    ):
+        raise ValueError("command phases must be a canonical phase tuple")
+    if any(not isinstance(item, ComponentCommandContract) for item in contracts):
+        raise TypeError("local commands must use ComponentCommandContract")
+    required_toolchains = {
+        item.tool_binding(phase).toolchain_identity.uri
+        for item in contracts
+        for phase in command_phases
+    }
+    for item in contracts:
+        for entrypoint in item.entrypoint_contracts or ():
+            required_toolchains.update(
+                binding.toolchain_identity.uri
+                for binding in entrypoint.tool_bindings
+                if binding.phase in command_phases
+            )
+        if command_phases == tuple(ComponentCommandPhase):
+            acceptance = item.library_acceptance_toolchain_identity
+            if acceptance is not None:
+                required_toolchains.add(acceptance.uri)
+    if any(not isinstance(item, StandardNpmTarget) for item in npm_targets):
+        raise TypeError("npm_targets must contain StandardNpmTarget values")
+    if ComponentCommandPhase.BUILD in command_phases:
+        required_toolchains.update(
+            target.node_toolchain_identity.uri for target in npm_targets
+        )
+    return frozenset(required_toolchains)
+
+
 class LocalStandardLifecyclePorts:
     """Production Standard ports backed by isolated directories and host processes."""
 
@@ -855,6 +941,9 @@ class LocalStandardLifecyclePorts:
         object_root: Path,
         contracts: tuple[ComponentCommandContract, ...],
         tool_bindings: tuple[LocalComponentToolBinding, ...] = (),
+        command_phases: tuple[ComponentCommandPhase, ...] = tuple(
+            ComponentCommandPhase
+        ),
         npm_targets: tuple[StandardNpmTarget, ...] = (),
         native_sdk_inputs: NativeSdkConsumerInputs | None = None,
         python_targets: tuple[StandardPythonTarget, ...] = (),
@@ -867,14 +956,16 @@ class LocalStandardLifecyclePorts:
         shared_cache: BoundSharedCache | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
+        required_toolchains = required_command_toolchains(
+            contracts, command_phases, npm_targets
+        )
+        self._command_phases = command_phases
         self.source_trees = source_trees
         if shared_cache is not None and not isinstance(shared_cache, BoundSharedCache):
             raise TypeError("shared cache must bind private configuration")
         self.shared_cache = shared_cache
         self.object_root = object_root.resolve()
         self.object_root.mkdir(parents=True, exist_ok=True)
-        if any(not isinstance(item, ComponentCommandContract) for item in contracts):
-            raise TypeError("local commands must use ComponentCommandContract")
         self.contracts = {item.component_revision.uri: item for item in contracts}
         if len(self.contracts) != len(contracts):
             raise ValueError("local Component command contracts must be unique")
@@ -883,18 +974,11 @@ class LocalStandardLifecyclePorts:
         }
         if len(self.tool_bindings) != len(tool_bindings):
             raise ValueError("local toolchain bindings must be unique")
-        required_toolchains = {
-            identity.uri
-            for item in contracts
-            for identity in item.execution_toolchain_identities
-        }
         if set(self.tool_bindings) != required_toolchains:
             raise ValueError(
                 "local tool bindings must cover every and only locked "
-                "execution toolchain"
+                "execution toolchain in the selected command phases"
             )
-        if any(not isinstance(item, StandardNpmTarget) for item in npm_targets):
-            raise TypeError("npm_targets must contain StandardNpmTarget values")
         self.npm_targets = {item.component_revision.uri: item for item in npm_targets}
         if len(self.npm_targets) != len(npm_targets):
             raise ValueError("Standard npm targets must name unique Components")
@@ -905,7 +989,7 @@ class LocalStandardLifecyclePorts:
             build_binding = contract.tool_binding(ComponentCommandPhase.BUILD)
             test_binding = contract.tool_binding(ComponentCommandPhase.TEST)
             execute_binding = contract.tool_binding(ComponentCommandPhase.EXECUTE)
-            npm_binding = self.tool_bindings[build_binding.toolchain_identity.uri]
+            npm_binding = self.tool_bindings.get(build_binding.toolchain_identity.uri)
             if (
                 contract.locked_build_authority_identity != target.identity
                 or contract.build_system_resolver_identity
@@ -918,7 +1002,10 @@ class LocalStandardLifecyclePorts:
                 or execute_binding.toolchain_identity != target.node_toolchain_identity
                 or contract.language_compiler_identity != target.node_toolchain_identity
                 or contract.language_runtime_identity != target.node_toolchain_identity
-                or npm_binding.command != target.npm_command
+                or (
+                    npm_binding is not None
+                    and npm_binding.command != target.npm_command
+                )
             ):
                 raise ValueError(
                     "Standard npm target does not match locked command authority"
@@ -961,13 +1048,16 @@ class LocalStandardLifecyclePorts:
                     != target.python_toolchain_identity
                     for phase in ComponentCommandPhase
                 )
-                or self.tool_bindings[target.python_toolchain_identity.uri].command
-                != target.python_command
+                or (
+                    target.python_toolchain_identity.uri in self.tool_bindings
+                    and self.tool_bindings[target.python_toolchain_identity.uri].command
+                    != target.python_command
+                )
             ):
                 raise ValueError(
                     "Python target does not match locked command authority"
                 )
-        if self.python_targets and python_wheelhouse is None:
+        if self.python_targets and command_phases and python_wheelhouse is None:
             raise ValueError(
                 "Python wheel targets require an explicit provisioned wheel directory"
             )
@@ -1018,6 +1108,7 @@ class LocalStandardLifecyclePorts:
             str, tuple[LibraryConsumerBinding, ...]
         ] = {}
         self._plans_by_revision: dict[str, StandardComponentBuildPlan] = {}
+        self._plan_inputs_by_revision: dict[str, StandardPlanFinalizationInputs] = {}
         self._sdk_build_authorizations: dict[
             str, tuple[BuildRequest, BuildAuthorization]
         ] = {}
@@ -1082,6 +1173,8 @@ class LocalStandardLifecyclePorts:
     def locked_command_authority_is_current(self) -> bool:
         """Check that every neutral contract still has its measured launcher bytes."""
 
+        if not self._command_phases:
+            return False
         try:
             for binding in self.tool_bindings.values():
                 binding.require_unchanged()
@@ -1142,16 +1235,15 @@ class LocalStandardLifecyclePorts:
                 "build intent differs from the exact live native SDK inputs"
             )
 
-    def create(
+    def build_intent_inputs(
         self,
         execution_plan: ComponentExecutionPlan,
         generation_plan: ComponentGenerationPlan,
         source_candidate: GeneratedSourceCandidate,
         provider_artifacts: tuple[ArtifactExport, ...],
         package_artifacts: tuple[ArtifactExport, ...],
-    ) -> StandardComponentBuildIntent:
+    ) -> StandardBuildIntentInputs:
         contract = self._contract(generation_plan.component_revision)
-        toolchain = contract.language_compiler_identity
         if self._native_sdk_inputs is not None and (
             execution_plan.component_lock_identity
             != self._native_sdk_inputs.snapshot.authority.lock.identity
@@ -1160,12 +1252,7 @@ class LocalStandardLifecyclePorts:
                 "native SDK inputs differ from the execution plan Component lock"
             )
         sdk_inputs = self._sdk_input_identities(contract)
-        builder_id = self._sdk_bound_builder_id(contract, sdk_inputs)
-        allowed_outputs = tuple(
-            sorted(item.export_id for item in contract.artifact_export_shapes())
-        )
         npm_target = self.npm_targets.get(generation_plan.component_revision.uri)
-        requested_privileges = ("execute-build-tools",)
         if generation_plan.component_revision.uri in self.python_targets:
             self._admit_python_source(
                 generation_plan.component_revision, source_candidate.tree_identity
@@ -1176,27 +1263,71 @@ class LocalStandardLifecyclePorts:
                 source_candidate.tree_identity,
                 npm_target,
             )
-            requested_privileges = (*requested_privileges, "network-access")
-        request = BuildRequest(
-            effective_revision_digest=generation_plan.component_revision.uri,
-            source_bundle_digest=source_candidate.source_bundle_identity.uri,
-            builder_id=builder_id,
-            toolchain_digest=toolchain.uri,
-            sandbox_profile="local-explicit-host-process",
-            requested_privileges=requested_privileges,
-            allowed_outputs=allowed_outputs,
-        )
-        intent = StandardComponentBuildIntent(
-            generation_plan.component_revision,
-            source_candidate.tree_identity,
-            source_candidate.source_bundle_identity,
-            request,
-            tuple(item.identity for item in provider_artifacts),
-            tuple(item.identity for item in package_artifacts),
+        return StandardBuildIntentInputs(
+            generation_plan.identity,
+            source_candidate,
+            contract,
+            provider_artifacts,
+            package_artifacts,
             sdk_inputs,
+            dependency_resolution=(
+                "npm"
+                if npm_target is not None
+                else "python"
+                if generation_plan.component_revision.uri in self.python_targets
+                else "none"
+            ),
         )
-        self._intent_artifacts[intent.identity.uri] = provider_artifacts
-        self._intent_package_artifacts[intent.identity.uri] = package_artifacts
+
+    def create(
+        self,
+        execution_plan: ComponentExecutionPlan,
+        generation_plan: ComponentGenerationPlan,
+        source_candidate: GeneratedSourceCandidate,
+        provider_artifacts: tuple[ArtifactExport, ...],
+        package_artifacts: tuple[ArtifactExport, ...],
+    ) -> StandardComponentBuildIntent:
+        inputs = self.build_intent_inputs(
+            execution_plan,
+            generation_plan,
+            source_candidate,
+            provider_artifacts,
+            package_artifacts,
+        )
+        return self._register_build_intent(generation_plan, inputs.create(), inputs)
+
+    def accept_build_intent(
+        self,
+        execution_plan: ComponentExecutionPlan,
+        generation_plan: ComponentGenerationPlan,
+        source_candidate: GeneratedSourceCandidate,
+        provider_artifacts: tuple[ArtifactExport, ...],
+        package_artifacts: tuple[ArtifactExport, ...],
+        intent: StandardComponentBuildIntent,
+    ) -> StandardComponentBuildIntent:
+        inputs = self.build_intent_inputs(
+            execution_plan,
+            generation_plan,
+            source_candidate,
+            provider_artifacts,
+            package_artifacts,
+        )
+        expected = inputs.create()
+        if intent != expected:
+            raise LocalStandardLifecycleError(
+                "worker build intent differs from current local authority"
+            )
+        return self._register_build_intent(generation_plan, expected, inputs)
+
+    def _register_build_intent(
+        self,
+        generation_plan: ComponentGenerationPlan,
+        intent: StandardComponentBuildIntent,
+        inputs: StandardBuildIntentInputs,
+    ) -> StandardComponentBuildIntent:
+        contract = inputs.contract
+        provider_artifacts = inputs.providers
+        package_artifacts = inputs.packages
         library_bindings: list[LibraryConsumerBinding] = []
         for artifact in provider_artifacts:
             provider_contract = self.contracts.get(artifact.component_revision.uri)
@@ -1237,9 +1368,7 @@ class LocalStandardLifecyclePorts:
                         ),
                     )
                 )
-        self._library_consumer_bindings[intent.identity.uri] = tuple(
-            sorted(library_bindings, key=lambda item: item.identity.uri)
-        )
+        bindings = tuple(sorted(library_bindings, key=lambda item: item.identity.uri))
         if self._evidence_recorder is not None:
             self._record_evidence(intent.to_dict())
             self._record_evidence(intent.build_request.to_dict())
@@ -1251,6 +1380,9 @@ class LocalStandardLifecyclePorts:
                     self._record_evidence(entrypoint.to_dict())
                     for command in entrypoint.commands:
                         self._record_evidence(command.to_dict())
+        self._intent_artifacts[intent.identity.uri] = provider_artifacts
+        self._intent_package_artifacts[intent.identity.uri] = package_artifacts
+        self._library_consumer_bindings[intent.identity.uri] = bindings
         return intent
 
     def library_consumer_bindings(
@@ -1283,33 +1415,36 @@ class LocalStandardLifecyclePorts:
     def authorize(
         self, intent: StandardComponentBuildIntent, index: ContentIdentity
     ) -> StandardBuildAuthorization:
+        inputs = self.authorization_inputs(intent, index)
+        return self.accept_build_authorization(inputs, inputs.authorize())
+
+    def authorization_inputs(self, intent, index) -> StandardAuthorizationInputs:
         self._require_intent_sdk_inputs(intent)
-        now = self.clock()
-        grant = BuildAuthorization(
-            authorization_id=f"local:{intent.identity.digest}",
-            classification_digest=index.uri,
-            request_digest=intent.build_request_identity.uri,
-            effective_revision_digest=intent.component_revision.uri,
-            actor="local-standard-lifecycle",
-            reason="execute explicitly configured local Component commands",
-            profile=SecurityProfile.CONSTRAINED,
-            privileges=intent.build_request.requested_privileges,
-            issued_at=now,
-            expires_at=now + timedelta(minutes=30),
-        )
-        authorization = StandardBuildAuthorization(
-            intent.identity, intent.build_request_identity, index, grant
-        )
+        return StandardAuthorizationInputs(intent, index, self.clock())
+
+    def accept_build_authorization(
+        self, inputs, authorization
+    ) -> StandardBuildAuthorization:
+        self._require_intent_sdk_inputs(inputs.intent)
+        expected = inputs.authorize()
+        if (
+            not isinstance(authorization, StandardBuildAuthorization)
+            or authorization.to_dict() != expected.to_dict()
+        ):
+            raise LocalStandardLifecycleError(
+                "remote authorization differs from admitted controller inputs"
+            )
+        authorization.grant.require_valid(inputs.intent.build_request, now=self.clock())
         if self._evidence_recorder is not None:
-            self._record_evidence(grant.to_dict())
+            self._record_evidence(authorization.grant.to_dict())
             self._record_evidence(authorization.to_dict())
         return authorization
 
-    def finalize(
+    def plan_finalization_inputs(
         self,
         intent: StandardComponentBuildIntent,
         authorization: StandardBuildAuthorization,
-    ) -> StandardComponentBuildPlan:
+    ) -> StandardPlanFinalizationInputs:
         self._require_intent_sdk_inputs(intent)
         if intent.native_sdk_input_identities and (
             authorization.build_intent_identity != intent.identity
@@ -1321,149 +1456,77 @@ class LocalStandardLifecyclePorts:
         contract = self._contract(intent.component_revision)
         providers = self._intent_artifacts[intent.identity.uri]
         package_artifacts = self._intent_package_artifacts[intent.identity.uri]
-        toolchain = contract.language_compiler_identity
-        build_system_driver = contract.build_system_toolchain_identity
-        build_system_resolver = contract.build_system_resolver_identity
-        language_runtime = contract.language_runtime_identity
-        from literate_ai.contracts.executable_components import (
-            ArtifactExportDeclaration,
+        return StandardPlanFinalizationInputs(
+            intent,
+            authorization,
+            contract,
+            providers,
+            package_artifacts,
+            dependency_resolution=(
+                "npm"
+                if intent.component_revision.uri in self.npm_targets
+                else "python"
+                if intent.component_revision.uri in self.python_targets
+                else "none"
+            ),
         )
 
-        dependencies = tuple(
-            sorted(
-                {
-                    item.identity.uri: item.identity
-                    for item in (*providers, *package_artifacts)
-                }.values(),
-                key=lambda item: item.uri,
-            )
-        )
-        declarations = tuple(
-            sorted(
-                (
-                    ArtifactExportDeclaration(
-                        shape.export_id,
-                        intent.component_revision,
-                        shape.role,
-                        shape.abi_identity,
-                        shape.target_identity,
-                        shape.media_type,
-                        shape.producer_identity,
-                        intent.source_tree_identity,
-                        toolchain,
-                        authorization.authorization_identity,
-                        dependencies,
-                    )
-                    for shape in contract.artifact_export_shapes()
-                ),
-                key=lambda item: item.export_id,
-            )
-        )
-        declaration = next(
-            item
-            for item in declarations
-            if item.export_id == contract.artifact_export.export_id
-        )
-        action_name = contract.identity.digest[:24]
-        action = BuildActionRequest(
-            action_id=f"build-{action_name}",
-            dependency_artifacts=providers,
-            package_dependency_artifacts=package_artifacts,
-            declared_output_ids=tuple(item.export_id for item in declarations),
-            output_declarations=declarations if contract.is_multi_entrypoint else (),
-            **{
-                name: getattr(declaration, name)
-                for name in (
-                    "component_revision",
-                    "role",
-                    "abi_identity",
-                    "target_identity",
-                    "media_type",
-                    "producer_identity",
-                    "source_tree_identity",
-                    "toolchain_identity",
-                    "authorization_identity",
-                )
-            },
-        )
-        actions = (action,)
-        ordered_actions = ((BuildSubActionKind.COMPILE, action.action_id),)
-        requested_privileges = (BuildPrivilege.EXECUTE_BUILD_TOOLS,)
-        if (
-            intent.component_revision.uri in self.npm_targets
-            or intent.component_revision.uri in self.python_targets
-        ):
-            resolve_action = BuildActionRequest(
-                **{
-                    name: getattr(action, name)
-                    for name in (
-                        "component_revision",
-                        "role",
-                        "abi_identity",
-                        "target_identity",
-                        "media_type",
-                        "producer_identity",
-                        "source_tree_identity",
-                        "toolchain_identity",
-                        "authorization_identity",
-                        "dependency_artifacts",
-                        "declared_output_ids",
-                        "package_dependency_artifacts",
-                        "output_declarations",
-                    )
-                },
-                action_id=f"resolve-{action_name}",
-            )
-            actions = tuple(
-                sorted((action, resolve_action), key=lambda item: item.action_id)
-            )
-            ordered_actions = (
-                (BuildSubActionKind.RESOLVE_DEPENDENCIES, resolve_action.action_id),
-                (BuildSubActionKind.COMPILE, action.action_id),
-            )
-            if intent.component_revision.uri in self.npm_targets:
-                requested_privileges = (
-                    BuildPrivilege.EXECUTE_BUILD_TOOLS,
-                    BuildPrivilege.NETWORK_ACCESS,
-                )
-        manifest = ComponentBuildManifest(
-            intent.component_revision,
-            intent.source_tree_identity,
-            build_system_driver,
-            actions,
-            (),
-            declarations,
-        )
-        materialization = ArtifactMaterializationPlan(
-            intent.source_tree_identity,
-            canonical_identity({"local-execution-root": intent.identity.uri}),
-            (),
-            native_sdk_input_identities=intent.native_sdk_input_identities,
-        )
-        request = create_composite_build_request(
-            manifest,
-            materialization,
-            build_system_resolver_identity=build_system_resolver,
-            language_compiler_identity=toolchain,
-            language_runtime_identity=language_runtime,
-            ordered_actions=ordered_actions,
-            requested_privileges=requested_privileges,
-        )
-        plan = StandardComponentBuildPlan(
-            intent.component_revision,
-            manifest,
-            materialization,
-            request,
-            tuple(item.identity for item in providers),
-            tuple(item.identity for item in package_artifacts),
-        )
+    def finalize(self, intent, authorization) -> StandardComponentBuildPlan:
+        inputs = self.plan_finalization_inputs(intent, authorization)
+        plan = inputs.finalize()
+        return self._register_finalized_plan(inputs, plan)
+
+    def accept_finalized_plan(
+        self, intent, authorization, plan
+    ) -> StandardComponentBuildPlan:
+        """Recheck current local authority before retaining a remote result."""
+        inputs = self.plan_finalization_inputs(intent, authorization)
+        try:
+            validate_standard_build_authority(plan, inputs, now=self.clock())
+        except StandardBuildInputError as exc:
+            raise LocalStandardLifecycleError(str(exc)) from exc
+        return self._register_finalized_plan(inputs, plan)
+
+    def _register_finalized_plan(
+        self, inputs: StandardPlanFinalizationInputs, plan: StandardComponentBuildPlan
+    ) -> StandardComponentBuildPlan:
+        intent, authorization = inputs.intent, inputs.authorization
         self._plans_by_revision[intent.component_revision.uri] = plan
+        self._plan_inputs_by_revision[intent.component_revision.uri] = inputs
         if intent.native_sdk_input_identities:
             self._sdk_build_authorizations[plan.identity.uri] = (
                 intent.build_request,
                 authorization.grant,
             )
         return plan
+
+    def build_execution_inputs(
+        self, plan: StandardComponentBuildPlan
+    ) -> StandardPlanFinalizationInputs:
+        """Read current controller custody without granting host command access."""
+        if (
+            not isinstance(plan, StandardComponentBuildPlan)
+            or self._plans_by_revision.get(plan.component_revision.uri) != plan
+        ):
+            raise LocalStandardLifecycleError("BUILD plan is not currently registered")
+        inputs = self._plan_inputs_by_revision.get(plan.component_revision.uri)
+        if (
+            inputs is None
+            or self.plan_finalization_inputs(inputs.intent, inputs.authorization)
+            != inputs
+        ):
+            raise LocalStandardLifecycleError(
+                "retained BUILD inputs are no longer current"
+            )
+        try:
+            validate_standard_build_authority(plan, inputs, now=self.clock())
+        except StandardBuildInputError as exc:
+            raise LocalStandardLifecycleError(str(exc)) from exc
+        if self._plans_by_revision.get(plan.component_revision.uri) != plan:
+            raise LocalStandardLifecycleError(
+                "BUILD plan changed during input admission"
+            )
+        return inputs
 
     def _provider_materials(
         self,
@@ -1651,6 +1714,26 @@ class LocalStandardLifecyclePorts:
             raise LocalStandardLifecycleError("evidence capture must precede builds")
         self._evidence_recorder = recorder
 
+    def retained_evidence_records(self) -> tuple[tuple[ContentIdentity, bytes], ...]:
+        """Snapshot the recorder installed before provider and consumer admission."""
+        if self._evidence_recorder is None:
+            raise LocalStandardLifecycleError("bounded evidence capture is required")
+        return self._evidence_recorder.entries
+
+    def retain_evidence_record(self, identity: ContentIdentity, content: bytes) -> None:
+        """Retain verified transfer bytes in the already installed bounded recorder."""
+        if self._evidence_recorder is None:
+            raise LocalStandardLifecycleError("bounded evidence capture is required")
+        if (
+            not isinstance(content, bytes)
+            or ContentIdentity.parse_uri(
+                "sha256:" + hashlib.sha256(content).hexdigest()
+            )
+            != identity
+        ):
+            raise LocalStandardLifecycleError("transferred evidence identity differs")
+        self._evidence_recorder.remember_bytes(content)
+
     def _record_evidence(self, value: object) -> ContentIdentity:
         if self._evidence_recorder is not None:
             return self._evidence_recorder.remember_json(value)
@@ -1667,6 +1750,7 @@ class LocalStandardLifecyclePorts:
         *,
         phase: str,
         plan_identity: ContentIdentity,
+        execution_authority: StandardExecutionAuthority | None = None,
     ) -> ContentIdentity:
         """Record bounded process facts without embedding host-specific paths."""
 
@@ -1678,6 +1762,8 @@ class LocalStandardLifecyclePorts:
             "stdout_identity": self._record_evidence(result.stdout).uri,
             "stderr_identity": self._record_evidence(result.stderr).uri,
         }
+        if execution_authority is not None:
+            document["execution_authority_identity"] = execution_authority.identity.uri
         sdk_execution = getattr(result, "native_sdk_execution_identity", None)
         if sdk_execution is not None:
             document["native_sdk_execution_identity"] = sdk_execution.uri
@@ -2225,6 +2311,7 @@ class LocalStandardLifecyclePorts:
         entrypoint_contract: ComponentEntrypointCommandContract | None = None,
     ) -> subprocess.CompletedProcess[str]:
         """Resolve typed roles to argv without a shell or ambient tool inference."""
+        self._require_command_phase(phase)
 
         command = (
             contract if entrypoint_contract is None else entrypoint_contract
@@ -2575,11 +2662,24 @@ class LocalStandardLifecyclePorts:
             self._record_evidence(plan.to_dict())
             return result
 
+    def _require_command_phase(self, phase: ComponentCommandPhase) -> None:
+        if phase not in self._command_phases:
+            raise LocalStandardLifecycleError(
+                f"command phase {phase.value} is outside the local runtime scope"
+            )
+
+    def _require_full_command_scope(self) -> None:
+        if self._command_phases != tuple(ComponentCommandPhase):
+            raise LocalStandardLifecycleError(
+                "independent acceptance requires the full local command scope"
+            )
+
     def build(
         self,
         plan: StandardComponentBuildPlan,
         provider_artifacts: tuple[ArtifactExport, ...],
     ) -> StandardBuildOutput:
+        self._require_command_phase(ComponentCommandPhase.BUILD)
         contract = self._contract(plan.component_revision)
         sdk_inputs = self._sdk_input_identities(contract)
         if sdk_inputs != plan.materialization.native_sdk_input_identities:
@@ -3447,42 +3547,10 @@ class LocalStandardLifecyclePorts:
                 "generated npm dependencies require an explicit package-npm target: "
                 + ", ".join(npm_manifests)
             )
-        declared_shapes = {
-            item.export_id: item for item in plan.manifest.export_declarations
-        }
-        expected_shapes = {
-            item.export_id: item for item in contract.artifact_export_shapes()
-        }
-        if set(declared_shapes) != set(expected_shapes) or any(
-            (
-                declaration.component_revision,
-                declaration.role,
-                declaration.abi_identity,
-                declaration.target_identity,
-                declaration.media_type,
-                declaration.producer_identity,
-                declaration.toolchain_identity,
-            )
-            != (
-                contract.component_revision,
-                expected_shapes[export_id].role,
-                expected_shapes[export_id].abi_identity,
-                expected_shapes[export_id].target_identity,
-                expected_shapes[export_id].media_type,
-                expected_shapes[export_id].producer_identity,
-                contract.language_compiler_identity,
-            )
-            for export_id, declaration in declared_shapes.items()
-        ):
-            raise LocalStandardLifecycleError(
-                "build plan does not realize the exact locked command export shape"
-            )
-        if tuple(item.identity for item in provider_artifacts) != (
-            plan.provider_artifact_identities
-        ):
-            raise LocalStandardLifecycleError(
-                "builder received different provider artifacts"
-            )
+        try:
+            validate_standard_build_inputs(plan, provider_artifacts, contract)
+        except StandardBuildInputError as exc:
+            raise LocalStandardLifecycleError(str(exc)) from exc
         source = self.source_trees.resolve(plan.request.source_tree_identity)
         source_identity = local_generated_source_tree_identity(source)
         provider_materials = self._provider_materials(
@@ -3727,12 +3795,235 @@ class LocalStandardLifecyclePorts:
             return
         os.replace(artifact_workspace, artifact)
 
+    @contextmanager
+    def _provider_artifact_custody(self, providers, entries, admission_guard):
+        """Scope already verified provider data to a current consumer operation."""
+        from literate_ai.adapters.action_build_result import (
+            MAX_BUILD_ARCHIVE_BYTES,
+            MAX_BUILD_ARCHIVE_FILES,
+            _verify_files,
+        )
+        from literate_ai.application.standard_provider_receipts import (
+            select_build_provider_receipts,
+        )
+
+        receipts = tuple(item[0] for item in entries)
+        if select_build_provider_receipts(providers, receipts) != receipts:
+            raise LocalStandardLifecycleError("provider receipt closure differs")
+        exports = {
+            export.identity: export
+            for receipt in receipts
+            for export in receipt.build.exports
+        }
+        paths, blob_paths, blob_bytes, evidence, contracts = {}, {}, {}, {}, {}
+        for receipt, reader, custody in entries:
+            admission_guard()
+            custody.require_unchanged()
+            root = custody.root.resolve(strict=True)
+            if root == self.object_root.resolve(strict=True) or not root.is_relative_to(
+                self.object_root.resolve(strict=True)
+            ):
+                raise LocalStandardLifecycleError(
+                    "provider artifact escapes object custody"
+                )
+            contract = self._contract(receipt.component_revision)
+            contracts[receipt.component_revision] = contract
+            plan = StandardComponentBuildPlan.from_dict(
+                reader.read_json(receipt.build.build_plan_identity)
+            )
+            validate_standard_build_inputs(
+                plan,
+                tuple(exports[item] for item in plan.provider_artifact_identities),
+                contract,
+            )
+            if any(
+                action.action_id
+                not in {
+                    "build-" + contract.identity.digest[:24],
+                    "resolve-" + contract.identity.digest[:24],
+                }
+                for action in plan.manifest.actions
+            ):
+                raise LocalStandardLifecycleError("provider command contract differs")
+            _verify_files(custody.files, receipt.build, reader)
+            by_path = {item.path: item for item in custody.files}
+            for export in receipt.build.exports:
+                if export.identity.uri in self._exports_by_identity:
+                    raise LocalStandardLifecycleError(
+                        "provider artifact is already registered"
+                    )
+                paths[export.identity.uri] = root
+                if export.export_id in by_path:
+                    blob_paths[export.blob.identity] = root / export.export_id
+                else:
+                    from literate_ai.adapters.directory_artifacts import (
+                        DirectoryExportFile,
+                        encode_directory_export,
+                    )
+
+                    prefix = export.export_id + "/"
+                    blob_bytes[export.blob.identity] = encode_directory_export(
+                        tuple(
+                            DirectoryExportFile(
+                                item.path[len(prefix) :], item.content, item.mode
+                            )
+                            for item in custody.files
+                            if item.path.startswith(prefix)
+                        ),
+                        max_bytes=MAX_BUILD_ARCHIVE_BYTES,
+                        max_entries=MAX_BUILD_ARCHIVE_FILES,
+                    )
+            evidence[receipt.build.identity.uri] = receipt.build
+
+        def require_custody():
+            admission_guard()
+            for revision, contract in contracts.items():
+                if self._contract(revision) != contract:
+                    raise LocalStandardLifecycleError(
+                        "provider contract changed during BUILD"
+                    )
+            for _receipt, _reader, custody in entries:
+                custody.require_unchanged()
+            admission_guard()
+
+        require_custody()
+        missing = object()
+        changes = (
+            (self._artifact_paths, paths),
+            (self._artifact_blob_paths, blob_paths),
+            (self._artifact_blob_bytes, blob_bytes),
+            (
+                self._exports_by_identity,
+                {key.uri: value for key, value in exports.items()},
+            ),
+            (self._build_evidence, evidence),
+        )
+        previous = [
+            (mapping, {key: mapping.get(key, missing) for key in values})
+            for mapping, values in changes
+        ]
+        try:
+            for mapping, values in changes:
+                mapping.update(values)
+            yield
+            require_custody()
+        finally:
+            # A consumer can produce the same immutable bytes as a provider.
+            # Its newly registered blob custody must survive provider removal.
+            imported = {item.uri for item in exports}
+            retained_blobs = {
+                item.blob.identity
+                for key, item in self._exports_by_identity.items()
+                if key not in imported
+            }
+            for mapping, values in previous:
+                for key, value in values.items():
+                    if key in retained_blobs and (
+                        (
+                            mapping is self._artifact_blob_paths
+                            and mapping.get(key) != blob_paths[key]
+                        )
+                        or (mapping is self._artifact_blob_bytes and value is missing)
+                    ):
+                        continue
+                    if value is missing:
+                        mapping.pop(key, None)
+                    else:
+                        mapping[key] = value
+
+    def admit_transferred_build(
+        self,
+        *,
+        plan: StandardComponentBuildPlan,
+        inputs: StandardPlanFinalizationInputs,
+        evidence: StandardBuildEvidence,
+        evidence_reader,
+        artifact: Path,
+        admission_guard: Callable[[], None] | None = None,
+    ) -> StandardBuildOutput:
+        """Reopen transferred bytes before publishing local artifact custody."""
+        from literate_ai.adapters.qualification_capture import (
+            QualificationEvidenceReader,
+            verify_qualification_build,
+        )
+
+        def require_authority():
+            if admission_guard is not None:
+                admission_guard()
+            validate_standard_build_authority(plan, inputs, now=self.clock())
+            if (
+                self._plans_by_revision.get(plan.component_revision.uri) != plan
+                or self.plan_finalization_inputs(inputs.intent, inputs.authorization)
+                != inputs
+            ):
+                raise LocalStandardLifecycleError(
+                    "transferred build differs from retained local authority"
+                )
+
+        require_authority()
+        if not isinstance(evidence, StandardBuildEvidence):
+            raise TypeError("transferred build requires exact Standard evidence")
+        if not isinstance(evidence_reader, QualificationEvidenceReader):
+            raise TypeError("transferred build requires bounded evidence custody")
+        if evidence_reader.read_bytes(evidence.identity) != canonical_json_bytes(
+            evidence.to_dict()
+        ):
+            raise LocalStandardLifecycleError(
+                "transferred build evidence record differs"
+            )
+        verify_qualification_build(evidence_reader, plan=plan, build=evidence)
+        if not isinstance(artifact, Path) or not artifact.is_absolute():
+            raise LocalStandardLifecycleError(
+                "transferred artifact root must be absolute"
+            )
+        require_safe_directory(artifact)
+        root = artifact.resolve(strict=True)
+        if not root.is_relative_to(self.object_root.resolve(strict=True)):
+            raise LocalStandardLifecycleError(
+                "transferred artifact is outside object custody"
+            )
+        tree = local_tree_identity(root)
+        materials = self._provider_materials(
+            inputs.providers, consumer_revision=plan.component_revision
+        )
+
+        def before_register():
+            require_authority()
+            if (
+                self.source_trees.evidence(plan.request.source_tree_identity).identity
+                != evidence.source_custody_identity
+                or self._provider_materials(
+                    inputs.providers, consumer_revision=plan.component_revision
+                )
+                != materials
+            ):
+                raise LocalStandardLifecycleError(
+                    "transferred build inputs changed during admission"
+                )
+            if local_tree_identity(root) != tree:
+                raise LocalStandardLifecycleError(
+                    "transferred artifact changed during admission"
+                )
+            require_authority()
+
+        return self._cached_build_output(
+            plan,
+            inputs.providers,
+            materials,
+            root,
+            expected_evidence=evidence,
+            before_register=before_register,
+        )
+
     def _cached_build_output(
         self,
         plan: StandardComponentBuildPlan,
         provider_artifacts: tuple[ArtifactExport, ...],
         provider_materials: tuple[dict[str, object], ...],
         artifact: Path,
+        *,
+        expected_evidence: StandardBuildEvidence | None = None,
+        before_register: Callable[[], None] | None = None,
     ) -> StandardBuildOutput:
         if artifact.is_symlink() or not artifact.is_dir():
             raise LocalStandardLifecycleError("cached local artifact is unsafe")
@@ -3769,18 +4060,27 @@ class LocalStandardLifecyclePorts:
             raise LocalStandardLifecycleError(
                 "cached local artifact has no build observation"
             )
-        self._build_observations[str(artifact.resolve())] = ContentIdentity.parse_uri(
-            observation
+        ContentIdentity.parse_uri(observation)
+        return self._build_output(
+            plan,
+            artifact,
+            expected_evidence=expected_evidence,
+            before_register=before_register,
         )
-        return self._build_output(plan, artifact)
 
     def _build_output(
         self,
         plan: StandardComponentBuildPlan,
         artifact: Path,
+        *,
+        expected_evidence: StandardBuildEvidence | None = None,
+        before_register: Callable[[], None] | None = None,
     ) -> StandardBuildOutput:
         artifact_root = artifact.resolve(strict=True)
         exports: list[ArtifactExport] = []
+        paths: dict[str, Path] = {}
+        blob_paths: dict[str, Path] = {}
+        blob_bytes: dict[str, bytes] = {}
         for declaration in plan.manifest.export_declarations:
             export_path = artifact / declaration.export_id
             if export_path.is_symlink() or not export_path.exists():
@@ -3823,15 +4123,14 @@ class LocalStandardLifecyclePorts:
                     media_type=declaration.media_type,
                 ),
             )
-            self._artifact_paths[export.identity.uri] = artifact
+            paths[export.identity.uri] = artifact
             if export_path.is_file():
-                self._artifact_blob_paths[export.blob.identity] = export_path
+                blob_paths[export.blob.identity] = export_path
             else:
-                self._artifact_blob_bytes[export.blob.identity] = export_bytes
-            self._exports_by_identity[export.identity.uri] = export
+                blob_bytes[export.blob.identity] = export_bytes
             exports.append(export)
         export_tuple = tuple(exports)
-        self._planned_exports[plan.component_revision.uri] = next(
+        planned_export = next(
             item
             for item in export_tuple
             if item.export_id
@@ -3876,6 +4175,10 @@ class LocalStandardLifecyclePorts:
             build_observation_identity=build_observation,
             artifact_custody_identity=artifact_custody,
         )
+        if expected_evidence is not None and evidence != expected_evidence:
+            raise LocalStandardLifecycleError(
+                "transferred build differs from exact expected evidence"
+            )
         if self._evidence_recorder is not None:
             # Preserve validated raw payloads under their existing byte identities.
             # JSON reserialization would change SBOM or generated-suite identity.
@@ -3904,8 +4207,17 @@ class LocalStandardLifecyclePorts:
                 evidence.to_dict(),
             ):
                 self._record_evidence(document)
+        output = StandardBuildOutput(export_tuple, evidence.identity, evidence)
+        if before_register is not None:
+            before_register()
+        self._artifact_paths.update(paths)
+        self._artifact_blob_paths.update(blob_paths)
+        self._artifact_blob_bytes.update(blob_bytes)
+        self._exports_by_identity.update({item.identity.uri: item for item in exports})
+        self._planned_exports[plan.component_revision.uri] = planned_export
+        self._build_observations[str(artifact_root)] = build_observation
         self._build_evidence[evidence.identity.uri] = evidence
-        return StandardBuildOutput(export_tuple, evidence.identity, evidence)
+        return output
 
     def read_artifact_blob(self, reference: BlobRef) -> bytes:
         """Read one immutable compiled export under its verified BlobRef custody."""
@@ -4029,6 +4341,7 @@ class LocalStandardLifecyclePorts:
         entrypoint_identity: ContentIdentity | None = None,
     ) -> LocalResolvedExecutionCommand:
         """Resolve the accepted export's ordinary product invocation prefix."""
+        self._require_command_phase(ComponentCommandPhase.EXECUTE)
 
         if not isinstance(plan, StandardComponentBuildPlan):
             raise TypeError("plan must be a StandardComponentBuildPlan")
@@ -4083,6 +4396,7 @@ class LocalStandardLifecyclePorts:
     def test(
         self, plan: StandardComponentBuildPlan, exports: tuple[ArtifactExport, ...]
     ) -> StandardGeneratedTestExecutionEvidence:
+        self._require_command_phase(ComponentCommandPhase.TEST)
         try:
             return self._test_locked(plan, exports)
         except LocalStandardLifecycleError as error:
@@ -4234,6 +4548,154 @@ class LocalStandardLifecyclePorts:
             for unit in evidence.entrypoint_evidence or ():
                 self._record_evidence(unit.to_dict())
         self._test_evidence[evidence.identity.uri] = evidence
+        return evidence
+
+    def build_evidence_for_test(self, plan, exports) -> StandardBuildEvidence:
+        """Read registered BUILD evidence under current TEST input authority."""
+        self.build_execution_inputs(plan)
+        build = self._build_evidence_for_exports(exports)
+        if (
+            build.build_plan_identity != plan.identity
+            or build.component_revision != plan.component_revision
+            or build.source_tree_identity != plan.request.source_tree_identity
+        ):
+            raise LocalStandardLifecycleError(
+                "TEST requires current registered BUILD evidence"
+            )
+        return build
+
+    def admit_transferred_tests(
+        self, *, plan, exports, evidence, records, admission_guard
+    ) -> StandardGeneratedTestExecutionEvidence:
+        """Register verified TEST custody without granting a local command phase."""
+        from literate_ai.adapters.action_build_limits import (
+            MAX_BUILD_EVIDENCE_BYTES,
+            MAX_BUILD_EVIDENCE_RECORDS,
+        )
+        from literate_ai.adapters.qualification_capture import (
+            QualificationEvidenceReader,
+        )
+        from literate_ai.adapters.standard_test_admission import (
+            verify_transferred_tests,
+        )
+
+        if not callable(admission_guard) or not isinstance(
+            evidence, StandardGeneratedTestExecutionEvidence
+        ):
+            raise TypeError("transferred TEST requires typed evidence and a live guard")
+        self.retained_evidence_records()
+        admission_guard()
+        inputs = self.build_execution_inputs(plan)
+        build = self._build_evidence_for_exports(exports)
+        source_custody = self.source_trees.evidence(plan.request.source_tree_identity)
+        contract = self._contract(plan.component_revision)
+        reader = QualificationEvidenceReader(
+            records,
+            max_bytes=MAX_BUILD_EVIDENCE_BYTES,
+            max_records=MAX_BUILD_EVIDENCE_RECORDS,
+        )
+        verify_transferred_tests(
+            reader,
+            plan=plan,
+            build=build,
+            source_custody=source_custody,
+            contract=contract,
+            evidence=evidence,
+        )
+        for identity, content in records:
+            self.retain_evidence_record(identity, content)
+        admission_guard()
+        if (
+            self.build_execution_inputs(plan) != inputs
+            or self._build_evidence_for_exports(exports) != build
+            or self.source_trees.evidence(plan.request.source_tree_identity)
+            != source_custody
+            or self._contract(plan.component_revision) != contract
+        ):
+            raise LocalStandardLifecycleError("transferred TEST authority changed")
+        admission_guard()
+        self._test_evidence[evidence.identity.uri] = evidence
+        return evidence
+
+    def admit_transferred_execution(
+        self,
+        *,
+        plan,
+        exports,
+        evidence,
+        records,
+        admission_guard,
+        scope=None,
+        provider_artifacts=None,
+    ) -> StandardExecutionEvidence:
+        """Publish verified EXECUTE custody and stdout without local execution."""
+        from literate_ai.adapters.action_build_limits import (
+            MAX_BUILD_EVIDENCE_BYTES,
+            MAX_BUILD_EVIDENCE_RECORDS,
+        )
+        from literate_ai.adapters.qualification_capture import (
+            QualificationEvidenceReader,
+        )
+        from literate_ai.adapters.standard_execution_admission import (
+            verify_transferred_execution,
+        )
+
+        if not callable(admission_guard) or not isinstance(
+            evidence, StandardExecutionEvidence
+        ):
+            raise TypeError(
+                "transferred EXECUTE requires typed evidence and a live guard"
+            )
+        if scope is not None and not isinstance(scope, StandardExecutionInputScope):
+            raise TypeError("transferred EXECUTE scope must be typed")
+        self.retained_evidence_records()
+        admission_guard()
+        inputs = self.build_execution_inputs(plan)
+        build = self.build_evidence_for_test(plan, exports)
+        custody = self.source_trees.evidence(plan.request.source_tree_identity)
+        contract = self._contract(plan.component_revision)
+        providers = (
+            self._intent_artifacts_for_plan(plan)
+            if provider_artifacts is None and scope is None
+            else provider_artifacts
+        )
+        if not isinstance(providers, tuple) or any(
+            not isinstance(item, ArtifactExport) for item in providers
+        ):
+            raise TypeError("transferred EXECUTE requires exact provider artifacts")
+        reader = QualificationEvidenceReader(
+            records,
+            max_bytes=MAX_BUILD_EVIDENCE_BYTES,
+            max_records=MAX_BUILD_EVIDENCE_RECORDS,
+        )
+        stdout = verify_transferred_execution(
+            reader,
+            plan=plan,
+            build=build,
+            source_custody=custody,
+            contract=contract,
+            evidence=evidence,
+            scope=scope,
+            provider_artifacts=providers,
+            now=self.clock(),
+        )
+        self._require_execution_authority(evidence.execution_authority, providers)
+        for identity, content in records:
+            self.retain_evidence_record(identity, content)
+        admission_guard()
+        if (
+            self.build_execution_inputs(plan) != inputs
+            or self.build_evidence_for_test(plan, exports) != build
+            or self.source_trees.evidence(plan.request.source_tree_identity) != custody
+            or self._contract(plan.component_revision) != contract
+        ):
+            raise LocalStandardLifecycleError("transferred EXECUTE authority changed")
+        if scope is None and self._intent_artifacts_for_plan(plan) != providers:
+            raise LocalStandardLifecycleError("transferred EXECUTE providers changed")
+        self._require_execution_authority(evidence.execution_authority, providers)
+        admission_guard()
+        self._execution_evidence[evidence.identity.uri] = evidence
+        self.execution_stdout[plan.component_revision.uri] = stdout
         return evidence
 
     def _generated_test_case_membership(
@@ -4462,17 +4924,165 @@ class LocalStandardLifecyclePorts:
         self._test_evidence[evidence.identity.uri] = evidence
         return evidence
 
+    def authorize_execution_inputs(
+        self, plan: StandardComponentBuildPlan, scope: StandardExecutionInputScope
+    ) -> StandardExecutionAuthority:
+        contract = self._contract(plan.component_revision)
+        runtime = standard_execution_runtime_identity(contract)
+        request = standard_execution_request(
+            scope, plan.request.source_tree_identity, contract.identity, runtime
+        )
+        now = self.clock()
+        grant = BuildAuthorization(
+            authorization_id=f"local-execute:{canonical_identity(request.to_dict()).digest}",
+            classification_digest=scope.identity.uri,
+            request_digest=canonical_identity(request.to_dict()).uri,
+            effective_revision_digest=scope.component_revision.uri,
+            actor="local-standard-lifecycle",
+            reason="execute configured commands with exact admitted provider inputs",
+            profile=SecurityProfile.CONSTRAINED,
+            privileges=request.requested_privileges,
+            issued_at=now,
+            expires_at=now + timedelta(minutes=5),
+        )
+        return StandardExecutionAuthority(
+            scope, plan.request.source_tree_identity, contract.identity, runtime, grant
+        )
+
+    def execute_scoped(
+        self,
+        plan: StandardComponentBuildPlan,
+        exports: tuple[ArtifactExport, ...],
+        scope: StandardExecutionInputScope,
+        provider_artifacts: tuple[ArtifactExport, ...],
+    ) -> StandardExecutionEvidence:
+        """Execute admitted late inputs without changing compilation provenance."""
+        self._require_command_phase(ComponentCommandPhase.EXECUTE)
+        if (
+            not isinstance(scope, StandardExecutionInputScope)
+            or scope.build_plan_identity != plan.identity
+            or scope.component_revision != plan.component_revision
+            or scope.build_provider_artifact_identities
+            != plan.provider_artifact_identities
+            or set(scope.export_identities) != {item.identity for item in exports}
+            or not isinstance(provider_artifacts, tuple)
+            or any(not isinstance(item, ArtifactExport) for item in provider_artifacts)
+            or tuple(item.identity for item in provider_artifacts)
+            != scope.provider_artifact_identities
+            or self._build_evidence_for_exports(exports).build_plan_identity
+            != plan.identity
+        ):
+            raise LocalStandardLifecycleError(
+                "execution scope differs from exact build and provider inputs"
+            )
+        authority = self.authorize_execution_inputs(plan, scope)
+        contract = self._contract(plan.component_revision)
+        if (
+            not isinstance(authority, StandardExecutionAuthority)
+            or authority.input_scope != scope
+            or authority.source_tree_identity != plan.request.source_tree_identity
+            or authority.command_contract_identity != contract.identity
+            or authority.runtime_identity
+            != standard_execution_runtime_identity(contract)
+        ):
+            raise LocalStandardLifecycleError(
+                "execution authority differs from current inputs and commands"
+            )
+        self._require_execution_authority(authority, provider_artifacts)
+        self._record_evidence(contract.to_dict())
+        self._record_evidence(scope.to_dict())
+        self._record_evidence(authority.to_dict())
+        return self._execute_with_inputs(plan, exports, provider_artifacts, authority)
+
+    def _require_execution_authority(
+        self,
+        authority: StandardExecutionAuthority | None,
+        providers: tuple[ArtifactExport, ...],
+    ) -> None:
+        if authority is None:
+            return
+        authority.require_valid(now=self.clock())
+        if (
+            tuple(item.identity for item in providers)
+            != authority.input_scope.provider_artifact_identities
+        ):
+            raise LocalStandardLifecycleError("execution provider inputs changed")
+        pending = list(providers)
+        scheduled = {item.identity for item in providers}
+        while pending:
+            item = pending.pop()
+            if self._exports_by_identity.get(item.identity.uri) != item:
+                raise LocalStandardLifecycleError(
+                    "execution provider has no exact local custody"
+                )
+            root = self._artifact_paths.get(item.identity.uri)
+            if root is None or path_is_link_or_reparse(root):
+                raise LocalStandardLifecycleError(
+                    "execution provider custody is unsafe"
+                )
+            export_path = root / item.export_id
+            if path_is_link_or_reparse(export_path) or not export_path.exists():
+                raise LocalStandardLifecycleError(
+                    "execution provider custody is unsafe"
+                )
+            if export_path.resolve(strict=True).parent != root.resolve(strict=True):
+                raise LocalStandardLifecycleError(
+                    "execution provider escaped its custody root"
+                )
+            content = (
+                _directory_export_bytes(export_path)
+                if export_path.is_dir()
+                else export_path.read_bytes()
+                if export_path.is_file()
+                else None
+            )
+            if (
+                content is None
+                or len(content) != item.blob.size
+                or hashlib.sha256(content).hexdigest() != item.blob.digest
+            ):
+                raise LocalStandardLifecycleError(
+                    "artifact blob changed after admission"
+                )
+            for identity in item.dependency_artifact_identities:
+                dependency = self._exports_by_identity.get(identity.uri)
+                if dependency is None or dependency.identity != identity:
+                    raise LocalStandardLifecycleError(
+                        "execution provider closure is incomplete"
+                    )
+                if identity not in scheduled:
+                    if len(scheduled) >= 16384:
+                        raise LocalStandardLifecycleError(
+                            "execution provider closure is oversized"
+                        )
+                    scheduled.add(identity)
+                    pending.append(dependency)
+
     def execute(
         self, plan: StandardComponentBuildPlan, exports: tuple[ArtifactExport, ...]
     ) -> StandardExecutionEvidence:
+        self._require_command_phase(ComponentCommandPhase.EXECUTE)
+        return self._execute_with_inputs(
+            plan, exports, self._intent_artifacts_for_plan(plan), None
+        )
+
+    def _execute_with_inputs(
+        self,
+        plan: StandardComponentBuildPlan,
+        exports: tuple[ArtifactExport, ...],
+        providers: tuple[ArtifactExport, ...],
+        authority: StandardExecutionAuthority | None,
+    ) -> StandardExecutionEvidence:
         contract = self._contract(plan.component_revision)
         if contract.is_multi_entrypoint:
-            return self._execute_multiple_entrypoints(plan, exports, contract)
-        providers = self._intent_artifacts_for_plan(plan)
+            return self._execute_multiple_entrypoints(
+                plan, exports, contract, providers, authority
+            )
         artifact = self._artifact_paths[exports[0].identity.uri]
         before = local_tree_identity(artifact)
         source = self.source_trees.resolve(plan.request.source_tree_identity)
         try:
+            self._require_execution_authority(authority, providers)
             result = self._run_locked(
                 contract,
                 ComponentCommandPhase.EXECUTE,
@@ -4482,6 +5092,7 @@ class LocalStandardLifecyclePorts:
                 export_path=artifact / contract.artifact_export.export_id,
                 providers=providers,
             )
+            self._require_execution_authority(authority, providers)
         except Exception as error:
             self._record_failure_diagnostic(
                 plan.component_revision.uri, f"{type(error).__name__}: {error}"
@@ -4500,15 +5111,22 @@ class LocalStandardLifecyclePorts:
             ComponentCommandPhase.EXECUTE
         ).identity
         evidence = StandardExecutionEvidence(
+            execution_authority=authority,
             component_revision=plan.component_revision,
             build_evidence_identity=build.identity,
+            provider_artifact_identities=tuple(
+                sorted((item.identity for item in providers), key=lambda item: item.uri)
+            ),
             export_identities=build.export_identities,
             root_export_identity=exports[0].identity,
             execution_contract_identity=execution_contract_identity,
             runtime_identity=runtime_identity,
             artifact_custody_identity=build.artifact_custody_identity,
             observation_identity=self._process_observation(
-                result, phase="execute", plan_identity=plan.identity
+                result,
+                phase="execute",
+                plan_identity=plan.identity,
+                execution_authority=authority,
             ),
             stdout_identity=self._record_evidence(result.stdout),
             stderr_identity=self._record_evidence(result.stderr),
@@ -4526,8 +5144,9 @@ class LocalStandardLifecyclePorts:
         plan: StandardComponentBuildPlan,
         exports: tuple[ArtifactExport, ...],
         contract: ComponentCommandContract,
+        providers: tuple[ArtifactExport, ...],
+        authority: StandardExecutionAuthority | None,
     ) -> StandardExecutionEvidence:
-        providers = self._intent_artifacts_for_plan(plan)
         by_export_id = {item.export_id: item for item in exports}
         entrypoints = tuple(
             sorted(
@@ -4558,6 +5177,7 @@ class LocalStandardLifecyclePorts:
         for entrypoint in entrypoints:
             export = by_export_id[entrypoint.artifact_export.export_id]
             try:
+                self._require_execution_authority(authority, providers)
                 result = self._run_locked(
                     contract,
                     ComponentCommandPhase.EXECUTE,
@@ -4568,6 +5188,7 @@ class LocalStandardLifecyclePorts:
                     providers=providers,
                     entrypoint_contract=entrypoint,
                 )
+                self._require_execution_authority(authority, providers)
             except Exception as error:
                 self._record_failure_diagnostic(
                     plan.component_revision.uri,
@@ -4591,6 +5212,7 @@ class LocalStandardLifecyclePorts:
                         result,
                         phase=f"execute:{entrypoint.deployment_unit}",
                         plan_identity=plan.identity,
+                        execution_authority=authority,
                     ),
                     stdout_identity=self._record_evidence(result.stdout),
                     stderr_identity=self._record_evidence(result.stderr),
@@ -4610,8 +5232,12 @@ class LocalStandardLifecyclePorts:
         build = self._build_evidence_for_exports(exports)
         root_export = by_export_id[contract.artifact_export.export_id]
         evidence = StandardExecutionEvidence(
+            execution_authority=authority,
             component_revision=plan.component_revision,
             build_evidence_identity=build.identity,
+            provider_artifact_identities=tuple(
+                sorted((item.identity for item in providers), key=lambda item: item.uri)
+            ),
             export_identities=build.export_identities,
             root_export_identity=root_export.identity,
             execution_contract_identity=self._record_evidence(
@@ -4708,6 +5334,91 @@ class LocalStandardLifecyclePorts:
             self._record_evidence(evidence.to_dict())
         return evidence
 
+    def admit_transferred_acceptance(
+        self,
+        *,
+        plan,
+        test_identity,
+        execution_identity,
+        generation_plan,
+        evidence,
+        records,
+        admission_guard,
+    ) -> StandardComponentAcceptanceEvidence:
+        """Admit acceptance only for exact current controller stage custody."""
+        from literate_ai.adapters.action_build_result import (
+            _capture_files,
+            _verify_files,
+        )
+        from literate_ai.adapters.action_provider_build import (
+            verify_accepted_component_records,
+        )
+
+        if not callable(admission_guard) or not isinstance(
+            evidence, StandardComponentAcceptanceEvidence
+        ):
+            raise TypeError(
+                "transferred ACCEPT requires typed evidence and a live guard"
+            )
+        self.retained_evidence_records()
+        admission_guard()
+        inputs = self.build_execution_inputs(plan)
+        source = self.source_trees.evidence(plan.request.source_tree_identity)
+        contract = self._contract(plan.component_revision)
+        try:
+            tests = self._test_evidence[test_identity.uri]
+            execution = self._execution_evidence[execution_identity.uri]
+        except KeyError as exc:
+            raise LocalStandardLifecycleError(
+                "ACCEPT requires registered TEST and EXECUTE evidence"
+            ) from exc
+        build = self.build_evidence_for_test(plan, evidence.build.exports)
+        if (
+            evidence.component_revision != plan.component_revision
+            or evidence.build != build
+            or evidence.generated_tests != tests
+            or evidence.execution != execution
+            or evidence.source_generation_identity != source.source_generation_identity
+            or evidence.generated_test_suite_identity
+            != ContentIdentity.parse_uri(source.generated_test_suite.content_identity)
+        ):
+            raise LocalStandardLifecycleError(
+                "transferred ACCEPT stage custody differs"
+            )
+
+        def current():
+            admission_guard()
+            if (
+                self.build_execution_inputs(plan) != inputs
+                or self.build_evidence_for_test(plan, build.exports) != build
+                or self._test_evidence.get(test_identity.uri) != tests
+                or self._execution_evidence.get(execution_identity.uri) != execution
+                or self.source_trees.evidence(plan.request.source_tree_identity)
+                != source
+                or self._contract(plan.component_revision) != contract
+            ):
+                raise LocalStandardLifecycleError(
+                    "transferred ACCEPT authority changed"
+                )
+
+        reader = verify_accepted_component_records(
+            records,
+            evidence,
+            self.source_trees.validation_inputs(plan.request.source_tree_identity),
+            generation_plan,
+        )
+        current()
+        roots = {self.artifact_path(item).parent for item in build.exports}
+        if len(roots) != 1:
+            raise LocalStandardLifecycleError("ACCEPT artifact roots differ")
+        files, custody = _capture_files(roots.pop(), current)
+        _verify_files(files, build, reader)
+        for identity, content in records:
+            self.retain_evidence_record(identity, content)
+        current()
+        custody.require_unchanged()
+        return evidence
+
     def assemble_project_artifacts(
         self,
         component_lock: ComponentLock,
@@ -4728,6 +5439,13 @@ class LocalStandardLifecyclePorts:
             raise LocalStandardLifecycleError(
                 "project artifact assembly received foreign authority"
             )
+        from literate_ai.application.release_artifacts import (
+            plan_standard_assembly_dependencies,
+        )
+
+        assembly_dependencies = plan_standard_assembly_dependencies(
+            execution_plan, results
+        )
         by_revision = {item.component_revision.uri: item for item in results}
         planned = {
             item.component_revision.uri: item for item in project_build_plan.components
@@ -4759,6 +5477,7 @@ class LocalStandardLifecyclePorts:
             graph = create_artifact_build_graph(
                 build_system_driver_identity=next(iter(drivers)),
                 manifests=manifests,
+                assembly_dependencies=assembly_dependencies,
                 link_roots=(),
                 link_root_groups=(
                     (
@@ -4775,6 +5494,7 @@ class LocalStandardLifecyclePorts:
             graph = create_artifact_build_graph(
                 build_system_driver_identity=next(iter(drivers)),
                 manifests=manifests,
+                assembly_dependencies=assembly_dependencies,
                 link_roots=(primary_root.identity,),
             )
         return graph, graph.link_plans[0]
@@ -5330,6 +6050,7 @@ class LocalStandardLifecyclePorts:
         extra_arguments: tuple[str, ...] = (),
         package_entrypoint: PackageEntrypoint | None = None,
     ) -> subprocess.CompletedProcess[str]:
+        self._require_command_phase(phase)
         if (
             custody.native_sdk_resources is not None
             and custody.native_sdk_resources.inputs
@@ -5632,6 +6353,7 @@ class LocalStandardLifecyclePorts:
         package_plan: PackagePlan,
         package_result: PackageResult,
     ) -> ContentIdentity:
+        self._require_command_phase(ComponentCommandPhase.TEST)
         del execution_plan, project_build_plan
         custody = self.project_package_custody(package_plan, package_result)
         root_revision = getattr(component_lock, "root_revision", None)
@@ -5725,6 +6447,7 @@ class LocalStandardLifecyclePorts:
         package_plan: PackagePlan,
         package_result: PackageResult,
     ) -> ContentIdentity:
+        self._require_command_phase(ComponentCommandPhase.EXECUTE)
         del execution_plan, project_build_plan
         root_revision = getattr(component_lock, "root_revision", None)
         root_contract = self.contracts.get(getattr(root_revision, "uri", ""))
@@ -6999,6 +7722,7 @@ class LocalStandardLifecyclePorts:
         _selected_entrypoint: PackageEntrypoint | None = None,
         _selected_oracle: object | None = None,
     ) -> ContentIdentity:
+        self._require_full_command_scope()
         from literate_ai.adapters.component_acceptance import (
             INDEPENDENT_ACCEPTANCE_EXEMPT_SCHEMA,
             ComponentAcceptanceError,

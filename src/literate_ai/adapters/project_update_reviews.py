@@ -101,6 +101,7 @@ def review_update_conflicts(
             {
                 "schema": CONFLICT_REVIEW_SCHEMA,
                 "path": diff.get("path"),
+                "file_identity": diff.get("file_identity"),
                 "decision": decision,
                 "rationale": rationale.strip(),
                 "merged_text": merged,

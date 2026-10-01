@@ -364,7 +364,7 @@ older host facade performs the same authority split for one selected Component:
 resolve -> plan -> prepare node -> generate or exactly resume source-only candidate
                                       |
                                       v
-          build intent -> index exact tree -> current authorization
+          index exact tree -> build intent -> current authorization
                                       |
                                       v
           finalize composite plan -> build -> test -> execute -> accept

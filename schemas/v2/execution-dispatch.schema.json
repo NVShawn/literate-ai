@@ -194,12 +194,18 @@
         "environment": {"type": "array", "items": {"$ref": "urn:literate-ai:schema:v1:execution-worker-environment"}},
         "transport": {"type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"},
         "lifecycle_executable": {"type": ["string", "null"], "maxLength": 4096, "pattern": "^(?:~/|/)[A-Za-z0-9._/-]+$"},
-        "slots": {"type": "integer", "minimum": 1, "maximum": 256}
+        "slots": {"type": "integer", "minimum": 1, "maximum": 256},
+        "action_protocol": {"enum": [null, "literate-ai/lifecycle-action-wire@1"]},
+        "action_command": {"type": "array", "maxItems": 128, "items": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\\x00\\r\\n]+$"}}
       },
       "allOf": [
         {
+          "if": {"required": ["action_command"], "properties": {"action_command": {"minItems": 1}}},
+          "then": {"required": ["action_protocol"], "properties": {"kind": {"const": "ssh"}, "action_protocol": {"const": "literate-ai/lifecycle-action-wire@1"}}}
+        },
+        {
           "if": {"properties": {"kind": {"const": "local"}}},
-          "then": {"properties": {"endpoint": {"type": "null"}, "workspace": {"type": "null"}, "command": {"maxItems": 0}, "environment": {"maxItems": 0}, "transport": {"const": "ssh"}, "lifecycle_executable": {"type": "null"}}}
+          "then": {"properties": {"endpoint": {"type": "null"}, "workspace": {"type": "null"}, "command": {"maxItems": 0}, "environment": {"maxItems": 0}, "transport": {"const": "ssh"}, "lifecycle_executable": {"type": "null"}, "action_protocol": {"type": "null"}}}
         },
         {
           "if": {"properties": {"kind": {"const": "ssh"}}},
@@ -218,7 +224,7 @@
       "required": ["schema", "workers"],
       "properties": {
         "schema": {"const": "urn:literate-ai:schema:v1:execution-worker-catalog"},
-        "workers": {"type": "array", "minItems": 1, "maxItems": 256, "items": {"$ref": "urn:literate-ai:schema:v1:execution-worker"}}
+        "workers": {"type": "array", "minItems": 0, "maxItems": 256, "items": {"$ref": "urn:literate-ai:schema:v1:execution-worker"}}
       }
     },
     "observed_gpu_device": {

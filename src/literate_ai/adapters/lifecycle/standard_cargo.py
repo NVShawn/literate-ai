@@ -127,6 +127,9 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         source_trees: LocalSourceTreeRegistry,
         object_root: Path,
         contracts: tuple[ComponentCommandContract, ...],
+        command_phases: tuple[ComponentCommandPhase, ...] = tuple(
+            ComponentCommandPhase
+        ),
         tool_bindings: tuple[LocalComponentToolBinding, ...] = (),
         cargo_targets: tuple[StandardCargoTarget, ...],
         npm_targets: tuple[StandardNpmTarget, ...] = (),
@@ -144,6 +147,7 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
             source_trees=source_trees,
             object_root=object_root,
             contracts=contracts,
+            command_phases=command_phases,
             tool_bindings=tool_bindings,
             npm_targets=npm_targets,
             python_targets=python_targets,

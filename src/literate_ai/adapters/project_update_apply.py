@@ -1,19 +1,8 @@
-"""Apply the mechanically safe part of an initialized-project update.
+"""Apply upstream-only changes, clean merges, and explicitly reviewed resolutions.
 
-Only ``upstream-only`` is safe without judgment: the classifier reached it by
-proving the project's copy still equals the recorded baseline, so upstream is the
-sole author of the change and nothing local can be lost. ``upstream-added`` is
-safe only in the narrower sense that there is no local content to destroy, but
-adopting a capability a project never had is a decision, and a new declared
-document can leave the documentation graph unreachable, so it stays opt-in.
-
-Everything else is deliberately refused. ``conflict`` needs semantic migration,
-``local-only`` is project authority, and ``preserved-dynamic`` has no upstream
-author. Those reach the operator as work items, not as writes.
-
-The plan is a snapshot. Between planning and writing the tree can move, so every
-write re-reads both sides and fails closed unless the recorded identities still
-hold. That turns a lost update into a refusal.
+All input bytes are rechecked. File writes and the upstream baseline checkpoint
+roll back together if prospective-project validation fails. Local overlays and
+unselected overlapping conflicts remain untouched.
 """
 
 from __future__ import annotations
@@ -42,7 +31,10 @@ from .project_updates import (
 
 APPLY_RESULT_SCHEMA = "literate-ai/project-update-apply@1"
 
-MECHANICAL = (ProjectUpdateClassification.UPSTREAM_ONLY,)
+MECHANICAL = (
+    ProjectUpdateClassification.UPSTREAM_ONLY,
+    ProjectUpdateClassification.MERGEABLE,
+)
 OPT_IN = (ProjectUpdateClassification.UPSTREAM_ADDED,)
 
 
@@ -54,11 +46,15 @@ class AppliedProjectUpdate:
     adopted: tuple[str, ...]
     refused: dict[str, tuple[str, ...]]
     adopted_because: str | None = None
+    merged: tuple[str, ...] = ()
+    resolutions: tuple[dict, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         value: dict[str, Any] = {
             "schema": APPLY_RESULT_SCHEMA,
             "applied": list(self.applied),
+            "merged": list(self.merged),
+            "resolutions": list(self.resolutions),
             "adopted": list(self.adopted),
             "refused": {
                 key: list(value) for key, value in sorted(self.refused.items())
@@ -95,6 +91,7 @@ def apply_project_update(
     *,
     adopt_added: bool = False,
     validator: Callable[[Path], object] | None = None,
+    resolutions: dict | None = None,
 ) -> AppliedProjectUpdate:
     """Write one rollback-safe subset and optionally validate the complete result."""
 
@@ -103,6 +100,23 @@ def apply_project_update(
             "project.update_plan_invalid", "apply requires a typed update plan"
         )
     root = Path(root).resolve()
+    from .update_merge import UpdateBases, resolution_content
+
+    resolutions = resolutions or {}
+    bases = UpdateBases(root)
+    if (
+        plan.update_bases_identity is not None
+        and _identity(bases.original or b"") != plan.update_bases_identity
+    ):
+        raise ProjectUpdateError(
+            "project.update_base_changed", "update baseline changed; re-plan"
+        )
+    if set(resolutions) - {item.path for item in plan.files}:
+        raise ProjectUpdateError(
+            "project.update_resolution_invalid", "unknown resolution path"
+        )
+    write_content: dict[str, bytes | None] = {}
+    merged: list[str] = []
     # The opt-in on upstream-added exists to guard judgment: adopting a capability a
     # project never had is a decision. A project that has not diverged from its
     # baseline has no such decision to make -- there is nothing local to protect and
@@ -113,6 +127,7 @@ def apply_project_update(
         in (
             ProjectUpdateClassification.LOCAL_ONLY,
             ProjectUpdateClassification.CONFLICT,
+            ProjectUpdateClassification.MERGEABLE,
         )
         for item in plan.files
     )
@@ -130,7 +145,7 @@ def apply_project_update(
     selected_items: list[ProjectUpdateFile] = []
 
     for item in plan.files:
-        if item.classification not in selected:
+        if item.classification not in selected and item.path not in resolutions:
             if item.classification in (
                 ProjectUpdateClassification.CONFLICT,
                 ProjectUpdateClassification.LOCAL_ONLY,
@@ -171,6 +186,14 @@ def apply_project_update(
                 f"{item.path} changed after planning; re-plan before applying",
             )
 
+        write_content[item.path] = resolution_content(
+            item, observed_content, content, resolutions
+        )
+        if (
+            item.classification is ProjectUpdateClassification.MERGEABLE
+            or resolutions.get(item.path, {}).get("decision") == "merge"
+        ):
+            merged.append(item.path)
         snapshots[item.path] = (
             observed_content,
             stat.S_IMODE(target.stat().st_mode) if target.is_file() else None,
@@ -181,9 +204,9 @@ def apply_project_update(
     try:
         for item in selected_items:
             target = _project_path(root, item.path)
-            content = upstream_content.get(item.path)
-            if item.upstream_identity is None:
-                target.unlink()
+            content = write_content[item.path]
+            if content is None:
+                target.unlink(missing_ok=True)
             else:
                 parent = target.parent
                 while parent != root and not parent.exists():
@@ -191,15 +214,28 @@ def apply_project_update(
                     parent = parent.parent
                 assert content is not None
                 _write_exact(target, content)
+                mode = snapshots[item.path][1]
+                if os.name != "nt" and mode is not None:
+                    os.chmod(target, mode)
             written.append(item.path)
             if item.classification is ProjectUpdateClassification.UPSTREAM_ADDED:
                 adopted.append(item.path)
             else:
                 applied.append(item.path)
+        for item in plan.files:
+            if item in selected_items or item.classification in (
+                ProjectUpdateClassification.UNCHANGED,
+                ProjectUpdateClassification.ALREADY_CURRENT,
+            ):
+                content = upstream_content.get(item.path)
+                if content is not None or item in selected_items:
+                    bases.advance("framework", item.path, content)
+        bases.write()
         if validator is not None:
             validator(root)
     except BaseException:
         try:
+            bases.rollback()
             for path in reversed(written):
                 target = _project_path(root, path)
                 previous, mode = snapshots[path]
@@ -229,6 +265,10 @@ def apply_project_update(
         tuple(sorted(applied)),
         tuple(sorted(adopted)),
         {key: tuple(sorted(value)) for key, value in refused.items()},
+        merged=tuple(sorted(merged)),
+        resolutions=tuple(
+            {**resolutions[path], "applied": True} for path in sorted(resolutions)
+        ),
         adopted_because=(
             None
             if not adopted

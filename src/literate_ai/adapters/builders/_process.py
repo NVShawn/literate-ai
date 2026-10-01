@@ -53,6 +53,9 @@ def run_bounded_process(
     poll_interval_seconds: float = 0.25,
     trace: bool = True,
     input_bytes: bytes | None = None,
+    input_limit_bytes: int = 64 * 1024,
+    interrupt_guard: Callable[[], None] | None = None,
+    terminate_descendants: bool = False,
 ) -> BoundedProcessResult:
     """Drain compiler streams concurrently and kill its process tree on failure."""
 
@@ -64,10 +67,18 @@ def run_bounded_process(
         raise ValueError("tool process poll interval must be positive")
     if stdout_limit_bytes <= 0 or stderr_limit_bytes <= 0:
         raise ValueError("tool process output limits must be positive")
-    if input_bytes is not None and (
-        not isinstance(input_bytes, bytes) or len(input_bytes) > 64 * 1024
+    if (
+        isinstance(input_limit_bytes, bool)
+        or not isinstance(input_limit_bytes, int)
+        or not 1 <= input_limit_bytes <= 64 * 1024 * 1024
     ):
-        raise ValueError("tool process input must be at most 64 KiB of bytes")
+        raise ValueError("tool input byte limit must be between one and 64 MiB")
+    if input_bytes is not None and (
+        not isinstance(input_bytes, bytes) or len(input_bytes) > input_limit_bytes
+    ):
+        raise ValueError("tool process input exceeds its configured byte limit")
+    if interrupt_guard is not None:
+        interrupt_guard()
     ownership = create_process_tree_ownership()
     child_environment = inherited_verbose_environment(environment)
     started_monotonic = clock()
@@ -168,6 +179,8 @@ def run_bounded_process(
     try:
         try:
             while True:
+                if interrupt_guard is not None:
+                    interrupt_guard()
                 now = clock()
                 elapsed = now - started_monotonic
                 with state_lock:
@@ -217,6 +230,8 @@ def run_bounded_process(
                 f"deadline_seconds={deadline:g})",
             )
 
+        if terminate_descendants:
+            _terminate_process_tree(process, ownership=ownership)
         pipe_close_deadline = time.monotonic() + _PIPE_CLOSE_TIMEOUT_SECONDS
         for reader in readers:
             reader.join(timeout=max(0.0, pipe_close_deadline - time.monotonic()))
@@ -273,7 +288,7 @@ def run_bounded_process(
             )
         return result
     finally:
-        if process.poll() is None:
+        if process.poll() is None or terminate_descendants:
             _terminate_process_tree(process, ownership=ownership)
             with suppress(subprocess.TimeoutExpired):
                 process.wait(timeout=5)

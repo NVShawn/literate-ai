@@ -6,6 +6,7 @@ import hashlib
 import json
 import threading
 import unittest
+from collections import Counter
 from contextlib import contextmanager
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
@@ -753,10 +754,17 @@ class LifecyclePorts:
             if item.component_revision == execution_plan.root_revision
         )
         root_export = root_result.exports[0]
+        from literate_ai.application.release_artifacts import (
+            plan_standard_assembly_dependencies,
+        )
+
         graph = create_artifact_build_graph(
             build_system_driver_identity=manifests[0].build_system_driver_identity,
             manifests=manifests,
             link_roots=(root_export.identity,),
+            assembly_dependencies=plan_standard_assembly_dependencies(
+                execution_plan, results
+            ),
         )
         return graph, graph.link_plans[0]
 
@@ -1215,6 +1223,7 @@ class ContractEvidenceLifecyclePorts(LifecyclePorts):
             stderr_identity=stderr_identity,
             component_revision=plan.component_revision,
             build_evidence_identity=build.identity,
+            provider_artifact_identities=plan.provider_artifact_identities,
             export_identities=build.export_identities,
             root_export_identity=build.exports[0].identity,
             artifact_custody_identity=build.artifact_custody_identity,
@@ -1610,7 +1619,10 @@ class StandardProjectLifecycleTests(unittest.TestCase):
                         )
 
     def setUp(self):
-        self.lock = _diamond_lock()
+        self._configure_dependencies(DependencyKind.GENERATION)
+
+    def _configure_dependencies(self, kind):
+        self.lock = _diamond_lock(dependency_kind=kind)
         self.execution, self.requests = _prepared_execution(self.lock)
         self.nodes = _prepared_nodes(self.execution, self.requests)
         self.names = _names(self.lock)
@@ -1643,6 +1655,7 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         }
 
     def test_diamond_uses_provider_artifacts_before_consumer_builds(self):
+        self._configure_dependencies(DependencyKind.BUILD)
         ports = LifecyclePorts(self.execution, self.names)
         result = _service(ports).execute(
             self.execution,
@@ -1704,14 +1717,14 @@ class StandardProjectLifecycleTests(unittest.TestCase):
                 self.assertEqual(ports.events.count((stage, name)), 1)
             self.assertLess(
                 event_positions[("generate", name)],
-                event_positions[("intent", name)],
-            )
-            self.assertLess(
-                event_positions[("intent", name)],
                 event_positions[("index", name)],
             )
             self.assertLess(
                 event_positions[("index", name)],
+                event_positions[("intent", name)],
+            )
+            self.assertLess(
+                event_positions[("intent", name)],
                 event_positions[("authorize", name)],
             )
             self.assertLess(
@@ -1830,6 +1843,260 @@ class StandardProjectLifecycleTests(unittest.TestCase):
                 ),
             )
 
+    def test_toolchain_providers_bind_exact_accepted_artifacts_before_build(self):
+        self._configure_dependencies(DependencyKind.TOOLCHAIN)
+        ports = LifecyclePorts(self.execution, self.names)
+        result = _service(ports).execute(
+            self.execution,
+            component_lock=self.lock,
+            invalidation=_decision(
+                self.execution, self.names, "money", tuple(self.names.values())
+            ),
+            prepared_nodes=self.nodes,
+            max_parallelism=2,
+        )
+        self.assertTrue(result.successful)
+        positions = {event: index for index, event in enumerate(ports.events)}
+        edges = {
+            edge.identity.uri: edge
+            for action in self.execution.action_plans
+            for edge in action.dependency_edges
+        }.values()
+        for generation in self.execution.generation_plans:
+            uri = generation.component_revision.uri
+            incoming = tuple(
+                edge for edge in edges if edge.consumer_revision.uri == uri
+            )
+            expected = {
+                artifact.identity
+                for edge in incoming
+                if edge.kind is DependencyKind.TOOLCHAIN
+                for artifact in ports.realized_exports[edge.provider_revision.uri]
+            }
+            plan = ports.plans[uri]
+            self.assertEqual(set(plan.provider_artifact_identities), expected)
+            self.assertEqual(
+                {
+                    item.identity
+                    for item in plan.manifest.actions[0].dependency_artifacts
+                },
+                expected,
+            )
+            for artifact in ports.realized_exports[uri]:
+                self.assertEqual(set(artifact.dependency_artifact_identities), expected)
+            for edge in incoming:
+                if edge.kind is DependencyKind.TOOLCHAIN:
+                    self.assertLess(
+                        positions[("accept", self.names[edge.provider_revision.uri])],
+                        positions[("intent", self.names[uri])],
+                    )
+
+    def test_assembly_requires_locked_late_edges_and_exact_provider_acceptance(self):
+        from literate_ai.application.release_artifacts import (
+            ReleaseArtifactAssemblyError,
+            create_standard_artifact_build_graph,
+            plan_standard_assembly_dependencies,
+        )
+
+        for kind in (
+            DependencyKind.RUNTIME,
+            DependencyKind.PACKAGING,
+        ):
+            with self.subTest(kind=kind):
+                self._configure_dependencies(kind)
+                ports = LifecyclePorts(self.execution, self.names)
+                arguments = dict(
+                    component_lock=self.lock,
+                    invalidation=_decision(
+                        self.execution, self.names, "money", tuple(self.names.values())
+                    ),
+                    prepared_nodes=self.nodes,
+                    max_parallelism=2,
+                )
+                result = _service(ports).execute(self.execution, **arguments)
+                self.assertTrue(result.successful)
+                self.assertEqual(
+                    create_standard_artifact_build_graph(
+                        self.execution, result
+                    ).identity,
+                    result.root_integration.artifact_graph.identity,
+                )
+                dependencies = plan_standard_assembly_dependencies(
+                    self.execution, result.node_results
+                )
+                self.assertTrue(dependencies)
+                package = result.root_integration.package_plan
+                self.assertTrue(
+                    {item.provider_artifact_identity for item in dependencies}
+                    <= {item.source_identity for item in package.inputs}
+                )
+                self.assertEqual(len(package.entrypoints), 1)
+                for invalid_results in (
+                    result.node_results[:-1],
+                    (*result.node_results, result.node_results[0]),
+                ):
+                    with self.assertRaises(ReleaseArtifactAssemblyError):
+                        plan_standard_assembly_dependencies(
+                            self.execution, invalid_results
+                        )
+                results = {
+                    item.component_revision: item for item in result.node_results
+                }
+                exports = {
+                    item.identity: node
+                    for node in result.node_results
+                    for item in node.exports
+                }
+                locked_edges = {
+                    edge.identity: edge
+                    for action in self.execution.action_plans
+                    for edge in action.dependency_edges
+                }
+                for item in dependencies:
+                    edge = locked_edges[item.dependency_edge_identity]
+                    self.assertEqual(item.dependency_kind, kind)
+                    self.assertEqual(
+                        exports[item.consumer_artifact_identity].component_revision,
+                        edge.consumer_revision,
+                    )
+                    self.assertEqual(
+                        exports[item.provider_artifact_identity].component_revision,
+                        edge.provider_revision,
+                    )
+                    self.assertEqual(
+                        item.provider_acceptance_identity,
+                        results[edge.provider_revision].acceptance_identity,
+                    )
+
+                class MissingAssemblyPorts(LifecyclePorts):
+                    def assemble_project_artifacts(self, *args):
+                        graph, link = super().assemble_project_artifacts(*args)
+                        # Rebuild a valid but incomplete closure; checking graph
+                        # structure alone cannot detect missing locked authority.
+                        missing = create_artifact_build_graph(
+                            build_system_driver_identity=graph.build_system_driver_identity,
+                            manifests=graph.manifests,
+                            link_roots=(link.root_artifact_identity,),
+                        )
+                        return missing, missing.link_plans[0]
+
+                with self.assertRaisesRegex(
+                    StandardProjectLifecycleError, "locked late dependencies"
+                ):
+                    _service(MissingAssemblyPorts(self.execution, self.names)).execute(
+                        self.execution, **arguments
+                    )
+
+    def test_package_only_provider_does_not_block_local_consumer_build(self):
+        lock = _diamond_lock(include_invoice_money_packaging_edge=True)
+        execution, requests = _prepared_execution(lock)
+        nodes = _prepared_nodes(execution, requests)
+        names = _names(lock)
+        provider_started = threading.Event()
+        consumer_built = threading.Event()
+
+        class PackageOverlapPorts(LifecyclePorts):
+            overlapped = False
+
+            def build(self, plan, provider_artifacts):
+                name = self.names[plan.component_revision.uri]
+                if name == "money":
+                    provider_started.set()
+                    self.overlapped = consumer_built.wait(5)
+                elif name == "invoice-cli":
+                    if not provider_started.wait(5):
+                        raise AssertionError("package provider did not start")
+                output = super().build(plan, provider_artifacts)
+                if name == "invoice-cli":
+                    consumer_built.set()
+                return output
+
+        ports = PackageOverlapPorts(execution, names)
+        result = _service(ports).execute(
+            execution,
+            component_lock=lock,
+            invalidation=_decision(execution, names, "money", tuple(names.values())),
+            prepared_nodes=nodes,
+            max_parallelism=2,
+        )
+        self.assertTrue(result.successful)
+        self.assertTrue(ports.overlapped, "consumer waited for packaging-only provider")
+        self.assertLess(
+            ports.events.index(("build", "invoice-cli")),
+            ports.events.index(("accept", "money")),
+        )
+        money = next(
+            item
+            for item in result.node_results
+            if names[item.component_revision.uri] == "money"
+        )
+        self.assertIn(
+            money.exports[0].identity,
+            {
+                item.source_identity
+                for item in result.root_integration.package_plan.inputs
+            },
+        )
+
+    def test_changed_package_provider_changes_package_not_consumer_build_identity(self):
+        lock = _diamond_lock(include_invoice_money_packaging_edge=True)
+        execution, requests = _prepared_execution(lock)
+        names = _names(lock)
+        arguments = dict(
+            component_lock=lock,
+            invalidation=_decision(execution, names, "money", tuple(names.values())),
+            prepared_nodes=_prepared_nodes(execution, requests),
+            max_parallelism=2,
+        )
+        original = LifecyclePorts(execution, names)
+        changed = LifecyclePorts(
+            execution,
+            names,
+            changed_exports={"money"},
+            export_label="changed-package-provider",
+        )
+        first = _service(original).execute(execution, **arguments)
+        second = _service(changed).execute(execution, **arguments)
+        self.assertTrue(first.successful)
+        self.assertTrue(second.successful)
+        root = execution.root_revision.uri
+        self.assertEqual(original.plans[root].identity, changed.plans[root].identity)
+        self.assertEqual(
+            original.realized_exports[root], changed.realized_exports[root]
+        )
+        self.assertNotEqual(
+            first.root_integration.package_plan.identity,
+            second.root_integration.package_plan.identity,
+        )
+        self.assertNotEqual(
+            first.root_integration.artifact_graph.identity,
+            second.root_integration.artifact_graph.identity,
+        )
+        money = next(uri for uri, name in names.items() if name == "money")
+        package_inputs = {
+            item.source_identity for item in second.root_integration.package_plan.inputs
+        }
+        self.assertIn(changed.realized_exports[money][0].identity, package_inputs)
+        self.assertNotIn(original.realized_exports[money][0].identity, package_inputs)
+
+    def test_failed_package_provider_preserves_compilation_but_blocks_publication(self):
+        lock = _diamond_lock(include_invoice_money_packaging_edge=True)
+        execution, requests = _prepared_execution(lock)
+        names = _names(lock)
+        ports = LifecyclePorts(execution, names, fail_build=("money",))
+        result = _service(ports).execute(
+            execution,
+            component_lock=lock,
+            invalidation=_decision(execution, names, "money", tuple(names.values())),
+            prepared_nodes=_prepared_nodes(execution, requests),
+            max_parallelism=2,
+        )
+        self.assertFalse(result.successful)
+        self.assertIn(("build", "invoice-cli"), ports.events)
+        self.assertNotIn(("create-package", "project"), ports.events)
+        self.assertNotIn(("receipt", "project"), ports.events)
+        self.assertFalse(ports.published_memberships)
+
     def test_packaging_provider_is_separate_from_build_but_joins_package_authority(
         self,
     ):
@@ -1837,10 +2104,9 @@ class StandardProjectLifecycleTests(unittest.TestCase):
 
         ``invoice-cli`` here sees pricing/reporting only through generation-visible
         public interfaces and has a packaging-kind edge straight to money. Public
-        interfaces order generation but do not join the build. Money remains in the
-        separately typed package-provider set and the realized root export's
-        dependency closure, so package assembly and acceptance bind the direct
-        packaging edge without exposing a process environment binding.
+        interfaces are already admitted by the lock. Money joins only the final
+        assembly closure, so its output does not alter compilation provenance or
+        require a build-time process environment binding.
         """
 
         lock = _diamond_lock(include_invoice_money_packaging_edge=True)
@@ -1871,7 +2137,7 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         )
         self.assertEqual(
             ports.plans[invoice_uri].package_artifact_identities,
-            (ports.realized_exports[money_uri][0].identity,),
+            (),
         )
 
         self.assertEqual(
@@ -1890,16 +2156,26 @@ class StandardProjectLifecycleTests(unittest.TestCase):
                 .manifest.actions[0]
                 .package_dependency_artifacts
             ),
-            (ports.realized_exports[money_uri][0].identity,),
+            (),
         )
         self.assertEqual(
             set(ports.realized_exports[invoice_uri][0].dependency_artifact_identities),
+            set(),
+        )
+        graph = result.root_integration.artifact_graph
+        self.assertEqual(
+            {item.provider_artifact_identity for item in graph.assembly_dependencies},
+            {ports.realized_exports[money_uri][0].identity},
+        )
+        self.assertIn(
+            ports.realized_exports[money_uri][0].identity,
             {
-                ports.realized_exports[money_uri][0].identity,
+                item.source_identity
+                for item in result.root_integration.package_plan.inputs
             },
         )
 
-    def test_public_interface_provider_orders_but_does_not_bind_build_artifact(self):
+    def test_public_interface_provider_does_not_bind_build_artifact(self):
         lock = _diamond_lock()
         public_edges = tuple(
             edge for edge in lock.edges if edge.public_interface_identity is not None
@@ -1957,6 +2233,67 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         )
         self.assertTrue(result.successful)
         self.assertTrue(ports.overlapped, "consumer waited for an unrelated layer peer")
+
+    def test_locked_interface_consumer_build_overlaps_provider_build(self):
+        provider_started = threading.Event()
+        consumer_built = threading.Event()
+        names = self.names
+
+        class InterfacePorts(LifecyclePorts):
+            overlapped = False
+
+            def build(self, plan, provider_artifacts):
+                name = names[plan.component_revision.uri]
+                if name == "money":
+                    provider_started.set()
+                    self.overlapped = consumer_built.wait(5)
+                elif name == "pricing":
+                    if not provider_started.wait(5):
+                        raise AssertionError("provider build did not start")
+                result = super().build(plan, provider_artifacts)
+                if name == "pricing":
+                    consumer_built.set()
+                return result
+
+        ports = InterfacePorts(self.execution, names)
+        result = _service(ports).execute(
+            self.execution,
+            component_lock=self.lock,
+            invalidation=_decision(
+                self.execution, names, "money", tuple(names.values())
+            ),
+            prepared_nodes=self.nodes,
+            max_parallelism=2,
+        )
+        self.assertTrue(result.successful)
+        self.assertTrue(ports.overlapped, "locked interface waited for provider build")
+        self.assertLess(
+            ports.events.index(("build", "pricing")),
+            ports.events.index(("accept", "money")),
+        )
+
+    def test_failed_provider_does_not_cancel_locked_interface_consumers(self):
+        ports = LifecyclePorts(self.execution, self.names, fail_build={"money"})
+        result = _service(ports).execute(
+            self.execution,
+            component_lock=self.lock,
+            invalidation=_decision(
+                self.execution, self.names, "money", tuple(self.names.values())
+            ),
+            prepared_nodes=self.nodes,
+            max_parallelism=2,
+        )
+        by_name = {
+            self.names[item.component_revision.uri]: item
+            for item in result.node_results
+        }
+        self.assertFalse(result.successful)
+        self.assertIsNotNone(by_name["money"].failure_code)
+        for name in ("pricing", "reporting", "invoice-cli"):
+            self.assertIsNone(by_name[name].failure_code)
+            self.assertIn(("build", name), ports.events)
+        self.assertNotIn(("admit", "project"), ports.events)
+        self.assertNotIn(("receipt", "project"), ports.events)
 
     def test_consumer_generation_overlaps_provider_build_but_import_waits(self):
         consumer_generated = threading.Event()
@@ -2032,6 +2369,180 @@ class StandardProjectLifecycleTests(unittest.TestCase):
             ),
             1,
         )
+
+    def test_consumer_index_overlaps_provider_build_but_intent_waits(self):
+        consumer_indexed = threading.Event()
+        provider_started = threading.Event()
+        provider_accepted = threading.Event()
+        lock = _diamond_lock(dependency_kind=DependencyKind.BUILD)
+        execution, requests = _prepared_execution(lock)
+        nodes = _prepared_nodes(execution, requests)
+        names = _names(lock)
+
+        class OverlapPorts(LifecyclePorts):
+            overlapped = False
+
+            def index(self, revision, source):
+                if names[revision.uri] == "pricing":
+                    if not provider_started.wait(5):
+                        raise AssertionError("provider build did not start")
+                    consumer_indexed.set()
+                return super().index(revision, source)
+
+            def create(self, execution_plan, generation_plan, *args):
+                if names[generation_plan.component_revision.uri] == "pricing":
+                    if not provider_accepted.is_set():
+                        raise AssertionError("intent used an unaccepted provider")
+                return super().create(execution_plan, generation_plan, *args)
+
+            def build(self, plan, provider_artifacts):
+                if names[plan.component_revision.uri] == "money":
+                    provider_started.set()
+                    self.overlapped = consumer_indexed.wait(5)
+                return super().build(plan, provider_artifacts)
+
+            def accept(self, plan, test_identity, execution_identity):
+                result = super().accept(plan, test_identity, execution_identity)
+                if names[plan.component_revision.uri] == "money":
+                    provider_accepted.set()
+                return result
+
+        ports = OverlapPorts(execution, names)
+        result = _service(ports).execute(
+            execution,
+            component_lock=lock,
+            invalidation=_decision(execution, names, "money", tuple(names.values())),
+            prepared_nodes=nodes,
+            max_parallelism=2,
+        )
+        self.assertTrue(result.successful)
+        self.assertTrue(ports.overlapped, "consumer indexing waited for provider build")
+
+    def test_component_build_phases_are_dispatched_as_separate_pool_operations(self):
+        ports = LifecyclePorts(self.execution, self.names)
+        service = _service(ports)
+        original = service._run_step
+        stages = []
+        guard = threading.Lock()
+
+        def dispatch(step):
+            self.assertIsNot(threading.current_thread(), threading.main_thread())
+            with guard:
+                stages.append(step.stage)
+            return original(step)
+
+        service._run_step = dispatch
+        result = service.execute(
+            self.execution,
+            component_lock=self.lock,
+            invalidation=_decision(
+                self.execution, self.names, "money", tuple(self.names.values())
+            ),
+            prepared_nodes=self.nodes,
+            max_parallelism=2,
+        )
+        self.assertTrue(result.successful)
+        self.assertEqual(
+            Counter(stages),
+            {
+                stage: len(self.nodes)
+                for stage in (
+                    StandardLifecycleStage.SOURCE_GENERATION,
+                    StandardLifecycleStage.BUILD_INTENT,
+                    StandardLifecycleStage.SOURCE_INDEX,
+                    StandardLifecycleStage.BUILD_AUTHORIZATION,
+                    StandardLifecycleStage.BUILD_PLAN,
+                    StandardLifecycleStage.BUILD,
+                    StandardLifecycleStage.TEST,
+                    StandardLifecycleStage.EXECUTE,
+                    StandardLifecycleStage.ACCEPT,
+                )
+            },
+        )
+
+    def test_malformed_dispatched_build_response_cannot_unlock_later_phases(self):
+        ports = LifecyclePorts(self.execution, self.names)
+        service = _service(ports)
+        original = service._run_step
+        stages = []
+
+        def dispatch(step):
+            stages.append(step.stage)
+            if step.stage is StandardLifecycleStage.BUILD:
+                return object()
+            return original(step)
+
+        service._run_step = dispatch
+        result = service.execute(
+            self.execution,
+            component_lock=self.lock,
+            invalidation=_decision(
+                self.execution, self.names, "money", tuple(self.names.values())
+            ),
+            prepared_nodes=self.nodes,
+            max_parallelism=2,
+        )
+        self.assertFalse(result.successful)
+        money = next(
+            item
+            for item in result.node_results
+            if self.names[item.component_revision.uri] == "money"
+        )
+        self.assertEqual(money.failure_code, "standard_lifecycle.build_output_invalid")
+        for stage in (
+            StandardLifecycleStage.TEST,
+            StandardLifecycleStage.EXECUTE,
+            StandardLifecycleStage.ACCEPT,
+        ):
+            self.assertNotIn(stage, stages)
+        self.assertNotIn(("admit", "project"), ports.events)
+        self.assertNotIn(("receipt", "project"), ports.events)
+
+    def test_queued_host_phase_rechecks_authorization_when_it_starts(self):
+        for selected in (
+            StandardLifecycleStage.BUILD,
+            StandardLifecycleStage.TEST,
+            StandardLifecycleStage.EXECUTE,
+            StandardLifecycleStage.ACCEPT,
+        ):
+            with self.subTest(phase=selected):
+                ports = LifecyclePorts(self.execution, self.names)
+                service = _service(ports)
+                original = service._run_step
+                now = [datetime(2026, 8, 7, 0, 1, tzinfo=UTC)]
+                service.clock = lambda now=now: now[0]
+
+                def dispatch(step, selected=selected, now=now, original=original):
+                    if step.stage is selected:
+                        now[0] += timedelta(hours=1)
+                    return original(step)
+
+                service._run_step = dispatch
+                result = service.execute(
+                    self.execution,
+                    component_lock=self.lock,
+                    invalidation=_decision(
+                        self.execution, self.names, "money", tuple(self.names.values())
+                    ),
+                    prepared_nodes=self.nodes,
+                    max_parallelism=2,
+                )
+                self.assertFalse(result.successful)
+                expired = [
+                    item
+                    for item in result.node_results
+                    if item.failure_code == "security.authorization_expired"
+                    and item.failure_evidence.phase
+                    is StandardNodeFailurePhase(selected.value)
+                ]
+                self.assertTrue(
+                    expired, "queued phase did not reject expired authority"
+                )
+                for item in expired:
+                    name = self.names[item.component_revision.uri]
+                    self.assertNotIn((selected.value, name), ports.events)
+                self.assertNotIn(("admit", "project"), ports.events)
+                self.assertNotIn(("receipt", "project"), ports.events)
 
     def test_run_scoped_diagnostics_propagate_to_parallel_component_nodes(self):
         ports = _VerboseContextPorts(self.execution, self.names)
@@ -2827,6 +3338,7 @@ class StandardProjectLifecycleTests(unittest.TestCase):
     def test_failing_node_cancels_consumer_and_preserves_independent_resume(
         self,
     ):
+        self._configure_dependencies(DependencyKind.BUILD)
         baseline = self._accepted_baseline()
         ports = LifecyclePorts(self.execution, self.names, fail_build={"pricing"})
         reporting_uri = next(
@@ -2923,6 +3435,109 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         self.assertNotIn("topsecret", failed.failure_evidence.diagnostic)
         self.assertNotIn("/Users/operator", failed.failure_evidence.diagnostic)
 
+    def test_rejected_provider_preserves_index_without_consumer_intent_or_repair(self):
+        lock = _diamond_lock(
+            dependency_kind=DependencyKind.BUILD, independent_reporting=True
+        )
+        execution, requests = _prepared_execution(lock)
+        nodes = _prepared_nodes(execution, requests)
+        names = _names(lock)
+        ports = PhaseFailurePorts(execution, names, "accept")
+        diagnosed = []
+
+        class TerminalRepairPort(_RepairPort):
+            def diagnose(self, failure, output):
+                diagnosed.append(names[failure.component_revision.uri])
+                return CandidateRepairDiagnostic(
+                    failure.component_revision,
+                    failure.phase,
+                    failure.code,
+                    "independent acceptance rejected the provider",
+                    CandidateFailureClassification.TERMINAL,
+                    failure.identity,
+                )
+
+        repair = TerminalRepairPort()
+        recorder = _CheckpointRecorder()
+        result = _service(
+            ports, candidate_repair_port=repair, checkpoint_recorder=recorder
+        ).execute(
+            execution,
+            component_lock=lock,
+            invalidation=_decision(execution, names, "money", tuple(names.values())),
+            prepared_nodes=nodes,
+            max_parallelism=2,
+        )
+        by_name = {
+            names[node.component_revision.uri]: node for node in result.node_results
+        }
+        self.assertFalse(result.successful)
+        self.assertIsNone(by_name["reporting"].failure_evidence)
+        self.assertIs(
+            by_name["money"].failure_evidence.phase, StandardNodeFailurePhase.ACCEPT
+        )
+        for name in ("pricing", "invoice-cli"):
+            node = by_name[name]
+            self.assertEqual(node.failure_code, "dependency.failed")
+            self.assertIs(
+                node.failure_evidence.phase, StandardNodeFailurePhase.DEPENDENCY
+            )
+            self.assertIsNotNone(node.index_identity)
+            self.assertIn(("index", name), ports.events)
+            for stage in ("intent", "authorize", "build", "accept", "publish"):
+                self.assertNotIn((stage, name), ports.events)
+            self.assertTrue(
+                any(
+                    item.component_revision == node.component_revision
+                    and item.stage is StandardLifecycleStage.SOURCE_INDEX
+                    and item.outcome is StandardLifecycleCheckpointOutcome.PASSED
+                    for item in recorder.evidence
+                )
+            )
+        self.assertEqual(diagnosed, ["money"])
+        self.assertEqual(repair.preparations, [])
+        self.assertNotIn(("admit", "project"), ports.events)
+        self.assertNotIn(("receipt", "project"), ports.events)
+
+    def test_execution_refuses_missing_or_substituted_provider_evidence(self):
+        self._configure_dependencies(DependencyKind.BUILD)
+        for changed in ((), (_identity("substituted-provider"),)):
+            with self.subTest(changed=changed):
+
+                class ChangedExecutionPorts(ContractEvidenceLifecyclePorts):
+                    def execute(self, plan, exports):
+                        evidence = super().execute(plan, exports)
+                        if self.names[plan.component_revision.uri] == "pricing":
+                            return replace(
+                                evidence,
+                                provider_artifact_identities=self.changed_inputs,
+                            )
+                        return evidence
+
+                ports = ChangedExecutionPorts(self.execution, self.names)
+                ports.changed_inputs = changed
+                result = _service(ports).execute(
+                    self.execution,
+                    component_lock=self.lock,
+                    invalidation=_decision(
+                        self.execution, self.names, "money", tuple(self.names.values())
+                    ),
+                    prepared_nodes=self.nodes,
+                    max_parallelism=2,
+                )
+                self.assertFalse(result.successful)
+                rejected = next(
+                    item
+                    for item in result.node_results
+                    if self.names[item.component_revision.uri] == "pricing"
+                )
+                self.assertEqual(
+                    rejected.failure_evidence.code,
+                    "standard_lifecycle.execution_evidence_mismatch",
+                )
+                self.assertNotIn(("accept", "pricing"), ports.events)
+                self.assertNotIn(("receipt", "project"), ports.events)
+
     def test_each_phase_has_sanitized_typed_failure_and_stops_downstream(self):
         cases = (
             (
@@ -2935,13 +3550,13 @@ class StandardProjectLifecycleTests(unittest.TestCase):
                 "intent",
                 StandardNodeFailurePhase.BUILD_INTENT,
                 "build-intent.failed",
-                "index",
+                "authorize",
             ),
             (
                 "index",
                 StandardNodeFailurePhase.SOURCE_INDEX,
                 "source-index.failed",
-                "authorize",
+                "intent",
             ),
             (
                 "authorize",
@@ -3501,7 +4116,10 @@ class StandardProjectLifecycleTests(unittest.TestCase):
 
         self.assertFalse(result.successful)
         self.assertNotIn(("generate", "money"), ports.events)
-        self.assertFalse(any(stage == "build" for stage, _name in ports.events))
+        self.assertNotIn(("build", "money"), ports.events)
+        self.assertIn(("build", "pricing"), ports.events)
+        self.assertNotIn(("admit", "project"), ports.events)
+        self.assertNotIn(("receipt", "project"), ports.events)
         money = next(
             item
             for item in result.node_results
@@ -3638,6 +4256,7 @@ class StandardProjectLifecycleTests(unittest.TestCase):
         self.assertEqual(
             len({item.workspace_allocation_identity for item in chain.attempts}), 3
         )
+        self.assertEqual(ports.events.count(("index", "money")), 3)
         self.assertEqual(
             sum(event == ("publish", "money") for event in ports.events),
             1,
@@ -3760,8 +4379,8 @@ class StandardProjectLifecycleTests(unittest.TestCase):
             [item.stage for item in evidence],
             [
                 StandardLifecycleStage.SOURCE_GENERATION,
-                StandardLifecycleStage.BUILD_INTENT,
                 StandardLifecycleStage.SOURCE_INDEX,
+                StandardLifecycleStage.BUILD_INTENT,
                 StandardLifecycleStage.BUILD_AUTHORIZATION,
                 StandardLifecycleStage.BUILD_PLAN,
                 StandardLifecycleStage.BUILD,

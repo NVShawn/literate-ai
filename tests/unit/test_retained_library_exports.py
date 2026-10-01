@@ -136,10 +136,14 @@ class RetainedLibraryExportTests(unittest.TestCase):
 
     def test_truncated_graph_refuses_even_when_products_remain(self):
         value = self.fixture()
-        wire = copy.deepcopy(value.to_dict())
-        wire["graph"]["manifests"] = wire["graph"]["manifests"][:-1]
-        with self.assertRaises(ContractValidationError):
-            RetainedLibraryExportSet.from_dict(wire)
+        for index in range(len(value.graph.manifests)):
+            wire = copy.deepcopy(value.to_dict())
+            del wire["graph"]["manifests"][index]
+            with (
+                self.subTest(removed=index),
+                self.assertRaises(ContractValidationError),
+            ):
+                RetainedLibraryExportSet.from_dict(wire)
 
     def test_untyped_or_oversized_products_refuse_before_parsing(self):
         value = self.fixture()

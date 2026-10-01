@@ -39,6 +39,7 @@ EXECUTION_WORKER_ENVIRONMENT_SCHEMA = (
 )
 EXECUTION_WORKER_SCHEMA = "urn:literate-ai:schema:v1:execution-worker"
 EXECUTION_WORKER_CATALOG_SCHEMA = "urn:literate-ai:schema:v1:execution-worker-catalog"
+LIFECYCLE_ACTION_WIRE_PROTOCOL = "literate-ai/lifecycle-action-wire@1"
 EXECUTION_DISPATCH_REQUEST_SCHEMA = (
     "urn:literate-ai:schema:v2:execution-dispatch-request"
 )
@@ -701,6 +702,8 @@ class ExecutionWorker:
     transport: str = "ssh"
     lifecycle_executable: str | None = None
     slots: int = 1
+    action_protocol: str | None = None
+    action_command: tuple[str, ...] = ()
 
     SCHEMA: ClassVar[str] = EXECUTION_WORKER_SCHEMA
 
@@ -719,6 +722,31 @@ class ExecutionWorker:
         _sorted_unique(environment_names, "ExecutionWorker.environment")
         _identifier(self.transport, "ExecutionWorker.transport")
         int_value(self.slots, "ExecutionWorker.slots", minimum=1, maximum=256)
+        if (
+            self.action_protocol is not None
+            and self.action_protocol != LIFECYCLE_ACTION_WIRE_PROTOCOL
+        ):
+            fail("ExecutionWorker.action_protocol", "unsupported action protocol")
+        if not isinstance(self.action_command, tuple):
+            fail("ExecutionWorker.action_command", "must be a tuple")
+        if self.action_command:
+            if (
+                self.kind is not ExecutionWorkerKind.SSH
+                or self.action_protocol != LIFECYCLE_ACTION_WIRE_PROTOCOL
+                or len(self.action_command) > MAX_WORKER_ARGUMENTS
+                or any(
+                    not isinstance(item, str)
+                    or not item
+                    or len(item) > 4096
+                    or any(character in item for character in ("\x00", "\r", "\n"))
+                    or "{request_file}" in item
+                    for item in self.action_command
+                )
+            ):
+                fail(
+                    "ExecutionWorker.action_command",
+                    "requires bounded literal SSH action arguments and protocol opt-in",
+                )
         if self.kind is ExecutionWorkerKind.LOCAL:
             if (
                 self.endpoint is not None
@@ -727,6 +755,7 @@ class ExecutionWorker:
                 or self.environment
                 or self.transport != "ssh"
                 or self.lifecycle_executable is not None
+                or self.action_protocol is not None
             ):
                 fail(
                     "ExecutionWorker",
@@ -808,6 +837,16 @@ class ExecutionWorker:
             "transport": self.transport,
             "lifecycle_executable": self.lifecycle_executable,
             "slots": self.slots,
+            **(
+                {"action_command": list(self.action_command)}
+                if self.action_command
+                else {}
+            ),
+            **(
+                {"action_protocol": self.action_protocol}
+                if self.action_protocol is not None
+                else {}
+            ),
         }
 
     @classmethod
@@ -829,7 +868,15 @@ class ExecutionWorker:
                     "environment",
                 }
             ),
-            optional=frozenset({"transport", "lifecycle_executable", "slots"}),
+            optional=frozenset(
+                {
+                    "transport",
+                    "lifecycle_executable",
+                    "slots",
+                    "action_protocol",
+                    "action_command",
+                }
+            ),
         )
         return cls(
             _identifier(data["worker_id"], f"{path}.worker_id"),
@@ -867,6 +914,13 @@ class ExecutionWorker:
                 data.get("lifecycle_executable"), f"{path}.lifecycle_executable"
             ),
             int_value(data.get("slots", 1), f"{path}.slots", minimum=1, maximum=256),
+            optional_string(data.get("action_protocol"), f"{path}.action_protocol"),
+            tuple(
+                string_value(item, f"{path}.action_command")
+                for item in list_value(
+                    data.get("action_command", []), f"{path}.action_command"
+                )
+            ),
         )
 
 
@@ -877,8 +931,8 @@ class ExecutionWorkerCatalog:
     SCHEMA: ClassVar[str] = EXECUTION_WORKER_CATALOG_SCHEMA
 
     def __post_init__(self) -> None:
-        if not self.workers or len(self.workers) > MAX_EXECUTION_WORKERS:
-            fail("ExecutionWorkerCatalog.workers", "must contain 1 to 256 workers")
+        if len(self.workers) > MAX_EXECUTION_WORKERS:
+            fail("ExecutionWorkerCatalog.workers", "must contain 0 to 256 workers")
         worker_ids = tuple(item.worker_id for item in self.workers)
         _sorted_unique(worker_ids, "ExecutionWorkerCatalog.workers")
 

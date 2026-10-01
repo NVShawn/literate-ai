@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import tarfile
 import tempfile
 import unittest
@@ -20,6 +21,7 @@ from literate_ai.adapters.cache import (
     SourceCacheResolver,
     restore_standard_source_cache_membership,
 )
+from literate_ai.adapters.cache.filesystem import _native_filesystem_path
 from literate_ai.adapters.source_materialization import (
     capture_accepted_source_cache_archive,
 )
@@ -385,74 +387,83 @@ class StandardSourceCacheRoundTripTests(unittest.TestCase):
     def test_twelve_published_keys_round_trip_through_portable_archive(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
-            project = root / ("project with spaces " + ("long-" * 20))
-            staging = root / "staging"
-            project.mkdir()
-            staging.mkdir()
-            caller_cas = FileSystemCAS(root / "caller-cas")
-            cache_root = project / "generated" / "accepted-source-cache"
-            coordinator = FileSystemSourceCache("runtime", cache_root)
-            entries = tuple(
-                _accepted_entry(
-                    caller_cas,
-                    suffix=f"node-{index}",
-                    key=_cache_key(selector=f"model-node-{index}"),
-                )
-                for index in range(12)
-            )
-            for entry in entries:
-                coordinator.publish(entry, caller_cas=caller_cas)
-
-            with patch.dict(os.environ, {"BUILD_DIR": str(project / "generated")}):
-                reference = capture_accepted_source_cache_archive(
-                    project, directory=staging
-                )
-            self.assertIsNotNone(reference)
-            archive = staging / "accepted-source-cache.tar.gz"
-            with tarfile.open(archive, "r:gz") as stream:
-                names = tuple(item.name for item in stream.getmembers())
-            self.assertTrue(names)
-            self.assertFalse(any("\\" in name for name in names))
-
-            restored_root = root / "short build root" / "accepted-source-cache"
-            restored_root.parent.mkdir()
-            extract_accepted_source_cache_archive(archive, restored_root)
-            restored = FileSystemSourceCache("runtime", restored_root)
-            long_lookup = (
-                cache_root
-                / "keys"
-                / "sha256"
-                / entries[0].derivation.cache_key.identity.digest
-                / f"{entries[0].identity.digest}.json"
-            )
-            self.assertGreater(len(str(long_lookup)), 260)
-            original_read_bytes = Path.read_bytes
-
-            def reject_checkout_cache_lookup(path: Path) -> bytes:
-                if path.resolve().is_relative_to(cache_root.resolve()):
-                    raise AssertionError(
-                        "restored lookup touched the long request-checkout cache"
+            try:
+                project = root / ("project with spaces " + ("long-" * 20))
+                staging = root / "staging"
+                project.mkdir()
+                staging.mkdir()
+                caller_cas = FileSystemCAS(root / "caller-cas")
+                cache_root = project / "generated" / "accepted-source-cache"
+                coordinator = FileSystemSourceCache("runtime", cache_root)
+                entries = tuple(
+                    _accepted_entry(
+                        caller_cas,
+                        suffix=f"node-{index}",
+                        key=_cache_key(selector=f"model-node-{index}"),
                     )
-                return original_read_bytes(path)
-
-            with patch.object(Path, "read_bytes", reject_checkout_cache_lookup):
-                candidates = tuple(
-                    candidate
-                    for entry in entries
-                    for candidate in restored.candidates(entry.derivation.cache_key)
+                    for index in range(12)
                 )
-            self.assertEqual(
-                len(candidates),
-                12,
-            )
-            self.assertEqual(
-                len(tuple((restored_root / "keys" / "sha256").glob("*/*.json"))),
-                12,
-            )
-            self.assertEqual(
-                {candidate.identity for candidate in candidates},
-                {entry.identity for entry in entries},
-            )
+                for entry in entries:
+                    coordinator.publish(entry, caller_cas=caller_cas)
+
+                with patch.dict(os.environ, {"BUILD_DIR": str(project / "generated")}):
+                    reference = capture_accepted_source_cache_archive(
+                        project, directory=staging
+                    )
+                self.assertIsNotNone(reference)
+                archive = staging / "accepted-source-cache.tar.gz"
+                with tarfile.open(archive, "r:gz") as stream:
+                    names = tuple(item.name for item in stream.getmembers())
+                self.assertTrue(names)
+                self.assertFalse(any("\\" in name for name in names))
+
+                restored_root = root / "short build root" / "accepted-source-cache"
+                restored_root.parent.mkdir()
+                extract_accepted_source_cache_archive(archive, restored_root)
+                restored = FileSystemSourceCache("runtime", restored_root)
+                long_lookup = (
+                    cache_root
+                    / "keys"
+                    / "sha256"
+                    / entries[0].derivation.cache_key.identity.digest
+                    / f"{entries[0].identity.digest}.json"
+                )
+                self.assertGreater(len(str(long_lookup)), 260)
+                original_read_bytes = Path.read_bytes
+
+                def reject_checkout_cache_lookup(path: Path) -> bytes:
+                    if (
+                        Path(_native_filesystem_path(path.absolute()))
+                        .resolve()
+                        .is_relative_to(
+                            Path(_native_filesystem_path(cache_root)).resolve()
+                        )
+                    ):
+                        raise AssertionError(
+                            "restored lookup touched the long request-checkout cache"
+                        )
+                    return original_read_bytes(path)
+
+                with patch.object(Path, "read_bytes", reject_checkout_cache_lookup):
+                    candidates = tuple(
+                        candidate
+                        for entry in entries
+                        for candidate in restored.candidates(entry.derivation.cache_key)
+                    )
+                self.assertEqual(
+                    len(candidates),
+                    12,
+                )
+                self.assertEqual(
+                    len(tuple((restored_root / "keys" / "sha256").glob("*/*.json"))),
+                    12,
+                )
+                self.assertEqual(
+                    {candidate.identity for candidate in candidates},
+                    {entry.identity for entry in entries},
+                )
+            finally:
+                shutil.rmtree(Path(_native_filesystem_path(root)))
 
     def test_complete_publication_binds_every_durable_cache_input(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

@@ -47,6 +47,20 @@ def canonical_json_bytes(value: Any) -> bytes:
     ).encode("utf-8")
 
 
+def _native_cas_path(path: Path) -> str | Path:
+    """Use the Win32 extended namespace consistently at the CAS blob I/O boundary."""
+    if os.name != "nt":
+        return path
+    value = os.fspath(path)
+    if value.startswith("\\\\?\\"):
+        return value
+    if not path.is_absolute():
+        raise StorageSafetyError("CAS native paths must be absolute")
+    if value.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + value[2:]
+    return "\\\\?\\" + value
+
+
 class FileSystemCAS:
     """A filesystem CAS that never overwrites an existing blob identity."""
 
@@ -61,7 +75,7 @@ class FileSystemCAS:
         self.root = configured.resolve(strict=True)
         if not self.root.is_dir():
             raise StorageSafetyError("CAS root must be a directory")
-        self.blob_root = self.root / "blobs" / "sha256"
+        self.blob_root = Path(_native_cas_path(self.root / "blobs" / "sha256"))
         if create:
             self.blob_root.mkdir(mode=0o700, parents=True, exist_ok=True)
         elif not self.blob_root.is_dir():
@@ -304,7 +318,7 @@ class FileSystemCAS:
             try:
                 # Linking is an atomic create-if-absent operation. Unlike replace(),
                 # it cannot overwrite an immutable identity won by another process.
-                os.link(temp_path, destination)
+                os.link(_native_cas_path(temp_path), _native_cas_path(destination))
             except FileExistsError:
                 self.verify(reference)
             else:
@@ -316,7 +330,8 @@ class FileSystemCAS:
         if path.is_symlink() or not path.is_dir():
             raise StorageSafetyError("managed CAS path must be a regular directory")
         resolved = path.resolve(strict=True)
-        if resolved != self.root and not resolved.is_relative_to(self.root):
+        native_root = Path(_native_cas_path(self.root))
+        if resolved != native_root and not resolved.is_relative_to(native_root):
             raise StorageSafetyError("managed CAS path escaped its root")
 
     @staticmethod

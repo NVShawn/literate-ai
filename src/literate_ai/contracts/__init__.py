@@ -83,6 +83,7 @@ from .components import (
 )
 from .cpp_libraries import CppLibraryLayout
 from .executable_components import (
+    ARTIFACT_ASSEMBLY_DEPENDENCY_SCHEMA,
     ARTIFACT_BUILD_GRAPH_SCHEMA,
     ARTIFACT_EXPORT_DECLARATION_SCHEMA,
     ARTIFACT_EXPORT_SCHEMA,
@@ -152,6 +153,7 @@ from .executable_components import (
     STANDARD_PYTHON_WHEEL_COMMAND_PROFILE_SCHEMA,
     STANDARD_REPO_MAN_COMMAND_PROFILE_SCHEMA,
     STANDARD_TOOLCHAIN_CLOSURE_SCHEMA,
+    ArtifactAssemblyDependency,
     ArtifactBuildGraph,
     ArtifactExport,
     ArtifactExportDeclaration,
@@ -706,6 +708,10 @@ from .specifications import (
     SpecificationScenario,
     SpecificationSet,
 )
+from .standard_execution_inputs import (
+    StandardExecutionAuthority,
+    StandardExecutionInputScope,
+)
 from .standard_lifecycle import (
     STANDARD_BUILD_AUTHORIZATION_SCHEMA,
     STANDARD_COMPONENT_BUILD_INTENT_SCHEMA,
@@ -864,6 +870,7 @@ __all__ = [
     "CURRENT_STANDARD_LIFECYCLE_POLICY_RESOURCE",
     "ACCEPTED_SOURCE_DERIVATION_SCHEMA",
     "AggregateSourceMember",
+    "ARTIFACT_ASSEMBLY_DEPENDENCY_SCHEMA",
     "ARTIFACT_BUILD_GRAPH_SCHEMA",
     "ARTIFACT_EXPORT_DECLARATION_SCHEMA",
     "ARTIFACT_EXPORT_SCHEMA",
@@ -918,6 +925,7 @@ __all__ = [
     "PROVIDER_RESOLUTION_REQUEST_SCHEMA",
     "PROVIDER_RESOLUTION_SCHEMA",
     "PROVIDER_RESOLVER_POLICY_IDENTITY",
+    "ArtifactAssemblyDependency",
     "ArtifactBuildGraph",
     "ArtifactExport",
     "ArtifactExportDeclaration",
@@ -1463,6 +1471,8 @@ __all__ = [
     "StandardComponentAcceptanceEvidence",
     "StandardComponentBuildIntentDocument",
     "StandardComponentBuildPlanDocument",
+    "StandardExecutionInputScope",
+    "StandardExecutionAuthority",
     "StandardEvidenceOutcome",
     "StandardExecutionEvidence",
     "StandardEntrypointExecutionEvidence",

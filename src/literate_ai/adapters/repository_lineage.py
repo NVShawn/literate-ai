@@ -487,6 +487,40 @@ class GitRepositorySnapshotProvider:
             parent_selection=parent_selection,
         )
 
+    def update_blobs(
+        self, reference: RepositoryParentReference, paths: tuple[str, ...]
+    ) -> dict[str, bytes]:
+        """Read historical update bases without checkout, filters, or hooks."""
+        import re
+
+        if not re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", reference.requested_revision):
+            raise ValueError("update base recovery requires an exact commit")
+        for path in paths:
+            parsed = PurePosixPath(path)
+            if (
+                parsed.is_absolute()
+                or parsed.as_posix() != path
+                or ".." in parsed.parts
+                or "\\" in path
+            ):
+                raise ValueError("unsafe update base path")
+        with self._locked_repository(reference.repository_url) as repository:
+            present = self._run(
+                repository, "cat-file", "-e", reference.requested_revision + "^{commit}"
+            )
+            if present.returncode:
+                self._fetch(repository, reference)
+            result = {}
+            for path in paths:
+                try:
+                    result[path] = self._blob(
+                        repository, reference.requested_revision, path
+                    )
+                except GitRepositoryLineageError as exc:
+                    if exc.code != "repository_lineage.authority_missing":
+                        raise
+            return result
+
     def catalog(self, node) -> ResolvedRepositoryCatalog:
         """Read declared catalog roots at one locked revision without checkout."""
 

@@ -67,6 +67,7 @@ from literate_ai.adapters.lifecycle.standard_local import (
     LocalSourceTreeRegistry,
     LocalStandardLifecyclePorts,
     RegisteredSourceGenerationRunner,
+    required_command_toolchains,
 )
 from literate_ai.adapters.lifecycle.standard_npm import StandardNpmTarget
 from literate_ai.adapters.lifecycle.standard_python import StandardPythonTarget
@@ -315,8 +316,23 @@ class ProjectedStandardToolchainClosure:
     provider_environment: Mapping[str, tuple[str, str]]
     dependency_observation: HostDependencyObservation
     python_targets: tuple[StandardPythonTarget, ...] = ()
+    command_phases: tuple[ComponentCommandPhase, ...] = tuple(ComponentCommandPhase)
+    dependency_guard: Callable[[], None] | None = field(
+        default=None, repr=False, compare=False
+    )
 
     def require_unchanged(self) -> None:
+        if self.dependency_guard is not None:
+            self.dependency_guard()
+        required = required_command_toolchains(
+            self.contracts, self.command_phases, self.npm_targets
+        )
+        if (
+            len({item.toolchain_identity.uri for item in self.tool_bindings})
+            != len(self.tool_bindings)
+            or {item.toolchain_identity.uri for item in self.tool_bindings} != required
+        ):
+            raise ValueError("Standard scoped tool bindings changed after projection")
         for binding in self.tool_bindings:
             binding.require_unchanged()
         for authority in self.toolchain_authorities:
@@ -1970,6 +1986,9 @@ def project_locked_standard_toolchain_closure(
     ]
     | None = None,
     native_sdk_inputs=None,
+    command_phases: tuple[ComponentCommandPhase, ...] = tuple(ComponentCommandPhase),
+    observer_identity: ContentIdentity | None = None,
+    dependency_guard: Callable[[], None] | None = None,
 ) -> ProjectedStandardToolchainClosure:
     """Derive all Standard command authority from one exact lock and its Flavors."""
 
@@ -1981,6 +2000,22 @@ def project_locked_standard_toolchain_closure(
         raise TypeError("snapshot must provide locked generation authority")
     if not isinstance(execution_plan, ComponentExecutionPlan):
         raise TypeError("execution_plan must be a ComponentExecutionPlan")
+    required_command_toolchains((), command_phases)
+    if observer_identity is not None and not isinstance(
+        observer_identity, ContentIdentity
+    ):
+        raise TypeError("observer_identity must be a ContentIdentity")
+    if not command_phases and (
+        host_platform is None
+        or toolchain_discoverer is None
+        or dependency_observer is None
+        or observer_identity is None
+    ):
+        raise StandardCommandProjectionError(
+            "standard_command.observation_required",
+            "custody-only projection requires explicit platform, tool discovery, "
+            "dependency observation and observer identity",
+        )
     snapshot.require_unchanged()
     if execution_plan.component_lock_identity != snapshot.authority.lock.identity:
         raise StandardCommandProjectionError(
@@ -2240,7 +2275,10 @@ def project_locked_standard_toolchain_closure(
 
         npm_discover = npm_toolchain_discoverer or _discover_selected_npm
         try:
-            tools["npm"] = npm_discover(node_toolchain, configured)
+            if not command_phases and npm_toolchain_discoverer is None:
+                tools["npm"] = discover("npm", npm_constraint, configured)
+            else:
+                tools["npm"] = npm_discover(node_toolchain, configured)
         except Exception as exc:
             raise StandardCommandProjectionError(
                 "standard_command.npm_toolchain_unavailable",
@@ -2307,8 +2345,13 @@ def project_locked_standard_toolchain_closure(
         elif isinstance(target, StandardPythonTarget):
             python_targets.append(target)
     bindings_by_identity = {}
+    scoped_identities = required_command_toolchains(
+        tuple(contracts), command_phases, tuple(npm_targets)
+    )
     for contract in contracts:
         for identity in contract.execution_toolchain_identities:
+            if identity.uri not in scoped_identities:
+                continue
             tool = next(
                 item for item in tools.values() if item.identity == identity.uri
             )
@@ -2326,7 +2369,8 @@ def project_locked_standard_toolchain_closure(
         ): edge
         for action_plan in execution_plan.action_plans
         for edge in action_plan.dependency_edges
-        if edge.semantics.consumed_input is DependencyInputKind.ARTIFACT_EXPORT
+        if edge.semantics.consumed_input
+        in {DependencyInputKind.ARTIFACT_EXPORT, DependencyInputKind.TOOLCHAIN}
     }
     for edge in provider_edges.values():
         provider = contracts_by_revision[edge.provider_revision.uri]
@@ -2368,7 +2412,8 @@ def project_locked_standard_toolchain_closure(
             bindings_by_identity[key] for key in sorted(bindings_by_identity)
         ),
         dependency_observation=observation,
-        observer_identity=canonical_identity(
+        observer_identity=observer_identity
+        or canonical_identity(
             {
                 "schema": "literate-ai/standard-toolchain-observer@1",
                 "adapter": "portable-host-dependency-observer@1",
@@ -2380,11 +2425,38 @@ def project_locked_standard_toolchain_closure(
         npm_targets=tuple(npm_targets),
         python_targets=tuple(python_targets),
         provider_environment=provider_environment,
-        toolchain_authorities=tuple(
-            LocalObservedToolchainAuthority.from_observed_toolchain(tools[name])
-            for name in sorted(tools)
-        ),
+        toolchain_authorities=_observed_tool_authorities(tools),
+        command_phases=command_phases,
+        dependency_guard=dependency_guard,
     )
+
+
+def _observed_tool_authorities(tools):
+    groups = {}
+    for name in sorted(tools):
+        tool = tools[name]
+        groups.setdefault(tool.identity, []).append(tool)
+    result = []
+    for identity, values in sorted(groups.items()):
+        selected = tuple(values)
+        first = selected[0]
+        if any(
+            tool.command != first.command
+            or getattr(tool, "environment", ()) != getattr(first, "environment", ())
+            for tool in selected
+        ):
+            raise ValueError(
+                "aliased tool observations disagree on command or environment"
+            )
+
+        def guard(selected=selected):
+            for tool in selected:
+                tool.require_unchanged()
+
+        result.append(
+            LocalObservedToolchainAuthority(ContentIdentity.parse_uri(identity), guard)
+        )
+    return tuple(result)
 
 
 def project_standard_toolchain_closure(
@@ -2400,11 +2472,17 @@ def project_standard_toolchain_closure(
     python_targets: tuple[StandardPythonTarget, ...] = (),
     provider_environment: Mapping[str, tuple[str, str]] | None = None,
     toolchain_authorities: tuple[LocalObservedToolchainAuthority, ...] = (),
+    command_phases: tuple[ComponentCommandPhase, ...] = tuple(ComponentCommandPhase),
+    dependency_guard: Callable[[], None] | None = None,
 ) -> ProjectedStandardToolchainClosure:
     """Bind one exact plan to commands, targets, providers, and observed host tools."""
 
     if not isinstance(execution_plan, ComponentExecutionPlan):
         raise TypeError("execution_plan must be a ComponentExecutionPlan")
+    if dependency_guard is not None:
+        if not callable(dependency_guard):
+            raise TypeError("dependency guard must be callable")
+        dependency_guard()
     if not isinstance(observer_identity, ContentIdentity):
         raise TypeError("observer_identity must be a ContentIdentity")
     if any(not isinstance(item, ComponentCommandContract) for item in contracts):
@@ -2474,26 +2552,23 @@ def project_standard_toolchain_closure(
             raise ValueError("build target differs from locked Component authority")
 
     binding_map = {item.toolchain_identity.uri: item for item in tool_bindings}
-    required_command_toolchains = {
-        identity.uri
-        for contract in contracts
-        for identity in contract.execution_toolchain_identities
-    }
-    if (
-        len(binding_map) != len(tool_bindings)
-        or set(binding_map) != required_command_toolchains
-    ):
+    required_bindings = required_command_toolchains(
+        contracts, command_phases, npm_targets
+    )
+    if len(binding_map) != len(tool_bindings) or set(binding_map) != required_bindings:
         raise ValueError("tool bindings must cover every and only execution toolchain")
     if any(
         binding_map[target.build_system_toolchain_identity.uri].command
         != target.npm_command
         for target in npm_targets
+        if target.build_system_toolchain_identity.uri in binding_map
     ):
         raise ValueError("npm target command differs from its locked tool binding")
     if any(
         binding_map[target.python_toolchain_identity.uri].command
         != target.python_command
         for target in python_targets
+        if target.python_toolchain_identity.uri in binding_map
     ):
         raise ValueError("Python target command differs from its locked tool binding")
     for binding in tool_bindings:
@@ -2533,7 +2608,8 @@ def project_standard_toolchain_closure(
         contract_map[edge.provider_revision.uri].artifact_export.export_id
         for action_plan in execution_plan.action_plans
         for edge in action_plan.dependency_edges
-        if edge.semantics.consumed_input is DependencyInputKind.ARTIFACT_EXPORT
+        if edge.semantics.consumed_input
+        in {DependencyInputKind.ARTIFACT_EXPORT, DependencyInputKind.TOOLCHAIN}
     }
     if set(provider_environment) != required_provider_exports:
         raise ValueError(
@@ -2585,6 +2661,8 @@ def project_standard_toolchain_closure(
         provider_environment,
         dependency_observation,
         python_targets,
+        command_phases,
+        dependency_guard,
     )
 
 
@@ -3024,6 +3102,108 @@ class FilesystemStandardProjectRuntime:
         return StandardProjectRuntimeReadiness(not ordered, ordered)
 
 
+@dataclass(frozen=True, slots=True)
+class StandardLifecyclePortComposition:
+    ports: LocalStandardLifecyclePorts
+    toolchain_closure: ProjectedStandardToolchainClosure
+
+
+def assemble_standard_lifecycle_ports(
+    *,
+    object_root: Path,
+    toolchain_closure: ProjectedStandardToolchainClosure,
+    source_trees: LocalSourceTreeRegistry,
+    command_phases: tuple[ComponentCommandPhase, ...] = tuple(ComponentCommandPhase),
+    python_wheelhouse: Path | None = None,
+    independent_acceptance_oracle: object | None = None,
+    browser_driver: object | None = None,
+    native_sdk_inputs=None,
+    bazel_cache_arguments: tuple[str, ...] = (),
+    shared_cache: BoundSharedCache | None = None,
+    clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+) -> StandardLifecyclePortComposition:
+    """Compose the exact specialized host adapter without a generation service."""
+
+    if not isinstance(toolchain_closure, ProjectedStandardToolchainClosure):
+        raise TypeError(
+            "public Standard runtime requires a projected toolchain closure"
+        )
+    toolchain_closure.require_unchanged()
+    required_tools = required_command_toolchains(
+        toolchain_closure.contracts, command_phases, toolchain_closure.npm_targets
+    )
+    if not set(command_phases).issubset(toolchain_closure.command_phases):
+        raise ValueError("assembly command scope exceeds projected command scope")
+    if shared_cache is not None and shared_cache.compiler_tool is not None:
+        if shared_cache.compiler_dependencies is None:
+            raise ValueError("compiler cache lacks native dependency evidence")
+        observation = shared_cache.compiler_dependencies.include_in(
+            toolchain_closure.dependency_observation
+        )
+        toolchain_closure = replace(
+            toolchain_closure,
+            record=replace(
+                toolchain_closure.record,
+                dependency_graph_identity=_dependency_observation_identity(observation),
+            ),
+            dependency_observation=observation,
+        )
+    if (
+        toolchain_closure.python_targets
+        and command_phases
+        and python_wheelhouse is None
+    ):
+        raise StandardCommandProjectionError(
+            "standard_command.python_wheelhouse_missing",
+            "Python wheel builds require an explicit provisioned wheel directory; "
+            "automatic network acquisition is not configured",
+        )
+    contracts = toolchain_closure.contracts
+    tool_bindings = (
+        toolchain_closure.tool_bindings
+        if command_phases == tuple(ComponentCommandPhase)
+        else tuple(
+            binding
+            for binding in toolchain_closure.tool_bindings
+            if binding.toolchain_identity.uri in required_tools
+        )
+    )
+    provider_environment = toolchain_closure.provider_environment
+
+    port_arguments = {
+        "source_trees": source_trees,
+        "object_root": object_root,
+        "contracts": contracts,
+        "command_phases": command_phases,
+        "tool_bindings": tool_bindings,
+        "npm_targets": toolchain_closure.npm_targets,
+        "python_targets": toolchain_closure.python_targets,
+        "python_wheelhouse": python_wheelhouse,
+        "provider_environment": provider_environment,
+        "dependency_observation": toolchain_closure.dependency_observation,
+        "independent_acceptance_oracle": independent_acceptance_oracle,
+        "browser_driver": browser_driver,
+        "native_sdk_inputs": native_sdk_inputs,
+        "clock": clock,
+    }
+    if toolchain_closure.bazel_targets:
+        ports = StandardBazelLifecyclePorts(
+            **port_arguments,
+            bazel_targets=toolchain_closure.bazel_targets,
+            bazel_cache_arguments=bazel_cache_arguments,
+            shared_cache=shared_cache,
+        )
+    elif toolchain_closure.cargo_targets:
+        ports = StandardCargoLifecyclePorts(
+            **port_arguments,
+            cargo_targets=toolchain_closure.cargo_targets,
+            shared_cache=shared_cache,
+        )
+    else:
+        ports = LocalStandardLifecyclePorts(**port_arguments, shared_cache=shared_cache)
+    return StandardLifecyclePortComposition(ports, toolchain_closure)
+
+
 def assemble_filesystem_standard_project_runtime(
     *,
     generator: ComponentSourceGenerationRunner,
@@ -3046,36 +3226,21 @@ def assemble_filesystem_standard_project_runtime(
 ) -> FilesystemStandardProjectRuntime:
     """Wire an explicit component-scoped host runtime, never a default CLI claim."""
 
-    if not isinstance(toolchain_closure, ProjectedStandardToolchainClosure):
-        raise TypeError(
-            "public Standard runtime requires a projected toolchain closure"
-        )
-    toolchain_closure.require_unchanged()
-    if shared_cache is not None and shared_cache.compiler_tool is not None:
-        if shared_cache.compiler_dependencies is None:
-            raise ValueError("compiler cache lacks native dependency evidence")
-        observation = shared_cache.compiler_dependencies.include_in(
-            toolchain_closure.dependency_observation
-        )
-        toolchain_closure = replace(
-            toolchain_closure,
-            record=replace(
-                toolchain_closure.record,
-                dependency_graph_identity=_dependency_observation_identity(observation),
-            ),
-            dependency_observation=observation,
-        )
-    if toolchain_closure.python_targets and python_wheelhouse is None:
-        raise StandardCommandProjectionError(
-            "standard_command.python_wheelhouse_missing",
-            "Python wheel builds require an explicit provisioned wheel directory; "
-            "automatic network acquisition is not configured",
-        )
-    contracts = toolchain_closure.contracts
-    tool_bindings = toolchain_closure.tool_bindings
-    provider_environment = toolchain_closure.provider_environment
-
     registry = source_trees or LocalSourceTreeRegistry()
+    composition = assemble_standard_lifecycle_ports(
+        object_root=object_root,
+        toolchain_closure=toolchain_closure,
+        source_trees=registry,
+        python_wheelhouse=python_wheelhouse,
+        independent_acceptance_oracle=independent_acceptance_oracle,
+        browser_driver=browser_driver,
+        native_sdk_inputs=native_sdk_inputs,
+        bazel_cache_arguments=bazel_cache_arguments,
+        shared_cache=shared_cache,
+        clock=clock,
+    )
+    ports = composition.ports
+    toolchain_closure = composition.toolchain_closure
     planned_cache_key = getattr(generator, "planned_cache_key", None)
 
     def context_cache_key(
@@ -3111,36 +3276,6 @@ def assemble_filesystem_standard_project_runtime(
         ),
         cache_key=context_cache_key,
     )
-    port_arguments = {
-        "source_trees": registry,
-        "object_root": object_root,
-        "contracts": contracts,
-        "tool_bindings": tool_bindings,
-        "npm_targets": toolchain_closure.npm_targets,
-        "python_targets": toolchain_closure.python_targets,
-        "python_wheelhouse": python_wheelhouse,
-        "provider_environment": provider_environment,
-        "dependency_observation": toolchain_closure.dependency_observation,
-        "independent_acceptance_oracle": independent_acceptance_oracle,
-        "browser_driver": browser_driver,
-        "native_sdk_inputs": native_sdk_inputs,
-        "clock": clock,
-    }
-    if toolchain_closure.bazel_targets:
-        ports = StandardBazelLifecyclePorts(
-            **port_arguments,
-            bazel_targets=toolchain_closure.bazel_targets,
-            bazel_cache_arguments=bazel_cache_arguments,
-            shared_cache=shared_cache,
-        )
-    elif toolchain_closure.cargo_targets:
-        ports = StandardCargoLifecyclePorts(
-            **port_arguments,
-            cargo_targets=toolchain_closure.cargo_targets,
-            shared_cache=shared_cache,
-        )
-    else:
-        ports = LocalStandardLifecyclePorts(**port_arguments, shared_cache=shared_cache)
     from literate_ai.adapters.candidate_repair import (
         FilesystemStandardCandidateRepairAdapter,
     )
@@ -3227,6 +3362,9 @@ def compose_filesystem_standard_source_cache(
         ports=runtime.lifecycle_ports,
         generator=RegisteredSourceGenerationRunner(generator, runtime.source_trees),
         indexer=indexer,
+        authorizer=runtime.application.lifecycle.authorizer,
+        build_plan_finalizer=runtime.application.lifecycle.build_plan_finalizer,
+        build_intent_dispatcher=runtime.application.lifecycle.build_intent_dispatcher,
         source_cache_publisher=publisher,
         checkpoint_recorder=runtime.checkpoint_store,
         context_evidence_recorder=runtime.context_evidence_recorder,
@@ -3258,6 +3396,9 @@ def compose_filesystem_standard_lifecycle_checkpoints(
         ports=runtime.lifecycle_ports,
         generator=lifecycle.generator,
         indexer=lifecycle.indexer,
+        authorizer=lifecycle.authorizer,
+        build_plan_finalizer=lifecycle.build_plan_finalizer,
+        build_intent_dispatcher=lifecycle.build_intent_dispatcher,
         source_cache_publisher=lifecycle.source_cache_publisher,
         checkpoint_recorder=store,
         context_evidence_recorder=runtime.context_evidence_recorder,

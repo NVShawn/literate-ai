@@ -79,6 +79,20 @@ class HttpSharedArtifactTests(unittest.TestCase):
         self.server.server_close()
         self.thread.join()
 
+    def test_local_quota_does_not_prevent_verified_remote_reuse_or_publication(self):
+        configuration = replace(self.configuration, maximum_bytes=len(self.payload))
+        remote = HttpSharedArtifactCache(configuration)
+        with tempfile.TemporaryDirectory() as directory:
+            local = LocalSharedArtifactCache(configuration, Path(directory).resolve())
+            cache = LayeredSharedArtifactCache(local, remote)
+            self.assertTrue(cache.put(self.manifest, self.payload))
+            self.assertIsNone(local.get(self.manifest))
+            result = cache.lookup(self.manifest)
+            self.assertEqual(result.payload, self.payload)
+            self.assertEqual(result.source, "remote")
+            self.assertEqual(result.unavailable_code, "shared_cache.quota_exhausted")
+            self.assertIsNone(local.get(self.manifest))
+
     def test_cold_then_concurrent_publication_then_warm(self):
         self.assertIsNone(self.cache.get(self.manifest))
         with ThreadPoolExecutor(max_workers=4) as pool:

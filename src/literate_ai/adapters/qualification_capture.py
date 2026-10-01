@@ -1863,33 +1863,7 @@ def verify_qualification_generated_suite(
             acceptance_arguments=_acceptance_argument_vectors(recipe),
             result_shape=_acceptance_result_shape(recipe),
         )
-        expected = {}
-        for case in suite.cases:
-            definition = {
-                "schema": "literate-ai/generated-test-case@1",
-                "case_id": case.case_id,
-                "category": case.category,
-                "specification_refs": list(case.specification_refs),
-                "arguments": list(case.arguments),
-                "expected_result": case.expected_result,
-            }
-            identity = canonical_identity(definition)
-            if canonical_json_bytes(reader.read_json(identity)) != canonical_json_bytes(
-                definition
-            ):
-                raise QualificationCaptureError(
-                    "qualification.capture.suite-membership-mismatch"
-                )
-            expected[case.case_id] = identity
-        groups = (
-            (tests,) if tests.entrypoint_evidence is None else tests.entrypoint_evidence
-        )
-        for group in groups:
-            actual = {case.case_id: case.case_identity for case in group.cases}
-            if actual != expected or len(group.cases) != len(expected):
-                raise QualificationCaptureError(
-                    "qualification.capture.suite-membership-mismatch"
-                )
+        verify_qualification_suite_membership(reader, suite=suite, tests=tests)
     except QualificationCaptureError:
         raise
     except (
@@ -1900,6 +1874,37 @@ def verify_qualification_generated_suite(
         RecursionError,
     ) as exc:
         raise QualificationCaptureError("qualification.capture.suite-invalid") from exc
+
+
+def verify_qualification_suite_membership(reader, *, suite, tests):
+    """Match retained cases to a caller-validated generated suite."""
+    expected = {}
+    for case in suite.cases:
+        definition = {
+            "schema": "literate-ai/generated-test-case@1",
+            "case_id": case.case_id,
+            "category": case.category,
+            "specification_refs": list(case.specification_refs),
+            "arguments": list(case.arguments),
+            "expected_result": case.expected_result,
+        }
+        identity = canonical_identity(definition)
+        if canonical_json_bytes(reader.read_json(identity)) != canonical_json_bytes(
+            definition
+        ):
+            raise QualificationCaptureError(
+                "qualification.capture.suite-membership-mismatch"
+            )
+        expected[case.case_id] = identity
+    groups = (
+        (tests,) if tests.entrypoint_evidence is None else tests.entrypoint_evidence
+    )
+    for group in groups:
+        actual = {case.case_id: case.case_identity for case in group.cases}
+        if actual != expected or len(group.cases) != len(expected):
+            raise QualificationCaptureError(
+                "qualification.capture.suite-membership-mismatch"
+            )
 
 
 def verify_qualification_generated_tests(
@@ -2107,6 +2112,7 @@ def verify_qualification_execution(
     *,
     build_plan_identity: ContentIdentity,
     execution: StandardExecutionEvidence,
+    expected_execution_plan_identity: ContentIdentity | None = None,
 ) -> None:
     """Reopen existing single/multiple-entrypoint execution process records."""
     from literate_ai.adapters.native_sdk_qualification import (
@@ -2122,6 +2128,90 @@ def verify_qualification_execution(
         raise QualificationCaptureError("qualification.capture.records-invalid")
 
     plan = read_sdk_build_plan(reader, build_plan_identity)
+    authority = execution.execution_authority
+    authority_fields = {}
+    if authority is None:
+        if execution.provider_artifact_identities != plan.provider_artifact_identities:
+            raise QualificationCaptureError(
+                "qualification.capture.execution-provider-mismatch"
+            )
+    else:
+        from literate_ai.contracts.executable_components import (
+            ComponentCommandContract,
+            ComponentCommandPhase,
+        )
+        from literate_ai.contracts.standard_execution_inputs import (
+            standard_execution_runtime_identity,
+        )
+
+        scope = authority.input_scope
+        contract = ComponentCommandContract.from_dict(
+            reader.read_json(authority.command_contract_identity)
+        )
+        built = StandardBuildEvidence.from_dict(
+            reader.read_json(execution.build_evidence_identity)
+        )
+        if (
+            scope.build_plan_identity != build_plan_identity
+            or scope.component_revision != plan.component_revision
+            or authority.source_tree_identity != plan.request.source_tree_identity
+            or scope.build_provider_artifact_identities
+            != plan.provider_artifact_identities
+            or (
+                expected_execution_plan_identity is not None
+                and scope.execution_plan_identity != expected_execution_plan_identity
+            )
+            or contract.component_revision != plan.component_revision
+            or authority.runtime_identity
+            != standard_execution_runtime_identity(contract)
+            or reader.read_json(scope.identity) != scope.to_dict()
+            or reader.read_json(authority.identity) != authority.to_dict()
+            or built.build_plan_identity != build_plan_identity
+            or built.component_revision != plan.component_revision
+            or built.export_identities != execution.export_identities
+            or contract.is_multi_entrypoint
+            != (execution.entrypoint_evidence is not None)
+        ):
+            raise QualificationCaptureError(
+                "qualification.capture.execution-authority-mismatch"
+            )
+        units = (
+            contract.entrypoint_command_contracts()
+            if contract.is_multi_entrypoint
+            else (contract,)
+        )
+        expected_units = {
+            (
+                unit.command(ComponentCommandPhase.EXECUTE).identity,
+                unit.tool_binding(ComponentCommandPhase.EXECUTE).toolchain_identity,
+                getattr(unit, "entrypoint_identity", None),
+                getattr(unit, "deployment_unit", None),
+                next(
+                    (
+                        item.identity
+                        for item in built.exports
+                        if item.export_id == unit.artifact_export.export_id
+                    ),
+                    None,
+                ),
+            )
+            for unit in units
+        }
+        observed_units = {
+            (
+                unit.execution_contract_identity,
+                unit.runtime_identity,
+                getattr(unit, "entrypoint_identity", None),
+                getattr(unit, "deployment_unit", None),
+                getattr(unit, "export_identity", execution.root_export_identity),
+            )
+            for unit in execution.entrypoint_evidence or (execution,)
+        }
+        if observed_units != expected_units:
+            raise QualificationCaptureError(
+                "qualification.capture.execution-command-mismatch"
+            )
+        authority_fields = {"execution_authority_identity": authority.identity.uri}
 
     def process(evidence, phase):
         value = reader.read_json(evidence.observation_identity)
@@ -2129,6 +2219,7 @@ def verify_qualification_execution(
             "schema": "literate-ai/local-process-observation@1",
             "phase": phase,
             "plan_identity": build_plan_identity.uri,
+            **authority_fields,
             "returncode": 0,
             "stdout_identity": evidence.stdout_identity.uri,
             "stderr_identity": evidence.stderr_identity.uri,
@@ -2312,6 +2403,7 @@ def reopen_qualification_run(
             reader,
             build_plan_identity=node.build_plan_identity,
             execution=node.execution_evidence,
+            expected_execution_plan_identity=root.execution_plan_identity,
         )
     fields = (
         "source_tree_identities",

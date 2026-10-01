@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-plan-action-inputs",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "execution_plan_identity",
+    "generation_plan_identity",
+    "intent",
+    "authorization",
+    "contract",
+    "provider_artifacts",
+    "package_artifacts",
+    "dependency_resolution"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:standard-plan-action-inputs"
+    },
+    "execution_plan_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generation_plan_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "intent": {
+      "$ref": "urn:literate-ai:schema:v2:standard-component-build-intent"
+    },
+    "authorization": {
+      "$ref": "urn:literate-ai:schema:v2:standard-build-authorization"
+    },
+    "contract": {
+      "$ref": "urn:literate-ai:schema:v2:component-command-contract"
+    },
+    "provider_artifacts": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:artifact-export"
+      }
+    },
+    "package_artifacts": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:artifact-export"
+      }
+    },
+    "dependency_resolution": {
+      "enum": [
+        "none",
+        "npm",
+        "python"
+      ]
+    }
+  }
+}

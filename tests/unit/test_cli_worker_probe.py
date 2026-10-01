@@ -56,6 +56,82 @@ class WorkerProbeCliTests(unittest.TestCase):
             self.assertEqual(observed["message"], error.message)
             self.assertFalse((Path(directory) / "observations.json").exists())
 
+    def test_all_reports_failed_peer_and_removes_its_stale_observation(self):
+        workers = tuple(
+            ExecutionWorker(
+                name,
+                ExecutionWorkerKind.SSH,
+                requirements=ExecutionRequirements(os_family="linux"),
+                endpoint=f"user@{name}.invalid",
+                workspace="~/litai",
+            )
+            for name in ("bad", "good")
+        )
+
+        def observation(name):
+            return WorkerHardwareObservation(
+                name,
+                "2026-08-12T00:00:00Z",
+                "linux",
+                "ubuntu",
+                "24.04",
+                "x86_64",
+                4,
+                8,
+                16384,
+                (),
+                NvidiaProbeStatus.ABSENT,
+            )
+
+        def probe(worker, **kwargs):
+            if worker.worker_id == "bad":
+                raise WorkerCapabilityProbeError(
+                    "worker.probe_transport_failed",
+                    "SSH exited 255 (authentication). Permission denied.",
+                    worker_id="bad",
+                )
+            return observation("good")
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            config = root / "workers.json"
+            config.write_bytes(
+                canonical_json_bytes(ExecutionWorkerCatalog(workers).to_dict())
+            )
+            output_path = root / "observations.json"
+            output_path.write_bytes(
+                canonical_json_bytes(
+                    WorkerHardwareObservationCatalog((observation("bad"),)).to_dict()
+                )
+            )
+            output = io.StringIO()
+            with patch(
+                "literate_ai.adapters.worker_capabilities.probe_worker_capabilities",
+                side_effect=probe,
+            ):
+                status = main(
+                    [
+                        "worker",
+                        "probe",
+                        "--all",
+                        "--json",
+                        "--worker-config",
+                        str(config),
+                        "--output",
+                        str(output_path),
+                    ],
+                    stdout=output,
+                    stderr=output,
+                )
+            result = json.loads(output.getvalue())["result"]
+            self.assertEqual(status, 1)
+            self.assertFalse(result["ok"])
+            self.assertEqual(result["probed"], ["good"])
+            self.assertEqual(result["failures"][0]["worker_id"], "bad")
+            self.assertIn("Permission denied", result["failures"][0]["message"])
+            persisted = json.loads(output_path.read_text())
+            self.assertEqual([w["worker_id"] for w in persisted["workers"]], ["good"])
+
     def test_scoped_help_is_available(self) -> None:
         output = io.StringIO()
         self.assertEqual(main(["worker", "probe", "help"], stdout=output), 0)
