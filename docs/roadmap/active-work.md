@@ -23182,3 +23182,8 @@ GitHub CI failure without relaxing identity checks.
   `120.00000000000006` timeout overshoot. The subprocess budget is capped without
   relaxing the test assertion or extending the absolute deadline. The runtime and
   redundant-test audit remain open; no full hosted qualification is claimed.
+- **Migration qualification repair:** Hosted PR run 36873559937 completed the
+  primary Python suite with one failure: the new profile-selection checkout lacked
+  the repository-wide `fetch-depth: 0` requirement. Preserve full history there
+  too; do not weaken the historical-commit test. All other PR execution cells
+  passed. Replacement exact-source CI remains required for normal landing.
