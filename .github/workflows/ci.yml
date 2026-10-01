@@ -17,99 +17,35 @@ permissions:
 env:
   PYTHONUNBUFFERED: "1"
   PYTHON_TEST_VERBOSITY: "2"
+  PIP_TIMEOUT: "60"
+  PIP_RETRIES: "3"
 
 jobs:
-  # Ordinary PRs use explicitly named macOS smoke evidence. Full qualification
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.select.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Select explicit CI profile
+        id: select
+        env:
+          CI_EVENT: ${{ github.event_name }}
+          CI_BASE_REF: ${{ github.base_ref }}
+        run: python3 scripts/select_ci_profile.py >> "$GITHUB_OUTPUT"
+
+  # Ordinary PRs use one Linux suite and named platform smoke evidence. Full qualification
   # below remains mandatory for main/release pushes and release-branch PRs.
   checks:
+    needs: profile
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     continue-on-error: false
     timeout-minutes: 240
     strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - task: "skill-evaluation"
-            name: "Changed skill admission"
-            os: "ubuntu-latest"
-            python: "3.13"
-            group: 0
-          - task: "documentation"
-            name: "Documentation / ubuntu-latest"
-            os: "ubuntu-latest"
-            python: "3.12"
-            group: 0
-          - task: "documentation"
-            name: "Documentation / macos-latest"
-            os: "macos-latest"
-            python: "3.12"
-            group: 0
-          - task: "documentation"
-            name: "Documentation / windows-latest"
-            os: "windows-latest"
-            python: "3.12"
-            group: 0
-          - task: "sample-composition"
-            name: "Sample composition / ubuntu-latest"
-            os: "ubuntu-latest"
-            python: "3.12"
-            group: 0
-          - task: "sample-composition"
-            name: "Sample composition / macos-latest"
-            os: "macos-latest"
-            python: "3.12"
-            group: 0
-          - task: "sample-composition"
-            name: "Sample composition / windows-latest"
-            os: "windows-latest"
-            python: "3.12"
-            group: 0
-          - task: "conformance"
-            name: "ubuntu-latest / Python 3.11"
-            os: "ubuntu-latest"
-            python: "3.11"
-            group: 0
-          - task: "conformance"
-            name: "ubuntu-latest / Python 3.14"
-            os: "ubuntu-latest"
-            python: "3.14"
-            group: 0
-          - task: "macos-smoke"
-            name: "macOS / Python 3.14 / PR smoke (not release qualification)"
-            os: "macos-latest"
-            python: "3.14"
-            group: 0
-          - task: "windows-gates"
-            name: "Windows / Python 3.12 / lint, OpenSpec, wheel"
-            os: "windows-latest"
-            python: "3.12"
-            group: 0
-          - task: "windows-tests"
-            name: "Windows / Python 3.12 / tests (1 of 3)"
-            os: "windows-latest"
-            python: "3.12"
-            group: 1
-          - task: "windows-tests"
-            name: "Windows / Python 3.12 / tests (2 of 3)"
-            os: "windows-latest"
-            python: "3.12"
-            group: 2
-          - task: "windows-tests"
-            name: "Windows / Python 3.12 / tests (3 of 3)"
-            os: "windows-latest"
-            python: "3.12"
-            group: 3
-          - task: "cpp-native"
-            name: "Native C++ library / ubuntu-latest"
-            os: "ubuntu-latest"
-            python: "3.12"
-            group: 0
-          - task: "cpp-native"
-            name: "Native C++ library / windows-latest"
-            os: "windows-latest"
-            python: "3.12"
-            group: 0
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.profile.outputs.matrix) }}
     steps:
       # skill-evaluation
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -120,6 +56,8 @@ jobs:
         if: matrix.task == 'skill-evaluation'
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - name: Install framework for skill detection
         if: matrix.task == 'skill-evaluation'
         run: python -m pip install -e .
@@ -171,23 +109,6 @@ jobs:
           LITAI_SKILL_EVALUATION_BASE: ${{ steps.changed-skills.outputs.base }}
         run: make skills-check PYTHON=python
 
-      # documentation
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: matrix.task == 'documentation'
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        if: matrix.task == 'documentation'
-        with:
-          node-version: "24"
-          package-manager-cache: false
-      - name: Install isolated documentation tooling
-        if: matrix.task == 'documentation'
-        run: npm --prefix tools/openspec ci
-      - name: Extract and render every Mermaid diagram
-        if: matrix.task == 'documentation'
-        run: npm --prefix tools/openspec run documentation:check
-
       # sample-composition
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: matrix.task == 'sample-composition'
@@ -197,11 +118,15 @@ jobs:
         if: matrix.task == 'sample-composition'
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: matrix.task == 'sample-composition'
         with:
           node-version: "24"
           package-manager-cache: false
+          cache: npm
+          cache-dependency-path: tools/openspec/package-lock.json
       - name: Verify native SBOM prerequisites and install, uninstall, and reinstall the CLI
         if: matrix.task == 'sample-composition'
         env:
@@ -234,11 +159,15 @@ jobs:
         if: matrix.task == 'conformance'
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: matrix.task == 'conformance'
         with:
           node-version: "24"
           package-manager-cache: false
+          cache: npm
+          cache-dependency-path: tools/openspec/package-lock.json
       - name: Install Python contributor tools
         if: matrix.task == 'conformance'
         run: python -m pip install -e ".[dev]"
@@ -276,35 +205,37 @@ jobs:
           PYTHONPATH: src
         run: python -m literate_ai.cli release evidence explain --project .
 
-      # macos-smoke: real prefix upgrade plus installation/launcher and native C++.
-      # The separate sample-composition macOS cell exercises make install/uninstall.
+      # platform-smoke: real prefix upgrade plus installation/launcher and native C++.
+      # Separate sample-composition cells exercise native make install/uninstall.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: matrix.task == 'macos-smoke'
+        if: matrix.task == 'platform-smoke'
         with:
           fetch-depth: 0
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        if: matrix.task == 'macos-smoke'
+        if: matrix.task == 'platform-smoke'
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - name: Install smoke tools
-        if: matrix.task == 'macos-smoke'
+        if: matrix.task == 'platform-smoke'
         timeout-minutes: 10
         run: python -m pip install -e ".[dev]"
-      - name: Run macOS smoke checks
-        if: matrix.task == 'macos-smoke'
+      - name: Run platform smoke checks
+        if: matrix.task == 'platform-smoke'
         timeout-minutes: 30
         run: >-
-          python scripts/litai_step.py --name macos-smoke --
+          python scripts/litai_step.py --name platform-smoke --
           python -m unittest -v
           tests.unit.test_host_install
           tests.unit.test_host_self_update
           tests.unit.test_cli_build_identity
           tests.unit.test_guarded_builder.GuardedCppBuilderTests
       - name: Upload smoke diagnostics (not release evidence)
-        if: matrix.task == 'macos-smoke' && (always())
+        if: matrix.task == 'platform-smoke' && (always())
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: macos-smoke-diagnostics
+          name: platform-smoke-diagnostics-${{ matrix.os }}
           path: _build/evidence
           if-no-files-found: warn
 
@@ -317,11 +248,15 @@ jobs:
         if: matrix.task == 'windows-gates'
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: matrix.task == 'windows-gates'
         with:
           node-version: "24"
           package-manager-cache: false
+          cache: npm
+          cache-dependency-path: tools/openspec/package-lock.json
       - name: Install Python contributor tools
         if: matrix.task == 'windows-gates'
         run: python -m pip install -e ".[dev]"
@@ -473,11 +408,15 @@ jobs:
         if: matrix.task == 'windows-tests'
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         if: matrix.task == 'windows-tests'
         with:
           node-version: "24"
           package-manager-cache: false
+          cache: npm
+          cache-dependency-path: tools/openspec/package-lock.json
       - name: Install Python contributor tools
         if: matrix.task == 'windows-tests'
         run: python -m pip install -e ".[dev]"
@@ -602,6 +541,8 @@ jobs:
         if: matrix.task == 'cpp-native'
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: bazel-contrib/setup-bazel@c5acdfb288317d0b5c0bbd7a396a3dc868bb0f86 # v0.19.0
         if: matrix.task == 'cpp-native'
         with:
@@ -699,7 +640,7 @@ jobs:
     timeout-minutes: 240
     continue-on-error: false
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - name: "macos-latest / Python 3.11"
@@ -725,10 +666,14 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
           package-manager-cache: false
+          cache: npm
+          cache-dependency-path: tools/openspec/package-lock.json
       - name: Install contributor tools
         timeout-minutes: 15
         run: python -m pip install -e ".[dev]"

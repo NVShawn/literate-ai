@@ -132,7 +132,23 @@ first. See `docs/architecture/design-traceability.md` and
 `docs/user/troubleshooting.md` for more on how these checks work and how to recover
 from a stale pin or marker mid-development, not just before a commit.
 
-## macOS CI profiles
+## CI feedback and qualification profiles
+
+Ordinary PRs run one complete Linux/Python 3.11 suite, with repository lint,
+OpenSpec and documentation gates in that same conformance job. Three redundant
+standalone documentation jobs are removed. Native install/uninstall/reinstall
+and sample composition remain on Linux, macOS and Windows; real C++ library
+consumption remains on Linux and Windows. Both macOS and Windows also run focused
+launcher/update smoke checks. The matrix is declared in `.github/ci-matrix.json`;
+`scripts/select_ci_profile.py` selects nine PR cells or all fourteen qualification
+cells. The four full macOS partitions are additional qualification jobs.
+
+Dependency download caches are keyed by Python/platform and dependency inputs.
+pip uses a 60-second network timeout and three transport retries; failed tests
+are never automatically retried. Independent matrix cells finish even if a peer
+fails, so the first network failure does not erase other diagnostic results.
+The 10–15 minute PR turnaround is a target, not a measured guarantee: the primary
+Linux suite and native gates still need hosted runtime measurements.
 
 Ordinary pull requests run the explicitly named macOS smoke check: installation
 contracts, launcher/self-update regressions (including a real disposable-prefix
@@ -143,8 +159,9 @@ These checks are **not release qualification** and do not upload qualified wheel
 Pushes to `main` or `release/**`, PRs targeting `release/**`, version-tag pushes,
 and manual CI runs retain the complete macOS Python 3.11/3.14 qualification matrix.
 The existing independent 3.11 checkpoint partitions are preserved; 3.14 runs all
-tests. Linux and Windows coverage and `make release-check` remain unchanged.
-Use a manual CI run on a candidate branch when full macOS evidence is needed
+tests. Full qualification also retains both Linux Python versions, all three
+Windows test shards and Windows packaging gates. `make release-check` remains
+unchanged. Use a manual CI run on a candidate branch when full platform evidence is needed
 before merging. Require full successful exact-commit qualification before release;
 a green ordinary PR smoke job is not a substitute.
 

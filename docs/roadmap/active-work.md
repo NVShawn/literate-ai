@@ -23157,6 +23157,9 @@ GitHub CI failure without relaxing identity checks.
 - **Depends on:** none
 - **Implementation:**
   - [x] Separate the workflow profiles, add bounded test steps and retain verbose failure diagnostics.
+  - [x] Extend the approved PR profile to one full Linux suite and focused Windows/macOS native installation checks; consolidate platform-neutral gates and cache dependency downloads.
+  - [x] Bound publication subprocess timeouts at the reviewed policy even when floating-point deadline subtraction rounds upward; add deterministic boundary coverage.
+  - [ ] Measure hosted runtimes and audit redundant mock-heavy tests before further consolidation; a 10–15 minute PR target is not yet demonstrated.
 - **Evidence:**
   - [x] Workflow regressions prove event gating, full-suite coverage, smoke selection and diagnostics; focused local macOS verification passes.
   - [ ] Hosted full qualification succeeds before release or closure of issue 13.
@@ -23169,3 +23172,13 @@ GitHub CI failure without relaxing identity checks.
   formatting, documentation rendering (121 diagrams), lifecycle driver and
   documentation authority checks pass. Documentation tooling retains one
   existing low-severity advisory below its high-severity failure threshold.
+- **PR-profile refinement:** 14 workflow regressions verify nine PR cells versus
+  fourteen qualification cells, plus the existing four full macOS partitions.
+  Release/main/tag/manual selection retains complete test coverage, while shared
+  documentation gates run in Linux conformance instead of three standalone jobs.
+  pip/npm download caches and bounded pip transport retries do not retry assertions.
+  Independent matrix failures no longer cancel sibling evidence. All 37 publication
+  tests pass, including a deterministic clock reproducing the hosted Windows
+  `120.00000000000006` timeout overshoot. The subprocess budget is capped without
+  relaxing the test assertion or extending the absolute deadline. The runtime and
+  redundant-test audit remain open; no full hosted qualification is claimed.

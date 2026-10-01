@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -14,6 +16,7 @@ from pathlib import Path
 from unittest import mock
 
 from literate_ai.contracts.yaml_subset import load_yaml_subset
+from scripts.select_ci_profile import select_matrix
 
 ROOT = Path(__file__).resolve().parents[2]
 USES = re.compile(r"(?m)^\s*(?:-\s*)?uses:\s*([^\n#]+)")
@@ -48,9 +51,11 @@ class CiActionPinTests(unittest.TestCase):
 
     def test_checks_and_full_macos_qualification_fail_closed(self) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
-        self.assertEqual(set(workflow["jobs"]), {"checks", "macos-qualification"})
+        self.assertEqual(
+            set(workflow["jobs"]), {"profile", "checks", "macos-qualification"}
+        )
         job = workflow["jobs"]["checks"]
-        self.assertIs(job["strategy"]["fail-fast"], True)
+        self.assertIs(job["strategy"]["fail-fast"], False)
         self.assertIs(job["continue-on-error"], False)
         self.assertIs(workflow["concurrency"]["cancel-in-progress"], True)
         self.assertEqual(workflow["permissions"], {"contents": "read"})
@@ -58,7 +63,7 @@ class CiActionPinTests(unittest.TestCase):
         self.assertEqual(job["runs-on"], "${{ matrix.os }}")
         expected = {("Changed skill admission", "ubuntu-latest")}
         for os_name in ("ubuntu-latest", "macos-latest", "windows-latest"):
-            for prefix in ("Documentation", "Sample composition"):
+            for prefix in ("Sample composition",):
                 expected.add((f"{prefix} / {os_name}", os_name))
         for os_name in ("ubuntu-latest",):
             for python in ("3.11", "3.14"):
@@ -78,8 +83,14 @@ class CiActionPinTests(unittest.TestCase):
             )
         for os_name in ("ubuntu-latest", "windows-latest"):
             expected.add((f"Native C++ library / {os_name}", os_name))
-        rows = job["strategy"]["matrix"]["include"]
-        self.assertEqual(len(rows), 16)
+        expected.add(
+            (
+                "Windows / Python 3.12 / PR smoke (not release qualification)",
+                "windows-latest",
+            )
+        )
+        rows = select_matrix("workflow_dispatch", "")["include"]
+        self.assertEqual(len(rows), 14)
         self.assertEqual({(row["name"], row["os"]) for row in rows}, expected)
         for row in rows:
             if row["task"] == "conformance":
@@ -113,12 +124,50 @@ class CiActionPinTests(unittest.TestCase):
                     1,
                 )
 
+    def test_profile_selector_preserves_full_qualification_and_one_pr_suite(self):
+        full = json.loads((ROOT / ".github/ci-matrix.json").read_text())
+        for event, base in (
+            ("push", ""),
+            ("workflow_dispatch", ""),
+            ("pull_request", "release/1.1.x"),
+            ("unknown", ""),
+        ):
+            with self.subTest(event=event, base=base):
+                self.assertEqual(select_matrix(event, base)["include"], full)
+        pr = select_matrix("pull_request", "main")["include"]
+        self.assertEqual(len(pr), 9)
+        self.assertEqual(sum(row["task"] == "conformance" for row in pr), 1)
+        self.assertEqual(
+            {row["os"] for row in pr if row["task"] == "platform-smoke"},
+            {"macos-latest", "windows-latest"},
+        )
+        self.assertFalse(any(row["task"] == "windows-tests" for row in pr))
+        workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
+        checks = workflow["jobs"]["checks"]
+        self.assertEqual(checks["needs"], "profile")
+        self.assertEqual(
+            checks["strategy"]["matrix"],
+            "${{ fromJSON(needs.profile.outputs.matrix) }}",
+        )
+        result = subprocess.run(
+            [sys.executable, str(ROOT / "scripts/select_ci_profile.py")],
+            env={**os.environ, "CI_EVENT": "pull_request", "CI_BASE_REF": "main"},
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(
+            json.loads(result.stdout.removeprefix("matrix=")), {"include": pr}
+        )
+
     def test_matrix_dispatch_preserves_failure_evidence_and_required_gates(
         self,
     ) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
         job = workflow["jobs"]["checks"]
-        tasks = {row["task"] for row in job["strategy"]["matrix"]["include"]}
+        tasks = {
+            row["task"] for row in select_matrix("workflow_dispatch", "")["include"]
+        }
         selected = {task: [] for task in tasks}
         for step in job["steps"]:
             match = re.fullmatch(
@@ -140,12 +189,11 @@ class CiActionPinTests(unittest.TestCase):
                 self.assertIs(step["continue-on-error"], False)
         required = {
             "skill-evaluation": "make skills-check PYTHON=python",
-            "documentation": "npm --prefix tools/openspec run documentation:check",
             "sample-composition": (
                 "test_all_host_recipes_compose_from_specs_and_real_flavors"
             ),
             "conformance": "make validate PYTHON=python RUFF=ruff",
-            "macos-smoke": "tests.unit.test_cli_build_identity",
+            "platform-smoke": "tests.unit.test_cli_build_identity",
             "windows-gates": "python scripts/wheel_smoke.py",
             "windows-tests": "--splits 3 --group ${{ matrix.group }}",
             "cpp-native": (
@@ -171,7 +219,7 @@ class CiActionPinTests(unittest.TestCase):
         self.assertEqual(workflow["on"]["push"]["tags"], ["v*"])
         self.assertIn("workflow_dispatch", workflow["on"])
         self.assertIs(job["continue-on-error"], False)
-        self.assertIs(job["strategy"]["fail-fast"], True)
+        self.assertIs(job["strategy"]["fail-fast"], False)
         self.assertEqual(job["runs-on"], "macos-latest")
         full314 = [
             r for r in job["strategy"]["matrix"]["include"] if r["python"] == "3.14"
@@ -197,7 +245,7 @@ class CiActionPinTests(unittest.TestCase):
     ) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
         steps = workflow["jobs"]["checks"]["steps"]
-        smoke = next(s for s in steps if s.get("name") == "Run macOS smoke checks")
+        smoke = next(s for s in steps if s.get("name") == "Run platform smoke checks")
         self.assertEqual(smoke["timeout-minutes"], 30)
         for module in (
             "test_host_install",

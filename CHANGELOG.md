@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- CI: run one full Linux suite plus cross-platform native/install smoke on ordinary
+  PRs, consolidate documentation jobs, cache dependency downloads, and preserve
+  independent failure diagnostics. Full multi-platform release qualification remains
+  required. Publication subprocess timeouts now stay within their reviewed limit
+  even when floating-point deadline arithmetic rounds upward.
+
 - CI: separate focused macOS PR smoke checks from full main/release qualification,
   bound conformance steps, and retain verbose test names and self-update failure
   diagnostics. Full release gates remain unchanged.
