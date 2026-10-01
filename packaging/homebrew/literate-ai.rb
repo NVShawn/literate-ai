@@ -4,12 +4,12 @@ class LiterateAi < Formula
   LITERATE_AI_VERSION = "1.1.0"
 
   desc "Specification-led software lifecycle control plane"
-  homepage "https://github.com/NVIDIA-dev/literate-ai"
+  homepage "https://github.com/jordanhubbard/literate-ai"
   license "Apache-2.0"
   version LITERATE_AI_VERSION
 
   # Replace url/sha256 with the published sdist when the matching tag exists.
-  url "https://github.com/NVIDIA-dev/literate-ai/archive/refs/tags/v#{LITERATE_AI_VERSION}.tar.gz"
+  url "https://github.com/jordanhubbard/literate-ai/archive/refs/tags/v#{LITERATE_AI_VERSION}.tar.gz"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
 
   depends_on "python@3.13"

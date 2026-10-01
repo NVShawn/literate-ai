@@ -1,5 +1,17 @@
 # Contributing
 
+## Repository location
+
+The canonical public repository is
+[jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai). Open issues
+and pull requests there; release tags, GitHub releases, and the Homebrew formula are
+published from it. Its history begins at a sanitized single-root snapshot, so never push
+branches or tags whose history predates that root.
+
+Issue, pull request, commit, and CI-run links recorded before 2026-09-30 refer to the
+archived `NVIDIA-dev/literate-ai` repository. They remain historical evidence and are
+not renumbered.
+
 ## Test observable behavior first
 
 Prefer contract and component/integration tests through supported public CLI or Python

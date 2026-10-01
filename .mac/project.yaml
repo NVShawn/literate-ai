@@ -1,6 +1,6 @@
 schema: mac.repository_contract.v1
 project: literate-ai
-canonical_remote_url: git@github.com:NVIDIA-dev/literate-ai.git
+canonical_remote_url: git@github.com:jordanhubbard/literate-ai.git
 default_branch: main
 contract_path: .mac/project.yaml
 

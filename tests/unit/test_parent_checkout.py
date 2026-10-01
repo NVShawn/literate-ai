@@ -49,7 +49,7 @@ def _commit_file(root: Path, relative: str, content: str, message: str) -> None:
 class ParentPrefixIdTests(unittest.TestCase):
     def test_uses_repository_name_without_git_suffix(self) -> None:
         self.assertEqual(
-            parent_prefix_id("https://github.com/NVIDIA-dev/literate-ai.git"),
+            parent_prefix_id("https://github.com/jordanhubbard/literate-ai.git"),
             "literate-ai",
         )
         self.assertEqual(

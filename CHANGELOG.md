@@ -5,6 +5,12 @@
 - Onboarding: feature the continuous narrated video in the README, with a clickable
   preview, chapters, subtitles, and a public-feedback link.
 
+- Move the canonical repository to
+  [jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai): release
+  publication, the Homebrew formula, install documentation, and initialized project
+  READMEs now reference it. Earlier issue and CI links refer to the archived
+  `NVIDIA-dev/literate-ai` repository.
+
 - CLI: identify Git/source builds and their exact revision in version output,
   without treating package metadata as published-release evidence. Explicit
   `litai update` now checks for and applies a newer stable release in an enrolled
@@ -68,10 +74,6 @@
   `build-repo-man` Flavor. Its repository-relative driver remains recorded authority
   while disposable generated wrappers build with the selected language toolchain;
   exact target, driver, path, schema, and public-catalog validation now fail closed.
-
-## 1.1.0 - 2026-09-21
-
-[README.md](https://github.com/NVIDIA-dev/literate-ai/blob/v1.1.0/README.md)
 
 - Bind implicit macOS developer-directory and SDK selections into C++ toolchain
   identity, and declare the selected SDK consistently to Bazel repository probes,

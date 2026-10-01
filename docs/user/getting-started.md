@@ -51,7 +51,7 @@ You need Python 3.11 or newer, Git, and one authenticated coding CLI: Codex, Cla
 Cursor Agent, or OpenCode. The selected language and build Flavors add their own compiler or runtime
 requirements at planning/rebuild time.
 
-Download the wheel asset from the [latest published release](https://github.com/NVIDIA-dev/literate-ai/releases/latest), then
+Download the wheel asset from the [latest published release](https://github.com/jordanhubbard/literate-ai/releases/latest), then
 install that exact wheel into a virtual environment. This is the stranger path exercised
 by the release gate; it neither imports this checkout through `PYTHONPATH` nor depends
 on maintainer bootstrap state.
