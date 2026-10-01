@@ -281,6 +281,12 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 )
 
             observed = []
+            diagnostics = []
+
+            def install(*args, **kwargs):
+                result = updater._default_runner(*args, **kwargs)
+                diagnostics.append(f"pip result: {result!r}")
+                return result
 
             def execute(command, env):
                 self.assertEqual(env[updater.REEXEC_ENVIRONMENT], "1")
@@ -293,6 +299,29 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                     timeout=30,
                 )
                 observed.append(json.loads(result.stdout))
+                probe = subprocess.run(
+                    [
+                        str(python),
+                        "-c",
+                        (
+                            "import importlib.metadata as m, pathlib, hashlib; "
+                            "import update_fixture as f; "
+                            "p=pathlib.Path(f.__file__); "
+                            "print('distribution:', m.version('literate-ai')); "
+                            "print('source:', p, p.stat().st_mtime_ns, p.read_text()); "
+                            "print('executed constants:', f.main.__code__.co_consts); "
+                            "c=pathlib.Path(f.__cached__); "
+                            "print('bytecode:', c, c.read_bytes()[:16].hex(), "
+                            "hashlib.sha256(c.read_bytes()).hexdigest()) "
+                            "if c.exists() else print('no bytecode')"
+                        ),
+                    ],
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+                diagnostics.append(f"installed probe: {probe!r}")
 
             errors = io.StringIO()
             with (
@@ -306,6 +335,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                     stderr=errors,
                     check_now=True,
                     exec_fn=execute,
+                    runner=install,
                 )
             self.assertEqual(
                 observed,
@@ -315,6 +345,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                         "argv": ["update", "--json", "project with spaces"],
                     }
                 ],
+                msg=errors.getvalue() + "\n" + "\n".join(diagnostics),
             )
             self.assertIn("from 1.0.0 to 2.0.0", errors.getvalue())
 

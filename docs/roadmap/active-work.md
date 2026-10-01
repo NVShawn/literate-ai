@@ -23146,3 +23146,26 @@ GitHub CI failure without relaxing identity checks.
   GitHub confirms the chapter file at the same published revision. The preview
   was visually inspected and `git diff --check` passes. This is documentation
   discoverability, not a claim that draft PR #10 or its framework changes landed.
+
+### [ ] CI-MACOS-001 — Separate macOS PR smoke from full qualification
+
+- **GitHub issue:** [#13](https://github.com/jordanhubbard/literate-ai/issues/13)
+- **Priority:** P0
+- **Owner:** GitHub CI workflow and diagnostic test harness
+- **Direction:** Keep focused macOS installation, launcher, update and native-build PR checks; retain full macOS release-candidate coverage with bounded runs and useful failure evidence.
+- **Conclusion:** Goal 4: separate explicitly named smoke checks from full conformance. Main pushes, release-branch PRs/pushes, version tags and manual qualification retain full macOS coverage. Preserve the existing checkpoint partitions and release gates; do not claim the unexplained self-update failure is fixed.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Separate the workflow profiles, add bounded test steps and retain verbose failure diagnostics.
+- **Evidence:**
+  - [x] Workflow regressions prove event gating, full-suite coverage, smoke selection and diagnostics; focused local macOS verification passes.
+  - [ ] Hosted full qualification succeeds before release or closure of issue 13.
+- **Local evidence:** 13 workflow policy regressions and 13 build-identity/update
+  tests pass through `make python-check`. The exact macOS smoke command passes
+  69 tests, including real prefix wheel upgrade/re-execution and native C++
+  compilation/execution. This does not qualify the full matrix or diagnose the
+  earlier Ubuntu update failure. Issue #13 remains open for hosted evidence.
+- **Additional checks:** actionlint 1.7.12 accepts the workflow; strict lint,
+  formatting, documentation rendering (121 diagrams), lifecycle driver and
+  documentation authority checks pass. Documentation tooling retains one
+  existing low-severity advisory below its high-severity failure threshold.

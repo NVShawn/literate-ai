@@ -131,3 +131,27 @@ provenance and authority mechanisms it provides to projects built with it apply 
 first. See `docs/architecture/design-traceability.md` and
 `docs/user/troubleshooting.md` for more on how these checks work and how to recover
 from a stale pin or marker mid-development, not just before a commit.
+
+## macOS CI profiles
+
+Ordinary pull requests run the explicitly named macOS smoke check: installation
+contracts, launcher/self-update regressions (including a real disposable-prefix
+wheel upgrade), and guarded native C++ compilation and execution. The existing
+macOS sample-composition check also exercises actual install/uninstall/reinstall.
+These checks are **not release qualification** and do not upload qualified wheels.
+
+Pushes to `main` or `release/**`, PRs targeting `release/**`, version-tag pushes,
+and manual CI runs retain the complete macOS Python 3.11/3.14 qualification matrix.
+The existing independent 3.11 checkpoint partitions are preserved; 3.14 runs all
+tests. Linux and Windows coverage and `make release-check` remain unchanged.
+Use a manual CI run on a candidate branch when full macOS evidence is needed
+before merging. Require full successful exact-commit qualification before release;
+a green ordinary PR smoke job is not a substitute.
+
+Conformance test steps have a 120-minute budget, leaving time within the job for
+always-run diagnostic uploads. A timeout is a failed qualification, never a pass
+or permission to skip a test. CI uses `PYTHON_TEST_VERBOSITY=2` so retained logs
+name the running test. Full macOS artifact names include their partition to avoid
+collisions. Self-update assertion failures include real pip output and installed
+source/bytecode diagnostics. Do not attach credentials or environment dumps.
+Keep public PR execution on GitHub-hosted runners, not personal developer Macs.

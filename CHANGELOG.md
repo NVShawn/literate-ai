@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- CI: separate focused macOS PR smoke checks from full main/release qualification,
+  bound conformance steps, and retain verbose test names and self-update failure
+  diagnostics. Full release gates remain unchanged.
+
 - Onboarding: feature the continuous narrated video in the README, with a clickable
   preview, chapters, subtitles, and a public-feedback link.
 

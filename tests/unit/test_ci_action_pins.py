@@ -46,9 +46,9 @@ class CiActionPinTests(unittest.TestCase):
         self.assertRegex(config, r'package-ecosystem: ["\']?github-actions["\']?')
         self.assertRegex(config, r'interval: ["\']?weekly["\']?')
 
-    def test_all_required_checks_share_one_native_cancellation_scope(self) -> None:
+    def test_checks_and_full_macos_qualification_fail_closed(self) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
-        self.assertEqual(set(workflow["jobs"]), {"checks"})
+        self.assertEqual(set(workflow["jobs"]), {"checks", "macos-qualification"})
         job = workflow["jobs"]["checks"]
         self.assertIs(job["strategy"]["fail-fast"], True)
         self.assertIs(job["continue-on-error"], False)
@@ -60,11 +60,15 @@ class CiActionPinTests(unittest.TestCase):
         for os_name in ("ubuntu-latest", "macos-latest", "windows-latest"):
             for prefix in ("Documentation", "Sample composition"):
                 expected.add((f"{prefix} / {os_name}", os_name))
-        for os_name in ("ubuntu-latest", "macos-latest"):
+        for os_name in ("ubuntu-latest",):
             for python in ("3.11", "3.14"):
                 expected.add((f"{os_name} / Python {python}", os_name))
-        for group in (2, 3):
-            expected.add((f"macos-latest / Python 3.11 ({group} of 3)", "macos-latest"))
+        expected.add(
+            (
+                "macOS / Python 3.14 / PR smoke (not release qualification)",
+                "macos-latest",
+            )
+        )
         expected.add(
             ("Windows / Python 3.12 / lint, OpenSpec, wheel", "windows-latest")
         )
@@ -75,7 +79,7 @@ class CiActionPinTests(unittest.TestCase):
         for os_name in ("ubuntu-latest", "windows-latest"):
             expected.add((f"Native C++ library / {os_name}", os_name))
         rows = job["strategy"]["matrix"]["include"]
-        self.assertEqual(len(rows), 19)
+        self.assertEqual(len(rows), 16)
         self.assertEqual({(row["name"], row["os"]) for row in rows}, expected)
         for row in rows:
             if row["task"] == "conformance":
@@ -94,14 +98,8 @@ class CiActionPinTests(unittest.TestCase):
         self,
     ) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
-        rows = workflow["jobs"]["checks"]["strategy"]["matrix"]["include"]
-        patterns = [
-            row["test_pattern"]
-            for row in rows
-            if row["task"] == "conformance"
-            and row["os"] == "macos-latest"
-            and row["python"] == "3.11"
-        ]
+        rows = workflow["jobs"]["macos-qualification"]["strategy"]["matrix"]["include"]
+        patterns = [row["test_pattern"] for row in rows if row["python"] == "3.11"]
         self.assertEqual(
             patterns,
             ["test_[a-p]*.py", "test_[q-s]*.py", "test_[t-z]*.py"],
@@ -133,6 +131,7 @@ class CiActionPinTests(unittest.TestCase):
             if step.get("name") in (
                 "Upload release evidence",
                 "Upload the profiling trace and hotspot report",
+                "Upload smoke diagnostics (not release evidence)",
             ):
                 self.assertEqual(original, "always()")
             if step.get("name") == "Explain release evidence":
@@ -146,6 +145,7 @@ class CiActionPinTests(unittest.TestCase):
                 "test_all_host_recipes_compose_from_specs_and_real_flavors"
             ),
             "conformance": "make validate PYTHON=python RUFF=ruff",
+            "macos-smoke": "tests.unit.test_cli_build_identity",
             "windows-gates": "python scripts/wheel_smoke.py",
             "windows-tests": "--splits 3 --group ${{ matrix.group }}",
             "cpp-native": (
@@ -158,6 +158,54 @@ class CiActionPinTests(unittest.TestCase):
             self.assertIn(
                 command, "\n".join(str(step.get("run", "")) for step in selected[task])
             )
+
+    def test_full_macos_profile_cannot_be_disabled_for_release_sources(self) -> None:
+        workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
+        job = workflow["jobs"]["macos-qualification"]
+        self.assertEqual(
+            job["if"],
+            "github.event_name != 'pull_request' || "
+            "startsWith(github.base_ref, 'release/')",
+        )
+        self.assertEqual(workflow["on"]["push"]["branches"], ["main", "release/**"])
+        self.assertEqual(workflow["on"]["push"]["tags"], ["v*"])
+        self.assertIn("workflow_dispatch", workflow["on"])
+        self.assertIs(job["continue-on-error"], False)
+        self.assertIs(job["strategy"]["fail-fast"], True)
+        self.assertEqual(job["runs-on"], "macos-latest")
+        full314 = [
+            r for r in job["strategy"]["matrix"]["include"] if r["python"] == "3.14"
+        ]
+        self.assertEqual(len(full314), 1)
+        self.assertEqual(full314[0]["test_pattern"], "test*.py")
+        commands = "\n".join(s.get("run", "") for s in job["steps"])
+        self.assertIn("make validate", commands)
+        self.assertIn("make wheel-check", commands)
+        for step in job["steps"]:
+            if step.get("name") == "Run full macOS conformance partition":
+                self.assertEqual(step["timeout-minutes"], 120)
+            if step.get("name") == "Upload full qualification diagnostics":
+                self.assertEqual(step["if"], "always()")
+                self.assertIn("${{ matrix.group }}", step["with"]["name"])
+        self.assertEqual(workflow["env"]["PYTHON_TEST_VERBOSITY"], "2")
+        self.assertIn(
+            '--verbosity "$(PYTHON_TEST_VERBOSITY)"', (ROOT / "Makefile").read_text()
+        )
+
+    def test_macos_smoke_is_bounded_and_includes_real_upgrade_and_native_build(
+        self,
+    ) -> None:
+        workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = workflow["jobs"]["checks"]["steps"]
+        smoke = next(s for s in steps if s.get("name") == "Run macOS smoke checks")
+        self.assertEqual(smoke["timeout-minutes"], 30)
+        for module in (
+            "test_host_install",
+            "test_host_self_update",
+            "test_cli_build_identity",
+            "test_guarded_builder.GuardedCppBuilderTests",
+        ):
+            self.assertIn(module, smoke["run"])
 
     def _skill_steps(self) -> list[str]:
         workflow = (ROOT / ".github/workflows/ci.yml").read_text()
