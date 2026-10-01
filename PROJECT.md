@@ -25,7 +25,10 @@ disposable output. The framework's own goals are:
    plans and scaffolds a new tree with workflow, receipts, and release protocol;
    `litai onboard adopt` wraps an existing tree in the same harness; `verify`,
    `lock`, `plan`, and `rebuild` prove when that tree is valid, and `release`
-   cuts a versioned line.
+   cuts a versioned line. Framework and derived-project releases must follow
+   Semantic Versioning: each published release has an immutable version tag on
+   its `release/<major>.<minor>.x` branch, selecting the exact qualified commit.
+   A package version or copied source snapshot alone is not a published release.
 2. Let a human-readable Component/Flavor/skill/workflow/routing specification fully
    determine generated application behavior, independent of which coding CLI or model
    performs the generation. This arrives in waves as models improve; it is not the
@@ -68,6 +71,12 @@ development (2026-09-10):
 | Samples | Non-inheritable demos under `samples/`, except `hello-component` (the inheritable starter `litai init` seeds). | See the open taxonomy question in `docs/roadmap/active-work.md`. |
 
 ## Current work
+
+RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
+enforce SemVer release identity and release-branch/tag ownership for the framework
+and derived projects, repair the public release baseline, and verify bare
+`litai init` from a fresh public installation. Publication remains pending;
+no unqualified snapshot may be tagged merely to unblock onboarding.
 
 REFRESH-ABSORBED-001 implements and qualifies attached refresh of absorbed primary
 worktrees under Goals 1 and 4, preserving external shared-branch custody. Focused
