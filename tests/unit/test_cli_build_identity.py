@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -194,6 +195,13 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
 
     def test_real_prefix_pip_upgrade_and_original_command_reexecution(self):
         """Use real wheels, pip and launcher; only release discovery is synthetic."""
+        self._real_prefix_upgrade(legacy_cache_environment=False)
+
+    def test_real_prefix_fixture_reproduces_legacy_stale_bytecode(self):
+        """Negative control: the former cache mismatch executes the old version."""
+        self._real_prefix_upgrade(legacy_cache_environment=True)
+
+    def _real_prefix_upgrade(self, *, legacy_cache_environment):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
             layout = HostInstallLayout.for_prefix(root / "prefix")
@@ -258,6 +266,33 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
             ):
                 variables.pop(key, None)
             variables.update(LITAI_HOST_INSTALL="1", LITAI_PREFIX=str(layout.prefix))
+            # Force an external cache and identical source size/timestamps. The
+            # regression must not depend on pip finishing within a clock tick.
+            variables["PYTHONPYCACHEPREFIX"] = str(root / "external-bytecode")
+            variables["PYTHONOPTIMIZE"] = "1"
+            variables["PIP_NO_COMPILE"] = "1"  # explicit --compile must win
+            baseline = subprocess.run(
+                [
+                    str(python),
+                    "-c",
+                    "import update_fixture; print(update_fixture.__file__)",
+                ],
+                env=variables,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            fixture_source = Path(baseline.stdout.strip())
+            timestamp = 1700000000
+            os.utime(fixture_source, (timestamp, timestamp))
+            subprocess.run(
+                [str(python), "-c", "import update_fixture; update_fixture.main()"],
+                env=variables,
+                check=True,
+                capture_output=True,
+                timeout=30,
+            )
             payload = {
                 "tag_name": "v2.0.0",
                 "assets": [
@@ -284,7 +319,14 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
             diagnostics = []
 
             def install(*args, **kwargs):
+                if legacy_cache_environment:
+                    kwargs["env"] = {
+                        key: value
+                        for key, value in kwargs["env"].items()
+                        if key not in {"PYTHONPYCACHEPREFIX", "PYTHONOPTIMIZE"}
+                    }
                 result = updater._default_runner(*args, **kwargs)
+                os.utime(fixture_source, (timestamp, timestamp))
                 diagnostics.append(f"pip result: {result!r}")
                 return result
 
@@ -341,7 +383,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 observed,
                 [
                     {
-                        "version": "2.0.0",
+                        "version": "1.0.0" if legacy_cache_environment else "2.0.0",
                         "argv": ["update", "--json", "project with spaces"],
                     }
                 ],

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- CLI self-update: refresh bytecode in the caller-selected cache and optimization
+  mode so a successful wheel upgrade cannot immediately execute stale code from
+  an equal-size, equal-timestamp previous version. Keep import-path overrides
+  excluded from the installer environment.
 - Instructional narrative: add an Opus-reviewed ten-minute skeptical-adopter
   script and a new local expressive-voice audition with separate acronym
   pronunciation text. The existing public film remains unchanged pending human

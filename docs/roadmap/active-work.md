@@ -23216,6 +23216,19 @@ GitHub CI failure without relaxing identity checks.
   stale external bytecode as the observed mechanism; investigate cache invalidation
   before claiming the updater is repaired. Preserve this failure during migration;
   normal CI-qualified landing remains blocked and no release is qualified.
+- **Repair in progress:** The operator retained full CI as the landing gate.
+  Preserve only the caller's bytecode-cache location and optimization mode in
+  pip's otherwise sanitized Python environment, and explicitly compile upgraded
+  wheel files into that cache. Add a deterministic equal-size/equal-timestamp
+  regression with real pip and launcher execution. Do not delete shared caches,
+  relax assertions or treat a passing PR smoke profile as full qualification.
+- **Repair verification:** Native macOS/Python 3.14 passes 14 build-identity/update
+  tests and 18 existing/extended updater tests. The real-prefix negative control
+  reproduces version 1.0.0 with the former sanitized cache environment; the same
+  fixture executes 2.0.0 after the repair, even with optimization enabled and
+  `PIP_NO_COMPILE` set. No shared cache deletion is used. Lint/format and driver/
+  documentation review pass. Full consolidated local and hosted qualification
+  remain required before landing; the operator explicitly declined a CI exception.
 
 ### [x] ONBOARD-VIDEO-001 — Feature the continuous onboarding video in the README
 
