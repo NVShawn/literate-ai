@@ -12,6 +12,7 @@ boundaries. Keeping them separate is the important part.
 | Project release | `skills/agent/release-project/` | Agent planning or publishing a project release | No |
 | Nested release deltas | `skills/agent/release-project/{backport,evidence,advance,ci-status,verify-published,notify-descendants}/` | Agent wrapping those CLI verbs; parent stays the four-phase cut | No |
 | Package artifacts | `skills/agent/package-artifacts/` | Agent constructing native packages without publication | No |
+| Instructional videos | `skills/agent/author-instructional-videos/` | Agent creating evidence-backed narrated courses with captions | No |
 | CI test plan | `skills/agent/ci-test-plan/` plus `shard/` and `impact/` | Agent authoring fail-closed shard/impact CI | No |
 | Convert project | `skills/agent/convert-project/` | Agent adopting an existing tree into the harness | No |
 | Bind lifecycle evidence | `skills/agent/bind-lifecycle-evidence/` | Agent confirming rebuild/SBOM/cache identities | No |

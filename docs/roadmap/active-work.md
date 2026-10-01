@@ -23058,3 +23058,218 @@ GitHub CI failure without relaxing identity checks.
   public-mirror qualification branch records the resulting lifecycle-driver and
   documentation authority identities and passes the complete managed Python suite,
   including the absorbed attached update, rollback/custody, and native Bazel cases.
+
+### [ ] COURSE-001 — Rebuildable instructional videos and onboarding demo repairs
+
+- **Priority:** P1
+- **Owner:** onboarding, retained test evidence, instructional video CLI
+- **Direction:** Fix defects exposed by the real course sessions, support repeatable course creation in Literate AI, and publish the courses publicly.
+- **Conclusion:** Repair starter acceptance authority and exact CTest summaries; add a portable course manifest, narration providers, captions, evidence verification and a documented CLI, then refresh the public examples.
+- **Review correction:** The first draft failed the viewing experience: robotic speech,
+  lecture-like dialogue, text-heavy visuals, and missing first-time setup. Goals 1 and
+  6 require a visual-first, engaging instructional method that children can inherit,
+  while this repository alone owns its two-character comedy and cast.
+- **Second audience correction:** The continuous cut still gives Sam explanatory
+  lines rather than consequential objections. Rewrite as a ten-minute contested
+  pitch: Sam already has C++, Make and tests; LitAI must earn adoption by showing
+  contract/implementation separation, selective Flavors and skills, pinned repo
+  inheritance, brownfield preservation and reviewed updates. Keep product limits
+  visible. Audition more expressive local speech with explicit acronym pronunciation
+  before replacing the existing public film. Obtain the latest available Opus
+  model's independent narrative critique and address it before rendering.
+- **Second-revision progress:** Opus 5.5 (`claude-opus-5-5`, confirmed by the
+  provider usage record) reviewed the complete 1,512-word draft and returned
+  **revise**. Its critique is retained in `docs/courses/play/OPUS-REVIEW.md`.
+  The revised 1,247-word/54-turn script moves taxonomy to relevant objections,
+  explicitly concedes a lenient oracle can pass wrong code, lets Sam count both
+  framework bugs, aligns capture/narration and ends with a limited trial.
+  This is not a second Opus approval. Local Qwen3-TTS voices and acronym-specific
+  speech text are being auditioned; the existing public movie is preserved.
+  Two narrative/pronunciation regressions and eleven video regressions pass.
+- **Audition evidence:** A six-turn, 75.76-second captioned Qwen3-TTS audition
+  renders and verifies locally; output SHA-256
+  `d80d0b01b40341eae223e860c7a5af75ba386cc7c51689cccfb9a9640a76382a`.
+  Local lint and formatting pass. Human listening/voice approval, final pacing,
+  complete shot review and full-film replacement remain required; no claim of
+  improved perceived voice quality is inferred from the media receipt.
+- **Migration handoff:** Preserve the revised source, independent review and
+  verified audition package on the public contribution branch. The operator selected
+  NVIDIA-dev `main` as the final migration source: consolidate the video, CLI
+  version/self-update, README and CI changes through PR #515 before the migration.
+  Validate the combined tree and await hosted qualification before landing; stop
+  writing to NVIDIA-dev after the verified main handoff. Keep original
+  feedback media and incomplete review/qualification states explicit. Do not move
+  private Git history, raw logs, credentials, model weights or disposable tools.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Fix starter oracle and CTest summary parsing with regression coverage.
+  - [x] Add reusable video authoring, build, verify, and refresh commands and packaged skill.
+  - [ ] Refresh and publish the course bundle with current demo evidence.
+  - [x] Replace stock system speech with auditioned natural narration and produce a short review cut before full rendering. User accepted the improved direction after watching the 94-second neural cut.
+  - [ ] Rewrite greenfield with real dialogue, a complete acquisition/install/authentication path, and visual demonstrations rather than bullet slides.
+  - [x] Make the inherited skill and starter narrative-neutral; retain cast, tone, and two-character choices only in this course package. Nine video regressions pass.
+  - [x] Produce one continuous video play with character introductions, respectful skeptical-engineer humor, real coding in the middle, and an updates/repository-lineage closing. The 13:38 feedback cut contains 85 turns, visible captions and labeled edited execution replays. Fresh installed-wheel generation, demo-local oracle recovery, 3-pass/2-skip verification, wheel build/verify, and TinyXML2 retained advancement passed; COURSE-003 preserves the discovered framework defect.
+  - [x] Publish the continuous feedback edition to the authorized public GitHub repository with captions, regeneration sources, provenance and explicit limitations. Public course commit `e118f2ca` is reachable on `docs/publish-video-courses`; an unauthenticated download matches MP4 SHA-256 `d23c1a39f8ee27423638caee670687c98f498af03c16bcb9cc3fc017f472f822`. Public PR #10 remains a feedback draft, not a framework release or upstream OSS adoption. Eleven video regressions, two demo regressions, complete media decode/verification, lint/format, public-export, layout and documentation checks pass. Full audience review and broader release qualification remain separate.
+- **Evidence:**
+  - [ ] Regression tests, installed CLI checks, real greenfield and TinyXML2 demos, and media verification pass.
+
+### [ ] COURSE-002 — Accepted-source continuation after an onboarding rebuild
+
+- **Priority:** P1
+- **Owner:** source cache continuation
+- **Direction:** Investigate the runtime_absent result observed during the greenfield course despite a passing rebuild.
+- **Conclusion:** Reproduce against the release candidate and compare exact admission keys before proposing a fix; do not weaken cache membership checks.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Reproduce and classify missing membership versus a framework lookup defect.
+- **Evidence:**
+  - [ ] Same-model accepted-source continuation passes or yields an actionable exact mismatch diagnosis.
+
+### [ ] COURSE-003 — Bind inherited starter acceptance to its actual contract
+
+- **Priority:** P1
+- **Owner:** project initialization and inherited acceptance authority
+- **Direction:** The continuous-course fresh run inherited the public parent's richer greeting-card Component but received the simple template's acceptance cases.
+- **Conclusion:** Selecting a starter by name is not enough to select its oracle. The generator correctly followed the inherited contract; independent acceptance failed with missing `messages`. Correcting the disposable demonstration oracle proves only local recovery, not a framework repair. Preserve verifier isolation and refuse unsupported assumptions rather than synthesizing expectations from generated code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Define explicit inherited acceptance ownership and bind it to the selected starter contract.
+  - [ ] Cover simple template, rich inherited starter, custom same-name starter and conflict/refusal cases.
+- **Evidence:**
+  - [ ] Fresh public-parent installed-CLI onboarding completes without hand-editing its oracle, with independent acceptance intact.
+### [ ] RELEASE-INVARIANTS-001 — Require SemVer release branches and verified public tags
+
+- **Release blocker:** yes; applies equally to the framework and derived projects.
+- **Observed failure:** The public repository advertises no tags, so default
+  installed-CLI parent selection fails with `repository_lineage.release_unavailable`.
+  Explicit-parent tutorial sessions did not exercise this first-run path.
+- **Enforcement findings:** Release policy accepts `pep440`; branch ownership has
+  an exemption when no default branch is configured. Published verification checks
+  remote branch/tag revision equality but does not itself require the branch to
+  be the version's release line. Remove exemptions, including legacy-policy paths.
+  Canonical release identity must be SemVer; ecosystem-specific package spelling
+  may only be a checked projection, not a competing release-version authority.
+- **Publication distinction:** Development builds may exist without release tags,
+  but neither an installer, migration, nor release receipt may represent such a
+  build as a verified published release. Framework-managed release paths must fail
+  closed; direct out-of-band Git/forge writes require forge protections and cannot
+  be made impossible by a client CLI alone.
+- **Dependency evidence:** Public PR #11 owns canonical-destination corrections
+  and remains unmerged with CI pending at inspection. Do not duplicate its edits
+  or treat its pre-merge checks as exact merged-source qualification. The public
+  source snapshot still carries the old provider destination until that repair lands.
+- **Next action:** Implement and test release invariants before publication;
+  retain default-parent fail-closed behavior. Use source-matched tooling because
+  the ambient 1.0.1 CLI cannot parse this checkout's `artifact_gate` policy.
+
+- **Priority:** P0
+- **Owner:** framework release core, inherited release policy, publication acceptance
+- **Direction:** Every Literate AI project must use SemVer and release from a release branch with a tag on that branch; repair public bare init failure.
+- **Conclusion:** Goals 1, 4 and 6: package metadata is not a published release. Remove branch-policy exemptions, require semantic release identity and remote branch/tag proof, and qualify fresh public installation without an explicit parent. Preserve private-history isolation and do not tag an unqualified snapshot.
+- **Depends on:** PUBLIC-MIRROR-001
+- **Implementation:**
+  - [ ] Enforce SemVer and release-line ownership across plan, prepare, check, publish and published verification, including legacy and derived policies.
+  - [ ] Integrate the canonical public destination repair after qualified landing; publish the qualified release branch and annotated version tag through the release workflow.
+- **Evidence:**
+  - [ ] Negative tests reject missing or wrong release branches, invalid versions, missing or mismatched tags and incomplete publication; valid derived-project release succeeds.
+  - [ ] Fresh public wheel installation runs bare litai init in an empty directory with no private credentials or explicit parent override.
+
+### [ ] CLI-BUILD-IDENTITY-001 — Distinguish source builds and verify explicit CLI self-update
+
+- **Priority:** P0
+- **Owner:** CLI version reporting and prefix self-update
+- **Direction:** Git main installations must not masquerade as a published release; verify that litai update applies a newer release.
+- **Conclusion:** Goals 1 and 4: report immutable installed Git provenance and unverified publication separately from package compatibility version. Explicit update performs bounded release discovery before applying an enrolled-prefix update; preserve project planning, opt-outs, installation custody and offline operation.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add source-aware offline CLI version reporting without changing protocol or lifecycle version authorities.
+  - [x] Make explicit update synchronously discover and apply eligible release wheels before re-executing the original command.
+- **Evidence:**
+  - [ ] Regression tests cover source provenance, newer release selection, original argv re-execution, opt-outs and failure behavior; disposable installed-prefix smoke demonstrates the real upgrade.
+- **Current verification:** 13 focused build-identity/explicit-update tests pass,
+  including real pip installation of a newer fixture wheel and execution of the
+  refreshed prefix launcher with unchanged arguments. Release discovery alone is
+  synthetic; no live public-release upgrade is claimed. The 17 existing updater
+  regressions and 12 version-authority tests pass. Lint, format, public-export,
+  reviewed driver identity and documentation authority checks pass. The broader
+  CLI slice also passes all 258 tests, including the new focused tests. A separate
+  non-editable Git-install probe was stopped after recursive shallow local-clone
+  fetches exhausted file descriptors; it is not passing installation evidence.
+  Full installed-wheel qualification was started separately and remains pending
+  at this handoff. No user's installed CLI, release tag or release branch changed.
+- **Post-merge follow-up:** PR #12 merged as `9862b98` after its checks passed,
+  but [merge CI run 36822853564](https://github.com/jordanhubbard/literate-ai/actions/runs/36822853564)
+  failed on Ubuntu/Python 3.11.16: the real-prefix integration test observed
+  `1.0.0` from the relaunched fixture instead of `2.0.0`. The retained CI artifact
+  contains the assertion, not pip's successful-command output or the temporary
+  installed files. Ten isolated Linux/Python 3.11 runs and ten native macOS/Python
+  3.14 runs passed with instrumented real pip and launcher execution. This does
+  not establish a root cause or clear the failed merge qualification. The next
+  diagnostic action is to retain pip output, installed distribution metadata,
+  fixture source and bytecode identity on failure, and reproduce the CI failure
+  before changing updater behavior. No production updater fix is claimed.
+- **Migration-batch reproduction:** Native macOS/Python 3.14 focused verification
+  now reproduces the real-prefix failure. pip reports a successful 2.0.0 install;
+  installed metadata and source both say 2.0.0, but the executed code constants
+  still contain 1.0.0. The bytecode lives in the external `PYTHONPYCACHEPREFIX`
+  used by the test harness, outside the prefix's site-packages tree. This isolates
+  stale external bytecode as the observed mechanism; investigate cache invalidation
+  before claiming the updater is repaired. Preserve this failure during migration;
+  normal CI-qualified landing remains blocked and no release is qualified.
+
+### [x] ONBOARD-VIDEO-001 — Feature the continuous onboarding video in the README
+
+- **Priority:** P1
+- **Owner:** root README and onboarding documentation
+- **Direction:** Prominently feature the onboarding video for new users.
+- **Conclusion:** Link the existing public 13:38 film with a preview, chapters and subtitles near the top of the README. Pin public media to its published commit while PR 10 remains unmerged; do not imply a software release or completed audience review.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add a prominent watch section ahead of the architectural overview.
+- **Evidence:**
+  - [x] Verify public media, thumbnail, chapter and subtitle links and check the documentation diff.
+- **Verification:** Commit-pinned MP4, preview PNG and SRT return HTTP 200;
+  GitHub confirms the chapter file at the same published revision. The preview
+  was visually inspected and `git diff --check` passes. This is documentation
+  discoverability, not a claim that draft PR #10 or its framework changes landed.
+
+### [ ] CI-MACOS-001 — Separate macOS PR smoke from full qualification
+
+- **GitHub issue:** [#13](https://github.com/jordanhubbard/literate-ai/issues/13)
+- **Priority:** P0
+- **Owner:** GitHub CI workflow and diagnostic test harness
+- **Direction:** Keep focused macOS installation, launcher, update and native-build PR checks; retain full macOS release-candidate coverage with bounded runs and useful failure evidence.
+- **Conclusion:** Goal 4: separate explicitly named smoke checks from full conformance. Main pushes, release-branch PRs/pushes, version tags and manual qualification retain full macOS coverage. Preserve the existing checkpoint partitions and release gates; do not claim the unexplained self-update failure is fixed.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Separate the workflow profiles, add bounded test steps and retain verbose failure diagnostics.
+  - [x] Extend the approved PR profile to one full Linux suite and focused Windows/macOS native installation checks; consolidate platform-neutral gates and cache dependency downloads.
+  - [x] Bound publication subprocess timeouts at the reviewed policy even when floating-point deadline subtraction rounds upward; add deterministic boundary coverage.
+  - [ ] Measure hosted runtimes and audit redundant mock-heavy tests before further consolidation; a 10–15 minute PR target is not yet demonstrated.
+- **Evidence:**
+  - [x] Workflow regressions prove event gating, full-suite coverage, smoke selection and diagnostics; focused local macOS verification passes.
+  - [ ] Hosted full qualification succeeds before release or closure of issue 13.
+- **Local evidence:** 13 workflow policy regressions and 13 build-identity/update
+  tests pass through `make python-check`. The exact macOS smoke command passes
+  69 tests, including real prefix wheel upgrade/re-execution and native C++
+  compilation/execution. This does not qualify the full matrix or diagnose the
+  earlier Ubuntu update failure. Issue #13 remains open for hosted evidence.
+- **Additional checks:** actionlint 1.7.12 accepts the workflow; strict lint,
+  formatting, documentation rendering (121 diagrams), lifecycle driver and
+  documentation authority checks pass. Documentation tooling retains one
+  existing low-severity advisory below its high-severity failure threshold.
+- **PR-profile refinement:** 14 workflow regressions verify nine PR cells versus
+  fourteen qualification cells, plus the existing four full macOS partitions.
+  Release/main/tag/manual selection retains complete test coverage, while shared
+  documentation gates run in Linux conformance instead of three standalone jobs.
+  pip/npm download caches and bounded pip transport retries do not retry assertions.
+  Independent matrix failures no longer cancel sibling evidence. All 37 publication
+  tests pass, including a deterministic clock reproducing the hosted Windows
+  `120.00000000000006` timeout overshoot. The subprocess budget is capped without
+  relaxing the test assertion or extending the absolute deadline. The runtime and
+  redundant-test audit remain open; no full hosted qualification is claimed.
+- **Migration qualification repair:** Hosted PR run 36873559937 completed the
+  primary Python suite with one failure: the new profile-selection checkout lacked
+  the repository-wide `fetch-depth: 0` requirement. Preserve full history there
+  too; do not weaken the historical-commit test. All other PR execution cells
+  passed. Replacement exact-source CI remains required for normal landing.

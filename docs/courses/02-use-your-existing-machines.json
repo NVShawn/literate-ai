@@ -1,0 +1,226 @@
+{
+  "schema": "literate-ai/video-course@1",
+  "id": "02-use-your-existing-machines",
+  "title": "Use machines you already have",
+  "speakers": {
+    "litai": {
+      "name": "LitAI",
+      "voice": "Samantha",
+      "portrait": "assets/litai-guide.png"
+    },
+    "sam": {
+      "name": "Sam",
+      "voice": "Daniel",
+      "portrait": "assets/sam-engineer.png"
+    }
+  },
+  "evidence": [
+    "EVIDENCE.md",
+    "evidence/tinyxml2-retained.json"
+  ],
+  "scenes": [
+    {
+      "title": "The outcome",
+      "points": [
+        "Reuse local and SSH machines as workers",
+        "Keep private endpoints out of the repo",
+        "Real session excerpts; edited transcript replay"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Do I need to buy runners or move my code into a hosted service?"
+        },
+        {
+          "speaker": "litai",
+          "text": "No new fleet is required. This course connects machines you already own to Literate AI as workers. The key boundary is simple: the project declares what it needs, while your private user configuration chooses where work runs. These are edited transcript replays of real sessions, not raw screen recordings. Remote-worker steps are a walkthrough."
+        }
+      ]
+    },
+    {
+      "title": "Target versus worker",
+      "points": [
+        "--target selects intended platform and Flavors",
+        "--worker selects the execution endpoint",
+        "Omitting --worker selects implicit local"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Why not just put the SSH host in my project file?"
+        },
+        {
+          "speaker": "litai",
+          "text": "Because endpoints and credentials are private execution choices, not portable product authority. A target and a worker are different decisions. The target determines the recipe and intended platform; the worker is the local, command, or SSH endpoint that executes it. Never encode private hostnames in project specifications."
+        }
+      ]
+    },
+    {
+      "title": "Find private config paths",
+      "points": [
+        "Use platform-resolved paths from the CLI",
+        "Keep worker and test files outside Git"
+      ],
+      "terminal": [
+        "$ litai config paths"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Ask litai config paths where this platform stores user configuration. Copy the checked-in synthetic examples to those private locations, or pass explicit absolute paths. Do not guess Windows or Unix conventions from memory."
+        }
+      ]
+    },
+    {
+      "title": "Define a worker",
+      "points": [
+        "Start with a worker ID and exact OS",
+        "Add the SSH endpoint and workspace privately",
+        "Leave unused hardware qualifiers unset"
+      ],
+      "terminal": [
+        "literate.workers.example.json",
+        "       -> private workers.json"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "In your private workers file, replace each example endpoint and workspace with a real assignment. Give each machine a stable worker ID and exact platform requirements. Keep credentials out of this JSON file."
+        }
+      ]
+    },
+    {
+      "title": "Choose a matrix",
+      "points": [
+        "Select worker IDs, not duplicated endpoints",
+        "Pair each worker with a matching OS Flavor",
+        "Select a coding CLI and resolvable model"
+      ],
+      "terminal": [
+        "literate.test.example.json",
+        "       -> private test.json"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The test matrix selects workers by ID and matching platform Flavor. It also selects a coding CLI and model for live generation. The matrix does not repeat SSH credentials or provisioning commands."
+        }
+      ]
+    },
+    {
+      "title": "Verify model and machine",
+      "points": [
+        "A model alias must resolve in the chosen CLI",
+        "Probe current OS, CPU, memory, and GPU facts",
+        "Degraded is not the same as absent"
+      ],
+      "terminal": [
+        "$ litai worker verify-model",
+        "$ litai worker probe --all"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "My model name works in chat. Why verify it again?"
+        },
+        {
+          "speaker": "litai",
+          "text": "Verify the model before a long run, then probe every configured worker. A missing NVIDIA utility means no GPU was discovered; a utility that cannot query its driver is a degraded observation, not proof of zero devices."
+        }
+      ]
+    },
+    {
+      "title": "Prepare the worker",
+      "points": [
+        "Check toolchain before installing anything",
+        "Use exact Git checkout, submodules, and LFS",
+        "Authenticate the coding CLI separately"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Prepare each assigned machine with detect-before-install checks. Hydrate the exact Git revision, including required submodules and LFS content. Coding-agent login is a separate readiness gate, and secrets stay in the worker environment."
+        }
+      ]
+    },
+    {
+      "title": "Run one cell first",
+      "points": [
+        "Start with one sample and one platform",
+        "Expand only after source and toolchain checks pass",
+        "Worker evidence returns to the coordinator"
+      ],
+      "terminal": [
+        "$ litai worker probe --all",
+        "$ make samples-platform-regression \\",
+        "    TEST_CONFIG=/path/to/test.json \\",
+        "    WORKER_CONFIG=/path/to/workers.json"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Start with one sample and one worker cell. Only expand the matrix after platform, source authority, and toolchain preflight pass. For this repository, samples-platform-regression is the supported fan-out demonstration."
+        }
+      ]
+    },
+    {
+      "title": "Use a worker directly",
+      "points": [
+        "Single-Component lifecycle accepts --worker ID",
+        "Artifacts and receipts are content-bound",
+        "A remote path alone is not accepted evidence"
+      ],
+      "terminal": [
+        "$ litai build COMPONENT --target host \\",
+        "    --worker WORKER_ID"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "If the remote machine says it passed, why isn't that enough?"
+        },
+        {
+          "speaker": "litai",
+          "text": "For a single Component, build, test, and run can choose a configured worker by ID. Returned artifacts and receipts must be imported and verified by the coordinator; a path on another machine alone is not evidence."
+        }
+      ]
+    },
+    {
+      "title": "Actual local worker run",
+      "points": [
+        "The starter wheel built on the implicit local worker",
+        "Result reports worker_id: local",
+        "SSH workers need your private endpoints"
+      ],
+      "terminal": [
+        "$ litai package build samples/hello-component",
+        "worker_id: local | kind: local",
+        "package: hello_component-1.0.0.whl"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Our real package build used the implicit local worker and produced a pip wheel. That verifies the local execution path without exposing a host address. To demonstrate an SSH worker, configure one of your own machines privately and rerun the same target with its worker ID."
+        }
+      ]
+    },
+    {
+      "title": "What to expect",
+      "points": [
+        "Parallelize eligible cells across existing hardware",
+        "Keep capacity observations separate from requirements",
+        "Do not claim generic fan-out for derived projects"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "This can make cross-platform tests more practical without buying a new service. Capacity probes inform selection, but never rewrite authored minimum requirements. Derived projects can wire the private matrix into their own CI; the packaged CLI does not promise a generic fan-out verb."
+        }
+      ]
+    }
+  ]
+}

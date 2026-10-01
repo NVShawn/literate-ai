@@ -579,6 +579,23 @@ class RepositoryPublicationTests(unittest.TestCase):
                 self.assertNotIn(secret, "".join(traceback.format_exception(error)))
                 self.assertTrue(all(not path.exists() for path in visited))
 
+    def test_deadline_rounding_never_increases_the_reviewed_process_budget(self):
+        now = 399.99999999999994
+        # Deterministically recreate the rounding seen on hosted Windows.
+        self.assertGreater((now + 120) - now, 120)
+        observed = []
+
+        def runner(command, **kwargs):
+            observed.append(kwargs["timeout_seconds"])
+            self.assertLessEqual(kwargs["timeout_seconds"], 120)
+            raise BuildError("git_output_stream", "fixture transport failure")
+
+        self.assert_refuses(
+            "transport_failed",
+            lambda: self.verify(process_runner=runner, clock=lambda: now),
+        )
+        self.assertTrue(observed)
+
     def test_semantic_failure_remains_primary_when_proof_cleanup_also_fails(self):
         calls = []
         cleanup_calls = []

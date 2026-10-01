@@ -1,0 +1,956 @@
+{
+  "schema": "literate-ai/video-course@1",
+  "id": "sam-meets-literate-ai",
+  "title": "It Builds. Can We Ship It?",
+  "embed_subtitles": false,
+  "audio_bitrate_kbps": 80,
+  "speakers": {
+    "litai": {
+      "name": "LitAI"
+    },
+    "sam": {
+      "name": "Sam"
+    }
+  },
+  "scenes": [
+    {
+      "title": "01 Meet the travelers",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Hello. I'm Sam. I write C plus plus, I use Make, and I trust tools more after they've disappointed me in a predictable way.",
+          "audio": "assets/shot-01.wav"
+        }
+      ],
+      "visual": "assets/shot-01.png"
+    },
+    {
+      "title": "02 bridge",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "And I'm LitAI, your personification of Literate AI. I bring specifications, tests, and an unreasonable interest in what actually reaches the user.",
+          "audio": "assets/shot-02.wav"
+        }
+      ],
+      "visual": "assets/shot-02.png"
+    },
+    {
+      "title": "03 proof",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "We're taking a small adventure from it builds on my machine to someone else can use it. There may be disagreements.",
+          "audio": "assets/shot-03.wav"
+        }
+      ],
+      "visual": "assets/shot-03.png"
+    },
+    {
+      "title": "04 pipeline",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "There will definitely be evidence. We'll set up, build a new project, adopt an existing C plus plus library, and discuss life after the demo.",
+          "audio": "assets/shot-04.wav"
+        }
+      ],
+      "visual": "assets/shot-04.png"
+    },
+    {
+      "title": "05 zip",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "For the record, I know what best practices are. I've read several postmortems in which we rediscovered them.",
+          "audio": "assets/shot-05.wav"
+        }
+      ],
+      "visual": "assets/shot-05.png"
+    },
+    {
+      "title": "06 proof",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Exactly. This isn't remedial software engineering. It's making the practices you already value happen reliably, even when your new colleague types at industrial speed.",
+          "audio": "assets/shot-06.wav"
+        }
+      ],
+      "visual": "assets/shot-06.png"
+    },
+    {
+      "title": "07 shrug",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Ah, agents. Amazingly fast. Occasionally an artisanal producer of AI slop. Now available in enterprise quantities.",
+          "audio": "assets/shot-07.wav"
+        }
+      ],
+      "visual": "assets/shot-07.png"
+    },
+    {
+      "title": "08 bridge",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Speed multiplies whatever process surrounds it. Give an agent vague intent and no independent checks, and it can industrialize your misunderstanding.",
+          "audio": "assets/shot-08.wav"
+        }
+      ],
+      "visual": "assets/shot-08.png"
+    },
+    {
+      "title": "09 proof",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So agents need oversight. Unlike experienced engineers, who have evolved beyond checklists.",
+          "audio": "assets/shot-09.wav"
+        }
+      ],
+      "visual": "assets/shot-09.png"
+    },
+    {
+      "title": "10 shrug",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Yes. That explains why production incidents stopped happening when senior titles were invented.",
+          "audio": "assets/shot-10.wav"
+        }
+      ],
+      "visual": "assets/shot-10.png"
+    },
+    {
+      "title": "11 zip",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Fine. We all need it. I'd prefer the oversight to be executable, rather than another document everyone agrees to ignore.",
+          "audio": "assets/shot-11.wav"
+        }
+      ],
+      "visual": "assets/shot-11.png"
+    },
+    {
+      "title": "12 pipeline",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "That's the point. The harness gives your agent a structured route from intent to proof. It doesn't replace engineering judgment, or make every generated answer correct.",
+          "audio": "assets/shot-12.wav"
+        }
+      ],
+      "visual": "assets/shot-12.png"
+    },
+    {
+      "title": "13 Acquire and prepare",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "First obstacle: where do I get it? Please don't begin with a machine you configured three months ago.",
+          "audio": "assets/shot-13.wav"
+        }
+      ],
+      "visual": "assets/shot-13.png"
+    },
+    {
+      "title": "14 repo",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The public repository is on screen. This film uses a development checkout; follow its installation documentation and choose a reviewed revision, not a mysterious package name.",
+          "audio": "assets/shot-14.wav"
+        }
+      ],
+      "visual": "assets/shot-14.png"
+    },
+    {
+      "title": "15 tools",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And on this Mac, the starting kit?",
+          "audio": "assets/shot-15.wav"
+        }
+      ],
+      "visual": "assets/shot-15.png"
+    },
+    {
+      "title": "16 clone",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Python three eleven or newer, Git, and Make. Clone the repository, enter it, then make install. These setup panels are a walkthrough, not a recording of installation.",
+          "audio": "assets/shot-16.wav"
+        }
+      ],
+      "visual": "assets/shot-16.png"
+    },
+    {
+      "title": "17 consent",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Does make install install every compiler I've ever offended?",
+          "audio": "assets/shot-17.wav"
+        }
+      ],
+      "visual": "assets/shot-17.png"
+    },
+    {
+      "title": "18 consent",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Read its prerequisite prompts and approve only the intended changes. It selects prerequisites for your platform. Windows has its own documented setup path.",
+          "audio": "assets/shot-18.wav"
+        }
+      ],
+      "visual": "assets/shot-18.png"
+    },
+    {
+      "title": "19 path",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Installation finished. My shell says command not found. A classic welcome ceremony.",
+          "audio": "assets/shot-19.wav"
+        }
+      ],
+      "visual": "assets/shot-19.png"
+    },
+    {
+      "title": "20 doctor",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Check the prefix the installer reported, then your PATH. Run litai dash dash version and litai doctor. A diagnostic is useful information, not an invitation to ignore it.",
+          "audio": "assets/shot-20.wav"
+        }
+      ],
+      "visual": "assets/shot-20.png"
+    },
+    {
+      "title": "21 login",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And installing the harness logs me into the coding agent?",
+          "audio": "assets/shot-21.wav"
+        }
+      ],
+      "visual": "assets/shot-21.png"
+    },
+    {
+      "title": "22 login",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Separate step. Authenticate your selected supported coding CLI. This session uses Codex with an explicit model selector. Credentials stay off camera, and model usage can cost money.",
+          "audio": "assets/shot-22.wav"
+        }
+      ],
+      "visual": "assets/shot-22.png"
+    },
+    {
+      "title": "23 next",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Good. Now let's do something real before our onboarding develops a sequel.",
+          "audio": "assets/shot-23.wav"
+        }
+      ],
+      "visual": "assets/shot-23.png"
+    },
+    {
+      "title": "24 A real greenfield coding session",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Here begins recorded execution, edited into a terminal replay. Waiting is compressed; results aren't invented. First, a read-only create plan for a disposable application.",
+          "audio": "assets/shot-24.wav"
+        }
+      ],
+      "recording": "assets/shot-24.mp4"
+    },
+    {
+      "title": "25 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "It tells me what it will create before touching the project. Python and Make for this first run. The language choice isn't the specification.",
+          "audio": "assets/shot-25.wav"
+        }
+      ],
+      "recording": "assets/shot-25.mp4"
+    },
+    {
+      "title": "26 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Right. Review the target and parent, then apply with acknowledgement. For automation, bind apply to the printed plan identity so a changed proposal cannot slip through.",
+          "audio": "assets/shot-26.wav"
+        }
+      ],
+      "recording": "assets/shot-26.mp4"
+    },
+    {
+      "title": "27 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Here's the inherited greeting-card contract: a name and messages go in; a greeting, normalized recipient identifier, message count and word count come out. Let's inspect that promise.",
+          "audio": "assets/shot-27.wav"
+        }
+      ],
+      "recording": "assets/shot-27.mp4"
+    },
+    {
+      "title": "28 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The Component owns observable behavior. Flavors select language, build system and platform. Skills guide technique. We haven't outsourced the definition of correct to the agent.",
+          "audio": "assets/shot-28.wav"
+        }
+      ],
+      "recording": "assets/shot-28.mp4"
+    },
+    {
+      "title": "29 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Let's ask it to implement that promise. And explicitly allow it to compile and execute here. This is a disposable demo, not a production deployment.",
+          "audio": "assets/shot-29.wav"
+        }
+      ],
+      "recording": "assets/shot-29.mp4"
+    },
+    {
+      "title": "30 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Rebuild drives the lifecycle. Generation is only one stage: current tests, execution and independent acceptance still have to pass. The model selector is visible in the command.",
+          "audio": "assets/shot-30.wav"
+        }
+      ],
+      "recording": "assets/shot-30.mp4"
+    },
+    {
+      "title": "31 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Now we're looking at code the agent actually generated in this run. Not a hand-written example disguised as an agent success story.",
+          "audio": "assets/shot-31.wav"
+        }
+      ],
+      "recording": "assets/shot-31.mp4"
+    },
+    {
+      "title": "32 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Read it. Does recipient normalization match the contract? Does counting handle Unicode whitespace? Fluency isn't evidence. The implementation must survive those questions.",
+          "audio": "assets/shot-32.wav"
+        }
+      ],
+      "recording": "assets/shot-32.mp4"
+    },
+    {
+      "title": "33 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And these are the generated tests. Useful, but the author grading its own homework isn't our entire quality department.",
+          "audio": "assets/shot-33.wav"
+        }
+      ],
+      "recording": "assets/shot-33.mp4"
+    },
+    {
+      "title": "34 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Exactly. Native tests and independent acceptance have different jobs. Passing a self-written test suite doesn't automatically prove the written product contract.",
+          "audio": "assets/shot-34.wav"
+        }
+      ],
+      "recording": "assets/shot-34.mp4"
+    },
+    {
+      "title": "35 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And it failed. Missing messages. The specification requires messages, but this acceptance invocation supplied only a name. That's not the agent ignoring the contract.",
+          "audio": "assets/shot-35.wav"
+        }
+      ],
+      "recording": "assets/shot-35.mp4"
+    },
+    {
+      "title": "36 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Correct. We found an inheritance defect: the richer parent Component got the simple starter's verifier. Here are our independently calculated acceptance cases for the actual written contract.",
+          "audio": "assets/shot-36.wav"
+        }
+      ],
+      "recording": "assets/shot-36.mp4"
+    },
+    {
+      "title": "37 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Two messages, six words. The expected recipient follows the specified normalization. We changed the verifier to match intent, not to flatter the generated code.",
+          "audio": "assets/shot-37.wav"
+        }
+      ],
+      "recording": "assets/shot-37.mp4"
+    },
+    {
+      "title": "38 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "This is a demo-local correction, not a framework fix. The inheritance defect is tracked for repair. We rerun the complete lifecycle before claiming success.",
+          "audio": "assets/shot-38.wav"
+        }
+      ],
+      "recording": "assets/shot-38.mp4"
+    },
+    {
+      "title": "39 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So this is a current result, with its actual passes and skips visible. Not a green screenshot borrowed from a different revision.",
+          "audio": "assets/shot-39.wav"
+        }
+      ],
+      "recording": "assets/shot-39.mp4"
+    },
+    {
+      "title": "40 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Keep the inputs and model selection consistent. A receipt is evidence about exact work, not a lifetime warranty on everything named hello.",
+          "audio": "assets/shot-40.wav"
+        }
+      ],
+      "recording": "assets/shot-40.mp4"
+    },
+    {
+      "title": "41 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Now packaging. The part of my old workflow described by a folder named release stuff.",
+          "audio": "assets/shot-41.wav"
+        }
+      ],
+      "recording": "assets/shot-41.mp4"
+    },
+    {
+      "title": "42 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "We build a local wheel from the accepted application. Packaging, package verification, publishing and releasing are distinct decisions. No registry upload happens in this film.",
+          "audio": "assets/shot-42.wav"
+        }
+      ],
+      "recording": "assets/shot-42.mp4"
+    },
+    {
+      "title": "43 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "A verified package is better than a confidently named zip. I remain emotionally attached to the zip.",
+          "audio": "assets/shot-43.wav"
+        }
+      ],
+      "recording": "assets/shot-43.mp4"
+    },
+    {
+      "title": "44 pipeline",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "You may keep the attachment. For your next feature, change observable intent, review it, then regenerate and re-run the gates. Don't make generated source your hidden specification.",
+          "audio": "assets/shot-44.wav"
+        }
+      ],
+      "visual": "assets/shot-44.png"
+    },
+    {
+      "title": "45 Use the machines you already own",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Do I need to buy a fleet to get started? I already own several computers that contribute mainly fan noise.",
+          "audio": "assets/shot-45.wav"
+        }
+      ],
+      "visual": "assets/shot-45.png"
+    },
+    {
+      "title": "46 workers",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Start here, locally. The session just used this machine. Existing compatible machines can be workers; you don't need a new hosted service merely to begin.",
+          "audio": "assets/shot-46.wav"
+        }
+      ],
+      "visual": "assets/shot-46.png"
+    },
+    {
+      "title": "47 workers",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So target means what I want to build, and worker means where it happens?",
+          "audio": "assets/shot-47.wav"
+        }
+      ],
+      "visual": "assets/shot-47.png"
+    },
+    {
+      "title": "48 worker-config",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Yes. Keep worker addresses and credentials out of project authority. Use the synthetic worker and test examples, and let litai config paths locate your private configuration.",
+          "audio": "assets/shot-48.wav"
+        }
+      ],
+      "visual": "assets/shot-48.png"
+    },
+    {
+      "title": "49 worker-config",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Then verify the selected model and probe the machine before I send it a long job. Start with one compatible cell, not the entire matrix.",
+          "audio": "assets/shot-49.wav"
+        }
+      ],
+      "visual": "assets/shot-49.png"
+    },
+    {
+      "title": "50 workers",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Exactly. This section is a remote-worker walkthrough, not proof of an SSH run. Check the toolchain and separate agent login on each actual worker.",
+          "audio": "assets/shot-50.wav"
+        }
+      ],
+      "visual": "assets/shot-50.png"
+    },
+    {
+      "title": "51 Adopt a real C++ project",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "The new project was deliberately tiny. What about code that already earns its keep? Preferably C plus plus, so I can recognize my own anxiety.",
+          "audio": "assets/shot-51.wav"
+        }
+      ],
+      "visual": "assets/shot-51.png"
+    },
+    {
+      "title": "52 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Let's use TinyXML2, a public XML library, at the recorded commit. This is our disposable demonstration, not an upstream adoption or an endorsement by its maintainers.",
+          "audio": "assets/shot-52.wav"
+        }
+      ],
+      "recording": "assets/shot-52.mp4"
+    },
+    {
+      "title": "53 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Read-only inspection first. It discovers the existing language and build tools. And there's a Git recovery point before any source moves.",
+          "audio": "assets/shot-53.wav"
+        }
+      ],
+      "recording": "assets/shot-53.mp4"
+    },
+    {
+      "title": "54 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Apply wraps the existing project and runs the authorized baseline and parity work. Watch the actual build evidence. We are not replacing the C plus plus implementation.",
+          "audio": "assets/shot-54.wav"
+        }
+      ],
+      "recording": "assets/shot-54.mp4"
+    },
+    {
+      "title": "55 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "There's the existing source in its retained implementation location. The library didn't disappear into a Markdown file.",
+          "audio": "assets/shot-55.wav"
+        }
+      ],
+      "recording": "assets/shot-55.mp4"
+    },
+    {
+      "title": "56 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Now run the retained harness. It rebuilds and tests the preserved implementation in disposable custody. The recorded result tells us what passed, not what we hoped.",
+          "audio": "assets/shot-56.wav"
+        }
+      ],
+      "recording": "assets/shot-56.mp4"
+    },
+    {
+      "title": "57 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "CMake, the actual C plus plus targets, and CTest. Familiar tools. The new thing is the explicit evidence around them.",
+          "audio": "assets/shot-57.wav"
+        }
+      ],
+      "recording": "assets/shot-57.mp4"
+    },
+    {
+      "title": "58 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The rehearsal exposed another framework bug: a new CTest summary format wasn't counted. We fixed the parser, not the test result, and reran the real harness.",
+          "audio": "assets/shot-58.wav"
+        }
+      ],
+      "recording": "assets/shot-58.mp4"
+    },
+    {
+      "title": "59 terminal",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Then publish the finalized test receipt to this local project. Publish here doesn't mean upload TinyXML2 anywhere.",
+          "audio": "assets/shot-59.wav"
+        }
+      ],
+      "recording": "assets/shot-59.mp4"
+    },
+    {
+      "title": "60 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Correct. Now advance to retained. Original source remains release authority. A recorded baseline is valuable already, without pretending we completed a native rewrite.",
+          "audio": "assets/shot-60.wav"
+        }
+      ],
+      "recording": "assets/shot-60.mp4"
+    },
+    {
+      "title": "61 adoption",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And the later stages? I suspect there's a catch called actually understanding the software.",
+          "audio": "assets/shot-61.wav"
+        }
+      ],
+      "visual": "assets/shot-61.png"
+    },
+    {
+      "title": "62 adoption",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "A good catch. Draft specifications, review them, then qualify clean regeneration against independent behavior evidence. Move one boundary at a time. These later stages aren't demonstrated as complete here.",
+          "audio": "assets/shot-62.wav"
+        }
+      ],
+      "visual": "assets/shot-62.png"
+    },
+    {
+      "title": "63 adoption",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So early adoption buys me repeatable evidence and clearer handoffs. Specification-led shipping comes later, when we've earned it. That sounds considerably less magical. Thank you.",
+          "audio": "assets/shot-63.wav"
+        }
+      ],
+      "visual": "assets/shot-63.png"
+    },
+    {
+      "title": "64 bridge",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "You're welcome. Magic makes an excellent demo and an awkward incident report.",
+          "audio": "assets/shot-64.wav"
+        }
+      ],
+      "visual": "assets/shot-64.png"
+    },
+    {
+      "title": "65 pipeline",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And Agentis? If it coordinates the agents, why have another layer?",
+          "audio": "assets/shot-65.wav"
+        }
+      ],
+      "visual": "assets/shot-65.png"
+    },
+    {
+      "title": "66 pipeline",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Coordination and product proof are different jobs. An orchestrator can assign the work; Literate AI structures the product lifecycle. This film proves the local harness, not a deployed Agentis integration.",
+          "audio": "assets/shot-66.wav"
+        }
+      ],
+      "visual": "assets/shot-66.png"
+    },
+    {
+      "title": "67 The morning after the demo",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "All right. Reluctantly, I'm convinced. It's not asking me to learn engineering again. It's asking me and my very fast colleagues to stop skipping it.",
+          "audio": "assets/shot-67.wav"
+        }
+      ],
+      "visual": "assets/shot-67.png"
+    },
+    {
+      "title": "68 updates",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "I'll accept reluctantly. What worries you now?",
+          "audio": "assets/shot-68.wav"
+        }
+      ],
+      "visual": "assets/shot-68.png"
+    },
+    {
+      "title": "69 updates",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Tomorrow the framework changes. Next week my project changes. Six months later nobody remembers which copied instructions are stale. How does this stay useful?",
+          "audio": "assets/shot-69.wav"
+        }
+      ],
+      "visual": "assets/shot-69.png"
+    },
+    {
+      "title": "70 terminal",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Start with litai update as a read-only plan. It compares recorded inheritance, current local files and upstream authority. Review the classifications before applying anything.",
+          "audio": "assets/shot-70.wav"
+        }
+      ],
+      "recording": "assets/shot-70.mp4"
+    },
+    {
+      "title": "71 updates",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So it isn't git pull followed by a cheerful overwrite of my decisions.",
+          "audio": "assets/shot-71.wav"
+        }
+      ],
+      "visual": "assets/shot-71.png"
+    },
+    {
+      "title": "72 updates",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "No. Safe upstream-only changes and local conflicts are different cases. Apply deliberately; review conflicting choices explicitly. This demonstrated revision doesn't promise automatic merging of arbitrary competing edits.",
+          "audio": "assets/shot-72.wav"
+        }
+      ],
+      "visual": "assets/shot-72.png"
+    },
+    {
+      "title": "73 updates",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And an updated framework executable is another authority change, not the same as refreshing inherited documents.",
+          "audio": "assets/shot-73.wav"
+        }
+      ],
+      "visual": "assets/shot-73.png"
+    },
+    {
+      "title": "74 updates",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Right. Standard-bound projects use the documented reviewed rebind after an intentional wheel upgrade. Then rebuild and verify current evidence. Old receipts don't become fresh because the version number did.",
+          "audio": "assets/shot-74.wav"
+        }
+      ],
+      "visual": "assets/shot-74.png"
+    },
+    {
+      "title": "75 lineage",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "Can I put our team's conventions in one repository and let several projects inherit them? Please say the answer doesn't involve synchronized copy and paste.",
+          "audio": "assets/shot-75.wav"
+        }
+      ],
+      "visual": "assets/shot-75.png"
+    },
+    {
+      "title": "76 lineage",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "That's repository lineage. The framework can feed a team parent, which feeds applications. Components, Flavors and skills compose through recorded parent revisions; projects can add their own intent.",
+          "audio": "assets/shot-76.wav"
+        }
+      ],
+      "visual": "assets/shot-76.png"
+    },
+    {
+      "title": "77 lineage",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "And our team can choose different presenters for its tutorial. I wasn't planning to become an inherited dependency.",
+          "audio": "assets/shot-77.wav"
+        }
+      ],
+      "visual": "assets/shot-77.png"
+    },
+    {
+      "title": "78 lineage",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The video craft is reusable. We are this repository's story. Pin and review parent changes; use explicit reparenting when changing parent authority, rather than quietly pointing somewhere else.",
+          "audio": "assets/shot-78.wav"
+        }
+      ],
+      "visual": "assets/shot-78.png"
+    },
+    {
+      "title": "79 orchestration",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "What about a product made of several independent repositories? That's a dependency graph, not necessarily an inheritance family.",
+          "audio": "assets/shot-79.wav"
+        }
+      ],
+      "visual": "assets/shot-79.png"
+    },
+    {
+      "title": "80 orchestration",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Precisely. Orchestration keeps declared child repositories, exact pins and dependency order explicit. Review the plan, acknowledge execution, and keep each child's evidence. Inheritance and orchestration solve different problems.",
+          "audio": "assets/shot-80.wav"
+        }
+      ],
+      "visual": "assets/shot-80.png"
+    },
+    {
+      "title": "81 zip",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So we keep the good old tools, add a visible process, and let the fast agents do the repetitive work without appointing them sole judges of success.",
+          "audio": "assets/shot-81.wav"
+        }
+      ],
+      "visual": "assets/shot-81.png"
+    },
+    {
+      "title": "82 bridge",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "That's the adventure. Start with one useful boundary and one machine. Review the intent, run the work, inspect the evidence, then expand.",
+          "audio": "assets/shot-82.wav"
+        }
+      ],
+      "visual": "assets/shot-82.png"
+    },
+    {
+      "title": "83 zip",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "I'm renaming final, final, really final dot zip. Apparently we can identify a release with something stronger than increasingly urgent adjectives.",
+          "audio": "assets/shot-83.wav"
+        }
+      ],
+      "visual": "assets/shot-83.png"
+    },
+    {
+      "title": "84 repo",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The public repository has the source, commands and limitations for this film. Tell us where you got stuck, what remained unclear, and what your real project needs.",
+          "audio": "assets/shot-84.wav"
+        }
+      ],
+      "visual": "assets/shot-84.png"
+    },
+    {
+      "title": "85 end",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "I'm still skeptical. But now I have a repeatable way to be skeptical. That's an upgrade I can ship.",
+          "audio": "assets/shot-85.wav"
+        }
+      ],
+      "visual": "assets/shot-85.png"
+    }
+  ],
+  "evidence": [
+    "production.json",
+    "sessions.json"
+  ]
+}

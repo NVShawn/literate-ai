@@ -1,0 +1,25 @@
+{
+  "title": "It builds. But can you ship it?",
+  "id": "greenfield-review-cut",
+  "voices": {"litai": "af_heart", "sam": "am_fenrir"},
+  "turns": [
+    {"speaker":"sam","shot":"zip","text":"Good news. It builds. I've named the zip final, final, really final."},
+    {"speaker":"litai","shot":"proof","text":"A bold naming convention. Which tests passed on the version inside?"},
+    {"speaker":"sam","shot":"shrug","text":"The reassuring ones."},
+    {"speaker":"litai","shot":"bridge","text":"Let's give your users something stronger than reassurance."},
+    {"speaker":"sam","shot":"where","text":"Fine. Where do I actually get Literate A I? Please don't say it's already installed."},
+    {"speaker":"litai","shot":"repo","text":"Fair. Start at github dot com, slash jordan hubbard, slash literate dash A I. It's public. We're using a checkout, not a mystery package name."},
+    {"speaker":"sam","shot":"tools","text":"All right. What do I need before I copy commands?"},
+    {"speaker":"litai","shot":"clone","text":"On this Mac: Python three eleven or newer, Git, and Make. Then clone the repository, enter its directory, and run make install."},
+    {"speaker":"sam","shot":"tools","text":"Is that about to install every compiler humanity has regretted?"},
+    {"speaker":"litai","shot":"consent","text":"No. It checks the selected prerequisites and asks before installing missing ones. Read the prompt. We are building software, not adopting a package manager."},
+    {"speaker":"sam","shot":"path","text":"And after the installer says done?"},
+    {"speaker":"litai","shot":"doctor","text":"Use the path it reports, then run lit eye version and lit eye doctor. If the command isn't found, fix your PATH first."},
+    {"speaker":"sam","shot":"login","text":"So installing the harness also signs me into my coding agent?"},
+    {"speaker":"litai","shot":"login","text":"Not yet. Choose a supported coding agent and sign in separately. Don't put credentials in the project. Or this recording."},
+    {"speaker":"sam","shot":"next","text":"Then we get to write code?"},
+    {"speaker":"litai","shot":"pipeline","text":"First, tell me what the product should do. Then we'll watch the agent write code, and make it prove the result."},
+    {"speaker":"sam","shot":"zip","text":"My zip file feels judged."},
+    {"speaker":"litai","shot":"end","text":"Only its release process."}
+  ]
+}

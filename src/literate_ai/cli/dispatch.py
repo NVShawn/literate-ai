@@ -55,6 +55,16 @@ from .errors import (
 from .source_to_specification import add_spec_parser, spec_from_args
 
 _GLOBAL_BOOL_FLAGS = frozenset({"--json", "-v", "--verbose", "--discover-mcps"})
+
+
+class _BuildVersionAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        from literate_ai.build_version import cli_version_label
+
+        print(f"{parser.prog} {cli_version_label()}")
+        parser.exit()
+
+
 _DEBUG_PATH_SUFFIXES = (".json", ".ndjson", ".log", ".txt", ".out")
 _TOP_LEVEL_COMMANDS = frozenset(
     {
@@ -95,6 +105,7 @@ _TOP_LEVEL_COMMANDS = frozenset(
         "prompt",
         "flavor",
         "design",
+        "video",
     }
 )
 _CLI_CATALOG_EPILOG = """
@@ -123,6 +134,7 @@ SDLC catalog (verbs unchanged; grouped for flow):
     litai rebuild
     litai build | test | run
     litai package plan | build | verify
+    litai video init | plan | build | verify
     litai clean | really-clean
 
   Release
@@ -260,6 +272,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         from .work import work_from_args
 
         return work_from_args(args)
+    if args.command == "video":
+        from .video import video_from_args
+
+        return video_from_args(args)
     if args.command == "document":
         from .document import document_from_args
 
@@ -468,10 +484,11 @@ def _parser() -> JsonArgumentParser:
         epilog=_CLI_CATALOG_EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    from literate_ai.version import DISTRIBUTION_VERSION
-
     parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {DISTRIBUTION_VERSION}"
+        "--version",
+        action=_BuildVersionAction,
+        nargs=0,
+        help="show build version and exit",
     )
     parser.add_argument(
         "--json",
@@ -822,6 +839,30 @@ def _parser() -> JsonArgumentParser:
     work_close = work_commands.add_parser("close")
     work_close.add_argument("work_id")
     work_close.add_argument("--project", default=".")
+    video = commands.add_parser(
+        "video", help="author, rebuild, and verify narrated instructional courses"
+    )
+    video_commands = video.add_subparsers(
+        dest="video_command", required=True, parser_class=JsonArgumentParser
+    )
+    for action in ("init", "plan", "build"):
+        video_action = video_commands.add_parser(action)
+        video_action.add_argument("manifest")
+        if action == "build":
+            video_action.add_argument("--output", required=True)
+            video_action.add_argument(
+                "--font",
+                required=True,
+                help="installed font file used for slide rendering",
+            )
+            video_action.add_argument(
+                "--narration", choices=("say", "espeak", "recorded"), default="recorded"
+            )
+    video_verify = video_commands.add_parser("verify")
+    video_verify.add_argument("receipt")
+    video_verify.add_argument(
+        "--manifest", help="also reject stale source and evidence"
+    )
     document = commands.add_parser(
         "document", help="inspect and verify deterministic document artifacts"
     )
@@ -3133,7 +3174,7 @@ def main(
         )
     )
     if (
-        command not in {"verify", "lock", "plan"}
+        command not in {"verify", "lock", "plan", "update"}
         and not scoped_orchestration
         and not scoped_evidence
         and not scoped_retained_cargo
@@ -3142,6 +3183,8 @@ def main(
     try:
         parser = _parser()
         args = parser.parse_args(arguments)
+        if args.command == "update":
+            maybe_host_self_update(raw, check_now=True)
         scoped_orchestration = (
             scoped_orchestration
             or scoped_retained_cargo

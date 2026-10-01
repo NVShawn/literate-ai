@@ -1,0 +1,40 @@
+{
+  "model": "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit",
+  "snapshot": "f35faf19b0cc2160865af64ecf0f22f83d335135",
+  "voices": {
+    "litai": "Serena",
+    "sam": "Ryan"
+  },
+  "mlx_audio": "0.5.7",
+  "synthetic": true,
+  "cloud_speech": false,
+  "story_sha256": "476c27397b0a9066de622abe68e0537af2e2689e7de84a412fe3d95e43e8cfba",
+  "producer_sha256": "8d3ead44a50403139070f6c158154f2fa2266b127649711d749a4d0e3d2f39d6",
+  "chapters": [
+    {
+      "title": "Ten minutes. No faith required.",
+      "scene": 1,
+      "approx_seconds": 0.0
+    },
+    {
+      "title": "One promise, two layers",
+      "scene": 6,
+      "approx_seconds": 56.67
+    }
+  ],
+  "edition": "public feedback; not framework release qualification",
+  "speech_directions": {
+    "litai": "Speak in clear natural American English, as an experienced female engineer making a persuasive live demonstration to a skeptical colleague. Warm, brisk, direct, dry humor. Respond to the objection, never sound like an announcer. Do not laugh unless the words call for it.",
+    "sam": "Speak in natural American English, as an experienced male software engineer cross-examining a vendor's demonstration. Wry, skeptical, concise, alert. Real questions, not a narrator. Not hostile, not theatrical."
+  },
+  "spoken_text": [
+    "I'm Sam. C plus plus, make, tests. They work. You've got ten minutes to convince me I need another tool. The clock includes buzzwords.",
+    "I'm Lit A. I., from Literate A. I.. Keep your tools; I'm selling a harness, not a religion. The interesting part is between an agent saying done and a product being ready.",
+    "My tests already tell me that. Are we adding yaml so a chatbot can feel supervised?",
+    "If your pipeline already proves every step, keep it. The gap is when an agent implements the wrong promise, tests that same misunderstanding, and calls the package shipped. Let's inspect one promise before generating anything.",
+    "You get one small example. Not a cathedral of configuration.",
+    "One promise. A greeting card: a name and messages in; a greeting, a recipient identifier and counts out. That promise is the Component, Unicode whitespace included. It says nothing about how it's built."
+  ],
+  "review": "Revised Qwen voice audition: human listening approval pending",
+  "audition": true
+}
