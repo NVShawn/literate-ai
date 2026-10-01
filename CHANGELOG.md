@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Onboarding: feature the continuous narrated video in the README, with a clickable
+  preview, chapters, subtitles, and a public-feedback link.
+
 - CLI: identify Git/source builds and their exact revision in version output,
   without treating package metadata as published-release evidence. Explicit
   `litai update` now checks for and applies a newer stable release in an enrolled

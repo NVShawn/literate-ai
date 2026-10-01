@@ -23119,3 +23119,30 @@ GitHub CI failure without relaxing identity checks.
   fetches exhausted file descriptors; it is not passing installation evidence.
   Full installed-wheel qualification was started separately and remains pending
   at this handoff. No user's installed CLI, release tag or release branch changed.
+- **Post-merge follow-up:** PR #12 merged as `9862b98` after its checks passed,
+  but [merge CI run 36822853564](https://github.com/jordanhubbard/literate-ai/actions/runs/36822853564)
+  failed on Ubuntu/Python 3.11.16: the real-prefix integration test observed
+  `1.0.0` from the relaunched fixture instead of `2.0.0`. The retained CI artifact
+  contains the assertion, not pip's successful-command output or the temporary
+  installed files. Ten isolated Linux/Python 3.11 runs and ten native macOS/Python
+  3.14 runs passed with instrumented real pip and launcher execution. This does
+  not establish a root cause or clear the failed merge qualification. The next
+  diagnostic action is to retain pip output, installed distribution metadata,
+  fixture source and bytecode identity on failure, and reproduce the CI failure
+  before changing updater behavior. No production updater fix is claimed.
+
+### [x] ONBOARD-VIDEO-001 — Feature the continuous onboarding video in the README
+
+- **Priority:** P1
+- **Owner:** root README and onboarding documentation
+- **Direction:** Prominently feature the onboarding video for new users.
+- **Conclusion:** Link the existing public 13:38 film with a preview, chapters and subtitles near the top of the README. Pin public media to its published commit while PR 10 remains unmerged; do not imply a software release or completed audience review.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add a prominent watch section ahead of the architectural overview.
+- **Evidence:**
+  - [x] Verify public media, thumbnail, chapter and subtitle links and check the documentation diff.
+- **Verification:** Commit-pinned MP4, preview PNG and SRT return HTTP 200;
+  GitHub confirms the chapter file at the same published revision. The preview
+  was visually inspected and `git diff --check` passes. This is documentation
+  discoverability, not a claim that draft PR #10 or its framework changes landed.
