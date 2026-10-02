@@ -23098,6 +23098,15 @@ GitHub CI failure without relaxing identity checks.
 
 ### [ ] CLI-BUILD-IDENTITY-001 — Distinguish source builds and verify explicit CLI self-update
 
+The Python 3.14 CI control exposed stale external bytecode after prefix self-update.
+Pip strips the configured bytecode-cache prefix while re-execution restores it,
+so equal-size/equal-timestamp replacement modules can load old code. Reproduce the
+collision deterministically and keep installation/re-execution cache custody aligned;
+preserve isolated import paths and unrelated operator caches.
+The collision fixture fails with the old updater and passes with aligned cache
+custody. All 13 build-identity tests and 17 updater regressions pass through
+Make, along with lint and format checks. Full CI remains pending.
+
 - **Priority:** P0
 - **Owner:** CLI version reporting and prefix self-update
 - **Direction:** Git main installations must not masquerade as a published release; verify that litai update applies a newer release.

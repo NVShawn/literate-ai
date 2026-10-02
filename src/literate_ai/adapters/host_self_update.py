@@ -265,6 +265,11 @@ def _pip_environment(environ: Mapping[str, str]) -> dict[str, str]:
         for name, value in environ.items()
         if not name.casefold().startswith("python")
     }
+    # Pip must refresh the same bytecode cache used by the re-executed launcher.
+    # Otherwise an equal-size, equal-timestamp upgrade can execute stale code.
+    # Keep import-path/interpreter overrides isolated; only cache custody is shared.
+    if "PYTHONPYCACHEPREFIX" in environ:
+        environment["PYTHONPYCACHEPREFIX"] = environ["PYTHONPYCACHEPREFIX"]
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
     return environment
 

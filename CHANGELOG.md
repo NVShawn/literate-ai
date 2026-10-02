@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- CLI: keep pip installation and command re-execution on the same configured
+  bytecode cache during self-update, preventing stale code after equal-size,
+  equal-timestamp upgrades while preserving unrelated caches.
+
 - Move the canonical repository to
   [jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai): release
   publication, the Homebrew formula, install documentation, and initialized project
