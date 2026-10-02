@@ -23119,3 +23119,18 @@ GitHub CI failure without relaxing identity checks.
   fetches exhausted file descriptors; it is not passing installation evidence.
   Full installed-wheel qualification was started separately and remains pending
   at this handoff. No user's installed CLI, release tag or release branch changed.
+
+### [ ] RETAINED-PROJECT-001 — Admit retained projects through explicit Standard lifecycle authority
+
+- **Priority:** P0
+- **Owner:** framework lifecycle, retained custody, package and release verification
+- **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
+- **Conclusion:** Preserve original source and release authority while adding typed bounded retained admission and complete Standard execution; no conversion bypass.
+- **Depends on:** Accepted ADR 0048; package providers retain their own qualification
+- **Implementation:**
+  - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
+  - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
+  - [ ] Bind package and release custody to retained origin without conversion advancement
+- **Evidence:**
+  - [ ] Public installed CLI mixed source and binary fixture passes complete build, test, docs and deterministic package lifecycle with repeat, invalidation and relocation checks
+  - [ ] Adversarial stale inputs, unsafe custody, missing stages, substituted artifacts, worker identity drift and authority transfer fail closed; existing modes remain green

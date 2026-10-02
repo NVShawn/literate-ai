@@ -1,10 +1,10 @@
 # ADR 0048: Retained projects use explicit Standard lifecycle admission without source-authority transfer
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-02
 - Decision owners: literate-ai maintainers and directing operator
 - Issue: https://github.com/jordanhubbard/literate-ai/issues/22
-- Roadmap: pending planning acceptance under ADR 0006
+- Roadmap: [RETAINED-PROJECT-001](../roadmap/active-work.md#retained-project-001-admit-retained-projects-through-explicit-standard-lifecycle-authority)
 
 ## Context
 
@@ -21,7 +21,7 @@ This proposal serves framework Goals 1, 4 and 6. It changes lifecycle admission,
 not the authority of retained implementation or the existing conversion criteria.
 The ZIP provider in issue #17 remains an independent packaging capability.
 
-## Proposed decision
+## Decision
 
 Add an explicitly selected retained-project execution mode to the Standard lifecycle.
 It must have a distinct typed admission record and receipt origin. Existing generated
@@ -66,7 +66,7 @@ transition. Ordinary receipts and retained-project receipts cannot substitute fo
 another. Legacy repository commands may adapt argv/exit status to these public verbs;
 they may not invoke an independent build/test/publication acceptance path.
 
-## Planned implementation and acceptance, after approval
+## Implementation and acceptance
 
 1. Define typed manifest, plan and retained-origin receipt contracts, bounded streaming
    capture, stale-input rejection and explicit authority-mode validation.
@@ -91,7 +91,7 @@ rather than weakening conversion gates or treating archived baseline logs as a c
 receipt. Projects must author complete manifests and acceptance inventories, and existing
 worker observations remain provisional until admitted by this route.
 
-This is a significant capability and remains Proposed until the directing human accepts
-or amends the design under ADR 0006. No product implementation or lifecycle bypass is
-included in the proposal. Acceptance of the design permits implementation and its tests;
-it does not itself authorize a release, claim qualification, or merge a PR.
+The directing human explicitly accepted this ADR on 2026-10-02: “I accept the ADR.”
+Acceptance permits implementation and its tests under ADR 0006. It does not itself
+authorize a release, claim qualification, or merge a PR. Implementation and full
+qualification remain open under RETAINED-PROJECT-001.
