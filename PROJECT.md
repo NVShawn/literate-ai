@@ -72,10 +72,12 @@ development (2026-09-10):
 
 ## Current work
 
-[Proposed ADR 0048](docs/decisions/0048-retained-project-standard-lifecycle.md)
+[Accepted ADR 0048](docs/decisions/0048-retained-project-standard-lifecycle.md)
 ([issue #22](https://github.com/jordanhubbard/literate-ai/issues/22)) records a
 retained-project Standard lifecycle admission route under Goals 1, 4 and 6.
-Planning acceptance is pending; conversion and release-authority gates remain unchanged.
+The directing human accepted this design on 2026-10-02. Implementation and full
+qualification remain open under RETAINED-PROJECT-001; conversion and release-authority
+gates remain unchanged.
 
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework
