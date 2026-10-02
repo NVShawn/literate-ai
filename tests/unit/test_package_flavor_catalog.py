@@ -35,6 +35,7 @@ class PackageFlavorCatalogTests(unittest.TestCase):
 
     def test_provider_names_targets_and_host_constraints_are_exact(self) -> None:
         expected = {
+            "package-zip": ("package-zip", "zip", None),
             "package-apt": ("package-apt", "apt", "linux"),
             "package-brew": ("package-brew", "brew", "macos"),
             "package-cargo": ("package-cargo", "crates", "rust"),

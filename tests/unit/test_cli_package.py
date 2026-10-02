@@ -318,7 +318,13 @@ class PackageCliTests(unittest.TestCase):
         self.assertEqual(dispatched_request.action, LifecycleDispatchAction.BUILD)
 
     def test_npm_public_plan_build_verify_and_stale_input_refusal(self) -> None:
-        generation = _generation_plan(providers=("npm",))
+        self._public_archive_lifecycle("npm")
+
+    def test_zip_public_plan_build_verify_and_stale_input_refusal(self) -> None:
+        self._public_archive_lifecycle("zip")
+
+    def _public_archive_lifecycle(self, provider: str) -> None:
+        generation = _generation_plan(providers=(provider,))
         release = PackageReleaseContractTests()
         release.setUp()
         base_plan = release.plan(PackageKind.DIRECTORY, ())
@@ -390,7 +396,7 @@ class PackageCliTests(unittest.TestCase):
             ):
                 declaration, status = package_from_args(plan_args)
             self.assertEqual(status, 0)
-            self.assertEqual(declaration["providers"][0]["value"], "npm")
+            self.assertEqual(declaration["providers"][0]["value"], provider)
             self.assertFalse(declaration["execution_authorized"])
 
             args = self._build_args()
@@ -410,7 +416,7 @@ class PackageCliTests(unittest.TestCase):
             ):
                 built, status = package_from_args(args)
             self.assertEqual(status, 0)
-            self.assertEqual(built["packages"][0]["provider"], "npm")
+            self.assertEqual(built["packages"][0]["provider"], provider)
             self.assertTrue(Path(built["packages"][0]["artifact"]).is_file())
             self.assertFalse(built["publication_authorized"])
 
@@ -430,7 +436,7 @@ class PackageCliTests(unittest.TestCase):
             ):
                 verified, status = package_from_args(args)
             self.assertEqual(status, 0)
-            self.assertEqual(verified["verified"][0]["provider"], "npm")
+            self.assertEqual(verified["verified"][0]["provider"], provider)
             self.assertFalse(verified["publication_authorized"])
 
             stale = {**generation, "input_closure": {"identity": "sha256:" + "f" * 64}}

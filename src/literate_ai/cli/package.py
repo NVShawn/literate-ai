@@ -29,12 +29,13 @@ from literate_ai.adapters.execution_dispatch import (
 from literate_ai.adapters.lifecycle.standard_local import local_tree_identity
 from literate_ai.adapters.packaging import (
     NativeMetadataArchiveAdapter,
+    NativeZipPackageAdapter,
     NpmPackageAdapter,
     WheelPackageAdapter,
+    lifecycle_archive_package_plan,
     materialized_package_input_bytes,
     native_archive_package_plan,
     native_metadata_archive_plan,
-    npm_archive_package_plan,
     validate_materialized_package_root,
 )
 from literate_ai.adapters.ssh_execution import SshLifecycleRequestHandler
@@ -158,6 +159,7 @@ def _provider_name(provider: dict[str, Any]) -> str:
     coordinate = str(provider["coordinate"])
     mapping = {
         "/package-pip": "pip",
+        "/package-zip": "zip",
         "/package-conan": "conan",
         "/package-npm": "npm",
         "/package-apt": "apt",
@@ -405,12 +407,16 @@ def _build_packages(
                         resolved_sbom=resolved_sbom,
                         resolved_sbom_source_identity=root_result.build_evidence.identity,
                     )
-                elif name == "npm":
-                    native_adapter = NpmPackageAdapter(
-                        _safe_name(distribution, lowercase=True).replace("_", "-"),
-                        version,
+                elif name in {"npm", "zip"}:
+                    native_adapter = (
+                        NativeZipPackageAdapter()
+                        if name == "zip"
+                        else NpmPackageAdapter(
+                            _safe_name(distribution, lowercase=True).replace("_", "-"),
+                            version,
+                        )
                     )
-                    plan = npm_archive_package_plan(
+                    plan = lifecycle_archive_package_plan(
                         integration.package_plan,
                         packager_identity=native_adapter.packager_identity,
                         specification=component_specification.read_bytes(),
@@ -667,6 +673,8 @@ def _verify_packages(
         version = str(component["version"])
         if provider == "pip":
             WheelPackageAdapter(distribution, version).verify_bytes(result, content)
+        elif provider == "zip":
+            NativeZipPackageAdapter().verify_bytes(result, content)
         elif provider == "conan":
             ConanPackageAdapter(
                 _safe_name(distribution, lowercase=True),

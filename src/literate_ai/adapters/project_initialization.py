@@ -1220,6 +1220,8 @@ _TEMPLATE_FILES = {
     ),
     "flavors/os-windows/openspec/spec.md": "flavors/os-windows/openspec/spec.md",
     "flavors/package-pip/flavor.md": "flavors/package-pip/flavor.md",
+    "flavors/package-zip/flavor.md": "flavors/package-zip/flavor.md",
+    "flavors/package-zip/openspec/spec.md": "flavors/package-zip/openspec/spec.md",
     "flavors/package-pip/openspec/spec.md": "flavors/package-pip/openspec/spec.md",
     "flavors/package-npm/flavor.md": "flavors/package-npm/flavor.md",
     "flavors/package-npm/toolchain.json": "flavors/package-npm/toolchain.json",

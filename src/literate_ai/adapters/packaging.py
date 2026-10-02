@@ -10,8 +10,11 @@ import io
 import json
 import re
 import stat
+import struct
+import sys
 import tarfile
 import zipfile
+import zlib
 from dataclasses import replace
 from pathlib import Path
 
@@ -92,7 +95,7 @@ def native_archive_package_plan(
     )
 
 
-def npm_archive_package_plan(
+def lifecycle_archive_package_plan(
     base: PackagePlan,
     *,
     packager_identity,
@@ -102,7 +105,7 @@ def npm_archive_package_plan(
     resolved_sbom: bytes,
     resolved_sbom_source_identity,
 ) -> PackagePlan:
-    """Bind both CycloneDX lifecycle documents into one native npm plan."""
+    """Bind both CycloneDX lifecycle documents into one native archive plan."""
 
     plan = native_archive_package_plan(
         base,
@@ -130,6 +133,10 @@ def npm_archive_package_plan(
         plan,
         inputs=tuple(sorted((*plan.inputs, source), key=lambda item: item.path)),
     )
+
+
+# Preserve the public npm helper while sharing the exact resource projection.
+npm_archive_package_plan = lifecycle_archive_package_plan
 
 
 _NATIVE_METADATA_PROVIDERS = frozenset({"apt", "brew", "winget", "chocolatey"})
@@ -454,6 +461,118 @@ def _tar_file(
     information.gname = ""
     information.mtime = 0
     return information
+
+
+class NativeZipPackageAdapter(DeterministicZipPackageAdapter):
+    """Expose deterministic ZIP construction through native package custody."""
+
+    @property
+    def packager_identity(self):
+        return canonical_identity(
+            {
+                "schema": "literate-ai/zip-packager@1",
+                "compression": "deflate-9",
+                "zlib_runtime": zlib.ZLIB_RUNTIME_VERSION,
+                "python_runtime": list(sys.version_info[:3]),
+                "zipfile_sha256": hashlib.sha256(
+                    Path(zipfile.__file__).read_bytes()
+                ).hexdigest(),
+                "timestamp": [1980, 1, 1, 0, 0, 0],
+                "regular_file_modes": [0o644, 0o755],
+            }
+        )
+
+    def package(self, plan: PackagePlan, *, materialized_root: Path) -> PackageResult:
+        if plan.packager_identity != self.packager_identity:
+            raise PackagingError("ZIP plan differs from exact packager authority")
+        _root, materialized = validate_materialized_package_root(
+            plan, materialized_root
+        )
+
+        def read_blob(reference: BlobRef) -> bytes:
+            item = next((item for item in plan.inputs if item.blob == reference), None)
+            if item is None:
+                raise PackagingError("ZIP verification requested an unknown blob")
+            return materialized_package_input_bytes(materialized[item.path])
+
+        result = super().package(plan, read_blob=read_blob)
+        self.verify_bytes(result, self.read_created_blob(result.artifacts[0].blob))
+        return result
+
+    def verify_bytes(self, result: PackageResult, content: bytes) -> None:
+        """Inspect archive bytes without extracting, executing or publishing."""
+
+        if result.packager_identity != self.packager_identity:
+            raise PackagingError("ZIP result differs from exact packager authority")
+        if result.package_kind is not PackageKind.ARCHIVE or len(result.artifacts) != 1:
+            raise PackagingError("ZIP result must contain one archive")
+        artifact = result.artifacts[0]
+        if artifact.path != f"package-{result.package_plan_identity.digest}.zip":
+            raise PackagingError("ZIP filename differs from exact package plan")
+        if (
+            not isinstance(content, bytes)
+            or len(content) != artifact.blob.size
+            or hashlib.sha256(content).hexdigest() != artifact.blob.digest
+        ):
+            raise PackagingError("ZIP bytes differ from the package result")
+        if content[:4] != b"PK\x03\x04" or content[-22:-18] != b"PK\x05\x06":
+            raise PackagingError("ZIP archive has non-canonical framing")
+        try:
+            with zipfile.ZipFile(io.BytesIO(content)) as archive:
+                members = archive.infolist()
+                names = [item.filename for item in members]
+                expected = {item.path: item for item in result.files}
+                if (
+                    names != sorted(expected)
+                    or len(expected) != len(result.files)
+                    or archive.comment
+                ):
+                    raise PackagingError(
+                        "ZIP members differ from exact canonical closure"
+                    )
+                for member in members:
+                    item = expected[member.filename]
+                    mode = (0o100755 if item.executable else 0o100644) << 16
+                    large_values = []
+                    if (
+                        member.file_size > zipfile.ZIP64_LIMIT
+                        or member.compress_size > zipfile.ZIP64_LIMIT
+                    ):
+                        large_values.extend([member.file_size, member.compress_size])
+                    if member.header_offset > zipfile.ZIP64_LIMIT:
+                        large_values.append(member.header_offset)
+                    canonical_extra = (
+                        struct.pack("<HH", 1, 8 * len(large_values))
+                        + struct.pack("<" + "Q" * len(large_values), *large_values)
+                        if large_values
+                        else b""
+                    )
+                    if (
+                        member.date_time != (1980, 1, 1, 0, 0, 0)
+                        or member.create_system != 3
+                        or member.external_attr != mode
+                        or member.compress_type != zipfile.ZIP_DEFLATED
+                        or member.comment
+                        or member.extra != canonical_extra
+                        or member.flag_bits & ~0x800
+                        or member.file_size != item.blob.size
+                    ):
+                        raise PackagingError("ZIP member metadata differs from plan")
+                    body = archive.read(member)
+                    if hashlib.sha256(body).hexdigest() != item.blob.digest:
+                        raise PackagingError("ZIP member content digest differs")
+        except (
+            zipfile.BadZipFile,
+            OSError,
+            ValueError,
+            RuntimeError,
+            zlib.error,
+        ) as exc:
+            if isinstance(exc, PackagingError):
+                raise
+            raise PackagingError(
+                "ZIP package is not a valid canonical archive"
+            ) from exc
 
 
 class NpmPackageAdapter:
@@ -960,8 +1079,10 @@ __all__ = [
     "DeterministicZipPackageAdapter",
     "DirectoryPackageAdapter",
     "NativeMetadataArchiveAdapter",
+    "NativeZipPackageAdapter",
     "NpmPackageAdapter",
     "WheelPackageAdapter",
+    "lifecycle_archive_package_plan",
     "logical_package_files",
     "materialized_package_input_bytes",
     "native_archive_package_plan",

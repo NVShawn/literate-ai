@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -233,6 +234,9 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 return path
 
             old, new = wheel("1.0.0"), wheel("2.0.0")
+            cache_environment = dict(updater.os.environ)
+            cache_environment["PYTHONPYCACHEPREFIX"] = str(root / "bytecode")
+            cache_environment.pop("PYTHONDONTWRITEBYTECODE", None)
             subprocess.run(
                 [
                     str(python),
@@ -246,8 +250,23 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 check=True,
                 capture_output=True,
                 timeout=60,
+                env=cache_environment,
             )
-            variables = dict(updater.os.environ)
+            # Reproduce equal-size sources with the same timestamp deterministically.
+            # The old bytecode is in the caller's configured cache, outside the venv.
+            fixture_source = next(environment.rglob("update_fixture.py"))
+            collision_time = 1_700_000_000
+            os.utime(fixture_source, (collision_time, collision_time))
+            subprocess.run(
+                [str(python), "-c", "import update_fixture"],
+                env=cache_environment,
+                check=True,
+                capture_output=True,
+                timeout=30,
+            )
+            unrelated_cache = root / "bytecode" / "unrelated.pyc"
+            unrelated_cache.write_bytes(b"operator-owned cache")
+            variables = dict(cache_environment)
             for key in (
                 "CI",
                 "GITHUB_ACTIONS",
@@ -294,6 +313,11 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 )
                 observed.append(json.loads(result.stdout))
 
+            def install_with_timestamp_collision(*args, **kwargs):
+                completed = updater._default_runner(*args, **kwargs)
+                os.utime(fixture_source, (collision_time, collision_time))
+                return completed
+
             errors = io.StringIO()
             with (
                 patch.object(updater, "DISTRIBUTION_VERSION", "1.0.0"),
@@ -306,6 +330,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                     stderr=errors,
                     check_now=True,
                     exec_fn=execute,
+                    runner=install_with_timestamp_collision,
                 )
             self.assertEqual(
                 observed,
@@ -317,6 +342,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 ],
             )
             self.assertIn("from 1.0.0 to 2.0.0", errors.getvalue())
+            self.assertEqual(unrelated_cache.read_bytes(), b"operator-owned cache")
 
     def test_explicit_update_checks_before_apply_without_background_spawn(self):
         with tempfile.TemporaryDirectory() as temporary:
