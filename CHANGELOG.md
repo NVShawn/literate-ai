@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- CLI self-update: refresh bytecode in the caller-selected cache and optimization
+  mode so a successful wheel upgrade cannot immediately execute stale code from
+  an equal-size, equal-timestamp previous version. Keep import-path overrides
+  excluded from the installer environment.
+
 - Move the canonical repository to
   [jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai): release
   publication, the Homebrew formula, install documentation, and initialized project

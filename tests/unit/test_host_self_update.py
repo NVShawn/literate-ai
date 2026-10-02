@@ -474,6 +474,28 @@ class HostSelfUpdateStagingTests(unittest.TestCase):
 
 
 class HostSelfUpdateApplyTests(unittest.TestCase):
+    def test_pip_preserves_cache_selection_without_import_path_injection(self) -> None:
+        from literate_ai.adapters.host_self_update import _pip_environment
+
+        self.assertEqual(
+            _pip_environment(
+                {
+                    "PATH": "/bin",
+                    "PYTHONPYCACHEPREFIX": "/operator-cache",
+                    "PYTHONOPTIMIZE": "1",
+                    "PYTHONPATH": "/untrusted-imports",
+                    "PYTHONHOME": "/untrusted-interpreter",
+                    "PYTHONSTARTUP": "/untrusted-startup",
+                }
+            ),
+            {
+                "PATH": "/bin",
+                "PYTHONPYCACHEPREFIX": "/operator-cache",
+                "PYTHONOPTIMIZE": "1",
+                "PYTHONDONTWRITEBYTECODE": "1",
+            },
+        )
+
     def test_apply_installs_and_reexecs_original_argv(self) -> None:
         from literate_ai.adapters.host_self_update import (
             apply_staged_wheel,
@@ -545,6 +567,7 @@ class HostSelfUpdateApplyTests(unittest.TestCase):
             self.assertIn(str(wheel), ran[0][0])
             self.assertIn("--no-index", ran[0][0])
             self.assertIn("--no-deps", ran[0][0])
+            self.assertIn("--compile", ran[0][0])
             self.assertEqual(ran[0][1], 120)
             self.assertEqual(len(execs), 1)
             self.assertEqual(execs[0][0][0], str(layout.launcher))
