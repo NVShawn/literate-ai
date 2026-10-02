@@ -1396,6 +1396,20 @@ def _rebuild_from_args_body(
 ) -> dict[str, object]:
     """Run one project-authorized full lifecycle and validate its external receipt."""
 
+    retained_project = getattr(args, "retained_project", None)
+    retained_project_plan = getattr(args, "retained_project_plan", False)
+    if not retained_project and any(
+        getattr(args, key, None)
+        for key in (
+            "retained_project_profile",
+            "retained_project_plan",
+            "authorize_retained_project",
+        )
+    ):
+        raise CliFailure(
+            "retained_project.manifest_required",
+            "Retained-project options require an explicit manifest",
+        )
     retained_plan = getattr(args, "retained_source_plan", False)
     retained_path = getattr(args, "retained_source", None)
     if (
@@ -1405,7 +1419,11 @@ def _rebuild_from_args_body(
             "retained_source.path_required",
             "Retained-source options require --retained-source",
         )
-    if not args.allow_host_execution and not retained_plan:
+    if (
+        not args.allow_host_execution
+        and not retained_plan
+        and not retained_project_plan
+    ):
         raise CliFailure(
             "rebuild.host_execution_not_acknowledged",
             "a full rebuild compiles and executes generated host code; rerun with "
@@ -1426,6 +1444,18 @@ def _rebuild_from_args_body(
         ).load_optional()
     except ConversionAuthorityError as exc:
         raise CliFailure(exc.code, exc.message) from exc
+    if retained_project:
+        from .retained_project import retained_project_from_args
+
+        driver = project.definition.lifecycle_driver
+        if not isinstance(driver, StandardProjectLifecycleDriver):
+            raise CliFailure(
+                "retained_project.standard_required",
+                "Retained-project admission requires the Standard lifecycle",
+            )
+        return retained_project_from_args(
+            project, _resolve_standard_binding(driver), args
+        )
     if (
         conversion_authority is not None
         and conversion_authority.stage is not ConversionAuthorityStage.QUALIFIED

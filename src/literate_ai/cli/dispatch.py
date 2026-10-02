@@ -2365,6 +2365,23 @@ def _parser() -> JsonArgumentParser:
         help="retain an automatically allocated successful Standard runtime",
     )
     rebuild.add_argument(
+        "--retained-project",
+        help="complete retained input manifest; explicit original-source authority",
+    )
+    rebuild.add_argument(
+        "--retained-project-profile",
+        help="manifest-owned locked build/test/docs action profile",
+    )
+    rebuild.add_argument(
+        "--retained-project-plan",
+        action="store_true",
+        help="validate retained project and inputs read-only; grants no admission",
+    )
+    rebuild.add_argument(
+        "--authorize-retained-project",
+        help="exact reviewed retained-project plan identity",
+    )
+    rebuild.add_argument(
         "--retained-source",
         help="exact local UTF-8 source tree to qualify, never regenerate",
     )

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retained adoption: add explicit read-only Standard planning with bounded binary input
+  custody and complete action inventories. Execution and release qualification remain
+  unavailable until the retained-origin receipt path is complete (ADR 0048).
+
 - CLI: keep pip installation and command re-execution on the same configured
   bytecode cache during self-update, preventing stale code after equal-size,
   equal-timestamp upgrades while preserving unrelated caches.
