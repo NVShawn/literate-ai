@@ -1303,6 +1303,22 @@ class FilesystemProjectInitializationAdapterTests(unittest.TestCase):
         self.assertIn(host_platform_selector(), selectors)
         self.assertNotIn("+flavor://literate-ai/build-bazel", selectors)
 
+    def test_zip_selection_installs_provider_without_implicit_pip(self) -> None:
+        selectors = apply_init_flavor_defaults(["package-zip"])
+        self.assertIn("+flavor://literate-ai/package-zip", selectors)
+        self.assertNotIn("+flavor://literate-ai/package-pip", selectors)
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "zip-project"
+            initialize_project(
+                target,
+                source_intelligence_provider="none",
+                empty=True,
+                flavor_selectors=selectors,
+            )
+            for name in ("flavor.md", "openspec/spec.md"):
+                self.assertTrue((target / "flavors/package-zip" / name).is_file())
+            self.assertFalse((target / "flavors/package-pip").exists())
+
     def test_two_language_flavors_default_to_package_conan(self) -> None:
         selectors = apply_init_flavor_defaults(["python", "javascript"])
 

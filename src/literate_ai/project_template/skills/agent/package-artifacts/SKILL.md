@@ -38,6 +38,10 @@ closure. Never use packaging to repair source, tests, binaries, specifications, 
 
 ## Respect provider compatibility
 
+- `package-zip`: Linux, macOS, and Windows; deterministic ZIPs preserve planned
+  payload paths, specifications and both CycloneDX SBOMs without imposing a language
+  ecosystem. The built-in packager binds its compression runtime; no external tool
+  installation is required.
 - `package-pip`: Linux, macOS, and Windows; require a Python package and build wheels.
 - `package-conan`: Linux, macOS, and Windows; portable provider selection does not
   erase target, compiler, architecture, runtime, or ABI identities.

@@ -23119,3 +23119,29 @@ GitHub CI failure without relaxing identity checks.
   fetches exhausted file descriptors; it is not passing installation evidence.
   Full installed-wheel qualification was started separately and remains pending
   at this handoff. No user's installed CLI, release tag or release branch changed.
+
+### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
+
+Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).
+
+- **Priority:** P0
+- **Owner:** Packaging Flavor, native package CLI and archive verification; Goals 1, 4 and 6
+- **Direction:** Provide a selectable portable ZIP provider for accepted artifact closures without bypassing existing lifecycle or release gates.
+- **Conclusion:** Expose exact package-zip authority and deterministic native ZIP construction/verification using the existing typed package contracts. Preserve both SBOMs, specifications, target and tool identities; publication remains separately authorized.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add package-zip Flavor authority and standard CLI provider dispatch.
+  - [x] Verify immutable member closure and typed plan/result bindings, including native metadata and source/resolved SBOM custody.
+- **Evidence:**
+  - [ ] Public package plan/build/verify uses accepted lifecycle custody and rejects stale, changed, missing and wrong-target evidence.
+  - [ ] Synthetic archive fixtures reproduce bytes and reject malformed or altered archives; existing package providers remain compatible.
+
+Local verification: `make python-check` with the package pattern passes 97 tests;
+CLI coverage passes 19, initialization passes 60, and focused ZIP adversarial
+coverage passes five tests including ZIP64. `make lint format-check` and
+`make skills-check` pass. The CLI tests exercise accepted lifecycle custody via
+a fixture; installed-wheel and actual downstream lifecycle qualification remain
+pending. `litai verify` accepts authority but rejects the stale project receipt.
+The initial wheel check correctly refused an uncommitted revision; the reviewed
+local checkpoint will supply immutable Git authority for its retry. This work
+has not been pushed, published, or installed into a derived project.

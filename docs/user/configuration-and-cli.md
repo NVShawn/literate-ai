@@ -542,7 +542,9 @@ format needed by the repository's user communities, for example
 `--flavor=+package-pip --flavor=+package-conan`. These providers produce independent
 package plans; selecting one does not subtract another. Target constraints still fail
 before generation: apt is Linux-only, Homebrew is macOS-only, and WinGet and Chocolatey
-are Windows-only. Pip wheels and Conan are portable selections.
+are Windows-only. Pip wheels, Conan and `+package-zip` are portable selections.
+ZIP does not require a language ecosystem and includes both source and resolved
+CycloneDX SBOMs with the accepted payload and specification.
 
 Planning is intentionally cheap and read-only. Building is intentionally not: it first
 requires the same accepted artifact, generated-test, application-execution, independent
