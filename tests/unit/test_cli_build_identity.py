@@ -4,6 +4,7 @@ import io
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 import venv
@@ -197,6 +198,11 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
         """Use real wheels, pip and launcher; only release discovery is synthetic."""
         self._real_prefix_upgrade(legacy_cache_environment=False)
 
+    @unittest.skipUnless(
+        sys.platform == "darwin",
+        "the legacy stale-bytecode mismatch is demonstrated on macOS; Windows runners "
+        "execute the replaced source, so the negative control does not apply there",
+    )
     def test_real_prefix_fixture_reproduces_legacy_stale_bytecode(self):
         """Negative control: the former cache mismatch executes the old version."""
         self._real_prefix_upgrade(legacy_cache_environment=True)
