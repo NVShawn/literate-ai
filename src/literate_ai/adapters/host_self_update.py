@@ -21,7 +21,10 @@ from literate_ai.adapters.user_paths import (
     HOST_INSTALL_MANIFEST_SCHEMA,
     HostInstallLayout,
 )
-from literate_ai.repository_urls import github_repository_coordinate
+from literate_ai.repository_urls import (
+    current_repository_origin,
+    github_repository_coordinate,
+)
 from literate_ai.version import DISTRIBUTION_VERSION
 
 HOST_INSTALL_ENVIRONMENT = "LITAI_HOST_INSTALL"
@@ -320,7 +323,9 @@ def github_releases_latest_url() -> str | None:
         origin = observe_installed_framework_origin(DISTRIBUTION_VERSION)
     except StandardLifecycleBindingError:
         return None
-    coordinate = github_repository_coordinate(origin.repository_url)
+    coordinate = github_repository_coordinate(
+        current_repository_origin(origin.repository_url)
+    )
     if coordinate is None:
         return None
     owner, repository = coordinate

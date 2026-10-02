@@ -127,7 +127,8 @@ check. Network failure leaves the current CLI available and reports the skipped
 check; self-update does not silently apply project changes or rebind lifecycle pins.
 Pip, editable and otherwise unenrolled installations are not automatically modified;
 use their installation manager to upgrade. Opt-outs above still apply to explicit
-updates.
+updates. Installations from the former `NVIDIA-dev/literate-ai` repository follow
+[Moving from NVIDIA-dev/literate-ai](repository-migration.md).
 
 `litai --version` shows the declared compatibility version together with source
 provenance. Git/source installations are identified as development builds and include

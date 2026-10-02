@@ -50,7 +50,7 @@ from literate_ai.projects import (
     ProjectError,
     discover_project,
 )
-from literate_ai.repository_urls import repository_urls_equivalent
+from literate_ai.repository_urls import repository_origin_continues
 
 _MAXIMUM_UPDATE_INPUT_BYTES = 16 * 1024 * 1024
 
@@ -472,8 +472,8 @@ class FilesystemProjectUpdateAdapter:
                 "installed update origin provider returned an invalid contract",
             )
         if (
-            not repository_urls_equivalent(
-                upstream.repository_url, previous.repository_url
+            not repository_origin_continues(
+                previous.repository_url, upstream.repository_url
             )
             or upstream.distribution_name != previous.distribution_name
         ):

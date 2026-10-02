@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Continue existing installations across the repository move: projects initialized
+  from `NVIDIA-dev/literate-ai` plan `litai update` against public-repository builds,
+  and self-update follows the declared successor. Other repository origins are still
+  refused. See the
+  [migration guide](docs/user/repository-migration.md).
+
 - Move the canonical repository to
   [jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai): release
   publication, the Homebrew formula, install documentation, and initialized project

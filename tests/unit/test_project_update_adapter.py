@@ -306,6 +306,54 @@ class FilesystemProjectUpdateAdapterTests(unittest.TestCase):
             )
         )
 
+    def test_project_initialized_before_repository_move_plans_from_successor(
+        self,
+    ) -> None:
+        previous = ProjectInitializationOrigin(
+            "https://github.com/NVIDIA-dev/literate-ai",
+            "a" * 40,
+            "literate-ai",
+            "1.0.1",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "project"
+            FilesystemProjectInitializationAdapter(
+                standard_binding_provider=lambda: None,
+                initialization_origin_provider=lambda: previous,
+            ).initialize(
+                target,
+                flavor_selectors=("+make", "+python", "+macos"),
+                source_intelligence_provider="none",
+                empty=True,
+            )
+            successor = ProjectInitializationOrigin(
+                "https://github.com/jordanhubbard/literate-ai",
+                "b" * 40,
+                "literate-ai",
+                "1.1.0",
+            )
+            plan = FilesystemProjectUpdateAdapter(
+                origin_provider=lambda: successor
+            ).plan(target)
+            self.assertEqual(plan.previous_origin, previous)
+            self.assertEqual(plan.upstream_origin, successor)
+            for unrelated in (
+                "https://github.com/other/literate-ai",
+                "https://github.com/jordanhubbard/other",
+            ):
+                with self.subTest(unrelated=unrelated):
+                    with self.assertRaises(ProjectUpdateError) as raised:
+                        FilesystemProjectUpdateAdapter(
+                            origin_provider=lambda unrelated=unrelated: (
+                                ProjectInitializationOrigin(
+                                    unrelated, "b" * 40, "literate-ai", "1.1.0"
+                                )
+                            )
+                        ).plan(target)
+                    self.assertEqual(
+                        raised.exception.code, "project.update_origin_changed"
+                    )
+
     def test_untouched_retired_catalog_template_is_a_safe_removal(self) -> None:
         previous = _origin("a", "0.2.0")
         upstream = _origin("b", "0.9.0")

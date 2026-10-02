@@ -9,6 +9,16 @@ _GITHUB_HOST = "github.com"
 _GITHUB_SCP = re.compile(r"^git@(?P<host>[^/:]+):(?P<path>[^?#]+)$")
 _GITHUB_SEGMENT = re.compile(r"^[A-Za-z0-9_.-]+$")
 
+# Declared repository moves (ADR 0048). An origin recorded at a predecessor continues
+# at its successor; this never makes two independent repositories equivalent.
+_REPOSITORY_SUCCESSORS: dict[tuple[str, str, str], tuple[str, str, str]] = {
+    (_GITHUB_HOST, "NVIDIA-dev", "literate-ai"): (
+        _GITHUB_HOST,
+        "jordanhubbard",
+        "literate-ai",
+    ),
+}
+
 
 def _github_repository_coordinate(value: str) -> tuple[str, str, str] | None:
     """Return one GitHub owner/repository coordinate for supported URL spellings."""
@@ -95,8 +105,48 @@ def github_repository_coordinate(value: str) -> tuple[str, str] | None:
     return None if coordinate is None else coordinate[1:]
 
 
+def _current_coordinate(coordinate: tuple[str, str, str]) -> tuple[str, str, str]:
+    seen = {coordinate}
+    while coordinate in _REPOSITORY_SUCCESSORS:
+        coordinate = _REPOSITORY_SUCCESSORS[coordinate]
+        if coordinate in seen:
+            raise ValueError("repository succession declarations form a cycle")
+        seen.add(coordinate)
+    return coordinate
+
+
+def current_repository_origin(value: str) -> str:
+    """Follow declared repository moves to the origin that currently publishes.
+
+    Undeclared origins are returned exactly as ``canonical_repository_origin`` would.
+    """
+
+    coordinate = _github_repository_coordinate(value)
+    if coordinate is None:
+        return value
+    host, owner, repository = _current_coordinate(coordinate)
+    return f"https://{host}/{owner}/{repository}"
+
+
+def repository_origin_continues(previous: str, upstream: str) -> bool:
+    """Whether both origins name one repository once declared moves are followed."""
+
+    if repository_urls_equivalent(previous, upstream):
+        return True
+    previous_coordinate = _github_repository_coordinate(previous)
+    upstream_coordinate = _github_repository_coordinate(upstream)
+    return (
+        previous_coordinate is not None
+        and upstream_coordinate is not None
+        and _current_coordinate(previous_coordinate)
+        == _current_coordinate(upstream_coordinate)
+    )
+
+
 __all__ = [
     "canonical_repository_origin",
+    "current_repository_origin",
     "github_repository_coordinate",
+    "repository_origin_continues",
     "repository_urls_equivalent",
 ]

@@ -66,6 +66,20 @@ class HostSelfUpdateEnrollmentTests(unittest.TestCase):
                 "https://api.github.com/repos/public-owner/literate-ai/releases/latest",
             )
 
+    def test_moved_repository_origin_checks_its_successor(self) -> None:
+        from literate_ai.adapters import host_self_update
+
+        with mock.patch(
+            "literate_ai.adapters.standard_lifecycle_binding.observe_installed_framework_origin",
+            return_value=SimpleNamespace(
+                repository_url="https://github.com/NVIDIA-dev/literate-ai"
+            ),
+        ):
+            self.assertEqual(
+                host_self_update.github_releases_latest_url(),
+                "https://api.github.com/repos/jordanhubbard/literate-ai/releases/latest",
+            )
+
     def test_non_github_distribution_origin_disables_release_check(self) -> None:
         from literate_ai.adapters import host_self_update
 

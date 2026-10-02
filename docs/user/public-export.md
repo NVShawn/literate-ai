@@ -29,3 +29,15 @@ Create the destination repository, set its new public `origin`, and update
 before publishing a release. Re-run `make public-export-check` in the exported tree.
 The old private repository remains the historical authority; do not rewrite it merely
 to create the public snapshot.
+
+## Historical tags and existing installations
+
+Earlier release tags are not published. Instead, each `v*` tag in the public repository is
+an annotated tag on a parentless marker commit. The commit contains a README naming the
+release, its date and original commit, plus its changelog section. Keep the original
+tags locally outside `refs/tags` (for example `refs/archive/<old-remote>/tags/`) so
+`git push --tags` cannot publish old history.
+
+Declare the move in `literate_ai.repository_urls` so existing projects and self-update
+follow it ([ADR 0048](../decisions/0048-repository-succession.md)). Existing users follow
+[Moving from NVIDIA-dev/literate-ai](repository-migration.md).

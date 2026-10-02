@@ -23119,3 +23119,21 @@ GitHub CI failure without relaxing identity checks.
   fetches exhausted file descriptors; it is not passing installation evidence.
   Full installed-wheel qualification was started separately and remains pending
   at this handoff. No user's installed CLI, release tag or release branch changed.
+
+### [ ] REPO-MOVE-001 — Continue existing installations across the repository move
+
+- **Design review:** [ADR 0048](../decisions/0048-repository-succession.md), Accepted 2026-10-02.
+- **Priority:** P0 (1.1.0 release blocker)
+- **GitHub issue:** [#18](https://github.com/jordanhubbard/literate-ai/issues/18)
+- **Owner:** repository origin continuity, self-update and release publication
+- **Direction:** Users of the archived `NVIDIA-dev/literate-ai` repository reach the public repository without editing projects or losing provenance.
+- **Conclusion:** Declare the move as an explicit predecessor-to-successor mapping. Update planning accepts the successor; self-update resolves through it; recorded origins and pins stay unchanged. Historical tags are parentless public markers. Releases 1.0.x hard-code the old endpoint, so 1.1.0 publishes one bridge release there.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Declare the succession and use it in update planning and self-update endpoint resolution.
+  - [x] Publish annotated historical markers for `v0.1.0a1` through `v1.0.1`, keeping the original tags outside `refs/tags`.
+  - [x] Document the migration for prefix, pip and editable installs, projects, and repository clones.
+  - [ ] After 1.1.0 publication, attach the identical wheel to a `v1.1.0` release on the temporarily unarchived predecessor, then re-archive it (#18).
+- **Evidence:**
+  - [x] Unit tests cover successor acceptance, refusal of unrelated origins, and successor release endpoints.
+  - [ ] A 1.0.1 prefix install self-updates to 1.1.0 through the bridge, and its next check targets the public repository.
