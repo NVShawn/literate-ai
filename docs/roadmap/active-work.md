@@ -23154,3 +23154,5 @@ pending. `litai verify` accepts authority but rejects the stale project receipt.
 The initial wheel check correctly refused an uncommitted revision; the reviewed
 local checkpoint will supply immutable Git authority for its retry. This work
 has not been pushed, published, or installed into a derived project.
+
+ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP adapter/CLI/initialization/templates plus bytecode-cache custody repair), refresh the exact implementation pin through the review command, and refresh documentation authority. Driver identity is now current; all 12 version-authority tests pass through make python-check. Downstream installed framework pins remain unchanged.
