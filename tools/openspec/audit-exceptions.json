@@ -1,0 +1,11 @@
+{
+  "exceptions": [
+    {
+      "advisory": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "reason": "No patched braces release exists (<= 3.0.3 affected; 3.0.3 is latest). Reached only through @fission-ai/openspec -> fast-glob -> micromatch in documentation tooling, expanding repository-authored globs.",
+      "issue": "https://github.com/jordanhubbard/literate-ai/issues/24",
+      "expires": "2026-11-15"
+    }
+  ]
+}
