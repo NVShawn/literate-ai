@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- macOS dependency observation reuses `dyld_info` facts within a process only for
+  identical inspector bytes, arguments and image identity: content and symlink chain
+  for on-disk images, the boot session for shared-cache images. Retained Cargo native
+  test guards no longer re-inspect ~700 unchanged system images per check (#13).
+
 - CLI self-update: refresh bytecode in the caller-selected cache and optimization
   mode so a successful wheel upgrade cannot immediately execute stale code from
   an equal-size, equal-timestamp previous version. Keep import-path overrides
