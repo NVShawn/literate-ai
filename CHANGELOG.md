@@ -242,6 +242,27 @@
   explicitly reviewed conflict resolutions with `--apply --resolutions FILE`.
   Update baselines and files roll back together on validation failure.
 
+- Instructional narrative: add an Opus-reviewed ten-minute skeptical-adopter
+  script and a new local expressive-voice audition with separate acronym
+  pronunciation text. The existing public film remains unchanged pending human
+  listening review and full replacement production.
+
+- Instructional media: replace the short-course viewing path with one continuous,
+  two-voice feedback-edition video play, character introductions, fresh recorded
+  greenfield/TinyXML2 execution, visible captions, and an updates/lineage closing.
+  Keep the discovered inherited-starter oracle defect and demo-local correction
+  explicit; this does not claim a framework release or an upstream defect repair.
+
+- Separate inheritable video-production craft from project-owned narrative:
+  neutral course initialization, project-selected presenters and voices, visual
+  shots, and a quality-review skill that calls for an audition before full production.
+- Add rebuildable instructional courses through `litai video init`, `plan`,
+  `build`, and `verify`: two-speaker narration, recordings, captions, and
+  source-bound media receipts, with a packaged video-authoring skill.
+- Repair two defects exposed by live course demos: starter independent acceptance
+  now matches its greeting specification, and retained test receipts recognize
+  CTest's newer exact all-passed summary without accepting zero or unknown counts.
+
 - Preserve an adopted project's repository parent selection when signed source
   promotion creates its nested native project. This keeps promotion usable from
   clean public checkouts without relying on unrelated local release tags.

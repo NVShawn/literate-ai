@@ -25905,3 +25905,79 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   the repository-wide `fetch-depth: 0` requirement. Preserve full history there
   too; do not weaken the historical-commit test. All other PR execution cells
   passed. Replacement exact-source CI remains required for normal landing.
+
+### [ ] COURSE-001 — Rebuildable instructional videos and onboarding demo repairs
+
+- **Priority:** P1
+- **Owner:** onboarding, retained test evidence, instructional video CLI
+- **Direction:** Fix defects exposed by the real course sessions, support repeatable course creation in Literate AI, and publish the courses publicly.
+- **Conclusion:** Repair starter acceptance authority and exact CTest summaries; add a portable course manifest, narration providers, captions, evidence verification and a documented CLI, then refresh the public examples.
+- **Review correction:** The first draft failed the viewing experience: robotic speech,
+  lecture-like dialogue, text-heavy visuals, and missing first-time setup. Goals 1 and
+  6 require a visual-first, engaging instructional method that children can inherit,
+  while this repository alone owns its two-character comedy and cast.
+- **Second audience correction:** The continuous cut still gives Sam explanatory
+  lines rather than consequential objections. Rewrite as a ten-minute contested
+  pitch: Sam already has C++, Make and tests; LitAI must earn adoption by showing
+  contract/implementation separation, selective Flavors and skills, pinned repo
+  inheritance, brownfield preservation and reviewed updates. Keep product limits
+  visible. Audition more expressive local speech with explicit acronym pronunciation
+  before replacing the existing public film. Obtain the latest available Opus
+  model's independent narrative critique and address it before rendering.
+- **Second-revision progress:** Opus 5.5 (`claude-opus-5-5`, confirmed by the
+  provider usage record) reviewed the complete 1,512-word draft and returned
+  **revise**. Its critique is retained in `docs/courses/play/OPUS-REVIEW.md`.
+  The revised 1,247-word/54-turn script moves taxonomy to relevant objections,
+  explicitly concedes a lenient oracle can pass wrong code, lets Sam count both
+  framework bugs, aligns capture/narration and ends with a limited trial.
+  This is not a second Opus approval. Local Qwen3-TTS voices and acronym-specific
+  speech text are being auditioned; the existing public movie is preserved.
+  Two narrative/pronunciation regressions and eleven video regressions pass.
+- **Audition evidence:** A six-turn, 75.76-second captioned Qwen3-TTS audition
+  renders and verifies locally; output SHA-256
+  `d80d0b01b40341eae223e860c7a5af75ba386cc7c51689cccfb9a9640a76382a`.
+  Local lint and formatting pass. Human listening/voice approval, final pacing,
+  complete shot review and full-film replacement remain required; no claim of
+  improved perceived voice quality is inferred from the media receipt.
+- **Migration handoff:** Preserve the revised source, independent review and
+  verified audition package on the public contribution branch, then consolidate
+  the owning video and CI branches into the operator-selected main. Keep original
+  feedback media and incomplete review/qualification states explicit. Do not move
+  private Git history, raw logs, credentials, model weights or disposable tools.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Fix starter oracle and CTest summary parsing with regression coverage.
+  - [x] Add reusable video authoring, build, verify, and refresh commands and packaged skill.
+  - [ ] Refresh and publish the course bundle with current demo evidence.
+  - [x] Replace stock system speech with auditioned natural narration and produce a short review cut before full rendering. User accepted the improved direction after watching the 94-second neural cut.
+  - [ ] Rewrite greenfield with real dialogue, a complete acquisition/install/authentication path, and visual demonstrations rather than bullet slides.
+  - [x] Make the inherited skill and starter narrative-neutral; retain cast, tone, and two-character choices only in this course package. Nine video regressions pass.
+  - [x] Produce one continuous video play with character introductions, respectful skeptical-engineer humor, real coding in the middle, and an updates/repository-lineage closing. The 13:38 feedback cut contains 85 turns, visible captions and labeled edited execution replays. Fresh installed-wheel generation, demo-local oracle recovery, 3-pass/2-skip verification, wheel build/verify, and TinyXML2 retained advancement passed; COURSE-003 preserves the discovered framework defect.
+  - [x] Publish the continuous feedback edition to the authorized public GitHub repository with captions, regeneration sources, provenance and explicit limitations. Public course commit `e118f2ca` is reachable on `docs/publish-video-courses`; an unauthenticated download matches MP4 SHA-256 `d23c1a39f8ee27423638caee670687c98f498af03c16bcb9cc3fc017f472f822`. Public PR #10 remains a feedback draft, not a framework release or upstream OSS adoption. Eleven video regressions, two demo regressions, complete media decode/verification, lint/format, public-export, layout and documentation checks pass. Full audience review and broader release qualification remain separate.
+- **Evidence:**
+  - [ ] Regression tests, installed CLI checks, real greenfield and TinyXML2 demos, and media verification pass.
+
+### [ ] COURSE-002 — Accepted-source continuation after an onboarding rebuild
+
+- **Priority:** P1
+- **Owner:** source cache continuation
+- **Direction:** Investigate the runtime_absent result observed during the greenfield course despite a passing rebuild.
+- **Conclusion:** Reproduce against the release candidate and compare exact admission keys before proposing a fix; do not weaken cache membership checks.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Reproduce and classify missing membership versus a framework lookup defect.
+- **Evidence:**
+  - [ ] Same-model accepted-source continuation passes or yields an actionable exact mismatch diagnosis.
+
+### [ ] COURSE-003 — Bind inherited starter acceptance to its actual contract
+
+- **Priority:** P1
+- **Owner:** project initialization and inherited acceptance authority
+- **Direction:** The continuous-course fresh run inherited the public parent's richer greeting-card Component but received the simple template's acceptance cases.
+- **Conclusion:** Selecting a starter by name is not enough to select its oracle. The generator correctly followed the inherited contract; independent acceptance failed with missing `messages`. Correcting the disposable demonstration oracle proves only local recovery, not a framework repair. Preserve verifier isolation and refuse unsupported assumptions rather than synthesizing expectations from generated code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Define explicit inherited acceptance ownership and bind it to the selected starter contract.
+  - [ ] Cover simple template, rich inherited starter, custom same-name starter and conflict/refusal cases.
+- **Evidence:**
+  - [ ] Fresh public-parent installed-CLI onboarding completes without hand-editing its oracle, with independent acceptance intact.

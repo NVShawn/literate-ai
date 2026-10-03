@@ -1,0 +1,183 @@
+1
+00:00:00,000 --> 00:00:03,764
+Sam: Do I need to buy runners or move my code into a hosted service?
+
+2
+00:00:03,917 --> 00:00:05,711
+LitAI: No new fleet is required.
+
+3
+00:00:05,875 --> 00:00:09,879
+LitAI: This course connects machines you already own to Literate AI as
+workers.
+
+4
+00:00:10,042 --> 00:00:17,403
+LitAI: The key boundary is simple: the project declares what it needs,
+while your private user configuration chooses where work runs.
+
+5
+00:00:17,553 --> 00:00:22,300
+LitAI: These are edited transcript replays of real sessions, not raw
+screen recordings.
+
+6
+00:00:22,470 --> 00:00:24,601
+LitAI: Remote-worker steps are a walkthrough.
+
+7
+00:00:24,761 --> 00:00:28,571
+Sam: Why not just put the SSH host in my project file?
+
+8
+00:00:28,721 --> 00:00:34,357
+LitAI: Because endpoints and credentials are private execution
+choices, not portable product authority.
+
+9
+00:00:34,513 --> 00:00:37,006
+LitAI: A target and a worker are different decisions.
+
+10
+00:00:37,156 --> 00:00:44,935
+LitAI: The target determines the recipe and intended platform; the
+worker is the local, command, or SSH endpoint that executes it.
+
+11
+00:00:45,085 --> 00:00:48,819
+LitAI: Never encode private hostnames in project specifications.
+
+12
+00:00:48,969 --> 00:00:53,331
+LitAI: Ask litai config paths where this platform stores user
+configuration.
+
+13
+00:00:53,481 --> 00:00:59,796
+LitAI: Copy the checked-in synthetic examples to those private
+locations, or pass explicit absolute paths.
+
+14
+00:00:59,946 --> 00:01:03,061
+LitAI: Do not guess Windows or Unix conventions from memory.
+
+15
+00:01:03,211 --> 00:01:08,851
+LitAI: In your private workers file, replace each example endpoint and
+workspace with a real assignment.
+
+16
+00:01:09,003 --> 00:01:13,233
+LitAI: Give each machine a stable worker ID and exact platform
+requirements.
+
+17
+00:01:13,383 --> 00:01:16,063
+LitAI: Keep credentials out of this JSON file.
+
+18
+00:01:16,216 --> 00:01:20,280
+LitAI: The test matrix selects workers by ID and matching platform
+Flavor.
+
+19
+00:01:20,430 --> 00:01:23,852
+LitAI: It also selects a coding CLI and model for live generation.
+
+20
+00:01:24,013 --> 00:01:28,286
+LitAI: The matrix does not repeat SSH credentials or provisioning
+commands.
+
+21
+00:01:28,436 --> 00:01:30,378
+Sam: My model name works in chat.
+
+22
+00:01:30,528 --> 00:01:32,120
+Sam: Why verify it again?
+
+23
+00:01:32,278 --> 00:01:36,635
+LitAI: Verify the model before a long run, then probe every configured
+worker.
+
+24
+00:01:36,786 --> 00:01:46,070
+LitAI: A missing NVIDIA utility means no GPU was discovered; a utility
+that cannot query its driver is a degraded observation, not proof of
+zero devices.
+
+25
+00:01:46,220 --> 00:01:49,817
+LitAI: Prepare each assigned machine with detect-before-install
+checks.
+
+26
+00:01:49,970 --> 00:01:55,261
+LitAI: Hydrate the exact Git revision, including required submodules
+and LFS content.
+
+27
+00:01:55,429 --> 00:02:00,686
+LitAI: Coding-agent login is a separate readiness gate, and secrets
+stay in the worker environment.
+
+28
+00:02:00,845 --> 00:02:03,413
+LitAI: Start with one sample and one worker cell.
+
+29
+00:02:03,563 --> 00:02:09,454
+LitAI: Only expand the matrix after platform, source authority, and
+toolchain preflight pass.
+
+30
+00:02:09,605 --> 00:02:15,028
+LitAI: For this repository, samples-platform-regression is the
+supported fan-out demonstration.
+
+31
+00:02:15,188 --> 00:02:18,825
+Sam: If the remote machine says it passed, why isn't that enough?
+
+32
+00:02:18,980 --> 00:02:24,531
+LitAI: For a single Component, build, test, and run can choose a
+configured worker by ID.
+
+33
+00:02:24,688 --> 00:02:31,836
+LitAI: Returned artifacts and receipts must be imported and verified
+by the coordinator; a path on another machine alone is not evidence.
+
+34
+00:02:31,986 --> 00:02:36,301
+LitAI: Our real package build used the implicit local worker and
+produced a pip wheel.
+
+35
+00:02:36,451 --> 00:02:40,873
+LitAI: That verifies the local execution path without exposing a host
+address.
+
+36
+00:02:41,034 --> 00:02:48,093
+LitAI: To demonstrate an SSH worker, configure one of your own
+machines privately and rerun the same target with its worker ID.
+
+37
+00:02:48,243 --> 00:02:52,699
+LitAI: This can make cross-platform tests more practical without
+buying a new service.
+
+38
+00:02:52,868 --> 00:02:57,883
+LitAI: Capacity probes inform selection, but never rewrite authored
+minimum requirements.
+
+39
+00:02:58,035 --> 00:03:05,217
+LitAI: Derived projects can wire the private matrix into their own CI;
+the packaged CLI does not promise a generic fan-out verb.
+

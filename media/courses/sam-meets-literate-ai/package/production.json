@@ -1,0 +1,47 @@
+{
+  "model": "mlx-community/Kokoro-82M-bf16",
+  "snapshot": "a71e4d38b236d968966a2002c4c895dbd12b1c3c",
+  "voices": {
+    "litai": "af_heart",
+    "sam": "am_fenrir"
+  },
+  "mlx_audio": "0.5.7",
+  "synthetic": true,
+  "cloud_speech": false,
+  "story_sha256": "87243f221f68a1003652f71f69bcb6cd815fec041f4239bc952af9c4b69c7b48",
+  "producer_sha256": "cbdb58c3dad625a8888f21fc5c080ced8fa2a3a0efcfed8feca0ca1ff44d0db1",
+  "chapters": [
+    {
+      "title": "Meet the travelers",
+      "scene": 1,
+      "approx_seconds": 0.0
+    },
+    {
+      "title": "Acquire and prepare",
+      "scene": 13,
+      "approx_seconds": 103.03
+    },
+    {
+      "title": "A real greenfield coding session",
+      "scene": 24,
+      "approx_seconds": 189.88
+    },
+    {
+      "title": "Use the machines you already own",
+      "scene": 45,
+      "approx_seconds": 410.03
+    },
+    {
+      "title": "Adopt a real C++ project",
+      "scene": 51,
+      "approx_seconds": 464.45
+    },
+    {
+      "title": "The morning after the demo",
+      "scene": 67,
+      "approx_seconds": 623.95
+    }
+  ],
+  "edition": "public feedback; not framework release qualification",
+  "review": "94-second voice/style audition accepted by user; full-cut audience review pending"
+}

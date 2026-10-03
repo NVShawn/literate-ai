@@ -1,0 +1,21 @@
+{
+  "schema": "literate-ai/video-course-result@1",
+  "course_id": "02-use-your-existing-machines",
+  "source_identity": "99107049929ce02cc2afc2e6bdac7116e4486e7da8e30829a14c862f34e9477e",
+  "renderer_sha256": "2829e12b4d5694b97858fee6dcbd61bf2974cf84c21c56b7721c0b5168bdeebf",
+  "font_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+  "narration_backend": "say",
+  "duration_seconds": 185.389405,
+  "caption_count": 39,
+  "publication_authorized": false,
+  "artifacts": {
+    "02-use-your-existing-machines.mp4": "fdfd7308b8f7e55d1ad363f663b1f4306499a354f27df2d769126958a47f0622",
+    "02-use-your-existing-machines.srt": "39471431f600ab5bfc2f2f33134eb759d3bbd976bdd3d2ab4deecac5c8076580",
+    "02-use-your-existing-machines.vtt": "6191540d87220174a06d01643eed30c3ef8bdac1858e7f84f640f372885fb2ff"
+  },
+  "tools": {
+    "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 9.0.1 Copyright (c) 2007-2026 the FFmpeg developers",
+    "magick": "Version: ImageMagick 7.1.2-31 Q16-HDRI aarch64 8309dc92a:20260903 https://imagemagick.org"
+  }
+}

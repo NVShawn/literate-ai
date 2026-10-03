@@ -1,0 +1,291 @@
+{
+  "schema": "literate-ai/video-course@1",
+  "id": "01-greenfield-first-project",
+  "title": "Your first greenfield project",
+  "speakers": {
+    "litai": {
+      "name": "LitAI",
+      "voice": "Samantha",
+      "portrait": "assets/litai-guide.png"
+    },
+    "sam": {
+      "name": "Sam",
+      "voice": "Daniel",
+      "portrait": "assets/sam-engineer.png"
+    }
+  },
+  "evidence": [
+    "EVIDENCE.md",
+    "evidence/tinyxml2-retained.json"
+  ],
+  "scenes": [
+    {
+      "title": "The outcome",
+      "points": [
+        "Create a project from reviewed intent",
+        "Generate, test, and run a real starter app",
+        "Real session excerpts; edited transcript replay"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "I've shipped C plus plus code with Make for years. Why would I need a harness?"
+        },
+        {
+          "speaker": "litai",
+          "text": "In this course, we create a new Literate AI project and prove that its starter application runs. The specification is durable authority; generated source is disposable output. These are edited transcript replays of real sessions, not raw screen recordings. Remote-worker steps are a walkthrough."
+        }
+      ]
+    },
+    {
+      "title": "The contract",
+      "points": [
+        "Component = observable behavior",
+        "Flavors = target choices",
+        "Receipts = current, verifiable evidence"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "A Makefile tells me how to build. Isn't that enough?"
+        },
+        {
+          "speaker": "litai",
+          "text": "Your Makefile compiles code, but it does not define the specification, acceptance evidence, packaging, or release policy. Literate AI separates what the application must do from how and where it is built. A Component describes observable behavior; Flavors select implementation targets; receipts bind the accepted result to exact inputs."
+        }
+      ]
+    },
+    {
+      "title": "Preflight",
+      "points": [
+        "Python 3.11+, Git, authenticated coding CLI",
+        "Install a published wheel in a virtual environment",
+        "Doctor checks the host before project work"
+      ],
+      "terminal": [
+        "$ python3 -m venv .venv",
+        "$ . .venv/bin/activate",
+        "$ litai doctor"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Start with Python, Git, and an authenticated coding CLI. Install a published Literate AI wheel in a virtual environment, then run litai doctor. Resolve reported blockers before requesting generation."
+        }
+      ]
+    },
+    {
+      "title": "Inspect the create plan",
+      "points": [
+        "Read-only first: inspect project type and Flavors",
+        "Choose a fresh path and meaningful project ID"
+      ],
+      "terminal": [
+        "$ litai onboard create my-project \\",
+        "    --type application --project-id my-project",
+        "ok: true  |  writes: false"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The first onboard create command is read-only. Review its proposed project type, target Flavors, blockers, and plan identity. No project tree is written yet."
+        }
+      ]
+    },
+    {
+      "title": "Apply what you reviewed",
+      "points": [
+        "Acknowledgement makes the mutation explicit",
+        "Recheck plan identity if the inputs may change"
+      ],
+      "terminal": [
+        "$ litai onboard create my-project \\",
+        "    --type application --project-id my-project \\",
+        "    --apply --acknowledge   # applied: true"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "Apply the reviewed plan with explicit acknowledgement. For automation or a long pause between planning and applying, use the printed plan identity to fail closed if the plan has changed."
+        }
+      ]
+    },
+    {
+      "title": "Inspect the new tree",
+      "points": [
+        "PROJECT.md defines project goals",
+        "SKILL.md onboards coding agents",
+        "The starter Component is executable"
+      ],
+      "terminal": [
+        "$ cd my-project",
+        "$ litai status",
+        "$ litai project validate"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "The scaffold contains project goals, agent onboarding, catalog entries, and an executable hello Component. Status shows the next step; project validate checks authored structure without claiming that an application has been built."
+        }
+      ]
+    },
+    {
+      "title": "Lock and plan",
+      "points": [
+        "Lock exact authority before generation",
+        "Inspect the recipe and target before model egress"
+      ],
+      "terminal": [
+        "$ litai lock --check",
+        "$ litai plan samples/hello-component"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "A lock binds the exact specification and selected Flavors. Planning exposes the recipe before a coding agent generates source. If either check fails, fix the authored inputs rather than bypassing the gate."
+        }
+      ]
+    },
+    {
+      "title": "Run the lifecycle",
+      "points": [
+        "This step can invoke a model and execute code",
+        "Host execution requires explicit acknowledgement"
+      ],
+      "terminal": [
+        "$ litai rebuild samples/hello-component \\",
+        "    --project . --allow-host-execution \\",
+        "    --update-receipt"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "If make succeeds, I've shipped the product, right?"
+        },
+        {
+          "speaker": "litai",
+          "text": "No. You have never really decided how to package and release this software, or how to prove the shipped artifact is the one you tested. Rebuild invokes the coding agent and then runs the generated application through independent gates. It may call a paid model and execute generated code, so acknowledge host execution only on a trusted machine."
+        }
+      ]
+    },
+    {
+      "title": "Coding session: generated source",
+      "points": [
+        "Codex generated the entrypoint and three tests",
+        "Edited excerpt from the real coding session",
+        "Candidate source still needs independent acceptance"
+      ],
+      "terminal": [
+        "def main(payload: object) -> dict[str, str]:",
+        "    # validation omitted from this excerpt",
+        "    name = payload.get('name')",
+        "    return {'greeting': f'Hello, {name}!', 'name': name}"
+      ],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "This is an edited excerpt from the actual Codex generation session, not a screen capture. The agent produced the entrypoint and three native behavior tests. They cover a normal name, a one-character boundary, and Unicode. We show the resulting behavior here; source is still only a candidate until independent acceptance passes."
+        }
+      ]
+    },
+    {
+      "title": "The verifier disagrees",
+      "points": [
+        "The scaffold oracle expected unrelated fields",
+        "The written spec says greeting and name only",
+        "Independent acceptance refused the receipt"
+      ],
+      "terminal": [
+        "ERROR: independent_acceptance_failed",
+        "oracle: recipient_id, message_count, word_count",
+        "candidate: greeting, name"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "The code looks fine. Why did your rebuild fail?"
+        },
+        {
+          "speaker": "litai",
+          "text": "Because the independent verifier protects us from our own assumptions. The first live rebuild failed. Its generated application matched the written greeting contract, but the scaffold's independent oracle expected extra fields absent from that contract. The gate rejected the candidate instead of issuing a false passing receipt."
+        }
+      ]
+    },
+    {
+      "title": "Correct authority, rerun",
+      "points": [
+        "Framework starter oracle fixed at its source",
+        "Fresh scaffolds now require greeting and name",
+        "Regression tests keep specification and oracle aligned"
+      ],
+      "terminal": [
+        "$ litai rebuild ... --update-receipt",
+        "passed: true | tests: 3/3",
+        "receipt_committed: true"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "You didn't just edit generated code to make it green?"
+        },
+        {
+          "speaker": "litai",
+          "text": "We corrected the demo verifier to match the specification and reran the lifecycle: three tests passed and a current receipt was committed. Then we fixed the framework starter oracle itself and added regression coverage. New scaffolds no longer inherit the incorrect fields. This is a framework defect repair, not editing generated code to fake a pass."
+        }
+      ]
+    },
+    {
+      "title": "Verify and package",
+      "points": [
+        "litai verify: 3 gates passed, 1 skipped",
+        "Pip wheel built and verified locally",
+        "No registry upload or release is implied"
+      ],
+      "terminal": [
+        "$ litai verify",
+        "$ litai package build samples/hello-component \\",
+        "    --target host --allow-host-execution"
+      ],
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "So is the wheel now on a package registry?"
+        },
+        {
+          "speaker": "litai",
+          "text": "No. A verified local wheel is not a published release. We then verified the project and built a pip wheel from the accepted artifact. Package verification passed using the same model selection. This gives a real, locally verified product; publishing it or cutting a release remains a separate, explicitly authorized gate."
+        }
+      ]
+    },
+    {
+      "title": "Your next change",
+      "points": [
+        "Edit observable requirements in the Component",
+        "Re-lock, plan, rebuild, and verify",
+        "Do not hand-edit generated source as authority"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "For the next feature, change the Component specification and repeat the evidence loop. Avoid treating generated source as the durable design. The project becomes easier to review because intent, target choices, and proof stay separate."
+        }
+      ]
+    },
+    {
+      "title": "Keeping Agentis on the rails",
+      "points": [
+        "Agentis coordinates the task; LitAI governs the product",
+        "Specification, build, tests, package, release: distinct gates",
+        "This demo proves the local harness, not an Agentis deployment"
+      ],
+      "terminal": [],
+      "dialogue": [
+        {"speaker": "sam", "text": "If Agentis can organize the work, why do I need all these extra gates?"},
+        {"speaker": "litai", "text": "Because organizing a task is not proof that its product is correct. This is the division of responsibility we want with Agentis: it coordinates work, while I keep specifications, exact build inputs, tests, packaging, and release evidence explicit. You have spent years on the code and too little thought on what actually ships. These gates make that missing work visible. This course proves the local harness; it does not claim an Agentis deployment."}
+      ]
+    }
+  ]
+}
