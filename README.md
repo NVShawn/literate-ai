@@ -47,9 +47,9 @@ is the maintainer setup for this checkout.
 A stakeholder-facing overview is also maintained separately. The 1.2.0 edition was
 published in place and export-back verified against its checked-in presentation and
 narrative at these stable links:
-[slides](https://docs.google.com/presentation/d/1V9mt1JpEst_2ucC0eJIIw7dff64MrtFRfut8MSiukeE/edit?usp=drivesdk)
+[slides](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
 and
-[narrative](https://docs.google.com/document/d/1fMxy0NTT54MV4T9AwmA8F0VahNet93Xhp0d0pszI6GA/edit?usp=drivesdk).
+[narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk).
 The authoring package is
 [`docs/presentations/literate-ai-manager-overview/`](docs/presentations/literate-ai-manager-overview/).
 

@@ -33,8 +33,8 @@ from literate_ai.contracts.identity import canonical_identity  # noqa: E402
 from literate_ai.version import DISTRIBUTION_VERSION  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-SLIDES_ID = "1V9mt1JpEst_2ucC0eJIIw7dff64MrtFRfut8MSiukeE"
-DOC_ID = "1fMxy0NTT54MV4T9AwmA8F0VahNet93Xhp0d0pszI6GA"
+SLIDES_ID = "1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE"
+DOC_ID = "1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA"
 PPTX_MIME = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 SLIDES_GOOGLE = "application/vnd.google-apps.presentation"

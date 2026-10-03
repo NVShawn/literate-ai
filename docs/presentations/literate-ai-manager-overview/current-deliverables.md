@@ -4,9 +4,9 @@ The checked-in members below are the published **1.2.0 throughput and native-acc
 edition**. Their stable Google Workspace IDs and links did not change. Both resources
 were refreshed in place and export-back verified against these accepted local members.
 
-- Native Google Slides (1.2.0 edition): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1V9mt1JpEst_2ucC0eJIIw7dff64MrtFRfut8MSiukeE/edit?usp=drivesdk)
+- Native Google Slides (1.2.0 edition): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
   — stable ID; 26 slides / 26 notes pages required on export-back.
-- Native Google Doc (1.2.0 edition): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1fMxy0NTT54MV4T9AwmA8F0VahNet93Xhp0d0pszI6GA/edit?usp=drivesdk)
+- Native Google Doc (1.2.0 edition): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
   — stable ID; 72 headings with no skipped level required on export-back.
 - Generated PowerPoint:
   [literate-ai-manager-and-engineering-overview.pptx](literate-ai-manager-and-engineering-overview.pptx)
@@ -33,8 +33,8 @@ SHA-256. Trust the acceptance report for the digest of the exact committed artif
 | Members | `presentation`, `narrative` |
 | Local presentation | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.pptx` |
 | Local narrative | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.docx` |
-| Published presentation | Slides file `1V9mt1JpEst_2ucC0eJIIw7dff64MrtFRfut8MSiukeE` |
-| Published narrative | Doc file `1fMxy0NTT54MV4T9AwmA8F0VahNet93Xhp0d0pszI6GA` |
+| Published presentation | Slides file `1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE` |
+| Published narrative | Doc file `1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA` |
 | Slides | 26 local; 26 on export-back |
 | Notes slides | 26 local; 26 on export-back |
 | Narrative headings | 72 local, no skipped level; 72 required on export-back |
