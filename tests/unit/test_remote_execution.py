@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from literate_ai import remote_source_guard
+from literate_ai.adapters.cache.filesystem import _native_filesystem_path
 from literate_ai.adapters.remote_execution import (
     RemoteExecutionError,
     RemoteLifecycleCustody,
@@ -810,7 +811,11 @@ class RemoteExecutionTests(unittest.TestCase):
     def test_twelve_cache_memberships_use_short_attempt_root_and_are_cleaned(
         self,
     ) -> None:
-        with tempfile.TemporaryDirectory() as directory:
+        # Use the native namespace for both fixture creation and cleanup; the
+        # coordinator path remains deliberately long and the receiver stays short.
+        with tempfile.TemporaryDirectory(
+            dir=_native_filesystem_path(Path(tempfile.gettempdir()))
+        ) as directory:
             root = Path(directory)
             project = root / ("coordinator project with spaces " + ("p" * 80))
             staging = root / "staging"
