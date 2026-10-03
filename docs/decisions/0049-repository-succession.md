@@ -1,4 +1,4 @@
-# ADR 0048: Continue installations across a declared repository move
+# ADR 0049: Continue installations across a declared repository move
 
 - Status: Accepted
 - Date: 2026-10-02

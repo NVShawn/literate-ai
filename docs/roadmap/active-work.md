@@ -23843,7 +23843,7 @@ Make, along with lint and format checks. Full CI remains pending.
 
 ### [ ] REPO-MOVE-001 — Continue existing installations across the repository move
 
-- **Design review:** [ADR 0048](../decisions/0048-repository-succession.md), Accepted 2026-10-02.
+- **Design review:** [ADR 0049](../decisions/0049-repository-succession.md), Accepted 2026-10-02.
 - **Priority:** P0 (1.1.0 release blocker)
 - **GitHub issue:** [#18](https://github.com/jordanhubbard/literate-ai/issues/18)
 - **Owner:** repository origin continuity, self-update and release publication

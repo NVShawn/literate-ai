@@ -9,7 +9,7 @@ _GITHUB_HOST = "github.com"
 _GITHUB_SCP = re.compile(r"^git@(?P<host>[^/:]+):(?P<path>[^?#]+)$")
 _GITHUB_SEGMENT = re.compile(r"^[A-Za-z0-9_.-]+$")
 
-# Declared repository moves (ADR 0048). An origin recorded at a predecessor continues
+# Declared repository moves (ADR 0049). An origin recorded at a predecessor continues
 # at its successor; this never makes two independent repositories equivalent.
 _REPOSITORY_SUCCESSORS: dict[tuple[str, str, str], tuple[str, str, str]] = {
     (_GITHUB_HOST, "NVIDIA-dev", "literate-ai"): (

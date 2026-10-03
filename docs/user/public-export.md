@@ -39,5 +39,5 @@ tags locally outside `refs/tags` (for example `refs/archive/<old-remote>/tags/`)
 `git push --tags` cannot publish old history.
 
 Declare the move in `literate_ai.repository_urls` so existing projects and self-update
-follow it ([ADR 0048](../decisions/0048-repository-succession.md)). Existing users follow
+follow it ([ADR 0049](../decisions/0049-repository-succession.md)). Existing users follow
 [Moving from NVIDIA-dev/literate-ai](repository-migration.md).

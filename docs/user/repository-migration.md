@@ -3,7 +3,7 @@
 Literate AI is now published from
 [jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai). The former
 `NVIDIA-dev/literate-ai` repository is archived and read-only. This page covers what
-existing users need to do; [ADR 0048](../decisions/0048-repository-succession.md)
+existing users need to do; [ADR 0049](../decisions/0049-repository-succession.md)
 records the design.
 
 ## Installed CLI
