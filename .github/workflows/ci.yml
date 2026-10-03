@@ -178,7 +178,8 @@ jobs:
         run: make tools-install
       - name: Run conformance gates
         if: matrix.task == 'conformance'
-        timeout-minutes: 120
+        # Full single-job Linux suites plus every gate; Python 3.14 runs slowest.
+        timeout-minutes: 180
         run: >-
           make validate PYTHON=python RUFF=ruff
           PYTHON_TEST_PATTERN="test*.py"

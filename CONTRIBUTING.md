@@ -165,7 +165,8 @@ unchanged. Use a manual CI run on a candidate branch when full platform evidence
 before merging. Require full successful exact-commit qualification before release;
 a green ordinary PR smoke job is not a substitute.
 
-Conformance test steps have a 120-minute budget, leaving time within the job for
+macOS conformance partitions have a 120-minute step budget and the single-job Linux
+suites 180 minutes, leaving time within the job for
 always-run diagnostic uploads. A timeout is a failed qualification, never a pass
 or permission to skip a test. CI uses `PYTHON_TEST_VERBOSITY=2` so retained logs
 name the running test. Full macOS artifact names include their partition to avoid
