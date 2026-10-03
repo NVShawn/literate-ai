@@ -60,11 +60,11 @@ class CiActionPinTests(unittest.TestCase):
         for os_name in ("ubuntu-latest", "macos-latest", "windows-latest"):
             for prefix in ("Documentation", "Sample composition"):
                 expected.add((f"{prefix} / {os_name}", os_name))
-        for os_name in ("ubuntu-latest", "macos-latest"):
-            for python in ("3.11", "3.14"):
-                expected.add((f"{os_name} / Python {python}", os_name))
-        for group in (2, 3):
-            expected.add((f"macos-latest / Python 3.11 ({group} of 3)", "macos-latest"))
+        for python in ("3.11", "3.14"):
+            expected.add((f"ubuntu-latest / Python {python}", "ubuntu-latest"))
+        for group in (1, 2, 3, 4):
+            expected.add((f"macos-latest / Python 3.11 ({group} of 4)", "macos-latest"))
+        expected.add(("macos-latest / Python 3.14 (smoke)", "macos-latest"))
         expected.add(
             ("Windows / Python 3.12 / lint, OpenSpec, wheel", "windows-latest")
         )
@@ -75,7 +75,7 @@ class CiActionPinTests(unittest.TestCase):
         for os_name in ("ubuntu-latest", "windows-latest"):
             expected.add((f"Native C++ library / {os_name}", os_name))
         rows = job["strategy"]["matrix"]["include"]
-        self.assertEqual(len(rows), 19)
+        self.assertEqual(len(rows), 20)
         self.assertEqual({(row["name"], row["os"]) for row in rows}, expected)
         for row in rows:
             if row["task"] == "conformance":
@@ -83,8 +83,11 @@ class CiActionPinTests(unittest.TestCase):
                     row["name"],
                     {
                         f"{row['os']} / Python {row['python']}",
-                        "macos-latest / Python 3.11 (2 of 3)",
-                        "macos-latest / Python 3.11 (3 of 3)",
+                        *(
+                            f"macos-latest / Python 3.11 ({n} of 4)"
+                            for n in range(1, 5)
+                        ),
+                        "macos-latest / Python 3.14 (smoke)",
                     },
                 )
             if row["task"] == "windows-tests":
@@ -95,17 +98,22 @@ class CiActionPinTests(unittest.TestCase):
     ) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
         rows = workflow["jobs"]["checks"]["strategy"]["matrix"]["include"]
-        patterns = [
-            row["test_pattern"]
+        shards = [
+            row
             for row in rows
             if row["task"] == "conformance"
             and row["os"] == "macos-latest"
             and row["python"] == "3.11"
         ]
+        self.assertEqual(len(shards), 4)
+        # Exactly one shard runs every repository gate and the wheel check.
         self.assertEqual(
-            patterns,
-            ["test_[a-p]*.py", "test_[q-s]*.py", "test_[t-z]*.py"],
+            [row.get("gates", "validate") for row in shards],
+            ["validate", "tests", "tests", "tests"],
         )
+        patterns = [
+            pattern for row in shards for pattern in row["test_patterns"].split()
+        ]
         modules = sorted((ROOT / "tests").rglob("test*.py"))
         self.assertTrue(modules)
         for module in modules:
