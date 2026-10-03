@@ -20,6 +20,10 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     continue-on-error: false
+    # Fail a stalled cell well inside GitHub's 6h job limit; the slowest healthy
+    # cells take about two hours. The repository-refresh shard is allowed longer
+    # until its git re-observation cost is reduced (#27).
+    timeout-minutes: ${{ matrix.timeout_minutes || 180 }}
     strategy:
       fail-fast: true
       matrix:
@@ -69,29 +73,43 @@ jobs:
             os: "ubuntu-latest"
             python: "3.14"
             group: 0
+          # macOS runs the full suite on 3.11 in measured-balance shards; only the
+          # first runs every repository gate. GitHub Free allows five concurrent
+          # macOS jobs, so 3.14 runs a smoke subset; Ubuntu runs all of 3.14.
           - task: "conformance"
-            name: "macos-latest / Python 3.11"
+            name: "macos-latest / Python 3.11 (1 of 4)"
             os: "macos-latest"
             python: "3.11"
             group: 0
-            test_pattern: "test_[a-p]*.py"
+            test_patterns: "test_[!nr]*.py test_r[!e]*.py"
           - task: "conformance"
-            name: "macos-latest / Python 3.11 (2 of 3)"
+            name: "macos-latest / Python 3.11 (2 of 4)"
             os: "macos-latest"
             python: "3.11"
             group: 0
-            test_pattern: "test_[q-s]*.py"
+            gates: "tests"
+            test_patterns: "test_n*.py"
           - task: "conformance"
-            name: "macos-latest / Python 3.11 (3 of 3)"
+            name: "macos-latest / Python 3.11 (3 of 4)"
             os: "macos-latest"
             python: "3.11"
             group: 0
-            test_pattern: "test_[t-z]*.py"
+            gates: "tests"
+            test_patterns: "test_re[!p]*.py test_repository_[!r]*.py"
           - task: "conformance"
-            name: "macos-latest / Python 3.14"
+            name: "macos-latest / Python 3.11 (4 of 4)"
+            os: "macos-latest"
+            python: "3.11"
+            group: 0
+            gates: "tests"
+            test_patterns: "test_repository_r*.py"
+            timeout_minutes: 330
+          - task: "conformance"
+            name: "macos-latest / Python 3.14 (smoke)"
             os: "macos-latest"
             python: "3.14"
             group: 0
+            test_patterns: "test_[!nr]*.py"
           - task: "windows-gates"
             name: "Windows / Python 3.12 / lint, OpenSpec, wheel"
             os: "windows-latest"
@@ -259,14 +277,32 @@ jobs:
         run: make tools-install
       - name: Run conformance gates
         if: matrix.task == 'conformance'
-        run: >-
-          make validate PYTHON=python RUFF=ruff
-          PYTHON_TEST_PATTERN="${{ matrix.test_pattern || 'test*.py' }}"
+        env:
+          # Name each test as it starts so a stalled cell's log identifies it.
+          PYTHONUNBUFFERED: "1"
+          TEST_PATTERNS: ${{ matrix.test_patterns || 'test*.py' }}
+          GATES: ${{ matrix.gates || 'validate' }}
+        run: |
+          set -euo pipefail
+          read -r -a patterns <<< "$TEST_PATTERNS"
+          if [ "$GATES" = tests ]; then
+            make python-check PYTHON=python PYTHON_TEST_VERBOSITY=2 \
+              PYTHON_TEST_PATTERN="${patterns[0]}"
+          else
+            make validate PYTHON=python RUFF=ruff PYTHON_TEST_VERBOSITY=2 \
+              PYTHON_TEST_PATTERN="${patterns[0]}"
+          fi
+          for index in "${!patterns[@]}"; do
+            [ "$index" -eq 0 ] && continue
+            make python-check PYTHON=python PYTHON_TEST_VERBOSITY=2 \
+              PYTHON_TEST_PATTERN="${patterns[$index]}" \
+              PYTHON_TEST_CHECKPOINT="$PWD/_build/python-test-checkpoint-$index.json"
+          done
       - name: Verify the installed wheel outside the checkout
-        if: matrix.task == 'conformance'
+        if: matrix.task == 'conformance' && (matrix.gates != 'tests')
         run: make wheel-check PYTHON=python
       - name: Upload the smoke-tested wheel and exact manifest
-        if: matrix.task == 'conformance'
+        if: matrix.task == 'conformance' && (matrix.gates != 'tests')
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: qualified-wheel-${{ matrix.os }}-${{ matrix.python }}
