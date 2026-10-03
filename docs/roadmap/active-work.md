@@ -25836,3 +25836,72 @@ local checkpoint will supply immutable Git authority for its retry. This work
 has not been pushed, published, or installed into a derived project.
 
 ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP adapter/CLI/initialization/templates plus bytecode-cache custody repair), refresh the exact implementation pin through the review command, and refresh documentation authority. Driver identity is now current; all 12 version-authority tests pass through make python-check. Downstream installed framework pins remain unchanged.
+
+- **Post-merge follow-up:** PR #12 merged as `9862b98` after its checks passed,
+  but [merge CI run 36822853564](https://github.com/jordanhubbard/literate-ai/actions/runs/36822853564)
+  failed on Ubuntu/Python 3.11.16: the real-prefix integration test observed
+  `1.0.0` from the relaunched fixture instead of `2.0.0`. The retained CI artifact
+  contains the assertion, not pip's successful-command output or the temporary
+  installed files. Ten isolated Linux/Python 3.11 runs and ten native macOS/Python
+  3.14 runs passed with instrumented real pip and launcher execution. This does
+  not establish a root cause or clear the failed merge qualification. The next
+  diagnostic action is to retain pip output, installed distribution metadata,
+  fixture source and bytecode identity on failure, and reproduce the CI failure
+  before changing updater behavior. No production updater fix is claimed.
+
+### [x] ONBOARD-VIDEO-001 — Feature the continuous onboarding video in the README
+
+- **Priority:** P1
+- **Owner:** root README and onboarding documentation
+- **Direction:** Prominently feature the onboarding video for new users.
+- **Conclusion:** Link the existing public 13:38 film with a preview, chapters and subtitles near the top of the README. Pin public media to its published commit while PR 10 remains unmerged; do not imply a software release or completed audience review.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add a prominent watch section ahead of the architectural overview.
+- **Evidence:**
+  - [x] Verify public media, thumbnail, chapter and subtitle links and check the documentation diff.
+- **Verification:** Commit-pinned MP4, preview PNG and SRT return HTTP 200;
+  GitHub confirms the chapter file at the same published revision. The preview
+  was visually inspected and `git diff --check` passes. This is documentation
+  discoverability, not a claim that draft PR #10 or its framework changes landed.
+
+### [ ] CI-MACOS-001 — Separate macOS PR smoke from full qualification
+
+- **GitHub issue:** [#13](https://github.com/jordanhubbard/literate-ai/issues/13)
+- **Priority:** P0
+- **Owner:** GitHub CI workflow and diagnostic test harness
+- **Direction:** Keep focused macOS installation, launcher, update and native-build PR checks; retain full macOS release-candidate coverage with bounded runs and useful failure evidence.
+- **Conclusion:** Goal 4: separate explicitly named smoke checks from full conformance. Main pushes, release-branch PRs/pushes, version tags and manual qualification retain full macOS coverage. Preserve the existing checkpoint partitions and release gates; do not claim the unexplained self-update failure is fixed.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Separate the workflow profiles, add bounded test steps and retain verbose failure diagnostics.
+  - [x] Extend the approved PR profile to one full Linux suite and focused Windows/macOS native installation checks; consolidate platform-neutral gates and cache dependency downloads.
+  - [x] Bound publication subprocess timeouts at the reviewed policy even when floating-point deadline subtraction rounds upward; add deterministic boundary coverage.
+  - [ ] Measure hosted runtimes and audit redundant mock-heavy tests before further consolidation; a 10–15 minute PR target is not yet demonstrated.
+- **Evidence:**
+  - [x] Workflow regressions prove event gating, full-suite coverage, smoke selection and diagnostics; focused local macOS verification passes.
+  - [ ] Hosted full qualification succeeds before release or closure of issue 13.
+- **Local evidence:** 13 workflow policy regressions and 13 build-identity/update
+  tests pass through `make python-check`. The exact macOS smoke command passes
+  69 tests, including real prefix wheel upgrade/re-execution and native C++
+  compilation/execution. This does not qualify the full matrix or diagnose the
+  earlier Ubuntu update failure. Issue #13 remains open for hosted evidence.
+- **Additional checks:** actionlint 1.7.12 accepts the workflow; strict lint,
+  formatting, documentation rendering (121 diagrams), lifecycle driver and
+  documentation authority checks pass. Documentation tooling retains one
+  existing low-severity advisory below its high-severity failure threshold.
+- **PR-profile refinement:** 14 workflow regressions verify nine PR cells versus
+  fourteen qualification cells, plus the existing four full macOS partitions.
+  Release/main/tag/manual selection retains complete test coverage, while shared
+  documentation gates run in Linux conformance instead of three standalone jobs.
+  pip/npm download caches and bounded pip transport retries do not retry assertions.
+  Independent matrix failures no longer cancel sibling evidence. All 37 publication
+  tests pass, including a deterministic clock reproducing the hosted Windows
+  `120.00000000000006` timeout overshoot. The subprocess budget is capped without
+  relaxing the test assertion or extending the absolute deadline. The runtime and
+  redundant-test audit remain open; no full hosted qualification is claimed.
+- **Migration qualification repair:** Hosted PR run 36873559937 completed the
+  primary Python suite with one failure: the new profile-selection checkout lacked
+  the repository-wide `fetch-depth: 0` requirement. Preserve full history there
+  too; do not weaken the historical-commit test. All other PR execution cells
+  passed. Replacement exact-source CI remains required for normal landing.

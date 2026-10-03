@@ -1,0 +1,114 @@
+[
+  {
+    "task": "skill-evaluation",
+    "name": "Changed skill admission",
+    "os": "ubuntu-latest",
+    "python": "3.13",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "sample-composition",
+    "name": "Sample composition / ubuntu-latest",
+    "os": "ubuntu-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "sample-composition",
+    "name": "Sample composition / macos-latest",
+    "os": "macos-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "sample-composition",
+    "name": "Sample composition / windows-latest",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "conformance",
+    "name": "ubuntu-latest / Python 3.11",
+    "os": "ubuntu-latest",
+    "python": "3.11",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "conformance",
+    "name": "ubuntu-latest / Python 3.14",
+    "os": "ubuntu-latest",
+    "python": "3.14",
+    "group": 0,
+    "pr": false
+  },
+  {
+    "task": "platform-smoke",
+    "name": "macOS / Python 3.14 / PR smoke (not release qualification)",
+    "os": "macos-latest",
+    "python": "3.14",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "windows-gates",
+    "name": "Windows / Python 3.12 / lint, OpenSpec, wheel",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": false
+  },
+  {
+    "task": "windows-tests",
+    "name": "Windows / Python 3.12 / tests (1 of 3)",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 1,
+    "pr": false
+  },
+  {
+    "task": "windows-tests",
+    "name": "Windows / Python 3.12 / tests (2 of 3)",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 2,
+    "pr": false
+  },
+  {
+    "task": "windows-tests",
+    "name": "Windows / Python 3.12 / tests (3 of 3)",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 3,
+    "pr": false
+  },
+  {
+    "task": "cpp-native",
+    "name": "Native C++ library / ubuntu-latest",
+    "os": "ubuntu-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "cpp-native",
+    "name": "Native C++ library / windows-latest",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": true
+  },
+  {
+    "task": "platform-smoke",
+    "name": "Windows / Python 3.12 / PR smoke (not release qualification)",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": true
+  }
+]

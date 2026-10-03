@@ -30,6 +30,19 @@
   bytecode cache during self-update, preventing stale code after equal-size,
   equal-timestamp upgrades while preserving unrelated caches.
 
+- CI: run one full Linux suite plus cross-platform native/install smoke on ordinary
+  PRs, consolidate documentation jobs, cache dependency downloads, and preserve
+  independent failure diagnostics. Full multi-platform release qualification remains
+  required. Publication subprocess timeouts now stay within their reviewed limit
+  even when floating-point deadline arithmetic rounds upward.
+
+- CI: separate focused macOS PR smoke checks from full main/release qualification,
+  bound conformance steps, and retain verbose test names and self-update failure
+  diagnostics. Full release gates remain unchanged.
+
+- Onboarding: feature the continuous narrated video in the README, with a clickable
+  preview, chapters, subtitles, and a public-feedback link.
+
 - Move the canonical repository to
   [jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai): release
   publication, the Homebrew formula, install documentation, and initialized project

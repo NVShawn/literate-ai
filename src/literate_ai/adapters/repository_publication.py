@@ -303,7 +303,9 @@ def _observe_repository_publication(
                 allowed: tuple[int, ...] = (0,),
                 stdout_limit_bytes: int = _STREAM_BYTES,
             ) -> BoundedProcessResult:
-                remaining = expires - clock()
+                # Floating-point addition/subtraction can round a fresh deadline
+                # above its reviewed budget, even with a nondecreasing clock.
+                remaining = min(policy.total_seconds, expires - clock())
                 if remaining <= 0:
                     _fail("timeout", "publication exceeded its total deadline")
                 result = process_runner(
