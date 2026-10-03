@@ -181,7 +181,7 @@ class ExecuteActionTests(unittest.TestCase):
             sys.executable,
             (
                 "-c",
-                "from pathlib import Path; import sys; "
+                "from pathlib import Path; import sys; sys.stdin.buffer.read(); "
                 "sys.stdout.buffer.write(Path('return.json').read_bytes())",
             ),
         )
