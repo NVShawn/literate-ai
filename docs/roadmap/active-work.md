@@ -25783,6 +25783,32 @@ probe failures. No native job from this qualification remains running.
   The long-path assertion, twelve distinct cache memberships, receiver short-root
   assertions, and cleanup assertions remain enabled. Production code is unchanged.
 
+### [ ] RETAINED-PROJECT-001 — Admit retained projects through explicit Standard lifecycle authority
+
+- **Priority:** P0
+- **Owner:** framework lifecycle, retained custody, package and release verification
+- **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
+- **Conclusion:** Preserve original source and release authority while adding typed bounded retained admission and complete Standard execution; no conversion bypass.
+- **Depends on:** Accepted ADR 0048; package providers retain their own qualification
+- **Implementation:**
+  - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
+  - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
+  - [ ] Bind package and release custody to retained origin without conversion advancement
+- **Evidence:**
+  - [ ] Public installed CLI mixed source and binary fixture passes complete build, test, docs and deterministic package lifecycle with repeat, invalidation and relocation checks
+  - [ ] Adversarial stale inputs, unsafe custody, missing stages, substituted artifacts, worker identity drift and authority transfer fail closed; existing modes remain green
+
+Planning foundation: bounded streaming binary manifests and immutable snapshot capture,
+strict action/inventory profiles, and public read-only retained-project planning now
+validate exact Standard distribution, project/Component locks, original conversion
+record, worker/target, SDK/toolchain/dependency closure and original policy inputs.
+`make python-check` passes 23 retained input/planning tests and 33 existing rebuild
+CLI regressions. Execution still fails closed: typed retained runtime/receipt, SBOM,
+package and release consumers and full installed-CLI qualification remain open.
+**Next action:** integrate a distinct retained-origin entry into the existing Standard
+lifecycle owners and share common post-admission gates; do not fabricate generated
+source, generated tests, cache membership or an ordinary regenerative receipt.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).

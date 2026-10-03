@@ -72,6 +72,13 @@ development (2026-09-10):
 
 ## Current work
 
+[Accepted ADR 0048](docs/decisions/0048-retained-project-standard-lifecycle.md)
+([issue #22](https://github.com/jordanhubbard/literate-ai/issues/22)) records a
+retained-project Standard lifecycle admission route under Goals 1, 4 and 6.
+The directing human accepted this design on 2026-10-02. Implementation and full
+qualification remain open under RETAINED-PROJECT-001; conversion and release-authority
+gates remain unchanged.
+
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
 standard package lifecycle. Exact accepted custody, both SBOMs, specifications,
