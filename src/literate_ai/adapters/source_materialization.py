@@ -18,6 +18,7 @@ from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.cache.filesystem import (
     FileSystemSourceCache,
     SourceCacheError,
+    _native_filesystem_path,
 )
 from literate_ai.contracts import (
     AcceptedSourceCacheEntry,
@@ -476,7 +477,9 @@ def capture_accepted_source_cache_archive(
     from literate_ai.cache_directories import resolve_cache_directories
 
     directories = resolve_cache_directories(Path(project_root).resolve(strict=True))
-    cache_root = directories.build_dir / "accepted-source-cache"
+    cache_root = Path(
+        _native_filesystem_path(directories.build_dir / "accepted-source-cache")
+    )
     if not cache_root.is_dir() or cache_root.is_symlink():
         return None
     paths = _cache_paths(cache_root)

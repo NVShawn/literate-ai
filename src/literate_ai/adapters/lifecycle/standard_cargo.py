@@ -11,12 +11,16 @@ import tempfile
 import time
 import tomllib
 from collections.abc import Callable, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 
+from literate_ai._cache_lock import exclusive_cache_lock
+from literate_ai._filesystem import require_safe_directory
 from literate_ai.adapters.builders import BuildError, run_bounded_process
+from literate_ai.adapters.compiler_cache import compiler_cache_session
 from literate_ai.adapters.dependencies import HostDependencyObservation
+from literate_ai.adapters.shared_cache_config import BoundSharedCache
 from literate_ai.application.standard_project_lifecycle import (
     StandardBuildOutput,
     StandardComponentBuildPlan,
@@ -29,6 +33,7 @@ from literate_ai.contracts import (
     CycloneDxBomBinding,
     canonical_identity,
 )
+from literate_ai.diagnostics import redact_secrets
 from literate_ai.storage import canonical_json_bytes
 
 from .standard_local import (
@@ -122,6 +127,9 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         source_trees: LocalSourceTreeRegistry,
         object_root: Path,
         contracts: tuple[ComponentCommandContract, ...],
+        command_phases: tuple[ComponentCommandPhase, ...] = tuple(
+            ComponentCommandPhase
+        ),
         tool_bindings: tuple[LocalComponentToolBinding, ...] = (),
         cargo_targets: tuple[StandardCargoTarget, ...],
         npm_targets: tuple[StandardNpmTarget, ...] = (),
@@ -132,12 +140,14 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         independent_acceptance_oracle: object | None = None,
         browser_driver: object | None = None,
         native_sdk_inputs: object | None = None,
+        shared_cache: BoundSharedCache | None = None,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         super().__init__(
             source_trees=source_trees,
             object_root=object_root,
             contracts=contracts,
+            command_phases=command_phases,
             tool_bindings=tool_bindings,
             npm_targets=npm_targets,
             python_targets=python_targets,
@@ -149,6 +159,7 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
             native_sdk_inputs=native_sdk_inputs,
             clock=clock,
         )
+        self.shared_cache = shared_cache
         self.cargo_targets = {
             item.component_revision.uri: item for item in cargo_targets
         }
@@ -393,6 +404,35 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         contract: ComponentCommandContract,
     ) -> StandardBuildOutput:
         target = self.cargo_targets.get(plan.component_revision.uri)
+        if (
+            self.shared_cache is None
+            or self.shared_cache.compiler_tool is None
+            or target is None
+        ):
+            return self._build_cargo_locked(plan, provider_artifacts, contract)
+        # Rust cache keys include the working directory and Cargo environment.
+        # An exact target owns one stable disposable location across rebuilds.
+        # Cross-process locking prevents one rebuild cleaning another's workspace.
+        with exclusive_cache_lock(
+            self.object_root / ".cargo-locks" / target.identity.digest
+        ):
+            stable = self.object_root / "cargo-work" / target.identity.digest
+            require_safe_directory(stable, allow_missing=True)
+            if stable.exists():
+                shutil.rmtree(stable)
+            return self._build_cargo_locked(
+                plan, provider_artifacts, contract, stable_staging=stable
+            )
+
+    def _build_cargo_locked(
+        self,
+        plan: StandardComponentBuildPlan,
+        provider_artifacts: tuple[ArtifactExport, ...],
+        contract: ComponentCommandContract,
+        *,
+        stable_staging: Path | None = None,
+    ) -> StandardBuildOutput:
+        target = self.cargo_targets.get(plan.component_revision.uri)
         if target is None:
             return super()._build_locked(plan, provider_artifacts, contract)
         declaration = plan.manifest.export_declarations[0]
@@ -449,6 +489,11 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                 "build_plan_identity": plan.identity.uri,
                 "source_tree_identity": plan.request.source_tree_identity.uri,
                 "provider_materials": provider_materials,
+                **(
+                    {"compiler_cache_identity": self.shared_cache.identity.uri}
+                    if self.shared_cache is not None
+                    else {}
+                ),
             }
         )
         artifact = self.object_root / cache_identity.digest
@@ -467,7 +512,13 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                 self.build_cache_hit_seconds += time.monotonic() - started
                 return reused
 
-        staging = Path(tempfile.mkdtemp(prefix="standard-cargo-", dir=self.object_root))
+        if stable_staging is None:
+            staging = Path(
+                tempfile.mkdtemp(prefix="standard-cargo-", dir=self.object_root)
+            )
+        else:
+            staging = stable_staging
+            staging.mkdir(parents=True)
         projection = staging / "projection"
         object_workspace = staging / "objects"
         artifact_workspace = staging / "artifact"
@@ -498,11 +549,13 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                 binding._authority_guard,
             )
 
-            def run(arguments: tuple[str, ...]):
+            def run(arguments: tuple[str, ...], *, cache_environment=None):
                 binding.require_unchanged()
                 environment = self._binding_environment(
                     self._environment(provider_artifacts), cargo_binding
                 )
+                if cache_environment is not None:
+                    environment = dict(cache_environment)
                 try:
                     result = run_bounded_process(
                         (*binding.command, *arguments),
@@ -514,9 +567,19 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                         error_prefix="builder.cargo",
                     )
                 except BuildError as exc:
-                    raise LocalStandardLifecycleError(str(exc)) from exc
+                    raise LocalStandardLifecycleError(
+                        redact_secrets(str(exc), environment)
+                    ) from exc
                 finally:
                     binding.require_unchanged()
+                if self.shared_cache is not None:
+                    token = self.shared_cache.credential()
+                    if token is not None:
+                        result = replace(
+                            result,
+                            stdout=result.stdout.replace(token.encode(), b"<redacted>"),
+                            stderr=result.stderr.replace(token.encode(), b"<redacted>"),
+                        )
                 if result.returncode != 0:
                     raise LocalStandardLifecycleError(
                         f"Cargo command failed ({result.returncode}): "
@@ -586,15 +649,31 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                     "cargo metadata --locked changed the derived Cargo.lock"
                 )
             build_target = ("--lib",) if target.library else ("--bin", target.binary)
-            build = run(
-                (
-                    "build",
-                    "--locked",
-                    "--manifest-path",
-                    str(projected_manifest),
-                    *build_target,
-                )
+            build_arguments = (
+                "build",
+                "--locked",
+                "--manifest-path",
+                str(projected_manifest),
+                *build_target,
             )
+            cache_observation = None
+            if (
+                self.shared_cache is not None
+                and self.shared_cache.compiler_tool is not None
+            ):
+                with compiler_cache_session(
+                    self.shared_cache,
+                    environment=self._binding_environment(
+                        self._environment(provider_artifacts), cargo_binding
+                    ),
+                    workspace=projected_manifest.parent,
+                ) as cache_session:
+                    build = run(
+                        build_arguments, cache_environment=cache_session.environment
+                    )
+                cache_observation = cache_session.observation
+            else:
+                build = run(build_arguments)
             if self._read_bounded(projected_lock, label="built lock") != lock_bytes:
                 raise LocalStandardLifecycleError(
                     "cargo build --locked changed the derived Cargo.lock"
@@ -653,6 +732,11 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                     "metadata": process_identity(metadata, "cargo-metadata"),
                     "build": process_identity(build, "cargo-build"),
                     "target_identity": target.identity.uri,
+                    **(
+                        {"compiler_cache": cache_observation}
+                        if cache_observation is not None
+                        else {}
+                    ),
                 }
             )
             self._cargo_resolution_builds[plan.identity.uri] = evidence

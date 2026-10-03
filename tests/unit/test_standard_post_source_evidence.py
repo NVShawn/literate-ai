@@ -19,6 +19,7 @@ from literate_ai.contracts.standard_post_source_evidence import (
     StandardGeneratedTestCaseEvidence,
     StandardGeneratedTestExecutionEvidence,
 )
+from tests.unit.test_schema_catalog import SchemaCatalog
 
 
 def _identity(label: str) -> ContentIdentity:
@@ -305,6 +306,39 @@ class StandardPostSourceEvidenceTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(ContractValidationError, "counts must equal"):
             replace(evidence.generated_tests, selected_count=2)
+
+    def test_execution_provider_inputs_are_canonical_identity_bound_and_round_trip(
+        self,
+    ):
+        old = _evidence().execution
+        providers = tuple(
+            sorted(
+                (_identity("provider-a"), _identity("provider-b")),
+                key=lambda item: item.uri,
+            )
+        )
+        bound = replace(old, provider_artifact_identities=providers)
+        SchemaCatalog().validate(bound.SCHEMA, bound.to_dict())
+        self.assertNotEqual(bound.identity, old.identity)
+        self.assertEqual(StandardExecutionEvidence.from_dict(bound.to_dict()), bound)
+        self.assertNotEqual(
+            replace(bound, provider_artifact_identities=(_identity("other"),)).identity,
+            bound.identity,
+        )
+        self.assertNotIn("provider_artifact_identities", old.to_dict())
+        self.assertEqual(
+            StandardExecutionEvidence.from_dict(old.to_dict()).identity, old.identity
+        )
+        for invalid in (
+            (providers[0], providers[0]),
+            tuple(reversed(providers)),
+            ("untyped",),
+        ):
+            with (
+                self.subTest(invalid=invalid),
+                self.assertRaises(ContractValidationError),
+            ):
+                replace(old, provider_artifact_identities=invalid)
 
     def test_execution_rejects_root_outside_exact_export_set(self) -> None:
         evidence = _evidence()

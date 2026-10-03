@@ -21,7 +21,9 @@ from literate_ai.contracts._validation import (
     parse_tuple,
     string_value,
 )
+from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.executable_components import (
+    ArtifactAssemblyDependency,
     ArtifactBuildGraph,
     ComponentExecutionPlan,
     PackageFileKind,
@@ -44,7 +46,10 @@ from .artifact_graph import (
     realize_manifest,
 )
 from .packaging import PackageBlobReader, verify_package_result
-from .standard_project_lifecycle import StandardProjectLifecycleResult
+from .standard_project_lifecycle import (
+    StandardNodeLifecycleResult,
+    StandardProjectLifecycleResult,
+)
 
 
 class ReleaseArtifactAssemblyError(ValueError):
@@ -327,6 +332,58 @@ def standard_release_evidence_identities(
     return tuple(sorted(evidence, key=lambda item: item.uri))
 
 
+def plan_standard_assembly_dependencies(
+    execution_plan: ComponentExecutionPlan,
+    results: tuple[StandardNodeLifecycleResult, ...],
+) -> tuple[ArtifactAssemblyDependency, ...]:
+    """Bind late link inputs to locked edges and exact accepted provider results."""
+    if not isinstance(execution_plan, ComponentExecutionPlan) or any(
+        not isinstance(item, StandardNodeLifecycleResult) for item in results
+    ):
+        raise ReleaseArtifactAssemblyError("assembly requires typed plan and results")
+    accepted = {item.component_revision: item for item in results}
+    expected = {item.component_revision for item in execution_plan.generation_plans}
+    if (
+        len(accepted) != len(results)
+        or set(accepted) != expected
+        or any(
+            item.failure_code is not None
+            or item.acceptance_identity is None
+            or not item.exports
+            for item in results
+        )
+    ):
+        raise ReleaseArtifactAssemblyError(
+            "assembly requires every exact accepted Component"
+        )
+    edges = {
+        edge.identity.uri: edge
+        for action in execution_plan.action_plans
+        for edge in action.dependency_edges
+        if edge.kind in {DependencyKind.RUNTIME, DependencyKind.PACKAGING}
+    }
+    bindings = []
+    for edge in edges.values():
+        consumer = accepted[edge.consumer_revision]
+        provider = accepted[edge.provider_revision]
+        if len(bindings) + len(consumer.exports) * len(provider.exports) > 16384:
+            raise ReleaseArtifactAssemblyError(
+                "assembly dependencies exceed 16384 bindings"
+            )
+        for output in consumer.exports:
+            for supplied in provider.exports:
+                bindings.append(
+                    ArtifactAssemblyDependency(
+                        output.identity,
+                        supplied.identity,
+                        edge.kind,
+                        edge.identity,
+                        provider.acceptance_identity,
+                    )
+                )
+    return tuple(sorted(bindings, key=lambda item: item.identity.uri))
+
+
 def create_standard_artifact_build_graph(
     execution_plan: ComponentExecutionPlan,
     lifecycle: StandardProjectLifecycleResult,
@@ -376,6 +433,9 @@ def create_standard_artifact_build_graph(
             build_system_driver_identity=next(iter(drivers)),
             manifests=realized,
             link_roots=root_exports,
+            assembly_dependencies=plan_standard_assembly_dependencies(
+                execution_plan, lifecycle.node_results
+            ),
         )
     except Exception as exc:
         raise ReleaseArtifactAssemblyError(
@@ -642,6 +702,7 @@ def create_standard_release_artifact_set(
 __all__ = [
     "ReleaseArtifactAssemblyError",
     "StandardReleaseDeclaration",
+    "plan_standard_assembly_dependencies",
     "create_standard_artifact_build_graph",
     "create_standard_package_plan",
     "create_standard_release_artifact_set",

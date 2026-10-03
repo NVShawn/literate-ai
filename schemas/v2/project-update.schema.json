@@ -11,8 +11,10 @@
       "properties": {
         "schema": {"const": "urn:literate-ai:schema:v2:project-update-file"},
         "path": {"type": "string", "minLength": 1},
+        "base_text": {"type": "string"},
+        "merged_text": {"type": "string"},
         "classification": {
-          "enum": ["unchanged", "already-current", "upstream-only", "local-only", "conflict", "upstream-added", "preserved-dynamic"]
+          "enum": ["unchanged", "already-current", "upstream-only", "local-only", "conflict", "mergeable", "upstream-added", "preserved-dynamic"]
         },
         "baseline_identity": {"anyOf": [{"$ref": "urn:literate-ai:schema:v1:content-identity"}, {"type": "null"}]},
         "local_identity": {"anyOf": [{"$ref": "urn:literate-ai:schema:v1:content-identity"}, {"type": "null"}]},
@@ -31,6 +33,7 @@
         "apply_supported": {"const": false},
         "project_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
         "baseline_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
+        "update_bases_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
         "previous_origin": {"$ref": "urn:literate-ai:schema:v1:project-initialization-origin"},
         "upstream_origin": {"$ref": "urn:literate-ai:schema:v1:project-initialization-origin"},
         "files": {"type": "array", "items": {"$ref": "urn:literate-ai:schema:v2:project-update-file"}},

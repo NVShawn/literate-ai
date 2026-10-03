@@ -1,6 +1,7 @@
 """Small, versioned contracts that make each Component independently executable."""
 
 from .artifacts import (
+    ARTIFACT_ASSEMBLY_DEPENDENCY_SCHEMA,
     ARTIFACT_BUILD_GRAPH_SCHEMA,
     ARTIFACT_EXPORT_DECLARATION_SCHEMA,
     ARTIFACT_EXPORT_SCHEMA,
@@ -11,6 +12,7 @@ from .artifacts import (
     EXACT_LINK_PLAN_SCHEMA,
     GENERATED_TEXT_TREE_SCHEMA,
     SOURCE_TREE_MANIFEST_SCHEMA,
+    ArtifactAssemblyDependency,
     ArtifactBuildGraph,
     ArtifactExport,
     ArtifactExportDeclaration,
@@ -245,6 +247,7 @@ from .toolchain_closure import (
 )
 
 __all__ = [
+    "ARTIFACT_ASSEMBLY_DEPENDENCY_SCHEMA",
     "ARTIFACT_BUILD_GRAPH_SCHEMA",
     "ARTIFACT_EXPORT_DECLARATION_SCHEMA",
     "ARTIFACT_EXPORT_SCHEMA",
@@ -315,6 +318,7 @@ __all__ = [
     "STANDARD_TOOLCHAIN_CLOSURE_SCHEMA",
     "RELEASE_ARTIFACT_SET_SCHEMA",
     "RELEASE_EVIDENCE_MANIFEST_SCHEMA",
+    "ArtifactAssemblyDependency",
     "ArtifactBuildGraph",
     "ArtifactExport",
     "ArtifactExportDeclaration",

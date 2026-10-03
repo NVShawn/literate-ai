@@ -107,7 +107,10 @@ class UpdateFollowPlanTests(unittest.TestCase):
             with (
                 patch(
                     "literate_ai.cli.project._repository_fetch_provider",
-                    return_value=SimpleNamespace(deadline_evidence={"fixture": True}),
+                    return_value=SimpleNamespace(
+                        deadline_evidence={"fixture": True},
+                        update_blobs=lambda *_args: {},
+                    ),
                 ),
                 patch(
                     "literate_ai.cli.project.resolve_repository_lineage",

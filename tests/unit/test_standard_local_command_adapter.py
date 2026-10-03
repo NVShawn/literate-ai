@@ -14,7 +14,7 @@ import textwrap
 import unittest
 import zipfile
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
@@ -70,7 +70,11 @@ from literate_ai.application.artifact_graph import (
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
+from literate_ai.application.standard_execution_inputs import (
+    plan_standard_execution_inputs,
+)
 from literate_ai.contracts import (
+    ArtifactAssemblyDependency,
     ArtifactExport,
     BlobRef,
     ComponentArtifactExportShape,
@@ -89,6 +93,8 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
+from literate_ai.contracts.capabilities import DependencyKind
+from literate_ai.security import AuthorizationError
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 from tests.unit.test_component_execution_planning import _diamond_lock, _models
 from tests.unit.test_component_node_generation_preparation import _fixture
@@ -649,6 +655,184 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
             ):
                 verify(replace(tests, cases=altered_cases))
 
+    def assert_late_provider_execution(
+        self, ports, execution_plan, plan, exports, recorder
+    ):
+        original_scope = plan_standard_execution_inputs(
+            execution_plan, plan, exports, ()
+        )
+        compiled_identity = plan.identity
+        output_identities = tuple(item.identity for item in exports)
+        payload = b"runtime-output\n"
+        # Supply an admitted provider, as the controller will do after acceptance.
+        for directory in (False, True):
+            with (
+                self.subTest(directory=directory),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                root = Path(temporary)
+                export_path = root / "runtime-provider"
+                if directory:
+                    export_path.mkdir()
+                    artifact = export_path / "entry"
+                else:
+                    artifact = export_path
+                artifact.write_bytes(payload)
+                content = _directory_export_bytes(export_path) if directory else payload
+                provider = replace(
+                    exports[0],
+                    export_id="runtime-provider",
+                    component_revision=_identity("late-runtime-provider"),
+                    blob=replace(
+                        exports[0].blob,
+                        digest=hashlib.sha256(content).hexdigest(),
+                        size=len(content),
+                    ),
+                )
+                dependency = ArtifactAssemblyDependency(
+                    exports[0].identity,
+                    provider.identity,
+                    DependencyKind.RUNTIME,
+                    _identity("admitted-runtime-edge"),
+                    _identity("provider-acceptance"),
+                )
+                scope = replace(original_scope, runtime_dependencies=(dependency,))
+                with (
+                    mock.patch.dict(
+                        ports._exports_by_identity, {provider.identity.uri: provider}
+                    ),
+                    mock.patch.dict(
+                        ports._artifact_paths, {provider.identity.uri: root}
+                    ),
+                    mock.patch.dict(
+                        ports._artifact_blob_paths, {provider.blob.identity: artifact}
+                    ),
+                    mock.patch.dict(
+                        ports._artifact_blob_bytes,
+                        {provider.blob.identity: content} if directory else {},
+                    ),
+                    mock.patch.dict(
+                        ports.provider_environment,
+                        {
+                            provider.export_id: (
+                                "LITAI_TEST_RUNTIME",
+                                artifact.relative_to(root).as_posix(),
+                            )
+                        },
+                    ),
+                ):
+                    execution = ports.execute_scoped(plan, exports, scope, (provider,))
+                    self.assertEqual(
+                        ports.execution_stdout[plan.component_revision.uri],
+                        "runtime-output",
+                    )
+                    self.assertEqual(
+                        execution.provider_artifact_identities, (provider.identity,)
+                    )
+                    self.assert_reopened_execution(recorder, plan, execution)
+                    artifact.write_bytes(b"corrupted-provider\n")
+                    if directory:
+                        # A still-valid cached ZIP must not hide changed live inputs.
+                        self.assertEqual(
+                            ports.read_artifact_blob(provider.blob), content
+                        )
+                    with mock.patch.object(ports, "_run_locked") as launch:
+                        with self.assertRaisesRegex(
+                            LocalStandardLifecycleError, "artifact blob changed"
+                        ):
+                            ports.execute_scoped(plan, exports, scope, (provider,))
+                        launch.assert_not_called()
+        self.assertEqual(plan.identity, compiled_identity)
+        self.assertEqual(tuple(item.identity for item in exports), output_identities)
+        self.assertEqual(plan.provider_artifact_identities, ())
+
+    def assert_scoped_execution(self, ports, execution_plan, plan, exports, recorder):
+        scope = plan_standard_execution_inputs(execution_plan, plan, exports, ())
+        executed = ports.execute_scoped(plan, exports, scope, ())
+        self.assertEqual(executed.execution_authority.input_scope, scope)
+        self.assertEqual(type(executed).from_dict(executed.to_dict()), executed)
+        self.assert_reopened_execution(recorder, plan, executed)
+        # Reopen actual single/multi-entrypoint stdout without another command.
+        expected_stdout = ports.execution_stdout.pop(plan.component_revision.uri)
+        del ports._execution_evidence[executed.identity.uri]
+        with mock.patch.object(
+            ports, "_run_locked", side_effect=AssertionError("controller command")
+        ):
+            self.assertEqual(
+                ports.admit_transferred_execution(
+                    plan=plan,
+                    exports=exports,
+                    evidence=executed,
+                    records=recorder.entries,
+                    admission_guard=lambda: None,
+                    scope=scope,
+                    provider_artifacts=(),
+                ),
+                executed,
+            )
+        self.assertEqual(
+            ports.execution_stdout[plan.component_revision.uri], expected_stdout
+        )
+        authority = executed.execution_authority
+        reader = QualificationEvidenceReader(
+            recorder.entries, max_bytes=5_000_000, max_records=1000
+        )
+        units = executed.entrypoint_evidence or (executed,)
+        for unit in units:
+            process = reader.read_json(unit.observation_identity)
+            self.assertEqual(
+                process["execution_authority_identity"], authority.identity.uri
+            )
+        with mock.patch.object(ports, "_run_locked") as launch:
+            with self.assertRaisesRegex(LocalStandardLifecycleError, "execution scope"):
+                ports.execute_scoped(
+                    plan,
+                    exports,
+                    replace(scope, build_plan_identity=_identity("other-build")),
+                    (),
+                )
+            with self.assertRaisesRegex(LocalStandardLifecycleError, "execution scope"):
+                ports.execute_scoped(plan, exports, scope, exports)
+            expired = replace(
+                authority,
+                grant=replace(
+                    authority.grant,
+                    issued_at=datetime(2020, 1, 1, tzinfo=UTC),
+                    expires_at=datetime(2020, 1, 2, tzinfo=UTC),
+                ),
+            )
+            with mock.patch.object(
+                ports, "authorize_execution_inputs", return_value=expired
+            ):
+                with self.assertRaisesRegex(AuthorizationError, "expired"):
+                    ports.execute_scoped(plan, exports, scope, ())
+            launch.assert_not_called()
+
+        # Expiry during a command prevents successful evidence and the next unit.
+        actual_launch = ports._run_locked
+        before_evidence = set(ports._execution_evidence)
+        with mock.patch.object(
+            ports, "clock", return_value=authority.grant.issued_at
+        ) as clock:
+
+            def expire_after_launch(*args, **kwargs):
+                result = actual_launch(*args, **kwargs)
+                clock.return_value = authority.grant.expires_at + timedelta(seconds=1)
+                return result
+
+            with (
+                mock.patch.object(
+                    ports, "authorize_execution_inputs", return_value=authority
+                ),
+                mock.patch.object(
+                    ports, "_run_locked", side_effect=expire_after_launch
+                ) as launch,
+                self.assertRaisesRegex(AuthorizationError, "expired"),
+            ):
+                ports.execute_scoped(plan, exports, scope, ())
+            self.assertEqual(launch.call_count, 1)
+        self.assertEqual(set(ports._execution_evidence), before_evidence)
+
     def assert_reopened_execution(self, recorder, plan, execution):
         def reader():
             return QualificationEvidenceReader(
@@ -658,8 +842,49 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
         verify_qualification_execution(
             reader(), build_plan_identity=plan.identity, execution=execution
         )
+        if execution.execution_authority is None:
+            with self.assertRaisesRegex(
+                QualificationCaptureError, "execution-provider-mismatch"
+            ):
+                verify_qualification_execution(
+                    reader(),
+                    build_plan_identity=plan.identity,
+                    execution=replace(
+                        execution,
+                        provider_artifact_identities=(
+                            _identity("substituted-provider"),
+                        ),
+                    ),
+                )
+        else:
+            with self.assertRaises(ContractValidationError):
+                replace(
+                    execution,
+                    provider_artifact_identities=(_identity("substituted-provider"),),
+                )
+            with self.assertRaisesRegex(
+                QualificationCaptureError, "execution-authority-mismatch"
+            ):
+                verify_qualification_execution(
+                    reader(),
+                    build_plan_identity=plan.identity,
+                    execution=execution,
+                    expected_execution_plan_identity=_identity(
+                        "different-project-plan"
+                    ),
+                )
         for missing in (
             plan.identity,
+            *(
+                (
+                    execution.execution_authority.identity,
+                    execution.execution_authority.input_scope.identity,
+                    execution.execution_authority.command_contract_identity,
+                    execution.build_evidence_identity,
+                )
+                if execution.execution_authority is not None
+                else ()
+            ),
             execution.observation_identity,
             execution.stdout_identity,
             execution.stderr_identity,
@@ -686,6 +911,7 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                 {"plan_identity": _identity("foreign-plan").uri},
                 {"stdout_identity": _identity("foreign-output").uri},
                 {"accepted": True},
+                {"execution_authority_identity": _identity("foreign-grant").uri},
             ):
                 forged = recorder.remember_json({**original, **changes})
                 with (
@@ -720,6 +946,41 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                         ),
                     )
         else:
+            if execution.execution_authority is not None:
+                units = execution.entrypoint_evidence
+                swapped = tuple(
+                    replace(unit, export_identity=units[-1 - index].export_identity)
+                    for index, unit in enumerate(units)
+                )
+                for unit in swapped:
+                    recorder.remember_json(unit.to_dict())
+                identities = [unit.identity.uri for unit in swapped]
+                forged = replace(
+                    execution,
+                    entrypoint_evidence=swapped,
+                    observation_identity=recorder.remember_json(
+                        {
+                            "schema": (
+                                "literate-ai/multi-entrypoint-execution-observation@1"
+                            ),
+                            "entrypoint_evidence": identities,
+                        }
+                    ),
+                    execution_contract_identity=recorder.remember_json(
+                        {
+                            "schema": (
+                                "literate-ai/multi-entrypoint-execution-contract@1"
+                            ),
+                            "entrypoint_evidence": identities,
+                        }
+                    ),
+                )
+                with self.assertRaisesRegex(
+                    QualificationCaptureError, "execution-command-mismatch"
+                ):
+                    verify_qualification_execution(
+                        reader(), build_plan_identity=plan.identity, execution=forged
+                    )
             original = reader().read_json(execution.stdout_identity)
             changed = dict(original)
             changed[next(iter(changed))] = "foreign output"
@@ -843,6 +1104,8 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                 tool_bindings=(binding,),
             )
             candidate = SimpleNamespace(
+                component_revision=generation_plan.component_revision,
+                component_generation_plan_identity=generation_plan.identity,
                 tree_identity=_identity("consumer-tree"),
                 source_bundle_identity=_identity("consumer-bundle"),
             )
@@ -853,6 +1116,11 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
             materials = ports._provider_materials(
                 (artifact,), consumer_revision=generation_plan.component_revision
             )
+            registered = (
+                dict(ports._intent_artifacts),
+                dict(ports._intent_package_artifacts),
+                dict(ports._library_consumer_bindings),
+            )
             with self.assertRaisesRegex(LocalStandardLifecycleError, "target differs"):
                 ports.create(
                     execution,
@@ -861,6 +1129,14 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                     (replace(artifact, target_identity=_identity("wrong-target")),),
                     (),
                 )
+            self.assertEqual(
+                registered,
+                (
+                    ports._intent_artifacts,
+                    ports._intent_package_artifacts,
+                    ports._library_consumer_bindings,
+                ),
+            )
 
         self.assertEqual(len(exact), 1)
         self.assertEqual(exact[0].artifact_identity, artifact.identity)
@@ -2330,8 +2606,9 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                 (
                     "{tool}",
                     "-c",
-                    "from pathlib import Path; import sys; "
-                    "print((Path(sys.argv[1])/'app').read_text().strip())",
+                    "from pathlib import Path; import os,sys; "
+                    "print(Path(os.environ.get('LITAI_TEST_RUNTIME', "
+                    "str(Path(sys.argv[1])/'app'))).read_text().strip())",
                     "{artifact_root}",
                     "--litai-smoke",
                 ),
@@ -2379,7 +2656,7 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                 tool_bindings=(binding,),
             )
             recorder = QualificationEvidenceRecorder(
-                max_bytes=1_000_000, max_records=200
+                max_bytes=1_000_000, max_records=400
             )
             ports.retain_evidence_with(recorder)
             # This test exercises one exact plan node; validation of complete project
@@ -2423,6 +2700,12 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
             first = ports.build(plan, ())
             test_identity = ports.test(plan, first.exports)
             execution_identity = ports.execute(plan, first.exports)
+            self.assert_late_provider_execution(
+                ports, execution, plan, first.exports, recorder
+            )
+            self.assert_scoped_execution(
+                ports, execution, plan, first.exports, recorder
+            )
             rerun = ports.execution_command(plan, first.exports)
             acceptance = ports.accept(
                 plan, test_identity.identity, execution_identity.identity
@@ -2950,7 +3233,53 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                 ].entrypoint_identity,
             )
             tests = ports.test(plan, first.exports)
+            from literate_ai.adapters.standard_test_admission import (
+                verify_transferred_tests,
+            )
+
+            test_reader = QualificationEvidenceReader(
+                recorder.entries, max_bytes=1_000_000, max_records=300
+            )
+            test_arguments = dict(
+                plan=plan,
+                build=first.evidence,
+                source_custody=registry.evidence(candidate.tree_identity),
+                contract=contract,
+                evidence=tests,
+            )
+            verify_transferred_tests(test_reader, **test_arguments)
+            altered_units = (
+                *contract.entrypoint_contracts[:-1],
+                replace(
+                    contract.entrypoint_contracts[-1], deployment_unit="another-unit"
+                ),
+            )
+            with self.assertRaisesRegex(ValueError, "entrypoint authority"):
+                verify_transferred_tests(
+                    test_reader,
+                    **(
+                        test_arguments
+                        | {
+                            "contract": replace(
+                                contract, entrypoint_contracts=altered_units
+                            )
+                        }
+                    ),
+                )
+            from tests.unit.multi_execute_worker_fixture import (
+                assert_multi_execute_worker,
+            )
+
+            worker_stdout = assert_multi_execute_worker(
+                self, ports, execution, plan, first
+            )
             executed = ports.execute(plan, first.exports)
+            self.assertEqual(
+                worker_stdout, ports.execution_stdout[plan.component_revision.uri]
+            )
+            self.assert_scoped_execution(
+                ports, execution, plan, first.exports, recorder
+            )
             accepted = ports.accept(plan, tests.identity, executed.identity)
             manifest = realize_manifest(plan.manifest, first.exports)
             graph = create_artifact_build_graph(

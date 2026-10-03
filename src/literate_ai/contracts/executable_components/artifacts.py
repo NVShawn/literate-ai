@@ -17,6 +17,7 @@ from .._validation import (
     string_value,
 )
 from ..blobs import BlobRef
+from ..capabilities import DependencyKind
 from ..identity import ContentIdentity, contract_identity
 from ..paths import canonical_relative_posix_path
 from ._common import canonical_identities, identity, portable_name, tuple_value
@@ -35,6 +36,9 @@ ARTIFACT_MATERIALIZATION_PLAN_SCHEMA = (
     "urn:literate-ai:schema:v2:artifact-materialization-plan"
 )
 COMPOSITE_BUILD_REQUEST_SCHEMA = "urn:literate-ai:schema:v2:composite-build-request"
+ARTIFACT_ASSEMBLY_DEPENDENCY_SCHEMA = (
+    "urn:literate-ai:schema:v2:artifact-assembly-dependency"
+)
 ARTIFACT_BUILD_GRAPH_SCHEMA = "urn:literate-ai:schema:v2:artifact-build-graph"
 
 
@@ -1346,12 +1350,87 @@ class CompositeBuildRequest:
 
 
 @dataclass(frozen=True, slots=True)
+class ArtifactAssemblyDependency:
+    """Accepted late input, distinct from immutable compilation provenance."""
+
+    consumer_artifact_identity: ContentIdentity
+    provider_artifact_identity: ContentIdentity
+    dependency_kind: DependencyKind
+    dependency_edge_identity: ContentIdentity
+    provider_acceptance_identity: ContentIdentity
+
+    SCHEMA: ClassVar[str] = ARTIFACT_ASSEMBLY_DEPENDENCY_SCHEMA
+
+    def __post_init__(self) -> None:
+        for name in (
+            "consumer_artifact_identity",
+            "provider_artifact_identity",
+            "dependency_edge_identity",
+            "provider_acceptance_identity",
+        ):
+            identity(getattr(self, name), f"ArtifactAssemblyDependency.{name}")
+        if self.consumer_artifact_identity == self.provider_artifact_identity:
+            fail("ArtifactAssemblyDependency", "must not depend on itself")
+        if not isinstance(
+            self.dependency_kind, DependencyKind
+        ) or self.dependency_kind not in {
+            DependencyKind.RUNTIME,
+            DependencyKind.PACKAGING,
+        }:
+            fail(
+                "ArtifactAssemblyDependency.dependency_kind",
+                "must be runtime or packaging",
+            )
+
+    @property
+    def identity(self) -> ContentIdentity:
+        return contract_identity(self)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "schema": self.SCHEMA,
+            "consumer_artifact_identity": self.consumer_artifact_identity.to_dict(),
+            "provider_artifact_identity": self.provider_artifact_identity.to_dict(),
+            "dependency_kind": self.dependency_kind.value,
+            "dependency_edge_identity": self.dependency_edge_identity.to_dict(),
+            "provider_acceptance_identity": self.provider_acceptance_identity.to_dict(),
+        }
+
+    @classmethod
+    def from_dict(
+        cls, value: Any, *, path: str = "ArtifactAssemblyDependency"
+    ) -> ArtifactAssemblyDependency:
+        names = (
+            "consumer_artifact_identity",
+            "provider_artifact_identity",
+            "dependency_edge_identity",
+            "provider_acceptance_identity",
+        )
+        data = contract_fields(
+            value,
+            path=path,
+            schema_uri=cls.SCHEMA,
+            required=frozenset((*names, "dependency_kind")),
+        )
+        return cls(
+            **{
+                name: ContentIdentity.from_dict(data[name], path=f"{path}.{name}")
+                for name in names
+            },
+            dependency_kind=enum_value(
+                DependencyKind, data["dependency_kind"], f"{path}.dependency_kind"
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class ArtifactBuildGraph:
     """Build-system-neutral graph; driver selection is data, never a default here."""
 
     build_system_driver_identity: ContentIdentity
     manifests: tuple[ComponentBuildManifest, ...]
     link_plans: tuple[ExactLinkPlan, ...]
+    assembly_dependencies: tuple[ArtifactAssemblyDependency, ...] = ()
 
     SCHEMA: ClassVar[str] = ARTIFACT_BUILD_GRAPH_SCHEMA
 
@@ -1397,10 +1476,41 @@ class ArtifactBuildGraph:
                 for item in export.dependency_artifact_identities
             ):
                 fail(
-                    "ArtifactBuildGraph", "artifact dependency is absent from the graph"
+                    "ArtifactBuildGraph",
+                    "artifact dependency is absent from the graph",
                 )
+        dependencies = tuple_value(
+            self.assembly_dependencies, "ArtifactBuildGraph.assembly_dependencies"
+        )
+        if len(dependencies) > 16384:
+            fail(
+                "ArtifactBuildGraph.assembly_dependencies",
+                "must contain at most 16384 values",
+            )
+        if any(
+            not isinstance(item, ArtifactAssemblyDependency) for item in dependencies
+        ):
+            fail(
+                "ArtifactBuildGraph.assembly_dependencies",
+                "must contain ArtifactAssemblyDependency values",
+            )
+        _canonical_by(
+            dependencies,
+            "ArtifactBuildGraph.assembly_dependencies",
+            lambda item: item.identity.uri,
+        )
+        additional: dict[str, set[str]] = {}
+        for dependency in dependencies:
+            consumer = dependency.consumer_artifact_identity.uri
+            provider = dependency.provider_artifact_identity.uri
+            if consumer not in exports or provider not in exports:
+                fail(
+                    "ArtifactBuildGraph.assembly_dependencies",
+                    "assembly endpoint is absent from the graph",
+                )
+            additional.setdefault(consumer, set()).add(provider)
         for export in exports.values():
-            _artifact_closure(export, exports)
+            _artifact_closure(export, exports, additional)
         for manifest in manifests:
             for action in manifest.actions:
                 if any(
@@ -1428,7 +1538,9 @@ class ArtifactBuildGraph:
                     {
                         uri
                         for root in link.resolved_root_artifact_identities
-                        for uri in _artifact_closure(exports[root.uri], exports)
+                        for uri in _artifact_closure(
+                            exports[root.uri], exports, additional
+                        )
                     }
                 )
             )
@@ -1443,12 +1555,17 @@ class ArtifactBuildGraph:
         return contract_identity(self)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        result = {
             "schema": self.SCHEMA,
             "build_system_driver_identity": self.build_system_driver_identity.to_dict(),
             "manifests": [item.to_dict() for item in self.manifests],
             "link_plans": [item.to_dict() for item in self.link_plans],
         }
+        if self.assembly_dependencies:
+            result["assembly_dependencies"] = [
+                item.to_dict() for item in self.assembly_dependencies
+            ]
+        return result
 
     @classmethod
     def from_dict(
@@ -1461,6 +1578,7 @@ class ArtifactBuildGraph:
             required=frozenset(
                 {"build_system_driver_identity", "manifests", "link_plans"}
             ),
+            optional=frozenset({"assembly_dependencies"}),
         )
         return cls(
             build_system_driver_identity=ContentIdentity.from_dict(
@@ -1472,6 +1590,11 @@ class ArtifactBuildGraph:
                 f"{path}.manifests",
                 ComponentBuildManifest.from_dict,
             ),
+            assembly_dependencies=parse_tuple(
+                data.get("assembly_dependencies", []),
+                f"{path}.assembly_dependencies",
+                ArtifactAssemblyDependency.from_dict,
+            ),
             link_plans=parse_tuple(
                 data["link_plans"], f"{path}.link_plans", ExactLinkPlan.from_dict
             ),
@@ -1479,7 +1602,9 @@ class ArtifactBuildGraph:
 
 
 def _artifact_closure(
-    root: ArtifactExport, exports: dict[str, ArtifactExport]
+    root: ArtifactExport,
+    exports: dict[str, ArtifactExport],
+    additional: dict[str, set[str]] | None = None,
 ) -> tuple[str, ...]:
     visiting: set[str] = set()
     visited: set[str] = set()
@@ -1492,6 +1617,8 @@ def _artifact_closure(
         visiting.add(uri)
         for dependency in exports[uri].dependency_artifact_identities:
             visit(dependency.uri)
+        for dependency in (additional or {}).get(uri, ()):
+            visit(dependency)
         visiting.remove(uri)
         visited.add(uri)
 
@@ -1508,6 +1635,7 @@ def authored_asset_identities(
 
 
 __all__ = [
+    "ARTIFACT_ASSEMBLY_DEPENDENCY_SCHEMA",
     "ARTIFACT_BUILD_GRAPH_SCHEMA",
     "ARTIFACT_EXPORT_DECLARATION_SCHEMA",
     "ARTIFACT_EXPORT_SCHEMA",
@@ -1518,6 +1646,7 @@ __all__ = [
     "EXACT_LINK_PLAN_SCHEMA",
     "GENERATED_TEXT_TREE_SCHEMA",
     "SOURCE_TREE_MANIFEST_SCHEMA",
+    "ArtifactAssemblyDependency",
     "ArtifactBuildGraph",
     "ArtifactExport",
     "ArtifactExportDeclaration",

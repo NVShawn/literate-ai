@@ -19,6 +19,8 @@ from literate_ai.adapters.candidate_repair import (
 from literate_ai.adapters.dependencies import HostDependencyObservation
 from literate_ai.adapters.lifecycle import (
     LocalComponentToolBinding,
+    LocalSourceTreeRegistry,
+    LocalStandardLifecycleError,
     RegisteredSourceGenerationRunner,
 )
 from literate_ai.adapters.locked_generation_authority import (
@@ -36,6 +38,7 @@ from literate_ai.adapters.standard_project import (
     StandardProjectPublicationRequest,
     _encoded_toolchain_environment,
     assemble_filesystem_standard_project_runtime,
+    assemble_standard_lifecycle_ports,
     compose_filesystem_standard_lifecycle_checkpoints,
     project_standard_toolchain_closure,
 )
@@ -59,9 +62,12 @@ from literate_ai.contracts import (
     StandardToolchainClosure,
     canonical_identity,
 )
+from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.security import SecurityProfile
+from tests.unit.test_component_execution_planning import _diamond_lock
 from tests.unit.test_component_node_generation_preparation import _budget, _fixture
 from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.unit.test_standard_project_lifecycle import _prepared_execution
 
 
 def _selection() -> CodingCliSelection:
@@ -155,7 +161,8 @@ def _toolchain_closure(execution, contracts, tool_bindings):
             by_revision[edge.provider_revision.uri].artifact_export.export_id
             for action_plan in execution.action_plans
             for edge in action_plan.dependency_edges
-            if edge.semantics.consumed_input is DependencyInputKind.ARTIFACT_EXPORT
+            if edge.semantics.consumed_input
+            in {DependencyInputKind.ARTIFACT_EXPORT, DependencyInputKind.TOOLCHAIN}
         }
     )
     provider_environment = {
@@ -378,6 +385,72 @@ class StandardProjectFactoryTests(unittest.TestCase):
         )
         closure.require_unchanged()
 
+    def test_ports_compose_without_generation_or_application_services(self):
+        _, execution = _fixture()
+        contracts, bindings = _command_contracts(execution)
+        closure = _toolchain_closure(execution, contracts, bindings)
+        registry = LocalSourceTreeRegistry()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with mock.patch(
+                "literate_ai.adapters.standard_project.assemble_standard_project_application_service",
+                side_effect=AssertionError("whole lifecycle assembled"),
+            ):
+                composition = assemble_standard_lifecycle_ports(
+                    object_root=root / "objects",
+                    toolchain_closure=closure,
+                    source_trees=registry,
+                )
+            self.assertIs(composition.ports.source_trees, registry)
+            self.assertIs(composition.toolchain_closure, closure)
+            self.assertEqual(tuple(composition.ports.contracts.values()), contracts)
+            self.assertFalse(
+                (
+                    root / "objects" / ".litai" / "forward-generation-context-cas"
+                ).exists()
+            )
+
+    def test_shared_factory_selects_only_build_execution_bindings(self):
+        _, execution = _fixture()
+        contracts, bindings = _command_contracts(execution)
+        test_tool = LocalComponentToolBinding(sys.executable, ("-I",))
+        execute_tool = LocalComponentToolBinding(sys.executable, ("-B",))
+        contracts = tuple(
+            replace(
+                contract,
+                language_runtime_identity=test_tool.toolchain_identity,
+                tool_bindings=(
+                    contract.tool_binding(ComponentCommandPhase.BUILD),
+                    ComponentCommandToolBinding(
+                        ComponentCommandPhase.TEST, test_tool.toolchain_identity
+                    ),
+                    ComponentCommandToolBinding(
+                        ComponentCommandPhase.EXECUTE, execute_tool.toolchain_identity
+                    ),
+                ),
+            )
+            for contract in contracts
+        )
+        closure = _toolchain_closure(
+            execution, contracts, (*bindings, test_tool, execute_tool)
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            composition = assemble_standard_lifecycle_ports(
+                object_root=Path(temporary),
+                toolchain_closure=closure,
+                source_trees=LocalSourceTreeRegistry(),
+                command_phases=(ComponentCommandPhase.BUILD,),
+            )
+            self.assertEqual(
+                set(composition.ports.tool_bindings),
+                {bindings[0].toolchain_identity.uri},
+            )
+            with self.assertRaisesRegex(LocalStandardLifecycleError, "scope"):
+                composition.ports.test(None, ())
+            with self.assertRaisesRegex(LocalStandardLifecycleError, "scope"):
+                composition.ports.execute(None, ())
+            self.assertIs(composition.toolchain_closure, closure)
+
     def test_runtime_accepts_only_one_coherent_toolchain_authority_path(self) -> None:
         _snapshot, execution = _fixture()
         contracts, tool_bindings = _command_contracts(execution)
@@ -499,6 +572,29 @@ class StandardProjectFactoryTests(unittest.TestCase):
 
         self.assertIn("toolchain-closure-plan-mismatch", mismatched.blockers)
         self.assertIn("toolchain-closure-invalid", drifted.blockers)
+
+    def test_toolchain_dependency_projection_requires_exact_provider_bindings(self):
+        execution, _ = _prepared_execution(
+            _diamond_lock(dependency_kind=DependencyKind.TOOLCHAIN)
+        )
+        contracts, tools = _command_contracts(execution)
+        closure = _toolchain_closure(execution, contracts, tools)
+        expected = {
+            contract.artifact_export.export_id
+            for contract in contracts
+            if contract.component_revision != execution.root_revision
+        }
+        self.assertEqual(set(closure.provider_environment), expected)
+        self.assertTrue(expected)
+        with self.assertRaisesRegex(ValueError, "provider bindings must cover"):
+            project_standard_toolchain_closure(
+                execution,
+                contracts=contracts,
+                tool_bindings=tools,
+                provider_environment={},
+                dependency_observation=closure.dependency_observation,
+                observer_identity=canonical_identity("toolchain-binding-regression"),
+            )
 
     def test_projection_rejects_missing_provider_or_dependency_custody(self) -> None:
         _snapshot, execution = _fixture()

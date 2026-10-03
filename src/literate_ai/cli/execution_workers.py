@@ -539,7 +539,7 @@ def create_execution_dispatch_request(
             ),
             artifact_reference=artifact_reference,
             timeout_seconds=getattr(args, "worker_timeout_seconds", 3600),
-            jobs=getattr(args, "jobs", 1),
+            jobs=1 if getattr(args, "jobs", None) is None else args.jobs,
             model_selector=getattr(args, "model", None),
             verbose=bool(getattr(args, "verbose", False)),
             accepted_source_only=accepted_source_only,

@@ -13,7 +13,7 @@ from .project_initialization import ProjectInitializationOrigin
 PROJECT_UPDATE_FILE_SCHEMA = "urn:literate-ai:schema:v2:project-update-file"
 PROJECT_UPDATE_PLAN_SCHEMA = "urn:literate-ai:schema:v2:project-update-plan"
 PROJECT_UPDATE_LIMITATIONS = (
-    "v1 does not apply filesystem changes",
+    "planning does not apply filesystem changes",
     "dynamic initialized files are preserved and require explicit review",
     "upstream removals outside declared catalog taxonomy cannot be inferred from an "
     "identity-only baseline",
@@ -26,6 +26,7 @@ class ProjectUpdateClassification(StrEnum):
     UPSTREAM_ONLY = "upstream-only"
     LOCAL_ONLY = "local-only"
     CONFLICT = "conflict"
+    MERGEABLE = "mergeable"
     UPSTREAM_ADDED = "upstream-added"
     PRESERVED_DYNAMIC = "preserved-dynamic"
 
@@ -37,6 +38,8 @@ class ProjectUpdateFile:
     baseline_identity: ContentIdentity | None
     local_identity: ContentIdentity | None
     upstream_identity: ContentIdentity | None
+    base_text: str | None = None
+    merged_text: str | None = None
 
     SCHEMA: ClassVar[str] = PROJECT_UPDATE_FILE_SCHEMA
 
@@ -60,12 +63,34 @@ class ProjectUpdateFile:
             if identity is not None and not isinstance(identity, ContentIdentity):
                 raise TypeError("project update file identities must be typed")
 
+        if self.base_text is not None:
+            import hashlib
+
+            if not isinstance(self.base_text, str) or self.baseline_identity is None:
+                raise ValueError("merge base must bind a baseline identity")
+            if (
+                hashlib.sha256(self.base_text.encode()).hexdigest()
+                != self.baseline_identity.digest
+            ):
+                raise ValueError("merge base identity mismatch")
+        if self.classification is ProjectUpdateClassification.MERGEABLE:
+            if self.base_text is None or not isinstance(self.merged_text, str):
+                raise ValueError("mergeable file requires base and result text")
+        elif self.merged_text is not None:
+            raise ValueError("only mergeable files may carry merged text")
+
     @property
     def identity(self) -> ContentIdentity:
         return contract_identity(self)
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **({"base_text": self.base_text} if self.base_text is not None else {}),
+            **(
+                {"merged_text": self.merged_text}
+                if self.merged_text is not None
+                else {}
+            ),
             "schema": self.SCHEMA,
             "path": self.path,
             "classification": self.classification.value,
@@ -94,7 +119,11 @@ class ProjectUpdateFile:
             "local_identity",
             "upstream_identity",
         }
-        if not isinstance(value, dict) or set(value) != fields:
+        if (
+            not isinstance(value, dict)
+            or not fields <= set(value)
+            or set(value) - fields - {"base_text", "merged_text"}
+        ):
             raise ValueError("project update file must have the exact field set")
         if value["schema"] != cls.SCHEMA:
             raise ValueError("project update file schema is unsupported")
@@ -108,6 +137,8 @@ class ProjectUpdateFile:
             optional_identity(value["baseline_identity"]),
             optional_identity(value["local_identity"]),
             optional_identity(value["upstream_identity"]),
+            value.get("base_text"),
+            value.get("merged_text"),
         )
 
 
@@ -118,6 +149,7 @@ class ProjectUpdatePlan:
     previous_origin: ProjectInitializationOrigin
     upstream_origin: ProjectInitializationOrigin
     files: tuple[ProjectUpdateFile, ...]
+    update_bases_identity: ContentIdentity | None = None
 
     SCHEMA: ClassVar[str] = PROJECT_UPDATE_PLAN_SCHEMA
 
@@ -166,6 +198,11 @@ class ProjectUpdatePlan:
 
     def _identity_document(self) -> dict[str, Any]:
         return {
+            **(
+                {"update_bases_identity": self.update_bases_identity.to_dict()}
+                if self.update_bases_identity is not None
+                else {}
+            ),
             "schema": self.SCHEMA,
             "mode": "read-only-plan",
             "apply_supported": False,
@@ -191,7 +228,11 @@ class ProjectUpdatePlan:
             "counts",
             "limitations",
         }
-        if not isinstance(value, dict) or set(value) != fields:
+        if (
+            not isinstance(value, dict)
+            or not fields <= set(value)
+            or set(value) - fields - {"update_bases_identity"}
+        ):
             raise ValueError("project update plan must have the exact field set")
         if (
             value["schema"] != cls.SCHEMA
@@ -206,6 +247,9 @@ class ProjectUpdatePlan:
             ProjectInitializationOrigin.from_dict(value["previous_origin"]),
             ProjectInitializationOrigin.from_dict(value["upstream_origin"]),
             tuple(ProjectUpdateFile.from_dict(item) for item in value["files"]),
+            ContentIdentity.from_dict(value["update_bases_identity"])
+            if "update_bases_identity" in value
+            else None,
         )
         expected = plan.to_dict()
         for derived in ("identity", "counts", "limitations"):

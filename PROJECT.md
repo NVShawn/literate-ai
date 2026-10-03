@@ -78,6 +78,15 @@ and derived projects, repair the public release baseline, and verify bare
 `litai init` from a fresh public installation. Publication remains pending;
 no unqualified snapshot may be tagged merely to unblock onboarding.
 
+WORKER-CLI-001 adds private worker CRUD, independent SSH connectivity tests and
+per-worker probe results under Goals 1 and 4. Local regression passes; native
+Linux/Windows qualification and open-review integration remain in progress.
+
+UPDATE-MERGE-002 completes Goals 1 and 6's missing three-way update path: verified
+baseline custody, clean text merges and explicit reviewed conflict application.
+Focused local tests cover consecutive updates and rollback; hosted and release
+qualification remain pending under [the queue](docs/roadmap/active-work.md).
+
 REFRESH-ABSORBED-001 implements and qualifies attached refresh of absorbed primary
 worktrees under Goals 1 and 4, preserving external shared-branch custody. Focused
 worktree, application and version-authority tests plus installed-wheel smoke
@@ -527,3 +536,14 @@ the goals above:
   fixed, transitive skill-dependency closure fixed for arbitrary-source promotion.
 - Go added as a sixth first-class language Flavor with its own toolchain discovery,
   authorization-gated builder, and portable-application skill.
+
+### Optional local worker provisioning
+
+Static workers in the private workers.json catalog remain sufficient for execution.
+Explicit dynamic provisioning requires a locally configured command and separate
+local enablement, with user-supplied credential environment bindings. The generic
+hook discovers help, submits a bounded versioned request, validates the returned
+SSH descriptor, and registers it privately. Durable request state prevents silent
+repeat allocation and preserves validated responses for registration recovery.
+Provider APIs, resource sizing translation, credential acquisition and remote
+resource deletion belong to the organization command.

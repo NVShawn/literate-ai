@@ -17,6 +17,7 @@ from ._validation import (
 from .executable_components import ArtifactExport
 from .identity import ContentIdentity, contract_identity
 from .sbom import CycloneDxBomBinding, CycloneDxLifecycle
+from .standard_execution_inputs import StandardExecutionAuthority
 
 STANDARD_BUILD_EVIDENCE_SCHEMA = (
     "urn:literate-ai:schema:v2:standard-component-build-evidence"
@@ -806,6 +807,9 @@ class StandardExecutionEvidence:
     outcome: StandardEvidenceOutcome = StandardEvidenceOutcome.PASSED
     entrypoint_evidence: tuple[StandardEntrypointExecutionEvidence, ...] | None = None
 
+    provider_artifact_identities: tuple[ContentIdentity, ...] = ()
+    execution_authority: StandardExecutionAuthority | None = None
+
     SCHEMA: ClassVar[str] = STANDARD_EXECUTION_EVIDENCE_SCHEMA
 
     def __post_init__(self) -> None:
@@ -826,6 +830,25 @@ class StandardExecutionEvidence:
             "StandardExecutionEvidence.export_identities",
             canonical=False,
         )
+        _identity_tuple(
+            self.provider_artifact_identities,
+            "StandardExecutionEvidence.provider_artifact_identities",
+            nonempty=False,
+        )
+        if self.execution_authority is not None:
+            authority = self.execution_authority
+            if (
+                not isinstance(authority, StandardExecutionAuthority)
+                or authority.input_scope.component_revision != self.component_revision
+                or set(authority.input_scope.export_identities)
+                != set(self.export_identities)
+                or authority.input_scope.provider_artifact_identities
+                != self.provider_artifact_identities
+            ):
+                fail(
+                    "StandardExecutionEvidence.execution_authority",
+                    "must bind exact execution inputs",
+                )
         if self.root_export_identity not in self.export_identities:
             fail(
                 "StandardExecutionEvidence.root_export_identity",
@@ -876,6 +899,12 @@ class StandardExecutionEvidence:
             "exit_code": self.exit_code,
             "outcome": self.outcome.value,
         }
+        if self.execution_authority is not None:
+            result["execution_authority"] = self.execution_authority.to_dict()
+        if self.provider_artifact_identities:
+            result["provider_artifact_identities"] = [
+                item.to_dict() for item in self.provider_artifact_identities
+            ]
         if self.entrypoint_evidence is not None:
             result["entrypoint_evidence"] = [
                 item.to_dict() for item in self.entrypoint_evidence
@@ -907,9 +936,22 @@ class StandardExecutionEvidence:
             path=path,
             schema_uri=cls.SCHEMA,
             required=names,
-            optional=frozenset({"entrypoint_evidence"}),
+            optional=frozenset(
+                {
+                    "entrypoint_evidence",
+                    "provider_artifact_identities",
+                    "execution_authority",
+                }
+            ),
         )
         return cls(
+            execution_authority=(
+                StandardExecutionAuthority.from_dict(
+                    data["execution_authority"], path=f"{path}.execution_authority"
+                )
+                if "execution_authority" in data
+                else None
+            ),
             component_revision=ContentIdentity.from_dict(
                 data["component_revision"], path=f"{path}.component_revision"
             ),
@@ -947,6 +989,11 @@ class StandardExecutionEvidence:
             ),
             exit_code=_parse_exit_code(data["exit_code"], f"{path}.exit_code"),
             outcome=_parse_outcome(data["outcome"], f"{path}.outcome"),
+            provider_artifact_identities=parse_tuple(
+                data.get("provider_artifact_identities", []),
+                f"{path}.provider_artifact_identities",
+                ContentIdentity.from_dict,
+            ),
             entrypoint_evidence=(
                 parse_tuple(
                     data["entrypoint_evidence"],

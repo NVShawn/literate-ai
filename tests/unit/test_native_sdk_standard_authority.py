@@ -81,6 +81,7 @@ class NativeSdkStandardAuthorityTests(unittest.TestCase):
             component_lock_identity=self.fixture.snapshot.authority.lock.identity
         )
         self.generation = SimpleNamespace(
+            identity=candidate.component_generation_plan_identity,
             component_revision=self.contract.component_revision,
             direct_generation_edges=(),
         )

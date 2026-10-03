@@ -67,6 +67,14 @@ def _existing(path: Path) -> WorkerHardwareObservationCatalog:
 
 
 def worker_from_args(args: Any) -> tuple[dict[str, object], int]:
+    if args.worker_command in {"provisioner", "provision"}:
+        from .worker_provisioning import provisioning_from_args
+
+        return provisioning_from_args(args)
+    if args.worker_command in {"list", "show", "add", "update", "remove", "test"}:
+        from .worker_registry import registry_from_args
+
+        return registry_from_args(args)
     if args.worker_command == "health":
         from .worker_health import worker_health_from_args
 
@@ -91,12 +99,14 @@ def worker_from_args(args: Any) -> tuple[dict[str, object], int]:
         return _verify_model_from_args(args)
     if args.worker_command != "probe":
         raise CliFailure("cli.usage", "a worker command is required")
+    failures: list[WorkerCapabilityProbeError] = []
     try:
         worker_path = resolve_worker_config_path(explicit=args.worker_config)
         observation_path = resolve_worker_observations_path(explicit=args.output)
         workers = load_execution_worker_catalog(worker_path)
         observed = probe_worker_catalog(
             workers,
+            errors=failures,
             worker_ids=None if args.all else tuple(args.worker_id),
             timeout_seconds=args.timeout_seconds,
         )
@@ -106,15 +116,19 @@ def worker_from_args(args: Any) -> tuple[dict[str, object], int]:
         raise CliFailure(
             getattr(exc, "code", "worker.probe_invalid"),
             getattr(exc, "message", str(exc)),
+            message_limit=8192 if isinstance(exc, WorkerCapabilityProbeError) else 512,
         ) from exc
     replacements = {
         item.worker_id: item for item in _existing(observation_path).workers
     }
+    for failure in failures:
+        replacements.pop(failure.worker_id, None)
     replacements.update({item.worker_id: item for item in observed.workers})
     combined = WorkerHardwareObservationCatalog(
         tuple(replacements[key] for key in sorted(replacements))
     )
-    if not args.dry_run:
+    written = not args.dry_run and bool(observed.workers or observation_path.exists())
+    if written:
         try:
             if args.output is None and not os.environ.get("LITAI_WORKER_OBSERVATIONS"):
                 paths = resolve_user_paths()
@@ -130,10 +144,19 @@ def worker_from_args(args: Any) -> tuple[dict[str, object], int]:
         "worker_catalog_identity": workers.identity.uri,
         "observation_catalog_identity": combined.identity.uri,
         "output": str(observation_path),
-        "written": not args.dry_run,
+        "written": written,
+        "ok": not failures,
+        "failures": [
+            {
+                "worker_id": failure.worker_id,
+                "code": failure.code,
+                "message": failure.message,
+            }
+            for failure in failures
+        ],
         "probed": [item.worker_id for item in observed.workers],
         "workers": [item.to_dict() for item in combined.workers],
-    }, 0
+    }, int(bool(failures))
 
 
 def _resolve_nvidia_from_args(args: Any) -> tuple[dict[str, object], int]:

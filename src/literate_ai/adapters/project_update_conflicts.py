@@ -112,11 +112,17 @@ def framework_conflict_diffs(
         if item.classification is not ProjectUpdateClassification.CONFLICT:
             continue
         diffs.append(
-            conflict_diff_document(
-                item.path,
-                ours=_local_bytes(root, item.path),
-                base=None,
-                theirs=upstream.get(item.path),
+            dict(
+                conflict_diff_document(
+                    item.path,
+                    ours=_local_bytes(root, item.path),
+                    base=None
+                    if item.base_text is None
+                    else item.base_text.encode("utf-8"),
+                    theirs=upstream.get(item.path),
+                ),
+                file_identity=item.identity.to_dict(),
+                base_status="verified" if item.base_text is not None else "unavailable",
             )
         )
     return diffs
@@ -134,11 +140,17 @@ def lineage_conflict_diffs(
             continue
         inherited = upstream.get(item.path)
         diffs.append(
-            conflict_diff_document(
-                item.path,
-                ours=_local_bytes(root, item.path),
-                base=None,
-                theirs=None if inherited is None else inherited.content,
+            dict(
+                conflict_diff_document(
+                    item.path,
+                    ours=_local_bytes(root, item.path),
+                    base=None
+                    if item.base_text is None
+                    else item.base_text.encode("utf-8"),
+                    theirs=None if inherited is None else inherited.content,
+                ),
+                file_identity=item.identity.to_dict(),
+                base_status="verified" if item.base_text is not None else "unavailable",
             )
         )
     return diffs

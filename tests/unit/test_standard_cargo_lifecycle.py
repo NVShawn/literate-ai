@@ -6,8 +6,12 @@ import json
 import sys
 import tempfile
 import unittest
+from contextlib import contextmanager
+from dataclasses import replace
 from pathlib import Path
+from unittest import mock
 
+from literate_ai.adapters.compiler_cache import CompilerCacheSession
 from literate_ai.adapters.lifecycle.standard_cargo import (
     StandardCargoLifecyclePorts,
     StandardCargoTarget,
@@ -18,6 +22,7 @@ from literate_ai.adapters.lifecycle.standard_local import (
     LocalStandardLifecycleError,
     local_generated_source_tree_identity,
 )
+from literate_ai.adapters.shared_cache_config import load_shared_cache
 from literate_ai.contracts import (
     ComponentArtifactExportShape,
     ComponentCommandContract,
@@ -30,6 +35,7 @@ from literate_ai.contracts import (
 )
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.unit.test_shared_cache import _configuration
 from tests.unit.test_standard_local_command_adapter import (
     copy_digest_cache_without_sidecars,
     rewrite_self_authenticating_artifact,
@@ -108,6 +114,7 @@ class StandardCargoLifecycleTests(unittest.TestCase):
         model_lock: bool = False,
         library: bool = False,
         recorder=None,
+        shared_cache=None,
     ):
         snapshot, execution = _fixture()
         generation_plan = execution.generation_plans[0]
@@ -198,6 +205,7 @@ class StandardCargoLifecycleTests(unittest.TestCase):
             contracts=(contract,),
             tool_bindings=(cargo, python),
             cargo_targets=(provisional,),
+            shared_cache=shared_cache,
         )
         if recorder is not None:
             ports.retain_evidence_with(recorder)
@@ -205,6 +213,77 @@ class StandardCargoLifecycleTests(unittest.TestCase):
         index = ports.index(candidate.component_revision, candidate.tree_identity)
         plan = ports.finalize(intent, ports.authorize(intent, index))
         return ports, plan, candidate
+
+    def test_compiler_cache_environment_and_observation_survive_capture(self):
+        from literate_ai.adapters.lifecycle import standard_cargo as module
+        from literate_ai.adapters.qualification_capture import (
+            QualificationEvidenceReader,
+            QualificationEvidenceRecorder,
+            verify_qualification_build,
+        )
+        from literate_ai.contracts.identity import ContentIdentity
+
+        recorder = QualificationEvidenceRecorder(max_bytes=5_000_000, max_records=1000)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            (root / "shared-cache.json").write_text(
+                json.dumps(
+                    _configuration(endpoint=None, credential_reference=None).to_dict()
+                )
+            )
+            binding = load_shared_cache(
+                environment={
+                    "LITAI_CONFIG_DIR": str(root),
+                    "LITAI_CACHE_DIR": str(root / "cache"),
+                }
+            )
+            binding = replace(
+                binding, compiler_tool=LocalComponentToolBinding(sys.executable)
+            )
+            observation = {
+                "schema": "literate-ai/compiler-cache-observation@1",
+                "configuration_identity": binding.identity.uri,
+                "tool_identity": binding.compiler_tool.toolchain_identity.uri,
+                "available": True,
+                "cache_hits": 1,
+                "cache_misses": 0,
+                "compile_requests": 1,
+            }
+
+            @contextmanager
+            def cache_session(_binding, *, environment, workspace):
+                self.assertEqual(_binding.identity, binding.identity)
+                self.assertIn("cargo-work", str(workspace))
+                yield CompilerCacheSession(
+                    dict(environment) | {"RUSTC_WRAPPER": sys.executable}, observation
+                )
+
+            ports, plan, _ = self._system(root, recorder=recorder, shared_cache=binding)
+            with (
+                mock.patch.object(
+                    module, "compiler_cache_session", side_effect=cache_session
+                ),
+                mock.patch.object(
+                    module, "run_bounded_process", wraps=module.run_bounded_process
+                ) as invoked,
+            ):
+                built = ports.build(plan, ())
+            build_call = next(
+                call for call in invoked.call_args_list if "build" in call.args[0]
+            )
+            self.assertEqual(
+                build_call.kwargs["environment"]["RUSTC_WRAPPER"], sys.executable
+            )
+            self.assertEqual(list((ports.object_root / "cargo-work").iterdir()), [])
+        reader = QualificationEvidenceReader(
+            recorder.entries, max_bytes=5_000_000, max_records=1000
+        )
+        verify_qualification_build(reader, plan=plan, build=built.evidence)
+        outer = reader.read_json(built.evidence.build_observation_identity)
+        captured = reader.read_json(
+            ContentIdentity.parse_uri(outer["process_observation_identity"])
+        )
+        self.assertEqual(captured["compiler_cache"], observation)
 
     def test_captured_native_build_reopens_after_all_workspaces_are_removed(self):
         from literate_ai.adapters.qualification_capture import (

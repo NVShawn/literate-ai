@@ -796,7 +796,7 @@ def _standard_rebuild_one_component(
                         runtime_root / "sources",
                         invalidation,
                         update_receipt=update_receipt,
-                        max_parallelism=getattr(args, "jobs", 1),
+                        max_parallelism=getattr(args, "jobs", None),
                         accepted_source_only=getattr(
                             args, "from_accepted_source", False
                         ),

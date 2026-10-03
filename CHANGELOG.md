@@ -33,6 +33,189 @@
   `litai update` now checks for and applies a newer stable release in an enrolled
   prefix before continuing project reconciliation; opt-outs remain effective.
 
+- Bind TEST dispatch to the exact worker, deadline, planned predecessors and
+  BUILD/result handoff before child execution, then re-admit returned evidence.
+  Configured receiver and scheduling integration remain pending.
+
+- Add a supervised TEST child with current grant/deadline checks, cancellation,
+  bounded streams and descendant cleanup, sharing BUILD's process supervision.
+  Configured receiver dispatch and production TEST scheduling remain pending.
+
+- Import worker TEST results through explicit verified return transport, retaining
+  evidence before registration and refusing corrupted records or changed worker
+  authority. Production TEST dispatch remains pending.
+
+- Add a worker TEST operation over verified transferred source and BUILD artifacts,
+  returning bounded evidence tied to the exact handoff. Supervised command/SSH
+  dispatch and production queue integration remain pending.
+
+- Add controller admission for transferred generated-test evidence, checking exact
+  suite, build and entrypoint authority before registration. Worker TEST execution
+  and production dispatch remain pending.
+
+- Remote tool discovery verifies authored command names against a worker's private
+  search environment and rechecks them before reuse. Changed resolution, including
+  a newly shadowing executable, is refused without running the supplied command.
+
+- Make locked-command BUILD export and provider checks reusable from portable
+  records, preserving local refusal before command execution. Remote BUILD
+  execution and artifact transfer remain pending.
+
+- Standard rebuild dispatches AUTHORIZE through the shared admitted worker pool,
+  captures controller time after reserving capacity, and rechecks returned grants
+  against current SDK custody and expiry without local retry or grant renewal.
+
+- Add bounded command-worker AUTHORIZE execution using the controller-selected
+  issuance time and fixed constrained policy. Changed index custody, future/expired
+  grants and payload substitutions are refused; production queue wiring is pending.
+
+- Report hardware probe error codes when no candidate can be observed, preserving
+  healthy-worker admission and excluding raw exception messages from the refusal.
+
+- Construct Standard authorization from explicit intent, index and controller time,
+  preserving the existing grant policy while retaining local SDK admission and
+  evidence recording. AUTHORIZE transport remains pending.
+
+- Retain remote PLAN result evidence before registering local plan or SDK authority;
+  an evidence-store failure leaves registration unchanged and frees worker capacity.
+
+- Command workers can construct build intent from an exact indexed-source handoff
+  and typed provider acceptance records, checking the canonical DAG and bounded
+  predecessor custody. Standard rebuild now dispatches BUILD_INTENT through the
+  shared INDEX/PLAN worker slots, retaining results before local admission and
+  refusing missing provider acceptance evidence without local retry.
+
+- Build-intent admission rechecks current inputs and registers provider bindings
+  only after library validation and required evidence recording succeed. Rejected
+  intents no longer leave partially registered provider state.
+
+- Standard rebuild can finalize plans through admitted command/SSH workers, sharing
+  capacity with source indexing and independently verifying returned plans before
+  local registration. Native Linux and Windows PLAN receiver and SSH checks pass;
+  remaining lifecycle phases and release qualification stay open.
+
+- Construct build intent from exact portable source, command, dependency and SDK
+  inputs, rejecting mismatched candidate and generation-plan bindings. Local source
+  admission, live SDK checks and library-import custody remain enforced.
+
+- Add opt-in local worker provisioning through an organization-owned command, with
+  credential bindings, help discovery, bounded request/response validation, durable
+  duplicate-allocation protection, and registration recovery. Static worker CRUD
+  and SSH tests remain independent of provisioning.
+
+- Windows action dispatch preserves case-insensitive runtime environment names.
+  Capability probes allow up to 60 seconds for native identity checks and startup,
+  while retaining any shorter action deadline and the existing environment allowlist.
+
+- Framework core: local builds no longer wait for packaging-only providers or bind
+  their artifacts into compilation. Final packages still require accepted providers;
+  provider failure prevents publication.
+
+- Framework core: artifact graphs retain explicit runtime and packaging dependencies
+  with locked-edge and provider-acceptance evidence, preserving compiled artifact
+  identities while validating exact package closure.
+
+- Framework core: execution evidence records exact provider artifacts; lifecycle
+  admission and independent evidence reopening reject omitted or substituted inputs.
+
+- Framework core: toolchain dependencies now bind accepted provider exports into
+  consumer build intent, build actions, worker imports, process bindings, and
+  resulting artifact provenance.
+
+- Framework core: consumers of locked public interfaces can build while providers
+  are still running. Artifact consumers retain acceptance barriers, and any failed
+  component still prevents project acceptance and publication.
+
+- Framework core: private action workers can configure an SSH receiver for capability
+  probes and source indexing, using bounded stdin and exact worker/receiver checks.
+
+- Framework core: action plans now bind accepted build/toolchain inputs before build
+  intent and authorization, while preserving runtime and packaging phase overlap.
+
+- Select admitted command indexing from private action-execution configuration,
+  with real health checks, pinned policy custody, and refusal of stale observations
+  or changed configuration. Command-worker hardware probing remains under qualification.
+
+- Bound command-index source reads before publication and after worker execution;
+  reject source growth before retaining qualification evidence.
+
+- Allow the Standard rebuild factory to index through an admitted command-worker
+  pool using verified source evidence custody and an explicit publication CAS;
+  preserve that port through source-cache and checkpoint composition.
+
+- Compose live command-worker phase admission into Standard indexing, checking
+  hardware freshness, source handoff, health evidence, and unchanged runtime
+  capabilities before dispatch and result acceptance. Automatic CLI routing remains
+  under qualification.
+
+- Add opt-in command-worker phase capability probes with exact worker/runtime
+  binding, replay refusal, and unchanged legacy worker identities.
+
+- Add a command-backed Standard generation indexer that publishes verified source,
+  respects admitted worker slots, and retains exact qualification evidence.
+  Automatic CLI routing remains under qualification.
+
+- Let command-worker source indexing fetch missing source blobs from a privately
+  configured HTTP(S) CAS, verifying exact bytes before local publication.
+
+- Execute preplanned source-index actions in a command worker using verified CAS files and
+  disposable source custody. Automatic routing and the remaining worker phases
+  remain under qualification.
+
+- Add a data-only command-worker action protocol with verified records, deadlines,
+  and cancellation. Production phase routing remains under qualification.
+
+- Enforce local shared-artifact expiry and aggregate storage quotas while preserving
+  deduplicated payloads, read-only access, and verified remote fallback.
+
+- Index local consumer source while providers build, then wait for accepted provider
+  exports before creating build intent; preserve completed indexing on cancellation.
+
+- Dispatch local Component build phases separately and recheck authorization when
+  each queued host phase starts, refusing expired grants before execution.
+
+- Repository refresh: validate existing files against their captured physical
+  permissions so group-writable checkouts remain valid while later permission
+  changes still fail custody checks.
+
+- Worker operations: add private catalog list/show/add/update/remove commands with
+  validated atomic writes and stale-identity protection, plus bounded SSH tests
+  that report each selected worker independently. Failed capability probes retain
+  successful peer results and remove stale observations for failed workers.
+
+- Overlap local consumer source generation with provider build work while preserving
+  accepted artifact imports and one shared concurrency limit.
+
+- Make action-DAG plans wait for provider acceptance before consuming build,
+  toolchain, or runtime artifacts, while keeping interface-only generation independent.
+
+- Include the compiler-cache tool's recursive native dependencies in build evidence
+  and cache identity, refusing dependency changes before and after compilation.
+
+- Cache native C++ translation units through sccache while linking each declared
+  executable normally, including Components with multiple entrypoints.
+
+- Run configured Cargo compiler caching through an identity-bound sccache tool
+  and an owned private server, retaining cache counters with build observations.
+
+- Bind private shared-cache configuration into Standard Bazel builds, with
+  temporary credential custody and disposable read-only disk-cache views.
+
+- Preserve bounded, redacted SSH probe diagnostics with the failing worker, exit
+  status, and actionable cause; retain worker identity on invalid observations.
+
+- Start ready Component lifecycles as soon as their own dependencies finish,
+  without waiting for unrelated work in a previous dependency layer.
+
+- Add bounded HTTP shared-artifact transport with immutable publication checks,
+  verified local fallback, and read-only access to writer entries. Production
+  lifecycle integration remains part of the 1.2 qualification program.
+
+- Project updates now merge non-overlapping local and upstream text edits using
+  verified base content, preserve overlays across consecutive updates, and apply
+  explicitly reviewed conflict resolutions with `--apply --resolutions FILE`.
+  Update baselines and files roll back together on validation failure.
+
 - Preserve an adopted project's repository parent selection when signed source
   promotion creates its nested native project. This keeps promotion usable from
   clean public checkouts without relying on unrelated local release tags.

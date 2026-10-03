@@ -529,9 +529,10 @@ class RemoteExecutionTests(unittest.TestCase):
     def test_parallel_build_persists_artifact_and_run_uses_exact_worker_cas(
         self,
     ) -> None:
+        from literate_ai.contracts.capabilities import DependencyKind
         from tests.unit import test_standard_project_lifecycle as lifecycle
 
-        lock = lifecycle._diamond_lock()
+        lock = lifecycle._diamond_lock(dependency_kind=DependencyKind.BUILD)
         execution, requests = lifecycle._prepared_execution(lock)
         nodes = lifecycle._prepared_nodes(execution, requests)
         names = lifecycle._names(lock)
@@ -558,11 +559,9 @@ class RemoteExecutionTests(unittest.TestCase):
             self.assertTrue(result.successful)
             events = {event: index for index, event in enumerate(ports.events)}
             for child in ("pricing", "reporting"):
+                self.assertLess(events[("accept", "money")], events[("intent", child)])
                 self.assertLess(
-                    events[("accept", "money")], events[("generate", child)]
-                )
-                self.assertLess(
-                    events[("accept", child)], events[("generate", "invoice-cli")]
+                    events[("accept", child)], events[("intent", "invoice-cli")]
                 )
             return rebuilt_artifact
 

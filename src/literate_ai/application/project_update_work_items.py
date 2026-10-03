@@ -34,6 +34,12 @@ WORK_ITEM_PREFIX = "UPSTREAM"
 # one decision covers the set, and a queue with sixty mechanical entries is not a queue.
 _GROUPED = (
     (
+        ProjectUpdateClassification.MERGEABLE,
+        "Apply {count} clean three-way update merge(s)",
+        "Verified baseline/local/upstream text merges cleanly. Apply rechecks "
+        "the exact inputs and preserves local edits.",
+    ),
+    (
         ProjectUpdateClassification.UPSTREAM_ADDED,
         "Consider adopting {count} capability file(s) added upstream",
         "Upstream added files this project has never had. Adopting them is optional; "

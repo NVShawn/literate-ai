@@ -230,6 +230,7 @@ class NativeSdkClosureTests(unittest.TestCase):
             fixture.candidate, component_revision=lock.root_revision
         )
         root.generation = SimpleNamespace(
+            identity=root.candidate.component_generation_plan_identity,
             component_revision=lock.root_revision,
             direct_generation_edges=(
                 SimpleNamespace(

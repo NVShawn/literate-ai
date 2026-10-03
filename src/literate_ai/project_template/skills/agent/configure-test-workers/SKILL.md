@@ -11,12 +11,16 @@ Keep worker identities and provisioning policy outside the project repository. L
 Python path adapter choose platform locations; do not construct them from remembered OS
 conventions.
 
-1. Run `litai config paths` in the canonical project. Copy
-   `literate.workers.example.json` to its reported `worker_config` path, or use an
-   explicit absolute `--worker-config` path. For an existing 0.8.x checkout, run
-   `litai config migrate` first and apply only a conflict-free plan.
-2. Replace every example endpoint/workspace pair with the private SSH assignment. Leave
-   unused hardware qualifiers null; pass exact OS/CPU/GPU constraints when known.
+1. Run `litai config paths`, then `litai worker list` to inspect the private
+   catalog. Use `litai worker add`, `show`, `update`, and `remove` for registrations;
+   `--worker-config` selects another absolute catalog. These commands do not
+   provision or destroy VMs. Use `--file` for complete advanced descriptors and
+   `--if-identity` when applying an earlier reviewed catalog change.
+2. Set the SSH endpoint and quoted home-relative workspace (for example
+   `--workspace '~/litai'`), plus exact known OS/CPU/GPU requirements. Use
+   `litai worker test --all` before dispatch; inspect every worker's independent
+   result. Resolve host-key or authentication failures explicitly without disabling
+   verification. A successful SSH test does not establish toolchain readiness.
 3. Copy `literate.test.example.json` to the reported project-scoped `test_config` path,
    or pass another absolute matrix path with `--config`. Select exact worker IDs and one matching platform Flavor;
    never duplicate endpoints, credentials, or provisioning commands in this matrix. The
@@ -29,10 +33,14 @@ conventions.
    `opencode models`); a bare provider alias that only the interactive session resolves
    (e.g. `router/...`) is not necessarily the id a `run` subprocess accepts (it may
    need the full `custom-provider/router/...` form).
-4. If workers are allocated dynamically, invoke the user's private routing skill first.
-   Materialize its assignments as a temporary matrix outside version control, then pass
-   that path explicitly. Never copy the private routing skill, credentials, API keys, or
-   resolved node names into the project.
+4. Static registrations are sufficient; do not provision merely because capacity is
+   missing. Dynamic allocation requires explicit enablement in the user's local
+   configuration, a user-supplied provisioner command, and user-supplied credential
+   bindings. When enabled, inspect that command's `--help` or `help` before using the
+   user's private routing workflow. Keep provider-specific arguments in that workflow;
+   do not invent framework configuration fields or imply that the planned automatic
+   provisioning handoff already exists. Materialize assignments outside version control.
+   Never copy routing commands, credentials, API keys, or resolved nodes into the project.
 5. Run the installed host-tool preflight on each assigned worker before Git acquisition
    or sample execution. Treat coding-agent authentication as a separate readiness gate.
 6. Run `litai worker probe --all` to refresh the reported user-state
@@ -45,3 +53,11 @@ conventions.
 
 The checked-in examples define only synthetic workers and selections. Real worker and
 matrix files are durable user configuration outside the project tree.
+
+For explicitly requested dynamic capacity, use `litai worker provisioner configure`
+with the user's local versioned command configuration, then explicit `enable`.
+Use `command-help` to inspect the organization's adapter and `worker provision`
+with a stable request ID. Static workers never require this setup. On failure,
+inspect `provisioner status`; use `recover` only for a saved validated response,
+without launching again. Never bake organization commands or credentials into
+framework code or project configuration.

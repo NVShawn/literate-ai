@@ -182,6 +182,13 @@
         "stdout_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
         "stderr_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
         "exit_code": {"const": 0},
+        "execution_authority": {"$ref": "urn:literate-ai:schema:v2:standard-execution-authority"},
+        "provider_artifact_identities": {
+          "type": "array",
+          "maxItems": 16384,
+          "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
         "entrypoint_evidence": {
           "type": "array",
           "minItems": 2,

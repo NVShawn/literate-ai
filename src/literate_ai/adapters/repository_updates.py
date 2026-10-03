@@ -297,7 +297,9 @@ class FilesystemRepositoryUpdateAdapter:
         *,
         lineage_resolver: RepositoryLineageResolver = _default_lineage_resolver,
         catalog_planner: RepositoryCatalogPlanner = _default_catalog_planner,
+        base_reader=None,
     ) -> None:
+        self._base_reader = base_reader
         self._lineage_resolver = lineage_resolver
         self._catalog_planner = catalog_planner
 
@@ -356,7 +358,12 @@ class FilesystemRepositoryUpdateAdapter:
                 "repository_update.resolution_invalid",
                 "repository update resolution returned inconsistent evidence",
             )
+        from .project_updates import _local_bytes
+        from .update_merge import UpdateBases, enrich_merge, recover_bases
+
+        bases = UpdateBases(project.root)
         baseline = _previous_inherited_files(project.root, previous)
+        baseline.update(bases.identities("catalog"))
         upstream = _prospective_files(catalogs)
         paths = tuple(sorted(set(baseline) | set(upstream)))
         local = {path: _local_identity(project.root, path) for path in paths}
@@ -379,6 +386,19 @@ class FilesystemRepositoryUpdateAdapter:
             )
             for path in paths
         )
+        recover_bases(project.root, files, bases, self._base_reader)
+        prospective_content = _prospective_content(catalogs)
+        files = tuple(
+            enrich_merge(
+                item,
+                bases.get(item.baseline_identity),
+                _local_bytes(project.root, item.path),
+                prospective_content[item.path].content
+                if item.path in prospective_content
+                else None,
+            )
+            for item in files
+        )
         return PlannedRepositoryLineageUpdate(
             RepositoryLineageUpdatePlan(
                 project.definition.identity,
@@ -398,6 +418,7 @@ class FilesystemRepositoryUpdateAdapter:
         take_upstream: frozenset[str] = frozenset(),
         keep_local: frozenset[str] = frozenset(),
         finalizer: Callable[[Path], object] | None = None,
+        resolutions: dict | None = None,
     ) -> AppliedRepositoryLineageUpdate:
         """Apply safe inherited deltas and one optional final transaction stage."""
 
@@ -429,6 +450,24 @@ class FilesystemRepositoryUpdateAdapter:
                 "repository_update.project_changed",
                 "project authority changed after repository update planning",
             )
+        from .update_merge import UpdateBases, resolution_content
+
+        resolutions = resolutions or {}
+        bases = UpdateBases(project.root)
+        bases.remember_catalog(
+            tuple(
+                imported
+                for imported in CatalogImportsFile.load(project.root).imports
+                if _source_belongs_to_lineage(
+                    imported.source, planned.contract.previous_lineage
+                )
+            )
+        )
+        write_content = {}
+        if set(resolutions) - {item.path for item in planned.contract.files}:
+            raise RepositoryUpdateError(
+                "project.update_resolution_invalid", "unknown resolution path"
+            )
         content = _prospective_content(planned.catalogs)
         conflict_paths = frozenset(
             item.path
@@ -459,7 +498,11 @@ class FilesystemRepositoryUpdateAdapter:
             item
             for item in planned.contract.files
             if (
-                item.classification is ProjectUpdateClassification.UPSTREAM_ONLY
+                item.classification
+                in (
+                    ProjectUpdateClassification.UPSTREAM_ONLY,
+                    ProjectUpdateClassification.MERGEABLE,
+                )
                 and item.path not in keep_local
             )
             or (
@@ -467,6 +510,7 @@ class FilesystemRepositoryUpdateAdapter:
                 and item.classification is ProjectUpdateClassification.UPSTREAM_ADDED
             )
             or item.path in take_upstream
+            or item.path in resolutions
         )
         snapshots: dict[str, tuple[bytes | None, int | None]] = {}
         for item in selected_files:
@@ -503,6 +547,12 @@ class FilesystemRepositoryUpdateAdapter:
                     "repository_update.local_changed",
                     f"local inherited path changed after planning: {item.path}",
                 )
+            write_content[item.path] = resolution_content(
+                item,
+                observed,
+                None if inherited is None else inherited.content,
+                resolutions,
+            )
             snapshots[item.path] = (
                 observed,
                 stat.S_IMODE(target.stat().st_mode) if target.is_file() else None,
@@ -517,7 +567,12 @@ class FilesystemRepositoryUpdateAdapter:
                 excluded_paths=frozenset(
                     item.path
                     for item in planned.contract.files
-                    if item not in selected_files
+                    if (
+                        item.classification is ProjectUpdateClassification.MERGEABLE
+                        or item.path in resolutions
+                        and resolutions[item.path]["decision"] != "take-upstream"
+                    )
+                    or item not in selected_files
                     and item.classification
                     not in (
                         ProjectUpdateClassification.UNCHANGED,
@@ -540,17 +595,29 @@ class FilesystemRepositoryUpdateAdapter:
         try:
             for item in selected_files:
                 target = _project_path(project.root, item.path)
-                if item.upstream_identity is None:
-                    target.unlink()
+                if write_content[item.path] is None:
+                    target.unlink(missing_ok=True)
                 else:
                     parent = target.parent
                     while parent != project.root and not parent.exists():
                         created_directories.add(parent)
                         parent = parent.parent
                     inherited = content[item.path]
-                    _write_exact(target, inherited.content)
+                    _write_exact(target, write_content[item.path])
                     if os.name != "nt":
-                        os.chmod(target, 0o755 if inherited.executable else 0o644)
+                        mode = snapshots[item.path][1]
+                        preserve = (
+                            item.classification is ProjectUpdateClassification.MERGEABLE
+                            or item.path in resolutions
+                        )
+                        os.chmod(
+                            target,
+                            mode
+                            if preserve and mode is not None
+                            else 0o755
+                            if inherited.executable
+                            else 0o644,
+                        )
                 written.append(item.path)
             if imports_bytes != previous_imports:
                 _write_exact(imports_path, imports_bytes)
@@ -563,6 +630,25 @@ class FilesystemRepositoryUpdateAdapter:
                 expected_lineage_identity=planned.contract.previous_lineage.identity,
             )
             lineage_replaced = True
+            for item in planned.contract.files:
+                if item in selected_files or item.classification in (
+                    ProjectUpdateClassification.UNCHANGED,
+                    ProjectUpdateClassification.ALREADY_CURRENT,
+                ):
+                    inherited = content.get(item.path)
+                    bases.advance(
+                        "catalog",
+                        item.path,
+                        None if inherited is None else inherited.content,
+                    )
+            for imported in catalog_imports_for_plan(planned.catalogs).imports:
+                for file in imported.files:
+                    if any(
+                        item.path == file.path and item in selected_files
+                        for item in planned.contract.files
+                    ):
+                        bases.sources[file.path] = imported.source.ref
+            bases.write()
             if finalizer is None:
                 validate_project(
                     project.root,
@@ -572,6 +658,7 @@ class FilesystemRepositoryUpdateAdapter:
             else:
                 finalizer(project.root)
         except Exception as exc:
+            bases.rollback()
             if lineage_replaced:
                 try:
                     store.replace(
@@ -643,7 +730,11 @@ class FilesystemRepositoryUpdateAdapter:
                 sorted(
                     item.path
                     for item in selected_files
-                    if item.classification is ProjectUpdateClassification.UPSTREAM_ONLY
+                    if item.classification
+                    in (
+                        ProjectUpdateClassification.UPSTREAM_ONLY,
+                        ProjectUpdateClassification.MERGEABLE,
+                    )
                 )
             ),
             tuple(

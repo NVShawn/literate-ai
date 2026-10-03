@@ -23,6 +23,9 @@ from literate_ai.application.source_generation_scheduling import (
     schedule_source_generation_executions,
     validate_prepared_component_generation_node,
 )
+from literate_ai.application.standard_lifecycle_ports import (
+    AdmittedBuildIntentDispatcher,
+)
 from literate_ai.application.standard_project_lifecycle import (
     AcceptedSourceCachePublisher,
     BuildAuthorizer,
@@ -311,6 +314,9 @@ def assemble_standard_project_application_service(
     ports: StandardProjectLifecyclePorts,
     generator: ComponentSourceGenerationRunner,
     indexer: GenerationIndexer | None = None,
+    authorizer: BuildAuthorizer | None = None,
+    build_plan_finalizer: ComponentBuildPlanFinalizer | None = None,
+    build_intent_dispatcher: AdmittedBuildIntentDispatcher | None = None,
     source_cache_publisher: AcceptedSourceCachePublisher | None = None,
     checkpoint_recorder: StandardLifecycleCheckpointRecorder | None = None,
     context_evidence_recorder: StandardContextEvidenceRecorder | None = None,
@@ -323,10 +329,13 @@ def assemble_standard_project_application_service(
         StandardProjectLifecycleService(
             validator=ports,
             build_intent_factory=ports,
-            build_plan_finalizer=ports,
+            build_intent_dispatcher=build_intent_dispatcher,
+            build_plan_finalizer=ports
+            if build_plan_finalizer is None
+            else build_plan_finalizer,
             generator=generator,
             indexer=ports if indexer is None else indexer,
-            authorizer=ports,
+            authorizer=ports if authorizer is None else authorizer,
             builder=ports,
             tester=ports,
             executor=ports,

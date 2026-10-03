@@ -16,7 +16,9 @@ from literate_ai.application.artifact_graph import (
 )
 from literate_ai.contracts._validation import ContractValidationError
 from literate_ai.contracts.blobs import BlobRef
+from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.executable_components.artifacts import (
+    ArtifactAssemblyDependency,
     ArtifactBuildGraph,
     ArtifactExport,
     ArtifactMaterializationPlan,
@@ -31,6 +33,7 @@ from literate_ai.contracts.executable_components.artifacts import (
 )
 from literate_ai.contracts.executable_components.assets import AuthoredBinaryAsset
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
+from tests.unit.test_schema_catalog import SchemaCatalog
 
 
 def identity(label: str) -> ContentIdentity:
@@ -214,6 +217,105 @@ class ArtifactGraphTests(unittest.TestCase):
             self.manifest(common),
         )
 
+    def test_late_assembly_dependencies_preserve_compilation_and_expand_closure(self):
+        app, runtime, resource = (
+            self.export(name) for name in ("app", "runtime", "resource")
+        )
+        manifests = tuple(self.manifest(item) for item in (app, runtime, resource))
+        edges = (
+            ArtifactAssemblyDependency(
+                app.identity,
+                runtime.identity,
+                DependencyKind.RUNTIME,
+                identity("runtime-edge"),
+                identity("runtime-acceptance"),
+            ),
+            ArtifactAssemblyDependency(
+                runtime.identity,
+                resource.identity,
+                DependencyKind.PACKAGING,
+                identity("package-edge"),
+                identity("resource-acceptance"),
+            ),
+        )
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=self.driver,
+            manifests=manifests,
+            link_roots=(app.identity,),
+            assembly_dependencies=edges,
+        )
+        self.assertEqual(
+            set(graph.link_plans[0].ordered_artifact_identities),
+            {app.identity, runtime.identity, resource.identity},
+        )
+        self.assertEqual(
+            graph.link_plans[0].resolved_root_artifact_identities, (app.identity,)
+        )
+        self.assertEqual(set(graph.manifests), set(manifests))
+        self.assertFalse(app.dependency_artifact_identities)
+        self.assertEqual(ArtifactBuildGraph.from_dict(graph.to_dict()), graph)
+        SchemaCatalog().validate(graph.SCHEMA, graph.to_dict())
+        for edge in edges:
+            SchemaCatalog().validate(edge.SCHEMA, edge.to_dict())
+        for kind in (DependencyKind.BUILD, DependencyKind.DEPLOYMENT):
+            with self.subTest(kind=kind), self.assertRaises(ContractValidationError):
+                replace(edges[0], dependency_kind=kind)
+        changed = tuple(
+            sorted(
+                (
+                    replace(
+                        edges[0],
+                        provider_acceptance_identity=identity("other-acceptance"),
+                    ),
+                    edges[1],
+                ),
+                key=lambda item: item.identity.uri,
+            )
+        )
+        self.assertNotEqual(
+            replace(graph, assembly_dependencies=changed).identity, graph.identity
+        )
+        reordered = create_artifact_build_graph(
+            build_system_driver_identity=self.driver,
+            manifests=reversed(manifests),
+            link_roots=(app.identity,),
+            assembly_dependencies=reversed(edges),
+        )
+        self.assertEqual(graph.identity, reordered.identity)
+        with self.assertRaisesRegex(ContractValidationError, "exact artifact closure"):
+            replace(
+                graph,
+                link_plans=(
+                    replace(
+                        graph.link_plans[0], ordered_artifact_identities=(app.identity,)
+                    ),
+                ),
+            )
+        for invalid in (
+            (edges[0], edges[0]),
+            (replace(edges[0], provider_artifact_identity=identity("absent")),),
+            (
+                *edges,
+                ArtifactAssemblyDependency(
+                    resource.identity,
+                    app.identity,
+                    DependencyKind.RUNTIME,
+                    identity("cycle-edge"),
+                    identity("app-acceptance"),
+                ),
+            ),
+        ):
+            with (
+                self.subTest(invalid=invalid),
+                self.assertRaises((ArtifactAssemblyError, ContractValidationError)),
+            ):
+                create_artifact_build_graph(
+                    build_system_driver_identity=self.driver,
+                    manifests=manifests,
+                    link_roots=(app.identity,),
+                    assembly_dependencies=invalid,
+                )
+
     def test_diamond_link_plan_is_exact_deduplicated_and_deterministic(self) -> None:
         manifests = self.diamond()
         app = manifests[0].exports[0]
@@ -228,6 +330,7 @@ class ArtifactGraphTests(unittest.TestCase):
             link_roots=(app.identity,),
         )
         self.assertEqual(graph.identity, reordered.identity)
+        self.assertNotIn("assembly_dependencies", graph.to_dict())
         self.assertEqual(len(graph.link_plans[0].ordered_artifact_identities), 4)
         self.assertEqual(len(set(graph.link_plans[0].ordered_artifact_identities)), 4)
         self.assertEqual(ArtifactBuildGraph.from_dict(graph.to_dict()), graph)
@@ -365,6 +468,15 @@ class ArtifactGraphTests(unittest.TestCase):
                     (replace(action, **{field: value}),),
                     (export,),
                 )
+
+    def test_unrealized_action_dependency_requires_graph_custody(self):
+        absent = self.export("absent")
+        root = self.export("root", (absent,))
+        manifest = replace(self.manifest(root, (absent,)), exports=())
+        with self.assertRaisesRegex(
+            ContractValidationError, "action dependency is absent"
+        ):
+            ArtifactBuildGraph(self.driver, (manifest,), ())
 
     def test_missing_dependency_fails_and_driver_is_not_hardcoded(self) -> None:
         absent = self.export("absent")

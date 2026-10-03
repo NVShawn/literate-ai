@@ -244,6 +244,85 @@ class FilesystemStandardRebuildAdapterTests(unittest.TestCase):
             (revision,),
         )
 
+    def test_automatic_parallelism_uses_admitted_slots_and_explicit_jobs_caps_them(
+        self,
+    ):
+        from literate_ai.adapters.action_admission import CommandActionWorkerPool
+        from literate_ai.adapters.action_dispatch_wire import ActionWireError
+
+        planned = PlannedStandardProject(
+            SimpleNamespace(require_unchanged=lambda: None),
+            SimpleNamespace(identity=_identity("execution-plan")),
+        )
+        for requested, slots, expected in (
+            (None, None, 1),
+            (3, None, 3),
+            (None, (2, 3), 5),
+            (2, (2, 3), 2),
+            (12, (2, 3), 5),
+            (None, (2, 3), "expired"),
+        ):
+            with self.subTest(requested=requested, slots=slots):
+                pool = None
+                if slots is not None:
+                    pool = mock.Mock(spec=CommandActionWorkerPool)
+                    pool.workers = tuple(
+                        SimpleNamespace(slots=count) for count in slots
+                    )
+                    pool.deadline = mock.Mock()
+                    pool.identity = _identity("admitted-pool")
+                    if expected == "expired":
+                        pool.deadline.remaining.side_effect = ActionWireError(
+                            "action_wire.expired", "admission expired"
+                        )
+                adapter = FilesystemStandardRebuildAdapter(
+                    project=self.project,
+                    binding=self.binding,
+                    runtime=self.runtime,
+                    source_cache_configuration=self.source_cache_configuration,
+                    authority_validator=lambda _root: _identity("project-authority"),
+                    action_workers=pool,
+                )
+                with (
+                    mock.patch.object(
+                        FilesystemStandardProjectRuntime, "plan", return_value=planned
+                    ),
+                    mock.patch.object(
+                        FilesystemStandardProjectRuntime,
+                        "production_readiness",
+                        return_value=StandardProjectRuntimeReadiness(True, ()),
+                    ),
+                    mock.patch.object(
+                        FilesystemStandardProjectRuntime,
+                        "execute",
+                        side_effect=RuntimeError("captured execution"),
+                    ) as execute,
+                    self.assertRaisesRegex(
+                        FilesystemStandardRebuildError
+                        if expected == "expired"
+                        else RuntimeError,
+                        "admission expired"
+                        if expected == "expired"
+                        else "captured execution",
+                    ),
+                ):
+                    adapter.rebuild(
+                        FilesystemStandardRebuildRequest(
+                            self.prepared,
+                            self.source_root,
+                            self.invalidation,
+                            max_parallelism=requested,
+                        )
+                    )
+                if expected == "expired":
+                    execute.assert_not_called()
+                else:
+                    self.assertEqual(
+                        execute.call_args.args[1].max_parallelism, expected
+                    )
+                if pool is not None:
+                    pool.deadline.remaining.assert_called_once_with()
+
     def test_direct_adapter_guards_authority_executes_and_projects_receipt(self):
         planned = PlannedStandardProject(
             SimpleNamespace(require_unchanged=lambda: None),

@@ -149,13 +149,13 @@ class FileSystemSourceCache:
         self.available = candidate.exists()
         if not self.available and not writable:
             self.root = candidate
-            self.entries = self.root / "entries" / "sha256"
-            self.keys = self.root / "keys" / "sha256"
-            self.intelligence = self.root / "intelligence" / "sha256"
+            self.entries = self._io_root / "entries" / "sha256"
+            self.keys = self._io_root / "keys" / "sha256"
+            self.intelligence = self._io_root / "intelligence" / "sha256"
             self.intelligence_by_source = (
-                self.root / "intelligence-by-source" / "sha256"
+                self._io_root / "intelligence-by-source" / "sha256"
             )
-            self.staging = self.root / "staging"
+            self.staging = self._io_root / "staging"
             self.cas: FileSystemCAS | None = None
             return
         self.root = (
@@ -164,11 +164,13 @@ class FileSystemSourceCache:
             else _open_managed_root(candidate, protected_paths=protected_paths)
         )
         self.available = True
-        self.entries = self.root / "entries" / "sha256"
-        self.keys = self.root / "keys" / "sha256"
-        self.intelligence = self.root / "intelligence" / "sha256"
-        self.intelligence_by_source = self.root / "intelligence-by-source" / "sha256"
-        self.staging = self.root / "staging"
+        self.entries = self._io_root / "entries" / "sha256"
+        self.keys = self._io_root / "keys" / "sha256"
+        self.intelligence = self._io_root / "intelligence" / "sha256"
+        self.intelligence_by_source = (
+            self._io_root / "intelligence-by-source" / "sha256"
+        )
+        self.staging = self._io_root / "staging"
         format_bytes = canonical_json_bytes(
             {"schema": _LAYOUT_SCHEMA, "format": "filesystem-v2"}
         )
@@ -184,12 +186,12 @@ class FileSystemSourceCache:
                 directory.mkdir(mode=0o700, parents=True, exist_ok=True)
                 self._require_directory(directory)
             self.cas = FileSystemCAS(self.root / "cas")
-            self._publish_immutable_bytes(self.root / "format.json", format_bytes)
+            self._publish_immutable_bytes(self._io_root / "format.json", format_bytes)
             return
 
         if (
             _read_regular_file(
-                self.root / "format.json",
+                self._io_root / "format.json",
                 maximum_bytes=4096,
                 code="source-cache.layout-invalid",
             )
@@ -204,7 +206,7 @@ class FileSystemSourceCache:
             self.keys.parent,
             self.intelligence.parent,
             self.intelligence_by_source.parent,
-            self.root / "cas",
+            self._io_root / "cas",
         )
         if not any(path.exists() or path.is_symlink() for path in namespace_roots):
             # Git cannot preserve the empty directories created by a writable cache.
@@ -968,7 +970,13 @@ class FileSystemSourceCache:
         finally:
             temporary.unlink(missing_ok=True)
 
+    @property
+    def _io_root(self) -> Path:
+        """Keep configured roots stable while native operations share one namespace."""
+        return Path(_native_filesystem_path(self.root))
+
     def _require_directory(self, directory: Path) -> None:
+        directory = Path(_native_filesystem_path(directory.absolute()))
         if directory.is_symlink() or not directory.is_dir():
             raise SourceCacheError(
                 "source-cache.path-unsafe",
@@ -981,7 +989,7 @@ class FileSystemSourceCache:
                 "source-cache.path-unsafe",
                 f"managed cache path is unavailable: {directory}",
             ) from exc
-        if resolved != self.root and not resolved.is_relative_to(self.root):
+        if resolved != self._io_root and not resolved.is_relative_to(self._io_root):
             raise SourceCacheError(
                 "source-cache.path-unsafe",
                 f"managed cache path escaped its root: {directory}",
@@ -1014,20 +1022,24 @@ class LegacyFileSystemV1SourceCache(FileSystemSourceCache):
         candidate = _candidate_root(root, protected_paths=protected_paths)
         self.available = candidate.exists()
         self.root = candidate
-        self.entries = self.root / "entries" / "sha256"
-        self.keys = self.root / "keys" / "sha256"
-        self.intelligence = self.root / "intelligence" / "sha256"
-        self.intelligence_by_source = self.root / "intelligence-by-source" / "sha256"
-        self.staging = self.root / "staging"
+        self.entries = self._io_root / "entries" / "sha256"
+        self.keys = self._io_root / "keys" / "sha256"
+        self.intelligence = self._io_root / "intelligence" / "sha256"
+        self.intelligence_by_source = (
+            self._io_root / "intelligence-by-source" / "sha256"
+        )
+        self.staging = self._io_root / "staging"
         self.cas: FileSystemCAS | None = None
         if not self.available:
             return
         self.root = _open_managed_root(candidate, protected_paths=protected_paths)
-        self.entries = self.root / "entries" / "sha256"
-        self.keys = self.root / "keys" / "sha256"
-        self.intelligence = self.root / "intelligence" / "sha256"
-        self.intelligence_by_source = self.root / "intelligence-by-source" / "sha256"
-        self.staging = self.root / "staging"
+        self.entries = self._io_root / "entries" / "sha256"
+        self.keys = self._io_root / "keys" / "sha256"
+        self.intelligence = self._io_root / "intelligence" / "sha256"
+        self.intelligence_by_source = (
+            self._io_root / "intelligence-by-source" / "sha256"
+        )
+        self.staging = self._io_root / "staging"
         self._require_directory(self.entries)
         self._require_directory(self.keys)
         self.cas = FileSystemCAS(self.root / "cas", create=False)
@@ -1036,7 +1048,7 @@ class LegacyFileSystemV1SourceCache(FileSystemSourceCache):
         )
         if (
             _read_regular_file(
-                self.root / "format.json",
+                self._io_root / "format.json",
                 maximum_bytes=4096,
                 code="source-cache.layout-invalid",
             )
@@ -1696,6 +1708,7 @@ def _read_canonical_json_object(
 
 
 def _read_regular_file(path: Path, *, maximum_bytes: int, code: str) -> bytes:
+    path = Path(_native_filesystem_path(path.absolute()))
     if path.is_symlink():
         raise SourceCacheError(code, "cache object must not be symbolic")
     flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
@@ -1708,9 +1721,11 @@ def _read_regular_file(path: Path, *, maximum_bytes: int, code: str) -> bytes:
         if not stat.S_ISREG(metadata.st_mode) or metadata.st_size > maximum_bytes:
             raise SourceCacheError(code, "cache object size or type is invalid")
         with os.fdopen(descriptor, "rb", closefd=False) as source:
-            content = source.read(maximum_bytes + 1)
-        if len(content) > maximum_bytes:
-            raise SourceCacheError(code, "cache object exceeds its size limit")
+            # read(n) allocates against n, even for a tiny regular file. The
+            # aggregate caller budget is a ceiling, not a per-file allocation.
+            content = source.read(metadata.st_size + 1)
+        if len(content) != metadata.st_size:
+            raise SourceCacheError(code, "cache object changed size during read")
         return content
     finally:
         os.close(descriptor)

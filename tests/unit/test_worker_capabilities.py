@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from literate_ai.adapters.worker_capabilities import (
     WorkerCapabilityProbeError,
@@ -41,6 +42,114 @@ def result(value: dict[str, object]) -> subprocess.CompletedProcess[bytes]:
 
 
 class WorkerCapabilityTests(unittest.TestCase):
+    def test_ssh_errors_preserve_distinct_causes_and_worker_identity(self):
+        cases = (
+            ("Host key verification failed.", "host-key-verification"),
+            ("REMOTE HOST IDENTIFICATION HAS CHANGED!", "changed-host-key"),
+            ("Permission denied (publickey).", "authentication"),
+            ("Could not resolve hostname example: unknown host", "name-resolution"),
+            (
+                "connect to host example port 22: Connection refused",
+                "connection-refused",
+            ),
+            ("Connection timed out", "timeout"),
+        )
+        for stderr, cause in cases:
+            with (
+                self.subTest(cause=cause),
+                self.assertRaises(WorkerCapabilityProbeError) as caught,
+            ):
+                probe_worker_capabilities(
+                    worker("failing-worker", "linux"),
+                    runner=lambda _argv, _seconds, stderr=stderr: (
+                        subprocess.CompletedProcess(("ssh",), 255, b"", stderr.encode())
+                    ),
+                )
+            self.assertEqual(caught.exception.worker_id, "failing-worker")
+            self.assertIn("SSH exited 255", caught.exception.message)
+            self.assertIn(cause, caught.exception.message)
+            self.assertIn(stderr, caught.exception.message)
+
+    def test_ssh_diagnostic_is_bounded_and_redacted_before_truncation(self):
+        stderr = (
+            b"Permission denied; token=inline-secret; "
+            b"https://user:password@proxy/ env-secret\n" + b"x" * 5000
+        )
+        with (
+            patch.dict(os.environ, {"PROBE_TEST_TOKEN": "env-secret"}),
+            self.assertRaises(WorkerCapabilityProbeError) as caught,
+        ):
+            probe_worker_capabilities(
+                worker("denied", "linux"),
+                runner=lambda _argv, _seconds: subprocess.CompletedProcess(
+                    ("ssh",), 255, b"", stderr
+                ),
+            )
+        message = caught.exception.message
+        self.assertLess(len(message), 4600)
+        self.assertIn("truncated", message)
+        for secret in ("inline-secret", "user:password", "env-secret"):
+            self.assertNotIn(secret, message)
+
+    def test_catalog_failure_names_only_the_failing_worker(self):
+        catalog = ExecutionWorkerCatalog(
+            (worker("healthy", "linux"), worker("unreachable", "linux"))
+        )
+
+        def runner(argv, _seconds):
+            if "user@unreachable.example" in argv:
+                return subprocess.CompletedProcess(
+                    argv, 255, b"", b"Connection refused"
+                )
+            return result(
+                {
+                    "os_name": "ubuntu",
+                    "os_version": "24.04",
+                    "architecture": "x86_64",
+                    "physical_cores": 4,
+                    "logical_cores": 8,
+                    "memory_mib": 16384,
+                    "nvidia_status": "absent",
+                    "gpus": [],
+                    "diagnostic": None,
+                }
+            )
+
+        with self.assertRaises(WorkerCapabilityProbeError) as caught:
+            probe_worker_catalog(catalog, runner=runner)
+        self.assertEqual(caught.exception.worker_id, "unreachable")
+        self.assertNotIn("healthy", caught.exception.message)
+
+    def test_invalid_observation_names_the_worker(self):
+        value = {
+            "os_name": "ubuntu",
+            "os_version": "24.04",
+            "architecture": "x86_64",
+            "physical_cores": 4,
+            "logical_cores": 8,
+            "memory_mib": 16384,
+            "nvidia_status": "ok",
+            "gpus": [
+                {
+                    "index": 0,
+                    "model": "GPU",
+                    "uuid": "GPU-1",
+                    "memory_mib": 0,
+                    "compute_capability": "9.0",
+                    "driver_version": "580",
+                }
+            ],
+            "diagnostic": None,
+        }
+        with self.assertRaises(WorkerCapabilityProbeError) as caught:
+            probe_worker_capabilities(
+                worker("invalid-observation", "linux"),
+                runner=lambda _argv, _seconds: result(value),
+            )
+        self.assertEqual(caught.exception.worker_id, "invalid-observation")
+        self.assertEqual(caught.exception.code, "worker.probe_invalid")
+        self.assertIn("memory_mib", caught.exception.message)
+
     def test_linux_nvidia_observation_is_typed_and_round_trips(self) -> None:
         value = {
             "os_name": "ubuntu",
