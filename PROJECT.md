@@ -64,13 +64,18 @@ development (2026-09-10):
 | Language Flavors | 8 (`lang-cpp`, `lang-go`, `lang-javascript`, `lang-python`, `lang-rust`, `lang-swift`, `lang-typescript`, `lang-zig`) | Each pairs a language Flavor with a portable-application skill and a native/tree build strategy. Bare selectors (`+cpp`) still resolve. |
 | Build-system Flavors | 5 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
 | OS Flavors | 3 (`os-linux`, `os-macos`, `os-windows`) | |
-| Packaging Flavors | 8 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
+| Packaging Flavors | 9 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`, `package-zip`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
 | Toolchain Flavors | 4 (`toolchain-zig-cc`, `toolchain-swift-apple`, `toolchain-swift-linux`, `toolchain-swift-windows`) | |
 | UI / deploy / accel / doc | `ui-react`; `deploy-docker`; `accel-nvidia-cuda`, `accelerator-cpu`; `doc-google-workspace`, `doc-microsoft-365` | Cataloged, not all first-class in Goal 5. |
 | Framework Components | `backend-application`, `document-pair`, `frontend-application`, `invoice-service`, `literate-ai-overview`, `mcp-application`, `money-calculation` | Reusable, inheritable authority under `components/`. |
 | Samples | Non-inheritable demos under `samples/`, except `hello-component` (the inheritable starter `litai init` seeds). | See the open taxonomy question in `docs/roadmap/active-work.md`. |
 
 ## Current work
+
+PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
+extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
+standard package lifecycle. Exact accepted custody, both SBOMs, specifications,
+target identities and release authorization remain mandatory. Qualification is pending.
 
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework

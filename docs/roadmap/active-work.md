@@ -23730,6 +23730,15 @@ GitHub CI failure without relaxing identity checks.
 
 ### [ ] CLI-BUILD-IDENTITY-001 — Distinguish source builds and verify explicit CLI self-update
 
+The Python 3.14 CI control exposed stale external bytecode after prefix self-update.
+Pip strips the configured bytecode-cache prefix while re-execution restores it,
+so equal-size/equal-timestamp replacement modules can load old code. Reproduce the
+collision deterministically and keep installation/re-execution cache custody aligned;
+preserve isolated import paths and unrelated operator caches.
+The collision fixture fails with the old updater and passes with aligned cache
+custody. All 13 build-identity tests and 17 updater regressions pass through
+Make, along with lint and format checks. Full CI remains pending.
+
 - **Priority:** P0
 - **Owner:** CLI version reporting and prefix self-update
 - **Direction:** Git main installations must not masquerade as a published release; verify that litai update applies a newer release.
@@ -25773,3 +25782,31 @@ probe failures. No native job from this qualification remains running.
   `aaca7479fd370366c7af81ca40f62c9703fed46e77de4f46db2a9b5d00d3c4a4`.
   The long-path assertion, twelve distinct cache memberships, receiver short-root
   assertions, and cleanup assertions remain enabled. Production code is unchanged.
+
+### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
+
+Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).
+
+- **Priority:** P0
+- **Owner:** Packaging Flavor, native package CLI and archive verification; Goals 1, 4 and 6
+- **Direction:** Provide a selectable portable ZIP provider for accepted artifact closures without bypassing existing lifecycle or release gates.
+- **Conclusion:** Expose exact package-zip authority and deterministic native ZIP construction/verification using the existing typed package contracts. Preserve both SBOMs, specifications, target and tool identities; publication remains separately authorized.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add package-zip Flavor authority and standard CLI provider dispatch.
+  - [x] Verify immutable member closure and typed plan/result bindings, including native metadata and source/resolved SBOM custody.
+- **Evidence:**
+  - [ ] Public package plan/build/verify uses accepted lifecycle custody and rejects stale, changed, missing and wrong-target evidence.
+  - [ ] Synthetic archive fixtures reproduce bytes and reject malformed or altered archives; existing package providers remain compatible.
+
+Local verification: `make python-check` with the package pattern passes 97 tests;
+CLI coverage passes 19, initialization passes 60, and focused ZIP adversarial
+coverage passes five tests including ZIP64. `make lint format-check` and
+`make skills-check` pass. The CLI tests exercise accepted lifecycle custody via
+a fixture; installed-wheel and actual downstream lifecycle qualification remain
+pending. `litai verify` accepts authority but rejects the stale project receipt.
+The initial wheel check correctly refused an uncommitted revision; the reviewed
+local checkpoint will supply immutable Git authority for its retry. This work
+has not been pushed, published, or installed into a derived project.
+
+ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP adapter/CLI/initialization/templates plus bytecode-cache custody repair), refresh the exact implementation pin through the review command, and refresh documentation authority. Driver identity is now current; all 12 version-authority tests pass through make python-check. Downstream installed framework pins remain unchanged.
