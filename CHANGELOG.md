@@ -8,6 +8,11 @@
   refused. See the
   [migration guide](docs/user/repository-migration.md).
 
+- macOS dependency observation reuses `dyld_info` facts within a process only for
+  identical inspector bytes, arguments and image identity: content and symlink chain
+  for on-disk images, the boot session for shared-cache images. Retained Cargo native
+  test guards no longer re-inspect ~700 unchanged system images per check (#13).
+
 - Documentation tooling: update DOMPurify to 3.4.16. Gate the dependency audit
   through reviewed, expiring per-advisory exceptions. The only exception covers the
   unpatched braces advisory GHSA-vfj7-8cjw-p6xm in OpenSpec's glob dependencies (#24).
