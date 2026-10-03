@@ -225,6 +225,7 @@ class CommandBuildWorkerTests(unittest.TestCase):
                 phase=LifecycleActionKind.INDEX,
                 source_handoff="filesystem-cas",
                 target_profile="host",
+                maximum_hardware_age=ACTION_TEST_DEADLINE,
                 cwd=root,
                 environment=environment,
             )

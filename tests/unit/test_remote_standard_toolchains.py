@@ -27,6 +27,7 @@ from literate_ai.contracts.execution_dispatch import ExecutionWorkerCatalog
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservationCatalog
 from tests.unit import test_action_tool_observation as transport_fixture
 from tests.unit import test_standard_command_projection as projection_fixture
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_standard_toolchain_observations import observation
 
 
@@ -248,6 +249,7 @@ class RemoteStandardToolchainTests(unittest.TestCase):
             phase=LifecycleActionKind.INDEX,
             source_handoff="filesystem-cas",
             target_profile="host",
+            maximum_hardware_age=ACTION_TEST_DEADLINE,
             cwd=fixture.root,
             environment=fixture.environment,
         )
