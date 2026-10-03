@@ -263,6 +263,25 @@
   now matches its greeting specification, and retained test receipts recognize
   CTest's newer exact all-passed summary without accepting zero or unknown counts.
 
+
+- CI: run one full Linux suite plus cross-platform native/install smoke on ordinary
+  PRs, consolidate documentation jobs, cache dependency downloads, and preserve
+  independent failure diagnostics. Full multi-platform release qualification remains
+  required. Publication subprocess timeouts now stay within their reviewed limit
+  even when floating-point deadline arithmetic rounds upward.
+
+- CI: separate focused macOS PR smoke checks from full main/release qualification,
+  bound conformance steps, and retain verbose test names and self-update failure
+  diagnostics. Full release gates remain unchanged.
+
+- Onboarding: feature the continuous narrated video in the README, with a clickable
+  preview, chapters, subtitles, and a public-feedback link.
+
+- CLI: identify Git/source builds and their exact revision in version output,
+  without treating package metadata as published-release evidence. Explicit
+  `litai update` now checks for and applies a newer stable release in an enrolled
+  prefix before continuing project reconciliation; opt-outs remain effective.
+
 - Preserve an adopted project's repository parent selection when signed source
   promotion creates its nested native project. This keeps promotion usable from
   clean public checkouts without relying on unrelated local release tags.
