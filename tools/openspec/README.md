@@ -13,6 +13,9 @@ to generated applications' selected runtimes. Keep browser sandbox defaults enab
 `make documentation-check` first audits the staged locked dependency graph. High or
 critical findings, or an unavailable audit service, fail the gate; do not substitute
 `--omit=dev`, because these development dependencies are the tooling being qualified.
+The only allowance is `audit-exceptions.json`: each entry names one advisory and
+package, with a reason, tracking issue and expiry date. Expired entries and entries that
+no longer match a finding also fail the gate.
 The gate needs access to the configured npm registry's audit endpoint. Parser and
 rendering checks still run after a passing audit.
 
