@@ -5,6 +5,7 @@ import secrets
 from datetime import UTC, datetime, timedelta
 
 from literate_ai.adapters.action_capabilities import (
+    ACTION_OBSERVATION_TIMEOUT_SECONDS,
     MAX_CAPABILITY_BYTES,
     decode_capability_request,
     decode_capability_response,
@@ -230,7 +231,10 @@ def probe_command_tool_selectors(
 ):
     deadline.remaining()
     deadline = ActionDispatchDeadline(
-        min(deadline.expires_at, datetime.now(UTC) + timedelta(seconds=60))
+        min(
+            deadline.expires_at,
+            datetime.now(UTC) + timedelta(seconds=ACTION_OBSERVATION_TIMEOUT_SECONDS),
+        )
     )
     expected = receiver_code_identity(deadline=deadline)
     observed.capability.require_current(worker, expected)

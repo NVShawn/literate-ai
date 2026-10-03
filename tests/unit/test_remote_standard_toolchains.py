@@ -8,7 +8,10 @@ from unittest.mock import Mock, patch
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
 from literate_ai.adapters.action_capabilities import ActionWorkerCapabilities
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
-from literate_ai.adapters.action_hardware import probe_command_hardware
+from literate_ai.adapters.action_hardware import (
+    HARDWARE_PROBE_TIMEOUT_SECONDS,
+    probe_command_hardware,
+)
 from literate_ai.adapters.action_tool_observation import WorkerToolObservation
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.adapters.remote_standard_toolchains import (
@@ -232,7 +235,7 @@ class RemoteStandardToolchainTests(unittest.TestCase):
         )
         hardware = probe_command_hardware(
             fixture.worker,
-            timeout_seconds=60,
+            timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
             cwd=fixture.root,
             environment=fixture.environment,
         )

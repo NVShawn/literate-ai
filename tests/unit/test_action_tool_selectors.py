@@ -14,7 +14,10 @@ from literate_ai.adapters.action_capabilities import (
     run_command_observation,
 )
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
-from literate_ai.adapters.action_hardware import probe_command_hardware
+from literate_ai.adapters.action_hardware import (
+    HARDWARE_PROBE_TIMEOUT_SECONDS,
+    probe_command_hardware,
+)
 from literate_ai.adapters.action_tool_selectors import (
     decode_selector_request,
     decode_selector_response,
@@ -102,7 +105,7 @@ class ActionToolSelectorTests(unittest.TestCase):
         )
         hardware = probe_command_hardware(
             fixture.worker,
-            timeout_seconds=60,
+            timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
             cwd=fixture.root,
             environment=fixture.environment,
         )

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
 from literate_ai.adapters.action_capabilities import (
+    ACTION_OBSERVATION_TIMEOUT_SECONDS,
     ActionWorkerCapabilities,
     decode_capability_request,
     decode_capability_response,
@@ -179,7 +180,10 @@ def probe_command_tool_observations(
 ):
     deadline.remaining()
     deadline = ActionDispatchDeadline(
-        min(deadline.expires_at, datetime.now(UTC) + timedelta(seconds=60))
+        min(
+            deadline.expires_at,
+            datetime.now(UTC) + timedelta(seconds=ACTION_OBSERVATION_TIMEOUT_SECONDS),
+        )
     )
     expected = receiver_code_identity(deadline=deadline)
     admitted.require_current(worker, expected)

@@ -40,6 +40,9 @@ from literate_ai.contracts.identity import (
     canonical_json_bytes,
 )
 
+# Bound one receiver observation, including start-up and native dependency
+# inspection on slow hosted runners.
+ACTION_OBSERVATION_TIMEOUT_SECONDS = 300
 CAPABILITY_PROTOCOL = "literate-ai/action-capabilities@1"
 MAX_CAPABILITY_BYTES = 32 * 1024
 _MAX_PROBE_SECONDS = 60

@@ -15,7 +15,10 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
-from literate_ai.adapters.action_hardware import probe_command_hardware
+from literate_ai.adapters.action_hardware import (
+    HARDWARE_PROBE_TIMEOUT_SECONDS,
+    probe_command_hardware,
+)
 from literate_ai.adapters.builders._process import run_bounded_process
 from literate_ai.adapters.command_builder import CommandComponentBuilder
 from literate_ai.adapters.command_executor import CommandComponentExecutor
@@ -209,7 +212,10 @@ class CommandBuildWorkerTests(unittest.TestCase):
                 LITAI_ACTION_WORKER_IDENTITY=worker.identity.uri,
             )
             hardware = probe_command_hardware(
-                worker, timeout_seconds=60, cwd=root, environment=environment
+                worker,
+                timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
+                cwd=root,
+                environment=environment,
             )
             admission = CommandActionWorkerPool(
                 lambda: catalog,

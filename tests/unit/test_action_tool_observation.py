@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters.action_capabilities import (
+    ACTION_OBSERVATION_TIMEOUT_SECONDS,
     probe_command_action_capabilities,
     run_command_observation,
 )
@@ -143,7 +144,10 @@ class ActionToolObservationTests(unittest.TestCase):
                     transport.call_args.kwargs["stdout_limit_bytes"],
                     MAX_TOOL_RESPONSE_BYTES,
                 )
-                self.assertLessEqual(transport.call_args.args[1].remaining(), 60)
+                self.assertLessEqual(
+                    transport.call_args.args[1].remaining(),
+                    ACTION_OBSERVATION_TIMEOUT_SECONDS,
+                )
                 self.assertEqual(list(self.workspace.iterdir()), [])
 
     def test_changed_private_profile_and_unconfigured_observations_refuse(self):
