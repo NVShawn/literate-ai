@@ -13,7 +13,7 @@
     "puppeteer": "25.10.0"
   },
   "scripts": {
-    "dependencies:check": "npm audit --audit-level=high",
+    "dependencies:check": "node scripts/check-npm-audit.mjs",
     "documentation:check": "npm run dependencies:check && npm run mermaid:test && npm run mermaid:render --",
     "mermaid:render": "node scripts/check-mermaid.mjs",
     "mermaid:test": "node --test test/*.test.mjs",
