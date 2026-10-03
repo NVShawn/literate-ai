@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -35,6 +35,7 @@ from literate_ai.contracts import ComponentCommandPhase, canonical_identity
 from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.storage import FileSystemCAS
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 from tests.unit.test_action_build_action import build_request
 from tests.unit.test_component_node_generation_preparation import _fixture
@@ -224,7 +225,7 @@ class StandardProviderWorkerTests(unittest.TestCase):
                 FileSystemCAS(root / "source-cas"),
                 FileSystemCAS(root / "worker-cas"),
             )
-            deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5))
+            deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
             transfers = tuple(
                 capture_provider_build(
                     receipt=receipt,

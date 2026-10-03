@@ -36,6 +36,7 @@ from literate_ai.contracts.identity import canonical_identity, canonical_json_by
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservationCatalog
 from tests.unit import test_cli_worker_health as health_fixture
 from tests.unit import test_standard_action_indexing as factory_fixture
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_action_blob_source import blob_path, source_cas_server
 
 
@@ -111,7 +112,7 @@ class ActionExecutionConfigurationTests(unittest.TestCase):
             catalog=ExecutionWorkerCatalog((worker,)),
             workers=(worker,),
             supports_phase=lambda worker, phase: True,
-            deadline=ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=1)),
+            deadline=ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE),
         )
 
     def test_explicit_result_sources_fetch_verify_and_refuse_worker_or_config_drift(

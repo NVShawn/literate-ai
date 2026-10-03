@@ -20,7 +20,10 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
-from literate_ai.adapters.action_hardware import probe_command_hardware
+from literate_ai.adapters.action_hardware import (
+    HARDWARE_PROBE_TIMEOUT_SECONDS,
+    probe_command_hardware,
+)
 from literate_ai.adapters.action_transport import supports_action_transport
 from literate_ai.adapters.user_assets import (
     ACTION_EXECUTION_CONFIG_ENVIRONMENT,
@@ -301,7 +304,7 @@ class BoundActionExecution:
                         try:
                             observed = probe_command_hardware(
                                 worker,
-                                timeout_seconds=60,
+                                timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
                                 cwd=project_root,
                                 environment=self.environment,
                                 deadline=deadline,

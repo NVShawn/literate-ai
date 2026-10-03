@@ -32,6 +32,8 @@ from literate_ai.contracts.identity import ContentIdentity, canonical_json_bytes
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservation
 
 HARDWARE_PROTOCOL = "literate-ai/action-hardware@1"
+# Bound one hardware observation, including receiver start-up on slow hosts.
+HARDWARE_PROBE_TIMEOUT_SECONDS = 180
 MAX_HARDWARE_BYTES = 64 * 1024
 _REQUEST = "literate-ai/action-hardware-request@1"
 _RESPONSE = "literate-ai/action-hardware-response@1"
@@ -118,7 +120,7 @@ def encode_hardware_response(
     observation = probe_worker_capabilities(
         ExecutionWorker(request["worker_id"], ExecutionWorkerKind.LOCAL),
         runner=run,
-        timeout_seconds=60,
+        timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
     )
     response = canonical_json_bytes(
         {
@@ -196,7 +198,9 @@ def probe_command_hardware(
     if type(timeout_seconds) is not int or timeout_seconds <= 0:
         _invalid()
     started = datetime.now(UTC)
-    expires = started + timedelta(seconds=min(timeout_seconds, 60))
+    expires = started + timedelta(
+        seconds=min(timeout_seconds, HARDWARE_PROBE_TIMEOUT_SECONDS)
+    )
     deadline = ActionDispatchDeadline(
         expires if deadline is None else min(expires, deadline.expires_at)
     )

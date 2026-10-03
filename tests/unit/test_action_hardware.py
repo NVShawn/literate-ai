@@ -19,6 +19,7 @@ from literate_ai.adapters.action_dispatch_wire import (
     ActionWireError,
 )
 from literate_ai.adapters.action_hardware import (
+    HARDWARE_PROBE_TIMEOUT_SECONDS,
     decode_hardware_request,
     decode_hardware_response,
     encode_hardware_response,
@@ -36,6 +37,7 @@ from literate_ai.contracts.execution_dispatch import (
 )
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from tests.unit import test_action_source_index as source_fixture
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 
 class ActionHardwareTests(unittest.TestCase):
@@ -44,9 +46,9 @@ class ActionHardwareTests(unittest.TestCase):
         self.fixture.setUp()
         self.addCleanup(self.fixture.doCleanups)
         # Some cases probe and then exercise the receiver again in one scenario.
-        # Each production operation retains its independent 60-second bound.
+        # Each production operation retains its independent bounded timeout.
         self.fixture.deadline = ActionDispatchDeadline(
-            datetime.now(UTC) + timedelta(minutes=3)
+            datetime.now(UTC) + ACTION_TEST_DEADLINE
         )
         self.worker = replace(
             self.fixture.worker, action_protocol=LIFECYCLE_ACTION_WIRE_PROTOCOL
@@ -56,7 +58,7 @@ class ActionHardwareTests(unittest.TestCase):
         worker = worker or self.worker
         return probe_command_hardware(
             worker,
-            timeout_seconds=60,
+            timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
             cwd=self.fixture.root,
             environment={**os.environ, "INDEX_WORKER_IDENTITY": worker.identity.uri},
         )
@@ -272,7 +274,7 @@ class ActionHardwareTests(unittest.TestCase):
         ) as run:
             self.probe()
         options = run.call_args.kwargs
-        self.assertLessEqual(options["timeout_seconds"], 60)
+        self.assertLessEqual(options["timeout_seconds"], HARDWARE_PROBE_TIMEOUT_SECONDS)
         self.assertEqual(options["stdout_limit_bytes"], 65536)
         self.assertEqual(options["stderr_limit_bytes"], 4096)
         self.assertTrue(options["terminate_descendants"])
@@ -284,7 +286,7 @@ class ActionHardwareTests(unittest.TestCase):
         ) as run:
             encode_hardware_response(request, deadline, self.worker.identity)
         options = run.call_args.kwargs
-        self.assertLessEqual(options["timeout_seconds"], 60)
+        self.assertLessEqual(options["timeout_seconds"], HARDWARE_PROBE_TIMEOUT_SECONDS)
         self.assertEqual(options["stdout_limit_bytes"], 262144)
         self.assertEqual(options["stderr_limit_bytes"], 4096)
         self.assertTrue(options["terminate_descendants"])

@@ -6,7 +6,7 @@ import shutil
 import stat
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.action_blob_source import HttpActionBlobSource
@@ -33,6 +33,7 @@ from literate_ai.security import AuthorizationError
 from literate_ai.storage import FileSystemCAS
 from literate_ai.storage.cas import BlobIntegrityError
 from tests.unit import test_standard_transferred_build as transfer_fixture
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_action_blob_source import blob_path, source_cas_server
 from tests.unit.test_component_node_generation_preparation import _fixture
 
@@ -75,7 +76,7 @@ class ActionBuildResultTests(unittest.TestCase):
         )
         self.input_record = self.input.to_bytes()
         self.input_identity = record_identity(self.input_record)
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.controller = LocalStandardLifecyclePorts(
             source_trees=self.worker.source_trees,
             object_root=self.root / "controller",

@@ -34,6 +34,7 @@ from literate_ai.contracts.execution_dispatch import (
 )
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from tests.unit import test_action_source_index as source_fixture
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_schema_catalog import SchemaCatalog
 
 
@@ -47,7 +48,7 @@ class ActionCapabilityTests(unittest.TestCase):
         )
         # These scenarios perform multiple probes and sometimes an index dispatch.
         # Each production probe retains its own cap inside this scenario budget.
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=3))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.fixture.deadline = self.deadline
         self.fixture.request = replace(
             self.fixture.request, deadline_identity=self.deadline.identity
@@ -107,7 +108,7 @@ class ActionCapabilityTests(unittest.TestCase):
             run.assert_not_called()
 
     def test_probe_caps_its_process_budget_even_with_a_long_action_deadline(self):
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         with patch(
             "literate_ai.adapters.action_capabilities.run_bounded_process",
             wraps=run_bounded_process,

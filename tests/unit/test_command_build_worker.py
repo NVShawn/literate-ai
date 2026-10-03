@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -50,6 +50,7 @@ from literate_ai.contracts.execution_dispatch import (
 )
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservationCatalog
 from literate_ai.storage import FileSystemCAS
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 from tests.unit.test_component_node_generation_preparation import _fixture
 from tests.unit.test_standard_project_factory import _command_contracts
@@ -214,7 +215,7 @@ class CommandBuildWorkerTests(unittest.TestCase):
                 lambda: catalog,
                 lambda: WorkerHardwareObservationCatalog((hardware,)),
                 lambda selected: canonical_identity({"healthy": selected.identity.uri}),
-                ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5)),
+                ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE),
                 phase=LifecycleActionKind.INDEX,
                 source_handoff="filesystem-cas",
                 target_profile="host",

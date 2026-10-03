@@ -43,6 +43,7 @@ from literate_ai.contracts import (
 from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.storage import FileSystemCAS
 from tests.unit import test_standard_transferred_build as build_fixture
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_component_node_generation_preparation import _fixture
 
 
@@ -52,7 +53,7 @@ class ActionExecuteExecutionTests(unittest.TestCase):
         self.addCleanup(f.doCleanups)
         f.setUp()
         f.admit()
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.source_cas = FileSystemCAS(f.root / "source-cas")
         source = f.receiver.source_trees
         custody = source.evidence(f.plan.request.source_tree_identity)

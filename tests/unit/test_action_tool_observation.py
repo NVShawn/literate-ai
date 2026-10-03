@@ -31,6 +31,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.storage import FileSystemCAS
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 _RECEIVER = """
 import os, sys
@@ -92,7 +93,7 @@ class ActionToolObservationTests(unittest.TestCase):
             OBSERVE_TOOLS="yes",
             PYTHONPATH=str(Path(__file__).resolve().parents[2] / "src"),
         )
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
 
     def admission(self):
         self.environment["LITAI_ACTION_WORKER_IDENTITY"] = self.worker.identity.uri

@@ -22,6 +22,7 @@ from literate_ai.contracts import ComponentCommandPhase, canonical_identity
 from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.security import AuthorizationError
 from literate_ai.storage import FileSystemCAS
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_action_blob_source import blob_path, source_cas_server
 from tests.unit.test_component_node_generation_preparation import _fixture
 from tests.unit.test_standard_local_command_adapter import _python_copy_lifecycle
@@ -61,7 +62,7 @@ class ActionBuildSourceTests(unittest.TestCase):
         self.cas = FileSystemCAS(self.root / "worker-cas")
         self.workspace = self.root / "workspace"
         self.workspace.mkdir()
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.now = authorization.grant.issued_at + timedelta(seconds=1)
 
     def scope(self, **changes):

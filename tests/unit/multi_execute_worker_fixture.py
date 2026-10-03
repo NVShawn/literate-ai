@@ -4,7 +4,7 @@ import json
 import os
 import sys
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -38,6 +38,7 @@ from literate_ai.application.standard_execution_inputs import (
 )
 from literate_ai.contracts import canonical_identity
 from literate_ai.storage import FileSystemCAS
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_action_execute_action import make_execute_request
 
 _CHILD = """
@@ -68,7 +69,7 @@ def assert_multi_execute_worker(case, ports, execution, plan, output):
     root = ports.object_root.parent.resolve() / "worker-proof"
     root.mkdir()
     source_cas = FileSystemCAS(root / "source-cas")
-    deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=3))
+    deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
     source = ports.source_trees.resolve(plan.request.source_tree_identity)
     indexer = SimpleNamespace(
         execution_plan=execution,

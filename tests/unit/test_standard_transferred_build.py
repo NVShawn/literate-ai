@@ -5,7 +5,7 @@ import sys
 import tempfile
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -36,6 +36,7 @@ from literate_ai.contracts import ComponentCommandPhase, ComponentCommandToolBin
 from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.security import AuthorizationError
 from literate_ai.storage import FileSystemCAS
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_component_node_generation_preparation import _fixture
 from tests.unit.test_standard_local_command_adapter import (
     _identity,
@@ -362,7 +363,7 @@ class StandardTransferredBuildTests(unittest.TestCase):
             execution,
         ).to_bytes()
         input_identity = record_identity(input_record)
-        deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=5))
+        deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         result_record = capture_build_result(
             input_record=input_record,
             input_identity=input_identity,

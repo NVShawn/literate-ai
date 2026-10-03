@@ -24,6 +24,7 @@ from literate_ai.contracts.blobs import BlobRef
 from literate_ai.generated_tests import GeneratedTestSuiteError
 from literate_ai.storage import FileSystemCAS
 from tests.unit import test_standard_transferred_build as transfer_fixture
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.test_action_build_intent import provider_evidence
 from tests.unit.test_component_node_generation_preparation import _fixture
 
@@ -43,7 +44,7 @@ class ProviderBuildTransferTests(unittest.TestCase):
         self.archive_root = ports.artifact_path(fixture.output.exports[0]).parent
         self.source = FileSystemCAS(fixture.root / "provider-cas")
         self.target = FileSystemCAS(fixture.root / "consumer-cas")
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=2))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.guard = Mock()
         self.validation = ports.source_trees.validation_inputs(
             self.receipt.build.source_tree_identity

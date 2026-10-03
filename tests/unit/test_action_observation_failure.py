@@ -6,7 +6,7 @@ import os
 import sys
 import tempfile
 import unittest
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -32,6 +32,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.storage import FileSystemCAS
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 
 class ObservationFailureTests(unittest.TestCase):
@@ -46,7 +47,7 @@ class ObservationFailureTests(unittest.TestCase):
             command=(sys.executable, "-c", "pass"),
             action_protocol=LIFECYCLE_ACTION_WIRE_PROTOCOL,
         )
-        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(minutes=1))
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.request = canonical_json_bytes(
             {
                 "schema": "literate-ai/action-capability-request@1",
