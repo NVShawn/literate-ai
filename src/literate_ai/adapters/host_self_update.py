@@ -263,10 +263,15 @@ def cache_allows_github_check(
 
 
 def _pip_environment(environ: Mapping[str, str]) -> dict[str, str]:
+    # pip must replace bytecode in the cache the relaunched interpreter will use.
+    # Otherwise equal-size sources installed within one timestamp tick can leave
+    # valid-looking old bytecode outside site-packages. These two settings affect
+    # cache selection, not import search paths or interpreter installation custody.
     environment = {
         name: value
         for name, value in environ.items()
         if not name.casefold().startswith("python")
+        or name.casefold() in {"pythonpycacheprefix", "pythonoptimize"}
     }
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
     return environment
@@ -555,6 +560,7 @@ def apply_staged_wheel(
             "--force-reinstall",
             "--no-index",
             "--no-deps",
+            "--compile",
             str(wheel),
             timeout=PIP_TIMEOUT_SECONDS,
             env=_pip_environment(environ),
