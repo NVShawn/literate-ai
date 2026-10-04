@@ -1556,6 +1556,49 @@ def _default_source_cache() -> SourceCacheConfiguration:
     )
 
 
+_GREETING_CARD_CASES = (
+    ("primary", "Ada Lovelace", ("Build portable software", "Ship with confidence")),
+    (
+        "generalization",
+        "Grace Hopper",
+        ("Debug boldly", "Build once", "Run everywhere safely"),
+    ),
+)
+
+
+def _starter_acceptance_cases(specification: str) -> list[dict[str, object]]:
+    """Return expectations for the starter contract this project actually received.
+
+    The packaged template specifies a name-only greeting. A project derived from
+    the framework repository (`init --from`) inherits that repository's richer
+    greeting-card sample, whose request also carries `messages`; its cases mirror
+    `samples/_harness/hello-component/acceptance`.
+    """
+
+    if "| `messages` |" not in specification:
+        return [
+            {
+                "case_id": case_id,
+                "arguments": [{"name": name}],
+                "expected_result": {"greeting": f"Hello, {name}!", "name": name},
+            }
+            for case_id, name, _ in _GREETING_CARD_CASES
+        ]
+    return [
+        {
+            "case_id": case_id,
+            "arguments": [{"name": name, "messages": list(messages)}],
+            "expected_result": {
+                "greeting": f"Hello, {name}!",
+                "recipient_id": "-".join(name.casefold().split()),
+                "message_count": len(messages),
+                "word_count": sum(len(message.split()) for message in messages),
+            },
+        }
+        for case_id, name, messages in _GREETING_CARD_CASES
+    ]
+
+
 def _write_starter_acceptance_oracle(target: Path) -> str:
     """Scaffold the starter Component's verifier-owned acceptance oracle.
 
@@ -1585,32 +1628,11 @@ def _write_starter_acceptance_oracle(target: Path) -> str:
         "specification_set_identity": (
             f"{specification['algorithm']}:{specification['digest']}"
         ),
-        "cases": [
-            {
-                "case_id": "primary",
-                "arguments": [
-                    {
-                        "name": "Ada Lovelace",
-                    }
-                ],
-                "expected_result": {
-                    "greeting": "Hello, Ada Lovelace!",
-                    "name": "Ada Lovelace",
-                },
-            },
-            {
-                "case_id": "generalization",
-                "arguments": [
-                    {
-                        "name": "Grace Hopper",
-                    }
-                ],
-                "expected_result": {
-                    "greeting": "Hello, Grace Hopper!",
-                    "name": "Grace Hopper",
-                },
-            },
-        ],
+        "cases": _starter_acceptance_cases(
+            (target / "samples" / "hello-component" / "component.md").read_text(
+                encoding="utf-8"
+            )
+        ),
     }
     relative = "verification/acceptance/hello-component.json"
     path = target.joinpath(*Path(relative).parts)

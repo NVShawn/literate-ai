@@ -4,10 +4,9 @@ This is the reproducible authoring package for the current manager and engineeri
 document pair: a `presentation` member (Google Slides deck) and a `narrative` member
 (Google Doc), per `component://literate-ai/literate-ai-overview`'s declared realization.
 
-**1.2.0 edition.** Tag `v1.1.0` is published. The stable Google Workspace pair now
-contains this accepted scheduling/cache/package/native-acceptance edition; both members
-were refreshed in place and export-back verified. This package does not claim that tag
-`v1.2.0` is already published. Later patch cuts on the `1.2.x` line keep these same
+**1.1.0 edition.** The stable Google Workspace pair now contains this accepted
+scheduling/cache/package/native-acceptance edition; both members were refreshed in
+place and export-back verified. Later patch cuts on the `1.1.x` line keep these same
 published locations.
 
 Published presentation: [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
@@ -47,7 +46,7 @@ explicit brownfield authority stages, native SDK and compiled-library custody, r
 source lifecycle progress, exact worker-routing/remote-receipt slices, bounded action-DAG
 scheduling, shared-cache authority, real local Debian packages, native CLI and gRPC
 acceptance, and repository-owned worktree placement. Local acceptance and the state of
-the 1.2.0 publication receipt are recorded in
+the 1.1.0 publication receipt are recorded in
 [the QA ledger](qa-ledger.md).
 
 Visual inputs: [cover](assets/cover-hero.png),

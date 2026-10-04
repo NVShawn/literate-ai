@@ -1,12 +1,12 @@
 # Current deliverables
 
-The checked-in members below are the published **1.2.0 throughput and native-acceptance
-edition**. Their stable Google Workspace IDs and links did not change. Both resources
+The checked-in members below are the published **1.1.0 throughput and native-acceptance
+edition**, the first edition from the public repository. Their stable Google Workspace IDs and links did not change. Both resources
 were refreshed in place and export-back verified against these accepted local members.
 
-- Native Google Slides (1.2.0 edition): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
+- Native Google Slides (1.1.0 edition): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
   — stable ID; 26 slides / 26 notes pages required on export-back.
-- Native Google Doc (1.2.0 edition): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
+- Native Google Doc (1.1.0 edition): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
   — stable ID; 72 headings with no skipped level required on export-back.
 - Generated PowerPoint:
   [literate-ai-manager-and-engineering-overview.pptx](literate-ai-manager-and-engineering-overview.pptx)
@@ -29,7 +29,7 @@ SHA-256. Trust the acceptance report for the digest of the exact committed artif
 | Component | `component://literate-ai/literate-ai-overview` (terminal) |
 | Capability | `literate-ai.document-pair` |
 | Ecosystem | `google-workspace` |
-| Edition | 1.2.0 (local candidate accepted; exact publication refresh pending) |
+| Edition | 1.1.0 (published in place and export-back verified, 2026-10-04) |
 | Members | `presentation`, `narrative` |
 | Local presentation | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.pptx` |
 | Local narrative | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.docx` |

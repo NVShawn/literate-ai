@@ -353,7 +353,7 @@ def build() -> Path:
     # 04 - implementation velocity
     s = add_slide(C["white"])
     title(s, "The implementation is moving unusually fast.", "One authority model now spans language, build, operating-system, and packaging choices while preserving exact target constraints.", False, 4)
-    facts = [("6", "languages"), ("4", "build systems"), ("3", "OS families"), ("6", "package providers")]
+    facts = [("9", "languages"), ("5", "build systems"), ("3", "OS families"), ("9", "package providers")]
     for i, (num, label) in enumerate(facts):
         x = 72 + i * 296
         text(s, num, x, 338, 240, 70, 48, C["orange"] if i == 3 else C["ink"], True, align="center")
@@ -370,8 +370,8 @@ def build() -> Path:
     caption_bar(s, "Surface area, not maturity. Slides 7–11 show the control model.")
     footer(s, 4)
     notes(s, [
-        "Current matrix: Python 3.11+, C++17, Rust 2021, JavaScript/Node 20+, Swift, and Go; Bazel, GNU Make, CMake, and Cargo; macOS, Linux, and Windows Flavors.",
-        "Packaging Flavors are pip, Conan, apt, Homebrew, WinGet, and Chocolatey. Multi-provider planning is implemented; native application-package construction and independent verification are live for pip wheels and Conan cache archives.",
+        "Current matrix: Python 3.11+, C++17, Rust 2021, JavaScript/Node 20+, TypeScript, Swift, Go, Zig, and Elixir/OTP 27+; Bazel, GNU Make, CMake, Cargo, and repo-man; macOS, Linux, and Windows Flavors.",
+        "Packaging Flavors are pip, Conan, apt, Homebrew, WinGet, Chocolatey, Cargo, npm, and ZIP. Multi-provider planning is implemented; native application-package construction and independent verification are live for pip wheels and Conan cache archives.",
         "The separate host installer selects one strict CycloneDX prerequisite SBOM by OS, CPU, and accelerator coordinate, then delegates missing native packages to APT, Homebrew, or WinGet only after consent.",
         "The private user-owned inventory currently has six workers spanning macOS ARM64, Windows 11 CPU/GPU, Ubuntu 24.04 CPU/GPU, and Ubuntu 26.04 CPU. The deck does not disclose endpoints or claim the full Cartesian matrix is qualified.",
     ])
@@ -827,7 +827,7 @@ def build() -> Path:
         "Every PR body has exactly one Literate-AI-Release: major.minor or Literate-AI-Release: none line. Missing, duplicate, malformed, stale, and other-line values remain unknown.",
         "LitAI enforces command authorization and state. Forge branch protection is separate and should mirror this policy; no live forge-protection claim is made here.",
         "Peer-work collection records exact merged or reason-bearing dead markers, inspects open PRs and every worktree, rejects stale/unmerged/protected/dirty state, plans by default, and requires --apply --authorize-delete.",
-        "ADR 0034 adds a Python-owned contribution sweep and authenticated document-pair preflight for every major or minor cut. This slide does not claim v1.2.0 is already published.",
+        "ADR 0034 adds a Python-owned contribution sweep and authenticated document-pair preflight for every major or minor cut. This slide does not claim v1.1.0 is already published.",
         "Gate target selection remains local worker fleet or GitHub Actions with the same declared gate; GitLab is recognized but fail-closed, and a single legacy-local VM remains complete when no fleet is configured.",
     ])
 
@@ -888,7 +888,7 @@ def build() -> Path:
     s = add_slide(C["ink"])
     add_image_cover(s, "engineering-section")
     wash(s, 0, 0, 700, H, 0.58)
-    title(s, "1.2 overlaps exact work and reuses only verified bytes.", "Bounded DAG scheduling, cache authority, Debian packages, native acceptance, and worktree placement advance together.", True, 23)
+    title(s, "1.1 overlaps exact work and reuses only verified bytes.", "Bounded DAG scheduling, cache authority, Debian packages, native acceptance, and worktree placement advance together.", True, 23)
     work = [
         ("SCHEDULE", "Ready DAG nodes on bounded slots"),
         ("REUSE", "Rehash shared cache objects"),
@@ -900,10 +900,10 @@ def build() -> Path:
         line(s, 70, y, 8, 64, C["green2"] if i == 0 else C["orange"])
         text(s, a, 96, y, 480, 26, 18, C["white"], True)
         text(s, b, 96, y + 28, 480, 28, 15, C["fog"])
-    caption_bar(s, "1.2 candidate slices; production dispatch, LAN proof, and remote package custody remain open.", 648, C["code"], C["orange2"], True)
+    caption_bar(s, "1.1 slices; production dispatch, LAN proof, and remote package custody remain open.", 648, C["code"], C["orange2"], True)
     footer(s, 23, True)
     notes(s, [
-        "The implemented 1.1 native-custody and 1.0 operator/release boundaries remain. 1.2 adds dependency-aware bounded scheduling, cache authority, real local Debian construction, native CLI and gRPC acceptance, and canonical worktree placement.",
+        "Native custody and the 1.0 operator/release boundaries remain. 1.1 adds dependency-aware bounded scheduling, cache authority, real local Debian construction, native CLI and gRPC acceptance, and canonical worktree placement.",
         "These are bounded implemented slices. Production command and SSH composition, measured real LAN warm-cache hits, remote native-package custody, complete native-CLI lifecycle proof, and audited legacy-worktree retirement remain follow-on work.",
     ])
 
@@ -923,7 +923,7 @@ def build() -> Path:
 
     # 25 - the ask
     s = add_slide(C["fog"])
-    title(s, "Use the exact parallel path. Harden for the portfolio.", "Take one demanding downstream application through installed 1.2 scheduling, cache, package, and native acceptance, then invest in production operations.", False, 25)
+    title(s, "Use the exact parallel path. Harden for the portfolio.", "Take one demanding downstream application through installed 1.1 scheduling, cache, package, and native acceptance, then invest in production operations.", False, 25)
     asks = [
         ("TWO WEEKS", "Containment + operational hardening", C["orange"]),
         ("ONE APPLICATION", "Installed adoption through retained", C["blue"]),
@@ -935,10 +935,10 @@ def build() -> Path:
         text(s, a, x, 328, 330, 34, 22, C["ink"], True)
         text(s, b, x, 372, 330, 72, 17, C["steel"])
     shape(s, "roundRect", 240, 560, 800, 46, C["ink"], radius="rounded-full")
-    text(s, "Decision: fund hardening and select one 1.2 production adopter.", 268, 574, 744, 22, 16, C["white"], True, align="center", fit=True)
+    text(s, "Decision: fund hardening and select one 1.1 production adopter.", 268, 574, 744, 22, 16, C["white"], True, align="center", fit=True)
     footer(s, 25)
     notes(s, [
-        "This is the decision slide. The requested outcome is production-hardening investment plus selection of the first downstream 1.2 production adoption.",
+        "This is the decision slide. The requested outcome is production-hardening investment plus selection of the first downstream 1.1 production adoption.",
         "The third column is not boilerplate: proving the loop while relaxing the gates would prove nothing, because acceptance is what makes the result a release candidate rather than a code dump.",
     ])
 

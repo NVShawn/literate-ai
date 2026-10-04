@@ -111,9 +111,9 @@ line, and marker-based safe collection after worktree/PR inspection. It SHALL di
 LitAI command enforcement from forge protection and make no claim that forge settings are
 live merely because policy exists. It SHALL also describe the continuous
 contribution sweep and authenticated document-pair preflight required for major and
-minor cuts, without claiming that `v1.2.0` is already published.
+minor cuts, without claiming that `v1.1.0` is already published.
 
-The 1.2 edition SHALL distinguish implemented bounded dependency-DAG scheduling,
+The 1.1 edition SHALL distinguish implemented bounded dependency-DAG scheduling,
 provider-neutral shared-cache authority, real local Debian packages, native CLI and
 gRPC acceptance, and repository-owned worktree placement from still-open production
 command/SSH composition, real LAN cache qualification, remote package custody,
@@ -128,7 +128,7 @@ text — this becomes a native Google Doc with real heading styles, not an expor
 ## Edition cadence
 
 Label the local `.docx` and the published Google Doc as the last major or minor
-*edition* (this regeneration is the 1.2.0 edition). Realize the `.docx` with the
+*edition* (this regeneration is the 1.1.0 edition). Realize the `.docx` with the
 project-local `python-docx` path (`build_narrative.py`); do not make the Codex
 `documents` plugin a hidden requirement. Patch releases keep README citations on that
 edition without regenerating.

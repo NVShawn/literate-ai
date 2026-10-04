@@ -132,19 +132,19 @@ def build() -> Path:
     core = doc.core_properties
     core.title = "Literate-AI: the application foundry"
     core.author = "Literate AI maintainers"
-    core.subject = "1.2.0 edition narrative member of component://literate-ai/literate-ai-overview"
+    core.subject = "1.1.0 edition narrative member of component://literate-ai/literate-ai-overview"
 
     heading(doc, 1, "Literate-AI: the application foundry")
     body(
         doc,
-        "This is the 1.2.0 edition of the narrative member of "
+        "This is the 1.1.0 edition of the narrative member of "
         "component://literate-ai/literate-ai-overview. It is the comprehensive technical "
         "account that accompanies the 26-slide presentation built from deck-specification.md. "
         "Both members share the factual ledger in source-notes.md and must not diverge on a "
         "shared claim. This edition is the major/minor regeneration required before the "
-        "1.2.0 cut. Tag v1.1.0 is already published; this document describes implemented "
-        "candidate authority, does not claim that v1.2.0 is already published, and does not "
-        "grant release authority.",
+        "1.1.0 cut, the first release from the public repository. This document "
+        "describes implemented candidate authority, does not claim that v1.1.0 is "
+        "already published, and does not grant release authority.",
     )
 
     heading(doc, 2, "What problem this solves")
@@ -297,11 +297,12 @@ def build() -> Path:
         doc,
         "These figures measure catalog surface area, not maturity or Cartesian "
         "qualification. The live language Flavor matrix is Python 3.11+, C++17, Rust 2021, "
-        "JavaScript with Node.js 20+, Swift with explicit Apple/Linux/Windows toolchain "
-        "realizations, and Go. The live build-system Flavor matrix is Bazel, GNU Make, "
-        "CMake, and Cargo. Bazel is a removable preference, never hard-coded authority. The "
+        "JavaScript with Node.js 20+, TypeScript, Swift with explicit Apple/Linux/Windows "
+        "toolchain realizations, Go, Zig, and Elixir with Erlang/OTP 27+. The live "
+        "build-system Flavor matrix is Bazel, GNU Make, CMake, Cargo, and repo-man. Bazel is a removable preference, never hard-coded authority. The "
         "live operating-system Flavor matrix is macOS, Linux, and Windows. The packaging "
-        "Flavor catalog contains pip wheels, Conan, apt, Homebrew, WinGet, and Chocolatey. "
+        "Flavor catalog contains pip wheels, Conan, apt, Homebrew, WinGet, Chocolatey, "
+        "Cargo, npm, and deterministic ZIP archives. "
         "Compatible providers compose as independent selections. The current CLI provides "
         "exact, read-only multi-provider package planning and Standard-lifecycle-backed "
         "native construction and independent verification for deterministic pip wheels and "
@@ -543,7 +544,7 @@ def build() -> Path:
         "regenerate, independently verify, preflight, publish, and export back the terminal "
         "document pair using one explicit active gcloud account. Authority: "
         "docs/decisions/0034-continuous-evidence-bound-release-closure.md. This edition does "
-        "not claim that tag v1.2.0 is already published.",
+        "not claim that tag v1.1.0 is already published.",
     )
     heading(doc, 2, "Gates that remember where they stopped")
     heading(doc, 3, "Fail-fast, checkpointed, content-fingerprinted resume")
@@ -671,10 +672,10 @@ def build() -> Path:
     heading(doc, 2, "The next hardening horizon")
     body(
         doc,
-        "The 1.1 native-custody and 1.0 operator and release boundaries remain implemented: contribution sweeps, "
+        "Native custody and the 1.0 operator and release boundaries remain implemented: contribution sweeps, "
         "document-pair publication, Standard lifecycle rebind, doctor, status, acknowledged "
         "create/adopt plans, explicit conversion stages, and an installed-wheel golden path. "
-        "The 1.2 candidate adds dependency-aware bounded action scheduling, provider-neutral "
+        "The 1.1 candidate adds dependency-aware bounded action scheduling, provider-neutral "
         "cache authority, real local Debian packages, native CLI and gRPC acceptance, and "
         "repository-owned worktree placement. The next horizon remains investment framing rather than a "
         "measured delivery guarantee.",
@@ -682,18 +683,18 @@ def build() -> Path:
     heading(doc, 3, "Operator adoption is now an explicit front door")
     body(
         doc,
-        "Installed 1.2 projects retain the project-independent "
+        "Installed 1.1 projects retain the project-independent "
         "doctor, status over existing authority, lock, receipt, tracker, and host services, "
         "acknowledged create/adopt plans, and explicit wrapped, retained, drafted, and qualified "
         "stages. Original source remains release authority until current regenerative "
         "qualification. A release-candidate-wheel gate proves create through a validated hello "
         "project and adopt through a current retained receipt. These are implemented candidate "
-        "claims inherited from 1.0, not a claim that v1.2.0 is already published.",
+        "claims inherited from 1.0, not a claim that v1.1.0 is already published.",
     )
     heading(doc, 3, "Exact scheduling, cache, package, and native acceptance slices")
     body(
         doc,
-        "The 1.2 candidate projects exact lifecycle actions into a deterministic dependency "
+        "The 1.1 candidate projects exact lifecycle actions into a deterministic dependency "
         "DAG and dispatches newly ready work through bounded capability-matched slots while "
         "isolating descendant cancellation and rejecting changed recovery routes. Local and "
         "HTTPS/WebDAV cache authority projects to Bazel and sccache, and immutable test, "
@@ -747,14 +748,14 @@ def build() -> Path:
         "through an explicit retained receipt. Use the next investment cycle for production "
         "containment and operational hardening while preserving the architecture needed for "
         "many. The requested decision is production-hardening investment plus selection of "
-        "that first downstream 1.2 production adoption.",
+        "that first downstream 1.1 production adoption.",
     )
     heading(doc, 2, "Building for the portfolio")
     body(
         doc,
         "Build for the portfolio from the first application: current gates, no shortcuts, "
         "and a regeneratable knowledge system rather than another copied implementation. "
-        "The published presentation and this narrative are the 1.2.0 edition of that "
+        "The published presentation and this narrative are the 1.1.0 edition of that "
         "argument. They do not grant release authority.",
     )
 
