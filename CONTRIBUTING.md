@@ -166,9 +166,10 @@ macOS sample-composition check also exercises actual install/uninstall/reinstall
 These checks are **not release qualification** and do not upload qualified wheels.
 
 Pushes to `main` or `release/**`, PRs targeting `release/**`, version-tag pushes,
-and manual CI runs retain the complete macOS Python 3.11/3.14 qualification matrix.
-The existing independent 3.11 checkpoint partitions are preserved; 3.14 runs all
-tests. Full qualification also retains both Linux Python versions, all three
+and manual CI runs add the macOS qualification job. It runs the complete suite on
+Python 3.11 in four partitions balanced by measured module time (only the first runs
+every repository gate and the wheel check), plus a Python 3.14 smoke subset; Linux
+qualifies all of Python 3.14. Full qualification also retains both Linux Python versions, all three
 Windows test shards and Windows packaging gates. `make release-check` remains
 unchanged. Use a manual CI run on a candidate branch when full platform evidence is needed
 before merging. Require full successful exact-commit qualification before release;
