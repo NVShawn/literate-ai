@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.1.0 - 2026-10-04
+
+[README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.1.0/README.md)
+
 - Initialization: seed the starter acceptance oracle from the `hello-component`
   contract the project actually received. Projects derived with `init --from` the
   framework repository inherit its greeting-card sample (`name` plus `messages`) and
