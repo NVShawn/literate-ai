@@ -35,6 +35,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.contracts.identity import canonical_identity
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 
 
 def request_fixture(worker=None, catalog=None, deadline=None):
@@ -43,7 +44,7 @@ def request_fixture(worker=None, catalog=None, deadline=None):
     )
     catalog = catalog or ExecutionWorkerCatalog((selected,))
     deadline = deadline or ActionDispatchDeadline(
-        datetime.now(UTC) + timedelta(minutes=1)
+        datetime.now(UTC) + ACTION_TEST_DEADLINE
     )
     payload, previous = b"exact phase payload", b"accepted predecessor record"
     records = {record_identity(payload): payload, record_identity(previous): previous}
@@ -187,7 +188,7 @@ class CommandActionDispatchTests(unittest.TestCase):
             for name in ("first", "second")
         )
         catalog = ExecutionWorkerCatalog(workers)
-        deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(seconds=60))
+        deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         base, _, records = request_fixture(workers[0], catalog, deadline)
         admitted = tuple(
             LifecycleActionWorker(

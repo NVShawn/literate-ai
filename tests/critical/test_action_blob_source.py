@@ -5,7 +5,7 @@ from __future__ import annotations
 import threading
 import unittest
 from contextlib import contextmanager
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -16,6 +16,7 @@ from literate_ai.adapters.action_dispatch_wire import (
     record_identity,
 )
 from literate_ai.contracts.blobs import BlobRef
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 
 
 def blob_path(reference):
@@ -81,9 +82,7 @@ class ActionBlobSourceTests(unittest.TestCase):
         self.reference = BlobRef(
             record_identity(self.content).digest, len(self.content)
         )
-        self.deadline = ActionDispatchDeadline(
-            datetime.now(UTC) + timedelta(seconds=20)
-        )
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
 
     def test_exact_get_with_private_bearer_credential(self):
         with source_cas_server({blob_path(self.reference): self.content}) as (

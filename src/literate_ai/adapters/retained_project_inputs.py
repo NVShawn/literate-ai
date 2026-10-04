@@ -6,6 +6,7 @@ import hashlib
 import os
 import shutil
 import stat
+import sys
 import tempfile
 from collections.abc import Mapping
 from pathlib import Path
@@ -24,6 +25,19 @@ _CHUNK = 1024 * 1024
 
 class RetainedProjectInputError(ValueError):
     """An input could not be captured under its reviewed identity."""
+
+
+def _remove_tree(path: Path) -> None:
+    """Remove a capture tree, including read-only blobs Windows refuses to unlink."""
+
+    def writable_retry(function, name, _error):
+        os.chmod(name, stat.S_IWRITE | stat.S_IREAD)
+        function(name)
+
+    if sys.version_info >= (3, 12):
+        shutil.rmtree(path, onexc=writable_retry)
+    else:
+        shutil.rmtree(path, onerror=writable_retry)
 
 
 def _same_open_file(path_stat: os.stat_result, open_stat: os.stat_result) -> bool:
@@ -287,8 +301,8 @@ def capture_retained_project_inputs(
             for name in ("blobs", "tree"):
                 (temporary / name).rename(destination / name)
         except BaseException:
-            shutil.rmtree(destination)
+            _remove_tree(destination)
             raise
         return destination / "tree"
     finally:
-        shutil.rmtree(temporary)
+        _remove_tree(temporary)

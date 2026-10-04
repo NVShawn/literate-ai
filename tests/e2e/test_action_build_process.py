@@ -30,6 +30,7 @@ from literate_ai.adapters.directory_artifacts import read_directory_export
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.contracts import canonical_identity
 from tests.support import fixtures_test_action_build_source as source_fixture
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
 from tests.support.fixtures_test_action_build_action import build_request
 from tests.support.fixtures_test_action_build_record import build_worker_input
@@ -50,9 +51,7 @@ class ActionBuildProcessTests(unittest.TestCase):
         self.plan = fixture.plan
         self.input_value = build_worker_input(fixture)
         self.record = self.input_value.to_bytes()
-        self.deadline = ActionDispatchDeadline(
-            datetime.now(UTC) + timedelta(seconds=30)
-        )
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
 
     def run_child(self, code, **changes):
         inputs = changes.pop("inputs", self.inputs)

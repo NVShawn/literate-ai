@@ -2,14 +2,10 @@
 
 from __future__ import annotations
 
-import copy
 import json
 import os
-import shutil
 import stat
-import tempfile
 import unittest
-from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters import repository_refresh_application as application
@@ -21,36 +17,13 @@ from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class RepositoryRefreshApplicationTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        # Build the two-child refresh fixture once; each test works on a copy.
-        template = fixtures.RefreshFileCustodyTests()
-        template.setUp()
-        cls.addClassCleanup(template.doCleanups)
-        cls.template = template.fixture
-
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary.cleanup)
-        base = Path(temporary.name).resolve() / "fixture"
-        old = str(self.template.base).encode()
-        shutil.copytree(self.template.base, base, symlinks=True)
-        for path in base.rglob("*"):
-            if path.is_file() and not path.is_symlink() and "objects" not in path.parts:
-                data = path.read_bytes()
-                if old in data:
-                    path.write_bytes(data.replace(old, str(base).encode()))
-        source = copy.copy(self.template)
-        source.base, source.root = base, base / "super"
-        source.child, source.remote = source.root / "app", base / "app.git"
-        source.local_endpoint = str(base) + "/app.git"
-        for repository in (source.root, source.child, source.root / "lib"):
-            git(repository, "update-index", "-q", "--refresh")
         harness = fixtures.RefreshFileCustodyTests()
-        harness.fixture = source
+        harness.setUp()
+        self.addCleanup(harness.doCleanups)
         self.harness = harness
-        self.source = source
-        self.child = source.child
+        self.source = harness.fixture
+        self.child = self.source.child
 
     def publish(self):
         (self.child / "source.txt").write_bytes(b"prospective\n")

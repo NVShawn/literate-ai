@@ -27,6 +27,7 @@ from literate_ai.contracts.worker_capabilities import (
     WorkerHardwareObservationCatalog,
 )
 from tests.support import fixtures_test_command_indexer as index_fixture
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_test_action_blob_source import source_cas_server
 
 
@@ -37,7 +38,7 @@ class CommandActionAdmissionTests(unittest.TestCase):
         self.addCleanup(self.fixture.doCleanups)
         self.source = self.fixture.fixture
         self.source.deadline = ActionDispatchDeadline(
-            datetime.now(UTC) + timedelta(minutes=5)
+            datetime.now(UTC) + ACTION_TEST_DEADLINE
         )
         self.observed = WorkerHardwareObservation(
             "index",

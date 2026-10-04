@@ -7,7 +7,7 @@ import shlex
 import shutil
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 from literate_ai.adapters.action_capabilities import probe_command_action_capabilities
@@ -32,6 +32,7 @@ from literate_ai.contracts.execution_dispatch import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from tests.support import fixtures_test_action_source_index as source_fixture
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 
 
 class SshActionTransportTests(unittest.TestCase):
@@ -50,9 +51,7 @@ class SshActionTransportTests(unittest.TestCase):
             action_protocol=LIFECYCLE_ACTION_WIRE_PROTOCOL,
             action_command=self.fixture.worker.command,
         )
-        self.deadline = ActionDispatchDeadline(
-            datetime.now(UTC) + timedelta(seconds=120)
-        )
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.fixture.deadline = self.deadline
 
     def test_posix_arguments_remain_literal_and_payload_is_not_in_argv(self):

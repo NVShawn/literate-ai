@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 from dataclasses import fields, replace
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
 from literate_ai.adapters.action_command_dispatch import (
@@ -49,6 +49,7 @@ from literate_ai.contracts.identity import (
 )
 from literate_ai.contracts.source_index import generated_source_tree_identity
 from literate_ai.storage import FileSystemCAS
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
 from tests.support.fixtures_test_component_execution_planning import (
     _diamond_lock,
@@ -84,9 +85,7 @@ class SourceIndexActionTests(unittest.TestCase):
             ),
         )
         self.catalog = ExecutionWorkerCatalog((self.worker,))
-        self.deadline = ActionDispatchDeadline(
-            datetime.now(UTC) + timedelta(seconds=60)
-        )
+        self.deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         self.results = {}
         self.fixture({"source/main.py": b"print('hello')\n", "README.md": b"source\n"})
 
