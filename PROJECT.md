@@ -40,7 +40,7 @@ disposable output. The framework's own goals are:
 4. Give every generated artifact an unbroken, independently verifiable evidence chain
    from specification through lock, generation, build, and acceptance.
 5. Support a growing set of first-class implementation-language Flavors
-   (currently C++, Go, JavaScript, Python, Rust, Swift, TypeScript, Zig) and
+   (currently C++, Elixir, Go, JavaScript, Python, Rust, Swift, TypeScript, Zig) and
    build-system Flavors (currently Bazel, Make) with the same generation,
    lock, build, and acceptance rigor for each.
 6. Let a project inherit and extend another project's Components, Flavors, and skills
@@ -61,7 +61,7 @@ development (2026-09-10):
 
 | Category | Current count | Notes |
 | --- | --- | --- |
-| Language Flavors | 8 (`lang-cpp`, `lang-go`, `lang-javascript`, `lang-python`, `lang-rust`, `lang-swift`, `lang-typescript`, `lang-zig`) | Each pairs a language Flavor with a portable-application skill and a native/tree build strategy. Bare selectors (`+cpp`) still resolve. |
+| Language Flavors | 9 (`lang-cpp`, `lang-elixir`, `lang-go`, `lang-javascript`, `lang-python`, `lang-rust`, `lang-swift`, `lang-typescript`, `lang-zig`) | Each pairs a language Flavor with a portable-application skill and a native/tree build strategy. Bare selectors (`+cpp`) still resolve. |
 | Build-system Flavors | 5 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
 | OS Flavors | 3 (`os-linux`, `os-macos`, `os-windows`) | |
 | Packaging Flavors | 9 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`, `package-zip`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
@@ -83,6 +83,11 @@ PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
 standard package lifecycle. Exact accepted custody, both SBOMs, specifications,
 target identities and release authorization remain mandatory. Qualification is pending.
+
+ELIXIR-001 adds the portable Elixir/OTP application Flavor under Goal 5, including
+Standard script-tree build/runtime contracts and initialized-project assets. All
+eight focused tests pass, including native macOS smoke on Elixir 1.20.4/OTP 29;
+live generation and native Linux/Windows qualification remain release gates.
 
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework

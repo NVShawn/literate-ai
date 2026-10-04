@@ -22,6 +22,7 @@ from literate_ai.adapters.builders import (
     discover_cargo_toolchain,
     discover_cmake_toolchain,
     discover_cpp_toolchain,
+    discover_elixir_toolchain,
     discover_go_toolchain,
     discover_make_toolchain,
     discover_node_toolchain,
@@ -71,6 +72,9 @@ from literate_ai.adapters.lifecycle.standard_local import (
 )
 from literate_ai.adapters.lifecycle.standard_npm import StandardNpmTarget
 from literate_ai.adapters.lifecycle.standard_python import StandardPythonTarget
+from literate_ai.adapters.lifecycle.standard_runtime import (
+    STANDARD_ELIXIR_RUNTIME_DRIVER as _STANDARD_ELIXIR_RUNTIME_DRIVER,
+)
 from literate_ai.adapters.lifecycle.standard_runtime import (
     STANDARD_NATIVE_RUNTIME_DRIVER as _STANDARD_NATIVE_RUNTIME_DRIVER,
 )
@@ -515,7 +519,8 @@ _STANDARD_BUILD_DRIVER = compiler_driver_source(
     "assert source.is_file() or strategy in "
     "('python-tree','javascript-tree','typescript-tree');"
     "pathlib.Path(obj).mkdir(parents=True,exist_ok=True);"
-    "tree=strategy in ('python-tree','javascript-tree','typescript-tree');"
+    "tree=strategy in "
+    "('python-tree','javascript-tree','typescript-tree','elixir-tree');"
     "out.parent.mkdir(parents=True,exist_ok=True);"
     "shutil.rmtree(out) if tree and out.exists() else None;"
     "pattern=('*.py' if strategy=='python-tree' else "
@@ -523,7 +528,14 @@ _STANDARD_BUILD_DRIVER = compiler_driver_source(
     "files=sorted(pathlib.Path(root).rglob(pattern));"
     "[compile(p.read_text(encoding='utf-8'),str(p),'exec') for p in files] "
     "if strategy=='python-tree' else None;"
-    "checks=[subprocess.run([*compiler,'--check',str(p)],capture_output=True) "
+    "elixir_files=sorted(p for p in pathlib.Path(root).rglob('*') "
+    "if p.suffix in ('.ex','.exs') and p.is_file());"
+    "elixir_check='Enum.each(System.argv(), fn path -> "
+    "Code.string_to_quoted!(File.read!(path), file: path) end)';"
+    "checks=[subprocess.run([*compiler,'-e',elixir_check,'--',"
+    "*[str(p) for p in elixir_files]],capture_output=True,env=environment)] "
+    "if strategy=='elixir-tree' else "
+    "[subprocess.run([*compiler,'--check',str(p)],capture_output=True) "
     "for p in files] "
     "if strategy=='javascript-tree' else [];"
     "bad=next((p for p in checks if p.returncode),None);"
@@ -1036,6 +1048,25 @@ def _discover_toolchain(
     command = None if constraint is None else constraint.command
     minimum = None if constraint is None else constraint.minimum_version
     required = None if constraint is None else constraint.required_version
+    if name == "elixir":
+        try:
+            return discover_elixir_toolchain(
+                environment,
+                pinned_command=command,
+                minimum_version=minimum or (1, 18),
+                required_version=required,
+            )
+        except BuildError as exc:
+            remediation = (
+                constraint.remediation
+                if constraint is not None and constraint.remediation
+                else "Install Elixir 1.18+ with Erlang/OTP 27+ "
+                "and expose elixir on PATH."
+            )
+            code = "unavailable" if exc.code.endswith("_unavailable") else "invalid"
+            raise StandardCommandProjectionError(
+                f"standard_command.elixir_toolchain_{code}", f"{exc}; {remediation}"
+            ) from exc
     if name == "python":
         return discover_python_toolchain(
             environment,
@@ -1209,6 +1240,17 @@ def _runtime_command(
         if entrypoint_relative is None
         else entrypoint_relative
     )
+    if profile.runtime_strategy is StandardLanguageRuntimeStrategy.ELIXIR:
+        return (
+            "{tool}",
+            "-e",
+            _STANDARD_ELIXIR_RUNTIME_DRIVER,
+            "--",
+            *common,
+            layout,
+            relative,
+            mode,
+        )
     if profile.runtime_strategy is StandardLanguageRuntimeStrategy.PYTHON:
         return (
             "{tool}",
@@ -1781,6 +1823,7 @@ def _command_contract(
     elif language.runtime_strategy in {
         StandardLanguageRuntimeStrategy.PYTHON,
         StandardLanguageRuntimeStrategy.JAVASCRIPT,
+        StandardLanguageRuntimeStrategy.ELIXIR,
     }:
         runtime_tool = compiler
     else:

@@ -207,6 +207,7 @@ def _locked_snapshot(
             flavors / f"lang-{language}",
         )
         skill_by_language = {
+            "elixir": "elixir-portable-application",
             "cpp": "cpp17-portable-json-application",
             "javascript": "javascript-portable-json-application",
             "rust": "rust-portable-json-application",
