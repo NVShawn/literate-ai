@@ -1,34 +1,23 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_provider_authority``."""
 
 import json
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from unittest import mock
 
 from literate_ai.adapters.authority import FileAuthorityProjectionStore
-
 from literate_ai.adapters.qualification_authority import qualification_verifier_case_map
-
 from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
-
 from literate_ai.adapters.retained_provider_authority import (
     read_retained_provider_authority,
 )
-
 from literate_ai.adapters.standard_lifecycle_binding import (
     StandardLifecycleBindingError,
     resolve_standard_project_lifecycle_driver,
 )
-
 from literate_ai.authority import ComponentAuthorityLifecycle
-
 from literate_ai.contracts import (
     ContentIdentity,
     RepositoryLineage,
@@ -37,26 +26,26 @@ from literate_ai.contracts import (
     canonical_identity,
     load_current_standard_lifecycle_policy,
 )
-
 from literate_ai.projects import PinnedInputClosureError, ProjectConfigurationStore
-
 from literate_ai.source_to_specification.host_qualification import (
     LocalQualificationCase,
     LocalQualificationProfile,
 )
-
 from literate_ai.source_to_specification.promotion_materialization import (
     SOURCE_PROMOTION_PROVENANCE_SCHEMA,
     SourcePromotionError,
 )
-
-from tests.support import fixtures_test_qualification_lifecycle_runner as lifecycle_fixtures
-
-from tests.support import fixtures_test_retained_provider_generation as generation_fixtures
-
-from tests.support import fixtures_test_standard_lifecycle_binding_adapter as binding_fixtures
-
+from tests.support import (
+    fixtures_test_qualification_lifecycle_runner as lifecycle_fixtures,
+)
+from tests.support import (
+    fixtures_test_retained_provider_generation as generation_fixtures,
+)
+from tests.support import (
+    fixtures_test_standard_lifecycle_binding_adapter as binding_fixtures,
+)
 from tests.support.fixtures_test_project_configuration import _definition
+
 
 class RetainedProviderAuthorityTests(unittest.TestCase):
     generation_fixture_class = generation_fixtures.RetainedProviderGenerationTests
@@ -285,4 +274,3 @@ class RetainedProviderAuthorityTests(unittest.TestCase):
         ):
             current.require_unchanged()
         self.assertEqual(path.read_bytes(), b"changed while reopening promotion\n")
-

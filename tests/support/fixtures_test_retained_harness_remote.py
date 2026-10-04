@@ -1,23 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_retained_harness_remote``."""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 from literate_ai.contracts import (
@@ -36,4 +19,3 @@ def _worker() -> ExecutionWorker:
         requirements=ExecutionRequirements(os_family="linux"),
         lifecycle_executable="~/.local/bin/litai",
     )
-

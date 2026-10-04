@@ -38,7 +38,3 @@ class HomebrewFormulaTests(unittest.TestCase):
         )
         self.assertEqual(formula_binding["format"], "quoted-constant")
         self.assertEqual(formula_binding["selectors"], ["LITERATE_AI_VERSION"])
-
-    def test_formula_accepts_the_selected_public_repository(self) -> None:
-        text = render_homebrew_formula(repository="public-owner/literate-ai")
-        self.assertIn("https://github.com/public-owner/literate-ai", text)

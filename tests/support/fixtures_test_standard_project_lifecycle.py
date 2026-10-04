@@ -1,26 +1,18 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_project_lifecycle``."""
 
 import hashlib
-
 import json
-
 import threading
-
 import unittest
-
 from collections import Counter
-
 from contextlib import contextmanager
-
 from dataclasses import dataclass, replace
-
 from datetime import UTC, datetime, timedelta
-
 from unittest.mock import PropertyMock, patch
 
 from literate_ai.adapters.models.coding_cli import CodingCliError
-
 from literate_ai.adapters.qualification_capture import (
     QualificationCaptureError,
     QualificationEvidenceReader,
@@ -30,33 +22,27 @@ from literate_ai.adapters.qualification_capture import (
     reopen_qualification_root,
     reopen_qualification_run,
 )
-
 from literate_ai.application.artifact_graph import (
     create_artifact_build_graph,
     create_composite_build_request,
     create_package_plan,
     realize_manifest,
 )
-
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-
 from literate_ai.application.component_generation_context import (
     PreparedComponentGenerationRequest,
     prepare_component_generation_context,
 )
-
 from literate_ai.application.component_generation_preparation import (
     ComponentGenerationWorkspaceDescriptor,
     PreparedComponentGenerationNode,
 )
-
 from literate_ai.application.standard_lifecycle_membership import (
     StandardLifecycleMembershipError,
     assemble_standard_lifecycle_membership,
 )
-
 from literate_ai.application.standard_project_lifecycle import (
     StandardBuildAuthorization,
     StandardBuildOutput,
@@ -67,7 +53,6 @@ from literate_ai.application.standard_project_lifecycle import (
     StandardProjectLifecycleService,
     StandardSourceCacheMembership,
 )
-
 from literate_ai.contracts import (
     ComponentLock,
     StandardLifecycleCheckpointOutcome,
@@ -80,11 +65,8 @@ from literate_ai.contracts import (
     StandardSourceSelectorSet,
     StandardSourceTestResult,
 )
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.capabilities import DependencyKind
-
 from literate_ai.contracts.executable_components import (
     ArtifactExport,
     ArtifactMaterializationPlan,
@@ -111,35 +93,33 @@ from literate_ai.contracts.executable_components import (
     create_forward_generation_context_cache_entry,
     create_forward_generation_prompt_journal,
 )
-
 from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
     canonical_json_bytes,
 )
-
 from literate_ai.diagnostics import verbose_diagnostics, verbose_enabled
-
 from literate_ai.security import BuildAuthorization, BuildRequest, SecurityProfile
-
-from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
-
+from tests.support.fixtures_test_component_execution_planning import (
+    _diamond_lock,
+    _models,
+)
 from tests.support.fixtures_test_component_generation_context import (
     _budget as _context_budget,
 )
-
 from tests.support.fixtures_test_component_generation_context import (
     _materialize,
 )
-
 from tests.support.fixtures_test_component_generation_scheduling import (
     _decision,
     _names,
     _prepared_execution,
 )
 
+
 def _identity(label: str):
     return canonical_identity({"standard-lifecycle": label})
+
 
 def _source_record(name: str) -> tuple[ContentIdentity, BlobRef, bytes, BlobRef, bytes]:
     tree_identity = canonical_identity({"generated": name})
@@ -162,6 +142,7 @@ def _source_record(name: str) -> tuple[ContentIdentity, BlobRef, bytes, BlobRef,
         media_type="application/vnd.literate-ai.generated-source-tree+json",
     )
     return tree_identity, file_blob, file_bytes, record_blob, record_bytes
+
 
 def command_contract_fixture(
     revision,
@@ -230,10 +211,12 @@ def command_contract_fixture(
         ),
     )
 
+
 @dataclass(frozen=True)
 class _Recipe:
     identity: object
     component_lock_identity: object
+
 
 def _prepared_nodes(execution, requests):
     return {
@@ -256,6 +239,7 @@ def _prepared_nodes(execution, requests):
         for plan in execution.generation_plans
     }
 
+
 def _prepared_execution_with_budget(lock, budget):
     execution = plan_component_execution(lock, model_identities=_models(lock))
     prepared = {}
@@ -271,6 +255,7 @@ def _prepared_execution_with_budget(lock, budget):
         plans.append(plan)
         prepared[plan.component_revision.uri] = request
     return replace(execution, generation_plans=tuple(plans)), prepared
+
 
 def _root_bound_prepared_nodes(execution, requests):
     """Give otherwise shared nodes distinct application-root custody."""
@@ -313,6 +298,7 @@ def _root_bound_prepared_nodes(execution, requests):
         for plan in execution.generation_plans
     }
 
+
 def _single_component_lock(lock: ComponentLock, name: str) -> ComponentLock:
     node = next(item for item in lock.nodes if item.revision.coordinate.name == name)
     authoring = next(
@@ -330,6 +316,7 @@ def _single_component_lock(lock: ComponentLock, name: str) -> ComponentLock:
         edges=(),
         _authorings=(authoring,),
     )
+
 
 class LifecyclePorts:
     def __init__(
@@ -896,6 +883,7 @@ class LifecyclePorts:
         self.issued_receipts.append(receipt)
         return receipt.identity
 
+
 class ContractEvidenceLifecyclePorts(LifecyclePorts):
     """Typed stage contract fixture; it does not compile or qualify native source."""
 
@@ -1266,16 +1254,19 @@ class ContractEvidenceLifecyclePorts(LifecyclePorts):
         super().accept(plan, test_identity, execution_identity)
         return self.typed_acceptances[plan.component_revision.uri]
 
+
 class _VerboseContextPorts(LifecyclePorts):
     def publish(self, membership):
         if not verbose_enabled():
             raise RuntimeError("verbose context was not propagated")
         return super().publish(membership)
 
+
 class MismatchedAuthorizationPorts(LifecyclePorts):
     def authorize(self, intent, index):
         authorization = super().authorize(intent, index)
         return replace(authorization, index_identity=_identity("another-index"))
+
 
 class MismatchedGrantPorts(LifecyclePorts):
     def authorize(self, intent, index):
@@ -1287,6 +1278,7 @@ class MismatchedGrantPorts(LifecyclePorts):
                 request_digest=_identity("another-build-request").uri,
             ),
         )
+
 
 class ExpiredAuthorizationPorts(LifecyclePorts):
     def authorize(self, intent, index):
@@ -1300,13 +1292,16 @@ class ExpiredAuthorizationPorts(LifecyclePorts):
             ),
         )
 
+
 class MismatchedReceiptPorts(LifecyclePorts):
     def issue(self, receipt):
         super().issue(receipt)
         return _identity("another-receipt")
 
+
 class _UnsafePhaseError(RuntimeError):
     code = "../../secret token"
+
 
 class PhaseFailurePorts(LifecyclePorts):
     def __init__(self, execution, names, phase):
@@ -1381,8 +1376,10 @@ class PhaseFailurePorts(LifecyclePorts):
         self._fail("publish", name)
         return super().publish(membership)
 
+
 class _RepairableBuildError(RuntimeError):
     code = "builder.generated-source-rejected"
+
 
 class RepairableBuildPorts(LifecyclePorts):
     def __init__(self, execution, names, *, rejected_attempts):
@@ -1396,6 +1393,7 @@ class RepairableBuildPorts(LifecyclePorts):
             self._record("build", name)
             raise _RepairableBuildError("relative/money.cc: declaration rejected")
         return super().build(plan, provider_artifacts)
+
 
 class _RepairPort:
     def __init__(self):
@@ -1437,6 +1435,7 @@ class _RepairPort:
         self.preparations.append(prepared)
         return prepared
 
+
 class PackagedExecutionFailurePorts(LifecyclePorts):
     def execute_packaged_project(
         self, component_lock, execution_plan, project_build_plan, plan, result
@@ -1444,12 +1443,14 @@ class PackagedExecutionFailurePorts(LifecyclePorts):
         self._record("execute-package")
         raise RuntimeError("packaged execution failed")
 
+
 class _CheckpointRecorder:
     def __init__(self):
         self.evidence = []
 
     def record(self, evidence):
         self.evidence.append(evidence)
+
 
 class _ContextEvidenceRecorder:
     """In-memory unit seam with the same exact projections as the durable adapter."""
@@ -1489,7 +1490,9 @@ class _ContextEvidenceRecorder:
             tuple(self._records[key][2] for key in sorted(self._records))
         )
 
+
 _DEFAULT_CONTEXT_RECORDER = object()
+
 
 def _service(
     ports,
@@ -1527,6 +1530,7 @@ def _service(
         clock=lambda: datetime(2026, 8, 7, 0, 1, tzinfo=UTC),
     )
 
+
 def _accepted(plan, prepared, name, exports, output):
     request = prepared.request
     generation = SourceGenerationResumeCandidate(
@@ -1553,6 +1557,7 @@ def _accepted(plan, prepared, name, exports, output):
             acceptance,
         ),
     )
+
 
 class StandardProjectLifecycleTests(unittest.TestCase):
     def test_retained_candidate_still_requires_all_acceptance_gates(self):
@@ -4442,12 +4447,8 @@ class StandardProjectLifecycleTests(unittest.TestCase):
             )
         )
 
+
 if __name__ == "__main__":
     unittest.main()
 
-from literate_ai.contracts.identity import canonical_identity  # noqa: F401
-from tests.support.fixtures_test_component_execution_planning import _diamond_lock  # noqa: F401
-from tests.support.fixtures_test_component_generation_scheduling import _decision  # noqa: F401
-from tests.support.fixtures_test_component_generation_scheduling import _names  # noqa: F401
-from tests.support.fixtures_test_component_generation_scheduling import _prepared_execution  # noqa: F401
 # NOTE: names not defined at top level of tests.unit.test_standard_project_lifecycle: ['_decision', '_diamond_lock', '_names', '_prepared_execution', 'canonical_identity']

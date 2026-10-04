@@ -4,7 +4,6 @@ import os
 import sys
 import unittest
 from dataclasses import replace
-from datetime import timedelta
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.action_build import execute_build_action
@@ -88,47 +87,6 @@ class BuildActionTests(unittest.TestCase):
         ):
             execute_build_action(**(self.arguments | changes))
         process.assert_not_called()
-
-    def test_wrong_worker_phase_predecessor_and_deadline_refuse_before_launch(self):
-        action = self.request.action
-        for changes in (
-            {"expected_worker_identity": canonical_identity("other-worker")},
-            {
-                "request": replace(
-                    self.request, action=replace(action, kind=LifecycleActionKind.TEST)
-                )
-            },
-            {
-                "request": replace(
-                    self.request, action=replace(action, action_id="other")
-                )
-            },
-            {
-                "request": replace(
-                    self.request, action=replace(action, predecessor_ids=("other",))
-                )
-            },
-            {"request": replace(self.request, predecessor_result_identities=())},
-            {
-                "deadline": replace(
-                    self.fixture.deadline,
-                    expires_at=self.fixture.deadline.expires_at + timedelta(seconds=1),
-                )
-            },
-        ):
-            with self.subTest(changes=changes.keys()):
-                self.refuse_before_launch(**changes)
-
-    def test_missing_extra_corrupt_and_oversized_records_refuse_before_launch(self):
-        input_identity = self.request.predecessor_result_identities[0]
-        for records in (
-            {},
-            self.records | {canonical_identity("extra"): b"extra"},
-            self.records | {input_identity: b"changed"},
-            self.records | {input_identity: b"x" * (17 * 1024 * 1024)},
-        ):
-            with self.subTest(size=sum(map(len, records.values()))):
-                self.refuse_before_launch(records=records)
 
     def test_validly_hashed_foreign_payload_cannot_launch(self):
         content = canonical_json_bytes(

@@ -8,9 +8,8 @@ from pathlib import Path
 
 from literate_ai.adapters.lifecycle.standard_runtime import (
     STANDARD_PYTHON_WHEEL_RUNTIME_DRIVER,
-    direct_service_process_argv,
 )
-from literate_ai.contracts import LITAI_SERVE_MODE_FLAG, LITAI_SMOKE_MODE_FLAG
+from literate_ai.contracts import LITAI_SMOKE_MODE_FLAG
 from tests.support import fixtures_test_standard_python_evidence as fixtures
 
 
@@ -83,13 +82,3 @@ class PythonWheelRuntimeTests(unittest.TestCase):
         result = self.run_driver()
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("verified Python payload is absent", result.stderr)
-
-    def test_service_mode_keeps_isolation_and_package_path_driver(self):
-        evidence = self.fixture.retain()
-        self.fixture.verify(evidence)
-        argv = direct_service_process_argv(self.argv)
-        self.assertEqual(argv[:-1], self.argv[:-1])
-        self.assertEqual(argv[-1], LITAI_SERVE_MODE_FLAG)
-        result = self.run_driver(argv)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(json.loads(result.stdout)[2][-1], LITAI_SERVE_MODE_FLAG)

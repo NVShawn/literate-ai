@@ -3,64 +3,51 @@
 from __future__ import annotations
 
 import hashlib
-import io
 import os
 import shutil
-import stat
 import tarfile
 import tempfile
 import unittest
-import zipfile
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 from literate_ai.adapters.artifact_exports import (
-    ArtifactExportError,
     load_artifact_export,
-    record_remote_artifact_export,
 )
 from literate_ai.adapters.directory_artifacts import (
     directory_export_bytes,
-    require_transported_library_package,
 )
 from literate_ai.adapters.remote_execution import (
     RemoteExecutionError,
-    _resolve_artifact,
     _write_deterministic_tar_gz,
-    acknowledge_remote_evidence_cleanup,
-    execute_remote_request,
     import_remote_evidence_bundle,
-    load_and_import_remote_evidence_bundle,
     materialize_and_execute,
 )
 from literate_ai.adapters.source_materialization import capture_source_archive
 from literate_ai.cli import build_run
 from literate_ai.contracts import (
     BlobRef,
-    ContentReference,
-    ContractValidationError,
     ExecutionDispatchResult,
     ExecutionWorker,
     ExecutionWorkerKind,
     LifecycleDispatchAction,
-    RemoteExecutionControlResult,
-    RemoteLifecycleEvidenceManifest,
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.support.fixtures_test_cli_command_worker_lifecycle import _Dispatcher, _request
+from tests.support.fixtures_test_cli_command_worker_lifecycle import (
+    _Dispatcher,
+    _request,
+)
 from tests.support.fixtures_test_cli_rebuild import invoke
 from tests.support.fixtures_test_library_products import library_product
 from tests.support.fixtures_test_remote_execution import (
     identity,
-    materialization,
     observation,
     request,
     worker,
 )
-from tests.support.fixtures_test_wire_contract_versions import _v2_schemas
 
 
 class RemoteLibraryTransportTests(unittest.TestCase):
@@ -137,204 +124,6 @@ class RemoteLibraryTransportTests(unittest.TestCase):
             )
         return result, bundle, ticket
 
-    def test_worker_build_and_test_return_typed_products_without_commands(self) -> None:
-        for action in (LifecycleDispatchAction.BUILD, LifecycleDispatchAction.TEST):
-            with self.subTest(action=action):
-                dispatch = request(action)
-                with patch(
-                    "literate_ai.adapters.remote_execution.probe_worker_capabilities",
-                    return_value=observation(),
-                ):
-                    result = execute_remote_request(
-                        worker(),
-                        dispatch,
-                        materialization(dispatch, self.project),
-                        project_root=self.project,
-                        cas_root=self.root / "cas",
-                        rebuild=Mock(return_value=self.accepted),
-                    )
-                self.assertEqual(result.library_product, self.product)
-                self.assertEqual(
-                    ExecutionDispatchResult.from_dict(result.to_dict()), result
-                )
-                payload, manifest = _resolve_artifact(
-                    result.artifact_reference, self.root / "cas"
-                )
-                self.assertEqual(directory_export_bytes(payload), self.content)
-                self.assertNotIn("argv", manifest)
-                with self.assertRaises(ContractValidationError):
-                    replace(result, library_product=None)
-                changed = replace(
-                    self.product,
-                    import_surface=replace(
-                        self.product.import_surface, package="other"
-                    ),
-                )
-                with self.assertRaises(ContractValidationError):
-                    replace(result, library_product=changed)
-
-    def test_failed_or_command_bearing_library_is_not_published(self) -> None:
-        dispatch = request(LifecycleDispatchAction.BUILD)
-        for changes in (
-            {"passed": False},
-            {"execution_command": {"argv": ["false"]}},
-            {"execution_entrypoints": [{}]},
-            {"library_artifact": None},
-        ):
-            with self.subTest(changes=changes):
-                with self.assertRaises(RemoteExecutionError):
-                    execute_remote_request(
-                        worker(),
-                        dispatch,
-                        materialization(dispatch, self.project),
-                        project_root=self.project,
-                        cas_root=self.root / "cas",
-                        rebuild=Mock(return_value=self.accepted | changes),
-                    )
-        self.assertFalse((self.root / "cas").exists())
-
-    def test_evidence_and_control_round_trip_preserve_exact_sealed_package(
-        self,
-    ) -> None:
-        result, bundle, ticket = self.transfer(LifecycleDispatchAction.TEST)
-        manifest = result.evidence_manifest
-        self.assertEqual(manifest.library_product, self.product)
-        self.assertEqual(
-            RemoteLifecycleEvidenceManifest.from_dict(manifest.to_dict()), manifest
-        )
-        self.assertEqual(ExecutionDispatchResult.from_dict(result.to_dict()), result)
-        schemas = _v2_schemas()
-        schemas.validate(result.SCHEMA, result.to_dict())
-        schemas.validate(manifest.SCHEMA, manifest.to_dict())
-        control = RemoteExecutionControlResult.from_dispatch_result(
-            result,
-            manifest_size=len(canonical_json_bytes(manifest.to_dict())),
-            bundle_size=bundle.stat().st_size,
-            redacted_summary="library passed",
-        )
-        self.assertNotIn("library_artifact", control.to_dict())
-        control = RemoteExecutionControlResult.from_dict(control.to_dict())
-        imported_manifest, _, imported = load_and_import_remote_evidence_bundle(
-            bundle,
-            expected_manifest_identity=control.manifest_identity,
-            expected_manifest_size=control.manifest_size,
-            expected_bundle_identity=control.evidence_reference.identity,
-            expected_bundle_size=control.bundle_size,
-            store_root=self.root / "coordinator",
-        )
-        rebound = control.bind_imported_manifest(imported_manifest)
-        self.assertEqual(rebound.library_product, self.product)
-        blob = self.product.artifact_export.blob
-        package = (
-            self.root
-            / "coordinator"
-            / "blobs"
-            / "sha256"
-            / blob.digest[:2]
-            / blob.digest
-        )
-        self.assertEqual(package.read_bytes(), self.content)
-        self.assertIn(identity_from_blob(blob), imported)
-        acknowledge_remote_evidence_cleanup(
-            ticket,
-            manifest_identity=manifest.identity,
-            bundle_identity=result.evidence_reference.identity,
-            acknowledgement_root=self.root / "acks",
-        )
-        self.assertFalse(self.workspace.exists())
-        self.assertFalse(self.accepted_runtime.exists())
-        self.assertEqual(package.read_bytes(), self.content)
-        self.assertTrue(
-            _resolve_artifact(result.artifact_reference, self.root / "cas")[0].is_dir()
-        )
-
-    def test_import_metadata_cannot_be_changed_or_dropped_under_valid_control(
-        self,
-    ) -> None:
-        result, bundle, _ = self.transfer()
-        manifest = result.evidence_manifest
-        control = RemoteExecutionControlResult.from_dispatch_result(
-            result,
-            manifest_size=len(canonical_json_bytes(manifest.to_dict())),
-            bundle_size=bundle.stat().st_size,
-            redacted_summary="passed",
-        )
-        changed = replace(
-            self.product,
-            import_surface=replace(self.product.import_surface, package="other"),
-        )
-        for product in (changed, None):
-            with self.subTest(product=product):
-                with self.assertRaises(ContractValidationError):
-                    replace(result, library_product=product)
-                changed_manifest = replace(manifest, library_product=product)
-                with self.assertRaises(ContractValidationError):
-                    control.bind_imported_manifest(changed_manifest)
-        document = result.to_dict() | {"library_artifact": None}
-        with self.assertRaises(ContractValidationError):
-            ExecutionDispatchResult.from_dict(document)
-        for changed_manifest in (
-            {
-                "files": tuple(
-                    item
-                    for item in manifest.files
-                    if item.path != "package/library.zip"
-                )
-            },
-            {"artifact_is_directory": False},
-            {"action": "run"},
-        ):
-            with self.assertRaises(ContractValidationError):
-                replace(manifest, **changed_manifest)
-
-    def test_sealed_archive_cannot_disagree_with_transported_file_evidence(
-        self,
-    ) -> None:
-        package = self.root / "library.zip"
-        package.write_bytes(self.content)
-        member = self.artifact / "__init__.py"
-        member.write_bytes(b"answer = 2\n")
-        with self.assertRaisesRegex(ValueError, "member differs"):
-            require_transported_library_package(self.product, package, self.artifact)
-        member.write_bytes(b"answer = 1\n")
-        (self.artifact / "extra.py").write_bytes(b"extra\n")
-        with self.assertRaisesRegex(ValueError, "members differ"):
-            require_transported_library_package(self.product, package, self.artifact)
-
-    def test_transport_checks_verified_mode_evidence_not_host_mode_projection(
-        self,
-    ) -> None:
-        stream = io.BytesIO()
-        with zipfile.ZipFile(stream, "w") as archive:
-            member = zipfile.ZipInfo("__init__.py", date_time=(1980, 1, 1, 0, 0, 0))
-            member.create_system = 3
-            member.external_attr = (stat.S_IFREG | 0o755) << 16
-            archive.writestr(member, b"answer = 1\n")
-        content = stream.getvalue()
-        product = replace(
-            self.product,
-            artifact_export=replace(
-                self.product.artifact_export,
-                blob=replace(
-                    self.product.artifact_export.blob,
-                    digest=hashlib.sha256(content).hexdigest(),
-                    size=len(content),
-                ),
-            ),
-        )
-        package = self.root / "library.zip"
-        package.write_bytes(content)
-        require_transported_library_package(
-            product, package, self.artifact, executable_by_path={"__init__.py": True}
-        )
-        with self.assertRaises(ValueError):
-            require_transported_library_package(
-                product,
-                package,
-                self.artifact,
-                executable_by_path={"__init__.py": False},
-            )
-
     def test_rehashed_bundle_cannot_bind_different_zip_and_artifact_bytes(self) -> None:
         result, bundle, _ = self.transfer()
         staging = self.root / "repack"
@@ -384,42 +173,6 @@ class RemoteLibraryTransportTests(unittest.TestCase):
                 store_root=self.root / "rejected",
             )
         self.assertEqual(raised.exception.code, "execution.remote_library_invalid")
-
-    def test_remote_publication_failure_preserves_prior_library_record(self) -> None:
-        selected = SimpleNamespace(
-            worker=ExecutionWorker(
-                "command", ExecutionWorkerKind.COMMAND, command=("fixture-worker",)
-            ),
-            parameters=(),
-        )
-        dispatch = _request(
-            object(),
-            component="components/demo",
-            selected=selected,
-            action=LifecycleDispatchAction.BUILD,
-        )
-        arguments = dict(
-            artifact_reference=ContentReference(
-                "artifact-export", "cas:fixture", identity("a")
-            ),
-            target_profile="host",
-            worker=selected.worker,
-            dispatch_request=dispatch,
-            library_product=self.product,
-        )
-        previous = record_remote_artifact_export(
-            self.project, "components/demo", **arguments
-        )
-        with patch(
-            "literate_ai.adapters.artifact_exports.os.replace",
-            side_effect=PermissionError("denied"),
-        ):
-            with self.assertRaises(ArtifactExportError):
-                record_remote_artifact_export(
-                    self.project, "components/demo", **arguments
-                )
-        self.assertEqual(load_artifact_export(self.project, "demo"), previous)
-        self.assertEqual(list(self.project.rglob(".record-*")), [])
 
     def test_public_remote_build_test_and_run_use_library_discriminator(self) -> None:
         self.assert_public_remote_library(

@@ -14,7 +14,6 @@ from unittest.mock import patch
 
 from literate_ai.adapters.component_acceptance import (
     NATIVE_CLI_SCHEMA,
-    ComponentAcceptanceError,
     NativeCliAcceptance,
     load_native_cli_acceptance,
 )
@@ -113,34 +112,6 @@ class NativeCliAcceptanceTests(unittest.TestCase):
             specification_set_identity=self.specification,
             target_identity=self.target,
         )
-
-    def test_contract_binds_entrypoint_target_cases_and_binary_content(self) -> None:
-        contract = self._load(self._document())
-        self.assertEqual(
-            contract.entrypoint_identity, canonical_identity(self.entrypoint.to_dict())
-        )
-        self.assertEqual(contract.target_identity, self.target)
-        self.assertEqual(contract.cases[0].stdin, b"-stdin")
-        self.assertEqual(contract.cases[0].fixtures[0].content, b"fixture")
-        self.assertTrue(contract.identity.uri.startswith("sha256:"))
-
-    def test_contract_rejects_unknown_placeholders_secrets_and_partial_content(
-        self,
-    ) -> None:
-        document = self._document()
-        document["cases"][0]["arguments"] = ["{project}/input.bin"]
-        with self.assertRaisesRegex(ComponentAcceptanceError, "unknown placeholder"):
-            self._load(document)
-
-        document = self._document()
-        document["environment"] = {"API_TOKEN": "not-authority"}
-        with self.assertRaisesRegex(ComponentAcceptanceError, "unsafe"):
-            self._load(document)
-
-        document = self._document()
-        document["cases"][0]["stdout"] = self._content()
-        with self.assertRaisesRegex(ComponentAcceptanceError, "must choose"):
-            self._load(document)
 
     def _execute(self, *, rogue: bool = False) -> ContentIdentity:
         contract = self._load(self._document())

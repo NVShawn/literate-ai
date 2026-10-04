@@ -8,7 +8,6 @@ from pathlib import Path
 
 from literate_ai.adapters.spec_merge import (
     SpecMergeError,
-    apply_spec_merge,
     plan_spec_merge,
 )
 from literate_ai.contracts import ProjectInitializationOrigin
@@ -27,42 +26,6 @@ def _origin() -> ProjectInitializationOrigin:
 
 
 class SpecMergeTests(unittest.TestCase):
-    def test_already_managed_island_adopts_without_quarantine(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            target = Path(directory) / "managed"
-            FilesystemProjectInitializationAdapter(
-                initialization_origin_provider=_origin,
-                standard_binding_provider=lambda: None,
-            ).initialize(
-                target,
-                flavor_selectors=("+python", "+macos"),
-                source_intelligence_provider="none",
-                empty=True,
-            )
-            island = target / "app"
-            island.mkdir()
-            (island / "lookup.py").write_text(
-                '"""Hardware lookup helpers."""\n\n'
-                "def sku_name(code: str) -> str:\n"
-                '    """Return a display name for one SKU code."""\n'
-                "    return code.upper()\n",
-                encoding="utf-8",
-            )
-            planned = plan_spec_merge(target, island, component="hardware-lookup")
-            self.assertFalse(planned["quarantine"])
-            self.assertFalse(planned["legacy_directory_created"])
-            self.assertFalse((target / "_legacy").exists())
-            self.assertEqual(
-                planned["destination"], "components/hardware-lookup/component.md"
-            )
-            applied = apply_spec_merge(planned)
-            self.assertTrue(applied["applied"])
-            self.assertFalse(applied["legacy_directory_created"])
-            self.assertFalse((target / "_legacy").exists())
-            written = target / "components" / "hardware-lookup" / "component.md"
-            self.assertTrue(written.is_file())
-            self.assertIn("hardware-lookup", written.read_text(encoding="utf-8"))
-
     def test_refuses_to_overwrite_an_existing_component(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / "managed"

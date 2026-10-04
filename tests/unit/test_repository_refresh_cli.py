@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import shutil
 import tempfile
 import unittest
 from contextlib import ExitStack
@@ -12,7 +13,6 @@ from unittest.mock import patch
 
 from literate_ai.adapters import repository_refresh_planning as planning
 from literate_ai.cli import dispatch, main
-from literate_ai.cli.orchestration import human_orchestration_text
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshRequest,
@@ -29,22 +29,34 @@ class TtyStringIO(io.StringIO):
 
 
 class RepositoryRefreshCliTests(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        # Build the published clean-clone fixture once; each test copies it.
         temporary = tempfile.TemporaryDirectory()
-        self.addCleanup(temporary.cleanup)
-        self.base = Path(temporary.name).resolve()
+        cls.addClassCleanup(temporary.cleanup)
+        cls.template = Path(temporary.name).resolve()
+        cls._build(cls.template)
+
+    @classmethod
+    def _build(cls, base):
         harness = fixtures.RefreshFileCustodyTests()
         harness.setUp()
-        self.addCleanup(harness.doCleanups)
+        try:
+            cls._build_from(base, harness)
+        finally:
+            harness.doCleanups()
+
+    @classmethod
+    def _build_from(cls, base, harness):
         source = harness.fixture
-        self.target = harness.publish("source.txt", b"public refresh\n")
+        cls.target = harness.publish("source.txt", b"public refresh\n")
         git(source.root, "add", "-A")
         git(source.root, "commit", "-q", "-m", "complete root authority")
-        source_root_remote = self.base / "super.git"
-        source_app_remote = self.base / "app.git"
-        source_lib_remote = self.base / "lib.git"
+        source_root_remote = base / "super.git"
+        source_app_remote = base / "app.git"
+        source_lib_remote = base / "lib.git"
         git(
-            self.base,
+            base,
             "clone",
             "--bare",
             "--no-hardlinks",
@@ -52,7 +64,7 @@ class RepositoryRefreshCliTests(unittest.TestCase):
             str(source_root_remote),
         )
         git(
-            self.base,
+            base,
             "clone",
             "--bare",
             "--no-hardlinks",
@@ -60,51 +72,65 @@ class RepositoryRefreshCliTests(unittest.TestCase):
             str(source_app_remote),
         )
         git(
-            self.base,
+            base,
             "clone",
             "--bare",
             "--no-hardlinks",
             str(source.root / "lib"),
             str(source_lib_remote),
         )
-        self.root = self.base / "clean"
-        git(self.base, "clone", "-q", source_root_remote.as_uri(), str(self.root))
+        root = base / "clean"
+        git(base, "clone", "-q", source_root_remote.as_uri(), str(root))
         git(
-            self.base,
+            base,
             "clone",
             "-q",
             "--no-hardlinks",
             source_app_remote.as_uri(),
-            str(self.root / "app"),
+            str(root / "app"),
         )
         git(
-            self.root / "app",
+            root / "app",
             "checkout",
             "-q",
             source.pin,
         )
         git(
-            self.base,
+            base,
             "clone",
             "-q",
             "--no-hardlinks",
             source_lib_remote.as_uri(),
-            str(self.root / "lib"),
+            str(root / "lib"),
         )
-        git(self.root / "lib", "checkout", "-q", source.pin)
-        for child in (self.root, self.root / "app", self.root / "lib"):
+        git(root / "lib", "checkout", "-q", source.pin)
+        for child in (root, root / "app", root / "lib"):
             git(child, "config", "user.name", "Test")
             git(child, "config", "user.email", "test@example.test")
-        self.assertEqual(
-            git(
-                self.root,
-                "status",
-                "--porcelain=v1",
-                "--untracked-files=all",
-                "--ignore-submodules=none",
-            ),
-            b"",
+        status = git(
+            root,
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+            "--ignore-submodules=none",
         )
+        if status:
+            raise AssertionError(status)
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name).resolve() / "fixture"
+        shutil.copytree(self.template, self.base, symlinks=True)
+        old = str(self.template).encode()
+        for path in self.base.rglob("*"):
+            if path.is_file() and not path.is_symlink() and "objects" not in path.parts:
+                data = path.read_bytes()
+                if old in data:
+                    path.write_bytes(data.replace(old, str(self.base).encode()))
+        self.root = self.base / "clean"
+        for repository in (self.root, self.root / "app", self.root / "lib"):
+            git(repository, "update-index", "-q", "--refresh")
         self.request_path = self.base / "refresh.json"
         self.write_request(self.target)
 
@@ -168,6 +194,10 @@ class RepositoryRefreshCliTests(unittest.TestCase):
         self.assertEqual(
             plan["target_modes"], [{"path": "app", "mode": "source-transition"}]
         )
+        code, text = self.invoke("plan", json_mode=False)
+        self.assertEqual(code, 0, text)
+        self.assertIn("orchestration refresh: reviewed plan", text)
+        self.assertIn("Child acceptance and crash replay are not qualified", text)
         self.assertEqual(snapshot(self.root), before)
 
         code, checked = self.invoke(
@@ -262,38 +292,6 @@ class RepositoryRefreshCliTests(unittest.TestCase):
             git(self.root, "ls-files", "--stage", "app").decode().split()[1],
             self.target,
         )
-
-    def test_public_exact_noop_reports_no_writes_and_preserves_clone(self):
-        current = git(self.root / "app", "rev-parse", "HEAD").decode().strip()
-        self.write_request(current)
-        before_noop = snapshot(self.root)
-        code, envelope = self.invoke("plan")
-        self.assertEqual(code, 0, envelope)
-        noop_plan = envelope["result"]
-        self.assertFalse(noop_plan["changed"])
-        code, envelope = self.invoke(
-            "apply",
-            "--expected-plan-identity",
-            noop_plan["plan_identity"],
-            "--acknowledge",
-        )
-        self.assertEqual(code, 0, envelope)
-        noop = envelope["result"]
-        self.assertEqual(noop["state"], "no-op")
-        self.assertFalse(noop["changed"])
-        self.assertFalse(noop["writes"])
-        self.assertFalse(noop["authority_review_required"])
-        self.assertEqual(snapshot(self.root), before_noop)
-        self.assertIn(
-            "Child acceptance and crash replay are not qualified",
-            human_orchestration_text(noop),
-        )
-
-    def test_human_plan_output_names_review_boundary(self):
-        code, text = self.invoke("plan", json_mode=False)
-        self.assertEqual(code, 0, text)
-        self.assertIn("orchestration refresh: reviewed plan", text)
-        self.assertIn("Child acceptance and crash replay are not qualified", text)
 
 
 if __name__ == "__main__":

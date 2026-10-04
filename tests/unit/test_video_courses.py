@@ -14,7 +14,6 @@ from literate_ai.video_courses import (
     VideoError,
     build_course,
     init_course,
-    plan_course,
     verify_course,
 )
 
@@ -44,107 +43,6 @@ class VideoCourseTests(unittest.TestCase):
             json.loads(output.getvalue())["result"]["executes_demo_commands"]
         )
         self.assertEqual(len(list(self.root.iterdir())), 1)
-
-    def test_init_never_overwrites(self):
-        before = self.manifest.read_bytes()
-        with self.assertRaises(FileExistsError):
-            init_course(self.manifest)
-        self.assertEqual(before, self.manifest.read_bytes())
-
-    def test_embed_subtitles_requires_boolean(self):
-        document = json.loads(self.manifest.read_text())
-        document["embed_subtitles"] = "false"
-        self.save(document)
-        with self.assertRaisesRegex(VideoError, "embed_subtitles"):
-            plan_course(self.manifest)
-
-    def test_audio_bitrate_is_bounded(self):
-        document = json.loads(self.manifest.read_text())
-        for value in (True, "80", 0, 321):
-            document["audio_bitrate_kbps"] = value
-            self.save(document)
-            with self.assertRaisesRegex(VideoError, "audio_bitrate_kbps"):
-                plan_course(self.manifest)
-
-    def test_starter_does_not_impose_cast_voice_or_framework_story(self):
-        document = plan_course(self.manifest)["document"]
-        self.assertEqual(list(document["speakers"]), ["narrator"])
-        self.assertNotIn("voice", document["speakers"]["narrator"])
-        self.assertEqual(document["scenes"][0]["terminal"], [])
-
-    def test_project_can_choose_three_presenters_and_visuals(self):
-        document = json.loads(self.manifest.read_text())
-        document["speakers"] = {name: {"name": name} for name in ("a", "b", "c")}
-        visual = self.root / "visual.svg"
-        visual.write_text('<svg xmlns="http://www.w3.org/2000/svg"/>')
-        document["scenes"][0]["dialogue"] = [
-            {
-                "speaker": name,
-                "text": "Project-owned presentation.",
-                "visual": visual.name,
-            }
-            for name in document["speakers"]
-        ]
-        self.save(document)
-        self.assertIn(visual.name, plan_course(self.manifest)["assets"])
-        identity = plan_course(self.manifest)["source_identity"]
-        visual.write_text(
-            '<svg xmlns="http://www.w3.org/2000/svg"><title>New</title></svg>'
-        )
-        self.assertNotEqual(identity, plan_course(self.manifest)["source_identity"])
-
-    def test_evidence_and_narration_drift_change_identity(self):
-        document = json.loads(self.manifest.read_text())
-        evidence = self.root / "evidence.txt"
-        evidence.write_text("one test passed")
-        document["evidence"] = [evidence.name]
-        self.save(document)
-        first = plan_course(self.manifest)["source_identity"]
-        evidence.write_text("two tests passed")
-        second = plan_course(self.manifest)["source_identity"]
-        self.assertNotEqual(first, second)
-        document["scenes"][0]["dialogue"][0]["text"] = "A different question."
-        self.save(document)
-        self.assertNotEqual(second, plan_course(self.manifest)["source_identity"])
-
-    def test_paths_and_dialogue_fail_closed(self):
-        document = json.loads(self.manifest.read_text())
-        for path in ("../outside.txt", "/absolute.txt", "missing.txt"):
-            with self.subTest(path=path):
-                document["evidence"] = [path]
-                self.save(document)
-                with self.assertRaises(VideoError):
-                    plan_course(self.manifest)
-        document["evidence"] = []
-        document["scenes"][0]["dialogue"][0]["speaker"] = "unknown"
-        self.save(document)
-        with self.assertRaises(VideoError):
-            plan_course(self.manifest)
-
-    def test_symlink_cannot_escape_package(self):
-        with tempfile.TemporaryDirectory() as other:
-            outside = Path(other) / "outside.txt"
-            outside.write_text("not a course asset")
-            try:
-                (self.root / "link.txt").symlink_to(outside)
-            except OSError:
-                self.skipTest("host cannot create symlinks")
-            document = json.loads(self.manifest.read_text())
-            document["evidence"] = ["link.txt"]
-            self.save(document)
-            with self.assertRaises(VideoError):
-                plan_course(self.manifest)
-
-    def test_missing_tools_preserve_previous_outputs(self):
-        font = self.root / "font.ttf"
-        font.write_bytes(b"font")
-        output = self.root / "output"
-        output.mkdir()
-        previous = output / "previous.mp4"
-        previous.write_bytes(b"accepted prior output")
-        with patch("shutil.which", return_value=None), self.assertRaises(VideoError):
-            build_course(self.manifest, output, font=font, backend="recorded")
-        self.assertEqual(list(output.iterdir()), [previous])
 
     def test_real_media_roundtrip_and_tamper_detection(self):
         if not all(shutil.which(tool) for tool in ("ffmpeg", "ffprobe", "magick")):

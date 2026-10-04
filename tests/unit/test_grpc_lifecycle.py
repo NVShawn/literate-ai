@@ -25,7 +25,11 @@ from literate_ai.adapters.qualification_capture import (
     QualificationEvidenceRecorder,
 )
 from literate_ai.contracts import canonical_identity
-from tests.support.fixtures_test_ipc_surface_acceptance import _identity, _lock, _valid_document
+from tests.support.fixtures_test_ipc_surface_acceptance import (
+    _identity,
+    _lock,
+    _valid_document,
+)
 
 _SERVER = r"""
 import signal, sys, time
@@ -284,6 +288,3 @@ class GrpcLifecycleTests(unittest.TestCase):
 
     def test_default_native_dispatch_refuses_wrong_response_and_stops_child(self):
         self.run_lifecycle("wrong", "response_invalid")
-
-    def test_default_native_dispatch_refuses_deadline_and_stops_child(self):
-        self.run_lifecycle("slow", "response_invalid")

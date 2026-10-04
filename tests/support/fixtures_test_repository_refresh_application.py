@@ -1,43 +1,28 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_refresh_application``."""
 
 import errno
-
 import hashlib
-
 import json
-
 import os
-
 import stat
-
 import unittest
-
 from pathlib import Path
-
 from types import SimpleNamespace
-
 from unittest.mock import patch
 
 from literate_ai.adapters import repository_refresh_application as application
-
 from literate_ai.adapters import repository_refresh_objects as objects_adapter
-
 from literate_ai.adapters import repository_refresh_ownership as ownership
-
 from literate_ai.adapters import repository_refresh_staging as staging
-
 from literate_ai.adapters._write_reservations import WriteReservationSet
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from literate_ai.contracts.repository_tree import RepositoryTreeCapturePolicy
-
 from literate_ai.projects import parse_project_configuration
-
 from tests.support import fixtures_test_refresh_file_custody as fixtures
-
 from tests.support.fixtures_test_repository_orchestration import git, snapshot
+
 
 class RepositoryRefreshApplicationTests(unittest.TestCase):
     def setUp(self):
@@ -1187,6 +1172,6 @@ class RepositoryRefreshApplicationTests(unittest.TestCase):
         self.assertEqual(snapshot(self.source.base), before)
         self.assertIs(application._materialize, materialize)
 
+
 if __name__ == "__main__":
     unittest.main()
-

@@ -1,36 +1,26 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_refresh_inputs``."""
 
 import hashlib
-
 import os
-
 import shlex
-
 import shutil
-
 import sys
-
 import unittest
-
 from unittest.mock import patch
 
 from literate_ai.adapters import repository_lfs
-
 from literate_ai.adapters import repository_refresh as refresh
-
 from literate_ai.adapters.repository_locks import RepositoryLockStore
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshRequest,
     RepositoryRefreshTarget,
 )
-
 from tests.support import fixtures_test_repository_lock_planning as lock_fixtures
-
 from tests.support.fixtures_test_repository_orchestration import git, snapshot
+
 
 class RepositoryRefreshInputTests(unittest.TestCase):
     def setUp(self):
@@ -536,4 +526,3 @@ class RepositoryRefreshInputTests(unittest.TestCase):
         with self.assertRaises(OrchestrationInventoryError):
             self.prepare()
         self.assertEqual(snapshot(self.base), before)
-

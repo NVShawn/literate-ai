@@ -1,20 +1,12 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_source_cache``."""
 
 
-
 import sqlite3
-
-
-
 from contextlib import closing
 
-
-
-
-
 from literate_ai.adapters.dependencies import build_cyclonedx_bom
-
 from literate_ai.contracts import (
     CYCLONEDX_SOURCE_SBOM_PATH,
     AcceptedSourceCacheEntry,
@@ -43,15 +35,16 @@ from literate_ai.contracts import (
     generated_source_snapshot_identity,
     generated_source_tree_identity,
 )
-
-
 from literate_ai.storage import FileSystemCAS
+
 
 def _identity(label: str) -> ContentIdentity:
     return canonical_identity({"label": label})
 
+
 def _content_identity(value: str) -> ContentIdentity:
     return ContentIdentity.parse_uri(value)
+
 
 def _cache_key(*, selector: str = "model-a") -> SourceDerivationCacheKey:
     return SourceDerivationCacheKey(
@@ -62,6 +55,7 @@ def _cache_key(*, selector: str = "model-a") -> SourceDerivationCacheKey:
         request_identity=_identity("request"),
     )
 
+
 def _evidence(cas: FileSystemCAS, kind: str, suffix: str):
     return cas.put_manifest(
         {
@@ -70,6 +64,7 @@ def _evidence(cas: FileSystemCAS, kind: str, suffix: str):
             "suffix": suffix,
         }
     )
+
 
 def _accepted_entry_with_attachment(
     cas: FileSystemCAS,
@@ -198,6 +193,7 @@ def _accepted_entry_with_attachment(
     )
     return entry, attachment
 
+
 def _accepted_entry(
     cas: FileSystemCAS,
     *,
@@ -214,6 +210,7 @@ def _accepted_entry(
         repository_resolutions=repository_resolutions,
     )[0]
 
+
 def _target(
     target_id: str = "local",
     *,
@@ -224,6 +221,7 @@ def _target(
         root_kind=SourceCacheRootKind.OPERATOR_BOUND,
         root_reference=binding,
     )
+
 
 def _configuration(
     mode: SourceCacheMode,
@@ -237,6 +235,7 @@ def _configuration(
         require_unique=require_unique,
     )
 
+
 def _source_intelligence_policy() -> ProjectSourceIntelligencePolicy:
     return ProjectSourceIntelligencePolicy(
         provider_id="none",
@@ -248,4 +247,3 @@ def _source_intelligence_policy() -> ProjectSourceIntelligencePolicy:
         ),
         artifact_publication=SourceIntelligenceArtifactPublication.METADATA_ONLY,
     )
-

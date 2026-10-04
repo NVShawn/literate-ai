@@ -1,25 +1,17 @@
 """Shared fixtures extracted from ``tests.unit.test_standard_runtime_scheduling``."""
 
-
-
 from dataclasses import replace
-
 from datetime import UTC, datetime, timedelta
 
 from literate_ai.contracts import StandardExecutionAuthority
-
-
 from literate_ai.contracts.standard_execution_inputs import standard_execution_request
-
 from literate_ai.security import BuildAuthorization, SecurityProfile
-
-
-
 from tests.support.fixtures_test_standard_project_lifecycle import (
     ContractEvidenceLifecyclePorts,
     _identity,
     canonical_identity,
 )
+
 
 class ScopedRuntimePorts(ContractEvidenceLifecyclePorts):
     """Typed controller fixture; real process/grant custody has adapter tests."""
@@ -62,4 +54,3 @@ class ScopedRuntimePorts(ContractEvidenceLifecyclePorts):
             self.typed_acceptances[plan.component_revision.uri], execution=result
         )
         return result
-

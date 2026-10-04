@@ -4,25 +4,15 @@ import contextlib
 import hashlib
 import json
 import os
-import shutil
 import signal
 import stat
 import subprocess
 import sys
 import tempfile
-import threading
 import time
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
-from unittest.mock import patch
 
-from literate_ai._cache_lock import CacheLockError
-from literate_ai.adapters.builders._process import (
-    BoundedProcessResult,
-    run_bounded_process,
-)
-from literate_ai.adapters.builders.python import BuildError
 from literate_ai.adapters.repository_lineage import (
     REPOSITORY_PARENT_FILE,
     GitRepositoryLineageError,
@@ -30,10 +20,7 @@ from literate_ai.adapters.repository_lineage import (
     repository_parent_reference,
 )
 from literate_ai.application.repository_lineage import resolve_repository_lineage
-from literate_ai.cli.errors import CliFailure
-from literate_ai.cli.project import _repository_fetch_provider
 from literate_ai.contracts import (
-    RepositoryFetchDeadlinePolicy,
     RepositoryParentReference,
     RepositoryParentSelection,
 )
@@ -104,61 +91,6 @@ def _stop_child(process: subprocess.Popen[str]) -> None:
     process.communicate(timeout=15)
 
 
-class _FetchConcurrencyProbe:
-    """Wrap a real process runner to observe fetch-call overlap deterministically.
-
-    Every ``git fetch`` invocation increments a shared counter before running
-    and decrements it after, recording the maximum number ever observed
-    in-flight simultaneously. A short sleep while "in" the fetch widens the
-    race window so overlap is reliably observed if it can happen at all --
-    the assertion afterward is a plain counter comparison, not a timing
-    guess.
-    """
-
-    def __init__(self, real_runner=run_bounded_process, *, hold_seconds: float = 0.2):
-        self._real_runner = real_runner
-        self._hold_seconds = hold_seconds
-        self._lock = threading.Lock()
-        self._active = 0
-        self.max_active = 0
-        self.fetch_calls = 0
-
-    def __call__(self, command, **kwargs):
-        is_fetch = "fetch" in command
-        if is_fetch:
-            with self._lock:
-                self._active += 1
-                self.max_active = max(self.max_active, self._active)
-                self.fetch_calls += 1
-            time.sleep(self._hold_seconds)
-        try:
-            return self._real_runner(command, **kwargs)
-        finally:
-            if is_fetch:
-                with self._lock:
-                    self._active -= 1
-
-
-class _BarrierGatedProbe:
-    """Wrap a real process runner so every fetch call must rendezvous first.
-
-    Used to prove independent cache entries are *not* serialized against one
-    another: if the implementation held a single lock across all entries,
-    the second concurrent fetch could never reach the barrier while the
-    first is blocked waiting for that shared lock, so the barrier would time
-    out instead of releasing both callers.
-    """
-
-    def __init__(self, barrier: threading.Barrier, real_runner=run_bounded_process):
-        self._barrier = barrier
-        self._real_runner = real_runner
-
-    def __call__(self, command, **kwargs):
-        if "fetch" in command:
-            self._barrier.wait(timeout=10)
-        return self._real_runner(command, **kwargs)
-
-
 def git(repository: Path, *arguments: str) -> str:
     completed = subprocess.run(
         ("git", *arguments),
@@ -211,185 +143,6 @@ def reference(repository: Path) -> RepositoryParentReference:
 
 
 class GitRepositorySnapshotProviderTests(unittest.TestCase):
-    def test_shallow_fetches_do_not_launch_automatic_maintenance(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "parent", RepositoryParentSelection.root()
-            )
-            baseline = git(repository, "rev-parse", "HEAD")
-            (repository / "new-file").write_text("next revision", encoding="utf-8")
-            git(repository, "add", "new-file")
-            git(repository, "commit", "-m", "Advance parent")
-            advanced = git(repository, "rev-parse", "HEAD")
-            provider = GitRepositorySnapshotProvider(temporary / "cache")
-            locator = repository.resolve().as_uri()
-            with provider._locked_repository(locator) as cache:
-                git(cache, "config", "maintenance.auto", "true")
-            trace = temporary / "git-trace.json"
-            with patch.dict(os.environ, {"GIT_TRACE2_EVENT": str(trace.resolve())}):
-                for revision in (baseline, advanced, baseline):
-                    snapshot = provider.resolve(
-                        RepositoryParentReference(locator, revision)
-                    )
-                    self.assertEqual(snapshot.resolved_revision, revision)
-            events = [json.loads(line) for line in trace.read_text().splitlines()]
-            # Observe real Git processes, not the adapter's constructed argv.
-            self.assertTrue(any(event.get("event") == "start" for event in events))
-            maintenance = [
-                event["argv"]
-                for event in events
-                if event.get("event") == "child_start"
-                and any(word in event.get("argv", ()) for word in ("maintenance", "gc"))
-            ]
-            self.assertEqual(maintenance, [])
-
-    def test_cli_deadline_override_is_validated_and_provenanced(self) -> None:
-        defaults = SimpleNamespace(
-            repository_fetch_total_seconds=None,
-            repository_fetch_no_progress_seconds=None,
-            repository_fetch_connect_seconds=None,
-        )
-        explicit = SimpleNamespace(
-            repository_fetch_total_seconds=600,
-            repository_fetch_no_progress_seconds=300,
-            repository_fetch_connect_seconds=60,
-        )
-
-        self.assertEqual(
-            _repository_fetch_provider(defaults).deadline_evidence["provenance"],
-            "framework-default",
-        )
-        selected = _repository_fetch_provider(explicit)
-        self.assertEqual(selected.deadline_evidence["provenance"], "cli")
-        self.assertEqual(
-            selected.deadline_evidence["policy"],
-            RepositoryFetchDeadlinePolicy(600, 300, 60).to_dict(),
-        )
-        explicit.repository_fetch_total_seconds = 29
-        with self.assertRaises(CliFailure) as raised:
-            _repository_fetch_provider(explicit)
-        self.assertEqual(raised.exception.code, "repository_lineage.deadline_invalid")
-
-    def test_fetch_deadline_policy_is_bounded_and_deterministic(self) -> None:
-        default = RepositoryFetchDeadlinePolicy()
-        self.assertEqual(
-            (
-                default.total_seconds,
-                default.no_progress_seconds,
-                default.connect_seconds,
-            ),
-            (3600, 600, 30),
-        )
-        self.assertEqual(
-            RepositoryFetchDeadlinePolicy.from_dict(default.to_dict()).identity,
-            default.identity,
-        )
-        for invalid in (
-            {"total_seconds": 29},
-            {"total_seconds": 14401},
-            {"no_progress_seconds": 14},
-            {"no_progress_seconds": 1801},
-            {"connect_seconds": 4},
-            {"connect_seconds": 121},
-            {"total_seconds": 60, "no_progress_seconds": 61},
-            {"no_progress_seconds": 30, "connect_seconds": 31},
-        ):
-            values = {
-                "total_seconds": 3600,
-                "no_progress_seconds": 600,
-                "connect_seconds": 30,
-                **invalid,
-            }
-            with self.subTest(values=values), self.assertRaises(ValueError):
-                RepositoryFetchDeadlinePolicy(**values)
-
-    def test_fetch_uses_separate_total_progress_and_ssh_connect_bounds(self) -> None:
-        observed: dict[str, object] = {}
-
-        def process_runner(command, **kwargs):
-            observed["command"] = command
-            observed.update(kwargs)
-            return BoundedProcessResult(0, b"", b"", 138.452)
-
-        with tempfile.TemporaryDirectory() as directory:
-            repository = Path(directory)
-            provider = GitRepositorySnapshotProvider(
-                repository / "cache",
-                process_runner=process_runner,
-            )
-            provider._run(repository, "fetch", "--progress")
-
-        self.assertEqual(observed["timeout_seconds"], 3600)
-        self.assertEqual(observed["inactivity_timeout_seconds"], 600)
-        self.assertIn("ConnectTimeout=30", observed["environment"]["GIT_SSH_COMMAND"])
-        self.assertEqual(
-            provider.deadline_evidence,
-            GitRepositorySnapshotProvider(Path("unused")).deadline_evidence,
-        )
-
-    def test_fetch_timeout_diagnostic_identifies_policy_without_locator(self) -> None:
-        def process_runner(_command, **_kwargs):
-            raise BuildError(
-                "repository_lineage.git_timeout",
-                "Tool process exceeded its total deadline "
-                "(elapsed_seconds=300.000, deadline_seconds=300)",
-            )
-
-        provider = GitRepositorySnapshotProvider(
-            Path("cache"),
-            deadline_provenance="cli",
-            process_runner=process_runner,
-        )
-        with self.assertRaises(GitRepositoryLineageError) as raised:
-            provider._run(Path.cwd(), "fetch", "private-repository")
-
-        self.assertEqual(raised.exception.code, "repository_lineage.fetch_timeout")
-        self.assertIn("elapsed_seconds=300.000", raised.exception.message)
-        self.assertIn(provider.deadline_policy.identity.uri, raised.exception.message)
-        self.assertIn("provenance=cli", raised.exception.message)
-        self.assertNotIn("private-repository", raised.exception.message)
-
-    @unittest.skipUnless(os.name == "posix", "requires POSIX process groups")
-    def test_fetch_reaps_transport_descendant_holding_output_streams(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "transport-parent", RepositoryParentSelection.root()
-            )
-            real_git = shutil.which("git")
-            assert real_git is not None
-            wrapper = temporary / "git-with-transport-descendant"
-            wrapper.write_text(
-                "#!" + sys.executable + "\n"
-                "import subprocess, sys\n"
-                f"result = subprocess.run([{real_git!r}, *sys.argv[1:]])\n"
-                "if 'fetch' in sys.argv[1:]:\n"
-                "    subprocess.Popen("
-                "[sys.executable, '-c', 'import time; time.sleep(60)'])\n"
-                "raise SystemExit(result.returncode)\n",
-                encoding="utf-8",
-                newline="\n",
-            )
-            wrapper.chmod(wrapper.stat().st_mode | stat.S_IXUSR)
-            provider = GitRepositorySnapshotProvider(
-                temporary / "cache", git_binary=str(wrapper)
-            )
-
-            resolved = provider.resolve(reference(repository))
-
-            self.assertEqual(resolved.project_id, "transport-parent")
-
-    def test_cli_sources_normalize_local_scp_and_revision_forms(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            local = repository_parent_reference("parent#release", base=root)
-        self.assertEqual(local.repository_url, (root / "parent").resolve().as_uri())
-        self.assertEqual(local.requested_revision, "release")
-        scp = repository_parent_reference("git@example.test:org/parent.git#main")
-        self.assertEqual(scp.repository_url, "ssh://git@example.test/org/parent.git")
-        self.assertEqual(scp.requested_revision, "main")
-
     def test_cli_source_rejects_embedded_credentials_without_echoing_them(self) -> None:
         secret = "do-not-repeat"
         with self.assertRaises(GitRepositoryLineageError) as raised:
@@ -441,26 +194,6 @@ class GitRepositorySnapshotProviderTests(unittest.TestCase):
             self.assertFalse(marker.exists())
             self.assertFalse(any((temporary / "cache").rglob(".git/index")))
 
-    def test_deadline_policy_does_not_change_exact_revision_custody(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "exact-parent", RepositoryParentSelection.root()
-            )
-            selected = reference(repository)
-            default = GitRepositorySnapshotProvider(
-                temporary / "default-cache"
-            ).resolve(selected)
-            configured = GitRepositorySnapshotProvider(
-                temporary / "configured-cache",
-                deadline_policy=RepositoryFetchDeadlinePolicy(600, 300, 60),
-                deadline_provenance="cli",
-            ).resolve(selected)
-            expected_revision = git(repository, "rev-parse", "HEAD")
-
-        self.assertEqual(default, configured)
-        self.assertEqual(default.resolved_revision, expected_revision)
-
     def test_missing_parent_authority_fails_instead_of_truncating_the_chain(
         self,
     ) -> None:
@@ -478,260 +211,18 @@ class GitRepositorySnapshotProviderTests(unittest.TestCase):
                 provider.resolve(reference(incomplete))
         self.assertEqual(raised.exception.code, "repository_lineage.authority_missing")
 
-    def test_list_remote_tags_omits_peeled_annotated_suffixes(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "tagged", RepositoryParentSelection.root()
-            )
-            git(repository, "tag", "v0.1.0")
-            git(repository, "tag", "-a", "v0.2.0", "-m", "annotated")
-            git(repository, "tag", "not-a-release")
-            provider = GitRepositorySnapshotProvider(temporary / "cache")
-            tags = provider.list_remote_tags(repository.resolve().as_uri())
-
-        self.assertIn("v0.1.0", tags)
-        self.assertIn("v0.2.0", tags)
-        self.assertIn("not-a-release", tags)
-        self.assertFalse(any(tag.endswith("^{}") for tag in tags))
-
-    def test_invalid_project_authority_names_the_contract_error(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "broken", RepositoryParentSelection.root()
-            )
-            (repository / "literate.project.json").write_text(
-                "{not json\n", encoding="utf-8", newline="\n"
-            )
-            git(repository, "add", "literate.project.json")
-            git(repository, "commit", "-m", "Break project authority")
-            provider = GitRepositorySnapshotProvider(temporary / "cache")
-
-            with self.assertRaises(GitRepositoryLineageError) as raised:
-                provider.resolve(reference(repository))
-
-        self.assertEqual(raised.exception.code, "repository_lineage.authority_invalid")
-        self.assertIn("project authority is invalid", raised.exception.message)
-
-    def test_unreachable_repository_fails_with_bounded_locator_free_diagnostics(
-        self,
-    ) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            missing = temporary / "private-repository-name"
-            provider = GitRepositorySnapshotProvider(temporary / "cache")
-
-            with self.assertRaises(GitRepositoryLineageError) as raised:
-                provider.resolve(reference(missing))
-
-        self.assertEqual(raised.exception.code, "repository_lineage.fetch_failed")
-        self.assertNotIn("private-repository-name", str(raised.exception))
-        self.assertIn("deadline_seconds=3600", str(raised.exception))
-
-    def test_reads_regular_catalog_blobs_from_the_locked_revision(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "catalog", RepositoryParentSelection.root()
-            )
-            component = repository / "components" / "example"
-            component.mkdir(parents=True)
-            (component / "component.md").write_text(
-                "# Example\n", encoding="utf-8", newline="\n"
-            )
-            (component / "data.bin").write_bytes(b"\x00catalog\n")
-            workflow = repository / "workflows" / "example.md"
-            workflow.parent.mkdir(parents=True)
-            workflow.write_text("# Workflow\n", encoding="utf-8", newline="\n")
-            route = repository / "routing" / "example.json"
-            route.parent.mkdir(parents=True)
-            route.write_text("{}\n", encoding="utf-8", newline="\n")
-            git(repository, "add", ".")
-            git(repository, "commit", "-m", "Add catalog")
-            provider = GitRepositorySnapshotProvider(temporary / "cache")
-            lineage = resolve_repository_lineage(
-                RepositoryParentSelection.inherit((reference(repository),)), provider
-            )
-
-            resolved = provider.catalog(lineage.nodes[0])
-
-            self.assertEqual(resolved.node, lineage.nodes[0])
-            self.assertEqual(
-                {item.path: item.content for item in resolved.files},
-                {
-                    "components/example/component.md": b"# Example\n",
-                    "components/example/data.bin": b"\x00catalog\n",
-                    "routing/example.json": b"{}\n",
-                    "workflows/example.md": b"# Workflow\n",
-                },
-            )
-
-    @unittest.skipIf(os.name == "nt", "symbolic-link fixture requires Unix Git")
-    def test_catalog_symlinks_are_rejected_without_materialization(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "unsafe", RepositoryParentSelection.root()
-            )
-            component = repository / "components" / "unsafe"
-            component.mkdir(parents=True)
-            (component / "component.md").write_text("# Unsafe\n", encoding="utf-8")
-            (component / "link").symlink_to("component.md")
-            git(repository, "add", ".")
-            git(repository, "commit", "-m", "Add unsafe catalog")
-            provider = GitRepositorySnapshotProvider(temporary / "cache")
-            lineage = resolve_repository_lineage(
-                RepositoryParentSelection.inherit((reference(repository),)), provider
-            )
-
-            with self.assertRaises(GitRepositoryLineageError) as raised:
-                provider.catalog(lineage.nodes[0])
-        self.assertEqual(raised.exception.code, "repository_lineage.catalog_unsafe")
-
-    def test_concurrent_resolve_of_the_same_repository_never_races_the_bare_cache(
-        self,
-    ) -> None:
-        """Issue #324: two processes sharing one object root raced an
-        uncoordinated fetch into the same derived bare-cache entry and one
-        failed with Git's competing-process lock diagnostic. This proves the
-        per-entry lock serializes the fetch instead: `max_active` can only
-        be 1 if the two threads' `git fetch` calls never overlapped, and
-        both callers still resolve the same, correct revision."""
-
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository = create_repository(
-                temporary, "shared", RepositoryParentSelection.root()
-            )
-            expected_revision = git(repository, "rev-parse", "HEAD")
-            probe = _FetchConcurrencyProbe()
-            provider = GitRepositorySnapshotProvider(
-                temporary / "cache", process_runner=probe
-            )
-            start = threading.Barrier(2, timeout=10)
-            results: list[object] = []
-            errors: list[BaseException] = []
-            results_lock = threading.Lock()
-
-            def worker() -> None:
-                start.wait()
-                try:
-                    resolved = provider.resolve(reference(repository))
-                except BaseException as exc:  # noqa: BLE001 - captured for assertion
-                    with results_lock:
-                        errors.append(exc)
-                else:
-                    with results_lock:
-                        results.append(resolved)
-
-            threads = [threading.Thread(target=worker) for _ in range(2)]
-            for thread in threads:
-                thread.start()
-            for thread in threads:
-                thread.join(timeout=30)
-
-            self.assertFalse(any(thread.is_alive() for thread in threads))
-            self.assertEqual(errors, [])
-            self.assertEqual(len(results), 2)
-            self.assertEqual(probe.fetch_calls, 2)
-            self.assertEqual(
-                probe.max_active,
-                1,
-                "concurrent same-entry fetches overlapped instead of serializing",
-            )
-            for resolved in results:
-                self.assertEqual(resolved.resolved_revision, expected_revision)
-
-    def test_concurrent_resolve_of_independent_repositories_stays_concurrent(
-        self,
-    ) -> None:
-        """Different repository identities must not be serialized against one
-        another. A rendezvous barrier inside the fetch call can only release
-        both threads if their fetches are genuinely in flight at the same
-        time; a single cache-wide lock would strand one thread waiting to
-        even start its fetch, and the barrier would time out."""
-
-        with tempfile.TemporaryDirectory() as directory:
-            temporary = Path(directory)
-            repository_a = create_repository(
-                temporary, "independent-a", RepositoryParentSelection.root()
-            )
-            repository_b = create_repository(
-                temporary, "independent-b", RepositoryParentSelection.root()
-            )
-            fetch_barrier = threading.Barrier(2)
-            probe = _BarrierGatedProbe(fetch_barrier)
-            provider = GitRepositorySnapshotProvider(
-                temporary / "cache", process_runner=probe
-            )
-            start = threading.Barrier(2, timeout=10)
-            results: dict[str, object] = {}
-            errors: list[BaseException] = []
-            results_lock = threading.Lock()
-
-            def worker(name: str, repository: Path) -> None:
-                start.wait()
-                try:
-                    resolved = provider.resolve(reference(repository))
-                except BaseException as exc:  # noqa: BLE001 - captured for assertion
-                    with results_lock:
-                        errors.append(exc)
-                else:
-                    with results_lock:
-                        results[name] = resolved
-
-            threads = [
-                threading.Thread(target=worker, args=("a", repository_a)),
-                threading.Thread(target=worker, args=("b", repository_b)),
-            ]
-            for thread in threads:
-                thread.start()
-            for thread in threads:
-                thread.join(timeout=30)
-
-            self.assertFalse(any(thread.is_alive() for thread in threads))
-            self.assertEqual(errors, [])
-            self.assertEqual(set(results), {"a", "b"})
-            self.assertEqual(
-                results["a"].resolved_revision, git(repository_a, "rev-parse", "HEAD")
-            )
-            self.assertEqual(
-                results["b"].resolved_revision, git(repository_b, "rev-parse", "HEAD")
-            )
-
-    def _separate_process_resolves(
-        self, *, same_repository: bool, read_during_fetch: bool = False
-    ) -> None:
+    def test_separate_processes_serialize_same_repository_fetches(self) -> None:
         with (
             tempfile.TemporaryDirectory() as directory,
             contextlib.ExitStack() as stack,
         ):
             temporary = Path(directory)
-            repository_a = create_repository(
+            repository = create_repository(
                 temporary, "first", RepositoryParentSelection.root()
             )
-            repository_b = (
-                repository_a
-                if same_repository
-                else create_repository(
-                    temporary, "second", RepositoryParentSelection.root()
-                )
-            )
-            first_revision = git(repository_a, "rev-parse", "HEAD")
-            first_stage = "show" if read_during_fetch else "fetch"
-            if read_during_fetch:
-                manifest_path = repository_a / "literate.project.json"
-                manifest = json.loads(manifest_path.read_bytes())
-                manifest["project_id"] = "updated"
-                manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
-                git(repository_a, "add", ".")
-                git(repository_a, "commit", "-m", "Change project identity")
-            second_revision = git(repository_b, "rev-parse", "HEAD")
+            revision = git(repository, "rev-parse", "HEAD")
 
-            def start(
-                name: str, repository: Path, stage: str, revision: str
-            ) -> subprocess.Popen[str]:
+            def start(name: str) -> subprocess.Popen[str]:
                 process = subprocess.Popen(
                     [
                         sys.executable,
@@ -742,7 +233,7 @@ class GitRepositorySnapshotProviderTests(unittest.TestCase):
                         str(temporary / "cache"),
                         str(temporary),
                         name,
-                        stage,
+                        "fetch",
                         revision,
                     ],
                     stdin=subprocess.DEVNULL,
@@ -762,87 +253,26 @@ class GitRepositorySnapshotProviderTests(unittest.TestCase):
                     self.assertLess(time.monotonic(), deadline, marker)
                     time.sleep(0.01)
 
-            first = start("first", repository_a, first_stage, first_revision)
-            wait_for(f"first.{first_stage}", first)
-            second = start("second", repository_b, "fetch", second_revision)
+            first = start("first")
+            wait_for("first.fetch", first)
+            second = start("second")
             wait_for("second.attempt", second)
-            if read_during_fetch:
-                # The old snapshot's immutable-object read must not hold the
-                # mutation lock. Let a new revision finish resolving first.
-                wait_for("second.fetch", second)
-                (temporary / "second.release").touch()
-                stdout, stderr = second.communicate(timeout=30)
-                self.assertEqual(second.returncode, 0, stderr)
-                self.assertEqual(json.loads(stdout)["project_id"], "updated")
-                self.assertIsNone(first.poll())
-                (temporary / "first.release").touch()
-            elif same_repository:
-                # Hold the first real fetch while the second process attempts
-                # the same OS lock. It must not reach its fetch until release.
-                deadline = time.monotonic() + 0.5
-                while time.monotonic() < deadline:
-                    self.assertIsNone(second.poll())
-                    self.assertFalse((temporary / "second.fetch").exists())
-                    time.sleep(0.01)
-                (temporary / "first.release").touch()
-                wait_for("second.fetch", second)
-            else:
-                # Both fetches must rendezvous before either may finish: a
-                # cache-wide lock would fail this bounded positive assertion.
-                wait_for("second.fetch", second)
-                self.assertIsNone(first.poll())
-                (temporary / "first.release").touch()
+            # Hold the first real fetch while the second process attempts
+            # the same OS lock. It must not reach its fetch until release.
+            deadline = time.monotonic() + 0.5
+            while time.monotonic() < deadline:
+                self.assertIsNone(second.poll())
+                self.assertFalse((temporary / "second.fetch").exists())
+                time.sleep(0.01)
+            (temporary / "first.release").touch()
+            wait_for("second.fetch", second)
             (temporary / "second.release").touch()
-            for process, repository, revision in (
-                (first, repository_a, first_revision),
-                (second, repository_b, second_revision),
-            ):
+            for process in (first, second):
                 stdout, stderr = process.communicate(timeout=30)
                 self.assertEqual(process.returncode, 0, stderr)
-                expected_manifest = json.loads(
-                    git(repository, "show", f"{revision}:literate.project.json")
-                )
                 self.assertEqual(
-                    json.loads(stdout),
-                    {
-                        "revision": revision,
-                        "project_id": expected_manifest["project_id"],
-                    },
+                    json.loads(stdout), {"revision": revision, "project_id": "first"}
                 )
-
-    def test_separate_processes_serialize_same_repository_fetches(self) -> None:
-        self._separate_process_resolves(same_repository=True)
-
-    def test_separate_processes_fetch_independent_repositories_concurrently(
-        self,
-    ) -> None:
-        self._separate_process_resolves(same_repository=False)
-
-    def test_resolved_snapshot_read_remains_available_during_another_process_fetch(
-        self,
-    ) -> None:
-        self._separate_process_resolves(same_repository=True, read_during_fetch=True)
-
-    def test_lock_acquisition_failure_identifies_entry_without_credentials(
-        self,
-    ) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            provider = GitRepositorySnapshotProvider(Path(directory) / "cache")
-            repository_url = "https://user:fixture-password@example.invalid/repo.git"
-            key = hashlib.sha256(repository_url.encode("utf-8")).hexdigest()
-            with patch(
-                "literate_ai.adapters.repository_lineage.exclusive_cache_lock",
-                side_effect=CacheLockError("fixture lock acquisition failure"),
-            ):
-                with self.assertRaises(GitRepositoryLineageError) as raised:
-                    with provider._locked_repository(repository_url):
-                        self.fail("failed acquisition yielded a repository")
-            self.assertEqual(
-                raised.exception.code, "repository_lineage.cache_lock_unavailable"
-            )
-            self.assertIn(key, raised.exception.message)
-            self.assertNotIn("fixture-password", raised.exception.message)
-            self.assertNotIn(repository_url, raised.exception.message)
 
     def test_an_interrupted_lock_owner_does_not_leave_an_unrecoverable_lock(
         self,

@@ -1,6 +1,6 @@
 from __future__ import annotations
-"""Shared fixtures extracted from ``tests.unit.test_component_command_contracts``."""
 
+"""Shared fixtures extracted from ``tests.unit.test_component_command_contracts``."""
 
 
 from literate_ai.contracts import (
@@ -17,6 +17,7 @@ from literate_ai.contracts import (
 def identity(label: str):
     return canonical_identity({"component-command-test": label})
 
+
 def command(phase: ComponentCommandPhase) -> ComponentLifecycleCommand:
     if phase is ComponentCommandPhase.BUILD:
         argv = (
@@ -32,6 +33,7 @@ def command(phase: ComponentCommandPhase) -> ComponentLifecycleCommand:
     else:
         argv = ("{tool}", phase.value, "{artifact_root}")
     return ComponentLifecycleCommand(phase, argv)
+
 
 def contract() -> ComponentCommandContract:
     revision = identity("revision")
@@ -66,8 +68,10 @@ def contract() -> ComponentCommandContract:
         artifact_export=export,
     )
 
+
 def entrypoint_command(phase: ComponentCommandPhase) -> ComponentLifecycleCommand:
     return ComponentLifecycleCommand(phase, ("{tool}", phase.value, "{artifact_root}"))
+
 
 def entrypoint_contract(label: str) -> ComponentEntrypointCommandContract:
     export = ComponentArtifactExportShape(
@@ -95,4 +99,3 @@ def entrypoint_contract(label: str) -> ComponentEntrypointCommandContract:
         ),
         artifact_export=export,
     )
-

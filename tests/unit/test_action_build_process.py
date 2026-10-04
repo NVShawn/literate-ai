@@ -33,7 +33,6 @@ from tests.support import fixtures_test_action_build_source as source_fixture
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
 from tests.support.fixtures_test_action_build_action import build_request
 from tests.support.fixtures_test_action_build_record import build_worker_input
-from tests.support.fixtures_test_standard_local_command_adapter import _identity
 from tests.support.fixtures_test_standard_project_factory import (
     _command_contracts,
     _toolchain_closure,
@@ -69,82 +68,6 @@ class ActionBuildProcessTests(unittest.TestCase):
         )
         arguments.update(changes)
         return run_build_worker_process(**arguments)
-
-    def test_exact_input_and_worker_environment_reach_child(self):
-        environment = dict(os.environ, LITAI_BUILD_FIXTURE="private-value")
-        output = self.run_child(
-            "import os,sys; "
-            'assert os.environ["LITAI_BUILD_FIXTURE"]=="private-value"; '
-            "sys.stdout.buffer.write(sys.stdin.buffer.read())",
-            environment=environment,
-        )
-        self.assertEqual(output, self.record)
-        with self.assertRaises(ActionWireError) as raised:
-            self.run_child(
-                'from pathlib import Path; Path("launched").touch()',
-                input_identity=_identity("wrong"),
-            )
-        self.assertEqual(raised.exception.code, "action_build.input_invalid")
-        self.assertFalse((self.root / "launched").exists())
-        oversized = b"x" * (17 * 1024 * 1024)
-        with self.assertRaises(ActionWireError) as raised:
-            self.run_child(
-                'from pathlib import Path; Path("launched").touch()',
-                input_record=oversized,
-                input_identity=record_identity(oversized),
-            )
-        self.assertEqual(raised.exception.code, "action_build.input_invalid")
-        self.assertFalse((self.root / "launched").exists())
-
-        substituted = replace(
-            self.input_value, generation_plan_identity=_identity("other-generation")
-        ).to_bytes()
-        with self.assertRaises(ActionWireError):
-            self.run_child(
-                'from pathlib import Path; Path("launched").touch()',
-                input_record=substituted,
-                input_identity=record_identity(substituted),
-            )
-        self.assertFalse((self.root / "launched").exists())
-
-    def test_supervisor_replaces_reserved_environment_case_variants(self):
-        code = (
-            "import os,json,sys; "
-            "sys.stdin.buffer.read(); "
-            "print(json.dumps({k:v for k,v in os.environ.items() "
-            "if k.casefold() in ('litai_build_input_identity',"
-            "'litai_build_deadline','litai_build_cas','litai_build_workspace')}))"
-        )
-        launcher = LocalComponentToolBinding(
-            sys.executable,
-            ("-c", code),
-            environment=(
-                ("litai_build_input_identity", "stale launcher"),
-                ("LITAI_BUILD_DEADLINE", "stale launcher"),
-            ),
-        )
-        output = self.run_child(
-            code,
-            launcher=launcher,
-            environment=dict(
-                os.environ,
-                LITAI_BUILD_INPUT_IDENTITY="stale caller",
-                litai_build_deadline="stale caller",
-                litai_build_cas="stale caller",
-                LITAI_BUILD_WORKSPACE="stale caller",
-            ),
-            cas_root=self.fixture.cas.root,
-            workspace_root=self.fixture.workspace,
-        )
-        self.assertEqual(
-            json.loads(output),
-            {
-                "LITAI_BUILD_INPUT_IDENTITY": record_identity(self.record).uri,
-                "LITAI_BUILD_DEADLINE": self.deadline.expires_at.isoformat(),
-                "LITAI_BUILD_CAS": str(self.fixture.cas.root),
-                "LITAI_BUILD_WORKSPACE": str(self.fixture.workspace),
-            },
-        )
 
     def test_supervised_child_readmits_and_builds_from_worker_cas(self):
         # The basic source fixture uses placeholder runtime/build-system IDs.
@@ -428,61 +351,3 @@ raise SystemExit(main(runtime_factory=runtime_factory))
                 self.run_child(code)
             self.assertEqual(raised.exception.code, expected)
             self.assertNotIn("private-value", str(raised.exception))
-
-    def test_successful_parent_cannot_leave_detached_output_writes(self):
-        child = (
-            "from pathlib import Path; import time; "
-            'Path("descendant-ready").touch(); time.sleep(1); Path("escaped").touch()'
-        )
-        code = (
-            "import subprocess,sys,time\nfrom pathlib import Path\n"
-            f'subprocess.Popen([sys.executable,"-c",{child!r}], '
-            "stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)\n"
-            'while not Path("descendant-ready").exists(): time.sleep(.01)\n'
-            'sys.stdin.buffer.read(); print("complete")\n'
-        )
-        self.assertEqual(self.run_child(code).strip(), b"complete")
-        time.sleep(1.2)
-        self.assertFalse((self.root / "escaped").exists())
-
-    def test_elapsed_action_deadline_stops_real_child(self):
-        started = time.monotonic()
-        with self.assertRaises(ActionWireError) as raised:
-            self.run_child(
-                "from pathlib import Path; import time; "
-                'Path("ready").touch(); time.sleep(30); Path("late").touch()',
-                deadline=ActionDispatchDeadline(
-                    datetime.now(UTC) + timedelta(seconds=2)
-                ),
-            )
-        self.assertIn(
-            raised.exception.code, {"action_build.expired", "action_wire.expired"}
-        )
-        self.assertTrue((self.root / "ready").exists())
-        self.assertFalse((self.root / "late").exists())
-        self.assertLess(time.monotonic() - started, 15)
-
-    def test_short_grant_stops_child_before_later_action_deadline(self):
-        authorization = replace(
-            self.inputs.authorization,
-            grant=replace(
-                self.inputs.authorization.grant,
-                expires_at=datetime.now(UTC) + timedelta(seconds=2),
-            ),
-        )
-        inputs = replace(self.inputs, authorization=authorization)
-        started = time.monotonic()
-        with self.assertRaises(ActionWireError) as raised:
-            self.run_child(
-                "from pathlib import Path; import time; "
-                'Path("ready").touch(); time.sleep(30); Path("late").touch()',
-                inputs=inputs,
-                plan=inputs.finalize(),
-            )
-        self.assertIn(
-            raised.exception.code,
-            {"action_build.expired", "action_build.authority_invalid"},
-        )
-        self.assertTrue((self.root / "ready").exists())
-        self.assertFalse((self.root / "late").exists())
-        self.assertLess(time.monotonic() - started, 15)

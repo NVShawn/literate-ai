@@ -1,24 +1,17 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_library_binding``."""
 
 import copy
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
 
 from literate_ai.contracts import canonical_identity
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.retained_libraries import RetainedLibraryBinding
-
 from literate_ai.schema_catalog import verify_schema_catalog
-
 from tests.support import fixtures_test_retained_library_exports as export_fixtures
-
 from tests.support import fixtures_test_schema_catalog as schema_fixtures
+
 
 class RetainedLibraryBindingTests(unittest.TestCase):
     def fixture(self):
@@ -123,6 +116,6 @@ class RetainedLibraryBindingTests(unittest.TestCase):
             self.assertNotEqual(changed.identity, binding.identity)
             self.assertEqual(changed.exports, binding.exports)
 
+
 if __name__ == "__main__":
     unittest.main()
-

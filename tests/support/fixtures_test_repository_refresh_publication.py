@@ -1,32 +1,24 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_refresh_publication``."""
 
 import hashlib
-
 from dataclasses import replace
-
 from unittest import TestCase
-
 from unittest.mock import patch
 
 from literate_ai.adapters import repository_publication as transport
-
 from literate_ai.adapters import repository_refresh as custody
-
 from literate_ai.adapters import repository_refresh_publication as publication
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from literate_ai.contracts.repository_lineage import RepositoryFetchDeadlinePolicy
-
 from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshRequest,
     RepositoryRefreshTarget,
 )
-
 from tests.support import fixtures_test_repository_refresh_inputs as fixtures
-
 from tests.support.fixtures_test_repository_orchestration import git, snapshot
+
 
 class RefreshPublicationTests(TestCase):
     def setUp(self):
@@ -385,4 +377,3 @@ class RefreshPublicationTests(TestCase):
             prepared.observations[1].repository_identity,
         )
         self.assertEqual(snapshot(self.base), before)
-

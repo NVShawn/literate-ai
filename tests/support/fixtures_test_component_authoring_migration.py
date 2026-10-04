@@ -1,40 +1,33 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_authoring_migration``."""
 
 import hashlib
-
 import json
-
-
-
 
 from literate_ai.contracts.capabilities import (
     Capability,
     CapabilityRequirement,
     DependencyKind,
 )
-
 from literate_ai.contracts.components import ComponentDefinition, Entrypoint
-
 from literate_ai.contracts.flavors import (
     FlavorAxis,
     FlavorCardinality,
     FlavorSlot,
 )
-
 from literate_ai.contracts.identity import (
     ComponentCoordinate,
     ContentIdentity,
     ContentReference,
 )
-
 from literate_ai.contracts.repositories import (
     RepositoryRevisionKind,
     RepositoryRevisionSelector,
     RepositorySourceDependency,
 )
-
 from tests.support.fixtures_test_component_lock_contracts import reference
+
 
 def repository_dependency() -> RepositorySourceDependency:
     return RepositorySourceDependency(
@@ -52,13 +45,16 @@ def repository_dependency() -> RepositorySourceDependency:
         ),
     )
 
+
 def pretty_repository_bytes(
     dependency: RepositorySourceDependency,
 ) -> bytes:
     return (json.dumps(dependency.to_dict(), indent=2) + "\n").encode("utf-8")
 
+
 def raw_identity(content: bytes) -> ContentIdentity:
     return ContentIdentity.parse_uri("sha256:" + hashlib.sha256(content).hexdigest())
+
 
 def definition(
     *, capability_contract=None, with_repository: bool = True
@@ -132,4 +128,3 @@ def definition(
             else ()
         ),
     )
-

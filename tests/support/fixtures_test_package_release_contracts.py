@@ -1,20 +1,15 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_package_release_contracts``."""
 
 import hashlib
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from datetime import UTC, datetime
-
 from pathlib import Path
 
 from literate_ai.adapters.packaging import DirectoryPackageAdapter
-
 from literate_ai.application.artifact_graph import (
     ArtifactAssemblyError,
     create_artifact_build_graph,
@@ -22,7 +17,6 @@ from literate_ai.application.artifact_graph import (
     create_resource_package_input,
     realize_manifest,
 )
-
 from literate_ai.application.release_artifacts import (
     ReleaseArtifactAssemblyError,
     StandardReleaseDeclaration,
@@ -31,7 +25,6 @@ from literate_ai.application.release_artifacts import (
     standard_release_evidence_identities,
     standard_release_evidence_manifest_bytes,
 )
-
 from literate_ai.contracts import (
     BlobRef,
     ComponentCoordinate,
@@ -40,9 +33,7 @@ from literate_ai.contracts import (
     SourceBundleClosure,
     SourceBundleFile,
 )
-
 from literate_ai.contracts._validation import ContractValidationError
-
 from literate_ai.contracts.executable_components.packages import (
     PackagedFile,
     PackageEntrypoint,
@@ -53,9 +44,7 @@ from literate_ai.contracts.executable_components.packages import (
     RuntimeRequirement,
     RuntimeRequirementKind,
 )
-
 from literate_ai.contracts.identity import canonical_identity
-
 from literate_ai.publication import (
     FilesystemPublicationTarget,
     PublicationError,
@@ -65,24 +54,18 @@ from literate_ai.publication import (
     StandardProjectReleaseService,
     create_publication_request_from_release,
 )
-
 from literate_ai.security import SecurityProfile
-
 from literate_ai.storage import AppendOnlyEventStore, FileSystemCAS
-
 from tests.support.fixtures_test_artifact_graph_contracts import (
     ArtifactGraphTests,
     SourceAssemblyTests,
 )
-
 from tests.support.fixtures_test_component_execution_planning import _diamond_lock
-
 from tests.support.fixtures_test_component_generation_scheduling import (
     _decision,
     _names,
     _prepared_execution,
 )
-
 from tests.support.fixtures_test_standard_project_lifecycle import (
     LifecyclePorts,
     _prepared_nodes,
@@ -90,13 +73,16 @@ from tests.support.fixtures_test_standard_project_lifecycle import (
     _source_record,
 )
 
+
 def _identity(label: str):
     return canonical_identity({"package-fixture": label})
+
 
 def _blob(content: bytes, media_type: str = "application/json") -> BlobRef:
     return BlobRef(
         hashlib.sha256(content).hexdigest(), len(content), media_type=media_type
     )
+
 
 def _source_bundle(
     name: str,
@@ -111,6 +97,7 @@ def _source_bundle(
         root_blob.identity: root_bytes,
         file_blob.identity: file_bytes,
     }
+
 
 def _release_declaration(execution, plan: PackagePlan) -> StandardReleaseDeclaration:
     return StandardReleaseDeclaration(
@@ -132,6 +119,7 @@ def _release_declaration(execution, plan: PackagePlan) -> StandardReleaseDeclara
         tuple(item for item in plan.inputs if item.kind.value == "resource"),
         plan.runtime_requirements,
     )
+
 
 class PackageReleaseContractTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -982,10 +970,11 @@ class PackageReleaseContractTests(unittest.TestCase):
                 actor="release-test",
             )
 
+
 if __name__ == "__main__":
     unittest.main()
 
-from literate_ai.contracts.executable_components.packages import PackageKind  # noqa: F401
-from literate_ai.contracts.executable_components.packages import PackagePlan  # noqa: F401
-from literate_ai.contracts.executable_components.packages import PackageResult  # noqa: F401
+from literate_ai.contracts.executable_components.packages import (
+    PackageKind,  # noqa: F401
+)
 # NOTE: names not defined at top level of tests.unit.test_package_release_contracts: ['PackageKind', 'PackagePlan', 'PackageResult']

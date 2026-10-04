@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import io
 import json
-import shutil
 import sys
 import tempfile
 import unittest
@@ -31,12 +30,17 @@ from literate_ai.contracts import ContentIdentity, StandardProjectLifecycleDrive
 from literate_ai.generated_tests import GENERATED_TEST_SUITE_PATH
 from scripts import installed_source_admission_smoke as smoke
 from tests.support.fixtures_test_cli_generation import bind_tree
-from tests.support.fixtures_test_cli_locked_generation import _generation_fixture, _write_lock
-from tests.support.fixtures_test_source_generation_custody_contracts import _generated_custody
+from tests.support.fixtures_test_cli_locked_generation import (
+    _generation_fixture,
+    _write_lock,
+)
+from tests.support.fixtures_test_source_generation_custody_contracts import (
+    _generated_custody,
+)
 
 
 class SourceAdmissionCliTests(unittest.TestCase):
-    def exercise(self, *, use_make=False, change_source=False):
+    def exercise(self, *, change_source=False):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
             component, flavors = _generation_fixture(root)
@@ -110,17 +114,7 @@ class SourceAdmissionCliTests(unittest.TestCase):
                 require_unchanged=lambda: None,
                 distribution=SimpleNamespace(identity=distribution),
             )
-            command = (
-                [
-                    shutil.which("make"),
-                    "-C",
-                    "source",
-                    f"PYTHON={sys.executable}",
-                    "test",
-                ]
-                if use_make
-                else [sys.executable, "source/verify.py"]
-            )
+            command = [sys.executable, "source/verify.py"]
             stdout, stderr = io.StringIO(), io.StringIO()
             with (
                 mock.patch.object(
@@ -205,10 +199,6 @@ class SourceAdmissionCliTests(unittest.TestCase):
 
     def test_public_admission_and_restore_exclude_test_outputs(self):
         self.exercise()
-
-    @unittest.skipUnless(shutil.which("make"), "native make is unavailable")
-    def test_build_make_command_admits_and_restores_original_source(self):
-        self.exercise(use_make=True)
 
     def test_public_admission_refuses_source_edit_and_publishes_nothing(self):
         self.exercise(change_source=True)

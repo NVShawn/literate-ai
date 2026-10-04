@@ -1,21 +1,9 @@
 """Shared fixtures extracted from ``tests.unit.test_html_render``."""
 
-
 import json
 
-
-
-
-
-
-
-
-
-
-
-
-
 from tests.support.fixtures_test_html_emitter import ROOT
+
 
 def _project(root):
     (root / ".literate").mkdir()
@@ -33,4 +21,3 @@ def _project(root):
     skill = root / "skills/agent/SKILL.md"
     skill.parent.mkdir(parents=True)
     skill.write_text("---\nname: example-agent\ndescription: Nested test.\n---\n")
-

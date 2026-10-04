@@ -1,61 +1,44 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_cli_rebuild``."""
 
 import hashlib
-
 import io
-
 import json
-
 import sys
-
 import tempfile
-
 import unittest
-
 from pathlib import Path
-
 from types import SimpleNamespace
-
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.cache.rebuild import read_rebuild_source_cache_control
-
 from literate_ai.adapters.generation_preparation import PreparedLockedGeneration
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecycleError
-
 from literate_ai.adapters.project_initialization import initialize_project
-
 from literate_ai.adapters.project_lifecycle_driver import (
     lifecycle_driver_environment_identity_material,
 )
-
 from literate_ai.adapters.standard_lifecycle_binding import (
     InstalledFrameworkDistribution,
     InstalledFrameworkDistributionMember,
     ResolvedStandardProjectLifecycleDriver,
     StandardLifecycleBindingError,
 )
-
 from literate_ai.adapters.standard_project import (
     FilesystemStandardProjectRuntime,
     PlannedStandardProject,
     StandardProjectRuntimeReadiness,
 )
-
 from literate_ai.adapters.standard_rebuild import (
     FilesystemStandardRebuildAdapter,
     _resolved_source_cache,
 )
-
 from literate_ai.cli import main
-
 from literate_ai.cli.rebuild import (
     _component_acceptance_oracle,
     _standard_root_product_result,
 )
-
 from literate_ai.contracts import (
     MINIMUM_PROJECT_REBUILD_PHASES,
     BlobRef,
@@ -70,14 +53,13 @@ from literate_ai.contracts import (
     canonical_identity,
     load_current_standard_lifecycle_policy,
 )
-
 from literate_ai.contracts.executable_components import (
     ArtifactExport,
     LibraryCapabilityImport,
     LibraryImportSurface,
 )
-
 from literate_ai.projects import load_project
+
 
 def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
     output = io.StringIO()
@@ -86,9 +68,11 @@ def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
     content = output.getvalue() if status == 0 else errors.getvalue()
     return status, json.loads(content)
 
+
 class TtyStringIO(io.StringIO):
     def isatty(self) -> bool:
         return True
+
 
 DRIVER_SOURCE = r"""
 import argparse
@@ -307,6 +291,7 @@ provisional = ProjectTestReceiptProvisional(
 )
 write_project_test_receipt_provisional(Path(args.candidate), provisional)
 """
+
 
 class RebuildCliTests(unittest.TestCase):
     def test_retained_review_reads_exact_source_without_runtime_allocation(self):
@@ -2199,6 +2184,6 @@ class RebuildCliTests(unittest.TestCase):
                 results[1]["source_cache_control_identity"],
             )
 
+
 if __name__ == "__main__":
     unittest.main()
-

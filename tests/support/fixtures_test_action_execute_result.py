@@ -1,40 +1,25 @@
 """Shared fixtures extracted from ``tests.unit.test_action_execute_result``."""
 
 import json
-
 import shutil
-
 import unittest
-
 from dataclasses import replace
-
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters import action_execute_result_record
-
 from literate_ai.adapters.action_build_result import import_build_result
-
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
-
 from literate_ai.adapters.action_execute_result import import_execute_result
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecycleError
-
 from literate_ai.adapters.qualification_capture import QualificationEvidenceRecorder
-
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.security import AuthorizationError
-
 from literate_ai.storage import FileSystemCAS
-
 from literate_ai.storage.cas import BlobIntegrityError, BlobNotFoundError
-
 from tests.support import fixtures_test_action_execute_execution as worker_fixture
+
 
 class ActionExecuteResultTests(unittest.TestCase):
     def setUp(self):
@@ -264,4 +249,3 @@ class ActionExecuteResultTests(unittest.TestCase):
                 self.import_result(admission_guard=guard)
         self.assertEqual(self.ports._execution_evidence, {})
         self.assertEqual(self.ports.execution_stdout, {})
-

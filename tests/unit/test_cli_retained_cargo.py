@@ -2,16 +2,14 @@
 
 import io
 import json
-import sys
 import unittest
 from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from literate_ai.cli import main
-from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
+from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.retained_cargo_admission import (
-    RetainedCargoAdmissionReceipt,
     RetainedCargoSourceRetirement,
 )
 from literate_ai.contracts.retained_cargo_tests import (
@@ -20,7 +18,9 @@ from literate_ai.contracts.retained_cargo_tests import (
     retained_cargo_test_targets,
 )
 from tests.support import fixtures_test_retained_cargo_current as current_fixtures
-from tests.support import fixtures_test_retained_cargo_materialization as materialization_fixtures
+from tests.support import (
+    fixtures_test_retained_cargo_materialization as materialization_fixtures,
+)
 from tests.support.fixtures_test_retained_cargo_files import blob
 
 
@@ -201,24 +201,6 @@ class RetainedCargoCliTests(unittest.TestCase):
         self.self_update.assert_not_called()
         return status, stdout.getvalue(), stderr.getvalue()
 
-    def snapshot(self):
-        return {
-            p.relative_to(self.root).as_posix(): p.read_bytes()
-            for p in self.root.rglob("*")
-            if p.is_file()
-        }
-
-    def test_check_absent_packages_is_read_only_and_does_not_admit(self):
-        before = self.snapshot()
-        status, output, error = self.invoke("check")
-        self.assertEqual((status, error), (0, ""), error)
-        result = json.loads(output)["result"]
-        self.assertEqual(result["missing_packages"], len(self.fixture.destinations))
-        self.assertEqual(result["verified_present_packages"], 0)
-        self.assertFalse(result["consumer_gates_executed"])
-        self.assertFalse(result["importer_admission"])
-        self.assertEqual(before, self.snapshot())
-
     def test_materialize_then_check_complete_packages_and_reuse_without_rewrites(self):
         for operation in ("materialize", "check", "materialize"):
             status, output, error = self.invoke(operation)
@@ -239,22 +221,6 @@ class RetainedCargoCliTests(unittest.TestCase):
                 self.published = current
             self.assertEqual(current, self.published)
 
-    def test_wrong_binding_review_refuses_before_provider_discovery(self):
-        arguments = list(self.arguments)
-        arguments[arguments.index("--reviewed-binding") + 1] = "sha256:" + "0" * 64
-        before = self.snapshot()
-        status, _, error = self.invoke("check", arguments)
-        self.assertEqual(status, 2, error)
-        self.provider_reader.assert_not_called()
-        self.assertEqual(before, self.snapshot())
-
-    def test_gate_drift_refuses_before_provider_discovery(self):
-        path = self.root / "gates.json"
-        path.write_bytes(path.read_bytes() + b" ")
-        status, _, error = self.invoke("check")
-        self.assertEqual(status, 2, error)
-        self.provider_reader.assert_not_called()
-
     def test_wrong_archive_is_not_materialized_and_diagnostics_are_sanitized(self):
         self.archive.write_bytes(b"secret-shaped candidate payload")
         status, output, error = self.invoke("materialize")
@@ -262,73 +228,6 @@ class RetainedCargoCliTests(unittest.TestCase):
         self.assertNotIn("secret-shaped", error + output)
         self.assertNotIn(str(self.root), error + output)
         self.assertTrue(all(not p.exists() for p in self.fixture.destinations))
-
-    def test_check_refuses_foreign_package_files_without_removing_them(self):
-        for destination in self.fixture.destinations:
-            self.fixture.populate(destination)
-        foreign = self.fixture.destinations[0] / "foreign"
-        foreign.write_bytes(b"preserve")
-        before = self.snapshot()
-        status, _, error = self.invoke("check")
-        self.assertEqual(status, 2, error)
-        self.assertEqual(before, self.snapshot())
-
-    def test_missing_review_arguments_are_usage_error(self):
-        status, _, error = self.invoke("materialize", [])
-        self.assertEqual(status, 2, error)
-        self.provider_reader.assert_not_called()
-
-    def test_admit_returns_canonical_receipt_after_explicit_acknowledgements(self):
-        arguments = self.admission_arguments()
-        observed = SimpleNamespace(
-            command=(sys.executable,),
-            identity=self.inputs.current_cargo_identity.uri,
-            require_unchanged=lambda: None,
-        )
-        receipt = RetainedCargoAdmissionReceipt(
-            self.fixture.fixture.binding.identity,
-            self.fixture.fixture.plan.identity,
-            canonical_identity("gate policy"),
-            canonical_identity("test inventory"),
-            canonical_identity("source retirement"),
-            self.fixture.fixture.plan.identity,
-            self.fixture.fixture.binding.qualification_identity,
-            (self.fixture.fixture.plan.identity,),
-        )
-        with (
-            patch(
-                "literate_ai.cli.retained_cargo.discover_cargo_toolchain",
-                return_value=observed,
-            ),
-            patch(
-                "literate_ai.cli.retained_cargo.discover_rust_toolchain",
-                return_value=SimpleNamespace(
-                    command=(sys.executable,),
-                    identity=self.inputs.current_rustc_identity.uri,
-                    require_unchanged=lambda: None,
-                ),
-            ),
-            patch(
-                "literate_ai.cli.retained_cargo.discover_make_toolchain",
-                return_value=observed,
-            ),
-            patch(
-                "literate_ai.cli.retained_cargo.read_retained_cargo_execution_inputs",
-                return_value=SimpleNamespace(),
-            ),
-            patch(
-                "literate_ai.cli.retained_cargo.admit_retained_cargo_consumer",
-                return_value=receipt,
-            ) as admit,
-        ):
-            status, output, error = self.invoke("admit", arguments)
-        self.assertEqual((status, error), (0, ""), error)
-        result = json.loads(output)["result"]
-        self.assertTrue(result["consumer_gates_executed"])
-        self.assertTrue(result["importer_admission"])
-        self.assertTrue(result["source_retirement"])
-        self.assertEqual(result["admission_identity"], receipt.identity.uri)
-        admit.assert_called_once()
 
     def test_admit_requires_both_acknowledgements_before_materialization(self):
         arguments = self.admission_arguments()

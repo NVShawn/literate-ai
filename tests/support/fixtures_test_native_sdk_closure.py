@@ -1,31 +1,12 @@
 """Shared fixtures extracted from ``tests.unit.test_native_sdk_closure``."""
 
-
 import shutil
-
-
-
 from copy import deepcopy
-
-
-
-
-
-
-
-
-
-
-
 
 from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
-
-
-
-
 
 
 def linked_recipe(fixture):
@@ -56,4 +37,3 @@ def linked_recipe(fixture):
     document["entrypoints"] = []
     document["provides"][0]["interface"] = {"uri": "integration.md", "pin": None}
     path.write_bytes(render_authoring_markdown(document, body))
-

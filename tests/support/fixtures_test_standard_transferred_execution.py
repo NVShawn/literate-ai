@@ -1,26 +1,19 @@
 """Shared fixtures extracted from ``tests.unit.test_standard_transferred_execution``."""
 
 import unittest
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecycleError
-
 from literate_ai.adapters.qualification_capture import QualificationCaptureError
-
 from literate_ai.application.standard_execution_inputs import (
     plan_standard_execution_inputs,
 )
-
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-
 from literate_ai.security import AuthorizationError
-
 from tests.support import fixtures_test_standard_transferred_tests as test_fixture
-
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+
 
 class StandardTransferredExecutionTests(unittest.TestCase):
     def setUp(self):
@@ -194,4 +187,3 @@ class StandardTransferredExecutionTests(unittest.TestCase):
             with self.assertRaises(AuthorizationError):
                 self.admit(scope=scope, provider_artifacts=())
         self.assert_unpublished()
-

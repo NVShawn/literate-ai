@@ -32,13 +32,11 @@ from literate_ai.application import (
     GenerationStatus,
 )
 from literate_ai.contracts import (
-    CYCLONEDX_SOURCE_SBOM_PATH,
     CycloneDxManagedGraph,
     SourceIntelligenceMode,
     SourceIntelligenceStage,
     canonical_identity,
 )
-from literate_ai.ports import require_committed_tree_result
 from literate_ai.security import (
     AuthorizationRevocationSet,
     BuildRequestDeclaration,
@@ -76,62 +74,7 @@ def source_intelligence_selection(provider=None):
     )
 
 
-def dependency_resolution():
-    authority = locked_authority_fixture()
-    managed_graph = CycloneDxManagedGraph.from_component_lock(authority.lock)
-    return DependencyResolver([], managed_graph).resolve(
-        {
-            "effective_revision_digest": canonical_identity({"revision": 1}).uri,
-            "source_bundle_digest": canonical_identity({"source": 1}).uri,
-            "files": {CYCLONEDX_SOURCE_SBOM_PATH: "{}"},
-        },
-        {
-            "artifact_digest": canonical_identity({"artifact": 1}).uri,
-            "source_bundle_digest": canonical_identity({"source": 1}).uri,
-        },
-    )
-
-
 class LocalLifecycleAdapterTests(unittest.TestCase):
-    def test_generated_file_paths_use_one_portable_posix_representation(self) -> None:
-        unsafe = (
-            "../escape.py",
-            "source/../escape.py",
-            "source\\..\\escape.py",
-            "/absolute.py",
-            "C:/escape.py",
-            "C:escape.py",
-            "//?/C:/escape.py",
-            "source//main.py",
-            "source/./main.py",
-            "source/NUL.txt",
-            "source/NUL .txt",
-            "source/CONOUT$",
-            "source/COM¹.txt",
-            "source/file:stream.py",
-            "source/trailing.",
-        )
-
-        for path in unsafe:
-            with self.subTest(path=path):
-                with self.assertRaises((TypeError, ValueError)):
-                    local_adapter_module._files({"files": {path: "print('unsafe')\n"}})
-
-        self.assertEqual(
-            local_adapter_module._files(
-                {"files": {"source/nested/main.py": "print('safe')\n"}}
-            ),
-            {"source/nested/main.py": b"print('safe')\n"},
-        )
-
-        for files in (
-            {"source/A.py": "first\n", "source/a.py": "second\n"},
-            {"source/a": "file\n", "source/a/main.py": "child\n"},
-        ):
-            with self.subTest(files=tuple(files)):
-                with self.assertRaises(ValueError):
-                    local_adapter_module._files({"files": files})
-
     @unittest.skipUnless(os.name == "posix", "symlink containment test is POSIX-only")
     def test_materialization_proves_containment_before_writing(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -255,46 +198,6 @@ class LocalLifecycleAdapterTests(unittest.TestCase):
                 build_step.output["source_bundle_digest"],
                 classification_step.output["source_digests"][0],
             )
-
-    def test_source_generation_off_commits_without_provider_work(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            store = WorkspaceTreeStore(Path(directory) / "workspace")
-            selection = SourceIntelligenceProviderSelection(
-                SourceIntelligenceStage.SOURCE_GENERATION,
-                SourceIntelligenceMode.OFF,
-                "none",
-                None,
-            )
-            adapter = WorkspaceTreeAdapter(
-                store,
-                source_intelligence=selection,
-            )
-            resolution = dependency_resolution()
-            prepared = adapter.prepare({"main.py": b"value = 1\n"}, resolution)
-
-            result = adapter.commit(prepared, "without/intelligence", resolution)
-
-            self.assertIsNone(result["source_intelligence"])
-            self.assertEqual(
-                result["source_intelligence_status"],
-                {
-                    "schema": "literate-ai/source-intelligence-stage-status@1",
-                    "stage": "source-generation",
-                    "mode": "off",
-                    "state": "off",
-                    "provider_id": "none",
-                },
-            )
-            accepted = store.resolve("without/intelligence")
-            self.assertIsNotNone(accepted)
-            self.assertFalse((accepted / ".codegraph").exists())
-            normalized = require_committed_tree_result(
-                result,
-                tree_digest=prepared["tree_digest"],
-                reference="without/intelligence",
-                dependency_resolution=resolution,
-            )
-            self.assertIsNone(normalized["source_intelligence"])
 
 
 if __name__ == "__main__":

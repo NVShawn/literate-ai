@@ -1,77 +1,60 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_cargo_import``."""
 
 import hashlib
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
 
 from literate_ai.adapters.directory_artifacts import (
     DirectoryExportFile,
     encode_directory_export,
 )
-
 from literate_ai.adapters.qualification_archive import encode_qualification_archive
-
 from literate_ai.adapters.retained_cargo_import import (
     RetainedCargoImportInputs,
     verify_retained_cargo_archive,
 )
-
 from literate_ai.application.locked_generation_authority import (
     LockedGenerationAuthority,
 )
-
 from literate_ai.application.source_promotion import qualify_locked_source_promotion
-
 from literate_ai.authority import ComponentAuthorityLifecycle
-
 from literate_ai.contracts.authority import ComponentGenerationClosure
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.cargo_workspace import (
     CargoPackageExpectation,
     CargoTargetExpectation,
     CargoWorkspaceExpectation,
 )
-
 from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
     canonical_json_bytes,
 )
-
 from literate_ai.contracts.repositories import RepositoryBuildCommand
-
 from literate_ai.contracts.retained_cargo import (
     CargoManifestChange,
     RetainedCargoWorkspacePlan,
 )
-
 from literate_ai.contracts.retained_libraries import RetainedLibraryBinding
-
 from literate_ai.source_to_specification.promotion_materialization import (
     PromotionInputKind,
     SourcePromotionInput,
     SourcePromotionMaterializer,
     VerifiedSourcePromotionEvidence,
 )
-
-from tests.support import fixtures_test_component_execution_planning as execution_fixtures
-
+from tests.support import (
+    fixtures_test_component_execution_planning as execution_fixtures,
+)
 from tests.support import fixtures_test_component_lock_contracts as locks
-
 from tests.support import fixtures_test_qualification_capture as captures
-
 from tests.support import fixtures_test_standard_project_lifecycle as lifecycle_fixtures
+
 
 def blob(content, media="application/json"):
     return BlobRef(hashlib.sha256(content).hexdigest(), len(content), media_type=media)
+
 
 class RetainedCargoImportTests(unittest.TestCase):
     def setUp(self):
@@ -429,6 +412,6 @@ class RetainedCargoImportTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             replace(self.inputs, require_unchanged=None)
 
+
 if __name__ == "__main__":
     unittest.main()
-

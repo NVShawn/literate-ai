@@ -1,62 +1,42 @@
 """Shared fixtures extracted from ``tests.unit.test_action_build_result``."""
 
 import json
-
 import os
-
 import shutil
-
 import stat
-
 import unittest
-
 from dataclasses import replace
-
 from datetime import UTC, datetime
-
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.action_blob_source import HttpActionBlobSource
-
 from literate_ai.adapters.action_build_record import BuildWorkerInput
-
 from literate_ai.adapters.action_build_result import (
     MAX_BUILD_ARCHIVE_BYTES,
     BuildWorkerResult,
     capture_build_result,
     import_build_result,
 )
-
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
     record_identity,
 )
-
 from literate_ai.adapters.directory_artifacts import (
     encode_directory_export,
     read_directory_export,
 )
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-
 from literate_ai.contracts.generation_cache import CachedSourceFile
-
 from literate_ai.security import AuthorizationError
-
 from literate_ai.storage import FileSystemCAS
-
 from literate_ai.storage.cas import BlobIntegrityError
-
 from tests.support import fixtures_test_standard_transferred_build as transfer_fixture
-
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
-from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
-
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 class ActionBuildResultTests(unittest.TestCase):
     def setUp(self):
@@ -334,4 +314,3 @@ class ActionBuildResultTests(unittest.TestCase):
                 self.receive()
         self.assertTrue(changed)
         self.assert_unregistered()
-

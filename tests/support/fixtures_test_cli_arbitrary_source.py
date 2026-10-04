@@ -1,34 +1,15 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_cli_arbitrary_source``."""
 
 
 import io
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from literate_ai.cli import main
-
-
-
-
-
-
-
 from tests.unit.root_parent_adapter import root_parent_for_fixture_project
 
 KEY = b"local-bootstrap-key-material-32-bytes-minimum"
+
 
 def invoke(*arguments: str) -> tuple[int, str, str]:
     output = io.StringIO()
@@ -36,6 +17,7 @@ def invoke(*arguments: str) -> tuple[int, str, str]:
     with root_parent_for_fixture_project(arguments):
         status = main(arguments, stdout=output, stderr=errors)
     return status, output.getvalue(), errors.getvalue()
+
 
 def reviewed_static_graph(bundle: dict[str, object], *, kind: str = "library") -> dict:
     result = bundle["result"]
@@ -97,4 +79,3 @@ def reviewed_static_graph(bundle: dict[str, object], *, kind: str = "library") -
         ],
         "edges": [],
     }
-

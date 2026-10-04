@@ -1,32 +1,20 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_command_projection``."""
 
 import base64
-
 import hashlib
-
 import json
-
 import os
-
 import shutil
-
 import subprocess
-
 import sys
-
 import tempfile
-
 import unittest
-
 import zlib
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from types import SimpleNamespace
-
 from unittest import mock
 
 from jsonschema import Draft202012Validator
@@ -35,26 +23,20 @@ from literate_ai.adapters.component_acceptance import (
     DeclaredLibraryAcceptanceCase,
     LibraryAcceptance,
 )
-
 from literate_ai.adapters.component_lock_planning import FilesystemComponentLockPlanner
-
 from literate_ai.adapters.component_locks import ComponentLockStore
-
 from literate_ai.adapters.component_resolution_audits import (
     ComponentResolutionAuditStore,
 )
-
 from literate_ai.adapters.lifecycle import (
     LocalSourceTreeRegistry,
     LocalStandardLifecyclePorts,
     local_tree_identity,
 )
-
 from literate_ai.adapters.locked_generation_authority import (
     FilesystemLockedGenerationAuthorityReader,
     LockedGenerationAuthorityReaderError,
 )
-
 from literate_ai.adapters.standard_project import (
     _STANDARD_LIBRARY_IMPORT_DRIVER,
     _STANDARD_LIBRARY_TEST_DRIVER,
@@ -63,15 +45,11 @@ from literate_ai.adapters.standard_project import (
     assemble_filesystem_standard_project_runtime,
     project_locked_standard_toolchain_closure,
 )
-
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-
 from literate_ai.application.component_lock_resolution import ComponentLockResolver
-
 from literate_ai.application.library_artifacts import project_library_import_surface
-
 from literate_ai.contracts import (
     ComponentCommandPhase,
     ContentIdentity,
@@ -83,10 +61,9 @@ from literate_ai.contracts import (
     canonical_identity,
     parse_standard_command_profile,
 )
-
 from tests.support.fixtures_test_component_lock_planning import _fixture
-
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+
 
 def _tool(name: str, *, environment: tuple[tuple[str, str], ...] = ()):
     return SimpleNamespace(
@@ -95,6 +72,7 @@ def _tool(name: str, *, environment: tuple[tuple[str, str], ...] = ()):
         identity=canonical_identity({"fake-standard-toolchain": name}).uri,
         require_unchanged=lambda: None,
     )
+
 
 def _npm_tool(node, *, selected_node=None):
     return SimpleNamespace(
@@ -108,6 +86,7 @@ def _npm_tool(node, *, selected_node=None):
         ).uri,
         require_unchanged=lambda: None,
     )
+
 
 def _observation(commands):
     from literate_ai.adapters.dependencies import HostDependencyObservation
@@ -124,6 +103,7 @@ def _observation(commands):
         components,
         tuple(("component:test-root", item["bom-ref"]) for item in components),
     )
+
 
 def _locked_snapshot(
     root: Path,
@@ -400,6 +380,7 @@ def _locked_snapshot(
         },
     )
     return component, snapshot, execution
+
 
 class StandardCommandProjectionTests(unittest.TestCase):
     def test_python_wheels_bind_profile_interpreter_and_closure_on_each_os(self):
@@ -1791,6 +1772,6 @@ class StandardCommandProjectionTests(unittest.TestCase):
                 with self.assertRaises(ContractValidationError):
                     parse_standard_command_profile(invalid)
 
+
 if __name__ == "__main__":
     unittest.main()
-

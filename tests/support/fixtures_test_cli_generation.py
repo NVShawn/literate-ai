@@ -1,16 +1,9 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_cli_generation``."""
 
 
-
-
-
 from dataclasses import replace
-
-
-
-
-
 
 
 def bind_tree(generated, root, **candidate_updates):
@@ -32,4 +25,3 @@ def bind_tree(generated, root, **candidate_updates):
         provenance_identity=provenance.identity,
     )
     return replace(generated, output=output, output_identity=output.identity)
-

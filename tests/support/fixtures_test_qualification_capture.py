@@ -1,53 +1,36 @@
 """Shared fixtures extracted from ``tests.unit.test_qualification_capture``."""
 
 import hashlib
-
 import json
-
 import subprocess
-
 import tempfile
-
 import unittest
-
 from concurrent.futures import ThreadPoolExecutor
-
 from dataclasses import fields, replace
-
 from pathlib import Path
-
 from threading import Barrier
-
 from types import SimpleNamespace
-
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.component_acceptance import (
     DeclaredLibraryAcceptanceCase,
     LibraryAcceptance,
 )
-
 from literate_ai.adapters.dependencies import build_cyclonedx_bom
-
 from literate_ai.adapters.evidence_storage import FileSystemEvidenceStore
-
 from literate_ai.adapters.lifecycle.standard_local import (
     LocalStandardLifecycleError,
     LocalStandardLifecyclePorts,
 )
-
 from literate_ai.adapters.models.coding_cli import GenerationRecipe, RecipeDocument
-
 from literate_ai.adapters.qualification import (
     FilesystemStandardQualificationAdapter,
     _observe,
 )
-
 from literate_ai.adapters.qualification_archive import (
     encode_qualification_archive,
     reopen_qualification_archive,
 )
-
 from literate_ai.adapters.qualification_capture import (
     QualificationCaptureError,
     QualificationEvidenceReader,
@@ -59,56 +42,42 @@ from literate_ai.adapters.qualification_capture import (
     reopen_qualification_root,
     verify_qualification_packaged_library_processes,
 )
-
 from literate_ai.application.artifact_graph import (
     create_artifact_build_graph,
     create_package_plan,
 )
-
 from literate_ai.application.standard_test_receipts import _aggregate
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.executable_components.packages import PackageKind
-
 from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
     canonical_json_bytes,
 )
-
 from literate_ai.contracts.library_products import LibraryArtifactProduct
-
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
-
 from literate_ai.contracts.sbom import (
     LITERATE_SOURCE_BOM_IDENTITY_PROPERTY,
     CycloneDxLifecycle,
     project_component_lock_managed_graph,
 )
-
 from literate_ai.contracts.standard_lifecycle_membership import StandardAggregateReceipt
-
 from literate_ai.contracts.standard_root_integration import (
     StandardRootIntegrationEvidence,
 )
-
 from literate_ai.contracts.testing import ProjectTestEvidence
-
 from literate_ai.source_to_specification.qualification_lifecycle import (
     QualificationLifecycleResult,
     QualificationLifecycleRunEvidence,
 )
-
 from tests.support import fixtures_test_artifact_graph_contracts as graph_fixtures
-
 from tests.support import fixtures_test_package_release_contracts as package_fixtures
-
-from tests.support import fixtures_test_qualification_lifecycle_runner as lifecycle_fixtures
-
+from tests.support import (
+    fixtures_test_qualification_lifecycle_runner as lifecycle_fixtures,
+)
 from tests.support.fixtures_test_library_products import library_product
-
 from tests.support.fixtures_test_standard_post_source_evidence import _evidence
+
 
 def fixture():
     content = b"exact accepted package bytes"
@@ -178,6 +147,7 @@ def fixture():
         covered_surface_ids=("fixture.logic",),
     )
     return QualificationLifecycleRunEvidence(**values), exports, acceptance, content
+
 
 def root_records(run, exports):
     """Contract fixture for exact root/receipt binding, not native qualification."""
@@ -275,6 +245,7 @@ def root_records(run, exports):
         lifecycle_policy_identity=receipt.suite.content_identity,
     )
     return run, (lifecycle, root.to_dict(), aggregate.to_dict(), receipt.to_dict())
+
 
 class QualificationCaptureTests(unittest.TestCase):
     def test_parity_retains_raw_outputs_and_template_bound_observation(self):
@@ -636,7 +607,9 @@ class QualificationCaptureTests(unittest.TestCase):
             fixture()[0].framework_distribution_identity,
             load_current_standard_lifecycle_policy().identity,
         )
-        from tests.support.fixtures_test_standard_project_lifecycle import command_contract_fixture
+        from tests.support.fixtures_test_standard_project_lifecycle import (
+            command_contract_fixture,
+        )
 
         self.current_commands = {
             node.plan.component_revision: command_contract_fixture(
@@ -2202,6 +2175,6 @@ class QualificationCaptureTests(unittest.TestCase):
                         max_bytes=1024,
                     )
 
+
 if __name__ == "__main__":
     unittest.main()
-

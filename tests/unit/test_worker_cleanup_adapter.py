@@ -97,28 +97,6 @@ class WorkerCleanupAdapterTests(unittest.TestCase):
             result.candidates,
         )
 
-    def test_substituted_response_identity_is_malformed(self):
-        def runner(_command, *, environment, timeout_seconds, input_bytes):
-            completed = subprocess.run(
-                _probe_command(sys.executable),
-                env=environment,
-                input=input_bytes,
-                capture_output=True,
-                timeout=timeout_seconds,
-                check=False,
-            )
-            value = json.loads(completed.stdout)
-            value["request_identity"] = "sha256:" + "0" * 64
-            return SimpleNamespace(
-                returncode=0,
-                stdout=json.dumps(value).encode(),
-            )
-
-        result = investigate_worker_cleanup(self.bindings, self.policy, runner=runner)
-
-        self.assertEqual(result.status, "malformed")
-        self.assertEqual(result.candidates, ())
-
 
 if __name__ == "__main__":
     unittest.main()

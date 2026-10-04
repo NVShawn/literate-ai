@@ -1,38 +1,30 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_cargo_test_observation``."""
 
 import copy
-
 import json
-
 import os
-
 import shutil
-
 import subprocess
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
 
 from literate_ai.adapters.builders._process import BoundedProcessResult
-
 from literate_ai.adapters.retained_cargo_test_observation import (
     select_cargo_test_executables,
     verify_libtest_observation,
 )
-
 from literate_ai.contracts.cargo_workspace import (
     CargoPackageExpectation,
     CargoTargetExpectation,
     CargoWorkspaceExpectation,
 )
 
+
 def process(stdout, code=0):
     return BoundedProcessResult(code, stdout.encode(), b"")
+
 
 @unittest.skipUnless(
     shutil.which("cargo"), "Cargo is required for native test attribution"
@@ -296,4 +288,3 @@ harness=false
             self.select(maximum_records=1)
         with self.assertRaises(ValueError):
             self.select(maximum_bytes=1)
-

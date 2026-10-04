@@ -1,36 +1,26 @@
 """Shared fixtures extracted from ``tests.unit.test_action_accept_execution``."""
 
 import shutil
-
 import unittest
-
 from contextlib import contextmanager
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_accept_execution import (
     execute_worker_accept,
     execute_worker_accept_from_cas,
 )
-
 from literate_ai.adapters.action_accept_result_record import AcceptWorkerResult
-
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.adapters.qualification_capture import (
     QualificationCaptureError,
     QualificationEvidenceRecorder,
 )
-
 from literate_ai.storage import FileSystemCAS
-
 from literate_ai.storage.cas import BlobNotFoundError
-
 from tests.support import fixtures_test_action_accept_result as fixture_module
+
 
 class AcceptWorkerExecutionTests(unittest.TestCase):
     def setUp(self):
@@ -177,4 +167,3 @@ class AcceptWorkerExecutionTests(unittest.TestCase):
         self.assertEqual(self.read_result(content).evidence, f.evidence)
         self.assertFalse(seen[0].exists())
         self.assertEqual(list(workspace.iterdir()), [])
-

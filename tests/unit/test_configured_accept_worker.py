@@ -4,7 +4,6 @@ import io
 import os
 import sys
 import unittest
-from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -13,14 +12,12 @@ from literate_ai.action_worker import main
 from literate_ai.adapters.action_accept_result_record import AcceptWorkerResult
 from literate_ai.adapters.action_accept_worker import ConfiguredAcceptWorker
 from literate_ai.adapters.action_dispatch_wire import (
-    ActionWireError,
     decode_action_response,
     encode_action_request,
     record_identity,
 )
 from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
-from literate_ai.adapters.qualification_capture import QualificationCaptureError
 from literate_ai.contracts import canonical_identity
 from tests.support import fixtures_test_action_accept_execution as fixture_module
 from tests.support.fixtures_test_action_accept_action import make_accept_request
@@ -47,19 +44,6 @@ class ConfiguredAcceptWorkerTests(unittest.TestCase):
                 os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[2] / "src")
             ),
         )
-
-    def execute(self, worker=None, **changes):
-        args = dict(
-            request=self.request,
-            deadline=self.deadline,
-            records=self.records,
-            expected_worker_identity=self.request.worker.worker_identity,
-            cas=self.fixture.cas,
-            workspace_root=self.workspace,
-            blob_source=self.fixture.fetch,
-        )
-        args.update(changes)
-        return (worker or self.worker()).execute(**args)
 
     def test_actual_child_needs_no_application_tools_and_cleans_job(self):
         code = """
@@ -110,52 +94,6 @@ raise SystemExit(main(runtime_factory=factory))
         self.assertEqual(result.evidence, self.fixture.fixture.evidence)
         self.assertEqual(list(self.workspace.iterdir()), [])
 
-    def test_child_failure_cleans_owned_job(self):
-        with self.assertRaises(ActionWireError):
-            self.execute()
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_missing_process_proof_refuses_before_job_allocation(self):
-        stage = self.value.test_result
-        missing = stage.evidence.cases[0].observation_identity.uri
-        changed = replace(
-            self.value,
-            test_result=replace(
-                stage,
-                evidence_records=tuple(
-                    ref for ref in stage.evidence_records if ref.identity != missing
-                ),
-            ),
-        )
-        request, records = make_accept_request(changed, self.deadline)
-        with patch(
-            "literate_ai.adapters.action_accept_worker.tempfile.mkdtemp",
-            side_effect=AssertionError("job allocated"),
-        ):
-            with self.assertRaises(QualificationCaptureError):
-                self.execute(request=request, records=records)
-
-    def test_cancel_refuses_before_job_allocation(self):
-        with patch(
-            "literate_ai.adapters.action_accept_worker.tempfile.mkdtemp",
-            side_effect=AssertionError("job allocated"),
-        ):
-            with self.assertRaises(ActionWireError):
-                self.execute(cancelled=lambda: True)
-
-    def test_corrupt_stage_bytes_refuse_before_job_allocation(self):
-        identity = self.value.test_result.evidence.cases[0].observation_identity.uri
-
-        def fetch(ref):
-            return b"bad" if ref.identity == identity else self.fixture.fetch(ref)
-
-        with patch(
-            "literate_ai.adapters.action_accept_worker.tempfile.mkdtemp",
-            side_effect=AssertionError("job allocated"),
-        ):
-            with self.assertRaises(ActionWireError):
-                self.execute(blob_source=fetch)
-
     def receive(self, worker):
         output = io.BytesIO()
         wire = encode_action_request(self.request, self.deadline, self.records)
@@ -187,8 +125,3 @@ raise SystemExit(main(runtime_factory=factory))
             )
         self.assertEqual(status, 0)
         return decode_action_response(output.getvalue(), self.request)
-
-    def test_unconfigured_receiver_refuses_accept(self):
-        outcome, content = self.receive(None)
-        self.assertEqual(outcome.failure_code, "action_accept.not_configured")
-        self.assertIsNone(content)

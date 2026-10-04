@@ -1,22 +1,14 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_python_wheel_lock``."""
 
 import base64
-
-
 import csv
-
 import hashlib
-
 import io
-
-
-
 import zipfile
 
-
 from packaging.markers import default_environment
-
 
 from literate_ai.adapters.dependencies.python_lock import (
     SCHEMA,
@@ -63,6 +55,7 @@ def wheel_record(name="example", dependencies=()):
         "requires_dist": sorted(dependencies),
     }, content
 
+
 def document():
     example, _ = wheel_record(dependencies=("helper>=1",))
     helper, _ = wheel_record("helper")
@@ -73,4 +66,3 @@ def document():
         "requirements": ["example==1.0"],
         "packages": [example, helper],
     }
-

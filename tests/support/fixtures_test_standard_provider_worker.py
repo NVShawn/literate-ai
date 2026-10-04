@@ -1,35 +1,5 @@
 """Shared fixtures extracted from ``tests.unit.test_standard_provider_worker``."""
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 _CHILD = """
 import json, os, sys
 from contextlib import contextmanager
@@ -76,4 +46,3 @@ def runtime(admitted, registry, recorder):
 
 raise SystemExit(main(runtime_factory=runtime))
 """
-

@@ -1,17 +1,12 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_post_source_evidence``."""
 
 
-
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.executable_components import ArtifactExport
-
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
-
 from literate_ai.contracts.sbom import CycloneDxBomBinding, CycloneDxLifecycle
-
 from literate_ai.contracts.standard_post_source_evidence import (
     StandardBuildEvidence,
     StandardComponentAcceptanceEvidence,
@@ -26,6 +21,7 @@ from literate_ai.contracts.standard_post_source_evidence import (
 def _identity(label: str) -> ContentIdentity:
     return canonical_identity({"fixture": label})
 
+
 def _source_bom() -> CycloneDxBomBinding:
     return CycloneDxBomBinding(
         CycloneDxLifecycle.SOURCE,
@@ -39,6 +35,7 @@ def _source_bom() -> CycloneDxBomBinding:
         1,
     )
 
+
 def _resolved_bom(source: CycloneDxBomBinding) -> CycloneDxBomBinding:
     return CycloneDxBomBinding(
         CycloneDxLifecycle.RESOLVED,
@@ -51,6 +48,7 @@ def _resolved_bom(source: CycloneDxBomBinding) -> CycloneDxBomBinding:
         3,
         2,
     )
+
 
 def _export(
     component: ContentIdentity,
@@ -72,6 +70,7 @@ def _export(
         (),
         BlobRef("ab" * 32, 17, media_type=media_type),
     )
+
 
 def _evidence() -> StandardComponentAcceptanceEvidence:
     component = _identity("component")
@@ -130,6 +129,7 @@ def _evidence() -> StandardComponentAcceptanceEvidence:
         execution=execution,
         acceptance_policy_identity=_identity("acceptance-policy"),
     )
+
 
 def _multi_evidence() -> StandardComponentAcceptanceEvidence:
     component = _identity("multi-component")
@@ -231,4 +231,3 @@ def _multi_evidence() -> StandardComponentAcceptanceEvidence:
         execution=execution,
         acceptance_policy_identity=_identity("multi-acceptance-policy"),
     )
-

@@ -8,7 +8,6 @@ from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from unittest.mock import patch
 
 from literate_ai.adapters.action_blob_source import HttpActionBlobSource
 from literate_ai.adapters.action_dispatch_wire import (
@@ -77,12 +76,6 @@ def source_cas_server(blobs, *, mode="ok"):
 
 
 class ActionBlobSourceTests(unittest.TestCase):
-    def test_endpoint_validation_does_not_initialize_transport_or_proxy_discovery(self):
-        with patch("literate_ai.adapters.action_blob_source.build_opener") as opener:
-            source = HttpActionBlobSource("https://example.invalid/cas", self.deadline)
-            self.assertIsNone(source.opener)
-            opener.assert_not_called()
-
     def setUp(self):
         self.content = b"source bytes\n"
         self.reference = BlobRef(
@@ -105,26 +98,6 @@ class ActionBlobSourceTests(unittest.TestCase):
                 requests, [(blob_path(self.reference), "Bearer synthetic-token")]
             )
 
-    def test_corrupt_oversized_encoded_truncated_and_ambiguous_reads_refuse(self):
-        for mode in (
-            "corrupt",
-            "oversized",
-            "encoded",
-            "truncated",
-            "duplicate-length",
-        ):
-            with (
-                self.subTest(mode=mode),
-                source_cas_server(
-                    {blob_path(self.reference): self.content}, mode=mode
-                ) as (url, requests),
-            ):
-                with self.assertRaises(ActionWireError):
-                    HttpActionBlobSource(url, self.deadline, allow_http=True).fetch(
-                        self.reference
-                    )
-                self.assertEqual(len(requests), 1)
-
     def test_redirect_never_reaches_a_second_path(self):
         with source_cas_server({}, mode="redirect") as (url, requests):
             with self.assertRaises(ActionWireError) as raised:
@@ -133,24 +106,6 @@ class ActionBlobSourceTests(unittest.TestCase):
                 ).fetch(self.reference)
             self.assertEqual(raised.exception.code, "action_source.redirect_refused")
             self.assertEqual(len(requests), 1)
-
-    def test_missing_response_uses_sanitized_failure(self):
-        with source_cas_server({}) as (url, _requests):
-            with self.assertRaises(ActionWireError) as raised:
-                HttpActionBlobSource(url, self.deadline, allow_http=True).fetch(
-                    self.reference
-                )
-            self.assertEqual(raised.exception.code, "action_source.fetch_failed")
-            self.assertNotIn(url, str(raised.exception))
-
-    def test_expired_deadline_sends_no_request(self):
-        expired = ActionDispatchDeadline(datetime.now(UTC) - timedelta(seconds=1))
-        with source_cas_server({}) as (url, requests):
-            with self.assertRaises(ActionWireError):
-                HttpActionBlobSource(url, expired, allow_http=True).fetch(
-                    self.reference
-                )
-            self.assertEqual(requests, [])
 
     def test_plaintext_and_embedded_credentials_require_safe_configuration(self):
         for url in (

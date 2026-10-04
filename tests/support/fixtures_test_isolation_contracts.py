@@ -1,6 +1,6 @@
 from __future__ import annotations
-"""Shared fixtures extracted from ``tests.unit.test_isolation_contracts``."""
 
+"""Shared fixtures extracted from ``tests.unit.test_isolation_contracts``."""
 
 
 from literate_ai.security.isolation import (
@@ -20,8 +20,10 @@ _BACKEND = "sha256:" + "2" * 64
 
 _EXECUTION = "sha256:" + "3" * 64
 
+
 def _controls(*values: ContainmentControl) -> tuple[ContainmentControl, ...]:
     return tuple(sorted(set(values), key=lambda item: item.value))
+
 
 def _policy(
     minimum: IsolationLevel = IsolationLevel.OS_SANDBOXED,
@@ -49,6 +51,7 @@ def _policy(
         allow_host_yolo=allow_host_yolo,
     )
 
+
 def _request(
     level: IsolationLevel = IsolationLevel.OS_SANDBOXED,
     *,
@@ -64,6 +67,7 @@ def _request(
         requested_level=level,
         host_yolo_acknowledged=acknowledged,
     )
+
 
 def _observation(
     level: IsolationLevel = IsolationLevel.OS_SANDBOXED,
@@ -98,4 +102,3 @@ def _observation(
         ),
         complete=complete,
     )
-

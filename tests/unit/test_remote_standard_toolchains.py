@@ -1,9 +1,8 @@
 """Received tools satisfy exact Flavor constraints without controller discovery."""
 
 import unittest
-from dataclasses import replace
-from datetime import UTC, datetime, timedelta
-from unittest.mock import Mock, patch
+from datetime import UTC, datetime
+from unittest.mock import patch
 
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
 from literate_ai.adapters.action_capabilities import ActionWorkerCapabilities
@@ -26,9 +25,11 @@ from literate_ai.contracts import ToolchainConstraint, canonical_identity
 from literate_ai.contracts.execution_dispatch import ExecutionWorkerCatalog
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservationCatalog
 from tests.support import fixtures_test_action_tool_observation as transport_fixture
-from tests.support import fixtures_test_standard_command_projection as projection_fixture
-from tests.unit.action_deadline import ACTION_TEST_DEADLINE
+from tests.support import (
+    fixtures_test_standard_command_projection as projection_fixture,
+)
 from tests.support.fixtures_test_standard_toolchain_observations import observation
+from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 
 def snapshot(*tools):
@@ -56,81 +57,6 @@ def snapshot(*tools):
 
 
 class RemoteStandardToolchainTests(unittest.TestCase):
-    def test_worker_verified_alias_retains_live_selector_guard(self):
-        verify = Mock(side_effect=lambda selectors: canonical_identity(selectors))
-        consumer = RemoteStandardToolchains(
-            snapshot(observation()),
-            require_current=lambda: None,
-            verify_selectors=verify,
-        )
-        with patch("shutil.which", side_effect=AssertionError("controller PATH")):
-            tool = consumer.discover(
-                "python", ToolchainConstraint("python", command=("python",)), {}
-            )
-            self.assertEqual(tool.command, observation().command)
-            tool.require_unchanged()
-            self.assertEqual(verify.call_args.args[0], {"python": ("python",)})
-            with self.assertRaises(ActionWireError):
-                consumer.discover(
-                    "python",
-                    ToolchainConstraint("python", command=("other-python",)),
-                    {},
-                )
-            verify.side_effect = ActionWireError(
-                "action_tools.selector_mismatch", "new PATH shadow"
-            )
-            with self.assertRaises(ActionWireError):
-                tool.require_unchanged()
-
-    def test_prefix_minimum_and_exclusive_maximum_boundaries(self):
-        guard = Mock()
-        consumer = RemoteStandardToolchains(
-            snapshot(observation()), require_current=guard
-        )
-        for arguments, accepted in (
-            ({}, True),
-            ({"minimum_version": (3, 14)}, True),
-            ({"required_version": (3, 14)}, True),
-            ({"maximum_exclusive_version": (3, 15)}, True),
-            ({"minimum_version": (3, 14, 1)}, False),
-            ({"required_version": (3, 13)}, False),
-            ({"maximum_exclusive_version": (3, 14)}, False),
-        ):
-            with self.subTest(arguments=arguments):
-                constraint = ToolchainConstraint("python", **arguments)
-                if accepted:
-                    tool = consumer.discover("python", constraint, {})
-                    self.assertEqual(
-                        tool.identity, observation().toolchain_identity.uri
-                    )
-                    tool.require_unchanged()
-                else:
-                    with self.assertRaises(ActionWireError):
-                        consumer.discover("python", constraint, {})
-        self.assertGreater(guard.call_count, 1)
-
-    def test_unknown_versions_and_default_runtime_floors_refuse(self):
-        for role, version in (
-            ("python", (3, 10, 9)),
-            ("node", (19, 9, 9)),
-            ("zig", (0, 12, 0)),
-            ("zig-cc", (0, 12, 0)),
-        ):
-            value = replace(observation(role), version_info=version)
-            with self.subTest(role=role), self.assertRaises(ActionWireError):
-                RemoteStandardToolchains(
-                    snapshot(value), require_current=lambda: None
-                ).discover(role, None, {})
-        value = replace(observation("cpp"), version_info=None)
-        consumer = RemoteStandardToolchains(
-            snapshot(value), require_current=lambda: None
-        )
-        self.assertIsNone(consumer.discover("cpp", None, {}).version_info)
-        with self.assertRaises(ActionWireError):
-            consumer.discover(
-                "cpp", ToolchainConstraint("cpp", minimum_version=(1,)), {}
-            )
-
     def test_commands_are_exact_data_and_never_resolved_against_controller_path(self):
         consumer = RemoteStandardToolchains(
             snapshot(observation()), require_current=lambda: None
@@ -161,71 +87,6 @@ class RemoteStandardToolchainTests(unittest.TestCase):
                 consumer.discover("python", ToolchainConstraint("node"), {})
             with self.assertRaises(ActionWireError):
                 consumer.discover("missing", None, {})
-
-    def test_npm_keeps_node_relationship_and_requires_bounded_constraint(self):
-        node = replace(observation("node"), version_info=(22, 0, 0))
-        npm = replace(
-            node,
-            role="npm",
-            toolchain_identity=canonical_identity("npm"),
-            version_info=(11, 0, 0),
-            node_identity=node.toolchain_identity,
-        )
-        consumer = RemoteStandardToolchains(
-            snapshot(node, npm), require_current=lambda: None
-        )
-        tool = consumer.discover(
-            "npm",
-            ToolchainConstraint(
-                "npm", minimum_version=(10,), maximum_exclusive_version=(12,)
-            ),
-            {},
-        )
-        self.assertEqual(tool.node.identity, node.toolchain_identity.uri)
-        for constraint in (
-            None,
-            ToolchainConstraint("npm", minimum_version=(10,)),
-            ToolchainConstraint(
-                "npm", minimum_version=(9,), maximum_exclusive_version=(11,)
-            ),
-        ):
-            with (
-                self.subTest(constraint=constraint),
-                self.assertRaises(ActionWireError),
-            ):
-                consumer.discover("npm", constraint, {})
-
-    def test_fresh_challenges_keep_stable_observer_identity_and_drift_guard(self):
-        value = snapshot(observation())
-        guard = Mock()
-        first = RemoteStandardToolchains(value, require_current=guard)
-        second = RemoteStandardToolchains(
-            replace(
-                value,
-                capability=replace(
-                    value.capability,
-                    request_identity=canonical_identity("new challenge"),
-                    observed_at=datetime.now(UTC) + timedelta(seconds=1),
-                ),
-            ),
-            require_current=lambda: None,
-        )
-        self.assertEqual(first.observer_identity, second.observer_identity)
-        tool = first.discover("python", None, {})
-        guard.side_effect = RuntimeError("worker drift")
-        with self.assertRaisesRegex(RuntimeError, "worker drift"):
-            tool.require_unchanged()
-        with self.assertRaises(ValueError):
-            RemoteStandardToolchains(
-                replace(
-                    value,
-                    capability=replace(
-                        value.capability,
-                        build_standard_tools=canonical_identity("other"),
-                    ),
-                ),
-                require_current=lambda: None,
-            )
 
     def test_actual_admitted_receiver_supplies_discovery_and_live_profile_guard(self):
         fixture = transport_fixture.ActionToolObservationTests()

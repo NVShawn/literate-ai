@@ -1,31 +1,14 @@
 """Shared fixtures extracted from ``tests.unit.test_remote_standard_toolchains``."""
 
-
-
 from datetime import UTC, datetime
 
-
-
 from literate_ai.adapters.action_capabilities import ActionWorkerCapabilities
-
-
-
 from literate_ai.adapters.action_tool_observation import WorkerToolObservation
-
-
-
 from literate_ai.adapters.standard_toolchain_observations import (
     StandardToolObservations,
 )
-
 from literate_ai.application.action_dag_scheduler import LifecycleActionKind
-
 from literate_ai.contracts import canonical_identity
-
-
-
-
-
 
 
 def snapshot(*tools):
@@ -50,4 +33,3 @@ def snapshot(*tools):
         inventory.identity,
     )
     return WorkerToolObservation(capability, inventory)
-

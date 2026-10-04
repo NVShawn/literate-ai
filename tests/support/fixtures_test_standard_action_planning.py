@@ -1,19 +1,16 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_action_planning``."""
 
 import unittest
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
-
 from literate_ai.adapters.command_plan_finalizer import CommandBuildPlanFinalizer
-
 from literate_ai.contracts.identity import canonical_identity
-
 from tests.support import fixtures_test_standard_action_indexing as factory_fixture
+
 
 class StandardActionPlanningTests(unittest.TestCase):
     def setUp(self):
@@ -140,4 +137,3 @@ class StandardActionPlanningTests(unittest.TestCase):
         )
         self.assertIsNotNone(recovered)
         recovered.release()
-

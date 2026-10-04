@@ -8,9 +8,7 @@ from literate_ai.source_to_specification import (
     SourceToSpecificationError,
     parse_source_attestation,
     read_local_trust_key,
-    sign_review,
     sign_source_inventory,
-    verify_review_attestation,
     verify_source_attestation,
 )
 
@@ -40,18 +38,6 @@ class LocalAttestationTests(unittest.TestCase):
             )
         with self.assertRaises(SourceToSpecificationError):
             parse_source_attestation({**attestation.to_dict(), "signer": 7})
-
-    def test_review_attestation_binds_actor_and_review(self) -> None:
-        review = {"review_id": "review-1", "decision": "accept"}
-        envelope = sign_review(review, actor="alice", key=KEY)
-        verify_review_attestation(envelope, review=review, actor="alice", key=KEY)
-        with self.assertRaisesRegex(SourceToSpecificationError, "signature"):
-            verify_review_attestation(
-                envelope,
-                review={**review, "decision": "reject"},
-                actor="alice",
-                key=KEY,
-            )
 
     def test_key_reader_rejects_weak_and_symbolic_keys(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

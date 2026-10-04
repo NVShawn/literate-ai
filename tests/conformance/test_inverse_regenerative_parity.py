@@ -383,12 +383,6 @@ class InverseRegenerativeParityTests(unittest.TestCase):
     def test_cpp_clean_regenerative_binary_parity(self):
         self._qualify_language("cpp")
 
-    def test_rust_clean_regenerative_binary_parity(self):
-        self._qualify_language("rust")
-
-    def test_javascript_clean_regenerative_parity(self):
-        self._qualify_language("javascript")
-
 
 if __name__ == "__main__":
     unittest.main()

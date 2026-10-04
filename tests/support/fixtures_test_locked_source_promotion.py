@@ -1,35 +1,27 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_locked_source_promotion``."""
 
 import hashlib
-
 import json
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
 
 from literate_ai.adapters.authority import (
     AuthorityProjectionStoreError,
     FileAuthorityProjectionStore,
 )
-
 from literate_ai.adapters.locked_generation_authority import (
     FilesystemLockedGenerationAuthorityReader,
 )
-
 from literate_ai.application.source_promotion import (
     LockedSourcePromotionError,
     qualify_locked_source_promotion,
     verify_qualified_locked_source_promotion,
 )
-
 from literate_ai.authority import ComponentAuthorityLifecycle
-
 from literate_ai.contracts import (
     ComponentAuthorityState,
     ComponentAuthorityTransition,
@@ -37,7 +29,6 @@ from literate_ai.contracts import (
     ContentIdentity,
     canonical_identity,
 )
-
 from literate_ai.source_to_specification import (
     PromotionInputKind,
     SourcePromotionError,
@@ -45,21 +36,20 @@ from literate_ai.source_to_specification import (
     SourcePromotionMaterializer,
     VerifiedSourcePromotionEvidence,
 )
-
 from tests.support.fixtures_test_component_lock_planning import _fixture
-
 from tests.support.fixtures_test_locked_generation_authority import (
     _SELECTORS,
     _TARGET,
     _write_lock,
 )
-
 from tests.support.fixtures_test_qualification_lifecycle_runner import (
     QualificationLifecycleRunnerTests,
 )
 
+
 def _identity(label: str) -> ContentIdentity:
     return canonical_identity({"fixture": label})
+
 
 class LockedSourcePromotionTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -475,6 +465,6 @@ class LockedSourcePromotionTests(unittest.TestCase):
                 ),
             )
 
+
 if __name__ == "__main__":
     unittest.main()
-

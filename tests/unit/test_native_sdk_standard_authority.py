@@ -35,9 +35,13 @@ from literate_ai.contracts import CYCLONEDX_SOURCE_SBOM_PATH, CycloneDxLifecycle
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.sbom import project_component_lock_managed_graph
 from literate_ai.storage.cas import BlobIntegrityError
-from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
+from tests.support import (
+    fixtures_test_native_sdk_source_build as test_native_sdk_source_build,
+)
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
-from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
+from tests.support.fixtures_test_standard_local_command_adapter import (
+    _python_copy_lifecycle,
+)
 
 
 class NativeSdkStandardAuthorityTests(unittest.TestCase):

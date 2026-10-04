@@ -1,30 +1,20 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_npm_lifecycle``."""
 
 import base64
-
 import json
-
 import os
-
 import subprocess
-
 import sys
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from unittest import mock
 
 from literate_ai._filesystem import path_is_link_or_reparse
-
 from literate_ai.adapters.builders import BoundedProcessResult
-
 from literate_ai.adapters.lifecycle import (
     LocalComponentToolBinding,
     LocalSourceTreeRegistry,
@@ -35,9 +25,7 @@ from literate_ai.adapters.lifecycle import (
     local_generated_source_tree_identity,
     local_tree_identity,
 )
-
 from literate_ai.adapters.lifecycle.standard_local import _local_tree_identity
-
 from literate_ai.adapters.lifecycle.standard_npm import (
     StandardNpmLockedPackage,
     StandardNpmSourceAuthority,
@@ -45,14 +33,12 @@ from literate_ai.adapters.lifecycle.standard_npm import (
     parse_npm_source_authority,
     validate_npm_inventory,
 )
-
 from literate_ai.adapters.qualification_capture import (
     QualificationCaptureError,
     QualificationEvidenceReader,
     QualificationEvidenceRecorder,
     verify_qualification_build,
 )
-
 from literate_ai.contracts import (
     BuildPrivilege,
     BuildSubActionKind,
@@ -65,16 +51,13 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-
-from tests.unit.standard_source_evidence_fixture import register_strict_source
-
 from tests.support.fixtures_test_component_node_generation_preparation import (
     _fixture as _generation_fixture,
 )
-
 from tests.support.fixtures_test_standard_local_command_adapter import (
     copy_digest_cache_without_sidecars,
 )
+from tests.unit.standard_source_evidence_fixture import register_strict_source
 
 _PACKAGE_NAME = "is-number"
 
@@ -82,8 +65,10 @@ _PACKAGE_VERSION = "7.0.0"
 
 _PACKAGE_REF = f"pkg:npm/{_PACKAGE_NAME}"
 
+
 def _identity(label: str):
     return canonical_identity({"standard-npm-lifecycle-test": label})
+
 
 def _package_component(
     *, version_range: str = "vers:npm/>=7.0.0|<8.0.0"
@@ -101,6 +86,7 @@ def _package_component(
         ],
     }
 
+
 def _package_manifest() -> bytes:
     return json.dumps(
         {
@@ -112,6 +98,7 @@ def _package_manifest() -> bytes:
         sort_keys=True,
         separators=(",", ":"),
     ).encode()
+
 
 def _package_lock(*, resolved: str | None = None) -> bytes:
     integrity = "sha256-" + base64.b64encode(b"a" * 32).decode()
@@ -140,6 +127,7 @@ def _package_lock(*, resolved: str | None = None) -> bytes:
         separators=(",", ":"),
     ).encode()
 
+
 def _npm_inventory() -> bytes:
     return json.dumps(
         {
@@ -155,6 +143,7 @@ def _npm_inventory() -> bytes:
         sort_keys=True,
         separators=(",", ":"),
     ).encode()
+
 
 class StandardNpmLifecycleTests(unittest.TestCase):
     def _fixture(
@@ -1367,6 +1356,6 @@ class StandardNpmLifecycleTests(unittest.TestCase):
             self.assertEqual(second.build_cache_misses, 1)
             self.assertEqual(second.build_cache_hits, 1)
 
+
 if __name__ == "__main__":
     unittest.main()
-

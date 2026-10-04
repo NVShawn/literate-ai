@@ -1,34 +1,24 @@
 """Shared fixtures extracted from ``tests.unit.test_action_accept_record``."""
 
 import json
-
 import unittest
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters import action_accept_record as records
-
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
-
 from literate_ai.adapters.action_execute_result_record import ExecuteWorkerResult
-
 from literate_ai.adapters.action_test_execution import execute_worker_test
-
 from literate_ai.adapters.action_test_record import TestWorkerInput, TestWorkerResult
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.adapters.qualification_capture import QualificationEvidenceRecorder
-
 from literate_ai.contracts import (
     ComponentCommandPhase,
     canonical_identity,
     canonical_json_bytes,
 )
-
 from tests.support import fixtures_test_action_execute_execution as fixture_module
+
 
 class AcceptWorkerRecordTests(unittest.TestCase):
     def setUp(self):
@@ -154,4 +144,3 @@ class AcceptWorkerRecordTests(unittest.TestCase):
         )
         with self.assertRaises(ActionWireError):
             self.admit(replace(self.value, test_result=changed))
-

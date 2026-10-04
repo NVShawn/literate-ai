@@ -1,34 +1,24 @@
 """Shared fixtures extracted from ``tests.unit.test_action_accept_result``."""
 
 import json
-
 import unittest
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_accept_result import import_accept_result
-
 from literate_ai.adapters.action_accept_result_record import AcceptWorkerResult
-
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
-
 from literate_ai.adapters.action_test_record import TestWorkerInput
-
 from literate_ai.adapters.action_test_result import import_test_result
-
 from literate_ai.adapters.qualification_capture import QualificationCaptureError
-
 from literate_ai.contracts import (
     StandardComponentAcceptanceEvidence,
     canonical_identity,
     canonical_json_bytes,
 )
-
 from literate_ai.storage import FileSystemCAS
-
 from tests.support import fixtures_test_action_accept_record as fixture_module
+
 
 class AcceptWorkerResultTests(unittest.TestCase):
     def setUp(self):
@@ -223,4 +213,3 @@ class AcceptWorkerResultTests(unittest.TestCase):
         ):
             with self.assertRaisesRegex(RuntimeError, "storage unavailable"):
                 self.transfer()
-

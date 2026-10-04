@@ -1,31 +1,16 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_schema_catalog``."""
 
 
 import json
-
 import re
-
-
-
-
 from pathlib import Path
-
-
-
-
-
-
-
-
-
-
-
-
 
 ROOT = Path(__file__).parents[2] / "schemas" / "v1"
 
 V2_ROOT = Path(__file__).parents[2] / "schemas" / "v2"
+
 
 class SchemaCatalog:
     def __init__(self, root: Path = ROOT) -> None:
@@ -186,4 +171,3 @@ class SchemaCatalog:
             "array": isinstance(value, list),
             "object": isinstance(value, dict),
         }[expected]
-

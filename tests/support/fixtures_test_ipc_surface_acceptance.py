@@ -1,30 +1,22 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_ipc_surface_acceptance``."""
 
 
-
-
-
-
-
-
-
 from types import SimpleNamespace
-
 from unittest import mock
 
 from literate_ai.adapters.component_acceptance import (
     IPC_SURFACE_SCHEMA,
 )
-
-
-
 from literate_ai.contracts import ContentIdentity, canonical_identity
 
 _DECLARED_SCHEMA = "urn:example:rest-surface@1"
 
+
 def _identity(label: str) -> ContentIdentity:
     return canonical_identity({"ipc-surface-test": label})
+
 
 def _valid_document(**overrides: object) -> dict[str, object]:
     document: dict[str, object] = {
@@ -45,6 +37,7 @@ def _valid_document(**overrides: object) -> dict[str, object]:
     document.update(overrides)
     return document
 
+
 def _lock(specification_uri: str) -> mock.Mock:
     lock = mock.Mock()
     lock.root_revision = _identity("root")
@@ -57,6 +50,7 @@ def _lock(specification_uri: str) -> mock.Mock:
         ),
     )
     return lock
+
 
 def _service_lock(component_name: str) -> mock.Mock:
     lock = mock.Mock()
@@ -74,4 +68,3 @@ def _service_lock(component_name: str) -> mock.Mock:
         ),
     )
     return lock
-

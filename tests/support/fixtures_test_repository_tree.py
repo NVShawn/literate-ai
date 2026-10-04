@@ -1,10 +1,8 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_tree``."""
 
 import hashlib
-
-
-
 from pathlib import PurePosixPath
 
 from literate_ai.contracts.repository_tree import (
@@ -12,11 +10,13 @@ from literate_ai.contracts.repository_tree import (
     RepositoryTreeSnapshot,
 )
 
+
 def oid(kind, content, width=40):
     return hashlib.new(
         "sha1" if width == 40 else "sha256",
         kind.encode() + b" " + str(len(content)).encode() + b"\0" + content,
     ).hexdigest()
+
 
 def tree(files, *, width=40, message=b"fixture"):
     entries = {}
@@ -61,4 +61,3 @@ def tree(files, *, width=40, message=b"fixture"):
         commit,
         tuple(sorted(entries.values(), key=lambda entry: entry.path)),
     )
-

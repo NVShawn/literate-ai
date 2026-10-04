@@ -1,44 +1,27 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_lock_planning``."""
 
 
 import json
-
 import shutil
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from unittest.mock import patch
 
-
-
-
 from literate_ai.adapters import repository_lock_planning as planning
-
 from literate_ai.adapters.orchestration_planning import plan_orchestration
-
 from literate_ai.adapters.orchestration_scaffold import prepare_orchestration_scaffold
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from literate_ai.contracts.identity import canonical_json_bytes
-
-
 from literate_ai.contracts.repository_orchestration import (
     RepositoryOrchestration,
     RepositoryRelationship,
 )
-
 from literate_ai.project_authority_graph import project_authority_graph
-
 from tests.support import fixtures_test_orchestration_planning as fixtures
-
 from tests.support.fixtures_test_repository_orchestration import git, snapshot
-
 
 
 class RepositoryLockPlanningTests(unittest.TestCase):
@@ -235,4 +218,3 @@ class RepositoryLockPlanningTests(unittest.TestCase):
         with patch.object(Path, "open", new=guarded):
             prepared = planning.prepare_repository_lock(self.root)
         self.assertEqual(prepared.lock.repository_orchestration, self.binding)
-

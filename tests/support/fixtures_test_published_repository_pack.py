@@ -1,19 +1,20 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_published_repository_pack``."""
 
 import unittest
-
 from dataclasses import replace
 
 from literate_ai.adapters import repository_publication as publication
-
 from literate_ai.adapters._repository_pack_capture import RepositoryPackPolicy
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from tests.support import fixtures_test_repository_publication as fixtures
+from tests.support.fixtures_test_repository_orchestration import (
+    git,
+    repository,
+    snapshot,
+)
 
-from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 class PublishedRepositoryPackTests(unittest.TestCase):
     def setUp(self):
@@ -168,4 +169,3 @@ class PublishedRepositoryPackTests(unittest.TestCase):
         self.assertEqual(
             caught.exception.code, "orchestration.publication_refs_changed"
         )
-

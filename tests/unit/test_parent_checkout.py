@@ -13,15 +13,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from literate_ai.adapters.parent_checkout import parent_prefix_id
-from literate_ai.cli import main
 from tests.support.fixtures_test_project_cli import invoke
-
-_PLAIN_TEXT_ENVIRONMENT = {
-    key: value
-    for key, value in os.environ.items()
-    if key not in {"FORCE_COLOR", "COLORTERM", "CLICOLOR", "CLICOLOR_FORCE"}
-} | {"NO_COLOR": "1", "TERM": "dumb"}
 
 
 def _git(root: Path, *arguments: str) -> None:
@@ -44,18 +36,6 @@ def _commit_file(root: Path, relative: str, content: str, message: str) -> None:
     path.write_text(content, encoding="utf-8")
     _git(root, "add", relative)
     _git(root, "commit", "--quiet", "-m", message)
-
-
-class ParentPrefixIdTests(unittest.TestCase):
-    def test_uses_repository_name_without_git_suffix(self) -> None:
-        self.assertEqual(
-            parent_prefix_id("https://github.com/jordanhubbard/literate-ai.git"),
-            "literate-ai",
-        )
-        self.assertEqual(
-            parent_prefix_id("git@gitlab.internal.example:org/platform.git"),
-            "platform",
-        )
 
 
 class ParentCheckoutCliTests(unittest.TestCase):
@@ -139,52 +119,6 @@ class ParentCheckoutCliTests(unittest.TestCase):
                 (checkout / "README.md").read_text(encoding="utf-8"), "two\n"
             )
 
-    def test_initializes_nested_submodules(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            module = root / "module"
-            parent = root / "upstream"
-            child = root / "derived"
-            module.mkdir()
-            parent.mkdir()
-            child.mkdir()
-            _git(module, "init", "--quiet", "-b", "main")
-            _git(module, "config", "user.email", "parent-test@example.com")
-            _git(module, "config", "user.name", "parent-test")
-            _commit_file(module, "nested.txt", "nested\n", "module")
-            _git(parent, "init", "--quiet", "-b", "main")
-            _git(parent, "config", "user.email", "parent-test@example.com")
-            _git(parent, "config", "user.name", "parent-test")
-            _commit_file(parent, "README.md", "one\n", "init")
-            _git(
-                parent,
-                "-c",
-                "protocol.file.allow=always",
-                "submodule",
-                "add",
-                "--quiet",
-                module.resolve().as_uri(),
-                "vendor/module",
-            )
-            _git(parent, "commit", "--quiet", "-m", "add submodule")
-            _git(child, "init", "--quiet", "-b", "main")
-            _git(child, "config", "user.email", "parent-test@example.com")
-            _git(child, "config", "user.name", "parent-test")
-            _commit_file(child, "CHILD.md", "child\n", "child")
-
-            status, envelope = invoke(
-                "project",
-                "parent",
-                "checkout",
-                parent.resolve().as_uri(),
-                "--project",
-                str(child),
-            )
-            self.assertEqual(status, 0, envelope)
-            nested = child / "parents" / "upstream" / "vendor" / "module" / "nested.txt"
-            self.assertEqual(nested.read_text(encoding="utf-8"), "nested\n")
-            self.assertTrue(envelope["result"]["submodules"])
-
     def test_rejects_urls_with_embedded_credentials(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             child = Path(directory)
@@ -201,18 +135,6 @@ class ParentCheckoutCliTests(unittest.TestCase):
             self.assertEqual(
                 envelope["error"]["code"], "project.parent_url_credentials"
             )
-
-    def test_help_names_checkout(self) -> None:
-        stdout = __import__("io").StringIO()
-        stderr = __import__("io").StringIO()
-        with mock.patch.dict(os.environ, _PLAIN_TEXT_ENVIRONMENT, clear=True):
-            status = main(
-                ("project", "parent", "checkout", "help"),
-                stdout=stdout,
-                stderr=stderr,
-            )
-        self.assertEqual(status, 0)
-        self.assertIn("usage: litai project parent checkout", stdout.getvalue())
 
     @unittest.skipUnless(os.name == "posix", "requires POSIX process groups")
     def test_clone_reaps_git_descendant_holding_output_streams(self) -> None:

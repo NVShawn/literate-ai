@@ -30,7 +30,6 @@ from literate_ai.contracts.executable_components import (
     GenerationComplexityBudget,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.support.vfi_scaling import PRIVATE_DESCENDANT, vfi_component_lock
 from tests.support.fixtures_test_component_execution_planning import (
     _diamond_lock,
     _models,
@@ -38,6 +37,7 @@ from tests.support.fixtures_test_component_execution_planning import (
 from tests.support.fixtures_test_component_generation_context import _materialize
 from tests.support.fixtures_test_component_lock_contracts import component_lock
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.vfi_scaling import PRIVATE_DESCENDANT, vfi_component_lock
 
 
 def _budget() -> GenerationComplexityBudget:

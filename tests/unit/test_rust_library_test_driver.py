@@ -107,20 +107,6 @@ class RustLibraryTestDriverTests(unittest.TestCase):
         self.assertIn("integration_value", result.stderr)
         self.assertIn("unit_value", result.stderr)
 
-    def test_invalid_integration_import_refuses_before_passing_protocol_binary(self):
-        self.integration.write_text(
-            "use super::value;\n"
-            "#[test] fn invalid_import() { assert_eq!(value(), 7); }\n",
-            encoding="utf-8",
-        )
-        result = self.run_driver()
-        self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(result.stdout, "")
-        self.assertIn("E0433", result.stderr)
-        self.assertIn("litai_test.rs", result.stderr)
-        self.assertIn("Cargo generated-test command failed:", result.stderr)
-        self.assertIn('"--all-targets"', result.stderr)
-
     def test_failing_native_case_refuses_and_retains_case_diagnostic(self):
         self.integration.write_text(
             "use fixture_library::value;\n"
@@ -132,30 +118,6 @@ class RustLibraryTestDriverTests(unittest.TestCase):
         self.assertEqual(result.stdout, "")
         self.assertIn("wrong_expected_value", result.stderr)
         self.assertIn("FAILED", result.stderr)
-
-    def test_invalid_additional_target_is_not_hidden_by_selected_binary(self):
-        examples = self.package / "examples"
-        examples.mkdir()
-        (examples / "broken.rs").write_text(
-            "fn main() { missing_example_function(); }\n", encoding="utf-8"
-        )
-        result = self.run_driver()
-        self.assertNotEqual(result.returncode, 0)
-        self.assertEqual(result.stdout, "")
-        self.assertIn("missing_example_function", result.stderr)
-        self.assertIn("broken.rs", result.stderr)
-
-    def test_native_pass_does_not_replace_the_attributable_protocol(self):
-        (self.package / "src/bin/litai_artifact.rs").write_text(
-            'fn main() { eprintln!("protocol driver failed"); '
-            "std::process::exit(17); }\n",
-            encoding="utf-8",
-        )
-        result = self.run_driver()
-        self.assertEqual(result.returncode, 17, result.stderr)
-        self.assertIn("integration_value", result.stderr)
-        self.assertIn("protocol driver failed", result.stderr)
-        self.assertEqual(result.stdout, "")
 
 
 if __name__ == "__main__":

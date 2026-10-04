@@ -1,33 +1,23 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_provider_generation``."""
 
 import hashlib
-
 import os
-
 import tempfile
-
 import unittest
-
 from pathlib import Path
-
 from unittest import mock
 
 from literate_ai.adapters.generation_preparation import (
     LockedComponentNodePreparationAdapter,
 )
-
 from literate_ai.adapters.locked_generation_authority import (
     LockedGenerationAuthorityReaderError,
 )
-
 from literate_ai.adapters.retained_provider_generation import (
     read_retained_provider_generation,
 )
-
 from literate_ai.application.generation_preparation import GenerationPreparationRequest
-
 from literate_ai.contracts import canonical_identity
-
 from literate_ai.source_to_specification.promotion_materialization import (
     PromotionInputKind,
     SourcePromotionError,
@@ -36,8 +26,8 @@ from literate_ai.source_to_specification.promotion_materialization import (
     VerifiedSourcePromotionEvidence,
     generation_input_subset_identity,
 )
-
 from tests.support import fixtures_test_cli_locked_generation as fixtures
+
 
 def _inventory(root):
     return {
@@ -45,6 +35,7 @@ def _inventory(root):
         for path in root.rglob("*")
         if path.is_file()
     }
+
 
 class RetainedProviderGenerationTests(unittest.TestCase):
     def setUp(self):
@@ -245,5 +236,5 @@ class RetainedProviderGenerationTests(unittest.TestCase):
             self.read()
         self.assertEqual(path.read_bytes(), changed)
 
-from tests.support import fixtures_test_cli_locked_generation as fixtures  # noqa: F401
+
 # NOTE: names not defined at top level of tests.unit.test_retained_provider_generation: ['fixtures']

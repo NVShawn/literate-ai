@@ -1,8 +1,8 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_action_dag_planning``."""
 
 import unittest
-
 from datetime import UTC, datetime
 
 from literate_ai.application.action_dag_planning import (
@@ -11,39 +11,36 @@ from literate_ai.application.action_dag_planning import (
     lifecycle_action_id,
     plan_lifecycle_action_dag,
 )
-
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDagScheduler,
     LifecycleActionDisposition,
     LifecycleActionKind,
 )
-
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-
 from literate_ai.contracts.capabilities import DependencyKind
-
 from literate_ai.contracts.execution_dispatch import (
     ExecutionRequirements,
     ExecutionWorker,
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
 )
-
 from literate_ai.contracts.worker_capabilities import (
     NvidiaProbeStatus,
     WorkerHardwareObservation,
     WorkerHardwareObservationCatalog,
 )
-
 from tests.support.fixtures_test_action_dag_scheduler import (
     _identity,
     _RecordingDispatcher,
     _worker,
 )
+from tests.support.fixtures_test_component_execution_planning import (
+    _diamond_lock,
+    _models,
+)
 
-from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
 
 class ActionDagPlanningTests(unittest.TestCase):
     def _plan(self, kind=DependencyKind.GENERATION, *, packaging=False):
@@ -291,6 +288,6 @@ class ActionDagPlanningTests(unittest.TestCase):
                 now=datetime(2026, 9, 25, 12, tzinfo=UTC),
             )
 
+
 if __name__ == "__main__":
     unittest.main()
-

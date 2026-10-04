@@ -1,32 +1,21 @@
 """Shared fixtures extracted from ``tests.unit.test_cli_worker_health``."""
 
 import io
-
 import json
-
 import sys
-
 import tempfile
-
 import time
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters.worker_health import (
     inspect_worker_storage,
     load_worker_health_inputs,
 )
-
 from literate_ai.application.worker_pressure import PressureSample
-
 from literate_ai.cli.dispatch import main
-
 from literate_ai.contracts import (
     CapacityMetric,
     CapacityProbeStatus,
@@ -39,12 +28,13 @@ from literate_ai.contracts import (
     WorkerCapacityObservation,
     canonical_identity,
 )
-
 from tests.support.fixtures_test_worker_capacity import ROLES, policy
+
 
 class Terminal(io.StringIO):
     def isatty(self):
         return True
+
 
 class WorkerHealthCliTests(unittest.TestCase):
     def setUp(self):
@@ -646,6 +636,6 @@ class WorkerHealthCliTests(unittest.TestCase):
             self.assertIn("worker.health_read_only_options", output)
         self.assertFalse((self.root / "debug.json").exists())
 
+
 if __name__ == "__main__":
     unittest.main()
-

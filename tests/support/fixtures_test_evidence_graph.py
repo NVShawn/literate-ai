@@ -1,24 +1,15 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_evidence_graph``."""
 
 import hashlib
-
-
-
 from dataclasses import replace
-
-
 from unittest.mock import Mock
 
-
 from literate_ai.application.evidence_resolution import ConfiguredEvidenceResolver
-
 from literate_ai.application.evidence_verification import verify_run_evidence_graph
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.identity import canonical_identity
-
 from literate_ai.security.evidence import (
     DSSE_MEDIA_TYPE,
     STATEMENT_MEDIA_TYPE,
@@ -35,17 +26,15 @@ from literate_ai.security.evidence import (
     PlatformRun,
     RunEvidenceExpectation,
 )
-
 from literate_ai.security.evidence.graph import (
     EvidenceRunRequirement,
     EvidenceVerificationState,
 )
-
 from literate_ai.security.evidence.records import PREDICATE_TYPES
-
 from literate_ai.security.evidence.storage import (
     EvidenceNotFoundError,
 )
+
 
 class _Graph:
     """Fixed trusted baseline; later signed mutations leave its expectations intact."""
@@ -253,4 +242,3 @@ class _Graph:
         )
         arguments.update(kwargs)
         return verify_run_evidence_graph(self.refs["matrix"], **arguments)
-

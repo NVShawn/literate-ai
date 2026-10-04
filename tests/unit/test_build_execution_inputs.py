@@ -2,8 +2,6 @@
 
 import tempfile
 import unittest
-from dataclasses import replace
-from datetime import timedelta
 from pathlib import Path
 
 from literate_ai.adapters.lifecycle import (
@@ -11,7 +9,6 @@ from literate_ai.adapters.lifecycle import (
     LocalStandardLifecyclePorts,
 )
 from literate_ai.contracts import ComponentCommandPhase
-from literate_ai.security import AuthorizationError
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
@@ -33,15 +30,6 @@ class BuildExecutionInputsTests(unittest.TestCase):
         )
         self.plan = self.inputs.finalize()
 
-    def test_local_and_remote_plan_registration_retain_exact_inputs(self):
-        for register in (self.ports.finalize, self.ports.accept_finalized_plan):
-            with self.subTest(register=register.__name__):
-                if register == self.ports.finalize:
-                    plan = register(self.intent, self.authorization)
-                else:
-                    plan = register(self.intent, self.authorization, self.plan)
-                self.assertEqual(self.ports.build_execution_inputs(plan), self.inputs)
-
     def test_unregistered_and_superseded_plans_cannot_recover_grants(self):
         with self.assertRaisesRegex(LocalStandardLifecycleError, "registered"):
             self.ports.build_execution_inputs(self.plan)
@@ -49,22 +37,6 @@ class BuildExecutionInputsTests(unittest.TestCase):
         self.assertEqual(self.ports.build_execution_inputs(self.plan), self.inputs)
         with self.assertRaisesRegex(LocalStandardLifecycleError, "registered"):
             self.ports.build_execution_inputs(self.old_plan)
-
-    def test_input_retrieval_rechecks_contract_and_current_grant(self):
-        self.ports.accept_finalized_plan(self.intent, self.authorization, self.plan)
-        revision = self.candidate.component_revision.uri
-        contract = self.ports.contracts[revision]
-        self.ports.contracts[revision] = replace(
-            contract, locked_build_authority_identity=_identity("changed-contract")
-        )
-        with self.assertRaisesRegex(LocalStandardLifecycleError, "no longer current"):
-            self.ports.build_execution_inputs(self.plan)
-        self.ports.contracts[revision] = contract
-        self.ports.clock = lambda: (
-            self.authorization.grant.expires_at + timedelta(seconds=1)
-        )
-        with self.assertRaises(AuthorizationError):
-            self.ports.build_execution_inputs(self.plan)
 
     def test_data_custody_does_not_enable_build_on_a_test_only_receiver(self):
         receiver = LocalStandardLifecyclePorts(

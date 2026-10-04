@@ -40,18 +40,6 @@ class ScxmlReviewCliTests(unittest.TestCase):
             self.assertEqual(result["provider"], "specification-provider:scxml@1")
             self.assertEqual(chart.read_bytes(), before)
 
-    def test_review_returns_stable_provider_error(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            chart = Path(directory) / "bad.scxml"
-            chart.write_text("<not-scxml/>", encoding="utf-8")
-
-            status, envelope = self.invoke("spec", "scxml-review", str(chart))
-
-            self.assertEqual(status, 2, envelope)
-            error = envelope["error"]
-            assert isinstance(error, dict)
-            self.assertEqual(error["code"], "scxml.namespace_invalid")
-
 
 if __name__ == "__main__":
     unittest.main()

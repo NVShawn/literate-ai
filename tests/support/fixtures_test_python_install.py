@@ -1,36 +1,25 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_python_install``."""
 
 import io
-
 import json
-
 import os
-
 import sys
-
-
 import unittest
-
 from contextlib import contextmanager
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters.builders.python import discover_python_toolchain
-
 from literate_ai.adapters.dependencies.python_install import (
     install_python_wheels,
 )
-
 from literate_ai.adapters.dependencies.python_lock import parse_python_wheel_lock
-
 from literate_ai.adapters.dependencies.python_target import observe_python_wheel_target
-
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-
 from tests.support import fixtures_test_python_installed as fixtures
+
 
 class PythonInstallerIntegrationTests(unittest.TestCase):
     """Requires the exact external installer wheel, not network during tests."""
@@ -227,6 +216,6 @@ class PythonInstallerIntegrationTests(unittest.TestCase):
             sorted(p.name for p in self.fixture.root.iterdir()), ["installed"]
         )
 
+
 if __name__ == "__main__":
     unittest.main()
-

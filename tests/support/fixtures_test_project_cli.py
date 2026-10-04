@@ -1,33 +1,19 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_project_cli``."""
 
 
 import io
-
 import json
-
 import re
-
 import shutil
-
-
-
-
-
 from pathlib import Path
 
-
-
-
-
 from literate_ai.cli import main
-
-
-
-
 from tests.unit.root_parent_adapter import root_parent_for_fixture_project
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+
 
 def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
     output = io.StringIO()
@@ -41,6 +27,7 @@ def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
         return status, json.loads(content)
     except json.JSONDecodeError as exc:
         raise AssertionError(f"non-JSON CLI output ({status=}): {content!r}") from exc
+
 
 def copy_generation_catalogs(target: Path) -> None:
     shutil.copytree(
@@ -67,6 +54,7 @@ def copy_generation_catalogs(target: Path) -> None:
         target / "routing" / "sample-host.json",
     )
 
+
 def copy_hello_component(target: Path) -> Path:
     component = target / "samples" / "hello-component"
     if not component.is_dir():
@@ -74,6 +62,7 @@ def copy_hello_component(target: Path) -> Path:
     for generated_lock in component.glob("component.*.json"):
         generated_lock.unlink()
     return component
+
 
 def refresh_authority_review(target: Path) -> None:
     manifest = json.loads((target / "literate.project.json").read_text())
@@ -111,4 +100,3 @@ def refresh_authority_review(target: Path) -> None:
         ),
         encoding="utf-8",
     )
-

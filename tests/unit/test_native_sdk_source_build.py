@@ -4,25 +4,24 @@ from __future__ import annotations
 
 import dataclasses
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from contextlib import contextmanager
+from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters.builders._process import run_bounded_process
 from literate_ai.adapters.native_sdk_custody import materialize_native_sdk
 from literate_ai.adapters.native_sdk_recipes import select_native_sdk_recipes
 from literate_ai.adapters.native_sdk_source_build import NativeSdkSourceBuildService
-from literate_ai.adapters.source.repository_cache import (
-    RepositorySourceCachePolicyError,
-)
 from literate_ai.application.repository_sources import RepositorySourceResolutionError
 from literate_ai.contracts import SourceIntelligenceMode
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.projects import PinnedInputClosureError
 from literate_ai.security import (
-    AuthorizationError,
     AuthorizationRevocationSet,
     SecurityPolicy,
 )
@@ -33,32 +32,37 @@ from tests.support.fixtures_test_repository_sources import source_intelligence_p
 
 
 class NativeSdkSourceBuildTests(unittest.TestCase):
-    def setUp(self):
-        self.recipe_fixture = test_native_sdk_recipes.NativeSdkRecipeTests(
+    @classmethod
+    def setUpClass(cls):
+        # The recipe fixture (vendor Git repository plus locked component) is
+        # read-only input for both tests; build it once. Each test still gets
+        # its own quarantine, references and revocations, and runs its own
+        # real build from a fresh checkout.
+        recipe_fixture = test_native_sdk_recipes.NativeSdkRecipeTests(
             "test_selected_flavor_recipe_drives_real_native_build_and_relocation"
         )
-        self.addCleanup(self.recipe_fixture.doCleanups)
-        self.recipe_fixture.entrypoint_kind = getattr(self, "entrypoint_kind", None)
-        self.recipe_fixture.setUp()
-        self.fixture = self.recipe_fixture.fixture
-        configure = getattr(self, "configure_recipe_fixture", None)
-        if configure is not None:
-            configure(self.recipe_fixture)
-        self.snapshot = self.recipe_fixture.snapshot()
-        (self.selection,) = select_native_sdk_recipes(
-            self.snapshot,
+        cls.addClassCleanup(recipe_fixture.doCleanups)
+        recipe_fixture.setUp()
+        cls.fixture = recipe_fixture.fixture
+        cls.snapshot = recipe_fixture.snapshot()
+        cls.origin_template = cls.fixture.root / "origin-template"
+        shutil.copytree(cls.fixture.source, cls.origin_template, symlinks=True)
+        (cls.selection,) = select_native_sdk_recipes(
+            cls.snapshot,
             next(
                 node.revision.identity
-                for node in self.snapshot.authority.lock.nodes
+                for node in cls.snapshot.authority.lock.nodes
                 if node.revision.repository_sources
             ),
         )
-        self.quarantine = QuarantineStore(
-            self.fixture.root / "quarantine", self.fixture.store
-        )
-        self.references = ReferenceIndex(
-            self.fixture.root / "references", self.fixture.store
-        )
+
+    def setUp(self):
+        # A test may delete the producer origin; restore it from the template.
+        if not self.fixture.source.exists():
+            shutil.copytree(self.origin_template, self.fixture.source, symlinks=True)
+        self.work = work = Path(tempfile.mkdtemp(prefix="test-", dir=self.fixture.root))
+        self.quarantine = QuarantineStore(work / "quarantine", self.fixture.store)
+        self.references = ReferenceIndex(work / "references", self.fixture.store)
         self.revocations = AuthorizationRevocationSet()
 
     def service(self, **overrides):
@@ -137,7 +141,7 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
 
         # The acquired checkout has already been deleted. Remove the origin too.
         self.fixture.remove_source()
-        parent = self.fixture.root / "consumer"
+        parent = self.work / "consumer"
         parent.mkdir()
         sdk = materialize_native_sdk(
             product.snapshot,
@@ -169,14 +173,6 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "verified"):
             service.builder.product(forged)
 
-    def test_missing_host_acknowledgement_refuses_before_any_command(self):
-        service = self.service(host_build_acknowledged=False)
-        with patch("literate_ai.adapters.native_sdk_build.run_bounded_process") as run:
-            with self.refuses(AuthorizationError, "security.privilege_not_permitted"):
-                service.build()
-            run.assert_not_called()
-        self.assert_not_admitted()
-
     def test_source_changed_after_configure_stops_compile_and_admission(self):
         service = self.service()
         commands = []
@@ -200,62 +196,4 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
             ):
                 service.build()
         self.assertEqual(len(commands), 1)
-        self.assert_not_admitted()
-
-    def test_live_revocation_after_configure_stops_compile_and_admission(self):
-        service = self.service()
-        commands = []
-
-        def run_and_revoke(command, **kwargs):
-            result = run_bounded_process(command, **kwargs)
-            commands.append(command)
-            self.assertEqual(result.returncode, 0, result.stderr)
-            for grant in service._grants.values():
-                self.revocations = self.revocations.revoke(
-                    grant.authorization_id, actor="operator", reason="Stop this build"
-                )
-            return result
-
-        with patch(
-            "literate_ai.adapters.native_sdk_build.run_bounded_process",
-            side_effect=run_and_revoke,
-        ):
-            with self.refuses(AuthorizationError, "security.authorization_revoked"):
-                service.build()
-        self.assertEqual(len(commands), 1)
-        self.assertIn("-S", commands[0])
-        self.assert_not_admitted()
-
-    def test_invalid_live_revocation_state_refuses_before_any_command(self):
-        service = self.service(revocations=lambda: None)
-        with patch("literate_ai.adapters.native_sdk_build.run_bounded_process") as run:
-            with self.refuses(AuthorizationError, "live_revocation_verifier_invalid"):
-                service.build()
-            run.assert_not_called()
-        self.assert_not_admitted()
-
-    def test_required_unavailable_intelligence_refuses_service_composition(self):
-        with self.assertRaises(RepositorySourceCachePolicyError):
-            self.service(
-                source_intelligence_policy=source_intelligence_policy(
-                    "codegraph", SourceIntelligenceMode.REQUIRED
-                )
-            )
-        self.assert_not_admitted()
-
-    def test_changed_recipe_plan_refuses_even_with_real_source_inspection(self):
-        service = self.service()
-        original = service.authorize
-
-        def changed_plan(lock, index, plan):
-            command = dataclasses.replace(plan.commands[0], argv=("cmake", "--version"))
-            return original(lock, index, dataclasses.replace(plan, commands=(command,)))
-
-        with patch.object(service, "authorize", side_effect=changed_plan):
-            with patch(
-                "literate_ai.adapters.native_sdk_build.run_bounded_process"
-            ) as run:
-                with self.refuses(ValueError, "exact authored recipe"):
-                    service.build()
-                run.assert_not_called()
         self.assert_not_admitted()

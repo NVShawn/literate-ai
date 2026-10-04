@@ -1,32 +1,28 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_generation_context``."""
 
 import hashlib
-
-
 from dataclasses import replace
 
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-
 from literate_ai.application.component_generation_context import (
     PromptSegmentInput,
 )
-
 from literate_ai.contracts.executable_components.context import (
     ContextAuthorityKind,
     GenerationComplexityBudget,
 )
-
 from literate_ai.contracts.executable_components.planning import ComponentGenerationPlan
-
 from literate_ai.contracts.identity import ContentIdentity
-
 from tests.support.fixtures_test_component_execution_planning import _models
+
 
 def _identity(content: bytes) -> ContentIdentity:
     return ContentIdentity.parse_uri(f"sha256:{hashlib.sha256(content).hexdigest()}")
+
 
 def _budget(**changes: int) -> GenerationComplexityBudget:
     values = {
@@ -43,6 +39,7 @@ def _budget(**changes: int) -> GenerationComplexityBudget:
     values.update(changes)
     return GenerationComplexityBudget(**values)
 
+
 def _named_plan(lock: object, name: str) -> ComponentGenerationPlan:
     execution = plan_component_execution(lock, model_identities=_models(lock))
     names = {
@@ -53,6 +50,7 @@ def _named_plan(lock: object, name: str) -> ComponentGenerationPlan:
         for item in execution.generation_plans
         if names[item.component_revision.uri] == name
     )
+
 
 def _materialize(
     plan: ComponentGenerationPlan,
@@ -188,5 +186,8 @@ def _materialize(
     )
     return updated, inputs
 
-from tests.support.fixtures_test_component_execution_planning import _diamond_lock  # noqa: F401
+
+from tests.support.fixtures_test_component_execution_planning import (
+    _diamond_lock,  # noqa: F401
+)
 # NOTE: names not defined at top level of tests.unit.test_component_generation_context: ['_diamond_lock']

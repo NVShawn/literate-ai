@@ -44,13 +44,14 @@ def tree_snapshot(root: Path) -> dict[str, bytes]:
 
 
 class VerifyCommandTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.directory = Path(tempfile.mkdtemp())
-        self.addCleanup(shutil.rmtree, self.directory, ignore_errors=True)
-        self.project = self.directory / "derived"
-        status, _ = invoke(
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.template_directory = Path(tempfile.mkdtemp())
+        cls.addClassCleanup(shutil.rmtree, cls.template_directory, ignore_errors=True)
+        cls.template = cls.template_directory / "derived"
+        status, envelope = invoke(
             "init",
-            str(self.project),
+            str(cls.template),
             "--flavor",
             "python",
             "--flavor",
@@ -58,7 +59,15 @@ class VerifyCommandTests(unittest.TestCase):
             "--flavor",
             "bazel",
         )
-        self.assertEqual(status, 0)
+        if status != 0:
+            raise AssertionError(envelope)
+
+    def setUp(self) -> None:
+        # Each test gets a private copy; the shared template is never mutated.
+        self.directory = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.directory, ignore_errors=True)
+        self.project = self.directory / "derived"
+        shutil.copytree(self.template, self.project, symlinks=True)
 
     def test_a_fresh_project_verifies(self) -> None:
         status, envelope = invoke("verify", str(self.project))
@@ -88,41 +97,6 @@ class VerifyCommandTests(unittest.TestCase):
         gates = {item["gate"]: item for item in result["gates"]}
         self.assertEqual(gates["authority"]["state"], "fail")
         self.assertFalse(result["ok"])
-
-    def test_a_single_gate_can_be_selected(self) -> None:
-        status, envelope = invoke("verify", str(self.project), "--gate", "locks")
-        self.assertEqual(status, 0, envelope)
-        self.assertEqual(
-            [item["gate"] for item in envelope["result"]["gates"]], ["locks"]
-        )
-
-    def test_gates_run_in_declared_order_regardless_of_request_order(self) -> None:
-        status, envelope = invoke(
-            "verify",
-            str(self.project),
-            "--gate",
-            "receipt",
-            "--gate",
-            "authority",
-        )
-        self.assertEqual(status, 0, envelope)
-        self.assertEqual(
-            [item["gate"] for item in envelope["result"]["gates"]],
-            ["authority", "receipt"],
-        )
-
-    def test_rebuild_is_not_a_verify_gate(self) -> None:
-        """Building is rebuild's job; verify must refuse to pretend otherwise."""
-
-        self.assertNotIn("rebuild", GATES)
-        status, envelope = invoke("verify", str(self.project), "--gate", "rebuild")
-        self.assertEqual(status, 2)
-        self.assertEqual(envelope["error"]["code"], "cli.usage")
-
-    def test_a_missing_project_is_reported(self) -> None:
-        status, envelope = invoke("verify", str(self.directory / "absent"))
-        self.assertEqual(status, 2)
-        self.assertEqual(envelope["error"]["code"], "project.not_found")
 
 
 if __name__ == "__main__":

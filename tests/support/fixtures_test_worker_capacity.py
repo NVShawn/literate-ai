@@ -1,13 +1,9 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_worker_capacity``."""
 
 
-
 from dataclasses import replace
-
-
-
-
 
 from literate_ai.contracts import (
     CapacityMetric,
@@ -20,7 +16,6 @@ from literate_ai.contracts import (
     canonical_identity,
 )
 
-
 ROLES = ("cache", "output", "temp", "workspace")
 
 JOB = canonical_identity({"job": "capacity-fixture"})
@@ -30,6 +25,7 @@ NOW = 100_000
 MEASURED = CapacityProbeStatus.MEASURED
 
 NOT_APPLICABLE = CapacityMetric(CapacityProbeStatus.NOT_APPLICABLE)
+
 
 def policy(**role_changes):
     return WorkerCapacityPolicy(
@@ -47,6 +43,7 @@ def policy(**role_changes):
         0,
         canonical_identity({"private_role_bindings": "fixture"}),
     )
+
 
 def observation(selected, *, available=1000, total=2000, separate=False):
     return WorkerCapacityObservation(
@@ -70,6 +67,7 @@ def observation(selected, *, available=1000, total=2000, separate=False):
         ),
     )
 
+
 def change_sample(observed, role, **changes):
     return replace(
         observed,
@@ -78,4 +76,3 @@ def change_sample(observed, role, **changes):
             for sample in observed.samples
         ),
     )
-

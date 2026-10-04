@@ -1,34 +1,21 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_python_installed``."""
 
 import base64
-
 import csv
-
 import hashlib
-
 import io
-
 import json
-
 import os
-
 import subprocess
-
 import sys
-
 import tempfile
-
 import unittest
-
 import zipfile
-
 from contextlib import contextmanager
-
 from pathlib import Path
-
 from types import SimpleNamespace
-
 from unittest.mock import patch
 
 from packaging.markers import default_environment
@@ -36,14 +23,11 @@ from packaging.markers import default_environment
 from literate_ai.adapters.dependencies.python_installed import (
     observe_python_installation,
 )
-
 from literate_ai.adapters.dependencies.python_lock import parse_python_wheel_lock
-
 from literate_ai.adapters.dependencies.python_wheelhouse import stage_python_wheels
-
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-
 from tests.support.fixtures_test_python_wheel_lock import document, wheel_record
+
 
 class PythonInstalledTests(unittest.TestCase):
     def setUp(self):
@@ -490,6 +474,6 @@ class PythonInstalledTests(unittest.TestCase):
             result = self.observe(staged)
         self.assertEqual(len(result.graph.components), 2)
 
+
 if __name__ == "__main__":
     unittest.main()
-

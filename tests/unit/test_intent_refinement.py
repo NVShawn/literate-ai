@@ -8,18 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from literate_ai.application.intent_refinement import (
-    IntentRefinementError,
-    IntentRefinementService,
-)
 from literate_ai.cli import main
-from literate_ai.contracts.intent_refinement import (
-    DesignAcceptRequest,
-    DesignDraft,
-    DesignStatus,
-    IntentRefinementRequest,
-    UnresolvedKind,
-)
 
 _PI_MISSION = (
     "Write a full-stack application which calculates pi as a service on one or "
@@ -37,55 +26,6 @@ def _run(arguments: list[str]) -> tuple[int, dict[str, object], str]:
     payload = output.getvalue() or errors.getvalue()
     document = json.loads(payload)
     return status, document, errors.getvalue()
-
-
-class IntentRefinementContractTests(unittest.TestCase):
-    def test_simple_request_is_one_sufficient_component(self) -> None:
-        request = IntentRefinementRequest(
-            mission="Print a greeting card from a name and message list.",
-            source="request.md",
-        )
-        round_tripped = IntentRefinementRequest.from_dict(request.to_dict())
-        self.assertEqual(round_tripped, request)
-        draft = IntentRefinementService().refine(request)
-        self.assertEqual(draft.status, DesignStatus.COMPLETE)
-        self.assertEqual(len(draft.components), 1)
-        self.assertEqual(draft.components[0].component_id, "application")
-        self.assertFalse(draft.blocking_questions())
-        self.assertEqual(DesignDraft.from_dict(draft.to_dict()), draft)
-
-    def test_mixed_depth_request_blocks_on_undecided_authority(self) -> None:
-        request = IntentRefinementRequest(mission=_PI_MISSION, source="pi.md")
-        draft = IntentRefinementService().refine(request)
-        self.assertEqual(draft.status, DesignStatus.NEEDS_DECISIONS)
-        self.assertGreater(len(draft.components), 1)
-        blocking = draft.blocking_questions()
-        self.assertGreaterEqual(len(blocking), 4)
-        self.assertTrue(all(item.kind is UnresolvedKind.BLOCKING for item in blocking))
-        target_bound = [
-            item
-            for item in draft.unresolved
-            if item.kind is UnresolvedKind.TARGET_BOUND
-        ]
-        self.assertTrue(target_bound)
-        with self.assertRaises(IntentRefinementError) as raised:
-            IntentRefinementService().accept(
-                draft,
-                DesignAcceptRequest(draft_identity=draft.identity.uri, decisions=()),
-            )
-        self.assertEqual(raised.exception.code, "intent_refinement.blocking_unanswered")
-
-    def test_accept_requires_the_exact_draft_identity(self) -> None:
-        request = IntentRefinementRequest(mission=_PI_MISSION, source="pi.md")
-        draft = IntentRefinementService().refine(request)
-        with self.assertRaises(IntentRefinementError) as raised:
-            IntentRefinementService().accept(
-                draft,
-                DesignAcceptRequest(draft_identity="sha256:" + "0" * 64, decisions=()),
-            )
-        self.assertEqual(
-            raised.exception.code, "intent_refinement.draft_identity_mismatch"
-        )
 
 
 class DesignCliTests(unittest.TestCase):

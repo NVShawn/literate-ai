@@ -1,33 +1,29 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_execution_planning``."""
 
 
 from dataclasses import replace
 
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.capabilities import CapabilityRequirement, DependencyKind
-
 from literate_ai.contracts.component_locking import (
     ComponentAssetSelector,
     ComponentLock,
     RequirementConstraintSatisfaction,
     ResolvedComponentAsset,
 )
-
 from literate_ai.contracts.executable_components import (
     ExecutableComponentEdge,
 )
-
 from literate_ai.contracts.identity import ContentIdentity
-
 from tests.support.fixtures_test_component_lock_contracts import (
     component_authoring,
     identity,
     locked_revision,
     node,
 )
+
 
 def _requirement(
     requirement_id: str,
@@ -40,6 +36,7 @@ def _requirement(
         ">=1,<2",
         dependency_kind,
     )
+
 
 def _diamond_lock(
     *,
@@ -253,6 +250,7 @@ def _diamond_lock(
         ),
     )
 
+
 def _diamond_lock_with_locked_money_asset() -> ComponentLock:
     """Put one ``ResolvedComponentAsset`` on the diamond money node.
 
@@ -321,6 +319,7 @@ def _diamond_lock_with_locked_money_asset() -> ComponentLock:
         _authorings=tuple(sorted(authorings, key=lambda item: item.identity.uri)),
     )
 
+
 def _models(lock: ComponentLock) -> dict[str, ContentIdentity]:
     return {
         item.revision.identity.uri: identity(
@@ -328,4 +327,3 @@ def _models(lock: ComponentLock) -> dict[str, ContentIdentity]:
         )
         for item in lock.nodes
     }
-

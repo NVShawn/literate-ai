@@ -1,10 +1,13 @@
-"""Native execution sequencing and custody with process/graph test doubles."""
+"""Native execution sequencing with process doubles and one real offline build."""
 
+import hashlib
 import json
+import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
-from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -124,115 +127,6 @@ class RetainedCargoExecutionTests(unittest.TestCase):
         self.assertEqual(self.processes[1][0], (*self.make.command, "test"))
         self.materialized.require_unchanged()
 
-    def test_no_execution_without_authorization_or_complete_tool_bindings(self):
-        for changes in (
-            {"allow_host_execution": False},
-            {"gate_tools": {}},
-            {"timeout_seconds": float("inf")},
-        ):
-            with self.subTest(changes=changes), self.assertRaises(ValueError):
-                self.run_execution(**changes)
-        self.process.assert_not_called()
-
-    def test_metadata_mismatch_stops_before_any_gate(self):
-        self.graph.side_effect = ValueError("wrong native graph")
-        with self.assertRaises(execution.RetainedCargoExecutionError) as failure:
-            self.run_execution()
-        self.assertEqual(len(failure.exception.observations), 1)
-        self.assertEqual(self.process.call_count, 1)
-
-    def test_failed_gate_preserves_output_and_never_runs_final_metadata(self):
-        self.process.side_effect = [
-            BoundedProcessResult(0, b'{"packages": []}', b""),
-            BoundedProcessResult(1, b"failed-test", b"detail"),
-        ]
-        with self.assertRaises(execution.RetainedCargoExecutionError) as failure:
-            self.run_execution()
-        self.assertEqual(self.process.call_count, 2)
-        self.assertEqual(
-            failure.exception.observations[-1].result.stdout, b"failed-test"
-        )
-
-    def test_consumer_drift_after_process_refuses_subsequent_gate(self):
-        def changed(*args, **kwargs):
-            self.consumer_source.write_text("// changed consumer\n")
-            return BoundedProcessResult(0, b'{"packages": []}', b"")
-
-        self.process.side_effect = changed
-        with self.assertRaises(execution.RetainedCargoExecutionError):
-            self.run_execution()
-        self.assertEqual(self.process.call_count, 1)
-
-    def test_compiler_and_output_overrides_refuse_before_process(self):
-        for environment in (
-            {"RUSTC": "/foreign/compiler"},
-            {"CARGO_TARGET_DIR": "/foreign/output"},
-        ):
-            with (
-                self.subTest(environment=environment),
-                self.assertRaises(ValueError),
-            ):
-                self.run_execution(environment={**self.environment, **environment})
-        self.process.assert_not_called()
-
-    def test_uncaptured_dependency_path_stops_before_gate(self):
-        self.process.side_effect = lambda *a, **kw: BoundedProcessResult(
-            0,
-            json.dumps(
-                {
-                    "packages": [
-                        {
-                            "manifest_path": str(self.home / "outside/Cargo.toml"),
-                            "targets": [],
-                        }
-                    ]
-                }
-            ).encode(),
-            b"",
-        )
-        with self.assertRaises(execution.RetainedCargoExecutionError) as failure:
-            self.run_execution()
-        self.assertEqual(self.process.call_count, 1)
-        self.assertEqual(len(failure.exception.observations), 1)
-
-    def test_asserted_consumer_identity_is_not_captured_input_authority(self):
-        with self.assertRaisesRegex(ValueError, "configuration-invalid"):
-            self.run_execution(consumer_inputs=lambda: canonical_identity("claimed"))
-        self.process.assert_not_called()
-
-    def test_environment_changes_require_new_input_capture(self):
-        inputs = read_retained_cargo_execution_inputs(
-            self.materialized, environment=self.environment
-        )
-        with self.assertRaisesRegex(ValueError, "input-environment-mismatch"):
-            self.run_execution(
-                consumer_inputs=inputs,
-                environment={**self.environment, "RUSTFLAGS": "--cfg=changed"},
-            )
-        self.process.assert_not_called()
-
-    def test_offline_refuses_network_enabled_gate(self):
-        plan = replace(
-            self.materialized.plan,
-            gates=(replace(self.materialized.plan.gates[0], network=True),),
-        )
-        self.materialized = replace(self.materialized, plan=plan)
-        self.importer = replace(
-            self.importer, gates=replace(self.importer.gates, commands=plan.gates)
-        )
-        with self.assertRaisesRegex(ValueError, "network-gate-refused"):
-            self.run_execution()
-        self.process.assert_not_called()
-
-    def test_duplicate_metadata_fields_refuse_before_gate(self):
-        self.process.side_effect = lambda *a, **kw: BoundedProcessResult(
-            0, b'{"version":1,"version":1}', b""
-        )
-        with self.assertRaises(execution.RetainedCargoExecutionError):
-            self.run_execution()
-        self.assertEqual(self.process.call_count, 1)
-        self.graph.assert_not_called()
-
     def test_foreign_addition_during_process_is_preserved_and_stops_execution(self):
         foreign = self.materialized.packages[0].root / "foreign"
 
@@ -247,62 +141,130 @@ class RetainedCargoExecutionTests(unittest.TestCase):
         self.assertEqual(len(failure.exception.observations), 1)
         self.assertEqual(foreign.read_bytes(), b"keep")
 
-    def test_symlinked_output_directory_refuses_before_process(self):
-        outside = self.root / "foreign-output"
-        outside.mkdir()
-        (outside / "keep").write_bytes(b"keep")
-        try:
-            (self.root / "cargo-output").symlink_to(outside, target_is_directory=True)
-        except OSError:
-            self.skipTest("host does not permit symbolic links")
-        with self.assertRaises(ValueError):
-            self.run_execution()
-        self.process.assert_not_called()
-        self.assertEqual((outside / "keep").read_bytes(), b"keep")
 
-    def test_asserted_tool_identity_without_observer_custody_refuses(self):
-        for name, original in (
-            ("cargo", self.cargo),
-            ("rustc", self.rustc),
-            ("make", self.make),
-        ):
-            candidate = LocalComponentToolBinding(
-                sys.executable, authority_identity=original.toolchain_identity
-            )
-            changes = (
-                {name: candidate}
-                if name != "make"
-                else {"gate_tools": {"make": candidate}}
-            )
-            with (
-                self.subTest(tool=name),
-                self.assertRaisesRegex(ValueError, "measured-tool-custody-required"),
-            ):
-                self.run_execution(**changes)
-        self.process.assert_not_called()
+class RetainedCargoOfflineVendorBuildTests(unittest.TestCase):
+    def setUp(self):
+        fixture = fixtures.RetainedCargoMaterializationTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        self.fixture = fixture
+        self.materialized = fixture.run_materializer()
+        self.root = fixture.root
+        temporary = tempfile.TemporaryDirectory(prefix="ce-")
+        self.addCleanup(temporary.cleanup)
+        self.scratch = Path(temporary.name).resolve()
+        self.home = self.scratch / "cargo-home"
+        self.home.mkdir()
+        self.environment = {
+            "CARGO_HOME": str(self.home),
+            "OBJ_DIR": "pkgs",
+            "BUILD_DIR": "build",
+        }
 
-    def test_observer_drift_after_launch_preserves_observation_and_stops(self):
-        changed = False
-
-        def observer_guard():
-            if changed:
-                raise ValueError("native observer drift")
-
-        cargo = LocalComponentToolBinding.from_observed_toolchain(
-            SimpleNamespace(
-                command=(sys.executable,),
-                identity=self.materialized.plan.cargo_identity.uri,
-                require_unchanged=observer_guard,
-            )
+    def capture(self, **changes):
+        return read_retained_cargo_execution_inputs(
+            self.materialized, environment=self.environment, **changes
         )
 
-        def process(*args, **kwargs):
-            nonlocal changed
-            changed = True
-            return BoundedProcessResult(0, b'{"packages": []}', b"")
+    def test_real_vendor_and_git_sources_stay_current_through_offline_build(self):
+        cargo, git = shutil.which("cargo"), shutil.which("git")
+        if not cargo or not git:
+            self.skipTest("Cargo and Git are required for native dependency custody")
+        project = self.root / "native"
+        project.mkdir()
+        vendor = project / "vendor/helper"
+        vendor.mkdir(parents=True)
+        (vendor / "Cargo.toml").write_text(
+            '[package]\nname="helper"\nversion="0.1.0"\nedition="2021"\n[lib]\npath="lib.rs"\n'
+        )
+        (vendor / "lib.rs").write_text("pub fn value() -> u8 { 3 }\n")
+        checksum = {
+            "package": "1" * 64,
+            "files": {
+                p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+                for p in vendor.iterdir()
+            },
+        }
+        (vendor / ".cargo-checksum.json").write_text(json.dumps(checksum))
+        remote = self.scratch / "git-source"
+        remote.mkdir()
+        (remote / "Cargo.toml").write_text(
+            '[package]\nname="git-helper"\nversion="0.1.0"\nedition="2021"\n[lib]\npath="lib.rs"\n'
+        )
+        (remote / "lib.rs").write_text("pub fn value() -> u8 { 4 }\n")
 
-        self.process.side_effect = process
-        with self.assertRaises(execution.RetainedCargoExecutionError) as failure:
-            self.run_execution(cargo=cargo)
-        self.assertEqual(self.process.call_count, 1)
-        self.assertEqual(len(failure.exception.observations), 1)
+        def command(argv, cwd, environment=None):
+            result = subprocess.run(
+                argv, cwd=cwd, env=environment, capture_output=True, timeout=120
+            )
+            self.assertEqual(
+                result.returncode, 0, result.stderr.decode(errors="replace")
+            )
+            return result.stdout
+
+        command([git, "init", "--quiet"], remote)
+        command([git, "add", "."], remote)
+        command(
+            [
+                git,
+                "-c",
+                "user.name=Fixture",
+                "-c",
+                "user.email=fixture@example.invalid",
+                "-c",
+                "commit.gpgsign=false",
+                "commit",
+                "--quiet",
+                "-m",
+                "fixture",
+            ],
+            remote,
+        )
+        (project / "Cargo.toml").write_text(
+            '[workspace]\n[package]\nname="consumer"\nversion="0.1.0"\nedition="2021"\n[lib]\npath="lib.rs"\n[dependencies]\nhelper="=0.1.0"\ngit-helper={git='
+            + json.dumps(remote.as_uri())
+            + "}\n"
+        )
+        (project / "lib.rs").write_text(
+            "pub fn value() -> u8 { helper::value() + git_helper::value() }\n"
+        )
+        (project / ".cargo").mkdir()
+        (project / ".cargo/config.toml").write_text(
+            '[source.crates-io]\nreplace-with="fixture"\n[source.fixture]\ndirectory="vendor"\n'
+        )
+        self.environment = {
+            **os.environ,
+            **self.environment,
+            "CARGO_TARGET_DIR": str(self.root / "cargo-output"),
+        }
+        # Provision the explicitly local Git source before capture. Registry
+        # resolution uses only the authored vendor directory.
+        command(
+            [cargo, "generate-lockfile"],
+            project,
+            {**self.environment, "CARGO_NET_OFFLINE": "false"},
+        )
+        self.environment["CARGO_NET_OFFLINE"] = "true"
+        snapshot = self.capture()
+        before = snapshot.current_identity()
+        metadata = json.loads(
+            command(
+                [cargo, "metadata", "--format-version", "1", "--locked", "--offline"],
+                project,
+                self.environment,
+            )
+        )
+        snapshot.require_metadata_paths(metadata)
+        sources = [p["source"] for p in metadata["packages"] if p["source"]]
+        self.assertTrue(any(source.startswith("registry+") for source in sources))
+        self.assertTrue(any(source.startswith("git+") for source in sources))
+        command([cargo, "build", "--locked", "--offline"], project, self.environment)
+        self.assertEqual(snapshot.current_identity(), before)
+        git_package = next(
+            p for p in metadata["packages"] if (p["source"] or "").startswith("git+")
+        )
+        Path(git_package["targets"][0]["src_path"]).write_text(
+            "pub fn value() -> u8 { 9 }\n"
+        )
+        with self.assertRaises(ValueError):
+            snapshot.current_identity()

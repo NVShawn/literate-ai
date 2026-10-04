@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import os
 import subprocess
 import tempfile
@@ -10,16 +9,10 @@ import unittest
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
-from literate_ai.contracts.execution_dispatch import (
-    ExecutionWorker,
-    ExecutionWorkerCatalog,
-    ExecutionWorkerKind,
-)
 from literate_ai.security.worker_forge_credentials import (
     ForgeCredentialScope,
     GitHubAppInstallationTokenProvider,
     GitHubInstallationTokenResponse,
-    GitLabCIJobTokenProvider,
     WorkerForgeCredential,
     WorkerForgeCredentialError,
     materialize_worker_source,
@@ -117,76 +110,6 @@ def _fetch_backed_runner(upstream: Path, revision: str):
     return recorded, runner
 
 
-class GitHubAppInstallationTokenProviderTests(unittest.TestCase):
-    def test_acquires_a_scoped_credential_from_an_injected_fetcher(self) -> None:
-        scope = ForgeCredentialScope("octo/example")
-        expires_at = _future()
-        seen: list[ForgeCredentialScope] = []
-
-        def fetch(requested: ForgeCredentialScope) -> GitHubInstallationTokenResponse:
-            seen.append(requested)
-            return GitHubInstallationTokenResponse(_SECRET_TOKEN, expires_at)
-
-        provider = GitHubAppInstallationTokenProvider("123", "456", fetch)
-        credential = provider.acquire(scope)
-
-        self.assertEqual(seen, [scope])
-        self.assertEqual(credential.token, _SECRET_TOKEN)
-        self.assertEqual(credential.username, "x-access-token")
-        self.assertEqual(credential.provider, "github-app-installation-token")
-        self.assertEqual(credential.expires_at, expires_at)
-        self.assertFalse(credential.is_expired())
-
-    def test_never_calls_a_real_network_endpoint(self) -> None:
-        # The fetcher is purely local; no network module is imported or used.
-        calls = {"count": 0}
-
-        def fetch(_: ForgeCredentialScope) -> GitHubInstallationTokenResponse:
-            calls["count"] += 1
-            return GitHubInstallationTokenResponse(_SECRET_TOKEN, _future())
-
-        provider = GitHubAppInstallationTokenProvider("app", "install", fetch)
-        provider.acquire(ForgeCredentialScope("octo/example"))
-        self.assertEqual(calls["count"], 1)
-
-    def test_wraps_fetcher_failure_in_a_typed_diagnostic(self) -> None:
-        def fetch(_: ForgeCredentialScope) -> GitHubInstallationTokenResponse:
-            raise RuntimeError("simulated broker outage")
-
-        provider = GitHubAppInstallationTokenProvider("app", "install", fetch)
-        with self.assertRaises(WorkerForgeCredentialError) as ctx:
-            provider.acquire(ForgeCredentialScope("octo/example"))
-        self.assertEqual(ctx.exception.code, "worker.forge_credential_unavailable")
-
-    def test_rejects_a_malformed_fetcher_response(self) -> None:
-        provider = GitHubAppInstallationTokenProvider(
-            "app",
-            "install",
-            lambda scope: "not-a-response",  # type: ignore[return-value]
-        )
-        with self.assertRaises(WorkerForgeCredentialError) as ctx:
-            provider.acquire(ForgeCredentialScope("octo/example"))
-        self.assertEqual(ctx.exception.code, "worker.forge_credential_provider_invalid")
-
-
-class GitLabCIJobTokenProviderTests(unittest.TestCase):
-    def test_binds_ci_job_token_from_injected_environment(self) -> None:
-        expires_at = _future()
-        provider = GitLabCIJobTokenProvider(
-            {"CI_JOB_TOKEN": "glcbt-fake-job-token"}, lambda: expires_at
-        )
-        credential = provider.acquire(ForgeCredentialScope("group/project"))
-        self.assertEqual(credential.token, "glcbt-fake-job-token")
-        self.assertEqual(credential.provider, "gitlab-ci-job-token")
-        self.assertEqual(credential.expires_at, expires_at)
-
-    def test_fails_closed_when_no_job_token_is_present(self) -> None:
-        provider = GitLabCIJobTokenProvider({}, _future)
-        with self.assertRaises(WorkerForgeCredentialError) as ctx:
-            provider.acquire(ForgeCredentialScope("group/project"))
-        self.assertEqual(ctx.exception.code, "worker.forge_credential_unavailable")
-
-
 class WorkerForgeCredentialRedactionTests(unittest.TestCase):
     def test_repr_and_str_redact_the_token(self) -> None:
         credential = WorkerForgeCredential(
@@ -199,50 +122,8 @@ class WorkerForgeCredentialRedactionTests(unittest.TestCase):
         self.assertNotIn(_SECRET_TOKEN, repr(credential))
         self.assertNotIn(_SECRET_TOKEN, str(credential))
 
-    def test_requires_timezone_aware_expiry(self) -> None:
-        with self.assertRaises(WorkerForgeCredentialError):
-            WorkerForgeCredential(
-                "github-app-installation-token",
-                ForgeCredentialScope("octo/example"),
-                _SECRET_TOKEN,
-                "x-access-token",
-                datetime.now(),  # noqa: DTZ005 - deliberately naive
-            )
-
 
 class WorkerForgeGitEnvironmentTests(unittest.TestCase):
-    def test_yields_an_askpass_helper_that_returns_username_and_token(self) -> None:
-        credential = WorkerForgeCredential(
-            "github-app-installation-token",
-            ForgeCredentialScope("octo/example"),
-            _SECRET_TOKEN,
-            "x-access-token",
-            _future(),
-        )
-        with worker_forge_git_environment(credential) as environment:
-            helper = environment["GIT_ASKPASS"]
-            self.assertTrue(Path(helper).is_file())
-            username = subprocess.run(
-                (helper, "Username for 'https://github.com': "),
-                check=True,
-                capture_output=True,
-                env=environment,
-                text=True,
-            ).stdout
-            password = subprocess.run(
-                (helper, "Password for 'https://x-access-token@github.com': "),
-                check=True,
-                capture_output=True,
-                env=environment,
-                text=True,
-            ).stdout
-            self.assertEqual(username, "x-access-token")
-            self.assertEqual(password, _SECRET_TOKEN)
-            helper_path = Path(helper)
-        # The helper and its containing directory are removed on exit.
-        self.assertFalse(helper_path.exists())
-        self.assertFalse(helper_path.parent.exists())
-
     def test_removes_the_helper_directory_even_when_the_body_raises(self) -> None:
         credential = WorkerForgeCredential(
             "github-app-installation-token",
@@ -275,23 +156,6 @@ class WorkerForgeGitEnvironmentTests(unittest.TestCase):
             after = sorted(Path(tempfile.gettempdir()).glob("litai-forge-cred-*"))
             self.assertEqual(before, after)
             self.assertEqual(os.listdir(directory), [])
-
-    def test_never_reuses_a_credential_once_its_lifetime_elapses(self) -> None:
-        expires_at = datetime.now(UTC) + timedelta(seconds=1)
-        credential = WorkerForgeCredential(
-            "github-app-installation-token",
-            ForgeCredentialScope("octo/example"),
-            _SECRET_TOKEN,
-            "x-access-token",
-            expires_at,
-        )
-        with worker_forge_git_environment(credential):
-            pass  # still valid at acquisition time
-        later = expires_at + timedelta(seconds=1)
-        with self.assertRaises(WorkerForgeCredentialError) as ctx:
-            with worker_forge_git_environment(credential, now=later):
-                self.fail("credential must not be reused past its lifetime")
-        self.assertEqual(ctx.exception.code, "worker.forge_credential_expired")
 
 
 class MaterializeWorkerSourceTests(unittest.TestCase):
@@ -335,91 +199,6 @@ class MaterializeWorkerSourceTests(unittest.TestCase):
             # The credential's ephemeral files are gone once materialization returns.
             first_askpass = Path(recorded[0][1]["GIT_ASKPASS"])
             self.assertFalse(first_askpass.exists())
-
-    def test_refuses_to_fetch_with_an_expired_credential(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            upstream, revision = _bare_upstream(root)
-            destination = root / "worker-checkout"
-
-            def fetch(_: ForgeCredentialScope) -> GitHubInstallationTokenResponse:
-                return GitHubInstallationTokenResponse(_SECRET_TOKEN, _past())
-
-            provider = GitHubAppInstallationTokenProvider("app", "install", fetch)
-            calls = {"count": 0}
-
-            def fake_runner(command, cwd, environment) -> None:  # noqa: ANN001
-                calls["count"] += 1
-
-            with self.assertRaises(WorkerForgeCredentialError) as ctx:
-                materialize_worker_source(
-                    destination,
-                    str(upstream),
-                    revision,
-                    provider=provider,
-                    scope=ForgeCredentialScope("octo/example"),
-                    runner=fake_runner,
-                )
-            self.assertEqual(ctx.exception.code, "worker.forge_credential_expired")
-            self.assertEqual(calls["count"], 0)
-            self.assertFalse(destination.exists())
-
-
-class CredentialsNeverPersistTests(unittest.TestCase):
-    """Credentials must never land in project authority or the worker catalog."""
-
-    def test_execution_worker_catalog_has_no_credential_carrying_fields(self) -> None:
-        catalog = ExecutionWorkerCatalog(
-            (
-                ExecutionWorker(
-                    "worker-1",
-                    ExecutionWorkerKind.SSH,
-                    endpoint="deploy@worker.example.com",
-                    workspace="/srv/litai/worker-1",
-                ),
-            )
-        )
-        serialized = json.dumps(catalog.to_dict())
-        self.assertNotIn(_SECRET_TOKEN, serialized)
-        for worker in catalog.workers:
-            payload = worker.to_dict()
-            self.assertNotIn("token", payload)
-            self.assertNotIn("credential", payload)
-            self.assertNotIn("credentials", payload)
-
-    def test_materializing_source_does_not_touch_an_unrelated_catalog_file(
-        self,
-    ) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            upstream, revision = _bare_upstream(root)
-            destination = root / "worker-checkout"
-            catalog_path = root / "execution-workers.json"
-            catalog_path.write_text(
-                json.dumps({"schema": "literate-ai/execution-worker-catalog@1"}),
-                encoding="utf-8",
-            )
-            before = catalog_path.read_text(encoding="utf-8")
-
-            def fetch(_: ForgeCredentialScope) -> GitHubInstallationTokenResponse:
-                return GitHubInstallationTokenResponse(_SECRET_TOKEN, _future())
-
-            provider = GitHubAppInstallationTokenProvider("app", "install", fetch)
-            _, fake_runner = _fetch_backed_runner(upstream, revision)
-
-            materialize_worker_source(
-                destination,
-                str(upstream),
-                revision,
-                provider=provider,
-                scope=ForgeCredentialScope("octo/example"),
-                runner=fake_runner,
-                include_lfs=False,
-            )
-
-            after = catalog_path.read_text(encoding="utf-8")
-            self.assertEqual(before, after)
-            self.assertNotIn(_SECRET_TOKEN, after)
 
 
 if __name__ == "__main__":

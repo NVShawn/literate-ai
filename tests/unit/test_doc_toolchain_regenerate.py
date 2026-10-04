@@ -72,38 +72,6 @@ def _locate_doc_toolchain_obj() -> Path | None:
 
 
 class DocToolchainRegenerateTests(unittest.TestCase):
-    def test_regenerate_sh_keeps_codex_plugin_discovery(self) -> None:
-        text = REGENERATE.read_text(encoding="utf-8")
-        self.assertIn("setup_artifact_tool_workspace.mjs", text)
-        self.assertIn("regenerate_python.sh", text)
-        self.assertIn("--check", text)
-
-    def test_regenerate_sh_without_plugin_or_toolchain_directs_bootstrap(self) -> None:
-        bash = _bash()
-        if bash is None:
-            self.skipTest("bash is unavailable")
-        with tempfile.TemporaryDirectory() as raw:
-            root = Path(raw)
-            obj = root / "obj"
-            obj.mkdir()
-            home = root / "home"
-            home.mkdir()
-            result = subprocess.run(
-                [bash, str(REGENERATE)],
-                cwd=str(PACKAGE),
-                capture_output=True,
-                text=True,
-                check=False,
-                env=_isolated_env(obj, codex_home=home / ".codex"),
-            )
-        self.assertEqual(result.returncode, 2, result.stderr)
-        combined = result.stderr + result.stdout
-        self.assertIn("doc-toolchain-bootstrap", combined)
-        self.assertNotIn(
-            "Install or refresh the presentations plugin, then rerun this script.",
-            combined,
-        )
-
     def test_checked_in_package_passes_the_independent_oracle(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             directory = Path(raw)

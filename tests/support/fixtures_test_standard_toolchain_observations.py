@@ -1,17 +1,10 @@
 """Shared fixtures extracted from ``tests.unit.test_standard_toolchain_observations``."""
 
-
-
-
-
-
-
-
 from literate_ai.adapters.standard_toolchain_observations import (
     StandardToolObservation,
 )
-
 from literate_ai.contracts import canonical_identity
+
 
 def observation(role="python"):
     return StandardToolObservation(
@@ -22,4 +15,3 @@ def observation(role="python"):
         "3.14.0",
         (3, 14, 0),
     )
-

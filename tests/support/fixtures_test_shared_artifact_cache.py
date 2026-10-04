@@ -1,27 +1,17 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_shared_artifact_cache``."""
 
 import hashlib
 
-
-
-
-
-
-
-
-
-
 from literate_ai.adapters.cache.shared_artifacts import (
     SharedCacheArtifactManifest,
 )
-
 from literate_ai.contracts.identity import (
     ContentIdentity,
     HashAlgorithm,
     canonical_identity,
 )
-
 from literate_ai.contracts.shared_cache import (
     SharedCacheAccessMode,
     SharedCacheConfiguration,
@@ -30,8 +20,10 @@ from literate_ai.contracts.shared_cache import (
     SharedCacheScope,
 )
 
+
 def _raw_identity(payload: bytes) -> ContentIdentity:
     return ContentIdentity(HashAlgorithm.SHA256, hashlib.sha256(payload).hexdigest())
+
 
 def _configuration(
     mode: SharedCacheAccessMode = SharedCacheAccessMode.READ_WRITE,
@@ -47,6 +39,7 @@ def _configuration(
         1024 * 1024,
         86400,
     )
+
 
 def _manifest(
     configuration: SharedCacheConfiguration,
@@ -80,4 +73,3 @@ def _manifest(
         canonical_identity("dpkg-deb-provider"),
         **product_fields,
     )
-

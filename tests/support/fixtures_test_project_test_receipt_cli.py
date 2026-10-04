@@ -1,16 +1,12 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_project_test_receipt_cli``."""
 
 import io
-
 import json
-
-
-
 from pathlib import Path
 
 from literate_ai.cli import main
-
 from literate_ai.contracts import (
     ContentIdentity,
     ProjectTestEvidence,
@@ -23,15 +19,11 @@ from literate_ai.contracts import (
     canonical_identity,
     rebuild_project_authority_identity,
 )
-
 from literate_ai.projects import load_project
-
-
-from tests.unit.root_parent_adapter import root_parent_for_fixture_project
-
 from tests.support.fixtures_test_project_cli import (
     refresh_authority_review,
 )
+from tests.unit.root_parent_adapter import root_parent_for_fixture_project
 
 _FINALIZATION_EVIDENCE = {
     "lifecycle-command": canonical_identity({"fixture": "command"}),
@@ -40,6 +32,7 @@ _FINALIZATION_EVIDENCE = {
     "source-cache-lifecycle": canonical_identity({"fixture": "lifecycle"}),
 }
 
+
 def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
     output = io.StringIO()
     errors = io.StringIO()
@@ -47,6 +40,7 @@ def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
         status = main(arguments, stdout=output, stderr=errors)
     content = output.getvalue() if status == 0 else errors.getvalue()
     return status, json.loads(content)
+
 
 def fixture_policy(version: str = "1.0.0") -> ProjectTestReceiptPolicy:
     return ProjectTestReceiptPolicy(
@@ -64,6 +58,7 @@ def fixture_policy(version: str = "1.0.0") -> ProjectTestReceiptPolicy:
         minimum_test_count=4,
     )
 
+
 def configure_receipt_policy(project_root: Path) -> ProjectTestReceiptPolicy:
     manifest_path = project_root / "literate.project.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -72,6 +67,7 @@ def configure_receipt_policy(project_root: Path) -> ProjectTestReceiptPolicy:
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     refresh_authority_review(project_root)
     return policy
+
 
 def make_candidate(
     project_root: Path,
@@ -123,6 +119,7 @@ def make_candidate(
     )
     return receipt.to_dict()
 
+
 def finalize_candidate(receipt_value: dict) -> dict:
     component_lock = canonical_identity({"fixture": "component-lock"})
     bound_value = dict(receipt_value)
@@ -146,4 +143,3 @@ def finalize_candidate(receipt_value: dict) -> dict:
             "source-cache-lifecycle"
         ],
     ).to_dict()
-

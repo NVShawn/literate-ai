@@ -1,34 +1,22 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_cargo_materialization``."""
 
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters import retained_cargo_materialization as materialization
-
 from literate_ai.adapters.directory_artifacts import read_directory_export
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from literate_ai.adapters.retained_cargo_files import read_retained_cargo_files
-
 from literate_ai.adapters.retained_package_tree import write_staged_package
-
 from literate_ai.contracts.identity import canonical_json_bytes
-
 from literate_ai.projects import serialize_project_configuration
-
 from tests.support import fixtures_test_project_configuration as projects
-
 from tests.support import fixtures_test_retained_cargo_import as imports
-
 from tests.support.fixtures_test_retained_cargo_files import blob
+
 
 class RetainedCargoMaterializationTests(unittest.TestCase):
     def setUp(self):
@@ -219,4 +207,3 @@ class RetainedCargoMaterializationTests(unittest.TestCase):
                 self.run_materializer()
             result.require_unchanged()
         result.require_unchanged()
-

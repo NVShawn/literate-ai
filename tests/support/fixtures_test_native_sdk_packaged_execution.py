@@ -1,44 +1,35 @@
 """Shared fixtures extracted from ``tests.unit.test_native_sdk_packaged_execution``."""
 
 import json
-
 import shutil
-
 import unittest
-
 from copy import deepcopy
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.lifecycle import (
     LocalStandardLifecycleError,
     LocalStandardLifecyclePorts,
 )
-
 from literate_ai.adapters.lifecycle.standard_runtime import (
     STANDARD_PYTHON_SDK_RUNTIME_DRIVER,
 )
-
 from literate_ai.adapters.native_sdk_qualification import packaged_sdk_process_fields
-
 from literate_ai.adapters.qualification_capture import (
     QualificationCaptureError,
     QualificationEvidenceReader,
     QualificationEvidenceRecorder,
 )
-
 from literate_ai.application.standard_project_lifecycle import StandardProjectBuildPlan
-
 from literate_ai.contracts.executable_components.commands import (
     ComponentCommandPhase,
     ComponentLifecycleCommand,
 )
-
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
+from tests.support import (
+    fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority,
+)
 
-from tests.support import fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority
 
 class NativeSdkPackagedExecutionTests(unittest.TestCase):
     def prepare_relocated_package(
@@ -256,4 +247,3 @@ class NativeSdkPackagedExecutionTests(unittest.TestCase):
                 self.assertRaises(QualificationCaptureError),
             ):
                 verify(altered, retained)
-

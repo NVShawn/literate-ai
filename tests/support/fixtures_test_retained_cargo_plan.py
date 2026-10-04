@@ -1,48 +1,34 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_cargo_plan``."""
 
 import copy
-
 import hashlib
-
 import unittest
-
 from dataclasses import replace
 
 from literate_ai.adapters.retained_cargo_plan import (
     reopen_retained_cargo_plan,
     verify_retained_cargo_inputs,
 )
-
 from literate_ai.application.artifact_graph import create_artifact_build_graph
-
 from literate_ai.application.source_promotion import qualify_locked_source_promotion
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.cargo_workspace import (
     CargoPackageExpectation,
     CargoTargetExpectation,
     CargoWorkspaceExpectation,
 )
-
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-
 from literate_ai.contracts.repositories import RepositoryBuildCommand
-
 from literate_ai.contracts.retained_cargo import (
     CargoManifestChange,
     RetainedCargoWorkspacePlan,
 )
-
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
-
 from tests.support import fixtures_test_artifact_graph_contracts as graphs
-
 from tests.support import fixtures_test_locked_source_promotion as promotions
-
 from tests.support import fixtures_test_retained_library_binding as bindings
-
 from tests.support import fixtures_test_schema_catalog as schemas
+
 
 class RetainedCargoPlanTests(unittest.TestCase):
     def importer_fixture(self):
@@ -341,6 +327,6 @@ class RetainedCargoPlanTests(unittest.TestCase):
         self.assertIn("--features=client/extra", command.argv)
         self.assertIn("--no-default-features", command.argv)
 
+
 if __name__ == "__main__":
     unittest.main()
-

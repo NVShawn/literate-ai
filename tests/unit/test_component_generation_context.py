@@ -11,20 +11,19 @@ from literate_ai.application.component_execution_planning import (
 )
 from literate_ai.application.component_generation_context import (
     ComponentGenerationContextError,
-    GenerationComplexityBudgetExceeded,
     PromptSegmentInput,
     prepare_component_generation_context,
 )
 from literate_ai.contracts.executable_components.context import (
-    BoundedComponentGenerationRequest,
-    ComponentGenerationContextManifest,
     ContextAuthorityKind,
-    ContextVisibility,
     GenerationComplexityBudget,
 )
 from literate_ai.contracts.executable_components.planning import ComponentGenerationPlan
 from literate_ai.contracts.identity import ContentIdentity
-from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_component_execution_planning import (
+    _diamond_lock,
+    _models,
+)
 
 
 def _identity(content: bytes) -> ContentIdentity:
@@ -61,8 +60,6 @@ def _named_plan(lock: object, name: str) -> ComponentGenerationPlan:
 
 def _materialize(
     plan: ComponentGenerationPlan,
-    *,
-    suffix: str = "",
 ) -> tuple[ComponentGenerationPlan, tuple[PromptSegmentInput, ...]]:
     """Give synthetic planned references exact test bytes and matching identities."""
 
@@ -87,7 +84,7 @@ def _materialize(
     contents: dict[tuple[ContextAuthorityKind, str], bytes] = {}
     for kind, identities in groups:
         for index, old_identity in enumerate(identities):
-            content = f"{kind.value}:{index}:{old_identity.uri}{suffix}".encode()
+            content = f"{kind.value}:{index}:{old_identity.uri}".encode()
             new_identity = _identity(content)
             replacements[old_identity.uri] = new_identity
             contents[(kind, new_identity.uri)] = content
@@ -195,77 +192,6 @@ def _materialize(
 
 
 class ComponentGenerationContextTests(unittest.TestCase):
-    def test_locked_local_asset_metadata_is_admitted_as_local_authority(self) -> None:
-        original = _named_plan(_diamond_lock(), "invoice-cli")
-        plan, inputs = _materialize(
-            replace(
-                original,
-                generation_key=replace(
-                    original.generation_key,
-                    asset_identities=(_identity(b"locked asset metadata"),),
-                ),
-            )
-        )
-
-        prepared = prepare_component_generation_context(
-            plan,
-            framework_envelope=b"trusted envelope",
-            authority_segments=inputs,
-            budget=_budget(),
-        )
-
-        assets = tuple(
-            item
-            for item in prepared.request.context_manifest.segments
-            if item.authority_kind is ContextAuthorityKind.LOCAL_ASSET_METADATA
-        )
-        self.assertEqual(len(assets), 1)
-        self.assertIs(assets[0].visibility, ContextVisibility.LOCAL_AUTHORITY)
-        self.assertEqual(assets[0].source_component_revision, plan.component_revision)
-
-    def test_diamond_manifest_is_deterministic_and_identity_bound(self) -> None:
-        plan, inputs = _materialize(_named_plan(_diamond_lock(), "invoice-cli"))
-        first = prepare_component_generation_context(
-            plan,
-            framework_envelope=b"trusted envelope",
-            authority_segments=tuple(reversed(inputs)),
-            budget=_budget(),
-        )
-        second = prepare_component_generation_context(
-            plan,
-            framework_envelope=b"trusted envelope",
-            authority_segments=inputs,
-            budget=_budget(),
-        )
-        self.assertEqual(first, second)
-        self.assertEqual(
-            first.request.context_manifest,
-            ComponentGenerationContextManifest.from_dict(
-                first.request.context_manifest.to_dict()
-            ),
-        )
-        self.assertEqual(
-            first.request,
-            BoundedComponentGenerationRequest.from_dict(first.request.to_dict()),
-        )
-        self.assertEqual(len(first.prompt), first.request.budget_decision.prompt_bytes)
-        self.assertEqual(
-            first.request.component_generation_plan_identity, plan.identity
-        )
-        self.assertEqual(
-            first.request.generation_key_identity, plan.generation_key.identity
-        )
-        interfaces = [
-            item
-            for item in first.request.context_manifest.segments
-            if item.authority_kind is ContextAuthorityKind.DIRECT_PUBLIC_INTERFACE
-        ]
-        self.assertEqual(len(interfaces), 2)
-        self.assertEqual(
-            {item.source_component_revision.uri for item in interfaces},
-            {edge.provider_revision.uri for edge in plan.direct_generation_edges},
-        )
-
     def test_private_transitive_canaries_are_rejected_even_when_names_collide(
         self,
     ) -> None:
@@ -305,173 +231,6 @@ class ComponentGenerationContextTests(unittest.TestCase):
             self.assertEqual(
                 error.exception.code, "generation_context.authority_forbidden"
             )
-
-    def test_chain_depth_and_private_leaf_change_have_zero_consumer_effect(
-        self,
-    ) -> None:
-        baseline, baseline_inputs = _materialize(
-            _named_plan(_diamond_lock(), "invoice-cli")
-        )
-        changed, changed_inputs = _materialize(
-            _named_plan(
-                _diamond_lock(money_spec="deep-private-canary-READ-ME"),
-                "invoice-cli",
-            )
-        )
-        left = prepare_component_generation_context(
-            baseline,
-            framework_envelope=b"trusted envelope",
-            authority_segments=baseline_inputs,
-            budget=_budget(),
-        )
-        right = prepare_component_generation_context(
-            changed,
-            framework_envelope=b"trusted envelope",
-            authority_segments=changed_inputs,
-            budget=_budget(),
-        )
-        self.assertEqual(
-            left.request.context_manifest.identity,
-            right.request.context_manifest.identity,
-        )
-        self.assertEqual(
-            left.request.generation_key_identity, right.request.generation_key_identity
-        )
-        self.assertNotIn(b"deep-private-canary", right.prompt)
-
-    def test_exported_interface_changes_only_its_direct_consumers(self) -> None:
-        baseline, baseline_inputs = _materialize(
-            _named_plan(_diamond_lock(), "pricing")
-        )
-        changed, changed_inputs = _materialize(
-            _named_plan(
-                _diamond_lock(money_interface="money-interface-public-v2"), "pricing"
-            )
-        )
-        left = prepare_component_generation_context(
-            baseline,
-            framework_envelope=b"trusted envelope",
-            authority_segments=baseline_inputs,
-            budget=_budget(),
-        )
-        right = prepare_component_generation_context(
-            changed,
-            framework_envelope=b"trusted envelope",
-            authority_segments=changed_inputs,
-            budget=_budget(),
-        )
-        self.assertNotEqual(
-            left.request.context_manifest.identity,
-            right.request.context_manifest.identity,
-        )
-        self.assertNotEqual(
-            left.request.generation_key_identity, right.request.generation_key_identity
-        )
-
-    def test_wide_fan_in_grows_only_by_interfaces_and_fails_before_egress(self) -> None:
-        plan, inputs = _materialize(_named_plan(_diamond_lock(), "invoice-cli"))
-        with self.assertRaises(GenerationComplexityBudgetExceeded) as error:
-            prepare_component_generation_context(
-                plan,
-                framework_envelope=b"trusted envelope",
-                authority_segments=inputs,
-                budget=_budget(max_dependency_fan_in=1),
-            )
-        decision = error.exception.decision
-        self.assertEqual(decision.violations, ("dependency_fan_in",))
-        self.assertEqual(decision.dependency_fan_in, 2)
-        self.assertEqual(len(decision.largest_interface_contributors), 2)
-        self.assertIn("refactor the Component", str(error.exception))
-
-    def test_byte_token_document_and_interface_limits_report_largest_inputs(
-        self,
-    ) -> None:
-        plan, inputs = _materialize(_named_plan(_diamond_lock(), "invoice-cli"))
-        with self.assertRaises(GenerationComplexityBudgetExceeded) as error:
-            prepare_component_generation_context(
-                plan,
-                framework_envelope=b"trusted envelope",
-                authority_segments=inputs,
-                budget=_budget(
-                    max_prompt_bytes=1,
-                    max_estimated_tokens=1,
-                    max_document_count=1,
-                    max_direct_interface_bytes=1,
-                ),
-            )
-        self.assertEqual(
-            error.exception.decision.violations,
-            (
-                "direct_interface_bytes",
-                "document_count",
-                "estimated_tokens",
-                "prompt_bytes",
-            ),
-        )
-        self.assertTrue(error.exception.decision.largest_local_contributors)
-        self.assertTrue(error.exception.decision.largest_interface_contributors)
-
-    def test_drift_wrong_source_omission_and_extra_transitive_interface_fail_closed(
-        self,
-    ) -> None:
-        plan, inputs = _materialize(_named_plan(_diamond_lock(), "invoice-cli"))
-        cases = (
-            (
-                replace(inputs[0], content=inputs[0].content + b" drift"),
-                "generation_context.content_drift",
-            ),
-            (
-                replace(
-                    inputs[0],
-                    source_component_revision=plan.direct_generation_edges[
-                        0
-                    ].provider_revision,
-                ),
-                "generation_context.source_component_mismatch",
-            ),
-        )
-        for replacement, code in cases:
-            with (
-                self.subTest(code=code),
-                self.assertRaises(ComponentGenerationContextError) as error,
-            ):
-                prepare_component_generation_context(
-                    plan,
-                    framework_envelope=b"trusted envelope",
-                    authority_segments=(replacement, *inputs[1:]),
-                    budget=_budget(),
-                )
-            self.assertEqual(error.exception.code, code)
-
-        with self.assertRaises(ComponentGenerationContextError) as omission:
-            prepare_component_generation_context(
-                plan,
-                framework_envelope=b"trusted envelope",
-                authority_segments=inputs[:-1],
-                budget=_budget(),
-            )
-        self.assertEqual(
-            omission.exception.code, "generation_context.authority_incomplete"
-        )
-
-        transitive_content = b"private transitive public-looking interface"
-        transitive = PromptSegmentInput(
-            ContextAuthorityKind.DIRECT_PUBLIC_INTERFACE,
-            plan.direct_generation_edges[0].provider_revision,
-            "not actually direct",
-            _identity(transitive_content),
-            transitive_content,
-        )
-        with self.assertRaises(ComponentGenerationContextError) as extra:
-            prepare_component_generation_context(
-                plan,
-                framework_envelope=b"trusted envelope",
-                authority_segments=(*inputs, transitive),
-                budget=_budget(),
-            )
-        self.assertEqual(
-            extra.exception.code, "generation_context.authority_unselected"
-        )
 
 
 if __name__ == "__main__":

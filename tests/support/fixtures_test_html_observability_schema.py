@@ -1,18 +1,14 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_html_observability_schema``."""
 
 import copy
-
 import json
-
 import unittest
-
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
-
 from referencing import Registry, Resource
-
 from referencing.jsonschema import DRAFT202012
 
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
@@ -39,12 +35,14 @@ RESULT = "urn:literate-ai:schema:v1:html-observability-render-result"
 
 REFUSAL = "urn:literate-ai:schema:v1:html-observability-render-refusal"
 
+
 def identity(nibble: str) -> dict[str, str]:
     return {
         "schema": "urn:literate-ai:schema:v1:content-identity",
         "algorithm": "sha256",
         "digest": nibble * 64,
     }
+
 
 def artifact_fixture() -> dict[str, object]:
     return {
@@ -109,6 +107,7 @@ def artifact_fixture() -> dict[str, object]:
         },
     }
 
+
 def surface_fixture() -> dict[str, object]:
     return {
         "schema": SURFACE,
@@ -116,6 +115,7 @@ def surface_fixture() -> dict[str, object]:
         "source_schema": "urn:literate-ai:schema:v2:component-authority-projection",
         "view_ids": ["authority-graph"],
     }
+
 
 def request_fixture() -> dict[str, object]:
     return {
@@ -127,6 +127,7 @@ def request_fixture() -> dict[str, object]:
         "external_asset_policy": "pinned-cdn",
     }
 
+
 def staleness_fixture() -> dict[str, object]:
     return {
         "schema": STALENESS,
@@ -136,6 +137,7 @@ def staleness_fixture() -> dict[str, object]:
         "observed_render_inputs_identity": identity("a"),
         "stale_source_labels": [],
     }
+
 
 class HtmlObservabilitySchemaTests(unittest.TestCase):
     """The Phase 0 artifact contract for GitHub #295 / #296."""
@@ -494,6 +496,6 @@ class HtmlObservabilitySchemaTests(unittest.TestCase):
                     getattr(subject, test_name)()
         self.assertEqual(SCHEMA_FILE.read_bytes(), original)
 
+
 if __name__ == "__main__":
     unittest.main()
-

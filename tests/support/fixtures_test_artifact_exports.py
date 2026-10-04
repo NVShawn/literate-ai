@@ -1,8 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_artifact_exports``."""
-
-
-
 
 
 from literate_ai.contracts import (
@@ -11,6 +9,7 @@ from literate_ai.contracts import (
     LifecycleDispatchAction,
     canonical_identity,
 )
+
 
 def dispatch_request(worker: ExecutionWorker) -> ExecutionDispatchRequest:
     identities = tuple(canonical_identity({"value": index}) for index in range(7))
@@ -28,4 +27,3 @@ def dispatch_request(worker: ExecutionWorker) -> ExecutionDispatchRequest:
         None,
         60,
     )
-

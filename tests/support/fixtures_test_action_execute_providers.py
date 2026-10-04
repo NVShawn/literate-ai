@@ -1,51 +1,34 @@
 """Shared fixtures extracted from ``tests.unit.test_action_execute_providers``."""
 
 import shutil
-
 import unittest
-
 from contextlib import contextmanager
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_build_record import BuildWorkerInput
-
 from literate_ai.adapters.action_build_result import (
     BuildWorkerResult,
     capture_build_result,
 )
-
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
-
 from literate_ai.adapters.action_execute_execution import (
     execute_worker_execution_from_cas,
 )
-
 from literate_ai.adapters.action_execute_record import ExecuteWorkerInput
-
 from literate_ai.adapters.action_execute_result_record import ExecuteWorkerResult
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.adapters.qualification_capture import QualificationEvidenceRecorder
-
 from literate_ai.application.standard_execution_inputs import (
     plan_standard_execution_receipts,
 )
-
 from literate_ai.contracts import ComponentCommandPhase
-
 from literate_ai.contracts.capabilities import DependencyKind
-
 from literate_ai.contracts.generation_cache import CachedSourceFile
-
 from tests.support import fixtures_test_action_provider_build as provider_fixture
-
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 class ExecuteProviderTests(unittest.TestCase):
     def setUp(self):
@@ -230,7 +213,9 @@ class ExecuteProviderTests(unittest.TestCase):
 
         from literate_ai.adapters.action_execute_worker import ConfiguredExecuteWorker
         from literate_ai.adapters.lifecycle import LocalComponentToolBinding
-        from tests.support.fixtures_test_action_execute_action import make_execute_request
+        from tests.support.fixtures_test_action_execute_action import (
+            make_execute_request,
+        )
 
         request, records = make_execute_request(self.value, self.fixture.deadline)
         worker = ConfiguredExecuteWorker(
@@ -304,4 +289,3 @@ class ExecuteProviderTests(unittest.TestCase):
             self.execute(blob_source=fetch)
         self.assertFalse(self.workers[-1]._execution_evidence)
         self.assert_clean()
-

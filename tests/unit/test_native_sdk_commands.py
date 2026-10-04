@@ -25,7 +25,9 @@ from literate_ai.contracts.authoring_markdown import (
 )
 from literate_ai.contracts.executable_components import ComponentCommandPhase
 from literate_ai.contracts.identity import canonical_identity
-from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
+from tests.support import (
+    fixtures_test_native_sdk_source_build as test_native_sdk_source_build,
+)
 from tests.support.fixtures_test_standard_command_projection import (
     _locked_snapshot,
     _observation,

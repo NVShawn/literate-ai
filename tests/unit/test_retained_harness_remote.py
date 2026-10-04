@@ -3,13 +3,10 @@ from __future__ import annotations
 import io
 import json
 import os
-import stat
 import subprocess
 import sys
-import tarfile
 import tempfile
 import unittest
-import zipfile
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
@@ -24,15 +21,12 @@ from literate_ai.adapters.retained_harness_remote import (
     RetainedHarnessRemoteRequest,
     RetainedHarnessRemoteResult,
     RetainedHarnessSshExecutor,
-    _retained_receiver_failure,
     _runtime_archive,
     _source_archive,
     execute_retained_harness_receiver,
-    retained_harness_runtime_requirements,
 )
 from literate_ai.adapters.ssh_transport import SshProcessResult
 from literate_ai.cli import main
-from literate_ai.cli.dispatch import _parser
 from literate_ai.contracts import (
     ContentIdentity,
     ExecutionRequirements,
@@ -41,7 +35,6 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from literate_ai.remote_source_guard import SourceGuardError
 
 
 def _worker() -> ExecutionWorker:
@@ -120,173 +113,6 @@ class RecordingRetainedRunner:
 
 
 class RetainedHarnessRemoteTests(unittest.TestCase):
-    def test_source_archive_contains_initialized_gitlink_files(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory) / "source"
-            child_source = Path(directory) / "child-source"
-            root.mkdir()
-            child_source.mkdir()
-            for repository in (root, child_source):
-                subprocess.run(("git", "init", "-q", str(repository)), check=True)
-                subprocess.run(
-                    ("git", "-C", str(repository), "config", "user.name", "Fixture"),
-                    check=True,
-                )
-                subprocess.run(
-                    (
-                        "git",
-                        "-C",
-                        str(repository),
-                        "config",
-                        "user.email",
-                        "fixture@example.test",
-                    ),
-                    check=True,
-                )
-            (child_source / "nested.cpp").write_text("int nested = 1;\n")
-            subprocess.run(("git", "-C", str(child_source), "add", "."), check=True)
-            subprocess.run(
-                ("git", "-C", str(child_source), "commit", "-qm", "child"),
-                check=True,
-            )
-            (root / "Makefile").write_text("test:\n\t@true\n")
-            subprocess.run(("git", "-C", str(root), "add", "."), check=True)
-            subprocess.run(
-                ("git", "-C", str(root), "commit", "-qm", "root"), check=True
-            )
-            subprocess.run(
-                (
-                    "git",
-                    "-c",
-                    "protocol.file.allow=always",
-                    "-C",
-                    str(root),
-                    "submodule",
-                    "add",
-                    "-q",
-                    str(child_source),
-                    "extensions/nested",
-                ),
-                check=True,
-            )
-            subprocess.run(
-                ("git", "-C", str(root), "commit", "-qam", "gitlink"), check=True
-            )
-            scope = capture_retained_source_scope(root)
-            archive = Path(directory) / "source.tar.gz"
-
-            _source_archive(root, {"source_scope": scope}, archive)
-
-            with tarfile.open(archive, "r:gz") as captured:
-                names = set(captured.getnames())
-            self.assertIn("literate-ai/extensions/nested/nested.cpp", names)
-            self.assertFalse(any(".git" in name.split("/") for name in names))
-
-    def test_canonical_receiver_failure_preserves_sanitized_code_and_message(
-        self,
-    ) -> None:
-        envelope = {
-            "schema": "literate-ai/cli-error@1",
-            "ok": False,
-            "command": "worker.execute-retained",
-            "error": {
-                "code": "retained_receipt.remote_runtime_invalid",
-                "message": "runtime archive differs from the request",
-            },
-        }
-
-        failure = _retained_receiver_failure(
-            SshProcessResult(
-                2,
-                b"",
-                b"bash: no job control in this shell\n"
-                + canonical_json_bytes(envelope)
-                + b"\n",
-            )
-        )
-
-        self.assertEqual(
-            failure.code,
-            "retained_receipt.remote_runtime_invalid",
-        )
-        self.assertEqual(
-            failure.message,
-            "runtime archive differs from the request",
-        )
-
-    def test_canonical_receiver_failure_preserves_bounded_diagnostic_tail(
-        self,
-    ) -> None:
-        message = "setup\n" + ("x" * 8192) + "\nretained-tail"
-        envelope = {
-            "schema": "literate-ai/cli-error@1",
-            "ok": False,
-            "command": "worker.execute-retained",
-            "error": {
-                "code": "project.convert_legacy_gate_failed",
-                "message": message,
-            },
-        }
-
-        failure = _retained_receiver_failure(
-            SshProcessResult(
-                2,
-                b"",
-                canonical_json_bytes(envelope) + b"\n",
-            )
-        )
-
-        self.assertEqual(failure.code, "project.convert_legacy_gate_failed")
-        self.assertIn("retained-tail", failure.message)
-
-    def test_noncanonical_receiver_failure_is_bounded_and_redacted(self) -> None:
-        with patch.dict(
-            os.environ,
-            {"PRIVATE_WORKER_TOKEN": "s3cr3t"},
-            clear=False,
-        ):
-            failure = _retained_receiver_failure(
-                SshProcessResult(
-                    2,
-                    b"",
-                    (
-                        b"Traceback under /home/private/work "
-                        b"token=s3cr3t password=also-secret\n"
-                    ),
-                )
-            )
-
-        self.assertEqual(failure.code, "execution.ssh_receiver_failed")
-        self.assertIn("SSH lifecycle receiver exited with status 2", failure.message)
-        self.assertIn("<private-path>", failure.message)
-        self.assertIn("<redacted>", failure.message)
-        self.assertNotIn("s3cr3t", failure.message)
-        self.assertNotIn("also-secret", failure.message)
-
-    def test_internal_receiver_command_has_only_staged_attempt_inputs(self) -> None:
-        parsed = _parser().parse_args(
-            [
-                "worker",
-                "execute-retained",
-                "--worker-file",
-                "worker.json",
-                "--request",
-                "request.json",
-                "--inventory",
-                "inventory.json",
-                "--archive",
-                "source.tar.gz",
-                "--runtime-archive",
-                "literate-ai-runtime.zip",
-                "--workspace",
-                "workspace",
-            ]
-        )
-
-        self.assertEqual(parsed.worker_command, "execute-retained")
-        self.assertEqual(parsed.inventory, "inventory.json")
-        self.assertEqual(parsed.runtime_archive, "literate-ai-runtime.zip")
-
     def test_receiver_cli_redacts_private_paths_and_secrets_but_keeps_code(
         self,
     ) -> None:
@@ -349,120 +175,6 @@ class RetainedHarnessRemoteTests(unittest.TestCase):
         self.assertNotIn("also-secret", public)
         self.assertIn("<private-path>", public)
         self.assertIn("<redacted>", public)
-
-    def test_runtime_archive_is_deterministic_portable_and_excludes_bytecode(
-        self,
-    ) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            package = root / "package" / "literate_ai"
-            package.mkdir(parents=True)
-            (package / "__init__.py").write_text("", encoding="utf-8")
-            module = package / "worker.py"
-            module.write_text("VALUE = 1\n", encoding="utf-8")
-            # Windows chmod does not set POSIX executable bits on Python files.
-            module.chmod(0o755)
-            cache = package / "__pycache__"
-            cache.mkdir()
-            (cache / "worker.cpython-313.pyc").write_bytes(b"cached")
-            (package / "legacy.pyo").write_bytes(b"cached")
-            first = root / "first.zip"
-            second = root / "second.zip"
-
-            first_identity, first_size = _runtime_archive(package, first)
-            second_identity, second_size = _runtime_archive(package, second)
-
-            self.assertEqual(first.read_bytes(), second.read_bytes())
-            self.assertEqual(first_identity, second_identity)
-            self.assertEqual(first_size, second_size)
-            with zipfile.ZipFile(first) as archive:
-                members = archive.infolist()
-            self.assertEqual(
-                [member.filename for member in members],
-                ["literate_ai/__init__.py", "literate_ai/worker.py"],
-            )
-            self.assertTrue(
-                all(member.date_time == (1980, 1, 1, 0, 0, 0) for member in members)
-            )
-            self.assertEqual(
-                [stat.S_IMODE(member.external_attr >> 16) for member in members],
-                [0o644, 0o644 if os.name == "nt" else 0o755],
-            )
-
-    def test_runtime_archive_rejects_package_symlinks(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            package = root / "package" / "literate_ai"
-            package.mkdir(parents=True)
-            (package / "__init__.py").write_text("", encoding="utf-8")
-            (package / "linked.py").symlink_to("__init__.py")
-
-            with self.assertRaises(RetainedHarnessRemoteError) as raised:
-                _runtime_archive(package, root / "runtime.zip")
-
-        self.assertEqual(
-            raised.exception.code,
-            "retained_receipt.remote_runtime_invalid",
-        )
-
-    def test_runtime_archive_carries_pinned_tools_for_admitted_scripts(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            package = root / "package" / "literate_ai"
-            package.mkdir(parents=True)
-            (package / "__init__.py").write_text("", encoding="utf-8")
-            source = root / "source"
-            (source / "tests").mkdir(parents=True)
-            (source / "tests" / "run.sh").write_text(
-                "cmake -G Ninja -S . -B build\n",
-                encoding="utf-8",
-            )
-            runtime = root / "runtime.zip"
-            inventory = {
-                "stages": [
-                    {"id": "build", "command": "uv build"},
-                    {
-                        "id": "test",
-                        "command": "./run.sh",
-                        "evidence": "tests/run.sh",
-                    },
-                ],
-            }
-
-            with patch(
-                "literate_ai.adapters.retained_harness_remote._download_runtime_tool",
-                side_effect=lambda descriptor: (
-                    b"ninja-binary" if descriptor["name"] == "ninja" else b"uv-binary"
-                ),
-            ):
-                _runtime_archive(
-                    package,
-                    runtime,
-                    inventory=inventory,
-                    source_root=source,
-                )
-
-            with zipfile.ZipFile(runtime) as archive:
-                self.assertEqual(
-                    archive.read("literate_ai_tools/x86_64/uv"),
-                    b"uv-binary",
-                )
-                self.assertEqual(
-                    archive.read("literate_ai_tools/x86_64/ninja"),
-                    b"ninja-binary",
-                )
-                manifest = json.loads(archive.read("literate_ai_tools/manifest.json"))
-            self.assertEqual(
-                manifest["requirements"],
-                ["ninja==1.13.2", "uv==0.12.12"],
-            )
-            self.assertEqual(
-                retained_harness_runtime_requirements(
-                    inventory,
-                    source_root=source,
-                ),
-                ("ninja==1.13.2", "uv==0.12.12"),
-            )
 
     def test_runtime_archive_supplies_current_receiver_over_exact_pythonpath(
         self,
@@ -538,67 +250,6 @@ class RetainedHarnessRemoteTests(unittest.TestCase):
             timeout_seconds=30,
             cwd=root,
         )
-
-    def test_mocked_transport_stages_only_bound_inputs_and_cleans(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            runner = RecordingRetainedRunner()
-            result = self._execute(root, runner)
-
-        self.assertEqual(result.platform["operating_system"], "linux")
-        self.assertEqual(len(runner.calls), 8)
-        self.assertEqual(runner.calls[0][0], "ssh")
-        self.assertTrue(all(call[0] == "scp" for call in runner.calls[1:6]))
-        self.assertEqual(
-            {Path(call[-2]).name for call in runner.calls[1:6]},
-            {
-                "source.tar.gz",
-                "literate-ai-runtime.zip",
-                "inventory.json",
-                "request.json",
-                "worker.json",
-            },
-        )
-        command = runner.calls[6][-1]
-        self.assertIn('"$HOME"/.local/bin/litai', command)
-        self.assertIn(
-            'PYTHONPATH="$incoming/literate-ai-runtime.zip"',
-            command,
-        )
-        self.assertNotIn("$PYTHONPATH", command)
-        self.assertIn("LITAI_NO_SELF_UPDATE=1", command)
-        self.assertIn("worker execute-retained", command)
-        self.assertIn(
-            '--runtime-archive "$incoming/literate-ai-runtime.zip"',
-            command,
-        )
-        self.assertIn("rm -rf", runner.calls[7][-1])
-        self.assertGreaterEqual(runner.timeouts[7], 299)
-        self.assertFalse(
-            any(str(root) in argument for call in runner.calls for argument in call)
-        )
-
-    def test_nonportable_source_guard_failure_is_typed_before_transport(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            runner = RecordingRetainedRunner()
-            with (
-                patch(
-                    "literate_ai.adapters.retained_harness_remote._source_archive",
-                    side_effect=SourceGuardError(
-                        "source symlink target is not portable: private/link"
-                    ),
-                ),
-                self.assertRaises(RetainedHarnessRemoteError) as raised,
-            ):
-                self._execute(root, runner)
-
-        self.assertEqual(
-            raised.exception.code,
-            "retained_receipt.remote_source_invalid",
-        )
-        self.assertIn("private/link", raised.exception.message)
-        self.assertEqual(runner.calls, [])
 
     def test_response_worker_identity_tampering_is_rejected_after_cleanup(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

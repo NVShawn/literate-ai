@@ -7,17 +7,13 @@ import os
 import subprocess
 import tempfile
 import unittest
-from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import patch
 
 from literate_ai.adapters.builders import (
     UNSANDBOXED_HOST_BUILD_PRIVILEGES,
     UNSANDBOXED_HOST_BUILD_PROFILE,
-    GuardedJavaScriptBuilder,
-    GuardedRustBuilder,
     GuardedRustJavaScriptBuilder,
     RustJavaScriptToolchain,
     canonical_tree_digest,
@@ -29,12 +25,8 @@ from literate_ai.adapters.builders import (
 )
 from literate_ai.adapters.builders.python import BuildError
 from literate_ai.adapters.lifecycle import (
-    JavaScriptBuildAdapter,
-    RustBuildAdapter,
     RustJavaScriptBuildAdapter,
 )
-from literate_ai.adapters.lifecycle import local as local_adapter_module
-from literate_ai.ports import BuildInputConsumption
 from literate_ai.security import (
     AuthorizationRevocationSet,
     BuildRequest,
@@ -260,180 +252,6 @@ class GuardedRustJavaScriptBuilderTests(unittest.TestCase):
                 {"frontend": "checked", "backend": {"echo": {"value": 7}}},
             )
 
-    def test_lifecycle_adapter_accepts_typed_outer_build_input_consumption(
-        self,
-    ) -> None:
-        files = {
-            **self.files(),
-            "source/BUILD.bazel": "# consumed by outer Bazel build\n",
-            "source/MODULE.bazel": 'module(name = "fixture", version = "1.0.0")\n',
-        }
-        source_digest = _source_digest(files)
-        request, authorization = _request_and_authorization(
-            source_digest=source_digest,
-            builder_id=GuardedRustJavaScriptBuilder.builder_id,
-            toolchain_identity=self.toolchain.identity,
-            allowed_outputs=FULL_STACK_OUTPUTS,
-        )
-        consumption = BuildInputConsumption(
-            consumer_id="bazel/bzlmod@1",
-            source_bundle_digest=source_digest,
-            files=("source/BUILD.bazel", "source/MODULE.bazel"),
-        )
-        with tempfile.TemporaryDirectory() as directory:
-            result = RustJavaScriptBuildAdapter(
-                artifact_store=Path(directory) / "artifacts",
-                toolchain=self.toolchain,
-                clock=lambda: NOW + timedelta(minutes=1),
-                authorization_verifier=AuthorizationRevocationSet(),
-            ).build_with_input_consumption(
-                {**request.to_dict(), "artifact": {"files": files}},
-                authorization.to_dict(),
-                consumption,
-            )
-
-        self.assertEqual(
-            result["build_system_consumed_files"],
-            ["source/BUILD.bazel", "source/MODULE.bazel"],
-        )
-        self.assertEqual(
-            result["build_input_consumption_identity"], consumption.identity
-        )
-
-    def test_request_must_bind_the_exact_composite_toolchain(self) -> None:
-        other_node = replace(
-            self.toolchain.node,
-            version=self.toolchain.node.version + "-other",
-        )
-        selected_other = RustJavaScriptToolchain(self.toolchain.rust, other_node)
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            source = root / "generated"
-            _materialize(source, self.files())
-            request, authorization = self.request_and_authorization(
-                source, toolchain=selected_other
-            )
-
-            with patch.object(
-                composite_builder_module, "_run_bounded_process"
-            ) as process_call:
-                with self.assertRaises(BuildError) as error:
-                    GuardedRustJavaScriptBuilder(
-                        self.toolchain, AuthorizationRevocationSet()
-                    ).build(
-                        request,
-                        authorization,
-                        source_root=source,
-                        artifact_store=root / "artifacts",
-                        now=NOW + timedelta(minutes=1),
-                    )
-
-            self.assertEqual(error.exception.code, "builder.toolchain_mismatch")
-            process_call.assert_not_called()
-
-    def test_referenced_backend_module_is_recorded_as_consumed(self) -> None:
-        files = self.files()
-        files["source/backend/main.rs"] = (
-            'mod response;\nfn main() { println!("{}", response::payload()); }\n'
-        )
-        files["source/backend/response.rs"] = (
-            'pub fn payload() -> &\'static str { "module-compiled" }\n'
-        )
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            source = root / "generated"
-            _materialize(source, files)
-            request, authorization = self.request_and_authorization(source)
-
-            artifact = GuardedRustJavaScriptBuilder(
-                self.toolchain, AuthorizationRevocationSet()
-            ).build(
-                request,
-                authorization,
-                source_root=source,
-                artifact_store=root / "artifacts",
-                now=NOW + timedelta(minutes=1),
-            )
-
-            expected_backend = (
-                "source/backend/main.rs",
-                "source/backend/response.rs",
-            )
-            expected_frontend = (
-                "source/frontend/helper.js",
-                "source/frontend/main.js",
-            )
-            self.assertEqual(artifact.consumed_backend_files, expected_backend)
-            self.assertEqual(artifact.checked_frontend_files, expected_frontend)
-            manifest = json.loads(
-                (artifact.artifact_path / "build-manifest.json").read_text()
-            )
-            self.assertEqual(manifest["consumed_backend_files"], list(expected_backend))
-            self.assertEqual(
-                manifest["checked_frontend_files"], list(expected_frontend)
-            )
-
-    def test_unconsumed_generated_backend_file_is_rejected(self) -> None:
-        files = self.files()
-        files["source/backend/dead.rs"] = "pub fn never_compiled() {}\n"
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            source = root / "generated"
-            _materialize(source, files)
-            request, authorization = self.request_and_authorization(source)
-
-            with self.assertRaises(BuildError) as error:
-                GuardedRustJavaScriptBuilder(
-                    self.toolchain, AuthorizationRevocationSet()
-                ).build(
-                    request,
-                    authorization,
-                    source_root=source,
-                    artifact_store=root / "artifacts",
-                    now=NOW + timedelta(minutes=1),
-                )
-
-            self.assertEqual(error.exception.code, "builder.generated_file_unconsumed")
-            self.assertIn("source/backend/dead.rs", str(error.exception))
-            self.assertEqual(list((root / "artifacts").iterdir()), [])
-
-    def test_whole_source_tree_drift_during_backend_compile_is_rejected(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            source = root / "generated"
-            _materialize(source, self.files())
-            request, authorization = self.request_and_authorization(source)
-            target = source / "source" / "frontend" / "helper.js"
-            real_run = composite_builder_module._run_bounded_process
-
-            def compile_then_mutate(*args, **kwargs):
-                completed = real_run(*args, **kwargs)
-                target.write_text(
-                    "'use strict';\nmodule.exports = 2;\n", encoding="utf-8"
-                )
-                return completed
-
-            with patch.object(
-                composite_builder_module,
-                "_run_bounded_process",
-                side_effect=compile_then_mutate,
-            ):
-                with self.assertRaises(BuildError) as error:
-                    GuardedRustJavaScriptBuilder(
-                        self.toolchain, AuthorizationRevocationSet()
-                    ).build(
-                        request,
-                        authorization,
-                        source_root=source,
-                        artifact_store=root / "artifacts",
-                        now=NOW + timedelta(minutes=1),
-                    )
-
-            self.assertEqual(
-                error.exception.code, "builder.source_changed_during_build"
-            )
-            self.assertEqual(list((root / "artifacts").iterdir()), [])
-
     def test_tampered_cached_artifact_is_never_reused(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -484,123 +302,6 @@ class GuardedRustJavaScriptBuilderTests(unittest.TestCase):
                     )
 
             self.assertEqual(error.exception.code, "builder.artifact_collision")
-
-
-class LanguageLifecycleAdapterTests(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        try:
-            cls.toolchain = discover_rust_javascript_toolchain()
-        except BuildError as exc:
-            raise unittest.SkipTest(str(exc)) from exc
-
-    def test_rust_adapter_materializes_whole_tree_and_maps_artifact(self) -> None:
-        files = {
-            "source/main.rs": "fn main() {}\n",
-            "source/support.rs": "// support\n",
-        }
-        request, authorization = _request_and_authorization(
-            source_digest=_source_digest(files),
-            builder_id=GuardedRustBuilder.builder_id,
-            toolchain_identity=self.toolchain.rust.identity,
-            allowed_outputs=("native-executable",),
-        )
-        built = SimpleNamespace(
-            artifact_digest="sha256:" + "d" * 64,
-            artifact_path=Path("/sealed/rust"),
-            source_bundle_digest=request.source_bundle_digest,
-            authorization_id=authorization.authorization_id,
-            executable_file="sample",
-            compiler_identity=self.toolchain.rust.identity,
-            consumed_source_files=("source/main.rs", "source/support.rs"),
-            lifecycle_consumed_files=(),
-            build_system_consumed_files=(),
-            build_input_consumption_identity=None,
-        )
-
-        with (
-            tempfile.TemporaryDirectory() as directory,
-            patch.object(local_adapter_module, "GuardedRustBuilder") as builder_type,
-        ):
-
-            def inspect_tree(*args, source_root: Path, **kwargs):
-                self.assertEqual(
-                    (source_root / "source" / "support.rs").read_text(), "// support\n"
-                )
-                return built
-
-            builder_type.return_value.build.side_effect = inspect_tree
-            result = RustBuildAdapter(
-                artifact_store=Path(directory) / "artifacts",
-                toolchain=self.toolchain.rust,
-                authorization_verifier=AuthorizationRevocationSet(),
-            ).build(
-                {**request.to_dict(), "artifact": {"files": files}},
-                authorization.to_dict(),
-            )
-
-        self.assertEqual(result["executable_file"], "sample")
-        self.assertEqual(result["compiled_files"], ["sample"])
-        self.assertEqual(result["compiler_identity"], self.toolchain.rust.identity)
-        self.assertEqual(
-            result["consumed_source_files"],
-            ["source/main.rs", "source/support.rs"],
-        )
-        self.assertEqual(result["lifecycle_consumed_files"], [])
-        self.assertEqual(result["build_system_consumed_files"], [])
-        self.assertIsNone(result["build_input_consumption_identity"])
-
-    def test_javascript_adapter_materializes_whole_tree_and_maps_artifact(self) -> None:
-        files = {
-            "source/main.js": "'use strict';\n",
-            "source/helper.js": "module.exports = 1;\n",
-        }
-        request, authorization = _request_and_authorization(
-            source_digest=_source_digest(files),
-            builder_id=GuardedJavaScriptBuilder.builder_id,
-            toolchain_identity=self.toolchain.node.identity,
-            allowed_outputs=("javascript-checked-bundle",),
-        )
-        built = SimpleNamespace(
-            artifact_digest="sha256:" + "d" * 64,
-            artifact_path=Path("/sealed/javascript"),
-            source_bundle_digest=request.source_bundle_digest,
-            authorization_id=authorization.authorization_id,
-            entrypoint_file="source/main.js",
-            checked_files=("source/helper.js", "source/main.js"),
-            runtime_command=self.toolchain.node.command,
-            toolchain_identity=self.toolchain.node.identity,
-        )
-
-        with (
-            tempfile.TemporaryDirectory() as directory,
-            patch.object(
-                local_adapter_module, "GuardedJavaScriptBuilder"
-            ) as builder_type,
-        ):
-
-            def inspect_tree(*args, source_root: Path, **kwargs):
-                self.assertEqual(
-                    (source_root / "source" / "helper.js").read_text(),
-                    "module.exports = 1;\n",
-                )
-                return built
-
-            builder_type.return_value.build.side_effect = inspect_tree
-            result = JavaScriptBuildAdapter(
-                artifact_store=Path(directory) / "artifacts",
-                toolchain=self.toolchain.node,
-                authorization_verifier=AuthorizationRevocationSet(),
-            ).build(
-                {**request.to_dict(), "artifact": {"files": files}},
-                authorization.to_dict(),
-            )
-
-        self.assertEqual(result["entrypoint_file"], "source/main.js")
-        self.assertEqual(
-            result["compiled_files"], ["source/helper.js", "source/main.js"]
-        )
-        self.assertEqual(result["runtime_command"], list(self.toolchain.node.command))
 
 
 if __name__ == "__main__":

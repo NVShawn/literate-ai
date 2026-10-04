@@ -1,9 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_library_products``."""
-
-
-
-
 
 
 from literate_ai.contracts import (
@@ -14,6 +11,7 @@ from literate_ai.contracts import (
     LibraryImportSurface,
     canonical_identity,
 )
+
 
 def library_product(language: str = "python") -> LibraryArtifactProduct:
     identities = [canonical_identity({"fixture": index}) for index in range(8)]
@@ -38,4 +36,3 @@ def library_product(language: str = "python") -> LibraryArtifactProduct:
         (LibraryCapabilityImport("fixture.logic", identities[0], "fixture", ("run",)),),
     )
     return LibraryArtifactProduct(artifact, surface)
-

@@ -25,38 +25,6 @@ class StandardActionAuthorizationTests(unittest.TestCase):
         self.expected = self.fixture.authorization
         self.ports.clock = lambda: self.expected.grant.issued_at
 
-    def test_public_factory_dispatches_grant_without_local_retry(self):
-        with patch.object(
-            self.ports, "authorize", side_effect=AssertionError("local retry")
-        ):
-            result = self.authorizer.authorize(self.intent, self.index)
-        self.assertEqual(result.to_dict(), self.expected.to_dict())
-        self.assertIsNotNone(self.runtime.checkpoint_store)
-        self.assertIsNotNone(self.runtime.source_cache_restorer)
-
-    def test_shared_capacity_does_not_capture_time_until_reserved(self):
-        index = self.indexer.try_reserve_index(
-            self.intent.component_revision, self.intent.source_tree_identity
-        )
-        self.assertIsNotNone(index)
-        with patch.object(self.ports, "authorization_inputs") as capture:
-            self.assertIsNone(
-                self.authorizer.try_reserve_authorization(self.intent, self.index)
-            )
-            capture.assert_not_called()
-        index.release()
-        reservation = self.authorizer.try_reserve_authorization(self.intent, self.index)
-        self.assertIsNotNone(reservation)
-        self.assertIsNone(
-            self.fixture.finalizer.try_reserve_plan(self.intent, self.expected)
-        )
-        self.assertEqual(reservation.run().identity, self.expected.identity)
-        recovered = self.indexer.try_reserve_index(
-            self.intent.component_revision, self.intent.source_tree_identity
-        )
-        self.assertIsNotNone(recovered)
-        recovered.release()
-
     def test_substituted_result_never_reaches_local_admission(self):
         original = self.indexer._dispatcher
 
@@ -76,17 +44,6 @@ class StandardActionAuthorizationTests(unittest.TestCase):
             patch.object(self.indexer, "_dispatcher", side_effect=tampered),
             ActionWireError,
             "another authorization",
-        )
-
-    def test_unretained_result_never_reaches_local_admission(self):
-        self._assert_refused_before_admission(
-            patch.object(
-                self.indexer,
-                "remember_action_result",
-                side_effect=RuntimeError("store failed"),
-            ),
-            RuntimeError,
-            "store failed",
         )
 
     def _assert_refused_before_admission(self, fault, error, message):

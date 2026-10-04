@@ -1,30 +1,26 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_source_generation_custody_contracts``."""
-
-
 
 
 from literate_ai.application.standard_project_services import (
     PreparedExecutableProject,
     StandardProjectApplicationService,
 )
-
-
 from literate_ai.contracts.executable_components import (
     ProjectSourceGenerationCustody,
 )
-
-
 from tests.support.fixtures_test_component_execution_planning import _diamond_lock
-
 from tests.support.fixtures_test_component_generation_scheduling import (
     _decision,
     _names,
     _prepared_execution,
 )
+from tests.support.fixtures_test_standard_project_lifecycle import (
+    LifecyclePorts,
+    _prepared_nodes,
+)
 
-
-from tests.support.fixtures_test_standard_project_lifecycle import LifecyclePorts, _prepared_nodes
 
 def _generated_custody() -> ProjectSourceGenerationCustody:
     lock = _diamond_lock()
@@ -44,4 +40,3 @@ def _generated_custody() -> ProjectSourceGenerationCustody:
         runner=LifecyclePorts(execution, names),
         max_parallelism=2,
     )
-

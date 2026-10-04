@@ -1,53 +1,36 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_native_sdk_source_build``."""
 
 import dataclasses
-
 import os
-
 import subprocess
-
 import sys
-
 import unittest
-
 from contextlib import contextmanager
-
 from unittest.mock import patch
 
 from literate_ai.adapters.builders._process import run_bounded_process
-
 from literate_ai.adapters.native_sdk_custody import materialize_native_sdk
-
 from literate_ai.adapters.native_sdk_recipes import select_native_sdk_recipes
-
 from literate_ai.adapters.native_sdk_source_build import NativeSdkSourceBuildService
-
 from literate_ai.adapters.source.repository_cache import (
     RepositorySourceCachePolicyError,
 )
-
 from literate_ai.application.repository_sources import RepositorySourceResolutionError
-
 from literate_ai.contracts import SourceIntelligenceMode
-
 from literate_ai.contracts.identity import canonical_identity
-
 from literate_ai.projects import PinnedInputClosureError
-
 from literate_ai.security import (
     AuthorizationError,
     AuthorizationRevocationSet,
     SecurityPolicy,
 )
-
 from literate_ai.sources import QuarantineStore
-
 from literate_ai.storage import BlobRef, ReferenceIndex
-
 from tests.support import fixtures_test_native_sdk_recipes as test_native_sdk_recipes
-
 from tests.support.fixtures_test_repository_sources import source_intelligence_policy
+
 
 class NativeSdkSourceBuildTests(unittest.TestCase):
     def setUp(self):
@@ -276,4 +259,3 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
                     service.build()
                 run.assert_not_called()
         self.assert_not_admitted()
-

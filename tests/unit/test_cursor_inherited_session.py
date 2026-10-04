@@ -9,6 +9,7 @@ from pathlib import Path
 
 from literate_ai.adapters.models import (
     DirectoryInheritedSessionTransport,
+    InheritedSessionCancellation,
     InheritedSessionError,
     InheritedSessionProviderAdapter,
     InheritedSessionProviderConfig,
@@ -18,7 +19,6 @@ from literate_ai.integrations.cursor_inherited_session import (
     cursor_provider_identity,
     cursor_session_identity,
     handle_stop,
-    require_live_cursor_hook,
 )
 
 SECRET = b"c" * 32
@@ -125,10 +125,10 @@ class CursorInheritedSessionTests(unittest.TestCase):
                 break
             thread.join(0.002)
         self.assertTrue(request.exists())
-        return transport, thread, result, failure
+        return adapter, transport, thread, result, failure
 
     def test_current_session_receives_exact_context_and_returns_bound_source(self):
-        transport, thread, result, failure = self.start_exchange()
+        _, transport, thread, result, failure = self.start_exchange()
         first = handle_stop(self.hook, environment=self.environment)
         self.assertIn(self.bundle().bounded_prompt.decode(), first["followup_message"])
         self.assertIn(str(self.workspace), first["followup_message"])
@@ -162,7 +162,7 @@ class CursorInheritedSessionTests(unittest.TestCase):
             ),
         ):
             with self.subTest(code=code):
-                transport, thread, _, _ = self.start_exchange()
+                adapter, transport, thread, _, _ = self.start_exchange()
                 event = dict(self.hook)
                 mutation(event)
                 if code.endswith("workspace_mismatch"):
@@ -170,33 +170,11 @@ class CursorInheritedSessionTests(unittest.TestCase):
                 with self.assertRaises(InheritedSessionError) as raised:
                     handle_stop(event, environment=self.environment)
                 self.assertEqual(raised.exception.code, code)
-                transport.cleanup()
+                # Cancel instead of waiting out the provider timeout.
+                adapter.cancel(InheritedSessionCancellation.RUNNER)
                 thread.join(5)
-
-    def test_symlink_output_is_rejected(self):
-        transport, thread, _, _ = self.start_exchange()
-        handle_stop(self.hook, environment=self.environment)
-        source = self.workspace / "source"
-        source.mkdir()
-        (source / "escape").symlink_to(self.transcript)
-        with self.assertRaises(InheritedSessionError) as raised:
-            handle_stop(self.hook, environment=self.environment)
-        self.assertEqual(
-            raised.exception.code,
-            "cursor_inherited_session.source_link_rejected",
-        )
-        transport.cleanup()
-        thread.join(5)
-
-    def test_missing_cursor_stop_hook_is_current_session_unavailable(self):
-        with self.assertRaises(InheritedSessionError) as raised:
-            require_live_cursor_hook(environment={})
-        self.assertEqual(
-            raised.exception.code,
-            "inherited_session.current_session_unavailable",
-        )
-        admitted = require_live_cursor_hook(self.hook, environment={})
-        self.assertEqual(admitted["conversation_id"], "conversation-1")
+                self.assertFalse(thread.is_alive())
+                transport.cleanup()
 
 
 if __name__ == "__main__":

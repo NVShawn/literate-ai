@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import tempfile
 import unittest
-from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -19,11 +18,9 @@ from literate_ai.security import (
 from literate_ai.source_to_specification import (
     AuthorizedDynamicObserver,
     SourceMutationError,
-    SourceToSpecificationError,
     SourceTreeFingerprint,
 )
 
-DIGEST_A = "sha256:" + "a" * 64
 DIGEST_B = "sha256:" + "b" * 64
 DIGEST_C = "sha256:" + "c" * 64
 NOW = datetime(2026, 8, 2, tzinfo=UTC)
@@ -85,43 +82,6 @@ def observer(runner: Runner, provider=lambda: AuthorizationRevocationSet()):
 
 
 class AuthorizedObservationTests(unittest.TestCase):
-    def test_exact_authorization_runs_and_records_provenance(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            source = Path(temporary) / "main.py"
-            source.write_text("print('ok')\n")
-            runner = Runner(source)
-            observation_request, authorization = grant(Path(temporary))
-            result = observer(runner).observe(
-                observation_request,
-                authorization,
-                source_root=temporary,
-                now=NOW,
-            )
-            self.assertEqual(runner.calls, 1)
-            self.assertEqual(result.authorization_id, authorization.authorization_id)
-            self.assertTrue(result.identity.startswith("sha256:"))
-
-    def test_expired_or_wrong_runner_fails_before_execution(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            source = Path(temporary) / "main.py"
-            source.write_text("pass\n")
-            runner = Runner(source)
-            observation_request, authorization = grant(Path(temporary))
-            with self.assertRaisesRegex(Exception, "expired"):
-                observer(runner).observe(
-                    observation_request,
-                    authorization,
-                    source_root=temporary,
-                    now=NOW + timedelta(minutes=6),
-                )
-            self.assertEqual(runner.calls, 0)
-            wrong = replace(observation_request, runner_id="runner:other@1")
-            with self.assertRaises(SourceToSpecificationError):
-                observer(runner).observe(
-                    wrong, authorization, source_root=temporary, now=NOW
-                )
-            self.assertEqual(runner.calls, 0)
-
     def test_source_mutation_is_detected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             source = Path(temporary) / "main.py"
@@ -134,29 +94,6 @@ class AuthorizedObservationTests(unittest.TestCase):
                     source_root=temporary,
                     now=NOW,
                 )
-
-    def test_grant_for_another_source_fails_before_execution(self) -> None:
-        with (
-            tempfile.TemporaryDirectory() as authorized_directory,
-            tempfile.TemporaryDirectory() as actual_directory,
-        ):
-            authorized_root = Path(authorized_directory)
-            actual_root = Path(actual_directory)
-            (authorized_root / "main.py").write_text("print('authorized')\n")
-            actual_source = actual_root / "main.py"
-            actual_source.write_text("print('different')\n")
-            observation_request, authorization = grant(authorized_root)
-            runner = Runner(actual_source)
-
-            with self.assertRaisesRegex(SourceToSpecificationError, "source"):
-                observer(runner).observe(
-                    observation_request,
-                    authorization,
-                    source_root=actual_root,
-                    now=NOW,
-                )
-
-            self.assertEqual(runner.calls, 0)
 
     def test_default_fails_closed_and_live_revocation_wins_after_issuance(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

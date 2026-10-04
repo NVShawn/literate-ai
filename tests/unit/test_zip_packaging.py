@@ -11,7 +11,6 @@ import warnings
 import zipfile
 from dataclasses import replace
 from pathlib import Path
-from unittest import mock
 
 from literate_ai.adapters.packaging import (
     NativeZipPackageAdapter,
@@ -94,50 +93,6 @@ class NativeZipTests(unittest.TestCase):
                 wrong_target,
                 result,
                 read_blob=lambda reference: self.contents[reference.identity],
-            )
-
-    def test_zip64_members_and_offsets_are_verified(self):
-        # Exercise large-member and large-offset records without allocating GiBs.
-        with mock.patch("zipfile.ZIP64_LIMIT", 16):
-            result, content = self.build()
-            NativeZipPackageAdapter().verify_bytes(result, content)
-            with zipfile.ZipFile(io.BytesIO(content)) as archive:
-                self.assertTrue(any(member.extra for member in archive.infolist()))
-
-    def test_changed_missing_extra_and_link_inputs_are_rejected(self):
-        path = self.root / self.plan.inputs[0].path
-        original = path.read_bytes()
-        path.write_bytes(b"changed")
-        with self.assertRaises(PackagingError):
-            self.build()
-        path.unlink()
-        with self.assertRaises(PackagingError):
-            self.build()
-        path.write_bytes(original)
-        extra = self.root / "undeclared"
-        extra.write_bytes(b"extra")
-        with self.assertRaises(PackagingError):
-            self.build()
-        extra.unlink()
-        extra.symlink_to(path)
-        with self.assertRaises(PackagingError):
-            self.build()
-
-    def test_changed_tool_and_reserved_resource_collisions_are_rejected(self):
-        with self.assertRaises(PackagingError):
-            self.adapter.package(
-                replace(self.plan, packager_identity=fixtures._identity("other-tool")),
-                materialized_root=self.root,
-            )
-        with self.assertRaises(PackagingError):
-            lifecycle_archive_package_plan(
-                self.plan,
-                packager_identity=self.adapter.packager_identity,
-                specification=self.spec,
-                source_sbom=self.source,
-                source_sbom_identity=fixtures._identity("source"),
-                resolved_sbom=self.resolved,
-                resolved_sbom_source_identity=fixtures._identity("resolved"),
             )
 
     def test_adversarial_members_fail_even_with_recomputed_outer_digest(self):

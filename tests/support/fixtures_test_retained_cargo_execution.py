@@ -1,40 +1,26 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_cargo_execution``."""
 
 import json
-
 import sys
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from types import SimpleNamespace
-
 from unittest.mock import patch
 
 from literate_ai.adapters import retained_cargo_execution as execution
-
 from literate_ai.adapters.builders._process import BoundedProcessResult
-
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
-
 from literate_ai.adapters.retained_cargo_current import RetainedCargoImporterAuthority
-
 from literate_ai.adapters.retained_cargo_execution_inputs import (
     read_retained_cargo_execution_inputs,
 )
-
 from literate_ai.contracts.identity import canonical_identity
-
 from literate_ai.contracts.retained_libraries import RetainedLibraryGatePolicy
-
 from literate_ai.projects import PinnedInputClosure
-
 from tests.support import fixtures_test_retained_cargo_materialization as fixtures
+
 
 class RetainedCargoExecutionTests(unittest.TestCase):
     def setUp(self):
@@ -321,5 +307,5 @@ class RetainedCargoExecutionTests(unittest.TestCase):
         self.assertEqual(self.process.call_count, 1)
         self.assertEqual(len(failure.exception.observations), 1)
 
-from literate_ai.adapters import retained_cargo_execution as execution  # noqa: F401
+
 # NOTE: names not defined at top level of tests.unit.test_retained_cargo_execution: ['execution']

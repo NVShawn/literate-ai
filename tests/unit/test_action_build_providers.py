@@ -124,8 +124,10 @@ class BuildProviderMaterializationTests(unittest.TestCase):
         from literate_ai.adapters.action_dispatch_wire import record_identity
         from literate_ai.contracts import ComponentCommandPhase
         from literate_ai.contracts.generation_cache import CachedSourceFile
+        from tests.support.fixtures_test_component_node_generation_preparation import (
+            _fixture,
+        )
         from tests.unit.standard_source_evidence_fixture import register_strict_source
-        from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
         snapshot, execution = _fixture()
         provider = self.fixture.receipt
@@ -355,7 +357,9 @@ raise SystemExit(main(runtime_factory=runtime))
         from literate_ai.adapters.action_dispatch_wire import record_identity
         from literate_ai.adapters.action_provider_build import capture_provider_build
         from literate_ai.contracts import ComponentCommandPhase
-        from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+        from tests.support.fixtures_test_component_node_generation_preparation import (
+            _fixture,
+        )
 
         old = self.fixture.fixture.producer
         contract = next(iter(old.contracts.values()))

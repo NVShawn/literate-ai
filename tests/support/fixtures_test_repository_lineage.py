@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_lineage``."""
 
 
@@ -15,8 +16,10 @@ from literate_ai.contracts import (
 def identity(character: str) -> ContentIdentity:
     return ContentIdentity(HashAlgorithm.SHA256, character * 64)
 
+
 def reference(name: str, revision: str = "main") -> RepositoryParentReference:
     return RepositoryParentReference(f"https://example.test/{name}.git", revision)
+
 
 def fixture() -> tuple[
     RepositoryParentSelection,
@@ -51,4 +54,3 @@ def fixture() -> tuple[
         child,
         RepositoryLineage(selection, (root, child), (child.identity,)),
     )
-

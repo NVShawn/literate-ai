@@ -10,7 +10,9 @@ from unittest.mock import patch
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.storage.cas import BlobIntegrityError
-from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
+from tests.support import (
+    fixtures_test_native_sdk_source_build as test_native_sdk_source_build,
+)
 
 
 class NativeSdkConsumerTests(unittest.TestCase):

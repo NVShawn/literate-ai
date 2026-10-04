@@ -1,24 +1,12 @@
 from __future__ import annotations
-"""Shared fixtures extracted from ``tests.unit.test_action_build_intent``."""
 
+"""Shared fixtures extracted from ``tests.unit.test_action_build_intent``."""
 
 
 from dataclasses import replace
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 from tests.support.fixtures_test_standard_post_source_evidence import _evidence
+
 
 def provider_evidence(revision):
     old = _evidence()
@@ -51,4 +39,3 @@ def provider_evidence(revision):
         generated_tests=tests,
         execution=execution,
     )
-

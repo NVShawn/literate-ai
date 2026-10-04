@@ -1,22 +1,16 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_action_blob_source``."""
 
 import threading
-
-
 from contextlib import contextmanager
-
-
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-
 from pathlib import Path
-
-
-
 
 
 def blob_path(reference):
     return f"/blobs/sha256/{reference.digest[:2]}/{reference.digest}"
+
 
 @contextmanager
 def source_cas_server(blobs, *, mode="ok"):
@@ -69,4 +63,3 @@ def source_cas_server(blobs, *, mode="ok"):
         server.shutdown()
         server.server_close()
         thread.join(timeout=5)
-

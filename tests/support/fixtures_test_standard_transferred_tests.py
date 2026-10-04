@@ -1,28 +1,21 @@
 """Shared fixtures extracted from ``tests.unit.test_standard_transferred_tests``."""
 
 import shutil
-
 import unittest
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecycleError
-
 from literate_ai.adapters.qualification_capture import (
     QualificationCaptureError,
     QualificationEvidenceReader,
     QualificationEvidenceRecorder,
 )
-
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-
 from tests.support import fixtures_test_standard_transferred_build as build_fixture
-
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+
 
 class StandardTransferredTestTests(unittest.TestCase):
     def setUp(self):
@@ -155,4 +148,3 @@ class StandardTransferredTestTests(unittest.TestCase):
         with self.assertRaises(LocalStandardLifecycleError):
             self.admit()
         self.assertEqual(self.controller._test_evidence, {})
-

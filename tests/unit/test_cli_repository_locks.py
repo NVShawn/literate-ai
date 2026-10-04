@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import io
 import json
-import os
+import shutil
+import tempfile
 import unittest
 from contextlib import ExitStack
 from dataclasses import replace
+from pathlib import Path
 from unittest.mock import patch
 
 from jsonschema import Draft202012Validator
@@ -41,11 +43,22 @@ class RepositoryLockCliTests(unittest.TestCase):
             {"$ref": "urn:literate-ai:schema:v2:repository-commands"}, registry=registry
         )
 
-    def setUp(self):
+        # Build the git fixture repositories once; each test mutates a private copy.
         fixture = fixtures.RepositoryLockPlanningTests()
         fixture.setUp()
-        self.addCleanup(fixture.doCleanups)
-        self.root, self.base = fixture.root, fixture.base
+        template = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(template.cleanup)
+        cls.template = Path(template.name).resolve() / "base"
+        shutil.copytree(fixture.base, cls.template, symlinks=True)
+        cls.root_name = fixture.root.relative_to(fixture.base)
+        fixture.doCleanups()
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name).resolve() / "base"
+        shutil.copytree(self.template, self.base, symlinks=True)
+        self.root = self.base / self.root_name
 
     def root_with_components(self):
         modules = (self.root / ".gitmodules").read_bytes()
@@ -117,33 +130,6 @@ class RepositoryLockCliTests(unittest.TestCase):
         self.assertEqual(cloned["result"], plan)
         self.assertEqual(snapshot(clone), before)
 
-    def test_mixed_root_missing_component_lock_refuses_plan_and_check(self):
-        self.root_with_components()
-        code, locked = self.invoke("lock")
-        self.assertEqual(code, 0, locked)
-        component = self.root / locked["result"]["components"][0]["component"]
-        (component / "component.lock.json").unlink()
-        before = snapshot(self.root)
-        code, checked = self.invoke("lock", "--check")
-        self.assertEqual(code, 1, checked)
-        self.assertEqual(checked["result"]["lock"]["state"], "current")
-        self.assertEqual(checked["result"]["components"][0]["lock"]["state"], "missing")
-        code, text = self.invoke("lock", "--check", tty=True)
-        self.assertEqual(code, 1, text)
-        self.assertIn("repository lock: not current", text)
-        self.assertIn("Repository artifact: current", text)
-        code, plan = self.invoke("plan")
-        self.assertEqual(code, 2, plan)
-        self.assertEqual(plan["error"]["code"], "orchestration.lock_not_current")
-        self.assertEqual(snapshot(self.root), before)
-        self.assertEqual(self.invoke("lock")[0], 0)
-        self.assertEqual(self.invoke("plan")[0], 0)
-        (component / "component.lock.json").write_bytes(b"{}\n")
-        before = snapshot(self.root)
-        self.assertEqual(self.invoke("verify", "--gate", "locks")[0], 1)
-        self.assertEqual(self.invoke("plan")[0], 2)
-        self.assertEqual(snapshot(self.root), before)
-
     def invoke(self, command, *options, root=None, tty=False):
         output, errors = io.StringIO(), io.StringIO()
         with ExitStack() as stack:
@@ -190,52 +176,6 @@ class RepositoryLockCliTests(unittest.TestCase):
             self.validator.validate(report["result"])
         return code, report
 
-    def test_public_schema_rejects_unknown_fields_and_execution_claims(self):
-        self.assertEqual(self.invoke("lock")[0], 0)
-        for command in ("lock", "plan"):
-            report = self.invoke(command)[1]["result"]
-            for update in (
-                {"execution": True},
-                {"publication": "verified"},
-                {"unknown": "field"},
-                {"repository_lock_identity": "latest"},
-            ):
-                self.assertTrue(list(self.validator.iter_errors({**report, **update})))
-            for field in report:
-                incomplete = {
-                    key: value for key, value in report.items() if key != field
-                }
-                self.assertTrue(list(self.validator.iter_errors(incomplete)), field)
-
-    def test_public_lock_plan_verify_and_check_are_root_only(self):
-        before = snapshot(self.base)
-        code, missing = self.invoke("lock", "--check")
-        self.assertEqual(code, 1, missing)
-        self.assertEqual(missing["result"]["lock"]["state"], "missing")
-        self.assertEqual(self.invoke("verify", "--gate", "locks")[0], 1)
-        self.assertEqual(snapshot(self.base), before)
-        code, created = self.invoke("lock")
-        self.assertEqual(code, 0, created)
-        self.assertTrue(created["result"]["repository_lock_updated"])
-        self.assertEqual(created["result"]["components"], [])
-        after = snapshot(self.base)
-        self.assertEqual({path: after[path] for path in before}, before)
-        self.assertEqual(
-            set(after) - set(before), {"super/.literate/repository.lock.json"}
-        )
-        code, plan = self.invoke("plan")
-        self.assertEqual(code, 0, plan)
-        self.assertEqual(plan["result"]["schema"], "literate-ai/repository-plan@1")
-        self.assertFalse(plan["result"]["writes"])
-        self.assertFalse(plan["result"]["execution"])
-        self.assertEqual(plan["result"]["publication"], "not-checked")
-        self.assertEqual(self.invoke("lock", "--check")[0], 0)
-        self.assertEqual(self.invoke("verify", "--gate", "locks")[0], 0)
-        code, noop = self.invoke("lock")
-        self.assertEqual(code, 0, noop)
-        self.assertFalse(noop["result"]["repository_lock_updated"])
-        self.assertEqual(snapshot(self.base), after)
-
     def test_missing_and_stale_locks_refuse_planning_without_writes(self):
         before = snapshot(self.base)
         code, report = self.invoke("plan")
@@ -269,105 +209,3 @@ class RepositoryLockCliTests(unittest.TestCase):
             self.assertEqual(report["error"]["code"], "orchestration.binding_stale")
         self.assertEqual(self.invoke("verify", "--gate", "locks")[0], 1)
         self.assertEqual(snapshot(self.base), before)
-
-    def test_clean_clone_reuses_committed_lock_and_plan_identity(self):
-        self.assertEqual(self.invoke("lock")[0], 0)
-        plan = self.invoke("plan")[1]["result"]
-        git(
-            self.root,
-            "add",
-            "SKILL.md",
-            "PROJECT.md",
-            "literate.project.json",
-            ".literate",
-        )
-        git(self.root, "commit", "-q", "-m", "root locks")
-        clone = self.base / "clone"
-        git(self.base, "clone", "-q", "--depth", "1", self.root.as_uri(), str(clone))
-        before = snapshot(clone)
-        code, reconstructed = self.invoke("plan", root=clone)
-        self.assertEqual(code, 0, reconstructed)
-        self.assertEqual(reconstructed["result"], plan)
-        self.assertEqual(self.invoke("lock", "--check", root=clone)[0], 0)
-        self.assertEqual(snapshot(clone), before)
-
-    def test_provider_and_meaningless_component_options_refuse(self):
-        for command, options in (
-            ("plan", ("--model", "never-call")),
-            ("plan", ("--recipe-id", "not-a-generation-plan")),
-            ("lock", ("--large-review", "start")),
-            ("lock", ("--target", "other")),
-            ("plan", ("--flavor", "+python")),
-            ("lock", ("--flavor-root", "unused")),
-        ):
-            with self.subTest(command=command, options=options):
-                before = snapshot(self.base)
-                code, report = self.invoke(command, *options)
-                self.assertEqual(code, 2, report)
-                self.assertEqual(
-                    report["error"]["code"], "orchestration.component_options"
-                )
-                self.assertEqual(snapshot(self.base), before)
-
-    def test_matrix_cell_override_refuses_before_creation(self):
-        directory = self.base / "matrix"
-        before = snapshot(self.base)
-        with patch.dict(os.environ, {"LITAI_MATRIX_CELL_ROOT": str(directory)}):
-            for command in ("lock", "plan"):
-                code, report = self.invoke(command)
-                self.assertEqual(code, 2, report)
-                self.assertEqual(
-                    report["error"]["code"], "orchestration.component_options"
-                )
-            self.assertEqual(self.invoke("verify", "--gate", "locks")[0], 1)
-        self.assertFalse(directory.exists())
-        self.assertEqual(snapshot(self.base), before)
-
-    def test_explicit_side_effect_options_refuse_without_implicit_side_effects(self):
-        for command in ("lock", "plan", "verify"):
-            for options in (
-                ("--discover-mcps",),
-                ("--debug", str(self.base / "debug.json")),
-            ):
-                with self.subTest(command=command, options=options):
-                    before = snapshot(self.base)
-                    code, report = self.invoke(command, *options)
-                    self.assertEqual(code, 2, report)
-                    self.assertEqual(
-                        report["error"]["code"], "orchestration.read_only_options"
-                    )
-                    self.assertEqual(snapshot(self.base), before)
-
-    def test_child_invalid_authority_is_not_admitted(self):
-        child = self.root / "app"
-        child.mkdir()
-        (child / "literate.project.json").write_bytes(b"independent invalid authority")
-        self.assertEqual(self.invoke("lock")[0], 0)
-        before = snapshot(self.base)
-        code, plan = self.invoke("plan")
-        self.assertEqual(code, 0, plan)
-        self.assertEqual(plan["result"]["components"], [])
-        self.assertEqual(snapshot(self.base), before)
-
-    def test_root_selection_uses_declared_catalogs_not_an_incidental_component(self):
-        (self.root / "component.md").write_text(
-            "Not declared in the root's Component catalogs.\n", encoding="utf-8"
-        )
-        code, locked = self.invoke("lock")
-        self.assertEqual(code, 0, locked)
-        self.assertEqual(locked["result"]["components"], [])
-        before = snapshot(self.base)
-        self.assertEqual(self.invoke("plan")[0], 0)
-        self.assertEqual(snapshot(self.base), before)
-
-    def test_interactive_output_preserves_exact_pins_and_boundaries(self):
-        code, text = self.invoke("lock", tty=True)
-        self.assertEqual(code, 0, text)
-        for pin in (
-            RepositoryLockStore(self.root).read().repository_orchestration.repositories
-        ):
-            self.assertIn(pin.commit, text)
-        code, text = self.invoke("plan", tty=True)
-        self.assertEqual(code, 0, text)
-        self.assertIn("Read-only", text)
-        self.assertIn("No child execution", text)

@@ -1,47 +1,33 @@
 """Shared fixtures extracted from ``tests.unit.test_action_provider_build``."""
 
 import shutil
-
 import unittest
-
 from dataclasses import replace
-
 from datetime import UTC, datetime, timedelta
-
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
-
 from literate_ai.adapters.action_provider_build import (
     capture_provider_build,
     read_provider_build,
 )
-
 from literate_ai.adapters.action_provider_record import (
     ProviderBuildTransfer,
     validate_provider_transfers,
 )
-
 from literate_ai.adapters.qualification_capture import QualificationCaptureError
-
 from literate_ai.contracts import canonical_identity
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.generated_tests import GeneratedTestSuiteError
-
 from literate_ai.storage import FileSystemCAS
-
 from tests.support import fixtures_test_standard_transferred_build as transfer_fixture
-
+from tests.support.fixtures_test_action_build_intent import provider_evidence
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
-from tests.support.fixtures_test_action_build_intent import provider_evidence
-
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 class ProviderBuildTransferTests(unittest.TestCase):
     def setUp(self):
@@ -304,4 +290,3 @@ class ProviderBuildTransferTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "consumer grant expired"):
             self.read(require_current=guard, blob_source=fetch)
         fetch.assert_not_called()
-

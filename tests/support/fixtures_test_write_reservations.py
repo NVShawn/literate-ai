@@ -1,25 +1,19 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_write_reservations``."""
 
 import os
-
 import subprocess
-
 import sys
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path, PureWindowsPath
-
 from unittest.mock import patch
 
 from literate_ai.adapters import _write_reservations as reservations
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
+
 
 class WriteReservationTests(unittest.TestCase):
     def setUp(self):
@@ -313,4 +307,3 @@ except OrchestrationInventoryError as error:
                 with self.assertRaises(OrchestrationInventoryError):
                     owned.verify_all()
         self.assertEqual(path.read_bytes(), b"foreign")
-

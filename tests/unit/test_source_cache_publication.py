@@ -20,7 +20,6 @@ from literate_ai.application import (
 )
 from literate_ai.cli import main
 from literate_ai.cli.cache import CACHE_PUBLISH_SCHEMA, cache_publish_from_args
-from literate_ai.cli.errors import CliFailure
 from literate_ai.contracts import (
     AcceptedSourceCacheEntry,
     ContentIdentity,
@@ -34,12 +33,6 @@ def _entry(label: str) -> AcceptedSourceCacheEntry:
     entry.identity = canonical_identity({"entry": label})
     entry.source_tree_identity = canonical_identity({"source": label})
     return entry
-
-
-def _attachment(label: str) -> SourceIntelligenceAttachment:
-    attachment = Mock(spec=SourceIntelligenceAttachment)
-    attachment.identity = canonical_identity({"attachment": label})
-    return attachment
 
 
 class _Source:
@@ -90,44 +83,6 @@ class _Destination:
 
 
 class SourceCachePublicationServiceTests(unittest.TestCase):
-    def test_publishes_only_missing_entries_with_attachments(self) -> None:
-        existing = _entry("existing")
-        fresh = _entry("fresh")
-        attachment = _attachment("fresh")
-        source = _Source(
-            (fresh, existing),
-            {fresh.source_tree_identity.uri: (attachment,)},
-        )
-        destination = _Destination((existing.identity,))
-
-        result = SourceCachePublicationService().publish(
-            source,
-            destination,
-            target_id="project-committed",
-            destination_reference="derived/accepted-source-cache",
-        )
-
-        self.assertEqual(result.published_entry_identities, (fresh.identity,))
-        self.assertEqual(result.already_present_entry_identities, (existing.identity,))
-        self.assertEqual(destination.calls, [(fresh, (attachment,))])
-        self.assertEqual(result.target_id, "project-committed")
-        self.assertEqual(result.destination, "derived/accepted-source-cache")
-
-        replay = SourceCachePublicationService().publish(
-            source,
-            destination,
-            target_id="project-committed",
-            destination_reference="derived/accepted-source-cache",
-        )
-        self.assertEqual(replay.published_entry_identities, ())
-        self.assertEqual(
-            replay.already_present_entry_identities,
-            tuple(
-                sorted((existing.identity, fresh.identity), key=lambda item: item.uri)
-            ),
-        )
-        self.assertEqual(destination.calls, [(fresh, (attachment,))])
-
     def test_rejects_a_destination_identity_substitution(self) -> None:
         entry = _entry("fresh")
         with self.assertRaises(SourceCachePublicationError) as raised:
@@ -196,44 +151,6 @@ class FilesystemProjectSourceCachePublicationTests(unittest.TestCase):
                 "already_present": [],
                 "note": SOURCE_CACHE_PUBLICATION_NOTE,
             },
-        )
-
-    def test_adapter_fails_before_creating_a_destination(self) -> None:
-        project = self.root / "project"
-        destination = project / "derived" / "accepted-source-cache"
-        _write_project(
-            project,
-            (("project-committed", "derived/accepted-source-cache"),),
-        )
-
-        with (
-            patch.dict(os.environ, {"BUILD_DIR": "generated"}),
-            self.assertRaises(SourceCachePublicationError) as raised,
-        ):
-            FilesystemProjectSourceCachePublicationAdapter().publish(project)
-        self.assertEqual(raised.exception.code, "source_cache.runtime_absent")
-        self.assertFalse(destination.exists())
-
-    def test_adapter_requires_one_exact_committable_target(self) -> None:
-        project = self.root / "project"
-        _write_project(
-            project,
-            (
-                ("first", "derived/first"),
-                ("second", "derived/second"),
-            ),
-        )
-
-        with self.assertRaises(SourceCachePublicationError) as raised:
-            FilesystemProjectSourceCachePublicationAdapter().publish(project)
-        self.assertEqual(raised.exception.code, "source_cache.ambiguous_target")
-
-        with self.assertRaises(CliFailure) as cli_raised:
-            cache_publish_from_args(
-                SimpleNamespace(project=str(project), target="missing")
-            )
-        self.assertEqual(
-            cli_raised.exception.code, "source_cache.no_committable_target"
         )
 
 

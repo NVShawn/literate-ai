@@ -1,30 +1,24 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_rebuild_adapter``."""
 
 import tempfile
-
 import unittest
-
 from pathlib import Path
-
 from types import SimpleNamespace
-
 from unittest import mock
 
 from literate_ai.adapters.generation_preparation import PreparedLockedGeneration
-
 from literate_ai.adapters.standard_lifecycle_binding import (
     InstalledFrameworkDistribution,
     InstalledFrameworkDistributionMember,
     ResolvedStandardProjectLifecycleDriver,
 )
-
 from literate_ai.adapters.standard_project import (
     FilesystemStandardProjectRuntime,
     PlannedStandardProject,
     StandardProjectRuntimeReadiness,
 )
-
 from literate_ai.adapters.standard_rebuild import (
     FilesystemStandardRebuildAdapter,
     FilesystemStandardRebuildError,
@@ -32,11 +26,9 @@ from literate_ai.adapters.standard_rebuild import (
     _configured_python_wheelhouse,
     _resolved_source_cache,
 )
-
 from literate_ai.application.component_generation_scheduling import (
     ComponentInvalidationDecision,
 )
-
 from literate_ai.contracts import (
     ComponentChangeSurface,
     ProjectTestEvidence,
@@ -51,11 +43,12 @@ from literate_ai.contracts import (
     canonical_identity,
     load_current_standard_lifecycle_policy,
 )
-
 from literate_ai.projects import LoadedProject
+
 
 def _identity(label: str):
     return canonical_identity({"standard-rebuild-test": label})
+
 
 class _Snapshot:
     def __init__(self, lock_identity):
@@ -64,6 +57,7 @@ class _Snapshot:
 
     def require_unchanged(self):
         self.calls += 1
+
 
 class FilesystemStandardRebuildAdapterTests(unittest.TestCase):
     def test_retained_authorization_and_checkpoint_invalidation(self):
@@ -608,6 +602,6 @@ class FilesystemStandardRebuildAdapterTests(unittest.TestCase):
         self.assertFalse(caches["project-committed"].available)
         self.assertEqual(tuple(committed_root.iterdir()), (format_path,))
 
+
 if __name__ == "__main__":
     unittest.main()
-

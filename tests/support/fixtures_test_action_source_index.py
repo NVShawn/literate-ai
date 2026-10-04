@@ -1,81 +1,64 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_action_source_index``."""
 
 import json
-
 import os
-
 import sys
-
 import tempfile
-
 import unittest
-
 from dataclasses import fields, replace
-
 from datetime import UTC, datetime, timedelta
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_command_dispatch import (
     CommandLifecycleActionDispatcher,
 )
-
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
     encode_action_request,
     record_identity,
 )
-
 from literate_ai.adapters.action_source_index import (
     execute_source_index_action,
     source_generation_result,
 )
-
 from literate_ai.application.action_dag_planning import (
     lifecycle_action_payload,
     plan_lifecycle_action_dag,
 )
-
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchRequest,
     LifecycleActionKind,
     LifecycleActionWorker,
 )
-
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-
 from literate_ai.contracts.executable_components import GeneratedSourceCandidate
-
 from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
     ExecutionWorkerCatalog,
     ExecutionWorkerEnvironment,
     ExecutionWorkerKind,
 )
-
 from literate_ai.contracts.generation_cache import CachedSourceFile
-
 from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
     canonical_json_bytes,
 )
-
 from literate_ai.contracts.source_index import generated_source_tree_identity
-
 from literate_ai.storage import FileSystemCAS
-
 from literate_ai.storage.cas import StorageError
-
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_component_execution_planning import (
+    _diamond_lock,
+    _models,
+)
 
-from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
 
 class SourceIndexActionTests(unittest.TestCase):
     def setUp(self):
@@ -459,4 +442,3 @@ class SourceIndexActionTests(unittest.TestCase):
             with self.assertRaises(ActionWireError):
                 self.execute()
         self.assertEqual(list(self.workspace.iterdir()), [])
-

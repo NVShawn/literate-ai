@@ -1,14 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_html_surfaces``."""
-
-
-
-
-
-
-
-
-
 
 
 from literate_ai.authority_graph import (
@@ -16,8 +8,6 @@ from literate_ai.authority_graph import (
     AuthorityGraphEdge,
     AuthorityGraphNode,
 )
-
-
 
 
 def _graph() -> AuthorityGraph:
@@ -38,4 +28,3 @@ def _graph() -> AuthorityGraph:
         ),
         (AuthorityGraphEdge("repository:example", "component:one", "defines"),),
     )
-

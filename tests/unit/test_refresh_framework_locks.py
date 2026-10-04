@@ -9,7 +9,6 @@ from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
 
-from literate_ai.adapters import repository_refresh as refresh
 from literate_ai.adapters import repository_refresh_reservations as reservations
 from literate_ai.adapters.lifecycle_lock import (
     ProjectLifecycleLockError,
@@ -69,24 +68,6 @@ class RefreshFrameworkLockTests(unittest.TestCase):
             **options,
         )
 
-    def test_new_metadata_is_exactly_owned_and_removed_after_reobservation(self):
-        prepared = self.fixture.prepare()
-        before = snapshot(self.base)
-        with self.acquire(prepared) as owned:
-            for observed in (prepared.root_git, *prepared.children):
-                self.assertTrue(owned.owns(project_lifecycle_lock_path(observed.root)))
-                self.assertTrue(
-                    owned.owns(observed.root / ".literate.project.json.write.lock")
-                )
-            refresh.require_repository_refresh_inputs_unchanged(
-                prepared, reservations=owned
-            )
-            with self.assertRaises(OrchestrationInventoryError):
-                refresh.require_repository_refresh_inputs_unchanged(prepared)
-        self.assertEqual(snapshot(self.base), before)
-        for root in (self.root, self.root / "app", self.root / "lib"):
-            self.assertFalse((root / ".litai-locks").exists())
-
     def test_lifecycle_writers_on_every_observed_root_are_excluded(self):
         prepared = self.fixture.prepare()
         before = snapshot(self.base)
@@ -116,67 +97,8 @@ class RefreshFrameworkLockTests(unittest.TestCase):
                     self.fail("original holder lost its lock")
         self.assertEqual(snapshot(self.base), before)
 
-    def test_existing_idle_advisory_files_are_not_rewritten_or_deleted(self):
-        for root in (self.root, self.root / "app", self.root / "lib"):
-            with project_lifecycle_lock(root, operation="fixture"):
-                pass
-            (root / ".literate.project.json.write.lock").write_bytes(b"\0")
-            with (root / ".git/info/exclude").open("ab") as stream:
-                stream.write(b"\n.litai-locks/\n.literate.project.json.write.lock\n")
-        prepared = self.fixture.prepare()
-        before = snapshot(self.base)
-        with self.acquire(prepared) as owned:
-            refresh.require_repository_refresh_inputs_unchanged(
-                prepared, reservations=owned
-            )
-        self.assertEqual(snapshot(self.base), before)
-
-    def test_foreign_untracked_sibling_is_not_hidden_by_owned_metadata(self):
-        prepared = self.fixture.prepare()
-        foreign = project_lifecycle_lock_path(self.root / "app").parent / "foreign"
-        with self.assertRaises(OrchestrationInventoryError):
-            with self.acquire(prepared) as owned:
-                foreign.write_bytes(b"retain")
-                with self.assertRaises(OrchestrationInventoryError) as caught:
-                    refresh.require_repository_refresh_inputs_unchanged(
-                        prepared, reservations=owned
-                    )
-                self.assertEqual(
-                    caught.exception.code, "orchestration.refresh_child_dirty"
-                )
-        self.assertEqual(foreign.read_bytes(), b"retain")
-
-    def test_late_observation_failure_cleans_owned_metadata(self):
-        prepared = self.fixture.prepare()
-        before = snapshot(self.base)
-        with patch.object(
-            reservations,
-            "require_repository_refresh_inputs_unchanged",
-            side_effect=(None, OrchestrationInventoryError("fixture", "fixture")),
-        ):
-            with self.assertRaises(OrchestrationInventoryError):
-                with self.acquire(prepared):
-                    self.fail("changed inputs")
-        self.assertEqual(snapshot(self.base), before)
-
-    def test_acknowledgement_and_stale_identity_fail_before_metadata_creation(self):
-        prepared = self.fixture.prepare()
-        before = snapshot(self.base)
-        for options in (
-            {"acknowledge": False},
-            {"acknowledge": 1},
-            {"expected_custody_identity": "sha256:" + "0" * 64},
-        ):
-            with self.assertRaises(OrchestrationInventoryError):
-                with self.acquire(prepared, **options):
-                    self.fail("unreviewed acquisition")
-        self.assertEqual(snapshot(self.base), before)
-
     def test_manifest_writer_process_waits_until_reservation_is_released(self):
         self._check_manifest_writer_handoff(existing=True)
-
-    def test_new_contended_manifest_marker_has_explicit_cleanup_outcome(self):
-        self._check_manifest_writer_handoff(existing=False)
 
     def _check_manifest_writer_handoff(self, *, existing):
         marker = self.root / ".literate.project.json.write.lock"

@@ -1,7 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_lock_resolution``."""
-
-
 
 
 from literate_ai.application.component_lock_resolution import (
@@ -11,22 +10,19 @@ from literate_ai.application.component_lock_resolution import (
     RequirementProviderInput,
     ResolvedComponentNodeInput,
 )
-
 from literate_ai.contracts.capabilities import (
     CapabilityConstraint,
     CapabilityRequirement,
     DependencyKind,
 )
-
 from literate_ai.contracts.flavors import CandidateStatus
-
 from literate_ai.contracts.repositories import RepositorySourceLock
-
 from tests.support.fixtures_test_component_lock_contracts import (
     component_authoring,
     identity,
     reference,
 )
+
 
 def resolved_node(
     authoring,
@@ -80,6 +76,7 @@ def resolved_node(
         catalog_attributes=attributes,
     )
 
+
 def resolution_plan() -> ComponentLockResolutionPlan:
     requirement = CapabilityRequirement(
         "pricing",
@@ -117,4 +114,3 @@ def resolution_plan() -> ComponentLockResolutionPlan:
             ),
         ),
     )
-

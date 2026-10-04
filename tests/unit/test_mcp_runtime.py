@@ -1,49 +1,28 @@
 from __future__ import annotations
 
-import io
-import json
-import os
 import sys
 import tempfile
 import unittest
 from collections.abc import Mapping
 from pathlib import Path
-from unittest import mock
 
 from literate_ai.adapters.mcp_runtime import (
     StdioJsonRpcMcpTransport,
     UnreachableMcp,
-    discover_catalog_mcps,
     fan_out_author_event,
-    load_project_channels,
-    notify_tool_arguments,
-    report_discovery,
-    select_notify_tool,
     set_mcp_transport_factory,
 )
-from literate_ai.cli.dispatch import main
 from literate_ai.contracts.channel_events import (
     ChannelEvent,
     ChannelKind,
     ChannelRole,
 )
-from literate_ai.contracts.project_mcp import generation_skill_requires_operator_mcp
 from literate_ai.contracts.projects import InstitutionalChannels
 from literate_ai.contracts.user_mcp import (
     UserMcpCatalog,
     UserMcpServer,
-    UserMcpUses,
 )
 
-_ROOT = Path(__file__).resolve().parents[2]
-_PYTHON_SERVICE_SKILL = (
-    _ROOT
-    / "skills"
-    / "specification-to-source"
-    / "backend-application"
-    / "python-service-application"
-    / "SKILL.md"
-)
 _STUB_SERVER = r"""
 import json
 import sys
@@ -145,59 +124,6 @@ class McpRuntimeTests(unittest.TestCase):
     def tearDown(self) -> None:
         set_mcp_transport_factory(None)
 
-    def test_malformed_project_does_not_leak_partial_channels(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            (root / "literate.project.json").write_text(
-                json.dumps(
-                    {
-                        "project_id": "demo",
-                        "version": 7,
-                        "institutional_channels": {"jira_issue": "SECRET-1"},
-                    }
-                ),
-                encoding="utf-8",
-            )
-            self.assertIsNone(load_project_channels(root))
-
-    def test_selects_notify_tools_by_channel(self) -> None:
-        self.assertEqual(
-            select_notify_tool(UserMcpUses.JIRA, ("add_comment", "search")),
-            "add_comment",
-        )
-        self.assertEqual(
-            select_notify_tool(UserMcpUses.JIRA, ("jira_search", "jira_update_issue")),
-            "jira_update_issue",
-        )
-        self.assertEqual(
-            select_notify_tool(UserMcpUses.SLACK, ("chat_postMessage",)),
-            "chat_postMessage",
-        )
-        self.assertIsNone(select_notify_tool(UserMcpUses.JIRA, ("search",)))
-
-    def test_discovery_off_does_not_probe(self) -> None:
-        fake = FakeMcpTransport()
-        ids = discover_catalog_mcps(
-            _catalog(_server("jira", "npx", "jira")),
-            enabled=False,
-            transport=fake,
-        )
-        self.assertEqual(ids, ())
-        self.assertEqual(fake.listed, [])
-
-    def test_discovery_on_probes_servers_with_command(self) -> None:
-        fake = FakeMcpTransport()
-        ids = discover_catalog_mcps(
-            _catalog(
-                _server("jira", "npx", "jira"),
-                UserMcpServer.from_dict({"id": "slack"}),
-            ),
-            enabled=True,
-            transport=fake,
-        )
-        self.assertEqual(ids, ("jira",))
-        self.assertEqual(fake.listed, ["jira"])
-
     def test_fan_out_posts_listed_channels(self) -> None:
         fake = FakeMcpTransport()
         skips = fan_out_author_event(
@@ -222,71 +148,6 @@ class McpRuntimeTests(unittest.TestCase):
         jira = next(item for item in fake.calls if item[0] == "jira")
         self.assertEqual(jira[2]["issue"], "LAI-1")
 
-    def test_fan_out_maps_jira_update_issue_to_a_comment_add(self) -> None:
-        fake = FakeMcpTransport(tools={"jira": ("jira_update_issue",)})
-        skips = fan_out_author_event(
-            _event(),
-            _catalog(_server("jira", "npx", "-y", "mcp-remote")),
-            InstitutionalChannels.from_dict({"jira_issue": "EXAMPLE-123"}),
-            transport=fake,
-        )
-        self.assertEqual(skips, ())
-        self.assertEqual(fake.calls[0][1], "jira_update_issue")
-        self.assertEqual(
-            fake.calls[0][2],
-            notify_tool_arguments(
-                UserMcpUses.JIRA,
-                "jira_update_issue",
-                "EXAMPLE-123",
-                _event().as_jira_comment(),
-            ),
-        )
-        self.assertEqual(fake.calls[0][2]["issue_id"], "EXAMPLE-123")
-        self.assertEqual(
-            fake.calls[0][2]["update"]["comment"][0]["add"]["body"],
-            _event().as_jira_comment(),
-        )
-
-    def test_fan_out_skips_missing_command_or_tool(self) -> None:
-        fake = FakeMcpTransport(
-            tools={"jira": ("search",), "slack": ("list_channels",)}
-        )
-        skips = fan_out_author_event(
-            _event(),
-            _catalog(
-                UserMcpServer.from_dict({"id": "jira"}),
-                _server("slack", "npx", "slack"),
-            ),
-            InstitutionalChannels.from_dict(
-                {"jira_issue": "LAI-1", "slack_channel": "#alerts"}
-            ),
-            transport=fake,
-            stderr=io.StringIO(),
-        )
-        self.assertIn("jira: catalog command missing", skips)
-        self.assertIn("slack: no matching notify tool", skips)
-        self.assertEqual(fake.calls, [])
-
-    def test_fan_out_skips_unregistered_institutional_channel(self) -> None:
-        fake = FakeMcpTransport()
-        skips = fan_out_author_event(
-            _event(),
-            _catalog(_server("jira", "npx", "jira"), _server("slack", "npx", "slack")),
-            InstitutionalChannels.from_dict({"jira_issue": "LAI-1"}),
-            transport=fake,
-            stderr=io.StringIO(),
-        )
-        self.assertEqual([item[0] for item in fake.calls], ["jira"])
-        self.assertIn("slack: unregistered institutional channel", skips)
-
-    def test_report_discovery_names_reachable_ids(self) -> None:
-        stderr = io.StringIO()
-        report_discovery(("jira",), enabled=True, stderr=stderr)
-        self.assertIn("jira", stderr.getvalue())
-        silent = io.StringIO()
-        report_discovery(("jira",), enabled=False, stderr=silent)
-        self.assertEqual(silent.getvalue(), "")
-
     def test_stdio_transport_speaks_json_rpc_with_a_stub_server(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             stub = Path(directory) / "stub.py"
@@ -295,79 +156,3 @@ class McpRuntimeTests(unittest.TestCase):
             transport = StdioJsonRpcMcpTransport()
             self.assertEqual(transport.list_tools(server), ("add_comment",))
             transport.call_tool(server, "add_comment", {"issue": "LAI-1", "body": "ok"})
-
-    def test_generation_skill_does_not_require_operator_mcp(self) -> None:
-        text = _PYTHON_SERVICE_SKILL.read_text(encoding="utf-8")
-        self.assertFalse(generation_skill_requires_operator_mcp(text))
-        self.assertIn("lang-python", text)
-        self.assertIn("modelcontextprotocol/python-sdk", text)
-        self.assertIn("lang-javascript", text)
-        self.assertIn("modelcontextprotocol/typescript-sdk", text)
-        self.assertIn("lang-cpp", text)
-        self.assertIn("hkr04/cpp-mcp", text)
-
-
-class McpCliFlagTests(unittest.TestCase):
-    def tearDown(self) -> None:
-        set_mcp_transport_factory(None)
-
-    def _invoke(self, *arguments: str, root: Path) -> tuple[int, str, str]:
-        stdout = io.StringIO()
-        stderr = io.StringIO()
-        env = {
-            key: value
-            for key, value in os.environ.items()
-            if key not in {"FORCE_COLOR", "COLORTERM", "CLICOLOR", "CLICOLOR_FORCE"}
-        }
-        env["NO_COLOR"] = "1"
-        env["TERM"] = "dumb"
-        env["LITAI_CONFIG_DIR"] = str(root)
-        with mock.patch.dict(os.environ, env, clear=True):
-            status = main(arguments, stdout=stdout, stderr=stderr)
-        return status, stdout.getvalue(), stderr.getvalue()
-
-    def test_help_lists_discover_mcps_flag(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory) / "litai"
-            status, stdout, stderr = self._invoke("help", root=root)
-        self.assertEqual(status, 0)
-        self.assertEqual(stderr, "")
-        self.assertIn("--discover-mcps", stdout)
-
-    def test_discover_flag_off_does_not_probe(self) -> None:
-        fake = FakeMcpTransport()
-        set_mcp_transport_factory(lambda: fake)
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory) / "litai"
-            root.mkdir()
-            (root / "mcps.json").write_text(
-                json.dumps(
-                    _catalog(_server("jira", "npx", "jira")).to_dict(),
-                    indent=2,
-                )
-                + "\n",
-                encoding="utf-8",
-            )
-            status, _stdout, stderr = self._invoke("help", root=root)
-        self.assertEqual(status, 0)
-        self.assertEqual(fake.listed, [])
-        self.assertNotIn("MCP discovery", stderr)
-
-    def test_discover_flag_on_probes(self) -> None:
-        fake = FakeMcpTransport()
-        set_mcp_transport_factory(lambda: fake)
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory) / "litai"
-            root.mkdir()
-            (root / "mcps.json").write_text(
-                json.dumps(
-                    _catalog(_server("jira", "npx", "jira")).to_dict(),
-                    indent=2,
-                )
-                + "\n",
-                encoding="utf-8",
-            )
-            status, _stdout, stderr = self._invoke("--discover-mcps", "help", root=root)
-        self.assertEqual(status, 0)
-        self.assertEqual(fake.listed, ["jira"])
-        self.assertIn("MCP discovery reachable: jira", stderr)

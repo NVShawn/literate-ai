@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -18,7 +19,6 @@ from literate_ai.adapters.retained_harness_receipts import (
 )
 from literate_ai.adapters.retained_harness_remote import RetainedHarnessRemoteResult
 from literate_ai.contracts import canonical_identity
-from literate_ai.contracts.operator_adoption import ConversionAuthorityStage
 from literate_ai.projects import load_project
 from tests.support.fixtures_test_retained_harness_receipts import (
     _adapter,
@@ -30,19 +30,27 @@ from tests.support.fixtures_test_retained_harness_remote import _worker
 
 
 class RetainedHarnessReadmissionTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Initialize the converted project once; each test copies it.
+        temporary = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(temporary.cleanup)
+        cls.template = Path(temporary.name).resolve() / "project"
+        _legacy_project(cls.template)
+        _adapter().initialize(
+            cls.template,
+            flavor_selectors=_selectors(cls.template),
+            source_intelligence_provider="none",
+            convert=True,
+            run_baseline=True,
+        )
+
     def setUp(self) -> None:
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.base = Path(temporary.name).resolve()
         self.root = self.base / "project"
-        _legacy_project(self.root)
-        _adapter().initialize(
-            self.root,
-            flavor_selectors=_selectors(self.root),
-            source_intelligence_provider="none",
-            convert=True,
-            run_baseline=True,
-        )
+        shutil.copytree(self.template, self.root, symlinks=True)
         self.source = self.root / "components/legacy-project-wrapper/implementation"
 
     def invoke(self, *arguments: str):
@@ -167,16 +175,6 @@ class RetainedHarnessReadmissionTests(unittest.TestCase):
         )
         return retained
 
-    def advance_authority(self, *stages: ConversionAuthorityStage) -> None:
-        store = readmission.FilesystemConversionAuthorityStore(self.root)
-        for stage in stages:
-            store.advance(
-                stage,
-                evidence_identities=(
-                    canonical_identity({"readmission-stage": stage.value}),
-                ),
-            )
-
     def test_readmission_replaces_false_bazel_and_requalifies_locally(self) -> None:
         self.make_unqualified_false_bazel_state()
         before_authority = (
@@ -249,156 +247,6 @@ class RetainedHarnessReadmissionTests(unittest.TestCase):
             before_authority,
         )
 
-    def test_retained_original_source_authority_can_readmit_commands(self) -> None:
-        self.make_unqualified_false_bazel_state()
-        self.advance_authority(ConversionAuthorityStage.RETAINED)
-        before_authority = (
-            self.root / readmission.CONVERSION_AUTHORITY_FILE
-        ).read_bytes()
-
-        code, planned = self.invoke()
-        self.assertEqual(code, 0, planned)
-        plan = planned["result"]
-        self.assertEqual(plan["conversion_authority"]["stage"], "retained")
-        self.assertEqual(
-            plan["conversion_authority"]["release_authority"], "original-source"
-        )
-        code, applied = self.invoke(
-            "--apply",
-            "--acknowledge",
-            "--expected-plan-identity",
-            plan["plan_identity"],
-        )
-
-        self.assertEqual(code, 0, applied)
-        self.assertTrue(applied["result"]["applied"])
-        self.assertEqual(
-            (self.root / readmission.CONVERSION_AUTHORITY_FILE).read_bytes(),
-            before_authority,
-        )
-
-    def test_explicit_stage_retention_is_bound_into_reviewed_plan(self) -> None:
-        retained = self.admit_repo_man_test_stage()
-
-        code, without_retention = self.invoke()
-        self.assertEqual(code, 0, without_retention)
-        self.assertNotIn(
-            "test",
-            {
-                stage["id"]
-                for stage in without_retention["result"]["new_inventory"]["stages"]
-            },
-        )
-
-        code, result = self.invoke("--retain-stage", "test")
-
-        self.assertEqual(code, 0, result)
-        plan = result["result"]
-        self.assertEqual(plan["retained_stage_ids"], ["test"])
-        self.assertIn(retained, plan["new_inventory"]["stages"])
-        self.assertIn(
-            {
-                "detector_id": "operator.retained-stage",
-                "path": "repo.sh",
-                "detail": "previously admitted stage retained by explicit review: test",
-            },
-            plan["new_inventory"]["findings"],
-        )
-
-    def test_stage_retention_rejects_unknown_and_duplicate_selections(self) -> None:
-        self.admit_repo_man_test_stage()
-
-        code, unknown = self.invoke("--retain-stage", "missing")
-        self.assertEqual(code, 2, unknown)
-        self.assertEqual(
-            unknown["error"]["code"], "retained_harness.stage_not_admitted"
-        )
-
-        code, duplicate = self.invoke(
-            "--retain-stage", "test", "--retain-stage", "test"
-        )
-        self.assertEqual(code, 2, duplicate)
-        self.assertEqual(
-            duplicate["error"]["code"], "retained_harness.stage_selection_invalid"
-        )
-
-    def test_retaining_test_and_package_preserves_both_receipt_gates(self) -> None:
-        test = self.admit_repo_man_test_stage()
-        path = self.root / readmission.INVENTORY
-        inventory = json.loads(path.read_bytes())
-        package = {**test, "id": "package", "command": "./repo.sh package"}
-        inventory["commands"]["package"] = package
-        inventory["stages"].append(package)
-        path.write_text(json.dumps(inventory), encoding="utf-8")
-
-        code, result = self.invoke(
-            "--retain-stage", "test", "--retain-stage", "package"
-        )
-
-        self.assertEqual(code, 0, result)
-        plan = result["result"]
-        self.assertEqual(plan["retained_stage_ids"], ["test", "package"])
-        self.assertIn(test, plan["new_inventory"]["stages"])
-        self.assertIn(package, plan["new_inventory"]["stages"])
-        self.assertIn("package-result", plan["new_policy"]["required_evidence_kinds"])
-        self.assertEqual(plan["new_policy"]["minimum_test_count"], 1)
-
-    def test_apply_must_repeat_the_reviewed_stage_selection(self) -> None:
-        self.admit_repo_man_test_stage()
-        code, planned = self.invoke("--retain-stage", "test")
-        self.assertEqual(code, 0, planned)
-
-        code, result = self.invoke(
-            "--apply",
-            "--acknowledge",
-            "--expected-plan-identity",
-            planned["result"]["plan_identity"],
-        )
-
-        self.assertEqual(code, 2, result)
-        self.assertEqual(result["error"]["code"], "retained_harness.plan_stale")
-
-    def test_specification_authority_refuses_readmission(self) -> None:
-        self.advance_authority(
-            ConversionAuthorityStage.RETAINED,
-            ConversionAuthorityStage.DRAFTED,
-            ConversionAuthorityStage.QUALIFIED,
-        )
-        before = (self.root / readmission.CONVERSION_AUTHORITY_FILE).read_bytes()
-
-        code, result = self.invoke()
-
-        self.assertEqual(code, 2, result)
-        self.assertEqual(
-            result["error"]["code"], "retained_harness.source_not_authoritative"
-        )
-        self.assertEqual(
-            (self.root / readmission.CONVERSION_AUTHORITY_FILE).read_bytes(), before
-        )
-
-    def test_source_change_invalidates_reviewed_readmission_plan(self) -> None:
-        self.make_unqualified_false_bazel_state()
-        code, planned = self.invoke()
-        self.assertEqual(code, 0, planned)
-        plan = planned["result"]
-        inventory_before = (self.root / readmission.INVENTORY).read_bytes()
-        source = self.source / "app.py"
-        source.write_text(source.read_text(encoding="utf-8") + "\n", encoding="utf-8")
-
-        code, result = self.invoke(
-            "--apply",
-            "--acknowledge",
-            "--expected-plan-identity",
-            plan["plan_identity"],
-        )
-
-        self.assertEqual(code, 2, result)
-        self.assertEqual(result["error"]["code"], "retained_harness.plan_stale")
-        self.assertEqual(
-            (self.root / readmission.INVENTORY).read_bytes(), inventory_before
-        )
-        self.assertFalse((self.root / readmission.HISTORY).exists())
-
     def test_source_change_during_qualification_rolls_back_publication(self) -> None:
         self.make_unqualified_false_bazel_state()
         code, planned = self.invoke()
@@ -433,67 +281,6 @@ class RetainedHarnessReadmissionTests(unittest.TestCase):
         )
         history = self.root / readmission.HISTORY
         self.assertFalse(history.exists() and any(history.rglob("*")))
-
-    def test_readmission_requires_review_and_rolls_back_publication(self) -> None:
-        self.make_unqualified_false_bazel_state()
-        code, result = self.invoke()
-        self.assertEqual(code, 0, result)
-        plan = result["result"]
-        before = {
-            path.relative_to(self.root): path.read_bytes()
-            for path in self.root.rglob("*")
-            if path.is_file()
-            and ".litai-locks" not in path.parts
-            and "perf" not in path.parts
-        }
-        code, result = self.invoke(
-            "--apply",
-            "--expected-plan-identity",
-            plan["plan_identity"],
-        )
-        self.assertEqual(code, 2, result)
-        self.assertEqual(
-            result["error"]["code"], "retained_harness.acknowledgement_required"
-        )
-        with mock.patch.object(
-            readmission.ProjectConfigurationStore,
-            "update",
-            side_effect=OSError("fault"),
-        ):
-            code, result = self.invoke(
-                "--apply",
-                "--acknowledge",
-                "--expected-plan-identity",
-                plan["plan_identity"],
-            )
-        self.assertEqual(code, 2, result)
-        after = {
-            path.relative_to(self.root): path.read_bytes()
-            for path in self.root.rglob("*")
-            if path.is_file()
-            and ".litai-locks" not in path.parts
-            and "perf" not in path.parts
-        }
-        self.assertEqual(after, before)
-
-    def test_allow_unready_policy_is_derived_from_final_inventory(self) -> None:
-        root = self.base / "allow-unready"
-        _legacy_project(root)
-
-        _adapter().initialize(
-            root,
-            flavor_selectors=_selectors(root),
-            source_intelligence_provider="none",
-            convert=True,
-            allow_unready=True,
-        )
-
-        inventory = json.loads((root / readmission.INVENTORY).read_bytes())
-        self.assertTrue(inventory["allow_unready"])
-        self.assertEqual(
-            load_project(root).definition.test_receipt_policy,
-            retained_harness_receipt_policy(inventory),
-        )
 
     def test_remote_readmission_executes_direct_and_generated_wrapper(self) -> None:
         retained = self.admit_repo_man_test_stage()

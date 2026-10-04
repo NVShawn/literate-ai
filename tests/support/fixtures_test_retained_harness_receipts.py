@@ -1,37 +1,19 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_retained_harness_receipts``."""
 
 import io
-
 import json
-
-
-
-
-
 from pathlib import Path
-
-
-
-
 
 from literate_ai.adapters.project_initialization import (
     detect_repo_flavors,
     host_platform_selector,
 )
-
-
-
-
-
-
 from literate_ai.cli import main
-
 from literate_ai.contracts import (
     ProjectInitializationOrigin,
 )
-
-
 from tests.unit.root_parent_adapter import (
     RootParentProjectInitializationAdapter as FilesystemProjectInitializationAdapter,
 )
@@ -45,11 +27,13 @@ def _origin() -> ProjectInitializationOrigin:
         distribution_version="0.9.0",
     )
 
+
 def _adapter() -> FilesystemProjectInitializationAdapter:
     return FilesystemProjectInitializationAdapter(
         initialization_origin_provider=_origin,
         standard_binding_provider=lambda: None,
     )
+
 
 def _selectors(target: Path) -> tuple[str, ...]:
     return (
@@ -57,12 +41,14 @@ def _selectors(target: Path) -> tuple[str, ...]:
         host_platform_selector(),
     )
 
+
 def _invoke(*arguments: str) -> tuple[int, dict[str, object]]:
     stdout = io.StringIO()
     stderr = io.StringIO()
     status = main(arguments, stdout=stdout, stderr=stderr)
     content = stdout.getvalue() if status == 0 else stderr.getvalue()
     return status, json.loads(content)
+
 
 def _legacy_project(target: Path, test_summary: str = "Ran 2 tests") -> None:
     target.mkdir()
@@ -79,4 +65,3 @@ def _legacy_project(target: Path, test_summary: str = "Ran 2 tests") -> None:
         "\tprintf 'package\\n' > dist/app.txt\n",
         encoding="utf-8",
     )
-

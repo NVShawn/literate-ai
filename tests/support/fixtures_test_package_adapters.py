@@ -1,28 +1,18 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_package_adapters``."""
 
 import copy
-
 import gzip
-
 import hashlib
-
 import io
-
 import subprocess
-
 import sys
-
 import tarfile
-
 import tempfile
-
 import unittest
-
 import zipfile
-
 from dataclasses import replace
-
 from pathlib import Path
 
 from literate_ai.adapters.conan_packaging import (
@@ -32,7 +22,6 @@ from literate_ai.adapters.conan_packaging import (
     _restored_reference,
     _verify_restored_payload,
 )
-
 from literate_ai.adapters.packaging import (
     DeterministicZipPackageAdapter,
     DirectoryPackageAdapter,
@@ -42,11 +31,8 @@ from literate_ai.adapters.packaging import (
     native_metadata_archive_plan,
     npm_archive_package_plan,
 )
-
 from literate_ai.application.packaging import PackagingError, verify_package_result
-
 from literate_ai.contracts import BlobRef
-
 from literate_ai.contracts.executable_components.packages import (
     PackageFileKind,
     PackageInput,
@@ -55,15 +41,15 @@ from literate_ai.contracts.executable_components.packages import (
     RuntimeRequirement,
     RuntimeRequirementKind,
 )
-
-from tests.support.fixtures_test_executable_component_v2_schemas import _official_validator
-
+from tests.support.fixtures_test_executable_component_v2_schemas import (
+    _official_validator,
+)
 from tests.support.fixtures_test_package_release_contracts import (
     PackageReleaseContractTests,
     _identity,
 )
-
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+
 
 class PackageAdapterTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -684,6 +670,6 @@ class PackageAdapterTests(unittest.TestCase):
                     ):
                         adapter.verify_bytes(result, content + b"x")
 
+
 if __name__ == "__main__":
     unittest.main()
-

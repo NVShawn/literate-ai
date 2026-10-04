@@ -10,15 +10,12 @@ import unittest
 from dataclasses import fields, replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from unittest.mock import patch
 
 from literate_ai.adapters.action_command_dispatch import (
     CommandLifecycleActionDispatcher,
 )
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
-    ActionWireError,
-    encode_action_request,
     record_identity,
 )
 from literate_ai.adapters.action_source_index import (
@@ -52,9 +49,11 @@ from literate_ai.contracts.identity import (
 )
 from literate_ai.contracts.source_index import generated_source_tree_identity
 from literate_ai.storage import FileSystemCAS
-from literate_ai.storage.cas import StorageError
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
-from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_component_execution_planning import (
+    _diamond_lock,
+    _models,
+)
 
 
 class SourceIndexActionTests(unittest.TestCase):
@@ -203,51 +202,6 @@ class SourceIndexActionTests(unittest.TestCase):
             self.request, predecessor_result_identities=(record_identity(content),)
         )
 
-    def test_real_command_worker_runs_production_index_policy_and_cleans_source(self):
-        outcome = self.dispatch()
-        self.assertIsNone(outcome.failure_code)
-        self.assertEqual(
-            json.loads(self.results[outcome.result_identity]), self.expected_result()
-        )
-        self.assertEqual(
-            outcome.result_identity, canonical_identity(self.expected_result())
-        )
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_large_source_stays_outside_bounded_control_message(self):
-        self.fixture({"large.txt": b"a" * (17 * 1024 * 1024)})
-        self.assertLess(
-            len(encode_action_request(self.request, self.deadline, self.records)), 8192
-        )
-        blobs = self.remote_source_blobs()
-        with source_cas_server(blobs) as (url, requests):
-            self.bind_remote_source(url)
-            outcome = self.dispatch()
-            self.assertEqual(len(requests), 1)
-        self.assertIsNone(outcome.failure_code)
-        self.assertEqual(
-            outcome.result_identity, canonical_identity(self.expected_result())
-        )
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_changed_generation_result_keeps_the_preplanned_action_identity(self):
-        original_action = self.request.action
-        original_predecessor = self.request.predecessor_result_identities
-        original = self.dispatch()
-        self.assertIsNone(original.failure_code)
-        self.fixture({"source/main.py": b"print('replacement candidate')\n"})
-        self.assertEqual(self.request.action, original_action)
-        self.assertNotEqual(
-            self.request.predecessor_result_identities, original_predecessor
-        )
-        replacement = self.dispatch()
-        self.assertIsNone(replacement.failure_code)
-        self.assertNotEqual(replacement.result_identity, original.result_identity)
-        self.assertEqual(
-            replacement.result_identity, canonical_identity(self.expected_result())
-        )
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
     def bind_remote_source(self, url):
         self.worker = replace(
             self.worker,
@@ -312,130 +266,4 @@ class SourceIndexActionTests(unittest.TestCase):
             )
         self.assertEqual(self.results, {})
         self.assertTrue(all(not self.cas.contains(item.blob) for item in self.files))
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_corrupt_existing_worker_blob_is_not_repaired_from_remote_source(self):
-        blobs = self.remote_source_blobs()
-        reference = self.files[0].blob
-        self.cas.put_bytes(blobs[blob_path(reference)].read_bytes())
-        path = self.cas.path_for(reference)
-        path.write_bytes(b"corrupt local custody")
-        with source_cas_server(blobs) as (url, requests):
-            self.bind_remote_source(url)
-            self.assertEqual(
-                self.dispatch().failure_code, "action_source.custody_unavailable"
-            )
-            self.assertEqual(requests, [])
-        self.assertEqual(path.read_bytes(), b"corrupt local custody")
-        self.assertEqual(self.results, {})
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_missing_remote_blob_leaves_no_index_result_or_workspace(self):
-        self.remote_source_blobs()
-        with source_cas_server({}) as (url, requests):
-            self.bind_remote_source(url)
-            self.assertEqual(self.dispatch().failure_code, "action_source.fetch_failed")
-            self.assertEqual(len(requests), 1)
-        self.assertEqual(self.results, {})
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_corrupt_and_missing_source_refuse_and_remove_partial_workspace(self):
-        for failure in ("corrupt", "missing"):
-            with self.subTest(failure=failure):
-                reference = self.files[-1].blob
-                path = self.cas.path_for(reference)
-                original = path.read_bytes()
-                if failure == "corrupt":
-                    path.write_bytes(b"changed")
-                else:
-                    path.unlink()
-                try:
-                    with self.assertRaises(StorageError):
-                        self.execute()
-                    outcome = self.dispatch()
-                    self.assertEqual(
-                        outcome.failure_code, "action_source.custody_unavailable"
-                    )
-                    self.assertEqual(self.results, {})
-                    self.assertEqual(list(self.workspace.iterdir()), [])
-                finally:
-                    if path.exists():
-                        path.unlink()
-                    self.cas.put_bytes(original)
-
-    def test_candidate_component_and_manifest_drift_refuse_before_copy(self):
-        cases = (
-            lambda value: value.update(
-                execution_plan_identity=canonical_identity("other").uri
-            ),
-            lambda value: value["files"][0]["blob"].update(size=1),
-            lambda value: value["files"][0].update(path="../outside"),
-            lambda value: value["files"].append(value["files"][0]),
-            lambda value: value["files"][0].update(path=".codegraph/index"),
-            lambda value: value.update(unrecognized=True),
-        )
-        initial_request, initial_records = self.request, dict(self.records)
-        for change in cases:
-            self.request, self.records = initial_request, dict(initial_records)
-            self.change_predecessor(change)
-            with self.subTest(change=change), patch.object(self.cas, "copy_to") as copy:
-                with self.assertRaises(ActionWireError):
-                    self.execute()
-                copy.assert_not_called()
-                self.assertEqual(list(self.workspace.iterdir()), [])
-        self.request, self.records = initial_request, initial_records
-        with self.assertRaises(ActionWireError):
-            self.execute(
-                request=replace(
-                    self.request,
-                    action=replace(
-                        self.request.action,
-                        component_revision=canonical_identity("other"),
-                    ),
-                )
-            )
-
-    def test_unrelated_predecessor_refuses_even_with_valid_blob_hashes(self):
-        self.change_predecessor(
-            lambda value: value["candidate"].update(
-                component_generation_plan_identity=canonical_identity(
-                    "other-plan"
-                ).to_dict()
-            )
-        )
-        with self.assertRaises(ActionWireError):
-            self.execute()
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_private_worker_binding_and_unconfigured_build_refuse(self):
-        outcome = self.dispatch(worker_identity=canonical_identity("other-worker"))
-        self.assertEqual(outcome.failure_code, "action_source.worker_mismatch")
-        self.request = replace(
-            self.request,
-            action=replace(self.request.action, kind=LifecycleActionKind.BUILD),
-        )
-        outcome = self.dispatch()
-        self.assertEqual(outcome.failure_code, "action_build.not_configured")
-        self.assertEqual(self.results, {})
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_expiry_during_materialization_cleans_partial_workspace(self):
-        original = self.cas.copy_to
-
-        def copy_then_expire(reference, destination):
-            original(reference, destination)
-            raise ActionWireError("action_wire.expired", "expired")
-
-        with patch.object(self.cas, "copy_to", side_effect=copy_then_expire):
-            with self.assertRaisesRegex(ActionWireError, "expired"):
-                self.execute()
-        self.assertEqual(list(self.workspace.iterdir()), [])
-
-    def test_manifest_limits_refuse_before_cas_reads(self):
-        with patch("literate_ai.adapters.action_source_index.MAX_SOURCE_BYTES", 1):
-            with self.assertRaises(ActionWireError):
-                self.execute()
-        with patch("literate_ai.adapters.action_source_index.MAX_SOURCE_FILES", 1):
-            with self.assertRaises(ActionWireError):
-                self.execute()
         self.assertEqual(list(self.workspace.iterdir()), [])

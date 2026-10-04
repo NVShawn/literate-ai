@@ -1,19 +1,16 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_qualification_lifecycle_runner``."""
 
 import unittest
-
 from copy import deepcopy
-
 from dataclasses import replace
-
 from types import SimpleNamespace
 
 from literate_ai.application.standard_project_lifecycle import (
     StandardNodeLifecycleResult,
     StandardProjectLifecycleResult,
 )
-
 from literate_ai.contracts import (
     PROJECT_TEST_OUTCOME_PASSED,
     PROJECT_TEST_SUITE_KIND,
@@ -27,15 +24,11 @@ from literate_ai.contracts import (
     VersionedContentRef,
     canonical_identity,
 )
-
 from literate_ai.contracts.executable_components import SourceGenerationDisposition
-
 from literate_ai.contracts.standard_lifecycle_policy import (
     STANDARD_FULL_REBUILD_EVIDENCE_KINDS,
 )
-
 from literate_ai.source_to_specification.errors import SourceToSpecificationError
-
 from literate_ai.source_to_specification.qualification_lifecycle import (
     QualificationCaseSurfaceBinding,
     QualificationLifecycleExecution,
@@ -48,13 +41,13 @@ from literate_ai.source_to_specification.qualification_lifecycle import (
     QualificationVerifierCaseMap,
     QualificationWorkspaceAllocation,
 )
-
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
-
 from tests.support.fixtures_test_standard_post_source_evidence import _evidence
+
 
 def identity(label: str):
     return canonical_identity({"qualification-lifecycle-test": label})
+
 
 class _Lifecycle(StandardProjectLifecycleResult):
     @property
@@ -64,6 +57,7 @@ class _Lifecycle(StandardProjectLifecycleResult):
     @property
     def successful(self):
         return self.admission_identity is not None and self.receipt_identity is not None
+
 
 def _lifecycle(
     run: str,
@@ -144,6 +138,7 @@ def _lifecycle(
         object.__setattr__(lifecycle, name, value)
     return lifecycle
 
+
 def _receipt(lifecycle, *, total: int = 1, omit_evidence: bool = False):
     kinds = sorted(STANDARD_FULL_REBUILD_EVIDENCE_KINDS)
     if omit_evidence:
@@ -167,6 +162,7 @@ def _receipt(lifecycle, *, total: int = 1, omit_evidence: bool = False):
         evidence,
     )
 
+
 class Workspaces:
     def __init__(self, *, reused: bool = False, empty: bool = True):
         self.reused = reused
@@ -177,6 +173,7 @@ class Workspaces:
         return QualificationWorkspaceAllocation(
             identity(f"workspace:{suffix}"), self.empty
         )
+
 
 class LifecyclePort:
     def __init__(
@@ -230,6 +227,7 @@ class LifecyclePort:
             identity("distribution"),
         )
 
+
 class Verifier:
     def __init__(self, events, case_map, *, failed=(), omit=(), substitute=False):
         self.events = events
@@ -276,6 +274,7 @@ class Verifier:
             case_map.identity,
             tuple(cases),
         )
+
 
 class QualificationLifecycleRunnerTests(unittest.TestCase):
     def setUp(self):
@@ -524,6 +523,6 @@ class QualificationLifecycleRunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(SourceToSpecificationError, "parity membership"):
             QualificationLifecycleResult.from_dict(failed_parity)
 
+
 if __name__ == "__main__":
     unittest.main()
-

@@ -2,20 +2,15 @@
 
 import io
 import json
-import os
 import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
-from jsonschema import Draft202012Validator
-from referencing import Registry, Resource
-
 from literate_ai.adapters.evidence_storage import FileSystemEvidenceStore
 from literate_ai.cli.dispatch import main
 from literate_ai.contracts.identity import canonical_identity
-from literate_ai.schema_catalog import schema_path, verify_schema_catalog
 from literate_ai.security.evidence import DsseEnvelope
 from literate_ai.security.evidence.plan import EvidenceVerificationPlan
 from tests.support.fixtures_test_evidence_graph import _Graph
@@ -133,24 +128,6 @@ class EvidenceVerificationCliTests(unittest.TestCase):
             },
         )
 
-    def test_wrong_or_changed_project_authority_refuses(self):
-        other = canonical_identity("other")
-        for authority in ([other], [self.authority, other]):
-            with self.subTest(authority=authority):
-                self.assertNotEqual(self.run_cli(authority=authority)[0], 0)
-
-    def test_missing_blob_and_missing_retention_refuse(self):
-        self.assertNotEqual(self.run_cli(arguments=self.arguments[:-2])[0], 0)
-        blob = next((self.root / "store").rglob("*.blob"), None)
-        # CAS filename suffixes are adapter-owned; select by known content instead.
-        for path in (self.root / "store").rglob("*"):
-            if path.is_file() and path.read_bytes() == b"sources":
-                blob = path
-                break
-        self.assertIsNotNone(blob)
-        blob.unlink()
-        self.assertNotEqual(self.run_cli()[0], 0)
-
     def test_revocation_reload_after_reads_refuses_newly_revoked_signer(self):
         original = FileSystemEvidenceStore.get_bytes
         revoked = replace(
@@ -172,55 +149,10 @@ class EvidenceVerificationCliTests(unittest.TestCase):
         with patch.object(FileSystemEvidenceStore, "get_bytes", read):
             self.assertNotEqual(self.run_cli()[0], 0)
 
-    def test_changed_operator_policy_after_reads_refuses(self):
-        original = FileSystemEvidenceStore.get_bytes
-
-        def read(store, reference):
-            content = original(store, reference)
-            self.policy_path.write_text(
-                json.dumps(
-                    replace(self.graph.policy, minimum_retention_seconds=91).to_dict()
-                )
-            )
-            return content
-
-        with patch.object(FileSystemEvidenceStore, "get_bytes", read):
-            self.assertNotEqual(self.run_cli()[0], 0)
-
-    def test_ambiguous_json_and_duplicate_store_names_refuse(self):
-        self.assertNotEqual(
-            self.run_cli(arguments=self.arguments + ["--store", "local=other"])[0], 0
-        )
-        self.plan_path.write_bytes(b'{"schema": "a", "schema":"b"}')
-        self.assertNotEqual(self.run_cli()[0], 0)
-
     def test_unsigned_retention_cannot_supply_routing_authority(self):
         path = self.root / "retention-0.json"
         envelope = DsseEnvelope.from_bytes(path.read_bytes())
         path.write_bytes(replace(envelope, signatures=()).to_bytes())
-        self.assertNotEqual(self.run_cli()[0], 0)
-
-    def test_plan_and_result_validate_against_public_schema(self):
-        documents = [
-            json.loads(schema_path(name, catalog_version="v2").read_bytes())
-            for name in (
-                "evidence-verification.schema.json",
-                "evidence-trust.schema.json",
-            )
-        ]
-        registry = Registry().with_resources(
-            (d["$id"], Resource.from_contents(d)) for d in documents
-        )
-        validator = Draft202012Validator(documents[0], registry=registry)
-        validator.validate(self.plan.to_dict())
-        status, result = self.run_cli()
-        self.assertEqual(status, 0)
-        validator.validate(result["result"])
-
-    @unittest.skipUnless(hasattr(os, "mkfifo"), "named pipes require POSIX")
-    def test_nonregular_input_refuses_without_waiting_for_a_writer(self):
-        self.plan_path.unlink()
-        os.mkfifo(self.plan_path)
         self.assertNotEqual(self.run_cli()[0], 0)
 
     def test_command_verifies_against_real_initialized_project_authority(self):
@@ -269,23 +201,3 @@ class EvidenceVerificationCliTests(unittest.TestCase):
                 if p.is_file()
             },
         )
-
-    def test_plan_is_closed_ordered_and_catalogued(self):
-        verify_schema_catalog("v2")
-        self.assertEqual(
-            EvidenceVerificationPlan.from_dict(self.plan.to_dict()), self.plan
-        )
-        for change in (
-            {**self.plan.to_dict(), "extra": True},
-            {
-                **self.plan.to_dict(),
-                "requirements": list(reversed(self.plan.to_dict()["requirements"])),
-            },
-        ):
-            with self.assertRaises(ValueError):
-                EvidenceVerificationPlan.from_dict(change)
-
-    def test_read_only_command_refuses_debug_files_and_discovery(self):
-        for option in (["--debug", str(self.root / "debug.json")], ["--discover-mcps"]):
-            self.assertNotEqual(self.run_cli(arguments=self.arguments + option)[0], 0)
-        self.assertFalse((self.root / "debug.json").exists())

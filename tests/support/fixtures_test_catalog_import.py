@@ -1,13 +1,7 @@
 """Shared fixtures extracted from ``tests.unit.test_catalog_import``."""
 
 import json
-
-
-
-
-
 from pathlib import Path
-
 
 
 def make_project(directory: Path, project_id: str, *, with_origin: bool = True) -> Path:
@@ -33,4 +27,3 @@ def make_project(directory: Path, project_id: str, *, with_origin: bool = True) 
             json.dumps(origin) + "\n", encoding="utf-8"
         )
     return directory
-

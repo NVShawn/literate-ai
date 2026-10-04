@@ -1,19 +1,10 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_orchestration``."""
 
 import os
-
-
 import subprocess
-
-
-
-
 from pathlib import Path
-
-
-
-
 
 
 def git(root: Path, *arguments: str) -> bytes:
@@ -38,6 +29,7 @@ def git(root: Path, *arguments: str) -> bytes:
         env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
     ).stdout
 
+
 def repository(root: Path, *, sha256: bool = False) -> None:
     root.mkdir()
     git(
@@ -55,10 +47,10 @@ def repository(root: Path, *, sha256: bool = False) -> None:
     git(root, "add", "source.txt")
     git(root, "commit", "-q", "-m", "initial")
 
+
 def snapshot(root: Path) -> dict[str, tuple[bytes, int]]:
     return {
         path.relative_to(root).as_posix(): (path.read_bytes(), path.stat().st_mtime_ns)
         for path in root.rglob("*")
         if path.is_file()
     }
-

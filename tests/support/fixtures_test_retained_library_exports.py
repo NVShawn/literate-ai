@@ -1,24 +1,17 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_library_exports``."""
 
 import copy
-
 import unittest
-
 from dataclasses import replace
 
 from literate_ai.application.artifact_graph import create_artifact_build_graph
-
 from literate_ai.contracts import ContractValidationError, canonical_identity
-
 from literate_ai.contracts.library_products import LibraryArtifactProduct
-
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
-
 from tests.support import fixtures_test_artifact_graph_contracts as graph_fixtures
-
 from tests.support import fixtures_test_library_products as library_fixtures
-
 from tests.support import fixtures_test_schema_catalog as schema_fixtures
+
 
 class RetainedLibraryExportTests(unittest.TestCase):
     def fixture(self):
@@ -160,4 +153,3 @@ class RetainedLibraryExportTests(unittest.TestCase):
                 RetainedLibraryExportSet.from_dict(wire)
         with self.assertRaises(ContractValidationError):
             replace(value, libraries=list(value.libraries))
-

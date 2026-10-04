@@ -1,30 +1,18 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_lock_planning``."""
 
 
-
-
 import shutil
-
-
-
-
 from pathlib import Path
-
-
-
-
-
 
 from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
 
-
-
-
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+
 
 def _component_document() -> str:
     return """---
@@ -66,6 +54,7 @@ source_dependencies: []
 ---
 A small portable greeting application with deterministic behavior.
 """
+
 
 def _fixture(root: Path) -> tuple[Path, Path]:
     root.mkdir(parents=True, exist_ok=True)
@@ -114,6 +103,7 @@ def _fixture(root: Path) -> tuple[Path, Path]:
         )
     return component, flavors
 
+
 def _flavor_variant(
     source: Path,
     destination: Path,
@@ -132,4 +122,3 @@ def _flavor_variant(
     document["target"] = value
     document["conflicts"] = list(conflicts)
     manifest.write_bytes(render_authoring_markdown(document, body))
-

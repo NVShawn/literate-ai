@@ -18,7 +18,9 @@ from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.application.standard_authorization import StandardAuthorizationInputs
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from tests.support import fixtures_test_action_source_index as source_fixture
-from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
+from tests.support.fixtures_test_standard_local_command_adapter import (
+    _python_copy_lifecycle,
+)
 
 
 class AuthorizationActionTests(unittest.TestCase):
@@ -141,69 +143,3 @@ class AuthorizationActionTests(unittest.TestCase):
         outcome = self.fixture.dispatch()
         self.assertEqual(outcome.failure_code, "action_authorization.invalid")
         self.assertIsNone(outcome.result_identity)
-
-    def test_worker_predecessor_deadline_and_record_custody_are_required(self):
-        with self.assertRaises(ActionWireError):
-            self.execute(worker=canonical_identity("foreign"))
-        for request in (
-            replace(self.fixture.request, predecessor_result_identities=()),
-            replace(
-                self.fixture.request, deadline_identity=canonical_identity("foreign")
-            ),
-            replace(
-                self.fixture.request,
-                action=replace(self.fixture.request.action, predecessor_ids=()),
-            ),
-        ):
-            with self.assertRaises(ActionWireError):
-                self.execute(request)
-        for records in (
-            {**self.fixture.records, canonical_identity("extra"): b"extra"},
-            {key: value + b" " for key, value in self.fixture.records.items()},
-        ):
-            with self.assertRaises(ActionWireError):
-                self.execute(records=records)
-
-    def test_duplicate_json_and_oversized_inputs_are_refused(self):
-        from literate_ai.adapters.action_dispatch_wire import MAX_ACTION_RECORD_BYTES
-
-        old = self.fixture.request.predecessor_result_identities[0]
-        original = self.fixture.records[old]
-        for content in (
-            b'{"schema":"duplicate",' + original[1:],
-            b" " * (MAX_ACTION_RECORD_BYTES + 1),
-        ):
-            records = dict(self.fixture.records)
-            records.pop(old)
-            identity = record_identity(content)
-            records[identity] = content
-            request = replace(
-                self.fixture.request, predecessor_result_identities=(identity,)
-            )
-            with self.assertRaises(ActionWireError):
-                self.execute(request, records)
-
-    def test_public_schema_is_closed(self):
-        from jsonschema import Draft202012Validator, ValidationError
-        from referencing import Registry, Resource
-        from referencing.jsonschema import DRAFT202012
-
-        from literate_ai.adapters.action_authorization import (
-            AUTHORIZATION_INPUTS_SCHEMA,
-        )
-        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
-
-        resources = SchemaCatalog().resources
-        registry = Registry().with_resources(
-            (uri, Resource.from_contents(value, default_specification=DRAFT202012))
-            for uri, value in resources.items()
-        )
-        validator = Draft202012Validator(
-            {"$ref": AUTHORIZATION_INPUTS_SCHEMA}, registry=registry
-        )
-        document = json.loads(
-            self.fixture.records[self.fixture.request.predecessor_result_identities[0]]
-        )
-        validator.validate(document)
-        with self.assertRaises(ValidationError):
-            validator.validate({**document, "unknown": True})

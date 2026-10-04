@@ -1,11 +1,8 @@
 """Shared fixtures extracted from ``tests.unit.test_grpc_descriptors``."""
 
 import hashlib
-
 import unittest
-
 from dataclasses import replace
-
 
 from literate_ai.adapters._grpc_call_cases import (
     GrpcCallCase,
@@ -13,13 +10,13 @@ from literate_ai.adapters._grpc_call_cases import (
     GrpcErrorDetail,
     GrpcStatus,
 )
-
 from literate_ai.adapters._grpc_descriptors import GrpcDescriptorClosure
-
 from literate_ai.contracts import ContentIdentity
+
 
 def identity(payload):
     return ContentIdentity.parse_uri("sha256:" + hashlib.sha256(payload).hexdigest())
+
 
 class GrpcDescriptorTests(unittest.TestCase):
     @classmethod
@@ -164,4 +161,3 @@ class GrpcDescriptorTests(unittest.TestCase):
         self.assertNotEqual(original, changed)
         with self.assertRaisesRegex(ValueError, "declared identity"):
             GrpcDescriptorClosure(changed, identity(original))
-

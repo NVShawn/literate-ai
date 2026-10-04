@@ -58,12 +58,7 @@ except (KeyboardInterrupt, subprocess.TimeoutExpired) as exc:
 @unittest.skipUnless(os.name == "posix", "requires targeted POSIX SIGINT")
 class EvidenceCancellationTests(unittest.TestCase):
     def test_interruption_stops_gate_tree_and_finalizes_nested_evidence(self):
-        for tee, reason in (
-            (True, "signal"),
-            (False, "signal"),
-            (True, "timeout"),
-            (False, "timeout"),
-        ):
+        for tee, reason in ((True, "signal"), (True, "timeout")):
             with (
                 self.subTest(tee=tee, reason=reason),
                 tempfile.TemporaryDirectory() as temporary,

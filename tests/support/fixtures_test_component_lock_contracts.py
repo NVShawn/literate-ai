@@ -1,17 +1,14 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_lock_contracts``."""
 
 
 from dataclasses import replace
 
-
-
-
 from literate_ai.contracts.capabilities import (
     CapabilityRequirement,
     DependencyKind,
 )
-
 from literate_ai.contracts.component_locking import (
     AuthoredProvidedCapability,
     ComponentAuthoring,
@@ -22,10 +19,7 @@ from literate_ai.contracts.component_locking import (
     RequirementConstraintSatisfaction,
     ordered_specification_set_identity,
 )
-
-
 from literate_ai.contracts.components import Entrypoint
-
 from literate_ai.contracts.executable_components import (
     ComponentInterfaceBinding,
     ExecutableComponentEdge,
@@ -33,13 +27,11 @@ from literate_ai.contracts.executable_components import (
     NodeTargetFlavorSelection,
     SelectedNodeFlavor,
 )
-
 from literate_ai.contracts.flavors import (
     FlavorAxis,
     FlavorCardinality,
     FlavorSlot,
 )
-
 from literate_ai.contracts.identity import (
     ComponentCoordinate,
     ContentIdentity,
@@ -48,12 +40,13 @@ from literate_ai.contracts.identity import (
 )
 
 
-
 def identity(label: str) -> ContentIdentity:
     return canonical_identity({"fixture": label})
 
+
 def reference(kind: str, uri: str, label: str | None = None) -> ContentReference:
     return ContentReference(kind, uri, identity(label or uri))
+
 
 def selector(
     kind: str,
@@ -62,6 +55,7 @@ def selector(
     pin: ContentIdentity | None = None,
 ) -> ComponentContentSelector:
     return ComponentContentSelector(kind, uri, pin)
+
 
 def component_authoring(
     name: str,
@@ -113,6 +107,7 @@ def component_authoring(
             selector("acceptance-contract", "acceptance/execution.json"),
         ),
     )
+
 
 def locked_revision(
     name: str,
@@ -167,6 +162,7 @@ def locked_revision(
         definition=selected_authoring,
     )
 
+
 def node(
     revision: LockedComponentRevision,
     *,
@@ -213,6 +209,7 @@ def node(
         )
     )
     return ComponentLockNode(revision, selection, bindings)
+
 
 def component_lock() -> ComponentLock:
     invoice_authoring = component_authoring(
@@ -297,4 +294,3 @@ def component_lock() -> ComponentLock:
             )
         ),
     )
-

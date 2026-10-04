@@ -1,16 +1,12 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_application_generation``."""
 
 import hashlib
-
 import json
-
 import unittest
-
 from collections.abc import Mapping, Sequence
-
 from dataclasses import replace
-
 from datetime import UTC, datetime, timedelta
 
 from literate_ai.application import (
@@ -24,12 +20,9 @@ from literate_ai.application import (
     GenerationStatus,
     ModelStage,
 )
-
 from literate_ai.application.locked_generation_authority import (
     LockedGenerationAuthority,
 )
-
-
 from literate_ai.contracts import (
     CYCLONEDX_SOURCE_SBOM_PATH,
     ContentIdentity,
@@ -43,9 +36,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
     project_component_lock_managed_graph,
 )
-
 from literate_ai.generated_tests import GENERATED_TEST_SUITE_SCHEMA
-
 from literate_ai.models import (
     DataEgress,
     Locality,
@@ -54,21 +45,17 @@ from literate_ai.models import (
     ModelRouter,
     StageModelPolicy,
 )
-
 from literate_ai.ports import (
     AUTHORIZED_EXECUTION_PROFILE,
     NON_EXECUTING_EXACT_TREE_PROFILE,
     PortContractError,
 )
-
-
 from literate_ai.security import (
     BuildRequestDeclaration,
     ObservationExecutionAuthorization,
     ObservationRequest,
     SecurityProfile,
 )
-
 from tests.support.fixtures_test_component_lock_contracts import component_lock
 
 TEST_RECIPE_IDENTITY = "sha256:" + "a" * 64
@@ -76,6 +63,7 @@ TEST_RECIPE_IDENTITY = "sha256:" + "a" * 64
 TEST_SPECIFICATION_REFERENCES = ("spec.md",)
 
 SOURCE_SBOM_CONTENT = "{}"
+
 
 def generated_suite_content(*, recipe_identity: str = TEST_RECIPE_IDENTITY) -> str:
     return canonical_json_bytes(
@@ -109,11 +97,14 @@ def generated_suite_content(*, recipe_identity: str = TEST_RECIPE_IDENTITY) -> s
         }
     ).decode("utf-8")
 
+
 def identity(label: str):
     return canonical_identity({"fixture": label})
 
+
 def reference(kind: str, label: str) -> ContentReference:
     return ContentReference(kind, f"fixture://{label}", identity(label))
+
 
 class Readiness:
     def __init__(self, ready: bool = True, source_available: bool = True) -> None:
@@ -135,6 +126,7 @@ class Readiness:
             self.ready,
             () if self.ready else ("source", "evidence"),
         )
+
 
 class Models:
     provider_id = "test-models"
@@ -174,6 +166,7 @@ class Models:
         files[CYCLONEDX_SOURCE_SBOM_PATH] = SOURCE_SBOM_CONTENT
         return {"files": files}
 
+
 class Validator:
     validator_id = "test-validator"
 
@@ -187,6 +180,7 @@ class Validator:
             "passed": self.passed,
             "findings": [] if self.passed else [{"code": "invalid"}],
         }
+
 
 class Classifier:
     classifier_id = "test-classifier"
@@ -204,6 +198,7 @@ class Classifier:
             "finding_count": len(findings),
         }
 
+
 class Authorizer:
     def __init__(self, calls: list[str]) -> None:
         self.calls = calls
@@ -217,6 +212,7 @@ class Authorizer:
             "effective_revision_digest": build_request["effective_revision_digest"],
             "profile": "constrained",
         }
+
 
 class Builder:
     builder_id = "test-builder"
@@ -233,6 +229,7 @@ class Builder:
             "authorization_id": authorization["authorization_id"],
             "compiled_files": ["main.pyc"],
         }
+
 
 class DependencyResolver:
     resolver_id = "test-dependency-resolver"
@@ -324,6 +321,7 @@ class DependencyResolver:
             len(self.managed_graph.edges),
         )
 
+
 class GeneratedTestRunner:
     runner_id = "test-generated-runner"
 
@@ -372,6 +370,7 @@ class GeneratedTestRunner:
                 for case_id in test_suite.case_ids
             ],
         }
+
 
 class IndependentAcceptanceRunner:
     runner_id = "test-independent-acceptance-runner"
@@ -453,6 +452,7 @@ class IndependentAcceptanceRunner:
             "case_results": [case_result],
         }
 
+
 class Workspace:
     def __init__(self, calls: list[str], fail_commit_once: bool = False) -> None:
         self.calls = calls
@@ -533,6 +533,7 @@ class Workspace:
     def recover(self):
         return ()
 
+
 class Events:
     def __init__(self) -> None:
         self.records: list[tuple[str, Mapping[str, object]]] = []
@@ -542,6 +543,7 @@ class Events:
 
     def stream(self, stream_id):
         return tuple(event for stream, event in self.records if stream == stream_id)
+
 
 def router() -> ModelRouter:
     endpoint = ModelEndpoint(
@@ -557,6 +559,7 @@ def router() -> ModelRouter:
         endpoints=(endpoint,),
         groups=(ModelGroup("generation", "1.0.0", ("local",)),),
     )
+
 
 def stages() -> tuple[ModelStage, ...]:
     return (
@@ -579,6 +582,7 @@ def stages() -> tuple[ModelStage, ...]:
         ),
     )
 
+
 def locked_authority_fixture() -> LockedGenerationAuthority:
     lock = component_lock()
     root_node = next(
@@ -590,6 +594,7 @@ def locked_authority_fixture() -> LockedGenerationAuthority:
         if item.identity == root_node.revision.authoring_identity
     )
     return LockedGenerationAuthority(lock, root_authoring, lock.authorings, (), ())
+
 
 def execution_plan(authority: LockedGenerationAuthority) -> GenerationExecutionPlan:
     stage_values = stages()
@@ -605,6 +610,7 @@ def execution_plan(authority: LockedGenerationAuthority) -> GenerationExecutionP
         stage_values,
         tuple(route_selector.select(item.policy) for item in stage_values),
     )
+
 
 def generation_context(
     authority: LockedGenerationAuthority,
@@ -640,6 +646,7 @@ def generation_context(
         workspace_reference=workspace_reference,
         prompt=prompt,
     )
+
 
 class GenerationOrchestratorTests(unittest.TestCase):
     def make_system(
@@ -1561,6 +1568,6 @@ class GenerationOrchestratorTests(unittest.TestCase):
             "generation.resume-checkpoint-invalid",
         )
 
+
 if __name__ == "__main__":
     unittest.main()
-

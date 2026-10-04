@@ -1,22 +1,13 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.conformance.test_live_bidirectional_roundtrip``."""
-
-
-
-
-
-
-
-
-
-
-
 
 
 from literate_ai.source_to_specification import (
     DraftScenario,
     DraftStatement,
 )
+
 
 def draft_statements(
     bundle: dict[str, object], *, language: str
@@ -43,4 +34,3 @@ def draft_statements(
         )
         for item in raw
     )
-

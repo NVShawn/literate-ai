@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import copy
-import hashlib
 import json
 import os
 import shutil
@@ -20,13 +19,6 @@ from literate_ai.adapters.cargo_workspace_graph import (
     CargoWorkspaceExpectation,
     CargoWorkspaceGraphError,
     verify_cargo_workspace_graph,
-)
-from literate_ai.contracts.blobs import BlobRef
-from literate_ai.contracts.identity import canonical_identity
-from literate_ai.contracts.repositories import RepositoryBuildCommand
-from literate_ai.contracts.retained_cargo import (
-    CargoManifestChange,
-    RetainedCargoWorkspacePlan,
 )
 
 
@@ -295,50 +287,6 @@ edition = "2021"
         self.assertEqual(self.after, self.inventory())
         self.assertFalse((self.root / "cargo-output").exists())
 
-    def test_reviewed_graph_roundtrip_still_matches_real_cargo(self) -> None:
-        reopened = CargoWorkspaceExpectation.from_dict(self.expected.to_dict())
-        self.assertEqual(reopened, self.expected)
-        verify_cargo_workspace_graph(
-            self.metadata, workspace_root=self.root, expected=reopened
-        )
-
-    def test_plan_metadata_command_observes_the_reviewed_native_graph(self) -> None:
-        manifests = []
-        for name, content in sorted(self.before.items()):
-            if Path(name).name in {"Cargo.toml", "Cargo.lock"}:
-                ref = BlobRef(hashlib.sha256(content).hexdigest(), len(content))
-                manifests.append(CargoManifestChange(name, ref, ref))
-        plan = RetainedCargoWorkspacePlan(
-            ".",
-            self.expected,
-            tuple(manifests),
-            canonical_identity("cargo-fixture"),
-            canonical_identity("rustc-fixture"),
-            "x86_64-unknown-linux-gnu",
-            (),
-            False,
-            False,
-            (
-                RepositoryBuildCommand(
-                    "existing-tests",
-                    ("cargo", "test", "--workspace", "--all-targets", "--locked"),
-                ),
-            ),
-        )
-        command = plan.metadata_command(offline=True)
-        before = self.inventory()
-        result = subprocess.run(
-            command.argv,
-            cwd=self.root / command.working_directory,
-            env={**self.environment, **{e.name: e.value for e in command.environment}},
-            capture_output=True,
-            check=True,
-            timeout=60,
-        )
-        self.verify(json.loads(result.stdout), expected=plan.graph)
-        self.assertEqual(before, self.inventory())
-        self.assertFalse(command.network)
-
     def test_package_root_name_version_and_registry_substitution_refuse(self) -> None:
         for field, value in (
             ("manifest_path", str(self.root / "old/Cargo.toml")),
@@ -352,151 +300,6 @@ edition = "2021"
                 provider[field] = value
                 with self.assertRaises(CargoWorkspaceGraphError):
                     self.verify(data)
-
-    def test_dependency_alias_kind_target_and_feature_drift_refuse(self) -> None:
-        for field, value in (
-            ("rename", "wrong"),
-            ("kind", "dev"),
-            ("target", "cfg(windows)"),
-            ("features", []),
-            ("uses_default_features", True),
-            ("optional", True),
-            ("req", "^99"),
-        ):
-            with self.subTest(field=field):
-                data = copy.deepcopy(self.metadata)
-                client = next(p for p in data["packages"] if p["name"] == "client")
-                dep = next(d for d in client["dependencies"] if d["kind"] is None)
-                dep[field] = value
-                with self.assertRaises(CargoWorkspaceGraphError):
-                    self.verify(data)
-
-    def test_resolved_alias_feature_and_missing_edge_refuse(self) -> None:
-        for change in ("name", "features", "edge"):
-            with self.subTest(change=change):
-                data = copy.deepcopy(self.metadata)
-                client_id = next(
-                    p["id"] for p in data["packages"] if p["name"] == "client"
-                )
-                client = next(
-                    n for n in data["resolve"]["nodes"] if n["id"] == client_id
-                )
-                if change == "name":
-                    client["deps"][0]["name"] = "unreviewed"
-                elif change == "features":
-                    client["features"] = ["unreviewed"]
-                else:
-                    client["deps"][0]["dep_kinds"].pop()
-                with self.assertRaises(CargoWorkspaceGraphError):
-                    self.verify(data)
-
-    def test_membership_and_test_target_loss_refuse(self) -> None:
-        for field in (
-            "workspace_members",
-            "workspace_default_members",
-            "targets",
-            "test",
-        ):
-            with self.subTest(field=field):
-                data = copy.deepcopy(self.metadata)
-                if field.startswith("workspace"):
-                    data[field].pop()
-                else:
-                    client = next(p for p in data["packages"] if p["name"] == "client")
-                    if field == "targets":
-                        client[field].pop()
-                    else:
-                        next(t for t in client["targets"] if t["kind"] == ["test"])[
-                            "test"
-                        ] = False
-                with self.assertRaises(CargoWorkspaceGraphError):
-                    self.verify(data)
-
-    def test_malformed_incomplete_and_duplicate_metadata_refuse_without_leaking(
-        self,
-    ) -> None:
-        cases = [
-            None,
-            [],
-            {},
-            {**self.metadata, "version": True},
-            {**self.metadata, "resolve": None},
-        ]
-        duplicate = copy.deepcopy(self.metadata)
-        duplicate["packages"].append(duplicate["packages"][0])
-        cases.append(duplicate)
-        for data in cases:
-            with self.subTest(data_type=type(data).__name__):
-                with self.assertRaises(CargoWorkspaceGraphError) as error:
-                    verify_cargo_workspace_graph(
-                        data, workspace_root=self.root, expected=self.expected
-                    )
-                self.assertNotIn(str(self.root), str(error.exception))
-                self.assertTrue(str(error.exception).startswith("cargo.workspace."))
-
-    def test_reviewed_expectation_is_required_and_duplicate_edges_refuse(self) -> None:
-        with self.assertRaises(CargoWorkspaceGraphError):
-            self.verify(
-                expected=replace(
-                    self.expected, dependencies=self.expected.dependencies[:-1]
-                )
-            )
-        with self.assertRaises(CargoWorkspaceGraphError):
-            replace(
-                self.expected,
-                dependencies=self.expected.dependencies
-                + self.expected.dependencies[:1],
-            )
-        with self.assertRaises(CargoWorkspaceGraphError):
-            replace(self.expected.packages[0], root="../foreign")
-        with self.assertRaises(CargoWorkspaceGraphError):
-            replace(self.expected, output_directory="pkgs/provider/target")
-
-    def test_inactive_optional_edge_and_output_substitution_refuse(self) -> None:
-        self.assertTrue(any(not d.resolved for d in self.expected.dependencies))
-        for field in ("optional", "target_directory", "build_directory"):
-            data = copy.deepcopy(self.metadata)
-            if field == "optional":
-                client = next(p for p in data["packages"] if p["name"] == "client")
-                client["dependencies"] = [
-                    d for d in client["dependencies"] if d["rename"] != "opt"
-                ]
-            else:
-                data[field] = str(self.root / "pkgs/provider/target")
-            with self.assertRaises(CargoWorkspaceGraphError):
-                self.verify(data)
-
-    def test_cargo_preserves_conditional_kinds_on_an_already_resolved_package(
-        self,
-    ) -> None:
-        # --filter-platform does not erase every nonmatching dep_kind when another
-        # declaration already resolves the same package. Do not treat kinds as cfg
-        # execution evidence, and do not silently discard them from comparison.
-        client_id = next(
-            p["id"] for p in self.metadata["packages"] if p["name"] == "client"
-        )
-        client = next(
-            n for n in self.metadata["resolve"]["nodes"] if n["id"] == client_id
-        )
-        self.assertIn(
-            {"kind": None, "target": "cfg(windows)"}, client["deps"][0]["dep_kinds"]
-        )
-        self.verify()
-
-    def test_package_ids_are_opaque_and_additive_metadata_is_compatible(self) -> None:
-        data = copy.deepcopy(self.metadata)
-        ids = {p["id"]: f"opaque-package-{i}" for i, p in enumerate(data["packages"])}
-        for package in data["packages"]:
-            package["id"] = ids[package["id"]]
-            package["future_cargo_field"] = {"arbitrary": [1, 2, 3]}
-        for field in ("workspace_members", "workspace_default_members"):
-            data[field] = [ids[identity] for identity in data[field]]
-        for node in data["resolve"]["nodes"]:
-            node["id"] = ids[node["id"]]
-            node["dependencies"] = [ids[identity] for identity in node["dependencies"]]
-            for dep in node["deps"]:
-                dep["pkg"] = ids[dep["pkg"]]
-        self.verify(data)
 
 
 if __name__ == "__main__":

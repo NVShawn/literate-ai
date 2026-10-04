@@ -1,20 +1,12 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_evidence_records``."""
 
 
 import hashlib
 
-
-
-
-
-
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.identity import canonical_identity
-
-
 from literate_ai.security.evidence import (
     DSSE_MEDIA_TYPE,
     DerivationRun,
@@ -25,11 +17,13 @@ from literate_ai.security.evidence import (
     PlatformRun,
 )
 
+
 def _blob(label: str, media_type: str = "application/json") -> BlobRef:
     content = label.encode()
     return BlobRef(
         hashlib.sha256(content).hexdigest(), len(content), media_type=media_type
     )
+
 
 def _records():
     context = EvidenceRunContext(
@@ -67,4 +61,3 @@ def _records():
     )
     locator = EvidenceLocator("retained-ci", _blob("receipt"), 300)
     return derivation, platform, matrix, locator
-

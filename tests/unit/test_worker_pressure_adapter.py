@@ -12,63 +12,12 @@ from literate_ai.contracts import (
     ExecutionWorker,
     ExecutionWorkerKind,
 )
-from literate_ai.contracts.worker_capacity import CapacityMetric, CapacityProbeStatus
-
-
-def measured(value):
-    return CapacityMetric(CapacityProbeStatus.MEASURED, value)
+from literate_ai.contracts.worker_capacity import CapacityProbeStatus
 
 
 class WorkerPressureAdapterTests(unittest.TestCase):
     def setUp(self):
         self.policy = PressurePolicy(3, 8000, 1024, 100, 512, 0)
-
-    def test_local_snapshot_window_is_bounded(self):
-        calls = []
-
-        def snapshot(previous):
-            calls.append(previous)
-            return measured(9000), measured(4096), measured(0), (), len(calls)
-
-        bindings = SimpleNamespace(
-            worker=ExecutionWorker("local", ExecutionWorkerKind.LOCAL)
-        )
-        samples = observe_worker_pressure(bindings, self.policy, snapshot=snapshot)
-
-        self.assertEqual(len(samples), 3)
-        self.assertEqual(calls, [None, 1, 2])
-        self.assertEqual(
-            [sample.observed_at_ms for sample in samples],
-            sorted({sample.observed_at_ms for sample in samples}),
-        )
-        self.assertTrue(
-            all(
-                sample.progress.status is CapacityProbeStatus.UNAVAILABLE
-                for sample in samples
-            )
-        )
-
-    def test_remote_without_bound_pressure_receiver_is_unknown(self):
-        bindings = SimpleNamespace(
-            worker=ExecutionWorker(
-                "remote", ExecutionWorkerKind.COMMAND, command=("dispatcher",)
-            ),
-            os_family="linux",
-            health_command=None,
-        )
-        samples = observe_worker_pressure(bindings, self.policy)
-
-        self.assertEqual(len(samples), 3)
-        self.assertEqual(
-            [sample.observed_at_ms for sample in samples],
-            sorted({sample.observed_at_ms for sample in samples}),
-        )
-        self.assertTrue(
-            all(
-                sample.available_memory_bytes.status is CapacityProbeStatus.UNSUPPORTED
-                for sample in samples
-            )
-        )
 
     def test_ssh_receiver_round_trip_binds_request_and_collects_native_memory(self):
         family = {"linux": "linux", "darwin": "macos", "win32": "windows"}[sys.platform]

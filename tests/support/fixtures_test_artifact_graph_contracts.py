@@ -1,10 +1,9 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_artifact_graph_contracts``."""
 
 import hashlib
-
 import unittest
-
 from dataclasses import replace
 
 from literate_ai.application.artifact_graph import (
@@ -13,13 +12,9 @@ from literate_ai.application.artifact_graph import (
     create_artifact_build_graph,
     plan_isolated_materialization,
 )
-
 from literate_ai.contracts._validation import ContractValidationError
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.capabilities import DependencyKind
-
 from literate_ai.contracts.executable_components.artifacts import (
     ArtifactAssemblyDependency,
     ArtifactBuildGraph,
@@ -30,20 +25,20 @@ from literate_ai.contracts.executable_components.artifacts import (
     GeneratedTextTree,
     SourceTreeEntryOrigin,
 )
-
 from literate_ai.contracts.executable_components.assets import AuthoredBinaryAsset
-
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
-
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+
 
 def identity(label: str) -> ContentIdentity:
     return canonical_identity({"fixture": label})
+
 
 def blob(content: bytes, media_type: str) -> BlobRef:
     return BlobRef(
         hashlib.sha256(content).hexdigest(), len(content), media_type=media_type
     )
+
 
 class SourceAssemblyTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -136,6 +131,7 @@ class SourceAssemblyTests(unittest.TestCase):
         document = plan.to_dict()
         self.assertNotIn("host_path", repr(document))
         self.assertIn("fresh-empty-exact-blobs", repr(document))
+
 
 class ArtifactGraphTests(unittest.TestCase):
     target = identity("linux-x86_64")
@@ -501,6 +497,6 @@ class ArtifactGraphTests(unittest.TestCase):
         )
         self.assertEqual(graph.build_system_driver_identity, alternative)
 
+
 if __name__ == "__main__":
     unittest.main()
-

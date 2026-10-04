@@ -1,57 +1,44 @@
 """Shared fixtures extracted from ``tests.unit.test_native_sdk_standard_authority``."""
 
 import json
-
 import sys
-
 import unittest
-
 from dataclasses import replace
-
 from types import SimpleNamespace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.dependencies import (
     build_cyclonedx_bom,
     validate_resolved_cyclonedx_bom,
 )
-
 from literate_ai.adapters.dependencies.observation import PortableHostDependencyObserver
-
 from literate_ai.adapters.lifecycle import (
     LocalStandardLifecycleError,
     LocalStandardLifecyclePorts,
     local_generated_source_tree_identity,
 )
-
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
-
 from literate_ai.adapters.native_sdk_package import NativeSdkPackageResources
-
 from literate_ai.application.artifact_graph import (
     create_artifact_build_graph,
     realize_manifest,
 )
-
 from literate_ai.application.standard_project_lifecycle import (
     StandardComponentBuildIntent,
     StandardComponentBuildPlan,
 )
-
 from literate_ai.contracts import CYCLONEDX_SOURCE_SBOM_PATH, CycloneDxLifecycle
-
 from literate_ai.contracts.identity import canonical_identity
-
 from literate_ai.contracts.sbom import project_component_lock_managed_graph
-
 from literate_ai.storage.cas import BlobIntegrityError
-
-from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
-
+from tests.support import (
+    fixtures_test_native_sdk_source_build as test_native_sdk_source_build,
+)
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_local_command_adapter import (
+    _python_copy_lifecycle,
+)
 
-from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
 
 class NativeSdkStandardAuthorityTests(unittest.TestCase):
     def setUp(self):
@@ -348,4 +335,3 @@ class NativeSdkStandardAuthorityTests(unittest.TestCase):
             self.ports.authorize(intent, index)
         with self.assertRaises(BlobIntegrityError):
             self.ports.finalize(intent, authorization)
-

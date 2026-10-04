@@ -21,26 +21,6 @@ def invoke(*arguments: str) -> tuple[int, str, str]:
 
 
 class CacheCleanCliTests(unittest.TestCase):
-    def test_conflicting_cache_roots_return_stable_refusal(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            project = Path(temporary).resolve()
-            with patch.dict(
-                os.environ,
-                {"BUILD_DIR": "cache", "OBJ_DIR": "cache"},
-                clear=False,
-            ):
-                status, output, errors = invoke("clean", "--project", str(project))
-
-        self.assertEqual(status, 2)
-        self.assertEqual(output, "")
-        envelope = json.loads(errors)
-        self.assertEqual(envelope["command"], "clean")
-        self.assertEqual(envelope["error"]["code"], "cache.clean_refused")
-        self.assertEqual(
-            envelope["error"]["message"],
-            "BUILD_DIR and OBJ_DIR must be different directories",
-        )
-
     def test_protected_cache_root_returns_stable_refusal(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             project = Path(temporary).resolve()

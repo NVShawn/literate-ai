@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_project_agent_development_workflow``."""
 
 
@@ -23,6 +24,7 @@ def _source_intelligence_policy() -> ProjectSourceIntelligencePolicy:
         artifact_publication=SourceIntelligenceArtifactPublication.METADATA_ONLY,
     )
 
+
 def _definition(**overrides: object) -> ProjectDefinition:
     fields: dict[str, object] = dict(
         project_id="workflow-project",
@@ -39,4 +41,3 @@ def _definition(**overrides: object) -> ProjectDefinition:
     )
     fields.update(overrides)
     return ProjectDefinition(**fields)
-

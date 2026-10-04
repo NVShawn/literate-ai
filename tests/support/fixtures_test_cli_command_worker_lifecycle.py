@@ -1,16 +1,9 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_cli_command_worker_lifecycle``."""
 
 
-
-
-
 from pathlib import Path
-
-
-
-
-
 
 from literate_ai.contracts import (
     ContentReference,
@@ -22,6 +15,7 @@ from literate_ai.contracts import (
     ObservedExecutionEnvironment,
     canonical_identity,
 )
+
 
 def _request(
     _args: object,
@@ -60,6 +54,7 @@ def _request(
         ),
         entrypoint=entrypoint,
     )
+
 
 class _Dispatcher:
     calls: list[ExecutionDispatchRequest] = []
@@ -108,4 +103,3 @@ class _Dispatcher:
             ),
             "",
         )
-

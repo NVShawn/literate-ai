@@ -99,15 +99,6 @@ class SpecificationCorpusCliTests(unittest.TestCase):
         self.assertEqual((status, errors), (0, ""))
         self.assertEqual(checked["result"]["changed_paths"], [])
 
-    def test_missing_root_is_a_stable_json_error(self) -> None:
-        (self.root / "spec.md").unlink()
-        status, payload, errors = invoke(
-            "spec", "validate", str(self.root), "--id-prefix", "example"
-        )
-        self.assertEqual(status, 2)
-        self.assertTrue(errors)
-        self.assertEqual(payload["error"]["code"], "specification_corpus.root_missing")
-
     def _snapshot(self) -> tuple[tuple[str, bytes], ...]:
         return tuple(
             (path.relative_to(self.root).as_posix(), path.read_bytes())

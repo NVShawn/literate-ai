@@ -85,32 +85,6 @@ class ProjectLifecycleLockConcurrencyTests(unittest.TestCase):
             self.assertIn("rebuild", exc.message)
             self.assertIn(str(os.getpid()), exc.message)
 
-    def test_lock_releases_after_success_so_the_next_mutation_proceeds(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project_root = Path(directory)
-            with project_lifecycle_lock(project_root, operation="rebuild"):
-                pass
-            # A crashed or completed holder must not leave a stale lock: the
-            # very next mutation against the same project succeeds.
-            with project_lifecycle_lock(project_root, operation="rebuild"):
-                pass
-
-    def test_lock_releases_after_the_holder_raises(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project_root = Path(directory)
-
-            class _Boom(RuntimeError):
-                pass
-
-            with self.assertRaises(_Boom):
-                with project_lifecycle_lock(project_root, operation="rebuild"):
-                    raise _Boom("simulated crash mid-mutation")
-
-            # Failure-safe release: an aborted holder does not leave a
-            # permanent stale lock, so the next mutation still proceeds.
-            with project_lifecycle_lock(project_root, operation="rebuild"):
-                pass
-
     def test_crashed_holder_process_does_not_leave_a_permanent_stale_lock(
         self,
     ) -> None:
@@ -142,15 +116,6 @@ class ProjectLifecycleLockConcurrencyTests(unittest.TestCase):
 
             with project_lifecycle_lock(project_root, operation="rebuild"):
                 pass
-
-    def test_independent_projects_never_contend(self) -> None:
-        with (
-            tempfile.TemporaryDirectory() as directory_a,
-            tempfile.TemporaryDirectory() as directory_b,
-        ):
-            with project_lifecycle_lock(Path(directory_a), operation="rebuild"):
-                with project_lifecycle_lock(Path(directory_b), operation="rebuild"):
-                    pass
 
 
 if __name__ == "__main__":

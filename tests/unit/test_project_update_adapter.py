@@ -35,10 +35,10 @@ from literate_ai.contracts import (
 )
 from literate_ai.projects import discover_project
 from literate_ai.repository_urls import repository_urls_equivalent
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 from tests.unit.root_parent_adapter import (
     RootParentProjectInitializationAdapter as FilesystemProjectInitializationAdapter,
 )
-from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _origin(revision: str, version: str) -> ProjectInitializationOrigin:

@@ -1,8 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_generated_tests``."""
-
-
-
 
 
 from literate_ai.generated_tests import (
@@ -11,6 +9,7 @@ from literate_ai.generated_tests import (
 )
 
 RECIPE_IDENTITY = "sha256:" + "1" * 64
+
 
 def valid_suite() -> dict[str, object]:
     return {
@@ -41,4 +40,3 @@ def valid_suite() -> dict[str, object]:
             },
         ],
     }
-

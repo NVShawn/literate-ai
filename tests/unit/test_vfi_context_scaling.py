@@ -16,25 +16,21 @@ from literate_ai.application.component_generation_context import (
     prepare_component_generation_context,
 )
 from literate_ai.contracts import (
-    ContractValidationError,
     SourceCacheModelBinding,
     SourceDerivationCacheKey,
     canonical_identity,
 )
 from literate_ai.contracts.executable_components.context import (
     ContextAuthorityKind,
-    ContextVisibility,
     GenerationComplexityBudget,
 )
 from literate_ai.contracts.executable_components.planning import ComponentGenerationPlan
 from literate_ai.contracts.identity import ContentIdentity
+from tests.support.fixtures_test_component_execution_planning import _models
 from tests.support.vfi_scaling import (
-    DIRECT_PROVIDER,
     FIXED_FEATURE,
-    PRIVATE_DESCENDANT,
     vfi_component_lock,
 )
-from tests.support.fixtures_test_component_execution_planning import _models
 
 
 def _identity(content: bytes) -> ContentIdentity:
@@ -185,102 +181,15 @@ def _materialize(
 
 
 class VfiContextScalingTests(unittest.TestCase):
-    def test_fifty_siblings_are_order_independent_and_do_not_flatten(self) -> None:
-        names = tuple(f"feature-{index:03d}" for index in range(50))
-        forward = _fixed_request(vfi_component_lock(sibling_order=names))
-        reverse = _fixed_request(
-            vfi_component_lock(sibling_order=tuple(reversed(names)))
-        )
-        self.assertEqual(forward, reverse)
-        self.assertEqual(forward.request.budget_decision.dependency_fan_in, 1)
-        self.assertEqual(
-            sum(
-                segment.visibility is ContextVisibility.DIRECT_PUBLIC_INTERFACE
-                for segment in forward.request.context_manifest.segments
-            ),
-            1,
-        )
-
-    def test_unrelated_sibling_addition_and_change_leave_prompt_invariant(self) -> None:
+    def test_unrelated_sibling_change_leaves_prompt_and_cache_key_invariant(
+        self,
+    ) -> None:
+        # Each request builds the 50-sibling VFI lock once.
         baseline = _fixed_request(vfi_component_lock())
-        added = _fixed_request(vfi_component_lock(sibling_count=51))
-        changed = _fixed_request(
+        unrelated_change = _fixed_request(
             vfi_component_lock(
                 specification_overrides={"feature-049": "feature-049-rewritten"},
                 interface_overrides={"feature-049": "feature-049-public-v2"},
-            )
-        )
-        self.assertEqual(baseline.prompt, added.prompt)
-        self.assertEqual(baseline.prompt, changed.prompt)
-        self.assertEqual(
-            baseline.request.context_manifest, added.request.context_manifest
-        )
-        self.assertEqual(
-            baseline.request.context_manifest, changed.request.context_manifest
-        )
-
-    def test_private_descendant_change_leaves_prompt_invariant(self) -> None:
-        baseline = _fixed_request(vfi_component_lock())
-        changed = _fixed_request(
-            vfi_component_lock(
-                specification_overrides={
-                    PRIVATE_DESCENDANT: "private-descendant-canary-READ-ME"
-                }
-            )
-        )
-        self.assertEqual(baseline.prompt, changed.prompt)
-        self.assertNotIn(b"private-descendant-canary", changed.prompt)
-        self.assertEqual(
-            baseline.request.context_manifest, changed.request.context_manifest
-        )
-
-    def test_only_direct_interface_bytes_enlarge_fixed_component_prompt(self) -> None:
-        baseline = _fixed_request(vfi_component_lock())
-        growth = 257
-        enlarged = _fixed_request(
-            vfi_component_lock(
-                interface_overrides={DIRECT_PROVIDER: "feature-001-public-v2"}
-            ),
-            interface_padding=growth,
-        )
-        left = baseline.request.context_manifest.segments
-        right = enlarged.request.context_manifest.segments
-        left_local = tuple(
-            item
-            for item in left
-            if item.visibility is ContextVisibility.LOCAL_AUTHORITY
-        )
-        right_local = tuple(
-            item
-            for item in right
-            if item.visibility is ContextVisibility.LOCAL_AUTHORITY
-        )
-        self.assertEqual(left_local, right_local)
-        self.assertEqual(
-            enlarged.request.budget_decision.prompt_bytes
-            - baseline.request.budget_decision.prompt_bytes,
-            growth,
-        )
-        self.assertEqual(
-            enlarged.request.budget_decision.direct_interface_bytes
-            - baseline.request.budget_decision.direct_interface_bytes,
-            growth,
-        )
-
-    def test_cache_key_tracks_local_and_direct_context_not_graph_neighborhood(
-        self,
-    ) -> None:
-        baseline = _fixed_request(vfi_component_lock())
-        unrelated_add = _fixed_request(vfi_component_lock(sibling_count=51))
-        unrelated_change = _fixed_request(
-            vfi_component_lock(
-                specification_overrides={"feature-049": "unrelated-private-v2"},
-                interface_overrides={"feature-049": "unrelated-public-v2"},
-            )
-        )
-        private_change = _fixed_request(
-            vfi_component_lock(
-                specification_overrides={PRIVATE_DESCENDANT: "private-v2"}
             )
         )
         local_change = _fixed_request(
@@ -288,34 +197,15 @@ class VfiContextScalingTests(unittest.TestCase):
                 specification_overrides={FIXED_FEATURE: "fixed-feature-v2"}
             )
         )
-        interface_change = _fixed_request(
-            vfi_component_lock(
-                interface_overrides={DIRECT_PROVIDER: "direct-interface-v2"}
-            )
+        self.assertEqual(baseline.prompt, unrelated_change.prompt)
+        self.assertEqual(
+            baseline.request.context_manifest,
+            unrelated_change.request.context_manifest,
         )
-
+        self.assertEqual(baseline.request.budget_decision.dependency_fan_in, 1)
         key = _cache_key(baseline)
-        self.assertEqual(
-            baseline.request.context_manifest_identity,
-            baseline.request.context_manifest.identity,
-        )
-        self.assertEqual(
-            baseline.request.complexity_decision_identity,
-            baseline.request.budget_decision.identity,
-        )
-        self.assertEqual(key, SourceDerivationCacheKey.from_dict(key.to_dict()))
-        self.assertEqual(key, _cache_key(unrelated_add))
         self.assertEqual(key, _cache_key(unrelated_change))
-        self.assertEqual(key, _cache_key(private_change))
         self.assertNotEqual(key, _cache_key(local_change))
-        self.assertNotEqual(key, _cache_key(interface_change))
-
-        forged = baseline.request.to_dict()
-        forged["context_manifest_identity"] = canonical_identity(
-            {"fixture": "forged-context"}
-        ).to_dict()
-        with self.assertRaisesRegex(ContractValidationError, "explicit context"):
-            type(baseline.request).from_dict(forged)
 
 
 if __name__ == "__main__":

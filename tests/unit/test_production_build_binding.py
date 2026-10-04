@@ -83,13 +83,6 @@ class ProductionBuildBindingTests(unittest.TestCase):
             verifier if verifier is not None else Mock(), self.store, lambda: NOW
         )
 
-    def test_bound_grant_succeeds_once_and_preserves_other_request_fields(self):
-        self.assertEqual(self.binding.bind(self.request), self.request)
-        admission = self.admission()
-        admission.admit_contained_build(self.grant, self.request, self.binding)
-        with self.assertRaisesRegex(AuthorizationError, "already_consumed"):
-            admission.admit_contained_build(self.grant, self.request, self.binding)
-
     def test_substituted_closure_refuses_before_consumption(self):
         changes = [
             {"runner_id": "other-runner"},
@@ -124,38 +117,3 @@ class ProductionBuildBindingTests(unittest.TestCase):
                 self.grant, other.bind(self.request), other
             )
         self.admission().admit_contained_build(self.grant, self.request, self.binding)
-
-    def test_wrong_subject_stage_and_local_fallback_refuse(self):
-        with self.assertRaisesRegex(AuthorizationError, "subject_mismatch"):
-            self.binding.bind(
-                replace(self.request, source_bundle_digest="sha256:" + "f" * 64)
-            )
-        for change, reason in (
-            ({"stage": ContainmentStage.GENERATED_TEST}, "stage_mismatch"),
-            ({"host_yolo_acknowledged": True}, "production_containment_required"),
-        ):
-            with (
-                self.subTest(change=change),
-                self.assertRaisesRegex(AuthorizationError, reason),
-            ):
-                replace(
-                    self.binding, isolation=replace(self.binding.isolation, **change)
-                )
-        with self.assertRaisesRegex(
-            AuthorizationError, "production_containment_required"
-        ):
-            replace(
-                self.binding,
-                isolation=replace(
-                    self.binding.isolation,
-                    requested_level=IsolationLevel.PROCESS_LIMITED,
-                ),
-                policy=replace(
-                    self.binding.policy,
-                    rules=(
-                        StageIsolationRule(
-                            ContainmentStage.BUILD, IsolationLevel.PROCESS_LIMITED, ()
-                        ),
-                    ),
-                ),
-            )

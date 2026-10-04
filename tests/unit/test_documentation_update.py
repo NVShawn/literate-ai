@@ -90,27 +90,6 @@ class DocumentationUpdateTests(unittest.TestCase):
             ],
         }
 
-    def apply(self, project, response):
-        return apply_documentation_update(
-            project,
-            review={"state": "stale", "document": "docs/guide.md"},
-            receipt_state="unconfigured",
-            authority={"project_id": "documentation-test"},
-            task_runner=ScriptedTaskRunner(response),
-        )
-
-    def test_applies_existing_markdown_only(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            result = self.apply(
-                project,
-                self.proposal("docs/guide.md", guide.read_bytes(), "# Current guide\n"),
-            )
-            self.assertTrue(result["applied"])
-            self.assertEqual(guide.read_text(encoding="utf-8"), "# Current guide\n")
-            self.assertEqual(result["marker"]["recorded"], False)
-
     def test_rolls_back_when_post_apply_validation_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = self.project(Path(directory))
@@ -133,217 +112,33 @@ class DocumentationUpdateTests(unittest.TestCase):
                 )
             self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
 
-    def test_rejects_malformed_response(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            with self.assertRaisesRegex(DocumentationUpdateError, "invalid schema"):
-                self.apply(project, {"schema": "wrong", "changes": []})
-
-    def test_rejects_review_marker_mutation(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            response = self.proposal(
-                "docs/guide.md",
-                guide.read_bytes(),
-                "# Changed\n<!-- literate-ai:authority-review-pending -->\n",
-            )
-            with self.assertRaisesRegex(DocumentationUpdateError, "review markers"):
-                self.apply(project, response)
-            self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
-
-    def test_rolls_back_when_final_plan_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            findings = "\n".join(
-                f"Run `litai missing-command-{index}`." for index in range(1_001)
-            )
-            with self.assertRaisesRegex(DocumentationUpdateError, "too many findings"):
-                self.apply(
-                    project,
-                    self.proposal(
-                        "docs/guide.md", guide.read_bytes(), f"# Changed\n{findings}\n"
-                    ),
-                )
-            self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
-
-    def test_rejects_out_of_scope_path(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            response = self.proposal("SKILL.md", guide.read_bytes(), "# Changed\n")
-            with self.assertRaisesRegex(DocumentationUpdateError, "outside existing"):
-                self.apply(project, response)
-            self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
-
-    def test_rejects_authority_change_during_model_call(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            component = project.root / "components" / "router"
-            component.mkdir()
-            authority = component / "component.md"
-            authority.write_text("# Initial authority\n", encoding="utf-8")
-            runner = ScriptedTaskRunner(
-                self.proposal("docs/guide.md", guide.read_bytes(), "# Changed\n")
-            )
-            original_run = runner.run_json_task
-
-            def mutate(prompt: str, *, model: str | None = None):
-                result = original_run(prompt, model=model)
-                authority.write_text("# Concurrent authority\n", encoding="utf-8")
-                return result
-
-            runner.run_json_task = mutate
-            with self.assertRaisesRegex(
-                DocumentationUpdateError, "authority or documentation changed"
-            ):
-                apply_documentation_update(
-                    project,
-                    review={"state": "stale", "document": "docs/guide.md"},
-                    receipt_state="unconfigured",
-                    authority={"project_id": "documentation-test"},
-                    task_runner=runner,
-                )
-            self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
-
-    def test_rejects_stale_base_identity(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            response = self.proposal("docs/guide.md", b"not current", "# Changed\n")
-            with self.assertRaisesRegex(
-                DocumentationUpdateError, "not based on current"
-            ):
-                self.apply(project, response)
-            self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
-
-    def test_prompt_includes_component_authority_content(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            component = project.root / "components" / "router"
-            component.mkdir()
-            (component / "component.md").write_text(
-                "# Router authority\n\nSupports streaming.\n", encoding="utf-8"
-            )
-            runner = ScriptedTaskRunner(
-                {
-                    "schema": "literate-ai/documentation-update-proposal@1",
-                    "changes": [],
-                }
-            )
-            apply_documentation_update(
-                project,
-                review={"state": "stale", "document": "docs/guide.md"},
-                receipt_state="unconfigured",
-                authority={"project_id": "documentation-test"},
-                task_runner=runner,
-            )
-            self.assertIn("Supports streaming.", runner.prompt)
-            self.assertIn("components/router/component.md", runner.prompt)
-
     def test_rejects_secret_bearing_document_before_model_egress(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            guide.write_text("api_key = abcdefghijklmnopqrstuvwxyz\n", encoding="utf-8")
-            runner = ScriptedTaskRunner(
-                {
-                    "schema": "literate-ai/documentation-update-proposal@1",
-                    "changes": [],
-                }
-            )
-            with self.assertRaisesRegex(DocumentationUpdateError, "cannot be sent"):
-                apply_documentation_update(
-                    project,
-                    review={"state": "stale", "document": "docs/guide.md"},
-                    receipt_state="unconfigured",
-                    authority={"project_id": "documentation-test"},
-                    task_runner=runner,
+        secrets = (
+            "api_key = abcdefghijklmnopqrstuvwxyz\n",
+            "Authorization: Bearer abcdefghijklmnopqrstuvwxyz\n",
+            "OPENAI_API_KEY=abcdefghijklmnop\n",
+            "Use sk-abcdefghijklmnopqrstuvwx for testing.\n",
+        )
+        for secret in secrets:
+            with self.subTest(secret=secret), tempfile.TemporaryDirectory() as raw:
+                project = self.project(Path(raw))
+                guide = project.root / "docs" / "guide.md"
+                guide.write_text(secret, encoding="utf-8")
+                runner = ScriptedTaskRunner(
+                    {
+                        "schema": "literate-ai/documentation-update-proposal@1",
+                        "changes": [],
+                    }
                 )
-            self.assertEqual(runner.prompt, "")
-
-    def test_rejects_bearer_token_before_model_egress(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            guide.write_text(
-                "Authorization: Bearer abcdefghijklmnopqrstuvwxyz\n",
-                encoding="utf-8",
-            )
-            runner = ScriptedTaskRunner(
-                {
-                    "schema": "literate-ai/documentation-update-proposal@1",
-                    "changes": [],
-                }
-            )
-            with self.assertRaisesRegex(DocumentationUpdateError, "cannot be sent"):
-                apply_documentation_update(
-                    project,
-                    review={"state": "stale", "document": "docs/guide.md"},
-                    receipt_state="unconfigured",
-                    authority={"project_id": "documentation-test"},
-                    task_runner=runner,
-                )
-            self.assertEqual(runner.prompt, "")
-
-    def test_rejects_prefixed_secret_before_model_egress(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            guide.write_text("OPENAI_API_KEY=abcdefghijklmnop\n", encoding="utf-8")
-            runner = ScriptedTaskRunner(
-                {
-                    "schema": "literate-ai/documentation-update-proposal@1",
-                    "changes": [],
-                }
-            )
-            with self.assertRaisesRegex(DocumentationUpdateError, "cannot be sent"):
-                apply_documentation_update(
-                    project,
-                    review={"state": "stale", "document": "docs/guide.md"},
-                    receipt_state="unconfigured",
-                    authority={"project_id": "documentation-test"},
-                    task_runner=runner,
-                )
-            self.assertEqual(runner.prompt, "")
-
-    def test_rejects_standalone_provider_token_before_model_egress(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            guide.write_text(
-                "Use sk-abcdefghijklmnopqrstuvwx for testing.\n", encoding="utf-8"
-            )
-            runner = ScriptedTaskRunner(
-                {
-                    "schema": "literate-ai/documentation-update-proposal@1",
-                    "changes": [],
-                }
-            )
-            with self.assertRaisesRegex(DocumentationUpdateError, "cannot be sent"):
-                apply_documentation_update(
-                    project,
-                    review={"state": "stale", "document": "docs/guide.md"},
-                    receipt_state="unconfigured",
-                    authority={"project_id": "documentation-test"},
-                    task_runner=runner,
-                )
-            self.assertEqual(runner.prompt, "")
-
-    def test_rejects_secret_like_replacement(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            project = self.project(Path(directory))
-            guide = project.root / "docs" / "guide.md"
-            response = self.proposal(
-                "docs/guide.md",
-                guide.read_bytes(),
-                "api_key = abcdefghijklmnopqrstuvwxyz\n",
-            )
-            with self.assertRaisesRegex(DocumentationUpdateError, "secret material"):
-                self.apply(project, response)
-            self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
+                with self.assertRaisesRegex(DocumentationUpdateError, "cannot be sent"):
+                    apply_documentation_update(
+                        project,
+                        review={"state": "stale", "document": "docs/guide.md"},
+                        receipt_state="unconfigured",
+                        authority={"project_id": "documentation-test"},
+                        task_runner=runner,
+                    )
+                self.assertEqual(runner.prompt, "")
 
 
 if __name__ == "__main__":

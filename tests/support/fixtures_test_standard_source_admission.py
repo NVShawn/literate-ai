@@ -1,8 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_source_admission``."""
-
-
-
 
 
 from literate_ai.contracts import (
@@ -13,8 +11,10 @@ from literate_ai.contracts import (
     canonical_identity,
 )
 
+
 def identity(label: str):
     return canonical_identity({"standard-source-admission-test": label})
+
 
 def generation(
     *,
@@ -66,4 +66,3 @@ def generation(
         identity("budget"),
         identity("complexity"),
     )
-

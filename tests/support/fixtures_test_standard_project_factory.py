@@ -1,34 +1,19 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_project_factory``."""
 
 import hashlib
-
-
-
-
 import sys
-
-
-
-
 from pathlib import Path
 
-
-
 from literate_ai.adapters.dependencies import HostDependencyObservation
-
 from literate_ai.adapters.lifecycle import (
     LocalComponentToolBinding,
 )
-
-
 from literate_ai.adapters.models import CodingCliSelection
-
 from literate_ai.adapters.standard_project import (
     project_standard_toolchain_closure,
 )
-
-
 from literate_ai.contracts import (
     ComponentArtifactExportShape,
     ComponentCommandContract,
@@ -40,15 +25,11 @@ from literate_ai.contracts import (
 )
 
 
-
-
-
-
-
 def _selection() -> CodingCliSelection:
     executable = Path(sys.executable).resolve(strict=True)
     digest = hashlib.sha256(executable.read_bytes()).hexdigest()
     return CodingCliSelection("codex", str(executable), f"sha256:{digest}")
+
 
 def _command_contracts(execution):
     binding = LocalComponentToolBinding(sys.executable)
@@ -101,6 +82,7 @@ def _command_contracts(execution):
     )
     return contracts, (binding,)
 
+
 def _toolchain_closure(execution, contracts, tool_bindings):
     by_revision = {item.component_revision.uri: item for item in contracts}
     provider_exports = sorted(
@@ -135,5 +117,8 @@ def _toolchain_closure(execution, contracts, tool_bindings):
         observer_identity=canonical_identity({"observer": "test-host-closure@1"}),
     )
 
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture  # noqa: F401
+
+from tests.support.fixtures_test_component_node_generation_preparation import (
+    _fixture,  # noqa: F401
+)
 # NOTE: names not defined at top level of tests.unit.test_standard_project_factory: ['_fixture']

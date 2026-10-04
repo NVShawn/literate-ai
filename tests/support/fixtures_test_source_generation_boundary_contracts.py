@@ -1,23 +1,18 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_source_generation_boundary_contracts``."""
-
-
-
-
-
 
 
 from literate_ai.contracts import (
     GeneratedSourceCandidate,
     SourceGenerationProvenance,
 )
-
-
-
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
+
 
 def _identity(label: str) -> ContentIdentity:
     return canonical_identity({"fixture": label})
+
 
 def _candidate() -> GeneratedSourceCandidate:
     return GeneratedSourceCandidate(
@@ -36,6 +31,7 @@ def _candidate() -> GeneratedSourceCandidate:
         source_bom_identity=_identity("bom"),
         generated_test_suite_identity=_identity("generated-test-suite"),
     )
+
 
 def _provenance(candidate: GeneratedSourceCandidate) -> SourceGenerationProvenance:
     return SourceGenerationProvenance(
@@ -64,4 +60,3 @@ def _provenance(candidate: GeneratedSourceCandidate) -> SourceGenerationProvenan
         ),
         candidate_identity=candidate.identity,
     )
-

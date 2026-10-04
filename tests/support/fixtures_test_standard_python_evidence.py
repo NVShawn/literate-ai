@@ -1,35 +1,27 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_python_evidence``."""
 
 import hashlib
-
 import json
-
 import os
-
 import unittest
-
 from dataclasses import fields, replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.dependencies.python_source import (
     prepare_python_source_authority,
 )
-
 from literate_ai.adapters.dependencies.python_target import observe_python_wheel_target
-
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-
 from literate_ai.adapters.lifecycle.standard_python import (
     StandardPythonBuildBinding,
     retain_standard_python_dependencies,
     verify_standard_python_dependencies,
 )
-
 from literate_ai.contracts import ContentIdentity, canonical_identity
-
 from tests.support import fixtures_test_python_install as install_fixtures
+
 
 class StandardPythonEvidenceTests(unittest.TestCase):
     @classmethod
@@ -204,6 +196,6 @@ class StandardPythonEvidenceTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.verify(evidence, expected_identity=None)
 
+
 if __name__ == "__main__":
     unittest.main()
-

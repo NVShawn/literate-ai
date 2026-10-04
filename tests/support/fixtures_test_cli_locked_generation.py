@@ -1,46 +1,31 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_cli_locked_generation``."""
 
 import json
-
-
 import shutil
-
-
-
 from pathlib import Path
-
-
-
 
 from literate_ai.adapters.component_lock_planning import (
     FilesystemComponentLockPlanner,
 )
-
 from literate_ai.adapters.component_locks import ComponentLockStore
-
 from literate_ai.adapters.component_resolution_audits import (
     ComponentResolutionAuditStore,
 )
-
-
-
 from literate_ai.application.component_lock_resolution import ComponentLockResolver
-
-
 from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
-
 from tests.support.fixtures_test_component_lock_planning import _fixture
-
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 
 _SELECTORS = ("+macos", "+python")
 
 _TARGET = "macos-host"
+
 
 def _generation_fixture(root: Path) -> tuple[Path, Path]:
     component, flavors = _fixture(root)
@@ -85,6 +70,7 @@ def _generation_fixture(root: Path) -> tuple[Path, Path]:
     python_manifest.write_bytes(render_authoring_markdown(python_flavor, body))
     return component, flavors
 
+
 def _write_lock(component: Path, flavors: Path):
     plan = FilesystemComponentLockPlanner().plan(
         component,
@@ -98,6 +84,7 @@ def _write_lock(component: Path, flavors: Path):
     ComponentResolutionAuditStore(component, _TARGET).update(result.catalog_audit)
     ComponentLockStore(component).update(result.lock)
     return result.lock
+
 
 def _add_generation_dependency(component: Path) -> None:
     root_document = component / "component.md"
@@ -173,4 +160,3 @@ The dependency SHALL keep its implementation private.
         path = dependency / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
-

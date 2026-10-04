@@ -1,50 +1,32 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_evidence_storage``."""
 
 import hashlib
-
 import http.client
-
 import ipaddress
-
-
 import ssl
-
-
 import tempfile
-
 import threading
-
 import unittest
-
-
 from datetime import UTC, datetime, timedelta
-
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from cryptography import x509
-
 from cryptography.hazmat.primitives import hashes, serialization
-
 from cryptography.hazmat.primitives.asymmetric import ec
-
 from cryptography.x509.oid import NameOID
 
 from literate_ai.adapters.evidence_storage import (
     HttpsEvidenceStore,
 )
-
 from literate_ai.application.evidence_resolution import (
     ConfiguredEvidenceResolver,
     resolve_statement_evidence,
 )
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.security.evidence import (
     STATEMENT_MEDIA_TYPE,
     DerivationRun,
@@ -57,13 +39,14 @@ from literate_ai.security.evidence import (
     EvidenceStorageError,
     verify_evidence_statement,
 )
-
 from tests.support.fixtures_test_evidence_records import _records
+
 
 def _reference(content=b"verified", media_type="application/octet-stream"):
     return BlobRef(
         hashlib.sha256(content).hexdigest(), len(content), media_type=media_type
     )
+
 
 class HttpsEvidenceStoreTests(unittest.TestCase):
     @classmethod
@@ -369,6 +352,6 @@ class HttpsEvidenceStoreTests(unittest.TestCase):
             else:
                 self.fail("wrong media was accepted")
 
+
 if __name__ == "__main__":
     unittest.main()
-

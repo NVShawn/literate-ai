@@ -1,49 +1,34 @@
 """Shared fixtures extracted from ``tests.unit.test_action_build_source``."""
 
 import shutil
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from datetime import UTC, datetime, timedelta
-
 from pathlib import Path
-
 from unittest.mock import Mock
 
 from literate_ai.adapters.action_blob_source import HttpActionBlobSource
-
 from literate_ai.adapters.action_build_source import materialize_build_source
-
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.adapters.source_evidence_validation import (
     SourceEvidenceValidationInputs,
 )
-
 from literate_ai.contracts import ComponentCommandPhase, canonical_identity
-
 from literate_ai.contracts.generation_cache import CachedSourceFile
-
 from literate_ai.security import AuthorizationError
-
 from literate_ai.storage import FileSystemCAS
-
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_standard_local_command_adapter import (
+    _python_copy_lifecycle,
+)
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
-from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
-
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture
-
-from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
 
 class ActionBuildSourceTests(unittest.TestCase):
     def setUp(self):
@@ -193,4 +178,3 @@ class ActionBuildSourceTests(unittest.TestCase):
                 self.fail("expired source was admitted")
         fetch.assert_not_called()
         self.assertEqual(list(self.workspace.iterdir()), [])
-

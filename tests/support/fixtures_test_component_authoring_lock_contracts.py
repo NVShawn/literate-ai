@@ -1,20 +1,15 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_authoring_lock_contracts``."""
 
 
 import json
-
-
-
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
-
 from referencing import Registry, Resource
 
-
 from literate_ai.contracts.capabilities import CapabilityRequirement, DependencyKind
-
 from literate_ai.contracts.component_locking import (
     AuthoredProvidedCapability,
     AuthoredRepositorySourceDependency,
@@ -22,27 +17,24 @@ from literate_ai.contracts.component_locking import (
     ComponentAuthoring,
     ComponentContentSelector,
 )
-
 from literate_ai.contracts.components import Entrypoint
-
 from literate_ai.contracts.flavors import FlavorAxis, FlavorCardinality, FlavorSlot
-
 from literate_ai.contracts.identity import ComponentCoordinate, canonical_identity
-
 from literate_ai.contracts.repositories import (
     RepositoryRevisionKind,
     RepositoryRevisionSelector,
 )
-
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
+
 
 def schema_catalog() -> SchemaCatalog:
     catalog = SchemaCatalog(ROOT / "schemas/v2")
     for path in sorted((ROOT / "schemas/v1").glob("*.schema.json")):
         catalog._collect(json.loads(path.read_text(encoding="utf-8")))
     return catalog
+
 
 def official_validator(resource_id: str) -> Draft202012Validator:
     registry = Registry()
@@ -54,12 +46,14 @@ def official_validator(resource_id: str) -> Draft202012Validator:
             )
     return Draft202012Validator({"$ref": resource_id}, registry=registry.crawl())
 
+
 def selector(kind: str, uri: str, *, pinned: bool = False) -> ComponentContentSelector:
     return ComponentContentSelector(
         kind,
         uri,
         canonical_identity({"pin": uri}) if pinned else None,
     )
+
 
 def authored_component() -> ComponentAuthoring:
     return ComponentAuthoring(
@@ -131,4 +125,3 @@ def authored_component() -> ComponentAuthoring:
             ),
         ),
     )
-

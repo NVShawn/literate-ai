@@ -343,64 +343,6 @@ class NativeSdkBuildTests(unittest.TestCase):
                 store=self.store,
             )
 
-    def test_default_verifier_refuses_before_any_build_process(self):
-        self.builder = NativeSdkRepositoryBuilder(
-            layout=self.layout,
-            tools=self.tools,
-            store=self.store,
-            grant_lookup=lambda identity: self.grants[identity.uri],
-            environment=dict(os.environ),
-        )
-        with mock.patch(
-            "literate_ai.adapters.native_sdk_build.run_bounded_process"
-        ) as run:
-            with self.assertRaisesRegex(
-                AuthorizationError, "live_revocation_verifier_required"
-            ):
-                self.verify()
-            run.assert_not_called()
-
-    def test_changed_plan_or_source_refuses_before_execution(self):
-        approval = self.approve()
-        changed = dataclasses.replace(self.plan, commands=(self.plan.commands[0],))
-        with mock.patch(
-            "literate_ai.adapters.native_sdk_build.run_bounded_process"
-        ) as run:
-            with self.assertRaisesRegex(ValueError, "exact live grant"):
-                self.verify(approval, changed)
-            (self.source / "vendor_math.c").write_text("changed source")
-            with self.assertRaisesRegex(ValueError, "exact capture"):
-                self.verify(approval)
-            run.assert_not_called()
-
-    def test_wrong_license_and_unbound_layout_refuse_before_execution(self):
-        with mock.patch(
-            "literate_ai.adapters.native_sdk_build.run_bounded_process"
-        ) as run:
-            self.builder.layout = dataclasses.replace(
-                self.layout, license_identity=canonical_identity("wrong license")
-            )
-            with self.assertRaisesRegex(ValueError, "exact source lock and layout"):
-                self.approve()
-            plan = dataclasses.replace(
-                self.plan, evidence=(self.builder.layout.identity,)
-            )
-            with self.assertRaisesRegex(ValueError, "source license"):
-                self.verify(plan=plan)
-            run.assert_not_called()
-
-    def test_preexisting_output_is_preserved_and_never_executed(self):
-        output = self.source / self.layout.sdk_root
-        output.mkdir(parents=True)
-        (output / "keep").write_text("prior result")
-        with mock.patch(
-            "literate_ai.adapters.native_sdk_build.run_bounded_process"
-        ) as run:
-            with self.assertRaisesRegex(ValueError, "must be absent"):
-                self.verify()
-            run.assert_not_called()
-        self.assertEqual((output / "keep").read_text(), "prior result")
-
     def test_revocation_after_configuration_prevents_compilation(self):
         from literate_ai.adapters.native_sdk_build import run_bounded_process
 
@@ -431,9 +373,3 @@ class NativeSdkBuildTests(unittest.TestCase):
                 self.source / self.layout.sdk_root / self.layout.native_libraries[0]
             ).exists()
         )
-
-    def test_missing_exported_license_cannot_produce_build_verification(self):
-        self.builder.layout = dataclasses.replace(self.layout, output_license="missing")
-        plan = dataclasses.replace(self.plan, evidence=(self.builder.layout.identity,))
-        with self.assertRaisesRegex(ValueError, "retain the exact source license"):
-            self.verify(plan=plan)

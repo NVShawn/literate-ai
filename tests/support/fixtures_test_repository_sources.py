@@ -1,13 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_sources``."""
-
-
-
-
-
-
-
-
 
 
 from literate_ai.application import (
@@ -15,7 +8,6 @@ from literate_ai.application import (
     RepositoryBuildVerification,
     RepositorySourceIndexBinding,
 )
-
 from literate_ai.contracts import (
     DependencyKind,
     ProjectSourceIntelligencePolicy,
@@ -32,11 +24,9 @@ from literate_ai.contracts import (
 )
 
 
-
-
-
 def identity(label: str):
     return canonical_identity({"fixture": label})
+
 
 def dependency(
     selector: RepositoryRevisionSelector | None = None,
@@ -47,6 +37,7 @@ def dependency(
         selector or RepositoryRevisionSelector(RepositoryRevisionKind.BRANCH, "main"),
         DependencyKind.BUILD,
     )
+
 
 def source_intelligence_policy(
     provider_id: str,
@@ -80,6 +71,7 @@ def source_intelligence_policy(
         ),
     )
 
+
 class _Indexer:
     def __init__(self, events: list[str]) -> None:
         self.events = events
@@ -93,6 +85,7 @@ class _Indexer:
             provider=identity("fixture-intelligence-provider"),
             index=self.index_identity,
         )
+
 
 class _Planner:
     def __init__(self, events: list[str]) -> None:
@@ -111,6 +104,7 @@ class _Planner:
             expected_outputs=("build/libportable.a",),
         )
 
+
 class _Authorizer:
     def __init__(self, events: list[str]) -> None:
         self.events = events
@@ -123,6 +117,7 @@ class _Authorizer:
             identity("classification"),
             identity("authorization"),
         )
+
 
 class _Builder:
     def __init__(self, events: list[str], *, passed: bool = True) -> None:
@@ -145,6 +140,7 @@ class _Builder:
             passed=self.passed,
         )
 
+
 class _Cache:
     def __init__(self, events: list[str]) -> None:
         self.events = events
@@ -152,4 +148,3 @@ class _Cache:
     def admit(self, _checkout, _capture, _admission):
         self.events.append("cache")
         return identity("cache-record")
-

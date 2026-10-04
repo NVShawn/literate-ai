@@ -46,7 +46,9 @@ from literate_ai.contracts.executable_components import (
 )
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 from literate_ai.security import AuthorizationError, BuildAuthorization
-from tests.support import fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority
+from tests.support import (
+    fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority,
+)
 from tests.support.fixtures_test_standard_local_command_adapter import (
     _provider_export,
     _python_copy_lifecycle,

@@ -1,22 +1,14 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_refresh_file_custody``."""
 
 import unittest
-
-
-
 from unittest.mock import patch
 
-
 from literate_ai.adapters import repository_refresh_ownership as ownership
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from literate_ai.adapters.repository_refresh_files import PreparedRefreshFiles
-
-
 from tests.support import fixtures_test_repository_refresh_publication as fixtures
-
 from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
@@ -97,4 +89,3 @@ class RefreshFileCustodyTests(unittest.TestCase):
             owned.require_inputs_unchanged()
         self.assertEqual(foreign.read_bytes(), b"private ignored content")
         self.assertEqual(snapshot(fixture.base), before)
-

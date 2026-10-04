@@ -1,28 +1,16 @@
 """Shared fixtures extracted from ``tests.unit.test_action_build_action``."""
 
-
-
-
-
-
-
-
 from literate_ai.adapters.action_dispatch_wire import record_identity
-
-
 from literate_ai.application.action_dag_planning import (
     lifecycle_action_payload,
     plan_lifecycle_action_dag,
 )
-
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchRequest,
     LifecycleActionKind,
     LifecycleActionWorker,
 )
-
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-
 
 
 def build_request(value, deadline):
@@ -60,4 +48,3 @@ def build_request(value, deadline):
         ),
         {record_identity(content): content, record_identity(payload): payload},
     )
-

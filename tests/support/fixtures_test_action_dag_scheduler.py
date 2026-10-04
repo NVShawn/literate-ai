@@ -1,19 +1,19 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_action_dag_scheduler``."""
 
 import threading
-
-
 
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchOutcome,
     LifecycleActionWorker,
 )
-
 from literate_ai.contracts.identity import canonical_identity
+
 
 def _identity(label: str):
     return canonical_identity({"test": label})
+
 
 def _worker(worker_id: str, *, slots: int = 1) -> LifecycleActionWorker:
     return LifecycleActionWorker(
@@ -23,6 +23,7 @@ def _worker(worker_id: str, *, slots: int = 1) -> LifecycleActionWorker:
         _identity(f"observation-{worker_id}"),
         slots,
     )
+
 
 class _RecordingDispatcher:
     def __init__(self, failures: dict[str, str] | None = None) -> None:
@@ -44,4 +45,3 @@ class _RecordingDispatcher:
     def cancel(self, request):
         with self.lock:
             self.cancelled.append(request)
-

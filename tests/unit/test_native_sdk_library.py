@@ -34,7 +34,9 @@ from literate_ai.contracts import (
 )
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 from literate_ai.security import AuthorizationError, BuildAuthorization
-from tests.support import fixtures_test_native_sdk_packaged_execution as test_native_sdk_packaged_execution
+from tests.support import (
+    fixtures_test_native_sdk_packaged_execution as test_native_sdk_packaged_execution,
+)
 
 _EVIDENCE_BYTE_LIMIT = 256 * 1024 * 1024
 

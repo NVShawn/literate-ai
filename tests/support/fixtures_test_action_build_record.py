@@ -1,19 +1,10 @@
 """Shared fixtures extracted from ``tests.unit.test_action_build_record``."""
 
-
-
-
-
 from literate_ai.adapters.action_build_record import (
     BuildWorkerInput,
 )
-
-
-
-
-
-
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+
 
 def build_worker_input(fixture):
     _, execution = _fixture()
@@ -30,4 +21,3 @@ def build_worker_input(fixture):
         execution.generation_plans[0],
         execution,
     )
-

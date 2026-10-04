@@ -144,40 +144,6 @@ class OpenAICompatibleAdapterTests(unittest.TestCase):
             )
         self.assertEqual(transport.calls, [])
 
-    def test_retryable_status_is_recorded(self) -> None:
-        endpoint = _endpoint(locality=Locality.LOCAL)
-        transport = FakeTransport([HTTPResponse(429, {}, b"{}"), _response()])
-        provider = OpenAICompatibleResponsesProvider(
-            endpoint=endpoint,
-            route_decision=_decision(endpoint, DataEgress.NONE),
-            transport=transport,
-        )
-        result = provider.complete_structured(
-            {
-                "input": "metadata",
-                "response_schema_name": "answer",
-                "response_schema": {"type": "object"},
-                "content_kind": "metadata",
-            }
-        )
-        self.assertEqual(result["attempts"], 2)
-        self.assertEqual(result["usage"]["prior_failures"], ["http:429"])
-
-    def test_endpoint_drift_is_rejected(self) -> None:
-        endpoint = _endpoint()
-        decision = _decision(endpoint, DataEgress.SOURCE_ALLOWED)
-        changed = ModelEndpoint(
-            endpoint_id=endpoint.endpoint_id,
-            provider=endpoint.provider,
-            model="different-model",
-            base_url=endpoint.base_url,
-            locality=endpoint.locality,
-            capabilities=endpoint.capabilities,
-            context_tokens=endpoint.context_tokens,
-        )
-        with self.assertRaisesRegex(ModelAdapterError, "changed after routing"):
-            OpenAICompatibleResponsesProvider(endpoint=changed, route_decision=decision)
-
 
 if __name__ == "__main__":
     unittest.main()

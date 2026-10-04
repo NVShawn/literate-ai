@@ -1,12 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_evidence_trust``."""
-
-
-
-
-
-
-
 
 
 from literate_ai.security.evidence import (
@@ -16,12 +10,12 @@ from literate_ai.security.evidence import (
     EvidenceStatement,
     RunEvidenceExpectation,
 )
-
-
 from tests.support.fixtures_test_evidence_records import _records
+
 
 def _signer():
     return Ed25519EvidenceSigner(bytes(range(32)))
+
 
 def _expectation(record=None):
     # Derive only the fixed test baseline here. Mutation tests retain this baseline
@@ -41,8 +35,8 @@ def _expectation(record=None):
         record.required_cells if isinstance(record, EvidenceMatrix) else (),
     )
 
+
 def _envelope(record, signer=None):
     return (signer or _signer()).sign(
         STATEMENT_MEDIA_TYPE, EvidenceStatement(record).to_bytes()
     )
-

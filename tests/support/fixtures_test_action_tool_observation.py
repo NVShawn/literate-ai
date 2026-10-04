@@ -1,21 +1,13 @@
 """Shared fixtures extracted from ``tests.unit.test_action_tool_observation``."""
 
 import json
-
 import os
-
 import sys
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from datetime import UTC, datetime, timedelta
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_capabilities import (
@@ -23,29 +15,23 @@ from literate_ai.adapters.action_capabilities import (
     probe_command_action_capabilities,
     run_command_observation,
 )
-
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
-
 from literate_ai.adapters.action_tool_observation import (
     MAX_TOOL_RESPONSE_BYTES,
     decode_tool_observation_response,
     probe_command_tool_observations,
 )
-
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-
 from literate_ai.contracts.execution_dispatch import (
     LIFECYCLE_ACTION_WIRE_PROTOCOL,
     ExecutionWorker,
     ExecutionWorkerEnvironment,
     ExecutionWorkerKind,
 )
-
 from literate_ai.storage import FileSystemCAS
-
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 _RECEIVER = """
@@ -68,6 +54,7 @@ accept_worker = ConfiguredAcceptWorker(binding, environment=dict(os.environ))
 raise SystemExit(main(build_worker=worker, test_worker=test_worker,
     execute_worker=execute_worker, accept_worker=accept_worker))
 """
+
 
 class ActionToolObservationTests(unittest.TestCase):
     def setUp(self):
@@ -246,5 +233,6 @@ class ActionToolObservationTests(unittest.TestCase):
                 with self.assertRaises(ActionWireError):
                     self.probe(authority)
                 transport.assert_not_called()
+
 
 # NOTE: names not defined at top level of tests.unit.test_action_tool_observation: ['deadline', 'environment', 'root', 'worker']

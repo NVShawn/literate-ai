@@ -1,42 +1,30 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_command_indexer``."""
 
 import os
-
 import threading
-
 import unittest
-
 from concurrent.futures import ThreadPoolExecutor
-
 from dataclasses import replace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
-
 from literate_ai.adapters.command_indexer import CommandGenerationIndexer
-
 from literate_ai.adapters.lifecycle.standard_local import LocalSourceTreeRegistry
-
 from literate_ai.adapters.qualification_capture import QualificationEvidenceRecorder
-
 from literate_ai.adapters.standard_project import (
     assemble_filesystem_standard_project_runtime,
 )
-
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-
 from literate_ai.storage import FileSystemCAS
-
 from tests.support import fixtures_test_action_source_index as source_fixture
-
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
-
 from tests.support.fixtures_test_standard_project_factory import (
     _command_contracts,
     _toolchain_closure,
 )
+
 
 class CommandIndexerTests(unittest.TestCase):
     def setUp(self):
@@ -252,4 +240,3 @@ class CommandIndexerTests(unittest.TestCase):
                 self.assertEqual(first.result(timeout=10), second.result(timeout=10))
             self.assertEqual(len(calls), 2)
             self.assertTrue(all(request.slot == 0 for request in calls))
-

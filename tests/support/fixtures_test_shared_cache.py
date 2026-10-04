@@ -1,9 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_shared_cache``."""
-
-
-
-
 
 
 from literate_ai.contracts.shared_cache import (
@@ -46,4 +43,3 @@ def _configuration(
         True,
         credential_reference,
     )
-

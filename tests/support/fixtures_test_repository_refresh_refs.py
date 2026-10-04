@@ -1,25 +1,19 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_refresh_refs``."""
 
 import os
-
 import subprocess
-
 import tempfile
-
 import unittest
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters import repository_refresh as refresh
-
 from literate_ai.adapters import repository_refresh_refs as refs
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from tests.support.fixtures_test_repository_orchestration import git, snapshot
+
 
 class RefreshReferenceTests(unittest.TestCase):
     def setUp(self):
@@ -173,4 +167,3 @@ class RefreshReferenceTests(unittest.TestCase):
         self.assertEqual(len(observed.commit), 64)
         self.assertIsNone(observed.references[0].file.content)
         self.assertEqual(snapshot(other), before)
-

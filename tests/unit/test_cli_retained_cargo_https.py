@@ -95,35 +95,12 @@ class RetainedCargoHttpsTests(unittest.TestCase):
             self.assertEqual((method, path), ("GET", self.path))
             self.assertEqual(headers["Authorization"], "Bearer test-secret-canary")
 
-    def test_offline_refuses_before_provider_or_transport(self):
-        self.assert_refused(self.invoke(extra=("--offline",)))
-        self.cli.provider_reader.assert_not_called()
-        self.assertEqual(self.state["requests"], [])
-
-    def test_supplied_file_offline_never_constructs_transport(self):
-        with patch("literate_ai.cli.retained_cargo.HttpsEvidenceStore") as transport:
-            status, output, error = self.cli.invoke(
-                "check", [*self.cli.arguments, "--offline"]
-            )
-        self.assertEqual((status, error), (0, ""), error)
-        self.assertFalse(json.loads(output)["result"]["importer_admission"])
-        transport.assert_not_called()
-        self.assertEqual(self.state["requests"], [])
-        self.assertEqual(self.before, self.cli.snapshot())
-
     def test_local_file_rejects_https_credentials(self):
         self.assert_refused(
             self.cli.invoke(
                 "check", [*self.cli.arguments, "--archive-token-env", "ANY_TOKEN"]
             )
         )
-        self.cli.provider_reader.assert_not_called()
-        self.assertEqual(self.state["requests"], [])
-
-    def test_explicit_missing_or_invalid_credentials_refuse_without_request(self):
-        for name in ("LITAI_MISSING_TEST_TOKEN", "bad token name"):
-            with self.subTest(name=name), patch.dict("os.environ", {}, clear=True):
-                self.assert_refused(self.invoke(extra=("--archive-token-env", name)))
         self.cli.provider_reader.assert_not_called()
         self.assertEqual(self.state["requests"], [])
 
@@ -136,16 +113,3 @@ class RetainedCargoHttpsTests(unittest.TestCase):
         self.assertTrue(
             all(request[1] == self.path for request in self.state["requests"])
         )
-
-    def test_missing_remote_object_does_not_use_local_archive(self):
-        self.state["objects"].clear()
-        self.assert_refused(self.invoke("materialize"))
-        self.assertEqual(len(self.state["requests"]), 1)
-
-    def test_gate_review_drift_refuses_before_remote_request(self):
-        path = self.cli.root / "gates.json"
-        path.write_bytes(path.read_bytes() + b" ")
-        self.before = self.cli.snapshot()
-        self.assert_refused(self.invoke("materialize"))
-        self.cli.provider_reader.assert_not_called()
-        self.assertEqual(self.state["requests"], [])

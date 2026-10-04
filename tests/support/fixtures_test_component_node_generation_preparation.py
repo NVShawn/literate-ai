@@ -1,25 +1,17 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_component_node_generation_preparation``."""
 
 import hashlib
-
-
-
 from dataclasses import replace
-
 from pathlib import Path
-
-
 
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-
-
 from literate_ai.application.locked_generation_authority import (
     LockedGenerationAuthority,
 )
-
 from literate_ai.contracts import (
     CapabilityRequirement,
     ComponentContentSelector,
@@ -40,7 +32,6 @@ from literate_ai.contracts import (
     RequirementConstraintSatisfaction,
     SelectedNodeFlavor,
 )
-
 from tests.support.fixtures_test_component_lock_contracts import (
     component_authoring,
     identity,
@@ -49,11 +40,14 @@ from tests.support.fixtures_test_component_lock_contracts import (
 
 ROOT = Path(__file__).resolve().parents[2]
 
+
 def _raw_identity(content: bytes) -> ContentIdentity:
     return ContentIdentity.parse_uri(f"sha256:{hashlib.sha256(content).hexdigest()}")
 
+
 def _reference(kind: str, uri: str, content: bytes) -> ContentReference:
     return ContentReference(kind, uri, _raw_identity(content))
+
 
 def _budget() -> GenerationComplexityBudget:
     return GenerationComplexityBudget(
@@ -67,6 +61,7 @@ def _budget() -> GenerationComplexityBudget:
         max_model_tokens=100_000,
         max_cost_microunits=50_000_000,
     )
+
 
 class _Snapshot:
     def __init__(self, authority, contents, flavor_contents) -> None:
@@ -83,6 +78,7 @@ class _Snapshot:
 
     def require_unchanged(self) -> None:
         self.guard_count += 1
+
 
 def _fixture(
     *,
@@ -420,6 +416,9 @@ def _fixture(
     }
     return snapshot, plan_component_execution(lock, model_identities=models)
 
-from literate_ai.adapters.generation_preparation import FilesystemComponentWorkspaceAllocator  # noqa: F401
-from literate_ai.adapters.generation_preparation import LockedComponentNodePreparationAdapter  # noqa: F401
+
+from literate_ai.adapters.generation_preparation import (
+    FilesystemComponentWorkspaceAllocator,  # noqa: F401
+    LockedComponentNodePreparationAdapter,  # noqa: F401
+)
 # NOTE: names not defined at top level of tests.unit.test_component_node_generation_preparation: ['FilesystemComponentWorkspaceAllocator', 'LockedComponentNodePreparationAdapter']

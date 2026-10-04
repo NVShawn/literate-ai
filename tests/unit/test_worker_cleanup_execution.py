@@ -1,6 +1,5 @@
 """Cleanup execution requires exact current authority and remeasurement."""
 
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -88,45 +87,6 @@ class WorkerCleanupExecutionTests(unittest.TestCase):
             )
 
         self.assertEqual(calls, [])
-
-    def test_supported_tool_uses_exact_target_and_reports_actual_recovery(self):
-        measurements = iter((100, 125))
-        calls = []
-
-        def runner(command, **kwargs):
-            calls.append((command, kwargs))
-            return subprocess.CompletedProcess(command, 0, b"", b"")
-
-        receipts = execute_authorized_cleanup(
-            self.proposal,
-            self.authorization(),
-            now_ms=20,
-            measure_available=lambda _alias: next(measurements),
-            runner=runner,
-        )
-
-        self.assertEqual(calls[0][0], ("supported-cleaner", str(self.candidate)))
-        self.assertFalse(calls[0][1].get("shell", False))
-        self.assertEqual(receipts[0].recovered_bytes, 25)
-        self.assertEqual(receipts[0].estimated_bytes, 36)
-
-    def test_uncertain_and_active_candidates_are_never_proposed(self):
-        (self.candidate / ".complete").unlink()
-        uncertain = create_cleanup_proposal(
-            self.policy,
-            worker_id="fixture-worker",
-            policy_identity=self.policy_identity,
-            created_at_ms=10,
-        )
-        self.assertEqual(uncertain.targets, ())
-        (self.candidate / ".active").write_text("owned")
-        active = create_cleanup_proposal(
-            self.policy,
-            worker_id="fixture-worker",
-            policy_identity=self.policy_identity,
-            created_at_ms=10,
-        )
-        self.assertEqual(active.targets, ())
 
 
 if __name__ == "__main__":

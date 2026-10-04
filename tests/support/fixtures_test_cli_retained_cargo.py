@@ -1,39 +1,30 @@
 """Shared fixtures extracted from ``tests.unit.test_cli_retained_cargo``."""
 
 import io
-
 import json
-
 import sys
-
 import unittest
-
 from dataclasses import replace
-
 from types import SimpleNamespace
-
 from unittest.mock import patch
 
 from literate_ai.cli import main
-
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-
 from literate_ai.contracts.retained_cargo_admission import (
     RetainedCargoAdmissionReceipt,
     RetainedCargoSourceRetirement,
 )
-
 from literate_ai.contracts.retained_cargo_tests import (
     RetainedCargoTestInventory,
     RetainedCargoTestTarget,
     retained_cargo_test_targets,
 )
-
 from tests.support import fixtures_test_retained_cargo_current as current_fixtures
-
-from tests.support import fixtures_test_retained_cargo_materialization as materialization_fixtures
-
+from tests.support import (
+    fixtures_test_retained_cargo_materialization as materialization_fixtures,
+)
 from tests.support.fixtures_test_retained_cargo_files import blob
+
 
 class RetainedCargoCliTests(unittest.TestCase):
     def setUp(self):
@@ -352,4 +343,3 @@ class RetainedCargoCliTests(unittest.TestCase):
                     all(not path.exists() for path in self.fixture.destinations)
                 )
         self.provider_reader.assert_not_called()
-

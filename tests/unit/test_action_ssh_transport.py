@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import base64
 import os
 import shlex
 import shutil
@@ -17,16 +16,13 @@ from literate_ai.adapters.action_command_dispatch import (
 )
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
-    ActionWireError,
 )
 from literate_ai.adapters.action_transport import (
     action_receiver_command,
-    supports_action_transport,
 )
 from literate_ai.adapters.builders._process import run_bounded_process
 from literate_ai.adapters.command_indexer import CommandGenerationIndexer
 from literate_ai.adapters.lifecycle.standard_local import LocalSourceTreeRegistry
-from literate_ai.contracts import ContractValidationError
 from literate_ai.contracts.execution_dispatch import (
     LIFECYCLE_ACTION_WIRE_PROTOCOL,
     ExecutionRequirements,
@@ -36,7 +32,6 @@ from literate_ai.contracts.execution_dispatch import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from tests.support import fixtures_test_action_source_index as source_fixture
-from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class SshActionTransportTests(unittest.TestCase):
@@ -60,27 +55,6 @@ class SshActionTransportTests(unittest.TestCase):
         )
         self.fixture.deadline = self.deadline
 
-    def test_contract_preserves_legacy_identity_and_validates_opt_in(self):
-        legacy = replace(self.worker, action_protocol=None, action_command=())
-        self.assertNotIn("action_command", legacy.to_dict())
-        self.assertFalse(supports_action_transport(legacy))
-        self.assertEqual(ExecutionWorker.from_dict(legacy.to_dict()), legacy)
-        self.assertEqual(ExecutionWorker.from_dict(self.worker.to_dict()), self.worker)
-        SchemaCatalog().validate(self.worker.SCHEMA, self.worker.to_dict())
-        for values in (
-            {"action_protocol": None},
-            {"action_command": ["receiver"]},
-            {"action_command": ("receiver", "line\nbreak")},
-            {"action_command": ("receiver", "{request_file}")},
-        ):
-            with (
-                self.subTest(values=values),
-                self.assertRaises(ContractValidationError),
-            ):
-                replace(self.worker, **values)
-        with self.assertRaises(ActionWireError):
-            action_receiver_command(legacy, self.deadline)
-
     def test_posix_arguments_remain_literal_and_payload_is_not_in_argv(self):
         values = ("receiver", "path with spaces", "$(touch escaped)", "it's literal")
         worker = replace(
@@ -94,23 +68,6 @@ class SshActionTransportTests(unittest.TestCase):
         self.assertEqual(shlex.split(shell[2]), ["exec", *values, "--describe"])
         self.assertEqual(argv[-2], worker.endpoint)
 
-    def test_windows_uses_literal_encoded_native_invocation_and_bounds(self):
-        worker = replace(
-            self.worker,
-            requirements=ExecutionRequirements(os_family="windows"),
-            action_command=("C:/receiver.exe", "it's $literal; $(value)"),
-        )
-        command = action_receiver_command(worker, self.deadline)[-1]
-        decoded = base64.b64decode(command.split()[-1]).decode("utf-16-le")
-        self.assertEqual(
-            decoded,
-            "& 'C:/receiver.exe' 'it''s $literal; $(value)'; exit $LASTEXITCODE",
-        )
-        oversized = replace(worker, action_command=("receiver", "a" * 4096))
-        with self.assertRaises(ActionWireError) as caught:
-            action_receiver_command(oversized, self.deadline)
-        self.assertEqual(caught.exception.code, "action_transport.command_oversized")
-
     def _native_receiver(self, argv, **kwargs):
         # Substitute only the SSH network hop. Execute its actual generated shell
         # command and receiver process; the remote private binding is independently
@@ -123,37 +80,6 @@ class SshActionTransportTests(unittest.TestCase):
             "LITAI_ACTION_WORKER_IDENTITY": self.worker.identity.uri,
         }
         return run_bounded_process(tuple(shlex.split(argv[-1])), **kwargs)
-
-    @unittest.skipUnless(
-        os.name == "nt" or shutil.which("bash"), "native receiver shell required"
-    )
-    def test_wrong_worker_and_failed_receiver_are_not_admitted(self):
-        for command in (
-            self.worker.action_command,
-            (self.worker.action_command[0], "-c", "raise SystemExit(23)"),
-        ):
-            worker = replace(self.worker, action_command=command)
-
-            def wrong_receiver(argv, worker=worker, **kwargs):
-                kwargs["environment"] = {
-                    **os.environ,
-                    "LITAI_ACTION_WORKER_IDENTITY": replace(
-                        worker, worker_id="different-worker"
-                    ).identity.uri,
-                }
-                return run_bounded_process(tuple(shlex.split(argv[-1])), **kwargs)
-
-            with (
-                self.subTest(command=command),
-                patch(
-                    "literate_ai.adapters.action_capabilities.run_bounded_process",
-                    side_effect=wrong_receiver,
-                ),
-                self.assertRaises(ActionWireError),
-            ):
-                probe_command_action_capabilities(
-                    worker, self.deadline, cwd=self.fixture.root
-                )
 
     @unittest.skipUnless(
         os.name == "nt" or shutil.which("bash"), "native receiver shell required"

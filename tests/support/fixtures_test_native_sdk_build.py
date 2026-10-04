@@ -1,82 +1,59 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_native_sdk_build``."""
 
 import dataclasses
-
 import json
-
 import os
-
 import platform
-
 import shutil
-
 import subprocess
-
 import sys
-
 import tempfile
-
 import unittest
-
 from contextlib import contextmanager
-
 from datetime import UTC, datetime, timedelta
-
 from pathlib import Path
-
 from unittest import mock
 
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
-
 from literate_ai.adapters.native_sdk_build import (
     NativeSdkBuildLayout,
     NativeSdkRepositoryBuilder,
 )
-
 from literate_ai.adapters.native_sdk_custody import (
     capture_native_sdk,
     materialize_native_sdk,
 )
-
 from literate_ai.adapters.native_sdk_runtime import observe_native_sdk_runtime
-
 from literate_ai.adapters.source.git import GitSourceAdapter
-
 from literate_ai.application.repository_sources import (
     RepositoryBuildApproval,
     RepositoryCheckout,
     RepositorySourceIndexBinding,
     RepositorySourceResolver,
 )
-
 from literate_ai.contracts.executable_components.commands import (
     LibraryCapabilityImport,
     LibraryImportSurface,
 )
-
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
-
 from literate_ai.contracts.native_sdks import NativeSdkSnapshot
-
 from literate_ai.contracts.repositories import (
     RepositoryBuildCommand,
     RepositoryBuildPlan,
     RepositorySourceLock,
 )
-
 from literate_ai.security import (
     AuthorizationError,
     BuildAuthorization,
     DirectBuildAuthorizationVerifier,
     SecurityProfile,
 )
-
 from literate_ai.storage.cas import FileSystemCAS
-
 from tests.support.fixtures_test_repository_sources import dependency
+
 
 class NativeSdkBuildTests(unittest.TestCase):
     def setUp(self):
@@ -456,4 +433,3 @@ class NativeSdkBuildTests(unittest.TestCase):
         plan = dataclasses.replace(self.plan, evidence=(self.builder.layout.identity,))
         with self.assertRaisesRegex(ValueError, "retain the exact source license"):
             self.verify(plan=plan)
-

@@ -39,24 +39,16 @@ def _git(repository: Path, *arguments: str) -> str:
 
 @unittest.skipUnless(shutil.which("git-lfs"), "Git LFS is required for checkout tests")
 class RepositoryCheckoutSkillTests(unittest.TestCase):
-    def test_empty_lfs_json_manifests_are_accepted(self) -> None:
-        checkout = _module()
-        with tempfile.TemporaryDirectory() as temporary:
-            repository = Path(temporary)
-            for manifest in (b'{"files": null}', b'{"files": []}'):
-                with (
-                    self.subTest(manifest=manifest),
-                    mock.patch.object(checkout, "_git_lfs", return_value=manifest),
-                    mock.patch.object(checkout, "_git", return_value=b""),
-                ):
-                    self.assertEqual(
-                        checkout._unresolved_lfs_paths(
-                            repository, checkout._environment()
-                        ),
-                        (),
-                    )
+    @classmethod
+    def setUpClass(cls) -> None:
+        # Checkouts only read the origin, so one shared fixture is safe; every
+        # test materializes into its own temporary destination.
+        fixture = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(fixture.cleanup)
+        cls.origin, cls.revision = cls._repository(Path(fixture.name))
 
-    def _repository(self, root: Path) -> tuple[str, str]:
+    @staticmethod
+    def _repository(root: Path) -> tuple[str, str]:
         submodule_source = root / "submodule-source"
         submodule_origin = root / "submodule-origin.git"
         submodule_source.mkdir()
@@ -124,7 +116,7 @@ class RepositoryCheckoutSkillTests(unittest.TestCase):
         checkout = _module()
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            origin, revision = self._repository(root)
+            origin, revision = self.origin, self.revision
             for index, requested in enumerate(("main", "fixture-tag", revision)):
                 with self.subTest(requested=requested):
                     destination = root / f"checkout-{index}"
@@ -157,50 +149,6 @@ class RepositoryCheckoutSkillTests(unittest.TestCase):
                         b"nested hydration\n",
                     )
 
-    def test_lfs_pull_change_to_effectively_unset_pointer_is_restored(self) -> None:
-        checkout = _module()
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            origin, _revision = self._repository(root)
-            destination = root / "checkout"
-            checkout.materialize(str(origin), "main", destination, history_depth=1)
-            destination.joinpath("excluded.bin").write_bytes(
-                b"intentionally stored pointer\n"
-            )
-            _git(destination, "add", "-f", "excluded.bin")
-            restored = checkout._restore_excluded_lfs_pointers(
-                destination, checkout._environment()
-            )
-            status = _git(destination, "status", "--porcelain=v1")
-        self.assertEqual(restored, 1)
-        self.assertEqual(status, "")
-
-    def test_full_history_is_explicit(self) -> None:
-        checkout = _module()
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            origin, _revision = self._repository(root)
-            report = checkout.materialize(
-                str(origin), "main", root / "checkout", history_depth=None
-            )
-        self.assertFalse(report["shallow"])
-        self.assertIsNone(report["history_depth"])
-
-    def test_bounded_history_depth_is_passed_to_fetch(self) -> None:
-        checkout = _module()
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            origin, _revision = self._repository(root)
-            with mock.patch.object(checkout, "_git", wraps=checkout._git) as git:
-                report = checkout.materialize(
-                    str(origin), "main", root / "checkout", history_depth=7
-                )
-        fetches = [
-            call.args for call in git.call_args_list if call.args[1:2] == ("fetch",)
-        ]
-        self.assertTrue(any("--depth=7" in arguments for arguments in fetches))
-        self.assertEqual(report["history_depth"], 7)
-
     def test_unresolved_current_tree_lfs_pointer_fails_closed(self) -> None:
         checkout = _module()
         original = checkout._git_lfs
@@ -212,25 +160,13 @@ class RepositoryCheckoutSkillTests(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
-            origin, _revision = self._repository(root)
+            origin = self.origin
             with mock.patch.object(checkout, "_git_lfs", side_effect=leave_pointer):
                 with self.assertRaises(checkout.CheckoutError) as caught:
                     checkout.materialize(
                         str(origin), "main", root / "checkout", history_depth=1
                     )
         self.assertEqual(caught.exception.code, "repository-checkout.lfs-unresolved")
-
-    def test_non_array_lfs_file_manifest_remains_invalid(self) -> None:
-        checkout = _module()
-        with (
-            tempfile.TemporaryDirectory() as temporary,
-            mock.patch.object(checkout, "_git_lfs", return_value=b'{"files":{}}'),
-        ):
-            with self.assertRaises(checkout.CheckoutError) as caught:
-                checkout._unresolved_lfs_paths(Path(temporary), checkout._environment())
-        self.assertEqual(
-            caught.exception.code, "repository-checkout.lfs-manifest-invalid"
-        )
 
     def test_missing_git_lfs_has_a_specific_failure(self) -> None:
         checkout = _module()

@@ -1,46 +1,33 @@
 """Shared fixtures extracted from ``tests.unit.test_command_builder``."""
 
 import os
-
 import shutil
-
 import sys
-
 import unittest
-
 from types import SimpleNamespace
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
-
 from literate_ai.adapters.command_builder import CommandComponentBuilder
-
 from literate_ai.adapters.command_indexer import CommandGenerationIndexer
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecycleError
-
 from literate_ai.adapters.qualification_capture import (
     QualificationCaptureError,
     QualificationEvidenceRecorder,
 )
-
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionKind,
     LifecycleActionWorker,
 )
-
 from literate_ai.contracts import canonical_identity
-
 from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
 )
-
 from tests.support import fixtures_test_action_build_result as result_fixture
-
 from tests.support.fixtures_test_standard_local_command_adapter import _provider_export
+
 
 class CommandBuilderTests(unittest.TestCase):
     def setUp(self):
@@ -249,6 +236,6 @@ sys.stdout.buffer.write(encode_action_response(
         self.assertTrue(self.marker.exists())
         self.assert_unregistered()
 
+
 if __name__ == "__main__":
     unittest.main()
-

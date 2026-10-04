@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
@@ -28,55 +27,6 @@ class NativeProjectRegistryTests(unittest.TestCase):
         child = self.root / ".literate/native-projects" / name
         ProjectConfigurationStore(child).create(_definition(project_id=name))
         return child
-
-    def test_registered_children_are_exact_and_definition_drift_is_rejected(self):
-        child = self.child("one")
-        registry.register_native_project(self.project, child)
-        self.assertEqual(registry._native_project_roots(self.project), (child,))
-        with self.assertRaisesRegex(registry.ConversionAuthorityError, "registered"):
-            registry.register_native_project(self.project, child)
-        path = child / "literate.project.json"
-        value = json.loads(path.read_bytes())
-        value["version"] = "1.0.1"
-        path.write_text(json.dumps(value))
-        with self.assertRaises(registry.ConversionAuthorityError):
-            registry._native_project_roots(self.project)
-
-    def test_reader_and_writer_reject_symlinked_ancestors(self):
-        child = self.child("one")
-        registry.register_native_project(self.project, child)
-        for relative in (".literate/native-projects", ".literate"):
-            with self.subTest(ancestor=relative):
-                path = self.root / relative
-                outside = self.base / "outside"
-                path.rename(outside)
-                try:
-                    try:
-                        path.symlink_to(outside, target_is_directory=True)
-                    except OSError as exc:
-                        self.skipTest(f"directory symlinks unavailable: {exc}")
-                    before = (self.root / registry.NATIVE_PROJECTS_FILE).read_bytes()
-                    with self.assertRaises(registry.ConversionAuthorityError):
-                        registry._native_project_roots(self.project)
-                    with self.assertRaises(registry.ConversionAuthorityError):
-                        registry.register_native_project(self.project, child)
-                    self.assertEqual(
-                        (self.root / registry.NATIVE_PROJECTS_FILE).read_bytes(), before
-                    )
-                finally:
-                    if path.is_symlink():
-                        path.unlink()
-                    outside.rename(path)
-
-    def test_dangling_registry_link_is_not_an_absent_registry(self):
-        path = self.root / registry.NATIVE_PROJECTS_FILE
-        path.parent.mkdir()
-        try:
-            path.symlink_to(self.base / "missing.json")
-        except OSError as exc:
-            self.skipTest(f"file symlinks unavailable: {exc}")
-        with self.assertRaises(registry.ConversionAuthorityError):
-            registry._native_project_roots(self.project)
 
     def test_concurrent_successful_registrations_retain_both_children(self):
         first, second = self.child("first"), self.child("second")

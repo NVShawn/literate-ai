@@ -1,29 +1,25 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_orchestration_planning``."""
 
 import io
-
 import json
-
 import tempfile
-
 import unittest
-
 from contextlib import ExitStack
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters import orchestration_planning as planning
-
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-
 from literate_ai.cli import dispatch, main
-
 from literate_ai.contracts.repository_orchestration import RepositoryOrchestration
+from tests.support.fixtures_test_repository_orchestration import (
+    git,
+    repository,
+    snapshot,
+)
 
-from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 class OrchestrationPlanningTests(unittest.TestCase):
     def setUp(self):
@@ -365,4 +361,3 @@ class OrchestrationPlanningTests(unittest.TestCase):
         before = snapshot(self.base)
         self.assertEqual(self.invoke("plan")[0], 0)
         self.assertEqual(snapshot(self.base), before)
-

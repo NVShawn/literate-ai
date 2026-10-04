@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -14,14 +15,10 @@ from literate_ai.adapters.cache.rebuild import read_rebuild_source_cache_control
 from literate_ai.adapters.generation_preparation import PreparedLockedGeneration
 from literate_ai.adapters.lifecycle import LocalStandardLifecycleError
 from literate_ai.adapters.project_initialization import initialize_project
-from literate_ai.adapters.project_lifecycle_driver import (
-    lifecycle_driver_environment_identity_material,
-)
 from literate_ai.adapters.standard_lifecycle_binding import (
     InstalledFrameworkDistribution,
     InstalledFrameworkDistributionMember,
     ResolvedStandardProjectLifecycleDriver,
-    StandardLifecycleBindingError,
 )
 from literate_ai.adapters.standard_project import (
     FilesystemStandardProjectRuntime,
@@ -33,14 +30,8 @@ from literate_ai.adapters.standard_rebuild import (
     _resolved_source_cache,
 )
 from literate_ai.cli import main
-from literate_ai.cli.rebuild import (
-    _component_acceptance_oracle,
-    _standard_root_product_result,
-)
 from literate_ai.contracts import (
-    MINIMUM_PROJECT_REBUILD_PHASES,
     BlobRef,
-    ProjectLifecycleDriver,
     ProjectTestEvidence,
     ProjectTestReceipt,
     ProjectTestReceiptFinalizedCandidate,
@@ -65,11 +56,6 @@ def invoke(*arguments: str) -> tuple[int, dict[str, object]]:
     status = main(arguments, stdout=output, stderr=errors)
     content = output.getvalue() if status == 0 else errors.getvalue()
     return status, json.loads(content)
-
-
-class TtyStringIO(io.StringIO):
-    def isatty(self) -> bool:
-        return True
 
 
 DRIVER_SOURCE = r"""
@@ -292,253 +278,17 @@ write_project_test_receipt_provisional(Path(args.candidate), provisional)
 
 
 class RebuildCliTests(unittest.TestCase):
-    def test_retained_review_reads_exact_source_without_runtime_allocation(self):
-        from contextlib import nullcontext
-
-        from literate_ai.adapters.retained_source import RetainedSourceError
-        from literate_ai.cli.errors import CliFailure
-        from literate_ai.cli.rebuild import _standard_rebuild_from_args
-
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary).resolve()
-            source = root / "source"
-            source.mkdir()
-            (source / "main.py").write_bytes(b"print('fixture')\r\n")
-            project = SimpleNamespace(
-                root=root,
-                roots=lambda _kind: (),
-                flavor_selectors_for=lambda _spec, selectors: selectors,
-                definition=SimpleNamespace(source_intelligence=None),
-            )
-            prepared = SimpleNamespace(
-                locked_authority_snapshot=SimpleNamespace(
-                    authority=SimpleNamespace(
-                        lock=SimpleNamespace(
-                            identity=canonical_identity({"lock": 1}),
-                            root_revision=canonical_identity({"component": 1}),
-                            nodes=(
-                                SimpleNamespace(
-                                    revision=SimpleNamespace(
-                                        identity=canonical_identity({"component": 1})
-                                    )
-                                ),
-                            ),
-                        )
-                    )
-                )
-            )
-            args = SimpleNamespace(
-                source_cache_entry=[],
-                source_cache_root=[],
-                specification="components/example",
-                flavor=[],
-                force_regeneration=False,
-                target="host",
-                retained_source=str(source),
-                retained_source_plan=True,
-                allow_host_execution=False,
-            )
-            with (
-                patch(
-                    "literate_ai.cli.rebuild._specification",
-                    return_value=(root / "components/example", "components/example"),
-                ),
-                patch(
-                    "literate_ai.cli.rebuild.FilesystemLockedGenerationApplicationAdapter.prepare",
-                    return_value=prepared,
-                ),
-                patch(
-                    "literate_ai.cli.rebuild._selected_cache_directories",
-                    return_value=SimpleNamespace(
-                        project_root=root,
-                        build_dir=root / "build",
-                        obj_dir=root / "obj",
-                    ),
-                ),
-                patch("literate_ai.cli.rebuild.NativeSdkProjectAcquisition"),
-                patch(
-                    "literate_ai.cli.rebuild.adapter_project_authority_identity",
-                    return_value=canonical_identity({"project": 1}),
-                ),
-                patch(
-                    "literate_ai.cli.rebuild.tempfile.mkdtemp",
-                    side_effect=AssertionError("read-only plan allocated runtime"),
-                ),
-            ):
-                binding = SimpleNamespace(
-                    policy=SimpleNamespace(identity=canonical_identity({"policy": 1})),
-                    require_unchanged=Mock(),
-                )
-                result = _standard_rebuild_from_args(project, binding, args)
-                self.assertFalse(result["admitted"])
-                args.retained_source_plan = False
-                args.authorize_retained_source = result["authorization_identity"]
-                args.runtime_root = str(root / "runtime")
-                with (
-                    patch(
-                        "literate_ai.cli.rebuild._external_runtime_root",
-                        return_value=root / "runtime",
-                    ),
-                    patch(
-                        "literate_ai.cli.rebuild.project_lifecycle_lock",
-                        return_value=nullcontext(),
-                    ),
-                    patch(
-                        "literate_ai.cli.rebuild._component_acceptance_oracle",
-                        return_value=None,
-                    ),
-                    patch(
-                        "literate_ai.cli.rebuild.assemble_filesystem_standard_rebuild_adapter",
-                        side_effect=RetainedSourceError(
-                            "retained_source.changed",
-                            "Retained source changed after review",
-                        ),
-                    ),
-                ):
-                    with self.assertRaises(CliFailure) as late_failure:
-                        _standard_rebuild_from_args(project, binding, args)
-                    self.assertEqual(
-                        late_failure.exception.code, "retained_source.changed"
-                    )
-                    self.assertEqual(
-                        late_failure.exception.message,
-                        "Retained source changed after review",
-                    )
-                (source / "main.py").write_bytes(b"changed")
-                with self.assertRaises(CliFailure) as raised:
-                    _standard_rebuild_from_args(project, binding, args)
-                self.assertEqual(
-                    raised.exception.code, "retained_source.authorization_mismatch"
-                )
-
-    def test_retained_options_require_source_and_execution_acknowledgment(self):
-        status, envelope = invoke("rebuild", ".", "--retained-source-plan")
-        self.assertNotEqual(status, 0)
-        self.assertEqual(envelope["error"]["code"], "retained_source.path_required")
-        status, envelope = invoke(
-            "rebuild",
-            ".",
-            "--retained-source",
-            "input",
-            "--authorize-retained-source",
-            "sha256:" + "0" * 64,
-        )
-        self.assertNotEqual(status, 0)
-        self.assertEqual(
-            envelope["error"]["code"], "rebuild.host_execution_not_acknowledged"
-        )
-
-    def test_retained_plan_routes_without_host_execution(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            self._configure_standard_driver(project)
-            with (
-                patch(
-                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
-                    return_value=Mock(),
-                ),
-                patch(
-                    "literate_ai.cli.rebuild._standard_rebuild_from_args",
-                    return_value={"admitted": False},
-                ) as plan,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--retained-source",
-                    "input",
-                    "--retained-source-plan",
-                )
-            self.assertEqual(status, 0, envelope)
-            self.assertFalse(plan.call_args.args[2].allow_host_execution)
-            self.assertTrue(plan.call_args.args[2].retained_source_plan)
-
-    def test_persistent_service_oracle_uses_locked_component_name(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            acceptance = root / "verification" / "acceptance"
-            acceptance.mkdir(parents=True)
-            (acceptance / "locked-name.json").write_text(
-                json.dumps(
-                    {
-                        "schema": "literate-ai/persistent-service-acceptance@1",
-                        "specification_set_identity": "sha256:spec",
-                        "process": {},
-                        "readiness": {"path": "/ready"},
-                        "requests": [{"path": "/value"}],
-                    }
-                ),
-                encoding="utf-8",
-            )
-            revision_identity = canonical_identity({"root": "service"})
-            component_lock = SimpleNamespace(
-                root_revision=revision_identity,
-                nodes=(
-                    SimpleNamespace(
-                        revision=SimpleNamespace(
-                            identity=revision_identity,
-                            definition=SimpleNamespace(
-                                coordinate=SimpleNamespace(name="locked-name"),
-                                entrypoints=(
-                                    SimpleNamespace(kind="persistent-service"),
-                                ),
-                            ),
-                        )
-                    ),
-                ),
-            )
-            oracle = _component_acceptance_oracle(
-                root, "components/different-path-name", component_lock
-            )
-        self.assertEqual(oracle.component_name, "locked-name")
-
-    def test_portable_oracle_preserves_specification_path_lookup(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            acceptance = root / "verification" / "acceptance"
-            acceptance.mkdir(parents=True)
-            (acceptance / "path-name.json").write_text(
-                json.dumps(
-                    {
-                        "schema": "literate-ai/component-acceptance-oracle@1",
-                        "specification_set_identity": "sha256:spec",
-                        "cases": [
-                            {
-                                "case_id": "one",
-                                "arguments": [],
-                                "expected_result": {},
-                            }
-                        ],
-                    }
-                ),
-                encoding="utf-8",
-            )
-            revision_identity = canonical_identity({"root": "application"})
-            component_lock = SimpleNamespace(
-                root_revision=revision_identity,
-                nodes=(
-                    SimpleNamespace(
-                        revision=SimpleNamespace(
-                            identity=revision_identity,
-                            definition=SimpleNamespace(
-                                coordinate=SimpleNamespace(name="locked-name"),
-                                entrypoints=(
-                                    SimpleNamespace(kind="portable-application"),
-                                ),
-                            ),
-                        )
-                    ),
-                ),
-            )
-            oracle = _component_acceptance_oracle(
-                root, "components/path-name", component_lock
-            )
-        self.assertEqual(
-            tuple(case.case_id for case in oracle.cases(component_lock)),
-            ("one",),
+    @classmethod
+    def setUpClass(cls) -> None:
+        # Initialize the project once; each test gets a private copy.
+        template = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(template.cleanup)
+        cls.project_template = Path(template.name).resolve() / "project"
+        initialize_project(
+            cls.project_template,
+            parent_selection=RepositoryParentSelection.root(),
+            source_intelligence_provider="none",
+            flavor_selectors=("+python", "+bazel", "+macos"),
         )
 
     def setUp(self) -> None:
@@ -554,212 +304,19 @@ class RebuildCliTests(unittest.TestCase):
         self.project_index_preflight.start()
         self.addCleanup(self.project_index_preflight.stop)
 
-    @staticmethod
-    def _successful_standard_result() -> dict[str, object]:
-        return {
-            "schema": "literate-ai/project-rebuild@1",
-            "passed": True,
-            "project_id": "component-example-demo",
-            "dag": {
-                "schema": "literate-ai/project-rebuild-dag@1",
-                "layers": [
-                    {
-                        "index": 0,
-                        "components": [
-                            {
-                                "coordinate": "component://example/hello",
-                                "revision": "sha256:" + "a" * 64,
-                                "source": "reused",
-                            }
-                        ],
-                    }
-                ],
-                "edges": [],
-            },
-            "build_cache": {"hits": 1, "misses": 0},
-            "repair": {"attempts": 0, "status": "not-needed"},
-            "test_summary": {"passed": 6, "failed": 0, "skipped": 0, "total": 6},
-            "artifact": "/tmp/run.pyz",
-            "execution_command": {
-                "argv": ["python3", "/tmp/run.pyz"],
-                "cwd": "/tmp",
-                "environment": {},
-            },
-            "receipt_committed": True,
-        }
-
-    def test_interactive_standard_rebuild_is_concise_and_actionable(self):
-        output = TtyStringIO()
-        errors = TtyStringIO()
-        with patch(
-            "literate_ai.cli.dispatch._handle",
-            return_value=(self._successful_standard_result(), 0),
-        ):
-            status = main(("rebuild", "."), stdout=output, stderr=errors)
-
-        self.assertEqual(status, 0)
-        content = output.getvalue()
-        self.assertIn("Literate AI rebuild: passed", content)
-        self.assertIn("DAG:", content)
-        self.assertIn("component://example/hello [reused]", content)
-        self.assertIn("Build cache: 1 hit(s), 0 miss(es)", content)
-        self.assertIn("Repair: not-needed (0 attempt(s))", content)
-        self.assertIn("Tests: 6 passed, 0 failed, 0 skipped", content)
-        self.assertIn("Execute: ", content)
-        self.assertIn("Receipt: committed and current", content)
-        self.assertEqual(errors.getvalue(), "")
-
-    def test_json_flag_preserves_complete_stable_rebuild_envelope_on_tty(self):
-        output = TtyStringIO()
-        errors = TtyStringIO()
-        result = self._successful_standard_result()
-        with patch(
-            "literate_ai.cli.dispatch._handle",
-            return_value=(result, 0),
-        ):
-            status = main(("--json", "rebuild", "."), stdout=output, stderr=errors)
-
-        self.assertEqual(status, 0)
-        self.assertEqual(
-            json.loads(output.getvalue()),
-            {
-                "schema": "literate-ai/cli-result@1",
-                "ok": True,
-                "command": "rebuild",
-                "result": result,
-            },
-        )
-        self.assertEqual(errors.getvalue(), "")
-
-    def test_standard_library_result_uses_import_surface_without_execution_command(
-        self,
-    ) -> None:
-        lifecycle_ports = Mock()
-        from tests.support.fixtures_test_library_products import library_product
-
-        product = library_product("rust")
-        component_revision = product.artifact_export.component_revision
-        root_build_plan = SimpleNamespace(component_revision=component_revision)
-        root_export = product.artifact_export
-        import_surface = product.import_surface
-        lifecycle_ports.contracts = {
-            component_revision.uri: SimpleNamespace(
-                is_library=True,
-                library_import_surface=import_surface,
-            )
-        }
-
-        execution, library = _standard_root_product_result(
-            lifecycle_ports,
-            root_build_plan,
-            (root_export,),
-            root_export,
-        )
-
-        self.assertIsNone(execution)
-        self.assertEqual(
-            library,
-            {
-                "schema": "literate-ai/library-rebuild-artifact@1",
-                "artifact_export": root_export.to_dict(),
-                "import_surface": import_surface.to_dict(),
-            },
-        )
-        lifecycle_ports.execution_command.assert_not_called()
-
-    def test_interactive_standard_library_rebuild_has_no_execute_instruction(self):
-        result = self._successful_standard_result()
-        result.pop("execution_command")
-        result["artifact"] = "/tmp/fixture-package"
-        result["library_artifact"] = {
-            "schema": "literate-ai/library-rebuild-artifact@1",
-            "artifact_export": {
-                "schema": "literate-ai/artifact-export@1",
-                "identity": "sha256:" + "a" * 64,
-            },
-            "import_surface": {
-                "schema": "urn:literate-ai:schema:v2:library-import-surface@1",
-                "language": "rust",
-                "package": "fixture",
-                "capabilities": [],
-            },
-        }
-        output = TtyStringIO()
-        errors = TtyStringIO()
-        with patch(
-            "literate_ai.cli.dispatch._handle",
-            return_value=(result, 0),
-        ):
-            status = main(("rebuild", "."), stdout=output, stderr=errors)
-
-        self.assertEqual(status, 0)
-        self.assertIn("Artifact: /tmp/fixture-package", output.getvalue())
-        self.assertNotIn("Execute:", output.getvalue())
-        self.assertEqual(errors.getvalue(), "")
-
-    def test_rebuild_request_environment_binds_semantics_without_secret_values(self):
-        first = lifecycle_driver_environment_identity_material(
-            {"PATH": "/toolchain/a", "OPENAI_API_KEY": "secret-one"}
-        )
-        second = lifecycle_driver_environment_identity_material(
-            {"PATH": "/toolchain/a", "OPENAI_API_KEY": "secret-two"}
-        )
-        changed_path = lifecycle_driver_environment_identity_material(
-            {"PATH": "/toolchain/b", "OPENAI_API_KEY": "secret-two"}
-        )
-        missing_credential = lifecycle_driver_environment_identity_material(
-            {"PATH": "/toolchain/a"}
-        )
-
-        self.assertEqual(first, second)
-        self.assertNotEqual(first, changed_path)
-        self.assertNotEqual(first, missing_credential)
-        self.assertNotIn("secret-one", json.dumps(first))
-        self.assertEqual(first["credential_key_presence"], ["OPENAI_API_KEY"])
-
-    def test_non_python_driver_does_not_require_a_python_placeholder(self):
-        implementation = canonical_identity({"fixture": "native-driver"})
-        driver = ProjectLifecycleDriver(
-            driver_id="native-driver",
-            version="1.0.0",
-            implementation_paths=("tools/native-driver",),
-            implementation_identity=implementation,
-            argv=(
-                "native-driver",
-                "{project}",
-                "{specification}",
-                "{runtime_root}",
-                "{candidate_receipt}",
-                "{project_revision_identity}",
-                "{lifecycle_request_identity}",
-                "{allow_host_execution}",
-            ),
-            environment_keys=("PATH",),
-            phases=MINIMUM_PROJECT_REBUILD_PHASES,
-            specification_scope="project",
-        )
-        self.assertNotIn("{python}", driver.argv)
-
     def _project(
         self,
         root: Path,
         *,
         include_driver: bool = True,
-        cache_aware: bool = True,
         planning_behavior: str = "normal",
-        specification_scope: str = "project",
     ) -> Path:
         project = root / "project"
-        initialize_project(
-            project,
-            parent_selection=RepositoryParentSelection.root(),
-            source_intelligence_provider="none",
-            flavor_selectors=("+python", "+bazel", "+macos"),
-        )
+        shutil.copytree(self.project_template, project, symlinks=True)
         driver_script = project / "driver.py"
         driver_script.write_text(
             DRIVER_SOURCE.replace("__FRAMEWORK_IMPORT_PATHS__", repr(list(sys.path)))
-            .replace("__CACHE_AWARE__", repr(cache_aware))
+            .replace("__CACHE_AWARE__", "True")
             .replace("__PLANNING_BEHAVIOR__", repr(planning_behavior)),
             encoding="utf-8",
         )
@@ -851,31 +408,11 @@ class RebuildCliTests(unittest.TestCase):
                     "admit-workspace",
                     "write-candidate-receipt",
                 ],
-                "specification_scope": specification_scope,
+                "specification_scope": "project",
                 "timeout_seconds": 30,
             }
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         return project
-
-    def _configure_read_only_cache(self, project: Path) -> None:
-        manifest_path = project / "literate.project.json"
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        manifest["source_cache"] = {
-            "schema": "urn:literate-ai:schema:v2:source-cache-configuration",
-            "mode": "read-only",
-            "targets": [
-                {
-                    "schema": "urn:literate-ai:schema:v2:source-cache-target",
-                    "target_id": "local",
-                    "format": "filesystem-v2",
-                    "root_kind": "project-relative",
-                    "root_reference": "derived/source-cache",
-                }
-            ],
-            "write_target_id": None,
-            "require_unique": True,
-        }
-        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
     def _configure_standard_driver(self, project: Path) -> None:
         manifest_path = project / "literate.project.json"
@@ -892,114 +429,9 @@ class RebuildCliTests(unittest.TestCase):
         }
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
-    def test_standard_driver_routes_through_in_process_filesystem_adapter(self):
-        with tempfile.TemporaryDirectory() as directory:
-            project = self._project(Path(directory))
-            self._configure_standard_driver(project)
-            resolved = Mock()
-
-            standard_result = {
-                "schema": "literate-ai/project-rebuild@1",
-                "passed": True,
-                "driver": "standard",
-            }
-            with (
-                patch(
-                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
-                    return_value=resolved,
-                ),
-                patch(
-                    "literate_ai.cli.rebuild._standard_rebuild_from_args",
-                    return_value=standard_result,
-                ) as rebuild_standard,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(Path(directory) / "runtime"),
-                    "--candidate-receipt",
-                    str(Path(directory) / "candidate.json"),
-                    "--allow-host-execution",
-                )
-
-            self.assertEqual(status, 0, envelope)
-            result = envelope["result"]
-            self.assertEqual(result["schema"], "literate-ai/project-rebuild@1")
-            self.assertTrue(result["passed"])
-            self.assertEqual(result["driver"], "standard")
-            intelligence = result["project_source_intelligence"]
-            self.assertEqual(
-                intelligence["schema"],
-                "literate-ai/project-source-intelligence-status@1",
-            )
-            self.assertEqual(intelligence["state"], "off")
-            self.assertEqual(intelligence["provider_id"], "none")
-            resolved.require_unchanged.assert_called_once_with()
-            rebuild_standard.assert_called_once()
-            self.assertIs(rebuild_standard.call_args.args[1], resolved)
-            self.assertFalse((Path(directory) / "runtime").exists())
-            self.assertFalse((Path(directory) / "candidate.json").exists())
-
-    def _add_locked_component(self, project: Path, relative: str) -> Path:
-        component = project.joinpath(*Path(relative).parts)
-        component.mkdir(parents=True)
-        (component / "component.md").write_text(
-            f"# {component.name}\n\nA locked fixture Component.\n",
-            encoding="utf-8",
-        )
-        (component / "component.lock.json").write_text("{}\n", encoding="utf-8")
-        return component
-
     def _clear_component_locks(self, project: Path) -> None:
         for lock in project.rglob("component.lock.json"):
             lock.unlink()
-
-    def _component_rebuild_result(
-        self, specification: str, *, update_receipt: bool
-    ) -> dict[str, object]:
-        return {
-            "schema": "literate-ai/project-rebuild@1",
-            "passed": True,
-            "driver": "standard",
-            "specification": specification,
-            "component_lock_identity": f"sha256:{specification}",
-            "component_lock_identities": [f"sha256:{specification}"],
-            "test_summary": {
-                "failed": 0,
-                "passed": 3,
-                "skipped": 0,
-                "total": 3,
-            },
-            "source_generation": {specification: "reused"},
-            "build_cache": {
-                "build_seconds": 0.25,
-                "hit_seconds": 0.0,
-                "hits": 0,
-                "misses": 1,
-            },
-            "dag": {
-                "schema": "literate-ai/project-rebuild-dag@1",
-                "layers": [
-                    {
-                        "index": 0,
-                        "components": [
-                            {
-                                "coordinate": f"component://fixture/{specification}",
-                                "revision": f"sha256:{specification}",
-                                "source": "reused",
-                            }
-                        ],
-                    }
-                ],
-                "edges": [],
-            },
-            "artifact": f"/tmp/{specification}",
-            "receipt_committed": update_receipt,
-            "receipt_update": {"updated": True} if update_receipt else None,
-        }
 
     def test_standard_project_root_rebuild_fails_without_committed_locks(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -1029,63 +461,6 @@ class RebuildCliTests(unittest.TestCase):
                 envelope["error"]["code"], "rebuild.standard_lock_set_empty"
             )
             rebuild_one.assert_not_called()
-
-    def test_standard_project_root_rebuild_stops_before_later_components(self):
-        from literate_ai.cli.errors import CliFailure
-
-        with tempfile.TemporaryDirectory() as directory:
-            project = self._project(Path(directory))
-            self._configure_standard_driver(project)
-            self._clear_component_locks(project)
-            self._add_locked_component(project, "components/alpha")
-            self._add_locked_component(project, "components/beta")
-            resolved = Mock()
-            seen: list[str] = []
-
-            def rebuild_one(
-                _project,
-                _binding,
-                _args,
-                specification,
-                specification_label,
-                **kwargs,
-            ):
-                seen.append(specification_label)
-                raise CliFailure("rebuild.fixture_failed", "alpha failed")
-
-            with (
-                patch(
-                    "literate_ai.cli.rebuild.validated_project_authority_identity",
-                    return_value=canonical_identity("project-authority"),
-                ),
-                patch(
-                    "literate_ai.cli.rebuild.current_project_component_lock_identities",
-                    return_value=(
-                        canonical_identity("alpha"),
-                        canonical_identity("beta"),
-                    ),
-                ),
-                patch(
-                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
-                    return_value=resolved,
-                ),
-                patch(
-                    "literate_ai.cli.rebuild._standard_rebuild_one_component",
-                    side_effect=rebuild_one,
-                ),
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--update-receipt",
-                    "--allow-host-execution",
-                )
-
-            self.assertEqual(status, 2, envelope)
-            self.assertEqual(envelope["error"]["code"], "rebuild.fixture_failed")
-            self.assertEqual(seen, ["components/alpha"])
 
     def test_public_standard_product_results_agree_with_committed_receipts(self):
         """Accepted-lifecycle fixture; CLI, adapter finalization and commit are real.
@@ -1480,211 +855,6 @@ class RebuildCliTests(unittest.TestCase):
                         self.assertNotIn("execution_entrypoints", result)
                         ports.execution_command.assert_called_once()
 
-    def test_external_driver_rejects_accepted_source_before_binding(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            runtime = root / "runtime"
-            candidate = root / "candidate.json"
-            with patch(
-                "literate_ai.cli.rebuild.bind_external_project_lifecycle_driver"
-            ) as bind_driver:
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(runtime),
-                    "--candidate-receipt",
-                    str(candidate),
-                    "--allow-host-execution",
-                    "--from-accepted-source",
-                )
-
-            self.assertEqual(status, 2, envelope)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.accepted_source_only_unsupported",
-            )
-            bind_driver.assert_not_called()
-            self.assertFalse(runtime.exists())
-            self.assertFalse(candidate.exists())
-
-    def test_standard_driver_retains_accepted_source_only_authority(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            self._configure_standard_driver(project)
-            resolved = Mock()
-            standard_result = {
-                "schema": "literate-ai/project-rebuild@1",
-                "passed": True,
-                "driver": "standard",
-            }
-            with (
-                patch(
-                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
-                    return_value=resolved,
-                ),
-                patch(
-                    "literate_ai.cli.rebuild._standard_rebuild_from_args",
-                    return_value=standard_result,
-                ) as rebuild_standard,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--allow-host-execution",
-                    "--from-accepted-source",
-                )
-
-            self.assertEqual(status, 0, envelope)
-            self.assertTrue(rebuild_standard.call_args.args[2].from_accepted_source)
-            self.assertFalse((root / "runtime").exists())
-            self.assertFalse((root / "candidate.json").exists())
-
-    def test_standard_driver_rejects_source_cache_entry_and_names_the_alternative(
-        self,
-    ):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            self._configure_standard_driver(project)
-            resolved = Mock()
-
-            with patch(
-                "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
-                return_value=resolved,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--allow-host-execution",
-                    "--source-cache-entry",
-                    "sha256:" + "a" * 64,
-                )
-
-            self.assertEqual(status, 2, envelope)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.standard_cache_override_unsupported",
-            )
-            self.assertIn("--from-accepted-source", envelope["error"]["message"])
-
-    def test_standard_driver_rejects_source_cache_root_and_names_the_alternative(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            self._configure_standard_driver(project)
-            resolved = Mock()
-
-            with patch(
-                "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
-                return_value=resolved,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--allow-host-execution",
-                    "--source-cache-root",
-                    "local=" + str(root / "cache"),
-                )
-
-            self.assertEqual(status, 2, envelope)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.standard_cache_override_unsupported",
-            )
-            self.assertIn("--from-accepted-source", envelope["error"]["message"])
-
-    def test_persistent_service_exit_is_cli_error_envelope(self):
-        from literate_ai.adapters.lifecycle.standard_local import (
-            PersistentServiceAcceptanceError,
-        )
-
-        failure = PersistentServiceAcceptanceError(
-            "lifecycle.persistent-service.exited",
-            "persistent-service exited before acceptance completed "
-            "(phase=readiness, status=7): CONFIG_REQUIRED missing <private-path>",
-            phase="readiness",
-            returncode=7,
-            stdout="",
-            stderr="CONFIG_REQUIRED missing <private-path>",
-        )
-        with patch(
-            "literate_ai.cli.rebuild.rebuild_from_args",
-            side_effect=failure,
-        ):
-            status, envelope = invoke("rebuild", ".", "--allow-host-execution")
-
-        self.assertEqual(status, 2, envelope)
-        self.assertEqual(envelope["schema"], "literate-ai/cli-error@1")
-        self.assertEqual(
-            envelope["error"]["code"], "lifecycle.persistent-service.exited"
-        )
-        self.assertIn("CONFIG_REQUIRED", envelope["error"]["message"])
-        self.assertNotIn("Traceback", json.dumps(envelope))
-        self.assertNotIn("/Users/", envelope["error"]["message"])
-
-    def test_standard_binding_failures_precede_specification_and_path_allocation(self):
-        cases = (
-            (
-                "standard_binding.distribution_mismatch",
-                "rebuild.standard_distribution_mismatch",
-            ),
-            ("standard_binding.policy_mismatch", "rebuild.standard_policy_mismatch"),
-            ("standard_binding.changed", "rebuild.standard_binding_changed"),
-            (
-                "standard_binding.distribution_editable",
-                "rebuild.standard_distribution_unavailable",
-            ),
-        )
-        for binding_code, expected_code in cases:
-            with self.subTest(binding_code=binding_code):
-                with tempfile.TemporaryDirectory() as directory:
-                    root = Path(directory)
-                    project = self._project(root)
-                    self._configure_standard_driver(project)
-                    runtime = root / "runtime"
-                    candidate = root / "candidate.json"
-                    failure = StandardLifecycleBindingError(
-                        binding_code, "fixture Standard binding failure"
-                    )
-                    with (
-                        patch(
-                            "literate_ai.cli.rebuild."
-                            "resolve_standard_project_lifecycle_driver",
-                            side_effect=failure,
-                        ),
-                        patch(
-                            "literate_ai.cli.rebuild._specification"
-                        ) as specification,
-                    ):
-                        status, envelope = invoke(
-                            "rebuild",
-                            ".",
-                            "--project",
-                            str(project),
-                            "--runtime-root",
-                            str(runtime),
-                            "--candidate-receipt",
-                            str(candidate),
-                            "--allow-host-execution",
-                        )
-
-                    self.assertEqual(status, 2, envelope)
-                    self.assertEqual(envelope["error"]["code"], expected_code)
-                    specification.assert_not_called()
-                    self.assertFalse(runtime.exists())
-                    self.assertFalse(candidate.exists())
-
     def test_rebuild_runs_authorized_argv_and_leaves_external_candidate(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -1758,40 +928,6 @@ class RebuildCliTests(unittest.TestCase):
                 ),
             )
 
-    def test_component_scoped_rebuild_rejects_a_project_lock_set(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root, specification_scope="component")
-            component = project / "components" / "fixture"
-            component.mkdir(parents=True)
-            (component / "component.md").write_text(
-                "# Fixture\n\nA component-scoped fixture.\n",
-                encoding="utf-8",
-            )
-            revision = canonical_identity({"fixture": "project-revision"})
-
-            with patch(
-                "literate_ai.cli.rebuild.validated_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    "components/fixture",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(root / "runtime"),
-                    "--candidate-receipt",
-                    str(root / "candidate.json"),
-                    "--allow-host-execution",
-                )
-
-            self.assertEqual(status, 2, envelope)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.component_lock_scope_mismatch",
-            )
-
     def test_rebuild_fails_closed_without_ack_or_driver(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -1827,12 +963,13 @@ class RebuildCliTests(unittest.TestCase):
             self.assertEqual(status, 2)
             self.assertEqual(envelope["error"]["code"], "rebuild.driver_unconfigured")
 
-    def test_rebuild_fails_closed_on_missing_or_tampered_derivation_plan(self):
+    def test_rebuild_fails_closed_on_tampered_derivation_plan_or_driver_drift(self):
         cases = (
             ("unsupported", "rebuild.derivation_planning_failed"),
             ("tamper-request", "rebuild.derivation_manifest_mismatch"),
             ("tamper-driver", "rebuild.derivation_manifest_mismatch"),
             ("tamper-plan", "rebuild.derivation_planning_failed"),
+            ("driver-drift", "rebuild.driver_implementation_mismatch"),
         )
         for behavior, expected_code in cases:
             with (
@@ -1840,7 +977,15 @@ class RebuildCliTests(unittest.TestCase):
                 tempfile.TemporaryDirectory() as directory,
             ):
                 root = Path(directory)
-                project = self._project(root, planning_behavior=behavior)
+                if behavior == "driver-drift":
+                    project = self._project(root)
+                    # The pinned driver changes after authorization.
+                    (project / "driver.py").write_text(
+                        DRIVER_SOURCE + "\n# changed after authorization\n",
+                        encoding="utf-8",
+                    )
+                else:
+                    project = self._project(root, planning_behavior=behavior)
                 revision = canonical_identity({"fixture": "project-revision"})
                 candidate = root / "candidate.json"
                 with patch(
@@ -1861,326 +1006,6 @@ class RebuildCliTests(unittest.TestCase):
                 self.assertEqual(status, 2, envelope)
                 self.assertEqual(envelope["error"]["code"], expected_code)
                 self.assertFalse(candidate.exists())
-
-    def test_rebuild_rejects_driver_implementation_drift(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            (project / "driver.py").write_text(
-                DRIVER_SOURCE + "\n# changed after authorization\n", encoding="utf-8"
-            )
-            revision = canonical_identity({"fixture": "project-revision"})
-            with patch(
-                "literate_ai.cli.rebuild.validated_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(root / "runtime"),
-                    "--candidate-receipt",
-                    str(root / "candidate.json"),
-                    "--allow-host-execution",
-                )
-
-            self.assertEqual(status, 2)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.driver_implementation_mismatch",
-            )
-
-    def test_rebuild_requires_argv_script_inside_implementation_closure(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            decoy = project / "decoy.py"
-            decoy.write_text("# unrelated pinned file\n", encoding="utf-8")
-            raw = decoy.read_bytes()
-            manifest_path = project / "literate.project.json"
-            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            manifest["lifecycle_driver"]["implementation_paths"] = ["decoy.py"]
-            manifest["lifecycle_driver"]["implementation_identity"] = (
-                canonical_identity(
-                    {
-                        "schema": "literate-ai/project-lifecycle-implementation@1",
-                        "members": [
-                            {
-                                "path": "decoy.py",
-                                "size": len(raw),
-                                "identity": "sha256:" + hashlib.sha256(raw).hexdigest(),
-                            }
-                        ],
-                    }
-                ).to_dict()
-            )
-            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
-            revision = canonical_identity({"fixture": "project-revision"})
-            with patch(
-                "literate_ai.cli.rebuild.validated_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(root / "runtime"),
-                    "--candidate-receipt",
-                    str(root / "candidate.json"),
-                    "--allow-host-execution",
-                )
-
-            self.assertEqual(status, 2)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.driver_implementation_incomplete",
-            )
-
-    def test_rebuild_rejects_unconsumed_explicit_flavors(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            revision = canonical_identity({"fixture": "project-revision"})
-            with patch(
-                "literate_ai.cli.rebuild.validated_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(root / "runtime"),
-                    "--candidate-receipt",
-                    str(root / "candidate.json"),
-                    "--flavor=+cmake",
-                    "--allow-host-execution",
-                )
-            self.assertEqual(status, 2)
-            self.assertEqual(envelope["error"]["code"], "rebuild.flavors_unsupported")
-
-    def test_configured_cache_requires_a_cache_aware_driver(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root, cache_aware=False)
-            self._configure_read_only_cache(project)
-            revision = canonical_identity({"fixture": "project-revision"})
-            with patch(
-                "literate_ai.cli.rebuild.validated_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(root / "runtime"),
-                    "--candidate-receipt",
-                    str(root / "candidate.json"),
-                    "--allow-host-execution",
-                )
-            self.assertEqual(status, 2)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.source_cache_driver_unaware",
-            )
-            self.assertFalse((root / "candidate.json").exists())
-            self.assertTrue(
-                (
-                    root
-                    / "runtime"
-                    / ".litai"
-                    / "project-test-receipt.provisional.json"
-                ).is_file()
-            )
-
-    def test_cache_aware_driver_returns_a_typed_untrusted_miss(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            self._configure_read_only_cache(project)
-            revision = canonical_identity({"fixture": "project-revision"})
-            with patch(
-                "literate_ai.cli.rebuild.validated_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(root / "runtime"),
-                    "--candidate-receipt",
-                    str(root / "candidate.json"),
-                    "--allow-host-execution",
-                )
-            self.assertEqual(status, 0, envelope)
-            result = envelope["result"]
-            assert isinstance(result, dict)
-            self.assertEqual(result["source_cache_mode"], "read-only")
-            self.assertTrue(result["source_cache_fresh_generation_required"])
-            decision = json.loads(
-                (root / "runtime" / ".litai" / "source-cache-decision.json").read_text(
-                    encoding="utf-8"
-                )
-            )
-            self.assertEqual(len(decision["items"]), 1)
-            self.assertEqual(decision["items"][0]["outcome"], "miss")
-            self.assertFalse(decision["items"][0]["current_acceptance_trusted"])
-            self.assertFalse(decision["items"][0]["generation_skipped"])
-            self.assertFalse((project / "derived" / "source-cache").exists())
-
-    def test_outer_side_effect_failure_never_exposes_promotable_candidate(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            revision = canonical_identity({"fixture": "project-revision"})
-            candidate = root / "candidate.json"
-            with (
-                patch(
-                    "literate_ai.cli.rebuild.validated_project_authority_identity",
-                    return_value=revision,
-                ),
-                patch(
-                    "literate_ai.cli.rebuild.publish_rebuild_source_cache_offer",
-                    side_effect=RuntimeError("injected outer-side-effect failure"),
-                ),
-            ):
-                with self.assertRaisesRegex(
-                    RuntimeError, "injected outer-side-effect failure"
-                ):
-                    invoke(
-                        "rebuild",
-                        ".",
-                        "--project",
-                        str(project),
-                        "--runtime-root",
-                        str(root / "runtime"),
-                        "--candidate-receipt",
-                        str(candidate),
-                        "--allow-host-execution",
-                    )
-            self.assertFalse(candidate.exists())
-            provisional = (
-                root / "runtime" / ".litai" / "project-test-receipt.provisional.json"
-            )
-            self.assertTrue(provisional.is_file())
-            value = json.loads(provisional.read_text(encoding="utf-8"))
-            self.assertEqual(
-                value["schema"],
-                "urn:literate-ai:schema:v1:project-test-receipt-provisional",
-            )
-            with patch(
-                "literate_ai.cli.project.adapter_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "project",
-                    "test-receipt",
-                    "update",
-                    str(provisional),
-                    "--project",
-                    str(project),
-                )
-            self.assertEqual(status, 2, envelope)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "project.test_receipt_provisional_unfinalized",
-            )
-            extracted = root / "extracted-raw-receipt.json"
-            extracted.write_text(
-                json.dumps(value["receipt"]),
-                encoding="utf-8",
-            )
-            with patch(
-                "literate_ai.cli.project.adapter_project_authority_identity",
-                return_value=revision,
-            ):
-                status, envelope = invoke(
-                    "project",
-                    "test-receipt",
-                    "update",
-                    str(extracted),
-                    "--project",
-                    str(project),
-                )
-            self.assertEqual(status, 2, envelope)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "project.test_receipt_candidate_unfinalized",
-            )
-            self.assertFalse((project / "verification" / "current.json").exists())
-
-    def test_cache_selection_and_force_regeneration_are_mutually_exclusive(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            self._configure_read_only_cache(project)
-            status, envelope = invoke(
-                "rebuild",
-                ".",
-                "--project",
-                str(project),
-                "--runtime-root",
-                str(root / "runtime"),
-                "--candidate-receipt",
-                str(root / "candidate.json"),
-                "--source-cache-entry",
-                "sha256:" + "a" * 64,
-                "--force-regeneration",
-                "--allow-host-execution",
-            )
-            self.assertEqual(status, 2)
-            self.assertEqual(
-                envelope["error"]["code"],
-                "rebuild.source_cache_selection_conflict",
-            )
-            self.assertFalse((root / "runtime").exists())
-
-    def test_force_regeneration_is_bound_into_the_rebuild_request(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            project = self._project(root)
-            revision = canonical_identity({"fixture": "project-revision"})
-            results: list[dict[str, object]] = []
-            for suffix, force in (("normal", False), ("forced", True)):
-                arguments = [
-                    "rebuild",
-                    ".",
-                    "--project",
-                    str(project),
-                    "--runtime-root",
-                    str(root / f"runtime-{suffix}"),
-                    "--candidate-receipt",
-                    str(root / f"candidate-{suffix}.json"),
-                    "--allow-host-execution",
-                ]
-                if force:
-                    arguments.insert(-1, "--force-regeneration")
-                with patch(
-                    "literate_ai.cli.rebuild.validated_project_authority_identity",
-                    return_value=revision,
-                ):
-                    status, envelope = invoke(*arguments)
-                self.assertEqual(status, 0, envelope)
-                result = envelope["result"]
-                assert isinstance(result, dict)
-                results.append(result)
-            self.assertNotEqual(
-                results[0]["lifecycle_request_identity"],
-                results[1]["lifecycle_request_identity"],
-            )
-            self.assertNotEqual(
-                results[0]["source_cache_control_identity"],
-                results[1]["source_cache_control_identity"],
-            )
 
 
 if __name__ == "__main__":

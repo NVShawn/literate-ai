@@ -1,24 +1,18 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_github_evidence_oidc``."""
 
 import base64
-
 import json
-
 import unittest
-
 from dataclasses import FrozenInstanceError, replace
-
 from unittest.mock import patch
 
 import jwt
-
 from cryptography.hazmat.primitives import hashes
-
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
 from literate_ai.contracts.identity import canonical_identity
-
 from literate_ai.security.evidence.github_oidc import (
     GITHUB_OIDC_ISSUER,
     EvidenceOidcError,
@@ -27,13 +21,13 @@ from literate_ai.security.evidence.github_oidc import (
     GitHubIssuerKeySet,
     verify_github_evidence_identity,
 )
-
 from tests.support.fixtures_test_evidence_records import _blob
-
 from tests.support.fixtures_test_evidence_trust import _expectation, _signer
+
 
 def _b64(value):
     return base64.urlsafe_b64encode(value).rstrip(b"=")
+
 
 class GitHubEvidenceOidcTests(unittest.TestCase):
     @classmethod
@@ -340,6 +334,6 @@ class GitHubEvidenceOidcTests(unittest.TestCase):
         with self.assertRaises(EvidenceOidcError):
             replace(self.request, run_attempt="01")
 
+
 if __name__ == "__main__":
     unittest.main()
-

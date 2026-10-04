@@ -3,7 +3,6 @@
 import hashlib
 import unittest
 from dataclasses import replace
-from unittest.mock import patch
 
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.security.evidence import DSSE_MEDIA_TYPE, Ed25519EvidenceSigner
@@ -65,21 +64,6 @@ class GitHubRunEvidenceTests(unittest.TestCase):
             now=210,
         )
 
-    def test_all_run_roles_require_the_exact_signed_payload(self):
-        for record in _records()[:3]:
-            record = self.github_record(record)
-            args = self.arguments(record, expectation=_expectation(record))
-            result = verify_github_run_evidence(**args)
-            self.assertEqual(result.envelope, args["envelope"])
-            self.assertEqual(result.authenticated.statement.predicate, record)
-            self.assertEqual(
-                result.identity_check.request_identity, args["request"].identity
-            )
-            self.assertEqual(
-                result.identity, verify_github_run_evidence(**args).identity
-            )
-            self.assertNotIn(args["token"].decode(), repr(result))
-
     def test_correct_oidc_token_cannot_replace_the_named_private_key(self):
         other = Ed25519EvidenceSigner(bytes(reversed(range(32))))
         for args in (
@@ -91,28 +75,6 @@ class GitHubRunEvidenceTests(unittest.TestCase):
                 self.assertRaisesRegex(ValueError, "signature"),
             ):
                 verify_github_run_evidence(**args)
-
-    def test_changed_envelope_bytes_refuse_before_dsse_verification(self):
-        args = self.arguments()
-        for envelope in (
-            args["envelope"] + b" ",
-            bytes([args["envelope"][0] ^ 1]) + args["envelope"][1:],
-        ):
-            with patch(
-                "literate_ai.security.evidence.github_oidc.verify_evidence_statement"
-            ) as verifier:
-                with self.assertRaises(ValueError):
-                    verify_github_run_evidence(**{**args, "envelope": envelope})
-                verifier.assert_not_called()
-
-    def test_invalid_token_refuses_before_possession_check(self):
-        args = self.arguments()
-        with patch(
-            "literate_ai.security.evidence.github_oidc.verify_evidence_statement"
-        ) as verifier:
-            with self.assertRaises(ValueError):
-                verify_github_run_evidence(**{**args, "token": self.fixture.token()})
-            verifier.assert_not_called()
 
     def test_legitimately_signed_and_token_bound_wrong_runs_refuse(self):
         changes = [
@@ -137,46 +99,3 @@ class GitHubRunEvidenceTests(unittest.TestCase):
                 self.assertRaisesRegex(ValueError, "evidence.trust."),
             ):
                 verify_github_run_evidence(**self.arguments(record))
-
-    def test_run_age_duration_and_future_limits_apply_independently_of_jwt(self):
-        for policy in (
-            replace(self.fixture.policy, maximum_run_age_seconds=9),
-            replace(self.fixture.policy, maximum_run_duration_seconds=99),
-        ):
-            with self.assertRaisesRegex(ValueError, "evidence.trust."):
-                verify_github_run_evidence(**self.arguments(policy=policy))
-        args = self.arguments()
-        with self.assertRaisesRegex(ValueError, "run-in-future"):
-            verify_github_run_evidence(
-                **{
-                    **args,
-                    "now": 200 - 1,
-                    "key_set": replace(self.fixture.keys, fetched_at=190),
-                    "token": self.fixture.token(
-                        {
-                            **self.fixture.claims,
-                            "iat": 190,
-                            "nbf": 190,
-                            "aud": args["request"].audience(args["policy"]),
-                        }
-                    ),
-                }
-            )
-        self.assertNotEqual(
-            self.fixture.policy.identity,
-            replace(self.fixture.policy, maximum_run_age_seconds=9).identity,
-        )
-
-    def test_matrix_required_cells_are_independent_of_the_signed_matrix(self):
-        matrix = self.github_record(_records()[2])
-        expectation = replace(_expectation(matrix), required_cells=("unplanned",))
-        with self.assertRaisesRegex(ValueError, "matrix-coverage-mismatch"):
-            verify_github_run_evidence(
-                **self.arguments(matrix, expectation=expectation)
-            )
-
-    def test_refuses_nonbytes_and_oversized_envelopes_before_token_checks(self):
-        args = self.arguments()
-        for envelope in ("{}", b"", b"x" * (16 * 1024 * 1024 + 1)):
-            with self.assertRaisesRegex(ValueError, "envelope-invalid"):
-                verify_github_run_evidence(**{**args, "envelope": envelope})

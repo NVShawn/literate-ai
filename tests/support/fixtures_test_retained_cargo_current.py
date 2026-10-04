@@ -1,37 +1,28 @@
 """Shared fixtures extracted from ``tests.unit.test_retained_cargo_current``."""
 
 import hashlib
-
 import json
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
 
 from literate_ai.adapters.retained_cargo_current import (
     read_retained_cargo_importer_authority,
 )
-
 from literate_ai.contracts.blobs import BlobRef
-
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-
 from literate_ai.contracts.repositories import (
     RepositoryBuildCommand,
 )
-
 from literate_ai.contracts.retained_libraries import RetainedLibraryGatePolicy
-
 from literate_ai.projects import serialize_project_configuration
-
 from tests.support import fixtures_test_project_configuration as projects
+
 
 def blob(content):
     return BlobRef(hashlib.sha256(content).hexdigest(), len(content))
+
 
 class RetainedCargoCurrentTests(unittest.TestCase):
     def setUp(self):
@@ -187,4 +178,3 @@ class RetainedCargoCurrentTests(unittest.TestCase):
             self.skipTest("host does not permit symbolic links")
         with self.assertRaises(ValueError):
             self.read()
-

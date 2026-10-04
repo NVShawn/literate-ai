@@ -1,18 +1,14 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_lifecycle_binding_adapter``."""
 
 import json
-
-
-
-
 from pathlib import Path, PurePosixPath
 
 from literate_ai.adapters.standard_lifecycle_binding import (
     InstalledFrameworkDistribution,
     observe_installed_framework_distribution,
 )
-
 
 
 class FakeDistribution:
@@ -60,8 +56,8 @@ class FakeDistribution:
             return self._direct_url
         return json.dumps(self._direct_url)
 
+
 def observe(distribution: FakeDistribution) -> InstalledFrameworkDistribution:
     return observe_installed_framework_distribution(
         distribution_finder=lambda _name: (distribution,)
     )
-

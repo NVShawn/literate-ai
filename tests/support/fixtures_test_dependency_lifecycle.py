@@ -1,16 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_dependency_lifecycle``."""
-
-
-
-
-
-
-
-
-
-
-
 
 
 from literate_ai.adapters.dependencies import (
@@ -18,11 +8,6 @@ from literate_ai.adapters.dependencies import (
     HostDependencyObservation,
     MacOsMachODependencyObserver,
 )
-
-
-
-
-
 from literate_ai.contracts import (
     CycloneDxManagedComponent,
     CycloneDxManagedGraph,
@@ -30,7 +15,6 @@ from literate_ai.contracts import (
     canonical_identity,
     component_bom_ref,
 )
-
 
 
 def _managed_graph() -> CycloneDxManagedGraph:
@@ -52,10 +36,12 @@ def _managed_graph() -> CycloneDxManagedGraph:
         canonical_identity({"fixture": "dependency-lifecycle-composition"}),
     )
 
+
 class _EmptyObserver:
     def observe(self, build, *, root_ref: str) -> HostDependencyObservation:
         del build, root_ref
         return HostDependencyObservation((), ())
+
 
 class _FixtureMacObserver(MacOsMachODependencyObserver):
     def __init__(self, accepted: set[str]) -> None:
@@ -70,4 +56,3 @@ class _FixtureMacObserver(MacOsMachODependencyObserver):
         ):
             return "valid"
         raise DependencyObservationError("fixture.rejected", "image is absent")
-

@@ -1,41 +1,19 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_coding_cli_generation``."""
 
 import hashlib
-
-
 import json
-
-
-
-
-
-
-
-
-
-
-
-
-
 from pathlib import Path
 
-
-
 import literate_ai.adapters.models.coding_cli as coding_cli_adapter
-
-
 from literate_ai.adapters.dependencies import build_cyclonedx_bom
-
-
 from literate_ai.adapters.models import (
     GenerationRecipe,
     RecipeDocument,
     RecipeFlavor,
     RecipeSkill,
 )
-
-
 from literate_ai.contracts import (
     CYCLONEDX_SOURCE_SBOM_PATH,
     ContentIdentity,
@@ -48,15 +26,13 @@ from literate_ai.contracts import (
     canonical_identity,
     component_bom_ref,
 )
-
-
-
 from literate_ai.generated_tests import (
     GENERATED_TEST_SUITE_PATH,
     GENERATED_TEST_SUITE_SCHEMA,
 )
 
 TEST_COMPONENT_LOCK_IDENTITY = ContentIdentity.parse_uri("sha256:" + "c" * 64)
+
 
 def generation_skill(
     skill_id: str = "specification-planning",
@@ -90,6 +66,7 @@ def generation_skill(
     )
     return RecipeSkill.from_reference(reference, content, source="test fixture")
 
+
 def flavor(value: str, *, models=(), skills=()) -> RecipeFlavor:
     revision = canonical_identity({"fixture_flavor": value}).uri
     specification_set = canonical_identity({"fixture_flavor_spec": value}).uri
@@ -103,6 +80,7 @@ def flavor(value: str, *, models=(), skills=()) -> RecipeFlavor:
         revision_identity=revision,
         specification_set_identity=specification_set,
     )
+
 
 def recipe(selected: RecipeFlavor) -> GenerationRecipe:
     suffix = "py" if selected.value == "python" else "cpp"
@@ -134,6 +112,7 @@ def recipe(selected: RecipeFlavor) -> GenerationRecipe:
         (generation_skill(),),
         managed_sbom_graph=managed_graph,
     )
+
 
 def generated_test_suite(
     value: GenerationRecipe, *, first_arguments: list[object] | None = None
@@ -171,6 +150,7 @@ def generated_test_suite(
         sort_keys=True,
     )
 
+
 def write_generated_test_suite(workspace: Path, value: GenerationRecipe) -> None:
     path = workspace / GENERATED_TEST_SUITE_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -188,4 +168,3 @@ def write_generated_test_suite(workspace: Path, value: GenerationRecipe) -> None
     sbom_path = workspace / CYCLONEDX_SOURCE_SBOM_PATH
     sbom_path.parent.mkdir(parents=True, exist_ok=True)
     sbom_path.write_bytes(sbom)
-

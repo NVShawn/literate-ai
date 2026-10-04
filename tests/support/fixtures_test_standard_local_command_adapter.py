@@ -1,46 +1,21 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_local_command_adapter``."""
 
 import hashlib
-
 import json
-
-
 import shutil
-
-
-
 import sys
-
-
-
-
-
-
-
-
 from pathlib import Path
-
-
-
-
-
 
 from literate_ai.adapters.lifecycle import (
     LocalComponentToolBinding,
     LocalSourceTreeRegistry,
     LocalStandardLifecyclePorts,
 )
-
 from literate_ai.adapters.lifecycle.standard_local import (
     _local_tree_identity,
 )
-
-
-
-
-
-
 from literate_ai.contracts import (
     ArtifactExport,
     BlobRef,
@@ -52,16 +27,13 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-
-
-
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 
 
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture
-
 def _identity(label: str):
     return canonical_identity({"standard-local-command-test": label})
+
 
 def rewrite_self_authenticating_artifact(
     artifact_root: Path, export_id: str, payload: bytes
@@ -77,6 +49,7 @@ def rewrite_self_authenticating_artifact(
     ).uri
     manifest_path.write_bytes(canonical_json_bytes(manifest))
 
+
 def copy_digest_cache_without_sidecars(source: Path, destination: Path) -> None:
     """Copy digest-named artifact directories and omit sibling checkpoint files."""
 
@@ -85,6 +58,7 @@ def copy_digest_cache_without_sidecars(source: Path, destination: Path) -> None:
         if not child.is_dir() or len(child.name) != 64:
             continue
         shutil.copytree(child, destination / child.name)
+
 
 def _python_copy_lifecycle(root: Path):
     snapshot, execution = _fixture()
@@ -175,6 +149,7 @@ def _python_copy_lifecycle(root: Path):
     plan = ports.finalize(intent, ports.authorize(intent, index))
     return ports, plan, candidate, intent
 
+
 def _provider_export(export_id: str) -> ArtifactExport:
     payload = export_id.encode()
     return ArtifactExport(
@@ -196,6 +171,5 @@ def _provider_export(export_id: str) -> ArtifactExport:
         ),
     )
 
-from literate_ai.contracts import ComponentCommandContract  # noqa: F401
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture  # noqa: F401
+
 # NOTE: names not defined at top level of tests.unit.test_standard_local_command_adapter: ['ComponentCommandContract', '_fixture']

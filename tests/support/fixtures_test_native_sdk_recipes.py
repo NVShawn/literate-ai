@@ -1,78 +1,58 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_native_sdk_recipes``."""
 
 import dataclasses
-
 import json
-
 import shutil
-
 import subprocess
-
 import sys
-
 import unittest
-
 from pathlib import Path
-
 from unittest.mock import patch
 
 from literate_ai.adapters.builders._process import run_bounded_process
-
 from literate_ai.adapters.generation_preparation import (
     GenerationPreparationError,
     load_flavor_contributions,
 )
-
 from literate_ai.adapters.locked_generation_authority import (
     FilesystemLockedGenerationAuthorityReader,
     LockedGenerationAuthorityReaderError,
 )
-
 from literate_ai.adapters.native_sdk_custody import materialize_native_sdk
-
 from literate_ai.adapters.native_sdk_recipes import (
     NativeSdkRecipePlanner,
     select_native_sdk_recipes,
 )
-
 from literate_ai.adapters.source.repository_git import (
     GitRepositorySourceAcquirer,
     GitRepositorySourceCapturer,
 )
-
 from literate_ai.application.repository_sources import (
     RepositorySourceIndexBinding,
     RepositorySourceResolver,
 )
-
 from literate_ai.contracts import RepositoryRevisionKind, RepositoryRevisionSelector
-
 from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
-
 from literate_ai.contracts.identity import (
     ContentIdentity,
     HashAlgorithm,
     canonical_identity,
 )
-
 from literate_ai.contracts.native_sdks import (
     NativeSdkBuildRecipe,
     NativeSdkSnapshot,
 )
-
 from tests.support import fixtures_test_native_sdk_build as test_native_sdk_build
-
 from tests.support.fixtures_test_cli_component_locks import _run
-
 from tests.support.fixtures_test_component_lock_planning import _fixture
-
 from tests.support.fixtures_test_repository_sources import dependency
-
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+
 
 class NativeSdkRecipeTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -398,4 +378,3 @@ class NativeSdkRecipeTests(unittest.TestCase):
             with self.subTest(change=tuple(change)):
                 with self.assertRaises(ValueError):
                     planner.plan(**{**arguments, **change})
-

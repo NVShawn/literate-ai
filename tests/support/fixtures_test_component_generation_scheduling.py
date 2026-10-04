@@ -1,6 +1,6 @@
 from __future__ import annotations
-"""Shared fixtures extracted from ``tests.unit.test_component_generation_scheduling``."""
 
+"""Shared fixtures extracted from ``tests.unit.test_component_generation_scheduling``."""
 
 
 from dataclasses import replace
@@ -8,27 +8,19 @@ from dataclasses import replace
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-
 from literate_ai.application.component_generation_context import (
     PreparedComponentGenerationRequest,
     prepare_component_generation_context,
 )
-
-
 from literate_ai.contracts.executable_components import (
     ComponentChangeSurface,
     ComponentInvalidationDecision,
     GenerationComplexityBudget,
 )
-
-
-
 from tests.support.fixtures_test_component_execution_planning import (
     _models,
 )
-
 from tests.support.fixtures_test_component_generation_context import _materialize
-
 
 
 def _budget() -> GenerationComplexityBudget:
@@ -43,6 +35,7 @@ def _budget() -> GenerationComplexityBudget:
         max_model_tokens=100_000,
         max_cost_microunits=50_000_000,
     )
+
 
 def _prepared_execution(lock):
     execution = plan_component_execution(lock, model_identities=_models(lock))
@@ -60,10 +53,12 @@ def _prepared_execution(lock):
         prepared[plan.component_revision.uri] = request
     return replace(execution, generation_plans=tuple(plans)), prepared
 
+
 def _names(lock) -> dict[str, str]:
     return {
         item.revision.identity.uri: item.revision.coordinate.name for item in lock.nodes
     }
+
 
 def _decision(execution, names, changed, regenerate=()):
     revisions = {
@@ -88,4 +83,3 @@ def _decision(execution, names, changed, regenerate=()):
         all_revisions,
         all_revisions,
     )
-

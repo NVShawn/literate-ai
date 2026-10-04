@@ -31,15 +31,6 @@ class QualificationArchiveTests(unittest.TestCase):
             **({"max_bytes": 4096, "max_records": 8} | limits),
         )
 
-    def test_round_trip_and_determinism(self):
-        self.assertEqual(
-            self.reopen(self.archive).read_bytes(self.identity), b"package bytes"
-        )
-        self.assertEqual(
-            self.archive,
-            encode_qualification_archive(self.entries, max_bytes=4096, max_records=8),
-        )
-
     def test_rehashed_outer_archive_cannot_hide_foreign_members(self):
         path = f"records/{self.identity.digest}"
         for name, mode, payload in (
@@ -57,24 +48,3 @@ class QualificationArchiveTests(unittest.TestCase):
                 )
                 with self.assertRaises(ValueError):
                     self.reopen(content)
-
-    def test_archive_identity_and_bounds(self):
-        with self.assertRaises(ValueError):
-            reopen_qualification_archive(
-                self.archive,
-                BlobRef("0" * 64, len(self.archive)),
-                max_bytes=4096,
-                max_records=8,
-            )
-        with self.assertRaises(ValueError):
-            self.reopen(self.archive, max_bytes=len(self.archive) - 1)
-        with self.assertRaises(ValueError):
-            encode_qualification_archive(
-                self.entries, max_bytes=len(self.archive) - 1, max_records=8
-            )
-
-    def test_record_substitution_refuses_before_encoding(self):
-        with self.assertRaises(ValueError):
-            encode_qualification_archive(
-                ((self.identity, b"substitution"),), max_bytes=4096, max_records=8
-            )

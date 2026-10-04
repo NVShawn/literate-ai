@@ -1,15 +1,6 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_repository_orchestration_contracts``."""
-
-
-
-
-
-
-
-
-
-
 
 
 from literate_ai.contracts.repository_orchestration import (
@@ -17,8 +8,6 @@ from literate_ai.contracts.repository_orchestration import (
     RepositoryPin,
     RepositoryRelationship,
 )
-
-
 
 
 def authority():
@@ -32,4 +21,3 @@ def authority():
         ),
         (RepositoryRelationship("services/app", "libraries/core"),),
     )
-

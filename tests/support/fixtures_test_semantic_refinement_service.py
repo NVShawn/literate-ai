@@ -1,12 +1,9 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_semantic_refinement_service``."""
 
 
-
-
-
 from literate_ai.contracts.identity import ContentReference, canonical_identity
-
 from literate_ai.contracts.semantic_refinement import (
     RefinementReviewBinding,
     ReviewDecision,
@@ -16,8 +13,10 @@ from literate_ai.contracts.semantic_refinement import (
     SemanticRefinementReview,
 )
 
+
 def _reference(kind: str, uri: str, content: str) -> ContentReference:
     return ContentReference(kind, uri, canonical_identity(content))
+
 
 def _fixture() -> SemanticRefinementRequest:
     root = _reference("specification-document", "spec/root.md", "root bytes")
@@ -57,4 +56,3 @@ def _fixture() -> SemanticRefinementRequest:
         proposals=(proposal,),
         reviews=(review,),
     )
-

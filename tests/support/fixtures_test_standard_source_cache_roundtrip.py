@@ -1,19 +1,9 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_standard_source_cache_roundtrip``."""
 
 
-
-
-
-
 from dataclasses import replace
-
-
-
-
-
-
-
 
 from literate_ai.contracts import (
     ContentIdentity,
@@ -29,16 +19,11 @@ from literate_ai.contracts import (
     StandardSourceSelectorSet,
     StandardSourceTestResult,
 )
-
-
-
 from literate_ai.storage import FileSystemCAS
-
 from tests.support.fixtures_test_source_cache import (
     _accepted_entry,
     _identity,
 )
-
 
 
 def _source_admission_entry(
@@ -140,4 +125,3 @@ def _source_admission_entry(
         cas.put_manifest(provenance.to_dict()),
         cas.put_manifest(evidence.semantic_dict()),
     )
-

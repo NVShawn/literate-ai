@@ -1,26 +1,17 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_debian_packaging``."""
 
 import gzip
-
 import hashlib
-
 import io
-
 import os
-
 import subprocess
-
 import tarfile
-
 import tempfile
-
 import unittest
-
 from dataclasses import replace
-
 from pathlib import Path
-
 from unittest import mock
 
 from literate_ai.adapters.debian_packaging import (
@@ -31,18 +22,13 @@ from literate_ai.adapters.debian_packaging import (
     debian_runtime_dependencies,
     project_debian_package,
 )
-
 from literate_ai.adapters.packaging import native_archive_package_plan
-
 from literate_ai.application.packaging import PackagingError
-
 from literate_ai.contracts import BlobRef
-
 from literate_ai.contracts.executable_components.packages import PackageKind
-
 from tests.support import fixtures_test_package_adapters as package_adapter_fixtures
-
 from tests.support.fixtures_test_package_release_contracts import _identity
+
 
 def _tar(entries: dict[str, tuple[bytes, int]]) -> bytes:
     raw = io.BytesIO()
@@ -74,6 +60,7 @@ def _tar(entries: dict[str, tuple[bytes, int]]) -> bytes:
         stream.write(raw.getvalue())
     return compressed.getvalue()
 
+
 def _ar(members: dict[str, bytes]) -> bytes:
     result = bytearray(b"!<arch>\n")
     for name, body in members.items():
@@ -87,6 +74,7 @@ def _ar(members: dict[str, bytes]) -> bytes:
         if len(body) % 2:
             result.extend(b"\n")
     return bytes(result)
+
 
 class DebianPackagingTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -344,6 +332,6 @@ class DebianPackagingTests(unittest.TestCase):
                     object_root=Path(self.temporary.name) / "objects",
                 )
 
+
 if __name__ == "__main__":
     unittest.main()
-

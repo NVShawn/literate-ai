@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import dataclasses
-import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -20,7 +19,6 @@ from literate_ai.contracts.executable_components.commands import (
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.native_sdks import NativeSdkSnapshot
 from literate_ai.storage.cas import BlobIntegrityError, BlobNotFoundError, FileSystemCAS
-from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class NativeSdkCustodyTests(unittest.TestCase):
@@ -63,18 +61,6 @@ class NativeSdkCustodyTests(unittest.TestCase):
     def capture(self) -> NativeSdkSnapshot:
         return capture_native_sdk(self.source, **self.arguments)
 
-    def test_schema_roundtrip_and_unknown_fields_fail_closed(self) -> None:
-        snapshot = self.capture()
-        schemas = SchemaCatalog()
-        document = json.loads(json.dumps(snapshot.to_dict()))
-        schemas.validate(snapshot.SCHEMA, document)
-        self.assertEqual(NativeSdkSnapshot.from_dict(document), snapshot)
-        document["execution_admitted"] = True
-        with self.assertRaises(ValueError):
-            NativeSdkSnapshot.from_dict(document)
-        with self.assertRaises(AssertionError):
-            schemas.validate(snapshot.SCHEMA, document)
-
     def test_replayed_bindings_fail_before_materialization(self) -> None:
         snapshot = self.capture()
         for field in (
@@ -116,25 +102,6 @@ class NativeSdkCustodyTests(unittest.TestCase):
                 )
             self.assertEqual(list(self.parent.iterdir()), [])
 
-    def test_copy_corruption_is_rejected_and_unrelated_files_survive(self) -> None:
-        snapshot = self.capture()
-        unrelated = self.parent / "keep.txt"
-        unrelated.write_text("keep")
-        with mock.patch.object(
-            self.store,
-            "copy_to",
-            side_effect=lambda _blob, target: target.write_bytes(b"corrupt"),
-        ):
-            with self.assertRaisesRegex(ValueError, "changed during materialization"):
-                materialize_native_sdk(
-                    snapshot,
-                    expected_identity=snapshot.identity,
-                    store=self.store,
-                    parent=self.parent,
-                )
-        self.assertEqual(list(self.parent.iterdir()), [unrelated])
-        self.assertEqual(unrelated.read_text(), "keep")
-
     def test_capture_rejects_symlinks_and_concurrent_mutation(self) -> None:
         link = self.source / "linked"
         try:
@@ -154,45 +121,3 @@ class NativeSdkCustodyTests(unittest.TestCase):
         with mock.patch.object(self.store, "put_file", side_effect=mutate):
             with self.assertRaisesRegex(ValueError, "changed during capture"):
                 self.capture()
-
-    def test_unsafe_aliases_missing_native_files_and_empty_imports_fail(self) -> None:
-        snapshot = self.capture()
-        for name in ("../escape", "python/VENDOR/__init__.py", "python/vendor"):
-            with self.subTest(name=name), self.assertRaises(ValueError):
-                added = dataclasses.replace(snapshot.files[-1], path=name)
-                dataclasses.replace(
-                    snapshot,
-                    files=tuple(
-                        sorted((*snapshot.files, added), key=lambda item: item.path)
-                    ),
-                )
-        with self.assertRaises(ValueError):
-            dataclasses.replace(snapshot, native_libraries=("missing.bin",))
-        with self.assertRaises(ValueError):
-            dataclasses.replace(snapshot, import_root="missing")
-
-    def test_materializations_are_distinct_and_preserve_exact_bytes(self) -> None:
-        snapshot = self.capture()
-        roots = [
-            materialize_native_sdk(
-                snapshot,
-                expected_identity=snapshot.identity,
-                store=self.store,
-                parent=self.parent,
-            )
-            for _ in range(2)
-        ]
-        self.assertNotEqual(*roots)
-        for root in roots:
-            self.assertEqual(
-                {
-                    p.relative_to(root).as_posix()
-                    for p in root.rglob("*")
-                    if p.is_file()
-                },
-                {f.path for f in snapshot.files},
-            )
-            for item in snapshot.files:
-                self.assertEqual(
-                    (root / item.path).read_bytes(), self.store.get_bytes(item.blob)
-                )

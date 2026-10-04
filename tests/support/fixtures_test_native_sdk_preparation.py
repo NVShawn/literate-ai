@@ -2,28 +2,11 @@
 
 import json
 
-
-
-
-
-
-
-
-
-
-
-
 from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
-
-
-
-
-
 from tests.support.fixtures_test_native_sdk_closure import linked_recipe
-
 
 
 def preparation_recipe(fixture):
@@ -69,4 +52,3 @@ def preparation_recipe(fixture):
             }
         )
     )
-

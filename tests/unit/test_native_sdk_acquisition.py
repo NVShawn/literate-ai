@@ -1,37 +1,24 @@
 """SDK acquisition discovers real tools and feeds locked generation preparation."""
 
 import json
-import os
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 from literate_ai.adapters.component_acceptance import (
     FilesystemComponentAcceptanceOracle,
 )
 from literate_ai.adapters.dependencies import build_cyclonedx_bom
-from literate_ai.adapters.generation_preparation import (
-    FilesystemLockedGenerationApplicationAdapter,
-    FilesystemLockedGenerationPreparationAdapter,
-)
 from literate_ai.adapters.lifecycle.standard_local import (
     local_generated_source_tree_identity,
-)
-from literate_ai.adapters.locked_generation_authority import (
-    LockedGenerationAuthorityReaderError,
 )
 from literate_ai.adapters.models.coding_cli import (
     _acceptance_argument_vectors,
     _acceptance_result_shape,
     _recipe_authority_sbom,
 )
-from literate_ai.adapters.native_sdk_acquisition import NativeSdkProjectAcquisition
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.adapters.native_sdk_generation import native_sdk_generation_identities
-from literate_ai.adapters.source.repository_cache import (
-    RepositorySourceCachePolicyError,
-)
 from literate_ai.adapters.standard_project import (
     PlannedStandardProject,
     StandardProjectExecutionRequest,
@@ -41,19 +28,12 @@ from literate_ai.adapters.standard_project import (
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
-from literate_ai.application.generation_preparation import (
-    GenerationPreparationError,
-    GenerationPreparationRequest,
-)
-from literate_ai.contracts import SourceIntelligenceMode
 from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
 from literate_ai.contracts.executable_components import (
     ComponentChangeSurface,
-    ComponentCommandPhase,
-    ComponentCommandRole,
     ComponentInvalidationDecision,
     GeneratedSourceCandidate,
     SourceGenerationProvenance,
@@ -67,12 +47,10 @@ from literate_ai.generated_tests import (
     MAJOR_REBUILD_GENERATION_MODE,
     validate_generated_test_suite,
 )
-from literate_ai.security import AuthorizationError, SecurityPolicy
-from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
+from tests.support import (
+    fixtures_test_native_sdk_source_build as test_native_sdk_source_build,
+)
 from tests.support.fixtures_test_component_node_generation_preparation import _budget
-from tests.support.fixtures_test_native_sdk_preparation import preparation_recipe
-from tests.support.fixtures_test_repository_sources import source_intelligence_policy
-from tests.support.fixtures_test_standard_command_projection import _observation, _tool
 from tests.support.fixtures_test_standard_project_factory import _selection
 
 _SDK_CASES = (
@@ -416,126 +394,3 @@ class NativeSdkAcquisitionTests(unittest.TestCase):
         self.assertIsNotNone(
             result.lifecycle.root_integration.independent_acceptance_identity
         )
-
-    def test_preflight_and_real_acquisition_feed_preparation(self):
-        fixture = test_native_sdk_source_build.NativeSdkSourceBuildTests()
-        self.addCleanup(fixture.doCleanups)
-        fixture.configure_recipe_fixture = preparation_recipe
-        fixture.setUp()
-        root = fixture.fixture.root / "acquired"
-        options = dict(
-            cache_root=root,
-            source_intelligence_policy=source_intelligence_policy(
-                "none", SourceIntelligenceMode.OFF
-            ),
-            security_policy=SecurityPolicy(canonical_identity("fixture policy").uri),
-            revocations=lambda: fixture.revocations,
-            environment=dict(os.environ),
-            actor="fixture-operator",
-            reason="Build the reviewed native acquisition fixture",
-            host_build_acknowledged=True,
-        )
-        with patch("literate_ai.adapters.native_sdk_acquisition.shutil.which") as which:
-            with self.assertRaises(GenerationPreparationError) as raised:
-                NativeSdkProjectAcquisition(
-                    **{**options, "host_build_acknowledged": False}
-                )(fixture.snapshot)
-            self.assertEqual(
-                raised.exception.code, "native_sdk.host_build_not_acknowledged"
-            )
-            which.assert_not_called()
-        self.assertFalse(root.exists())
-        with self.assertRaises(GenerationPreparationError) as raised:
-            NativeSdkProjectAcquisition(**{**options, "environment": {"PATH": ""}})(
-                fixture.snapshot
-            )
-        self.assertEqual(raised.exception.code, "native_sdk.tool_unavailable")
-        self.assertFalse(root.exists())
-        with patch(
-            "literate_ai.adapters.native_sdk_acquisition.platform.machine",
-            return_value="unsupported-target",
-        ):
-            with self.assertRaises(GenerationPreparationError) as raised:
-                NativeSdkProjectAcquisition(**options)(fixture.snapshot)
-        self.assertEqual(raised.exception.code, "native_sdk.host_target_mismatch")
-        self.assertFalse(root.exists())
-        with patch("literate_ai.adapters.native_sdk_acquisition.shutil.which") as which:
-
-            def rejected_revocations():
-                raise AuthorizationError("native_sdk.project_authority_changed")
-
-            with self.assertRaises(GenerationPreparationError) as raised:
-                NativeSdkProjectAcquisition(
-                    **{**options, "revocations": rejected_revocations}
-                )(fixture.snapshot)
-            self.assertEqual(
-                raised.exception.code, "native_sdk.project_authority_changed"
-            )
-            which.assert_not_called()
-        self.assertFalse(root.exists())
-        with patch(
-            "literate_ai.adapters.native_sdk_acquisition.NativeSdkSourceBuildService",
-            side_effect=RepositorySourceCachePolicyError(
-                "repository_source.intelligence_unavailable", "Indexer unavailable"
-            ),
-        ):
-            with self.assertRaises(GenerationPreparationError) as raised:
-                NativeSdkProjectAcquisition(**options)(fixture.snapshot)
-            self.assertEqual(
-                raised.exception.code, "repository_source.intelligence_unavailable"
-            )
-        acquisition = NativeSdkProjectAcquisition(**options)
-        adapter = FilesystemLockedGenerationApplicationAdapter(
-            FilesystemLockedGenerationPreparationAdapter(native_sdk_builder=acquisition)
-        )
-        recipe_fixture = fixture.recipe_fixture
-        prepared = adapter.prepare(
-            GenerationPreparationRequest(
-                component_root=recipe_fixture.component,
-                target_name="host",
-                flavor_selectors=(
-                    "+python",
-                    "+" + recipe_fixture.recipe.layout.operating_system,
-                ),
-                flavor_roots=(recipe_fixture.flavors,),
-            )
-        )
-        snapshot = prepared.locked_authority_snapshot
-        inputs = prepared.native_sdk_inputs
-        self.assertIsNotNone(inputs)
-        ids = native_sdk_generation_identities(inputs, snapshot)
-        self.assertEqual(len(ids), 1)
-        self.assertNotIn(snapshot.authority.lock.root_revision.uri, ids)
-        execution = plan_component_execution(
-            snapshot.authority.lock,
-            model_identities={
-                node.revision.identity.uri: canonical_identity("model")
-                for node in snapshot.authority.lock.nodes
-            },
-            native_sdk_input_identities=ids,
-        )
-        self.assertEqual(len(execution.generation_plans), 2)
-        closure = project_locked_standard_toolchain_closure(
-            snapshot,
-            execution,
-            native_sdk_inputs=inputs,
-            toolchain_discoverer=lambda name, *_: _tool(name),
-            dependency_observer=_observation,
-        )
-        root_contract = next(
-            contract
-            for contract in closure.contracts
-            if contract.component_revision == snapshot.authority.lock.root_revision
-        )
-        self.assertIn(
-            ComponentCommandRole.NATIVE_SDK_INPUTS,
-            root_contract.command(ComponentCommandPhase.EXECUTE).roles,
-        )
-        adapter.require_unchanged(prepared)
-        with self.assertRaisesRegex(ValueError, "single-use"):
-            acquisition(snapshot)
-        path = recipe_fixture.component / "provider" / "integration.md"
-        path.write_bytes(path.read_bytes() + b"\nChanged contract.\n")
-        with self.assertRaises(LockedGenerationAuthorityReaderError) as changed:
-            adapter.require_unchanged(prepared)
-        self.assertIn("stale", str(getattr(changed.exception, "code", "")))

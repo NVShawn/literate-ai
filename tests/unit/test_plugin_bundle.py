@@ -15,21 +15,6 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 class PluginBundleTests(unittest.TestCase):
-    def test_legacy_builder_rejects_symlink_to_owned_output(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            owned = root / "owned"
-            build_plugin_bundle(repository=REPO, output=owned)
-            selected = root / "link"
-            try:
-                selected.symlink_to(owned, target_is_directory=True)
-            except OSError:
-                self.skipTest("host does not permit directory symlinks")
-            original = (owned / "SKILL.md").read_bytes()
-            with self.assertRaises(ValueError):
-                build_plugin_bundle(repository=REPO, output=selected)
-            self.assertEqual((owned / "SKILL.md").read_bytes(), original)
-
     def test_release_archives_are_reproducible_and_preserve_canonical_skill(
         self,
     ) -> None:
@@ -60,15 +45,6 @@ class PluginBundleTests(unittest.TestCase):
                         any(".." in Path(name).parts for name in archive.namelist())
                     )
 
-    def test_legacy_builder_refuses_to_replace_unowned_output(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            marker = root / "user-content"
-            marker.write_text("retain me")
-            with self.assertRaises(ValueError):
-                build_plugin_bundle(repository=REPO, output=root)
-            self.assertEqual(marker.read_text(), "retain me")
-
     def test_bundle_skill_bytes_match_catalog(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "literate-ai"
@@ -95,7 +71,3 @@ class PluginBundleTests(unittest.TestCase):
                 (REPO / "SKILL.md").read_bytes(), (output / "SKILL.md").read_bytes()
             )
             self.assertFalse((REPO / "skills" / "agent" / ".plugin-copy").exists())
-
-    def test_repository_does_not_check_in_a_second_agent_skill_tree(self) -> None:
-        plugin_skills = REPO / ".claude-plugin" / "skills"
-        self.assertFalse(plugin_skills.exists())

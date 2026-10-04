@@ -259,7 +259,9 @@ sys.stdout.buffer.write(encode_action_response(request,result_record=Path({str(r
         self.assert_released()
 
     def test_conflicting_receipts_for_same_scope_do_not_replace_accepted_state(self):
-        from tests.support import fixtures_test_action_execute_providers as provider_fixture
+        from tests.support import (
+            fixtures_test_action_execute_providers as provider_fixture,
+        )
 
         fixture = provider_fixture.ExecuteProviderTests()
         self.addCleanup(fixture.doCleanups)

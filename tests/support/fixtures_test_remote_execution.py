@@ -1,21 +1,9 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_remote_execution``."""
 
 
-
-
-
-
-
-
 from pathlib import Path
-
-
-
-
-
-
-
 
 from literate_ai.contracts import (
     ContentIdentity,
@@ -32,11 +20,12 @@ from literate_ai.contracts import (
     ObservedGpuDevice,
     WorkerHardwareObservation,
 )
-
 from literate_ai.remote_source_guard import source_tree_identity
+
 
 def identity(character: str) -> ContentIdentity:
     return ContentIdentity(HashAlgorithm.SHA256, character * 64)
+
 
 def worker() -> ExecutionWorker:
     return ExecutionWorker(
@@ -47,6 +36,7 @@ def worker() -> ExecutionWorker:
         endpoint="user@host",
         workspace="~/literate-ai",
     )
+
 
 def request(
     action: LifecycleDispatchAction,
@@ -78,6 +68,7 @@ def request(
         entrypoint=entrypoint,
     )
 
+
 def materialization(
     dispatch_request: ExecutionDispatchRequest, project: Path
 ) -> ExecutionSourceMaterialization:
@@ -89,6 +80,7 @@ def materialization(
             "source-archive", "staged:source.tar.gz", identity("9")
         ),
     )
+
 
 def observation() -> WorkerHardwareObservation:
     return WorkerHardwareObservation(
@@ -112,4 +104,3 @@ def observation() -> WorkerHardwareObservation:
         ),
         NvidiaProbeStatus.OK,
     )
-

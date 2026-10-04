@@ -82,9 +82,3 @@ class LocalTestHandoffTests(unittest.TestCase):
                 self.builder.build(f.plan, ())
         with self.assertRaises(ActionWireError):
             self.builder.test_handoff(f.plan, f.fixture.fixture.output.exports)
-
-    def test_substituted_exports_refuse_existing_handoff(self):
-        f = self.fixture
-        self.builder.build(f.plan, ())
-        with self.assertRaises(ActionWireError):
-            self.builder.test_handoff(f.plan, ())

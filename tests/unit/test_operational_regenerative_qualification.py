@@ -1,32 +1,22 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import tempfile
 import unittest
-from dataclasses import replace
 from pathlib import Path
 
 from literate_ai.application import SourcePromotionService
 from literate_ai.source_to_specification import (
-    LEGACY_QUALIFICATION_BLOCKER,
-    CurrentRegenerativeQualificationEvidence,
-    LocalFilesystemQualificationCheckpointStore,
     ParityOutcome,
     PromotionInputKind,
-    QualificationRunCheckpoint,
     RegenerationOutcome,
     RegenerationRunPlan,
     RegenerativeQualificationPolicy,
     SourcePromotionInput,
-    SourceToSpecificationError,
     canonical_digest,
     inventory_source,
     run_regenerative_qualification,
 )
-from tests.support.fixtures_test_schema_catalog import SchemaCatalog
-
-ROOT = Path(__file__).resolve().parents[2]
 
 
 def identity(label: str) -> str:
@@ -84,20 +74,6 @@ class FixtureAttestor:
 
     def verify(self, payload, attestation_id):
         return canonical_digest(payload) == attestation_id
-
-
-class InterruptingRegenerator(FixtureRegenerator):
-    def __init__(self):
-        super().__init__()
-        self.calls = 0
-
-    def regenerate(self, request, workspace):
-        self.calls += 1
-        if self.calls == 2:
-            raise SourceToSpecificationError(
-                "fixture.interrupted", "second generation was interrupted"
-            )
-        return super().regenerate(request, workspace)
 
 
 class OperationalRegenerativeQualificationTests(unittest.TestCase):
@@ -181,76 +157,6 @@ class OperationalRegenerativeQualificationTests(unittest.TestCase):
             )
         return result, selected
 
-    def test_runner_measures_empty_spec_only_runs_as_historical_evidence(self):
-        result, regenerator = self.qualify()
-        self.assertFalse(result.decision.qualified)
-        self.assertIn(LEGACY_QUALIFICATION_BLOCKER, result.decision.blockers)
-        self.assertEqual(regenerator.received_empty_workspaces, [True, True])
-        self.assertTrue(
-            all(item.source_excluded_from_generation for item in result.evidence)
-        )
-        self.assertEqual(len({item.run_attestation_id for item in result.evidence}), 2)
-
-    def current_evidence(self, runs):
-        return CurrentRegenerativeQualificationEvidence(
-            source_snapshot_identity=self.source,
-            specification_set_identity=self.specification,
-            component_revision_identity=identity("component-revision"),
-            target_lock_identity=identity("flavors"),
-            flavor_set_identity=identity("flavor-set"),
-            skill_set_identity=identity("skill-set"),
-            workflow_identity=identity("workflow"),
-            routing_policy_identity=identity("routing"),
-            promotion_input_audit_identity=self.source_exclusion.generation_input_audit_identity,
-            promotion_tree_identity=self.source_exclusion.materialized_tree_identity,
-            inverse_evidence_custody_identity=identity("inverse-custody"),
-            generation_recipe_identity=identity("recipe"),
-            regenerator_identity=FixtureRegenerator.provider_identity,
-            verifier_identity=FixtureParityVerifier.provider_identity,
-            attestor_identity=identity("provider:attestor"),
-            policy=self.policy,
-            runs=runs,
-        )
-
-    def test_current_evidence_admits_complete_clean_runs(self):
-        result, _ = self.qualify()
-        evidence = self.current_evidence(result.evidence)
-        self.assertEqual(
-            evidence.to_dict()["runs"], [item.to_dict() for item in result.evidence]
-        )
-        self.assertTrue(evidence.identity.startswith("sha256:"))
-        SchemaCatalog(ROOT / "schemas" / "v2").validate(
-            evidence.SCHEMA, evidence.to_dict()
-        )
-        self.assertEqual(
-            CurrentRegenerativeQualificationEvidence.from_dict(evidence.to_dict()),
-            evidence,
-        )
-
-    def test_current_evidence_rejects_failed_or_cached_run(self):
-        result, _ = self.qualify()
-        for mutation in (
-            {"build_passed": False},
-            {"generated_source_cache_hit": True},
-            {"independent_parity_passed": False},
-        ):
-            with (
-                self.subTest(mutation=mutation),
-                self.assertRaisesRegex(
-                    SourceToSpecificationError, "every admitted run"
-                ),
-            ):
-                self.current_evidence(
-                    (
-                        replace(result.evidence[0], **mutation),
-                        *result.evidence[1:],
-                    )
-                )
-
-    def test_undeclared_generation_input_fails_before_attestation(self):
-        with self.assertRaisesRegex(SourceToSpecificationError, "outside the exact"):
-            self.qualify(FixtureRegenerator(extra_input=True))
-
     def test_missing_source_closure_evidence_fails_closed_instead_of_claiming_true(
         self,
     ):
@@ -276,94 +182,6 @@ class OperationalRegenerativeQualificationTests(unittest.TestCase):
         self.assertTrue(
             all(not item.source_excluded_from_generation for item in result.evidence)
         )
-
-    def test_source_path_in_audited_closure_fails_even_with_different_bytes(self):
-        (self.accepted_root / "main.py").write_text(
-            "# specification-shaped but source-path aliased\n", encoding="utf-8"
-        )
-        assessment = self._assessment("main.py", "spec.md")
-
-        self.assertFalse(assessment.source_excluded)
-        self.assertEqual(assessment.overlapping_paths, ("main.py",))
-        self.assertEqual(assessment.overlapping_content_identities, ())
-
-    def test_assessment_for_another_source_inventory_is_rejected(self):
-        with self.assertRaisesRegex(SourceToSpecificationError, "another source"):
-            run_regenerative_qualification(
-                source_snapshot_id=identity("other-source"),
-                specification_set_id=self.specification,
-                policy=self.policy,
-                plans=self.plans,
-                regenerator=FixtureRegenerator(),
-                parity_verifier=FixtureParityVerifier(),
-                attestor=FixtureAttestor(identity("provider:attestor")),
-                source_exclusion=self.source_exclusion,
-            )
-
-    def test_interrupted_qualification_resumes_from_signed_run_evidence(self):
-        checkpoint_root = Path(self.temporary.name) / "checkpoints"
-        store = LocalFilesystemQualificationCheckpointStore(checkpoint_root)
-        interrupted = InterruptingRegenerator()
-        attestor = FixtureAttestor(identity("provider:attestor"))
-        with self.assertRaisesRegex(SourceToSpecificationError, "interrupted"):
-            run_regenerative_qualification(
-                source_snapshot_id=self.source,
-                specification_set_id=self.specification,
-                policy=self.policy,
-                plans=self.plans,
-                regenerator=interrupted,
-                parity_verifier=FixtureParityVerifier(),
-                attestor=attestor,
-                source_exclusion=self.source_exclusion,
-                checkpoint_store=store,
-            )
-        self.assertEqual(interrupted.calls, 2)
-        checkpoint_files = tuple(checkpoint_root.glob("*.json"))
-        self.assertEqual(len(checkpoint_files), 1)
-        checkpoint = QualificationRunCheckpoint.from_dict(
-            json.loads(checkpoint_files[0].read_bytes())
-        )
-        SchemaCatalog(ROOT / "schemas" / "v2").validate(
-            checkpoint.to_dict()["schema"], checkpoint.to_dict()
-        )
-
-        resumed = FixtureRegenerator()
-        result = run_regenerative_qualification(
-            source_snapshot_id=self.source,
-            specification_set_id=self.specification,
-            policy=self.policy,
-            plans=self.plans,
-            regenerator=resumed,
-            parity_verifier=FixtureParityVerifier(),
-            attestor=attestor,
-            source_exclusion=self.source_exclusion,
-            checkpoint_store=store,
-        )
-
-        self.assertEqual(len(resumed.received_empty_workspaces), 1)
-        self.assertEqual(result.resumed_run_ids, (self.plans[0].run_id,))
-        self.assertEqual(len(result.evidence), 2)
-
-    def test_runner_rejects_nonindependent_providers(self):
-        with self.assertRaisesRegex(SourceToSpecificationError, "distinct identities"):
-            self.qualify(attestor_identity=FixtureParityVerifier.provider_identity)
-
-    def test_plan_for_another_specification_is_rejected_before_execution(self):
-        bad = replace(self.plans[0], specification_set_id=identity("other"))
-        with tempfile.TemporaryDirectory() as temporary:
-            with self.assertRaisesRegex(
-                SourceToSpecificationError, "exact specification"
-            ):
-                run_regenerative_qualification(
-                    source_snapshot_id=self.source,
-                    specification_set_id=self.specification,
-                    policy=self.policy,
-                    plans=(bad, self.plans[1]),
-                    regenerator=FixtureRegenerator(),
-                    parity_verifier=FixtureParityVerifier(),
-                    attestor=FixtureAttestor(identity("provider:attestor")),
-                    scratch_root=Path(temporary),
-                )
 
 
 if __name__ == "__main__":

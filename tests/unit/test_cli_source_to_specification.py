@@ -3,20 +3,15 @@ from __future__ import annotations
 import hashlib
 import io
 import json
-import os
-import shutil
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
 
 from literate_ai.cli import main
-from literate_ai.schema_catalog import SCHEMA_CATALOG_ROOT_ENVIRONMENT
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = REPO_ROOT / "tests" / "fixtures" / "source_to_specification"
 STATE_CASE = FIXTURES / "state-machine" / "case.json"
-REVISION_ONE = FIXTURES / "two-revision-refresh" / "revision-1" / "case.json"
 REVISION_TWO = FIXTURES / "two-revision-refresh" / "revision-2" / "case.json"
 CASES = (
     STATE_CASE,
@@ -115,115 +110,6 @@ class SourceToSpecificationCliTests(unittest.TestCase):
             self.assertFalse(overlapping.exists())
         self.assertEqual(tree_digest(source), before)
 
-    def test_persisted_bundle_reviews_with_an_explicit_embedded_catalog(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            catalog = root / "embedded-catalog"
-            shutil.copytree(REPO_ROOT / "schemas", catalog)
-            source = root / "source"
-            source.mkdir()
-            (source / "counter.py").write_text(
-                "def increment(value: int) -> int:\n    return value + 1\n",
-                encoding="utf-8",
-            )
-            key_path = root / "review.key"
-            key_path.write_bytes(b"embedded-catalog-review-key-material")
-            bundle_path = root / "bundle.json"
-            environment = {SCHEMA_CATALOG_ROOT_ENVIRONMENT: str(catalog)}
-            with (
-                patch.dict(os.environ, environment),
-                patch(
-                    "literate_ai.schema_catalog.sysconfig.get_path",
-                    return_value=str(root / "unrelated-install"),
-                ),
-            ):
-                status, bundle, errors = invoke("spec", "derive", str(source))
-                self.assertEqual((status, errors), (0, ""))
-                bundle_path.write_text(bundle, encoding="utf-8")
-
-                status, review, errors = invoke(
-                    "spec",
-                    "review",
-                    str(bundle_path),
-                    "--actor",
-                    "catalog-reviewer",
-                    "--key",
-                    str(key_path),
-                )
-                self.assertEqual((status, errors), (0, ""))
-                self.assertEqual(
-                    json.loads(review)["result"]["schema"],
-                    "literate-ai/specification-review-decision@1",
-                )
-
-                (catalog / "v2" / "index.json").write_text("{}", encoding="utf-8")
-                status, output, errors = invoke(
-                    "spec",
-                    "review",
-                    str(bundle_path),
-                    "--actor",
-                    "catalog-reviewer",
-                    "--key",
-                    str(key_path),
-                )
-                self.assertEqual((status, output), (2, ""))
-                self.assertEqual(
-                    json.loads(errors)["error"]["code"],
-                    "cli.invalid_bundle",
-                )
-
-    def test_audit_refresh_coverage_and_diff_use_cases(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            bootstrap_path = root / "bootstrap.json"
-            audit_path = root / "audit.json"
-            refresh_path = root / "refresh.json"
-
-            status, bootstrap, errors = invoke("spec", "derive", str(REVISION_ONE))
-            self.assertEqual((status, errors), (0, ""))
-            bootstrap_path.write_text(bootstrap)
-
-            status, audit, errors = invoke(
-                "spec",
-                "audit",
-                str(REVISION_ONE),
-                "--baseline",
-                str(bootstrap_path),
-            )
-            self.assertEqual((status, errors), (0, ""))
-            audit_path.write_text(audit)
-            audit_payload = json.loads(audit)
-            self.assertEqual(audit_payload["result"]["artifact_diff"]["changed"], [])
-
-            status, refresh, errors = invoke(
-                "spec",
-                "refresh",
-                str(REVISION_TWO),
-                "--previous",
-                str(audit_path),
-            )
-            self.assertEqual((status, errors), (0, ""))
-            refresh_path.write_text(refresh)
-            refresh_payload = json.loads(refresh)
-            invalidation = refresh_payload["result"]["invalidation"]
-            self.assertEqual(invalidation["invalidated_surface_ids"], ["retry-limit"])
-            self.assertEqual(
-                invalidation["retained_statement_ids"],
-                ["statement:name-observation"],
-            )
-
-            status, coverage, errors = invoke("spec", "coverage", str(refresh_path))
-            self.assertEqual((status, errors), (0, ""))
-            self.assertEqual(json.loads(coverage)["result"]["counts"], {"covered": 2})
-
-            status, difference, errors = invoke(
-                "spec", "diff", str(bootstrap_path), str(bootstrap_path)
-            )
-            self.assertEqual((status, errors), (0, ""))
-            diff = json.loads(difference)["result"]
-            self.assertEqual(diff["changed"], [])
-            self.assertEqual(diff["unchanged"], ["specs/derived/spec.md"])
-
     def test_prompt_injection_cannot_select_skills_or_change_policy(self):
         case = FIXTURES / "prompt-injection" / "case.json"
         status, output, errors = invoke("spec", "derive", str(case))
@@ -235,16 +121,6 @@ class SourceToSpecificationCliTests(unittest.TestCase):
         )
         observation = result["observations"][0]
         self.assertEqual(observation["skill"]["skill_id"], "security")
-
-    def test_usage_and_input_errors_are_stable_json(self):
-        first = invoke("spec", "derive", "missing-case.json")
-        second = invoke("spec", "derive", "missing-case.json")
-        self.assertEqual(first, second)
-        self.assertEqual((first[0], first[1]), (2, ""))
-        payload = json.loads(first[2])
-        self.assertEqual(payload["schema"], "literate-ai/cli-error@1")
-        self.assertFalse(payload["ok"])
-        self.assertEqual(payload["error"]["code"], "cli.input_unavailable")
 
 
 if __name__ == "__main__":

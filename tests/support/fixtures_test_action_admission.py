@@ -1,45 +1,34 @@
 from __future__ import annotations
+
 """Shared fixtures extracted from ``tests.unit.test_action_admission``."""
 
 import os
-
 import unittest
-
 from dataclasses import replace
-
 from datetime import UTC, datetime, timedelta
-
 from unittest.mock import patch
 
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
-
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
 )
-
 from literate_ai.adapters.command_indexer import CommandGenerationIndexer
-
 from literate_ai.adapters.qualification_capture import QualificationEvidenceRecorder
-
 from literate_ai.application.action_dag_scheduler import LifecycleActionKind
-
 from literate_ai.contracts.execution_dispatch import (
     LIFECYCLE_ACTION_WIRE_PROTOCOL,
     ExecutionWorkerCatalog,
 )
-
 from literate_ai.contracts.identity import canonical_identity
-
 from literate_ai.contracts.worker_capabilities import (
     NvidiaProbeStatus,
     WorkerHardwareObservation,
     WorkerHardwareObservationCatalog,
 )
-
 from tests.support import fixtures_test_command_indexer as index_fixture
-
 from tests.support.fixtures_test_action_blob_source import source_cas_server
+
 
 class CommandActionAdmissionTests(unittest.TestCase):
     def setUp(self):
@@ -365,6 +354,6 @@ class CommandActionAdmissionTests(unittest.TestCase):
                 pool.revalidate(worker)
             self.assertEqual(raised.exception.code, "action_admission.runtime_changed")
 
+
 if __name__ == "__main__":
     unittest.main()
-

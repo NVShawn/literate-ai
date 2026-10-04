@@ -1,70 +1,51 @@
 """Shared fixtures extracted from ``tests.unit.test_action_execute_execution``."""
 
 import json
-
 import shutil
-
 import unittest
-
 from contextlib import contextmanager
-
 from datetime import UTC, datetime, timedelta
-
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters import action_execute_record as records
-
 from literate_ai.adapters.action_build_record import BuildWorkerInput
-
 from literate_ai.adapters.action_build_result import (
     BuildWorkerResult,
     capture_build_result,
 )
-
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
     record_identity,
 )
-
 from literate_ai.adapters.action_execute_execution import (
     execute_worker_execution,
     execute_worker_execution_from_cas,
 )
-
 from literate_ai.adapters.action_execute_result_record import ExecuteWorkerResult
-
 from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
-
 from literate_ai.adapters.qualification_capture import (
     QualificationEvidenceReader,
     QualificationEvidenceRecorder,
 )
-
 from literate_ai.adapters.standard_execution_admission import (
     verify_transferred_execution,
 )
-
 from literate_ai.application.standard_execution_inputs import (
     plan_standard_execution_receipts,
 )
-
 from literate_ai.contracts import (
     ComponentCommandPhase,
     ContentIdentity,
     canonical_identity,
     canonical_json_bytes,
 )
-
 from literate_ai.contracts.generation_cache import CachedSourceFile
-
 from literate_ai.storage import FileSystemCAS
-
 from tests.support import fixtures_test_standard_transferred_build as build_fixture
-
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
-from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 class ActionExecuteExecutionTests(unittest.TestCase):
     def setUp(self):
@@ -342,4 +323,3 @@ class ActionExecuteExecutionTests(unittest.TestCase):
         )
         self.assertFalse(seen[0].exists())
         self.assertEqual(list(workspace.iterdir()), [])
-

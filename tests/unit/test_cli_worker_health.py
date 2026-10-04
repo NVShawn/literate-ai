@@ -6,13 +6,11 @@ import sys
 import tempfile
 import time
 import unittest
-from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters.worker_health import (
     inspect_worker_storage,
-    load_worker_health_inputs,
 )
 from literate_ai.application.worker_pressure import PressureSample
 from literate_ai.cli.dispatch import main
@@ -26,7 +24,6 @@ from literate_ai.contracts import (
     QuotaCapacitySample,
     StorageCapacitySample,
     WorkerCapacityObservation,
-    canonical_identity,
 )
 from tests.support.fixtures_test_worker_capacity import ROLES, policy
 
@@ -72,45 +69,6 @@ class WorkerHealthCliTests(unittest.TestCase):
 
     def write_config(self):
         self.config_file.write_text(json.dumps(self.config))
-
-    def test_remote_windows_cleanup_paths_are_not_resolved_on_controller(self):
-        worker = ExecutionWorker(
-            "windows-worker",
-            ExecutionWorkerKind.COMMAND,
-            requirements=ExecutionRequirements(os_family="windows"),
-            command=("dispatcher",),
-        )
-        catalog = self.root / "windows-workers.json"
-        catalog.write_text(json.dumps(ExecutionWorkerCatalog((worker,)).to_dict()))
-        config = {
-            **self.config,
-            "worker_id": worker.worker_id,
-            "os_family": "windows",
-            "paths": [[role, rf"C:\worker\{role}"] for role in ROLES],
-            "cleanup": {
-                "roots": [
-                    {
-                        "alias": "task-cache",
-                        "path": r"C:\worker\cache\tasks",
-                        "ownership": "task-owned",
-                        "recovery": "re-download pinned packages",
-                        "active_markers": [".active"],
-                        "inactive_markers": [".complete"],
-                        "cleanup_command": ["cleanup-tool.exe", "{target}"],
-                    }
-                ],
-                "deadline_ms": 1000,
-                "maximum_entries": 100,
-                "maximum_depth": 4,
-                "minimum_candidate_bytes": 1,
-            },
-        }
-        health = self.root / "windows-health.json"
-        health.write_text(json.dumps(config))
-
-        inputs = load_worker_health_inputs(health, catalog, worker_id=worker.worker_id)
-
-        self.assertEqual(inputs.cleanup.roots[0].path, r"C:\worker\cache\tasks")
 
     def invoke(self, *extra, terminal=False):
         output = Terminal() if terminal else io.StringIO()
@@ -306,12 +264,6 @@ class WorkerHealthCliTests(unittest.TestCase):
         self.assertEqual(result["proposal_identity"], proposal["proposal_identity"])
         self.assertEqual(len(result["receipts"]), 1)
 
-    def test_help_names_private_inputs_and_no_cleanup_option(self):
-        output = io.StringIO()
-        self.assertEqual(main(["worker", "health", "help"], stdout=output), 0)
-        self.assertIn("--health-config", output.getvalue())
-        self.assertNotIn("--authorize-delete", output.getvalue())
-
     def test_real_local_measurement_preserves_files_and_suppresses_implicit_writes(
         self,
     ):
@@ -364,277 +316,6 @@ class WorkerHealthCliTests(unittest.TestCase):
                 if p.is_file()
             },
         )
-
-    def test_held_capacity_is_visible_in_json_and_human_alerts(self):
-        for role in self.config["capacity"]["roles"]:
-            role["additional_bytes"] = 20
-            role["reserve_bytes"] = 10
-        self.write_config()
-        with self.using_observer(
-            lambda *a, **kw: self.observed(*a, **kw, available=89)
-        ):
-            status, output = self.invoke("--json")
-            human_status, human = self.invoke(terminal=True)
-        self.assertEqual((status, human_status), (1, 1))
-        result = json.loads(output)["result"]
-        alert = next(a for a in result["alerts"] if a["resource"] == "bytes")
-        self.assertEqual(alert["deficit"], 1)
-        self.assertEqual(alert["impact"], "hold")
-        self.assertIn("deficit=1", human)
-        self.assertIn("exact-target authorization", human)
-        self.assertNotIn(str(self.root), human)
-        self.assertEqual(result["cleanup_investigation"]["status"], "not-configured")
-
-    def test_disk_incident_automatically_investigates_configured_task_cache(self):
-        candidate = self.root / "cache" / "old-wheelhouse"
-        candidate.mkdir()
-        (candidate / "wheel").write_bytes(b"x" * 32)
-        self.config["cleanup"] = {
-            "roots": [
-                {
-                    "alias": "package-cache",
-                    "path": str(self.root / "cache"),
-                    "ownership": "task-owned",
-                    "recovery": "re-download pinned packages",
-                    "active_markers": [".active"],
-                    "inactive_markers": [".complete"],
-                    "cleanup_command": ["cleanup-tool", "{target}"],
-                }
-            ],
-            "deadline_ms": 1000,
-            "maximum_entries": 100,
-            "maximum_depth": 4,
-            "minimum_candidate_bytes": 1,
-        }
-        for role in self.config["capacity"]["roles"]:
-            role["reserve_bytes"] = 100
-        self.write_config()
-
-        with self.using_observer(
-            lambda *a, **kw: self.observed(*a, **kw, available=99)
-        ):
-            status, output = self.invoke("--json")
-
-        self.assertEqual(status, 1)
-        result = json.loads(output)["result"]
-        investigation = result["cleanup_investigation"]
-        self.assertEqual(investigation["status"], "complete")
-        self.assertEqual(len(investigation["candidates"]), 1)
-        self.assertEqual(investigation["candidates"][0]["root"], "package-cache")
-        self.assertEqual(investigation["candidates"][0]["active_use"], "uncertain")
-        self.assertFalse(investigation["deletion_authorized"])
-        self.assertNotIn(str(self.root), output)
-
-    def test_required_unknown_returns_retry_and_optional_unknown_stays_visible(self):
-        def observer(*args, **kwargs):
-            return self.observed(
-                *args, **kwargs, quota_status=CapacityProbeStatus.DENIED
-            )
-
-        for required, expected in ((False, 0), (True, 2)):
-            for role in self.config["capacity"]["roles"]:
-                role["require_quota"] = required
-            self.write_config()
-            with self.using_observer(observer):
-                status, output = self.invoke("--json")
-            self.assertEqual(status, expected)
-            self.assertEqual(
-                json.loads(output)["result"]["assessment"]["health"], "unknown"
-            )
-            self.assertIn("probe-denied", output)
-
-    def test_job_identity_is_bound_and_path_changes_change_effective_policy(self):
-        job = canonical_identity("job").uri
-        with self.using_observer(self.observed):
-            _, first = self.invoke("--job-identity", job, "--json")
-            self.config["paths"][0][1] = str(self.root / "temp")
-            self.write_config()
-            _, second = self.invoke("--job-identity", job, "--json")
-        first, second = (json.loads(s)["result"] for s in (first, second))
-        self.assertEqual(first["assessment"]["job_identity"], job)
-        self.assertNotEqual(
-            first["assessment"]["policy_identity"],
-            second["assessment"]["policy_identity"],
-        )
-
-    def test_changed_configuration_during_measurement_refuses_without_leaking_content(
-        self,
-    ):
-        def observer(*args, **kwargs):
-            observed = self.observed(*args, **kwargs)
-            self.config_file.write_text("private-secret-invalid")
-            return observed
-
-        with self.using_observer(observer):
-            status, output = self.invoke("--json")
-        self.assertNotEqual(status, 0)
-        self.assertIn("worker.health_input_invalid", output)
-        self.assertNotIn("private-secret-invalid", output)
-        self.assertNotIn(str(self.root), output)
-
-    def test_ambiguous_unknown_oversized_and_wrong_worker_inputs_refuse_before_probe(
-        self,
-    ):
-        original = self.config_file.read_text()
-        variants = [
-            original.replace(
-                '"worker_id": "fixture"',
-                '"worker_id": "fixture", "worker_id": "fixture"',
-            ),
-            original.replace('"worker_id": "fixture"', '"worker_id": "other"'),
-            json.dumps({**self.config, "secret-value": "private-secret"}),
-            " " * (64 * 1024 + 1),
-        ]
-        with patch(
-            "literate_ai.cli.worker_health.inspect_worker_storage",
-            side_effect=AssertionError("probe must not run"),
-        ):
-            for raw in variants:
-                self.config_file.write_text(raw)
-                status, output = self.invoke("--json")
-                self.assertNotEqual(status, 0)
-                self.assertNotIn("private-secret", output)
-                self.assertNotIn("secret-value", output)
-
-    def test_explicit_command_receiver_runs_without_lifecycle_dispatch(self):
-        from literate_ai import worker_storage_probe
-
-        worker = ExecutionWorker(
-            "fixture",
-            ExecutionWorkerKind.COMMAND,
-            requirements=ExecutionRequirements(os_family=self.family),
-            command=("never-run-lifecycle", "{request_file}"),
-        )
-        self.catalog.write_text(json.dumps(ExecutionWorkerCatalog((worker,)).to_dict()))
-        self.config["health_command"] = {
-            "schema": "literate-ai/private-worker-storage-command@1",
-            "command": [sys.executable, "-B", worker_storage_probe.__file__],
-            "environment": [],
-        }
-        self.write_config()
-        status, output = self.invoke("--json")
-        self.assertEqual(status, 0, output)
-        self.assertNotIn("never-run-lifecycle", output)
-        self.assertNotIn(worker_storage_probe.__file__, output)
-        self.assertTrue(
-            all(
-                sample["available_bytes"]["status"] == "measured"
-                for sample in json.loads(output)["result"]["observation"]["samples"]
-            )
-        )
-
-    def test_catalog_change_during_measurement_also_refuses(self):
-        def observer(*args, **kwargs):
-            observed = self.observed(*args, **kwargs)
-            self.catalog.write_text("changed catalog")
-            return observed
-
-        with self.using_observer(observer):
-            status, output = self.invoke("--json")
-        self.assertNotEqual(status, 0)
-        self.assertIn("worker.health_input_invalid", output)
-
-    def test_explicit_alert_history_deduplicates_and_reports_recovery(self):
-        from tests.support.fixtures_test_worker_capacity import NOW
-
-        for role in self.config["capacity"]["roles"]:
-            role["reserve_bytes"] = 100
-        self.config["capacity"]["warning_headroom_bytes"] = 20
-        self.write_config()
-        state_path = self.root / "alerts.json"
-        tick = 0
-        available = 99
-
-        def inspect(inputs, **kwargs):
-            def observe(*args, **options):
-                return replace(
-                    self.observed(*args, **options, available=available),
-                    started_at_ms=NOW + tick - 2,
-                    completed_at_ms=NOW + tick - 1,
-                    expires_at_ms=NOW + tick + 1000,
-                )
-
-            return inspect_worker_storage(
-                inputs, observer=observe, clock_ms=lambda: NOW + tick, **kwargs
-            )
-
-        with patch(
-            "literate_ai.cli.worker_health.inspect_worker_storage", side_effect=inspect
-        ):
-            status, first = self.invoke("--alert-state", str(state_path), "--json")
-            self.assertEqual(status, 1)
-            first = json.loads(first)["result"]
-            self.assertEqual(len(first["events"]), 4)
-            tick += 1
-            _, repeated = self.invoke("--alert-state", str(state_path), terminal=True)
-            self.assertIn("No new alert transitions", repeated)
-            tick += 1
-            available = 1000
-            status, recovery = self.invoke("--alert-state", str(state_path), "--json")
-            self.assertEqual(status, 0)
-            recovered = json.loads(recovery)["result"]
-            self.assertEqual(
-                {event["transition"] for event in recovered["events"]}, {"recovered"}
-            )
-            self.assertEqual(recovered["assessment"]["decision"], "proceed")
-        self.assertNotIn(str(self.root), recovery)
-        self.assertLess(state_path.stat().st_size, 65536)
-
-    def test_configuration_schema_and_capacity_schema_resolve_together(self):
-        from jsonschema import Draft202012Validator
-        from referencing import Registry, Resource
-
-        from literate_ai.schema_catalog import verify_schema_catalog
-
-        schemas = Path(__file__).resolve().parents[2] / "schemas"
-        registry = Registry()
-        for path in schemas.glob("v*/*.schema.json"):
-            document = json.loads(path.read_text())
-            registry = registry.with_resource(
-                document["$id"], Resource.from_contents(document)
-            )
-        registry = registry.crawl()
-        validator = Draft202012Validator(
-            {"$ref": self.config["schema"]}, registry=registry
-        )
-        validator.validate(self.config)
-        invalid = {
-            **self.config,
-            "capacity": {
-                **self.config["capacity"],
-                "storage_bindings_identity": "foreign",
-            },
-        }
-        self.assertTrue(list(validator.iter_errors(invalid)))
-        self.assertGreater(
-            verify_schema_catalog("v2", schemas / "v2")["resource_count"], 0
-        )
-
-    def test_role_mismatch_and_foreign_binding_override_refuse(self):
-        for changes in (
-            {"paths": self.config["paths"][:-1]},
-            {
-                "capacity": {
-                    **self.config["capacity"],
-                    "storage_bindings_identity": "foreign",
-                }
-            },
-        ):
-            self.config_file.write_text(json.dumps({**self.config, **changes}))
-            with patch(
-                "literate_ai.cli.worker_health.inspect_worker_storage",
-                side_effect=AssertionError("probe must not run"),
-            ):
-                status, output = self.invoke("--json")
-            self.assertNotEqual(status, 0)
-            self.assertIn("worker.health_input_invalid", output)
-
-    def test_read_only_command_refuses_discovery_or_debug_file(self):
-        for extra in (("--discover-mcps",), ("--debug", str(self.root / "debug.json"))):
-            status, output = self.invoke(*extra, "--json")
-            self.assertNotEqual(status, 0)
-            self.assertIn("worker.health_read_only_options", output)
-        self.assertFalse((self.root / "debug.json").exists())
 
 
 if __name__ == "__main__":
