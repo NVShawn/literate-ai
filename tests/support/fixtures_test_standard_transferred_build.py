@@ -36,13 +36,13 @@ from literate_ai.contracts import ComponentCommandPhase, ComponentCommandToolBin
 from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.security import AuthorizationError
 from literate_ai.storage import FileSystemCAS
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _python_copy_lifecycle,
     rewrite_self_authenticating_artifact,
 )
-from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 
 class StandardTransferredBuildTests(unittest.TestCase):

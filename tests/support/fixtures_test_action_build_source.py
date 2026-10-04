@@ -22,12 +22,12 @@ from literate_ai.contracts import ComponentCommandPhase, canonical_identity
 from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.security import AuthorizationError
 from literate_ai.storage import FileSystemCAS
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.support.fixtures_test_standard_local_command_adapter import (
     _python_copy_lifecycle,
 )
-from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 
 class ActionBuildSourceTests(unittest.TestCase):

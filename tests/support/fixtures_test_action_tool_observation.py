@@ -32,7 +32,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.storage import FileSystemCAS
-from tests.unit.action_deadline import ACTION_TEST_DEADLINE
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 
 _RECEIVER = """
 import os, sys

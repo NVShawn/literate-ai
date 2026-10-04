@@ -147,6 +147,6 @@ next nominal boundary; retry that does not create a second daily run; and next-r
 status readable by a separate read-only connection. A reference implementation and
 its deterministic acceptance tests live alongside the framework's own test support
 (`tests/support/scheduler_lease_reference.py` and
-`tests/unit/test_scheduler_lease_reference.py`) to prove the contract is real and
+`tests/smoke/test_scheduler_lease_reference.py`) to prove the contract is real and
 implementable with only an injected clock, an injected random source, and the
 embedded SQL cache boundary.

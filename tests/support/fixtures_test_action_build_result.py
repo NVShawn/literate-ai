@@ -33,9 +33,9 @@ from literate_ai.security import AuthorizationError
 from literate_ai.storage import FileSystemCAS
 from literate_ai.storage.cas import BlobIntegrityError
 from tests.support import fixtures_test_standard_transferred_build as transfer_fixture
+from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
-from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 
 class ActionBuildResultTests(unittest.TestCase):

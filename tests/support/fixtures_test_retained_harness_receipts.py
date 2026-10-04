@@ -14,7 +14,7 @@ from literate_ai.cli import main
 from literate_ai.contracts import (
     ProjectInitializationOrigin,
 )
-from tests.unit.root_parent_adapter import (
+from tests.support.root_parent_adapter import (
     RootParentProjectInitializationAdapter as FilesystemProjectInitializationAdapter,
 )
 

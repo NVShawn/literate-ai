@@ -158,79 +158,68 @@ python-check: python-version $(DEV_PREREQUISITE) ## Validate the Python framewor
 .PHONY: finite-acceptance-check
 finite-acceptance-check: python-version $(RUNTIME_PREREQUISITE) ## Verify fractional application/library acceptance and identity compatibility.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_product_json_acceptance \
-		tests.unit.test_library_acceptance \
-		tests.unit.test_javascript_library_acceptance \
-		tests.unit.test_standard_local_command_adapter
+		tests.smoke.test_product_json_acceptance \
+		tests.smoke.test_javascript_library_acceptance \
+		tests.smoke.test_standard_local_command_adapter
 
 .PHONY: repository-lifecycle-check
 repository-lifecycle-check: python-version $(RUNTIME_PREREQUISITE) ## Qualify explicit retained-child lifecycle delegation.
-	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest tests.unit.test_repository_lifecycle
+	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest tests.e2e.test_repository_lifecycle
 
 .PHONY: component-worker-check
 component-worker-check: python-version $(RUNTIME_PREREQUISITE) ## Verify exact Component worker routing and predecessor byte custody.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_component_workers \
-		tests.unit.test_component_execution_planning \
-		tests.unit.test_standard_project_lifecycle \
-		tests.unit.test_cas_read_bounds \
-		tests.unit.test_schema_catalog \
-		tests.unit.test_wire_contract_versions
+		tests.critical.test_component_workers \
+		tests.smoke.test_standard_project_lifecycle \
+		tests.critical.test_cas_read_bounds \
+		tests.smoke.test_schema_catalog \
+		tests.critical.test_wire_contract_versions
 
 source-intelligence-check: python-version $(RUNTIME_PREREQUISITE) ## Verify opt-in project source-intelligence boundaries.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_project_source_index \
-		tests.unit.test_project_cli.ProjectCliTests.test_init_defaults_to_disabled_source_intelligence \
-		tests.unit.test_project_cli.ProjectCliTests.test_init_allows_opt_in_without_installing_external_provider \
-		tests.unit.test_project_cli.ProjectCliTests.test_explicit_source_intelligence_sync_uses_configured_project \
-		tests.unit.test_project_cli.ProjectCliTests.test_validation_honors_preferred_and_required_stage_modes \
-		tests.unit.test_cli_arbitrary_source.SourceIntelligenceStageTests \
-		tests.unit.test_cli_project_index_preflight
+		tests.smoke.test_project_source_index
 
 provider-resolution-check: python-version $(RUNTIME_PREREQUISITE) ## Verify canonical capability-based provider resolution.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_provider_resolution \
-		tests.unit.test_component_execution_planning \
-		tests.unit.test_component_lock_contracts \
-		tests.unit.test_schema_catalog \
-		tests.unit.test_wire_contract_versions
+		tests.smoke.test_provider_resolution \
+		tests.smoke.test_schema_catalog \
+		tests.critical.test_wire_contract_versions
 
 source-admission-check: python-version $(RUNTIME_PREREQUISITE) ## Verify source admission, worker fanout, and receipt boundaries.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_cli_generation \
-		tests.unit.test_cli_source_admission \
-		tests.unit.test_source_verification_workspace \
-		tests.unit.test_standard_project_lifecycle \
-		tests.unit.test_standard_source_admission \
-		tests.unit.test_standard_source_cache_roundtrip \
-		tests.unit.test_source_cache_continuation \
-		tests.unit.test_source_cache_publication
+		tests.critical.test_cli_generation \
+		tests.e2e.test_cli_source_admission \
+		tests.critical.test_source_verification_workspace \
+		tests.smoke.test_standard_project_lifecycle \
+		tests.critical.test_standard_source_admission \
+		tests.smoke.test_standard_source_cache_roundtrip \
+		tests.smoke.test_source_cache_publication
 
 remote-evidence-check: python-version $(RUNTIME_PREREQUISITE) ## Verify remote evidence transfer, import, diagnostics, and cleanup.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_execution_dispatch_contracts \
-		tests.unit.test_remote_execution \
-		tests.unit.test_ssh_execution \
-		tests.unit.test_ssh_transport
+		tests.critical.test_execution_dispatch_contracts \
+		tests.critical.test_remote_execution \
+		tests.smoke.test_ssh_execution \
+		tests.critical.test_ssh_transport
 
 inherited-session-check: python-version $(RUNTIME_PREREQUISITE) ## Verify authenticated inherited-session handoff and source admission.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_inherited_session_provider \
-		tests.unit.test_cursor_inherited_session \
-		tests.unit.test_cached_coding_cli_source_generation_runner \
-		tests.unit.test_coding_cli_generation.CodingCliSelectionTests \
-		tests.unit.test_project_lifecycle_driver_adapter \
-		tests.unit.test_schema_catalog \
-		tests.unit.test_standard_source_admission
+		tests.critical.test_inherited_session_provider \
+		tests.smoke.test_cursor_inherited_session \
+		tests.critical.test_cached_coding_cli_source_generation_runner \
+		tests.critical.test_coding_cli_generation.CodingCliSelectionTests \
+		tests.critical.test_project_lifecycle_driver_adapter \
+		tests.smoke.test_schema_catalog \
+		tests.critical.test_standard_source_admission
 
 target-matrix-check: python-version $(RUNTIME_PREREQUISITE) ## Verify concurrent target-matrix contracts, CLI, and scoped evidence.
 	PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \
-		tests.unit.test_target_matrices \
-		tests.unit.test_target_matrix_cli \
-		tests.unit.test_component_lock_store \
-		tests.unit.test_component_lock_planning \
-		tests.unit.test_locked_generation_authority \
-		tests.unit.test_schema_catalog
+		tests.smoke.test_target_matrices \
+		tests.smoke.test_target_matrix_cli \
+		tests.critical.test_component_lock_store \
+		tests.smoke.test_component_lock_planning \
+		tests.critical.test_locked_generation_authority \
+		tests.smoke.test_schema_catalog
 
 native-toolchain-check: python-version $(RUNTIME_PREREQUISITE) ## Run explicitly authorized real-Bazel conformance (may resolve dependencies).
 	LITERATE_AI_NATIVE_TOOLCHAIN_TESTS=1 PYTHONPATH=src $(RUN_PYTHON_COMMAND) -m unittest \

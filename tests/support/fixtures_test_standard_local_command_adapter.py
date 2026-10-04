@@ -28,7 +28,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
 )
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
-from tests.unit.standard_source_evidence_fixture import register_strict_source
+from tests.support.standard_source_evidence_fixture import register_strict_source
 
 
 def _identity(label: str):

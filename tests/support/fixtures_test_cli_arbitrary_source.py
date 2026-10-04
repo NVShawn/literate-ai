@@ -5,7 +5,7 @@ from __future__ import annotations
 import io
 
 from literate_ai.cli import main
-from tests.unit.root_parent_adapter import root_parent_for_fixture_project
+from tests.support.root_parent_adapter import root_parent_for_fixture_project
 
 KEY = b"local-bootstrap-key-material-32-bytes-minimum"
 

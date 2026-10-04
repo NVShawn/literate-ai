@@ -40,9 +40,9 @@ trees plus labeled unit fixtures:
 | `tests/fixtures/source_to_specification/**` | Inverse-work source, treated as generated-like trees |
 | `tests/fixtures/spec_map_hello/source/` | Small authored source fixture |
 | `samples/` | Sample Component trees (specifications; little generated product source) |
-| Unit fixtures in `tests/unit/test_coverage_gaps.py` | Labeled true positives and plausible false positives |
+| Unit fixtures in `tests/smoke/test_coverage_gaps.py` | Labeled true positives and plausible false positives |
 
-`tests/unit/test_coverage_gaps.py` (`test_fixture_and_sample_trees_have_no_fail_closed_hits`)
+`tests/smoke/test_coverage_gaps.py` (`test_fixture_and_sample_trees_have_no_fail_closed_hits`)
 requires that fail-closed markers fire on **zero** files in the fixture/sample
 corpus. That is a 0% fail-closed false-positive rate against available generated-like
 source. Advisory `TODO`/`FIXME` hits, if any, do not fail the build.

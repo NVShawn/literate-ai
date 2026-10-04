@@ -40,7 +40,7 @@ from tests.support.fixtures_test_standard_project_factory import (
     _selection,
     _toolchain_closure,
 )
-from tests.unit.standard_source_evidence_fixture import register_strict_source
+from tests.support.standard_source_evidence_fixture import register_strict_source
 
 
 class _Generator:

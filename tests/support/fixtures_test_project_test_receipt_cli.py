@@ -23,7 +23,7 @@ from literate_ai.projects import load_project
 from tests.support.fixtures_test_project_cli import (
     refresh_authority_review,
 )
-from tests.unit.root_parent_adapter import root_parent_for_fixture_project
+from tests.support.root_parent_adapter import root_parent_for_fixture_project
 
 _FINALIZATION_EVIDENCE = {
     "lifecycle-command": canonical_identity({"fixture": "command"}),

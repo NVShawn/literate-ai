@@ -8,7 +8,6 @@ import os
 import sys
 import unittest
 from contextlib import contextmanager
-from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters.builders.python import discover_python_toolchain
@@ -19,6 +18,7 @@ from literate_ai.adapters.dependencies.python_lock import parse_python_wheel_loc
 from literate_ai.adapters.dependencies.python_target import observe_python_wheel_target
 from literate_ai.adapters.dependencies.types import DependencyObservationError
 from tests.support import fixtures_test_python_installed as fixtures
+from tests.support.pip_wheel import pinned_pip_wheel
 
 
 class PythonInstallerIntegrationTests(unittest.TestCase):
@@ -26,10 +26,7 @@ class PythonInstallerIntegrationTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        value = os.environ.get("LITAI_TEST_PIP_WHEEL")
-        if not value:
-            raise unittest.SkipTest("Set LITAI_TEST_PIP_WHEEL to the pinned pip wheel")
-        cls.installer_path = Path(value).resolve(strict=True)
+        cls.installer_path = pinned_pip_wheel()
         cls.toolchain = discover_python_toolchain(pinned_command=sys.executable)
         cls.target = observe_python_wheel_target(cls.toolchain)
 

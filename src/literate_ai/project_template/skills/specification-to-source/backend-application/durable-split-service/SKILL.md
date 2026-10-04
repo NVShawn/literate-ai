@@ -135,7 +135,7 @@ frontend→API→cache never reaches the upstream source. A reference implementa
 of the coherent-snapshot cache boundary and its deterministic acceptance tests
 live alongside the framework's own test support
 (`tests/support/snapshot_cache_reference.py` and
-`tests/unit/test_snapshot_cache_reference.py`) to prove the durability and
+`tests/smoke/test_snapshot_cache_reference.py`) to prove the durability and
 read-isolation contract is real and implementable with only the standard library
 and the embedded SQL cache boundary. The frontend of this pattern is exactly what
 the browser-acceptance skill validates; the collector's cadence is exactly the

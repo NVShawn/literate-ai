@@ -9,7 +9,7 @@ import shutil
 from pathlib import Path
 
 from literate_ai.cli import main
-from tests.unit.root_parent_adapter import root_parent_for_fixture_project
+from tests.support.root_parent_adapter import root_parent_for_fixture_project
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 

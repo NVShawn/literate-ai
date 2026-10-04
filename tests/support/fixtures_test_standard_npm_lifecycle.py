@@ -57,7 +57,7 @@ from tests.support.fixtures_test_component_node_generation_preparation import (
 from tests.support.fixtures_test_standard_local_command_adapter import (
     copy_digest_cache_without_sidecars,
 )
-from tests.unit.standard_source_evidence_fixture import register_strict_source
+from tests.support.standard_source_evidence_fixture import register_strict_source
 
 _PACKAGE_NAME = "is-number"
 

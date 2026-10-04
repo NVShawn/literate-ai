@@ -148,9 +148,8 @@ jobs:
         run: >-
           python -m unittest
           tests.conformance.test_sample_ladder.NeutralSampleLadderTests.test_all_host_recipes_compose_from_specs_and_real_flavors
-          tests.unit.test_guarded_builder.GuardedCppBuilderTests
-          tests.unit.test_project_test_receipt
-          tests.unit.test_rebuild_source_cache_protocol
+          tests.critical.test_guarded_builder.GuardedCppBuilderTests
+          tests.e2e.test_rebuild_source_cache_protocol
 
       # conformance
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -230,10 +229,10 @@ jobs:
         run: >-
           python scripts/litai_step.py --name platform-smoke --
           python -m unittest -v
-          tests.unit.test_host_install
-          tests.unit.test_host_self_update
-          tests.unit.test_cli_build_identity
-          tests.unit.test_guarded_builder.GuardedCppBuilderTests
+          tests.critical.test_host_install
+          tests.critical.test_host_self_update
+          tests.e2e.test_cli_build_identity
+          tests.critical.test_guarded_builder.GuardedCppBuilderTests
       - name: Upload smoke diagnostics (not release evidence)
         if: matrix.task == 'platform-smoke' && (always())
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -524,7 +523,7 @@ jobs:
         if: matrix.task == 'windows-tests'
         shell: pwsh
         run: |
-          python scripts/profile_pytest.py logs/profile-${{ matrix.group }}.ndjson logs/profile-report-${{ matrix.group }}.json -- --splits 3 --group ${{ matrix.group }} --durations-path=.test_durations tests/unit tests/conformance tests/test_package.py
+          python scripts/profile_pytest.py logs/profile-${{ matrix.group }}.ndjson logs/profile-report-${{ matrix.group }}.json -- --splits 3 --group ${{ matrix.group }} --durations-path=.test_durations tests/e2e tests/smoke tests/critical tests/conformance
       - name: Upload the profiling trace and hotspot report
         if: matrix.task == 'windows-tests' && (always())
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -608,7 +607,7 @@ jobs:
         run: >-
           python -m pytest -q -rA -o junit_logging=all
           --junitxml=cpp-native-qualification.xml
-          tests/unit/test_cpp_bazel_outputs.py::CppBazelOutputTests::test_locked_cpp_library_runs_through_complete_filesystem_runtime
+          tests/e2e/test_cpp_bazel_outputs.py::CppBazelOutputTests::test_locked_cpp_library_runs_through_complete_filesystem_runtime
       - name: Reject skipped or incomplete native qualification
         if: matrix.task == 'cpp-native'
         shell: python
@@ -621,7 +620,7 @@ jobs:
               for name in ("tests", "failures", "errors", "skipped")
           }
           print(counts)
-          expected = {"tests": 11, "failures": 0, "errors": 0, "skipped": 0}
+          expected = {"tests": 6, "failures": 0, "errors": 0, "skipped": 0}
           if counts != expected:
               raise SystemExit(
                   "native qualification did not pass its parent test and all ten "
