@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Documentation: point getting started, installation, worker registration and
+  adoption guidance at the onboarding film and instructional courses, and link the
+  course index to repository files instead of a feature branch.
+
 - Continue existing installations across the repository move: projects initialized
   from `NVIDIA-dev/literate-ai` plan `litai update` against public-repository builds,
   and self-update follows the declared successor. Other repository origins are still

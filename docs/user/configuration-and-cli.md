@@ -1978,6 +1978,10 @@ for identity and partial-update boundaries.
 
 ### Reviewing multiple build roots before adoption
 
+Video walkthrough:
+[Adopt an existing project](../courses/03-adopt-an-existing-project/03-adopt-an-existing-project.mp4)
+([captions](../courses/03-adopt-an-existing-project/03-adopt-an-existing-project.vtt)).
+
 `litai onboard adopt PATH` reports `conversion.build_root_candidates`. A marker
 such as `kit/repo.toml` is a candidate, not a selected Component or a proven
 independent build. The default continues to use one retained wrapper.
@@ -2238,6 +2242,10 @@ make release-check
 See [Installation](installation.md) for Python and contributor-tool requirements.
 
 ### Private worker registration and connectivity
+
+Video walkthrough:
+[Use machines you already have](../courses/02-use-your-existing-machines/02-use-your-existing-machines.mp4)
+([captions](../courses/02-use-your-existing-machines/02-use-your-existing-machines.vtt)).
 
 Static workers are a complete supported mode: register machines the user or an
 administrator has already provisioned. An empty catalog is also valid. These

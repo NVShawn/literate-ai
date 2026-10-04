@@ -2,7 +2,7 @@
 
 ## Start here: the continuous video play
 
-**[Watch or download: It Builds. Can We Ship It?](https://github.com/jordanhubbard/literate-ai/raw/refs/heads/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)**
+**[Watch or download: It Builds. Can We Ship It?](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)**
 
 Sam and LitAI introduce themselves, argue about agents and engineering habits,
 work through real greenfield and TinyXML2 sessions, and finish with updates,
@@ -10,10 +10,10 @@ repository inheritance and orchestration. One continuous film, two neural voices
 visible captions, and SRT/VTT sidecars. This is the **public feedback edition**.
 Running time: **13:38**. [Chapter timestamps](play/CHAPTERS.md).
 
-[SRT](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.srt) · [WebVTT](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.vtt) ·
+[SRT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.srt) · [WebVTT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.vtt) ·
 [Production and limitations](play/README.md) · [Script](play/story.json) ·
-[Rebuildable manifest](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/package/course.json) · [Session excerpts](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/package/sessions.json) ·
-[Media receipt](https://github.com/jordanhubbard/literate-ai/blob/docs/publish-video-courses/media/courses/sam-meets-literate-ai/video/video-result.json)
+[Rebuildable manifest](../../media/courses/sam-meets-literate-ai/package/course.json) · [Session excerpts](../../media/courses/sam-meets-literate-ai/package/sessions.json) ·
+[Media receipt](../../media/courses/sam-meets-literate-ai/video/video-result.json)
 
 The coding sections are edited terminal replays of actual execution, not raw screen
 recordings. Installation and remote-worker setup are labeled walkthroughs. An
