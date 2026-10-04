@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Elixir: add `lang-elixir` with portable script-tree generation, syntax validation,
+  Standard runtime/test dispatch, exact Elixir/OTP toolchain identities, and
+  `init`/`flavor add` assets. Requires Elixir 1.18+ and Erlang/OTP 27+; native
+  qualification remains pending in ELIXIR-001. Mix/Hex/Phoenix are outside this
+  dependency-free profile.
+
 - Documentation tooling: update DOMPurify to 3.4.16. Gate the dependency audit
   through reviewed, expiring per-advisory exceptions. The only exception covers the
   unpatched braces advisory GHSA-vfj7-8cjw-p6xm in OpenSpec's glob dependencies (#24).

@@ -28,6 +28,9 @@ _SKIP_LOCK_PARTS = frozenset(
     {"_build", ".git", ".codegraph", "node_modules", "__pycache__"}
 )
 _SKILL_FILES_BY_DIRECTORY = {
+    "lang-elixir": (
+        "skills/specification-to-source/elixir-portable-application/SKILL.md",
+    ),
     "deploy-docker": (
         "skills/specification-to-source/docker-container-application/SKILL.md",
     ),

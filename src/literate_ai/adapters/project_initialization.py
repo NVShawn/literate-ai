@@ -1134,6 +1134,12 @@ _TEMPLATE_FILES = {
     "flavors/lang-typescript/openspec/spec.md": (
         "flavors/lang-typescript/openspec/spec.md"
     ),
+    "flavors/lang-elixir/flavor.md": "flavors/lang-elixir/flavor.md",
+    "flavors/lang-elixir/toolchain.json": "flavors/lang-elixir/toolchain.json",
+    "flavors/lang-elixir/standard-command-profile.json": (
+        "flavors/lang-elixir/standard-command-profile.json"
+    ),
+    "flavors/lang-elixir/openspec/spec.md": "flavors/lang-elixir/openspec/spec.md",
     "flavors/lang-zig/flavor.md": "flavors/lang-zig/flavor.md",
     "flavors/lang-zig/toolchain.json": "flavors/lang-zig/toolchain.json",
     "flavors/lang-zig/standard-command-profile.json": (
@@ -1382,6 +1388,9 @@ _TEMPLATE_FILES = {
     ),
     "skills/specification-to-source/typescript-portable-application/SKILL.md": (
         "skills/specification-to-source/typescript-portable-application/SKILL.md"
+    ),
+    "skills/specification-to-source/elixir-portable-application/SKILL.md": (
+        "skills/specification-to-source/elixir-portable-application/SKILL.md"
     ),
     "skills/specification-to-source/zig-portable-application/SKILL.md": (
         "skills/specification-to-source/zig-portable-application/SKILL.md"

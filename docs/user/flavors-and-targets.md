@@ -90,6 +90,23 @@ Python or C++ Flavor. Those language Flavors conflict explicitly; changing langu
 requires an ordered `-current` then `+replacement` selection rather than an implicit
 winner.
 
+## Elixir applications
+
+`flavor://literate-ai/lang-elixir` selects dependency-free Elixir scripts on Elixir
+1.18+ and Erlang/OTP 27+, using the [built-in JSON module](https://elixir.hexdocs.pm/1.18.0/JSON.html).
+Its native Standard build parses every `.ex` and `.exs` file and copies the complete
+application tree; runtime commands invoke `source/main.exs` from that artifact.
+Native tests live at `source/tests/litai_test.exs`. Make/Bazel single-file exports
+must assemble helpers and tests into one self-contained script. Mix/Hex/Phoenix
+projects and OTP release packaging require additional ecosystem/build policy.
+
+Install the shipped Flavor into an existing project with
+`litai flavor add flavor://literate-ai/lang-elixir --no-default`, then select it for
+the Component's language slot. New projects may use
+`litai init --flavor flavor://literate-ai/lang-elixir`. An explicit `ELIXIR` command
+or typed toolchain command pin must satisfy the selected version constraints;
+unavailable runtimes fail before generation, without installing software.
+
 ## Build systems are replaceable Flavors
 
 `build.system` is independent of operating system, implementation language, and

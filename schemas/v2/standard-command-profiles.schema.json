@@ -52,9 +52,9 @@
         "artifact_entrypoint": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
         "bazel_output_path": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
         "build_strategy": {
-          "enum": ["python-tree", "javascript-tree", "rust-executable", "cpp-executable", "swift-executable", "go-executable"]
+          "enum": ["elixir-tree", "python-tree", "javascript-tree", "typescript-tree", "zig-executable", "rust-executable", "cpp-executable", "swift-executable", "go-executable"]
         },
-        "runtime_strategy": { "enum": ["python", "javascript", "native-executable"] },
+        "runtime_strategy": { "enum": ["elixir", "python", "javascript", "native-executable"] },
         "media_type": { "type": "string", "minLength": 1, "maxLength": 255 },
         "cpp_library_kind": { "enum": ["static", "shared"] }
       },
@@ -64,7 +64,7 @@
           "then": { "properties": { "target": { "const": "cpp" }, "build_strategy": { "const": "cpp-executable" } } }
         },
         {
-          "if": { "properties": { "build_strategy": { "enum": ["python-tree", "javascript-tree"] } } },
+          "if": { "properties": { "build_strategy": { "enum": ["elixir-tree", "python-tree", "javascript-tree", "typescript-tree"] } } },
           "then": { "properties": { "artifact_layout": { "const": "tree" } } },
           "else": { "properties": { "artifact_layout": { "const": "file" } } }
         }

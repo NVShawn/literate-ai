@@ -16,17 +16,16 @@ import sys
 import zlib
 from pathlib import Path, PurePosixPath
 
-_TREE_STRATEGIES = frozenset({"python-tree", "javascript-tree", "typescript-tree"})
+_TREE_STRATEGIES = frozenset(
+    {"python-tree", "javascript-tree", "typescript-tree", "elixir-tree"}
+)
 
 
 def standalone_driver_source() -> str:
-    """Return this stdlib-only driver as a self-contained ``python -c`` payload.
+    """Embed exact stdlib-only driver bytes for the selected host Python.
 
-    Standard build commands run with the selected host toolchain interpreter,
-    which is intentionally independent of the interpreter containing the
-    installed Literate AI distribution.  Serializing the exact helper bytes into
-    the identity-bound command keeps that boundary portable: the target Python
-    needs only the standard library and never an ambient ``literate_ai`` import.
+    The host interpreter needs no installed framework import. This payload is
+    part of the locked command identity.
     """
 
     encoded = base64.urlsafe_b64encode(
@@ -115,6 +114,24 @@ def _check_tree(
     *,
     environment: dict[str, str],
 ) -> None:
+    if strategy == "elixir-tree":
+        files = sorted(
+            path
+            for path in source_root.rglob("*")
+            if path.suffix in {".ex", ".exs"} and path.is_file()
+        )
+        _run(
+            [
+                *compiler,
+                "-e",
+                "Enum.each(System.argv(), fn path -> "
+                "Code.string_to_quoted!(File.read!(path), file: path) end)",
+                "--",
+                *(str(path) for path in files),
+            ],
+            environment=environment,
+        )
+        return
     suffix = {
         "python-tree": ".py",
         "javascript-tree": ".js",

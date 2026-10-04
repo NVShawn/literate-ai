@@ -110,6 +110,7 @@ class StandardArtifactLayout(StrEnum):
 
 
 class StandardLanguageBuildStrategy(StrEnum):
+    ELIXIR_TREE = "elixir-tree"
     PYTHON_TREE = "python-tree"
     JAVASCRIPT_TREE = "javascript-tree"
     TYPESCRIPT_TREE = "typescript-tree"
@@ -121,6 +122,7 @@ class StandardLanguageBuildStrategy(StrEnum):
 
 
 class StandardLanguageRuntimeStrategy(StrEnum):
+    ELIXIR = "elixir"
     PYTHON = "python"
     JAVASCRIPT = "javascript"
     NATIVE_EXECUTABLE = "native-executable"
@@ -205,6 +207,7 @@ class StandardLanguageCommandProfile:
             StandardArtifactLayout.TREE
             if self.build_strategy
             in {
+                StandardLanguageBuildStrategy.ELIXIR_TREE,
                 StandardLanguageBuildStrategy.PYTHON_TREE,
                 StandardLanguageBuildStrategy.JAVASCRIPT_TREE,
                 StandardLanguageBuildStrategy.TYPESCRIPT_TREE,
