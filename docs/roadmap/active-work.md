@@ -23120,7 +23120,7 @@ GitHub CI failure without relaxing identity checks.
   Full installed-wheel qualification was started separately and remains pending
   at this handoff. No user's installed CLI, release tag or release branch changed.
 
-### [ ] ELIXIR-001 — Add Elixir implementation-language support
+### [x] ELIXIR-001 — Add Elixir implementation-language support
 
 - **Priority:** P1
 - **Owner:** Elixir Flavor, generation skill, Standard command profiles and host toolchains
@@ -23133,24 +23133,26 @@ GitHub CI failure without relaxing identity checks.
   - [x] Cover catalog, init/add, lifecycle and update documentation
 - **Evidence:**
   - [x] Focused Python, formatting, specification and skill checks pass
-  - [ ] Real Elixir host smoke passes on an available Elixir/OTP installation
+  - [x] Real Elixir host smoke passes on an available Elixir/OTP installation
 
 - **Verification:** `make python-check` passes the 56 flavor tests (including the
-  eight Elixir tests with one native-runtime skip), 59 project-initialization tests,
+  eight Elixir tests; the original native-runtime skip is now qualified), 59 project-initialization tests,
   20 schema-catalog tests, six multi-entrypoint tests and six runtime-driver tests.
   Lint, format, repository
   layout, OpenSpec, documentation rendering and pinned SkillEvaluator admission pass.
   The new skill scores 91.5/100 in both catalog and initialized template.
-- **Qualification limits:** Neither Elixir nor Erlang is installed on this host;
-  Docker is present but its daemon is unavailable. Native Elixir execution and live
-  generation/acceptance remain unqualified. The broader Standard suite passed 64
+- **Qualification limits:** Native macOS execution passes with Elixir 1.20.4
+  and Erlang/OTP 29 (ERTS 17.1). The repeated `make python-check
+  PYTHON_TEST_PATTERN=test_elixir_flavor.py` runs all eight tests with no skips,
+  including toolchain discovery and execution of the copied script tree after
+  removal of the generation workspace. Live coding-provider generation/acceptance
+  and native Linux/Windows execution remain release qualification work. The broader Standard suite passed 64
   tests before its Rust verifier fixture aborted because the installed Cargo links
   a missing Homebrew `libllhttp.9.3.dylib`; `cargo --version` reproduces that failure
   independently of this branch. No native Rust failure is treated as a pass.
   `litai verify` passes authority, names the three inapplicable gates as skipped,
   and rejects the previous project test receipt as stale after these authority
   changes; a current full receipt is not claimed.
-- **Next action:** Provision an acknowledged Elixir 1.18+/OTP 27+ test runtime and
-  run `test_native_runtime_runs_after_generation_workspace_is_removed`; qualify a
-  generated application through build, generated tests and independent acceptance
-  before claiming native language qualification.
+- **Next action:** Complete for portable script-tree support and macOS native
+  smoke verification. Broader live generation and cross-platform qualification
+  remain release gates; no full release receipt is claimed.

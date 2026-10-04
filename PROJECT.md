@@ -73,8 +73,9 @@ development (2026-09-10):
 ## Current work
 
 ELIXIR-001 adds the portable Elixir/OTP application Flavor under Goal 5, including
-Standard script-tree build/runtime contracts and initialized-project assets. Native
-qualification remains tracked in the active-work queue.
+Standard script-tree build/runtime contracts and initialized-project assets. All
+eight focused tests pass, including native macOS smoke on Elixir 1.20.4/OTP 29;
+live generation and native Linux/Windows qualification remain release gates.
 
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework
