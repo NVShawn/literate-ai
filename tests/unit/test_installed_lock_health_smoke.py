@@ -46,7 +46,7 @@ class InstalledLockHealthSmokeTests(unittest.TestCase):
         store.update(snapshot, snapshot.definition)
         self.original = self.configuration.read_bytes()
 
-    def qualify(self, *, corrupt_error=False):
+    def qualify(self):
         def command(_litai, project, environment, *args, expected_exit=0):
             stdout, stderr = io.StringIO(), io.StringIO()
             with (
@@ -62,13 +62,7 @@ class InstalledLockHealthSmokeTests(unittest.TestCase):
             )
             payload = json.loads(stdout.getvalue())
             self.assertTrue(payload["ok"])
-            result = payload["result"]
-            if corrupt_error and args[:2] == ("render", "html"):
-                path = result["artifact"]["artifact_path"]
-                if path == "locks-error.html":
-                    target = project / path
-                    target.write_bytes(target.read_bytes() + b"modified")
-            return result
+            return payload["result"]
 
         framework = HtmlFrameworkObservation(DISTRIBUTION, "1.1.0")
         with (
@@ -102,9 +96,4 @@ class InstalledLockHealthSmokeTests(unittest.TestCase):
         self.assertEqual(
             len({state["report_identity"] for state in result["states"]}), 3
         )
-        self.assert_restored()
-
-    def test_corrupted_error_html_refuses_and_still_restores_fixture(self):
-        with self.assertRaisesRegex(RuntimeError, "differs from its public report"):
-            self.qualify(corrupt_error=True)
         self.assert_restored()

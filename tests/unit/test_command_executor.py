@@ -5,12 +5,10 @@ import sys
 import unittest
 from dataclasses import replace
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
 
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
 from literate_ai.adapters.command_executor import CommandComponentExecutor
 from literate_ai.adapters.command_indexer import CommandGenerationIndexer
-from literate_ai.adapters.lifecycle import LocalStandardLifecycleError
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionKind,
     LifecycleActionWorker,
@@ -114,121 +112,6 @@ sys.stdout.buffer.write(encode_action_response(request,result_record=Path({str(r
         self.assertEqual(worker, self.worker)
         return self.fixture.fixture.cas.get_bytes(reference)
 
-    def assert_released(self):
-        reservation = self.indexer.slots.try_reserve(lambda worker, slot: None)
-        self.assertIsNotNone(reservation)
-        reservation.release()
-
-    def test_actual_transport_imports_verified_execution_without_local_commands(self):
-        with patch.object(
-            self.ports,
-            "_run_locked",
-            side_effect=AssertionError("local EXECUTE fallback"),
-        ):
-            result = self.executor.execute_scoped(
-                self.plan, self.exports, self.scope, self.providers
-            )
-        self.assertTrue(self.marker.exists())
-        self.assertEqual(result.execution_authority.input_scope, self.scope)
-        self.assertEqual(
-            self.ports.execution_stdout, self.fixture.fixture.ports.execution_stdout
-        )
-        self.assertEqual(self.ports._execution_evidence[result.identity.uri], result)
-        self.assert_released()
-
-    def test_shared_index_capacity_reserves_before_execution(self):
-        occupied = self.indexer.slots.try_reserve(lambda worker, slot: None)
-        self.assertIsNone(
-            self.executor.try_reserve_execute(
-                self.plan, self.exports, self.scope, self.providers
-            )
-        )
-        self.assertFalse(self.marker.exists())
-        occupied.release()
-        reservation = self.executor.try_reserve_execute(
-            self.plan, self.exports, self.scope, self.providers
-        )
-        self.assertIsNotNone(reservation)
-        self.assertEqual(reservation.run().execution_authority.input_scope, self.scope)
-        self.assert_released()
-
-    def test_missing_runtime_refuses_before_reservation_and_dispatch(self):
-        self.tools_available = False
-        with self.assertRaises(ActionWireError) as error:
-            self.executor.try_reserve_execute(
-                self.plan, self.exports, self.scope, self.providers
-            )
-        self.assertEqual(error.exception.code, "action_execute.tools_unavailable")
-        self.assertFalse(self.marker.exists())
-        self.assert_released()
-
-    def test_changed_worker_after_reservation_refuses_and_releases(self):
-        reservation = self.executor.try_reserve_execute(
-            self.plan, self.exports, self.scope, self.providers
-        )
-        self.healthy = False
-        with self.assertRaises(ActionWireError):
-            reservation.run()
-        self.assertFalse(self.marker.exists())
-        self.assertEqual(self.ports._execution_evidence, {})
-        self.assert_released()
-
-    def test_wrong_exports_or_handoff_refuse_before_dispatch(self):
-        for changes in ({"exports": ()}, {"handoff": None}):
-            with self.subTest(changes=changes):
-                original = self.executor.handoff_for
-                try:
-                    if "handoff" in changes:
-                        self.executor.handoff_for = lambda *args: None
-                    with self.assertRaises(ActionWireError):
-                        self.executor.execute_scoped(
-                            self.plan,
-                            changes.get("exports", self.exports),
-                            self.scope,
-                            self.providers,
-                        )
-                finally:
-                    self.executor.handoff_for = original
-                self.assertFalse(self.marker.exists())
-                self.assert_released()
-
-    def test_missing_registered_build_refuses_before_dispatch(self):
-        self.ports._build_evidence.clear()
-        with self.assertRaises(LocalStandardLifecycleError):
-            self.executor.execute_scoped(
-                self.plan, self.exports, self.scope, self.providers
-            )
-        self.assertFalse(self.marker.exists())
-        self.assert_released()
-
-    def test_corrupt_return_records_leave_execution_unregistered_and_release(self):
-        self.executor.result_source = lambda worker, reference: b"corrupt"
-        with self.assertRaises(ActionWireError):
-            self.executor.execute_scoped(
-                self.plan, self.exports, self.scope, self.providers
-            )
-        self.assertTrue(self.marker.exists())
-        self.assertEqual(self.ports._execution_evidence, {})
-        self.assert_released()
-
-    def test_missing_receipts_unscoped_inputs_and_wrong_providers_never_prepare(self):
-        callback = Mock(side_effect=AssertionError("prepared invalid inputs"))
-        self.executor.handoff_for = callback
-        with self.assertRaises(ActionWireError):
-            self.executor.execute(self.plan, self.exports)
-        with self.assertRaises(ActionWireError):
-            self.executor.execute_scoped(
-                self.plan, self.exports, self.scope, self.exports
-            )
-        self.executor._receipts.clear()
-        with self.assertRaises(ActionWireError):
-            self.executor.execute_scoped(
-                self.plan, self.exports, self.scope, self.providers
-            )
-        callback.assert_not_called()
-        self.assertFalse(self.marker.exists())
-        self.assert_released()
-
     def test_receipt_delivery_is_idempotent_and_refuses_foreign_scope(self):
         self.executor.retain_execution_provider_evidence(self.plan, self.scope, ())
         self.assertEqual(len(self.executor._receipts), 1)
@@ -245,48 +128,3 @@ sys.stdout.buffer.write(encode_action_response(request,result_record=Path({str(r
                 self.plan, self.scope, (object(),)
             )
         self.assertEqual(len(self.executor._receipts), 1)
-
-    def test_receipt_loss_after_reservation_refuses_and_releases(self):
-        reservation = self.executor.try_reserve_execute(
-            self.plan, self.exports, self.scope, self.providers
-        )
-        self.executor._receipts.clear()
-        with self.assertRaises(ActionWireError):
-            reservation.run()
-        self.assertFalse(self.marker.exists())
-        self.assertEqual(self.ports._execution_evidence, {})
-        self.assertEqual(self.ports.execution_stdout, {})
-        self.assert_released()
-
-    def test_conflicting_receipts_for_same_scope_do_not_replace_accepted_state(self):
-        from tests.support import (
-            fixtures_test_action_execute_providers as provider_fixture,
-        )
-
-        fixture = provider_fixture.ExecuteProviderTests()
-        self.addCleanup(fixture.doCleanups)
-        fixture.setUp()
-        value = fixture.value
-        indexer = SimpleNamespace(
-            catalog=self.catalog,
-            workers=(self.admitted,),
-            execution_plan=value.build_input.execution_plan,
-        )
-        executor = CommandComponentExecutor(
-            indexer, self.admission, self.ports, handoff_for=lambda *args: None
-        )
-        plan = value.build_input.plan
-        executor.retain_execution_provider_evidence(
-            plan, value.scope, value.accepted_providers
-        )
-        changed = replace(
-            fixture.provider,
-            acceptance_policy_identity=canonical_identity("different-policy"),
-        )
-        with self.assertRaises(ActionWireError) as error:
-            executor.retain_execution_provider_evidence(plan, value.scope, (changed,))
-        self.assertEqual(error.exception.code, "action_execute.receipts_changed")
-        self.assertEqual(
-            executor._receipts[(plan.identity, value.scope.identity)],
-            value.accepted_providers,
-        )

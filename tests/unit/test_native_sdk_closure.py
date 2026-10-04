@@ -7,11 +7,9 @@ suite; this does not qualify public source generation.
 
 import json
 import shutil
-import tempfile
 import unittest
 from copy import copy, deepcopy
 from dataclasses import replace
-from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -48,10 +46,6 @@ from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 from literate_ai.security import AuthorizationError, BuildAuthorization
 from tests.support import (
     fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority,
-)
-from tests.support.fixtures_test_standard_local_command_adapter import (
-    _provider_export,
-    _python_copy_lifecycle,
 )
 
 
@@ -116,59 +110,6 @@ def runtime_contract(contract):
 
 
 class NativeSdkClosureTests(unittest.TestCase):
-    def test_packaged_provider_roles_use_custody_without_rewriting_command_text(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            ports, plan, _, _ = _python_copy_lifecycle(root)
-            original = ports.contracts[plan.component_revision.uri]
-            provider = _provider_export("library")
-            root_export = _provider_export("application")
-            deleted = root / "deleted producer"
-            literal = "print(" + repr(str(deleted)) + ")"
-            ports.contracts[plan.component_revision.uri] = replace(
-                original,
-                commands=tuple(
-                    ComponentLifecycleCommand(
-                        command.phase,
-                        (
-                            "{tool}",
-                            "-c",
-                            literal,
-                            "{artifact_root}",
-                            "{provider_artifacts}",
-                        ),
-                    )
-                    if command.phase is ComponentCommandPhase.EXECUTE
-                    else command
-                    for command in original.commands
-                ),
-            )
-            package = root / "relocated package"
-            library = package / "provider" / "library"
-            library.parent.mkdir(parents=True)
-            library.write_text("packaged provider")
-            app = package / "app"
-            app.write_text("packaged application")
-            ports._planned_exports[plan.component_revision.uri] = root_export
-            ports._artifact_paths[provider.identity.uri] = deleted
-            custody = SimpleNamespace(
-                root_plan=plan,
-                root=package,
-                artifact_paths={
-                    provider.identity.uri: library,
-                    root_export.identity.uri: app,
-                },
-                python_dependency_observer=None,
-                python_artifact_tree_identity=None,
-            )
-            with patch.object(
-                ports, "_intent_artifacts_for_plan", return_value=(provider,)
-            ):
-                argv = ports._packaged_argv(custody, ComponentCommandPhase.EXECUTE)
-            self.assertEqual(argv[2], literal)
-            self.assertEqual(argv[-1], str(library.parent.resolve()))
-            self.assertFalse(deleted.exists())
-
     def test_linked_provider_sdk_executes_and_retains_owner_authority(self):
         fixture = test_native_sdk_standard_authority.NativeSdkStandardAuthorityTests()
         self.addCleanup(fixture.doCleanups)

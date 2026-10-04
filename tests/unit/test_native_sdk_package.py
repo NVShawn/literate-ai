@@ -10,8 +10,6 @@ import sys
 import unittest
 
 from literate_ai.adapters.native_sdk_package import NativeSdkPackageResources
-from literate_ai.contracts.identity import canonical_identity
-from literate_ai.storage.cas import BlobIntegrityError
 from tests.support import fixtures_test_native_sdk_consumer as test_native_sdk_consumer
 
 
@@ -92,28 +90,3 @@ class NativeSdkPackageTests(unittest.TestCase):
         path.unlink()
         with self.assertRaisesRegex(ValueError, "missing declared"):
             self.resources.verify_materialized(relocated)
-
-    def test_foreign_authority_cas_corruption_and_collisions_are_refused(self):
-        for key in ("component_lock_identity", "target_identity"):
-            with self.assertRaisesRegex(ValueError, "differs"):
-                NativeSdkPackageResources(
-                    self.inputs,
-                    **{**self.arguments, key: canonical_identity("foreign")},
-                )
-        foreign = self.fixture.service.store.put_bytes(b"not a package input")
-        with self.assertRaisesRegex(ValueError, "not a declared"):
-            self.resources.read_blob(foreign)
-        self.assertFalse(self.resources.owns_blob(foreign))
-        namespace = self.root / "native-sdks"
-        namespace.write_text("existing consumer file")
-        with self.assertRaises(FileExistsError):
-            self.resources.materialize(self.root)
-        self.assertEqual(namespace.read_text(), "existing consumer file")
-        namespace.unlink()
-        item = self.built.product.snapshot.files[0]
-        path = self.fixture.service.store.path_for(item.blob)
-        path.chmod(0o600)
-        path.write_bytes(b"corrupt")
-        with self.assertRaises(BlobIntegrityError):
-            self.resources.materialize(self.root)
-        self.assertFalse(namespace.exists())

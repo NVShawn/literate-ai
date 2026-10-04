@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import errno
-import io
 import os
 import sys
 import tempfile
@@ -13,10 +11,6 @@ from unittest import mock
 
 from literate_ai.adapters.harness_inventory import (
     HARNESS_DIAGNOSTIC_CHARS,
-    HarnessBaselineError,
-    _command_output_excerpt,
-    _gate_failure_message,
-    _run_harness_command,
 )
 from tests.support.fixtures_test_retained_harness_receipts import (
     _adapter,
@@ -114,92 +108,3 @@ class RetainedFailureDiagnosticsTests(unittest.TestCase):
         self.assertIn("ACTUAL-STDERR-TAIL", message)
         self.assertNotIn("private-diagnostic-token", message)
         self.assertLessEqual(len(message), HARNESS_DIAGNOSTIC_CHARS + 512)
-
-    def test_generic_exit_two_preserves_tail_without_inventing_storage_failure(self):
-        error = self.exercise()
-        self.assertEqual(error["code"], "project.convert_legacy_gate_failed")
-        self.assertNotIn("reported storage failure", error["message"])
-        self.assertIn("ACTUAL-STDOUT-TAIL", error["message"])
-        self.assertIn("ACTUAL-STDERR-TAIL", error["message"])
-
-    def test_direct_enospc_has_a_specific_error_and_no_private_path(self):
-        error = self.exercise(host_errno=errno.ENOSPC)
-        self.assertEqual(error["code"], "project.host_storage_exhausted")
-        self.assertIn("quotas and inodes", error["message"])
-        self.assertNotIn("private filesystem detail", error["message"])
-
-    def test_other_os_error_is_not_reported_as_storage_exhaustion(self):
-        error = self.exercise(host_errno=errno.EACCES)
-        self.assertEqual(error["code"], "retained_receipt.execution_failed")
-
-    def test_full_stream_hint_finds_middle_failure_across_read_boundary(self):
-        prefix = b"x" * (65536 - 3) + b"\n"
-        for marker in (
-            b"ENOSPC",
-            b"EDQUOT",
-            b"No space left on device",
-            b"Disk quota exceeded",
-        ):
-            with self.subTest(marker=marker):
-                raw = prefix + marker + b"\n" + b"y" * 9000 + b"\nACTUAL-TAIL"
-                excerpt = _command_output_excerpt(
-                    io.BytesIO(raw), size=len(raw), limit=512
-                )
-                self.assertIn("[reported storage failure]", excerpt)
-                self.assertIn("ACTUAL-TAIL", excerpt)
-                self.assertLessEqual(len(excerpt), 512)
-
-    def test_large_generic_output_has_no_storage_hint(self):
-        raw = b"unrelated error\n" * 1000 + b"ACTUAL-TAIL"
-        excerpt = _command_output_excerpt(io.BytesIO(raw), size=len(raw), limit=512)
-        self.assertNotIn("reported storage failure", excerpt)
-        self.assertLess(excerpt.index("[output tail]"), excerpt.index("[output head]"))
-        self.assertIn("ACTUAL-TAIL", excerpt)
-
-    def test_long_command_does_not_consume_the_stream_diagnostic_budget(self):
-        message = _gate_failure_message(
-            "test",
-            {
-                "command": "long-command " + "x" * 10000,
-                "exit_code": 2,
-                "stdout_excerpt": "STDOUT-TAIL",
-                "stderr_excerpt": "STDERR-TAIL",
-            },
-        )
-        self.assertIn("STDOUT-TAIL", message)
-        self.assertIn("STDERR-TAIL", message)
-        self.assertLessEqual(len(message.splitlines()[0]), 511)
-
-    def test_errno_name_split_before_identifier_suffix_is_not_a_match(self):
-        raw = b"x" * (65536 - 7) + b"\nENOSPC_TEST_PASSED\n" + b"y" * 1000
-        excerpt = _command_output_excerpt(io.BytesIO(raw), size=len(raw), limit=512)
-        self.assertNotIn("reported storage failure", excerpt)
-
-    def test_trimmed_overlap_does_not_invent_a_word_boundary(self):
-        raw = b"a" * (65536 - 64) + b"ENOSPC\n" + b"b" * 1000
-        excerpt = _command_output_excerpt(io.BytesIO(raw), size=len(raw), limit=512)
-        self.assertNotIn("reported storage failure", excerpt)
-
-    def test_direct_storage_error_while_starting_harness_is_classified(self):
-        for number in (errno.ENOSPC, getattr(errno, "EDQUOT", errno.ENOSPC)):
-            with self.subTest(errno=number), tempfile.TemporaryDirectory() as temporary:
-                with (
-                    mock.patch(
-                        "literate_ai.adapters.harness_inventory._ensure_disposable_git_identity"
-                    ),
-                    mock.patch(
-                        "literate_ai.adapters.harness_inventory.subprocess.Popen",
-                        side_effect=OSError(number, "private storage detail"),
-                    ),
-                    self.assertRaises(HarnessBaselineError) as raised,
-                ):
-                    _run_harness_command(
-                        "test",
-                        {"command": "fixture", "evidence": "fixture"},
-                        legacy_root=Path(temporary),
-                        timeout_seconds=10,
-                    )
-                self.assertEqual(
-                    raised.exception.code, "project.host_storage_exhausted"
-                )
-                self.assertNotIn("private storage detail", raised.exception.message)

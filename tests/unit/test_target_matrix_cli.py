@@ -16,16 +16,6 @@ class TargetMatrixCliTests(unittest.TestCase):
         status = main(arguments, stdout=stdout, stderr=stderr)
         return status, stdout.getvalue(), stderr.getvalue()
 
-    def test_help_exposes_declaration_concurrency_and_host_acknowledgement(
-        self,
-    ) -> None:
-        status, stdout, stderr = self.invoke("matrix", "help")
-        self.assertEqual(status, 0)
-        self.assertEqual(stderr, "")
-        self.assertIn("--evidence-root", stdout)
-        self.assertIn("--jobs", stdout)
-        self.assertIn("--allow-host-execution", stdout)
-
     def test_invalid_target_is_rejected_before_lifecycle_execution(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

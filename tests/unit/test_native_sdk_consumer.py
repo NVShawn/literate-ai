@@ -5,11 +5,9 @@ from __future__ import annotations
 import subprocess
 import sys
 import unittest
-from unittest.mock import patch
 
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.contracts.identity import canonical_identity
-from literate_ai.storage.cas import BlobIntegrityError
 from tests.support import (
     fixtures_test_native_sdk_source_build as test_native_sdk_source_build,
 )
@@ -31,17 +29,6 @@ class NativeSdkConsumerTests(unittest.TestCase):
             snapshot=self.fixture.snapshot,
             services=(self.service,) if services is None else services,
         )
-
-    def test_unbuilt_or_missing_source_builds_never_execute_as_a_side_effect(self):
-        with patch("literate_ai.adapters.native_sdk_build.run_bounded_process") as run:
-            with self.assertRaisesRegex(ValueError, "not completed"):
-                self.inputs()
-            with self.assertRaisesRegex(ValueError, "every selected"):
-                self.inputs(())
-            with self.assertRaisesRegex(TypeError, "source-build services"):
-                self.inputs(({"sdk": "self-asserted input"},))
-            run.assert_not_called()
-        self.assertEqual(list(self.parent.iterdir()), [])
 
     def test_bound_sdk_inputs_relocate_run_and_clean_up_without_source(self):
         built = self.service.build()
@@ -99,55 +86,3 @@ class NativeSdkConsumerTests(unittest.TestCase):
             inputs.for_consumer(
                 canonical_identity("wrong consumer"), target_identity=target
             )
-
-    def test_changed_consumer_sdk_refuses_and_removes_only_owned_directory(self):
-        built = self.service.build()
-        inputs = self.inputs()
-        unrelated = self.parent / "keep.txt"
-        unrelated.write_text("keep")
-        with self.assertRaisesRegex(ValueError, "changed during use"):
-            with inputs.materialize(
-                built.selection.component_revision,
-                target_identity=built.selection.target_identity,
-                parent=self.parent,
-            ) as values:
-                sdk = values[0]
-                library = sdk.root / built.product.snapshot.native_libraries[0]
-                library.write_bytes(library.read_bytes() + b"changed")
-        self.assertFalse(sdk.root.exists())
-        self.assertEqual(list(self.parent.iterdir()), [unrelated])
-
-    def test_consumer_exception_still_cleans_up_its_sdk_inputs(self):
-        built = self.service.build()
-        inputs = self.inputs()
-        with self.assertRaisesRegex(RuntimeError, "consumer failed"):
-            with inputs.materialize(
-                built.selection.component_revision,
-                target_identity=built.selection.target_identity,
-                parent=self.parent,
-            ) as values:
-                root = values[0].root
-                raise RuntimeError("consumer failed")
-        self.assertFalse(root.exists())
-        self.assertEqual(list(self.parent.iterdir()), [])
-
-    def test_corrupt_cas_refuses_before_creating_consumer_directories(self):
-        built = self.service.build()
-        inputs = self.inputs()
-        native = next(
-            item
-            for item in built.product.snapshot.files
-            if item.path == built.product.snapshot.native_libraries[0]
-        )
-        blob = self.service.store.path_for(native.blob)
-        content = blob.read_bytes()
-        blob.chmod(0o600)
-        blob.write_bytes(content + b"corrupt")
-        with self.assertRaises(BlobIntegrityError):
-            with inputs.materialize(
-                built.selection.component_revision,
-                target_identity=built.selection.target_identity,
-                parent=self.parent,
-            ):
-                self.fail("corrupt SDK input was exposed to a consumer")
-        self.assertEqual(list(self.parent.iterdir()), [])

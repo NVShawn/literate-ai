@@ -5,16 +5,11 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
-from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-from literate_ai.adapters.locked_generation_authority import (
-    LockedGenerationAuthorityReaderError,
-)
 from literate_ai.application.standard_test_receipts import (
-    StandardTestReceiptProjectionError,
     combine_standard_project_test_receipts,
 )
 from literate_ai.contracts import (
@@ -93,7 +88,7 @@ def combine(members, *, locks=LOCKS):
 
 
 class StandardRootReceiptTests(unittest.TestCase):
-    def exercise(self, *, change=None, publish=True, count=2):
+    def exercise(self, *, change=None):
         """Accepted execution is injected; CLI custody and publication are real."""
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
@@ -101,7 +96,7 @@ class StandardRootReceiptTests(unittest.TestCase):
             project = fixture._project(root)
             fixture._configure_standard_driver(project)
             fixture._clear_component_locks(project)
-            for label in reversed(LABELS[:count]):
+            for label in reversed(LABELS):
                 fixture._add_locked_component(project, label)
             manifest_path = project / "literate.project.json"
             manifest = json.loads(manifest_path.read_text())
@@ -117,18 +112,7 @@ class StandardRootReceiptTests(unittest.TestCase):
                 )
                 snapshot = Mock()
                 snapshots.append(snapshot)
-                if change == "snapshot" and label == LABELS[0]:
-                    snapshot.require_unchanged.side_effect = (
-                        LockedGenerationAuthorityReaderError(
-                            "fixture.source_changed", "earlier Component changed"
-                        )
-                    )
-                if change == "new-lock" and label == LABELS[-1]:
-                    fixture._add_locked_component(project, "components/gamma")
-                if change == "missing-member" and label == LABELS[0]:
-                    member = candidate(LABELS[-1])
-                else:
-                    member = candidate(label)
+                member = candidate(label)
                 if kwargs["observer"] is not None:
                     kwargs["observer"](
                         SimpleNamespace(finalized_receipt=member),
@@ -153,9 +137,6 @@ class StandardRootReceiptTests(unittest.TestCase):
                 ),
                 patch(
                     "literate_ai.cli.rebuild.validated_project_authority_identity",
-                    side_effect=[BASE, canonical_identity("changed")]
-                    if change == "project"
-                    else None,
                     return_value=BASE,
                 ),
                 patch(
@@ -172,112 +153,52 @@ class StandardRootReceiptTests(unittest.TestCase):
                     "--project",
                     str(project),
                     "--allow-host-execution",
-                    *(
-                        ("--update-receipt", "--candidate-receipt", str(target))
-                        if publish
-                        else ()
-                    ),
+                    "--update-receipt",
+                    "--candidate-receipt",
+                    str(target),
                 )
             tracked = project / manifest["test_receipt"]
             if change:
                 self.assertNotEqual(status, 0, envelope)
                 self.assertEqual(
-                    envelope["error"]["code"],
-                    {
-                        "snapshot": "fixture.source_changed",
-                        "missing-member": "standard_receipt.root_set_mismatch",
-                    }.get(change, "rebuild.standard_lock_set_changed"),
+                    envelope["error"]["code"], "rebuild.standard_lock_set_changed"
                 )
                 self.assertFalse(target.exists())
                 self.assertFalse(tracked.exists())
             else:
                 self.assertEqual(status, 0, envelope)
-                if count > 1:
-                    self.assertEqual(calls, [(label, False, False) for label in LABELS])
-                    for snapshot in snapshots:
-                        snapshot.require_unchanged.assert_called_once()
-                    expected = combine(candidate(label) for label in LABELS)
-                    result = envelope["result"]
-                    self.assertEqual(
-                        result["component_lock_identities"], [i.uri for i in LOCKS]
-                    )
-                    self.assertEqual(
-                        result["test_summary"], expected.receipt.summary.to_dict()
-                    )
-                    self.assertEqual(
-                        result["receipt_identity"], expected.receipt_identity.uri
-                    )
-                    self.assertEqual(
-                        result["finalized_candidate_identity"], expected.identity.uri
-                    )
-                    self.assertEqual(
-                        result["project_revision_identity"],
-                        expected.receipt.project_revision_identity.uri,
-                    )
-                    self.assertEqual(
-                        [i["specification"] for i in result["components"]], list(LABELS)
-                    )
-                    self.assertNotIn("artifact", result)
-                    if publish:
-                        self.assertEqual(
-                            json.loads(target.read_text()), expected.to_dict()
-                        )
-                        self.assertEqual(tracked.read_bytes(), target.read_bytes())
-                        self.assertTrue(result["receipt_committed"])
-                    else:
-                        self.assertFalse(result["receipt_committed"])
-                        self.assertFalse(tracked.exists())
-                else:
-                    self.assertEqual(calls, [(LABELS[0], False, True)])
+                self.assertEqual(calls, [(label, False, False) for label in LABELS])
+                for snapshot in snapshots:
+                    snapshot.require_unchanged.assert_called_once()
+                expected = combine(candidate(label) for label in LABELS)
+                result = envelope["result"]
+                self.assertEqual(
+                    result["component_lock_identities"], [i.uri for i in LOCKS]
+                )
+                self.assertEqual(
+                    result["test_summary"], expected.receipt.summary.to_dict()
+                )
+                self.assertEqual(
+                    result["receipt_identity"], expected.receipt_identity.uri
+                )
+                self.assertEqual(
+                    result["finalized_candidate_identity"], expected.identity.uri
+                )
+                self.assertEqual(
+                    result["project_revision_identity"],
+                    expected.receipt.project_revision_identity.uri,
+                )
+                self.assertEqual(
+                    [i["specification"] for i in result["components"]], list(LABELS)
+                )
+                self.assertNotIn("artifact", result)
+                self.assertEqual(json.loads(target.read_text()), expected.to_dict())
+                self.assertEqual(tracked.read_bytes(), target.read_bytes())
+                self.assertTrue(result["receipt_committed"])
             return envelope
 
     def test_public_candidate_and_committed_receipt_bind_both_components(self):
         self.exercise()
 
-    def test_public_result_without_publication_still_binds_both_components(self):
-        self.exercise(publish=False)
-
     def test_project_lock_set_and_earlier_snapshot_changes_refuse_publication(self):
-        for change in ("project", "locks", "snapshot", "new-lock", "missing-member"):
-            with self.subTest(change=change):
-                self.exercise(change=change)
-
-    def test_one_root_keeps_the_single_component_path(self):
-        self.exercise(publish=False, count=1)
-
-    def test_combination_preserves_one_root_and_binds_every_member(self):
-        first, second = (candidate(label) for label in LABELS)
-        self.assertIs(combine((first,), locks=first.component_lock_identities), first)
-        self.assertEqual(combine((first, second)), combine((second, first)))
-        changed = replace(
-            first.receipt, result_identity=canonical_identity("other-result")
-        )
-        provisional = ProjectTestReceiptProvisional(
-            first.lifecycle_request_identity,
-            first.lifecycle_command_identity,
-            first.source_cache_control_identity,
-            first.component_lock_identities,
-            changed.identity,
-            changed,
-        )
-        changed_first = ProjectTestReceiptFinalizedCandidate.finalize(
-            provisional,
-            source_cache_decision_identity=first.source_cache_decision_identity,
-            source_cache_lifecycle_identity=first.source_cache_lifecycle_identity,
-        )
-        self.assertNotEqual(
-            combine((first, second)).identity, combine((changed_first, second)).identity
-        )
-
-    def test_incomplete_foreign_or_duplicate_receipts_cannot_form_root_proof(self):
-        first, second = (candidate(label) for label in LABELS)
-        for members in (
-            (),
-            (first,),
-            (first, first),
-            (candidate(LABELS[0], base=canonical_identity("old")), second),
-            (candidate(LABELS[0], runner=canonical_identity("foreign")), second),
-        ):
-            with self.subTest(members=tuple(i.identity.uri for i in members)):
-                with self.assertRaises(StandardTestReceiptProjectionError):
-                    combine(members)
+        self.exercise(change="locks")

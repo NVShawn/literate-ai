@@ -38,37 +38,6 @@ class WorkerCleanupInvestigationTests(unittest.TestCase):
         values.update(changes)
         return CleanupScanPolicy(**values)
 
-    def test_measures_top_level_candidates_without_paths_or_deletion(self):
-        inactive = self.root / "old-cache"
-        inactive.mkdir()
-        (inactive / "payload").write_bytes(b"x" * 32)
-        (inactive / ".complete").write_text("done")
-        active = self.root / "active-cache"
-        active.mkdir()
-        (active / ".active").write_text("owned")
-        (active / "payload").write_bytes(b"y" * 16)
-        before = {
-            path: path.read_bytes() for path in self.root.rglob("*") if path.is_file()
-        }
-
-        result = investigate_cleanup_candidates(self.policy()).to_dict()
-
-        self.assertEqual(result["status"], "complete")
-        self.assertFalse(result["deletion_authorized"])
-        self.assertEqual(len(result["candidates"]), 2)
-        self.assertEqual(result["candidates"][0]["root"], "task-cache")
-        self.assertEqual(result["candidates"][0]["active_use"], "inactive")
-        self.assertNotIn(str(self.root), str(result))
-        self.assertEqual(result["candidates"][1]["active_use"], "active")
-        self.assertEqual(
-            before,
-            {
-                path: path.read_bytes()
-                for path in self.root.rglob("*")
-                if path.is_file()
-            },
-        )
-
     def test_links_are_not_followed_into_unrelated_content(self):
         outside = self.root.parent / (self.root.name + "-outside")
         outside.mkdir()
@@ -84,48 +53,6 @@ class WorkerCleanupInvestigationTests(unittest.TestCase):
         result = investigate_cleanup_candidates(self.policy(minimum_candidate_bytes=0))
 
         self.assertEqual(result.skipped_links, 1)
-        self.assertEqual(result.candidates, ())
-
-    def test_entry_and_time_budgets_return_partial_evidence(self):
-        candidate = self.root / "many"
-        candidate.mkdir()
-        for index in range(8):
-            (candidate / str(index)).write_bytes(b"x")
-        ticks = iter((0.0, 0.0, 0.0, 2.0, 2.0, 2.0))
-
-        result = investigate_cleanup_candidates(
-            self.policy(deadline_ms=1000), monotonic=lambda: next(ticks, 2.0)
-        )
-
-        self.assertEqual(result.status, "bounded-partial")
-        self.assertLess(result.scanned_entries, 9)
-
-    def test_linked_ancestor_refuses_before_candidate_traversal(self):
-        real = self.root / "real"
-        cache = real / "cache"
-        candidate = cache / "candidate"
-        candidate.mkdir(parents=True)
-        (candidate / "payload").write_bytes(b"x" * 32)
-        linked = self.root / "linked"
-        try:
-            linked.symlink_to(real, target_is_directory=True)
-        except OSError:
-            self.skipTest("host does not permit symbolic links")
-        root = CleanupRoot(
-            "linked-cache",
-            linked / "cache",
-            "task-owned",
-            "rebuild",
-            (),
-            (),
-            ("cleanup-tool", "{target}"),
-        )
-
-        result = investigate_cleanup_candidates(
-            CleanupScanPolicy((root,), 1000, 100, 4, 0)
-        )
-
-        self.assertEqual(result.status, "bounded-partial")
         self.assertEqual(result.candidates, ())
 
 

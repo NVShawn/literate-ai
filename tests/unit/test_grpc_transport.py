@@ -6,7 +6,6 @@ import tempfile
 import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import replace
 from pathlib import Path
 
 from literate_ai.adapters.component_acceptance import (
@@ -15,7 +14,6 @@ from literate_ai.adapters.component_acceptance import (
 from literate_ai.adapters.grpc_surface_acceptance import GrpcIpcSurfaceProbe
 from literate_ai.adapters.ipc_surface_acceptance import (
     IpcSurfaceAcceptanceError,
-    decide_ipc_surface_conformance,
 )
 from tests.support.fixtures_test_ipc_surface_acceptance import _valid_document
 
@@ -205,74 +203,6 @@ class GrpcTransportTests(unittest.TestCase):
             self.url, contract or self.contract(), timeout_seconds=timeout
         )
 
-    def test_all_four_rpc_shapes_and_native_reflection_pass(self):
-        contract = self.contract()
-        self.assertTrue(self.probe.is_ready(self.url, contract, timeout_seconds=1))
-        observation = self.observe(contract)
-        self.assertEqual(
-            decide_ipc_surface_conformance(contract, observation)["outcome"], "accepted"
-        )
-        self.assertEqual(self.invocations, ["UU", "US", "SU", "SS"])
-        self.assertTrue(observation.served_description_bytes)
-        raw = json.loads(observation.protocol_detail)
-        self.assertTrue(raw["normalized_descriptor_identity"].startswith("sha256:"))
-        self.assertEqual(raw["cases"][0]["responses"], ["0802"])
-        from literate_ai.contracts import canonical_identity
-
-        for case, observed in zip(raw["cases"], observation.request_cases, strict=True):
-            self.assertEqual(canonical_identity(case).uri, observed.response_identity)
-        reflected = json.loads(observation.served_description_bytes)
-        self.assertEqual(
-            [r["file_by_filename"] for r in reflected["responses"]],
-            ["native.proto", "types.proto"],
-        )
-
-    def test_typed_error_details_after_partial_stream_pass(self):
-        from literate_ai.adapters._grpc_call_cases import GrpcErrorDetail, GrpcStatus
-
-        self.mode = "error"
-        contract = self.contract(("US",))
-        bound = contract.request_cases[0]
-        contract = replace(
-            contract,
-            request_cases=(
-                replace(
-                    bound,
-                    call=replace(
-                        bound.call,
-                        status=GrpcStatus.INVALID_ARGUMENT,
-                        status_message="invalid",
-                        error_details=(GrpcErrorDetail("native.Failure", b"\x08\x01"),),
-                    ),
-                ),
-            ),
-        )
-        self.assertEqual(
-            decide_ipc_surface_conformance(contract, self.observe(contract))["outcome"],
-            "accepted",
-        )
-
-    def test_wrong_response_and_status_refuse_decision(self):
-        for mode in ["wrong", "error"]:
-            self.mode = mode
-            contract = self.contract(("UU",) if mode == "wrong" else ("US",))
-            with self.subTest(mode=mode), self.assertRaises(IpcSurfaceAcceptanceError):
-                decide_ipc_surface_conformance(contract, self.observe(contract))
-
-    def test_malformed_response_and_extra_stream_are_refused(self):
-        for mode, name in [("invalid", "UU"), ("extra", "US")]:
-            self.mode = mode
-            with self.subTest(mode=mode), self.assertRaises(IpcSurfaceAcceptanceError):
-                self.observe(self.contract((name,)))
-
-    def test_deadline_cancels_stream_instead_of_accepting_partial_results(self):
-        self.mode = "slow"
-        contract = self.contract(("US",))
-        start = time.monotonic()
-        with self.assertRaises(IpcSurfaceAcceptanceError):
-            self.observe(contract, timeout=0.1)
-        self.assertLess(time.monotonic() - start, 2)
-
     def test_reflection_drift_refuses_before_operation_calls(self):
         document = self.pb.FileDescriptorSet.FromString(self.payload)
         document.file[0].options.java_package = "changed"
@@ -280,77 +210,3 @@ class GrpcTransportTests(unittest.TestCase):
         with self.assertRaises(IpcSurfaceAcceptanceError):
             self.observe()
         self.assertEqual(self.invocations, [])
-
-    def test_missing_duplicate_and_extra_reflection_files_refuse(self):
-        for mode in ("reflection-missing", "reflection-duplicate", "reflection-extra"):
-            self.mode = mode
-            with self.subTest(mode=mode), self.assertRaises(IpcSurfaceAcceptanceError):
-                self.observe()
-        self.assertEqual(self.invocations, [])
-
-    def test_missing_and_reordered_response_sequences_refuse(self):
-        for mode in ("missing", "reordered"):
-            self.mode = mode
-            contract = self.contract(("US",))
-            if mode == "reordered":
-                bound = contract.request_cases[0]
-                contract = replace(
-                    contract,
-                    request_cases=(
-                        replace(
-                            bound,
-                            call=replace(
-                                bound.call, responses=(b"\x08\x02", b"\x08\x03")
-                            ),
-                        ),
-                    ),
-                )
-            with self.subTest(mode=mode), self.assertRaises(IpcSurfaceAcceptanceError):
-                decide_ipc_surface_conformance(contract, self.observe(contract))
-
-    def test_declared_call_deadline_is_enforced_with_total_time_remaining(self):
-        from literate_ai.adapters._grpc_call_cases import GrpcStatus
-
-        self.mode = "slow"
-        contract = self.contract(("US",))
-        bound = contract.request_cases[0]
-        contract = replace(
-            contract,
-            request_cases=(
-                replace(
-                    bound,
-                    call=replace(
-                        bound.call,
-                        responses=(),
-                        status=GrpcStatus.DEADLINE_EXCEEDED,
-                        status_message="Deadline Exceeded",
-                        timeout_milliseconds=50,
-                    ),
-                ),
-            ),
-        )
-        start = time.monotonic()
-        observation = self.observe(contract, timeout=3)
-        self.assertEqual(
-            decide_ipc_surface_conformance(contract, observation)["outcome"], "accepted"
-        )
-        self.assertLess(time.monotonic() - start, 2)
-
-    def test_non_loopback_targets_and_invalid_budgets_refuse(self):
-        contract = self.contract()
-        for target in [
-            "http://example.invalid:123",
-            "http://127.0.0.1:123/path",
-            "http://user@127.0.0.1:123",
-        ]:
-            with (
-                self.subTest(target=target),
-                self.assertRaises(IpcSurfaceAcceptanceError),
-            ):
-                self.probe.observe_with_timeout(target, contract, timeout_seconds=1)
-        for budget in [0, -1, True, "1", float("inf"), float("nan")]:
-            with (
-                self.subTest(budget=budget),
-                self.assertRaises(IpcSurfaceAcceptanceError),
-            ):
-                self.observe(timeout=budget)

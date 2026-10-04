@@ -37,15 +37,15 @@ class ExecuteProviderTests(unittest.TestCase):
         snapshot, execution = _fixture(dependency_kind=DependencyKind.RUNTIME)
         with (
             patch(
-                "tests.unit.test_standard_local_command_adapter._fixture",
+                "tests.support.fixtures_test_standard_local_command_adapter._fixture",
                 return_value=(snapshot, execution),
             ),
             patch(
-                "tests.unit.test_standard_transferred_build._fixture",
+                "tests.support.fixtures_test_standard_transferred_build._fixture",
                 return_value=(snapshot, execution),
             ),
             patch(
-                "tests.unit.test_action_provider_build._fixture",
+                "tests.support.fixtures_test_action_provider_build._fixture",
                 return_value=(snapshot, execution),
             ),
         ):
