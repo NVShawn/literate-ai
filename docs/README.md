@@ -59,6 +59,7 @@ lists the per-project fields and their defaults.
 
 - [Installation and first run](user/installation.md)
 - [Public repository export](user/public-export.md)
+- [Test-suite audit (October 2026)](testing/test-suite-audit.md)
 - [Moving from NVIDIA-dev/literate-ai](user/repository-migration.md)
 - [Getting started](user/getting-started.md)
 - [The framework flow](user/framework-flow.md)

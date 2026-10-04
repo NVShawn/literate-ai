@@ -14,24 +14,33 @@ not renumbered.
 
 ## Test observable behavior first
 
-Prefer contract and component/integration tests through supported public CLI or Python
-APIs. Cover request and response schemas, exit/status codes, documented errors,
-backward compatibility, and applicable authentication or authorization behavior. Use
-real internal components and realistic persistence; mock only true external boundaries
-such as networks, host tools, credentials, clocks, and model providers.
+The suite favors end-to-end and smoke tests over unit tests. Every test lives in one of
+three directories:
 
-Exercise important stateful behavior as complete scenarios, including relevant
-transitions and recovery. Give distinct coverage to malformed input, missing data,
-duplicate and idempotent requests, authorization failures, timeouts, retries, partial
-failures, boundaries, and concurrency hazards. Use parameterized or property-based
-tests when they express related inputs more economically.
+- `tests/e2e`: drive a public surface end to end, such as the `litai` CLI, an installed
+  wheel, a real project lifecycle, real Git repositories, real builds or packages, or a
+  real worker round trip.
+- `tests/smoke`: one fast happy path (plus at most one fail-closed path) through each
+  major subsystem's public entry point, enough to catch "this subsystem is broken".
+- `tests/critical`: the minimal cases proving a security, custody, tamper-detection,
+  credential, sandbox, or data-loss invariant that no end-to-end test already covers.
 
-Retain method-level unit tests only when isolated logic is complex, safety-critical,
-algorithmically subtle, or substantially easier to diagnose independently. Do not add
-tests merely for count or line coverage, duplicate the same behavior at multiple
-layers, assert internal call sequences, test trivial wrappers/getters, or build
-mock-heavy replicas of the implementation. Every test should protect a distinct
-contract, failure mode, boundary, or regression.
+`tests/conformance` holds the sample-ladder and self-hosting end-to-end runs and their
+harness. Shared fixtures belong in `tests/support`; test modules must not import each
+other.
+
+Do not add tests of internal functions, dataclass validation, schema or wire round
+trips, formatting, argument parsing, or mock-heavy replicas of an implementation. Do
+not repeat a case per language, phase, or option when one representative proves the
+behavior; use a compact `subTest` table when several inputs matter. Build expensive
+fixtures (repositories, SDKs, initialized projects) once per class and copy them per
+test instead of rebuilding them in `setUp`. Mock only true external boundaries such as
+networks, credentials, clocks, and model providers.
+
+Prefer adding a case to an existing end-to-end or smoke module over creating a new
+module. A new critical test must name the invariant it protects. The October 2026 suite
+audit, recorded in `docs/testing/test-suite-audit.md`, lists the protected behavior for
+each retained module.
 
 ## Before you open a pull request
 

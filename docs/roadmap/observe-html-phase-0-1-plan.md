@@ -142,7 +142,7 @@ locally verified follow-up changes, not additions already present in that merge.
 | Rendering contract supports future surfaces | No structural counterexample found among verify-gate, component-locks, perf-timeline, workflow-routing and build-history. [Surface/request](https://github.com/NVIDIA-dev/literate-ai/blob/66fd355eda3b676a39df2505654592c56bbb385c/schemas/v2/html-observability.schema.json#L183-L223) uses open identifiers and a schema binding, not a graph-only enumeration. A source can have several supported views, and provenance supports several ordered source bindings. |
 
 Repeatable evidence is in
-[`test_html_observability_schema.py`](../../tests/unit/test_html_observability_schema.py):
+`test_html_observability_schema.py` (`tests/unit/test_html_observability_schema.py`, since removed):
 
 - Fifteen tests pass, including five prospective surface/request/artifact shape
   probes backed by existing catalog resource identifiers. They do not register
