@@ -1,12 +1,13 @@
 # Factual claim ledger
 
-## 1.2.0 edition (2026-09-26)
+## 1.1.0 edition (2026-10-04)
 
-This is the major/minor document-pair regeneration required before the `1.2.0`
-cut. `v1.1.0` is published. The repository still declares the shipped `1.1.0`
-while the exact 1.2 release preparation remains pending; this edition describes
-implemented candidate authority and evidence, not a claim that tag `v1.2.0` has
-already been published. Both local members are regenerated and verified together.
+This is the major/minor document-pair regeneration required before the `1.1.0`
+cut, the first release from the public `jordanhubbard/literate-ai` repository. The
+private repository's last published tag was `v1.0.1`; the work drafted there as the
+1.1 and 1.2 programs ships together as `1.1.0`. This edition describes implemented
+candidate authority and evidence, not a claim that tag `v1.1.0` has already been
+published. Both local members are regenerated and verified together.
 The stable Google Workspace resources retain the prior edition until the explicit
 account-bound in-place update and export-back verification complete.
 
@@ -337,10 +338,12 @@ Release-check gates: the Makefile `RELEASE_GATES` list is **14** names. There is
 including `codegraph`; that drawing is stale relative to current authority.
 
 The live Flavor surface (counts measure catalog area, not maturity or Cartesian
-qualification): six language Flavors (Python 3.11+, C++17, Rust 2021, JavaScript with
-Node.js 20+, Swift with Apple/Linux/Windows toolchain realizations, and Go); four
-build-system Flavors (Bazel, GNU Make, CMake, Cargo); three OS families (macOS, Linux,
-Windows); six package providers (pip, Conan, apt, Homebrew, WinGet, Chocolatey). Native
+qualification), re-verified against `flavors/` for 1.1.0: nine language Flavors (Python
+3.11+, C++17, Rust 2021, JavaScript with Node.js 20+, TypeScript, Swift with
+Apple/Linux/Windows toolchain realizations, Go, Zig, and Elixir with Erlang/OTP 27+);
+five build-system Flavors (Bazel, GNU Make, CMake, Cargo, repo-man); three OS families
+(macOS, Linux, Windows); nine package providers (pip, Conan, apt, Homebrew, WinGet,
+Chocolatey, Cargo, npm, ZIP). Native
 construction remains pip wheels and Conan cache archives.
 
 The `narrative` member is realized locally with `python-docx` (`build_narrative.py`).
