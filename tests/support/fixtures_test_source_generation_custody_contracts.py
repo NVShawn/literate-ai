@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_source_generation_custody_contracts."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_source_generation_custody_contracts``."""
-
 
 from literate_ai.application.standard_project_services import (
     PreparedExecutableProject,

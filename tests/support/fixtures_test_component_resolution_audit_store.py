@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_component_resolution_audit_store."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_component_resolution_audit_store``."""
-
 
 import subprocess
 from pathlib import Path

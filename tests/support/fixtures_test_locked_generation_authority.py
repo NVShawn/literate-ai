@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_locked_generation_authority."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_locked_generation_authority``."""
-
 
 from pathlib import Path
 

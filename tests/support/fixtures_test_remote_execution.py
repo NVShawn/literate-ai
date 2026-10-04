@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_remote_execution."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_remote_execution``."""
-
 
 from pathlib import Path
 

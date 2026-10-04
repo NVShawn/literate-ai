@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_repository_refresh_publication."""
 
-"""Shared fixtures extracted from ``tests.unit.test_repository_refresh_publication``."""
+from __future__ import annotations
 
 import hashlib
 from dataclasses import replace

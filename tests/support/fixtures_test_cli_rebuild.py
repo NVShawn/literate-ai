@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_cli_rebuild."""
 
-"""Shared fixtures extracted from ``tests.unit.test_cli_rebuild``."""
+from __future__ import annotations
 
 import hashlib
 import io

@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_component_lock_planning."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_component_lock_planning``."""
-
 
 import shutil
 from pathlib import Path

@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_project_configuration."""
 
-"""Shared fixtures extracted from ``tests.unit.test_project_configuration``."""
+from __future__ import annotations
 
 import json
 from pathlib import Path

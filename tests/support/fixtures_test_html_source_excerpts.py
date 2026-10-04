@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_html_source_excerpts."""
 
-"""Shared fixtures extracted from ``tests.unit.test_html_source_excerpts``."""
+from __future__ import annotations
 
 import hashlib
 

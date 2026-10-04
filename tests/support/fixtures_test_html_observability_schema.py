@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_html_observability_schema."""
 
-"""Shared fixtures extracted from ``tests.unit.test_html_observability_schema``."""
+from __future__ import annotations
 
 import copy
 import json

@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_host_self_update."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_host_self_update``."""
-
 
 import json
 import os

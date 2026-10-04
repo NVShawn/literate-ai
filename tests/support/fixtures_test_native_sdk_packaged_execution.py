@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_native_sdk_packaged_execution``."""
+"""Shared test fixtures extracted from test_native_sdk_packaged_execution."""
 
 import json
 import shutil

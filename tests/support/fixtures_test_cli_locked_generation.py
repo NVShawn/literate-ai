@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_cli_locked_generation."""
 
-"""Shared fixtures extracted from ``tests.unit.test_cli_locked_generation``."""
+from __future__ import annotations
 
 import json
 import shutil

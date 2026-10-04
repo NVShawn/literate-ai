@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_standard_project_factory."""
 
-"""Shared fixtures extracted from ``tests.unit.test_standard_project_factory``."""
+from __future__ import annotations
 
 import hashlib
 import sys
@@ -22,6 +22,9 @@ from literate_ai.contracts import (
     ComponentLifecycleCommand,
     DependencyInputKind,
     canonical_identity,
+)
+from tests.support.fixtures_test_component_node_generation_preparation import (
+    _fixture,  # noqa: F401
 )
 
 
@@ -116,9 +119,3 @@ def _toolchain_closure(execution, contracts, tool_bindings):
         dependency_observation=observation,
         observer_identity=canonical_identity({"observer": "test-host-closure@1"}),
     )
-
-
-from tests.support.fixtures_test_component_node_generation_preparation import (
-    _fixture,  # noqa: F401
-)
-# NOTE: names not defined at top level of tests.unit.test_standard_project_factory: ['_fixture']

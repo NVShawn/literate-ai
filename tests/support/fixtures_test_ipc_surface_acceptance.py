@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_ipc_surface_acceptance."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_ipc_surface_acceptance``."""
-
 
 from types import SimpleNamespace
 from unittest import mock

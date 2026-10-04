@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_component_command_contracts."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_component_command_contracts``."""
-
 
 from literate_ai.contracts import (
     ComponentArtifactExportShape,

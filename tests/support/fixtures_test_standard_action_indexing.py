@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_standard_action_indexing."""
 
-"""Shared fixtures extracted from ``tests.unit.test_standard_action_indexing``."""
+from __future__ import annotations
 
 import unittest
 from dataclasses import replace

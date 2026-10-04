@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_standard_local_command_adapter."""
 
-"""Shared fixtures extracted from ``tests.unit.test_standard_local_command_adapter``."""
+from __future__ import annotations
 
 import hashlib
 import json
@@ -170,6 +170,3 @@ def _provider_export(export_id: str) -> ArtifactExport:
             media_type=("application/x-native"),
         ),
     )
-
-
-# NOTE: names not defined at top level of tests.unit.test_standard_local_command_adapter: ['ComponentCommandContract', '_fixture']

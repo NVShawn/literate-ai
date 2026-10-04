@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_action_execute_action``."""
+"""Shared test fixtures extracted from test_action_execute_action."""
 
 from literate_ai.adapters.action_dispatch_wire import record_identity
 from literate_ai.adapters.action_execute import (

@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_retained_cargo_execution``."""
+"""Shared test fixtures extracted from test_retained_cargo_execution."""
 
 import json
 import sys
@@ -306,6 +306,3 @@ class RetainedCargoExecutionTests(unittest.TestCase):
             self.run_execution(cargo=cargo)
         self.assertEqual(self.process.call_count, 1)
         self.assertEqual(len(failure.exception.observations), 1)
-
-
-# NOTE: names not defined at top level of tests.unit.test_retained_cargo_execution: ['execution']

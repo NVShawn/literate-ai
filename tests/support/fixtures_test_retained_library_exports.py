@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_retained_library_exports``."""
+"""Shared test fixtures extracted from test_retained_library_exports."""
 
 import copy
 import unittest

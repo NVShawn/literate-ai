@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_dependency_lifecycle."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_dependency_lifecycle``."""
-
 
 from literate_ai.adapters.dependencies import (
     DependencyObservationError,

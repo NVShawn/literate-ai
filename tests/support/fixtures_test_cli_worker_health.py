@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_cli_worker_health``."""
+"""Shared test fixtures extracted from test_cli_worker_health."""
 
 import io
 import json

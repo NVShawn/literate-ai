@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_worker_capacity."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_worker_capacity``."""
-
 
 from dataclasses import replace
 

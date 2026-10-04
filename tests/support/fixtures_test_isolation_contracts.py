@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_isolation_contracts."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_isolation_contracts``."""
-
 
 from literate_ai.security.isolation import (
     ContainmentControl,

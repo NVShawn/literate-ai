@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_repository_publication."""
 
-"""Shared fixtures extracted from ``tests.unit.test_repository_publication``."""
+from __future__ import annotations
 
 import os
 import tempfile

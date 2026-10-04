@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_evidence_trust."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_evidence_trust``."""
-
 
 from literate_ai.security.evidence import (
     STATEMENT_MEDIA_TYPE,

@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_repository_tree."""
 
-"""Shared fixtures extracted from ``tests.unit.test_repository_tree``."""
+from __future__ import annotations
 
 import hashlib
 from pathlib import PurePosixPath

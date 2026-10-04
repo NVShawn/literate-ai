@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_standard_project_lifecycle."""
 
-"""Shared fixtures extracted from ``tests.unit.test_standard_project_lifecycle``."""
+from __future__ import annotations
 
 import hashlib
 import json
@@ -4450,5 +4450,3 @@ class StandardProjectLifecycleTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-# NOTE: names not defined at top level of tests.unit.test_standard_project_lifecycle: ['_decision', '_diamond_lock', '_names', '_prepared_execution', 'canonical_identity']

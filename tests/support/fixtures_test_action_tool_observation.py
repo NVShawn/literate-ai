@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_action_tool_observation``."""
+"""Shared test fixtures extracted from test_action_tool_observation."""
 
 import json
 import os
@@ -233,6 +233,3 @@ class ActionToolObservationTests(unittest.TestCase):
                 with self.assertRaises(ActionWireError):
                     self.probe(authority)
                 transport.assert_not_called()
-
-
-# NOTE: names not defined at top level of tests.unit.test_action_tool_observation: ['deadline', 'environment', 'root', 'worker']

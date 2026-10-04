@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_action_build_result``."""
+"""Shared test fixtures extracted from test_action_build_result."""
 
 import json
 import os

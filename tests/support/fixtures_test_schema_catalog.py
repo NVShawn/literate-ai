@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_schema_catalog."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_schema_catalog``."""
-
 
 import json
 import re

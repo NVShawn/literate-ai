@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_component_authoring_lock_contracts."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_component_authoring_lock_contracts``."""
-
 
 import json
 from pathlib import Path

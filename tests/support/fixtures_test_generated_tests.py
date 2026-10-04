@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_generated_tests."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_generated_tests``."""
-
 
 from literate_ai.generated_tests import (
     GENERATED_TEST_SUITE_SCHEMA,

@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_remote_standard_toolchains``."""
+"""Shared test fixtures extracted from test_remote_standard_toolchains."""
 
 from datetime import UTC, datetime
 

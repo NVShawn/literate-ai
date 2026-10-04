@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_native_sdk_standard_authority``."""
+"""Shared test fixtures extracted from test_native_sdk_standard_authority."""
 
 import json
 import sys

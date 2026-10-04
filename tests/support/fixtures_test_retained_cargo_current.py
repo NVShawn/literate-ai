@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_retained_cargo_current``."""
+"""Shared test fixtures extracted from test_retained_cargo_current."""
 
 import hashlib
 import json

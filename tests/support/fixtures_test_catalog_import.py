@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_catalog_import``."""
+"""Shared test fixtures extracted from test_catalog_import."""
 
 import json
 from pathlib import Path

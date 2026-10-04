@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_retained_provider_authority``."""
+"""Shared test fixtures extracted from test_retained_provider_authority."""
 
 import json
 import tempfile

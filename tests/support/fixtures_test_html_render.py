@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_html_render``."""
+"""Shared test fixtures extracted from test_html_render."""
 
 import json
 

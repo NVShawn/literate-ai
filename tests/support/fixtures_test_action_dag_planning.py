@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_action_dag_planning."""
 
-"""Shared fixtures extracted from ``tests.unit.test_action_dag_planning``."""
+from __future__ import annotations
 
 import unittest
 from datetime import UTC, datetime

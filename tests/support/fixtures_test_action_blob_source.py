@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_action_blob_source."""
 
-"""Shared fixtures extracted from ``tests.unit.test_action_blob_source``."""
+from __future__ import annotations
 
 import threading
 from contextlib import contextmanager

@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_action_provider_build``."""
+"""Shared test fixtures extracted from test_action_provider_build."""
 
 import shutil
 import unittest

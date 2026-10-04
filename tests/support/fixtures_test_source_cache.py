@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_source_cache."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_source_cache``."""
-
 
 import sqlite3
 from contextlib import closing

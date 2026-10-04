@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_action_dag_scheduler."""
 
-"""Shared fixtures extracted from ``tests.unit.test_action_dag_scheduler``."""
+from __future__ import annotations
 
 import threading
 

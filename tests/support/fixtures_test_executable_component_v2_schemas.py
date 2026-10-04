@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_executable_component_v2_schemas."""
 
-"""Shared fixtures extracted from ``tests.unit.test_executable_component_v2_schemas``."""
+from __future__ import annotations
 
 import json
 from pathlib import Path

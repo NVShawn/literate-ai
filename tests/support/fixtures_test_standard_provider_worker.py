@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_standard_provider_worker``."""
+"""Shared test fixtures extracted from test_standard_provider_worker."""
 
 _CHILD = """
 import json, os, sys

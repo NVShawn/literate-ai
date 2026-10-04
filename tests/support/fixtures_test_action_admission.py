@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_action_admission."""
 
-"""Shared fixtures extracted from ``tests.unit.test_action_admission``."""
+from __future__ import annotations
 
 import os
 import unittest

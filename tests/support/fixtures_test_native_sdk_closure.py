@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_native_sdk_closure``."""
+"""Shared test fixtures extracted from test_native_sdk_closure."""
 
 import shutil
 from copy import deepcopy

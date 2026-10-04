@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_artifact_graph_contracts."""
 
-"""Shared fixtures extracted from ``tests.unit.test_artifact_graph_contracts``."""
+from __future__ import annotations
 
 import hashlib
 import unittest

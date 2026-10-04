@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_action_build_source``."""
+"""Shared test fixtures extracted from test_action_build_source."""
 
 import shutil
 import tempfile

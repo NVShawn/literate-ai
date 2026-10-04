@@ -1,11 +1,15 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_component_node_generation_preparation."""
 
-"""Shared fixtures extracted from ``tests.unit.test_component_node_generation_preparation``."""
+from __future__ import annotations
 
 import hashlib
 from dataclasses import replace
 from pathlib import Path
 
+from literate_ai.adapters.generation_preparation import (
+    FilesystemComponentWorkspaceAllocator,  # noqa: F401
+    LockedComponentNodePreparationAdapter,  # noqa: F401
+)
 from literate_ai.application.component_execution_planning import (
     plan_component_execution,
 )
@@ -415,10 +419,3 @@ def _fixture(
         for item in lock.nodes
     }
     return snapshot, plan_component_execution(lock, model_identities=models)
-
-
-from literate_ai.adapters.generation_preparation import (
-    FilesystemComponentWorkspaceAllocator,  # noqa: F401
-    LockedComponentNodePreparationAdapter,  # noqa: F401
-)
-# NOTE: names not defined at top level of tests.unit.test_component_node_generation_preparation: ['FilesystemComponentWorkspaceAllocator', 'LockedComponentNodePreparationAdapter']

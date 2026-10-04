@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_repository_orchestration_contracts."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_repository_orchestration_contracts``."""
-
 
 from literate_ai.contracts.repository_orchestration import (
     RepositoryOrchestration,

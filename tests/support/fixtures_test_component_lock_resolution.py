@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_component_lock_resolution."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_component_lock_resolution``."""
-
 
 from literate_ai.application.component_lock_resolution import (
     CatalogAttribute,

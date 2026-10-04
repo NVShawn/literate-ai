@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_qualification_lifecycle_runner."""
 
-"""Shared fixtures extracted from ``tests.unit.test_qualification_lifecycle_runner``."""
+from __future__ import annotations
 
 import unittest
 from copy import deepcopy

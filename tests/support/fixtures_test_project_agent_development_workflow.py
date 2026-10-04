@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_project_agent_development_workflow."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_project_agent_development_workflow``."""
-
 
 from literate_ai.contracts import (
     ProjectDefinition,

@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_package_release_contracts."""
 
-"""Shared fixtures extracted from ``tests.unit.test_package_release_contracts``."""
+from __future__ import annotations
 
 import hashlib
 import tempfile
@@ -973,8 +973,3 @@ class PackageReleaseContractTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-from literate_ai.contracts.executable_components.packages import (
-    PackageKind,  # noqa: F401
-)
-# NOTE: names not defined at top level of tests.unit.test_package_release_contracts: ['PackageKind', 'PackagePlan', 'PackageResult']

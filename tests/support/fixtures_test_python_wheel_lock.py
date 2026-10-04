@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_python_wheel_lock."""
 
-"""Shared fixtures extracted from ``tests.unit.test_python_wheel_lock``."""
+from __future__ import annotations
 
 import base64
 import csv

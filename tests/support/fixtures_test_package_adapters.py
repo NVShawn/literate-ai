@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_package_adapters."""
 
-"""Shared fixtures extracted from ``tests.unit.test_package_adapters``."""
+from __future__ import annotations
 
 import copy
 import gzip

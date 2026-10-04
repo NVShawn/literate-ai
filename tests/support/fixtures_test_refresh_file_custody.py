@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_refresh_file_custody."""
 
-"""Shared fixtures extracted from ``tests.unit.test_refresh_file_custody``."""
+from __future__ import annotations
 
 import unittest
 from unittest.mock import patch

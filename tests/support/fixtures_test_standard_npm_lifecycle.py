@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_standard_npm_lifecycle."""
 
-"""Shared fixtures extracted from ``tests.unit.test_standard_npm_lifecycle``."""
+from __future__ import annotations
 
 import base64
 import json

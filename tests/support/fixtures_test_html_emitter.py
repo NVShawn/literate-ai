@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_html_emitter."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_html_emitter``."""
-
 
 from pathlib import Path
 

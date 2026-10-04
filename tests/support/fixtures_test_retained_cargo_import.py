@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_retained_cargo_import``."""
+"""Shared test fixtures extracted from test_retained_cargo_import."""
 
 import hashlib
 import tempfile

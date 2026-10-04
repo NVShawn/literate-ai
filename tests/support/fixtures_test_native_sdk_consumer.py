@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_native_sdk_consumer."""
 
-"""Shared fixtures extracted from ``tests.unit.test_native_sdk_consumer``."""
+from __future__ import annotations
 
 import subprocess
 import sys

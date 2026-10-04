@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_component_generation_context."""
 
-"""Shared fixtures extracted from ``tests.unit.test_component_generation_context``."""
+from __future__ import annotations
 
 import hashlib
 from dataclasses import replace
@@ -17,7 +17,10 @@ from literate_ai.contracts.executable_components.context import (
 )
 from literate_ai.contracts.executable_components.planning import ComponentGenerationPlan
 from literate_ai.contracts.identity import ContentIdentity
-from tests.support.fixtures_test_component_execution_planning import _models
+from tests.support.fixtures_test_component_execution_planning import (
+    _diamond_lock,  # noqa: F401
+    _models,
+)
 
 
 def _identity(content: bytes) -> ContentIdentity:
@@ -185,9 +188,3 @@ def _materialize(
         for identity in identities
     )
     return updated, inputs
-
-
-from tests.support.fixtures_test_component_execution_planning import (
-    _diamond_lock,  # noqa: F401
-)
-# NOTE: names not defined at top level of tests.unit.test_component_generation_context: ['_diamond_lock']

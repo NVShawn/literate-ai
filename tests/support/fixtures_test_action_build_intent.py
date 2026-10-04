@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_action_build_intent."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_action_build_intent``."""
-
 
 from dataclasses import replace
 

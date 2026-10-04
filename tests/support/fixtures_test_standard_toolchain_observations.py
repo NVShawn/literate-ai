@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_standard_toolchain_observations``."""
+"""Shared test fixtures extracted from test_standard_toolchain_observations."""
 
 from literate_ai.adapters.standard_toolchain_observations import (
     StandardToolObservation,

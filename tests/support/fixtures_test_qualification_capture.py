@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_qualification_capture``."""
+"""Shared test fixtures extracted from test_qualification_capture."""
 
 import hashlib
 import json

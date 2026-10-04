@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_action_build_record``."""
+"""Shared test fixtures extracted from test_action_build_record."""
 
 from literate_ai.adapters.action_build_record import (
     BuildWorkerInput,

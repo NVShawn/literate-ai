@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_html_surfaces."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_html_surfaces``."""
-
 
 from literate_ai.authority_graph import (
     AuthorityGraph,

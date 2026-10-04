@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_repository_sources."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_repository_sources``."""
-
 
 from literate_ai.application import (
     RepositoryBuildApproval,

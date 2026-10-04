@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_published_repository_pack."""
 
-"""Shared fixtures extracted from ``tests.unit.test_published_repository_pack``."""
+from __future__ import annotations
 
 import unittest
 from dataclasses import replace

@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_debian_packaging."""
 
-"""Shared fixtures extracted from ``tests.unit.test_debian_packaging``."""
+from __future__ import annotations
 
 import gzip
 import hashlib

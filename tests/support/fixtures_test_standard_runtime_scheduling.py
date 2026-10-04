@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_standard_runtime_scheduling``."""
+"""Shared test fixtures extracted from test_standard_runtime_scheduling."""
 
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta

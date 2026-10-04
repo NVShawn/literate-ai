@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_retained_harness_remote."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_retained_harness_remote``."""
-
 
 from literate_ai.contracts import (
     ExecutionRequirements,

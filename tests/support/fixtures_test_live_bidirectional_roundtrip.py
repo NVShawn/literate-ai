@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_live_bidirectional_roundtrip."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.conformance.test_live_bidirectional_roundtrip``."""
-
 
 from literate_ai.source_to_specification import (
     DraftScenario,

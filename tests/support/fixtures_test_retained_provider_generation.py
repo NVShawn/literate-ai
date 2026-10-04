@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_retained_provider_generation``."""
+"""Shared test fixtures extracted from test_retained_provider_generation."""
 
 import hashlib
 import os
@@ -235,6 +235,3 @@ class RetainedProviderGenerationTests(unittest.TestCase):
         ):
             self.read()
         self.assertEqual(path.read_bytes(), changed)
-
-
-# NOTE: names not defined at top level of tests.unit.test_retained_provider_generation: ['fixtures']

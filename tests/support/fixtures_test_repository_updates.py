@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_repository_updates."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_repository_updates``."""
-
 
 from pathlib import Path
 
@@ -12,6 +11,7 @@ from literate_ai.adapters.repository_catalogs import (
 from literate_ai.contracts import (
     ProjectInitializationOrigin,
 )
+from tests.support.fixtures_test_repository_lineage import fixture  # noqa: F401
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -43,7 +43,3 @@ def flavor_item(node, name: str, source_name: str) -> InheritedCatalogItem:
             if path.is_file()
         ),
     )
-
-
-from tests.support.fixtures_test_repository_lineage import fixture  # noqa: F401
-# NOTE: names not defined at top level of tests.unit.test_repository_updates: ['fixture']

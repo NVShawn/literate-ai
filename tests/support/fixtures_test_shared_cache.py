@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_shared_cache."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_shared_cache``."""
-
 
 from literate_ai.contracts.shared_cache import (
     SharedCacheAccessMode,

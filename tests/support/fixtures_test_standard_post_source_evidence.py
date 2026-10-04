@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_standard_post_source_evidence."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_standard_post_source_evidence``."""
-
 
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.executable_components import ArtifactExport

@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_source_cache_hardening."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_source_cache_hardening``."""
-
 
 from pathlib import Path
 

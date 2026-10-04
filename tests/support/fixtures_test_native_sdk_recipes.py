@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_native_sdk_recipes."""
 
-"""Shared fixtures extracted from ``tests.unit.test_native_sdk_recipes``."""
+from __future__ import annotations
 
 import dataclasses
 import json

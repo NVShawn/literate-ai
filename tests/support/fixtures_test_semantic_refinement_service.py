@@ -1,7 +1,6 @@
+"""Shared test fixtures extracted from test_semantic_refinement_service."""
+
 from __future__ import annotations
-
-"""Shared fixtures extracted from ``tests.unit.test_semantic_refinement_service``."""
-
 
 from literate_ai.contracts.identity import ContentReference, canonical_identity
 from literate_ai.contracts.semantic_refinement import (

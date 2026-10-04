@@ -1,4 +1,4 @@
-"""Shared fixtures extracted from ``tests.unit.test_grpc_descriptors``."""
+"""Shared test fixtures extracted from test_grpc_descriptors."""
 
 import hashlib
 import unittest

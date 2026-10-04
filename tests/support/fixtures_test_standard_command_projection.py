@@ -1,6 +1,6 @@
-from __future__ import annotations
+"""Shared test fixtures extracted from test_standard_command_projection."""
 
-"""Shared fixtures extracted from ``tests.unit.test_standard_command_projection``."""
+from __future__ import annotations
 
 import base64
 import hashlib
