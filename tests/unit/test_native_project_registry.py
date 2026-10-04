@@ -12,7 +12,7 @@ from unittest import mock
 
 from literate_ai.adapters import conversion_authority as registry
 from literate_ai.projects import ProjectConfigurationStore, load_project
-from tests.unit.test_project_agent_development_workflow import _definition
+from tests.support.fixtures_test_project_agent_development_workflow import _definition
 
 
 class NativeProjectRegistryTests(unittest.TestCase):

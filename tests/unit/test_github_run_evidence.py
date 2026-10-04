@@ -8,9 +8,9 @@ from unittest.mock import patch
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.security.evidence import DSSE_MEDIA_TYPE, Ed25519EvidenceSigner
 from literate_ai.security.evidence.github_oidc import verify_github_run_evidence
-from tests.unit import test_github_evidence_oidc as oidc_fixtures
-from tests.unit.test_evidence_records import _blob, _records
-from tests.unit.test_evidence_trust import _envelope, _expectation, _signer
+from tests.support import fixtures_test_github_evidence_oidc as oidc_fixtures
+from tests.support.fixtures_test_evidence_records import _blob, _records
+from tests.support.fixtures_test_evidence_trust import _envelope, _expectation, _signer
 
 
 class GitHubRunEvidenceTests(unittest.TestCase):

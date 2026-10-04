@@ -12,7 +12,7 @@ from literate_ai.adapters.standard_toolchain_observations import (
     capture_standard_tool_observations,
 )
 from literate_ai.contracts import ToolchainConstraint
-from tests.unit.test_remote_standard_toolchains import snapshot
+from tests.support.fixtures_test_remote_standard_toolchains import snapshot
 
 
 class CompilerVersionObservationTests(unittest.TestCase):

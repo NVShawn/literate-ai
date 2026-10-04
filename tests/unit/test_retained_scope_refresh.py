@@ -11,7 +11,7 @@ from unittest import mock
 
 from literate_ai.adapters import retained_scope_refresh as refresh
 from literate_ai.adapters.lifecycle_lock import project_lifecycle_lock
-from tests.unit.test_retained_harness_receipts import (
+from tests.support.fixtures_test_retained_harness_receipts import (
     _adapter,
     _invoke,
     _legacy_project,

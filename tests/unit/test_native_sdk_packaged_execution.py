@@ -26,7 +26,7 @@ from literate_ai.contracts.executable_components.commands import (
     ComponentLifecycleCommand,
 )
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
-from tests.unit import test_native_sdk_standard_authority
+from tests.support import fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority
 
 
 class NativeSdkPackagedExecutionTests(unittest.TestCase):

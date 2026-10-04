@@ -38,7 +38,7 @@ from literate_ai.repository_urls import repository_urls_equivalent
 from tests.unit.root_parent_adapter import (
     RootParentProjectInitializationAdapter as FilesystemProjectInitializationAdapter,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _origin(revision: str, version: str) -> ProjectInitializationOrigin:

@@ -17,8 +17,8 @@ from literate_ai.application.action_dag_planning import (
 from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.application.standard_authorization import StandardAuthorizationInputs
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-from tests.unit import test_action_source_index as source_fixture
-from tests.unit.test_standard_local_command_adapter import _python_copy_lifecycle
+from tests.support import fixtures_test_action_source_index as source_fixture
+from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
 
 
 class AuthorizationActionTests(unittest.TestCase):
@@ -191,7 +191,7 @@ class AuthorizationActionTests(unittest.TestCase):
         from literate_ai.adapters.action_authorization import (
             AUTHORIZATION_INPUTS_SCHEMA,
         )
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         resources = SchemaCatalog().resources
         registry = Registry().with_resources(

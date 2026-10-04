@@ -11,7 +11,7 @@ from unittest.mock import patch
 from literate_ai.adapters import repository_local_tree as local
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.contracts.repository_tree import RepositoryTreeCapturePolicy
-from tests.unit.test_repository_orchestration import git, repository, snapshot
+from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 
 class RepositoryLocalTreeTests(unittest.TestCase):

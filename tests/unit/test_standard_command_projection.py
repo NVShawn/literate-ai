@@ -61,8 +61,8 @@ from literate_ai.contracts import (
     canonical_identity,
     parse_standard_command_profile,
 )
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _tool(name: str, *, environment: tuple[tuple[str, str], ...] = ()):

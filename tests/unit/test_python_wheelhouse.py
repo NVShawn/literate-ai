@@ -13,7 +13,7 @@ from packaging.markers import default_environment
 from literate_ai.adapters.dependencies.python_lock import parse_python_wheel_lock
 from literate_ai.adapters.dependencies.python_wheelhouse import stage_python_wheels
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-from tests.unit.test_python_wheel_lock import document, wheel_record
+from tests.support.fixtures_test_python_wheel_lock import document, wheel_record
 
 
 class PythonWheelhouseTests(unittest.TestCase):

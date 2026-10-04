@@ -20,7 +20,7 @@ from literate_ai.contracts.executable_components import (
     RuntimeRequirementKind,
 )
 from literate_ai.publication import StandardProjectReleaseReceipt
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _identity(label: str):

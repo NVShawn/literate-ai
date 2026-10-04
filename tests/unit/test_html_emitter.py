@@ -24,8 +24,8 @@ from literate_ai.contracts.html_observability import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.project_authority_graph import project_authority_graph
-from tests.unit import test_html_observability_schema as schema_tests
-from tests.unit.test_html_surfaces import _graph
+from tests.support import fixtures_test_html_observability_schema as schema_tests
+from tests.support.fixtures_test_html_surfaces import _graph
 
 ROOT = Path(__file__).resolve().parents[2]
 STAMP = "2026-09-11T00:00:00Z"

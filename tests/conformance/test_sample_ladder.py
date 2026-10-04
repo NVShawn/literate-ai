@@ -2635,7 +2635,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
     def test_real_orchestrator_failure_tail_authorizes_candidate_replacement(
         self,
     ) -> None:
-        from tests.unit.test_application_generation import (
+        from tests.support.fixtures_test_application_generation import (
             GenerationOrchestratorTests,
         )
 
@@ -2684,7 +2684,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
     def test_real_orchestrator_compile_failure_authorizes_candidate_replacement(
         self,
     ) -> None:
-        from tests.unit.test_application_generation import (
+        from tests.support.fixtures_test_application_generation import (
             GenerationOrchestratorTests,
         )
 
@@ -2719,7 +2719,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
     def test_bazel_generated_graph_failure_authorizes_candidate_replacement(
         self,
     ) -> None:
-        from tests.unit.test_application_generation import (
+        from tests.support.fixtures_test_application_generation import (
             GenerationOrchestratorTests,
         )
 
@@ -4938,7 +4938,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
                 )
 
     def test_standard_sample_report_rejects_identity_only_lifecycle_fixture(self):
-        from tests.unit.test_standard_project_lifecycle import (
+        from tests.support.fixtures_test_standard_project_lifecycle import (
             LifecyclePorts,
             _decision,
             _diamond_lock,

@@ -23,8 +23,8 @@ from literate_ai.contracts.component_locking import ComponentAuthoring
 from literate_ai.contracts.flavors import FlavorAxis
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.library_imports import AuthoredLibraryImport
-from tests.unit import test_standard_command_projection as commands
-from tests.unit.test_component_authoring_lock_contracts import (
+from tests.support import fixtures_test_standard_command_projection as commands
+from tests.support.fixtures_test_component_authoring_lock_contracts import (
     authored_component,
     official_validator,
 )

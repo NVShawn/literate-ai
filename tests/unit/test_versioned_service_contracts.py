@@ -52,7 +52,7 @@ from literate_ai.security import (
     normalize_security_document,
 )
 from literate_ai.storage import AppendOnlyEventStore, FileSystemCAS
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 DIGEST_A = "sha256:" + "a" * 64
 DIGEST_B = "sha256:" + "b" * 64

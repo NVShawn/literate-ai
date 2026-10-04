@@ -23,7 +23,7 @@ from literate_ai.contracts import (
 )
 from literate_ai.projects import LoadedProject
 from literate_ai.storage import FileSystemCAS
-from tests.unit.test_source_cache import (
+from tests.support.fixtures_test_source_cache import (
     _accepted_entry,
     _accepted_entry_with_attachment,
     _cache_key,

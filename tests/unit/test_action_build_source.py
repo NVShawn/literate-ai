@@ -23,9 +23,9 @@ from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.security import AuthorizationError
 from literate_ai.storage import FileSystemCAS
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
-from tests.unit.test_action_blob_source import blob_path, source_cas_server
-from tests.unit.test_component_node_generation_preparation import _fixture
-from tests.unit.test_standard_local_command_adapter import _python_copy_lifecycle
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
 
 
 class ActionBuildSourceTests(unittest.TestCase):

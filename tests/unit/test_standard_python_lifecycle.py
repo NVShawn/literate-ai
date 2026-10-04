@@ -22,8 +22,8 @@ from literate_ai.application.artifact_graph import (
     realize_manifest,
 )
 from literate_ai.contracts import BuildPrivilege, BuildSubActionKind, ContentIdentity
-from tests.unit import test_python_install as wheel_fixtures
-from tests.unit import test_standard_command_projection as projection_fixtures
+from tests.support import fixtures_test_python_install as wheel_fixtures
+from tests.support import fixtures_test_standard_command_projection as projection_fixtures
 from tests.unit.standard_source_evidence_fixture import register_strict_source
 
 

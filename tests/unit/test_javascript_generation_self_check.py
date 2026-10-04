@@ -17,7 +17,7 @@ from literate_ai.adapters.models.generated_source_validation import (
     GeneratedSourceValidationError,
     validate_javascript_generation_handoff,
 )
-from tests.unit.test_coding_cli_generation import (
+from tests.support.fixtures_test_coding_cli_generation import (
     flavor,
     recipe,
     write_generated_test_suite,

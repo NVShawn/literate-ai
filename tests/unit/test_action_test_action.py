@@ -26,8 +26,8 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.unit import test_action_dag_planning as planning_fixture
-from tests.unit import test_action_test_execution as source_fixture
+from tests.support import fixtures_test_action_dag_planning as planning_fixture
+from tests.support import fixtures_test_action_test_execution as source_fixture
 
 
 def make_test_request(value, deadline):

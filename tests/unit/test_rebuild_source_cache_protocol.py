@@ -47,14 +47,14 @@ from literate_ai.contracts.rebuild_cache import (
 )
 from literate_ai.projects import LoadedProject
 from literate_ai.storage import FileSystemCAS
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_source_cache import (
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_source_cache import (
     _accepted_entry,
     _cache_key,
     _configuration,
     _target,
 )
-from tests.unit.test_source_cache_hardening import _project
+from tests.support.fixtures_test_source_cache_hardening import _project
 
 
 def _identity(label: str) -> ContentIdentity:

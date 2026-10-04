@@ -41,8 +41,8 @@ from literate_ai.source_to_specification.qualification_lifecycle import (
     QualificationVerifierCaseMap,
     QualificationWorkspaceAllocation,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_post_source_evidence import _evidence
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_post_source_evidence import _evidence
 
 
 def identity(label: str):

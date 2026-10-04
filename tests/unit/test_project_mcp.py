@@ -12,7 +12,7 @@ from literate_ai.adapters.project_mcp import (
 )
 from literate_ai.contracts._validation import ContractValidationError
 from literate_ai.contracts.projects import InstitutionalChannels
-from tests.unit.test_catalog_import import make_project
+from tests.support.fixtures_test_catalog_import import make_project
 
 _VALID_MCP = b"""---
 name: loan-risk-tools

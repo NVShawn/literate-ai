@@ -20,13 +20,13 @@ from literate_ai.contracts.executable_components import (
 from literate_ai.contracts.standard_lifecycle_membership import (
     StandardNodeFailureEvidence,
 )
-from tests.unit.test_component_execution_planning import _diamond_lock
-from tests.unit.test_component_generation_scheduling import (
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock
+from tests.support.fixtures_test_component_generation_scheduling import (
     _decision,
     _names,
     _prepared_execution,
 )
-from tests.unit.test_standard_project_lifecycle import (
+from tests.support.fixtures_test_standard_project_lifecycle import (
     LifecyclePorts,
     RepairableBuildPorts,
     _identity,

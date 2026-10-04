@@ -35,10 +35,10 @@ from literate_ai.source_to_specification.promotion_materialization import (
     SOURCE_PROMOTION_PROVENANCE_SCHEMA,
     SourcePromotionError,
 )
-from tests.unit import test_qualification_lifecycle_runner as lifecycle_fixtures
-from tests.unit import test_retained_provider_generation as generation_fixtures
-from tests.unit import test_standard_lifecycle_binding_adapter as binding_fixtures
-from tests.unit.test_project_configuration import _definition
+from tests.support import fixtures_test_qualification_lifecycle_runner as lifecycle_fixtures
+from tests.support import fixtures_test_retained_provider_generation as generation_fixtures
+from tests.support import fixtures_test_standard_lifecycle_binding_adapter as binding_fixtures
+from tests.support.fixtures_test_project_configuration import _definition
 
 
 class RetainedProviderAuthorityTests(unittest.TestCase):

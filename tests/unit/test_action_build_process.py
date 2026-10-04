@@ -29,12 +29,12 @@ from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.directory_artifacts import read_directory_export
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.contracts import canonical_identity
-from tests.unit import test_action_build_source as source_fixture
-from tests.unit.test_action_blob_source import blob_path, source_cas_server
-from tests.unit.test_action_build_action import build_request
-from tests.unit.test_action_build_record import build_worker_input
-from tests.unit.test_standard_local_command_adapter import _identity
-from tests.unit.test_standard_project_factory import (
+from tests.support import fixtures_test_action_build_source as source_fixture
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_action_build_action import build_request
+from tests.support.fixtures_test_action_build_record import build_worker_input
+from tests.support.fixtures_test_standard_local_command_adapter import _identity
+from tests.support.fixtures_test_standard_project_factory import (
     _command_contracts,
     _toolchain_closure,
 )

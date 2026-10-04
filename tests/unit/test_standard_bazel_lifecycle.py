@@ -40,9 +40,9 @@ from literate_ai.contracts import (
     canonical_identity,
 )
 from tests.unit.standard_source_evidence_fixture import register_strict_source
-from tests.unit.test_component_node_generation_preparation import _fixture
-from tests.unit.test_shared_cache import _configuration
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_shared_cache import _configuration
+from tests.support.fixtures_test_standard_local_command_adapter import (
     copy_digest_cache_without_sidecars,
     rewrite_self_authenticating_artifact,
 )

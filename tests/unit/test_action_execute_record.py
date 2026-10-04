@@ -15,7 +15,7 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.unit import test_action_test_execution as fixture_module
+from tests.support import fixtures_test_action_test_execution as fixture_module
 
 
 class ExecuteWorkerRecordTests(unittest.TestCase):
@@ -103,7 +103,7 @@ class ExecuteWorkerRecordTests(unittest.TestCase):
                 self.admit()
 
     def test_missing_or_unbound_provider_transfer_refuses(self):
-        from tests.unit import test_action_provider_build as provider_module
+        from tests.support import fixtures_test_action_provider_build as provider_module
 
         fixture = provider_module.ProviderBuildTransferTests()
         self.addCleanup(fixture.doCleanups)

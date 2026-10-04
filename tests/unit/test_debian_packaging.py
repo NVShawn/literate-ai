@@ -26,8 +26,8 @@ from literate_ai.adapters.packaging import native_archive_package_plan
 from literate_ai.application.packaging import PackagingError
 from literate_ai.contracts import BlobRef
 from literate_ai.contracts.executable_components.packages import PackageKind
-from tests.unit import test_package_adapters as package_adapter_fixtures
-from tests.unit.test_package_release_contracts import _identity
+from tests.support import fixtures_test_package_adapters as package_adapter_fixtures
+from tests.support.fixtures_test_package_release_contracts import _identity
 
 
 def _tar(entries: dict[str, tuple[bytes, int]]) -> bytes:

@@ -531,7 +531,7 @@ class RemoteExecutionTests(unittest.TestCase):
         self,
     ) -> None:
         from literate_ai.contracts.capabilities import DependencyKind
-        from tests.unit import test_standard_project_lifecycle as lifecycle
+        from tests.support import fixtures_test_standard_project_lifecycle as lifecycle
 
         lock = lifecycle._diamond_lock(dependency_kind=DependencyKind.BUILD)
         execution, requests = lifecycle._prepared_execution(lock)

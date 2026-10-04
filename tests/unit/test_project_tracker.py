@@ -18,7 +18,7 @@ from literate_ai.application.project_tracker import (
     sanitize_git_url,
 )
 from literate_ai.cli import main
-from tests.unit.test_project_cli import invoke
+from tests.support.fixtures_test_project_cli import invoke
 
 _PLAIN_TEXT_ENVIRONMENT = {
     key: value

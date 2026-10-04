@@ -62,7 +62,7 @@ from literate_ai.version import DISTRIBUTION_VERSION, EXPECTED_RELEASE_TAG
 from tests.unit.root_parent_adapter import (
     RootParentProjectInitializationAdapter as FilesystemProjectInitializationAdapter,
 )
-from tests.unit.test_repository_lineage import fixture
+from tests.support.fixtures_test_repository_lineage import fixture
 
 DEFAULT_TEST_FLAVORS = ("+bazel", "+python", "+macos")
 

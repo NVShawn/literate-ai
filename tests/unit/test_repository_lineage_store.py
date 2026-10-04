@@ -20,7 +20,7 @@ from literate_ai.contracts import (
 
 
 def inherited() -> tuple[RepositoryParentSelection, RepositoryLineage]:
-    from tests.unit.test_repository_lineage import fixture
+    from tests.support.fixtures_test_repository_lineage import fixture
 
     selection, _root, _child, lineage = fixture()
     return selection, lineage

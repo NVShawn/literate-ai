@@ -70,7 +70,7 @@ from literate_ai.projects import PROJECT_FILENAME, ProjectError, load_project
 from tests.unit.root_parent_adapter import (
     RootParentProjectInitializationAdapter as FilesystemProjectInitializationAdapter,
 )
-from tests.unit.test_repository_lineage import fixture as repository_lineage_fixture
+from tests.support.fixtures_test_repository_lineage import fixture as repository_lineage_fixture
 
 
 def _origin() -> ProjectInitializationOrigin:

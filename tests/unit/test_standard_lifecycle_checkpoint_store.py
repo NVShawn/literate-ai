@@ -24,8 +24,8 @@ from literate_ai.contracts import (
     StandardLifecycleStageEvidence,
     canonical_identity,
 )
-from tests.unit.test_component_node_generation_preparation import _budget, _fixture
-from tests.unit.test_standard_project_factory import (
+from tests.support.fixtures_test_component_node_generation_preparation import _budget, _fixture
+from tests.support.fixtures_test_standard_project_factory import (
     _command_contracts,
     _selection,
     _toolchain_closure,

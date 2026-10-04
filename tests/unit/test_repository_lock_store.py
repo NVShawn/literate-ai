@@ -17,8 +17,8 @@ from literate_ai.adapters.repository_orchestration import (
     _read_document,
 )
 from literate_ai.contracts.identity import canonical_json_bytes
-from tests.unit import test_repository_lock_planning as fixtures
-from tests.unit.test_repository_orchestration import snapshot
+from tests.support import fixtures_test_repository_lock_planning as fixtures
+from tests.support.fixtures_test_repository_orchestration import snapshot
 
 
 class RepositoryLockStoreTests(unittest.TestCase):

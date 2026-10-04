@@ -16,7 +16,7 @@ from literate_ai.adapters.standard_project import (
     project_locked_standard_toolchain_closure,
 )
 from literate_ai.contracts import ComponentCommandPhase, ComponentCommandRole
-from tests.unit.test_standard_command_projection import _locked_snapshot, _observation
+from tests.support.fixtures_test_standard_command_projection import _locked_snapshot, _observation
 
 _APPLICATION = """\
 import json

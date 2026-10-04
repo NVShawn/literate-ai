@@ -24,7 +24,7 @@ from literate_ai.adapters.locked_generation_authority import (
 )
 from literate_ai.application.component_lock_resolution import ComponentLockResolver
 from literate_ai.contracts.identity import canonical_json_bytes
-from tests.unit.test_component_lock_planning import _fixture, _flavor_variant
+from tests.support.fixtures_test_component_lock_planning import _fixture, _flavor_variant
 
 _SELECTORS = ("+macos", "+python")
 _TARGET = "macos-host"

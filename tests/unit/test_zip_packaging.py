@@ -20,7 +20,7 @@ from literate_ai.adapters.packaging import (
 from literate_ai.application.packaging import PackagingError, verify_package_result
 from literate_ai.contracts import BlobRef
 from literate_ai.contracts.executable_components.packages import PackageKind
-from tests.unit import test_package_release_contracts as fixtures
+from tests.support import fixtures_test_package_release_contracts as fixtures
 
 
 class NativeZipTests(unittest.TestCase):

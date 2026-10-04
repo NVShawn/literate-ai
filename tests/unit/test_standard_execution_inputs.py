@@ -25,16 +25,16 @@ from literate_ai.contracts.standard_lifecycle_membership import (
     StandardNodeFailurePhase,
 )
 from literate_ai.security import AuthorizationError, BuildAuthorization, SecurityProfile
-from tests.unit.test_component_execution_planning import _diamond_lock
-from tests.unit.test_component_generation_scheduling import _names, _prepared_execution
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_project_lifecycle import (
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock
+from tests.support.fixtures_test_component_generation_scheduling import _names, _prepared_execution
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_project_lifecycle import (
     _decision,
     _identity,
     _prepared_nodes,
     _service,
 )
-from tests.unit.test_standard_runtime_scheduling import ScopedRuntimePorts
+from tests.support.fixtures_test_standard_runtime_scheduling import ScopedRuntimePorts
 
 
 class StandardExecutionInputTests(unittest.TestCase):

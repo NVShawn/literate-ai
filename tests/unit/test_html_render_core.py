@@ -25,7 +25,7 @@ from literate_ai.contracts.html_observability import (
     HtmlView,
     render_inputs_identity,
 )
-from tests.unit import test_html_observability_schema as schema_tests
+from tests.support import fixtures_test_html_observability_schema as schema_tests
 
 
 def identity(value: str) -> ContentIdentity:

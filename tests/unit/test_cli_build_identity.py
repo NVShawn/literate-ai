@@ -21,7 +21,7 @@ from literate_ai.adapters.user_paths import (
     HostInstallLayout,
 )
 from literate_ai.version import DISTRIBUTION_VERSION
-from tests.unit.test_host_self_update import _python_path, _write_manifest
+from tests.support.fixtures_test_host_self_update import _python_path, _write_manifest
 
 
 class CliBuildIdentityTests(unittest.TestCase):

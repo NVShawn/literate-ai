@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 from literate_ai.adapters import repository_orchestration as inventory
-from tests.unit.test_repository_orchestration import git, repository, snapshot
+from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 
 class RepositoryIndexObservationTests(unittest.TestCase):

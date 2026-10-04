@@ -50,7 +50,7 @@ from literate_ai.security import (
 from literate_ai.storage import AppendOnlyEventStore
 from literate_ai.validation import PythonSyntaxValidator, ValidationPipeline
 from literate_ai.workspace import WorkspaceTreeStore
-from tests.unit.test_application_generation import (
+from tests.support.fixtures_test_application_generation import (
     TEST_RECIPE_IDENTITY,
     TEST_SPECIFICATION_REFERENCES,
     DependencyResolver,

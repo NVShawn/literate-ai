@@ -14,7 +14,7 @@ from pathlib import Path
 from literate_ai.adapters.builders.bazel import _remove_bazel_directory
 from literate_ai.adapters.shared_cache_config import load_shared_cache
 from literate_ai.contracts.shared_cache import SharedCacheAccessMode
-from tests.unit.test_shared_cache import _configuration
+from tests.support.fixtures_test_shared_cache import _configuration
 
 
 @unittest.skipUnless(shutil.which("bazel"), "Bazel is required for cache qualification")

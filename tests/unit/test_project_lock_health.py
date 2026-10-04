@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 from literate_ai.adapters.lock_command_errors import LockCommandError
 from literate_ai.adapters.project_lock_health import observe_project_locks
-from tests.unit.test_repository_orchestration import snapshot
+from tests.support.fixtures_test_repository_orchestration import snapshot
 
 
 class ProjectLockHealthTests(unittest.TestCase):

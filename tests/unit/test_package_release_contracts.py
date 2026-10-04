@@ -56,17 +56,17 @@ from literate_ai.publication import (
 )
 from literate_ai.security import SecurityProfile
 from literate_ai.storage import AppendOnlyEventStore, FileSystemCAS
-from tests.unit.test_artifact_graph_contracts import (
+from tests.support.fixtures_test_artifact_graph_contracts import (
     ArtifactGraphTests,
     SourceAssemblyTests,
 )
-from tests.unit.test_component_execution_planning import _diamond_lock
-from tests.unit.test_component_generation_scheduling import (
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock
+from tests.support.fixtures_test_component_generation_scheduling import (
     _decision,
     _names,
     _prepared_execution,
 )
-from tests.unit.test_standard_project_lifecycle import (
+from tests.support.fixtures_test_standard_project_lifecycle import (
     LifecyclePorts,
     _prepared_nodes,
     _service,

@@ -23,15 +23,15 @@ from literate_ai.source_to_specification.host_qualification import (
     LocalQualificationProfile,
 )
 from literate_ai.source_to_specification.inventory import inventory_source
-from tests.unit.test_cli_rebuild import invoke
-from tests.unit.test_standard_rebuild_adapter import (
+from tests.support.fixtures_test_cli_rebuild import invoke
+from tests.support.fixtures_test_standard_rebuild_adapter import (
     _identity as identity,
 )
 
 
 class PublicLibraryQualificationTests(unittest.TestCase):
     def setUp(self) -> None:
-        from tests.unit.test_standard_rebuild_adapter import (
+        from tests.support.fixtures_test_standard_rebuild_adapter import (
             FilesystemStandardRebuildAdapterTests as RebuildFixture,
         )
 

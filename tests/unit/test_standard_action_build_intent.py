@@ -9,7 +9,7 @@ from unittest.mock import patch
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
 from literate_ai.adapters.command_build_intent import CommandBuildIntentDispatcher
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit import test_standard_action_indexing as factory_fixture
+from tests.support import fixtures_test_standard_action_indexing as factory_fixture
 
 
 class StandardActionBuildIntentTests(unittest.TestCase):

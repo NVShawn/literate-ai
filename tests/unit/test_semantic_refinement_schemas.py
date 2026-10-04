@@ -9,8 +9,8 @@ from pathlib import Path
 from jsonschema import Draft202012Validator
 
 from literate_ai.application.semantic_refinement import SemanticRefinementService
-from tests.unit import test_semantic_refinement_service as refinement_fixtures
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support import fixtures_test_semantic_refinement_service as refinement_fixtures
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
 V2_ROOT = ROOT / "schemas" / "v2"

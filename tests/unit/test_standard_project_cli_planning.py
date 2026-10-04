@@ -16,7 +16,7 @@ from literate_ai.contracts import (
     ContentIdentity,
     ModelScopeBinding,
 )
-from tests.unit.test_cli_locked_generation import (
+from tests.support.fixtures_test_cli_locked_generation import (
     _TARGET,
     _generation_fixture,
     _write_lock,

@@ -24,7 +24,7 @@ from literate_ai.contracts import (
     NvidiaProbeStatus,
     WorkerHardwareObservationCatalog,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def worker(worker_id: str, family: str) -> ExecutionWorker:

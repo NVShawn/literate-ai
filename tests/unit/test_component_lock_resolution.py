@@ -22,7 +22,7 @@ from literate_ai.contracts.capabilities import (
 )
 from literate_ai.contracts.flavors import CandidateStatus
 from literate_ai.contracts.repositories import RepositorySourceLock
-from tests.unit.test_component_lock_contracts import (
+from tests.support.fixtures_test_component_lock_contracts import (
     component_authoring,
     identity,
     reference,

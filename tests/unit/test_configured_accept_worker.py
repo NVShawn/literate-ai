@@ -22,8 +22,8 @@ from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.adapters.qualification_capture import QualificationCaptureError
 from literate_ai.contracts import canonical_identity
-from tests.unit import test_action_accept_execution as fixture_module
-from tests.unit.test_action_accept_action import make_accept_request
+from tests.support import fixtures_test_action_accept_execution as fixture_module
+from tests.support.fixtures_test_action_accept_action import make_accept_request
 
 
 class ConfiguredAcceptWorkerTests(unittest.TestCase):

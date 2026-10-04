@@ -28,8 +28,8 @@ from literate_ai.adapters.standard_project import (
     native_cpp_cache_contract,
 )
 from literate_ai.contracts import ComponentCommandPhase, ComponentLifecycleCommand
-from tests.unit.test_shared_cache import _configuration
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support.fixtures_test_shared_cache import _configuration
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _python_copy_lifecycle,
 )

@@ -27,7 +27,7 @@ from literate_ai.contracts.retained_cargo_tests import (
     RetainedCargoTestTarget,
     retained_cargo_test_targets,
 )
-from tests.unit import test_retained_cargo_execution as fixtures
+from tests.support import fixtures_test_retained_cargo_execution as fixtures
 
 
 def blob(content):

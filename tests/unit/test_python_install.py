@@ -18,7 +18,7 @@ from literate_ai.adapters.dependencies.python_install import (
 from literate_ai.adapters.dependencies.python_lock import parse_python_wheel_lock
 from literate_ai.adapters.dependencies.python_target import observe_python_wheel_target
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-from tests.unit import test_python_installed as fixtures
+from tests.support import fixtures_test_python_installed as fixtures
 
 
 class PythonInstallerIntegrationTests(unittest.TestCase):

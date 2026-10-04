@@ -30,7 +30,7 @@ from literate_ai.projects import (
     serialize_project_configuration,
 )
 from literate_ai.schema_catalog import verify_schema_catalog
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -247,7 +247,7 @@ class RepositoryOrchestrationContractTests(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             replace(base, source_cache=cache)
-        from tests.unit.test_html_emitter import request
+        from tests.support.fixtures_test_html_emitter import request
 
         output = replace(request("literate-ai"), output_path="services/app/graph.html")
         with self.assertRaises(ValueError):

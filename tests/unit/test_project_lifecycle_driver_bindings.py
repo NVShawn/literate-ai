@@ -13,7 +13,7 @@ from literate_ai.contracts import (
     StandardProjectLifecycleDriver,
     canonical_identity,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 DRIVER_SCHEMA = "urn:literate-ai:schema:v2:project-lifecycle-driver"

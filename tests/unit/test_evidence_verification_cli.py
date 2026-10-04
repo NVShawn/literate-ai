@@ -18,8 +18,8 @@ from literate_ai.contracts.identity import canonical_identity
 from literate_ai.schema_catalog import schema_path, verify_schema_catalog
 from literate_ai.security.evidence import DsseEnvelope
 from literate_ai.security.evidence.plan import EvidenceVerificationPlan
-from tests.unit.test_evidence_graph import _Graph
-from tests.unit.test_evidence_retention import _claims
+from tests.support.fixtures_test_evidence_graph import _Graph
+from tests.support.fixtures_test_evidence_retention import _claims
 
 
 class EvidenceVerificationCliTests(unittest.TestCase):
@@ -227,7 +227,7 @@ class EvidenceVerificationCliTests(unittest.TestCase):
         from literate_ai.adapters.project_validation import (
             validated_project_authority_identity,
         )
-        from tests.unit.test_project_test_receipt_cli import invoke
+        from tests.support.fixtures_test_project_test_receipt_cli import invoke
 
         project = self.root / "project"
         status, result = invoke(

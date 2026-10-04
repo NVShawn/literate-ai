@@ -27,7 +27,7 @@ from literate_ai.contracts.repositories import (
     RepositoryRevisionKind,
     RepositoryRevisionSelector,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA_PATH = ROOT / "schemas/v2/component-authoring-locks.schema.json"

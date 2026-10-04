@@ -12,7 +12,7 @@ from literate_ai.schema_catalog import (
     PublishedSchemaError,
     verify_published_schemas,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 SCHEMAS = REPOSITORY / "schemas" / "v1"

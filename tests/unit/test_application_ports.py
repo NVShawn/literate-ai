@@ -25,7 +25,7 @@ from literate_ai.security import (
     ObservationRequest,
     SecurityProfile,
 )
-from tests.unit.test_application_generation import identity
+from tests.support.fixtures_test_application_generation import identity
 
 
 class ApplicationPortTests(unittest.TestCase):

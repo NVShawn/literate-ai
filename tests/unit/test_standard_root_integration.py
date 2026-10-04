@@ -7,9 +7,9 @@ from dataclasses import replace
 
 from literate_ai.contracts import StandardRootIntegrationEvidence
 from literate_ai.contracts._validation import ContractValidationError
-from tests.unit.test_package_release_contracts import PackageReleaseContractTests
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_project_lifecycle import _identity
+from tests.support.fixtures_test_package_release_contracts import PackageReleaseContractTests
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_project_lifecycle import _identity
 
 
 class StandardRootIntegrationEvidenceTests(unittest.TestCase):

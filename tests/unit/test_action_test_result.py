@@ -15,7 +15,7 @@ from literate_ai.contracts import canonical_identity, canonical_json_bytes
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.storage import FileSystemCAS
 from literate_ai.storage.cas import BlobIntegrityError, BlobNotFoundError
-from tests.unit import test_action_test_execution as worker_fixture
+from tests.support import fixtures_test_action_test_execution as worker_fixture
 
 
 class ActionTestResultTests(unittest.TestCase):

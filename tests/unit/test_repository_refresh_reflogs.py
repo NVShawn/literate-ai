@@ -16,8 +16,8 @@ from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshRequest,
     RepositoryRefreshTarget,
 )
-from tests.unit import test_repository_refresh_refs as fixtures
-from tests.unit.test_repository_orchestration import git, repository, snapshot
+from tests.support import fixtures_test_repository_refresh_refs as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 IDENT = b"Test <test@example.test> 1700000000 +0000"
 

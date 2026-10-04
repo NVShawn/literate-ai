@@ -25,7 +25,7 @@ from literate_ai.adapters.qualification_capture import (
     QualificationEvidenceRecorder,
 )
 from literate_ai.contracts import canonical_identity
-from tests.unit.test_ipc_surface_acceptance import _identity, _lock, _valid_document
+from tests.support.fixtures_test_ipc_surface_acceptance import _identity, _lock, _valid_document
 
 _SERVER = r"""
 import signal, sys, time

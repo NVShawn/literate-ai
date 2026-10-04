@@ -11,7 +11,7 @@ from literate_ai.adapters.lifecycle.standard_runtime import (
     direct_service_process_argv,
 )
 from literate_ai.contracts import LITAI_SERVE_MODE_FLAG, LITAI_SMOKE_MODE_FLAG
-from tests.unit import test_standard_python_evidence as fixtures
+from tests.support import fixtures_test_standard_python_evidence as fixtures
 
 
 class PythonWheelRuntimeTests(unittest.TestCase):

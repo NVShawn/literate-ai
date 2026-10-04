@@ -24,9 +24,9 @@ from literate_ai.contracts.html_observability import (
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.projects import discover_project
 from literate_ai.schema_catalog import verify_schema_catalog
-from tests.unit import test_html_observability_schema as schema_tests
-from tests.unit.test_html_emitter import DISTRIBUTION, STAMP, request
-from tests.unit.test_html_render import _project
+from tests.support import fixtures_test_html_observability_schema as schema_tests
+from tests.support.fixtures_test_html_emitter import DISTRIBUTION, STAMP, request
+from tests.support.fixtures_test_html_render import _project
 
 
 class HtmlStalenessTests(unittest.TestCase):

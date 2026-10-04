@@ -10,7 +10,7 @@ from literate_ai.adapters.standard_project import (
     project_locked_standard_toolchain_closure,
 )
 from literate_ai.contracts import canonical_identity
-from tests.unit import test_standard_command_projection as fixture
+from tests.support import fixtures_test_standard_command_projection as fixture
 
 
 class StandardDependencyGuardTests(unittest.TestCase):

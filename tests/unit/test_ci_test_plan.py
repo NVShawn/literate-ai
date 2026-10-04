@@ -10,7 +10,7 @@ from pathlib import Path
 from unittest import mock
 
 from literate_ai.ci_test_plan import CiTestPlanError, plan_ci_tests
-from tests.unit.test_project_cli import REPO_ROOT, invoke
+from tests.support.fixtures_test_project_cli import REPO_ROOT, invoke
 
 CATALOG = REPO_ROOT / "skills" / "agent" / "ci-test-plan"
 TEMPLATE = (

@@ -12,7 +12,7 @@ from pathlib import Path
 from literate_ai.adapters.retained_cargo_execution_inputs import (
     read_retained_cargo_execution_inputs,
 )
-from tests.unit import test_retained_cargo_materialization as fixtures
+from tests.support import fixtures_test_retained_cargo_materialization as fixtures
 
 
 class RetainedCargoExecutionInputsTests(unittest.TestCase):

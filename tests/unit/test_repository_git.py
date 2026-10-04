@@ -43,9 +43,9 @@ from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
-from tests.unit.test_cli_component_locks import _run
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_repository_sources import (
+from tests.support.fixtures_test_cli_component_locks import _run
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_repository_sources import (
     _Authorizer,
     _Builder,
     _Cache,

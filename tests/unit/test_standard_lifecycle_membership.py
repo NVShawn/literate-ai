@@ -18,8 +18,8 @@ from literate_ai.contracts import (
     StandardPlannedLifecycleNode,
     StandardProjectLifecycleMembership,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_project_lifecycle import _identity
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_project_lifecycle import _identity
 
 
 def _planned(name: str) -> StandardPlannedLifecycleNode:

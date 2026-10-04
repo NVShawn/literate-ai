@@ -35,8 +35,8 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit import test_action_source_index as source_fixture
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support import fixtures_test_action_source_index as source_fixture
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class SshActionTransportTests(unittest.TestCase):

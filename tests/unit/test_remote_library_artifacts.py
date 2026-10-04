@@ -20,8 +20,8 @@ from literate_ai.adapters.remote_execution import (
     execute_remote_request,
 )
 from literate_ai.contracts import BlobRef, LifecycleDispatchAction, canonical_identity
-from tests.unit.test_library_products import library_product
-from tests.unit.test_remote_execution import identity, materialization, request, worker
+from tests.support.fixtures_test_library_products import library_product
+from tests.support.fixtures_test_remote_execution import identity, materialization, request, worker
 
 
 class RemoteLibraryArtifactTests(unittest.TestCase):

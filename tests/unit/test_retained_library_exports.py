@@ -8,9 +8,9 @@ from literate_ai.application.artifact_graph import create_artifact_build_graph
 from literate_ai.contracts import ContractValidationError, canonical_identity
 from literate_ai.contracts.library_products import LibraryArtifactProduct
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
-from tests.unit import test_artifact_graph_contracts as graph_fixtures
-from tests.unit import test_library_products as library_fixtures
-from tests.unit import test_schema_catalog as schema_fixtures
+from tests.support import fixtures_test_artifact_graph_contracts as graph_fixtures
+from tests.support import fixtures_test_library_products as library_fixtures
+from tests.support import fixtures_test_schema_catalog as schema_fixtures
 
 
 class RetainedLibraryExportTests(unittest.TestCase):

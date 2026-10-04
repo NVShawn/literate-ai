@@ -27,9 +27,9 @@ from literate_ai.adapters.action_test_worker import ConfiguredTestWorker
 from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.contracts import ComponentCommandPhase, canonical_identity
-from tests.unit import test_action_test_execution as execution_fixture
-from tests.unit.test_action_test_action import make_test_request
-from tests.unit.test_component_command_contracts import (
+from tests.support import fixtures_test_action_test_execution as execution_fixture
+from tests.support.fixtures_test_action_test_action import make_test_request
+from tests.support.fixtures_test_component_command_contracts import (
     contract,
     entrypoint_contract,
     identity,

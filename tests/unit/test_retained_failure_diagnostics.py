@@ -18,7 +18,7 @@ from literate_ai.adapters.harness_inventory import (
     _gate_failure_message,
     _run_harness_command,
 )
-from tests.unit.test_retained_harness_receipts import (
+from tests.support.fixtures_test_retained_harness_receipts import (
     _adapter,
     _invoke,
     _selectors,

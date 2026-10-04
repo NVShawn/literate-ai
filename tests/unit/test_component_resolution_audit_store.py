@@ -18,7 +18,7 @@ from literate_ai.adapters.component_resolution_audits import (
 )
 from literate_ai.contracts.component_locking import ComponentResolutionAudit
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-from tests.unit.test_component_lock_contracts import component_lock
+from tests.support.fixtures_test_component_lock_contracts import component_lock
 
 
 def audit(label: str = "catalog") -> ComponentResolutionAudit:

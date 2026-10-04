@@ -26,7 +26,7 @@ from literate_ai.contracts import (
     RepositoryLineageNode,
     RepositoryParentSelection,
 )
-from tests.unit.test_repository_lineage import fixture, identity, reference
+from tests.support.fixtures_test_repository_lineage import fixture, identity, reference
 
 ROOT = Path(__file__).resolve().parents[2]
 

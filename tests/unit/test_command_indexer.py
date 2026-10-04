@@ -18,9 +18,9 @@ from literate_ai.adapters.standard_project import (
 )
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from literate_ai.storage import FileSystemCAS
-from tests.unit import test_action_source_index as source_fixture
-from tests.unit.test_action_blob_source import blob_path, source_cas_server
-from tests.unit.test_standard_project_factory import (
+from tests.support import fixtures_test_action_source_index as source_fixture
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_standard_project_factory import (
     _command_contracts,
     _toolchain_closure,
 )

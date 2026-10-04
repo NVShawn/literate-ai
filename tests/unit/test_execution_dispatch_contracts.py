@@ -29,7 +29,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
     resolve_worker_parameters,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def identity(character: str) -> ContentIdentity:

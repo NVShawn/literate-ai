@@ -19,8 +19,8 @@ from literate_ai.contracts.html_observability import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.version_check import check_versions
-from tests.unit.test_html_emitter import DISTRIBUTION, ROOT, STAMP
-from tests.unit.test_html_render import _project
+from tests.support.fixtures_test_html_emitter import DISTRIBUTION, ROOT, STAMP
+from tests.support.fixtures_test_html_render import _project
 
 
 class VersionHealthTests(unittest.TestCase):

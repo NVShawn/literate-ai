@@ -7,7 +7,7 @@ from unittest.mock import Mock
 from literate_ai.application.action_dag_planning import plan_lifecycle_action_dag
 from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.contracts.capabilities import DependencyKind
-from tests.unit.test_standard_project_lifecycle import (
+from tests.support.fixtures_test_standard_project_lifecycle import (
     ContractEvidenceLifecyclePorts,
     LifecyclePorts,
     _decision,
@@ -360,7 +360,7 @@ class StandardActionReadyQueueTests(unittest.TestCase):
         )
 
     def test_reserved_execution_cannot_bypass_current_runtime_scope_admission(self):
-        from tests.unit.test_standard_runtime_scheduling import ScopedRuntimePorts
+        from tests.support.fixtures_test_standard_runtime_scheduling import ScopedRuntimePorts
 
         for substitute in (False, True):
             with self.subTest(substitute=substitute):
@@ -751,7 +751,7 @@ class StandardActionReadyQueueTests(unittest.TestCase):
 
     def test_build_provider_receipts_are_captured_after_acceptance(self):
         from literate_ai.contracts.capabilities import DependencyKind
-        from tests.unit.test_standard_project_lifecycle import (
+        from tests.support.fixtures_test_standard_project_lifecycle import (
             ContractEvidenceLifecyclePorts,
         )
 

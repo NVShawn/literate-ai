@@ -15,7 +15,7 @@ from literate_ai.adapters.qualification_capture import QualificationEvidenceRead
 from literate_ai.application.standard_project_lifecycle import StandardProjectBuildPlan
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.security import AuthorizationError, BuildAuthorization
-from tests.unit import test_native_sdk_packaged_execution
+from tests.support import fixtures_test_native_sdk_packaged_execution as test_native_sdk_packaged_execution
 
 
 def service_program(results):

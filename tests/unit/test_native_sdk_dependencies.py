@@ -30,7 +30,7 @@ from literate_ai.contracts.sbom import (
     CycloneDxRepositorySourceResolution,
     project_component_lock_managed_graph,
 )
-from tests.unit import test_native_sdk_source_build
+from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
 
 
 class _NoConsumerBuildObservation:

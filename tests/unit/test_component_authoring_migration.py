@@ -34,7 +34,7 @@ from literate_ai.contracts.repositories import (
     RepositoryRevisionSelector,
     RepositorySourceDependency,
 )
-from tests.unit.test_component_lock_contracts import identity, reference
+from tests.support.fixtures_test_component_lock_contracts import identity, reference
 
 
 def repository_dependency() -> RepositorySourceDependency:

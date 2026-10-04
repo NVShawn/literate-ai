@@ -54,12 +54,12 @@ from literate_ai.contracts import (
 )
 from literate_ai.sources import GitFacts, QuarantineStore, SourceSnapshotter
 from literate_ai.storage import FileSystemCAS, ReferenceIndex
-from tests.unit.test_project_cli import (
+from tests.support.fixtures_test_project_cli import (
     copy_generation_catalogs,
     copy_hello_component,
     invoke,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 COMMIT = "a" * 40
 

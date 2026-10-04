@@ -16,9 +16,9 @@ from literate_ai.adapters.html_framework import HtmlFrameworkObservation
 from literate_ai.cli.dispatch import main
 from literate_ai.projects import ProjectConfigurationStore
 from scripts import installed_html_smoke
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_html_emitter import DISTRIBUTION
-from tests.unit.test_html_render import _project
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_html_emitter import DISTRIBUTION
+from tests.support.fixtures_test_html_render import _project
 
 
 class InstalledLockHealthSmokeTests(unittest.TestCase):

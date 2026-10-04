@@ -50,9 +50,9 @@ from literate_ai.contracts.library_products import LibraryArtifactProduct
 from literate_ai.contracts.standard_root_integration import (
     StandardRootIntegrationEvidence,
 )
-from tests.unit import test_artifact_graph_contracts as graph_fixtures
-from tests.unit import test_package_release_contracts as package_fixtures
-from tests.unit.test_standard_command_projection import (
+from tests.support import fixtures_test_artifact_graph_contracts as graph_fixtures
+from tests.support import fixtures_test_package_release_contracts as package_fixtures
+from tests.support.fixtures_test_standard_command_projection import (
     _locked_snapshot,
     _observation,
     _tool,

@@ -56,7 +56,7 @@ from literate_ai.security import (
     SecurityProfile,
 )
 from literate_ai.storage.cas import FileSystemCAS
-from tests.unit.test_repository_sources import dependency
+from tests.support.fixtures_test_repository_sources import dependency
 
 
 class NativeSdkBuildTests(unittest.TestCase):

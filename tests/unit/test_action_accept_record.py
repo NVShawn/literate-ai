@@ -17,7 +17,7 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.unit import test_action_execute_execution as fixture_module
+from tests.support import fixtures_test_action_execute_execution as fixture_module
 
 
 class AcceptWorkerRecordTests(unittest.TestCase):

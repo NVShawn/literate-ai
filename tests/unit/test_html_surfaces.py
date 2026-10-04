@@ -32,7 +32,7 @@ from literate_ai.contracts.html_observability import (
     HtmlView,
 )
 from literate_ai.project_authority_graph import project_authority_graph
-from tests.unit import test_html_observability_schema as schema_tests
+from tests.support import fixtures_test_html_observability_schema as schema_tests
 
 ROOT = Path(__file__).resolve().parents[2]
 

@@ -21,7 +21,7 @@ from literate_ai.adapters.builders._process import run_bounded_process
 from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.contracts import canonical_identity
-from tests.unit import test_action_execute_execution as execution_fixture
+from tests.support import fixtures_test_action_execute_execution as execution_fixture
 
 
 class ActionExecuteProcessTests(unittest.TestCase):

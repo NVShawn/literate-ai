@@ -25,8 +25,8 @@ from literate_ai.contracts import (
 from tests.unit.root_parent_adapter import (
     RootParentProjectInitializationAdapter as FilesystemProjectInitializationAdapter,
 )
-from tests.unit.test_repository_lineage import fixture, identity
-from tests.unit.test_repository_updates import origin
+from tests.support.fixtures_test_repository_lineage import fixture, identity
+from tests.support.fixtures_test_repository_updates import origin
 
 
 class UpdateFollowPlanTests(unittest.TestCase):
@@ -291,7 +291,7 @@ class UpdateFollowPlanTests(unittest.TestCase):
 
         from literate_ai.adapters import project_initialization as init_module
         from literate_ai.adapters.repository_lineage import repository_parent_reference
-        from tests.unit.test_repository_initialization_e2e import (
+        from tests.support.fixtures_test_repository_initialization_e2e import (
             commit_project,
             git,
         )

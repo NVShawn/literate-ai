@@ -20,7 +20,7 @@ from literate_ai.contracts.executable_components import (
     ArtifactExport,
     ComponentCommandContract,
 )
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _provider_export,
     _python_copy_lifecycle,

@@ -13,7 +13,7 @@ from literate_ai.adapters.orchestration_scaffold import prepare_orchestration_sc
 from literate_ai.adapters.project_validation import FilesystemProjectValidationAdapter
 from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
 from literate_ai.projects import discover_project, project_skill_catalog
-from tests.unit.test_repository_orchestration_contracts import authority
+from tests.support.fixtures_test_repository_orchestration_contracts import authority
 
 
 class OrchestrationScaffoldTests(unittest.TestCase):

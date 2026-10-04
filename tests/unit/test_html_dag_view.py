@@ -14,9 +14,9 @@ from unittest import mock
 from literate_ai.adapters import html_dag_view, html_emitter, html_source_excerpts
 from literate_ai.contracts.html_observability import HtmlRenderRefusal
 from literate_ai.project_authority_graph import project_authority_graph
-from tests.unit import test_html_observability_schema as schema_tests
-from tests.unit.test_html_emitter import DISTRIBUTION, ROOT, STAMP, request
-from tests.unit.test_html_source_excerpts import source_for
+from tests.support import fixtures_test_html_observability_schema as schema_tests
+from tests.support.fixtures_test_html_emitter import DISTRIBUTION, ROOT, STAMP, request
+from tests.support.fixtures_test_html_source_excerpts import source_for
 
 
 class HtmlDagViewTests(unittest.TestCase):

@@ -15,7 +15,7 @@ from literate_ai.adapters.builders._process import BoundedProcessResult
 from literate_ai.adapters.builders.python import BuildError
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.contracts.repository_lineage import RepositoryFetchDeadlinePolicy
-from tests.unit.test_repository_orchestration import git, repository, snapshot
+from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 
 class RepositoryPublicationTests(unittest.TestCase):

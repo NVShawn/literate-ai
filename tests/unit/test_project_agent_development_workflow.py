@@ -10,7 +10,7 @@ from literate_ai.contracts import (
     SourceIntelligenceMode,
     SourceIntelligenceStage,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _source_intelligence_policy() -> ProjectSourceIntelligencePolicy:

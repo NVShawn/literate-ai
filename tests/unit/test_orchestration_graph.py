@@ -17,7 +17,7 @@ from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.repository_orchestration import RepositoryRelationship
 from literate_ai.project_authority_graph import project_authority_graph
 from literate_ai.projects import serialize_project_configuration
-from tests.unit.test_repository_orchestration_contracts import authority
+from tests.support.fixtures_test_repository_orchestration_contracts import authority
 
 
 class OrchestrationGraphTests(unittest.TestCase):

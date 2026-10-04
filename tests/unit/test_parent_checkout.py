@@ -15,7 +15,7 @@ from unittest import mock
 
 from literate_ai.adapters.parent_checkout import parent_prefix_id
 from literate_ai.cli import main
-from tests.unit.test_project_cli import invoke
+from tests.support.fixtures_test_project_cli import invoke
 
 _PLAIN_TEXT_ENVIRONMENT = {
     key: value

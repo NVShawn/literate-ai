@@ -19,8 +19,8 @@ from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshTarget,
 )
 from literate_ai.projects import parse_project_configuration
-from tests.unit import test_refresh_file_custody as fixtures
-from tests.unit.test_repository_orchestration import git, snapshot
+from tests.support import fixtures_test_refresh_file_custody as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class TtyStringIO(io.StringIO):

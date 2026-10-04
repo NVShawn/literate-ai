@@ -25,8 +25,8 @@ from literate_ai.ports.contracts import (
     require_dependency_resolution_result,
     require_dependency_source_validation_result,
 )
-from tests.unit import test_dependency_lifecycle as lifecycle_fixtures
-from tests.unit import test_standard_python_evidence as retained_fixtures
+from tests.support import fixtures_test_dependency_lifecycle as lifecycle_fixtures
+from tests.support import fixtures_test_standard_python_evidence as retained_fixtures
 
 
 class PythonResolutionTests(unittest.TestCase):

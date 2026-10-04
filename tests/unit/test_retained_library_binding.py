@@ -9,8 +9,8 @@ from literate_ai.contracts import canonical_identity
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.retained_libraries import RetainedLibraryBinding
 from literate_ai.schema_catalog import verify_schema_catalog
-from tests.unit import test_retained_library_exports as export_fixtures
-from tests.unit import test_schema_catalog as schema_fixtures
+from tests.support import fixtures_test_retained_library_exports as export_fixtures
+from tests.support import fixtures_test_schema_catalog as schema_fixtures
 
 
 class RetainedLibraryBindingTests(unittest.TestCase):

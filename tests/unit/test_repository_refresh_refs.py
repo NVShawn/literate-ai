@@ -12,7 +12,7 @@ from unittest.mock import patch
 from literate_ai.adapters import repository_refresh as refresh
 from literate_ai.adapters import repository_refresh_refs as refs
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-from tests.unit.test_repository_orchestration import git, snapshot
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class RefreshReferenceTests(unittest.TestCase):

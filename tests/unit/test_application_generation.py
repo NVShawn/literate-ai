@@ -77,7 +77,7 @@ from literate_ai.security import (
     ObservationRequest,
     SecurityProfile,
 )
-from tests.unit.test_component_lock_contracts import component_lock
+from tests.support.fixtures_test_component_lock_contracts import component_lock
 
 TEST_RECIPE_IDENTITY = "sha256:" + "a" * 64
 TEST_SPECIFICATION_REFERENCES = ("spec.md",)

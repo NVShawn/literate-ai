@@ -480,7 +480,7 @@ class _ReindexVerifier:
 
 class SourceCacheContractTests(unittest.TestCase):
     def test_every_cache_contract_matches_its_public_schema(self) -> None:
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         with tempfile.TemporaryDirectory() as temporary:
             entry, attachment = _accepted_entry_with_attachment(
@@ -596,7 +596,7 @@ class SourceCacheContractTests(unittest.TestCase):
             )
 
     def test_project_definition_round_trips_optional_source_cache(self) -> None:
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         source_cache = _configuration(SourceCacheMode.READ_ONLY, _target())
         definition = ProjectDefinition(
@@ -668,7 +668,7 @@ class FileSystemSourceCacheTests(unittest.TestCase):
             SourceCacheMode.READ_ONLY,
             (target,),
         )
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         SchemaCatalog().validate(target.SCHEMA, target.to_dict())
         SchemaCatalog().validate(configuration.SCHEMA, configuration.to_dict())

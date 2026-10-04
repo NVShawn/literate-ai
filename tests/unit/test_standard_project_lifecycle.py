@@ -100,14 +100,14 @@ from literate_ai.contracts.identity import (
 )
 from literate_ai.diagnostics import verbose_diagnostics, verbose_enabled
 from literate_ai.security import BuildAuthorization, BuildRequest, SecurityProfile
-from tests.unit.test_component_execution_planning import _diamond_lock, _models
-from tests.unit.test_component_generation_context import (
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_component_generation_context import (
     _budget as _context_budget,
 )
-from tests.unit.test_component_generation_context import (
+from tests.support.fixtures_test_component_generation_context import (
     _materialize,
 )
-from tests.unit.test_component_generation_scheduling import (
+from tests.support.fixtures_test_component_generation_scheduling import (
     _decision,
     _names,
     _prepared_execution,
@@ -156,7 +156,7 @@ def command_contract_fixture(
         ComponentCommandToolBinding,
         ComponentLifecycleCommand,
     )
-    from tests.unit.test_library_products import library_product
+    from tests.support.fixtures_test_library_products import library_product
 
     compiler = _identity(f"compiler-{producer_label}")
     return ComponentCommandContract(
@@ -996,7 +996,7 @@ class ContractEvidenceLifecyclePorts(LifecyclePorts):
         return self.root_acceptance(*arguments)
 
     def build(self, plan, provider_artifacts):
-        from tests.unit.test_standard_post_source_evidence import _evidence
+        from tests.support.fixtures_test_standard_post_source_evidence import _evidence
 
         built = super().build(plan, provider_artifacts)
         prototype = _evidence()
@@ -2736,8 +2736,8 @@ class StandardProjectLifecycleTests(unittest.TestCase):
     def test_reopened_root_requires_the_exact_lifecycle_and_project_receipt(self):
         from literate_ai.application.standard_test_receipts import _aggregate
         from literate_ai.contracts.testing import ProjectTestEvidence
-        from tests.unit.test_qualification_capture import fixture
-        from tests.unit.test_qualification_lifecycle_runner import _receipt
+        from tests.support.fixtures_test_qualification_capture import fixture
+        from tests.support.fixtures_test_qualification_lifecycle_runner import _receipt
 
         ports = LifecyclePorts(self.execution, self.names)
         lifecycle = _service(ports).execute(
@@ -2902,7 +2902,7 @@ class StandardProjectLifecycleTests(unittest.TestCase):
             QualificationLifecycleExecution,
             QualificationLifecycleRunner,
         )
-        from tests.unit.test_qualification_capture import fixture
+        from tests.support.fixtures_test_qualification_capture import fixture
 
         ports = ContractEvidenceLifecyclePorts(
             self.execution,
@@ -2913,7 +2913,7 @@ class StandardProjectLifecycleTests(unittest.TestCase):
             generated_suites=generated_suites,
             generated_boms=generated_boms,
         )
-        from tests.unit.test_application_generation import execution_plan
+        from tests.support.fixtures_test_application_generation import execution_plan
 
         ports.generation_execution_plan = execution_plan(self)
         ports.artifact_payloads = artifact_payloads or {}

@@ -19,7 +19,7 @@ from literate_ai.adapters.qualification_capture import (
 )
 from literate_ai.storage import FileSystemCAS
 from literate_ai.storage.cas import BlobNotFoundError
-from tests.unit import test_action_accept_result as fixture_module
+from tests.support import fixtures_test_action_accept_result as fixture_module
 
 
 class AcceptWorkerExecutionTests(unittest.TestCase):

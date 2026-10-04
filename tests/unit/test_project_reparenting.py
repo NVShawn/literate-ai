@@ -28,8 +28,8 @@ from literate_ai.contracts import (
     RepositoryParentSelection,
     RepositoryReparentDisposition,
 )
-from tests.unit.test_repository_lineage import fixture
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_repository_lineage import fixture
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def origin() -> ProjectInitializationOrigin:

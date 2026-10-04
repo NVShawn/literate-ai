@@ -50,17 +50,17 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.unit.test_cli_command_worker_lifecycle import _Dispatcher, _request
-from tests.unit.test_cli_rebuild import invoke
-from tests.unit.test_library_products import library_product
-from tests.unit.test_remote_execution import (
+from tests.support.fixtures_test_cli_command_worker_lifecycle import _Dispatcher, _request
+from tests.support.fixtures_test_cli_rebuild import invoke
+from tests.support.fixtures_test_library_products import library_product
+from tests.support.fixtures_test_remote_execution import (
     identity,
     materialization,
     observation,
     request,
     worker,
 )
-from tests.unit.test_wire_contract_versions import _v2_schemas
+from tests.support.fixtures_test_wire_contract_versions import _v2_schemas
 
 
 class RemoteLibraryTransportTests(unittest.TestCase):

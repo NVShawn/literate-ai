@@ -16,7 +16,7 @@ from literate_ai.adapters.retained_bundle_delivery import (
     RetainedBundleDeliveryError,
 )
 from literate_ai.contracts.blobs import BlobRef
-from tests.unit import test_evidence_storage as tls_fixture
+from tests.support import fixtures_test_evidence_storage as tls_fixture
 
 
 def bundle(root: Path):

@@ -26,8 +26,8 @@ from literate_ai.contracts.worker_capabilities import (
     WorkerHardwareObservation,
     WorkerHardwareObservationCatalog,
 )
-from tests.unit import test_command_indexer as index_fixture
-from tests.unit.test_action_blob_source import source_cas_server
+from tests.support import fixtures_test_command_indexer as index_fixture
+from tests.support.fixtures_test_action_blob_source import source_cas_server
 
 
 class CommandActionAdmissionTests(unittest.TestCase):

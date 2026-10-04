@@ -30,8 +30,8 @@ from literate_ai.contracts.sbom import (
     repository_dependency_bom_ref,
     repository_dependency_identity,
 )
-from tests.unit.test_component_lock_contracts import component_authoring, identity
-from tests.unit.test_component_lock_resolution import resolved_node
+from tests.support.fixtures_test_component_lock_contracts import component_authoring, identity
+from tests.support.fixtures_test_component_lock_resolution import resolved_node
 
 
 def _requirement(

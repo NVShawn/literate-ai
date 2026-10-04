@@ -16,7 +16,7 @@ from literate_ai.application.standard_project_lifecycle import (
     StandardComponentBuildPlan,
 )
 from literate_ai.contracts.executable_components import ComponentCommandContract
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _provider_export,
     _python_copy_lifecycle,

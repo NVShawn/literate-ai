@@ -20,13 +20,13 @@ from literate_ai.adapters.retained_harness_remote import RetainedHarnessRemoteRe
 from literate_ai.contracts import canonical_identity
 from literate_ai.contracts.operator_adoption import ConversionAuthorityStage
 from literate_ai.projects import load_project
-from tests.unit.test_retained_harness_receipts import (
+from tests.support.fixtures_test_retained_harness_receipts import (
     _adapter,
     _invoke,
     _legacy_project,
     _selectors,
 )
-from tests.unit.test_retained_harness_remote import _worker
+from tests.support.fixtures_test_retained_harness_remote import _worker
 
 
 class RetainedHarnessReadmissionTests(unittest.TestCase):

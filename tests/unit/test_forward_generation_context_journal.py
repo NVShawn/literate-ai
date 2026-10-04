@@ -37,13 +37,13 @@ from literate_ai.contracts.executable_components.source_generation import (
     SourceGenerationNodeResult,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit.test_component_generation_context import (
+from tests.support.fixtures_test_component_generation_context import (
     _budget,
     _diamond_lock,
     _materialize,
     _named_plan,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _fixture():

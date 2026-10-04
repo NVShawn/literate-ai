@@ -19,7 +19,7 @@ from literate_ai.adapters.retained_cargo_execution_inputs import (
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.retained_libraries import RetainedLibraryGatePolicy
 from literate_ai.projects import PinnedInputClosure
-from tests.unit import test_retained_cargo_materialization as fixtures
+from tests.support import fixtures_test_retained_cargo_materialization as fixtures
 
 
 class RetainedCargoExecutionTests(unittest.TestCase):

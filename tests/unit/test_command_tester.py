@@ -20,7 +20,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
 )
-from tests.unit import test_action_test_result as result_fixture
+from tests.support import fixtures_test_action_test_result as result_fixture
 
 
 class CommandTesterTests(unittest.TestCase):

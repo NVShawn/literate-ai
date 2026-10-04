@@ -9,8 +9,8 @@ from pathlib import Path
 
 from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
 from literate_ai.contracts import RepositoryParentSelection
-from tests.unit.test_cli_arbitrary_source import KEY, invoke, reviewed_static_graph
-from tests.unit.test_retained_harness_receipts import (
+from tests.support.fixtures_test_cli_arbitrary_source import KEY, invoke, reviewed_static_graph
+from tests.support.fixtures_test_retained_harness_receipts import (
     _adapter,
     _legacy_project,
     _selectors,

@@ -18,7 +18,7 @@ from literate_ai.source_to_specification import (
     canonical_digest,
     semantic_comparison_from_response,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
 

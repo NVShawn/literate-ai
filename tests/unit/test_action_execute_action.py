@@ -31,8 +31,8 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.unit import test_action_dag_planning as planning_fixture
-from tests.unit import test_action_execute_execution as source_fixture
+from tests.support import fixtures_test_action_dag_planning as planning_fixture
+from tests.support import fixtures_test_action_execute_execution as source_fixture
 
 
 def make_execute_request(value, deadline):
@@ -254,7 +254,7 @@ class ExecuteActionTests(unittest.TestCase):
 
 class RuntimeExecuteActionTests(unittest.TestCase):
     def setUp(self):
-        from tests.unit import test_action_execute_providers as provider_fixture
+        from tests.support import fixtures_test_action_execute_providers as provider_fixture
 
         self.fixture = f = provider_fixture.ExecuteProviderTests()
         self.addCleanup(f.doCleanups)

@@ -25,8 +25,8 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
 )
-from tests.unit import test_action_build_result as result_fixture
-from tests.unit.test_standard_local_command_adapter import _provider_export
+from tests.support import fixtures_test_action_build_result as result_fixture
+from tests.support.fixtures_test_standard_local_command_adapter import _provider_export
 
 
 class CommandBuilderTests(unittest.TestCase):
@@ -194,7 +194,7 @@ sys.stdout.buffer.write(encode_action_response(
         self.assert_unregistered()
 
     def test_foreign_provider_receipt_refuses_before_dispatch(self):
-        from tests.unit.test_action_build_intent import provider_evidence
+        from tests.support.fixtures_test_action_build_intent import provider_evidence
 
         self.builder.retain_build_provider_evidence(self.plan, ())
         with self.assertRaises(ActionWireError):

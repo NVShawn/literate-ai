@@ -12,9 +12,9 @@ from literate_ai.adapters.action_build_record import (
 from literate_ai.adapters.action_build_source import materialize_build_source
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-from tests.unit import test_action_build_source as source_fixture
-from tests.unit.test_action_build_intent import provider_evidence
-from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.support import fixtures_test_action_build_source as source_fixture
+from tests.support.fixtures_test_action_build_intent import provider_evidence
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 
 def build_worker_input(fixture):

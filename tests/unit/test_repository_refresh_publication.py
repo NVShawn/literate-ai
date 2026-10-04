@@ -16,8 +16,8 @@ from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshRequest,
     RepositoryRefreshTarget,
 )
-from tests.unit import test_repository_refresh_inputs as fixtures
-from tests.unit.test_repository_orchestration import git, snapshot
+from tests.support import fixtures_test_repository_refresh_inputs as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class RefreshPublicationTests(TestCase):

@@ -64,10 +64,10 @@ from literate_ai.contracts import (
 )
 from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.security import SecurityProfile
-from tests.unit.test_component_execution_planning import _diamond_lock
-from tests.unit.test_component_node_generation_preparation import _budget, _fixture
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_project_lifecycle import _prepared_execution
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock
+from tests.support.fixtures_test_component_node_generation_preparation import _budget, _fixture
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_project_lifecycle import _prepared_execution
 
 
 def _selection() -> CodingCliSelection:

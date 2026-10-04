@@ -11,7 +11,7 @@ from jsonschema import Draft202012Validator
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
 
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
 V1_ROOT = ROOT / "schemas" / "v1"

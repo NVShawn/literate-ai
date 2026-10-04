@@ -20,9 +20,9 @@ from literate_ai.security.evidence.current import CurrentEvidenceMap
 from literate_ai.security.evidence.graph import EvidenceGraphLimits
 from literate_ai.security.evidence.plan import EvidenceVerificationPlan
 from literate_ai.security.evidence.storage import EvidenceReadLimits
-from tests.unit.test_evidence_graph import _Graph
-from tests.unit.test_evidence_retention import _claims
-from tests.unit.test_project_test_receipt_cli import (
+from tests.support.fixtures_test_evidence_graph import _Graph
+from tests.support.fixtures_test_evidence_retention import _claims
+from tests.support.fixtures_test_project_test_receipt_cli import (
     configure_receipt_policy,
     finalize_candidate,
     invoke,

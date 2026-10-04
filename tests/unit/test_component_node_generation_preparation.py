@@ -44,7 +44,7 @@ from literate_ai.contracts import (
     RequirementConstraintSatisfaction,
     SelectedNodeFlavor,
 )
-from tests.unit.test_component_lock_contracts import (
+from tests.support.fixtures_test_component_lock_contracts import (
     component_authoring,
     identity,
     locked_revision,

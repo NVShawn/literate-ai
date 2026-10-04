@@ -11,8 +11,8 @@ from literate_ai.application.standard_execution_inputs import (
 )
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
 from literate_ai.security import AuthorizationError
-from tests.unit import test_standard_transferred_tests as test_fixture
-from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.support import fixtures_test_standard_transferred_tests as test_fixture
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 
 class StandardTransferredExecutionTests(unittest.TestCase):

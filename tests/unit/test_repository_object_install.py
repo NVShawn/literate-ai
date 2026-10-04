@@ -11,8 +11,8 @@ from unittest.mock import patch
 
 from literate_ai.adapters import repository_object_install as install
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-from tests.unit import test_refresh_file_custody as fixtures
-from tests.unit.test_repository_orchestration import git, snapshot
+from tests.support import fixtures_test_refresh_file_custody as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class ObjectFileInstallTests(unittest.TestCase):

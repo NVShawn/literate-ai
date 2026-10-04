@@ -15,8 +15,8 @@ from literate_ai.application.generation_preparation import (
     GenerationPreparationService,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_locked_generation_authority import (
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_locked_generation_authority import (
     _SELECTORS,
     _TARGET,
     _write_lock,

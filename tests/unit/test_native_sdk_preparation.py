@@ -36,11 +36,11 @@ from literate_ai.contracts.executable_components import (
     ContextAuthorityKind,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit import test_native_sdk_source_build
-from tests.unit.test_component_node_generation_preparation import _budget
-from tests.unit.test_native_sdk_closure import linked_recipe
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_project_factory import (
+from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
+from tests.support.fixtures_test_component_node_generation_preparation import _budget
+from tests.support.fixtures_test_native_sdk_closure import linked_recipe
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_project_factory import (
     _command_contracts,
     _selection,
     _toolchain_closure,

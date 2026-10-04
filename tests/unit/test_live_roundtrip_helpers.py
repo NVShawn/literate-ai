@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import unittest
 
-from tests.conformance.test_live_bidirectional_roundtrip import draft_statements
+from tests.support.fixtures_test_live_bidirectional_roundtrip import draft_statements
 
 
 def _statement(identifier: str, requirement: str) -> dict[str, object]:

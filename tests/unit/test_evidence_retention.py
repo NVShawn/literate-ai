@@ -27,7 +27,7 @@ from literate_ai.security.evidence.storage import (
     EvidenceReadLimits,
     EvidenceStorageError,
 )
-from tests.unit.test_evidence_graph import _Graph
+from tests.support.fixtures_test_evidence_graph import _Graph
 
 
 def _claims(graph, *, signer=None, locators=None):

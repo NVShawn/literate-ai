@@ -25,7 +25,7 @@ from literate_ai.evidence_ledger import (
     prune_runs,
     record_subprocess,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _allocate_node(project: str, run_root: str) -> None:

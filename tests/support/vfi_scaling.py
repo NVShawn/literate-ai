@@ -11,7 +11,7 @@ from literate_ai.contracts.component_locking import (
     ordered_specification_set_identity,
 )
 from literate_ai.contracts.executable_components import ExecutableComponentEdge
-from tests.unit.test_component_lock_contracts import (
+from tests.support.fixtures_test_component_lock_contracts import (
     component_authoring,
     identity,
     locked_revision,

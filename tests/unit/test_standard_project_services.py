@@ -22,13 +22,13 @@ from literate_ai.application.standard_project_services import (
     StandardProjectApplicationService,
     StandardProjectApplicationServiceError,
 )
-from tests.unit.test_component_execution_planning import (
+from tests.support.fixtures_test_component_execution_planning import (
     _diamond_lock_with_locked_money_asset,
     _models,
 )
-from tests.unit.test_component_generation_scheduling import _decision, _names
-from tests.unit.test_component_node_generation_preparation import _budget, _fixture
-from tests.unit.test_standard_project_lifecycle import (
+from tests.support.fixtures_test_component_generation_scheduling import _decision, _names
+from tests.support.fixtures_test_component_node_generation_preparation import _budget, _fixture
+from tests.support.fixtures_test_standard_project_lifecycle import (
     LifecyclePorts,
     _ContextEvidenceRecorder,
     _prepared_execution,

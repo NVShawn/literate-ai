@@ -18,8 +18,8 @@ from literate_ai.adapters.component_locks import (
 )
 from literate_ai.application.component_lock_resolution import ComponentLockResolver
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-from tests.unit.test_component_lock_contracts import component_lock
-from tests.unit.test_component_lock_resolution import resolution_plan
+from tests.support.fixtures_test_component_lock_contracts import component_lock
+from tests.support.fixtures_test_component_lock_resolution import resolution_plan
 
 
 class ComponentLockStoreTests(unittest.TestCase):

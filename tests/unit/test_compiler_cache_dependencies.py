@@ -16,7 +16,7 @@ from literate_ai.adapters.shared_cache_config import (
     SharedCacheConfigurationError,
     load_shared_cache,
 )
-from tests.unit.test_shared_cache import _configuration
+from tests.support.fixtures_test_shared_cache import _configuration
 
 
 def _observation(version="1"):
@@ -115,7 +115,7 @@ class CompilerCacheDependencyTests(unittest.TestCase):
         from literate_ai.adapters.standard_project import (
             assemble_filesystem_standard_project_runtime,
         )
-        from tests.unit.test_standard_project_factory import (
+        from tests.support.fixtures_test_standard_project_factory import (
             _command_contracts,
             _fixture,
             _toolchain_closure,

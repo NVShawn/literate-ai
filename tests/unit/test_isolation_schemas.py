@@ -23,7 +23,7 @@ from literate_ai.security import (
     IsolationRequest,
     evaluate_isolation_policy,
 )
-from tests.unit.test_isolation_contracts import _observation, _policy, _request
+from tests.support.fixtures_test_isolation_contracts import _observation, _policy, _request
 
 
 class IsolationSchemaTests(unittest.TestCase):

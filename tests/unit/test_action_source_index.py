@@ -53,8 +53,8 @@ from literate_ai.contracts.identity import (
 from literate_ai.contracts.source_index import generated_source_tree_identity
 from literate_ai.storage import FileSystemCAS
 from literate_ai.storage.cas import StorageError
-from tests.unit.test_action_blob_source import blob_path, source_cas_server
-from tests.unit.test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
 
 
 class SourceIndexActionTests(unittest.TestCase):

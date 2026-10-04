@@ -11,7 +11,7 @@ from unittest import mock
 from literate_ai.adapters.flavor_add import FlavorAddError, add_flavor_to_project
 from literate_ai.adapters.project_initialization import initialize_project
 from literate_ai.contracts import RepositoryParentSelection
-from tests.unit.test_project_cli import invoke
+from tests.support.fixtures_test_project_cli import invoke
 
 
 class FlavorAddTests(unittest.TestCase):

@@ -14,7 +14,7 @@ from literate_ai.source_to_specification.promotion_journals import (
 from literate_ai.source_to_specification.promotion_materialization import (
     SourcePromotionError,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class LegacySourcePromotionJournalMigratorTests(unittest.TestCase):

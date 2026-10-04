@@ -63,7 +63,7 @@ from literate_ai.contracts.repositories import (
     RepositorySourceDependency,
     RepositorySourceLock,
 )
-from tests.unit.test_component_authoring_lock_contracts import schema_catalog
+from tests.support.fixtures_test_component_authoring_lock_contracts import schema_catalog
 
 ROOT = Path(__file__).resolve().parents[2]
 

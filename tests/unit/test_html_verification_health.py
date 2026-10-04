@@ -18,8 +18,8 @@ from literate_ai.contracts.html_observability import (
     HtmlView,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit.test_html_emitter import DISTRIBUTION, STAMP
-from tests.unit.test_html_render import _project
+from tests.support.fixtures_test_html_emitter import DISTRIBUTION, STAMP
+from tests.support.fixtures_test_html_render import _project
 
 
 class VerificationHealthTests(unittest.TestCase):

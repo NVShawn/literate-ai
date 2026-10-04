@@ -12,7 +12,7 @@ from literate_ai.adapters.retained_cargo_consumer_files import (
 )
 from literate_ai.contracts.retained_cargo import CargoManifestChange
 from literate_ai.projects import PinnedInputClosureError
-from tests.unit import test_retained_cargo_materialization as fixtures
+from tests.support import fixtures_test_retained_cargo_materialization as fixtures
 
 
 class RetainedCargoConsumerFilesTests(unittest.TestCase):

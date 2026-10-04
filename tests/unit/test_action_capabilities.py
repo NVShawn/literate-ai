@@ -33,9 +33,9 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-from tests.unit import test_action_source_index as source_fixture
+from tests.support import fixtures_test_action_source_index as source_fixture
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class ActionCapabilityTests(unittest.TestCase):

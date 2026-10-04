@@ -23,7 +23,7 @@ from literate_ai.contracts.authoring_markdown import (
     render_authoring_markdown,
 )
 from scripts.migrate_flavor_authoring import migrate
-from tests.unit.test_component_lock_planning import _fixture
+from tests.support.fixtures_test_component_lock_planning import _fixture
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 

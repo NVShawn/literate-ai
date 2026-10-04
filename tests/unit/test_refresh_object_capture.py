@@ -11,7 +11,7 @@ from literate_ai.adapters import repository_refresh_objects as objects
 from literate_ai.adapters._repository_pack_capture import RepositoryPackPolicy
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.adapters.repository_refresh_files import PreparedRefreshFiles
-from tests.unit import test_published_repository_pack as fixtures
+from tests.support import fixtures_test_published_repository_pack as fixtures
 
 
 class RefreshObjectCaptureTests(unittest.TestCase):

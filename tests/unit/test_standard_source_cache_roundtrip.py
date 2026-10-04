@@ -58,15 +58,15 @@ from literate_ai.contracts.standard_lifecycle import (
 )
 from literate_ai.remote_source_guard import extract_accepted_source_cache_archive
 from literate_ai.storage import FileSystemCAS
-from tests.unit.test_source_cache import (
+from tests.support.fixtures_test_source_cache import (
     _accepted_entry,
     _cache_key,
     _configuration,
     _identity,
     _target,
 )
-from tests.unit.test_standard_post_source_evidence import _export
-from tests.unit.test_wire_contract_versions import _v2_schemas
+from tests.support.fixtures_test_standard_post_source_evidence import _export
+from tests.support.fixtures_test_wire_contract_versions import _v2_schemas
 
 
 class _FabricatedAcceptedSourceCacheEntry(AcceptedSourceCacheEntry):
@@ -328,7 +328,7 @@ def _source_admission_entry(
 
 class StandardSourceCacheRoundTripTests(unittest.TestCase):
     def test_source_admission_contracts_match_public_schemas(self):
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         with tempfile.TemporaryDirectory() as temporary:
             entry = _source_admission_entry(

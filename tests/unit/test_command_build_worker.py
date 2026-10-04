@@ -55,9 +55,9 @@ from literate_ai.contracts.worker_capabilities import WorkerHardwareObservationC
 from literate_ai.storage import FileSystemCAS
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 from tests.unit.standard_source_evidence_fixture import register_strict_source
-from tests.unit.test_component_node_generation_preparation import _fixture
-from tests.unit.test_standard_project_factory import _command_contracts
-from tests.unit.test_standard_provider_worker import _CHILD
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_standard_project_factory import _command_contracts
+from tests.support.fixtures_test_standard_provider_worker import _CHILD
 
 _RECEIVER = """
 import os, sys

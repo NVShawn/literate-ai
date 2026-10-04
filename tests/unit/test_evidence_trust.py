@@ -29,7 +29,7 @@ from literate_ai.security.evidence import (
     check_run_evidence,
 )
 from literate_ai.security.evidence.records import PREDICATE_TYPES
-from tests.unit.test_evidence_records import _records
+from tests.support.fixtures_test_evidence_records import _records
 
 
 def _signer():

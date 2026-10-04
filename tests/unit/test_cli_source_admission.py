@@ -30,9 +30,9 @@ from literate_ai.cli.dispatch import main
 from literate_ai.contracts import ContentIdentity, StandardProjectLifecycleDriver
 from literate_ai.generated_tests import GENERATED_TEST_SUITE_PATH
 from scripts import installed_source_admission_smoke as smoke
-from tests.unit.test_cli_generation import bind_tree
-from tests.unit.test_cli_locked_generation import _generation_fixture, _write_lock
-from tests.unit.test_source_generation_custody_contracts import _generated_custody
+from tests.support.fixtures_test_cli_generation import bind_tree
+from tests.support.fixtures_test_cli_locked_generation import _generation_fixture, _write_lock
+from tests.support.fixtures_test_source_generation_custody_contracts import _generated_custody
 
 
 class SourceAdmissionCliTests(unittest.TestCase):

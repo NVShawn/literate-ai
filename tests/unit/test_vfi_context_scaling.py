@@ -34,7 +34,7 @@ from tests.support.vfi_scaling import (
     PRIVATE_DESCENDANT,
     vfi_component_lock,
 )
-from tests.unit.test_component_execution_planning import _models
+from tests.support.fixtures_test_component_execution_planning import _models
 
 
 def _identity(content: bytes) -> ContentIdentity:

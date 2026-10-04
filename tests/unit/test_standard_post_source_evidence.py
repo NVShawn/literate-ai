@@ -19,7 +19,7 @@ from literate_ai.contracts.standard_post_source_evidence import (
     StandardGeneratedTestCaseEvidence,
     StandardGeneratedTestExecutionEvidence,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _identity(label: str) -> ContentIdentity:

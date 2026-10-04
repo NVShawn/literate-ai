@@ -17,7 +17,7 @@ from literate_ai.contracts.repositories import (
 )
 from literate_ai.contracts.retained_libraries import RetainedLibraryGatePolicy
 from literate_ai.projects import serialize_project_configuration
-from tests.unit import test_project_configuration as projects
+from tests.support import fixtures_test_project_configuration as projects
 
 
 def blob(content):
@@ -187,7 +187,7 @@ class RetainedCargoCompositionTests(RetainedCargoCurrentTests):
 
         from literate_ai.adapters.retained_provider_native import RetainedProviderNative
         from literate_ai.projects import PinnedInputClosure
-        from tests.unit import test_retained_cargo_import as imports
+        from tests.support import fixtures_test_retained_cargo_import as imports
 
         fixture = imports.RetainedCargoImportTests()
         fixture.setUp()

@@ -8,8 +8,8 @@ import json
 import unittest
 from unittest.mock import patch
 
-from tests.unit import test_cli_retained_cargo as cli_fixture
-from tests.unit import test_evidence_storage as tls_fixture
+from tests.support import fixtures_test_cli_retained_cargo as cli_fixture
+from tests.support import fixtures_test_evidence_storage as tls_fixture
 
 
 class RetainedCargoHttpsTests(unittest.TestCase):

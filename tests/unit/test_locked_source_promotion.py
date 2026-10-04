@@ -36,13 +36,13 @@ from literate_ai.source_to_specification import (
     SourcePromotionMaterializer,
     VerifiedSourcePromotionEvidence,
 )
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_locked_generation_authority import (
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_locked_generation_authority import (
     _SELECTORS,
     _TARGET,
     _write_lock,
 )
-from tests.unit.test_qualification_lifecycle_runner import (
+from tests.support.fixtures_test_qualification_lifecycle_runner import (
     QualificationLifecycleRunnerTests,
 )
 

@@ -20,8 +20,8 @@ from literate_ai.application.action_dag_scheduler import (
     LifecycleActionWorker,
 )
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-from tests.unit import test_action_build_source as source_fixture
-from tests.unit.test_action_build_record import build_worker_input
+from tests.support import fixtures_test_action_build_source as source_fixture
+from tests.support.fixtures_test_action_build_record import build_worker_input
 
 
 def build_request(value, deadline):

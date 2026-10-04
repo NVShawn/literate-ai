@@ -14,7 +14,7 @@ from literate_ai.adapters.action_tool_dependencies import (
     probe_command_tool_dependencies,
 )
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-from tests.unit import test_action_tool_observation as tool_fixture
+from tests.support import fixtures_test_action_tool_observation as tool_fixture
 
 
 class ActionToolDependencyTests(unittest.TestCase):

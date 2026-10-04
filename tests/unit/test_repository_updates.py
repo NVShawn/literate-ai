@@ -46,8 +46,8 @@ from literate_ai.contracts import (
     RepositoryParentReference,
     RepositoryParentSelection,
 )
-from tests.unit.test_repository_lineage import fixture, identity
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_repository_lineage import fixture, identity
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE = ROOT / "src" / "literate_ai" / "project_template"

@@ -15,7 +15,7 @@ from literate_ai.contracts import (
     StandardLanguageCommandProfile,
     parse_standard_command_profile,
 )
-from tests.unit.test_coding_cli_generation import flavor, recipe
+from tests.support.fixtures_test_coding_cli_generation import flavor, recipe
 
 
 def _posix_profile() -> dict[str, object]:

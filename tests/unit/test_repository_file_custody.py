@@ -14,7 +14,7 @@ from unittest.mock import patch
 from literate_ai.adapters import repository_file_custody as custody
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.contracts.repository_tree import RepositoryTreeCapturePolicy
-from tests.unit.test_repository_tree import tree
+from tests.support.fixtures_test_repository_tree import tree
 
 
 class RepositoryFileCustodyTests(unittest.TestCase):

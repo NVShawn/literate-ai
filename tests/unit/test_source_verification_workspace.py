@@ -14,8 +14,8 @@ from unittest import mock
 from literate_ai.adapters import source_verification_workspace as workspaces
 from literate_ai.cli.errors import CliFailure
 from literate_ai.cli.generation import _CommandSourceVerifier
-from tests.unit.test_cli_generation import bind_tree
-from tests.unit.test_standard_source_admission import generation
+from tests.support.fixtures_test_cli_generation import bind_tree
+from tests.support.fixtures_test_standard_source_admission import generation
 
 
 class SourceVerificationWorkspaceTests(unittest.TestCase):

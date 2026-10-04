@@ -44,7 +44,7 @@ from literate_ai.security.evidence import (
     EvidenceStorageError,
     verify_evidence_statement,
 )
-from tests.unit.test_evidence_records import _records
+from tests.support.fixtures_test_evidence_records import _records
 
 
 def _reference(content=b"verified", media_type="application/octet-stream"):

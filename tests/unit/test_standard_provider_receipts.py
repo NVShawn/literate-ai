@@ -9,8 +9,8 @@ from literate_ai.application.standard_provider_receipts import (
     select_build_provider_receipts,
 )
 from literate_ai.contracts import canonical_identity
-from tests.unit.test_action_build_intent import provider_evidence
-from tests.unit.test_standard_post_source_evidence import _multi_evidence
+from tests.support.fixtures_test_action_build_intent import provider_evidence
+from tests.support.fixtures_test_standard_post_source_evidence import _multi_evidence
 
 
 def receipt(name, dependencies=()):

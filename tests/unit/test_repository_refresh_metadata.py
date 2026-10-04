@@ -21,7 +21,7 @@ from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshTarget,
 )
 from literate_ai.projects import parse_project_configuration
-from tests.unit import test_repository_refresh_inputs as fixtures
+from tests.support import fixtures_test_repository_refresh_inputs as fixtures
 
 
 class RefreshMetadataTests(unittest.TestCase):

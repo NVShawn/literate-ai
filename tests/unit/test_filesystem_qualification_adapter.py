@@ -31,12 +31,12 @@ from literate_ai.source_to_specification.inventory import inventory_source
 from literate_ai.source_to_specification.qualification_lifecycle import (
     QualificationLifecycleRequest,
 )
-from tests.unit.test_qualification_lifecycle_runner import (
+from tests.support.fixtures_test_qualification_lifecycle_runner import (
     _lifecycle,
     _receipt,
     identity,
 )
-from tests.unit.test_standard_rebuild_adapter import (
+from tests.support.fixtures_test_standard_rebuild_adapter import (
     FilesystemStandardRebuildAdapterTests as _RebuildFixture,
 )
 

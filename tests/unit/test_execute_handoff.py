@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
 from literate_ai.adapters.action_test_record import TestWorkerInput
 from literate_ai.adapters.execute_handoff import CompletedBuildExecuteHandoff
-from tests.unit import test_action_execute_providers as provider_fixture
+from tests.support import fixtures_test_action_execute_providers as provider_fixture
 
 
 class ExecuteHandoffTests(unittest.TestCase):

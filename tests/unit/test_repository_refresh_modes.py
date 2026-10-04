@@ -13,8 +13,8 @@ from unittest.mock import patch
 from literate_ai.adapters import repository_refresh_application as application
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.contracts.repository_tree import RepositoryTreeCapturePolicy
-from tests.unit.test_repository_orchestration import git, repository
-from tests.unit.test_repository_tree import tree
+from tests.support.fixtures_test_repository_orchestration import git, repository
+from tests.support.fixtures_test_repository_tree import tree
 
 
 @unittest.skipIf(os.name == "nt", "POSIX physical permissions")
@@ -91,7 +91,7 @@ class RefreshNoopModeTests(unittest.TestCase):
 @unittest.skipIf(os.name == "nt", "POSIX physical permissions")
 class RefreshPhysicalModeIntegrationTests(unittest.TestCase):
     def test_refresh_accepts_admitted_group_writable_permissions(self):
-        from tests.unit import test_repository_refresh_application as fixtures
+        from tests.support import fixtures_test_repository_refresh_application as fixtures
 
         fixture = fixtures.RepositoryRefreshApplicationTests()
 

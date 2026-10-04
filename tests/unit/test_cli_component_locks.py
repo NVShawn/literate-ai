@@ -33,9 +33,9 @@ from literate_ai.cli.component_locks import component_lock_from_args
 from literate_ai.cli.errors import CliFailure
 from literate_ai.contracts import RepositoryLineage, RepositoryParentSelection
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_component_lock_resolution import resolution_plan
-from tests.unit.test_repository_orchestration import snapshot
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_component_lock_resolution import resolution_plan
+from tests.support.fixtures_test_repository_orchestration import snapshot
 
 
 def _run(arguments: list[str]) -> tuple[int, dict[str, object], str]:

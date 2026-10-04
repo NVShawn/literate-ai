@@ -32,7 +32,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
 )
 from literate_ai.contracts.executable_components.packages import PackageKind
-from tests.unit.test_package_release_contracts import (
+from tests.support.fixtures_test_package_release_contracts import (
     PackageReleaseContractTests,
     _identity,
 )
@@ -457,7 +457,7 @@ class PackageCliTests(unittest.TestCase):
             self.assertEqual(raised.exception.code, "package.declaration_changed")
 
     def test_apt_public_build_and_verify_selects_real_debian_adapter(self) -> None:
-        from tests.unit.test_debian_packaging import DebianPackagingTests
+        from tests.support.fixtures_test_debian_packaging import DebianPackagingTests
 
         generation = _generation_plan(providers=("apt",))
         release = PackageReleaseContractTests()

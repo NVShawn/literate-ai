@@ -13,8 +13,8 @@ from literate_ai.adapters.qualification_capture import (
     QualificationEvidenceRecorder,
 )
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-from tests.unit import test_standard_transferred_build as build_fixture
-from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.support import fixtures_test_standard_transferred_build as build_fixture
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 
 class StandardTransferredTestTests(unittest.TestCase):

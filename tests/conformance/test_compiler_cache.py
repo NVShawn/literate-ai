@@ -28,7 +28,7 @@ from literate_ai.contracts.shared_cache import (
     SharedCacheAccessMode,
     SharedCacheNamespace,
 )
-from tests.unit.test_shared_cache import _configuration
+from tests.support.fixtures_test_shared_cache import _configuration
 
 
 @unittest.skipUnless(

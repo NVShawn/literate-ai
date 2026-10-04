@@ -19,8 +19,8 @@ from literate_ai.contracts import (
     StandardLifecycleStageEvidence,
     canonical_identity,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_source_generation_boundary_contracts import (
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_source_generation_boundary_contracts import (
     _candidate,
     _identity,
     _provenance,

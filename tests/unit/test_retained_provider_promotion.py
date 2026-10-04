@@ -20,7 +20,7 @@ from literate_ai.source_to_specification.promotion_materialization import (
     SOURCE_PROMOTION_PROVENANCE_SCHEMA,
     SourcePromotionError,
 )
-from tests.unit import test_locked_source_promotion as fixtures
+from tests.support import fixtures_test_locked_source_promotion as fixtures
 
 
 class RetainedProviderPromotionTests(unittest.TestCase):

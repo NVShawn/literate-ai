@@ -25,9 +25,9 @@ from literate_ai.contracts import RepositoryParentSelection
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.repository_orchestration import RepositoryOrchestration
 from literate_ai.projects import ProjectConfigurationStore
-from tests.unit import test_repository_lock_planning as fixtures
-from tests.unit.test_repository_orchestration import git, snapshot
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support import fixtures_test_repository_lock_planning as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class RepositoryLockCliTests(unittest.TestCase):

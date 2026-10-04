@@ -8,7 +8,7 @@ from literate_ai.adapters._grpc_descriptors import (
     MAX_DESCRIPTOR_FILES,
     GrpcDescriptorClosure,
 )
-from tests.unit import test_grpc_descriptors as fixtures
+from tests.support import fixtures_test_grpc_descriptors as fixtures
 
 
 class GrpcReflectionTests(unittest.TestCase):

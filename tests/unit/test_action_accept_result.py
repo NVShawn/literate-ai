@@ -17,7 +17,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
 )
 from literate_ai.storage import FileSystemCAS
-from tests.unit import test_action_accept_record as fixture_module
+from tests.support import fixtures_test_action_accept_record as fixture_module
 
 
 class AcceptWorkerResultTests(unittest.TestCase):

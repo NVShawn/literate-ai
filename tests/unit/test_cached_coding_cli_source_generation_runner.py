@@ -59,8 +59,8 @@ from literate_ai.generated_tests import (
     GeneratedTestSuiteError,
 )
 from literate_ai.storage import FileSystemCAS
-from tests.unit.test_application_generation import router, stages
-from tests.unit.test_component_node_generation_preparation import (
+from tests.support.fixtures_test_application_generation import router, stages
+from tests.support.fixtures_test_component_node_generation_preparation import (
     FilesystemComponentWorkspaceAllocator,
     LockedComponentNodePreparationAdapter,
     _budget,

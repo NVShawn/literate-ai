@@ -29,8 +29,8 @@ from literate_ai.contracts.authoring_markdown import (
     parse_authoring_markdown,
     render_authoring_markdown,
 )
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_source_generation_custody_contracts import _generated_custody
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_source_generation_custody_contracts import _generated_custody
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _SELECTORS = ("+macos", "+python")

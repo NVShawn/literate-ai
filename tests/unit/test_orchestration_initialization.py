@@ -11,8 +11,8 @@ from unittest.mock import patch
 from literate_ai.adapters import orchestration_initialization as initialization
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.projects import CANONICAL_AGENT_SHIMS, discover_project
-from tests.unit import test_orchestration_planning as planning_fixtures
-from tests.unit.test_repository_orchestration import git, repository, snapshot
+from tests.support import fixtures_test_orchestration_planning as planning_fixtures
+from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 
 class OrchestrationInitializationTests(unittest.TestCase):

@@ -33,7 +33,7 @@ from literate_ai.contracts.executable_components.artifacts import (
 )
 from literate_ai.contracts.executable_components.assets import AuthoredBinaryAsset
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def identity(label: str) -> ContentIdentity:

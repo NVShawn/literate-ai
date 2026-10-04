@@ -23,10 +23,10 @@ from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.library_products import LibraryArtifactProduct
 from literate_ai.contracts.retained_cargo import CargoManifestChange
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
-from tests.unit import test_artifact_graph_contracts as graphs
-from tests.unit import test_library_products as libraries
-from tests.unit import test_qualification_capture as captures
-from tests.unit import test_retained_cargo_plan as plans
+from tests.support import fixtures_test_artifact_graph_contracts as graphs
+from tests.support import fixtures_test_library_products as libraries
+from tests.support import fixtures_test_qualification_capture as captures
+from tests.support import fixtures_test_retained_cargo_plan as plans
 
 MANIFEST = (
     b'[package]\nname = "import-proof"\nversion = "1.0.0"\nedition = "2021"\n'

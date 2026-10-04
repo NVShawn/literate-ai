@@ -24,8 +24,8 @@ from literate_ai.application.action_dag_planning import (
 )
 from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-from tests.unit import test_action_source_index as source_fixture
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support import fixtures_test_action_source_index as source_fixture
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _python_copy_lifecycle,
 )
@@ -215,7 +215,7 @@ class PlanActionTests(unittest.TestCase):
         from referencing import Registry, Resource
         from referencing.jsonschema import DRAFT202012
 
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         resources = SchemaCatalog().resources
         registry = Registry().with_resources(

@@ -47,11 +47,11 @@ from literate_ai.contracts.native_sdks import (
     NativeSdkBuildRecipe,
     NativeSdkSnapshot,
 )
-from tests.unit import test_native_sdk_build
-from tests.unit.test_cli_component_locks import _run
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_repository_sources import dependency
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support import fixtures_test_native_sdk_build as test_native_sdk_build
+from tests.support.fixtures_test_cli_component_locks import _run
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_repository_sources import dependency
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class NativeSdkRecipeTests(unittest.TestCase):

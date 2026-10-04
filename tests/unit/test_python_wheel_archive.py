@@ -16,7 +16,7 @@ from literate_ai.adapters.dependencies.python_lock import (
     verify_locked_wheel,
 )
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-from tests.unit.test_python_wheel_lock import wheel_record
+from tests.support.fixtures_test_python_wheel_lock import wheel_record
 
 _DIST = "example-1.0.dist-info/"
 

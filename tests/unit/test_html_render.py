@@ -18,8 +18,8 @@ from literate_ai.adapters.html_framework import HtmlFrameworkObservation
 from literate_ai.cli import dispatch
 from literate_ai.contracts.html_observability import HtmlArtifact, HtmlRenderResult
 from literate_ai.storage import StorageError
-from tests.unit import test_html_observability_schema as schema_tests
-from tests.unit.test_html_emitter import DISTRIBUTION, ROOT, request
+from tests.support import fixtures_test_html_observability_schema as schema_tests
+from tests.support.fixtures_test_html_emitter import DISTRIBUTION, ROOT, request
 
 
 def _project(root):

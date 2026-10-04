@@ -26,8 +26,8 @@ from literate_ai.contracts import (
     ExecutionWorkerEnvironment,
     ExecutionWorkerKind,
 )
-from tests.unit.test_worker_capacity import JOB, ROLES
-from tests.unit.test_worker_storage import (
+from tests.support.fixtures_test_worker_capacity import JOB, ROLES
+from tests.support.fixtures_test_worker_storage import (
     FAMILY,
     bindings,
     reply,

@@ -17,7 +17,7 @@ from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshRequest,
     RepositoryRefreshTarget,
 )
-from tests.unit.test_repository_orchestration import git, snapshot
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class RegisteredWorktreeProtocolTests(unittest.TestCase):

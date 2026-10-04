@@ -38,10 +38,10 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.storage.cas import BlobIntegrityError, BlobNotFoundError, FileSystemCAS
-from tests.unit.test_component_execution_planning import _diamond_lock, _models
-from tests.unit.test_component_lock_contracts import identity
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_project_lifecycle import (
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_component_lock_contracts import identity
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_project_lifecycle import (
     LifecyclePorts,
     _decision,
     _names,

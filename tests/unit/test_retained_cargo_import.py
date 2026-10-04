@@ -44,10 +44,10 @@ from literate_ai.source_to_specification.promotion_materialization import (
     SourcePromotionMaterializer,
     VerifiedSourcePromotionEvidence,
 )
-from tests.unit import test_component_execution_planning as execution_fixtures
-from tests.unit import test_component_lock_contracts as locks
-from tests.unit import test_qualification_capture as captures
-from tests.unit import test_standard_project_lifecycle as lifecycle_fixtures
+from tests.support import fixtures_test_component_execution_planning as execution_fixtures
+from tests.support import fixtures_test_component_lock_contracts as locks
+from tests.support import fixtures_test_qualification_capture as captures
+from tests.support import fixtures_test_standard_project_lifecycle as lifecycle_fixtures
 
 
 def blob(content, media="application/json"):

@@ -20,7 +20,7 @@ from literate_ai.contracts.authoring_markdown import (
     render_authoring_markdown,
 )
 from scripts.migrate_workflow_authoring import migrate
-from tests.unit.test_project_cli import copy_generation_catalogs, invoke
+from tests.support.fixtures_test_project_cli import copy_generation_catalogs, invoke
 
 REPOSITORY = Path(__file__).resolve().parents[2]
 

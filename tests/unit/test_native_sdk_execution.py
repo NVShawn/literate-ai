@@ -28,9 +28,9 @@ from literate_ai.contracts.executable_components.commands import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.security import AuthorizationError, BuildAuthorization, SecurityProfile
-from tests.unit import test_native_sdk_standard_authority
+from tests.support import fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority
 from tests.unit.native_sdk_qualification_checks import check_sdk_records
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class NativeSdkExecutionTests(unittest.TestCase):

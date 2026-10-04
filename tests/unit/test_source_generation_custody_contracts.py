@@ -17,14 +17,14 @@ from literate_ai.contracts.executable_components import (
     ProjectSourceGenerationCustody,
 )
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit.test_component_execution_planning import _diamond_lock
-from tests.unit.test_component_generation_scheduling import (
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock
+from tests.support.fixtures_test_component_generation_scheduling import (
     _decision,
     _names,
     _prepared_execution,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_standard_project_lifecycle import LifecyclePorts, _prepared_nodes
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_standard_project_lifecycle import LifecyclePorts, _prepared_nodes
 
 ROOT = Path(__file__).resolve().parents[2]
 

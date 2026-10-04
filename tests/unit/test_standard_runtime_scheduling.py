@@ -9,9 +9,9 @@ from literate_ai.contracts import StandardExecutionAuthority
 from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.standard_execution_inputs import standard_execution_request
 from literate_ai.security import BuildAuthorization, SecurityProfile
-from tests.unit.test_component_execution_planning import _diamond_lock
-from tests.unit.test_component_generation_scheduling import _names, _prepared_execution
-from tests.unit.test_standard_project_lifecycle import (
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock
+from tests.support.fixtures_test_component_generation_scheduling import _names, _prepared_execution
+from tests.support.fixtures_test_standard_project_lifecycle import (
     ContractEvidenceLifecyclePorts,
     _accepted,
     _decision,

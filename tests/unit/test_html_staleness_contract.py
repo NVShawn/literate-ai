@@ -9,7 +9,7 @@ from dataclasses import FrozenInstanceError, replace
 
 from literate_ai.contracts.html_observability import HtmlStalenessReport
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit import test_html_observability_schema as schema_tests
+from tests.support import fixtures_test_html_observability_schema as schema_tests
 
 # Synthetic input identities qualify the record, not an installed HTML artifact.
 EXPECTED = canonical_identity({"fixture": "current-render-inputs"})

@@ -114,7 +114,7 @@ class GenerationTransitionHelperTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, "generate.invalid_model_selection")
 
     def test_source_admission_verifier_executes_tests_and_records_results(self) -> None:
-        from tests.unit.test_standard_source_admission import generation
+        from tests.support.fixtures_test_standard_source_admission import generation
 
         generated = generation()
         with tempfile.TemporaryDirectory() as temporary:
@@ -139,7 +139,7 @@ class GenerationTransitionHelperTests(unittest.TestCase):
         self.assertEqual(verification.test_results[0].passed_count, 3)
 
     def test_source_admission_verifier_canonicalizes_multiple_results(self) -> None:
-        from tests.unit.test_standard_source_admission import generation
+        from tests.support.fixtures_test_standard_source_admission import generation
 
         generated = generation()
         with tempfile.TemporaryDirectory() as temporary:
@@ -182,7 +182,7 @@ class GenerationTransitionHelperTests(unittest.TestCase):
         # failed: python3" -- no failing Component revision, exit status, or
         # bounded output to distinguish a generated-test defect from an
         # invocation/cwd defect (see issue #65).
-        from tests.unit.test_standard_source_admission import generation
+        from tests.support.fixtures_test_standard_source_admission import generation
 
         generated = generation()
         with tempfile.TemporaryDirectory() as temporary:

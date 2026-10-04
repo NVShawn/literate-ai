@@ -13,7 +13,7 @@ from literate_ai.adapters.retained_cargo_execution_inputs import (
     read_retained_cargo_execution_inputs,
 )
 from literate_ai.contracts.retained_libraries import RetainedLibraryGatePolicy
-from tests.unit import test_retained_cargo_execution as fixtures
+from tests.support import fixtures_test_retained_cargo_execution as fixtures
 
 
 class RetainedCargoExternalInputTests(unittest.TestCase):

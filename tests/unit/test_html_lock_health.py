@@ -26,10 +26,10 @@ from literate_ai.contracts.html_observability import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.schema_catalog import schema_path
-from tests.unit.test_component_lock_planning import _fixture
-from tests.unit.test_html_emitter import DISTRIBUTION, STAMP
-from tests.unit.test_html_render import _project
-from tests.unit.test_repository_orchestration import snapshot
+from tests.support.fixtures_test_component_lock_planning import _fixture
+from tests.support.fixtures_test_html_emitter import DISTRIBUTION, STAMP
+from tests.support.fixtures_test_html_render import _project
+from tests.support.fixtures_test_repository_orchestration import snapshot
 
 
 class LockHealthHtmlTests(unittest.TestCase):

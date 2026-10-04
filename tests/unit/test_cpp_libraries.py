@@ -108,7 +108,7 @@ class CppLibraryLayoutTests(unittest.TestCase):
 class CppLibraryProductTests(unittest.TestCase):
     def test_product_binds_layout_and_public_header_mapping(self):
         from literate_ai.contracts.library_products import LibraryArtifactProduct
-        from tests.unit.test_library_products import library_product
+        from tests.support.fixtures_test_library_products import library_product
 
         ordinary = library_product()
         capability = replace(
@@ -125,7 +125,7 @@ class CppLibraryProductTests(unittest.TestCase):
         )
         product = LibraryArtifactProduct(ordinary.artifact_export, surface, layout)
         self.assertEqual(LibraryArtifactProduct.from_dict(product.to_dict()), product)
-        from tests.unit.test_executable_component_v2_schemas import _official_validator
+        from tests.support.fixtures_test_executable_component_v2_schemas import _official_validator
 
         validator = _official_validator(
             "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/library_product"
@@ -167,9 +167,9 @@ class CppCommandLayoutTests(unittest.TestCase):
 
         from literate_ai.cli.rebuild import _standard_root_product_result
         from literate_ai.contracts import ComponentCommandContract
-        from tests.unit.test_component_command_contracts import contract
-        from tests.unit.test_executable_component_v2_schemas import _official_validator
-        from tests.unit.test_library_products import library_product
+        from tests.support.fixtures_test_component_command_contracts import contract
+        from tests.support.fixtures_test_executable_component_v2_schemas import _official_validator
+        from tests.support.fixtures_test_library_products import library_product
 
         base = contract()
         product = library_product()

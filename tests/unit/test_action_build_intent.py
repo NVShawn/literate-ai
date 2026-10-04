@@ -30,10 +30,10 @@ from literate_ai.application.component_execution_planning import (
 from literate_ai.application.standard_build_intent import StandardBuildIntentInputs
 from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
-from tests.unit import test_action_source_index as source_fixture
-from tests.unit.test_component_execution_planning import _diamond_lock, _models
-from tests.unit.test_standard_local_command_adapter import _python_copy_lifecycle
-from tests.unit.test_standard_post_source_evidence import _evidence
+from tests.support import fixtures_test_action_source_index as source_fixture
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
+from tests.support.fixtures_test_standard_post_source_evidence import _evidence
 
 
 def provider_evidence(revision):
@@ -362,7 +362,7 @@ class BuildIntentActionTests(unittest.TestCase):
         from referencing import Registry, Resource
         from referencing.jsonschema import DRAFT202012
 
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         resources = SchemaCatalog().resources
         registry = Registry().with_resources(

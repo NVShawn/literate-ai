@@ -70,11 +70,11 @@ from literate_ai.source_to_specification.qualification_lifecycle import (
     QualificationLifecycleResult,
     QualificationLifecycleRunEvidence,
 )
-from tests.unit import test_artifact_graph_contracts as graph_fixtures
-from tests.unit import test_package_release_contracts as package_fixtures
-from tests.unit import test_qualification_lifecycle_runner as lifecycle_fixtures
-from tests.unit.test_library_products import library_product
-from tests.unit.test_standard_post_source_evidence import _evidence
+from tests.support import fixtures_test_artifact_graph_contracts as graph_fixtures
+from tests.support import fixtures_test_package_release_contracts as package_fixtures
+from tests.support import fixtures_test_qualification_lifecycle_runner as lifecycle_fixtures
+from tests.support.fixtures_test_library_products import library_product
+from tests.support.fixtures_test_standard_post_source_evidence import _evidence
 
 
 def fixture():
@@ -563,7 +563,7 @@ class QualificationCaptureTests(unittest.TestCase):
             reader.assert_called_once()
 
     def library_authority_fixture(self, *, bind_current_target=False):
-        from tests.unit.test_standard_project_lifecycle import (
+        from tests.support.fixtures_test_standard_project_lifecycle import (
             StandardProjectLifecycleTests,
         )
 
@@ -605,7 +605,7 @@ class QualificationCaptureTests(unittest.TestCase):
             fixture()[0].framework_distribution_identity,
             load_current_standard_lifecycle_policy().identity,
         )
-        from tests.unit.test_standard_project_lifecycle import command_contract_fixture
+        from tests.support.fixtures_test_standard_project_lifecycle import command_contract_fixture
 
         self.current_commands = {
             node.plan.component_revision: command_contract_fixture(
@@ -618,7 +618,7 @@ class QualificationCaptureTests(unittest.TestCase):
             )
             for node in producer.nodes.values()
         }
-        from tests.unit.test_coding_cli_generation import generation_skill
+        from tests.support.fixtures_test_coding_cli_generation import generation_skill
 
         self.current_recipes = {
             node.plan.component_revision: GenerationRecipe(
@@ -734,8 +734,8 @@ class QualificationCaptureTests(unittest.TestCase):
                 }
             )
 
-        from tests.unit.test_generated_tests import valid_suite
-        from tests.unit.test_standard_project_lifecycle import _Recipe
+        from tests.support.fixtures_test_generated_tests import valid_suite
+        from tests.support.fixtures_test_standard_project_lifecycle import _Recipe
 
         generated_suites = {}
         for uri, node in producer.nodes.items():
@@ -967,7 +967,7 @@ class QualificationCaptureTests(unittest.TestCase):
 
     def test_disabled_index_capture_reopens_both_products_and_refuses_bad_records(self):
         from literate_ai.adapters.intelligence import DisabledGenerationIndexer
-        from tests.unit.test_standard_project_lifecycle import (
+        from tests.support.fixtures_test_standard_project_lifecycle import (
             ContractEvidenceLifecyclePorts,
             LifecyclePorts,
         )

@@ -18,7 +18,7 @@ from literate_ai.adapters.lifecycle.standard_python import (
     verify_standard_python_dependencies,
 )
 from literate_ai.contracts import ContentIdentity, canonical_identity
-from tests.unit import test_python_install as install_fixtures
+from tests.support import fixtures_test_python_install as install_fixtures
 
 
 class StandardPythonEvidenceTests(unittest.TestCase):

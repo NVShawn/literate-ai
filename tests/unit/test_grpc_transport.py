@@ -17,7 +17,7 @@ from literate_ai.adapters.ipc_surface_acceptance import (
     IpcSurfaceAcceptanceError,
     decide_ipc_surface_conformance,
 )
-from tests.unit.test_ipc_surface_acceptance import _valid_document
+from tests.support.fixtures_test_ipc_surface_acceptance import _valid_document
 
 
 class GrpcTransportTests(unittest.TestCase):

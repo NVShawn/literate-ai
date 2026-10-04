@@ -32,12 +32,12 @@ from literate_ai.contracts import (
     SourceGenerationScheduleResult,
     canonical_identity,
 )
-from tests.unit.test_component_generation_scheduling import _decision
-from tests.unit.test_component_node_generation_preparation import (
+from tests.support.fixtures_test_component_generation_scheduling import _decision
+from tests.support.fixtures_test_component_node_generation_preparation import (
     _budget,
     _fixture,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _recipe_identity(node: PreparedComponentGenerationNode) -> ContentIdentity:

@@ -16,9 +16,9 @@ from literate_ai.adapters.action_dispatch_wire import (
     encode_action_request,
 )
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
-from tests.unit import test_action_build_source as source_fixture
-from tests.unit.test_action_build_action import build_request
-from tests.unit.test_action_build_record import build_worker_input
+from tests.support import fixtures_test_action_build_source as source_fixture
+from tests.support.fixtures_test_action_build_action import build_request
+from tests.support.fixtures_test_action_build_record import build_worker_input
 
 
 class ConfiguredBuildWorkerTests(unittest.TestCase):

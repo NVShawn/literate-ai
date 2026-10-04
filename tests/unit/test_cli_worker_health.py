@@ -28,7 +28,7 @@ from literate_ai.contracts import (
     WorkerCapacityObservation,
     canonical_identity,
 )
-from tests.unit.test_worker_capacity import ROLES, policy
+from tests.support.fixtures_test_worker_capacity import ROLES, policy
 
 
 class Terminal(io.StringIO):
@@ -535,7 +535,7 @@ class WorkerHealthCliTests(unittest.TestCase):
         self.assertIn("worker.health_input_invalid", output)
 
     def test_explicit_alert_history_deduplicates_and_reports_recovery(self):
-        from tests.unit.test_worker_capacity import NOW
+        from tests.support.fixtures_test_worker_capacity import NOW
 
         for role in self.config["capacity"]["roles"]:
             role["reserve_bytes"] = 100

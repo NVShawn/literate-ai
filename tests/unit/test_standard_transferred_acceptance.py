@@ -8,8 +8,8 @@ from literate_ai.adapters.action_dispatch_wire import ActionWireError
 from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecycleError
 from literate_ai.adapters.qualification_capture import QualificationCaptureError
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
-from tests.unit import test_standard_transferred_execution as execution_fixture
-from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.support import fixtures_test_standard_transferred_execution as execution_fixture
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 
 class TransferredAcceptanceTests(unittest.TestCase):

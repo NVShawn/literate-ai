@@ -18,7 +18,7 @@ from literate_ai.adapters.cache.shared_artifacts import (
 )
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.shared_cache import SharedCacheAccessMode
-from tests.unit.test_shared_artifact_cache import _configuration, _manifest
+from tests.support.fixtures_test_shared_artifact_cache import _configuration, _manifest
 
 
 class HttpSharedArtifactTests(unittest.TestCase):

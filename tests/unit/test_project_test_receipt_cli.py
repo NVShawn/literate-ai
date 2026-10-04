@@ -29,7 +29,7 @@ from literate_ai.test_receipts import (
     update_project_test_receipt_value,
 )
 from tests.unit.root_parent_adapter import root_parent_for_fixture_project
-from tests.unit.test_project_cli import (
+from tests.support.fixtures_test_project_cli import (
     copy_generation_catalogs,
     copy_hello_component,
     refresh_authority_review,

@@ -42,7 +42,7 @@ from literate_ai.contracts import (
 )
 from literate_ai.contracts.project_mcp import generation_skill_requires_operator_mcp
 from tests.conformance.support.sample_runner import _matrix_languages
-from tests.unit.test_component_lock_planning import _fixture
+from tests.support.fixtures_test_component_lock_planning import _fixture
 
 REPO = Path(__file__).resolve().parents[2]
 CATALOG = REPO / "skills" / "specification-to-source"

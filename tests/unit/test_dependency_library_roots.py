@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters.dependencies import observation
-from tests.unit import test_dependency_lifecycle as fixtures
+from tests.support import fixtures_test_dependency_lifecycle as fixtures
 
 
 class DependencyLibraryRootTests(unittest.TestCase):

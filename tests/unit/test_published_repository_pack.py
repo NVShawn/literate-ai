@@ -8,8 +8,8 @@ from dataclasses import replace
 from literate_ai.adapters import repository_publication as publication
 from literate_ai.adapters._repository_pack_capture import RepositoryPackPolicy
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
-from tests.unit import test_repository_publication as fixtures
-from tests.unit.test_repository_orchestration import git, repository, snapshot
+from tests.support import fixtures_test_repository_publication as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
 
 
 class PublishedRepositoryPackTests(unittest.TestCase):

@@ -96,8 +96,8 @@ from literate_ai.contracts import (
 from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.security import AuthorizationError
 from tests.unit.standard_source_evidence_fixture import register_strict_source
-from tests.unit.test_component_execution_planning import _diamond_lock, _models
-from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 
 def _identity(label: str):

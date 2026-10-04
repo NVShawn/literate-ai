@@ -9,8 +9,8 @@ from dataclasses import replace
 from literate_ai.adapters import repository_publication as publication
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.contracts.repository_tree import RepositoryTreeCapturePolicy
-from tests.unit import test_repository_publication as fixtures
-from tests.unit.test_repository_orchestration import git, snapshot
+from tests.support import fixtures_test_repository_publication as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class PublishedRepositoryTreeTests(unittest.TestCase):
@@ -122,7 +122,7 @@ class PublishedRepositoryTreeTests(unittest.TestCase):
         self.assertTrue(all(not path.exists() for path in stores))
 
     def test_sha256_capture_recomputes_all_object_hashes(self):
-        from tests.unit.test_repository_orchestration import repository
+        from tests.support.fixtures_test_repository_orchestration import repository
 
         root = self.base / "sha256"
         repository(root, sha256=True)

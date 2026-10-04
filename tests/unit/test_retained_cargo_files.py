@@ -15,9 +15,9 @@ from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.retained_cargo import CargoManifestChange
 from literate_ai.projects import serialize_project_configuration
-from tests.unit import test_project_configuration as projects
-from tests.unit import test_retained_cargo_import as imports
-from tests.unit import test_retained_cargo_plan as plans
+from tests.support import fixtures_test_project_configuration as projects
+from tests.support import fixtures_test_retained_cargo_import as imports
+from tests.support import fixtures_test_retained_cargo_plan as plans
 
 
 def blob(content):

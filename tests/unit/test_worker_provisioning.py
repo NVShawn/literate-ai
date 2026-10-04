@@ -254,7 +254,7 @@ class WorkerProvisioningTests(unittest.TestCase):
         from referencing import Registry, Resource
         from referencing.jsonschema import DRAFT202012
 
-        from tests.unit.test_schema_catalog import SchemaCatalog
+        from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
         resources = SchemaCatalog().resources
         registry = Registry().with_resources(

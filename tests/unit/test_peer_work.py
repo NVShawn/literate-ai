@@ -22,7 +22,7 @@ from literate_ai.adapters.peer_work import (
     mark_branch_lifecycle,
     survey_peer_work,
 )
-from tests.unit.test_project_cli import invoke
+from tests.support.fixtures_test_project_cli import invoke
 
 
 def _git(root: Path, *arguments: str) -> None:

@@ -25,7 +25,7 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.unit import test_action_accept_execution as source_fixture
+from tests.support import fixtures_test_action_accept_execution as source_fixture
 
 
 def make_accept_request(value, deadline):

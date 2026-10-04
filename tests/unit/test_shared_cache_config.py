@@ -16,7 +16,7 @@ from literate_ai.adapters.shared_cache_config import (
 )
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.contracts.shared_cache import SharedCacheAccessMode
-from tests.unit.test_shared_cache import _configuration
+from tests.support.fixtures_test_shared_cache import _configuration
 
 
 class SharedCacheConfigurationTests(unittest.TestCase):

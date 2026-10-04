@@ -19,7 +19,7 @@ from literate_ai.adapters.compiler_cache import (
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
 from literate_ai.adapters.shared_cache_config import BoundSharedCache, load_shared_cache
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit.test_shared_cache import _configuration
+from tests.support.fixtures_test_shared_cache import _configuration
 
 
 class CompilerCacheTests(unittest.TestCase):

@@ -12,8 +12,8 @@ from literate_ai.adapters.lifecycle import (
 )
 from literate_ai.contracts import ComponentCommandPhase
 from literate_ai.security import AuthorizationError
-from tests.unit.test_component_node_generation_preparation import _fixture
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _python_copy_lifecycle,
 )

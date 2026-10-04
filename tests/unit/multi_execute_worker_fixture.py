@@ -39,7 +39,7 @@ from literate_ai.application.standard_execution_inputs import (
 from literate_ai.contracts import canonical_identity
 from literate_ai.storage import FileSystemCAS
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
-from tests.unit.test_action_execute_action import make_execute_request
+from tests.support.fixtures_test_action_execute_action import make_execute_request
 
 _CHILD = """
 import os,json,sys

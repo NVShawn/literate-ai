@@ -16,8 +16,8 @@ from literate_ai.adapters.component_acceptance import (
     oracle_path,
     resolve_component_acceptance_oracle,
 )
-from tests.unit import test_grpc_descriptors as descriptor_fixtures
-from tests.unit.test_ipc_surface_acceptance import _service_lock, _valid_document
+from tests.support import fixtures_test_grpc_descriptors as descriptor_fixtures
+from tests.support.fixtures_test_ipc_surface_acceptance import _service_lock, _valid_document
 
 
 class GrpcOracleTests(unittest.TestCase):

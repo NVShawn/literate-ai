@@ -15,7 +15,7 @@ from literate_ai.contracts.shared_cache import (
     SharedCacheNamespacePolicy,
     SharedCacheScope,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def _configuration(

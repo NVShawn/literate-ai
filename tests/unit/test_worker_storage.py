@@ -35,7 +35,7 @@ from literate_ai.contracts import (
     ExecutionWorker,
     ExecutionWorkerKind,
 )
-from tests.unit.test_worker_capacity import JOB, NOW, ROLES, observation, policy
+from tests.support.fixtures_test_worker_capacity import JOB, NOW, ROLES, observation, policy
 
 FAMILY = {"darwin": "macos", "linux": "linux", "win32": "windows"}[sys.platform]
 

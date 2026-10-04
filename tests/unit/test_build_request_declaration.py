@@ -9,7 +9,7 @@ from literate_ai.security import (
     BuildRequest,
     BuildRequestDeclaration,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 REVISION = "sha256:" + "a" * 64
 SOURCE = "sha256:" + "b" * 64

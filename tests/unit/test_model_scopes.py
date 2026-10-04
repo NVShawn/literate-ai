@@ -12,7 +12,7 @@ from literate_ai.contracts import (
     canonical_identity,
     resolve_model_scope,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class ModelScopeTests(unittest.TestCase):

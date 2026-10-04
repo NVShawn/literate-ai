@@ -24,10 +24,10 @@ from literate_ai.contracts.retained_cargo import (
     RetainedCargoWorkspacePlan,
 )
 from literate_ai.contracts.retained_libraries import RetainedLibraryExportSet
-from tests.unit import test_artifact_graph_contracts as graphs
-from tests.unit import test_locked_source_promotion as promotions
-from tests.unit import test_retained_library_binding as bindings
-from tests.unit import test_schema_catalog as schemas
+from tests.support import fixtures_test_artifact_graph_contracts as graphs
+from tests.support import fixtures_test_locked_source_promotion as promotions
+from tests.support import fixtures_test_retained_library_binding as bindings
+from tests.support import fixtures_test_schema_catalog as schemas
 
 
 class RetainedCargoPlanTests(unittest.TestCase):

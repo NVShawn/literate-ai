@@ -18,9 +18,9 @@ from literate_ai.adapters.standard_project import (
     project_locked_standard_toolchain_closure,
 )
 from literate_ai.contracts import canonical_identity
-from tests.unit import test_standard_command_projection as fixture
-from tests.unit.test_remote_standard_toolchains import snapshot as worker_snapshot
-from tests.unit.test_standard_toolchain_observations import observation
+from tests.support import fixtures_test_standard_command_projection as fixture
+from tests.support.fixtures_test_remote_standard_toolchains import snapshot as worker_snapshot
+from tests.support.fixtures_test_standard_toolchain_observations import observation
 
 
 class LockedScopedProjectionTests(unittest.TestCase):

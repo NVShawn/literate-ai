@@ -24,7 +24,7 @@ from literate_ai.contracts.executable_components.context import (
 )
 from literate_ai.contracts.executable_components.planning import ComponentGenerationPlan
 from literate_ai.contracts.identity import ContentIdentity
-from tests.unit.test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
 
 
 def _identity(content: bytes) -> ContentIdentity:

@@ -15,8 +15,8 @@ from literate_ai.adapters.component_resolution_audits import (
     ComponentResolutionAuditStore,
     ComponentResolutionAuditStoreError,
 )
-from tests.unit.test_component_lock_contracts import component_lock
-from tests.unit.test_component_resolution_audit_store import (
+from tests.support.fixtures_test_component_lock_contracts import component_lock
+from tests.support.fixtures_test_component_resolution_audit_store import (
     audit,
     create_windows_junction,
 )

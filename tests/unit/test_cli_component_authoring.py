@@ -20,7 +20,7 @@ from literate_ai.application.component_authoring_migration import (
 )
 from literate_ai.cli import main
 from literate_ai.contracts.component_locking import ComponentContentSelector
-from tests.unit.test_component_authoring_migration import (
+from tests.support.fixtures_test_component_authoring_migration import (
     definition,
     pretty_repository_bytes,
     raw_identity,

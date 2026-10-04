@@ -31,12 +31,12 @@ from literate_ai.contracts.worker_capabilities import (
     WorkerHardwareObservation,
     WorkerHardwareObservationCatalog,
 )
-from tests.unit.test_action_dag_scheduler import (
+from tests.support.fixtures_test_action_dag_scheduler import (
     _identity,
     _RecordingDispatcher,
     _worker,
 )
-from tests.unit.test_component_execution_planning import _diamond_lock, _models
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock, _models
 
 
 class ActionDagPlanningTests(unittest.TestCase):

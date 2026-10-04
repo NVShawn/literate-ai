@@ -21,8 +21,8 @@ from literate_ai.security.evidence.github_oidc import (
     GitHubIssuerKeySet,
     verify_github_evidence_identity,
 )
-from tests.unit.test_evidence_records import _blob
-from tests.unit.test_evidence_trust import _expectation, _signer
+from tests.support.fixtures_test_evidence_records import _blob
+from tests.support.fixtures_test_evidence_trust import _expectation, _signer
 
 
 def _b64(value):

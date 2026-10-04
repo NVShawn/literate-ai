@@ -40,7 +40,7 @@ from literate_ai.project_releases import (
     set_release_state,
     verify_published_release,
 )
-from tests.unit.test_schema_catalog import V2_ROOT, SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import V2_ROOT, SchemaCatalog
 
 
 class ProjectReleaseTests(unittest.TestCase):

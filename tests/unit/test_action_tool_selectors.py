@@ -32,7 +32,7 @@ from literate_ai.contracts import (
 )
 from literate_ai.contracts.execution_dispatch import ExecutionWorkerCatalog
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservationCatalog
-from tests.unit import test_action_tool_observation as fixture
+from tests.support import fixtures_test_action_tool_observation as fixture
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
 
 

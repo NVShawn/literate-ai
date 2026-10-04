@@ -9,7 +9,7 @@ from unittest.mock import patch
 from literate_ai.adapters import repository_refresh_directories as directories
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit import test_write_reservations as fixtures
+from tests.support import fixtures_test_write_reservations as fixtures
 
 
 class RefreshDirectoryTests(unittest.TestCase):

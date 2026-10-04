@@ -18,7 +18,7 @@ from literate_ai.contracts import canonical_identity
 class HostComponentLifecycleSessionTests(unittest.TestCase):
     @staticmethod
     def system():
-        from tests.unit.test_application_generation import GenerationOrchestratorTests
+        from tests.support.fixtures_test_application_generation import GenerationOrchestratorTests
 
         fixture = GenerationOrchestratorTests(methodName="runTest")
         return fixture.make_system()

@@ -17,8 +17,8 @@ from literate_ai.contracts import (
     ComponentCommandToolBinding,
     canonical_identity,
 )
-from tests.unit.test_component_node_generation_preparation import _fixture
-from tests.unit.test_standard_project_factory import _command_contracts
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_standard_project_factory import _command_contracts
 
 
 class StandardToolchainClosureConformanceTests(unittest.TestCase):

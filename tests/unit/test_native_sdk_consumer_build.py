@@ -20,7 +20,7 @@ from literate_ai.adapters.qualification_capture import (
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 from literate_ai.security import AuthorizationError
 from literate_ai.storage.cas import BlobIntegrityError
-from tests.unit import test_native_sdk_standard_authority
+from tests.support import fixtures_test_native_sdk_standard_authority as test_native_sdk_standard_authority
 
 _CAPTURE_MAX_BYTES = 80_000_000
 

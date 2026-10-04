@@ -25,10 +25,10 @@ from literate_ai.contracts.repository_orchestration import (
     RepositoryRelationship,
 )
 from literate_ai.project_authority_graph import project_authority_graph
-from tests.unit import test_orchestration_planning as fixtures
-from tests.unit.test_repository_orchestration import git, snapshot
-from tests.unit.test_repository_orchestration_contracts import authority
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support import fixtures_test_orchestration_planning as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
+from tests.support.fixtures_test_repository_orchestration_contracts import authority
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class RepositoryLockContractTests(unittest.TestCase):

@@ -12,7 +12,7 @@ from literate_ai.application.standard_project_lifecycle import (
     StandardComponentBuildIntent,
 )
 from literate_ai.security import AuthorizationError, SecurityProfile
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _python_copy_lifecycle,
 )

@@ -20,7 +20,7 @@ from literate_ai.contracts.executable_components.commands import (
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.native_sdks import NativeSdkSnapshot
 from literate_ai.storage.cas import BlobIntegrityError, BlobNotFoundError, FileSystemCAS
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class NativeSdkCustodyTests(unittest.TestCase):

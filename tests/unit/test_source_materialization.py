@@ -38,7 +38,7 @@ from literate_ai.remote_source_guard import (
     verify_materialized_source,
 )
 from literate_ai.storage import FileSystemCAS
-from tests.unit.test_source_cache import _accepted_entry, _cache_key
+from tests.support.fixtures_test_source_cache import _accepted_entry, _cache_key
 
 _EXECUTABLE_CONTENT = b"#!/usr/bin/env python3\n"
 
@@ -373,7 +373,7 @@ class SourceMaterializationTests(unittest.TestCase):
             )
 
     def test_fresh_workspace_discovers_standard_admission_provider(self) -> None:
-        from tests.unit.test_standard_source_cache_roundtrip import (
+        from tests.support.fixtures_test_standard_source_cache_roundtrip import (
             _source_admission_entry,
         )
 

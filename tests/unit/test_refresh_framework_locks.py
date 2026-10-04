@@ -18,8 +18,8 @@ from literate_ai.adapters.lifecycle_lock import (
 )
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.projects import ProjectConfigurationStore
-from tests.unit import test_repository_refresh_inputs as fixtures
-from tests.unit.test_repository_orchestration import snapshot
+from tests.support import fixtures_test_repository_refresh_inputs as fixtures
+from tests.support.fixtures_test_repository_orchestration import snapshot
 
 
 def _lock_metadata(path):

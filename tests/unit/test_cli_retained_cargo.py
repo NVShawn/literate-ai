@@ -19,9 +19,9 @@ from literate_ai.contracts.retained_cargo_tests import (
     RetainedCargoTestTarget,
     retained_cargo_test_targets,
 )
-from tests.unit import test_retained_cargo_current as current_fixtures
-from tests.unit import test_retained_cargo_materialization as materialization_fixtures
-from tests.unit.test_retained_cargo_files import blob
+from tests.support import fixtures_test_retained_cargo_current as current_fixtures
+from tests.support import fixtures_test_retained_cargo_materialization as materialization_fixtures
+from tests.support.fixtures_test_retained_cargo_files import blob
 
 
 class RetainedCargoCliTests(unittest.TestCase):

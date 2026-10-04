@@ -14,7 +14,7 @@ from literate_ai.contracts.projects import (
     SourceIntelligenceMode,
     SourceIntelligenceStage,
 )
-from tests.unit import test_html_observability_schema as schema_tests
+from tests.support import fixtures_test_html_observability_schema as schema_tests
 
 
 def project() -> ProjectDefinition:

@@ -32,7 +32,7 @@ from literate_ai.contracts import (
     ProjectUpdateFile,
 )
 from tests.unit.root_parent_adapter import RootParentProjectInitializationAdapter
-from tests.unit.test_project_update_adapter import _origin
+from tests.support.fixtures_test_project_update_adapter import _origin
 
 BASE = b"first\n" + b"context\n" * 10 + b"last\n"
 OURS = BASE.replace(b"first", b"local first")
@@ -340,7 +340,7 @@ class CatalogMergeTests(unittest.TestCase):
         from literate_ai.adapters.repository_updates import (
             FilesystemRepositoryUpdateAdapter,
         )
-        from tests.unit.test_repository_updates import fixture, flavor_item, origin
+        from tests.support.fixtures_test_repository_updates import fixture, flavor_item, origin
 
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
@@ -463,7 +463,7 @@ class CatalogMergeTests(unittest.TestCase):
         from types import SimpleNamespace
 
         from literate_ai.cli.project import update_project_from_args
-        from tests.unit.test_repository_updates import origin
+        from tests.support.fixtures_test_repository_updates import origin
 
         self.upstream(b"# Parent\n")
         framework_target = self.root / ".gitignore"

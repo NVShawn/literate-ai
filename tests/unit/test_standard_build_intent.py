@@ -22,7 +22,7 @@ from literate_ai.contracts.executable_components import (
     GeneratedSourceCandidate,
 )
 from literate_ai.contracts.native_sdks import native_sdk_consumer_build_identity
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _fixture,
     _identity,
     _provider_export,

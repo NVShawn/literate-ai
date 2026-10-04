@@ -18,7 +18,7 @@ from literate_ai.contracts import (
     LibraryImportSurface,
     canonical_identity,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 COMMAND_SCHEMA = "urn:literate-ai:schema:v2:component-command-contract"
 LIFECYCLE_COMMAND_SCHEMA = "urn:literate-ai:schema:v2:component-lifecycle-command"

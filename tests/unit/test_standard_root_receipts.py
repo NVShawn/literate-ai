@@ -29,7 +29,7 @@ from literate_ai.contracts import (
     load_current_standard_lifecycle_policy,
     rebuild_project_authority_identity,
 )
-from tests.unit import test_cli_rebuild as cli_fixture
+from tests.support import fixtures_test_cli_rebuild as cli_fixture
 
 POLICY = load_current_standard_lifecycle_policy()
 BASE = canonical_identity("project-authority")

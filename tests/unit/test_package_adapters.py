@@ -41,12 +41,12 @@ from literate_ai.contracts.executable_components.packages import (
     RuntimeRequirement,
     RuntimeRequirementKind,
 )
-from tests.unit.test_executable_component_v2_schemas import _official_validator
-from tests.unit.test_package_release_contracts import (
+from tests.support.fixtures_test_executable_component_v2_schemas import _official_validator
+from tests.support.fixtures_test_package_release_contracts import (
     PackageReleaseContractTests,
     _identity,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class PackageAdapterTests(unittest.TestCase):

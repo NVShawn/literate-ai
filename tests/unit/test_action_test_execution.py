@@ -36,9 +36,9 @@ from literate_ai.contracts import (
 )
 from literate_ai.contracts.generation_cache import CachedSourceFile
 from literate_ai.storage import FileSystemCAS
-from tests.unit import test_standard_transferred_build as build_fixture
+from tests.support import fixtures_test_standard_transferred_build as build_fixture
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
-from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 
 class ActionTestExecutionTests(unittest.TestCase):

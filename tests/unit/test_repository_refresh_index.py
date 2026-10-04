@@ -19,8 +19,8 @@ from literate_ai.contracts.repository_refresh import (
     RepositoryRefreshRequest,
     RepositoryRefreshTarget,
 )
-from tests.unit.test_repository_orchestration import git, repository, snapshot
-from tests.unit.test_repository_tree import tree
+from tests.support.fixtures_test_repository_orchestration import git, repository, snapshot
+from tests.support.fixtures_test_repository_tree import tree
 
 
 class RefreshIndexTests(unittest.TestCase):

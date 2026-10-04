@@ -14,8 +14,8 @@ from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_id
 from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecycleError
 from literate_ai.adapters.qualification_capture import QualificationEvidenceRecorder
 from literate_ai.contracts import canonical_identity
-from tests.unit import test_action_build_source as source_fixture
-from tests.unit.test_action_build_record import build_worker_input
+from tests.support import fixtures_test_action_build_source as source_fixture
+from tests.support.fixtures_test_action_build_record import build_worker_input
 
 
 class ActionBuildExecutionTests(unittest.TestCase):

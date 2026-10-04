@@ -28,8 +28,8 @@ from literate_ai.security import (
 )
 from literate_ai.sources import QuarantineStore
 from literate_ai.storage import BlobRef, ReferenceIndex
-from tests.unit import test_native_sdk_recipes
-from tests.unit.test_repository_sources import source_intelligence_policy
+from tests.support import fixtures_test_native_sdk_recipes as test_native_sdk_recipes
+from tests.support.fixtures_test_repository_sources import source_intelligence_policy
 
 
 class NativeSdkSourceBuildTests(unittest.TestCase):

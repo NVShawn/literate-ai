@@ -17,7 +17,7 @@ from literate_ai.source_to_specification.promotion_materialization import (
     SourcePromotionMaterializer,
     _read_regular_file_windows,
 )
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 def content_identity(content: bytes) -> str:

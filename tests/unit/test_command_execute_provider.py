@@ -34,10 +34,10 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerKind,
 )
 from literate_ai.storage import FileSystemCAS
-from tests.unit import test_action_execute_providers as provider_fixture
-from tests.unit import test_standard_local_command_adapter as local_fixture
-from tests.unit.test_standard_project_factory import _command_contracts
-from tests.unit.test_standard_provider_worker import _CHILD
+from tests.support import fixtures_test_action_execute_providers as provider_fixture
+from tests.support import fixtures_test_standard_local_command_adapter as local_fixture
+from tests.support.fixtures_test_standard_project_factory import _command_contracts
+from tests.support.fixtures_test_standard_provider_worker import _CHILD
 
 _RECEIVER = """
 import os, sys

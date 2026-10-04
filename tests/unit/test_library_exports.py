@@ -26,9 +26,9 @@ from literate_ai.contracts import (
     ExecutionWorkerKind,
     canonical_identity,
 )
-from tests.unit.test_artifact_exports import dispatch_request
-from tests.unit.test_cli_rebuild import invoke
-from tests.unit.test_library_products import library_product
+from tests.support.fixtures_test_artifact_exports import dispatch_request
+from tests.support.fixtures_test_cli_rebuild import invoke
+from tests.support.fixtures_test_library_products import library_product
 
 
 class LibraryExportTests(unittest.TestCase):

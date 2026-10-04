@@ -11,7 +11,7 @@ from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
 from literate_ai.adapters.lifecycle.standard_local import LocalStandardLifecycleError
 from literate_ai.adapters.qualification_capture import QualificationEvidenceRecorder
 from literate_ai.contracts import canonical_identity
-from tests.unit import test_action_provider_build as provider_fixture
+from tests.support import fixtures_test_action_provider_build as provider_fixture
 
 
 class BuildProviderMaterializationTests(unittest.TestCase):
@@ -125,7 +125,7 @@ class BuildProviderMaterializationTests(unittest.TestCase):
         from literate_ai.contracts import ComponentCommandPhase
         from literate_ai.contracts.generation_cache import CachedSourceFile
         from tests.unit.standard_source_evidence_fixture import register_strict_source
-        from tests.unit.test_component_node_generation_preparation import _fixture
+        from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
         snapshot, execution = _fixture()
         provider = self.fixture.receipt
@@ -233,7 +233,7 @@ class BuildProviderMaterializationTests(unittest.TestCase):
 
             from literate_ai.adapters.action_build_worker import ConfiguredBuildWorker
             from literate_ai.adapters.lifecycle import LocalComponentToolBinding
-            from tests.unit.test_action_build_action import build_request
+            from tests.support.fixtures_test_action_build_action import build_request
 
             code = """
 import json, os, sys
@@ -355,7 +355,7 @@ raise SystemExit(main(runtime_factory=runtime))
         from literate_ai.adapters.action_dispatch_wire import record_identity
         from literate_ai.adapters.action_provider_build import capture_provider_build
         from literate_ai.contracts import ComponentCommandPhase
-        from tests.unit.test_component_node_generation_preparation import _fixture
+        from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
         old = self.fixture.fixture.producer
         contract = next(iter(old.contracts.values()))

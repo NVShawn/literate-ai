@@ -45,8 +45,8 @@ from literate_ai.contracts import (
 )
 from literate_ai.models import Locality, ModelEndpoint
 from literate_ai.storage import FileSystemCAS
-from tests.unit.test_source_cache import _configuration, _identity, _target
-from tests.unit.test_standard_source_cache_roundtrip import _source_admission_entry
+from tests.support.fixtures_test_source_cache import _configuration, _identity, _target
+from tests.support.fixtures_test_standard_source_cache_roundtrip import _source_admission_entry
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _SAMPLE_ROOT = _REPOSITORY_ROOT / "samples" / "hello-component"

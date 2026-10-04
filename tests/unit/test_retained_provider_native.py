@@ -12,9 +12,9 @@ from literate_ai.adapters.standard_project import (
     project_locked_standard_toolchain_closure,
 )
 from literate_ai.projects import PinnedInputClosureError
-from tests.unit import test_retained_provider_authority as provider_fixtures
-from tests.unit import test_retained_provider_generation as generation_fixtures
-from tests.unit import test_standard_command_projection as command_fixtures
+from tests.support import fixtures_test_retained_provider_authority as provider_fixtures
+from tests.support import fixtures_test_retained_provider_generation as generation_fixtures
+from tests.support import fixtures_test_standard_command_projection as command_fixtures
 
 
 class RetainedProviderNativeTests(unittest.TestCase):

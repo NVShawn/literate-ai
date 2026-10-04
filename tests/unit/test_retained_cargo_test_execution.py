@@ -17,7 +17,7 @@ from literate_ai.adapters.retained_cargo_test_execution import (
 from literate_ai.contracts.cargo_workspace import CargoTargetExpectation
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.retained_cargo_tests import RetainedCargoTestTarget
-from tests.unit import test_retained_cargo_test_observation as fixtures
+from tests.support import fixtures_test_retained_cargo_test_observation as fixtures
 
 
 @unittest.skipUnless(

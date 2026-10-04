@@ -20,8 +20,8 @@ from literate_ai.adapters._write_reservations import WriteReservationSet
 from literate_ai.adapters.repository_orchestration import OrchestrationInventoryError
 from literate_ai.contracts.repository_tree import RepositoryTreeCapturePolicy
 from literate_ai.projects import parse_project_configuration
-from tests.unit import test_refresh_file_custody as fixtures
-from tests.unit.test_repository_orchestration import git, snapshot
+from tests.support import fixtures_test_refresh_file_custody as fixtures
+from tests.support.fixtures_test_repository_orchestration import git, snapshot
 
 
 class RepositoryRefreshApplicationTests(unittest.TestCase):

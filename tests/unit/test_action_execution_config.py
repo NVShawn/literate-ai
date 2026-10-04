@@ -34,10 +34,10 @@ from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.contracts.execution_dispatch import ExecutionWorkerCatalog
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from literate_ai.contracts.worker_capabilities import WorkerHardwareObservationCatalog
-from tests.unit import test_cli_worker_health as health_fixture
-from tests.unit import test_standard_action_indexing as factory_fixture
+from tests.support import fixtures_test_cli_worker_health as health_fixture
+from tests.support import fixtures_test_standard_action_indexing as factory_fixture
 from tests.unit.action_deadline import ACTION_TEST_DEADLINE
-from tests.unit.test_action_blob_source import blob_path, source_cas_server
+from tests.support.fixtures_test_action_blob_source import blob_path, source_cas_server
 
 
 class ActionExecutionConfigurationTests(unittest.TestCase):

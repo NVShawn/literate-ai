@@ -9,7 +9,7 @@ from literate_ai.adapters.dependencies.python_source import (
     prepare_python_source_authority,
 )
 from literate_ai.adapters.dependencies.types import DependencyObservationError
-from tests.unit.test_python_wheel_lock import document
+from tests.support.fixtures_test_python_wheel_lock import document
 
 
 class PythonSourceAuthorityTests(unittest.TestCase):

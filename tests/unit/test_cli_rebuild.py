@@ -635,7 +635,7 @@ class RebuildCliTests(unittest.TestCase):
         self,
     ) -> None:
         lifecycle_ports = Mock()
-        from tests.unit.test_library_products import library_product
+        from tests.support.fixtures_test_library_products import library_product
 
         product = library_product("rust")
         component_revision = product.artifact_export.component_revision

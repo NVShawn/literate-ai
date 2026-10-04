@@ -30,11 +30,11 @@ from literate_ai.contracts.executable_components.artifacts import (
     BuildSubActionKind,
     ComponentBuildManifest,
 )
-from tests.unit import test_artifact_graph_contracts as artifact_fixtures
-from tests.unit import test_component_execution_planning as planning_fixtures
-from tests.unit import test_component_generation_context as context_fixtures
-from tests.unit import test_package_release_contracts as package_fixtures
-from tests.unit.test_schema_catalog import SchemaCatalog
+from tests.support import fixtures_test_artifact_graph_contracts as artifact_fixtures
+from tests.support import fixtures_test_component_execution_planning as planning_fixtures
+from tests.support import fixtures_test_component_generation_context as context_fixtures
+from tests.support import fixtures_test_package_release_contracts as package_fixtures
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 ROOT = Path(__file__).resolve().parents[2]
 V2_ROOT = ROOT / "schemas" / "v2"

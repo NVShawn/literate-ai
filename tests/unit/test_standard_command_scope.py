@@ -13,9 +13,9 @@ from literate_ai.adapters.lifecycle import (
 from literate_ai.adapters.lifecycle.standard_bazel import StandardBazelLifecyclePorts
 from literate_ai.adapters.lifecycle.standard_cargo import StandardCargoLifecyclePorts
 from literate_ai.contracts import ComponentCommandPhase, ComponentCommandToolBinding
-from tests.unit import test_standard_npm_lifecycle as npm_tests
-from tests.unit.test_component_node_generation_preparation import _fixture
-from tests.unit.test_standard_local_command_adapter import (
+from tests.support import fixtures_test_standard_npm_lifecycle as npm_tests
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_standard_local_command_adapter import (
     _identity,
     _python_copy_lifecycle,
 )
@@ -229,7 +229,7 @@ class StandardCustodyOnlyTests(unittest.TestCase):
         from literate_ai.adapters.qualification_capture import (
             QualificationEvidenceRecorder,
         )
-        from tests.unit import test_standard_transferred_build as transferred
+        from tests.support import fixtures_test_standard_transferred_build as transferred
 
         fixture = transferred.StandardTransferredBuildTests()
         self.addCleanup(fixture.doCleanups)

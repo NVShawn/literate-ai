@@ -12,7 +12,7 @@ from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
 from literate_ai.adapters.local_test_handoff import LocalBuildTestHandoff
 from literate_ai.contracts import ComponentCommandPhase
 from literate_ai.storage import FileSystemCAS
-from tests.unit import test_command_builder as builder_fixture
+from tests.support import fixtures_test_command_builder as builder_fixture
 
 
 class LocalTestHandoffTests(unittest.TestCase):

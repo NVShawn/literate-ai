@@ -23,8 +23,8 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from tests.unit.test_component_node_generation_preparation import _fixture
-from tests.unit.test_standard_local_command_adapter import _python_copy_lifecycle
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_standard_local_command_adapter import _python_copy_lifecycle
 
 
 class StandardSourceValidationTests(unittest.TestCase):

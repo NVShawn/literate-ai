@@ -68,12 +68,12 @@ from literate_ai.generated_tests import (
     validate_generated_test_suite,
 )
 from literate_ai.security import AuthorizationError, SecurityPolicy
-from tests.unit import test_native_sdk_source_build
-from tests.unit.test_component_node_generation_preparation import _budget
-from tests.unit.test_native_sdk_preparation import preparation_recipe
-from tests.unit.test_repository_sources import source_intelligence_policy
-from tests.unit.test_standard_command_projection import _observation, _tool
-from tests.unit.test_standard_project_factory import _selection
+from tests.support import fixtures_test_native_sdk_source_build as test_native_sdk_source_build
+from tests.support.fixtures_test_component_node_generation_preparation import _budget
+from tests.support.fixtures_test_native_sdk_preparation import preparation_recipe
+from tests.support.fixtures_test_repository_sources import source_intelligence_policy
+from tests.support.fixtures_test_standard_command_projection import _observation, _tool
+from tests.support.fixtures_test_standard_project_factory import _selection
 
 _SDK_CASES = (
     ("scale-example", 2, 4, "8", "example"),

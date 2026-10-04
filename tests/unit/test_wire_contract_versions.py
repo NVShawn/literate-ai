@@ -45,8 +45,8 @@ from literate_ai.source_to_specification import (
     normalize_source_to_specification_result,
 )
 from literate_ai.version import DISTRIBUTION_VERSION
-from tests.unit.test_schema_catalog import SchemaCatalog
-from tests.unit.test_source_generation_boundary_contracts import (
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+from tests.support.fixtures_test_source_generation_boundary_contracts import (
     _candidate,
     _identity,
     _provenance,

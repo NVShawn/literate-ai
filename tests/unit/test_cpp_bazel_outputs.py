@@ -76,7 +76,7 @@ from literate_ai.generated_tests import (
     MAJOR_REBUILD_GENERATION_MODE,
     validate_generated_test_suite,
 )
-from tests.unit.test_standard_command_projection import _locked_snapshot
+from tests.support.fixtures_test_standard_command_projection import _locked_snapshot
 
 
 def target(layout, test="tests/run"):
@@ -1731,8 +1731,8 @@ namespace sample { SAMPLE_API int add(int, int); }
             ComponentCommandToolBinding,
             ContentIdentity,
         )
-        from tests.unit.test_component_command_contracts import contract
-        from tests.unit.test_library_products import library_product
+        from tests.support.fixtures_test_component_command_contracts import contract
+        from tests.support.fixtures_test_library_products import library_product
 
         binding = LocalComponentToolBinding(
             tool.command[0],

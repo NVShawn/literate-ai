@@ -12,7 +12,7 @@ import unittest
 from literate_ai.adapters.native_sdk_package import NativeSdkPackageResources
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.storage.cas import BlobIntegrityError
-from tests.unit import test_native_sdk_consumer
+from tests.support import fixtures_test_native_sdk_consumer as test_native_sdk_consumer
 
 
 class NativeSdkPackageTests(unittest.TestCase):

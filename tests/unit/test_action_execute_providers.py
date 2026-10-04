@@ -25,9 +25,9 @@ from literate_ai.application.standard_execution_inputs import (
 from literate_ai.contracts import ComponentCommandPhase
 from literate_ai.contracts.capabilities import DependencyKind
 from literate_ai.contracts.generation_cache import CachedSourceFile
-from tests.unit import test_action_provider_build as provider_fixture
+from tests.support import fixtures_test_action_provider_build as provider_fixture
 from tests.unit.standard_source_evidence_fixture import register_strict_source
-from tests.unit.test_component_node_generation_preparation import _fixture
+from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 
 
 class ExecuteProviderTests(unittest.TestCase):
@@ -213,7 +213,7 @@ class ExecuteProviderTests(unittest.TestCase):
 
         from literate_ai.adapters.action_execute_worker import ConfiguredExecuteWorker
         from literate_ai.adapters.lifecycle import LocalComponentToolBinding
-        from tests.unit.test_action_execute_action import make_execute_request
+        from tests.support.fixtures_test_action_execute_action import make_execute_request
 
         request, records = make_execute_request(self.value, self.fixture.deadline)
         worker = ConfiguredExecuteWorker(

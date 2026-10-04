@@ -30,8 +30,8 @@ from literate_ai.contracts.provider_resolution import (
     resolve_provider,
     resolve_provider_declaration,
 )
-from tests.unit.test_component_execution_planning import _diamond_lock
-from tests.unit.test_component_lock_planning import _fixture
+from tests.support.fixtures_test_component_execution_planning import _diamond_lock
+from tests.support.fixtures_test_component_lock_planning import _fixture
 
 
 def capability_set(provider_id: str, *capabilities: str) -> ProviderCapabilitySet:

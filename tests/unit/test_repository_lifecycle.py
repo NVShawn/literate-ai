@@ -32,7 +32,7 @@ from literate_ai.contracts.repository_orchestration import (
     RepositoryOrchestration,
     RepositoryPin,
 )
-from tests.unit.test_repository_orchestration import git, repository
+from tests.support.fixtures_test_repository_orchestration import git, repository
 
 
 class RepositoryLifecycleTests(unittest.TestCase):

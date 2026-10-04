@@ -7,7 +7,7 @@ from unittest.mock import patch
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
 from literate_ai.adapters.command_authorizer import CommandBuildAuthorizer
 from literate_ai.contracts.identity import canonical_identity
-from tests.unit import test_standard_action_planning as plan_fixture
+from tests.support import fixtures_test_standard_action_planning as plan_fixture
 
 
 class StandardActionAuthorizationTests(unittest.TestCase):

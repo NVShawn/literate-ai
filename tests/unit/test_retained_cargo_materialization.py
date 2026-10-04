@@ -13,9 +13,9 @@ from literate_ai.adapters.retained_cargo_files import read_retained_cargo_files
 from literate_ai.adapters.retained_package_tree import write_staged_package
 from literate_ai.contracts.identity import canonical_json_bytes
 from literate_ai.projects import serialize_project_configuration
-from tests.unit import test_project_configuration as projects
-from tests.unit import test_retained_cargo_import as imports
-from tests.unit.test_retained_cargo_files import blob
+from tests.support import fixtures_test_project_configuration as projects
+from tests.support import fixtures_test_retained_cargo_import as imports
+from tests.support.fixtures_test_retained_cargo_files import blob
 
 
 class RetainedCargoMaterializationTests(unittest.TestCase):

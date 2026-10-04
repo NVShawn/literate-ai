@@ -26,7 +26,7 @@ from literate_ai.source_to_specification.promotion_materialization import (
     VerifiedSourcePromotionEvidence,
     generation_input_subset_identity,
 )
-from tests.unit import test_cli_locked_generation as fixtures
+from tests.support import fixtures_test_cli_locked_generation as fixtures
 
 
 def _inventory(root):

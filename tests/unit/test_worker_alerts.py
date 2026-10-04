@@ -30,7 +30,7 @@ from literate_ai.contracts import (
     QuotaCapacitySample,
     canonical_identity,
 )
-from tests.unit.test_worker_capacity import (
+from tests.support.fixtures_test_worker_capacity import (
     JOB,
     NOT_APPLICABLE,
     NOW,
