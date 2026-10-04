@@ -26,6 +26,23 @@ class RetainedProjectInputError(ValueError):
     """An input could not be captured under its reviewed identity."""
 
 
+def _same_open_file(path_stat: os.stat_result, open_stat: os.stat_result) -> bool:
+    """Compare a path ``lstat`` with the open handle's ``fstat``.
+
+    On Windows, path and handle stats report file identity through different APIs
+    (128-bit versus 64-bit file IDs), so only type, size and modification time are
+    comparable there; path-to-path comparisons still use the full stamp.
+    """
+
+    if os.name == "nt":
+        return (
+            stat.S_IFMT(path_stat.st_mode) == stat.S_IFMT(open_stat.st_mode)
+            and path_stat.st_size == open_stat.st_size
+            and path_stat.st_mtime_ns == open_stat.st_mtime_ns
+        )
+    return _stamp(path_stat) == _stamp(open_stat)
+
+
 def _stamp(value: os.stat_result) -> tuple[int, ...]:
     return (
         value.st_dev,
@@ -87,7 +104,9 @@ def _stream(
     digest = hashlib.sha256()
     count = 0
     with os.fdopen(descriptor, "rb") as stream:
-        if _stamp(os.fstat(stream.fileno())) != _stamp(before):
+        if not _same_open_file(before, os.fstat(stream.fileno())) or _stamp(
+            before
+        ) != _stamp(_safe(root, name).lstat()):
             raise RetainedProjectInputError("Retained input changed before read")
         while data := stream.read(min(_CHUNK, limit - count + 1)):
             count += len(data)
@@ -98,7 +117,7 @@ def _stream(
                 output.write(data)
         after = os.fstat(stream.fileno())
     if (
-        _stamp(before) != _stamp(after)
+        not _same_open_file(before, after)
         or _stamp(before) != _stamp(_safe(root, name).lstat())
         or count != before.st_size
     ):
