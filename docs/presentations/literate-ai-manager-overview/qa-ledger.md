@@ -188,9 +188,9 @@
 - Empty `CODEX_HOME` plus `make doc-toolchain-bootstrap` regenerated both members from
   the checked-in package into a temp output (checked-in PPTX/DOCX bytes unchanged).
   Independent document-pair oracle: **11 pass, 0 fail, 0 not-applicable**.
-- Tests: `tests.unit.test_doc_toolchain_regenerate` (plugin discovery retained,
+- Tests: `tests.e2e.test_doc_toolchain_regenerate` (plugin discovery retained,
   bootstrap-directed failure without plugin or toolchain, checked-in package oracle,
-  vanilla regenerate + oracle) and `tests.unit.test_doc_toolchain_bootstrap`.
+  vanilla regenerate + oracle) and `tests.smoke.test_doc_toolchain_bootstrap`.
 - Live Google Slides were not regenerated.
 
 ## 2026-08-28 document-pair layout authority (DOC-PAIR-001)
@@ -473,7 +473,7 @@
   missing notes page, an element outside the surface, a surface disagreeing with the
   declaration, and an unresolved placeholder. All ten were caught, and a control confirms
   the unmutated realization is still accepted. These are retained as
-  `tests/unit/test_document_pair_oracle.py` (14 tests).
+  `tests/critical/test_document_pair_oracle.py` (14 tests).
 
 ## 2026-08-09 publication of the 22-slide revision
 

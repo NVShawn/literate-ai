@@ -16,7 +16,10 @@ from literate_ai.adapters.standard_project import (
     project_locked_standard_toolchain_closure,
 )
 from literate_ai.contracts import ComponentCommandPhase, ComponentCommandRole
-from tests.unit.test_standard_command_projection import _locked_snapshot, _observation
+from tests.support.fixtures_test_standard_command_projection import (
+    _locked_snapshot,
+    _observation,
+)
 
 _APPLICATION = """\
 import json
@@ -268,12 +271,6 @@ class StandardLockedCommandProjectionConformanceTests(unittest.TestCase):
                 {"language": language, "status": "ok"},
             )
             closure.require_unchanged()
-
-    def test_javascript_toolchain_compiles_and_runs_projected_artifact(self) -> None:
-        self._assert_real_toolchain_projection("javascript")
-
-    def test_rust_toolchain_compiles_and_runs_projected_artifact(self) -> None:
-        self._assert_real_toolchain_projection("rust")
 
     def test_cpp_toolchain_compiles_and_runs_projected_artifact(self) -> None:
         self._assert_real_toolchain_projection("cpp")

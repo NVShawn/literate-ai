@@ -33,7 +33,7 @@
 ## File map
 
 - Create: `src/literate_ai/adapters/host_self_update.py` — enrollment, cache, GitHub selection, staging, apply, re-exec, worker.
-- Create: `tests/unit/test_host_self_update.py` — hermetic coverage for the adapter.
+- Create: `tests/critical/test_host_self_update.py` — hermetic coverage for the adapter.
 - Modify: `src/literate_ai/adapters/user_paths.py` — add `@2` schema constant; keep `@1` for uninstall compatibility.
 - Modify: `scripts/install_litai.py` — write `@2` with `self_update: true`.
 - Modify: `scripts/litai-launcher`, `scripts/litai-launcher.cmd` — export host-install env.
@@ -49,11 +49,11 @@
 **Files:**
 - Modify: `src/literate_ai/adapters/user_paths.py`
 - Create: `src/literate_ai/adapters/host_self_update.py`
-- Create: `tests/unit/test_host_self_update.py`
+- Create: `tests/critical/test_host_self_update.py`
 - Modify: `scripts/install_litai.py`
 - Modify: `scripts/litai-launcher`
 - Modify: `scripts/litai-launcher.cmd`
-- Modify: `tests/unit/test_install_litai.py` if it asserts exact `@1` JSON
+- Modify: `tests/smoke/test_install_litai.py` if it asserts exact `@1` JSON
 
 **Interfaces:**
 - Consumes: `HostInstallLayout.for_prefix`
@@ -70,7 +70,7 @@
 - [x] **Step 1: Write failing enrollment tests**
 
 ```python
-# tests/unit/test_host_self_update.py
+# tests/critical/test_host_self_update.py
 from __future__ import annotations
 
 import json
@@ -176,7 +176,7 @@ class HostSelfUpdateEnrollmentTests(unittest.TestCase):
 
 - [x] **Step 2: Run the test to verify it fails**
 
-Run: `PYTHONPATH=src python3 -m unittest tests.unit.test_host_self_update -v`
+Run: `PYTHONPATH=src python3 -m unittest tests.critical.test_host_self_update -v`
 
 Expected: FAIL because `host_self_update` is missing.
 
@@ -208,7 +208,7 @@ Expected: PASS.
 
 **Files:**
 - Modify: `src/literate_ai/adapters/host_self_update.py`
-- Modify: `tests/unit/test_host_self_update.py`
+- Modify: `tests/critical/test_host_self_update.py`
 
 **Interfaces:**
 - Consumes: `HostSelfUpdateEnrollment`, `literate_ai.version.DISTRIBUTION_VERSION`
@@ -246,7 +246,7 @@ Do not perform I/O in these functions.
 
 **Files:**
 - Modify: `src/literate_ai/adapters/host_self_update.py`
-- Modify: `tests/unit/test_host_self_update.py`
+- Modify: `tests/critical/test_host_self_update.py`
 
 **Interfaces:**
 - Consumes: Task 2 types, `urllib.request` injected as a fetch callable
@@ -287,7 +287,7 @@ Use `urllib.request.Request` like `host_install._download_artifact`, timeout 10.
 
 **Files:**
 - Modify: `src/literate_ai/adapters/host_self_update.py`
-- Modify: `tests/unit/test_host_self_update.py`
+- Modify: `tests/critical/test_host_self_update.py`
 
 **Interfaces:**
 - Consumes: enrollment, staged wheel, `DISTRIBUTION_VERSION`
@@ -330,7 +330,7 @@ Order in `maybe_host_self_update`:
 
 **Files:**
 - Modify: `src/literate_ai/cli/dispatch.py` (`main` at line 2697)
-- Modify: `tests/unit/test_host_self_update.py` or a small `tests/unit/test_cli_self_update_hook.py`
+- Modify: `tests/critical/test_host_self_update.py` or a small `tests/unit/test_cli_self_update_hook.py`
 
 **Interfaces:**
 - Consumes: `maybe_host_self_update`
@@ -361,7 +361,7 @@ Pass the same `argv` the caller provided so tests that inject `argv=` still work
 
 **Files:**
 - Modify: `src/literate_ai/adapters/host_uninstall.py`
-- Modify: `tests/unit/test_host_uninstall.py`
+- Modify: `tests/critical/test_host_uninstall.py`
 
 **Interfaces:**
 - Consumes: both manifest schemas
@@ -373,7 +373,7 @@ Keep the existing `@1` fixture working. Add an `@2` fixture with a `self-update/
 
 Replace `document != expected` with a field-wise check: required keys match layout; schema is `@1` or `@2`; if `@2`, `self_update is True`.
 
-- [x] **Step 2: Run `tests.unit.test_host_uninstall`; expect FAIL on `@2`**
+- [x] **Step 2: Run `tests.critical.test_host_uninstall`; expect FAIL on `@2`**
 
 - [x] **Step 3: Implement dual-schema planning; rmtree staging as part of application_root cleanup (already happens if the whole application_root is removed — ensure staging does not prevent `rmdir`. Today uninstall removes launcher, rmtree environment, unlink manifest, then rmdir application_root if empty. Staging would block that rmdir. Explicitly `shutil.rmtree(application_root / "self-update")` before the empty-root rmdir, or rmtree application_root only if it contains solely owned children. Prefer: remove known owned children (venv, manifest, self-update) then rmdir if empty. Do not recursively delete unknown files in application_root.**
 

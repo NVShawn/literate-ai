@@ -50,7 +50,7 @@ Contract areas and the first migrated slices:
 | Contract area | Public surface | Isolated unit still required | First migrated slice |
 | --- | --- | --- | --- |
 | Component-lock review | `litai lock --large-review` | semantic-diff bounds, page chaining | CLI transaction tests keep lock bytes on disk |
-| Intent refinement | `litai design refine\|explain\|accept` | none beyond schema round-trip | `tests/unit/test_intent_refinement.py` |
+| Intent refinement | `litai design refine\|explain\|accept` | none beyond schema round-trip | `tests/smoke/test_intent_refinement.py` |
 | Release protocol | `litai release plan\|prepare\|check\|publish` | Git write-transaction rollback | already public in `test_project_releases.py` |
 | Sample execution | `_load_sample` / execution interface | canonical identity of harness bytes | persistent-service and web-application kinds |
 | Coding CLI fallback | `CodingCliSourceGenerator.generate`, `CodingCliTaskRunner.run_json_task` | phrase classification | JSON-task quota fallback |
@@ -71,5 +71,5 @@ disk. After that slice, mock counts still concentrate here (highest first):
 | Rebuild / workers / SSH | `test_cli_rebuild.py`, worker and SSH suites | process and transport seams | mock only those true external boundaries |
 
 JSON-task quota fallback now drives `CodingCliTaskRunner.run_json_task` through
-stub executables on `PATH` in `tests/unit/test_coding_cli_quota_fallback.py`.
+stub executables on `PATH` in `tests/smoke/test_coding_cli_quota_fallback.py`.
 Phrase classification remains an isolated unit around `_coding_cli_quota_denied`.

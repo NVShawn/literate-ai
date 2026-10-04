@@ -885,7 +885,7 @@ CI-IMPACT-001. #251 remains RELEASE-017 / GOLDEN-PATH-001.
   - [ ] Wire the contract into the live worker dispatch/fetch pipeline
 - **Evidence:**
   - [x] Focused tests cover acquisition, use during fetch, and expiry without catalog writes
-        (`tests/unit/test_worker_forge_credentials.py`)
+        (`tests/critical/test_worker_forge_credentials.py`)
   - [ ] Controller-to-worker SSH stays a separate credential class
 
 ### [ ] LIBRARY-ARTIFACT-001 — Admit an importable library-artifact Component
@@ -5012,8 +5012,8 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
   - [x] Architecture/CLI inventory, hotfix citation, skills.md table
   - [x] Catalog/template parity and focused tests
 - **Evidence:**
-  - [x] Focused `tests.unit.test_project_releases` and tracker inspect tests
-  - [x] `tests.unit.test_cli_help` command-reference inventory
+  - [x] Focused `tests.e2e.test_project_releases` and tracker inspect tests
+  - [x] `tests.smoke.test_cli_help` command-reference inventory
   - [x] Catalog/template nested skills byte-identical; `make skills-check`
         SkillEvaluator 20260829151821–20260829151824 (8 skills, 6/6 each).
   - [x] Documentation-authority marker current after architecture edits
@@ -5068,10 +5068,10 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
         once the line exists; a per-patch `release/x.y.z` name fails
         `release.branch_not_release_line`; `prepare` leaves the operator on the
         new line; `check` accepts that line even when `source_branch` is still
-        the trunk. `tests.unit.test_project_releases` 52 tests OK.
+        the trunk. `tests.e2e.test_project_releases` 52 tests OK.
   - [x] Catalog and template `release-project` skills are byte-identical;
         `make skills-check` passes (SkillEvaluator 20260827180622).
-  - [x] Focused `tests.unit.test_project_releases` pass; `make lint` and
+  - [x] Focused `tests.e2e.test_project_releases` pass; `make lint` and
         `make skills-check` are current; lifecycle-driver pin
         `sha256:c9d8f0a5ad8bb71c91d69b0045f5c68c9a2a2692f0e69b5d6b1192dfa69c4457`.
 
@@ -5189,7 +5189,7 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
         `make samples` remains FLAVOR-005 evidence. Do not tag `v0.8.0`.
   - [x] A downstream-sized fixture completes through bounded pages and one atomic
         replacement.
-        `tests.unit.test_cli_component_locks.ComponentLockCliTests.test_ide_shell_shaped_review_completes_three_pages`
+        `tests.smoke.test_cli_component_locks.ComponentLockCliTests.test_ide_shell_shaped_review_completes_three_pages`
         passed 2026-08-28 (1025 nested plugin keys, three 512-entry pages, one apply).
         `test_omitted_optional_mcp_roots_do_not_block_cache_binding` covers the
         review-storage regression from optional catalog fields.
@@ -6214,7 +6214,7 @@ investigated and explicitly deferred with reasoning rather than rushed.
   a `coding_cli_metadata_retry` operation-log event per attempt; any other error code,
   or exhausting the bound, still fails closed with the original typed error.
 - **Evidence:**
-  - [x] `tests/unit/test_coding_cli_generation.py::CodingCliInvocationTests` covers a
+  - [x] `tests/critical/test_coding_cli_generation.py::CodingCliInvocationTests` covers a
         reproduced case succeeding through the bounded automatic retry without caller
         intervention, and a persistently malformed case still failing closed after the
         bound is exhausted.
@@ -6322,7 +6322,7 @@ investigated and explicitly deferred with reasoning rather than rushed.
   - [x] `--build-dir`/`--obj-dir` accepted by `litai rebuild` and routed through
         `bind_cache_directories()`.
   - [x] Flag-over-environment precedence covered by regression tests, including a
-        disagreeing flag/environment pair (`tests/unit/test_build_cache_directories.py`).
+        disagreeing flag/environment pair (`tests/critical/test_build_cache_directories.py`).
   - [x] Candidate test receipt carries the resolved cache-directory custody identity,
         tolerated as absent when reading a receipt written before this change.
 
@@ -6356,7 +6356,7 @@ investigated and explicitly deferred with reasoning rather than rushed.
 - **Completion evidence:** generate() retries the three `generated_tests.*`
   contract codes with the existing fresh-workspace bound.
 - **Evidence:**
-  - [x] `tests/unit/test_coding_cli_generation.py` recovers on a first
+  - [x] `tests/critical/test_coding_cli_generation.py` recovers on a first
         `generated_tests.duplicate_arguments` payload and fails closed after
         exhausting the bound.
   - [x] `tests/unit/test_sample_checkpoint.py` lists the expanded retry set and
@@ -6438,8 +6438,8 @@ investigated and explicitly deferred with reasoning rather than rushed.
 - **2026-08-28 remaining evidence:** `require_live_cursor_hook` is implemented. Missing
   channel/key without a stop-hook raises `inherited_session.current_session_unavailable`
   before `runtime_configuration_invalid`. Covered in
-  `tests/unit/test_cursor_inherited_session.py` and
-  `tests/unit/test_inherited_session_provider.py`.
+  `tests/smoke/test_cursor_inherited_session.py` and
+  `tests/critical/test_inherited_session_provider.py`.
 - **2026-08-23 implementation evidence:** `make inherited-session-check` passes 86
   protocol/adapter/admission tests; `make format-check lint openspec-check
   documentation-check` passes. A synthetic full directory transaction exercised the
@@ -6954,7 +6954,7 @@ investigated and explicitly deferred with reasoning rather than rushed.
 - **Evidence:**
   - [x] `--target local` dispatches through the configured private worker fleet and
         fails closed when unconfigured or unreachable:
-        `tests/unit/test_project_releases.py::ReleaseTargetTests::test_target_local_dispatches_through_the_configured_worker_fleet`,
+        `tests/e2e/test_project_releases.py::ReleaseTargetTests::test_target_local_dispatches_through_the_configured_worker_fleet`,
         `::test_target_local_fails_closed_when_worker_fleet_is_unconfigured`,
         `::test_target_local_fails_closed_when_worker_is_unreachable`.
   - [x] The release evidence records which target produced a passing gate:
@@ -7089,9 +7089,9 @@ investigated and explicitly deferred with reasoning rather than rushed.
   paths) invokes that exact configured path and never falls back to ambient discovery,
   while legacy workers without one keep the existing bounded discovery behavior.
 - **Evidence:**
-  - [x] `tests/unit/test_execution_dispatch_contracts.py::test_ssh_worker_lifecycle_
+  - [x] `tests/critical/test_execution_dispatch_contracts.py::test_ssh_worker_lifecycle_
         executable_is_identity_bound_and_ssh_only` and
-        `tests/unit/test_ssh_execution.py::test_receivers_use_configured_lifecycle_
+        `tests/smoke/test_ssh_execution.py::test_receivers_use_configured_lifecycle_
         executable_without_discovery` (both POSIX and Windows-path launcher forms)
         cover this; full unit suite passes.
 
@@ -7372,7 +7372,7 @@ the reported failure.
   (`RemoteExecutionControlResult.bind_imported_manifest`). The stdout bound itself was
   not raised.
 - **Evidence:**
-  - [x] `tests/unit/test_remote_execution.py::test_large_27_cell_manifest_uses_bounded_out_of_band_control`
+  - [x] `tests/critical/test_remote_execution.py::test_large_27_cell_manifest_uses_bounded_out_of_band_control`
         builds a synthetic 27-cell-scale manifest whose canonical bytes exceed 1 MiB,
         asserts the derived control result stays under 1 MiB and never embeds the
         large per-cell content, then proves `load_and_import_remote_evidence_bundle`
@@ -7580,7 +7580,7 @@ the reported failure.
 - **Evidence:**
   - [x] Root `SKILL.md` and `src/literate_ai/project_template/SKILL.md` both require
         conservative Windows-portable names and cite `MAX_PATH` 260.
-  - [x] `tests.unit.test_prompt_master_agent_skill` passes (4 tests); lifecycle-driver
+  - [x] `tests.critical.test_prompt_master_agent_skill` passes (4 tests); lifecycle-driver
         TCB re-pinned after the template copy; documentation-authority review recorded
         on the same revision.
 
@@ -8145,7 +8145,7 @@ the reported failure.
   - [x] Keep catalog and init-template copies aligned.
 - **Evidence:**
   - [x] Document-pair oracle rejects overlapping text-bearing frames and still
-        accepts the unmutated fixture (`tests.unit.test_document_pair_oracle`).
+        accepts the unmutated fixture (`tests.critical.test_document_pair_oracle`).
   - [x] Overview SKILL no longer names geometry-escape as the overflow gate.
 
 ### [ ] RELEASE-013 — Agent-owned patch content; remaining PROC-KILL call sites as 0.7.3
@@ -8339,7 +8339,7 @@ the reported failure.
 - **Evidence:**
   - [x] `docs/history/roadmap/release-branching-model.md` committed with the full model.
   - [x] `litai release backport` / `litai release backport-status` implemented,
-    tested (`tests/unit/test_project_releases.py::ReleaseBackportTests`), documented
+    tested (`tests/e2e/test_project_releases.py::ReleaseBackportTests`), documented
     (`docs/user/configuration-and-cli.md`).
 
 ## 0.6.0 planning — carried forward from 0.5.0's specification-hierarchy triage
@@ -9028,7 +9028,7 @@ the reported failure.
         `test_check_never_attempts_a_rebuild_on_runtime_version_drift` (asserts `check`
         raises without ever invoking `index`) in `tests/unit/test_codegraph_adapter.py`,
         plus `test_unhealthy_error_preserves_the_specific_underlying_reason` in
-        `tests/unit/test_project_source_index.py`.
+        `tests/smoke/test_project_source_index.py`.
 - **Evidence:**
   - [x] Reproduced this session's exact scenario locally (`codegraph` upgraded
         1.1.1 → 1.5.0 on this host, existing `.codegraph/` index) — verified live before
@@ -9106,7 +9106,7 @@ the reported failure.
         drift reporting, write-and-round-trip, and fetch-failure paths).
   - [x] The `darwin` scope decision is recorded above, not merely absent from the
         table, and is now backed by real pinned entries for both `arm64` and `x64`;
-        `tests/unit/test_remote_worker_bootstrap.py` covers `_capability_target`
+        `tests/e2e/test_remote_worker_bootstrap.py` covers `_capability_target`
         resolving every pinned platform including both darwin architectures.
 
 ### [x] DOC-PUB-001 — Keep generic authoring portable and publication provider-bound
@@ -9162,7 +9162,7 @@ the reported failure.
         `tools/doc-toolchain/authoring-toolchain.json` pins python-pptx/python-docx/lxml/Pillow;
         `scripts/bootstrap_doc_toolchain.py --detect|--install --allow-install` and
         `make doc-toolchain-bootstrap` install only into ignored OBJ_DIR.
-        `regenerate_python.sh` refuses silent pip. `tests.unit.test_doc_toolchain_bootstrap`.
+        `regenerate_python.sh` refuses silent pip. `tests.smoke.test_doc_toolchain_bootstrap`.
   - [x] Port the maintained deck builder onto the pinned python-pptx backend as the
         primary path. Plugin discovery remains fallback until semantic and visual
         parity pass. Live Google Slides were not regenerated.
@@ -9170,8 +9170,8 @@ the reported failure.
   - [x] Vanilla worker, empty `CODEX_HOME`, no Codex plugin: `regenerate.sh` rebuilds
         the checked-in package to temp outputs and
         `scripts/verify_document_pair.py` reports 11 pass / 0 fail.
-        `tests.unit.test_doc_toolchain_regenerate` plus
-        `tests.unit.test_doc_toolchain_bootstrap` under `LITAI_SESSION_ID=dev`.
+        `tests.e2e.test_doc_toolchain_regenerate` plus
+        `tests.smoke.test_doc_toolchain_bootstrap` under `LITAI_SESSION_ID=dev`.
   - [ ] Local and Google-exported visible text and notes remain exact, and every slide
         passes full visual review on at least macOS, Linux, and Windows.
 
@@ -9291,7 +9291,7 @@ the reported failure.
         `--no-testmon`. `scripts/run_impact_pytest.py` / `ci_impact_run.py`
         pass real `--testmon`. This repo's `python-check` / Windows shard jobs
         still do not use it. Landed as `620c4fa3` (isolated `48b6f5c0`).
-        `tests.unit.test_ci_impact_run` and `tests.unit.test_ci_test_plan`.
+        `tests.critical.test_ci_impact_run` and `tests.unit.test_ci_test_plan`.
   - [x] The skill does not assume pytest, Python, or this repository's own CI shape.
 
 ### [ ] PROC-KILL-001 — Windows process-tree kill misses late-spawned grandchildren
@@ -9315,7 +9315,7 @@ the reported failure.
 - **Reproduced live, independently, twice in one CI run (2026-08-16):** landing the
   CI-SHARD-001 Windows test-sharding split surfaced this exact bug class twice in a
   single run, in two different shards, via two different symptoms:
-  - `tests/unit/test_authorized_host_execution.py::AuthorizedHostExecutionTests::test_timeout_kills_host_process_descendants`
+  - `tests/critical/test_authorized_host_execution.py::AuthorizedHostExecutionTests::test_timeout_kills_host_process_descendants`
     — the descendant's sentinel file existed after the timeout kill, meaning the
     descendant was never actually terminated.
   - `tests/conformance/test_self_hosting.py::SnapshotReplicationConformanceTests::test_isolated_candidate_timeout_terminates_descendant_process_tree`
@@ -9417,7 +9417,7 @@ the reported failure.
   - [x] Direction (B) (adversarial second pass) deferred; see
         `docs/history/roadmap/coverage-gap-detection.md`.
 - **Evidence:**
-  - [x] Unit tests (`tests/unit/test_coverage_gaps.py`) cover: no gaps on fully
+  - [x] Unit tests (`tests/smoke/test_coverage_gaps.py`) cover: no gaps on fully
         implemented source; `NotImplementedError`/`TODO`/`None`-bound-handler markers
         each flagged with the correct reason code; nested files scanned; report
         identity stable and content-addressed.
@@ -9773,7 +9773,7 @@ the reported failure.
         `mcp-application` and nested `webmcp` plus catalog/template copies.
         `assert_generation_skills_are_mcp_free` and
         `generation_skill_requires_operator_mcp` still reject `~/.config/literate-ai`.
-  - [x] `tests.unit.test_app_stack_skills.AppStackSkillCatalogTests`: WebMCP pins
+  - [x] `tests.smoke.test_app_stack_skills.AppStackSkillCatalogTests`: WebMCP pins
         the MCP parent identity and fails closed without it; operator catalog
         ids are not product authority.
 
@@ -9836,8 +9836,8 @@ the reported failure.
 - **Evidence:**
   - [x] Catalog and project-template copies are byte-identical; exact dependency pins
         resolve in the initialized catalog.
-  - [x] `tests.unit.test_app_stack_skills`,
-        `tests.unit.test_project_initialization_adapter` (77 tests), and
+  - [x] `tests.smoke.test_app_stack_skills`,
+        `tests.e2e.test_project_initialization_adapter` (77 tests), and
         `tests.conformance.test_sample_acceptance_interfaces` (6 tests) pass.
   - [x] `make skills-check` admits every changed or added skill; browser verification
         scores B/88.5. `make lint`, `make format-check`, and `litai project validate` pass.
@@ -9902,7 +9902,7 @@ the reported failure.
   - [x] `+lang-javascript` / `+ui-react` stay JavaScript; `lang-javascript-react`
         is a UI alias, not a language pin
         (`test_explicit_javascript_pin_stays_javascript`).
-  - [x] Focused tests: `tests.unit.test_app_stack_skills` (16 tests) plus
+  - [x] Focused tests: `tests.smoke.test_app_stack_skills` (16 tests) plus
         flavor-markdown, skill-routing, schema, project-MCP, and wheel
         package-data checks. Harness-gap: no `samples/_harness/<id>/sample.json`
         for the new peers (same as python-service-example); live `make samples`
@@ -10262,7 +10262,7 @@ the reported failure.
   - [ ] `litai init --from /path/to/openstl-generator flavor:openscad` initializes
         a new project with the openscad Flavor, and `imports.json` records openstl-
         generator as the source with literate-ai in `transitive_ancestors`.
-  - [x] Focused `tests.unit.test_catalog_import` git copy/pin/credentials/file-URI
+  - [x] Focused `tests.smoke.test_catalog_import` git copy/pin/credentials/file-URI
         tests passed under `LITAI_SESSION_ID=dev` from isolated `8a4181ca`;
         cherry-picked as `59c01c6f`.
 
@@ -10664,7 +10664,7 @@ the reported failure.
   by pin hash instead of its current ad hoc lock-list identity. Directly affects trust in
   RELEASE-001's resumed gate runs.
 - **Evidence:**
-  - [x] `tests.unit.test_pinned_test_dispatch` — pin whose closure identity
+  - [x] `tests.critical.test_pinned_test_dispatch` — pin whose closure identity
         changes re-enters untested; sibling never opened.
   - [x] Tested pin skipped without reading declared inputs.
   - [x] No CACHE-007 admission → never scheduled; admitted pin enqueued.
@@ -10784,7 +10784,7 @@ the reported failure.
         frontend Components. Catalog and template `SKILL.md` copies stay
         byte-identical.
 - **Evidence:**
-  - [x] Lockfile-pinned npm composition path exists: `tests.unit.test_app_stack_skills`
+  - [x] Lockfile-pinned npm composition path exists: `tests.smoke.test_app_stack_skills`
         (axis, js-npm with/without JS), `test_javascript_ecosystem_skill`
         (detect-before-install), `test_flavor_add` (`flavor add js-npm`),
         `test_package_flavor_catalog` (catalog/template match including `js-npm`).
@@ -10806,7 +10806,7 @@ the reported failure.
         plans a Component draft from one island and `--apply` writes only that draft.
 - **Evidence:**
   - [x] A fixture already-managed tree can adopt one hand-authored island without
-        re-quarantining the whole project (`tests/unit/test_spec_merge.py`).
+        re-quarantining the whole project (`tests/critical/test_spec_merge.py`).
 
 ### [x] COMPONENT-KIND-001 — Make the CLI entrypoint contract a Component subclass
 
@@ -10942,7 +10942,7 @@ the reported failure.
 - **Evidence:**
   - [x] Fixture `tests/fixtures/lint-render-library` fails closed on
         `component_acceptance.render_drift` and passes when the snapshot matches.
-        `LITAI_SESSION_ID=dev` `tests.unit.test_lint_render_acceptance` — 8 tests
+        `LITAI_SESSION_ID=dev` `tests.smoke.test_lint_render_acceptance` — 8 tests
         OK.
 
 ### [x] FLAVOR-008 — Fail closed on duplicate packaging and document Flavor aliases
@@ -11875,7 +11875,7 @@ the reported failure.
   - [x] Unit/schema tests cover version transitions, dirty/wrong/upstream-diverged state,
         stale gates, tag collisions, missing credentials, artifact/SBOM drift, idempotent
         replay, partial provider failure, and secret-free receipts.
-        `tests/unit/test_project_releases.py` owns the protocol.
+        `tests/e2e/test_project_releases.py` owns the protocol.
   - [x] An installed wheel initializes a project, prepares a release in a temporary local
         Git remote, proves exact version/changelog/tag state, and publishes through a
         synthetic provider without network access.
@@ -13135,10 +13135,10 @@ the reported failure.
 - **Evidence:**
   - [x] SkillEvaluator passes Prompt Master at Tier 1 (quality A, 90.2/100); upstream
         commit/version/license, direct trigger, MAC bypass, onboarding, and byte-equal
-        template coverage pass in `tests/unit/test_prompt_master_agent_skill.py`; full
+        template coverage pass in `tests/critical/test_prompt_master_agent_skill.py`; full
         Python suite passes (2553 tests, 27 skipped); lifecycle and documentation
         authority are re-pinned.
-  - [x] `tests/unit/test_prompt_routing.py` covers the CLI envelope, empty request, and
+  - [x] `tests/smoke/test_prompt_routing.py` covers the CLI envelope, empty request, and
         MAC bypass.
 
 ### [x] CONVERT-FW-004 — Implement the phased conversion protocol (E2E baseline, rollback, shims, lift-and-shift)
@@ -13182,10 +13182,10 @@ the reported failure.
   - [x] Integration test: fixture project converts, fails its E2E gate, and rolls
         back byte-identically to pre-convert state; a passing fixture records
         digest-only phase evidence, and a GitHub-only CI project without a local `ci`
-        target converts with remote CI recorded (`tests/unit/test_harness_inventory.py`).
+        target converts with remote CI recorded (`tests/e2e/test_harness_inventory.py`).
   - [x] Integration test: passing Make and CMake fixtures convert through Phase 1.1
         with wrapper parity equal to the direct baseline source authority; missing
-        stages remain loud-failing stubs (`tests/unit/test_harness_inventory.py`).
+        stages remain loud-failing stubs (`tests/e2e/test_harness_inventory.py`).
   - [x] The same vertical slices prove Phase 1.2 moves the complete hierarchy into
         first-class Component authority, removes quarantine, keeps the generated
         wrapper executable, and links the adoption ADR into the documentation spine.
@@ -13230,7 +13230,7 @@ the reported failure.
   - [x] Synthetic repo_man fixture; Make/CMake slices stay green; GitHub-without-local
         `ci` converts instead of rolling back.
 - **Evidence:**
-  - [x] Unit tests in `tests/unit/test_harness_inventory.py` cover plan, repo_man
+  - [x] Unit tests in `tests/e2e/test_harness_inventory.py` cover plan, repo_man
         wrap, and the GitHub-CI protocol change.
   - [x] `litai init --convert --plan` against Omniverse Kit names kit/rendering/runtime
         and `repo.sh` without mutating the tree.
@@ -13414,7 +13414,7 @@ the reported failure.
 - **Evidence:**
   - [x] Vertical-slice tests execute the generated wrapper through real `make`
         invocations and fail closed otherwise
-        (`tests/unit/test_harness_inventory.py`).
+        (`tests/e2e/test_harness_inventory.py`).
   - [x] Byte-equality enforced across all shared flavor directories
         (`tests/unit/test_package_flavor_catalog.py`).
   - [x] Full non-live suite green from a cold checkpoint (2548 tests OK); lifecycle
@@ -13492,7 +13492,7 @@ the reported failure.
   - [x] New unit tests: git-tracked moves appear as renames in `git status`; non-git
         and mixed trees convert; legacy hierarchy byte-equal beneath the aside dir;
         double conversion raises `project.already_initialized`; root symlinks escaping
-        the tree are refused (`tests/unit/test_project_initialization_adapter.py`).
+        the tree are refused (`tests/e2e/test_project_initialization_adapter.py`).
   - [x] Full non-live pytest suite green from a cold checkpoint (2545 tests OK);
         lifecycle-driver TCB re-pinned and documentation authority review refreshed.
 
@@ -13813,7 +13813,7 @@ the reported failure.
   - [x] A derived project authors a catalog skill with `source/backend` and
         `source/frontend` and passes public `litai project validate` without rewriting
         its skill bytes. The same CLI rejects non-source and escaping output paths.
-        `tests.unit.test_project_cli.ProjectCliTests.test_derived_project_accepts_multi_output_catalog_skill`
+        `tests.e2e.test_project_cli.ProjectCliTests.test_derived_project_accepts_multi_output_catalog_skill`
         and all six `tests.unit.test_skill_closure` tests pass. This proves authoring
         and validation; generated multi-language execution remains separate acceptance.
 
@@ -13886,7 +13886,7 @@ the reported failure.
         (`portable-specification-planning`/`portable-application-implementation` — a
         real, informative finding: these two skills are semantically adjacent by
         design) and a `fragile_pass` for a genuinely thin match, not a silent
-        correct-pick for either — `tests/unit/test_skill_routing_evaluation.py::RealCatalogEvaluationTests::test_seed_corpus_mostly_routes_correctly_with_one_known_ambiguity`.
+        correct-pick for either — `tests/smoke/test_skill_routing_evaluation.py::RealCatalogEvaluationTests::test_seed_corpus_mostly_routes_correctly_with_one_known_ambiguity`.
         A dedicated synthetic-fixture test
         (`test_known_ambiguous_pair_reproducibly_misroutes_or_fragile_passes`) makes the
         same property deterministic and independent of the real catalog's content
@@ -13960,12 +13960,12 @@ the reported failure.
         fallback. An explicit CLI pin or resolved generation model scope prohibits
         cross-provider fallback; select a healthy provider before locking that scope.
 - **Evidence:**
-  - [x] `tests/unit/test_coding_cli_generation.py::test_quota_denial_falls_back_to_the_next_available_cli`
+  - [x] `tests/critical/test_coding_cli_generation.py::test_quota_denial_falls_back_to_the_next_available_cli`
         reproduces this session's exact scenario (codex denies with the real observed
         spend-cap phrase, `claude` is the next PATH-available CLI) and asserts the
         fallback CLI is invoked and the generation succeeds — no manual `CODING_CLI`
         override required.
-  - [x] `tests.unit.test_coding_cli_quota_fallback.CodingCliJsonTaskQuotaContractTests.test_json_task_quota_denial_falls_back_to_the_next_available_cli`
+  - [x] `tests.smoke.test_coding_cli_quota_fallback.CodingCliJsonTaskQuotaContractTests.test_json_task_quota_denial_falls_back_to_the_next_available_cli`
         covers the same fallback on `run_json_task` unless `CODING_CLI` is pinned.
   - [x] `test_explicit_coding_cli_pin_disables_fallback` and
         `test_quota_denial_reraises_original_error_when_fallback_is_exhausted` cover the
@@ -14292,7 +14292,7 @@ the reported failure.
         collisions; the error class/code remain defined for other genuine failure
         paths in the same module.
 - **Evidence:**
-  - [x] `tests/unit/test_repository_updates.py::test_different_repository_import_collision_keeps_the_local_entry`
+  - [x] `tests/smoke/test_repository_updates.py::test_different_repository_import_collision_keeps_the_local_entry`
         (renamed from `..._remains_fail_closed`, which asserted the now-superseded
         hard-abort behavior) — a foreign-sourced local import collides with an
         inherited recomputation; `apply()` no longer raises, the local provenance
@@ -14303,7 +14303,7 @@ the reported failure.
         foreign-sourced) alongside a second, genuinely upstream-changed item
         (`macos`); the `macos` file classifies and applies as `upstream-only` while
         the `python` collision is preserved untouched, in the same `apply()` call.
-  - [x] Full `tests/unit/test_repository_updates.py` suite (9 tests, including the two
+  - [x] Full `tests/smoke/test_repository_updates.py` suite (9 tests, including the two
         above) passes.
 
 ### [x] UPDATE-PROGRESS-001 — Interactive `litai update` must show multi-stage progress
@@ -14669,9 +14669,9 @@ the reported failure.
         plan help, deterministic pip+Conan projection, untagged rejection, model-scope
         forwarding, both authorization flags false, and the intentional pip-wheel
         default in newly initialized Python projects.
-        `tests.unit.test_cli_package` additionally proves OS mismatch
+        `tests.e2e.test_cli_package` additionally proves OS mismatch
         (`package.worker_os_mismatch`), worker forward, and COMMAND dispatch
-        without artifact export. `tests.unit.test_package_adapters` independently
+        without artifact export. `tests.e2e.test_package_adapters` independently
         verifies native metadata ZIP bytes.
         Provider tests additionally prove deterministic valid wheel construction,
         independent byte verification, real pip installation, changed-input rejection,
@@ -14765,7 +14765,7 @@ the reported failure.
     `production` are not scaffolded into new projects by default; a project opts in by
     copying them (or via `litai catalog copy`) once genuine composition exists.
 - **Evidence:**
-  - [x] `tests/unit/test_workflow_markdown.py::NamedWorkflowCatalogTests` proves each of
+  - [x] `tests/e2e/test_workflow_markdown.py::NamedWorkflowCatalogTests` proves each of
     the three named workflows parses, declares its own `workflow_id`, and pairs with a
     distinctly-tightening routing policy.
   - [x] The live
@@ -14891,7 +14891,7 @@ the reported failure.
   - [x] `_release_gate_failure_detail` summarizes a failed gate; `check_release`
     includes it in `release.gate_failed`.
 - **Evidence:**
-  - [x] `tests/unit/test_project_releases.py::ReleaseGateFailureDetailTests` proves
+  - [x] `tests/e2e/test_project_releases.py::ReleaseGateFailureDetailTests` proves
     stderr preference, stdout fallback, the silent-gate message, and that the detail is
     bounded while keeping the tail.
 
@@ -14992,7 +14992,7 @@ the reported failure.
     semantics.
 - **Implementation:**
   - [x] Generate the existing skills bundle from checked-in skill files and prove there is
-        no second maintained copy (`make plugin-bundle`, `tests.unit.test_plugin_bundle`).
+        no second maintained copy (`make plugin-bundle`, `tests.smoke.test_plugin_bundle`).
   - [ ] Define and validate one versioned, provider-neutral plugin-bundle manifest.
   - [ ] Project reproducible Codex and Claude plugin artifacts and record explicit Cursor
         and OpenCode support decisions.
@@ -17197,7 +17197,7 @@ slice here before implementation so this file always names the resumable frontie
   - [x] Specify and implement the reusable path, schema, precedence, permission, example, and update contracts across Linux, macOS, and Windows in `literate_ai.adapters.application_settings`, generalizing `user_paths.py`/`user_assets.py` into a separate per-application namespace (never nested beneath `literate-ai/`).
   - [ ] Wire a `litai config app-settings` CLI surface and an OS-keychain writer/reader for `ref` credentials; deliberately deferred pending a bounded design for keychain integration across platforms.
 - **Evidence:**
-  - [x] `tests/unit/test_application_settings.py` (27 tests) covers cross-platform path resolution, CLI/env/file/default precedence, malformed JSON, unsupported schema version, application-namespace mismatch, ambiguous/missing credential shape, owner-only permission enforcement for literal credentials, literal-value redaction with reference pointers preserved, named-profile addressing, and unversioned-legacy-to-v1 update preservation.
+  - [x] `tests/critical/test_application_settings.py` (27 tests) covers cross-platform path resolution, CLI/env/file/default precedence, malformed JSON, unsupported schema version, application-namespace mismatch, ambiguous/missing credential shape, owner-only permission enforcement for literal credentials, literal-value redaction with reference pointers preserved, named-profile addressing, and unversioned-legacy-to-v1 update preservation.
 
 ### [x] CONVERT-OUTPUT-CUSTODY-001 — Preserve complete host-heavy build output identities without rejecting successful builds
 
@@ -17327,7 +17327,7 @@ slice here before implementation so this file always names the resumable frontie
   - [x] Same-content/same-plan receipts still skip without opening declared inputs.
   - [x] Inserting, deleting, or reordering a gate forces evaluation even when the
     content-pin identity is unchanged; cross-pin and legacy-receipt cases fail closed.
-    (`tests/unit/test_pinned_test_dispatch.py`:
+    (`tests/critical/test_pinned_test_dispatch.py`:
     `test_inserted_deleted_or_reordered_gate_forces_evaluation`,
     `test_legacy_unbound_receipt_fails_closed`,
     `test_cross_pin_receipt_never_matches_a_different_pin`.)
@@ -17356,10 +17356,10 @@ slice here before implementation so this file always names the resumable frontie
     point operators at the supported `--from-accepted-source` reuse contract instead
     of building a new graph-level accepted-cache selection contract.
 - **Evidence:**
-  - [x] `tests/unit/test_cli_rebuild.py::RebuildCliTests::test_standard_driver_rejects_source_cache_entry_and_names_the_alternative`
+  - [x] `tests/e2e/test_cli_rebuild.py::RebuildCliTests::test_standard_driver_rejects_source_cache_entry_and_names_the_alternative`
     and `::test_standard_driver_rejects_source_cache_root_and_names_the_alternative`
     prove the Standard rejection message names `--from-accepted-source`.
-  - [x] `tests/unit/test_cli_help.py::CliHelpTests::test_rebuild_help_scopes_source_cache_overrides_to_the_external_driver`
+  - [x] `tests/smoke/test_cli_help.py::CliHelpTests::test_rebuild_help_scopes_source_cache_overrides_to_the_external_driver`
     proves `litai rebuild --help` scopes both flags to the external driver.
 
 ### [x] PROJECT-LIFECYCLE-LOCK-001 — Serialize project-scoped lifecycle mutation
@@ -17386,7 +17386,7 @@ slice here before implementation so this file always names the resumable frontie
     `project_lifecycle_lock` (`src/literate_ai/adapters/lifecycle_lock.py`) reuses the
     existing portable `fcntl.flock`/`msvcrt.locking` primitive from
     `literate_ai._cache_lock`, so a crashed holder's lock releases with the process
-    with no PID-file bookkeeping. `tests/unit/test_lifecycle_lock.py` covers a
+    with no PID-file bookkeeping. `tests/critical/test_lifecycle_lock.py` covers a
     deterministic barrier-synchronized concurrent rejection with owner diagnostics,
     success/exception release, a real crashed-process (`multiprocessing`, `os._exit`)
     non-stale-lock check, and cross-project independence.
@@ -17603,8 +17603,8 @@ slice here before implementation so this file always names the resumable frontie
 - **Evidence:**
   - [x] Standard help no longer advertises an unsupported override without
     qualification; the rejection message and docs name the supported
-    alternative. See `tests/unit/test_cli_rebuild.py` and
-    `tests/unit/test_cli_help.py` additions covering this behavior.
+    alternative. See `tests/e2e/test_cli_rebuild.py` and
+    `tests/smoke/test_cli_help.py` additions covering this behavior.
 
 ### [x] LIFECYCLE-MUTATION-LOCK-001 — Serialize concurrent Standard lifecycle mutations in one project
 
@@ -17747,7 +17747,7 @@ slice here before implementation so this file always names the resumable frontie
   - [x] Bind every adopted-project command to the target root.
   - [x] Explain host readiness separately from authority verification.
 - **Evidence:**
-  - [x] Foreign-cwd and whitespace-path fixtures target only the adopted project (`tests.unit.test_operator_adoption`).
+  - [x] Foreign-cwd and whitespace-path fixtures target only the adopted project (`tests.smoke.test_operator_adoption`).
   - [x] Create/adopt public CLI tests pass in the 165-test focused lifecycle batch.
 
 ### [ ] AUD-DOC-001 — Refresh operator onboarding and 1.1 product documentation
@@ -17811,7 +17811,7 @@ slice here before implementation so this file always names the resumable frontie
   - [x] Resolve tool paths against a configured session root and reject escapes, including ancestor-project discovery.
   - [x] Repair verify argv and failure status propagation; reject option injection through tool data.
 - **Evidence:**
-  - [x] Foreign-root symlinks, traversal, ancestor discovery and option injection fail before dispatch (`tests.unit.test_mcp_server`).
+  - [x] Foreign-root symlinks, traversal, ancestor discovery and option injection fail before dispatch (`tests.smoke.test_mcp_server`).
   - [x] Read-only calls work; unacknowledged mutations fail (9 focused MCP tests on macOS).
 
 ### [ ] AUD-STATE-001 — Reconcile the active queue and expose release scope
@@ -17866,7 +17866,7 @@ slice here before implementation so this file always names the resumable frontie
 - **Implementation:**
   - [x] Pin third-party actions to resolved full commit IDs and configure weekly Dependabot PRs.
 - **Evidence:**
-  - [x] Workflow/Dependabot YAML parse and three `tests.unit.test_ci_action_pins` tests pass. Hosted execution remains part of final CI.
+  - [x] Workflow/Dependabot YAML parse and three `tests.critical.test_ci_action_pins` tests pass. Hosted execution remains part of final CI.
   - [x] Repair the historical-checkout regression exposed by the broad run: enforce
         `fetch-depth: 0` per checkout step without depending on tag spelling.
         The regression and three pin-policy tests pass; full rerun remains pending.
@@ -21912,10 +21912,10 @@ dispatch or independent product acceptance.
   retained source projection, canonical inventory, and deterministic coordinator
   runtime archive to the internal receiver, and finalizes only identity-bound
   sanitized phases and the actual remote platform.
-  `tests.unit.test_retained_harness_receipts` (19 tests),
-  `tests.unit.test_retained_harness_remote` (9 tests),
-  `tests.unit.test_remote_source_guard` plus
-  `tests.unit.test_source_materialization` (27 tests), repository lint, and
+  `tests.e2e.test_retained_harness_receipts` (19 tests),
+  `tests.e2e.test_retained_harness_remote` (9 tests),
+  `tests.critical.test_remote_source_guard` plus
+  `tests.critical.test_source_materialization` (27 tests), repository lint, and
   `make remote-evidence-check` (66 tests) pass on macOS. An isolated
   `make python-check` release-evidence run passes all 5,044 tests with 33
   expected skips. The installed CLI produced ovrtx receipt
@@ -25858,7 +25858,7 @@ probe failures. No native job from this qualification remains running.
 - **Repair validation:** macOS and native Windows each passed all 19 remote-execution
   tests after the fixture repair; Windows also passed all six PLAN tests. The
   native rerun used the published integration above plus only the revised
-  `tests/unit/test_remote_execution.py`, SHA-256
+  `tests/critical/test_remote_execution.py`, SHA-256
   `aaca7479fd370366c7af81ca40f62c9703fed46e77de4f46db2a9b5d00d3c4a4`.
   The long-path assertion, twelve distinct cache memberships, receiver short-root
   assertions, and cleanup assertions remain enabled. Production code is unchanged.

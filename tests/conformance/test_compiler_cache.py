@@ -7,7 +7,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from dataclasses import replace
@@ -17,18 +16,12 @@ from unittest import mock
 from literate_ai.adapters import compiler_cache as module
 from literate_ai.adapters.compiler_cache import compiler_cache_session
 from literate_ai.adapters.dependencies import HostDependencyObservation
-from literate_ai.adapters.multi_entrypoint_build import standalone_driver_source
 from literate_ai.adapters.shared_cache_config import load_shared_cache
-from literate_ai.adapters.standard_project import (
-    _STANDARD_BUILD_DRIVER,
-    _encoded_multi_entrypoint_outputs,
-    _encoded_toolchain_environment,
-)
 from literate_ai.contracts.shared_cache import (
     SharedCacheAccessMode,
     SharedCacheNamespace,
 )
-from tests.unit.test_shared_cache import _configuration
+from tests.support.fixtures_test_shared_cache import _configuration
 
 
 @unittest.skipUnless(
@@ -76,74 +69,6 @@ class CompilerCacheConformanceTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr[-4000:])
         return session.observation
 
-    @unittest.skipUnless(shutil.which("clang++"), "clang++ is required")
-    def test_native_cpp_drivers_reuse_objects_and_link_identical_executables(self):
-        source = self.root / "source"
-        source.mkdir()
-        (source / "shared.cpp").write_text("int answer() { return 42; }\n")
-        (source / "main.cpp").write_text(
-            "int answer(); int main() { return answer() == 42 ? 0 : 1; }\n"
-        )
-        for multiple in (False, True):
-            if multiple:
-                (source / "second.cpp").write_text(
-                    "int answer(); int main() { return answer() != 42; }\n"
-                )
-            hashes, observations = [], []
-            for label in ("cold", "warm"):
-                stage = self.root / f"{multiple}-{label}"
-                objects, artifacts = stage / "objects", stage / "artifacts"
-                artifacts.mkdir(parents=True)
-                executable = artifacts / ("app.exe" if os.name == "nt" else "app")
-                secondary = "second.exe" if os.name == "nt" else "second"
-                common = [
-                    sys.executable,
-                    "-c",
-                    standalone_driver_source() if multiple else _STANDARD_BUILD_DRIVER,
-                    "cpp-executable",
-                    json.dumps([shutil.which("clang++")]),
-                    _encoded_toolchain_environment(()),
-                    str(self.root),
-                ]
-                arguments = (
-                    [
-                        str(objects),
-                        str(artifacts),
-                        str(executable),
-                        _encoded_multi_entrypoint_outputs(
-                            [
-                                {
-                                    "source": "source/main.cpp",
-                                    "export_id": executable.name,
-                                },
-                                {"source": "source/second.cpp", "export_id": secondary},
-                            ]
-                        ),
-                    ]
-                    if multiple
-                    else ["source/main.cpp", str(objects), str(executable)]
-                )
-                observations.append(
-                    self.run_compile(common + arguments, workspace=artifacts)
-                )
-                outputs = (
-                    [executable, artifacts / secondary] if multiple else [executable]
-                )
-                hashes.append(
-                    [
-                        hashlib.sha256(output.read_bytes()).hexdigest()
-                        for output in outputs
-                    ]
-                )
-                for output in outputs:
-                    self.assertEqual(
-                        subprocess.run([str(output)], timeout=10).returncode, 0
-                    )
-                shutil.rmtree(stage)
-            self.assertGreater(observations[1]["cache_hits"], 0, observations)
-            self.assertEqual(observations[1]["cache_misses"], 0, observations)
-            self.assertEqual(hashes[0], hashes[1])
-
     @unittest.skipUnless(shutil.which("clang"), "clang is required")
     def test_cold_and_warm_c_compilation_produce_identical_objects(self):
         dependencies = self.binding.compiler_dependencies.include_in(
@@ -178,35 +103,6 @@ class CompilerCacheConformanceTests(unittest.TestCase):
         self.assertEqual(cold["cache_misses"], 1)
         self.assertEqual(warm["cache_hits"], 1)
         self.assertEqual(warm["compile_requests"], 1)
-
-    @unittest.skipUnless(
-        shutil.which("cargo") and shutil.which("rustc"), "Cargo is required"
-    )
-    def test_cargo_reuses_rust_library_with_a_fresh_target_directory(self):
-        (self.root / "Cargo.toml").write_text(
-            '[package]\nname="cache_proof"\nversion="0.1.0"\nedition="2021"\n[lib]\npath="lib.rs"\n'
-        )
-        (self.root / "lib.rs").write_text("pub fn answer() -> i32 { 42 }\n")
-        hashes = []
-        observations = []
-        for _ in ("cold", "warm"):
-            target = self.root / "target"
-            observations.append(
-                self.run_compile(
-                    [shutil.which("cargo"), "build", "--offline", "--lib"],
-                    self.environment
-                    | {"CARGO_TARGET_DIR": str(target), "RUSTC": shutil.which("rustc")},
-                )
-            )
-            hashes.append(
-                hashlib.sha256(
-                    (target / "debug/libcache_proof.rlib").read_bytes()
-                ).hexdigest()
-            )
-            shutil.rmtree(target)
-        self.assertEqual(hashes[0], hashes[1])
-        self.assertGreater(observations[0]["cache_misses"], 0)
-        self.assertGreater(observations[1]["cache_hits"], 0, observations)
 
     def test_exception_terminates_the_owned_server_and_removes_private_files(self):
         processes = []

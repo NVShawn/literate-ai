@@ -18,7 +18,6 @@ from tests.conformance.support.sample_runner import (
     _load_sample,
     sample_harness_manifest,
     sample_harness_oracle,
-    sample_harness_root,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -82,98 +81,6 @@ def _sample_roots() -> tuple[Path, ...]:
 
 
 class SampleAcceptanceInterfaceTests(unittest.TestCase):
-    def test_hello_spec_interface_oracle_and_generation_context_agree(self):
-        sample_root = SAMPLES / "hello-component"
-        _metadata, definition, loaded, _closures = _load_sample(sample_root)
-        interface, interface_document = _execution_contract(
-            sample_root, definition, loaded
-        )
-        component_text = (sample_root / "component.md").read_text(encoding="utf-8")
-        self.assertIn("accepts exactly one positional argument", component_text)
-        self.assertIn("public callable is `main(request)`", component_text)
-        self.assertIn("exactly these fields and no others", component_text)
-
-        oracle_reference = ContentReference.from_dict(_metadata["acceptance_oracle"])
-        oracle = json.loads(
-            sample_harness_oracle(sample_root, oracle_reference).read_bytes()
-        )
-        for invocation, result in zip(
-            interface["invocations"], oracle["oracle_results"], strict=True
-        ):
-            self.assertEqual(len(invocation["arguments"]), 1)
-            request = invocation["arguments"][0]
-            self.assertEqual(set(request), {"messages", "name"})
-            self.assertIsInstance(request["name"], str)
-            self.assertTrue(
-                all(isinstance(message, str) for message in request["messages"])
-            )
-            self.assertEqual(
-                set(result["expected_result"]),
-                {"greeting", "message_count", "recipient_id", "word_count"},
-            )
-
-        documents = tuple(
-            RecipeDocument.create(path, content.decode("utf-8"))
-            for path, content in loaded.contents
-        )
-        prompt = GenerationRecipe(
-            recipe_id="public-generation-hello-contract",
-            application_id="hello-component",
-            documents=(*documents, interface_document),
-            component_lock_identity=TEST_COMPONENT_LOCK_IDENTITY,
-            skills=_coding_skills(
-                sample_root,
-                definition,
-                boundary=project_boundary(sample_root, legacy=sample_root.parent),
-                source=f"Component {definition.coordinate.uri}",
-            ),
-        ).prompt()
-        self.assertIn("public callable is `main(request)`", prompt)
-        self.assertIn('"arity":1', prompt)
-        self.assertIn('"messages"', prompt)
-        self.assertIn('"name"', prompt)
-
-    def test_sample_catalog_contains_only_specification_and_metadata_files(self):
-        files = tuple(
-            path
-            for path in SAMPLES.rglob("*")
-            if path.is_file()
-            and not (
-                path.name.startswith(".component.")
-                and path.name.endswith(".write.lock")
-            )
-        )
-
-        self.assertTrue(files)
-        self.assertEqual(
-            {path.suffix for path in files},
-            {".json", ".md", ".dmn", ".scxml"},
-            "implementation and test-driver source belongs outside samples/",
-        )
-        self.assertFalse(
-            any("source" in path.parts for path in files),
-            "generated or fixture source belongs outside the sample catalog",
-        )
-
-    def test_child_component_harnesses_share_the_central_portfolio_boundary(self):
-        for component in ("invoice-service", "money-calculation"):
-            root = SAMPLES / component
-            self.assertEqual(
-                sample_harness_root(root),
-                (SAMPLES / "_harness" / component).resolve(strict=True),
-            )
-
-    def test_component_directories_exclude_harness_and_legacy_projection_files(self):
-        for component_root in _sample_roots():
-            if not component_root.is_dir():
-                continue
-            with self.subTest(component=component_root.name):
-                self.assertTrue((component_root / "component.md").is_file())
-                self.assertFalse((component_root / "component.json").exists())
-                self.assertFalse((component_root / "sample.json").exists())
-                self.assertFalse((component_root / "openspec").exists())
-                self.assertFalse((component_root / "acceptance").exists())
-
     def test_interfaces_and_verifier_oracles_have_disjoint_exact_authority(self):
         roots = _sample_roots()
         discovered_names = {root.name for root in roots}

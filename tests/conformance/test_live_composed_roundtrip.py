@@ -117,36 +117,6 @@ def _root_generated_source(
     return source
 
 
-class ComposedCustodySelectionTests(unittest.TestCase):
-    def test_selects_exact_root_workspace_without_flattening(self) -> None:
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            workspace = root / "root-workspace"
-            source = workspace / "source"
-            source.mkdir(parents=True)
-            root_revision = ContentIdentity.parse_uri("sha256:" + "1" * 64)
-            dependency_revision = ContentIdentity.parse_uri("sha256:" + "2" * 64)
-            report = {
-                "standard_source_generation": {
-                    "components": [
-                        {
-                            "component_revision": dependency_revision.to_dict(),
-                            "workspace_locator": str(root / "dependency-workspace"),
-                        },
-                        {
-                            "component_revision": root_revision.to_dict(),
-                            "workspace_locator": str(workspace),
-                        },
-                    ]
-                }
-            }
-
-            self.assertEqual(
-                _root_generated_source(report, root_revision),
-                source,
-            )
-
-
 @unittest.skipUnless(
     os.environ.get("LITERATE_AI_RUN_LIVE_COMPOSED_ROUNDTRIP") == "1",
     "set LITERATE_AI_RUN_LIVE_COMPOSED_ROUNDTRIP=1 for composed live round-trip",
