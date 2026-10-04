@@ -11,6 +11,12 @@ from literate_ai.contracts import (
     canonical_relative_posix_path,
 )
 
+STANDARD_ELIXIR_RUNTIME_DRIVER = (
+    "[_artifact,export,layout,relative|arguments]=System.argv();"
+    'path=if layout=="file",do: export,else: Path.join(export,relative);'
+    "System.argv(arguments);Code.require_file(path)"
+)
+
 STANDARD_PYTHON_RUNTIME_DRIVER = (
     "import pathlib,runpy,sys;"
     "sys.dont_write_bytecode=True;"
@@ -198,6 +204,14 @@ def direct_service_process_argv(argv: tuple[str, ...]) -> tuple[str, ...]:
             "runtime dispatcher mode"
         )
 
+    if len(argv) >= 9 and argv[-8:-5] == ("-e", STANDARD_ELIXIR_RUNTIME_DRIVER, "--"):
+        tool = argv[:-8]
+        if not tool:
+            raise ValueError("Standard Elixir runtime command has no bound tool")
+        _artifact, export, layout, relative, _mode = argv[-5:]
+        entrypoint = _entrypoint(export, layout, relative)
+        return (*tool, str(entrypoint), LITAI_SERVE_MODE_FLAG)
+
     if len(argv) >= 8:
         tool = argv[:-7]
         flag, driver, _artifact, export, layout, relative, _mode = argv[-7:]
@@ -221,6 +235,7 @@ def direct_service_process_argv(argv: tuple[str, ...]) -> tuple[str, ...]:
 
 __all__ = [
     "STANDARD_NATIVE_RUNTIME_DRIVER",
+    "STANDARD_ELIXIR_RUNTIME_DRIVER",
     "STANDARD_NODE_RUNTIME_DRIVER",
     "STANDARD_PYTHON_RUNTIME_DRIVER",
     "STANDARD_PYTHON_SDK_RUNTIME_DRIVER",

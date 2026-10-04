@@ -17,6 +17,12 @@
   for on-disk images, the boot session for shared-cache images. Retained Cargo native
   test guards no longer re-inspect ~700 unchanged system images per check (#13).
 
+- Elixir: add `lang-elixir` with portable script-tree generation, syntax validation,
+  Standard runtime/test dispatch, exact Elixir/OTP toolchain identities, and
+  `init`/`flavor add` assets. Requires Elixir 1.18+ and Erlang/OTP 27+; native
+  macOS smoke verification passes with Elixir 1.20.4/OTP 29. Mix/Hex/Phoenix
+  are outside this dependency-free profile.
+
 - Documentation tooling: update DOMPurify to 3.4.16. Gate the dependency audit
   through reviewed, expiring per-advisory exceptions. The only exception covers the
   unpatched braces advisory GHSA-vfj7-8cjw-p6xm in OpenSpec's glob dependencies (#24).

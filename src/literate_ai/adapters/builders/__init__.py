@@ -40,6 +40,10 @@ from .cpp import (
     NativeBuildArtifact,
     discover_cpp_toolchain,
 )
+from .elixir import (
+    ElixirToolchain,
+    discover_elixir_toolchain,
+)
 from .go import (
     DEFAULT_GO_BUILD_TIMEOUT_SECONDS,
     DEFAULT_GO_STDERR_LIMIT_BYTES,
@@ -174,6 +178,7 @@ __all__ = [
     "DEFAULT_ZIG_STDOUT_LIMIT_BYTES",
     "DEFAULT_ZIG_VERSION_TIMEOUT_SECONDS",
     "GoBuildArtifact",
+    "ElixirToolchain",
     "GoToolchain",
     "GuardedCppBuilder",
     "GuardedGoBuilder",
@@ -204,6 +209,7 @@ __all__ = [
     "discover_bazel_toolchain",
     "discover_cargo_toolchain",
     "discover_cmake_toolchain",
+    "discover_elixir_toolchain",
     "discover_go_toolchain",
     "discover_node_toolchain",
     "discover_npm_toolchain",

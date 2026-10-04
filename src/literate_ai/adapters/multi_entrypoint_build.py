@@ -20,7 +20,9 @@ from pathlib import Path, PurePosixPath
 if __package__:
     from .native_cpp_build import compile_cpp, compiler_driver_source
 
-_TREE_STRATEGIES = frozenset({"python-tree", "javascript-tree", "typescript-tree"})
+_TREE_STRATEGIES = frozenset(
+    {"python-tree", "javascript-tree", "typescript-tree", "elixir-tree"}
+)
 
 
 def standalone_driver_source() -> str:
@@ -139,6 +141,24 @@ def _check_tree(
     *,
     environment: dict[str, str],
 ) -> None:
+    if strategy == "elixir-tree":
+        files = sorted(
+            path
+            for path in source_root.rglob("*")
+            if path.suffix in {".ex", ".exs"} and path.is_file()
+        )
+        _run(
+            [
+                *compiler,
+                "-e",
+                "Enum.each(System.argv(), fn path -> "
+                "Code.string_to_quoted!(File.read!(path), file: path) end)",
+                "--",
+                *(str(path) for path in files),
+            ],
+            environment=environment,
+        )
+        return
     suffix = {
         "python-tree": ".py",
         "javascript-tree": ".js",
