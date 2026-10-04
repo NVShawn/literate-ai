@@ -115,7 +115,7 @@ def main(argv: list[str]) -> int:
     config = _config()
     budget_seconds = float(config.get("budget_seconds", 600))
     durations_path = _ROOT / str(config.get("durations_path", ".test_durations"))
-    testpaths = list(config.get("testpaths", ["tests/unit"]))
+    testpaths = list(config.get("testpaths", ["tests/smoke"]))
 
     args = list(argv)
     while args:

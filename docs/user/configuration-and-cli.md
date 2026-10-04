@@ -123,10 +123,29 @@ litai config channel-parse
 litai work record
 litai work close
 litai document verify
+litai video init
+litai video plan
+litai video build
+litai video verify
 litai worker verify-model
 litai worker resolve-nvidia
+litai worker list
+litai worker show
+litai worker add
+litai worker update
+litai worker remove
+litai worker test
 litai worker probe
 litai worker health
+litai worker provision
+litai worker provisioner command-help
+litai worker provisioner configure
+litai worker provisioner disable
+litai worker provisioner enable
+litai worker provisioner recover
+litai worker provisioner remove
+litai worker provisioner show
+litai worker provisioner status
 litai worker cleanup plan
 litai worker cleanup apply
 litai worker wheelhouse
@@ -314,6 +333,46 @@ writing. Run `litai config migrate --apply` to validate and move them. Migration
 symlinks and differing destinations, never prints file contents, and removes a legacy
 source only after the private destination is durable.
 
+### Shared Bazel cache
+
+Standard Bazel rebuilds read optional private `shared-cache.json`, reported by
+`litai config paths`. Set `LITAI_SHARED_CACHE_CONFIG` to an absolute path to select
+another file. Its [shared-cache contract](../../schemas/v2/shared-cache.schema.json)
+selects scope, namespace, access mode, local placement, size/retention policy, and an
+optional HTTPS endpoint. Keep endpoint settings and credentials outside project
+authority. Credential references use `env:NAME`; the environment variable contains
+the bearer token. Missing or invalid explicitly selected configuration is refused.
+
+Read-only builds reuse a bounded disposable copy of local entries and disable remote
+uploads, so Bazel cannot modify the shared directory. Expired entries are omitted;
+an unavailable or over-budget local copy falls back to an ordinary build. The copy
+cost depends on cache size. Shared writer-retention qualification remains tracked
+by RELEASE-INTEGRATION-003.
+
+### Native compiler cache
+
+A `compiler` policy in the same private configuration enables sccache for Cargo
+and the Standard native C++ command drivers. Install sccache 0.18.0 or newer on
+`PATH`, or select its absolute executable
+with `LITAI_SCCACHE`. The executable and recursive native dependency identities are
+frozen before rebuild and included in build dependency evidence. Dependency resolution
+is repeated before and after each cached build, using its loader environment; drift
+or unsupported loader controls refuse the build. Each build owns a private server
+and ignores ambient sccache settings.
+Cargo incremental compilation is disabled for this mode. Link steps remain normal
+compiler work; supported library compilations can reuse cached objects.
+
+An exact Cargo target uses a locked, stable disposable build directory because
+sccache's Rust key includes the working directory and Cargo settings. Read-only
+compiler caching uses a disposable local copy to preserve shared-file timestamps.
+Native C++ drivers compile each translation unit separately through the cache tool,
+then link each executable with the selected compiler. Multiple entrypoints use the
+same compilation boundary; linking does not go through sccache.
+Cache counters are retained as diagnostics with captured build evidence and never
+replace tests or independent acceptance. Native dependency inspection adds per-build
+cost; throughput, LAN, and cross-platform qualification remain tracked under
+RELEASE-INTEGRATION-003.
+
 ### Generated-application settings
 
 This is Literate AI's own configuration. Applications that Literate AI generates or
@@ -439,6 +498,10 @@ root-integration acceptance still remain.
 | `work close ID [--project PATH]` | Close one work item only after every implementation and evidence checkbox is complete. |
 | `worker resolve-nvidia --compatibility FILE --worker-id ID --python-abi ABI [--observations FILE] [--toolkit VERSION] [--package NAME==VERSION]` | Select the oldest compatible exact stack from retained primary-source authority and a typed worker observation; never fetch or infer compatibility. |
 | `document verify --manifest FILE --component FILE` | Run the packaged independent document-pair structural, access, credential, geometry, notes, and placeholder acceptance oracle. |
+| `video init MANIFEST` | Create a narrative-neutral editable course manifest without overwriting an existing file. |
+| `video plan MANIFEST` | Validate scenes and bind referenced local media and evidence without running demo commands. |
+| `video build MANIFEST --output DIR --font FILE [--narration recorded\|say\|espeak]` | Render a new MP4, embedded subtitles, SRT, VTT, and integrity receipt; see [instructional videos](instructional-videos.md). |
+| `video verify RECEIPT [--manifest MANIFEST]` | Verify media integrity, caption timing, and optionally current source identity. |
 | `skills evaluate CORPUS [--project PATH] [--fire-threshold N] [--fragile-threshold N]` | Run a synthetic prompt corpus against the real skill catalog and classify each outcome as correct/misroute/over_greedy/fragile_pass -- a behavioral check that a skill's own description would distinguish it, distinct from validate's structural checks. |
 | `catalog graph [--project PATH]` | Inspect the repository provenance DAG rooted at Literate AI. |
 | `catalog copy SOURCE ITEM [ITEM ...] [--project PATH]` | Copy selected Flavor, Skill, or Component catalog items from another Literate AI project. |
@@ -489,6 +552,12 @@ root-integration acceptance still remain.
 | `worker health --worker-id ID --health-config PATH [--worker-config PATH] [--job-identity SHA256] [--alert-state PATH]` | Bounded storage and optional sustained CPU/memory/paging/GPU inspection with explicit unknowns, deficit alerts and proceed/hold/recheck decisions. Disk incidents automatically run the configured read-only cleanup investigation. An alert-state file only deduplicates reporting; it authorizes neither dispatch nor cleanup. |
 | `worker cleanup plan --worker-id ID --health-config PATH [--worker-config PATH]` | Re-run the bounded configured candidate scan and emit only exact proved-inactive target identities, measurements, ownership evidence and recovery cost. Planning is read-only and explicitly reports that deletion is unauthorized. |
 | `worker cleanup apply --worker-id ID --health-config PATH --authorization PATH [--worker-config PATH]` | On the exact local worker, require a current authorization bound to worker, policy, proposal, target IDs, supported operation and expiry; revalidate candidates, invoke only the configured exact-target tool, then report measured capacity recovery. Remote apply remains unsupported rather than acting on controller paths. |
+| `worker list [--worker-config PATH]` | List validated entries in the private worker catalog. |
+| `worker show WORKER_ID [--worker-config PATH]` | Inspect one configured worker. |
+| `worker add WORKER_ID [--file FILE] [--worker-config PATH]` | Add a validated worker using an atomic private-catalog write. |
+| `worker update WORKER_ID [--file FILE] [--worker-config PATH]` | Update supplied fields or replace a complete definition, with optional identity protection. |
+| `worker remove WORKER_ID [--worker-config PATH]` | Remove a private worker entry with optional identity protection. |
+| `worker test (--worker-id ID ... \| --all) [--worker-config PATH]` | Test selected SSH connections and report each result independently. |
 | `worker probe (--worker-id ID ... \| --all) [--worker-config PATH] [--output PATH] [--dry-run]` | Probe private workers concurrently for bounded OS, CPU, memory, and GPU observations without changing their authored routing requirements. |
 | `verify [PATH]` | Check declared project authority without writing, building, or invoking a model. |
 | `learn RUN` | Produce a read-only proposal for placing one evidence-backed lesson in Component, Flavor, Skill, workflow, routing, test, or framework authority. |
@@ -542,7 +611,9 @@ format needed by the repository's user communities, for example
 `--flavor=+package-pip --flavor=+package-conan`. These providers produce independent
 package plans; selecting one does not subtract another. Target constraints still fail
 before generation: apt is Linux-only, Homebrew is macOS-only, and WinGet and Chocolatey
-are Windows-only. Pip wheels and Conan are portable selections.
+are Windows-only. Pip wheels, Conan and `+package-zip` are portable selections.
+ZIP does not require a language ecosystem and includes both source and resolved
+CycloneDX SBOMs with the accepted payload and specification.
 
 Planning is intentionally cheap and read-only. Building is intentionally not: it first
 requires the same accepted artifact, generated-test, application-execution, independent
@@ -569,6 +640,67 @@ JSON. The coordinator downloads the bundle, verifies the declared bundle and man
 sizes and digests, independently verifies every listed file, and imports it into
 `OBJ_DIR/remote-evidence-cas` before accepting a custody receipt. Worker-local CAS paths
 are never coordinator evidence.
+
+Fine-grained command and SSH action routing is under 1.2 qualification. A private worker can
+opt into its capability probe with
+`"action_protocol": "literate-ai/lifecycle-action-wire@1"`; omitting this field retains
+the existing worker document and identity. SSH workers additionally declare
+`action_command`, a literal argv array naming their worker-owned action receiver.
+This is separate from `lifecycle_executable`; legacy SSH workers remain ineligible.
+The receiver's private environment owns its identity and credentials. SSH requests
+travel over stdin, and controller environment bindings are not forwarded to that
+receiver. Configured SSH agent authentication remains available to the local transport.
+The one-shot action receiver supports `--describe`, `--describe-hardware`, and stdin
+or `--request-file` input,
+with private worker identity, CAS, and workspace bindings. Its current implemented
+phase is source indexing. Capability observations bind the challenge, worker, Python
+receiver code and runtime identities, supported phases, and configured source handoff.
+They supplement hardware and health admission; automatic CLI phase selection remains
+under qualification.
+
+Standard rebuild selects worker indexing when the optional private
+`action-execution.json` exists under the user configuration root. Override that path
+with `LITAI_ACTION_EXECUTION_CONFIG`. Every field below is required:
+
+| Field | Value |
+| --- | --- |
+| `schema` | `literate-ai/private-action-execution@1` |
+| `source_cas_root` | Absolute controller publication directory outside project authority |
+| `source_handoff` | `filesystem-cas` for shared custody, or `http-cas` for the worker's configured source service |
+| `duration_seconds` | Whole action-pool lifetime, from 1 through 86400 seconds |
+| `maximum_hardware_age_seconds` | Maximum hardware-observation age, from 1 through 86400 seconds |
+| `health_configurations` | Map of worker IDs to absolute private health-policy file paths |
+| `result_sources` | Optional map of worker IDs to explicit BUILD result transports; required for each admitted BUILD worker |
+
+A result transport is `{"kind":"shared-cas"}` when worker artifacts are available
+in `source_cas_root`, or `{"kind":"http-cas","endpoint":"https://cache.example/cas"}`
+for a separate worker result CAS. HTTP entries may name `token_env` for a bearer-token
+environment binding and set `allow_http: true` for an explicitly selected plaintext
+LAN service. The default requires HTTPS. These services must already exist; Literate
+AI does not create them or infer result endpoints from source upload configuration.
+Configured BUILD is selected automatically, shares INDEX worker capacity, and verifies
+result bytes before artifact admission. A worker advertising BUILD without explicit
+result transport is refused. Full remote provider/SDK runtime qualification remains
+unfinished in the current development line.
+
+The existing worker-catalog path override still applies. Automatic admission collects
+live hardware from matching, explicitly opted-in command or SSH workers with a configured
+health policy. It does not require a persisted hardware-observation file. Only
+eligible action workers with fresh observations, matching
+capabilities, and passing health admission receive indexing work. The source service
+must expose the configured controller CAS; this configuration does not start a service.
+Configuration and health-policy changes refuse the current admission. Missing default
+configuration preserves local indexing; explicitly missing or invalid configuration
+refuses instead of falling back. Refresh opted-in command-worker hardware through
+`litai worker probe`: the receiver collects its own platform facts and the controller
+verifies the exact request, worker, and receiver code before writing observations.
+The stored timestamp is the controller probe start, conservatively including transit
+and collection time. Legacy commands remain unsupported for hardware probes.
+Automatic indexing caches its live observations only within the configured freshness
+window and refreshes them after expiry. Unavailable workers are excluded; changed
+hardware facts invalidate existing admission even when the new observation is fresh.
+The public probe output remains an operator report at the configured observation path.
+Other lifecycle phases keep their current routes.
 
 A successful command-worker build or test must publish an `artifact-export`
 `ContentReference`: a credential-free, query-free durable URI plus exact content
@@ -1222,21 +1354,42 @@ That explicit taxonomy migration preserves local Flavor content while moving it 
 canonical `lang-*`, `os-*`, and `build-*` directories; running update first would
 correctly fail duplicate-Flavor validation when it adds the canonical parent paths.
 
-`litai update --apply` writes the mechanically safe subset in both plans:
-`upstream-only` files,
-which the classifier reached by proving the project's copy still equals the recorded
-baseline, so upstream is the sole author and nothing local can be lost. `conflict`,
+`litai update --apply` writes upstream-only changes and clean three-way text merges
+in both plans. `upstream-only` files still equal the recorded baseline locally,
+so upstream is the sole author. `conflict`,
 `local-only`, and `preserved-dynamic` are preserved and reported as refused by default.
 `--adopt-added` additionally writes `upstream-added` files; that stays opt-in because
 adopting a capability a project never had is a decision, and a new declared document
 can leave the documentation graph unreachable.
+
+Files with non-overlapping local and upstream edits are `mergeable`. Their plan binds
+verified base text and the merged result; apply rechecks the inputs before writing.
+`.literate/update-bases.json` retains content-addressed upstream bases and unresolved
+catalog source references. Keep this metadata with the project. Legacy identity-only
+bases are recovered from exact recorded Git revisions and accepted only after hash
+verification. Unavailable bases, binary content, and overlapping edits remain conflicts.
+
+For semantic conflicts, run `litai update --review-conflicts` and save the JSON output.
+Review each `conflict_reviews` entry, its rationale, and any `merged_text`, then run:
+
+```console
+litai update --apply --resolutions reviewed-update.json
+```
+
+The file can contain the complete JSON envelope or a selected list of its review
+entries. Each decision binds the exact file-plan identity. Stale, duplicate, unknown,
+or malformed choices fail before writes. Accepted `merge`, `keep-local`, and
+`take-upstream` decisions apply to either framework or catalog files. The receipt
+records the resolutions and merged paths. Unselected conflicts stay unchanged.
+Successful updates retain upstream bytes as the next base while preserving local
+overlays; failed validation rolls back the baseline with the files.
 
 After reviewing a true inherited-catalog conflict, repeat
 `--take-upstream PROJECT-RELATIVE-PATH` with `--apply` to replace exactly those paths
 inside the same transaction. A path that is not a conflict in that exact plan is an
 error, and the apply receipt lists accepted choices under `taken_upstream`. This is the
 execution half of a reviewed decision; `--review-conflicts` itself remains plan-only.
-Framework conflicts and every unselected catalog conflict remain untouched.
+Framework conflicts require `--resolutions`; every unselected conflict remains untouched.
 If validation shows that local authority still depends on an inherited path which the
 new parent retired, repeat `--keep-local PROJECT-RELATIVE-PATH` to preserve only that
 planned removal as local authority. Its import provenance is removed and the receipt
@@ -1287,8 +1440,8 @@ the final rebuild is what produces current accepted evidence. A
 request for this reviewed rebind, not permission to hand-edit a digest or weaken the
 resolver.
 
-Merged-text conflict migration, destructive upstream removal inference, initialization
-baseline compaction, and post-apply lifecycle gates remain separate reviewed work.
+Destructive upstream removal inference, initialization baseline compaction, and
+post-apply lifecycle gates remain separate reviewed work.
 
 `litai update --record-work-items` additionally appends advisory entries to the
 project's queue (`docs/roadmap/active-work.md` by default, overridable with
@@ -1825,6 +1978,10 @@ for identity and partial-update boundaries.
 
 ### Reviewing multiple build roots before adoption
 
+Video walkthrough:
+[Adopt an existing project](../courses/03-adopt-an-existing-project/03-adopt-an-existing-project.mp4)
+([captions](../courses/03-adopt-an-existing-project/03-adopt-an-existing-project.vtt)).
+
 `litai onboard adopt PATH` reports `conversion.build_root_candidates`. A marker
 such as `kit/repo.toml` is a candidate, not a selected Component or a proven
 independent build. The default continues to use one retained wrapper.
@@ -2083,3 +2240,125 @@ make release-check
 ```
 
 See [Installation](installation.md) for Python and contributor-tool requirements.
+
+### Private worker registration and connectivity
+
+Video walkthrough:
+[Use machines you already have](../courses/02-use-your-existing-machines/02-use-your-existing-machines.mp4)
+([captions](../courses/02-use-your-existing-machines/02-use-your-existing-machines.vtt)).
+
+Static workers are a complete supported mode: register machines the user or an
+administrator has already provisioned. An empty catalog is also valid. These
+operations do not require provisioning rights.
+
+Optional dynamic provisioning uses an organization-owned local command. It is disabled
+by default and must be explicitly enabled in the user's `worker-provisioner.json`
+(`litai config paths` shows its location). Static CRUD, SSH tests, and normal dispatch
+never implicitly allocate a machine. The framework contains no cloud or
+organization-specific provisioning implementation.
+
+Configure the command with a private JSON file:
+
+```json
+{
+  "schema": "urn:literate-ai:schema:v1:worker-provisioner",
+  "command": ["my-worker-adapter"],
+  "enabled": false,
+  "environment": [
+    {
+      "schema": "urn:literate-ai:schema:v1:execution-worker-environment",
+      "name": "PROVIDER_TOKEN",
+      "source_variable": "MY_PROVIDER_TOKEN",
+      "required": true
+    }
+  ],
+  "help_argument": "--help",
+  "timeout_seconds": 300
+}
+```
+
+```sh
+litai worker provisioner configure --file /absolute/private/provisioner.json
+litai worker provisioner show
+litai worker provisioner enable
+litai worker provisioner command-help
+litai worker provision new-linux --request-id allocation-001 --parameter size=small
+litai worker test --worker-id new-linux
+litai worker provisioner disable
+```
+
+`configure` always disables provisioning, even if its input says `enabled: true`;
+`enable` is a separate explicit action. `remove` removes only this local configuration.
+Commands are argument arrays executed without a shell. Put credential values in
+user-supplied environment variables, never command arguments or parameters. The
+child receives basic OS runtime variables and explicit credential bindings, not the
+controller's entire environment. Required missing credentials prevent invocation.
+`help_argument` accepts `--help` or `help`. `command-help` invokes it with a bounded
+deadline and redacts bound values from output. Provisioning also checks that help
+succeeds before submitting a request. The organization command must make help
+side-effect-free.
+
+The organization may wrap any provisioning CLI. The adapter reads one JSON request
+from stdin and writes exactly one JSON response to stdout. See
+[the published protocol schema](../../schemas/v2/worker-provisioning.schema.json).
+Requests contain `schema` (`urn:literate-ai:schema:v1:worker-provision-request`),
+`request_id`, `worker_id`, `target_profile`, versioned `requirements`, and opaque
+string `parameters`. `--requirements FILE` selects execution requirements and
+`--target-profile PROFILE` defaults to `host`. Provider-specific resource options,
+including disk size, belong in `--parameter KEY=VALUE`. Credential acquisition and
+translation to provider commands remain the adapter's responsibility.
+
+Responses contain `schema` (`urn:literate-ai:schema:v1:worker-provision-response`),
+`request_identity`, `worker` (a complete versioned SSH worker descriptor), and an
+opaque nonempty `lease_id` for provider recovery. `request_identity` is `sha256:`
+plus the SHA-256 of canonical request JSON (UTF-8, sorted keys, no insignificant
+whitespace). The worker ID, target profile and authored requirements must match
+exactly. These declarations are not hardware observations: use `worker test` for
+SSH connectivity and `worker probe` for independent hardware evidence afterward.
+The adapter must implement idempotency using the full request identity and never
+return credentials in its response or logs.
+
+Input and each output stream are limited to 64 KiB; allocation deadlines are
+1–3600 seconds. A private durable record is written before allocation, serialized
+per worker ID. Repeating a successful request returns its saved result; a different
+request for that worker, or an uncertain prior result, cannot allocate again.
+`litai worker provisioner status WORKER_ID` inspects the record.
+`litai worker provisioner recover WORKER_ID` registers a previously validated result
+without invoking the provider and works even when provisioning is disabled.
+Registration conflicts preserve the existing worker. Timeouts, invalid responses,
+and interrupted operations remain uncertain; inspect the provider using the saved
+request identity before taking manual recovery action. Removing a registration or
+provisioner configuration does not delete allocation records or remote machines.
+This hook is explicit on-demand provisioning; automatic scheduling and provider
+resource deletion remain separate work under `WORKER-001`.
+
+`litai worker list` and `show WORKER_ID` inspect the private catalog selected by
+`--worker-config`, `LITAI_WORKER_CONFIG`, or `litai config paths`.
+`add WORKER_ID --endpoint user@host --os linux --workspace '~/litai'` registers an
+SSH worker; `--kind local` registers the controller. `--file` accepts a complete
+versioned worker descriptor for advanced command-worker or hardware requirements.
+`update WORKER_ID` changes only supplied fields, while `remove WORKER_ID` removes
+only the local registration. These commands never allocate, stop, or destroy a VM.
+Mutations validate before publication, sort entries, serialize competing CLI writes,
+and atomically replace a private catalog. An empty catalog is valid. Duplicate adds,
+unknown updates/removals, invalid declarations and unsafe paths fail without replacement.
+`--if-identity sha256:...` rejects a stale reviewed catalog. Windows workspace
+paths use the supported home-relative representation, such as `~/litai`.
+
+`litai worker test --all` or repeated `--worker-id ID` runs a bounded,
+noninteractive SSH echo handshake without requiring Python, GPU tooling, or LitAI
+on the worker. Results identify each worker, SSH status, diagnostic and remediation.
+DNS, connection refusal, timeout, unknown/changed host keys and authentication failures
+remain distinct. One failure never suppresses peer results. A nonzero exit status means
+at least one worker failed or was unsupported. Tests do not alter host-key policy,
+install credentials, mutate workspaces, or publish hardware observations.
+
+### Standard lifecycle parallelism
+
+For `build`, `test`, `rebuild`, and `profile`, omitting `--jobs` selects the live
+admitted action-worker slot count (at most 256). An explicit `--jobs N` caps that
+capacity. Without an admitted action-worker pool, omission uses one local operation;
+an explicit local limit remains supported. Per-worker index reservations prevent
+waiting indexes from occupying shared lifecycle threads. Complete-node transports
+retain their existing integer dispatch default; this does not claim that every
+lifecycle phase already executes remotely.

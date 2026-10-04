@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:standard-authorization-action-inputs",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "execution_plan_identity",
+    "generation_plan_identity",
+    "intent",
+    "issued_at",
+    "index_result"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:standard-authorization-action-inputs"
+    },
+    "execution_plan_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generation_plan_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "intent": {
+      "$ref": "urn:literate-ai:schema:v2:standard-component-build-intent"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "index_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "component_revision",
+        "source"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/disabled-source-index@1"
+        },
+        "component_revision": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

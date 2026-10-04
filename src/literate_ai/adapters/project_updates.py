@@ -50,7 +50,7 @@ from literate_ai.projects import (
     ProjectError,
     discover_project,
 )
-from literate_ai.repository_urls import repository_urls_equivalent
+from literate_ai.repository_urls import repository_origin_continues
 
 _MAXIMUM_UPDATE_INPUT_BYTES = 16 * 1024 * 1024
 
@@ -387,9 +387,16 @@ def _protect_dangling_roadmap_queue_owners(
     if active_work_index is None:
         return files
     active_work_item = files[active_work_index]
-    if active_work_item.classification is not ProjectUpdateClassification.UPSTREAM_ONLY:
+    if active_work_item.classification not in (
+        ProjectUpdateClassification.UPSTREAM_ONLY,
+        ProjectUpdateClassification.MERGEABLE,
+    ):
         return files
-    upstream_active_work = upstream_content.get(_ACTIVE_WORK_PATH)
+    upstream_active_work = (
+        active_work_item.merged_text.encode("utf-8")
+        if active_work_item.merged_text is not None
+        else upstream_content.get(_ACTIVE_WORK_PATH)
+    )
     if upstream_active_work is None:
         return files
     try:
@@ -421,7 +428,9 @@ def _protect_dangling_roadmap_queue_owners(
             # against the upstream replacement -- both mean a mechanical
             # upstream-only apply of the queue is unsafe here.
             replaced = replace(
-                active_work_item, classification=ProjectUpdateClassification.CONFLICT
+                active_work_item,
+                classification=ProjectUpdateClassification.CONFLICT,
+                merged_text=None,
             )
             return (
                 files[:active_work_index] + (replaced,) + files[active_work_index + 1 :]
@@ -437,7 +446,9 @@ class FilesystemProjectUpdateAdapter:
         *,
         origin_provider=discover_installed_initialization_origin,
         protected_paths: frozenset[str] = frozenset(),
+        base_reader=None,
     ):
+        self._base_reader = base_reader
         self._origin_provider = origin_provider
         self._protected_paths = frozenset(protected_paths)
 
@@ -472,8 +483,8 @@ class FilesystemProjectUpdateAdapter:
                 "installed update origin provider returned an invalid contract",
             )
         if (
-            not repository_urls_equivalent(
-                upstream.repository_url, previous.repository_url
+            not repository_origin_continues(
+                previous.repository_url, upstream.repository_url
             )
             or upstream.distribution_name != previous.distribution_name
         ):
@@ -481,11 +492,16 @@ class FilesystemProjectUpdateAdapter:
                 "project.update_origin_changed",
                 "installed framework origin differs from the initializing origin",
             )
+        from .update_merge import UpdateBases, enrich_merge, recover_bases
+
+        bases = UpdateBases(root)
         baseline_by_path = {item.path: item.identity for item in baseline.files}
+        baseline_by_path.update(bases.identities("framework"))
         upstream_content = _upstream_template(set(baseline_by_path))
         imported = _catalog_import_paths(root)
         inherited = (
             imported
+            | frozenset(bases.scopes["catalog"])
             | _project_owned_generation_input_paths(project, imported)
             | _retained_legacy_shim_authority_paths(root)
             | self._protected_paths
@@ -524,6 +540,16 @@ class FilesystemProjectUpdateAdapter:
             )
             for relative in paths
         )
+        recover_bases(root, files, bases, self._base_reader, previous)
+        files = tuple(
+            enrich_merge(
+                item,
+                bases.get(item.baseline_identity),
+                _local_bytes(root, item.path),
+                upstream_content.get(item.path),
+            )
+            for item in files
+        )
         files = _protect_dangling_roadmap_queue_owners(root, files, upstream_content)
         return ProjectUpdatePlan(
             project.definition.identity,
@@ -531,6 +557,7 @@ class FilesystemProjectUpdateAdapter:
             previous,
             upstream,
             files,
+            _identity(bases.original or b""),
         )
 
 

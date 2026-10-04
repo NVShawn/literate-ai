@@ -24,8 +24,8 @@ STANDARD_LIFECYCLE_ATTEMPT_EVIDENCE_SCHEMA = (
 
 class StandardLifecycleStage(StrEnum):
     SOURCE_GENERATION = "source-generation"
-    BUILD_INTENT = "build-intent"
     SOURCE_INDEX = "source-index"
+    BUILD_INTENT = "build-intent"
     BUILD_AUTHORIZATION = "build-authorization"
     BUILD_PLAN = "build-plan"
     BUILD = "build"

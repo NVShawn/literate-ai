@@ -1,0 +1,87 @@
+{
+  "schema": "literate-ai/video-course@1",
+  "id": "sam-meets-literate-ai-ten-minutes-audition",
+  "title": "Ten Minutes. Keep Your Makefile.",
+  "embed_subtitles": false,
+  "audio_bitrate_kbps": 80,
+  "speakers": {
+    "litai": {
+      "name": "LitAI"
+    },
+    "sam": {
+      "name": "Sam"
+    }
+  },
+  "scenes": [
+    {
+      "title": "01 Ten minutes. No faith required.",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "I'm Sam. C++, make, tests. They work. You've got ten minutes to convince me I need another tool. The clock includes buzzwords.",
+          "audio": "assets/shot-01.wav"
+        }
+      ],
+      "visual": "assets/shot-01.png"
+    },
+    {
+      "title": "02 challenge",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "I'm Litai, from Literate AI. Keep your tools; I'm selling a harness, not a religion. The interesting part is between an agent saying done and a product being ready.",
+          "audio": "assets/shot-02.wav"
+        }
+      ],
+      "visual": "assets/shot-02.png"
+    },
+    {
+      "title": "03 challenge",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "My tests already tell me that. Are we adding YAML so a chatbot can feel supervised?",
+          "audio": "assets/shot-03.wav"
+        }
+      ],
+      "visual": "assets/shot-03.png"
+    },
+    {
+      "title": "04 contract",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "If your pipeline already proves every step, keep it. The gap is when an agent implements the wrong promise, tests that same misunderstanding, and calls the package shipped. Let's inspect one promise before generating anything.",
+          "audio": "assets/shot-04.wav"
+        }
+      ],
+      "visual": "assets/shot-04.png"
+    },
+    {
+      "title": "05 contract",
+      "dialogue": [
+        {
+          "speaker": "sam",
+          "text": "You get one small example. Not a cathedral of configuration.",
+          "audio": "assets/shot-05.wav"
+        }
+      ],
+      "visual": "assets/shot-05.png"
+    },
+    {
+      "title": "06 One promise, two layers",
+      "dialogue": [
+        {
+          "speaker": "litai",
+          "text": "One promise. A greeting card: a name and messages in; a greeting, a recipient identifier and counts out. That promise is the Component, Unicode whitespace included. It says nothing about how it's built.",
+          "audio": "assets/shot-06.wav"
+        }
+      ],
+      "visual": "assets/shot-06.png"
+    }
+  ],
+  "evidence": [
+    "production.json",
+    "sessions.json"
+  ]
+}

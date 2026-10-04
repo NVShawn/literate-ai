@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:update-merge-contracts",
+  "title": "Update base custody and reviewed merge resolutions",
+  "$defs": {
+    "bases": {
+      "$id": "literate-ai/update-bases@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "blobs",
+        "framework",
+        "catalog",
+        "sources"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/update-bases@1"
+        },
+        "blobs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "framework": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "catalog": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        },
+        "sources": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^git:"
+          }
+        }
+      }
+    },
+    "review": {
+      "$id": "literate-ai/project-update-conflict-review@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "path",
+        "file_identity",
+        "decision",
+        "rationale",
+        "merged_text",
+        "applied"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/project-update-conflict-review@1"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "decision": {
+          "enum": [
+            "keep-local",
+            "take-upstream",
+            "merge"
+          ]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "merged_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "applied": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "literate-ai/update-bases@1"
+    },
+    {
+      "$ref": "literate-ai/project-update-conflict-review@1"
+    }
+  ]
+}

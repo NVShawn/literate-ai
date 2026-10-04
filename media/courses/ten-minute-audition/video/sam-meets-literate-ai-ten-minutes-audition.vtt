@@ -1,0 +1,30 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:11.280
+Sam: I'm Sam. C++, make, tests. They work. You've got ten minutes to
+convince me I need another tool. The clock includes buzzwords.
+
+00:00:11.430 --> 00:00:26.230
+LitAI: I'm Litai, from Literate AI. Keep your tools; I'm selling a
+harness, not a religion. The interesting part is between an agent
+saying done and a product being ready.
+
+00:00:26.388 --> 00:00:33.028
+Sam: My tests already tell me that. Are we adding YAML so a chatbot
+can feel supervised?
+
+00:00:33.180 --> 00:00:50.380
+LitAI: If your pipeline already proves every step, keep it. The gap is
+when an agent implements the wrong promise, tests that same
+misunderstanding, and calls the package shipped. Let's inspect one
+promise before generating anything.
+
+00:00:50.530 --> 00:00:56.530
+Sam: You get one small example. Not a cathedral of configuration.
+
+00:00:56.697 --> 00:01:15.577
+LitAI: One promise. A greeting card: a name and messages in; a
+greeting, a recipient identifier and counts out. That promise is the
+Component, Unicode whitespace included. It says nothing about how it's
+built.
+

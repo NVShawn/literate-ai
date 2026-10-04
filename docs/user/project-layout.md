@@ -146,9 +146,11 @@ See [repository inheritance](../architecture/repository-inheritance.md).
 `litai update [PROJECT]` verifies initialization evidence, re-resolves the complete
 parent chain, and emits versioned three-way plans for both inherited catalogs and the
 static framework scaffold: `unchanged`, `already-current`, `upstream-only`,
-`local-only`, `conflict`, `upstream-added`, or `preserved-dynamic`. `--apply` updates
-only mechanically safe files and the exact lineage/provenance records; local changes
-and conflicts are preserved. `--adopt-added` remains an explicit capability-adoption
+`local-only`, `mergeable`, `conflict`, `upstream-added`, or `preserved-dynamic`. `--apply` updates
+upstream-only files, clean text merges, and the exact lineage/provenance records.
+Local overlays survive merging; overlapping conflicts require explicit review.
+`.literate/update-bases.json` retains verified upstream bases across updates;
+`--resolutions FILE` explicitly applies identity-bound reviewed conflict choices. `--adopt-added` remains an explicit capability-adoption
 decision. After review, repeatable `--take-upstream PATH` choices can include exact
 inherited-catalog conflicts in that same transaction; other paths fail before writes.
 A repeatable `--keep-local PATH` can retain an exact planned removal when local
@@ -157,8 +159,8 @@ and lineage back.
 
 `litai reparent URL[#REVISION]` resolves and reviews a new complete chain before a
 compare-and-swap change. `litai reparent none` explicitly makes the repository a root;
-for that project, `litai update` is a no-op. Semantic conflict migration, lock refresh,
-Tests and receipt finalization remain subsequent gates.
+for that project, `litai update` is a no-op. Lock refresh,
+tests and receipt finalization remain subsequent gates.
 
 Each catalog-root field remains explicit in the manifest, but unused Component, Flavor,
 skill, workflow, and routing lists may be empty. `documentation_roots` is required and

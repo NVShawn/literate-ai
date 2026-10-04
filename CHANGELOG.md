@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Documentation: point getting started, installation, worker registration and
+  adoption guidance at the onboarding film and instructional courses, and link the
+  course index to repository files instead of a feature branch.
+
+- Continue existing installations across the repository move: projects initialized
+  from `NVIDIA-dev/literate-ai` plan `litai update` against public-repository builds,
+  and self-update follows the declared successor. Other repository origins are still
+  refused. See the
+  [migration guide](docs/user/repository-migration.md).
+
+- macOS dependency observation reuses `dyld_info` facts within a process only for
+  identical inspector bytes, arguments and image identity: content and symlink chain
+  for on-disk images, the boot session for shared-cache images. Retained Cargo native
+  test guards no longer re-inspect ~700 unchanged system images per check (#13).
+
 - Documentation tooling: update DOMPurify to 3.4.16. Gate the dependency audit
   through reviewed, expiring per-advisory exceptions. The only exception covers the
   unpatched braces advisory GHSA-vfj7-8cjw-p6xm in OpenSpec's glob dependencies (#24).
@@ -11,11 +26,260 @@
   an equal-size, equal-timestamp previous version. Keep import-path overrides
   excluded from the installer environment.
 
+- Retained adoption: add explicit read-only Standard planning with bounded binary input
+  custody and complete action inventories. Execution and release qualification remain
+  unavailable until the retained-origin receipt path is complete (ADR 0048).
+
+- CLI: keep pip installation and command re-execution on the same configured
+  bytecode cache during self-update, preventing stale code after equal-size,
+  equal-timestamp upgrades while preserving unrelated caches.
+
+- CI: run one full Linux suite plus cross-platform native/install smoke on ordinary
+  PRs, consolidate documentation jobs, cache dependency downloads, and preserve
+  independent failure diagnostics. Full multi-platform release qualification remains
+  required. Publication subprocess timeouts now stay within their reviewed limit
+  even when floating-point deadline arithmetic rounds upward.
+
+- CI: separate focused macOS PR smoke checks from full main/release qualification,
+  bound conformance steps, and retain verbose test names and self-update failure
+  diagnostics. Full release gates remain unchanged.
+
+- Onboarding: feature the continuous narrated video in the README, with a clickable
+  preview, chapters, subtitles, and a public-feedback link.
+
 - Move the canonical repository to
   [jordanhubbard/literate-ai](https://github.com/jordanhubbard/literate-ai): release
   publication, the Homebrew formula, install documentation, and initialized project
   READMEs now reference it. Earlier issue and CI links refer to the archived
   `NVIDIA-dev/literate-ai` repository.
+
+- CLI: identify Git/source builds and their exact revision in version output,
+  without treating package metadata as published-release evidence. Explicit
+  `litai update` now checks for and applies a newer stable release in an enrolled
+  prefix before continuing project reconciliation; opt-outs remain effective.
+
+- Bind TEST dispatch to the exact worker, deadline, planned predecessors and
+  BUILD/result handoff before child execution, then re-admit returned evidence.
+  Configured receiver and scheduling integration remain pending.
+
+- Add a supervised TEST child with current grant/deadline checks, cancellation,
+  bounded streams and descendant cleanup, sharing BUILD's process supervision.
+  Configured receiver dispatch and production TEST scheduling remain pending.
+
+- Import worker TEST results through explicit verified return transport, retaining
+  evidence before registration and refusing corrupted records or changed worker
+  authority. Production TEST dispatch remains pending.
+
+- Add a worker TEST operation over verified transferred source and BUILD artifacts,
+  returning bounded evidence tied to the exact handoff. Supervised command/SSH
+  dispatch and production queue integration remain pending.
+
+- Add controller admission for transferred generated-test evidence, checking exact
+  suite, build and entrypoint authority before registration. Worker TEST execution
+  and production dispatch remain pending.
+
+- Remote tool discovery verifies authored command names against a worker's private
+  search environment and rechecks them before reuse. Changed resolution, including
+  a newly shadowing executable, is refused without running the supplied command.
+
+- Make locked-command BUILD export and provider checks reusable from portable
+  records, preserving local refusal before command execution. Remote BUILD
+  execution and artifact transfer remain pending.
+
+- Standard rebuild dispatches AUTHORIZE through the shared admitted worker pool,
+  captures controller time after reserving capacity, and rechecks returned grants
+  against current SDK custody and expiry without local retry or grant renewal.
+
+- Add bounded command-worker AUTHORIZE execution using the controller-selected
+  issuance time and fixed constrained policy. Changed index custody, future/expired
+  grants and payload substitutions are refused; production queue wiring is pending.
+
+- Report hardware probe error codes when no candidate can be observed, preserving
+  healthy-worker admission and excluding raw exception messages from the refusal.
+
+- Construct Standard authorization from explicit intent, index and controller time,
+  preserving the existing grant policy while retaining local SDK admission and
+  evidence recording. AUTHORIZE transport remains pending.
+
+- Retain remote PLAN result evidence before registering local plan or SDK authority;
+  an evidence-store failure leaves registration unchanged and frees worker capacity.
+
+- Command workers can construct build intent from an exact indexed-source handoff
+  and typed provider acceptance records, checking the canonical DAG and bounded
+  predecessor custody. Standard rebuild now dispatches BUILD_INTENT through the
+  shared INDEX/PLAN worker slots, retaining results before local admission and
+  refusing missing provider acceptance evidence without local retry.
+
+- Build-intent admission rechecks current inputs and registers provider bindings
+  only after library validation and required evidence recording succeed. Rejected
+  intents no longer leave partially registered provider state.
+
+- Standard rebuild can finalize plans through admitted command/SSH workers, sharing
+  capacity with source indexing and independently verifying returned plans before
+  local registration. Native Linux and Windows PLAN receiver and SSH checks pass;
+  remaining lifecycle phases and release qualification stay open.
+
+- Construct build intent from exact portable source, command, dependency and SDK
+  inputs, rejecting mismatched candidate and generation-plan bindings. Local source
+  admission, live SDK checks and library-import custody remain enforced.
+
+- Test qualification: preserve the long coordinator-path regression on native
+  Windows by creating its fixture through the existing native filesystem boundary.
+  Real SSH PLAN checks now confirm exact results and authorization refusals on
+  Linux and Windows without executing a build.
+
+- Add opt-in local worker provisioning through an organization-owned command, with
+  credential bindings, help discovery, bounded request/response validation, durable
+  duplicate-allocation protection, and registration recovery. Static worker CRUD
+  and SSH tests remain independent of provisioning.
+
+- Windows action dispatch preserves case-insensitive runtime environment names.
+  Capability probes allow up to 60 seconds for native identity checks and startup,
+  while retaining any shorter action deadline and the existing environment allowlist.
+
+- Framework core: local builds no longer wait for packaging-only providers or bind
+  their artifacts into compilation. Final packages still require accepted providers;
+  provider failure prevents publication.
+
+- Framework core: artifact graphs retain explicit runtime and packaging dependencies
+  with locked-edge and provider-acceptance evidence, preserving compiled artifact
+  identities while validating exact package closure.
+
+- Framework core: execution evidence records exact provider artifacts; lifecycle
+  admission and independent evidence reopening reject omitted or substituted inputs.
+
+- Framework core: toolchain dependencies now bind accepted provider exports into
+  consumer build intent, build actions, worker imports, process bindings, and
+  resulting artifact provenance.
+
+- Framework core: consumers of locked public interfaces can build while providers
+  are still running. Artifact consumers retain acceptance barriers, and any failed
+  component still prevents project acceptance and publication.
+
+- Framework core: private action workers can configure an SSH receiver for capability
+  probes and source indexing, using bounded stdin and exact worker/receiver checks.
+
+- Framework core: action plans now bind accepted build/toolchain inputs before build
+  intent and authorization, while preserving runtime and packaging phase overlap.
+
+- Select admitted command indexing from private action-execution configuration,
+  with real health checks, pinned policy custody, and refusal of stale observations
+  or changed configuration. Command-worker hardware probing remains under qualification.
+
+- Bound command-index source reads before publication and after worker execution;
+  reject source growth before retaining qualification evidence.
+
+- Allow the Standard rebuild factory to index through an admitted command-worker
+  pool using verified source evidence custody and an explicit publication CAS;
+  preserve that port through source-cache and checkpoint composition.
+
+- Compose live command-worker phase admission into Standard indexing, checking
+  hardware freshness, source handoff, health evidence, and unchanged runtime
+  capabilities before dispatch and result acceptance. Automatic CLI routing remains
+  under qualification.
+
+- Add opt-in command-worker phase capability probes with exact worker/runtime
+  binding, replay refusal, and unchanged legacy worker identities.
+
+- Add a command-backed Standard generation indexer that publishes verified source,
+  respects admitted worker slots, and retains exact qualification evidence.
+  Automatic CLI routing remains under qualification.
+
+- Let command-worker source indexing fetch missing source blobs from a privately
+  configured HTTP(S) CAS, verifying exact bytes before local publication.
+
+- Execute preplanned source-index actions in a command worker using verified CAS files and
+  disposable source custody. Automatic routing and the remaining worker phases
+  remain under qualification.
+
+- Add a data-only command-worker action protocol with verified records, deadlines,
+  and cancellation. Production phase routing remains under qualification.
+
+- Enforce local shared-artifact expiry and aggregate storage quotas while preserving
+  deduplicated payloads, read-only access, and verified remote fallback.
+
+- Index local consumer source while providers build, then wait for accepted provider
+  exports before creating build intent; preserve completed indexing on cancellation.
+
+- Dispatch local Component build phases separately and recheck authorization when
+  each queued host phase starts, refusing expired grants before execution.
+
+- Repository refresh: validate existing files against their captured physical
+  permissions so group-writable checkouts remain valid while later permission
+  changes still fail custody checks.
+
+- Worker operations: add private catalog list/show/add/update/remove commands with
+  validated atomic writes and stale-identity protection, plus bounded SSH tests
+  that report each selected worker independently. Failed capability probes retain
+  successful peer results and remove stale observations for failed workers.
+
+- Overlap local consumer source generation with provider build work while preserving
+  accepted artifact imports and one shared concurrency limit.
+
+- Make action-DAG plans wait for provider acceptance before consuming build,
+  toolchain, or runtime artifacts, while keeping interface-only generation independent.
+
+- Include the compiler-cache tool's recursive native dependencies in build evidence
+  and cache identity, refusing dependency changes before and after compilation.
+
+- Cache native C++ translation units through sccache while linking each declared
+  executable normally, including Components with multiple entrypoints.
+
+- Run configured Cargo compiler caching through an identity-bound sccache tool
+  and an owned private server, retaining cache counters with build observations.
+
+- Bind private shared-cache configuration into Standard Bazel builds, with
+  temporary credential custody and disposable read-only disk-cache views.
+
+- Preserve bounded, redacted SSH probe diagnostics with the failing worker, exit
+  status, and actionable cause; retain worker identity on invalid observations.
+
+- Start ready Component lifecycles as soon as their own dependencies finish,
+  without waiting for unrelated work in a previous dependency layer.
+
+- Add bounded HTTP shared-artifact transport with immutable publication checks,
+  verified local fallback, and read-only access to writer entries. Production
+  lifecycle integration remains part of the 1.2 qualification program.
+
+- Project updates now merge non-overlapping local and upstream text edits using
+  verified base content, preserve overlays across consecutive updates, and apply
+  explicitly reviewed conflict resolutions with `--apply --resolutions FILE`.
+  Update baselines and files roll back together on validation failure.
+
+- Instructional narrative: add an Opus-reviewed ten-minute skeptical-adopter
+  script and a new local expressive-voice audition with separate acronym
+  pronunciation text. The existing public film remains unchanged pending human
+  listening review and full replacement production.
+
+- Instructional media: replace the short-course viewing path with one continuous,
+  two-voice feedback-edition video play, character introductions, fresh recorded
+  greenfield/TinyXML2 execution, visible captions, and an updates/lineage closing.
+  Keep the discovered inherited-starter oracle defect and demo-local correction
+  explicit; this does not claim a framework release or an upstream defect repair.
+
+- Separate inheritable video-production craft from project-owned narrative:
+  neutral course initialization, project-selected presenters and voices, visual
+  shots, and a quality-review skill that calls for an audition before full production.
+- Add rebuildable instructional courses through `litai video init`, `plan`,
+  `build`, and `verify`: two-speaker narration, recordings, captions, and
+  source-bound media receipts, with a packaged video-authoring skill.
+- Repair two defects exposed by live course demos: starter independent acceptance
+  now matches its greeting specification, and retained test receipts recognize
+  CTest's newer exact all-passed summary without accepting zero or unknown counts.
+
+
+- CI: run one full Linux suite plus cross-platform native/install smoke on ordinary
+  PRs, consolidate documentation jobs, cache dependency downloads, and preserve
+  independent failure diagnostics. Full multi-platform release qualification remains
+  required. Publication subprocess timeouts now stay within their reviewed limit
+  even when floating-point deadline arithmetic rounds upward.
+
+- CI: separate focused macOS PR smoke checks from full main/release qualification,
+  bound conformance steps, and retain verbose test names and self-update failure
+  diagnostics. Full release gates remain unchanged.
+
+- Onboarding: feature the continuous narrated video in the README, with a clickable
+  preview, chapters, subtitles, and a public-feedback link.
 
 - CLI: identify Git/source builds and their exact revision in version output,
   without treating package metadata as published-release evidence. Explicit

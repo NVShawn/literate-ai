@@ -1,5 +1,8 @@
 # Installation and first run
 
+New to Literate AI? Watch the [onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4) and the
+[instructional courses](../courses/README.md) for a guided tour before installing.
+
 ## Requirements
 
 - GNU Make and Python 3.11 or newer are the stage-zero requirements for the repository
@@ -127,7 +130,8 @@ check. Network failure leaves the current CLI available and reports the skipped
 check; self-update does not silently apply project changes or rebind lifecycle pins.
 Pip, editable and otherwise unenrolled installations are not automatically modified;
 use their installation manager to upgrade. Opt-outs above still apply to explicit
-updates.
+updates. Installations from the former `NVIDIA-dev/literate-ai` repository follow
+[Moving from NVIDIA-dev/literate-ai](repository-migration.md).
 
 `litai --version` shows the declared compatibility version together with source
 provenance. Git/source installations are identified as development builds and include

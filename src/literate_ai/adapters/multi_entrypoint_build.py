@@ -7,6 +7,7 @@ no Component policy and never discovers tools or output names on its own.
 
 from __future__ import annotations
 
+import ast
 import base64
 import json
 import os
@@ -15,6 +16,9 @@ import subprocess
 import sys
 import zlib
 from pathlib import Path, PurePosixPath
+
+if __package__:
+    from .native_cpp_build import compile_cpp, compiler_driver_source
 
 _TREE_STRATEGIES = frozenset({"python-tree", "javascript-tree", "typescript-tree"})
 
@@ -29,14 +33,34 @@ def standalone_driver_source() -> str:
     needs only the standard library and never an ambient ``literate_ai`` import.
     """
 
-    encoded = base64.urlsafe_b64encode(
-        zlib.compress(Path(__file__).read_bytes(), level=9)
-    ).decode("ascii")
-    return (
-        "import base64,zlib;"
-        "exec(compile(zlib.decompress(base64.urlsafe_b64decode("
-        + repr(encoded)
-        + ')),"<literate-ai-multi-entrypoint-build>","exec"))'
+    module = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    module.body = [
+        node
+        for node in module.body
+        if not (
+            isinstance(node, ast.Expr)
+            and isinstance(node.value, ast.Constant)
+            and isinstance(node.value.value, str)
+            or isinstance(node, ast.ImportFrom)
+            and node.module == "__future__"
+            or isinstance(node, ast.FunctionDef)
+            and node.name == "standalone_driver_source"
+            or isinstance(node, ast.If)
+            and isinstance(node.test, ast.Name)
+            and node.test.id == "__package__"
+        )
+    ]
+    for node in ast.walk(module):
+        if (
+            isinstance(node, ast.FunctionDef)
+            and node.body
+            and isinstance(node.body[0], ast.Expr)
+            and isinstance(node.body[0].value, ast.Constant)
+            and isinstance(node.body[0].value.value, str)
+        ):
+            node.body.pop(0)
+    return compiler_driver_source(
+        ast.unparse(module), filename="<literate-ai-multi-entrypoint-build>"
     )
 
 
@@ -171,7 +195,6 @@ def build_many(
         if strategy == "cpp-executable"
         else []
     )
-    compiler_name = Path(compiler[0]).name.lower()
     for source, output in descriptors:
         output.parent.mkdir(parents=True, exist_ok=True)
         if strategy == "zig-executable":
@@ -182,34 +205,20 @@ def build_many(
             argv = [*compiler, "build", "-o", str(output), str(source)]
         elif strategy == "swift-executable":
             argv = [*compiler, str(source), "-o", str(output)]
-        elif strategy == "cpp-executable" and compiler_name in {
-            "cl",
-            "cl.exe",
-            "clang-cl",
-            "clang-cl.exe",
-        }:
-            argv = [
-                *compiler,
-                "/nologo",
-                "/std:c++17",
-                "/EHsc",
-                "/I" + str(cpp_root),
-                str(source),
-                *shared_cpp,
-                "/Fe" + str(output),
-            ]
         elif strategy == "cpp-executable":
-            argv = [
-                *compiler,
-                "-std=c++17",
-                "-O2",
-                "-I",
-                str(cpp_root),
-                str(source),
-                *shared_cpp,
-                "-o",
-                str(output),
-            ]
+            result = compile_cpp(
+                compiler,
+                [str(source), *shared_cpp],
+                cpp_root,
+                object_root,
+                output,
+                environment,
+            )
+            sys.stdout.buffer.write(result.stdout)
+            sys.stderr.buffer.write(result.stderr)
+            if result.returncode:
+                raise SystemExit(result.returncode)
+            continue
         else:
             raise ValueError(f"unsupported multi-entrypoint build strategy: {strategy}")
         _run(argv, environment=environment)

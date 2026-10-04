@@ -645,15 +645,15 @@ def _physical_tree_paths(
     return paths
 
 
-def _entry_state(entry, directory_mode: int | None) -> _State:
+def _entry_state(entry, physical_mode: int | None) -> _State:
     if entry.mode == "040000":
-        return _State("directory", permissions=directory_mode)
+        return _State("directory", permissions=physical_mode)
     if entry.mode == "120000":
         return _State("symlink", entry.content)
     if entry.mode == "100644":
-        return _State("file", entry.content, None if os.name == "nt" else 0o644)
+        return _State("file", entry.content, physical_mode)
     if entry.mode == "100755":
-        return _State("file", entry.content, None if os.name == "nt" else 0o755)
+        return _State("file", entry.content, physical_mode)
     _fail("tree_changed", "nested Gitlinks have no live source ownership")
 
 
@@ -702,6 +702,13 @@ def _require_worktree_state(application, plan, *, prospective: bool) -> None:
         item.path: None if os.name == "nt" else stat.S_IMODE(item.signature[2])
         for item in plan.directories
     }
+    member_modes = {
+        (PurePosixPath(directory.path) / os.fsdecode(name)).as_posix(): stat.S_IMODE(
+            signature[2]
+        )
+        for directory in plan.directories
+        for name, signature in directory.members
+    }
     direct = observations[plan.root]
     hydrated = {
         item.path: item for item in direct.hydrated_lfs if item.path not in changes
@@ -728,6 +735,14 @@ def _require_worktree_state(application, plan, *, prospective: bool) -> None:
             continue
         mode = directory_modes.get(path)
         change = changes.get(path)
+        if os.name != "nt" and plan.changes and entry.mode in {"100644", "100755"}:
+            # Git records executable intent, whereas preparation admitted the
+            # checkout's exact permissions (including umask/shared-repo bits).
+            mode = (
+                (0o755 if entry.mode == "100755" else 0o644)
+                if prospective and change is not None
+                else member_modes[path]
+            )
         if (
             prospective
             and entry.mode == "040000"
@@ -736,6 +751,26 @@ def _require_worktree_state(application, plan, *, prospective: bool) -> None:
         ):
             mode = None if os.name == "nt" else 0o755
         expected_state = _entry_state(entry, mode)
+        if not plan.changes and os.name != "nt" and entry.mode != "120000":
+            # A no-op physical plan intentionally has no directory inventory.
+            # Admit its exact permissions once at application entry, then retain
+            # that expectation through commit/rollback and terminal validation.
+            live_path = plan.root / path
+            admitted = application._noop_states.get(live_path)
+            if admitted is None:
+                observed = _state(live_path, expected_state)
+                if entry.mode in {"100644", "100755"} and (
+                    observed.permissions is None
+                    or bool(observed.permissions & 0o100) != (entry.mode == "100755")
+                ):
+                    _fail("tree_changed", "live executable intent changed")
+                admitted = _State(
+                    expected_state.kind, expected_state.content, observed.permissions
+                )
+                if observed != admitted:
+                    _fail("tree_changed", "live tracked worktree state changed")
+                application._noop_states[live_path] = admitted
+            expected_state = admitted
         if _state(plan.root / path, expected_state) != expected_state:
             _fail("tree_changed", "live tracked worktree state changed")
 
@@ -766,6 +801,7 @@ class _LiveRefreshApplication:
         self._targets: dict[Path, tuple[_State, _State, str]] = {}
         self._installed_objects = None
         self._retained_custody: list[_OwnedNode] = []
+        self._noop_states: dict[Path, _State] = {}
         self._result: AppliedRepositoryRefresh | None = None
 
     @property

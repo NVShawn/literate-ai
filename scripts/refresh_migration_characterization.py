@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 
 from literate_ai.contracts import canonical_identity
-from tests.unit.test_migration_characterization_baseline import (
+from tests.support.migration_characterization import (
     CURRENT_FIXTURE_PATH,
     _wire_shape_observation,
 )

@@ -134,7 +134,7 @@ need a Codex presentations plugin. Plugin discovery remains a fallback until thr
 visual parity closes. Because the build program holds no publication authorization, it
 records `published_location: null`; publication is a separate authorized step.
 
-An oracle that has never failed is a rubber stamp, so `tests/unit/test_document_pair_oracle.py`
+An oracle that has never failed is a rubber stamp, so `tests/critical/test_document_pair_oracle.py`
 mutates a conforming realization once per scenario — widened audience, credential material,
 unauthorized publication, undeclared member, missing artifact, missing package element,
 missing notes page, an element outside the surface, a surface disagreeing with the

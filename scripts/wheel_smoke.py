@@ -61,6 +61,7 @@ required = (
     "workflows/production/staging/dev/workflow.md",
     "routing/production/staging/dev/routing.json",
     "skills/agent/record-user-directed-work/SKILL.md",
+    "skills/agent/author-instructional-videos/SKILL.md",
     "flavors/os-windows/standard-command-profile.json",
 )
 missing = [

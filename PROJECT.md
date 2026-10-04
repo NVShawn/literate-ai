@@ -64,7 +64,7 @@ development (2026-09-10):
 | Language Flavors | 8 (`lang-cpp`, `lang-go`, `lang-javascript`, `lang-python`, `lang-rust`, `lang-swift`, `lang-typescript`, `lang-zig`) | Each pairs a language Flavor with a portable-application skill and a native/tree build strategy. Bare selectors (`+cpp`) still resolve. |
 | Build-system Flavors | 5 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
 | OS Flavors | 3 (`os-linux`, `os-macos`, `os-windows`) | |
-| Packaging Flavors | 8 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
+| Packaging Flavors | 9 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`, `package-zip`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
 | Toolchain Flavors | 4 (`toolchain-zig-cc`, `toolchain-swift-apple`, `toolchain-swift-linux`, `toolchain-swift-windows`) | |
 | UI / deploy / accel / doc | `ui-react`; `deploy-docker`; `accel-nvidia-cuda`, `accelerator-cpu`; `doc-google-workspace`, `doc-microsoft-365` | Cataloged, not all first-class in Goal 5. |
 | Framework Components | `backend-application`, `document-pair`, `frontend-application`, `invoice-service`, `literate-ai-overview`, `mcp-application`, `money-calculation` | Reusable, inheritable authority under `components/`. |
@@ -72,11 +72,32 @@ development (2026-09-10):
 
 ## Current work
 
+[Accepted ADR 0048](docs/decisions/0048-retained-project-standard-lifecycle.md)
+([issue #22](https://github.com/jordanhubbard/literate-ai/issues/22)) records a
+retained-project Standard lifecycle admission route under Goals 1, 4 and 6.
+The directing human accepted this design on 2026-10-02. Implementation and full
+qualification remain open under RETAINED-PROJECT-001; conversion and release-authority
+gates remain unchanged.
+
+PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
+extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
+standard package lifecycle. Exact accepted custody, both SBOMs, specifications,
+target identities and release authorization remain mandatory. Qualification is pending.
+
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework
 and derived projects, repair the public release baseline, and verify bare
 `litai init` from a fresh public installation. Publication remains pending;
 no unqualified snapshot may be tagged merely to unblock onboarding.
+
+WORKER-CLI-001 adds private worker CRUD, independent SSH connectivity tests and
+per-worker probe results under Goals 1 and 4. Local regression passes; native
+Linux/Windows qualification and open-review integration remain in progress.
+
+UPDATE-MERGE-002 completes Goals 1 and 6's missing three-way update path: verified
+baseline custody, clean text merges and explicit reviewed conflict application.
+Focused local tests cover consecutive updates and rollback; hosted and release
+qualification remain pending under [the queue](docs/roadmap/active-work.md).
 
 REFRESH-ABSORBED-001 implements and qualifies attached refresh of absorbed primary
 worktrees under Goals 1 and 4, preserving external shared-branch custody. Focused
@@ -527,3 +548,14 @@ the goals above:
   fixed, transitive skill-dependency closure fixed for arbitrary-source promotion.
 - Go added as a sixth first-class language Flavor with its own toolchain discovery,
   authorization-gated builder, and portable-application skill.
+
+### Optional local worker provisioning
+
+Static workers in the private workers.json catalog remain sufficient for execution.
+Explicit dynamic provisioning requires a locally configured command and separate
+local enablement, with user-supplied credential environment bindings. The generic
+hook discovers help, submits a bounded versioned request, validates the returned
+SSH descriptor, and registers it privately. Durable request state prevents silent
+repeat allocation and preserves validated responses for registration recovery.
+Provider APIs, resource sizing translation, credential acquisition and remote
+resource deletion belong to the organization command.

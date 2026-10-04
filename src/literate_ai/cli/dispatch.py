@@ -26,6 +26,7 @@ from literate_ai.adapters.mcp_runtime import (
 )
 from literate_ai.adapters.models import CodingCliError
 from literate_ai.adapters.project_update_work_items import DEFAULT_QUEUE_PATH
+from literate_ai.adapters.shared_cache_config import SharedCacheConfigurationError
 from literate_ai.adapters.standard_project import StandardCommandProjectionError
 from literate_ai.adapters.user_config import (
     UserConfigError,
@@ -105,6 +106,7 @@ _TOP_LEVEL_COMMANDS = frozenset(
         "prompt",
         "flavor",
         "design",
+        "video",
     }
 )
 _CLI_CATALOG_EPILOG = """
@@ -133,6 +135,7 @@ SDLC catalog (verbs unchanged; grouped for flow):
     litai rebuild
     litai build | test | run
     litai package plan | build | verify
+    litai video init | plan | build | verify
     litai clean | really-clean
 
   Release
@@ -270,6 +273,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         from .work import work_from_args
 
         return work_from_args(args)
+    if args.command == "video":
+        from .video import video_from_args
+
+        return video_from_args(args)
     if args.command == "document":
         from .document import document_from_args
 
@@ -833,6 +840,30 @@ def _parser() -> JsonArgumentParser:
     work_close = work_commands.add_parser("close")
     work_close.add_argument("work_id")
     work_close.add_argument("--project", default=".")
+    video = commands.add_parser(
+        "video", help="author, rebuild, and verify narrated instructional courses"
+    )
+    video_commands = video.add_subparsers(
+        dest="video_command", required=True, parser_class=JsonArgumentParser
+    )
+    for action in ("init", "plan", "build"):
+        video_action = video_commands.add_parser(action)
+        video_action.add_argument("manifest")
+        if action == "build":
+            video_action.add_argument("--output", required=True)
+            video_action.add_argument(
+                "--font",
+                required=True,
+                help="installed font file used for slide rendering",
+            )
+            video_action.add_argument(
+                "--narration", choices=("say", "espeak", "recorded"), default="recorded"
+            )
+    video_verify = video_commands.add_parser("verify")
+    video_verify.add_argument("receipt")
+    video_verify.add_argument(
+        "--manifest", help="also reject stale source and evidence"
+    )
     document = commands.add_parser(
         "document", help="inspect and verify deterministic document artifacts"
     )
@@ -855,6 +886,12 @@ def _parser() -> JsonArgumentParser:
     worker_commands = worker.add_subparsers(
         dest="worker_command", required=True, parser_class=JsonArgumentParser
     )
+    from .worker_registry import add_registry_arguments
+
+    add_registry_arguments(worker_commands)
+    from .worker_provisioning import add_provisioning_arguments
+
+    add_provisioning_arguments(worker_commands)
     worker_health = worker_commands.add_parser(
         "health", help="inspect bounded storage health without dispatch or cleanup"
     )
@@ -1468,7 +1505,7 @@ def _parser() -> JsonArgumentParser:
         "--model",
         help="pipeline-default coding-CLI model; narrower scopes may override it",
     )
-    build.add_argument("--jobs", type=int, default=1)
+    build.add_argument("--jobs", type=int, default=None)
     build.add_argument(
         "--force-regeneration",
         action="store_true",
@@ -1510,7 +1547,7 @@ def _parser() -> JsonArgumentParser:
         "--model",
         help="pipeline-default coding-CLI model; narrower scopes may override it",
     )
-    test_command.add_argument("--jobs", type=int, default=1)
+    test_command.add_argument("--jobs", type=int, default=None)
     test_command.add_argument(
         "--target",
         default="host",
@@ -1606,20 +1643,27 @@ def _parser() -> JsonArgumentParser:
             "Components, Flavors, skills, workflows, and routing policies, and compare "
             "them plus framework-owned scaffold files with their previous provenance "
             "and current local bytes. "
-            "Planning is read-only. --apply updates only upstream-only files; new "
-            "files require --adopt-added. Local changes and conflicts are preserved "
-            "unless an inherited-catalog conflict is explicitly selected with "
-            "--take-upstream; a retired path needed by local authority can be kept "
-            "with --keep-local."
+            "Planning is read-only. --apply writes upstream-only and clean merges. "
+            "New files require --adopt-added. Overlapping conflicts require "
+            "--resolutions or an explicit inherited --take-upstream choice; "
+            "--keep-local retains a retired dependency."
         ),
     )
     update.add_argument("path", nargs="?", default=".")
     update.add_argument(
+        "--resolutions",
+        metavar="FILE",
+        help=(
+            "with --apply, apply explicitly reviewed identity-bound "
+            "conflict_reviews from update JSON"
+        ),
+    )
+    update.add_argument(
         "--apply",
         action="store_true",
         help=(
-            "write the mechanically safe subset: upstream-only changes to files this "
-            "project never touched. Conflicts and local changes are never written"
+            "apply upstream-only changes and clean three-way text merges; "
+            "overlapping conflicts require explicitly reviewed resolutions"
         ),
     )
     update.add_argument(
@@ -2365,6 +2409,23 @@ def _parser() -> JsonArgumentParser:
         help="retain an automatically allocated successful Standard runtime",
     )
     rebuild.add_argument(
+        "--retained-project",
+        help="complete retained input manifest; explicit original-source authority",
+    )
+    rebuild.add_argument(
+        "--retained-project-profile",
+        help="manifest-owned locked build/test/docs action profile",
+    )
+    rebuild.add_argument(
+        "--retained-project-plan",
+        action="store_true",
+        help="validate retained project and inputs read-only; grants no admission",
+    )
+    rebuild.add_argument(
+        "--authorize-retained-project",
+        help="exact reviewed retained-project plan identity",
+    )
+    rebuild.add_argument(
         "--retained-source",
         help="exact local UTF-8 source tree to qualify, never regenerate",
     )
@@ -2380,8 +2441,8 @@ def _parser() -> JsonArgumentParser:
     rebuild.add_argument(
         "--jobs",
         type=int,
-        default=1,
-        help="maximum parallel Component lifecycle operations (default: 1)",
+        default=None,
+        help="cap parallel Component operations (default: admitted worker capacity)",
     )
     rebuild.add_argument(
         "--flavor",
@@ -2484,8 +2545,8 @@ def _parser() -> JsonArgumentParser:
     profile.add_argument(
         "--jobs",
         type=int,
-        default=1,
-        help="maximum parallel Component lifecycle operations",
+        default=None,
+        help="cap parallel Component operations (default: admitted worker capacity)",
     )
     profile.add_argument("--flavor", action="append", default=[])
     profile.add_argument("--force-regeneration", action="store_true")
@@ -2622,7 +2683,7 @@ def _update_moving_counts(counts: object) -> dict[str, int]:
     if not isinstance(counts, dict):
         return {}
     moving: dict[str, int] = {}
-    for key in ("conflict", "upstream-added", "upstream-only"):
+    for key in ("conflict", "mergeable", "upstream-added", "upstream-only"):
         value = counts.get(key)
         if isinstance(value, int) and value:
             moving[key] = value
@@ -2675,7 +2736,7 @@ def _human_update_movement_lines(
     if not moving:
         lines.append("  Nothing in this half has moved.")
     else:
-        for key in ("conflict", "upstream-added", "upstream-only"):
+        for key in ("conflict", "mergeable", "upstream-added", "upstream-only"):
             if moving.get(key):
                 lines.append(f"  {moving[key]} {key}")
         lines.extend(_human_update_conflict_lines(files, diffs))
@@ -2697,7 +2758,7 @@ def _human_update_text(result: dict[str, Any]) -> str:
         lines.append("Nothing upstream has moved.")
     else:
         lines.append("Upstream movement:")
-        for key in ("conflict", "upstream-added", "upstream-only"):
+        for key in ("conflict", "mergeable", "upstream-added", "upstream-only"):
             if moving.get(key):
                 lines.append(f"  {moving[key]} {key}")
         lines.extend(
@@ -3273,6 +3334,17 @@ def main(
             if isinstance(result, dict) and result.get("coding_cli") is not None:
                 perf_outcome["coding_cli"] = result["coding_cli"]
         renderer = _HUMAN_RENDERERS.get(command)
+        if command in {
+            "worker.list",
+            "worker.show",
+            "worker.add",
+            "worker.update",
+            "worker.remove",
+            "worker.test",
+        }:
+            from .worker_registry import human_registry_result
+
+            renderer = human_registry_result
         if command == "worker.health":
             from .worker_health import human_worker_health
 
@@ -3319,6 +3391,7 @@ def main(
         CodingCliError,
         LocalStandardLifecycleError,
         SourceCacheError,
+        SharedCacheConfigurationError,
         SourceToSpecificationError,
         StandardCommandProjectionError,
         UserConfigError,

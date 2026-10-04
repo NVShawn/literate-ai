@@ -121,8 +121,8 @@ Worse, qualification counts successful shell commands rather than parsed test ca
 line 373).
 Its own unit test transfers specification authority with a generated test containing
 only assert True
-([test_host_regenerative_qualification.py](../../tests/unit/test_host_regenerative_qualification.py),
-line 37).
+(`tests/unit/test_host_regenerative_qualification.py`, line 37; that module was
+removed in the 1.1 test-suite reduction).
 
 This is the most serious correctness issue. Qualification must reuse the normal forced
 rebuild lifecycle, consume typed generated-test and verifier evidence, map probes to

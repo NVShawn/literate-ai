@@ -133,12 +133,12 @@ version = {attr = "literate_ai.version.DISTRIBUTION_VERSION"}
 
 [tool.pytest.ini_options]
 addopts = "-n auto --dist=loadfile --randomly-seed=12345"
-testpaths = ["tests/unit"]
+testpaths = ["tests/e2e", "tests/smoke", "tests/critical"]
 
 [tool.smoke_tests]
 budget_seconds = 600
 durations_path = ".test_durations"
-testpaths = ["tests/unit", "tests/conformance", "tests/test_package.py"]
+testpaths = ["tests/e2e", "tests/smoke", "tests/critical", "tests/conformance"]
 
 [tool.ruff]
 line-length = 88

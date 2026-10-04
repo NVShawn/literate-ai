@@ -221,9 +221,17 @@ def load_execution_worker_catalog(path: str | Path) -> ExecutionWorkerCatalog:
         value = json.loads(raw.decode("utf-8"))
         return ExecutionWorkerCatalog.from_dict(value)
     except (UnicodeDecodeError, json.JSONDecodeError, TypeError, ValueError) as exc:
+        from literate_ai.contracts import ContractValidationError
+        from literate_ai.diagnostics import redact_secrets
+
+        detail = (
+            redact_secrets(f"{exc.path}: {exc.message}")[:400]
+            if isinstance(exc, ContractValidationError)
+            else "expected a UTF-8 JSON execution-worker-catalog document"
+        )
         raise ExecutionDispatchAdapterError(
             "execution.worker_catalog_invalid",
-            "worker catalog is not a valid execution-worker-catalog document",
+            f"Invalid worker catalog: {detail}",
         ) from exc
 
 

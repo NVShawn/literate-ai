@@ -130,6 +130,42 @@ class CppToolchain:
             ),
         )
 
+    @property
+    def version_info(self) -> tuple[int, int, int] | None:
+        """Numeric authority only for recognized identity-bound compiler banners."""
+        patterns = (
+            r"(?:Apple )?clang version (\d+\.\d+\.\d+)(?:\s|$)",
+            r"(?:Apple )?Swift version (\d+\.\d+(?:\.\d+)?)(?:\s|$)",
+            r"(?:gcc|g\+\+|c\+\+|cc)(?: \([^()\r\n]*\))? (\d+\.\d+\.\d+)(?:\s|$)",
+        )
+        version = None
+        if self.family == "msvc" and re.fullmatch(
+            r"\d+\.\d+\.\d+(?:\.\d+)?", self.version
+        ):
+            version = self.version
+        else:
+            for pattern in patterns:
+                match = re.match(pattern, self.version)
+                if match:
+                    version = match.group(1)
+                    break
+            cuda = re.fullmatch(
+                r"Cuda compilation tools, release (\d+)\.(\d+), V(\d+\.\d+\.\d+)",
+                self.version,
+            )
+            if cuda:
+                if tuple(map(int, cuda.group(3).split(".")[:2])) != (
+                    int(cuda.group(1)),
+                    int(cuda.group(2)),
+                ):
+                    return None
+                version = cuda.group(3)
+        if version is None:
+            return None
+        numbers = tuple(map(int, version.split(".")[:3]))
+        numbers = (*numbers, *(0,) * (3 - len(numbers)))
+        return numbers if all(number <= 2**31 - 1 for number in numbers) else None
+
     def require_unchanged(self) -> None:
         if self.sdk_selection_identity is not None:
             if _sdk_selection_identity(self.environment) != self.sdk_selection_identity:

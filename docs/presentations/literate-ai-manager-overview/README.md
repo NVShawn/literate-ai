@@ -10,9 +10,9 @@ were refreshed in place and export-back verified. This package does not claim th
 `v1.2.0` is already published. Later patch cuts on the `1.2.x` line keep these same
 published locations.
 
-Published presentation: [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1V9mt1JpEst_2ucC0eJIIw7dff64MrtFRfut8MSiukeE/edit?usp=drivesdk)
+Published presentation: [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
 
-Published narrative: [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1fMxy0NTT54MV4T9AwmA8F0VahNet93Xhp0d0pszI6GA/edit?usp=drivesdk)
+Published narrative: [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
 
 Start with the [current deliverables](current-deliverables.md), then read
 the [deck specification](deck-specification.md),

@@ -1,0 +1,21 @@
+{
+  "schema": "literate-ai/video-course-result@1",
+  "course_id": "01-greenfield-first-project",
+  "source_identity": "4b22e0556a74c565cfff3e25262af00f366083aa3ffc5ba3c0fb06a334145a1e",
+  "renderer_sha256": "2829e12b4d5694b97858fee6dcbd61bf2974cf84c21c56b7721c0b5168bdeebf",
+  "font_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+  "narration_backend": "say",
+  "duration_seconds": 268.19987,
+  "caption_count": 59,
+  "publication_authorized": false,
+  "artifacts": {
+    "01-greenfield-first-project.mp4": "a86c87d6ccc66b09ce68f58c4456886c5c3cbaeb605560c313b86c33edbd2dd3",
+    "01-greenfield-first-project.srt": "3569094fe337a4eaec7a219e67939b5c77c28154b85d1dc656bc7bf0cbc60131",
+    "01-greenfield-first-project.vtt": "99e4fac7fb437fe634f5392498dab9b1d287f849a8964b3f34192e9b6627b4ef"
+  },
+  "tools": {
+    "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 9.0.1 Copyright (c) 2007-2026 the FFmpeg developers",
+    "magick": "Version: ImageMagick 7.1.2-31 Q16-HDRI aarch64 8309dc92a:20260903 https://imagemagick.org"
+  }
+}

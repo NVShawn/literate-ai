@@ -479,6 +479,20 @@ flowchart LR
     R -->|separate authorization| X[External publication]
 ```
 
+## Portable ZIP packages
+
+Select `--flavor=+package-zip` with `litai package plan`, `build`, and `verify`
+for a portable archive provider. Construction still runs the complete accepted
+Standard lifecycle and requires host execution acknowledgment. The ZIP preserves
+planned payload paths and executable modes, includes the authored specification
+and source/resolved CycloneDX SBOMs, and binds the exact target and compression
+runtime. It grants no ABI portability or publication authority.
+
+Verification reads the exact plan, result, custody and archive bytes again. Changed
+inputs, target or tool identities, duplicate or undeclared members, altered modes,
+and content digest mismatches fail before release preparation. Outputs remain in
+`OBJ_DIR/packages/`; the release lifecycle owns any separately authorized upload.
+
 ## Publication
 
 Publication is an explicit, resumable operation over exact immutable objects. A

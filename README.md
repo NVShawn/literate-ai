@@ -12,6 +12,27 @@ source is disposable. Writing production code from a spec is still arriving in
 waves as models improve — the harness that proves when a tree is valid is the
 durable talent.
 
+## Watch the onboarding video
+
+**[It Builds. Can We Ship It? — watch the 13:38 onboarding film](https://github.com/jordanhubbard/literate-ai/raw/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)**
+
+[![Watch Sam and LitAI in It Builds. Can We Ship It?](https://raw.githubusercontent.com/jordanhubbard/literate-ai/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/package/assets/shot-01.png)](https://github.com/jordanhubbard/literate-ai/raw/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)
+
+Follow Sam, a skeptical software engineer, and LitAI, his evidence-minded guide,
+through setup, a first greenfield project, and adoption of TinyXML2. Real coding
+sessions appear as edited terminal replays, alongside walkthroughs of using machines
+you already own, updating projects, and connecting repositories. Two voices, captions,
+and a little engineering comedy make this one continuous introduction.
+
+[Chapters](https://github.com/jordanhubbard/literate-ai/blob/cf95311b863326ffd68064219b1d1ae34e89e2ff/docs/courses/play/CHAPTERS.md)
+· [Subtitles (SRT)](https://raw.githubusercontent.com/jordanhubbard/literate-ai/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.srt)
+· [Leave timestamped feedback](https://github.com/jordanhubbard/literate-ai/pull/10)
+
+This is the public-feedback edition; use the [getting-started guide](docs/user/getting-started.md)
+for current commands. If your browser downloads the MP4, open it in your video player.
+
+## Why Literate AI?
+
 The idea follows Don Knuth's literate-programming principle: explain the system clearly
 for people, then keep its executable form traceable to that explanation. Components can
 depend on other spec-driven Components or pinned repository sources, and can be nested
@@ -26,9 +47,9 @@ is the maintainer setup for this checkout.
 A stakeholder-facing overview is also maintained separately. The 1.2.0 edition was
 published in place and export-back verified against its checked-in presentation and
 narrative at these stable links:
-[slides](https://docs.google.com/presentation/d/1V9mt1JpEst_2ucC0eJIIw7dff64MrtFRfut8MSiukeE/edit?usp=drivesdk)
+[slides](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
 and
-[narrative](https://docs.google.com/document/d/1fMxy0NTT54MV4T9AwmA8F0VahNet93Xhp0d0pszI6GA/edit?usp=drivesdk).
+[narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk).
 The authoring package is
 [`docs/presentations/literate-ai-manager-overview/`](docs/presentations/literate-ai-manager-overview/).
 

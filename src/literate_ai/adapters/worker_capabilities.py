@@ -6,6 +6,7 @@ import base64
 import json
 import os
 import platform
+import re
 import shlex
 import subprocess
 import tempfile
@@ -14,9 +15,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
 
-from literate_ai.adapters._processes import run_with_tree_kill
+from literate_ai.adapters.builders._process import run_bounded_process
+from literate_ai.adapters.builders.python import BuildError
 from literate_ai.adapters.ssh_transport import SshTransportError, ssh_arguments
 from literate_ai.contracts import (
+    ContractValidationError,
     ExecutionWorker,
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
@@ -26,16 +29,85 @@ from literate_ai.contracts import (
     WorkerHardwareObservationCatalog,
     canonical_json_bytes,
 )
+from literate_ai.diagnostics import redact_secrets
 
 MAX_PROBE_OUTPUT_BYTES = 256 * 1024
 DEFAULT_PROBE_TIMEOUT_SECONDS = 20
+MAX_PROBE_DIAGNOSTIC_CHARS = 4096
 
 
 class WorkerCapabilityProbeError(RuntimeError):
-    def __init__(self, code: str, message: str) -> None:
+    def __init__(
+        self, code: str, message: str, *, worker_id: str | None = None
+    ) -> None:
         self.code = code
-        self.message = message
-        super().__init__(f"{code}: {message}")
+        self.worker_id = worker_id
+        self.message = (
+            message if worker_id is None else f"worker {worker_id}: {message}"
+        )
+        super().__init__(f"{code}: {self.message}")
+
+
+def ssh_failure_details(stderr: bytes) -> dict[str, str]:
+    if len(stderr) > MAX_PROBE_OUTPUT_BYTES:
+        return {
+            "cause": "output-limit",
+            "remedy": "Reduce SSH diagnostic output.",
+            "diagnostic": "Diagnostic exceeded the probe output limit.",
+        }
+    diagnostic = redact_secrets(stderr.decode("utf-8", errors="replace"))
+    diagnostic = re.sub(r"(?i)(https?://)[^/\s@]+@", r"\1<redacted>@", diagnostic)
+    diagnostic = re.sub(
+        r"(?i)(\b(?:password|token|secret|authorization)\s*[:=]\s*)(?:Bearer\s+)?[^\s]+",
+        r"\1<redacted>",
+        diagnostic,
+    )
+    diagnostic = "".join(
+        char for char in diagnostic if char in "\n\t" or char.isprintable()
+    )
+    lowered = diagnostic.casefold()
+    if "remote host identification has changed" in lowered:
+        cause, remedy = (
+            "changed-host-key",
+            "Verify the host key change before updating known_hosts.",
+        )
+    elif "host key verification failed" in lowered or "host key is known" in lowered:
+        cause, remedy = (
+            "host-key-verification",
+            "Verify and register the host key in known_hosts.",
+        )
+    elif "permission denied" in lowered:
+        cause, remedy = (
+            "authentication",
+            "Check the configured SSH user and non-interactive credentials.",
+        )
+    elif (
+        "could not resolve hostname" in lowered
+        or "name or service not known" in lowered
+    ):
+        cause, remedy = "name-resolution", "Check the configured host name and DNS."
+    elif "connection refused" in lowered:
+        cause, remedy = (
+            "connection-refused",
+            "Check the SSH service and configured port.",
+        )
+    elif "timed out" in lowered or "timeout" in lowered:
+        cause, remedy = "timeout", "Check network reachability and the SSH timeout."
+    else:
+        cause, remedy = "transport", "Check the SSH diagnostic and configured route."
+    excerpt = diagnostic[:MAX_PROBE_DIAGNOSTIC_CHARS].strip()
+    if len(diagnostic) > MAX_PROBE_DIAGNOSTIC_CHARS:
+        excerpt += "\n[diagnostic truncated]"
+    detail = excerpt or "No SSH diagnostic was returned."
+    return {"cause": cause, "remedy": remedy, "diagnostic": detail}
+
+
+def _ssh_failure(stderr: bytes) -> str:
+    details = ssh_failure_details(stderr)
+    return (
+        f"SSH exited 255 ({details['cause']}). {details['remedy']}\n"
+        f"{details['diagnostic']}"
+    )
 
 
 class ProbeRunner(Protocol):
@@ -48,22 +120,30 @@ def _run(
     argv: tuple[str, ...], timeout_seconds: int
 ) -> subprocess.CompletedProcess[bytes]:
     try:
-        result = run_with_tree_kill(
+        result = run_bounded_process(
             argv,
-            timeout=timeout_seconds,
+            cwd=None,
+            environment=os.environ,
+            timeout_seconds=timeout_seconds,
+            stdout_limit_bytes=MAX_PROBE_OUTPUT_BYTES,
+            stderr_limit_bytes=MAX_PROBE_OUTPUT_BYTES,
+            error_prefix="worker.probe",
         )
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        raise WorkerCapabilityProbeError(
-            "worker.probe_transport_failed", f"probe command failed: {argv[0]}"
-        ) from exc
-    if (
-        len(result.stdout) > MAX_PROBE_OUTPUT_BYTES
-        or len(result.stderr) > MAX_PROBE_OUTPUT_BYTES
-    ):
-        raise WorkerCapabilityProbeError(
-            "worker.probe_output_oversized", "worker probe exceeded its output limit"
+    except BuildError as exc:
+        code = (
+            "worker.probe_output_oversized"
+            if "output_limit" in exc.code
+            else "worker.probe_transport_failed"
         )
-    return result
+        detail = (
+            "Worker probe timed out; check network reachability and the timeout."
+            if "timeout" in exc.code
+            else str(exc)
+        )
+        raise WorkerCapabilityProbeError(code, detail) from exc
+    return subprocess.CompletedProcess(
+        argv, result.returncode, result.stdout, result.stderr
+    )
 
 
 def _text(result: subprocess.CompletedProcess[bytes], *, label: str) -> str:
@@ -102,12 +182,21 @@ def _invoke(
             if result.returncode == 255:
                 raise WorkerCapabilityProbeError(
                     "worker.probe_transport_failed",
-                    "SSH transport or non-interactive authentication failed",
+                    _ssh_failure(result.stderr),
+                    worker_id=worker.worker_id,
                 )
             return result
+    except WorkerCapabilityProbeError as exc:
+        if exc.worker_id is not None:
+            raise
+        raise WorkerCapabilityProbeError(
+            exc.code, exc.message, worker_id=worker.worker_id
+        ) from exc
     except (OSError, SshTransportError, subprocess.TimeoutExpired) as exc:
         raise WorkerCapabilityProbeError(
-            "worker.probe_transport_failed", "worker probe transport failed"
+            "worker.probe_transport_failed",
+            "worker probe transport failed",
+            worker_id=worker.worker_id,
         ) from exc
     raise WorkerCapabilityProbeError(
         "worker.probe_protocol_unsupported",
@@ -209,6 +298,55 @@ def probe_worker_capabilities(
     timeout_seconds: int = DEFAULT_PROBE_TIMEOUT_SECONDS,
     observed_at: str | None = None,
 ) -> WorkerHardwareObservation:
+    try:
+        return _probe_worker_capabilities(
+            worker,
+            runner=runner,
+            timeout_seconds=timeout_seconds,
+            observed_at=observed_at,
+        )
+    except WorkerCapabilityProbeError as exc:
+        if exc.worker_id is not None:
+            raise
+        raise WorkerCapabilityProbeError(
+            exc.code, exc.message, worker_id=worker.worker_id
+        ) from exc
+    except ContractValidationError as exc:
+        raise WorkerCapabilityProbeError(
+            "worker.probe_invalid", str(exc), worker_id=worker.worker_id
+        ) from exc
+
+
+def _probe_worker_capabilities(
+    worker: ExecutionWorker,
+    *,
+    runner: ProbeRunner,
+    timeout_seconds: int,
+    observed_at: str | None,
+) -> WorkerHardwareObservation:
+    if worker.kind is ExecutionWorkerKind.COMMAND:
+        from pathlib import Path
+
+        from literate_ai.adapters.action_dispatch_wire import ActionWireError
+        from literate_ai.adapters.action_hardware import probe_command_hardware
+        from literate_ai.contracts.execution_dispatch import (
+            LIFECYCLE_ACTION_WIRE_PROTOCOL,
+        )
+
+        if worker.action_protocol != LIFECYCLE_ACTION_WIRE_PROTOCOL:
+            raise WorkerCapabilityProbeError(
+                "worker.probe_protocol_unsupported",
+                "command workers need an explicit hardware-observation protocol",
+            )
+        try:
+            return probe_command_hardware(
+                worker, timeout_seconds=timeout_seconds, cwd=Path.cwd()
+            )
+        except (ActionWireError, OSError, ValueError) as exc:
+            raise WorkerCapabilityProbeError(
+                "worker.probe_transport_failed",
+                "command hardware observation failed verification or transport bounds",
+            ) from exc
     family = worker.requirements.os_family
     if family is None:
         family = (
@@ -291,26 +429,45 @@ def probe_worker_catalog(
     runner: ProbeRunner = _run,
     timeout_seconds: int = DEFAULT_PROBE_TIMEOUT_SECONDS,
     observed_at: str | None = None,
+    errors: list[WorkerCapabilityProbeError] | None = None,
 ) -> WorkerHardwareObservationCatalog:
     selected = (
         catalog.workers
         if worker_ids is None
         else tuple(catalog.worker(item) for item in sorted(set(worker_ids)))
     )
+
+    def probe(worker):
+        try:
+            return probe_worker_capabilities(
+                worker,
+                runner=runner,
+                timeout_seconds=timeout_seconds,
+                observed_at=observed_at,
+            )
+        except WorkerCapabilityProbeError as exc:
+            if errors is None:
+                raise
+            return exc
+
     with ThreadPoolExecutor(max_workers=min(len(selected), 16) or 1) as pool:
-        results = tuple(
-            pool.map(
-                lambda worker: probe_worker_capabilities(
-                    worker,
-                    runner=runner,
-                    timeout_seconds=timeout_seconds,
-                    observed_at=observed_at,
+        results = tuple(pool.map(probe, selected))
+    failures = [
+        item for item in results if isinstance(item, WorkerCapabilityProbeError)
+    ]
+    if errors is not None:
+        errors.extend(failures)
+    return WorkerHardwareObservationCatalog(
+        tuple(
+            sorted(
+                (
+                    item
+                    for item in results
+                    if isinstance(item, WorkerHardwareObservation)
                 ),
-                selected,
+                key=lambda item: item.worker_id,
             )
         )
-    return WorkerHardwareObservationCatalog(
-        tuple(sorted(results, key=lambda item: item.worker_id))
     )
 
 

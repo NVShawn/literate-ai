@@ -1,0 +1,22 @@
+{
+  "schema": "literate-ai/video-course-result@1",
+  "course_id": "sam-meets-literate-ai-ten-minutes-audition",
+  "source_identity": "0e5a2f3750754f8929be0e5734064e066a2d84d115cd05b3bd1b998a957bd269",
+  "renderer_sha256": "098bd698c75000ef39445a08f96a52e133f2c533613d1d350ab61b89d74101cd",
+  "font_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+  "narration_backend": "recorded",
+  "duration_seconds": 75.759685,
+  "caption_count": 6,
+  "embed_subtitles": false,
+  "publication_authorized": false,
+  "artifacts": {
+    "sam-meets-literate-ai-ten-minutes-audition.mp4": "d80d0b01b40341eae223e860c7a5af75ba386cc7c51689cccfb9a9640a76382a",
+    "sam-meets-literate-ai-ten-minutes-audition.srt": "f8626356f0877f6f8f4b2549a2c9a75e8eeecefa490a9b05cdc6d69d79cf01ba",
+    "sam-meets-literate-ai-ten-minutes-audition.vtt": "19e73c699d6d0fead1fa91f1ef92295d5d24dbfc8118178ab6220239dd6d92cd"
+  },
+  "tools": {
+    "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 9.0.1 Copyright (c) 2007-2026 the FFmpeg developers",
+    "magick": "Version: ImageMagick 7.1.2-31 Q16-HDRI aarch64 8309dc92a:20260903 https://imagemagick.org"
+  }
+}

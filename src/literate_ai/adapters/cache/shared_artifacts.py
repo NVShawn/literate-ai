@@ -5,8 +5,11 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import stat
 import tempfile
+import time
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -30,6 +33,10 @@ from literate_ai.contracts.shared_cache import (
 )
 
 _MANIFEST_SCHEMA = "literate-ai/shared-cache-artifact-manifest@1"
+_MANIFEST_BYTES = 1024 * 1024
+_MAX_INVENTORY_ENTRIES = 100_000
+_MAX_INVENTORY_MANIFEST_BYTES = 16 * 1024 * 1024
+_INVENTORY_SECONDS = 30.0
 
 
 class SharedArtifactCacheError(RuntimeError):
@@ -244,7 +251,18 @@ class LocalSharedArtifactCache:
             raise SharedArtifactCacheError(
                 "shared_cache.root_unsafe", "cache namespace path is unsafe"
             ) from exc
-        lock = namespace_root / ".locks" / f"{manifest.key_identity.digest}.lock"
+        encoded = canonical_json_bytes(manifest.to_dict())
+        if len(encoded) > _MANIFEST_BYTES:
+            raise SharedArtifactCacheError(
+                "shared_cache.manifest_oversized",
+                "manifest exceeds the cache reader byte limit",
+            )
+        if len(encoded) + len(payload) > self.configuration.maximum_bytes:
+            raise SharedArtifactCacheError(
+                "shared_cache.quota_exhausted",
+                "payload and manifest exceed the aggregate cache size policy",
+            )
+        lock = namespace_root / ".locks" / "publication.lock"
         try:
             with exclusive_cache_lock(lock):
                 object_path = (
@@ -255,25 +273,28 @@ class LocalSharedArtifactCache:
                     / "manifests"
                     / f"{manifest.key_identity.digest}.json"
                 )
-                if object_path.exists():
-                    if self._read_regular(object_path) != payload:
-                        raise SharedArtifactCacheError(
-                            "shared_cache.object_collision",
-                            "content-addressed object contains different bytes",
-                        )
-                else:
-                    # Cache-file permissions are host custody, not the product mode.
-                    # The latter remains in the exact expected manifest and may name
-                    # a mode inside an archive that Windows cannot represent locally.
+                # Detect collisions before retention can remove any existing entry.
+                if (
+                    object_path.exists()
+                    and self._read_regular(object_path, len(payload)) != payload
+                ):
+                    raise SharedArtifactCacheError(
+                        "shared_cache.object_collision",
+                        "content-addressed object contains different bytes",
+                    )
+                if (
+                    manifest_path.exists()
+                    and self._read_regular(manifest_path, _MANIFEST_BYTES) != encoded
+                ):
+                    raise SharedArtifactCacheError(
+                        "shared_cache.key_collision",
+                        "cache key already binds another manifest",
+                    )
+                self._reserve(namespace_root, manifest, encoded)
+                if not object_path.exists():
+                    # Physical cache permissions are separate from product modes.
                     self._atomic_write(object_path, payload, 0o600)
-                encoded = canonical_json_bytes(manifest.to_dict())
-                if manifest_path.exists():
-                    if self._read_regular(manifest_path) != encoded:
-                        raise SharedArtifactCacheError(
-                            "shared_cache.key_collision",
-                            "cache key already binds another manifest",
-                        )
-                else:
+                if not manifest_path.exists():
                     self._atomic_write(manifest_path, encoded, 0o600)
         except CacheLockError as exc:
             raise SharedArtifactCacheError(
@@ -289,9 +310,20 @@ class LocalSharedArtifactCache:
         if not manifest_path.exists():
             return None
         try:
+            if (
+                manifest_path.lstat().st_mtime
+                < time.time() - self.configuration.retention_seconds
+            ):
+                return None
             observed = SharedCacheArtifactManifest.from_dict(
-                json.loads(self._read_regular(manifest_path))
+                json.loads(self._read_regular(manifest_path, _MANIFEST_BYTES))
             )
+        except FileNotFoundError:
+            return None
+        except SharedArtifactCacheError as exc:
+            if isinstance(exc.__cause__, FileNotFoundError):
+                return None  # Concurrent writer eviction is an ordinary miss.
+            raise
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
             raise SharedArtifactCacheError(
                 "shared_cache.manifest_corrupt", "cached manifest is malformed"
@@ -302,7 +334,12 @@ class LocalSharedArtifactCache:
                 "cached manifest does not match current complete authority",
             )
         object_path = namespace_root / "objects" / observed.payload_identity.digest
-        payload = self._read_regular(object_path)
+        try:
+            payload = self._read_regular(object_path, observed.size_bytes)
+        except SharedArtifactCacheError as exc:
+            if isinstance(exc.__cause__, FileNotFoundError):
+                return None  # Partial publication or eviction cannot become a hit.
+            raise
         if (
             len(payload) != observed.size_bytes
             or _bytes_identity(payload) != observed.payload_identity
@@ -313,24 +350,221 @@ class LocalSharedArtifactCache:
             )
         return payload
 
+    def _reserve(
+        self, root: Path, incoming: SharedCacheArtifactManifest, encoded: bytes
+    ) -> None:
+        """Inventory before mutation, then evict manifests before unreferenced objects.
+
+        The caller holds the namespace writer lock. Readers do not acquire a writable
+        lock and tolerate entries disappearing between their two verified reads.
+        """
+        deadline = time.monotonic() + _INVENTORY_SECONDS
+        count = metadata_bytes = 0
+        objects: dict[str, os.stat_result] = {}
+        manifests: dict[str, tuple[os.stat_result, SharedCacheArtifactManifest]] = {}
+
+        def check_budget() -> None:
+            if count > _MAX_INVENTORY_ENTRIES or time.monotonic() > deadline:
+                raise SharedArtifactCacheError(
+                    "shared_cache.inventory_exhausted",
+                    "cache inventory exceeds its finite budget",
+                )
+
+        try:
+            for directory, suffix in (("objects", ""), ("manifests", ".json")):
+                parent = root / directory
+                require_safe_directory(parent)
+                with os.scandir(parent) as entries:
+                    for entry in entries:
+                        count += 1
+                        check_budget()
+                        path = parent / entry.name
+                        metadata = path.lstat()
+                        if (
+                            re.fullmatch(
+                                r"[0-9a-f]{64}" + re.escape(suffix), entry.name
+                            )
+                            is None
+                            or path_is_link_or_reparse(path)
+                            or not stat.S_ISREG(metadata.st_mode)
+                            or metadata.st_nlink != 1
+                        ):
+                            raise SharedArtifactCacheError(
+                                "shared_cache.inventory_unsafe",
+                                "cache inventory contains an unsafe entry",
+                            )
+                        if directory == "objects":
+                            objects[entry.name] = metadata
+                            continue
+                        metadata_bytes += metadata.st_size
+                        if metadata_bytes > _MAX_INVENTORY_MANIFEST_BYTES:
+                            raise SharedArtifactCacheError(
+                                "shared_cache.inventory_exhausted",
+                                "cache manifest inventory exceeds its byte budget",
+                            )
+                        content = self._read_regular(path, _MANIFEST_BYTES)
+                        observed = SharedCacheArtifactManifest.from_dict(
+                            json.loads(content)
+                        )
+                        if (
+                            observed.namespace is not incoming.namespace
+                            or observed.key_identity.digest + ".json" != entry.name
+                            or observed.cache_configuration_identity
+                            not in {
+                                self.configuration.identity,
+                                self.configuration.storage_identity,
+                            }
+                            or canonical_json_bytes(observed.to_dict()) != content
+                        ):
+                            raise SharedArtifactCacheError(
+                                "shared_cache.inventory_unsafe",
+                                "cache manifest inventory has inconsistent custody",
+                            )
+                        manifests[entry.name] = (metadata, observed)
+            check_budget()
+            cutoff = time.time() - self.configuration.retention_seconds
+            retained = {
+                name: value
+                for name, value in manifests.items()
+                if value[0].st_mtime >= cutoff
+                and value[1].payload_identity.digest in objects
+            }
+            protected = incoming.key_identity.digest + ".json"
+
+            references = Counter(
+                value[1].payload_identity.digest for value in retained.values()
+            )
+            references[incoming.payload_identity.digest] += 1
+            retained_metadata_bytes = len(encoded) + sum(
+                metadata.st_size
+                for name, (metadata, _) in retained.items()
+                if name != protected
+            )
+            total = retained_metadata_bytes + sum(
+                incoming.size_bytes
+                if digest == incoming.payload_identity.digest
+                else objects[digest].st_size
+                for digest in references
+            )
+
+            def fits() -> bool:
+                entry_count = (
+                    len(retained) + (protected not in retained) + len(references)
+                )
+                return (
+                    total <= self.configuration.maximum_bytes
+                    and retained_metadata_bytes <= _MAX_INVENTORY_MANIFEST_BYTES
+                    and entry_count <= _MAX_INVENTORY_ENTRIES
+                )
+
+            # Oldest publication first; immutable digest breaks timestamp ties.
+            for name in sorted(
+                retained, key=lambda name: (retained[name][0].st_mtime_ns, name)
+            ):
+                check_budget()
+                if fits():
+                    break
+                if name == protected:
+                    continue
+                metadata, removed = retained.pop(name)
+                total -= metadata.st_size
+                retained_metadata_bytes -= metadata.st_size
+                digest = removed.payload_identity.digest
+                references[digest] -= 1
+                if not references[digest]:
+                    total -= objects[digest].st_size
+                    del references[digest]
+            referenced = set(references)
+            if not fits():
+                raise SharedArtifactCacheError(
+                    "shared_cache.quota_exhausted",
+                    "cache quota cannot admit this entry",
+                )
+            victims = [
+                (root / "manifests" / name, metadata)
+                for name, (metadata, _) in manifests.items()
+                if name not in retained
+            ] + [
+                (root / "objects" / digest, metadata)
+                for digest, metadata in objects.items()
+                if digest not in referenced
+            ]
+            # Recheck every victim before deleting any, and again at each unlink.
+            for path, metadata in victims:
+                check_budget()
+                self._require_unchanged(path, metadata)
+            for path, metadata in victims:
+                check_budget()
+                self._require_unchanged(path, metadata)
+                path.unlink()
+        except (
+            OSError,
+            UnsafeFilesystemPathError,
+            UnicodeDecodeError,
+            json.JSONDecodeError,
+        ) as exc:
+            raise SharedArtifactCacheError(
+                "shared_cache.inventory_unsafe",
+                "cache retention inventory is unavailable or unsafe",
+            ) from exc
+
+    @staticmethod
+    def _require_unchanged(path: Path, expected: os.stat_result) -> None:
+        require_safe_directory(path.parent)
+        actual = path.lstat()
+        if path_is_link_or_reparse(path) or (
+            actual.st_dev,
+            actual.st_ino,
+            actual.st_mode,
+            actual.st_size,
+            actual.st_mtime_ns,
+            actual.st_nlink,
+        ) != (
+            expected.st_dev,
+            expected.st_ino,
+            expected.st_mode,
+            expected.st_size,
+            expected.st_mtime_ns,
+            expected.st_nlink,
+        ):
+            raise SharedArtifactCacheError(
+                "shared_cache.entry_changed", "cache entry changed before retention"
+            )
+
     def _require_manifest(self, manifest: SharedCacheArtifactManifest) -> None:
         if not isinstance(manifest, SharedCacheArtifactManifest):
             raise TypeError("shared cache manifest must be typed")
-        if manifest.cache_configuration_identity != self.configuration.identity:
+        if manifest.cache_configuration_identity not in {
+            self.configuration.storage_identity,
+            self.configuration.identity,  # Retain exact legacy local entries.
+        }:
             raise SharedArtifactCacheError(
                 "shared_cache.configuration_mismatch",
                 "artifact manifest binds another cache configuration",
             )
         self.configuration.policy(manifest.namespace)
+        if manifest.size_bytes > self.configuration.maximum_bytes:
+            raise SharedArtifactCacheError(
+                "shared_cache.payload_oversized", "artifact exceeds cache size policy"
+            )
 
     @staticmethod
-    def _read_regular(path: Path) -> bytes:
+    def _read_regular(path: Path, maximum_bytes: int) -> bytes:
         try:
             require_safe_directory(path.parent)
             before = path.lstat()
             if path_is_link_or_reparse(path) or not stat.S_ISREG(before.st_mode):
                 raise OSError
-            content = path.read_bytes()
+            if before.st_size > maximum_bytes:
+                raise SharedArtifactCacheError(
+                    "shared_cache.entry_oversized", "cache entry exceeds bound"
+                )
+            with path.open("rb") as stream:
+                content = stream.read(maximum_bytes + 1)
+            if len(content) > maximum_bytes:
+                raise SharedArtifactCacheError(
+                    "shared_cache.entry_oversized", "cache entry exceeds bound"
+                )
             after = path.lstat()
         except (OSError, UnsafeFilesystemPathError) as exc:
             raise SharedArtifactCacheError(

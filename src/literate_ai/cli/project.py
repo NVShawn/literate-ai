@@ -594,10 +594,13 @@ def update_project_from_args(args) -> dict[str, Any]:
 
     take_upstream = frozenset(getattr(args, "take_upstream", ()) or ())
     keep_local = frozenset(getattr(args, "keep_local", ()) or ())
-    if (take_upstream or keep_local) and not getattr(args, "apply", False):
+    if (
+        take_upstream or keep_local or getattr(args, "resolutions", None)
+    ) and not getattr(args, "apply", False):
         raise CliFailure(
             "repository_update.resolution_requires_apply",
-            "--take-upstream and --keep-local are explicit transaction decisions "
+            "--take-upstream, --keep-local and --resolutions are explicit "
+            "transaction decisions "
             "and require --apply",
         )
     try:
@@ -679,6 +682,7 @@ def update_project_from_args(args) -> dict[str, Any]:
             catalog_planner=lambda prospective: plan_inherited_catalogs(
                 prospective, provider
             ),
+            base_reader=provider.update_blobs,
         )
         if follow_plan is not None and not getattr(args, "apply", False):
             lineage_update = repository_updates.plan(
@@ -733,8 +737,21 @@ def update_project_from_args(args) -> dict[str, Any]:
         )
         report_progress("Classifying framework templates")
         framework_plan = ProjectUpdateService(
-            FilesystemProjectUpdateAdapter(protected_paths=protected_paths)
+            FilesystemProjectUpdateAdapter(
+                protected_paths=protected_paths, base_reader=provider.update_blobs
+            )
         ).plan(Path(args.path))
+        from literate_ai.adapters.update_merge import load_resolutions
+
+        resolutions = load_resolutions(
+            getattr(args, "resolutions", None),
+            (*framework_plan.files, *lineage_update.contract.files),
+        )
+        if set(resolutions) & (take_upstream | keep_local):
+            raise ProjectUpdateError(
+                "project.update_resolution_invalid",
+                "a path has multiple resolution choices",
+            )
     except (ProjectUpdateError, RepositoryUpdateError, RepositoryReparentError) as exc:
         rollback_staged_reparent()
         raise CliFailure(exc.code, exc.message) from exc
@@ -766,6 +783,14 @@ def update_project_from_args(args) -> dict[str, Any]:
         if getattr(args, "apply", False):
             value["follow"]["applied"] = follow_applied
 
+    try:
+        _attach_update_conflict_evidence(
+            args, Path(args.path).resolve(), value, framework_plan, lineage_update
+        )
+    except BaseException:
+        rollback_staged_reparent()
+        raise
+
     if getattr(args, "apply", False):
         try:
             report_progress("Applying inherited catalog updates")
@@ -776,12 +801,20 @@ def update_project_from_args(args) -> dict[str, Any]:
                 # after inherited catalogs settle, while retaining refused parent paths
                 # as local authority, then validate the one complete prospective tree.
                 framework_plan = ProjectUpdateService(
-                    FilesystemProjectUpdateAdapter(protected_paths=protected_paths)
+                    FilesystemProjectUpdateAdapter(
+                        protected_paths=protected_paths,
+                        base_reader=provider.update_blobs,
+                    )
                 ).plan(root)
                 applied = apply_project_update(
                     framework_plan,
                     root,
                     adopt_added=getattr(args, "adopt_added", False),
+                    resolutions={
+                        item.path: resolutions[item.path]
+                        for item in framework_plan.files
+                        if item.path in resolutions
+                    },
                     validator=lambda candidate: validate_project(
                         candidate,
                         require_authority_review=False,
@@ -803,25 +836,38 @@ def update_project_from_args(args) -> dict[str, Any]:
                 take_upstream=take_upstream,
                 keep_local=keep_local,
                 finalizer=finalize_complete_project,
+                resolutions={
+                    item.path: resolutions[item.path]
+                    for item in lineage_update.contract.files
+                    if item.path in resolutions
+                },
             )
             assert applied is not None
         except (ProjectUpdateError, RepositoryUpdateError) as exc:
             rollback_staged_reparent()
             raise CliFailure(exc.code, exc.message) from exc
+        framework_diffs = value["framework"].get("conflict_diffs", [])
         value["framework"] = framework_plan.to_dict()
+        value["framework"]["conflict_diffs"] = framework_diffs
+        value["framework"]["files"] = enrich_conflict_files(
+            value["framework"]["files"], framework_diffs
+        )
         value["repository_lineage"]["applied"] = repository_applied.to_dict()
+        value["repository_lineage"]["applied"]["merged"] = [
+            item.path
+            for item in lineage_update.contract.files
+            if item.classification is ProjectUpdateClassification.MERGEABLE
+            or resolutions.get(item.path, {}).get("decision") == "merge"
+        ]
+        value["repository_lineage"]["applied"]["resolutions"] = [
+            {**resolutions[item.path], "applied": True}
+            for item in lineage_update.contract.files
+            if item.path in resolutions
+        ]
         value["framework"]["applied"] = applied.to_dict()
         if evidence_migration is not None and evidence_migration.migrated:
             value["retained_evidence_migration"] = evidence_migration.to_dict()
         value["mode"] = "applied"
-
-    _attach_update_conflict_evidence(
-        args,
-        Path(args.path).resolve(),
-        value,
-        framework_plan,
-        lineage_update,
-    )
 
     if not getattr(args, "record_work_items", False):
         return value

@@ -1,0 +1,398 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:07.975
+Sam: Hello. I'm Sam. I write C plus plus, I use Make, and I trust
+tools more after they've disappointed me in a predictable way.
+
+00:00:08.125 --> 00:00:18.075
+LitAI: And I'm LitAI, your personification of Literate AI. I bring
+specifications, tests, and an unreasonable interest in what actually
+reaches the user.
+
+00:00:18.225 --> 00:00:25.250
+Sam: We're taking a small adventure from it builds on my machine to
+someone else can use it. There may be disagreements.
+
+00:00:25.400 --> 00:00:34.825
+LitAI: There will definitely be evidence. We'll set up, build a new
+project, adopt an existing C plus plus library, and discuss life after
+the demo.
+
+00:00:34.983 --> 00:00:41.908
+Sam: For the record, I know what best practices are. I've read several
+postmortems in which we rediscovered them.
+
+00:00:42.067 --> 00:00:52.967
+LitAI: Exactly. This isn't remedial software engineering. It's making
+the practices you already value happen reliably, even when your new
+colleague types at industrial speed.
+
+00:00:53.117 --> 00:01:01.792
+Sam: Ah, agents. Amazingly fast. Occasionally an artisanal producer of
+AI slop. Now available in enterprise quantities.
+
+00:01:01.950 --> 00:01:11.750
+LitAI: Speed multiplies whatever process surrounds it. Give an agent
+vague intent and no independent checks, and it can industrialize your
+misunderstanding.
+
+00:01:11.908 --> 00:01:18.158
+Sam: So agents need oversight. Unlike experienced engineers, who have
+evolved beyond checklists.
+
+00:01:18.325 --> 00:01:24.275
+LitAI: Yes. That explains why production incidents stopped happening
+when senior titles were invented.
+
+00:01:24.425 --> 00:01:32.175
+Sam: Fine. We all need it. I'd prefer the oversight to be executable,
+rather than another document everyone agrees to ignore.
+
+00:01:32.342 --> 00:01:42.942
+LitAI: That's the point. The harness gives your agent a structured
+route from intent to proof. It doesn't replace engineering judgment,
+or make every generated answer correct.
+
+00:01:43.092 --> 00:01:49.217
+Sam: First obstacle: where do I get it? Please don't begin with a
+machine you configured three months ago.
+
+00:01:49.383 --> 00:02:01.283
+LitAI: The public repository is on screen. This film uses a
+development checkout; follow its installation documentation and choose
+a reviewed revision, not a mysterious package name.
+
+00:02:01.433 --> 00:02:03.683
+Sam: And on this Mac, the starting kit?
+
+00:02:03.850 --> 00:02:15.150
+LitAI: Python three eleven or newer, Git, and Make. Clone the
+repository, enter it, then make install. These setup panels are a
+walkthrough, not a recording of installation.
+
+00:02:15.308 --> 00:02:19.633
+Sam: Does make install install every compiler I've ever offended?
+
+00:02:19.783 --> 00:02:30.133
+LitAI: Read its prerequisite prompts and approve only the intended
+changes. It selects prerequisites for your platform. Windows has its
+own documented setup path.
+
+00:02:30.283 --> 00:02:36.233
+Sam: Installation finished. My shell says command not found. A classic
+welcome ceremony.
+
+00:02:36.383 --> 00:02:48.283
+LitAI: Check the prefix the installer reported, then your PATH. Run
+litai dash dash version and litai doctor. A diagnostic is useful
+information, not an invitation to ignore it.
+
+00:02:48.433 --> 00:02:52.108
+Sam: And installing the harness logs me into the coding agent?
+
+00:02:52.267 --> 00:03:04.967
+LitAI: Separate step. Authenticate your selected supported coding CLI.
+This session uses Codex with an explicit model selector. Credentials
+stay off camera, and model usage can cost money.
+
+00:03:05.117 --> 00:03:09.842
+Sam: Good. Now let's do something real before our onboarding develops
+a sequel.
+
+00:03:09.992 --> 00:03:22.317
+LitAI: Here begins recorded execution, edited into a terminal replay.
+Waiting is compressed; results aren't invented. First, a read-only
+create plan for a disposable application.
+
+00:03:22.492 --> 00:03:31.442
+Sam: It tells me what it will create before touching the project.
+Python and Make for this first run. The language choice isn't the
+specification.
+
+00:03:31.617 --> 00:03:42.467
+LitAI: Right. Review the target and parent, then apply with
+acknowledgement. For automation, bind apply to the printed plan
+identity so a changed proposal cannot slip through.
+
+00:03:42.617 --> 00:03:55.117
+Sam: Here's the inherited greeting-card contract: a name and messages
+go in; a greeting, normalized recipient identifier, message count and
+word count come out. Let's inspect that promise.
+
+00:03:55.283 --> 00:04:07.283
+LitAI: The Component owns observable behavior. Flavors select
+language, build system and platform. Skills guide technique. We
+haven't outsourced the definition of correct to the agent.
+
+00:04:07.450 --> 00:04:17.225
+Sam: Let's ask it to implement that promise. And explicitly allow it
+to compile and execute here. This is a disposable demo, not a
+production deployment.
+
+00:04:17.408 --> 00:04:29.958
+LitAI: Rebuild drives the lifecycle. Generation is only one stage:
+current tests, execution and independent acceptance still have to
+pass. The model selector is visible in the command.
+
+00:04:30.117 --> 00:04:39.092
+Sam: Now we're looking at code the agent actually generated in this
+run. Not a hand-written example disguised as an agent success story.
+
+00:04:39.242 --> 00:04:50.792
+LitAI: Read it. Does recipient normalization match the contract? Does
+counting handle Unicode whitespace? Fluency isn't evidence. The
+implementation must survive those questions.
+
+00:04:50.950 --> 00:04:59.050
+Sam: And these are the generated tests. Useful, but the author grading
+its own homework isn't our entire quality department.
+
+00:04:59.200 --> 00:05:09.725
+LitAI: Exactly. Native tests and independent acceptance have different
+jobs. Passing a self-written test suite doesn't automatically prove
+the written product contract.
+
+00:05:09.908 --> 00:05:20.983
+Sam: And it failed. Missing messages. The specification requires
+messages, but this acceptance invocation supplied only a name. That's
+not the agent ignoring the contract.
+
+00:05:21.158 --> 00:05:33.833
+LitAI: Correct. We found an inheritance defect: the richer parent
+Component got the simple starter's verifier. Here are our
+independently calculated acceptance cases for the actual written
+contract.
+
+00:05:33.992 --> 00:05:45.442
+Sam: Two messages, six words. The expected recipient follows the
+specified normalization. We changed the verifier to match intent, not
+to flatter the generated code.
+
+00:05:45.617 --> 00:05:55.717
+LitAI: This is a demo-local correction, not a framework fix. The
+inheritance defect is tracked for repair. We rerun the complete
+lifecycle before claiming success.
+
+00:05:55.867 --> 00:06:04.092
+Sam: So this is a current result, with its actual passes and skips
+visible. Not a green screenshot borrowed from a different revision.
+
+00:06:04.242 --> 00:06:13.642
+LitAI: Keep the inputs and model selection consistent. A receipt is
+evidence about exact work, not a lifetime warranty on everything named
+hello.
+
+00:06:13.825 --> 00:06:19.400
+Sam: Now packaging. The part of my old workflow described by a folder
+named release stuff.
+
+00:06:19.575 --> 00:06:31.425
+LitAI: We build a local wheel from the accepted application.
+Packaging, package verification, publishing and releasing are distinct
+decisions. No registry upload happens in this film.
+
+00:06:31.575 --> 00:06:38.450
+Sam: A verified package is better than a confidently named zip. I
+remain emotionally attached to the zip.
+
+00:06:38.617 --> 00:06:50.292
+LitAI: You may keep the attachment. For your next feature, change
+observable intent, review it, then regenerate and re-run the gates.
+Don't make generated source your hidden specification.
+
+00:06:50.450 --> 00:06:57.500
+Sam: Do I need to buy a fleet to get started? I already own several
+computers that contribute mainly fan noise.
+
+00:06:57.658 --> 00:07:07.708
+LitAI: Start here, locally. The session just used this machine.
+Existing compatible machines can be workers; you don't need a new
+hosted service merely to begin.
+
+00:07:07.867 --> 00:07:12.417
+Sam: So target means what I want to build, and worker means where it
+happens?
+
+00:07:12.575 --> 00:07:24.575
+LitAI: Yes. Keep worker addresses and credentials out of project
+authority. Use the synthetic worker and test examples, and let litai
+config paths locate your private configuration.
+
+00:07:24.742 --> 00:07:34.167
+Sam: Then verify the selected model and probe the machine before I
+send it a long job. Start with one compatible cell, not the entire
+matrix.
+
+00:07:34.325 --> 00:07:44.775
+LitAI: Exactly. This section is a remote-worker walkthrough, not proof
+of an SSH run. Check the toolchain and separate agent login on each
+actual worker.
+
+00:07:44.925 --> 00:07:54.700
+Sam: The new project was deliberately tiny. What about code that
+already earns its keep? Preferably C plus plus, so I can recognize my
+own anxiety.
+
+00:07:54.850 --> 00:08:07.800
+LitAI: Let's use TinyXML2, a public XML library, at the recorded
+commit. This is our disposable demonstration, not an upstream adoption
+or an endorsement by its maintainers.
+
+00:08:07.975 --> 00:08:17.400
+Sam: Read-only inspection first. It discovers the existing language
+and build tools. And there's a Git recovery point before any source
+moves.
+
+00:08:17.558 --> 00:08:28.983
+LitAI: Apply wraps the existing project and runs the authorized
+baseline and parity work. Watch the actual build evidence. We are not
+replacing the C plus plus implementation.
+
+00:08:29.142 --> 00:08:37.217
+Sam: There's the existing source in its retained implementation
+location. The library didn't disappear into a Markdown file.
+
+00:08:37.392 --> 00:08:48.242
+LitAI: Now run the retained harness. It rebuilds and tests the
+preserved implementation in disposable custody. The recorded result
+tells us what passed, not what we hoped.
+
+00:08:48.392 --> 00:08:56.817
+Sam: CMake, the actual C plus plus targets, and CTest. Familiar tools.
+The new thing is the explicit evidence around them.
+
+00:08:56.975 --> 00:09:07.875
+LitAI: The rehearsal exposed another framework bug: a new CTest
+summary format wasn't counted. We fixed the parser, not the test
+result, and reran the real harness.
+
+00:09:08.058 --> 00:09:16.683
+Sam: Then publish the finalized test receipt to this local project.
+Publish here doesn't mean upload TinyXML2 anywhere.
+
+00:09:16.850 --> 00:09:28.500
+LitAI: Correct. Now advance to retained. Original source remains
+release authority. A recorded baseline is valuable already, without
+pretending we completed a native rewrite.
+
+00:09:28.683 --> 00:09:34.208
+Sam: And the later stages? I suspect there's a catch called actually
+understanding the software.
+
+00:09:34.358 --> 00:09:48.558
+LitAI: A good catch. Draft specifications, review them, then qualify
+clean regeneration against independent behavior evidence. Move one
+boundary at a time. These later stages aren't demonstrated as complete
+here.
+
+00:09:48.708 --> 00:10:00.408
+Sam: So early adoption buys me repeatable evidence and clearer
+handoffs. Specification-led shipping comes later, when we've earned
+it. That sounds considerably less magical. Thank you.
+
+00:10:00.558 --> 00:10:05.758
+LitAI: You're welcome. Magic makes an excellent demo and an awkward
+incident report.
+
+00:10:05.908 --> 00:10:10.383
+Sam: And Agentis? If it coordinates the agents, why have another
+layer?
+
+00:10:10.533 --> 00:10:24.433
+LitAI: Coordination and product proof are different jobs. An
+orchestrator can assign the work; Literate AI structures the product
+lifecycle. This film proves the local harness, not a deployed Agentis
+integration.
+
+00:10:24.583 --> 00:10:34.058
+Sam: All right. Reluctantly, I'm convinced. It's not asking me to
+learn engineering again. It's asking me and my very fast colleagues to
+stop skipping it.
+
+00:10:34.208 --> 00:10:37.433
+LitAI: I'll accept reluctantly. What worries you now?
+
+00:10:37.583 --> 00:10:48.458
+Sam: Tomorrow the framework changes. Next week my project changes. Six
+months later nobody remembers which copied instructions are stale. How
+does this stay useful?
+
+00:10:48.625 --> 00:11:00.275
+LitAI: Start with litai update as a read-only plan. It compares
+recorded inheritance, current local files and upstream authority.
+Review the classifications before applying anything.
+
+00:11:00.458 --> 00:11:04.958
+Sam: So it isn't git pull followed by a cheerful overwrite of my
+decisions.
+
+00:11:05.125 --> 00:11:20.650
+LitAI: No. Safe upstream-only changes and local conflicts are
+different cases. Apply deliberately; review conflicting choices
+explicitly. This demonstrated revision doesn't promise automatic
+merging of arbitrary competing edits.
+
+00:11:20.800 --> 00:11:28.625
+Sam: And an updated framework executable is another authority change,
+not the same as refreshing inherited documents.
+
+00:11:28.775 --> 00:11:42.600
+LitAI: Right. Standard-bound projects use the documented reviewed
+rebind after an intentional wheel upgrade. Then rebuild and verify
+current evidence. Old receipts don't become fresh because the version
+number did.
+
+00:11:42.750 --> 00:11:52.875
+Sam: Can I put our team's conventions in one repository and let
+several projects inherit them? Please say the answer doesn't involve
+synchronized copy and paste.
+
+00:11:53.042 --> 00:12:06.167
+LitAI: That's repository lineage. The framework can feed a team
+parent, which feeds applications. Components, Flavors and skills
+compose through recorded parent revisions; projects can add their own
+intent.
+
+00:12:06.333 --> 00:12:13.508
+Sam: And our team can choose different presenters for its tutorial. I
+wasn't planning to become an inherited dependency.
+
+00:12:13.667 --> 00:12:26.667
+LitAI: The video craft is reusable. We are this repository's story.
+Pin and review parent changes; use explicit reparenting when changing
+parent authority, rather than quietly pointing somewhere else.
+
+00:12:26.833 --> 00:12:35.458
+Sam: What about a product made of several independent repositories?
+That's a dependency graph, not necessarily an inheritance family.
+
+00:12:35.625 --> 00:12:51.575
+LitAI: Precisely. Orchestration keeps declared child repositories,
+exact pins and dependency order explicit. Review the plan, acknowledge
+execution, and keep each child's evidence. Inheritance and
+orchestration solve different problems.
+
+00:12:51.725 --> 00:13:01.250
+Sam: So we keep the good old tools, add a visible process, and let the
+fast agents do the repetitive work without appointing them sole judges
+of success.
+
+00:13:01.400 --> 00:13:10.400
+LitAI: That's the adventure. Start with one useful boundary and one
+machine. Review the intent, run the work, inspect the evidence, then
+expand.
+
+00:13:10.567 --> 00:13:20.842
+Sam: I'm renaming final, final, really final dot zip. Apparently we
+can identify a release with something stronger than increasingly
+urgent adjectives.
+
+00:13:20.992 --> 00:13:31.342
+LitAI: The public repository has the source, commands and limitations
+for this film. Tell us where you got stuck, what remained unclear, and
+what your real project needs.
+
+00:13:31.492 --> 00:13:37.917
+Sam: I'm still skeptical. But now I have a repeatable way to be
+skeptical. That's an upgrade I can ship.
+

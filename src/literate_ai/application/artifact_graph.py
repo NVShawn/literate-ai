@@ -9,6 +9,7 @@ from dataclasses import replace
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.cpp_libraries import CppLibraryLayout
 from literate_ai.contracts.executable_components.artifacts import (
+    ArtifactAssemblyDependency,
     ArtifactBuildGraph,
     ArtifactExport,
     ArtifactMaterializationPlan,
@@ -179,7 +180,9 @@ def plan_isolated_materialization(
     )
 
 
-def _link_closure(root: str, exports: dict[str, ArtifactExport]) -> tuple[str, ...]:
+def _link_closure(
+    root: str, exports: dict[str, ArtifactExport], additional: dict[str, set[str]]
+) -> tuple[str, ...]:
     visited: set[str] = set()
     visiting: set[str] = set()
 
@@ -194,6 +197,8 @@ def _link_closure(root: str, exports: dict[str, ArtifactExport]) -> tuple[str, .
             raise ArtifactAssemblyError(f"dependency artifact is absent: {uri}")
         for dependency in artifact.dependency_artifact_identities:
             visit(dependency.uri)
+        for dependency in additional.get(uri, ()):
+            visit(dependency)
         visiting.remove(uri)
         visited.add(uri)
 
@@ -207,6 +212,7 @@ def create_artifact_build_graph(
     manifests: Iterable[ComponentBuildManifest],
     link_roots: Iterable[ContentIdentity],
     link_root_groups: Iterable[tuple[ContentIdentity, ...]] = (),
+    assembly_dependencies: Iterable[ArtifactAssemblyDependency] = (),
 ) -> ArtifactBuildGraph:
     """Canonicalize an arbitrary adapter's manifests and derive exact link closures."""
 
@@ -222,11 +228,26 @@ def create_artifact_build_graph(
         for manifest in ordered_manifests
         for export in manifest.exports
     }
+    dependencies = tuple(assembly_dependencies)
+    if len(dependencies) > 16384 or any(
+        not isinstance(item, ArtifactAssemblyDependency) for item in dependencies
+    ):
+        raise ArtifactAssemblyError(
+            "assembly dependencies must be bounded typed records"
+        )
+    dependencies = tuple(sorted(dependencies, key=lambda item: item.identity.uri))
+    additional: dict[str, set[str]] = {}
+    for dependency in dependencies:
+        consumer = dependency.consumer_artifact_identity.uri
+        provider = dependency.provider_artifact_identity.uri
+        if consumer not in exports or provider not in exports:
+            raise ArtifactAssemblyError("assembly endpoint is absent from the graph")
+        additional.setdefault(consumer, set()).add(provider)
     links: list[ExactLinkPlan] = []
     for root in sorted(set(link_roots), key=lambda item: item.uri):
         if root.uri not in exports:
             raise ArtifactAssemblyError(f"link root is absent: {root.uri}")
-        closure = _link_closure(root.uri, exports)
+        closure = _link_closure(root.uri, exports, additional)
         links.append(
             ExactLinkPlan(
                 root_artifact_identity=root,
@@ -253,7 +274,7 @@ def create_artifact_build_graph(
                 {
                     uri
                     for root in canonical_group
-                    for uri in _link_closure(root.uri, exports)
+                    for uri in _link_closure(root.uri, exports, additional)
                 }
             )
         )
@@ -271,6 +292,7 @@ def create_artifact_build_graph(
         build_system_driver_identity=build_system_driver_identity,
         manifests=ordered_manifests,
         link_plans=tuple(links),
+        assembly_dependencies=dependencies,
     )
 
 

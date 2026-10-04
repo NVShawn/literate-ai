@@ -1,0 +1,21 @@
+{
+  "schema": "literate-ai/video-course-result@1",
+  "course_id": "03-adopt-an-existing-project",
+  "source_identity": "f105c5b680276bd6e4276ae78c7e3b362a84b0ddb199d1859b2c4c3ff0cca197",
+  "renderer_sha256": "2829e12b4d5694b97858fee6dcbd61bf2974cf84c21c56b7721c0b5168bdeebf",
+  "font_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+  "narration_backend": "say",
+  "duration_seconds": 194.033104,
+  "caption_count": 39,
+  "publication_authorized": false,
+  "artifacts": {
+    "03-adopt-an-existing-project.mp4": "a7dcaa0fe40d81c46e36d50ac36b520beec9ee7f670e5cbd7023a2f13dc42dde",
+    "03-adopt-an-existing-project.srt": "b3ef0563e65ef0842df5a7eadb07feefd9e35ef2cdddd412dc8549d7bb47b80c",
+    "03-adopt-an-existing-project.vtt": "adc6245824342d952ec92e0a0883d7cf884317c0fe7e09a455cf769a69198144"
+  },
+  "tools": {
+    "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 9.0.1 Copyright (c) 2007-2026 the FFmpeg developers",
+    "magick": "Version: ImageMagick 7.1.2-31 Q16-HDRI aarch64 8309dc92a:20260903 https://imagemagick.org"
+  }
+}

@@ -23,6 +23,7 @@ class ActionDagSchedulingError(RuntimeError):
 class LifecycleActionKind(StrEnum):
     GENERATE = "generate"
     INDEX = "index"
+    BUILD_INTENT = "build_intent"
     AUTHORIZE = "authorize"
     PLAN = "plan"
     BUILD = "build"

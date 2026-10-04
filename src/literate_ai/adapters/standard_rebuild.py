@@ -11,6 +11,7 @@ from literate_ai.application import (
     StandardTestReceiptProjectionError,
     project_standard_project_test_receipt,
 )
+from literate_ai.application.action_dag_scheduler import LifecycleActionKind
 from literate_ai.application.component_generation_context import (
     GenerationComplexityBudget,
 )
@@ -35,7 +36,15 @@ from literate_ai.projects import LoadedProject, ProjectError
 from literate_ai.storage import FileSystemCAS
 from literate_ai.test_receipts import update_project_test_receipt_finalized_value
 
+from .action_admission import CommandActionWorkerPool
+from .action_dispatch_wire import ActionWireError
+from .action_execution_config import (
+    ActionExecutionConfigurationError,
+    BoundActionExecution,
+    load_action_execution,
+)
 from .cache import FileSystemSourceCache, SourceCacheMaterializer, SourceCacheResolver
+from .command_indexer import CommandGenerationIndexer
 from .generation_preparation import (
     LockedComponentNodePreparationAdapter,
     PreparedLockedGeneration,
@@ -48,6 +57,7 @@ from .lifecycle import (
 )
 from .project_validation import validated_project_authority_identity
 from .retained_source import RetainedSourceInput
+from .shared_cache_config import BoundSharedCache, load_shared_cache
 from .standard_lifecycle_binding import (
     ResolvedStandardProjectLifecycleDriver,
     resolve_standard_project_lifecycle_driver,
@@ -63,6 +73,7 @@ from .standard_project import (
     assemble_filesystem_standard_project_runtime,
     compose_filesystem_standard_lifecycle_checkpoints,
     compose_filesystem_standard_source_cache,
+    native_cpp_cache_contract,
     project_locked_standard_toolchain_closure,
 )
 
@@ -85,7 +96,7 @@ class FilesystemStandardRebuildRequest:
     source_root: Path
     invalidation: ComponentInvalidationDecision
     update_receipt: bool = False
-    max_parallelism: int = 1
+    max_parallelism: int | None = None
     budget: GenerationComplexityBudget | None = None
     accepted_source_only: bool = False
     source_selectors: StandardSourceSelectorSet | None = None
@@ -114,11 +125,11 @@ class FilesystemStandardRebuildRequest:
             raise TypeError(
                 "accepted_source_only requires explicit directory custody identity"
             )
-        if (
-            not isinstance(self.max_parallelism, int)
+        if self.max_parallelism is not None and (
+            type(self.max_parallelism) is not int
             or not 1 <= self.max_parallelism <= 256
         ):
-            raise ValueError("max_parallelism must be between 1 and 256")
+            raise ValueError("max_parallelism must be automatic or between 1 and 256")
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,6 +158,9 @@ class FilesystemStandardRebuildAdapter:
         ),
         retained_source: RetainedSourceInput | None = None,
         retained_source_authorization: str | None = None,
+        shared_cache: BoundSharedCache | None = None,
+        action_workers: CommandActionWorkerPool | None = None,
+        action_execution: BoundActionExecution | None = None,
     ) -> None:
         if not isinstance(project, LoadedProject):
             raise TypeError("project must be a LoadedProject")
@@ -173,8 +187,29 @@ class FilesystemStandardRebuildAdapter:
         self.source_cache_configuration = source_cache_configuration
         self.authority_validator = authority_validator
         self.retained_source = retained_source
+        if shared_cache is not None and not isinstance(shared_cache, BoundSharedCache):
+            raise TypeError("shared cache must bind private configuration")
+        self.shared_cache = shared_cache
+        if action_workers is not None and not isinstance(
+            action_workers, CommandActionWorkerPool
+        ):
+            raise TypeError("action workers must have live phase admission")
+        self.action_workers = action_workers
+        if action_execution is not None and (
+            not isinstance(action_execution, BoundActionExecution)
+            or action_workers is None
+        ):
+            raise TypeError("private action execution requires admitted workers")
+        self.action_execution = action_execution
         if retained_source is not None:
             retained_source.require_authorization(retained_source_authorization)
+
+    def _require_action_configuration(self) -> None:
+        if self.action_execution is not None:
+            try:
+                self.action_execution.require_unchanged()
+            except ActionExecutionConfigurationError as exc:
+                raise FilesystemStandardRebuildError(exc.code, exc.message) from exc
 
     def rebuild(
         self, request: FilesystemStandardRebuildRequest
@@ -197,6 +232,9 @@ class FilesystemStandardRebuildAdapter:
                 "generated source runtime must remain outside project authority",
             )
         self.binding.require_unchanged()
+        if self.shared_cache is not None:
+            self.shared_cache.require_unchanged()
+        self._require_action_configuration()
         snapshot.require_unchanged()
         validated = self.authority_validator(self.project.root)
         if self.retained_source is not None:
@@ -225,6 +263,26 @@ class FilesystemStandardRebuildAdapter:
                 "Standard runtime lacks required capabilities: "
                 + ", ".join(readiness.blockers),
             )
+        admitted_slots = (
+            None
+            if self.action_workers is None
+            else sum(worker.slots for worker in self.action_workers.workers)
+        )
+        if admitted_slots is not None:
+            try:
+                self.action_workers.deadline.remaining()
+            except ActionWireError as exc:
+                raise FilesystemStandardRebuildError(exc.code, str(exc)) from exc
+            if not 1 <= admitted_slots <= 256:
+                raise FilesystemStandardRebuildError(
+                    "standard_rebuild.capacity_invalid",
+                    "admitted worker capacity must be between 1 and 256",
+                )
+        parallelism = (
+            min(request.max_parallelism or admitted_slots, admitted_slots)
+            if admitted_slots is not None
+            else request.max_parallelism or 1
+        )
         lifecycle_request = canonical_identity(
             {
                 "schema": "literate-ai/standard-filesystem-rebuild-request@1",
@@ -241,7 +299,26 @@ class FilesystemStandardRebuildAdapter:
                 "framework_distribution_identity": (
                     self.binding.distribution.identity.uri
                 ),
-                "max_parallelism": request.max_parallelism,
+                "max_parallelism": parallelism,
+                **(
+                    {"action_execution_identity": self.action_execution.identity.uri}
+                    if self.action_execution is not None
+                    else {}
+                ),
+                **(
+                    {
+                        "action_worker_admission_identity": (
+                            self.action_workers.identity.uri
+                        )
+                    }
+                    if self.action_workers is not None
+                    else {}
+                ),
+                **(
+                    {"shared_cache_identity": self.shared_cache.identity.uri}
+                    if self.shared_cache is not None
+                    else {}
+                ),
                 "accepted_source_only": request.accepted_source_only,
                 **(
                     {"retained_source_identity": self.retained_source.identity.uri}
@@ -276,7 +353,7 @@ class FilesystemStandardRebuildAdapter:
                     planned,
                     source_root,
                     request.invalidation,
-                    max_parallelism=request.max_parallelism,
+                    max_parallelism=parallelism,
                     budget=request.budget,
                     accepted_source_only=request.accepted_source_only,
                     expected_framework_distribution_identity=(
@@ -316,6 +393,9 @@ class FilesystemStandardRebuildAdapter:
                 "Standard lifecycle did not produce an accepted project"
                 + (f": {detail}" if detail else ""),
             )
+        if self.shared_cache is not None:
+            self.shared_cache.require_unchanged()
+        self._require_action_configuration()
         self.binding.require_unchanged()
         snapshot.require_unchanged()
         if self.authority_validator(self.project.root) != validated:
@@ -489,6 +569,9 @@ def assemble_filesystem_standard_rebuild_adapter(
     accepted_cas_root: Path,
     checkpoint_root: Path,
     python_wheelhouse: Path | None = None,
+    action_workers: CommandActionWorkerPool | None = None,
+    action_source_cas: FileSystemCAS | None = None,
+    action_result_source=None,
     binding: ResolvedStandardProjectLifecycleDriver | None = None,
     independent_acceptance_oracle: LocalIndependentAcceptanceOracle | None = None,
     pipeline_model: str | None = None,
@@ -502,10 +585,31 @@ def assemble_filesystem_standard_rebuild_adapter(
 ) -> FilesystemStandardRebuildAdapter:
     """Compose every production Standard host capability behind one adapter."""
 
+    if (action_workers is None) != (action_source_cas is None):
+        raise FilesystemStandardRebuildError(
+            "standard_rebuild.action_configuration_incomplete",
+            "command indexing requires both admitted workers "
+            "and a source publication CAS",
+        )
+    if action_workers is not None and (
+        not isinstance(action_workers, CommandActionWorkerPool)
+        or not isinstance(action_source_cas, FileSystemCAS)
+    ):
+        raise TypeError("command indexing requires typed admission and source CAS")
     if not isinstance(project, LoadedProject):
         raise TypeError("project must be a LoadedProject")
     if not isinstance(prepared, PreparedLockedGeneration):
         raise TypeError("prepared must be a PreparedLockedGeneration")
+    if action_workers is not None:
+        action_workers.deadline.remaining()
+        if (
+            action_workers.target_profile
+            != prepared.locked_authority_snapshot.authority.lock.target_name
+        ):
+            raise FilesystemStandardRebuildError(
+                "standard_rebuild.action_target_mismatch",
+                "command workers were admitted for a different locked target",
+            )
     driver = project.definition.lifecycle_driver
     if not isinstance(driver, StandardProjectLifecycleDriver):
         raise FilesystemStandardRebuildError(
@@ -537,6 +641,58 @@ def assemble_filesystem_standard_rebuild_adapter(
             raise FilesystemStandardRebuildError(
                 "retained_source.authority_mismatch",
                 "Retained source currently requires one exact locked Component",
+            )
+    action_execution = None
+    if action_workers is None:
+        try:
+            action_execution = load_action_execution(project_root=project.root)
+            if action_execution is not None:
+                action_workers, action_source_cas = action_execution.admit(
+                    project_root=project.root,
+                    target_profile=prepared.locked_authority_snapshot.authority.lock.target_name,
+                    job_identity=prepared.locked_authority_snapshot.authority.lock.identity,
+                )
+        except (ActionExecutionConfigurationError, ActionWireError) as exc:
+            raise FilesystemStandardRebuildError(exc.code, str(exc)) from exc
+        except (ValueError, OSError, RuntimeError) as exc:
+            raise FilesystemStandardRebuildError(
+                "action_execution.admission_failed",
+                "configured command indexing could not be admitted",
+            ) from exc
+    remote_build = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.BUILD)
+        for worker in action_workers.workers
+    )
+    remote_test = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.TEST)
+        for worker in action_workers.workers
+    )
+    remote_execute = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.EXECUTE)
+        for worker in action_workers.workers
+    )
+    if remote_build or remote_test or remote_execute:
+        if action_result_source is None and action_execution is not None:
+            try:
+                action_result_source = action_execution.build_result_source(
+                    action_workers,
+                    action_source_cas,
+                    phases=tuple(
+                        phase
+                        for phase, enabled in (
+                            (LifecycleActionKind.BUILD, remote_build),
+                            (LifecycleActionKind.TEST, remote_test),
+                            (LifecycleActionKind.EXECUTE, remote_execute),
+                        )
+                        if enabled
+                    ),
+                )
+            except (ActionExecutionConfigurationError, ActionWireError) as exc:
+                raise FilesystemStandardRebuildError(exc.code, str(exc)) from exc
+        if not callable(action_result_source):
+            raise FilesystemStandardRebuildError(
+                "standard_rebuild.result_source_missing",
+                "BUILD/TEST/EXECUTE requires explicit worker result transport",
             )
     source_generation = FilesystemStandardSourceGenerationAdapter.from_environment(
         project_root=project.root,
@@ -570,7 +726,23 @@ def assemble_filesystem_standard_rebuild_adapter(
     )
     generator.retained_source = retained_source
     source_trees = LocalSourceTreeRegistry()
-    indexer = DisabledGenerationIndexer(source_trees)
+    indexer = (
+        DisabledGenerationIndexer(source_trees)
+        if action_workers is None
+        else CommandGenerationIndexer.from_admission(
+            planned.execution_plan,
+            source_trees,
+            lambda source: source_trees.registered_evidence(source).candidate,
+            action_source_cas,
+            action_workers,
+        )
+    )
+    shared_cache = load_shared_cache()
+    if shared_cache is not None and (
+        closure.cargo_targets
+        or any(native_cpp_cache_contract(item) for item in closure.contracts)
+    ):
+        shared_cache = shared_cache.bind_compiler_tool()
     runtime = assemble_filesystem_standard_project_runtime(
         generator=generator,
         object_root=object_root,
@@ -590,6 +762,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         indexer=indexer,
         independent_acceptance_oracle=independent_acceptance_oracle,
         native_sdk_inputs=prepared.native_sdk_inputs,
+        shared_cache=shared_cache,
     )
     configuration, caches = _resolved_source_cache(project, source_cache_root)
     resolver = SourceCacheResolver(configuration, caches)
@@ -605,6 +778,74 @@ def assemble_filesystem_standard_rebuild_adapter(
         runtime,
         checkpoint_root=checkpoint_root,
     )
+    if action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.BUILD_INTENT)
+        for worker in action_workers.workers
+    ):
+        from .command_build_intent import CommandBuildIntentDispatcher
+
+        runtime.application.lifecycle.build_intent_dispatcher = (
+            CommandBuildIntentDispatcher(
+                indexer, action_workers, runtime.lifecycle_ports
+            )
+        )
+    if action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.AUTHORIZE)
+        for worker in action_workers.workers
+    ):
+        from .command_authorizer import CommandBuildAuthorizer
+
+        runtime.application.lifecycle.authorizer = CommandBuildAuthorizer(
+            indexer, action_workers, runtime.lifecycle_ports
+        )
+    if action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.PLAN)
+        for worker in action_workers.workers
+    ):
+        from .command_plan_finalizer import CommandBuildPlanFinalizer
+
+        runtime.application.lifecycle.build_plan_finalizer = CommandBuildPlanFinalizer(
+            indexer, action_workers, runtime.lifecycle_ports
+        )
+    if remote_build:
+        from .command_builder import CommandComponentBuilder
+
+        runtime.application.lifecycle.builder = CommandComponentBuilder(
+            indexer,
+            action_workers,
+            runtime.lifecycle_ports,
+            result_source=action_result_source,
+        )
+    lifecycle = runtime.application.lifecycle
+    if (remote_test or remote_execute) and not remote_build:
+        from .local_test_handoff import LocalBuildTestHandoff
+
+        lifecycle.builder = LocalBuildTestHandoff(
+            lifecycle.builder, indexer, runtime.lifecycle_ports
+        )
+    if remote_test:
+        from .command_tester import CommandComponentTester
+
+        lifecycle.tester = CommandComponentTester(
+            indexer,
+            action_workers,
+            runtime.lifecycle_ports,
+            handoff_for=lifecycle.builder.test_handoff,
+            result_source=action_result_source,
+        )
+    if remote_execute:
+        from .command_executor import CommandComponentExecutor
+        from .execute_handoff import CompletedBuildExecuteHandoff
+
+        lifecycle.executor = CommandComponentExecutor(
+            indexer,
+            action_workers,
+            runtime.lifecycle_ports,
+            handoff_for=CompletedBuildExecuteHandoff(
+                lifecycle.builder, indexer, runtime.lifecycle_ports
+            ),
+            result_source=action_result_source,
+        )
     return FilesystemStandardRebuildAdapter(
         project=project,
         binding=selected_binding,
@@ -613,6 +854,9 @@ def assemble_filesystem_standard_rebuild_adapter(
         authority_validator=authority_validator,
         retained_source=retained_source,
         retained_source_authorization=retained_source_authorization,
+        shared_cache=shared_cache,
+        action_workers=action_workers,
+        action_execution=action_execution,
     )
 
 

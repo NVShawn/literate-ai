@@ -22,13 +22,14 @@
         "counts": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["unchanged", "already-current", "upstream-only", "local-only", "conflict", "upstream-added", "preserved-dynamic"],
+          "required": ["unchanged", "already-current", "upstream-only", "local-only", "conflict", "mergeable", "upstream-added", "preserved-dynamic"],
           "properties": {
             "unchanged": { "type": "integer", "minimum": 0 },
             "already-current": { "type": "integer", "minimum": 0 },
             "upstream-only": { "type": "integer", "minimum": 0 },
             "local-only": { "type": "integer", "minimum": 0 },
             "conflict": { "type": "integer", "minimum": 0 },
+            "mergeable": { "type": "integer", "minimum": 0 },
             "upstream-added": { "type": "integer", "minimum": 0 },
             "preserved-dynamic": { "type": "integer", "minimum": 0 }
           }

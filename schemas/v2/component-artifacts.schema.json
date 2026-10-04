@@ -11,6 +11,7 @@
     { "$ref": "#/$defs/exactLinkPlan" },
     { "$ref": "#/$defs/materializationPlan" },
     { "$ref": "#/$defs/compositeBuildRequest" },
+    { "$ref": "#/$defs/artifactAssemblyDependency" },
     { "$ref": "#/$defs/artifactBuildGraph" },
     { "$ref": "#/$defs/packagePlan" },
     { "$ref": "#/$defs/packageResult" },
@@ -246,6 +247,19 @@
         }
       }
     },
+    "artifactAssemblyDependency": {
+      "$id": "urn:literate-ai:schema:v2:artifact-assembly-dependency",
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "consumer_artifact_identity", "provider_artifact_identity", "dependency_kind", "dependency_edge_identity", "provider_acceptance_identity"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:artifact-assembly-dependency" },
+        "consumer_artifact_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "provider_artifact_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "dependency_kind": { "enum": ["runtime", "packaging"] },
+        "dependency_edge_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
+        "provider_acceptance_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" }
+      }
+    },
     "artifactBuildGraph": {
       "$id": "urn:literate-ai:schema:v2:artifact-build-graph",
       "type": "object", "additionalProperties": false,
@@ -254,6 +268,7 @@
         "schema": { "const": "urn:literate-ai:schema:v2:artifact-build-graph" },
         "build_system_driver_identity": { "$ref": "urn:literate-ai:schema:v1:content-identity" },
         "manifests": { "type": "array", "maxItems": 16384, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v2:component-build-manifest" } },
+        "assembly_dependencies": { "type": "array", "maxItems": 16384, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v2:artifact-assembly-dependency" } },
         "link_plans": { "type": "array", "maxItems": 16384, "uniqueItems": true, "items": { "$ref": "urn:literate-ai:schema:v2:exact-link-plan" } }
       }
     },

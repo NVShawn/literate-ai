@@ -216,7 +216,7 @@ def component_artifact_handoff(
     consumer_revision: ContentIdentity,
     accepted_products: Mapping[str, ComponentWorkerProduct],
 ) -> ComponentArtifactHandoff:
-    """Select only direct artifact/package inputs from scheduler-accepted results.
+    """Select direct artifact, toolchain and package inputs from accepted results.
 
     This does not authenticate acceptance evidence. The lifecycle owns admission of
     ``accepted_products`` and must validate routing against the current catalog.
@@ -238,7 +238,11 @@ def component_artifact_handoff(
         for edge in action.dependency_edges
         if edge.consumer_revision == consumer_revision
         and edge.semantics.consumed_input
-        in {DependencyInputKind.ARTIFACT_EXPORT, DependencyInputKind.PACKAGE}
+        in {
+            DependencyInputKind.ARTIFACT_EXPORT,
+            DependencyInputKind.TOOLCHAIN,
+            DependencyInputKind.PACKAGE,
+        }
     }
     products = []
     for uri in sorted(providers):

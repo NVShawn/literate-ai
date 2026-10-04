@@ -597,6 +597,43 @@ def _python_distribution_component(
     }
 
 
+# Process-wide memo of dyld_info facts. A fact is reused only for identical inspector
+# bytes, arguments and image identity: an on-disk image by its materialized binding
+# (content digest and symlink chain), and a shared-cache-only image by the boot
+# session, because the dyld shared cache cannot change without a reboot.
+_DYLD_FACTS: dict[tuple[object, ...], object] = {}
+_DYLD_FACTS_LIMIT = 65536
+_BOOT_SESSION: list[str | None] = []
+
+
+_BOOT_SESSION_UUID = re.compile(r"^[0-9A-F]{8}(?:-[0-9A-F]{4}){3}-[0-9A-F]{12}$")
+
+
+def _remember_dyld_fact(key: tuple[object, ...], fact: object) -> None:
+    if len(_DYLD_FACTS) >= _DYLD_FACTS_LIMIT:
+        _DYLD_FACTS.clear()
+    _DYLD_FACTS[key] = fact
+
+
+def _macos_boot_session() -> str | None:
+    """Return this boot's session UUID, or ``None`` when it cannot be proven."""
+
+    if not _BOOT_SESSION:
+        try:
+            completed = subprocess.run(
+                ("/usr/sbin/sysctl", "-n", "kern.bootsessionuuid"),
+                stdin=subprocess.DEVNULL,
+                capture_output=True,
+                timeout=10,
+                check=False,
+            )
+            value = completed.stdout.decode("ascii").strip().upper()
+        except (OSError, subprocess.TimeoutExpired, UnicodeError):
+            value = ""
+        _BOOT_SESSION.append(value if _BOOT_SESSION_UUID.fullmatch(value) else None)
+    return _BOOT_SESSION[0]
+
+
 @dataclass(frozen=True, slots=True)
 class _MachOMaterializedFile:
     resolved_path: str
@@ -766,6 +803,7 @@ class MacOsMachODependencyObserver:
             )
         dyld_digest = _file_digest(dyld_info)
         self._dyld_info = dyld_info
+        self._dyld_digest = dyld_digest
         self._validated_paths: dict[str, bool] = {}
         artifact_root = _artifact_root(build)
         seed_paths: dict[str, set[str]] = {}
@@ -994,13 +1032,21 @@ class MacOsMachODependencyObserver:
         binding_before = _macho_materialized_file(exact_path) if materialized else None
         # Inspect each image once. The sectioned output supports all three facts;
         # starting a second inspector for load commands adds no authority.
-        summary = self._run_dyld(("-uuid", "-linked_dylibs", "-load_commands", path))
-        uuids, linked = parse_dyld_info_links(summary)
-        if not uuids:
-            raise DependencyObservationError(
-                "dependencies.macos-uuid-missing",
-                f"dyld_info did not report an exact Mach-O UUID for {path}",
+        key = self._dyld_fact_key("inspect", path, binding_before)
+        cached = _DYLD_FACTS.get(key) if key is not None else None
+        if cached is None:
+            summary = self._run_dyld(
+                ("-uuid", "-linked_dylibs", "-load_commands", path)
             )
+            uuids, linked = parse_dyld_info_links(summary)
+            if not uuids:
+                raise DependencyObservationError(
+                    "dependencies.macos-uuid-missing",
+                    f"dyld_info did not report an exact Mach-O UUID for {path}",
+                )
+            rpaths = parse_dyld_info_rpaths(summary)
+        else:
+            uuids, linked, rpaths = cached
         materialized_after = exact_path.exists()
         binding_after = (
             _macho_materialized_file(exact_path) if materialized_after else None
@@ -1010,13 +1056,29 @@ class MacOsMachODependencyObserver:
                 "dependencies.macos-image-changed",
                 f"Mach-O image changed during inspection: {path}",
             )
-        return _MachOImage(
-            path,
-            uuids,
-            linked,
-            parse_dyld_info_rpaths(summary),
-            binding_before,
-        )
+        if key is not None and cached is None:
+            _remember_dyld_fact(key, (uuids, linked, rpaths))
+        return _MachOImage(path, uuids, linked, rpaths, binding_before)
+
+    def _dyld_fact_key(
+        self, kind: str, path: str, binding: _MachOMaterializedFile | None
+    ) -> tuple[object, ...] | None:
+        """Key one reusable dyld_info fact, or ``None`` when it must be re-observed."""
+
+        # Fixture or subclass inspectors are never memoized with real inspector facts.
+        if type(self)._run_dyld is not MacOsMachODependencyObserver._run_dyld:
+            return None
+        digest = getattr(self, "_dyld_digest", None)
+        if not isinstance(digest, str):
+            return None
+        if binding is None:
+            session = _macos_boot_session()
+            if session is None:
+                return None
+            identity: tuple[object, ...] = ("shared-cache", session)
+        else:
+            identity = ("file", binding)
+        return (kind, digest, path, identity)
 
     def _resolve_load_path(
         self,
@@ -1085,15 +1147,32 @@ class MacOsMachODependencyObserver:
         cache = getattr(self, "_validated_paths", None)
         accepted = cache.get(candidate) if isinstance(cache, dict) else None
         if accepted is None:
-            try:
-                self._run_dyld(("-validate_only", candidate))
-            except DependencyObservationError:
-                accepted = False
-            else:
-                accepted = True
+            key = self._validation_fact_key(candidate)
+            accepted = _DYLD_FACTS.get(key) if key is not None else None
+            if accepted is None:
+                try:
+                    self._run_dyld(("-validate_only", candidate))
+                except DependencyObservationError:
+                    accepted = False
+                else:
+                    accepted = True
+                if key is not None and key == self._validation_fact_key(candidate):
+                    _remember_dyld_fact(key, accepted)
             if isinstance(cache, dict):
                 cache[candidate] = accepted
         return accepted
+
+    def _validation_fact_key(self, candidate: str) -> tuple[object, ...] | None:
+        if self._dyld_fact_key("validate", candidate, None) is None:
+            return None
+        path = Path(candidate)
+        if not path.exists():
+            return self._dyld_fact_key("validate", candidate, None)
+        try:
+            binding = _macho_materialized_file(path)
+        except DependencyObservationError:
+            return None
+        return self._dyld_fact_key("validate", candidate, binding)
 
     def _run_dyld(self, arguments: Sequence[str]) -> str:
         dyld_info = getattr(self, "_dyld_info", None)

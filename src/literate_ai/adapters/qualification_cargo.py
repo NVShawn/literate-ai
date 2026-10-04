@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import tomllib
 
+from literate_ai.adapters.compiler_cache import validate_compiler_cache_observation
 from literate_ai.adapters.lifecycle.standard_cargo import StandardCargoTarget
 from literate_ai.contracts.identity import ContentIdentity, canonical_json_bytes
 
@@ -82,6 +83,15 @@ def verify_qualification_cargo_build(reader, *, plan, observation, files) -> Non
             "schema": "literate-ai/local-cargo-build-observation@1",
             **{name: observation[name] for name in processes},
             "target_identity": target_id.uri,
+            **(
+                {
+                    "compiler_cache": validate_compiler_cache_observation(
+                        observation["compiler_cache"]
+                    )
+                }
+                if "compiler_cache" in observation
+                else {}
+            ),
         },
     )
     artifact_files = {item["path"]: "sha256:" + item["sha256"] for item in files}

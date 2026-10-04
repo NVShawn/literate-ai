@@ -1220,6 +1220,8 @@ _TEMPLATE_FILES = {
     ),
     "flavors/os-windows/openspec/spec.md": "flavors/os-windows/openspec/spec.md",
     "flavors/package-pip/flavor.md": "flavors/package-pip/flavor.md",
+    "flavors/package-zip/flavor.md": "flavors/package-zip/flavor.md",
+    "flavors/package-zip/openspec/spec.md": "flavors/package-zip/openspec/spec.md",
     "flavors/package-pip/openspec/spec.md": "flavors/package-pip/openspec/spec.md",
     "flavors/package-npm/flavor.md": "flavors/package-npm/flavor.md",
     "flavors/package-npm/toolchain.json": "flavors/package-npm/toolchain.json",
@@ -1404,6 +1406,9 @@ _TEMPLATE_FILES = {
     "skills/agent/author-presentations-and-documents/SKILL.md": (
         "skills/agent/author-presentations-and-documents/SKILL.md"
     ),
+    "skills/agent/author-instructional-videos/SKILL.md": (
+        "skills/agent/author-instructional-videos/SKILL.md"
+    ),
     "skills/agent/record-user-directed-work/SKILL.md": (
         "skills/agent/record-user-directed-work/SKILL.md"
     ),
@@ -1577,17 +1582,11 @@ def _write_starter_acceptance_oracle(target: Path) -> str:
                 "arguments": [
                     {
                         "name": "Ada Lovelace",
-                        "messages": [
-                            "Build portable software",
-                            "Ship with confidence",
-                        ],
                     }
                 ],
                 "expected_result": {
                     "greeting": "Hello, Ada Lovelace!",
-                    "recipient_id": "ada-lovelace",
-                    "message_count": 2,
-                    "word_count": 6,
+                    "name": "Ada Lovelace",
                 },
             },
             {
@@ -1595,18 +1594,11 @@ def _write_starter_acceptance_oracle(target: Path) -> str:
                 "arguments": [
                     {
                         "name": "Grace Hopper",
-                        "messages": [
-                            "Debug boldly",
-                            "Build once",
-                            "Run everywhere safely",
-                        ],
                     }
                 ],
                 "expected_result": {
                     "greeting": "Hello, Grace Hopper!",
-                    "recipient_id": "grace-hopper",
-                    "message_count": 3,
-                    "word_count": 7,
+                    "name": "Grace Hopper",
                 },
             },
         ],
@@ -3392,6 +3384,20 @@ class FilesystemProjectInitializationAdapter:
         baseline = _initialization_baseline(resolved_target, origin, created)
         baseline_path.write_bytes(canonical_json_bytes(baseline.to_dict()) + b"\n")
         created.append(INITIALIZATION_BASELINE_FILE)
+        from literate_ai.contracts import CatalogImportsFile
+
+        from .update_merge import CHECKPOINT, UpdateBases
+
+        bases = UpdateBases(resolved_target)
+        for relative in created:
+            if not relative.startswith(".literate/"):
+                path = resolved_target / relative
+                if path.is_file():
+                    bases.retain(path.read_bytes())
+        if (resolved_target / CatalogImportsFile.PATH).is_file():
+            bases.remember_catalog(CatalogImportsFile.load(resolved_target).imports)
+        bases.write()
+        created.append(CHECKPOINT)
         try:
             finalized_project = self._validation.validate(
                 resolved_target,

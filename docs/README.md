@@ -5,6 +5,8 @@
 
 ## User documentation
 
+- [Rebuildable instructional videos](user/instructional-videos.md)
+- [Watch the introductory courses](courses/README.md)
 - [Native gRPC oracle declarations and qualification boundary](user/native-grpc-oracles.md)
 - [Independent child repository lifecycle commands](user/repository-lifecycle.md)
 
@@ -57,6 +59,8 @@ lists the per-project fields and their defaults.
 
 - [Installation and first run](user/installation.md)
 - [Public repository export](user/public-export.md)
+- [Test-suite audit (October 2026)](testing/test-suite-audit.md)
+- [Moving from NVIDIA-dev/literate-ai](user/repository-migration.md)
 - [Getting started](user/getting-started.md)
 - [The framework flow](user/framework-flow.md)
 - [Canonical project layout](user/project-layout.md)
@@ -100,6 +104,8 @@ lists the per-project fields and their defaults.
 - [Accepted Debian package construction on compatible workers](decisions/0045-debian-package-worker-custody.md)
 - [Accepted project-scoped worktree lifecycle](decisions/0046-project-scoped-worktree-lifecycle.md)
 - [Accepted native CLI Component acceptance](decisions/0047-native-cli-component-acceptance.md)
+- [Accepted retained-project Standard lifecycle](decisions/0048-retained-project-standard-lifecycle.md)
+- [Accepted repository succession](decisions/0049-repository-succession.md)
 - [User-directed work loop](architecture/user-directed-work-loop.md)
 - [Project release protocol](architecture/project-releases.md)
 - [Skill architecture](architecture/skills.md)
