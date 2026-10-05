@@ -26134,12 +26134,21 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   - [x] Document the native PowerShell install entry point and record isolated CLI qualification.
 - **Evidence:**
   - [x] Focused host-install and installer regressions pass on Windows.
-  - [ ] Isolated installation, doctor, onboard create, project validate and launcher startup pass; record any unmet native prerequisites.
+  - [x] Isolated installation, doctor, onboard create, project validate and launcher startup pass; record any unmet native prerequisites.
 - **Evidence:** Native Windows/Python 3.11 runs five focused tests via
   `python -m unittest tests.critical.test_host_install tests.smoke.test_install_litai`.
   Ruff lint and formatting pass. The installed editable CLI runs help, doctor and
   onboard-create planning. Native installer preflight now exits with a clear
   diagnostic instead of a traceback on inaccessible declared tool directories.
+- **Installed-wheel evidence:** A clean non-editable wheel at `6e633a7` has
+  SHA-256 `22f7e7b7e714fd547dccdb9afa7875588843b777d75c9658bb400a3a6258146a`.
+  Fresh isolated wheel installation resolves all dependencies; `pip check` passes.
+  Outside the checkout, the private Windows launcher reports its embedded exact
+  revision, imports only the installed package, and runs doctor, acknowledged
+  onboard-create, canonical project validation, starter lock and starter plan.
+  This proves core CLI operation, not native host-tool or generated-code readiness.
+  The sandbox's default Git Schannel transport fails authentication; this test
+  uses a process-only OpenSSL transport configuration, without changing host Git.
 - **Qualification limits:** Full native host installation and live generation are
   not yet qualified. The current restricted session cannot inspect all declared
   native tool directories; GNU Make is absent, so `make python-check` cannot run.
@@ -26148,6 +26157,5 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   install. Tracker/peer survey skipped because the named `gh` CLI is unavailable.
   Existing CI runs these tests on all supported platforms and performs installed
   wheel qualification on Windows. Require its exact-branch result before landing.
-- **Next action:** Qualify a non-editable wheel and initialized project, then obtain
-  exact-head Windows/Linux/macOS CI evidence. Keep full native prerequisite and
+- **Next action:** Obtain exact-head Windows/Linux/macOS CI evidence. Keep full native prerequisite and
   coding-provider qualification separate from CLI startup claims.
