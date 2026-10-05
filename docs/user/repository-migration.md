@@ -10,11 +10,18 @@ records the design.
 
 Check how `litai` was installed with `litai --version` and `litai doctor`.
 
-- **Prefix install (`make install`) on 1.0.x:** no action is needed once 1.1.0 is
-  published. Releases 1.0.x check only the old repository, so 1.1.0 is also attached
-  there once as a bridge. Your next self-update installs 1.1.0, and from then on updates
-  come from the public repository. To move immediately, clone the public repository and
-  run `make install` again with the same `PREFIX`.
+- **Prefix install (`make install`) on 1.0.x:** reinstall once from the public
+  repository. Releases 1.0.x check only the old repository, and because it is not
+  public they cannot download from it, so they never update on their own. Clone the
+  public repository and run `make install` again with the same `PREFIX`:
+
+  ```sh
+  git clone https://github.com/jordanhubbard/literate-ai.git
+  cd literate-ai
+  make install PREFIX=/your/previous/prefix   # omit PREFIX if you used the default
+  ```
+
+  From 1.1.0 on, self-update checks the public repository.
 - **Pip or editable install:** download the wheel from the
   [latest release](https://github.com/jordanhubbard/literate-ai/releases/latest) and
   install it with `python -m pip install path/to/WHEEL.whl` in the same environment.
