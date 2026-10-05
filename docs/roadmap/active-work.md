@@ -26122,7 +26122,7 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   smoke verification. Broader live generation and cross-platform qualification
   remain release gates; no full release receipt is claimed.
 
-### [ ] WINDOWS-INSTALL-001 — Qualify native Windows installation and CLI startup
+### [x] WINDOWS-INSTALL-001 — Qualify native Windows installation and CLI startup
 
 - **Priority:** P1
 - **Owner:** framework host-install adapter and Windows documentation
@@ -26149,16 +26149,22 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   This proves core CLI operation, not native host-tool or generated-code readiness.
   The sandbox's default Git Schannel transport fails authentication; this test
   uses a process-only OpenSSL transport configuration, without changing host Git.
-- **Qualification limits:** Full native host installation and live generation are
-  not yet qualified. The current restricted session cannot inspect all declared
+- **Qualification limits:** Live coding-provider generation is outside this core
+  install/CLI qualification slice. The current restricted session cannot inspect all declared
   native tool directories; GNU Make is absent, so `make python-check` cannot run.
   The initial isolated build-dependency install did not complete; installing the
   exact pinned setuptools then using `--no-build-isolation` completed the editable
   install. Tracker/peer survey skipped because the named `gh` CLI is unavailable.
   Existing CI runs these tests on all supported platforms and performs installed
   wheel qualification on Windows. Require its exact-branch result before landing.
-- **Next action:** Obtain exact-head Windows/Linux/macOS CI evidence. Keep full native prerequisite and
-  coding-provider qualification separate from CLI startup claims.
+- **Final CI evidence:** [Run 37274186953](https://github.com/jordanhubbard/literate-ai/actions/runs/37274186953)
+  completes successfully with all 20 jobs passing at exact implementation/test
+  commit `e4f58b7ead9d0319c051d5e7ff3f6d30a48ff159`. Windows, Linux and macOS
+  pass full tests/conformance, native installation/uninstallation/reinstallation,
+  and non-editable installed-wheel verification. Python 3.11/3.12/3.14 cells are
+  covered by the existing supported matrix.
+- **Next action:** Complete for core installation and CLI startup. Live generated
+  applications remain a separate authorization and qualification surface.
 - **CI review repair:** The first full run at `618e5dc`
   ([run 37271309114](https://github.com/jordanhubbard/literate-ai/actions/runs/37271309114))
   passed Windows platform smoke but rejected stale documentation authority during
@@ -26169,7 +26175,7 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   relaxed gate. The regression now drives public host observation with a denied
   filesystem boundary and verifies fail-closed typed readiness on every platform.
 
-### [ ] CI-FIXTURE-001 — Wait for POSIX child termination before fixture cleanup
+### [x] CI-FIXTURE-001 — Wait for POSIX child termination before fixture cleanup
 
 - **Priority:** P1
 - **Owner:** remote sample fanout end-to-end fixture
@@ -26179,7 +26185,7 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
 - **Implementation:**
   - [x] Add bounded marker polling before temporary directory cleanup.
 - **Evidence:**
-  - [ ] Focused fixture regressions and lint pass; native POSIX CI verifies the real process-group case.
+  - [x] Focused fixture regressions and lint pass; native POSIX CI verifies the real process-group case.
 - **Diagnosis:** macOS shard 3 at `42955d8` returned the expected supervisor
   timeout status, but checked the child marker before its signal handler finished.
   After the fixture removed its directory, the child raised FileNotFoundError
@@ -26189,5 +26195,11 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   eleven cases on native Windows: ten pass and the POSIX process-group case skips
   explicitly. Ruff lint and formatting pass. Lifecycle-driver and documentation
   reviews remain current. Native Linux/macOS execution remains required in CI.
-- **Next action:** Submit the corrected exact head for full cross-platform CI;
-  require the real POSIX test to pass before closing this fixture repair.
+- **Native evidence:** [macOS Python 3.11 shard 3](https://github.com/jordanhubbard/literate-ai/actions/runs/37274186953/job/111647547753)
+  explicitly reports the real worker process-group termination test passing at
+  `e4f58b7`; the complete 20-job full matrix passes, including Linux POSIX coverage.
+- **Next action:** Complete. Preserve the same termination assertion and bounded
+  fixture lifetime; no production supervisor behavior changed.
+- **End-of-cycle survey:** Supported peer survey and read-only GC planning both
+  report `project.peer_work_tracker_unavailable` because `gh` is absent. No
+  branches, worktrees or external reviews are collected or merged.
