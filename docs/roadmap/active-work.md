@@ -26203,3 +26203,27 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
 - **End-of-cycle survey:** Supported peer survey and read-only GC planning both
   report `project.peer_work_tracker_unavailable` because `gh` is absent. No
   branches, worktrees or external reviews are collected or merged.
+
+### [ ] WINDOWS-INTEGRATION-001 — Integrate Windows fixes with manual migration documentation
+
+- **Priority:** P1
+- **Owner:** framework documentation integration and reviewed authority
+- **Direction:** Commit, push and land the Windows fixes while preserving newly merged manual 1.0.x migration documentation.
+- **Conclusion:** Merge current main without rewriting history, retain both changelog outcomes and migration guidance, then recompute the documentation review marker through its supported command. Source behavior remains the previously qualified Windows fix.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Resolve changelog and documentation marker conflicts while preserving both contributions.
+- **Evidence:**
+  - [x] Focused Windows regressions, authority validation and review pins pass locally.
+  - [ ] The integrated pull request passes required CI before landing.
+- **Integration evidence:** Merge `origin/main` at `7d897be` without rewriting
+  history. Preserve the manual 1.0.x reinstall guidance and succession ADR,
+  together with the Windows diagnostic and POSIX fixture changelog entries.
+  Runtime, test and installer source is unchanged from `e4f58b7`, whose complete
+  20-job matrix passed. The focused eleven-case Windows batch passes with the
+  POSIX-only case explicitly skipped; Ruff checks and formatting pass.
+  Project validation and the supported documentation review pass; lifecycle
+  driver and test-runner review pins remain current.
+- **Next action:** Push the integration commit, verify its required CI, and land
+  through the authorized writer using merge semantics. Integration CI remains
+  pending until evidence is observed.

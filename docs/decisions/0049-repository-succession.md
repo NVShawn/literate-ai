@@ -51,6 +51,14 @@ release on the predecessor repository, which is unarchived only for that publica
 every later check to the successor. Pip and editable installs upgrade manually from
 the successor's releases.
 
+**Amended at 1.1.0 publication (2026-10-04):** the bridge release was published
+(`v1.1.0` on the predecessor, identical wheel), but it cannot complete the upgrade.
+The predecessor is an internal repository. 1.0.x reaches its release API with a
+token, then downloads the wheel from its `browser_download_url`, which returns 404 for
+non-public repositories even when authenticated. The predecessor stays internal, so
+1.0.x prefix installs migrate manually by reinstalling from the successor (see the
+migration guide). The bridge release remains as a pointer to the successor.
+
 Historical tags `v0.1.0a1` through `v1.0.1` exist in the successor as annotated tags on
 parentless marker commits. Each contains a README naming the release, its date and
 original commit, plus its changelog section. They keep version history and changelog
@@ -62,6 +70,7 @@ links coherent without publishing pre-export source.
   without manual edits.
 - Self-update reaches the successor from either recorded origin.
 - The bridge is a one-time release task for 1.1.0; later releases publish only to the
-  successor.
+  successor. Because the predecessor is not public, 1.0.x prefix installs still
+  reinstall manually once (see the amendment above).
 - Adding another move requires an explicit declaration and review, never inference
   from names.
