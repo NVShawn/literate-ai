@@ -26159,3 +26159,12 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   wheel qualification on Windows. Require its exact-branch result before landing.
 - **Next action:** Obtain exact-head Windows/Linux/macOS CI evidence. Keep full native prerequisite and
   coding-provider qualification separate from CLI startup claims.
+- **CI review repair:** The first full run at `618e5dc`
+  ([run 37271309114](https://github.com/jordanhubbard/literate-ai/actions/runs/37271309114))
+  passed Windows platform smoke but rejected stale documentation authority during
+  Linux sample-composition validation. Review the narrow source/documentation diff,
+  record the lifecycle TCB through `scripts/review_lifecycle_driver.py --record`,
+  then record documentation through `litai project documentation-review . --record`.
+  Both authored pins are current; this is required review bookkeeping, not a
+  relaxed gate. The regression now drives public host observation with a denied
+  filesystem boundary and verifies fail-closed typed readiness on every platform.
