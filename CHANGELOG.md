@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Documentation: 1.0.x prefix installs cannot self-update across the repository move,
+  because the archived `NVIDIA-dev/literate-ai` is internal and 1.0.x downloads wheels
+  from a URL that refuses non-public repositories. The migration guide and ADR 0049 now
+  give the one-time `make install` reinstall from the public repository (#18).
+
 ## 1.1.0 - 2026-10-04
 
 [README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.1.0/README.md)
