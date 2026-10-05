@@ -26168,3 +26168,26 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
   Both authored pins are current; this is required review bookkeeping, not a
   relaxed gate. The regression now drives public host observation with a denied
   filesystem boundary and verifies fail-closed typed readiness on every platform.
+
+### [ ] CI-FIXTURE-001 — Wait for POSIX child termination before fixture cleanup
+
+- **Priority:** P1
+- **Owner:** remote sample fanout end-to-end fixture
+- **Direction:** Cross-platform qualification exposed a macOS race in the existing worker process-group termination test.
+- **Conclusion:** Wait at most five monotonic seconds for the child signal-handler marker inside the temporary fixture, preserving the termination assertion and production supervisor behavior.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add bounded marker polling before temporary directory cleanup.
+- **Evidence:**
+  - [ ] Focused fixture regressions and lint pass; native POSIX CI verifies the real process-group case.
+- **Diagnosis:** macOS shard 3 at `42955d8` returned the expected supervisor
+  timeout status, but checked the child marker before its signal handler finished.
+  After the fixture removed its directory, the child raised FileNotFoundError
+  writing `child-stopped`. The failure is in fixture synchronization; production
+  process-group termination is unchanged.
+- **Local evidence:** The focused fanout, host-install and installer batch runs
+  eleven cases on native Windows: ten pass and the POSIX process-group case skips
+  explicitly. Ruff lint and formatting pass. Lifecycle-driver and documentation
+  reviews remain current. Native Linux/macOS execution remains required in CI.
+- **Next action:** Submit the corrected exact head for full cross-platform CI;
+  require the real POSIX test to pass before closing this fixture repair.

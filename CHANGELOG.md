@@ -6,6 +6,9 @@
   as actionable host-install errors instead of uncaught tracebacks. Document the
   PowerShell source-install entry point and activation-free wheel commands.
 
+- Testing: keep the POSIX worker termination fixture alive for a bounded child
+  signal-handler acknowledgement before removing its temporary directory.
+
 ## 1.1.0 - 2026-10-04
 
 [README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.1.0/README.md)
