@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -358,6 +359,11 @@ class RemoteSampleFanoutTests(unittest.TestCase):
                 "time.sleep(30)"
             )
             returncode = supervise(1, status, [sys.executable, "-c", parent])
+            # The parent can exit before its child's signal handler writes the
+            # marker. Keep the fixture alive for that bounded shutdown interval.
+            deadline = time.monotonic() + 5
+            while not child_stopped.is_file() and time.monotonic() < deadline:
+                time.sleep(0.01)
             child_was_stopped = child_stopped.is_file()
 
         self.assertEqual(returncode, 124)

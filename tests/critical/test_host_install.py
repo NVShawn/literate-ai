@@ -10,12 +10,14 @@ import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from literate_ai.adapters import host_install
 from literate_ai.adapters.host_install import (
     HostInstallError,
 )
 from literate_ai.bootstrap.host_install_requirements import (
+    HostInstallTarget,
     HostManagedArtifact,
 )
 
@@ -38,6 +40,31 @@ def _artifact(archive: Path, *, digest: str | None = None) -> HostManagedArtifac
 
 
 class HostInstallContractTests(unittest.TestCase):
+    def test_inaccessible_native_search_path_reports_typed_error(self) -> None:
+        # Native host readiness must fail closed when declared tool paths cannot
+        # be inspected, with a typed error the installer and doctor can report.
+        root = Path(__file__).resolve().parents[2]
+        sbom_path, sbom = host_install.load_host_install_sbom(
+            root / "flavors", HostInstallTarget("windows", "x86_64")
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = {"PATH": "existing-tools", "LOCALAPPDATA": temporary}
+            for failure in (PermissionError("access denied"), OSError("unavailable")):
+                with (
+                    self.subTest(failure=type(failure).__name__),
+                    mock.patch.object(Path, "is_dir", side_effect=failure),
+                    self.assertRaises(HostInstallError) as raised,
+                ):
+                    host_install.observe_host_install_dependencies(
+                        sbom_path=sbom_path,
+                        sbom=sbom,
+                        environment=environment,
+                        managed_tool_root=Path(temporary) / "tools",
+                    )
+                self.assertEqual(raised.exception.code, "host-install.path-unreadable")
+                self.assertIn("account with access", raised.exception.message)
+                self.assertEqual(environment["PATH"], "existing-tools")
+
     def test_managed_artifact_verifies_digest_and_normalizes_name(
         self,
     ) -> None:

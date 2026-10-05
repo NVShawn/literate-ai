@@ -26121,3 +26121,109 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
 - **Next action:** Complete for portable script-tree support and macOS native
   smoke verification. Broader live generation and cross-platform qualification
   remain release gates; no full release receipt is claimed.
+
+### [x] WINDOWS-INSTALL-001 — Qualify native Windows installation and CLI startup
+
+- **Priority:** P1
+- **Owner:** framework host-install adapter and Windows documentation
+- **Direction:** Test installation and basic execution on a native Windows host, and fix concrete failures.
+- **Conclusion:** Keep prerequisite validation intact while reporting inaccessible declared tool-search paths through the typed host-install diagnostic contract; document a PowerShell source-install command. Validate isolated package installation without changing global native tools. This supports PROJECT.md Goals 1 and 4.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Report inaccessible declared native PATH augmentation through HostInstallError and add regression coverage.
+  - [x] Document the native PowerShell install entry point and record isolated CLI qualification.
+- **Evidence:**
+  - [x] Focused host-install and installer regressions pass on Windows.
+  - [x] Isolated installation, doctor, onboard create, project validate and launcher startup pass; record any unmet native prerequisites.
+- **Evidence:** Native Windows/Python 3.11 runs five focused tests via
+  `python -m unittest tests.critical.test_host_install tests.smoke.test_install_litai`.
+  Ruff lint and formatting pass. The installed editable CLI runs help, doctor and
+  onboard-create planning. Native installer preflight now exits with a clear
+  diagnostic instead of a traceback on inaccessible declared tool directories.
+- **Installed-wheel evidence:** A clean non-editable wheel at `6e633a7` has
+  SHA-256 `22f7e7b7e714fd547dccdb9afa7875588843b777d75c9658bb400a3a6258146a`.
+  Fresh isolated wheel installation resolves all dependencies; `pip check` passes.
+  Outside the checkout, the private Windows launcher reports its embedded exact
+  revision, imports only the installed package, and runs doctor, acknowledged
+  onboard-create, canonical project validation, starter lock and starter plan.
+  This proves core CLI operation, not native host-tool or generated-code readiness.
+  The sandbox's default Git Schannel transport fails authentication; this test
+  uses a process-only OpenSSL transport configuration, without changing host Git.
+- **Qualification limits:** Live coding-provider generation is outside this core
+  install/CLI qualification slice. The current restricted session cannot inspect all declared
+  native tool directories; GNU Make is absent, so `make python-check` cannot run.
+  The initial isolated build-dependency install did not complete; installing the
+  exact pinned setuptools then using `--no-build-isolation` completed the editable
+  install. Tracker/peer survey skipped because the named `gh` CLI is unavailable.
+  Existing CI runs these tests on all supported platforms and performs installed
+  wheel qualification on Windows. Require its exact-branch result before landing.
+- **Final CI evidence:** [Run 37274186953](https://github.com/jordanhubbard/literate-ai/actions/runs/37274186953)
+  completes successfully with all 20 jobs passing at exact implementation/test
+  commit `e4f58b7ead9d0319c051d5e7ff3f6d30a48ff159`. Windows, Linux and macOS
+  pass full tests/conformance, native installation/uninstallation/reinstallation,
+  and non-editable installed-wheel verification. Python 3.11/3.12/3.14 cells are
+  covered by the existing supported matrix.
+- **Next action:** Complete for core installation and CLI startup. Live generated
+  applications remain a separate authorization and qualification surface.
+- **CI review repair:** The first full run at `618e5dc`
+  ([run 37271309114](https://github.com/jordanhubbard/literate-ai/actions/runs/37271309114))
+  passed Windows platform smoke but rejected stale documentation authority during
+  Linux sample-composition validation. Review the narrow source/documentation diff,
+  record the lifecycle TCB through `scripts/review_lifecycle_driver.py --record`,
+  then record documentation through `litai project documentation-review . --record`.
+  Both authored pins are current; this is required review bookkeeping, not a
+  relaxed gate. The regression now drives public host observation with a denied
+  filesystem boundary and verifies fail-closed typed readiness on every platform.
+
+### [x] CI-FIXTURE-001 — Wait for POSIX child termination before fixture cleanup
+
+- **Priority:** P1
+- **Owner:** remote sample fanout end-to-end fixture
+- **Direction:** Cross-platform qualification exposed a macOS race in the existing worker process-group termination test.
+- **Conclusion:** Wait at most five monotonic seconds for the child signal-handler marker inside the temporary fixture, preserving the termination assertion and production supervisor behavior.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add bounded marker polling before temporary directory cleanup.
+- **Evidence:**
+  - [x] Focused fixture regressions and lint pass; native POSIX CI verifies the real process-group case.
+- **Diagnosis:** macOS shard 3 at `42955d8` returned the expected supervisor
+  timeout status, but checked the child marker before its signal handler finished.
+  After the fixture removed its directory, the child raised FileNotFoundError
+  writing `child-stopped`. The failure is in fixture synchronization; production
+  process-group termination is unchanged.
+- **Local evidence:** The focused fanout, host-install and installer batch runs
+  eleven cases on native Windows: ten pass and the POSIX process-group case skips
+  explicitly. Ruff lint and formatting pass. Lifecycle-driver and documentation
+  reviews remain current. Native Linux/macOS execution remains required in CI.
+- **Native evidence:** [macOS Python 3.11 shard 3](https://github.com/jordanhubbard/literate-ai/actions/runs/37274186953/job/111647547753)
+  explicitly reports the real worker process-group termination test passing at
+  `e4f58b7`; the complete 20-job full matrix passes, including Linux POSIX coverage.
+- **Next action:** Complete. Preserve the same termination assertion and bounded
+  fixture lifetime; no production supervisor behavior changed.
+- **End-of-cycle survey:** Supported peer survey and read-only GC planning both
+  report `project.peer_work_tracker_unavailable` because `gh` is absent. No
+  branches, worktrees or external reviews are collected or merged.
+
+### [ ] WINDOWS-INTEGRATION-001 — Integrate Windows fixes with manual migration documentation
+
+- **Priority:** P1
+- **Owner:** framework documentation integration and reviewed authority
+- **Direction:** Commit, push and land the Windows fixes while preserving newly merged manual 1.0.x migration documentation.
+- **Conclusion:** Merge current main without rewriting history, retain both changelog outcomes and migration guidance, then recompute the documentation review marker through its supported command. Source behavior remains the previously qualified Windows fix.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Resolve changelog and documentation marker conflicts while preserving both contributions.
+- **Evidence:**
+  - [x] Focused Windows regressions, authority validation and review pins pass locally.
+  - [ ] The integrated pull request passes required CI before landing.
+- **Integration evidence:** Merge `origin/main` at `7d897be` without rewriting
+  history. Preserve the manual 1.0.x reinstall guidance and succession ADR,
+  together with the Windows diagnostic and POSIX fixture changelog entries.
+  Runtime, test and installer source is unchanged from `e4f58b7`, whose complete
+  20-job matrix passed. The focused eleven-case Windows batch passes with the
+  POSIX-only case explicitly skipped; Ruff checks and formatting pass.
+  Project validation and the supported documentation review pass; lifecycle
+  driver and test-runner review pins remain current.
+- **Next action:** Push the integration commit, verify its required CI, and land
+  through the authorized writer using merge semantics. Integration CI remains
+  pending until evidence is observed.

@@ -72,6 +72,12 @@ development (2026-09-10):
 
 ## Current work
 
+WINDOWS-INSTALL-001 and CI-FIXTURE-001 complete Goals 1 and 4's native Windows
+installation and core CLI qualification slice. All 20 full CI jobs pass on
+Windows, Linux and macOS at `e4f58b7`, including native installation and installed
+wheel verification. Broader live coding-provider qualification remains separate
+from this slice; see [the queue](docs/roadmap/active-work.md).
+
 [Accepted ADR 0048](docs/decisions/0048-retained-project-standard-lifecycle.md)
 ([issue #22](https://github.com/jordanhubbard/literate-ai/issues/22)) records a
 retained-project Standard lifecycle admission route under Goals 1, 4 and 6.
@@ -539,6 +545,11 @@ Notable open threads at the time of writing:
   `SKILL.md` files.
 
 ## Completed work
+
+- Windows core installation and CLI startup qualify across the full native CI
+  matrix at `e4f58b7` (Goals 1 and 4). Inaccessible tool directories produce typed
+  diagnostics, and the POSIX termination fixture preserves its temporary workspace
+  until its bounded child acknowledgement. See WINDOWS-INSTALL-001 and CI-FIXTURE-001.
 
 See `CHANGELOG.md` for the released, user-facing history. Milestones directly tied to
 the goals above:
