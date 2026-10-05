@@ -72,6 +72,11 @@ development (2026-09-10):
 
 ## Current work
 
+WINDOWS-INSTALL-001 supports Goals 1 and 4 with native Windows installation and
+CLI startup qualification. Focused diagnostic regressions and editable CLI startup
+pass; non-editable wheel, full native prerequisites and all-platform CI evidence
+remain pending under [the queue](docs/roadmap/active-work.md).
+
 [Accepted ADR 0048](docs/decisions/0048-retained-project-standard-lifecycle.md)
 ([issue #22](https://github.com/jordanhubbard/literate-ai/issues/22)) records a
 retained-project Standard lifecycle admission route under Goals 1, 4 and 6.

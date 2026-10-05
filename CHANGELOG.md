@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Windows installation: report inaccessible declared native-tool search directories
+  as actionable host-install errors instead of uncaught tracebacks. Document the
+  PowerShell source-install entry point and activation-free wheel commands.
+
 ## 1.1.0 - 2026-10-04
 
 [README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.1.0/README.md)

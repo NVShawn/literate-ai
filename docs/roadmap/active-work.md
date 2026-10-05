@@ -26121,3 +26121,33 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
 - **Next action:** Complete for portable script-tree support and macOS native
   smoke verification. Broader live generation and cross-platform qualification
   remain release gates; no full release receipt is claimed.
+
+### [ ] WINDOWS-INSTALL-001 — Qualify native Windows installation and CLI startup
+
+- **Priority:** P1
+- **Owner:** framework host-install adapter and Windows documentation
+- **Direction:** Test installation and basic execution on a native Windows host, and fix concrete failures.
+- **Conclusion:** Keep prerequisite validation intact while reporting inaccessible declared tool-search paths through the typed host-install diagnostic contract; document a PowerShell source-install command. Validate isolated package installation without changing global native tools. This supports PROJECT.md Goals 1 and 4.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Report inaccessible declared native PATH augmentation through HostInstallError and add regression coverage.
+  - [x] Document the native PowerShell install entry point and record isolated CLI qualification.
+- **Evidence:**
+  - [x] Focused host-install and installer regressions pass on Windows.
+  - [ ] Isolated installation, doctor, onboard create, project validate and launcher startup pass; record any unmet native prerequisites.
+- **Evidence:** Native Windows/Python 3.11 runs five focused tests via
+  `python -m unittest tests.critical.test_host_install tests.smoke.test_install_litai`.
+  Ruff lint and formatting pass. The installed editable CLI runs help, doctor and
+  onboard-create planning. Native installer preflight now exits with a clear
+  diagnostic instead of a traceback on inaccessible declared tool directories.
+- **Qualification limits:** Full native host installation and live generation are
+  not yet qualified. The current restricted session cannot inspect all declared
+  native tool directories; GNU Make is absent, so `make python-check` cannot run.
+  The initial isolated build-dependency install did not complete; installing the
+  exact pinned setuptools then using `--no-build-isolation` completed the editable
+  install. Tracker/peer survey skipped because the named `gh` CLI is unavailable.
+  Existing CI runs these tests on all supported platforms and performs installed
+  wheel qualification on Windows. Require its exact-branch result before landing.
+- **Next action:** Qualify a non-editable wheel and initialized project, then obtain
+  exact-head Windows/Linux/macOS CI evidence. Keep full native prerequisite and
+  coding-provider qualification separate from CLI startup claims.

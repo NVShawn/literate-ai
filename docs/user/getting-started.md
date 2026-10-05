@@ -77,6 +77,23 @@ On Windows, activate with `.venv\Scripts\activate` and use the same `python -m p
 and `litai doctor` commands. Doctor reports platform-resolved configuration paths,
 native tools, and coding-CLI authentication without requiring a project.
 
+In PowerShell, activate with `.\.venv\Scripts\Activate.ps1`. Activation is
+optional: invoke `.\.venv\Scripts\python.exe -m pip install path/to/DOWNLOADED_WHEEL.whl`,
+then `.\.venv\Scripts\litai.exe doctor` to check the host.
+
+For installation from a clean source checkout on Windows, the native entry point
+does not require GNU Make to start:
+
+```powershell
+python scripts/install_litai.py
+```
+
+This checks the declared Windows prerequisites before installing the private
+runtime and launcher. It asks before installing missing native tools. Run it in
+your regular PowerShell session with access to your installed tool directories;
+an inaccessible declared search directory produces a host-install diagnostic.
+Contributor validation still requires the documented GNU Make toolchain.
+
 Source builds embed the exact Git revision and repository origin. Recognized GitHub
 HTTPS, SCP-style SSH and `ssh://git@` aliases use one HTTPS origin spelling in newly
 built wheels, independent of a trailing `.git` or default transport port. Other

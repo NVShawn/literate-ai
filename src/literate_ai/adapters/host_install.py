@@ -1266,7 +1266,15 @@ def _prepend_paths(
     environment: Mapping[str, str], entries: Sequence[Path]
 ) -> dict[str, str]:
     updated = dict(environment)
-    values = tuple(dict.fromkeys(str(item) for item in entries if item.is_dir()))
+    try:
+        values = tuple(dict.fromkeys(str(item) for item in entries if item.is_dir()))
+    except OSError as exc:
+        raise HostInstallError(
+            "host-install.path-unreadable",
+            "could not inspect a declared native tool search directory; "
+            "run installation from an account with access to the host tool paths: "
+            f"{exc}",
+        ) from exc
     if values:
         updated["PATH"] = os.pathsep.join((*values, updated.get("PATH", "")))
     return updated
