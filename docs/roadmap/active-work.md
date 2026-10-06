@@ -22335,6 +22335,8 @@ dispatch or independent product acceptance.
 
 ### [ ] ADOPT-READMIT-001 — Readmit corrected retained harnesses after conversion
 
+- **Selection-accounting follow-up:** [#40](https://github.com/jordanhubbard/literate-ai/issues/40). Cargo `ignored` cases are excluded from its default run, not runtime-skipped selected cases. Preserve their count as explicit excluded evidence; only passed/failed selected cases contribute to the selected total. A failed selected case, ignored-only suite, zero collection, Python runtime skip or known failure still cannot qualify. Verify actual Cargo default/include-ignored behavior and public retained receipt admission/refusal without changing source custody or receipt authentication.
+
 - **GitHub follow-up:** [#488](https://github.com/NVIDIA-dev/literate-ai/issues/488). Restore explicit retained-stage selection from the archived implementation onto current main. Fresh inspection currently drops admitted test/package stages; preserve exact reviewed records and selection identity through plan/apply, then prove the installed-wheel command retains all required evidence. This restores a missing acceptance gate without changing release authority. The retained-harness/readmission/remote suite passes 44 tests, and the added two-stage regression passes separately. Lint and formatting pass. A read-only wrapped-project plan retains build/test/package, minimum test count one and required package evidence; installed-wheel validation and hosted CI remain pending.
 
 - **GitHub issue:** [#451](https://github.com/NVIDIA-dev/literate-ai/issues/451)

@@ -2362,3 +2362,13 @@ an explicit local limit remains supported. Per-worker index reservations prevent
 waiting indexes from occupying shared lifecycle threads. Complete-node transports
 retain their existing integer dispatch default; this does not claim that every
 lifecycle phase already executes remotely.
+
+### Retained Cargo test selection
+
+Retained test evidence records Cargo's `ignored` count as `excluded`, separately
+from the selected `total`, `passed`, and `failed` counters. Rust excludes
+`#[ignore]` cases from the default run; explicitly selecting them executes them
+and produces ordinary pass/fail outcomes. An ignored-only suite still has zero
+selected tests and cannot qualify. Failed selected tests and runtime-skipped or
+known-failure outcomes remain blocking; excluded cases are never claimed as
+passed. See [Rust test selection](https://doc.rust-lang.org/book/ch11-02-running-tests.html#ignoring-tests-unless-specifically-requested).

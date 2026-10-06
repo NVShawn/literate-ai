@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Retained Cargo receipts report unselected ignored cases as explicit exclusions, preserving strict selected-test failures and empty-suite rejection.
+
 - Windows installation: report inaccessible declared native-tool search directories
   as actionable host-install errors instead of uncaught tracebacks. Document the
   PowerShell source-install entry point and activation-free wheel commands.
