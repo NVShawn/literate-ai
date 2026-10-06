@@ -1558,20 +1558,27 @@ def _derived_release_class(
 ) -> tuple[str, str | None]:
     """Classify against the highest stable tag, not the source version marker."""
 
-    candidate = Version(_canonical_version(next_version, scheme))
+    parse = SemanticVersion.parse if scheme == "semver" else Version
+    candidate = parse(_canonical_version(next_version, scheme))
     stable = sorted(
         (
-            Version(_canonical_version(value, scheme))
+            parse(_canonical_version(value, scheme))
             for value in released
             if not _is_prerelease(value, scheme)
-            and Version(_canonical_version(value, scheme)) < candidate
+            and parse(_canonical_version(value, scheme)) < candidate
         ),
     )
     if not stable:
         return "initial", None
     predecessor = stable[-1]
-    previous_release = (*predecessor.release, 0, 0, 0)[:3]
-    next_release = (*candidate.release, 0, 0, 0)[:3]
+    if isinstance(candidate, SemanticVersion):
+        assert isinstance(predecessor, SemanticVersion)
+        previous_release = (predecessor.major, predecessor.minor, predecessor.patch)
+        next_release = (candidate.major, candidate.minor, candidate.patch)
+    else:
+        assert isinstance(predecessor, Version)
+        previous_release = (*predecessor.release, 0, 0, 0)[:3]
+        next_release = (*candidate.release, 0, 0, 0)[:3]
     if next_release[0] != previous_release[0]:
         release_class = "major"
     elif next_release[1] != previous_release[1]:
@@ -4075,13 +4082,14 @@ def _expected_wheel_prefix(root: Path, version: str) -> str | None:
     return f"{distribution}-{normalized_version}-"
 
 
-def _require_stable_github_release(
+def _require_published_github_release(
     root: Path,
     repository: str,
     tag: str,
     *,
     version: str,
     require_wheel: bool,
+    prerelease: bool,
 ) -> dict[str, object]:
     evidence = _github_release_evidence(root, repository, tag)
     if evidence is None:
@@ -4089,10 +4097,11 @@ def _require_stable_github_release(
             "release.published_provider_missing",
             f"GitHub release for {tag} is missing; Git publication may be complete",
         )
-    if evidence["draft"] or evidence["prerelease"]:
+    if evidence["draft"] or evidence["prerelease"] != prerelease:
         raise ProjectReleaseError(
             "release.published_provider_unstable",
-            f"GitHub release for {tag} is not a stable published release",
+            f"GitHub release for {tag} is unpublished or has "
+            "a mismatched prerelease status",
         )
     if not evidence["notes_present"]:
         raise ProjectReleaseError(
@@ -4400,12 +4409,15 @@ def publish_release(
             None if observed_release is None else str(observed_release["url"])
         )
         if observed_release is not None:
-            _require_stable_github_release(
+            _require_published_github_release(
                 root,
                 policy.provider_repository,
                 tag,
                 version=str(prepared["version"]),
                 require_wheel=False,
+                prerelease=_is_prerelease(
+                    str(prepared["version"]), policy.version_scheme
+                ),
             )
         changelog = _binding_path(root, policy.changelog_path)
         release_notes = _changelog_release_notes(
@@ -4433,6 +4445,13 @@ def publish_release(
                             "--notes-file",
                             notes_path,
                             "--verify-tag",
+                            *(
+                                ("--prerelease",)
+                                if _is_prerelease(
+                                    str(prepared["version"]), policy.version_scheme
+                                )
+                                else ()
+                            ),
                         ),
                         cwd=root,
                         check=False,
@@ -4473,12 +4492,13 @@ def publish_release(
             wheel_path = _build_wheel(root)
             if wheel_path is not None:
                 _upload_wheel_asset(root, policy.provider_repository, tag, wheel_path)
-        provider_release = _require_stable_github_release(
+        provider_release = _require_published_github_release(
             root,
             policy.provider_repository,
             tag,
             version=str(prepared["version"]),
             require_wheel=wheel_path is not None,
+            prerelease=_is_prerelease(str(prepared["version"]), policy.version_scheme),
         )
         provider_url = str(provider_release["url"])
     result: dict[str, object] = {
@@ -4551,13 +4571,14 @@ def verify_published_release(project: Path, prepared_path: Path) -> dict[str, ob
     provider_release: dict[str, object] | None = None
     if policy.provider_kind == "github":
         assert policy.provider_repository is not None
-        provider_release = _require_stable_github_release(
+        provider_release = _require_published_github_release(
             root,
             policy.provider_repository,
             tag,
             version=str(prepared["version"]),
             require_wheel=_expected_wheel_prefix(root, str(prepared["version"]))
             is not None,
+            prerelease=_is_prerelease(str(prepared["version"]), policy.version_scheme),
         )
         provider_url = str(provider_release["url"])
         if artifacts is not None:

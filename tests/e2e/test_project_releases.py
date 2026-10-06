@@ -85,6 +85,91 @@ class ProjectReleaseTests(unittest.TestCase):
             json.dumps(policy, indent=2) + "\n", encoding="utf-8"
         )
 
+    def test_release_class_uses_semver_prerelease_precedence(self):
+        cases = (
+            ("1.0.0-draft.1", (), ("initial", None)),
+            ("1.3.0-draft.1", ("1.2.9", "1.3.0-draft.9"), ("minor", "1.2.9")),
+            ("1.2.10-draft.1", ("1.2.8", "1.2.9"), ("patch", "1.2.9")),
+            ("2.0.0-draft.1", ("1.9.9",), ("major", "1.9.9")),
+            ("1.2.9-draft.1", ("1.2.9", "1.2.8"), ("patch", "1.2.8")),
+        )
+        for candidate, released, expected in cases:
+            with self.subTest(candidate=candidate):
+                self.assertEqual(
+                    project_releases._derived_release_class(
+                        candidate, released, scheme="semver"
+                    ),
+                    expected,
+                )
+        self.assertEqual(
+            project_releases._derived_release_class(
+                "1.2.4rc1", ("1.2.3",), scheme="pep440"
+            ),
+            ("patch", "1.2.3"),
+        )
+
+    def test_public_plan_accepts_a_numbered_semver_draft(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, _remote = self.initialize(Path(temporary))
+            policy = json.loads((root / "literate.release.json").read_text())
+            policy["allowed_transitions"].append("prerelease")
+            self.write_record(root / "literate.release.json", policy)
+            self.git(root, "add", "literate.release.json")
+            self.git(root, "commit", "-m", "Allow prerelease")
+            self.git(root, "tag", "v1.2.3")
+            with patch(
+                "literate_ai.project_releases.discover_project",
+                return_value=SimpleNamespace(root=root),
+            ):
+                plan = create_release_plan(
+                    root, transition="explicit", explicit_version="1.2.4-draft.1"
+                )
+            self.assertEqual(plan["transition"], "prerelease")
+            self.assertEqual(plan["release_class"], "patch")
+            self.assertEqual(plan["stable_predecessor"], "1.2.3")
+            self.assertEqual(plan["tag"], "v1.2.4-draft.1")
+
+    def test_provider_status_matches_prepared_prerelease_and_refuses_drafts(self):
+        for expected in (True, False):
+            for observed in (True, False):
+                for draft in (True, False):
+                    with self.subTest(
+                        expected=expected, observed=observed, draft=draft
+                    ):
+                        evidence = {
+                            "url": "https://github.com/example/project/releases/tag/v1.2.4",
+                            "draft": draft,
+                            "prerelease": observed,
+                            "notes_present": True,
+                            "assets": [],
+                        }
+                        with patch(
+                            "literate_ai.project_releases._github_release_evidence",
+                            return_value=evidence,
+                        ):
+                            args = (Path("."), "example/project", "v1.2.4")
+                            kwargs = {
+                                "version": "1.2.4",
+                                "require_wheel": False,
+                                "prerelease": expected,
+                            }
+                            if draft or expected != observed:
+                                with self.assertRaises(ProjectReleaseError) as caught:
+                                    project_releases._require_published_github_release(
+                                        *args, **kwargs
+                                    )
+                                self.assertEqual(
+                                    caught.exception.code,
+                                    "release.published_provider_unstable",
+                                )
+                            else:
+                                self.assertEqual(
+                                    project_releases._require_published_github_release(
+                                        *args, **kwargs
+                                    ),
+                                    evidence,
+                                )
+
     def test_authorization_strict_and_loose_break_glass(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

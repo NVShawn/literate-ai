@@ -23773,6 +23773,10 @@ GitHub CI failure without relaxing identity checks.
   - [ ] Fresh public-parent installed-CLI onboarding completes without hand-editing its oracle, with independent acceptance intact.
 ### [ ] RELEASE-INVARIANTS-001 — Require SemVer release branches and verified public tags
 
+Prerelease correctness refinement (**GitHub issue:** [#38](https://github.com/jordanhubbard/literate-ai/issues/38)): honor the selected version scheme when classifying numbered drafts. GitHub publication and verification must match the prepared version's prerelease status, refuse unpublished drafts and retain notes/artifact/tag/branch checks. Qualify stable, SemVer draft and PEP 440 regression paths; upstream landing remains separate.
+Local release regression suite passes (see focused Make test run), along with strict lint and formatting. Hosted review remains pending; release-invariant program completion is not claimed.
+
+
 - **Release blocker:** yes; applies equally to the framework and derived projects.
 - **Observed failure:** The public repository advertises no tags, so default
   installed-CLI parent selection fails with `repository_lineage.release_unavailable`.
