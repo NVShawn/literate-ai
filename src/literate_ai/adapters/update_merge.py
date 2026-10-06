@@ -231,6 +231,7 @@ def enrich_merge(item, base: bytes | None, ours: bytes | None, theirs: bytes | N
 def recover_bases(root, files, bases, reader=None, origin=None):
     """Recover legacy identity-only bases, accepting only exact digest matches."""
     from literate_ai.contracts import CatalogImportsFile, RepositoryParentReference
+    from literate_ai.repository_urls import canonical_repository_origin
 
     from .project_initialization import _STARTER_TEMPLATE_FILES, _TEMPLATE_FILES
     from .repository_lineage import GitRepositoryLineageError
@@ -247,7 +248,7 @@ def recover_bases(root, files, bases, reader=None, origin=None):
     groups = {}
     if origin is not None:
         reference = RepositoryParentReference(
-            origin.repository_url, origin.git_revision
+            canonical_repository_origin(origin.repository_url), origin.git_revision
         )
         resources = {**_TEMPLATE_FILES, **_STARTER_TEMPLATE_FILES}
         paths = set(missing)
@@ -271,7 +272,10 @@ def recover_bases(root, files, bases, reader=None, origin=None):
             paths = {path} if path in missing else set()
             if paths:
                 groups.setdefault(
-                    RepositoryParentReference(url, revision), set()
+                    RepositoryParentReference(
+                        canonical_repository_origin(url), revision
+                    ),
+                    set(),
                 ).update(paths)
     wanted = {identity.uri for identity in missing.values()}
     for reference, paths in groups.items():

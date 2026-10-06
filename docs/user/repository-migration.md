@@ -35,6 +35,11 @@ naming the repository that initialized it; that is provenance. `litai update` fr
 public-repository build recognizes the move and plans normally. A project initialized
 from any other repository is still refused with `project.update_origin_changed`.
 
+Historical update recovery accepts safe GitHub SSH/SCP transport aliases. It fetches
+from the recorded predecessor at the exact recorded commit and admits only bytes
+matching the baseline digest; it does not redirect historical recovery to the successor
+or rewrite initialization or catalog provenance.
+
 As with every upgrade, a changed installed framework no longer matches the project's
 Standard pin. Plan, review and apply the rebind:
 

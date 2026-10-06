@@ -19,8 +19,10 @@ from literate_ai.adapters.update_merge import (
     CHECKPOINT,
     UpdateBases,
     digest,
+    recover_bases,
 )
 from literate_ai.contracts import (
+    ContentIdentity,
     ProjectUpdateClassification,
 )
 from tests.support.fixtures_test_project_update_adapter import _origin
@@ -30,6 +32,54 @@ BASE = b"first\n" + b"context\n" * 10 + b"last\n"
 OURS = BASE.replace(b"first", b"local first")
 THEIRS = BASE.replace(b"last", b"upstream last")
 MERGED = OURS.replace(b"last", b"upstream last")
+
+
+class HistoricalTransportRecoveryTests(unittest.TestCase):
+    def test_scp_initialization_and_catalog_recover_only_exact_historical_bytes(self):
+        from types import SimpleNamespace
+
+        for scope in ("framework", "catalog"):
+            with self.subTest(scope=scope), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                bases = UpdateBases(root)
+                url = "git@github.com:NVIDIA-dev/literate-ai.git"
+                revision = "a" * 40
+                origin = replace(_origin("a", "1.0.0"), repository_url=url)
+                ref = f"git:{url}@{revision}"
+                if scope == "catalog":
+                    bases.sources[".gitignore"] = ref
+                item = SimpleNamespace(
+                    path=".gitignore",
+                    classification=ProjectUpdateClassification.CONFLICT,
+                    baseline_identity=ContentIdentity.parse_uri(digest(BASE)),
+                )
+                calls = []
+
+                def read(reference, paths, calls=calls):
+                    calls.append((reference, paths))
+                    return {"wrong": b"wrong bytes", "exact": BASE}
+
+                recover_bases(
+                    root,
+                    (item,),
+                    bases,
+                    read,
+                    origin=origin if scope == "framework" else None,
+                )
+                self.assertEqual(len(calls), 1)
+                reference, paths = calls[0]
+                self.assertEqual(
+                    reference.repository_url,
+                    "https://github.com/NVIDIA-dev/literate-ai",
+                )
+                self.assertEqual(reference.requested_revision, revision)
+                self.assertIn(".gitignore", paths)
+                self.assertEqual(bases.get(item.baseline_identity), BASE)
+                self.assertNotIn(digest(b"wrong bytes"), bases.blobs)
+                self.assertEqual(origin.repository_url, url)
+                if scope == "catalog":
+                    self.assertEqual(bases.sources[".gitignore"], ref)
+                self.assertFalse((root / CHECKPOINT).exists())
 
 
 class FrameworkMergeTests(unittest.TestCase):
