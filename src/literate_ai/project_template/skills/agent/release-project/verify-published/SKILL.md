@@ -21,8 +21,10 @@ writes nothing.
    only when policy allows idempotent reuse of the exact annotated tag.
 3. On `release.published_provider_missing`, Git publication may already
    have succeeded. Authenticate `gh` and retry publish; never retag.
-4. Require the provider release to be stable rather than draft or prerelease,
-   to carry non-empty release notes, and to expose every policy-required asset.
+4. Require a published provider release (`draft=false`) whose prerelease flag
+   matches the exact prepared version, with non-empty release notes and every
+   policy-required asset. Stable candidates must be stable; explicitly prepared
+   prerelease candidates must be published prereleases.
    For a major/minor document pair, require the release-bound receipt and its
    exported read-back hashes to match the exact prepared revision.
 5. Run a final `litai release contributions sweep` after remote verification.
