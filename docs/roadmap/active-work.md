@@ -26231,3 +26231,5 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
 - **Next action:** Push the integration commit, verify its required CI, and land
   through the authorized writer using merge semantics. Integration CI remains
   pending until evidence is observed.
+
+The release prerelease correction in upstream issue #38 also updates the publication-verification skill: published/draft state remains strict, while stable versus prerelease metadata must match the prepared version. This records the same portable contract exercised by the release tests; it does not waive assets or publication verification.
