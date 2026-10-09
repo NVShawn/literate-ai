@@ -15,23 +15,32 @@ from unittest import mock
 
 from literate_ai.adapters.builders import BuildError, discover_elixir_toolchain
 from literate_ai.adapters.builders._process import BoundedProcessResult
+from literate_ai.adapters.builders.elixir import ElixirToolchain
 from literate_ai.adapters.flavor_add import FlavorAddError, add_flavor_to_project
+from literate_ai.adapters.generation_preparation import (
+    FilesystemLockedGenerationApplicationAdapter,
+)
+from literate_ai.adapters.host_install import load_host_install_sbom
 from literate_ai.adapters.lifecycle.standard_runtime import (
     STANDARD_ELIXIR_RUNTIME_DRIVER,
     direct_service_process_argv,
 )
+from literate_ai.adapters.models import portable_source_entrypoint
 from literate_ai.adapters.multi_entrypoint_build import build_many
 from literate_ai.adapters.project_initialization import initialize_project
 from literate_ai.adapters.standard_project import (
     _STANDARD_BUILD_DRIVER,
     project_locked_standard_toolchain_closure,
 )
+from literate_ai.application.generation_preparation import GenerationPreparationRequest
+from literate_ai.bootstrap.host_install_requirements import HostInstallTarget
 from literate_ai.cli.generation import load_flavor_catalog
 from literate_ai.contracts import (
     ComponentCommandPhase,
     RepositoryParentSelection,
     parse_standard_command_profile,
 )
+from tests.conformance.support.sample_runner import _matrix_languages
 from tests.unit.test_schema_catalog import SchemaCatalog
 from tests.unit.test_standard_command_projection import (
     _locked_snapshot,
@@ -47,6 +56,84 @@ def _encoded(value):
 
 
 class ElixirCatalogTests(unittest.TestCase):
+    def test_native_observation_uses_beam_and_retains_script_and_module_hashes(self):
+        paths = ("elixir", "beam.smp", "Kernel.beam", "JSON.beam", "json.beam", "sh")
+        with (
+            tempfile.TemporaryDirectory() as temporary,
+            mock.patch.object(ElixirToolchain, "require_unchanged"),
+            mock.patch(
+                "literate_ai.adapters.standard_project.PortableHostDependencyObserver"
+            ) as observer,
+        ):
+            root = Path(temporary)
+            bindings = tuple(
+                (str(root / name), f"sha256:{index:064x}")
+                for index, name in enumerate(paths)
+            )
+            for path, _ in bindings:
+                Path(path).write_bytes(b"fixture")
+            tool = ElixirToolchain(
+                (str(root / "elixir"),), "1.18.0", (1, 18, 0), "27", bindings
+            )
+            observer.return_value.observe.return_value = _observation(())
+            _, snapshot, execution = _locked_snapshot(
+                root / "authority",
+                language="elixir",
+                platform="linux",
+                build_system="bazel",
+            )
+            closure = project_locked_standard_toolchain_closure(
+                snapshot,
+                execution,
+                host_platform="linux",
+                toolchain_discoverer=lambda name, *_: (
+                    tool if name == "elixir" else _tool(name)
+                ),
+            )
+            commands = observer.call_args.kwargs["toolchain_commands"]
+            self.assertIn((str(root / "beam.smp"),), commands)
+            self.assertIn((str(root / "sh"),), commands)
+            self.assertNotIn(tool.command, commands)
+            self.assertIn(
+                f"--action_env=LITAI_LANGUAGE_TOOL={tool.command[0]}",
+                closure.bazel_targets[0].build_options,
+            )
+            files = [
+                item
+                for item in closure.dependency_observation.components
+                if item["bom-ref"].startswith("urn:literate-ai:beam-toolchain-file:")
+            ]
+            self.assertEqual({item["name"] for item in files}, set(paths))
+            self.assertTrue(
+                all(len(item["hashes"][0]["content"]) == 64 for item in files)
+            )
+
+    def test_qualification_selection_and_host_prerequisites(self):
+        self.assertEqual(_matrix_languages(("+lang-elixir",)), ("elixir",))
+        self.assertIn("elixir", _matrix_languages(("lang.*",)))
+        self.assertEqual(portable_source_entrypoint("elixir"), "source/main.exs")
+        for target in (
+            HostInstallTarget("macos", "arm64"),
+            HostInstallTarget("macos", "x86_64"),
+            HostInstallTarget("windows", "x86_64"),
+            HostInstallTarget("linux-debian", "arm64"),
+            HostInstallTarget("linux-debian", "x86_64"),
+        ):
+            with self.subTest(target=target):
+                _, sbom = load_host_install_sbom(
+                    REPO / "flavors", target, flavor_names=("lang-elixir",)
+                )
+                self.assertEqual(
+                    sbom.base.capability("elixir").version_constraint, ">=1.18"
+                )
+                self.assertEqual(
+                    sbom.base.capability("erlang").version_constraint, ">=27"
+                )
+                self.assertEqual(
+                    {item.capability for item in sbom.packages} & {"elixir", "erlang"},
+                    {"elixir", "erlang"},
+                )
+
     def test_catalog_profile_schema_and_template_parity(self):
         (flavor,) = load_flavor_catalog((REPO / "flavors/lang-elixir",))
         self.assertEqual(flavor.coordinate_uri, "flavor://literate-ai/lang-elixir")
@@ -74,6 +161,59 @@ class ElixirCatalogTests(unittest.TestCase):
                 self.assertEqual(
                     (source / path).read_bytes(), (template / path).read_bytes()
                 )
+
+    def test_canonical_mix_catalog_installs_and_locks_generation_skill(self):
+        (flavor,) = load_flavor_catalog((REPO / "flavors/build-mix",))
+        self.assertEqual(flavor.coordinate_uri, "flavor://literate-ai/build-mix")
+        self.assertEqual(flavor.skills[0].skill_id, "mix-build-system")
+        profile = json.loads(
+            (REPO / "flavors/build-mix/standard-command-profile.json").read_text()
+        )
+        self.assertEqual(parse_standard_command_profile(profile).target, "mix")
+        SchemaCatalog().validate(profile["schema"], profile)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "initialized"
+            initialize_project(
+                target,
+                parent_selection=RepositoryParentSelection.root(),
+                source_intelligence_provider="none",
+                empty=True,
+                flavor_selectors=("+elixir", "+linux", "+mix"),
+            )
+            for relative in (
+                "flavors/build-mix",
+                "skills/specification-to-source/mix-build-system",
+            ):
+                source = REPO / relative
+                template = REPO / "src/literate_ai/project_template" / relative
+                for path in source.rglob("*"):
+                    if path.is_file():
+                        name = path.relative_to(source)
+                        self.assertEqual(
+                            path.read_bytes(), (template / name).read_bytes()
+                        )
+                        self.assertEqual(
+                            path.read_bytes(), (target / relative / name).read_bytes()
+                        )
+            component, snapshot, _ = _locked_snapshot(
+                root / "locked",
+                language="elixir",
+                build_system="mix",
+                generation_ready=True,
+            )
+            prepared = FilesystemLockedGenerationApplicationAdapter().prepare(
+                GenerationPreparationRequest(
+                    component_root=component,
+                    target_name=snapshot.authority.lock.target_name,
+                    flavor_selectors=snapshot.authority.requested_flavor_selectors,
+                    flavor_roots=(root / "locked/flavors",),
+                )
+            )
+            self.assertIn(
+                "mix-build-system",
+                {skill.skill_id for skill in prepared.recipe.resolved_skills},
+            )
 
     def test_init_and_add_install_skill_and_preserve_language_conflicts(self):
         with tempfile.TemporaryDirectory() as temporary:

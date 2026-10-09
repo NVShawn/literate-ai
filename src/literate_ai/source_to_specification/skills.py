@@ -50,6 +50,7 @@ _BUILTIN_ORDER = (
 _BUILTIN_LANGUAGE_SKILLS = (
     ("python", frozenset({"python"}), "language-python"),
     ("cpp", frozenset({"cpp"}), "language-cpp"),
+    ("elixir", frozenset({"elixir"}), "language-elixir"),
     ("rust", frozenset({"rust"}), "language-rust"),
     (
         "javascript",

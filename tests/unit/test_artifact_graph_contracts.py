@@ -28,6 +28,7 @@ from literate_ai.contracts.executable_components.artifacts import (
     GeneratedTextFile,
     GeneratedTextTree,
     SourceTreeEntryOrigin,
+    artifact_driver_composition_identity,
 )
 from literate_ai.contracts.executable_components.assets import AuthoredBinaryAsset
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
@@ -365,6 +366,70 @@ class ArtifactGraphTests(unittest.TestCase):
                     (replace(action, **{field: value}),),
                     (export,),
                 )
+
+    def test_mixed_drivers_require_explicit_exact_composition(self) -> None:
+        library = self.export("source-library")
+        root = self.export("mix-root", (library,))
+        manifests = (
+            self.manifest(library),
+            replace(
+                self.manifest(root, (library,)),
+                build_system_driver_identity=identity("native-mix-driver"),
+            ),
+        )
+        drivers = tuple(
+            sorted(
+                {item.build_system_driver_identity for item in manifests},
+                key=lambda item: item.uri,
+            )
+        )
+        with self.assertRaisesRegex(ContractValidationError, "selected driver"):
+            create_artifact_build_graph(
+                build_system_driver_identity=self.driver,
+                manifests=manifests,
+                link_roots=(root.identity,),
+            )
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=artifact_driver_composition_identity(drivers),
+            driver_composition=drivers,
+            manifests=manifests,
+            link_roots=(root.identity,),
+        )
+        self.assertEqual(ArtifactBuildGraph.from_dict(graph.to_dict()), graph)
+        self.assertEqual(
+            {item.identity for item in graph.manifests},
+            {item.identity for item in manifests},
+        )
+        self.assertEqual(len(graph.link_plans[0].ordered_artifact_identities), 2)
+        for composition in (
+            drivers[:1],
+            tuple(reversed(drivers)),
+            tuple(
+                sorted((*drivers, identity("unplanned-driver")), key=lambda i: i.uri)
+            ),
+        ):
+            with (
+                self.subTest(composition=composition),
+                self.assertRaises(ContractValidationError),
+            ):
+                replace(graph, driver_composition=composition)
+        with self.assertRaises(ContractValidationError):
+            replace(graph, build_system_driver_identity=self.driver)
+        with self.assertRaises(ContractValidationError):
+            replace(graph, driver_composition=())
+
+    def test_single_driver_graph_retains_legacy_wire_identity(self) -> None:
+        root = self.export("legacy-root")
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=self.driver,
+            manifests=(self.manifest(root),),
+            link_roots=(root.identity,),
+        )
+        wire = graph.to_dict()
+        self.assertNotIn("driver_composition", wire)
+        self.assertEqual(graph.identity, canonical_identity(wire))
+        with self.assertRaises(ContractValidationError):
+            ArtifactBuildGraph.from_dict({**wire, "driver_composition": []})
 
     def test_missing_dependency_fails_and_driver_is_not_hardcoded(self) -> None:
         absent = self.export("absent")

@@ -242,7 +242,7 @@ samples: python-version $(RUNTIME_PREREQUISITE) ## Run the live sample matrix di
 samples-packages: python-version $(RUNTIME_PREREQUISITE) ## Build selected samples end to end, then construct and verify their pip/Conan packages.
 	BUILD_DIR="$(BUILD_DIR)" OBJ_DIR="$(OBJ_DIR)" $(RUN_PYTHON_COMMAND) scripts/run_samples.py --allow-host-execution --native-package $(PACKAGE_SAMPLE_PATTERNS) $(SAMPLE_FLAVORS)
 
-roundtrip-host: python-version $(RUNTIME_PREREQUISITE) ## Forward/inverse all four languages under an exact installed wheel; set ROUNDTRIP_LANGUAGES to select a subset.
+roundtrip-host: python-version $(RUNTIME_PREREQUISITE) ## Forward/inverse qualified languages under an exact installed wheel; set ROUNDTRIP_LANGUAGES to select a subset.
 	BUILD_DIR="$(BUILD_DIR)" OBJ_DIR="$(OBJ_DIR)" $(PYTHON_COMMAND) scripts/installed_roundtrip.py --repository "$(CURDIR)" $(if $(ROUNDTRIP_LANGUAGES),--languages "$(ROUNDTRIP_LANGUAGES)",)
 
 samples-platform-regression: python-version $(RUNTIME_PREREQUISITE) ## Fan the canonical sample concurrently to configured macOS, Linux, and Windows targets; override SAMPLE with a glob.

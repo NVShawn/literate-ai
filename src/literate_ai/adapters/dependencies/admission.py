@@ -11,7 +11,10 @@ import tomllib
 from collections.abc import Mapping
 from pathlib import PurePosixPath
 
+from literate_ai.contracts.mix_projects import MixProjectIntent
+
 from .javascript_imports import javascript_package_imports
+from .mix_lock import MixLock
 from .types import DependencyObservationError, _normalized_package_name
 
 _PYTHON_REQUIREMENT = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
@@ -126,6 +129,35 @@ def reconcile_generated_dependencies(
             root_name = _cargo_root_name(content)
             if root_name is not None:
                 project_package_names.add(root_name)
+        elif name == "mix-project.json":
+            project = _mix_project_intent(content)
+            declared.update(
+                _normalized_package_name(item.name) for item in project.dependencies
+            )
+            project_package_names.add(_normalized_package_name(project.app))
+        elif name == "mix.exs":
+            raise DependencyObservationError(
+                "dependencies.mix-authority-unsupported",
+                "generated Mix projects must use declarative mix-project.json; "
+                "native mix.exs belongs only in the authorized build projection",
+            )
+        elif name == "mix.lock":
+            intent_path = str(PurePosixPath(path).parent / "mix-project.json")
+            intent = text_files.get(intent_path)
+            if intent is None:
+                raise DependencyObservationError(
+                    "dependencies.mix-manifest-missing",
+                    "Mix lock requires corresponding declarative project intent",
+                )
+            try:
+                lock = MixLock.from_bytes(
+                    content.encode("utf-8"), project=_mix_project_intent(intent)
+                )
+            except UnicodeError as exc:
+                raise DependencyObservationError(
+                    "dependencies.mix-lock-invalid", "Mix lock must be UTF-8"
+                ) from exc
+            locked.update(_normalized_package_name(item.name) for item in lock.packages)
         elif name in {"Cargo.lock", "poetry.lock", "uv.lock"}:
             locked.update(_toml_lock_dependencies(content, name=name))
         elif name == "vcpkg.json":
@@ -186,6 +218,16 @@ def reconcile_generated_dependencies(
             "generated external imports are absent from manifests and the source BOM: "
             + ", ".join(missing_imported),
         )
+
+
+def _mix_project_intent(content: str) -> MixProjectIntent:
+    try:
+        return MixProjectIntent.from_bytes(content.encode("utf-8"))
+    except (ValueError, UnicodeError) as exc:
+        raise DependencyObservationError(
+            "dependencies.mix-manifest-invalid",
+            "Mix project requires bounded declarative dependency intent",
+        ) from exc
 
 
 def _bom_package_names(document: object) -> set[str]:

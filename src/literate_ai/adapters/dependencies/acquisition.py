@@ -19,6 +19,8 @@ from .admission import (
     _pyproject_dependencies,
     _python_requirements,
 )
+from .mix_lock import MixLock
+from .mix_source import MixSourceAuthority, prepare_mix_source_authority
 from .python_lock import PythonWheelLock
 from .python_source import PythonSourceAuthority, prepare_python_source_authority
 from .types import DependencyObservationError, _normalized_package_name
@@ -68,6 +70,29 @@ def _python_wheel_lock_projection(lock: PythonWheelLock) -> _LockProjection:
     )
 
 
+def _mix_lock_projection(lock: MixLock) -> _LockProjection:
+    """Project a lifecycle-verified native lock; never prove acquisition here."""
+    prefix = "mix-lock:"
+    return _LockProjection(
+        (
+            _LockedPackage(prefix + "@root", "hex", "", "", "", "", True),
+            *(
+                _LockedPackage(
+                    prefix + package.name,
+                    "hex",
+                    package.name,
+                    package.version,
+                    "SHA-256",
+                    package.outer_sha256,
+                    False,
+                )
+                for package in lock.packages
+            ),
+        ),
+        tuple((prefix + parent, prefix + child) for parent, child in lock.edges),
+    )
+
+
 def _matching_locked_package(
     source: Mapping[str, object], projection: _LockProjection
 ) -> _LockedPackage | None:
@@ -109,7 +134,7 @@ def _source_package_identity(
         return None
     body = purl[4:].split("?", 1)[0].split("#", 1)[0]
     ecosystem, separator, coordinate = body.partition("/")
-    if not separator or ecosystem not in {"cargo", "generic", "npm", "pypi"}:
+    if not separator or ecosystem not in {"cargo", "generic", "hex", "npm", "pypi"}:
         return None
     version_separator = coordinate.rfind("@")
     if version_separator > coordinate.rfind("/"):
@@ -160,6 +185,7 @@ def _generated_lock_projection(
     *,
     allow_missing_cargo_lock: bool = False,
     python_source_authority: PythonSourceAuthority | None = None,
+    mix_source_authority: MixSourceAuthority | None = None,
 ) -> _LockProjection:
     text_files = {
         path: content
@@ -214,8 +240,36 @@ def _generated_lock_projection(
             "dependencies.python-source-invalid",
             "Selected Python lifecycle authority is absent from source",
         )
+    mix_paths = [
+        path
+        for path in files
+        if isinstance(path, str)
+        and PurePosixPath(path).name.casefold()
+        in {"mix-project.json", "mix.lock", "mix.exs", ".iex.exs"}
+    ]
+    if mix_source_authority is not None:
+        if (
+            not isinstance(mix_source_authority, MixSourceAuthority)
+            or prepare_mix_source_authority(files) != mix_source_authority
+        ):
+            raise DependencyObservationError(
+                "dependencies.mix-source-invalid",
+                "Mix source differs from its selected lifecycle authority",
+            )
+    elif mix_paths:
+        raise DependencyObservationError(
+            "dependencies.mix-acquisition-evidence-missing",
+            "Mix dependency authority requires its lifecycle-owned lock, "
+            "acquired archive and retained runtime payload evidence",
+        )
     for path, content in text_files.items():
         name = PurePosixPath(path).name
+        if name in {"mix.lock", "mix.exs"}:
+            raise DependencyObservationError(
+                "dependencies.mix-acquisition-evidence-missing",
+                "Mix dependency authority requires its lifecycle-owned lock, "
+                "acquired archive and retained runtime payload evidence",
+            )
         if name in {"pnpm-lock.yaml", "yarn.lock", "poetry.lock", "uv.lock"}:
             raise DependencyObservationError(
                 "dependencies.lock-authority-unsupported",

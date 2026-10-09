@@ -663,7 +663,11 @@ class NeutralSampleLadderTests(unittest.TestCase):
             ),
         )
 
-        self.assertEqual([variant.variant_id for variant in variants], ["cpp"])
+        self.assertEqual(
+            [variant.variant_id for variant in variants], ["cpp", "elixir"]
+        )
+        elixir = _execution_variants(definition, execution, ("-lang.*", "+lang-elixir"))
+        self.assertEqual([variant.variant_id for variant in elixir], ["elixir"])
 
     def test_subtractive_selectors_cannot_remove_every_pinned_language(self):
         _metadata, definition, loaded, _closures = _load_sample(
@@ -4697,6 +4701,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
                         {flavor.value for flavor in recipe.flavors},
                     )
                 language_skills = {
+                    "elixir": "elixir-portable-application",
                     "python": "python-portable-application",
                     "cpp": "cpp17-portable-json-application",
                     "rust": "rust-portable-json-application",
@@ -4791,6 +4796,8 @@ class NeutralSampleLadderTests(unittest.TestCase):
                         else ({"swift"} if "swift" in item["languages"] else set())
                     )
                 )
+                if "elixir" in item["languages"]:
+                    expected_toolchains = {*expected_toolchains, "elixir"}
                 if "nvidia-cuda" in {flavor.value for flavor in recipe.flavors}:
                     expected_toolchains = {*expected_toolchains, "nvcc"}
                 self.assertEqual(
@@ -5403,7 +5410,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
 
     def test_language_toolchains_are_content_pinned_flavors(self):
         definitions = {}
-        for language in ("python", "cpp", "rust", "javascript"):
+        for language in ("python", "cpp", "rust", "javascript", "elixir"):
             with self.subTest(language=language):
                 root = REPO_ROOT / "flavors" / f"lang-{language}"
                 definition = _flavor_definition(root)

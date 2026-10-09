@@ -45,6 +45,7 @@ from literate_ai.adapters.lifecycle.standard_local import (
     _child_process_environment,
     _directory_export_bytes,
     _host_process_environment,
+    _local_tree_document,
     _local_tree_identity,
     _require_generated_export,
 )
@@ -2262,13 +2263,22 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                 (directory / "nested").mkdir(parents=True)
                 (directory / "app.js").write_bytes(b"console.log('known')\n")
                 (directory / "nested" / "data.txt").write_bytes(b"payload\n")
+                (directory / "nested.bin").write_bytes(b"prefix\n")
+                (directory / "Z.beam").write_bytes(b"mixed case\n")
+                self.assertEqual(
+                    [item["path"] for item in _local_tree_document(directory)["files"]],
+                    ["Z.beam", "app.js", "nested.bin", "nested/data.txt"],
+                )
 
             first_bytes = _directory_export_bytes(first)
             second_bytes = _directory_export_bytes(second)
 
             self.assertEqual(first_bytes, second_bytes)
             with zipfile.ZipFile(BytesIO(first_bytes)) as archive:
-                self.assertEqual(archive.namelist(), ["app.js", "nested/data.txt"])
+                self.assertEqual(
+                    archive.namelist(),
+                    ["Z.beam", "app.js", "nested.bin", "nested/data.txt"],
+                )
                 self.assertEqual(archive.read("nested/data.txt"), b"payload\n")
 
             with self.assertRaisesRegex(

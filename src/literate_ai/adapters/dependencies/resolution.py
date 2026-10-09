@@ -40,6 +40,7 @@ from .acquisition import (
     _LockedPackage,
     _LockProjection,
     _matching_locked_package,
+    _mix_lock_projection,
     _require_lock_graph_covered,
     _source_package_identity,
 )
@@ -50,6 +51,12 @@ from .cyclonedx import (
     validate_cyclonedx_bom,
     validate_resolved_cyclonedx_bom,
 )
+from .mix_resolution import (
+    MixDependencyEvidence,
+    project_mix_evidence,
+    validate_mix_source_bom,
+)
+from .mix_source import MixSourceAuthority
 from .observation import (
     _MAX_OBSERVED_FILES,
     _MAX_TOOL_OUTPUT,
@@ -143,6 +150,8 @@ class CycloneDxLifecycleResolver:
         python_source_authority: PythonSourceAuthority | None = None,
         python_dependency_observer: Callable[[], PythonDependencyEvidence]
         | None = None,
+        mix_source_authority: MixSourceAuthority | None = None,
+        mix_dependency_observer: Callable[[], MixDependencyEvidence] | None = None,
     ) -> None:
         self.managed_graph = managed_graph
         self.observer = observer
@@ -152,6 +161,13 @@ class CycloneDxLifecycleResolver:
         self.repository_resolutions = tuple(repository_resolutions)
         self.allow_missing_cargo_lock = allow_missing_cargo_lock
         self.runtime_python_imports = runtime_python_imports
+        self.mix_source_authority = mix_source_authority
+        self.mix_dependency_observer = mix_dependency_observer
+        if mix_dependency_observer is not None and mix_source_authority is None:
+            raise DependencyObservationError(
+                "dependencies.mix-source-invalid",
+                "Mix payload observation requires explicit source authority",
+            )
         self.python_source_authority = python_source_authority
         self.python_dependency_observer = python_dependency_observer
         if python_dependency_observer is not None and python_source_authority is None:
@@ -196,7 +212,14 @@ class CycloneDxLifecycleResolver:
             files,
             allow_missing_cargo_lock=self.allow_missing_cargo_lock,
             python_source_authority=self.python_source_authority,
+            mix_source_authority=self.mix_source_authority,
         )
+        if self.mix_source_authority is not None:
+            validate_mix_source_bom(
+                source_content,
+                root_ref=self.managed_graph.root_ref,
+                source=self.mix_source_authority,
+            )
         if any(
             package.ecosystem in {"npm", "pypi"} and not package.root
             for package in lock_projection.packages
@@ -306,6 +329,40 @@ class CycloneDxLifecycleResolver:
                     )
                 ),
             )
+        mix_observed = HostDependencyObservation((), ())
+        mix_evidence = None
+        lock_projection = _generated_lock_projection(
+            resolution_files,
+            python_source_authority=self.python_source_authority,
+            mix_source_authority=self.mix_source_authority,
+        )
+        if self.mix_source_authority is not None:
+            if self.mix_dependency_observer is None:
+                raise DependencyObservationError(
+                    "dependencies.mix-acquisition-evidence-missing",
+                    "Mix resolution requires fresh lifecycle-owned "
+                    "payload verification",
+                )
+            mix_evidence = self.mix_dependency_observer()
+            mix_observed = project_mix_evidence(
+                source_content,
+                root_ref=self.managed_graph.root_ref,
+                source=self.mix_source_authority,
+                evidence=mix_evidence,
+            )
+            if any(
+                (_source_package_identity(component) or (None,))[0] == "hex"
+                for component in (*observed.components, *self.additional_components)
+            ):
+                raise DependencyObservationError(
+                    "dependencies.mix-resolution-invalid",
+                    "Hex packages must come only from the lifecycle payload verifier",
+                )
+            mix_projection = _mix_lock_projection(mix_evidence.lock)
+            lock_projection = _LockProjection(
+                (*lock_projection.packages, *mix_projection.packages),
+                (*lock_projection.edges, *mix_projection.edges),
+            )
         bazel_intent = _bazel_module_intent(files)
         bazel_resolution = (
             _bzlmod_resolution_observation(
@@ -325,10 +382,9 @@ class CycloneDxLifecycleResolver:
                 *bazel_resolution.components,
                 *observed.components,
                 *python_observed.components,
+                *mix_observed.components,
             ),
-            lock_projection=_generated_lock_projection(
-                resolution_files, python_source_authority=self.python_source_authority
-            ),
+            lock_projection=lock_projection,
             authoritative_bzlmod_versions=dict(bazel_resolution.authoritative_versions),
         )
         edges = (
@@ -337,6 +393,7 @@ class CycloneDxLifecycleResolver:
             *bazel_resolution.edges,
             *observed.edges,
             *python_observed.edges,
+            *mix_observed.edges,
         )
         resolved_content, resolved_binding = build_cyclonedx_bom(
             lifecycle=CycloneDxLifecycle.RESOLVED,
@@ -393,6 +450,11 @@ class CycloneDxLifecycleResolver:
                 python_evidence.identity.uri
             )
             result["python_dependency_evidence_identity"] = python_evidence.identity.uri
+        if mix_evidence is not None:
+            identity_material["mix_dependency_evidence_identity"] = (
+                mix_evidence.identity.uri
+            )
+            result["mix_dependency_evidence_identity"] = mix_evidence.identity.uri
         result["resolution_identity"] = canonical_identity(identity_material).uri
         return result
 
@@ -2026,7 +2088,7 @@ def _require_version_in_range(raw_range: object, version: str) -> None:
     scheme = raw_range.partition("/")[0].removeprefix("vers:")
     if scheme == "cargo" and "|" not in raw_range and "," in raw_range:
         raw_range = raw_range.replace(",", "|")
-    if scheme not in {"cargo", "generic", "npm", "pypi"}:
+    if scheme not in {"cargo", "generic", "hex", "npm", "pypi"}:
         raise DependencyObservationError(
             "dependencies.source-range-unsupported",
             f"source dependency uses unsupported VERS scheme {scheme!r}",

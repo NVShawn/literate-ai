@@ -220,6 +220,28 @@ class RetainedNativeFilesTests(unittest.TestCase):
         ):
             native_file_digest(self.file, 1024)
 
+    def test_linux_recheck_does_not_depend_on_same_size_metadata_change(self):
+        original = os.read
+        changed = False
+
+        def mutate(descriptor, count):
+            nonlocal changed
+            chunk = original(descriptor, count)
+            if chunk and not changed:
+                changed = True
+                self.file.write_bytes(b"X" * len(chunk))
+            return chunk
+
+        module = "literate_ai.adapters.retained_native_file_custody"
+        with (
+            patch("os.read", side_effect=mutate),
+            patch(f"{module}.sys.platform", "linux"),
+            patch(f"{module}._signature", return_value=("same",)),
+            patch(f"{module}._stat_binding_identity", return_value=("same",)),
+            self.assertRaisesRegex(ValueError, "custody-changed"),
+        ):
+            native_file_digest(self.file, 1024)
+
     def test_windows_recheck_does_not_depend_on_same_size_metadata_change(self):
         original = os.read
         changed = False

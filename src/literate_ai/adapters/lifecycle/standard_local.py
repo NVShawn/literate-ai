@@ -54,6 +54,7 @@ from literate_ai.adapters.dependencies import (
     HostDependencyObservation,
     validate_cyclonedx_bom,
 )
+from literate_ai.adapters.dependencies.mix_resolution import MixDependencyObserver
 from literate_ai.adapters.dependencies.python_install import (
     PIP_INSTALLER,
     install_python_wheels,
@@ -397,7 +398,9 @@ def _local_tree_document(
 
     root = root.resolve(strict=True)
     entries: list[dict[str, str]] = []
-    for path in sorted(root.rglob("*")):
+    for path in sorted(
+        root.rglob("*"), key=lambda path: path.relative_to(root).as_posix()
+    ):
         if path.is_symlink():
             raise LocalStandardLifecycleError("generated trees cannot contain links")
         if path.is_file():
@@ -1299,6 +1302,12 @@ class LocalStandardLifecyclePorts:
             self._record_evidence(authorization.to_dict())
         return authorization
 
+    def _has_dependency_resolution_target(self, revision: str) -> bool:
+        return revision in self.npm_targets or revision in self.python_targets
+
+    def _has_network_dependency_target(self, revision: str) -> bool:
+        return revision in self.npm_targets
+
     def finalize(
         self,
         intent: StandardComponentBuildIntent,
@@ -1383,10 +1392,7 @@ class LocalStandardLifecyclePorts:
         actions = (action,)
         ordered_actions = ((BuildSubActionKind.COMPILE, action.action_id),)
         requested_privileges = (BuildPrivilege.EXECUTE_BUILD_TOOLS,)
-        if (
-            intent.component_revision.uri in self.npm_targets
-            or intent.component_revision.uri in self.python_targets
-        ):
+        if self._has_dependency_resolution_target(intent.component_revision.uri):
             resolve_action = BuildActionRequest(
                 **{
                     name: getattr(action, name)
@@ -1415,7 +1421,7 @@ class LocalStandardLifecyclePorts:
                 (BuildSubActionKind.RESOLVE_DEPENDENCIES, resolve_action.action_id),
                 (BuildSubActionKind.COMPILE, action.action_id),
             )
-            if intent.component_revision.uri in self.npm_targets:
+            if self._has_network_dependency_target(intent.component_revision.uri):
                 requested_privileges = (
                     BuildPrivilege.EXECUTE_BUILD_TOOLS,
                     BuildPrivilege.NETWORK_ACCESS,
@@ -2020,7 +2026,10 @@ class LocalStandardLifecyclePorts:
             if not path.is_file():
                 continue
             try:
-                content = path.read_text(encoding="utf-8")
+                # Dependency source inventories bind the original UTF-8 bytes.
+                # Universal-newline translation would change CRLF identities
+                # before comparison with the retained native artifact.
+                content = path.read_bytes().decode("utf-8")
             except UnicodeError:
                 continue
             files[path.relative_to(root).as_posix()] = content
@@ -2035,6 +2044,7 @@ class LocalStandardLifecyclePorts:
         artifact_digest: str | None = None,
         additional_build_evidence: Mapping[str, object] | None = None,
         python_observer: StandardPythonDependencyObserver | None = None,
+        mix_observer: MixDependencyObserver | None = None,
     ) -> CycloneDxBomBinding:
         source = self.source_trees.evidence(plan.request.source_tree_identity)
         from literate_ai.adapters.native_sdk_dependencies import (
@@ -2139,6 +2149,10 @@ class LocalStandardLifecyclePorts:
                 None if python_observer is None else python_observer.source
             ),
             python_dependency_observer=python_observer,
+            mix_source_authority=(
+                None if mix_observer is None else mix_observer.source
+            ),
+            mix_dependency_observer=mix_observer,
             allow_missing_cargo_lock=(
                 additional_build_evidence is not None
                 and additional_build_evidence.get("cargo_lifecycle_profile") is True
@@ -4690,11 +4704,22 @@ class LocalStandardLifecyclePorts:
             realize_manifest(plan.manifest, by_revision[uri].exports)
             for uri, plan in sorted(planned.items())
         )
-        drivers = {item.build_system_driver_identity for item in manifests}
-        if len(drivers) != 1:
-            raise LocalStandardLifecycleError(
-                "one project artifact graph requires one exact build-system driver"
+        drivers = tuple(
+            sorted(
+                {item.build_system_driver_identity for item in manifests},
+                key=lambda item: item.uri,
             )
+        )
+        from literate_ai.contracts.executable_components.artifacts import (
+            artifact_driver_composition_identity,
+        )
+
+        composition = drivers if len(drivers) > 1 else ()
+        graph_driver = (
+            artifact_driver_composition_identity(composition)
+            if composition
+            else drivers[0]
+        )
         root_result = by_revision[component_lock.root_revision.uri]
         if not root_result.exports:
             raise LocalStandardLifecycleError("root Component has no built export")
@@ -4706,7 +4731,8 @@ class LocalStandardLifecyclePorts:
         )
         if len(root_result.exports) > 1:
             graph = create_artifact_build_graph(
-                build_system_driver_identity=next(iter(drivers)),
+                build_system_driver_identity=graph_driver,
+                driver_composition=composition,
                 manifests=manifests,
                 link_roots=(),
                 link_root_groups=(
@@ -4722,7 +4748,8 @@ class LocalStandardLifecyclePorts:
             )
         else:
             graph = create_artifact_build_graph(
-                build_system_driver_identity=next(iter(drivers)),
+                build_system_driver_identity=graph_driver,
+                driver_composition=composition,
                 manifests=manifests,
                 link_roots=(primary_root.identity,),
             )
@@ -7358,9 +7385,13 @@ class LocalStandardLifecyclePorts:
             ]
         ).decode("utf-8")
         surface_document = canonical_json_bytes(surface.to_dict()).decode("utf-8")
-        suffix = {"python": ".py", "javascript": ".js", "rust": ".rs", "cpp": ".cpp"}[
-            oracle.language
-        ]
+        suffix = {
+            "python": ".py",
+            "javascript": ".js",
+            "rust": ".rs",
+            "cpp": ".cpp",
+            "elixir": ".exs",
+        }[oracle.language]
         acceptance_toolchain = contract.library_acceptance_toolchain_identity
         assert acceptance_toolchain is not None
         binding = self.tool_bindings[acceptance_toolchain.uri]

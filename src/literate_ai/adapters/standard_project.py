@@ -24,7 +24,9 @@ from literate_ai.adapters.builders import (
     discover_cpp_toolchain,
     discover_elixir_toolchain,
     discover_go_toolchain,
+    discover_hex_toolchain,
     discover_make_toolchain,
+    discover_mix_toolchain,
     discover_node_toolchain,
     discover_npm_toolchain,
     discover_python_toolchain,
@@ -32,6 +34,8 @@ from literate_ai.adapters.builders import (
     discover_zig_toolchain,
 )
 from literate_ai.adapters.builders.cpp import bazel_sdk_build_options
+from literate_ai.adapters.builders.elixir import ElixirToolchain
+from literate_ai.adapters.builders.hex import HexToolchain
 from literate_ai.adapters.cache import (
     CachedCodingCliSourceGenerator,
     FilesystemStandardAcceptedSourcePublisher,
@@ -68,6 +72,10 @@ from literate_ai.adapters.lifecycle.standard_local import (
     LocalSourceTreeRegistry,
     LocalStandardLifecyclePorts,
     RegisteredSourceGenerationRunner,
+)
+from literate_ai.adapters.lifecycle.standard_mix import (
+    StandardMixLifecyclePorts,
+    StandardMixTarget,
 )
 from literate_ai.adapters.lifecycle.standard_npm import StandardNpmTarget
 from literate_ai.adapters.lifecycle.standard_python import StandardPythonTarget
@@ -157,6 +165,7 @@ from literate_ai.contracts import (
     StandardLanguageRuntimeStrategy,
     StandardLifecycleStageEvidence,
     StandardMakeCommandProfile,
+    StandardMixCommandProfile,
     StandardNpmCommandProfile,
     StandardPlatformCommandProfile,
     StandardPythonWheelCommandProfile,
@@ -317,6 +326,7 @@ class ProjectedStandardToolchainClosure:
     provider_environment: Mapping[str, tuple[str, str]]
     dependency_observation: HostDependencyObservation
     python_targets: tuple[StandardPythonTarget, ...] = ()
+    mix_targets: tuple[StandardMixTarget, ...] = ()
 
     def require_unchanged(self) -> None:
         for binding in self.tool_bindings:
@@ -333,6 +343,7 @@ class ProjectedStandardToolchainClosure:
                 *self.cargo_targets,
                 *self.npm_targets,
                 *self.python_targets,
+                *self.mix_targets,
             )
         }
         authority_revisions = {
@@ -499,7 +510,8 @@ _STANDARD_BUILD_DRIVER = (
     "if os.name!='nt' or name.casefold() not in overridden);"
     "environment.update(compiler_environment);"
     "assert source.is_file() or strategy in "
-    "('python-tree','javascript-tree','typescript-tree');"
+    "('python-tree','javascript-tree','typescript-tree') or "
+    "(strategy=='elixir-tree' and relative=='.' and source.is_dir());"
     "pathlib.Path(obj).mkdir(parents=True,exist_ok=True);"
     "tree=strategy in "
     "('python-tree','javascript-tree','typescript-tree','elixir-tree');"
@@ -573,6 +585,8 @@ if language == "python":
     command = [*tool, str(export / "source" / "main.py"), "--litai-test"]
 elif language == "javascript":
     command = [*tool, str(export / "source" / "main.js"), "--litai-test"]
+elif language == "elixir":
+    command = [*tool, str(export / "source" / "main.exs"), "--litai-test"]
 elif language == "rust":
     temporary = pathlib.Path(tempfile.mkdtemp(prefix="litai-library-test-"))
     command = [*tool, "run", "--quiet", "--locked", "--manifest-path",
@@ -632,7 +646,98 @@ surface = json.loads(surface_json)
 export = pathlib.Path(export_value).resolve(strict=True)
 source = (export / "source").resolve(strict=True)
 observed = []
-if language == "python":
+if language == "elixir-mix":
+    ebin = (export / "runtime" / surface["package"] / "ebin").resolve(strict=True)
+    files = sorted(ebin.glob("*.beam"))
+    if not files or export not in ebin.parents:
+        raise RuntimeError("Mix library lacks its exact retained application")
+    script = '''[surface_json, files_json] = System.argv()
+surface = JSON.decode!(surface_json)
+normalize = fn path ->
+  expanded = Path.expand(path)
+  if match?({:win32, _}, :os.type()), do: String.downcase(expanded), else: expanded
+end
+files = JSON.decode!(files_json)
+modules = Enum.map(files, fn path ->
+  {:ok, {module, _}} = :beam_lib.chunks(String.to_charlist(path), [])
+  Code.ensure_loaded!(module)
+  unless normalize.(List.to_string(:code.which(module))) == normalize.(path),
+    do: raise("Mix library module escaped retained application")
+  module
+end)
+unless length(Enum.uniq(modules)) == length(modules),
+  do: raise("duplicate Mix library module")
+seen = Enum.map(surface["capabilities"], fn capability ->
+  module = Enum.find(modules, fn value ->
+    Atom.to_string(value) == "Elixir." <> capability["module"]
+  end) || raise("missing Mix library module")
+  exports = module.__info__(:functions) ++ module.__info__(:macros)
+  Enum.each(capability["symbols"], fn symbol ->
+    unless Enum.any?(exports, fn {name, _} -> Atom.to_string(name) == symbol end),
+      do: raise("missing Mix library export")
+  end)
+  capability["capability"]
+end)
+IO.puts(JSON.encode!(%{schema: "literate-ai/library-import-observation@1",
+  capabilities: seen}))
+'''
+    completed = subprocess.run([*tool, "-e", script, "--", surface_json,
+        json.dumps([str(path) for path in files])], capture_output=True)
+    sys.stdout.buffer.write(completed.stdout)
+    sys.stderr.buffer.write(completed.stderr)
+    raise SystemExit(completed.returncode)
+elif language == "elixir":
+    package_root = (source / surface["package"]).resolve(strict=True)
+    if source not in package_root.parents:
+        raise RuntimeError("Elixir package escaped the exact artifact")
+    files = sorted(package_root.rglob("*.ex"))
+    if not files:
+        raise RuntimeError("Elixir library has no retained module sources")
+    for path in files:
+        if (path.is_symlink() or not path.is_file()
+                or package_root not in path.resolve(strict=True).parents):
+            raise RuntimeError("Elixir library source escaped package authority")
+    script = '''[surface_json] = System.argv()
+surface = JSON.decode!(surface_json)
+files = JSON.decode!(IO.read(:stdio, :eof)) |> Enum.map(&Path.expand/1)
+seen = make_ref()
+each_module = fn file, module, _binary ->
+  loaded = Process.get(seen, MapSet.new())
+  if MapSet.member?(loaded, module), do: raise("duplicate library module")
+  unless Path.expand(file) in files,
+    do: raise("module compiled outside retained closure")
+  Process.put(seen, MapSet.put(loaded, module))
+end
+modules = case Kernel.ParallelCompiler.compile(files,
+    warnings_as_errors: true, each_module: each_module) do
+  {:ok, modules, _warnings} -> modules
+  _ -> raise "Elixir library compilation failed"
+end
+Process.delete(seen)
+seen = Enum.map(surface["capabilities"], fn capability ->
+  module = Enum.find(modules, fn value ->
+    Atom.to_string(value) == "Elixir." <> capability["module"]
+  end) || raise "missing retained library module"
+  origin = module.module_info(:compile) |> Keyword.fetch!(:source)
+    |> List.to_string() |> Path.expand()
+  unless origin in files, do: raise("library module escaped the exact artifact")
+  exports = module.__info__(:functions) ++ module.__info__(:macros)
+  Enum.each(capability["symbols"], fn symbol ->
+    unless Enum.any?(exports, fn {name, _arity} -> Atom.to_string(name) == symbol end),
+      do: raise("missing library symbol")
+  end)
+  capability["capability"]
+end)
+IO.puts(JSON.encode!(%{schema: "literate-ai/library-import-observation@1",
+  capabilities: seen}))
+'''
+    file_json = json.dumps([str(path.resolve(strict=True)) for path in files])
+    completed = subprocess.run([*tool, "-e", script, "--", surface_json],
+                               input=file_json.encode("utf-8"), capture_output=True)
+    sys.stdout.buffer.write(completed.stdout)
+    sys.stderr.buffer.write(completed.stderr)
+    raise SystemExit(completed.returncode)
+elif language == "python":
     sys.path[:] = [str(source)]
     for capability in surface["capabilities"]:
         module = importlib.import_module(capability["module"])
@@ -931,6 +1036,7 @@ def _profile_contributions(snapshot, node) -> tuple[object, ...]:
                     StandardMakeCommandProfile,
                     StandardCMakeCommandProfile,
                     StandardCargoCommandProfile,
+                    StandardMixCommandProfile,
                 ),
                 FlavorAxis.PACKAGING: (
                     StandardNpmCommandProfile,
@@ -1314,6 +1420,7 @@ def _command_contract(
         | StandardMakeCommandProfile
         | StandardCMakeCommandProfile
         | StandardCargoCommandProfile
+        | StandardMixCommandProfile
         | None
     ),
     tools: Mapping[str, object],
@@ -1352,7 +1459,11 @@ def _command_contract(
         else None
     )
     retained_repo_man = isinstance(build_system, StandardRepoManCommandProfile)
-    single_file = build_system is not None and not retained_repo_man
+    single_file = (
+        build_system is not None
+        and not retained_repo_man
+        and not isinstance(build_system, StandardMixCommandProfile)
+    )
     bazel = isinstance(build_system, StandardBuildSystemCommandProfile)
     target = None
     if (python_profile is None) != (python_flavor_revision_identity is None):
@@ -1478,7 +1589,7 @@ def _command_contract(
             }
         )
         if library_surface is not None:
-            if language.target not in {"python", "javascript"}:
+            if language.target not in {"python", "javascript", "elixir"}:
                 raise StandardCommandProjectionError(
                     "standard_command.library_build_profile_required",
                     "Rust importable libraries require the Cargo build profile",
@@ -1555,13 +1666,32 @@ def _command_contract(
             and not output.endswith(platform.executable_suffix)
         ):
             output += platform.executable_suffix
+        elixir_options = ()
+        if isinstance(compiler, ElixirToolchain):
+            language_command = compiler.launcher_command or compiler.command
+            if len(language_command) != 1:
+                raise StandardCommandProjectionError(
+                    "standard_command.bazel_language_tool_unsupported",
+                    "the Elixir Bazel lifecycle requires one exact "
+                    "language-tool executable",
+                )
+            runtime_path = os.pathsep.join(
+                (str(Path(compiler.file_bindings[1][0]).parent), os.defpath)
+            )
+            elixir_options = (
+                f"--action_env=LITAI_LANGUAGE_TOOL={language_command[0]}",
+                f"--action_env=PATH={runtime_path}",
+            )
         target = StandardBazelTarget(
             plan.component_revision,
             resolver,
             ContentIdentity.parse_uri(build_system_tool.identity),
             build_system.target_label,
             output,
-            build_options=bazel_sdk_build_options(getattr(compiler, "environment", ())),
+            build_options=(
+                *bazel_sdk_build_options(getattr(compiler, "environment", ())),
+                *elixir_options,
+            ),
             cpp_layout=native_layout,
             cpp_test_output=(
                 "tests/run" + platform.executable_suffix if cpp_library else None
@@ -1578,7 +1708,12 @@ def _command_contract(
     elif isinstance(build_system, StandardMakeCommandProfile):
         build_system_tool = tools[build_system.toolchain]
         build_command_tool = tools["python"]
-        if len(compiler.command) != 1:
+        language_command = (
+            compiler.launcher_command or compiler.command
+            if isinstance(compiler, ElixirToolchain)
+            else compiler.command
+        )
+        if len(language_command) != 1:
             raise StandardCommandProjectionError(
                 "standard_command.make_language_tool_unsupported",
                 "the Make lifecycle requires one exact language-tool executable",
@@ -1595,7 +1730,7 @@ def _command_contract(
             "-c",
             _STANDARD_MAKE_BUILD_DRIVER,
             json.dumps(build_system_tool.command, separators=(",", ":")),
-            compiler.command[0],
+            language_command[0],
             json.dumps(
                 list(getattr(compiler, "environment", ())), separators=(",", ":")
             ),
@@ -1636,6 +1771,47 @@ def _command_contract(
             "{export_path}",
             build_system.cmakelists,
             build_system.build_target,
+        )
+    elif isinstance(build_system, StandardMixCommandProfile):
+        if (
+            language.target != "elixir"
+            or language.build_strategy is not StandardLanguageBuildStrategy.ELIXIR_TREE
+            or language.runtime_strategy is not StandardLanguageRuntimeStrategy.ELIXIR
+            or language.artifact_layout is not StandardArtifactLayout.TREE
+            or (library_surface is None and len(entrypoints) != 1)
+            or npm_profile is not None
+            or python_profile is not None
+        ):
+            raise StandardCommandProjectionError(
+                "standard_command.mix_shape_unsupported",
+                "Mix requires an Elixir tree library or one application entrypoint "
+                "without competing packaging authority",
+            )
+        build_system_tool = tools[build_system.toolchain]
+        if (
+            not isinstance(build_system_tool, HexToolchain)
+            or not isinstance(compiler, ElixirToolchain)
+            or build_system_tool.mix.elixir != compiler
+        ):
+            raise StandardCommandProjectionError(
+                "standard_command.mix_toolchain_mismatch",
+                "Mix requires Hex bound to the selected Elixir installation",
+            )
+        build_command_tool = build_system_tool
+        resolver = canonical_identity(
+            {
+                "schema": "literate-ai/standard-mix-build-resolver@1",
+                "profile_identity": build_system.identity.uri,
+                "hex_toolchain_identity": build_system_tool.identity,
+            }
+        )
+        target = StandardMixTarget(plan.component_revision, resolver, build_system_tool)
+        build_argv = (
+            "{tool}",
+            "compile",
+            "{source_root}",
+            "{object_root}",
+            "{export_path}",
         )
     elif isinstance(build_system, StandardCargoCommandProfile):
         if language.target != "rust":
@@ -1741,7 +1917,9 @@ def _command_contract(
             "{tool}",
             "-c",
             _STANDARD_LIBRARY_IMPORT_DRIVER,
-            language.target,
+            "elixir-mix"
+            if isinstance(build_system, StandardMixCommandProfile)
+            else language.target,
             json.dumps(verification_tool.command, separators=(",", ":")),
             _encoded_library_import_surface(library_surface),
             "{export_path}",
@@ -2069,6 +2247,7 @@ def project_locked_standard_toolchain_closure(
             | StandardMakeCommandProfile
             | StandardCMakeCommandProfile
             | StandardCargoCommandProfile
+            | StandardMixCommandProfile
             | None,
             StandardAcceleratorCommandProfile | None,
             StandardNpmCommandProfile | None,
@@ -2116,6 +2295,7 @@ def project_locked_standard_toolchain_closure(
                 StandardMakeCommandProfile,
                 StandardCMakeCommandProfile,
                 StandardCargoCommandProfile,
+                StandardMixCommandProfile,
             ),
             required=False,
             label="build-system command",
@@ -2223,6 +2403,8 @@ def project_locked_standard_toolchain_closure(
                 required_tool_names.add("python")
         elif npm_profile is None:
             required_tool_names.add("python")
+        if not authoring.entrypoints:
+            required_tool_names.add("python")
         if npm_profile is not None:
             required_tool_names.add(npm_profile.toolchain)
         if (
@@ -2239,8 +2421,56 @@ def project_locked_standard_toolchain_closure(
     discover = toolchain_discoverer or _discover_toolchain
     tools = {
         name: discover(name, merged_constraints.get(name), configured)
-        for name in sorted(required_tool_names - {"npm"})
+        for name in sorted(required_tool_names - {"npm", "hex"})
     }
+    if "hex" in required_tool_names:
+        elixir = tools.get("elixir")
+        plugin = configured.get("LITAI_HEX_EBIN")
+        if not isinstance(elixir, ElixirToolchain) or not plugin:
+            raise StandardCommandProjectionError(
+                "standard_command.mix_hex_missing",
+                "Mix requires selected Elixir and explicitly staged LITAI_HEX_EBIN",
+            )
+        try:
+            hex_tool = discover_hex_toolchain(
+                discover_mix_toolchain(elixir, configured),
+                ebin=Path(plugin),
+                environment=configured,
+            )
+            constraint = merged_constraints.get("hex")
+            if constraint is not None:
+                if (
+                    constraint.command is not None
+                    and tuple(constraint.command) != hex_tool.command
+                ):
+                    raise ValueError("Hex pin names another native command")
+                from packaging.version import Version
+
+                release = Version(hex_tool.version).release
+
+                def floor(prefix):
+                    return (*prefix, *(0 for _ in range(max(0, 3 - len(prefix)))))
+
+                if constraint.minimum_version and release < floor(
+                    constraint.minimum_version
+                ):
+                    raise ValueError("Hex is below the selected minimum")
+                if (
+                    constraint.required_version
+                    and release[: len(constraint.required_version)]
+                    != constraint.required_version
+                ):
+                    raise ValueError("Hex differs from the selected required prefix")
+                if constraint.maximum_exclusive_version and release >= floor(
+                    constraint.maximum_exclusive_version
+                ):
+                    raise ValueError("Hex exceeds the selected exclusive upper bound")
+            tools["hex"] = hex_tool
+        except (BuildError, ValueError) as exc:
+            raise StandardCommandProjectionError(
+                "standard_command.mix_hex_invalid",
+                "Explicit Hex/Mix payload differs from selected authority",
+            ) from exc
     if "npm" in required_tool_names:
         node_toolchain = tools.get("node")
         if node_toolchain is None:
@@ -2302,6 +2532,7 @@ def project_locked_standard_toolchain_closure(
     contracts = []
     bazel_targets = []
     cargo_targets = []
+    mix_targets = []
     npm_targets = []
     python_targets = []
     language_by_revision = {}
@@ -2330,12 +2561,16 @@ def project_locked_standard_toolchain_closure(
             )
         contracts.append(contract)
         language_by_revision[plan.component_revision.uri] = language
-        if profiles[2] is not None:
+        if profiles[2] is not None and not isinstance(
+            profiles[2], StandardMixCommandProfile
+        ):
             single_file_revisions.add(plan.component_revision.uri)
         if isinstance(target, StandardBazelTarget):
             bazel_targets.append(target)
         elif isinstance(target, StandardCargoTarget):
             cargo_targets.append(target)
+        elif isinstance(target, StandardMixTarget):
+            mix_targets.append(target)
         elif isinstance(target, StandardNpmTarget):
             npm_targets.append(target)
         elif isinstance(target, StandardPythonTarget):
@@ -2378,16 +2613,52 @@ def project_locked_standard_toolchain_closure(
         )
     commands = tuple(tool.command for tool in tools.values())
     if dependency_observer is None:
+        native_commands = tuple(
+            command
+            for tool in tools.values()
+            for command in (
+                tool.native_dependency_commands
+                if isinstance(tool, (ElixirToolchain, HexToolchain))
+                else (tool.command,)
+            )
+        )
+        root_ref = f"urn:literate-ai:component:{execution_plan.root_revision.digest}"
         with tempfile.TemporaryDirectory(prefix="litai-toolchain-observation-") as root:
             observation = PortableHostDependencyObserver(
-                toolchain_commands=commands,
+                toolchain_commands=native_commands,
                 lifecycle_commands=(),
             ).observe(
                 {"artifact_path": root},
-                root_ref=(
-                    f"urn:literate-ai:component:{execution_plan.root_revision.digest}"
-                ),
+                root_ref=root_ref,
             )
+        bound_files = {}
+        for tool in tools.values():
+            if isinstance(tool, ElixirToolchain):
+                for path, identity in tool.file_bindings:
+                    digest = identity.removeprefix("sha256:")
+                    ref = f"urn:literate-ai:beam-toolchain-file:{digest}"
+                    bound_files[ref] = {
+                        "type": "file",
+                        "bom-ref": ref,
+                        "name": Path(path).name,
+                        "version": f"sha256-{digest}",
+                        "hashes": [{"alg": "SHA-256", "content": digest}],
+                        "properties": [
+                            {
+                                "name": "literate-ai:dependency-kind",
+                                "value": "toolchain",
+                            },
+                            {
+                                "name": "literate-ai:dependency-scope",
+                                "value": "runtime",
+                            },
+                            {"name": "literate-ai:launcher-path", "value": path},
+                        ],
+                    }
+        observation = HostDependencyObservation(
+            (*observation.components, *bound_files.values()),
+            (*observation.edges, *((root_ref, ref) for ref in bound_files)),
+        )
     else:
         observation = dependency_observer(commands)
     snapshot.require_unchanged()
@@ -2411,6 +2682,7 @@ def project_locked_standard_toolchain_closure(
         ),
         bazel_targets=tuple(bazel_targets),
         cargo_targets=tuple(cargo_targets),
+        mix_targets=tuple(mix_targets),
         npm_targets=tuple(npm_targets),
         python_targets=tuple(python_targets),
         provider_environment=provider_environment,
@@ -2430,6 +2702,7 @@ def project_standard_toolchain_closure(
     observer_identity: ContentIdentity,
     bazel_targets: tuple[StandardBazelTarget, ...] = (),
     cargo_targets: tuple[StandardCargoTarget, ...] = (),
+    mix_targets: tuple[StandardMixTarget, ...] = (),
     npm_targets: tuple[StandardNpmTarget, ...] = (),
     python_targets: tuple[StandardPythonTarget, ...] = (),
     provider_environment: Mapping[str, tuple[str, str]] | None = None,
@@ -2449,6 +2722,8 @@ def project_standard_toolchain_closure(
         raise TypeError("bazel_targets must contain StandardBazelTarget values")
     if any(not isinstance(item, StandardCargoTarget) for item in cargo_targets):
         raise TypeError("cargo_targets must contain StandardCargoTarget values")
+    if any(not isinstance(item, StandardMixTarget) for item in mix_targets):
+        raise TypeError("mix_targets must contain StandardMixTarget values")
     if any(not isinstance(item, StandardNpmTarget) for item in npm_targets):
         raise TypeError("npm_targets must contain StandardNpmTarget values")
     if any(not isinstance(item, StandardPythonTarget) for item in python_targets):
@@ -2468,11 +2743,17 @@ def project_standard_toolchain_closure(
         raise ValueError(
             "command contracts must cover every and only planned Component"
         )
-    if bazel_targets and cargo_targets:
+    if bazel_targets and (cargo_targets or mix_targets):
         raise ValueError(
-            "one Standard project cannot mix Bazel and Cargo lifecycle targets"
+            "one Standard project cannot mix Bazel with Cargo or Mix lifecycle targets"
         )
-    all_targets = (*bazel_targets, *cargo_targets, *npm_targets, *python_targets)
+    all_targets = (
+        *bazel_targets,
+        *cargo_targets,
+        *mix_targets,
+        *npm_targets,
+        *python_targets,
+    )
     target_map = {item.component_revision.uri: item for item in all_targets}
     if len(target_map) != len(all_targets) or not set(target_map).issubset(planned):
         raise ValueError("build targets must name unique planned Components")
@@ -2619,6 +2900,7 @@ def project_standard_toolchain_closure(
         provider_environment,
         dependency_observation,
         python_targets,
+        mix_targets,
     )
 
 
@@ -3143,6 +3425,15 @@ def assemble_filesystem_standard_project_runtime(
             **port_arguments,
             bazel_targets=toolchain_closure.bazel_targets,
             bazel_cache_arguments=bazel_cache_arguments,
+        )
+    elif toolchain_closure.mix_targets:
+        from literate_ai.security import AuthorizationRevocationSet
+
+        ports = StandardMixLifecyclePorts(
+            **port_arguments,
+            mix_targets=toolchain_closure.mix_targets,
+            cargo_targets=toolchain_closure.cargo_targets,
+            mix_authorization_verifier=AuthorizationRevocationSet(),
         )
     elif toolchain_closure.cargo_targets:
         ports = StandardCargoLifecyclePorts(

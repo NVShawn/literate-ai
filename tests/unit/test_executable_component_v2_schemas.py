@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -248,6 +249,40 @@ class ExecutableComponentV2SchemaTests(unittest.TestCase):
         self.assertFalse(
             _official_validator(package_fixtures.PackageResult.SCHEMA).is_valid(result)
         )
+
+    def test_mixed_driver_graph_wire_declares_bounded_unique_composition(self) -> None:
+        fixture = artifact_fixtures.ArtifactGraphTests()
+        manifests = fixture.diamond()
+        manifests = (
+            replace(
+                manifests[0],
+                build_system_driver_identity=artifact_fixtures.identity("mix"),
+            ),
+            *manifests[1:],
+        )
+        drivers = tuple(
+            sorted(
+                {item.build_system_driver_identity for item in manifests},
+                key=lambda item: item.uri,
+            )
+        )
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=(
+                artifact_fixtures.artifact_driver_composition_identity(drivers)
+            ),
+            driver_composition=drivers,
+            manifests=manifests,
+            link_roots=(manifests[0].exports[0].identity,),
+        )
+        validator = _official_validator(graph.SCHEMA)
+        validator.validate(graph.to_dict())
+        for drivers_wire in ([], [drivers[0].to_dict()], [drivers[0].to_dict()] * 2):
+            with self.subTest(drivers=drivers_wire):
+                self.assertFalse(
+                    validator.is_valid(
+                        {**graph.to_dict(), "driver_composition": drivers_wire}
+                    )
+                )
 
     def test_v2_catalog_lists_every_file_and_resource_and_resolves_refs(self) -> None:
         catalog = json.loads((V2_ROOT / "index.json").read_text(encoding="utf-8"))

@@ -98,7 +98,7 @@ class HostInstallContractTests(unittest.TestCase):
         logical = [FLAVORS / "os-base" / "toolchain.cdx.json"]
         logical.extend(sorted(FLAVORS.glob("*/host-toolchain.cdx.json")))
         realizations = sorted(FLAVORS.glob("os-*/host-install/*/*/*.cdx.json"))
-        self.assertEqual(len(logical), 12)
+        self.assertEqual(len(logical), 13)
         self.assertEqual(len(realizations), 5)
         validator = JsonStrictValidator(SchemaVersion.V1_7)
         base = parse_base_toolchain_sbom(

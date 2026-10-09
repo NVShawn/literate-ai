@@ -7704,7 +7704,9 @@ def run_sample(
                     raise SampleFailure(str(exc)) from exc
             executions_list.append(portfolio_execution)
             continue
-        if sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES:
+        if sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES or variant.languages == (
+            "elixir",
+        ):
             with _sample_evidence_phase(
                 evidence_run=attach_run(),
                 sample_id=sample_id,
@@ -9235,8 +9237,10 @@ def plan_derivation_manifest(
                 keys.extend(key for key, _lock in planned_nodes)
                 lock_identities.update(lock for _key, lock in planned_nodes)
                 continue
-            if sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES or (
-                sample_id == "service-stack" and variant.variant_id == "python"
+            if (
+                variant.languages == ("elixir",)
+                or sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES
+                or (sample_id == "service-stack" and variant.variant_id == "python")
             ):
                 planned_nodes = _plan_standard_sample_derivations(
                     sample_root=sample_root,

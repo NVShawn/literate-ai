@@ -199,7 +199,9 @@ def directory_export_bytes(root: Path) -> bytes:
     if not root.is_dir():
         raise ValueError("directory artifact export is empty")
     files = []
-    for path in sorted(root.rglob("*")):
+    for path in sorted(
+        root.rglob("*"), key=lambda path: path.relative_to(root).as_posix()
+    ):
         if path_is_link_or_reparse(path):
             raise ValueError("artifact exports cannot contain links")
         if path.is_dir():

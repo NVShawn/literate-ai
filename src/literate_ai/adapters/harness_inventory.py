@@ -475,7 +475,9 @@ def source_language_markers(root: Path) -> set[str]:
                 found.add("python")
             elif lower.endswith((".c", ".cpp", ".cc", ".cxx", ".cu", ".cuh")):
                 found.add("cpp")
-        if "python" in found and "cpp" in found:
+            elif lower.endswith((".ex", ".exs")):
+                found.add("elixir")
+        if {"python", "cpp", "elixir"} <= found:
             break
     return found
 

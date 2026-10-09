@@ -578,6 +578,9 @@ class ArbitrarySourceCliTests(unittest.TestCase):
             source.mkdir()
             (source / "main.py").write_text("def python_api():\n    return 1\n")
             (source / "main.cpp").write_text("int cpp_api() { return 1; }\n")
+            (source / "main.exs").write_text(
+                "defmodule Sample do\n  def elixir_api, do: 1\nend\n"
+            )
             (source / "main.rs").write_text("pub fn rust_api() -> i32 { 1 }\n")
             (source / "main.js").write_text(
                 "export function javascriptApi() { return 1; }\n"
@@ -591,17 +594,20 @@ class ArbitrarySourceCliTests(unittest.TestCase):
             item["skill"]["skill_id"] for item in bundle["skill_stage_runs"]
         )
         self.assertEqual(
-            stage_ids[-4:],
+            stage_ids[-5:],
             (
                 "language-python",
                 "language-cpp",
+                "language-elixir",
                 "language-rust",
                 "language-javascript",
             ),
         )
         flavor_drafts = {item["flavor_id"]: item for item in bundle["flavor_drafts"]}
-        self.assertTrue({"python", "cpp", "rust", "javascript"}.issubset(flavor_drafts))
-        for language in ("python", "cpp", "rust", "javascript"):
+        self.assertTrue(
+            {"python", "cpp", "elixir", "rust", "javascript"}.issubset(flavor_drafts)
+        )
+        for language in ("python", "cpp", "elixir", "rust", "javascript"):
             with self.subTest(language=language):
                 self.assertEqual(flavor_drafts[language]["status"], "proposal")
                 self.assertTrue(flavor_drafts[language]["statements"])

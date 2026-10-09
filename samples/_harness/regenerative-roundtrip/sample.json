@@ -2,7 +2,7 @@
   "acceptance_oracle": {
     "identity": {
       "algorithm": "sha256",
-      "digest": "e31fb0cd0040d5e46c29e961e38eb59f872d444a561c7520093983f47b6ae8a2",
+      "digest": "215d300e13b95e225e7d369f155f3bea6ed5525e943fc0a4e48ed3682666409b",
       "schema": "urn:literate-ai:schema:v1:content-identity"
     },
     "kind": "acceptance-oracle",
@@ -10,7 +10,7 @@
     "uri": "acceptance/oracle.json"
   },
   "component_authoring_identity": "sha256:abb77aa7115e9d83da1459e0eac4837587f9b7209c92e3eafb6a562ec53e5610",
-  "execution_interface_identity": "sha256:553160e940695a9697ad5c4b3249f8f662579344db12df9c069ccf5c68eb3105",
+  "execution_interface_identity": "sha256:0158085f03fb500f60a132618387a4007326693ae625fe254a24241028073481",
   "expected_assertions": [
     "workflow-completes",
     "restart-reuses-exact-stages"

@@ -552,6 +552,42 @@ class FixtureCollector:
 
 
 class ModelSourceToSpecificationTests(unittest.TestCase):
+    def test_elixir_inverse_translation_binds_the_shipped_language_skill(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "main.exs").write_text(
+                "defmodule App do\n def run, do: 42\nend\nApp.run()\n"
+            )
+            catalog = dict(load_builtin_skill_catalog())
+            skill_set = builtin_skill_set(catalog, languages=("elixir",))
+            self.assertEqual(skill_set.skills[-1].skill_id, "language-elixir")
+            self.assertEqual(
+                (
+                    ROOT / "skills/source-to-specification/language-elixir/SKILL.md"
+                ).read_bytes(),
+                (
+                    ROOT
+                    / "src/literate_ai/source_to_specification/builtin_skills"
+                    / "language-elixir/SKILL.md"
+                ).read_bytes(),
+            )
+            runner = ScriptedTaskRunner()
+            result = derive_model_checkout(
+                source=root,
+                inventory=inventory_source(root),
+                origin_attestation_id=canonical_digest("elixir-origin"),
+                skill_set=skill_set,
+                skill_catalog=catalog,
+                intelligence_collector=FixtureCollector(),
+                translator=CodingCliInverseTranslator(
+                    model="test-model", task_runner=runner
+                ),
+            )
+            self.assertEqual(
+                tuple(journal.language for journal in result.journals), ("elixir",)
+            )
+            self.assertTrue(result.result.draft.statements)
+
     def _source_tree(self, root: Path) -> None:
         (root / "app.py").write_text(
             "async def serve():\n    return 'ok'\n\nclass Worker:\n    pass\n",

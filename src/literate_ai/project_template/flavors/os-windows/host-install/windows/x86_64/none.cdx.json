@@ -490,6 +490,46 @@
           "value": "opencode.exe"
         }
       ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "pkg:generic/winget-elixir",
+      "name": "Elixir runtime",
+      "version": ">=1.18",
+      "properties": [
+        {
+          "name": "literate-ai:host-install:realization-kind",
+          "value": "native-package"
+        },
+        {
+          "name": "literate-ai:host-install:manager-package",
+          "value": "Elixir.Elixir"
+        },
+        {
+          "name": "literate-ai:host-install:base-capabilities",
+          "value": "[\"elixir\"]"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "pkg:generic/winget-erlang",
+      "name": "Erlang/OTP runtime",
+      "version": ">=27",
+      "properties": [
+        {
+          "name": "literate-ai:host-install:realization-kind",
+          "value": "native-package"
+        },
+        {
+          "name": "literate-ai:host-install:manager-package",
+          "value": "Erlang.ErlangOTP"
+        },
+        {
+          "name": "literate-ai:host-install:base-capabilities",
+          "value": "[\"erlang\"]"
+        }
+      ]
     }
   ],
   "dependencies": [
@@ -509,7 +549,9 @@
         "pkg:generic/winget-rustlang-rustup",
         "pkg:generic/codex-windows-x64",
         "pkg:generic/claude-code-windows-x64",
-        "pkg:generic/opencode-windows-x64"
+        "pkg:generic/opencode-windows-x64",
+        "pkg:generic/winget-elixir",
+        "pkg:generic/winget-erlang"
       ]
     },
     {
@@ -566,6 +608,14 @@
     },
     {
       "ref": "pkg:generic/opencode-windows-x64",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:generic/winget-elixir",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:generic/winget-erlang",
       "dependsOn": []
     }
   ]

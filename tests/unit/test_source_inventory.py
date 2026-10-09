@@ -12,6 +12,32 @@ from literate_ai.source_to_specification import (
 
 
 class SourceInventoryTests(unittest.TestCase):
+    def test_elixir_modules_scripts_and_native_tests_are_inert_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "tests").mkdir()
+            (root / "helper.ex").write_text(
+                "defmodule Helper do\n def value, do: 42\nend\n"
+            )
+            (root / "main.exs").write_text('raise "inventory must never execute"\n')
+            (root / "tests/litai_test.exs").write_text("nil\n")
+            entries = {item.path: item for item in inventory_source(root).entries}
+            self.assertEqual({item.language for item in entries.values()}, {"elixir"})
+            self.assertEqual(
+                entries["main.exs"].classification, SourceFileClassification.SOURCE
+            )
+            self.assertEqual(
+                entries["tests/litai_test.exs"].classification,
+                SourceFileClassification.TEST,
+            )
+            self.assertIn("value", entries["helper.ex"].symbols)
+            self.assertTrue(
+                any(
+                    item.flavor_id == "elixir"
+                    for item in entries["main.exs"].flavor_signals
+                )
+            )
+
     def test_inventory_is_deterministic_classified_and_content_free(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

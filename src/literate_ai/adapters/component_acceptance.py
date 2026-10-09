@@ -882,10 +882,10 @@ def load_library_acceptance(
             f"{path} names another Component",
         )
     language = document.get("language")
-    if language not in {"python", "javascript", "rust", "cpp"}:
+    if language not in {"python", "javascript", "rust", "cpp", "elixir"}:
         raise ComponentAcceptanceError(
             "component_acceptance.contract_invalid",
-            f"{path} must select python, javascript, rust, or cpp",
+            f"{path} must select python, javascript, rust, cpp, or elixir",
         )
 
     def parse_identity(value: object, label: str) -> ContentIdentity:

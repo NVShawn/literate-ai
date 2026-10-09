@@ -3,6 +3,7 @@
 import hashlib
 import os
 import stat
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -39,7 +40,7 @@ def _stream_descriptor(descriptor, maximum_bytes):
 
 
 def _requires_content_recheck():
-    return os.name == "nt"
+    return os.name == "nt" or sys.platform == "linux"
 
 
 def native_file_digest(path, maximum_bytes):
@@ -80,10 +81,9 @@ def native_file_digest(path, maximum_bytes):
     ):
         raise ValueError("retained.native.custody-changed")
     if _requires_content_recheck():
-        # Windows can preserve every observable stat field for a same-size
-        # overwrite completed while the first descriptor is open. Reopen and
-        # stream the named file once more so custody does not depend on deferred
-        # metadata finalization.
+        # Windows can defer metadata finalization and Linux filesystems can expose
+        # coarse timestamps. A same-size overwrite may preserve every observable
+        # stat field. Reopen and stream once more instead of relying on timestamps.
         verification_descriptor = os.open(path, flags)
         try:
             verification_opened = os.fstat(verification_descriptor)

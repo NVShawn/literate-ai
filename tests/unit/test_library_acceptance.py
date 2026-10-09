@@ -99,6 +99,21 @@ class LibraryAcceptanceTests(unittest.TestCase):
             self.assertEqual(oracle.language, "cpp")
             self.assertEqual(oracle.harness_content, harness.read_bytes())
 
+    def test_elixir_oracle_binds_the_reviewed_native_harness(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path, document = self._write_oracle(Path(temporary))
+            document["language"] = "elixir"
+            harness = path.parent / "harness.exs"
+            harness.write_text('IO.puts("reviewed harness")\n', encoding="utf-8")
+            document["harness"] = harness.name
+            document["harness_identity"] = (
+                "sha256:" + hashlib.sha256(harness.read_bytes()).hexdigest()
+            )
+            path.write_text(json.dumps(document), encoding="utf-8")
+            oracle = load_library_acceptance(path, "math-library")
+            self.assertEqual(oracle.language, "elixir")
+            self.assertEqual(oracle.harness_content, harness.read_bytes())
+
     def test_rejects_harness_content_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

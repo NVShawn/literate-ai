@@ -498,6 +498,46 @@
           "value": "[\"rustc\",\"cargo\"]"
         }
       ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "pkg:generic/apt-elixir",
+      "name": "Elixir runtime",
+      "version": ">=1.18",
+      "properties": [
+        {
+          "name": "literate-ai:host-install:realization-kind",
+          "value": "native-package"
+        },
+        {
+          "name": "literate-ai:host-install:manager-package",
+          "value": "elixir"
+        },
+        {
+          "name": "literate-ai:host-install:base-capabilities",
+          "value": "[\"elixir\"]"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "pkg:generic/apt-erlang",
+      "name": "Erlang/OTP runtime",
+      "version": ">=27",
+      "properties": [
+        {
+          "name": "literate-ai:host-install:realization-kind",
+          "value": "native-package"
+        },
+        {
+          "name": "literate-ai:host-install:manager-package",
+          "value": "erlang-base"
+        },
+        {
+          "name": "literate-ai:host-install:base-capabilities",
+          "value": "[\"erlang\"]"
+        }
+      ]
     }
   ],
   "dependencies": [
@@ -516,7 +556,9 @@
         "pkg:generic/apt-build-essential",
         "pkg:generic/apt-cmake",
         "pkg:generic/bazelisk-linux-amd64",
-        "pkg:generic/apt-cargo"
+        "pkg:generic/apt-cargo",
+        "pkg:generic/apt-elixir",
+        "pkg:generic/apt-erlang"
       ]
     },
     {
@@ -569,6 +611,14 @@
     },
     {
       "ref": "pkg:generic/apt-cargo",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:generic/apt-elixir",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:generic/apt-erlang",
       "dependsOn": []
     }
   ]

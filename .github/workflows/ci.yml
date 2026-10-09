@@ -122,6 +122,60 @@ jobs:
             os: "windows-latest"
             python: "3.12"
             group: 0
+          - task: "elixir-native"
+            name: "Elixir 1.18.0 / OTP 27.0 / ubuntu-24.04"
+            os: "ubuntu-24.04"
+            python: "3.12"
+            group: 0
+            elixir: "1.18.0"
+            otp: "27.0"
+            otp_major: "27"
+            hex_args: ""
+          - task: "elixir-native"
+            name: "Elixir 1.20.4 / OTP 29.1.1 / ubuntu-24.04"
+            os: "ubuntu-24.04"
+            python: "3.12"
+            group: 0
+            elixir: "1.20.4"
+            otp: "29.1.1"
+            otp_major: "29"
+            hex_args: "--build-from-source"
+          - task: "elixir-native"
+            name: "Elixir 1.18.0 / OTP 27.0 / macos-15"
+            os: "macos-15"
+            python: "3.12"
+            group: 0
+            elixir: "1.18.0"
+            otp: "27.0"
+            otp_major: "27"
+            hex_args: ""
+          - task: "elixir-native"
+            name: "Elixir 1.20.4 / OTP 29.1.1 / macos-15"
+            os: "macos-15"
+            python: "3.12"
+            group: 0
+            elixir: "1.20.4"
+            otp: "29.1.1"
+            otp_major: "29"
+            hex_args: "--build-from-source"
+          - task: "elixir-native"
+            name: "Elixir 1.18.0 / OTP 27.0 / windows-2022"
+            os: "windows-2022"
+            python: "3.12"
+            group: 0
+            elixir: "1.18.0"
+            otp: "27.0"
+            otp_major: "27"
+            hex_args: ""
+          - task: "elixir-native"
+            name: "Elixir 1.20.4 / OTP 29.1.1 / windows-2022"
+            os: "windows-2022"
+            python: "3.12"
+            group: 0
+            elixir: "1.20.4"
+            otp: "29.1.1"
+            otp_major: "29"
+            hex_args: "--build-from-source"
     steps:
       # skill-evaluation
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -667,4 +721,100 @@ jobs:
         with:
           name: native-cpp-qualification-${{ matrix.os }}
           path: cpp-native-qualification.xml
+          if-no-files-found: error
+
+      # elixir-native
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: matrix.task == 'elixir-native'
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: matrix.task == 'elixir-native'
+        with:
+          python-version: "3.12"
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1
+        if: matrix.task == 'elixir-native'
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+          version-type: strict
+          install-hex: false
+          install-rebar: false
+      - name: Install Python contributor tools
+        if: matrix.task == 'elixir-native'
+        run: python -m pip install -e ".[dev]"
+      - name: Expose Windows native qualification tools
+        if: matrix.task == 'elixir-native' && (runner.os == 'Windows')
+        shell: pwsh
+        run: |
+          if (-not (Get-Command make -ErrorAction SilentlyContinue)) {
+            choco install make --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          $llvm = "C:\Program Files\LLVM\bin"
+          if (Test-Path "$llvm\llvm-readobj.exe") {
+            $llvm | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          } elseif (-not (Get-Command llvm-readobj -ErrorAction SilentlyContinue)) {
+            choco install llvm --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $llvm | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+      - name: Stage exact Bazelisk and repository-pinned Bazel
+        if: matrix.task == 'elixir-native'
+        shell: bash
+        env:
+          BAZELISK_HOME: ${{ github.workspace }}/_build/elixir/bazelisk
+        run: |
+          python scripts/stage_elixir_qualification_tools.py --output _build/elixir/tools
+          echo "$GITHUB_WORKSPACE/_build/elixir/tools" >> "$GITHUB_PATH"
+      - name: Stage digest-pinned Hex outside the user Mix home
+        if: matrix.task == 'elixir-native'
+        run: python scripts/stage_elixir_hex.py --output _build/elixir/hex ${{ matrix.hex_args }}
+      - name: Check Elixir framework modules
+        if: matrix.task == 'elixir-native'
+        shell: bash
+        run: make python-check PYTHON=python PYTHON_TEST_PATTERN='test_elixir*.py'
+      - name: Qualify real native, Make, Bazel, and Mix Elixir artifacts
+        if: matrix.task == 'elixir-native'
+        shell: bash
+        env:
+          BAZELISK_HOME: ${{ github.workspace }}/_build/elixir/bazelisk
+          LITERATE_AI_ELIXIR_QUALIFICATION: "1"
+          LITERATE_AI_ELIXIR_BUILD_SYSTEMS: "1"
+          LITERATE_AI_ELIXIR_MIX_QUALIFICATION: "1"
+          LITAI_HEX_EBIN: ${{ github.workspace }}/_build/elixir/hex/hex-2.5.1/ebin
+          LITAI_ELIXIR_EXPECT_VERSION: ${{ matrix.elixir }}
+          LITAI_ELIXIR_EXPECT_OTP: ${{ matrix.otp_major }}
+        run: >-
+          python -m pytest -q -rA -o addopts='' -o junit_logging=all
+          --junitxml=_build/elixir/native-qualification.xml
+          tests/conformance/test_elixir_native_qualification.py
+          tests/conformance/test_elixir_mix_qualification.py
+          tests/conformance/test_elixir_mix_library_qualification.py
+          tests/conformance/test_elixir_mix_graph_qualification.py
+          tests/conformance/test_elixir_mix_shared_qualification.py
+      - name: Reject skipped or incomplete Elixir native qualification
+        if: matrix.task == 'elixir-native'
+        shell: python
+        run: |
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse("_build/elixir/native-qualification.xml").getroot()
+          counts = {
+              name: sum(int(suite.attrib.get(name, "0")) for suite in root)
+              for name in ("failures", "errors", "skipped")
+          }
+          counts["tests"] = len(root.findall(".//testcase"))
+          print(counts)
+          if counts != {"tests": 18, "failures": 0, "errors": 0, "skipped": 0}:
+              raise SystemExit("Elixir native qualification must pass all eighteen fixtures")
+      - name: Upload qualification evidence
+        if: matrix.task == 'elixir-native' && (always())
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: elixir-${{ matrix.os }}-${{ matrix.elixir }}
+          path: |
+            _build/evidence
+            _build/python-test-checkpoint.json
+            _build/elixir/native-qualification.xml
           if-no-files-found: error

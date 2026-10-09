@@ -74,8 +74,11 @@ class CiActionPinTests(unittest.TestCase):
             )
         for os_name in ("ubuntu-latest", "windows-latest"):
             expected.add((f"Native C++ library / {os_name}", os_name))
+        for os_name in ("ubuntu-24.04", "macos-15", "windows-2022"):
+            for elixir, otp in (("1.18.0", "27.0"), ("1.20.4", "29.1.1")):
+                expected.add((f"Elixir {elixir} / OTP {otp} / {os_name}", os_name))
         rows = job["strategy"]["matrix"]["include"]
-        self.assertEqual(len(rows), 19)
+        self.assertEqual(len(rows), 25)
         self.assertEqual({(row["name"], row["os"]) for row in rows}, expected)
         for row in rows:
             if row["task"] == "conformance":
@@ -148,6 +151,7 @@ class CiActionPinTests(unittest.TestCase):
             "conformance": "make validate PYTHON=python RUFF=ruff",
             "windows-gates": "python scripts/wheel_smoke.py",
             "windows-tests": "--splits 3 --group ${{ matrix.group }}",
+            "elixir-native": "PYTHON_TEST_PATTERN='test_elixir*.py'",
             "cpp-native": (
                 "test_locked_cpp_library_runs_through_complete_filesystem_runtime"
             ),
@@ -183,6 +187,76 @@ class CiActionPinTests(unittest.TestCase):
             selected.append(step)
         self.assertTrue(selected, "the matrix must execute skill admission")
         return selected
+
+    def test_elixir_matrix_requires_explicit_hex_and_unskipped_native_mix(self):
+        workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = [
+            step
+            for step in workflow["jobs"]["checks"]["steps"]
+            if step["if"] == "matrix.task == 'elixir-native'"
+        ]
+        stage = next(
+            step for step in steps if "stage_elixir_hex.py" in step.get("run", "")
+        )
+        native = next(step for step in steps if "--junitxml=" in step.get("run", ""))
+        self.assertLess(steps.index(stage), steps.index(native))
+        self.assertIn("${{ matrix.hex_args }}", stage["run"])
+        self.assertEqual(
+            native["env"]["LITAI_ELIXIR_EXPECT_OTP"], "${{ matrix.otp_major }}"
+        )
+        rows = workflow["jobs"]["checks"]["strategy"]["matrix"]["include"]
+        for row in rows:
+            if row["task"] == "elixir-native":
+                self.assertEqual(row["otp_major"], row["otp"].split(".")[0])
+                self.assertEqual(
+                    row["hex_args"],
+                    "--build-from-source" if row["otp_major"] == "29" else "",
+                )
+        self.assertEqual(native["env"]["LITERATE_AI_ELIXIR_MIX_QUALIFICATION"], "1")
+        self.assertEqual(native["env"]["LITERATE_AI_ELIXIR_BUILD_SYSTEMS"], "1")
+        self.assertEqual(
+            native["env"]["LITAI_HEX_EBIN"],
+            "${{ github.workspace }}/_build/elixir/hex/hex-2.5.1/ebin",
+        )
+        self.assertIn("test_elixir_mix_qualification.py", native["run"])
+        self.assertIn("test_elixir_mix_graph_qualification.py", native["run"])
+        self.assertIn("test_elixir_mix_shared_qualification.py", native["run"])
+        self.assertIn("-o addopts=''", native["run"])
+        gate = next(step for step in steps if step.get("shell") == "python")
+        probe = compile(gate["run"], "ci.yml:elixir-native-gate", "exec")
+        import xml.etree.ElementTree as ET
+
+        for counts, accepted in (
+            ((18, 0, 0, 0), True),
+            ((18, 0, 0, 1), False),
+            ((17, 0, 0, 0), False),
+            ((18, 1, 0, 0), False),
+            ((18, 0, 1, 0), False),
+        ):
+            root = ET.Element("testsuites")
+            suite = ET.SubElement(
+                root,
+                "testsuite",
+                dict(
+                    zip(
+                        ("tests", "failures", "errors", "skipped"),
+                        map(str, counts),
+                        strict=True,
+                    )
+                ),
+            )
+            for index in range(counts[0]):
+                ET.SubElement(suite, "testcase", {"name": f"fixture-{index}"})
+            with (
+                self.subTest(counts=counts),
+                mock.patch.object(ET, "parse", return_value=ET.ElementTree(root)),
+                mock.patch("builtins.print"),
+            ):
+                if accepted:
+                    exec(probe, {})
+                else:
+                    with self.assertRaises(SystemExit):
+                        exec(probe, {})
 
     def _uv_probe(self) -> str:
         steps = self._skill_steps()

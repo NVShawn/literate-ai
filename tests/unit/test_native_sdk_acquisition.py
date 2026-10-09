@@ -4,6 +4,8 @@ import json
 import os
 import tempfile
 import unittest
+from datetime import timedelta
+from functools import partial
 from pathlib import Path
 from unittest.mock import patch
 
@@ -15,6 +17,7 @@ from literate_ai.adapters.generation_preparation import (
     FilesystemLockedGenerationApplicationAdapter,
     FilesystemLockedGenerationPreparationAdapter,
 )
+from literate_ai.adapters.lifecycle.local import PolicyBuildAuthorizer
 from literate_ai.adapters.lifecycle.standard_local import (
     local_generated_source_tree_identity,
 )
@@ -417,6 +420,12 @@ class NativeSdkAcquisitionTests(unittest.TestCase):
             result.lifecycle.root_integration.independent_acceptance_identity
         )
 
+    # This real dependency-observation fixture can exceed the production default
+    # on slow hosts. Retain real, identity-scoped grants and expiry verification.
+    @patch(
+        "literate_ai.adapters.native_sdk_source_build.PolicyBuildAuthorizer",
+        new=partial(PolicyBuildAuthorizer, authorization_lifetime=timedelta(hours=1)),
+    )
     def test_preflight_and_real_acquisition_feed_preparation(self):
         fixture = test_native_sdk_source_build.NativeSdkSourceBuildTests()
         self.addCleanup(fixture.doCleanups)

@@ -574,6 +574,7 @@
         "urn:literate-ai:schema:v2:standard-make-command-profile",
         "urn:literate-ai:schema:v2:standard-cmake-command-profile",
         "urn:literate-ai:schema:v2:standard-cargo-command-profile",
+        "urn:literate-ai:schema:v2:standard-mix-command-profile",
         "urn:literate-ai:schema:v2:standard-npm-command-profile",
         "urn:literate-ai:schema:v2:standard-python-wheel-command-profile",
         "urn:literate-ai:schema:v2:standard-platform-command-profile",

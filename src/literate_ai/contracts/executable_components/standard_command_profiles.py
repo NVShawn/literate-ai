@@ -34,6 +34,9 @@ STANDARD_CMAKE_COMMAND_PROFILE_SCHEMA = (
 STANDARD_CARGO_COMMAND_PROFILE_SCHEMA = (
     "urn:literate-ai:schema:v2:standard-cargo-command-profile"
 )
+STANDARD_MIX_COMMAND_PROFILE_SCHEMA = (
+    "urn:literate-ai:schema:v2:standard-mix-command-profile"
+)
 STANDARD_NPM_COMMAND_PROFILE_SCHEMA = (
     "urn:literate-ai:schema:v2:standard-npm-command-profile"
 )
@@ -601,6 +604,57 @@ class StandardCargoCommandProfile:
 
 
 @dataclass(frozen=True, slots=True)
+class StandardMixCommandProfile:
+    """Inert Mix intent and explicitly staged Hex toolchain convention."""
+
+    target: str
+    toolchain: str
+    manifest: str
+
+    SCHEMA: ClassVar[str] = STANDARD_MIX_COMMAND_PROFILE_SCHEMA
+
+    def __post_init__(self) -> None:
+        if self.target != "mix" or self.toolchain != "hex":
+            fail(
+                "StandardMixCommandProfile.target",
+                "requires the mix target and hex toolchain",
+            )
+        if self.manifest != "source/mix-project.json":
+            fail(
+                "StandardMixCommandProfile.manifest",
+                "requires the canonical declarative Mix intent",
+            )
+
+    @property
+    def identity(self) -> ContentIdentity:
+        return contract_identity(self)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "schema": self.SCHEMA,
+            "target": self.target,
+            "toolchain": self.toolchain,
+            "manifest": self.manifest,
+        }
+
+    @classmethod
+    def from_dict(
+        cls, value: Any, *, path: str = "StandardMixCommandProfile"
+    ) -> StandardMixCommandProfile:
+        data = contract_fields(
+            value,
+            path=path,
+            schema_uri=cls.SCHEMA,
+            required=frozenset({"target", "toolchain", "manifest"}),
+        )
+        return cls(
+            string_value(data["target"], f"{path}.target"),
+            string_value(data["toolchain"], f"{path}.toolchain"),
+            string_value(data["manifest"], f"{path}.manifest"),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class StandardNpmCommandProfile:
     """Locked npm manifest and lockfile selected by the npm packaging Flavor."""
 
@@ -864,6 +918,7 @@ StandardCommandProfile = (
     | StandardMakeCommandProfile
     | StandardCMakeCommandProfile
     | StandardCargoCommandProfile
+    | StandardMixCommandProfile
     | StandardNpmCommandProfile
     | StandardPythonWheelCommandProfile
     | StandardPlatformCommandProfile
@@ -886,6 +941,7 @@ def parse_standard_command_profile(
         StandardMakeCommandProfile.SCHEMA: StandardMakeCommandProfile.from_dict,
         StandardCMakeCommandProfile.SCHEMA: StandardCMakeCommandProfile.from_dict,
         StandardCargoCommandProfile.SCHEMA: StandardCargoCommandProfile.from_dict,
+        StandardMixCommandProfile.SCHEMA: StandardMixCommandProfile.from_dict,
         StandardNpmCommandProfile.SCHEMA: StandardNpmCommandProfile.from_dict,
         StandardPythonWheelCommandProfile.SCHEMA: (
             StandardPythonWheelCommandProfile.from_dict
@@ -908,6 +964,7 @@ __all__ = [
     "STANDARD_ACCELERATOR_COMMAND_PROFILE_SCHEMA",
     "STANDARD_CMAKE_COMMAND_PROFILE_SCHEMA",
     "STANDARD_CARGO_COMMAND_PROFILE_SCHEMA",
+    "STANDARD_MIX_COMMAND_PROFILE_SCHEMA",
     "STANDARD_COMMAND_PROFILE_CONTENT_KIND",
     "STANDARD_LANGUAGE_COMMAND_PROFILE_SCHEMA",
     "STANDARD_MAKE_COMMAND_PROFILE_SCHEMA",
@@ -920,6 +977,7 @@ __all__ = [
     "StandardRepoManCommandProfile",
     "StandardCMakeCommandProfile",
     "StandardCargoCommandProfile",
+    "StandardMixCommandProfile",
     "StandardCommandProfile",
     "StandardLanguageBuildStrategy",
     "StandardLanguageCommandProfile",

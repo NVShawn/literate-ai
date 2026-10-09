@@ -641,6 +641,8 @@ def _is_test_source_path(path: str, language: str) -> bool:
         return bool(re.search(r"(?:^|\.)(?:test|spec)\.(?:[cm]?[jt]sx?)$", name))
     if language == "rust":
         return name.endswith("_test.rs") or name.endswith("_tests.rs")
+    if language == "elixir":
+        return name.endswith("_test.exs") or name.endswith("_tests.exs")
     if language == "cpp":
         stem = re.sub(r"\.(?:c|cc|cpp|cxx|h|hh|hpp|hxx)$", "", name)
         return stem.endswith("_test") or stem.endswith("_tests")
@@ -756,6 +758,10 @@ def _ordering_surface_symbols(
     """
 
     patterns = {
+        "elixir": (
+            ("sequence-sort", r"\bEnum\.sort(?:_by)?\s*\("),
+            ("selection-tie-break", r"\bEnum\.(?:min|max)(?:_by)?\s*\("),
+        ),
         "python": (
             ("sequence-sort", r"\bsorted\s*\(|\.sort\s*\("),
             ("selection-tie-break", r"\b(?:min|max)\s*\([^\n]*\bkey\s*="),
@@ -790,6 +796,11 @@ def _normalization_surface_symbols(
     """Locate explicit value normalization for a distinct model coverage audit."""
 
     patterns = {
+        "elixir": (
+            ("trim", r"\bString\.trim(?:_leading|_trailing)?\s*\("),
+            ("case-fold", r"\bString\.(?:downcase|upcase)\s*\("),
+            ("pattern-rewrite", r"\b(?:String|Regex)\.replace\s*\("),
+        ),
         "python": (
             ("trim", r"\.strip\s*\("),
             ("case-fold", r"\.(?:lower|upper|casefold)\s*\("),

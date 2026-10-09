@@ -109,6 +109,7 @@ def _locked_snapshot(
     root: Path,
     *,
     build_system: str | None = None,
+    test_build_flavor_root: Path | None = None,
     language: str = "python",
     platform: str = "macos",
     accelerator: str | None = None,
@@ -131,6 +132,7 @@ def _locked_snapshot(
                 "portable-specification-planning/SKILL.md",
             ),
             encoding="utf-8",
+            newline="\n",
         )
         (component / "acceptance/execution.json").write_text(
             json.dumps(
@@ -157,7 +159,7 @@ def _locked_snapshot(
             "    path: run\n",
             "entrypoints: []\n",
         )
-        document.write_text(text, encoding="utf-8")
+        document.write_text(text, encoding="utf-8", newline="\n")
         interface = component / "interfaces/library.md"
         interface.parent.mkdir(parents=True, exist_ok=True)
         interface.write_text(
@@ -196,7 +198,7 @@ def _locked_snapshot(
             "  - name: run-again\n    kind: portable-application\n"
             "    path: run-again\n",
         )
-        document.write_text(text, encoding="utf-8")
+        document.write_text(text, encoding="utf-8", newline="\n")
     repository = Path(__file__).resolve().parents[2]
     if language != "python":
         import shutil
@@ -256,19 +258,22 @@ def _locked_snapshot(
             "    capability_contract: sample.portable-app\n"
             "  - slot_id: os\n",
         )
-        document.write_text(text, encoding="utf-8")
+        document.write_text(text, encoding="utf-8", newline="\n")
         import shutil
 
         shutil.copytree(
-            repository / "flavors" / f"build-{build_system}",
+            test_build_flavor_root or repository / "flavors" / f"build-{build_system}",
             flavors / f"build-{build_system}",
         )
-        shutil.copytree(
-            repository
-            / "skills/specification-to-source"
-            / f"{build_system}-build-system",
-            root / "skills/specification-to-source" / f"{build_system}-build-system",
-        )
+        if test_build_flavor_root is None:
+            shutil.copytree(
+                repository
+                / "skills/specification-to-source"
+                / f"{build_system}-build-system",
+                root
+                / "skills/specification-to-source"
+                / f"{build_system}-build-system",
+            )
         if build_system == "cargo":
             shutil.copytree(
                 repository / "skills/specification-to-source/rust-ecosystem",
@@ -286,7 +291,7 @@ def _locked_snapshot(
             "    capability_contract: sample.portable-app\n"
             "  - slot_id: os\n",
         )
-        document.write_text(text, encoding="utf-8")
+        document.write_text(text, encoding="utf-8", newline="\n")
         import shutil
 
         shutil.copytree(repository / "flavors" / accelerator, flavors / accelerator)
@@ -612,6 +617,7 @@ class StandardCommandProjectionTests(unittest.TestCase):
     def test_library_only_standard_commands_project_exact_import_surface(self) -> None:
         for language, build_system in (
             ("python", None),
+            ("elixir", None),
             ("javascript", None),
             ("rust", "cargo"),
         ):

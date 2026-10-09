@@ -929,7 +929,7 @@ def reopen_qualification_products(
     if root_product is None:
         raise QualificationCaptureError("qualification.capture.root-export-mismatch")
     for member in result.runs:
-        execution = reopen_qualification_run(reader, member)
+        execution = reopen_qualification_run(reader, member, current_commands=commands)
         if {
             node.component_revision for node in execution.lifecycle.node_results
         } != set(recipes):
@@ -1397,6 +1397,14 @@ def verify_qualification_build_authorization(
         request_identity = ContentIdentity.parse_uri(grant.request_digest)
         request_document = reader.read_json(request_identity)
         request = BuildRequest.from_dict(request_document)
+        from literate_ai.adapters.qualification_mix import is_mix_request
+
+        mix_request = is_mix_request(plan, request)
+        expected_toolchain = (
+            plan.request.build_system_toolchain_identity
+            if mix_request
+            else plan.request.language_compiler_identity
+        )
         intent = StandardComponentBuildIntent(
             plan.component_revision,
             candidate.tree_identity,
@@ -1415,7 +1423,11 @@ def verify_qualification_build_authorization(
             or grant.effective_revision_digest != plan.component_revision.uri
             or set(grant.privileges) != set(request.requested_privileges)
             or plan.request.authorization_identity != authorization_identity
-            or request.toolchain_digest != plan.request.language_compiler_identity.uri
+            or request.toolchain_digest != expected_toolchain.uri
+            or (
+                mix_request
+                and plan.manifest.build_system_driver_identity != expected_toolchain
+            )
             or set(request.requested_privileges)
             != {item.value for item in plan.request.requested_privileges}
             or set(request.allowed_outputs)
@@ -1445,7 +1457,12 @@ def verify_qualification_build_authorization(
 
 
 def verify_qualification_build(
-    reader: QualificationEvidenceReader, *, plan: object, build: StandardBuildEvidence
+    reader: QualificationEvidenceReader,
+    *,
+    plan: object,
+    build: StandardBuildEvidence,
+    provider_exports: Mapping | None = None,
+    current_commands: Mapping | None = None,
 ) -> None:
     """Bind build processes and the artifact tree's metadata-only transition."""
 
@@ -1511,11 +1528,19 @@ def verify_qualification_build(
         value = reader.read_json(build.build_observation_identity)
         process_id = ContentIdentity.parse_uri(value["process_observation_identity"])
         tree = ContentIdentity.parse_uri(value["artifact_tree_identity"])
+        native = reader.read_json(process_id)
+        observed_plan = plan.identity
+        if native.get("schema") == "literate-ai/mix-build-evidence@1":
+            # Cache reuse retains the issued build's observation. The Mix
+            # decoder reopens that origin and binds it to the current plan.
+            observed_plan = ContentIdentity.parse_uri(
+                native["standard_authority"]["build_plan_identity"]
+            )
         same(
             build.build_observation_identity,
             {
                 "schema": "literate-ai/local-build-observation@1",
-                "build_plan_identity": plan.identity.uri,
+                "build_plan_identity": observed_plan.uri,
                 "process_observation_identity": process_id.uri,
                 "artifact_tree_identity": tree.uri,
                 "resolved_sbom_identity": build.resolved_sbom.bom_identity.uri,
@@ -1614,6 +1639,19 @@ def verify_qualification_build(
             return before
 
         value = reader.read_json(process_id)
+        if current_commands is not None:
+            from literate_ai.adapters.qualification_mix import mix_target_document
+
+            contract = current_commands.get(plan.component_revision)
+            if (
+                contract is not None
+                and contract.locked_build_authority_identity
+                == canonical_identity(mix_target_document(plan))
+                and value.get("schema") != "literate-ai/mix-build-evidence@1"
+            ):
+                raise QualificationCaptureError(
+                    "qualification.capture.mix-build-mismatch"
+                )
         if value.get("schema") == "literate-ai/local-process-observation@1":
             process(process_id, "build")
             artifact_tree()
@@ -1625,6 +1663,21 @@ def verify_qualification_build(
 
             verify_qualification_cargo_build(
                 reader, plan=plan, observation=value, files=artifact_tree()
+            )
+            return
+        if value.get("schema") == "literate-ai/mix-build-evidence@1":
+            from literate_ai.adapters.qualification_mix import (
+                verify_qualification_mix_build,
+            )
+
+            verify_qualification_mix_build(
+                reader,
+                plan=plan,
+                observation=value,
+                files=artifact_tree(),
+                exports=build.exports,
+                provider_exports=provider_exports or {},
+                current_commands=current_commands or {},
             )
             return
         target_id = ContentIdentity.parse_uri(value["npm_target_identity"])
@@ -2195,6 +2248,8 @@ def verify_qualification_execution(
 def reopen_qualification_run(
     reader: QualificationEvidenceReader,
     run: QualificationLifecycleRunEvidence,
+    *,
+    current_commands: Mapping | None = None,
 ) -> QualificationLifecycleExecution:
     """Reopen the complete typed lifecycle membership claimed by one run.
 
@@ -2290,7 +2345,15 @@ def reopen_qualification_run(
             plan=plans[node.build_plan_identity],
         )
         verify_qualification_build(
-            reader, plan=plans[node.build_plan_identity], build=node.build_evidence
+            reader,
+            plan=plans[node.build_plan_identity],
+            build=node.build_evidence,
+            provider_exports={
+                export.identity: export
+                for member in lifecycle.node_results
+                for export in member.exports
+            },
+            current_commands=current_commands,
         )
         verify_qualification_generated_tests(
             reader,

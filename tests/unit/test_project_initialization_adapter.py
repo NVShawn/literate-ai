@@ -2224,6 +2224,55 @@ class ConvertModeTests(unittest.TestCase):
                 ],
             )
 
+    def test_detect_repo_flavors_identifies_elixir_without_evaluating_sources(self):
+        from literate_ai.adapters.project_initialization import detect_repo_flavors
+
+        for marker in ("app.ex", "main.exs", "mix.exs"):
+            with (
+                self.subTest(marker=marker),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                root = Path(directory)
+                (root / marker).write_text(
+                    'raise "must not execute"\n', encoding="utf-8"
+                )
+                selectors = detect_repo_flavors(root)
+                self.assertIn("flavor://literate-ai/lang-elixir", selectors)
+                self.assertNotIn("flavor://literate-ai/lang-python", selectors)
+                self.assertNotIn("flavor://literate-ai/build-cargo", selectors)
+
+    def test_elixir_detection_preserves_mixed_language_evidence(self):
+        from literate_ai.adapters.project_initialization import (
+            detected_language_flavors,
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for marker in ("main.cpp", "main.py"):
+                (root / marker).write_text("", encoding="utf-8")
+            (root / "lib").mkdir()
+            (root / "lib" / "app.ex").write_text("", encoding="utf-8")
+            self.assertEqual(
+                detected_language_flavors(root),
+                [
+                    "flavor://literate-ai/lang-cpp",
+                    "flavor://literate-ai/lang-python",
+                    "flavor://literate-ai/lang-elixir",
+                ],
+            )
+
+    def test_elixir_detection_ignores_generated_and_hidden_sources(self):
+        from literate_ai.adapters.project_initialization import (
+            detected_language_flavors,
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ("_build", ".cache"):
+                (root / name).mkdir()
+                (root / name / "main.exs").write_text("", encoding="utf-8")
+            self.assertEqual(detected_language_flavors(root), [])
+
     def test_detect_repo_flavors_identifies_rust_and_cargo(self) -> None:
         from literate_ai.adapters.project_initialization import detect_repo_flavors
 

@@ -100,12 +100,68 @@ Native tests live at `source/tests/litai_test.exs`. Make/Bazel single-file expor
 must assemble helpers and tests into one self-contained script. Mix/Hex/Phoenix
 projects and OTP release packaging require additional ecosystem/build policy.
 
+For declarative Mix packages, select `+flavor://literate-ai/build-mix` on the
+Component's build-system slot alongside `lang-elixir`. The selected Mix skill
+adds `source/mix-project.json` (`literate-ai/mix-project@1`) with application
+metadata and public Hex dependency requirements. The authorized lifecycle creates
+`mix.exs` and derives the lock in an external projection, freezes acquired Hex
+checksums, compiles and tests natively, and retains application/dependency artifacts.
+Generated source supplies neither executable Mix project authority nor a lock.
+The Hex plugin must be explicitly staged and bound; ambient plugins are not accepted.
+This profile supports applications and locked Elixir library import surfaces.
+Phoenix conventions and OTP release assembly still require their own policy.
+
 Install the shipped Flavor into an existing project with
 `litai flavor add flavor://literate-ai/lang-elixir --no-default`, then select it for
 the Component's language slot. New projects may use
 `litai init --flavor flavor://literate-ai/lang-elixir`. An explicit `ELIXIR` command
 or typed toolchain command pin must satisfy the selected version constraints;
 unavailable runtimes fail before generation, without installing software.
+
+Host prerequisite plans now declare both Elixir and OTP, with Brew, Debian-family
+APT and Windows Winget realizations. The selected package repository must supply
+versions meeting both minimums; older distribution packages do not qualify merely
+because installation succeeds. Discovery and generation never install tools.
+
+Contributor qualification uses real host runtimes and fails when an opted-in tool
+is missing. Stage digest-pinned Bazelisk with
+`python scripts/stage_elixir_qualification_tools.py --output _build/elixir/tools`,
+put that directory on `PATH`, then run
+`LITERATE_AI_ELIXIR_QUALIFICATION=1 LITERATE_AI_ELIXIR_BUILD_SYSTEMS=1 make python-check PYTHON_TEST_PATTERN=test_elixir_native_qualification.py`.
+Set `LITAI_ELIXIR_EXPECT_VERSION=1.18.0` and `LITAI_ELIXIR_EXPECT_OTP=27` for the
+minimum-version check. The CI matrix declares both 1.18.0/OTP 27.0 and
+1.18.4/OTP 27.3.4.3 on Linux, macOS and Windows. These fixtures prove native command behavior; provider
+generation requires the separate live sample ladder. To isolate its pinned Elixir
+target, use ordered selectors `--flavor=-lang.* --flavor=+lang-elixir` with
+`scripts/run_samples.py --sample regenerative-roundtrip`, an explicit OS selector,
+provider/model and execution acknowledgement.
+
+Read-only `litai onboard adopt` plans recognize `.ex` and `.exs` files, including
+`mix.exs`, and propose the shipped Elixir Flavor. Mixed-language plans retain
+Elixir evidence alongside C++ and Python. Mix manifests expose monorepo root
+candidates, but do not supply a supported retained build driver by themselves.
+Use an existing supported driver for adoption; manifest detection never evaluates
+Elixir code.
+
+Elixir library Components use `kind: library` with no product entrypoints. Public
+`.ex` modules live beneath `source/<package>/`; a package such as `invoice_api`
+uses the module namespace `InvoiceApi`. Declare `library_imports` when public names
+differ from the derived convention. Each declaration binds language `elixir`,
+package, capability, module and sorted exported symbols; predicate and bang names
+such as `valid?` and `add!` are supported. Keep `source/main.exs --litai-test` as
+the generated-test launcher. Native import verification compiles the retained
+package closure, checks module origins and exports, and refuses missing or duplicate
+modules. Independent acceptance runs the reviewed `.exs` harness with the exact
+artifact, import surface and cases. Consumers load the retained provider roots
+supplied by the lifecycle; ambient modules and fetched substitutes cannot replace
+the declared library.
+
+Native qualification passes all six parser, failure, artifact-custody, JSON transport,
+Make and Bazel cases on macOS (Elixir 1.20.4/OTP 29), Ubuntu 24.04 and Windows 11
+(the latter two with Elixir 1.18.0/OTP 27.0). A macOS live Codex generation run also
+passes independent acceptance and replay. Hosted CI has not yet run. Inverse
+inventory and skill coverage are tested, but live inverse translation is currently
+unavailable for every language; a complete bidirectional roundtrip remains open.
 
 ## Build systems are replaceable Flavors
 

@@ -193,7 +193,8 @@ policy = SecurityPolicy(canonical_identity({'policy': 'candidate-probe'}).uri)
 skills = load_builtin_skill_catalog()
 if set(skills) != {
     'architecture', 'api-surface', 'behavior-state', 'tests', 'security', 'operations',
-    'language-python', 'language-cpp', 'language-rust', 'language-javascript'
+    'language-python', 'language-cpp', 'language-rust', 'language-javascript',
+    'language-elixir'
 }:
     raise RuntimeError('candidate packaged skill resources are incomplete')
 workspace = WorkspaceTreeStore(probe_root / 'workspace')

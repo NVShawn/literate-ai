@@ -75,6 +75,16 @@ class MonorepoAdoptionTests(unittest.TestCase):
             self.root, self.selection_file, inspect_harness(self.root), submodules=[]
         )
 
+    def test_mix_manifest_exposes_an_inert_monorepo_root_candidate(self):
+        root = self.root / "beam"
+        root.mkdir()
+        (root / "mix.exs").write_text('raise "must not execute"\n', encoding="utf-8")
+        candidates = build_root_candidates(inspect_harness(self.root))
+        candidate = next(item for item in candidates if item["root"] == "beam")
+        self.assertEqual(candidate["markers"], ["beam/mix.exs"])
+        self.assertEqual(candidate["authority"], "candidate-only")
+        self.assertFalse(candidate["selected"])
+
     def snapshot(self):
         return {
             p.relative_to(self.root).as_posix(): p.read_bytes() if p.is_file() else None

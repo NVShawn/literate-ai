@@ -301,7 +301,8 @@
                   "python",
                   "javascript",
                   "rust",
-                  "cpp"
+                  "cpp",
+                  "elixir"
                 ]
               },
               "package": {
@@ -326,13 +327,17 @@
                 "uniqueItems": true,
                 "items": {
                   "type": "string",
-                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*[!?]?$"
                 }
               }
             },
             "if": {"properties": {"language": {"const": "cpp"}}},
             "then": {"properties": {"symbols": {"items": {"maxLength": 512}}}},
-            "else": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"}}}}
+            "else": {
+              "if": {"properties": {"language": {"const": "elixir"}}},
+              "then": {"properties": {"symbols": {"items": {"pattern": "^[a-z_][A-Za-z0-9_]*[!?]?$"}}}},
+              "else": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_][A-Za-z0-9_]*$"}}}}
+            }
           }
         },
         "provider_resolutions": {

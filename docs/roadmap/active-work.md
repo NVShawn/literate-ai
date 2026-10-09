@@ -23156,3 +23156,1289 @@ GitHub CI failure without relaxing identity checks.
 - **Next action:** Complete for portable script-tree support and macOS native
   smoke verification. Broader live generation and cross-platform qualification
   remain release gates; no full release receipt is claimed.
+
+### [ ] ELIXIR-002 — Qualify the Elixir lifecycle and host prerequisites
+
+- **Priority:** P1
+- **Owner:** Elixir Flavor, host installation, sample and roundtrip qualification
+- **Direction:** Implement the remaining Elixir qualification work identified in branch review.
+- **Conclusion:** Host prerequisites, native negative/build-system checks and live forward application generation are implemented and executed. Native and live library/consumer qualification pass. The complete project lifecycle passes 328 checks with a current receipt, and three full-framework shards cover all test files and pass 6,101 test entries with 124 normal skips. Public retained Mix importer admission and hosted CI remain open.
+- **Depends on:** ELIXIR-001
+- **Parity audit:** The user requires Elixir to be a first-class language Flavor
+  equal in features to Rust and Python. Native application qualification alone
+  does not establish this. Adoption detection is repaired. Importable Elixir
+  library projection/acceptance is implemented with native three-OS and live DAG
+  qualification; ecosystem policy remains open. Close those gaps before claiming
+  full parity; retain the existing dependency and execution authority boundaries.
+- **Implementation:**
+  - [x] Enable Elixir sample and roundtrip selection using Standard command profiles
+  - [x] Declare Elixir and OTP host prerequisites and platform realization policy with shipped template parity
+  - [x] Add native syntax, artifact custody, Make/Bazel and public lifecycle qualification coverage
+  - [x] Track exact minimum-version and Linux/Windows live qualification without treating mock projection as native evidence
+  - [x] Detect Elixir sources in adoption/readiness plans and expose its public selector
+  - [x] Implement and qualify importable Elixir library Components and consuming applications
+  - [x] Complete the Rust/Python feature comparison, including dependency and packaging workflows
+  - [x] Implement and qualify optional Elixir ecosystem build/dependency/packaging authority corresponding to Cargo and Python wheels
+- **Evidence:**
+  - [x] Focused Elixir and affected harness/host-install tests pass
+  - [x] Real native lifecycle and build-system execution passes on available hosts
+  - [x] Live coding-provider generation and independent acceptance pass
+  - [x] Elixir 1.18 with OTP 27 and native Linux/Windows qualification pass
+  - [x] Full framework test coverage and repository gates pass on the implemented parity features
+  - [x] The complete project lifecycle produces a current receipt
+  - [x] Native minimum-version Linux/Windows and live provider-generated library qualification pass
+
+- **Native evidence (2026-10-05):** Six real parser, syntax/test failure,
+  artifact-custody, inert JSON transport, Make and Bazel cases pass on macOS
+  (arm64, Elixir 1.20.4/OTP 29), Ubuntu 24.04 and Windows 11 Pro 25H2
+  (Elixir 1.18.0/OTP 27.0 on both minimum-version workers). The macOS Elixir
+  focused run passes 16 tests, renewed on 2026-10-06 after the custody repair.
+  Disposable qualification VMs and private disks
+  were removed after retaining evidence; private infrastructure is not shipped.
+- **Live forward evidence (renewed 2026-10-06):** Codex `gpt-6.1-sol` passes production
+  Standard generation, Bazel build, eight generated checks, independent acceptance
+  and nine execution/replay invocations for the pinned Elixir regenerative-roundtrip
+  target. Its conformance report records 11 checks and aggregate receipt
+  `sha256:1039f7279c2a24af8afc8dc1d3af7674dbbd07a42062b6cea0dd31166c5b7973`.
+- **Framework/package evidence (2026-10-06):** Three Make-managed Linux shards
+  cover the complete test-file inventory and pass: 2,485, 2,252 and 1,205 executed
+  test entries, with 104 normal platform/tool skips in total. Read-only isolated
+  discovery confirms coverage of every declared test ID; imported duplicate
+  cases and class-level skips account for differences in discovery/run counts.
+  The native SDK group also passes all 74 real tests without skips. These are
+  qualification checks, not release attestation. The installed-wheel smoke test
+  passes with exact current runtime and shipped-asset parity; wheel identity is
+  `sha256:593d585e2a94bf31d182164fd3ed056a32cd201f0892f96c530e4211dd82e726`.
+  Lint, formatting, layout, OpenSpec, documentation rendering, skill validation
+  and driver/runner source reviews pass. A Chromium rendering timeout passes on
+  unchanged retry.
+- **Regression repairs:** Add full checkout history to the Elixir CI step and
+  update the sample host-toolchain expectation for the fifth language. Native
+  capture now rechecks content on Linux as well as Windows: same-size writes can
+  preserve observable timestamps on the Linux worker. The same-metadata regression
+  and all 17 focused custody tests pass without relaxing read budgets. The slow
+  SDK integration fixture uses a real identity-scoped one-hour grant, within the
+  existing policy maximum; the production ten-minute default is unchanged.
+  The disposable worker uses `umask 0022` for the existing strict file-mode tests.
+- **Open gates:** Live coding-CLI inverse translation is unavailable for every
+  language in the current framework; inert collector fixtures do not establish
+  semantic or regenerative inverse qualification. Hosted CI is authored but has
+  not run. The root lifecycle requires project scope, the complete `*` sample
+  matrix and at least 100 checks; the passing 11-check Elixir target is not a
+  replacement root receipt, which remains stale. Mix/Hex/Phoenix and OTP releases
+  remain outside this dependency-free profile.
+- **Adoption parity evidence (2026-10-06):** Make-managed checks pass 62
+  initialization cases, 21 monorepo cases, two public adoption-plan cases and 63
+  retained-harness cases (148 total). Lint, formatting, layout and strict OpenSpec
+  validation pass. Driver and runner review identities are current.
+  Elixir markers are inert, mixed-language evidence is preserved, hidden/generated
+  source is excluded, and a Mix-only tree retains the missing-driver gate.
+  The previous installed-wheel and full-suite evidence predates this additional
+  framework integration change and must not be claimed as current parity proof.
+- **Next parity action (in progress):** Complete optional Mix/Hex build, dependency
+  and packaging authority. Native library qualification passes on macOS, Linux and
+  Windows; live provider-generated library/consumer qualification also passes. Keep the portable tree export; library modules live
+  beneath `source/<package>/`, with explicit namespace/function import authority.
+  Native import observation compiles only the retained package's `.ex` closure,
+  checks module provenance and exported symbols, and never resolves an ambient
+  module as a substitute. Independent acceptance uses an identity-bound `.exs`
+  harness with the existing oracle protocol and unchanged custody checks.
+  Then add optional ecosystem build/dependency/packaging policy corresponding to
+  Rust's Cargo and Python's wheel workflows. Elixir marker detection does not
+  implement Mix execution or Hex dependency custody.
+- **Ecosystem implementation boundary:** Bind Mix to the selected Elixir/OTP
+  installation before adding the optional build profile. Resolve its script and
+  complete Mix BEAM payload from that installation, invoke it through the selected
+  native Elixir command on every OS, and fail on drift or a different explicit pin.
+  Discovery must not evaluate a project manifest or download Hex. The later
+  authorized build must operate in an external projection and retain the derived
+  dependency graph, checksums, acquired payloads and package evidence; parsing a
+  lock alone is not acquisition proof. Do not expose a selectable Mix Flavor until
+  its execution and evidence adapters enforce those boundaries.
+- **Mix execution design:** Use bounded declarative project intent for generated
+  applications and libraries. The authorized builder synthesizes `mix.exs` only
+  in its external projection; admission must not evaluate a generated manifest.
+  Preserve the admitted tree and export the native package plus immutable build
+  evidence. Hex dependencies must retain their exact graph, registry checksums,
+  acquired package bytes and runtime payloads. Native compilation alone does not
+  close the dependency or package custody gates. This is an implementation stage
+  toward the complete ecosystem workflow, not a dependency-free substitute for it.
+- **Provider integration implementation:** First retain typed compiled-provider
+  inputs in the native producer, checking byte custody before every phase,
+  rejecting module collisions and verifying the declared native public interface.
+  Then bind those inputs to published Standard artifacts and direct generation/
+  runtime edges. Default library exports retain source, so their compilation must
+  belong to the authorized consumer build; compiled Mix library exports must
+  retain their own dependency closure. These steps do not replace the remaining
+  canonical catalog, generation and portable package/capture acceptance gates.
+- **Compiled-provider producer implementation:** `MixProviderLibrary` selects
+  independently pinned BEAM bytes and a typed Elixir import surface. Standalone
+  requests bind the exact provider identities, surfaces and byte pins through
+  their builder identity; an unbound request cannot expose provider paths. The
+  native producer checks original and copied bytes around every process, uses a
+  bare VM to reject runtime shadows, duplicate modules and namespace escapes
+  before adding code paths, and verifies exact module origins and declared
+  exports. A framework compiler restores only selected provider paths after
+  normal Mix code-path pruning. Retained provider paths are included in the
+  returned runtime command, and historical verification checks them against the
+  independent artifact/evidence identities. This primitive accepts flat compiled
+  library closures; it does not bind published Standard library exports or
+  acquire a Mix provider's own application/dependency closure.
+  The Standard integration verifies registered exports against their independent
+  blob and publication checkpoint, retain exact direct-interface bindings, compile
+  only each declared package source closure under the existing consumer grant,
+  and includes compiled provider paths in sealed consumer runtime dispatch. Source
+  compilation must retain its own process/input evidence and recheck source,
+  toolchain and publication custody around execution. Historical provider grants
+  do not substitute for the current consumer grant.
+  The default source-provider implementation now compiles dependency-ordered
+  package closures, retains input/process/output evidence, and checks that evidence
+  around subsequent native phases. A bare VM checks actual compiled module names
+  before those paths are exposed. Extending an installed namespace is allowed;
+  shadowing an installed module is refused. Cache admission rechecks published
+  input custody, while source-retired execution uses the sealed consumer closure
+  and its current grant. Native default-library and installed-parent-namespace
+  fixtures exercise actual Standard provider publication and consumer grants.
+  Mix library production now retains its own declared Hex application closure
+  and binds published compiled libraries to current consumer grants. The next
+  action is native minimum-version renewal, then complete provider acquisition/
+  BOM carry and shared/transitive/mixed-provider resolution for portable capture.
+  Broader retained-library regression also exposed an outdated v2 public-resource
+  catalog entry for the added Mix command profile. Refresh its schema entry and verify
+  the complete catalog before claiming packaged schema qualification.
+- **Compiled-provider qualification (2026-10-06):** Native snapshot
+  `6b23cf94fa69211c91784894f70e436ba43abc4e` passes the compiled-provider case and
+  45 focused custody/profile/authority checks on minimum-version Windows
+  (147.927 seconds) and Linux (292.296 seconds), without skips. Both use Elixir
+  1.18.0/OTP 27.0 and explicitly staged Hex 2.5.1. All four native Mix conformance
+  fixtures pass on macOS Elixir 1.20.4/OTP 29 (267.211 seconds), including acquired
+  graph/SBOM evidence, Standard cache/current-grant checks and locked-profile
+  runtime assembly. The new provider case refuses an unbound request, namespace
+  escape and missing public export; it executes after the consumer/provider
+  input directories retire and refuses retained BEAM mutation. The focused Make
+  run passes 127 tests with 11 opt-in skips; it is not a complete root receipt.
+  Layout, Ruff and strict OpenSpec checks pass. The reviewed source TCB is
+  `sha256:da7f2b56ee66c0ff1ecf2c87c8fe3e4dab9e51f040195211c875295bbc768fdc`;
+  the runner pin remains current. Private qualification evidence:
+  `sha256:68ee3a4d3d223081ff77781219e481a20417092580c411d5d91d1fe2b8ee48fd`.
+  Standard published-provider binding, provider source compilation, Mix library
+  dependency closure, canonical catalog/generation, portable package/capture,
+  latest-version Linux/Windows and full framework/wheel/root-receipt gates remain
+  open. Both qualification VMs are stopped with their persistent workspaces
+  retained. `litai verify` passes authority; receipt fails with
+  `project.test_receipt_stale`, and locks, source intelligence and HTML
+  observability retain their three configured skips. This evidence does not
+  close ELIXIR-002.
+- **Standard source-provider qualification (2026-10-06):** Native snapshot
+  `2cafa143a8f467e1f480521d79446b6ef90d034d` passes 51 focused checks without
+  skips on minimum-version Windows (319.481 seconds) and Linux (592.151 seconds),
+  including actual Standard library publication, direct interface binding,
+  consumer-grant compilation, sealed cache reuse, provider-byte drift refusal,
+  retained BEAM tamper refusal and current-grant revocation. Both workers use
+  Elixir 1.18.0/OTP 27.0 with explicit Hex 2.5.1. The provider's generation
+  workspace retires before the consumer build; both consumer source and provider
+  publication retire before retained runtime execution. A separate namespace
+  fixture imports `Kernel.Math`, proving that an installed parent namespace is
+  not mistaken for an exact module collision. macOS Elixir 1.20.4/OTP 29 passes
+  the two namespace/source-provider fixtures (143.240 seconds) and the final
+  pre-build-retirement case (73.410 seconds). The preceding five-case native Mix
+  regression passes in 334.313 seconds.
+  The focused Make run passes 133 tests with 13 opt-in skips; broader Standard,
+  retained-library/import and Cargo-consumer regression passes 79 tests with two
+  opt-in skips. Catalog/CI/source guards pass 32 checks after registering the
+  missing Mix profile public resource in the v2 schema index. Layout, Ruff and
+  strict OpenSpec gates pass. The reviewed source TCB is
+  `sha256:8240c23d0322318d317203fc32c705223119d7745a9ba51a58cc9235d554c59d`;
+  the runner pin remains current. Private evidence:
+  `sha256:d9fe3f06ac0666922e29832c2b6dd01ef2d4ad189445558e3294eeca88599e68`.
+  Mix library production/own Hex closure, transitive and mixed-provider proof,
+  canonical catalog/generation, portable package/capture, latest-version workers,
+  live Mix generation and complete framework/wheel/root receipt gates remain
+  open. Both qualification workers are stopped with persistent workspaces retained.
+  `litai verify` passes authority, reports `project.test_receipt_stale`, and retains
+  the three configured locks/source-intelligence/HTML skips. Default source-library
+  consumer qualification does not close ELIXIR-002.
+- **Library implementation evidence (2026-10-06):** Typed declarations and schemas
+  support Elixir package namespaces, predicate/bang exports and native import
+  surfaces; generation and inverse guidance preserve those names. Native library
+  execution, independent function acceptance, negative acceptance, missing exports,
+  duplicate modules and consuming applications pass on macOS Elixir 1.20.4/OTP 29.
+  The final focused library run passes 12 cases in 33.640 seconds with no skips;
+  the broader Elixir native/Make/Bazel set passes 30 cases. Native import observation
+  rejects duplicate definitions even within a single file, where compiler warnings
+  alone do not suffice. Struct dependencies compile independently of filename
+  order. Compiler-reported paths are normalized for Windows provenance comparison.
+  Module file manifests use verifier
+  stdin to avoid Windows command-line limits; product requests retain their normal
+  argument-array protocol. Application entrypoint validation remains strict.
+  Affected projection (32), authored import (9), oracle (6), schema (20), recipe (5),
+  CI policy (11), model inverse (16) and library product (5) groups pass.
+  CI now runs all `test_elixir*.py` cases on its six Elixir/OTP rows.
+  Wider and live library qualification were pending at that snapshot; the
+  subsequent evidence below closes those gates. Previous wheel/live/full framework
+  identities remain historical evidence until the completed parity source is
+  requalified. The source-retirement and provider-root fixtures run native code;
+  their dependency observation and package-custody lookup are metadata fixtures.
+
+
+- **Additional library qualification (2026-10-06):** The frozen implementation
+  snapshot `7fe1796a37daaa2459fb6b76c28cabc65cc93a38` passes all 30
+  `test_elixir*.py` checks on Ubuntu 24.04 x86_64, Elixir 1.18.0 and OTP 27.0,
+  in 287.911 seconds with no skips. The Make-managed run includes native retained
+  library import, duplicate-module rejection, independent acceptance, consuming
+  applications, adoption and Make/Bazel cases. Its evidence archive is
+  `sha256:364441571eac5d951a1e679a04df10aa6f2d22cfc4ec6bc0f2544327c364e1b5`.
+  A separate live Codex `gpt-6.1-sol` library run on macOS arm64 passes production
+  Standard generation, native build/import observation, eight generated checks,
+  sealed packaging and three independent function cases. Its aggregate receipt is
+  `sha256:87c7916db29377535a62ed3197be9eb0a486aedc5ad075380f7dc627a736b5e6`;
+  retained private evidence is
+  `sha256:739a6844d6d2d7c4ff178347c9170cd05f802cad7bc133f17445ee7b90288522`.
+  This live proof uses a single library Component; it does not establish live
+  generation of a consuming application DAG or the complete root-project receipt.
+  Windows library qualification was pending at that checkpoint; its passing
+  evidence follows below. The Linux cache
+  was relocated to the disposable data disk after a Bazel extraction exhausted
+  the small guest root disk; source and validation gates were unchanged.
+
+
+- **Live library-consumer DAG evidence (2026-10-06):** A subsequent Codex
+  `gpt-6.1-sol` run passes production Standard generation of both the Elixir
+  library and its consuming application, exact native import observation, 18
+  generated checks, sealed dependency packaging and three independent application
+  cases. The consumer calls the actual retained `MathApi.Add.add` function through
+  the projected provider binding; generation and runtime dependency edges are both
+  declared. Aggregate receipt:
+  `sha256:f738aeb6cc4a5898e73a1e1c355928f79a33c07990aa13143c36ae7ce39c8c88`.
+  Retained private evidence:
+  `sha256:7076285c48db34f872e63e03b4816c6ca90546d2d9181b8e295519977600def2`.
+  This closes the live consumer qualification gap of the preceding single-library
+  run. The Windows minimum-version gate subsequently passes below. Optional
+  ecosystem policy and the complete root-project receipt remain open.
+
+- **Windows library qualification (2026-10-06):** Snapshot
+  `9b55525aa86a309af6ce204f647293f0e81091f4` passes all 30 Elixir checks
+  on Windows 11 Pro 25H2 x86_64, Elixir 1.18.0/OTP 27.0, in 158.904 seconds
+  with no skips. Evidence archive:
+  `sha256:07972a0be49fb10f12ea8f44a0bee0ab41f6882bc90739e46d445b2af7fc1a91`.
+  The minimum-version run found a Windows path defect in the independent test
+  harness glob; normalizing the artifact path fixes it. A fresh complete run passes;
+  the production import observer and custody checks are unchanged. Earlier worker
+  setup failures (a dependency-download timeout and absent transferred Git origin)
+  remain in private evidence. The repaired native library group also passes all
+  12 local checks in 36.292 seconds.
+- **Mix foundation evidence (2026-10-06):** Exact installation-bound discovery,
+  version/origin rejection, complete shipped Mix application byte guards and
+  fail-closed explicit pins are implemented. Seven contract cases and one real
+  native macOS check pass without skips; discovery and `--version` do not evaluate
+  a deliberately executable `mix.exs`. The complete expanded `test_elixir*.py`
+  set passes 38 checks with no skips on macOS arm64 (Elixir 1.20.4/OTP 29,
+  132.603 seconds) and Windows x86_64 (Elixir 1.18.0/OTP 27.0, 167.651 seconds).
+  The frozen Windows snapshot is `d9782cc990e2fdc34e94dfd7b7f5c879e81e85a7`;
+  its evidence archive is
+  `sha256:e294196ab3b50f541a4f71c55cd4eafc45097c7258f21c168406514bee7765a0`.
+  Native Linux Mix discovery is not yet qualified. There is no selectable Mix build profile or
+  Hex acquisition/packaging adapter yet. Those are the next parity implementation,
+  followed by renewed complete framework/package qualification and the root receipt.
+
+- **Mix intent/native prototype evidence (2026-10-06):** Declarative project
+  intent rejects executable project options, non-Hex dependency authorities,
+  duplicate keys/dependencies, interpolation and escaping package paths. Ten
+  contract checks pass. A real macOS Elixir 1.20.4/OTP 29 prototype fetches Decimal
+  2.3.0, verifies its acquired archive against the derived lock's outer SHA-256,
+  compiles with warnings treated as errors, and builds a native Hex package.
+  Three decimal-arithmetic cases pass from retained files after the source,
+  compiler, dependency and acquisition workspaces are removed. The loaded Decimal
+  module is verified to originate in the retained package. Private evidence:
+  `sha256:a207f48ba8e6e58efd1e6f9a61e8fae73c8d3e2ba094de9c7cf91cf6c4c1a416`.
+  The published Hex 2.5.1 archive cannot load `Hex.State` on OTP 29; a native
+  source build from exact upstream commit
+  `a43131c26aeca06064959297d737991163f5ac5d` works. Package metadata must include
+  links as well as description and licenses. This prototype validates the execution
+  design; it does not establish Standard plan/authorization, SBOM, cache or package
+  custody integration. Implement those production adapters next and qualify both
+  minimum and newer runtimes without assuming that a version-only Hex probe proves
+  a loadable plugin closure.
+
+- **Hex plugin custody evidence (2026-10-06):** Explicit plugin discovery now binds
+  all 132 files in the staged Hex 2.5.1 application to the selected Mix/Elixir
+  installation. It checks native application/version agreement and loadability
+  and origin of state, registry, solver, remote convergence, HTTP, SCM and packaging
+  modules. Discovery does not evaluate project manifests, start Hex or acquire
+  packages. Eight focused guard checks pass, including byte drift, additions,
+  removals, symlink substitution, ambient origins and mutation during observation.
+  Real macOS Elixir 1.20.4/OTP 29 accepts the source-built plugin and rejects the
+  incompatible published installer payload. The native Elixir suite passes 50
+  cases without skips; repository lint, formatting and layout checks pass.
+  Private evidence:
+  `sha256:cd0e10f8377f8d16260bc437b1a86997085e960449cec94bbe07737f61ba5052`.
+  Linux/Windows Hex plugin qualification and production Standard Mix lifecycle,
+  lock/acquisition/SBOM, cache and retained runtime integration remain open.
+
+- **Mix dependency admission and archive evidence (2026-10-06):** Production
+  dependency admission now recognizes bounded `mix-project.json` declarations,
+  reconciles root and locked transitive names with the source BOM and rejects
+  generated executable `mix.exs`. Standard lock projection rejects Mix inputs
+  without lifecycle-owned lock/acquisition/runtime evidence. A bounded inert
+  reader accepts native atom-key Mix locks, retains direct and selected optional
+  edges and rejects executable terms, duplicates, incomplete or unreachable
+  package graphs, private registries and unsupported managers. The Hex archive
+  verifier checks actual bytes against both native lock checksums and a complete,
+  regular, bounded archive envelope without extraction or metadata evaluation.
+  Twenty focused cases, 67 dependency-lifecycle cases and 70 native macOS Elixir
+  cases pass; the Elixir suite has no skips. The retained native Decimal 2.3.0
+  lock and acquired archive pass both checksum checks. Lint, formatting and layout
+  pass. Private evidence:
+  `sha256:0fd285fa727640853e9f83626a497823cb39d1eccea8b84a4e1ff43e1dca4efa`.
+  Structural lock parsing does not prove native requirement satisfaction or
+  acquired metadata coordinates. The authorized Mix lifecycle must bind those
+  observations, the complete graph, compiled payloads, SBOM and package/cache
+  custody before the optional profile becomes selectable. The supported lock
+  reader currently requires public Hex packages built by Mix; other native build
+  managers require their own bound execution policy and qualification.
+
+- **Authorized Mix builder evidence (2026-10-06):** A standalone host-build adapter
+  now verifies exact request/tool/source identities and live revocation at each
+  native phase. It synthesizes immutable native project code in an external
+  projection, freezes the derived lock, checks source-BOM inventory, verifies
+  acquired archive checksums and native metadata/requirements, compiles with
+  warnings as errors and builds a native Hex package. Artifacts retain complete
+  compiled application/dependency payloads, original source, acquired packages,
+  process outputs and request/authorization-bound evidence. Verification checks
+  complete bytes against independently held artifact/evidence identities and
+  validates native metadata and the retained graph again. A separate pre-load
+  inventory rejects duplicate and installed-runtime module collisions before
+  retained code can participate in validation; native load observation checks
+  application versions and origins. Windows origin comparison accounts for native
+  path casing; this new builder is not yet natively qualified on Windows.
+  Fourteen focused authorization/integrity cases and the 84-case native macOS
+  Elixir suite pass without skips. Real builds cover no dependencies, Decimal
+  2.3.0 alone, and Jason 1.4.4 with its selected optional Decimal edge. Nine product
+  cases pass after source and build workspaces are removed; relocated artifacts
+  verify and compiled-payload mutation is rejected. A JSON runtime-shadow fixture
+  fails the unchanged warnings-as-errors gate and publishes no artifact.
+  Private evidence:
+  `sha256:e4177f759e3a0f05efc2daee6cfdb31c8a396509eeba9fed7c5712622a73bab0`.
+  These standalone BuildRequest fixtures use source-BOM inventory fixtures; they
+  do not prove a complete Standard lifecycle or source-to-resolved BOM transition.
+  The next implementation is Standard Mix profile/target/ports integration,
+  including verified source/resolved SBOM, provider-library execution, sealed
+  package/cache custody and current execution authorization. Then qualify native
+  minimum/latest Linux/Windows and live generation before renewing full framework,
+  installed-wheel and complete root-project receipt evidence. Mix remains
+  unselectable until those production lifecycle boundaries are enforced.
+
+- **Mix dependency resolution evidence (2026-10-06):** The production CycloneDX
+  adapter now accepts explicit typed Mix source authority bound to the full
+  admitted text inventory. Pre-acquisition validation requires declared root Hex
+  coordinates and source edges; raw manifests, model-generated locks and alternate
+  roots remain rejected. Resolution obtains the derived native lock only from a
+  fresh lifecycle callback, rechecks archive/compiled artifact bytes against
+  independent identities, preserves source references/ranges/hashes and requires
+  the complete selected graph. Foreign host/additional Hex observations and
+  serialized verification flags cannot replace acquired payload evidence.
+  Twelve focused source/graph/identity cases and 67 dependency lifecycle cases
+  pass. The 96-case Elixir suite passes 95 cases with its native Mix discovery
+  case disabled; that case passes separately with explicit native opt-in.
+  Native macOS conformance passes one combined acquired-package, source/resolved
+  BOM, repeated observation, relocated-byte verification, tamper rejection and
+  source/projection-retirement test (45.362 seconds). The real Jason 1.4.4 /
+  Decimal 2.3.0 graph includes its selected optional edge and passes three product
+  requests after retirement. Layout, lint and formatting checks pass.
+  Private evidence:
+  `sha256:51530228e4962ab876cd5635533114978739f49ed34391a6dc9c8979758e1f60`.
+  This proves the shared dependency adapter with real native artifacts, not a
+  selected Standard Mix target or live provider generation. The next action is
+  Standard Mix profile/target/ports integration with current plan/authorization,
+  provider and package/cache custody; then native minimum/latest Linux/Windows,
+  live generation, full framework/wheel and complete root receipt qualification.
+
+
+- **Standard Mix ports evidence (2026-10-06):** Typed targets now bind native Mix
+  production to the actual issued Standard intent, indexed grant and finalized
+  plan, with dependency-resolution/network subactions and a required live
+  revocation verifier. The shared producer retains Standard history without
+  equating its canonical source-byte digest with Standard bundle/tree identities
+  or manufacturing a second grant. Fresh BOM observation checks native history,
+  acquired archives and compiled payloads against independent pins. Cache reuse
+  verifies the complete outer publication checkpoint before deriving nested pins;
+  runtime adds exact retained code paths only after sealed-tree/current-grant
+  checks and can materialize after source retirement.
+  Twenty-one focused Standard/native-builder cases pass. The complete Elixir
+  group passes 103 cases with native Mix discovery enabled and no skips. Native
+  macOS conformance passes both standalone and Standard fixtures (106.679 seconds),
+  including sealed reuse, BEAM mutation refusal, source retirement and rejection
+  after current-grant revocation. Dependency/npm checks pass 87 cases; Cargo/Python
+  checks pass eight with one separately disabled opt-in Cargo native case. Layout,
+  lint, formatting and strict OpenSpec checks pass. Private evidence:
+  `sha256:9532c9089cd100a7de4760f97075b224b307f6583541b2271b1fa01b7b664f72`.
+  This is Standard ports qualification, not catalog/profile selection or live
+  provider generation. Current Mix ports deliberately reject provider/SDK inputs
+  and multiple entrypoints until those paths have owned authority; exposing a
+  selectable Flavor remains gated on provider-library and portable package/capture
+  integration. Then run Linux/Windows minimum/latest, live generation, full
+  framework/wheel and complete project receipt qualification.
+
+
+- **Mix profile/projection evidence (2026-10-06):** Strict command profiles accept
+  only the declarative `source/mix-project.json` manifest and an explicitly bound
+  Hex toolchain. Locked projection preserves tree exports, enforces the selected
+  Elixir installation and Hex version constraints, and assembles production
+  Standard Mix ports alongside Cargo targets. Five focused tests cover profile
+  validation, three-OS projection and missing/incompatible authority. All 44
+  affected projection/Standard port cases pass with the configured Rust toolchain.
+  The new native macOS test locks a test-owned Flavor, discovers actual tools,
+  assembles the production runtime, builds and dispatches its retained artifact
+  after source retirement (78.395 seconds). The other two acquired-dependency and
+  Standard cache/grant native cases passed in the preceding three-case run; its
+  profile fixture initially failed preparation and was repaired before the focused
+  native rerun. Make discovery exposed two unqualified fixture imports; their
+  corrected module imports pass all 12 dependency-resolution cases. The Make
+  Elixir group passes 112 cases with five explicitly disabled conformance cases;
+  layout, lint, formatting and strict OpenSpec checks pass. This qualifies locked
+  profile projection and runtime assembly, without claiming canonical catalog or
+  live Mix generation coverage. Provider-library and portable package/capture
+  custody remain prerequisites to exposing a selectable Mix Flavor.
+
+- **Minimum-version Windows Mix evidence (2026-10-06):** Elixir 1.18.0/OTP 27
+  loads the explicitly staged official Hex 2.5.1 archive. Native acquired graph,
+  selected optional dependency edges, source retirement, sealed Standard cache
+  reuse, BEAM tamper refusal and current-grant revocation pass. Windows exposed
+  CRLF translation in source inventory; the shared inventory reader now preserves
+  exact UTF-8 bytes, and the authoring fixtures write their required LF format.
+  Twenty-three of 24 focused cases passed after those repairs; production locked
+  projection still required a PE inspector. After staging a signature-verified
+  LLVM inspector, that projection exposed the selected BEAM DLL being passed
+  through executable discovery. The Windows observer now admits exact absolute
+  regular PE DLL inputs without command lookup, rejecting relative paths,
+  arguments, links and invalid headers. All four guards and the actual locked
+  projection/build/source-retirement/runtime fixture then pass (203.578 seconds).
+  The final native snapshot is `fe12f575b08ea846eade69e741ec7e4fd14a6344`;
+  the acquired graph/cache fixtures passed on
+  `3c36b6cb4c47c77837a360f52df49c8ea34f679a`, before the isolated PE-input fix.
+  Twenty-five affected PE/retained-dependency cases and ten source-admission
+  cases pass locally. General Windows worker bootstrap remains unqualified:
+  its package-manager Python inventory query timed out. This result claims the
+  tools exercised by the native fixtures, not full worker readiness. Linux
+  qualification is being reprovisioned with a persistent compiler workspace;
+  its minimum-version tool installation is in progress. Latest-version workers,
+  canonical Mix catalog/generation, provider libraries, portable package/capture,
+  full framework/wheel and complete root receipt qualification remain open.
+  Private profile/Windows qualification evidence:
+  `sha256:1a23d33ee7268f04a4925f97db79d1f05211d4cd9d1814578aa87aed8dfb0b00`.
+
+- **Minimum-version Linux Mix evidence (2026-10-06):** A freshly provisioned
+  Ubuntu 24 x86-64 worker uses digest-verified OTP 27.0 source and Elixir 1.18.0,
+  with the explicitly staged official Hex 2.5.1 archive. All 36 focused checks
+  pass with no skips (741.849 seconds) on native snapshot
+  `fe12f575b08ea846eade69e741ec7e4fd14a6344`. The three native fixtures cover
+  acquired graph/selected optional edges, strict source/resolved BOM continuity,
+  locked-profile production runtime assembly, source retirement, sealed cache
+  reuse, BEAM tamper refusal and current-grant revocation. The compiler workspace
+  now persists across worker stops. General sample-worker bootstrap reports
+  unmet capabilities outside this native fixture scope; no broader readiness is
+  claimed. Minimum-version Mix fixture coverage now spans Linux and Windows,
+  alongside macOS coverage. Canonical Mix catalog/generation, provider-library
+  and portable package/capture integration, latest-version Linux/Windows,
+  live generation, full framework/wheel and the complete project receipt remain
+  open.
+  Private Linux qualification evidence:
+  `sha256:e54df43f7e6af599e9620275b7ef70e693506f8daaee6484acbc9e0b2a71689a`.
+
+| Feature compared with Rust/Python | Elixir state |
+| --- | --- |
+| Catalog selectors, init assets, portable generation skill | Implemented and tested |
+| Bound toolchain discovery and three-OS host prerequisite policy | Implemented and natively qualified |
+| Native build, generated tests, independent application acceptance, multiple entrypoints and source retirement | Implemented; native and live application evidence retained |
+| Make/Bazel application exports and inert Windows arguments | Implemented and natively qualified |
+| Read-only repository adoption and monorepo candidates | Implemented; 148 affected checks pass |
+| Inverse inventory, static behavioral evidence and packaged skills | Implemented; coding-CLI live inverse disabled framework-wide |
+| Importable library projection, import observation, independent library acceptance and consuming applications | Implemented; native macOS/Linux/Windows fixtures and live library/consumer generation pass |
+| Optional language ecosystem build and locked dependency/package workflows | Partial; typed Mix profile projection, Standard runtime assembly, fresh SBOM/runtime evidence and sealed cache reuse are implemented; default source-library and compiled Mix library consumers are integrated; Mix producers retain their own locked Hex runtime closure; provider acquisition/BOM carry, canonical catalog/generation and portable package/capture integration remain open |
+| Current complete lifecycle receipt and hosted CI | Open; previous package/full-suite evidence predates the completed parity implementation |
+
+- **ELIXIR-002 CI Mix qualification wiring (implemented; hosted results pending):** The six declared
+  Elixir/OTP matrix cells currently omit the Mix opt-in and explicit Hex payload.
+  Stage the verified official Hex 2.5.1 archive compiled for Elixir 1.16, under
+  the ignored object tree; bind its archive digest before extraction and pass
+  its exact ebin directory to native discovery. Keep ordinary Make checks and
+  run the twelve native application/Mix fixtures with a no-skips JUnit gate.
+  Windows must expose a native PE inspector for locked Standard projection.
+  Local staging and workflow regression proof precede hosted matrix results;
+  configuring CI does not constitute a hosted pass or a complete receipt.
+
+  Local evidence: fifteen staging/workflow checks pass; Make passes 136
+  Elixir checks in 40.391 seconds with thirteen expected opt-in skips.
+  Layout, lint, formatting (1,312 files), and strict OpenSpec pass.
+  The sequential native runner passes all twelve application/Mix fixtures and
+  two subtests on macOS Elixir 1.20.4/OTP 29 in 446.45 seconds with no skips,
+  using the previously qualified source-built Hex 2.5.1 for OTP 29. The CI
+  result gate accepts the actual native XML. A separate download/staging check
+  verifies the official OTP-27-compatible archive against its existing digest;
+  the matrix uses that archive rather than the OTP-29 source build.
+  Pytest counts subtest reports in suite totals; the gate checks twelve actual
+  fixture records plus zero failures/errors/skips, and the runner overrides
+  default parallel options for these native fixtures.
+  Tested source tree: `22f0b57fcbadfbb5a3a0a658b55bff785b6684eb`; source TCB
+  remains `sha256:8240c23d0322318d317203fc32c705223119d7745a9ba51a58cc9235d554c59d`.
+  Root HEAD/index remain unchanged; both private VMs remain stopped.
+  Private qualification evidence:
+  `sha256:88ed34fd4457d369d51ad3843683d64b41969fb1bceba6067b1a473fab387818`.
+  This supplies CI wiring and local runner qualification, not hosted matrix
+  results, canonical Mix generation, Mix library/own-Hex closure, portable
+  package capture, or a complete project receipt. The next implementation
+  action remains Mix library production with its own dependency closure.
+  Final verification passes authority/documentation review, reports the stale
+  complete lifecycle receipt, and names three configured skips (locks,
+  source intelligence, HTML observability). End-cycle peer survey succeeds.
+
+- **ELIXIR-002 Mix library production (in progress):** Extend the authorized
+  native producer to build libraries without an application entrypoint, binding
+  exact declared package/import authority into standalone requests and retained
+  history. Observe the produced namespace and public symbols against exact BEAM
+  origins, and retain the library application metadata plus its own verified Hex
+  application closure. Typed provider inputs must carry independently pinned
+  application names/versions/bytes, guard both original and copied payloads at
+  every native phase, reject collisions, and retain those paths for source-retired
+  consumer execution. Then integrate these inputs with actual Standard published
+  library exports under current consumer grants and qualify native library/Hex
+  consumers, followed by canonical Mix selection/generation and portable capture.
+
+  Implementation now covers native library production and Standard admission of
+  its sealed runtime application closure, including exact compiled import
+  verification. Standalone macOS source-retirement/Decimal closure qualification
+  passes in 72.341 seconds. The two standalone/Standard native cases pass in
+  201.140 seconds, including producer-grant revocation before consumer build,
+  consumer cache reuse and current-consumer revocation. Focused unit checks pass
+  55 cases; Make passes 143 cases with fifteen expected opt-in skips. The full
+  fourteen-fixture native regression is still running. Linux/Windows renewal,
+  transitive/mixed providers and shared-dependency qualification remain required.
+  The consumer currently retains compiled application closures and exact
+  published-artifact identities; full provider acquisition/archive/BOM evidence
+  must also survive portable capture. Strengthen that carry and shared Hex
+  closure resolution before exposing canonical Mix selection/generation.
+
+- **Mix library production qualification (2026-10-06):** Snapshot
+  `300c652c73fed1f75058d2f4d2246a945945b6df` (tree
+  `ef5c9d70170008dee5a68adaa745c9ef65d7b39e`) passes all fourteen native
+  application/Mix fixtures and two subtests on macOS Elixir 1.20.4/OTP 29
+  with source-built Hex 2.5.1 in 679.59 seconds, with no skips. The actual
+  result XML passes the updated CI fixture-count/failure/skip gate. New fixtures
+  build a library without an application entrypoint, retain its Decimal archive
+  and compiled application closure, observe its exact compiled public interface,
+  and compile/execute a consumer after both source trees and original provider
+  publication retire. The Standard case uses actual issued consumer authority
+  after historical producer-grant revocation, verifies sealed cache reuse, and
+  refuses runtime materialization after current-consumer revocation.
+  Fifty-five focused checks pass; Make passes 143 cases in 86.610 seconds with
+  fifteen expected opt-in skips. Broader Standard/retained-library/import/Cargo
+  regression passes 113 checks in 23.724 seconds with two opt-in skips. Layout,
+  Ruff (1,313 files), strict OpenSpec and public-export audit pass.
+  Reviewed source TCB:
+  `sha256:90d0d9b5b1e55a7896354f62c13a403b26dbc869caa33710cd648a33d80a28b8`;
+  runner pin remains current. Bundle digest:
+  `sha256:2363836aabf628ea06fa0c2f7ae8a9cac01c56e1cacef4211e737c697814c772`.
+  Private evidence:
+  `sha256:03f3ab7d2aa8965174c150e7519af632bb9b3570cdda696369c30a2fdfa451c1`.
+  Both VM objects are authoritatively Halted/Stopped; their workspaces remain
+  available for minimum-version renewal. Root HEAD/index are unchanged.
+  Hosted CI, Linux/Windows Mix-library renewal, latest-version worker coverage,
+  shared/transitive/mixed-provider qualification, complete provider acquisition/
+  BOM carry, canonical Mix generation, portable package/capture and full
+  framework/wheel/root-receipt gates remain open. ELIXIR-002 remains active.
+  Provider admission currently consults the producer's latest finalized plan;
+  qualification must also cover consumption of an older sealed publication after
+  a producer rebuild, retaining the exact historical issued context rather than
+  assuming the latest source plan describes the older export.
+  Final project verification passes authority/documentation review, reports
+  `project.test_receipt_stale`, and retains three configured skips for locks,
+  source intelligence and HTML observability. The end-cycle peer survey succeeds.
+
+- **ELIXIR-002 historical-provider repair and minimum-version renewal (qualified):** Published Mix libraries must be verified against the exact issued
+  producer plan identified by sealed build history, even after a later producer
+  rebuild changes its latest source plan. Retain finalized plans by identity,
+  keep current execution restricted to the latest finalized plan and live grant,
+  and use historical context only for sealed read-only provider verification.
+  Qualify an actual later provider publication while the consumer continues to
+  select its original library export. Then renew native library/Hex closure and
+  authority guards on the existing minimum-version Linux and Windows workers.
+
+  Minimum-version Windows renewal found a real MAX_PATH failure copying a
+  Standard consumer's nested provider application closure. Replace digest-named
+  provider directories with unique ordinal slots in a versioned sealed layout,
+  retaining full provider identities and tree pins in request/history records.
+  Historical verification and retained runtime dispatch must agree on the exact
+  layout, support existing digest layouts, and reject unknown layout versions.
+  Renew the affected native consumer case and structural guards after repair.
+
+  Repaired snapshot `1c105bb603f9b0ea61dba4140521acd7dededca7` (tree
+  `b43ec96c509add95336ec78bb081217dbbfdb471`) passes 45 focused guards and
+  Make's 145 Elixir checks in 177.204 seconds with fifteen expected opt-in skips.
+  Both native macOS library cases pass in 772.424 seconds; three compiled/source
+  provider regressions pass in 749.285 seconds, without skips. Minimum-version
+  Windows passes 58 unit/native checks in 427.958 seconds on the repaired layout.
+  Linux's preceding historical-plan snapshot passes 57 checks in 898.973 seconds;
+  Windows also passes three compiled/source-provider native regressions in
+  402.307 seconds without skips. Linux repaired-layout consumer renewal passes
+  57 checks in 677.890 seconds,
+  including the actual native rebuild/consumer case, without skips.
+
+  Reviewed source TCB:
+  `sha256:a0b976ef85dbf63720a78bd1bdd45be1aa43f021a9c94d99b2973044bdf3b87d`.
+  Repaired bundle: `sha256:4d66312b89e833d81c5b4ee3c0524dfd61277b12cf0c38fa8fc64cf36a1196ff`.
+  Private renewal evidence: `sha256:4e5eb9c3fdac39a82828be454d1a82b6dc1d1948f0259e2afa2fa8c1dd1a4cba`.
+  Both owned VM objects are confirmed Halted/Stopped, retaining their workspaces.
+  Root HEAD/index remain unchanged. Final project verification passes authority
+  and documentation review, reports `project.test_receipt_stale`, and names three
+  configured skips (locks, source intelligence and HTML observability). End-cycle
+  peer survey succeeds; the dirty active branch remains retained work.
+  This closes the historical-plan/path repair qualification, not ELIXIR-002.
+  Next: carry each provider's acquired archives and source/resolved BOM authority
+  into portable consumer capture, then qualify shared/transitive/mixed closures
+  before exposing canonical Mix selection/generation. Hosted CI, latest-version
+  Linux/Windows, installed-wheel/full-framework and complete root receipt remain open.
+
+- **ELIXIR-002 Mix package custody and evidence carry (in progress):** Generic
+  qualification capture already retains every linked provider export plus exact
+  source/resolved BOM records. Native Mix exports contain their acquired Hex
+  archives, lock, source and runtime evidence. Prove that existing full-graph
+  carry instead of duplicating acquisition metadata in the consumer. Inspection
+  found a production gap: packaged Mix exports have no owner-bound dependency
+  observer, so retained packaged execution fails closed. Bind each copied root
+  to independently sealed native export identities and the current consumer plan,
+  guarded by complete package custody. Qualify original-source/artifact retirement,
+  current-grant revocation, retained archive/BOM reopening and tamper refusal.
+
+  Implemented owner-bound Mix package observers, copying the original native
+  export pins rather than deriving trust from package metadata. Package custody
+  guards the entire linked tree; native verification and current consumer grants
+  guard execution. Native macOS proof passes in 173.340 seconds on Elixir
+  1.20.4/OTP 29 with source-built Hex 2.5.1. It builds the actual older library
+  publication and consumer, packages their complete two-Component graph under
+  an explicit service-root fixture lock, then retires both original sources and
+  original artifacts. The copied consumer returns 42; captured provider archive
+  bytes and both source/resolved BOMs reopen against retained managed graphs.
+  Package tampering and current-grant revocation refuse execution.
+  This proves native packaging and immutable build/export record carry; it does
+  not claim a full accepted qualification run, portable importer admission or
+  canonical Mix generation. Minimum-version package renewal, shared/transitive/
+  mixed Hex providers and full qualification-bundle integration remain open.
+
+  Exact native qualification snapshot: `85c4aded8c398b98853ddd35f85dafa716e852c2`
+  (tree `3fa2876016470f1b1c2beb06193eaa1bc147fa0b`). Bundle:
+  `sha256:b7b7ed835c6724b553524cded5fbdcfbe3907b43cbebbd954e7f6bc81bef4e0f`.
+  Source TCB remains current at `sha256:f5f81c1253db2f79303c40cb912ffaf85aacbd02af29f5d4a85f4812c418bacf`.
+  Private evidence: `sha256:caf7bf1d422544f4421ab803029265e9eafd18e8efdf2d9db1f8f6a03a065174`.
+  Focused Mix/capture checks pass 63 cases, and affected generation fixture checks
+  pass 17. Final Make passes 145 Elixir cases in 44.217 seconds with fifteen
+  expected opt-in skips. Final broader lifecycle/library/Cargo regression passes
+  134 cases in 11.686 seconds with two expected skips. Layout, Ruff formatting
+  and lint, strict OpenSpec, public export and end-cycle peer survey pass.
+  Project verification passes authority/documentation review, reports the stale
+  complete lifecycle receipt, and names three configured skips (locks, source
+  intelligence and HTML observability). Both VM objects remain Halted/Stopped;
+  root HEAD/index remain unchanged. ELIXIR-002 stays active.
+  Next action: renew the packaged consumer/source-retirement/retained-BOM proof
+  on minimum-version Linux and Windows, then implement and qualify shared Hex
+  and transitive/mixed provider closures before canonical Mix exposure and full
+  accepted qualification-bundle, installed-wheel/framework and root-receipt gates.
+
+- **ELIXIR-002 minimum-version Mix package renewal (in progress):** Resume the
+  retained, owner-verified Linux/Windows workers and qualify snapshot
+  `85c4aded8c398b98853ddd35f85dafa716e852c2` with the native packaged consumer,
+  original-source/artifact retirement, captured archive/BOM reopening and
+  tamper/revocation refusal. Include the focused Mix/capture and generation
+  fixture regressions on each platform. Preserve private endpoints and evidence
+  outside Git, and halt both workers after terminal runs. This renews package
+  custody evidence; full accepted bundle/importer and shared-provider gates remain
+  separate required work under ELIXIR-002.
+
+  Renewal passes on both workers: Linux runs 72 checks in 748.302 seconds,
+  Windows runs 72 checks in 399.862 seconds, with no skips. Both use Elixir
+  1.18.0/OTP 27.0 and staged Hex 2.5.1 against the exact snapshot above. The
+  native case executes the packaged consumer after original source/artifact
+  retirement, reopens captured acquired archives and exact source/resolved BOM
+  records, and refuses changed package bytes or revoked current grants.
+  This closes minimum-version native package renewal; ELIXIR-002 remains active
+  for shared/transitive/mixed provider closures, full accepted qualification-bundle
+  admission, canonical Mix generation and the remaining matrix/framework gates.
+  Retained renewal evidence: `sha256:f24aed53ebd358ab6d444aa1f8ed665da3f599809cdb45b3630616373ddd8e70`.
+  Both owned VM objects are confirmed Halted/Stopped with disks retained. Project
+  verification passes authority/documentation review and reports the stale complete
+  receipt plus three configured skips. End-cycle peer survey succeeds; the dirty
+  active branch remains retained work. Direct forge inspection lists existing
+  unrelated issues/reviews; none was merged or adopted in this cycle.
+
+- **ELIXIR-002 transitive shared native closure (in progress):** Qualify an actual
+  Mix library consuming another Mix library, then a consumer selecting both the
+  bridge and original library. Retain the identical shared Hex closure through
+  both imports, execute after source/producer retirement, and refuse retained
+  dependency tampering. This tests exact-byte deduplication; it does not authorize
+  substituting independently compiled dependency payloads with different bytes.
+
+  The new native fixture exposed a second request check that omitted the produced
+  library's public surface when providers were selected. The check now binds the
+  same complete input selection as outer admission. Corrected fixture source
+  namespace and retained-path assumptions without weakening production guards.
+  Native macOS proof passes in 113.074 seconds (Elixir 1.20.4/OTP 29/Hex 2.5.1).
+  A real leaf with Decimal is imported by a bridge library; the final consumer
+  selects both publications and shares exactly identical application bytes. It
+  returns 42 after all sources and producer artifacts retire, then refuses
+  retained indirect Decimal tampering. This lower-level native proof does not
+  replace Standard graph/export authority, independent compilation conflict
+  handling or complete portable qualification-bundle admission.
+  Make passes 146 Elixir checks in 42.548 seconds with sixteen expected opt-in
+  skips; all twelve final CI-policy checks pass. Layout, lint, formatting, strict
+  OpenSpec and public-export gates pass. Source TCB is reviewed and current at
+  `sha256:a863dd19d23c06080bc255d85e901325dae93e39d78b84ff3e200e9a26c7300f`.
+  Exact renewal snapshot: `46e50ebea9c24a657732a6fe96d617a7dae19946`
+  (tree `9b1caa065c37456218c41ae59a2e4fa03da441f5`), based on the package
+  snapshot above. Bundle: `sha256:5912a170ff29a9384b3d3125231c74e897fa2ea6ce41ad3ee68c53dfb3c30409`.
+  Private evidence: `sha256:9867d7ac89946083edb59f7cb41709dfc722073461b1d5c2a88e6d9a762471da`.
+  Root HEAD/index remain unchanged. Documentation authority review is current;
+  verification passes authority, names the stale complete lifecycle receipt and
+  three configured skips. End-cycle peer survey succeeds. Both workers remain
+  stopped after the earlier package renewal, with disks retained.
+  Next action: renew this transitive native fixture on minimum-version Linux and
+  Windows using the exact snapshot, then qualify Standard transitive/mixed graph
+  authority and independently compiled shared Hex conflicts. Canonical Mix
+  generation, complete bundle/importer admission, hosted/latest-version matrix,
+  installed-wheel/full-framework and complete root receipt gates remain open.
+
+- **ELIXIR-002 Standard transitive graph/package qualification (in progress):**
+  Native direct/transitive closure renewal runs on the owned minimum-version
+  workers against snapshot `46e50ebea9c24a657732a6fe96d617a7dae19946`.
+  Add a distinct native Standard three-Component fixture with a locked storage
+  library, service library and application. Issue actual indexed build grants,
+  retain each published dependency identity, revoke historical producer grants
+  and retire source before the next consumer builds. Package the complete graph,
+  retire all original artifacts, execute under the current root grant and reopen
+  exact source/resolved BOM records for every Component. This is native build,
+  publication and packaging proof; complete accepted qualification-bundle admission
+  and canonical Mix generation remain separate gates.
+
+  Minimum-version native transitive renewal passes: Linux runs 72 checks in
+  491.788 seconds, Windows runs 72 checks in 283.451 seconds, both without skips
+  on Elixir 1.18.0/OTP 27.0/Hex 2.5.1. Both use the exact frozen transitive
+  snapshot above. This completes lower-level native transitive/shared-byte closure
+  renewal; Standard graph and complete accepted bundle gates remain distinct.
+
+  The Standard three-Component native graph passes on macOS in 166.196 seconds
+  (Elixir 1.20.4/OTP 29/Hex 2.5.1). Corrected fixture grant-wrapper access,
+  dependency ordering and explicit graph driver input. All three actual indexed
+  builds succeed after prior producer grants/source retire. Package assembly
+  retains the exact leaf/bridge publication closure; the copied root returns 42
+  after every original artifact and source is removed. Captured source/resolved
+  BOMs validate against retained managed graphs for all three nodes. Current root
+  revocation refuses packaged execution. Add this sixteenth native fixture to CI.
+  Inspection also identifies the next production integration gap: qualification
+  capture decodes generic, Cargo and NPM build observations, but has no typed
+  `literate-ai/mix-build-evidence@1` branch. Implement and qualify that inert
+  retained-byte decoder before claiming complete portable bundle admission or
+  exposing canonical Mix generation. Cached history must remain distinct from
+  current consumer/root execution authorization. Platform renewal of this new
+  Standard fixture, mixed provider graphs, independently compiled shared Hex
+  conflicts, hosted/latest-version matrix and wheel/framework/root receipt gates
+  remain open under ELIXIR-002.
+
+  Exact Standard graph renewal snapshot: `369d778a7f6de0ca9a64caf8dbda43596e9c8a5d`
+  (tree `3e69c68868e245182f3338ba71ebd65d10a17c3b`), based on the qualified
+  lower-level transitive snapshot. Bundle: `sha256:5d2733754b8fcf12ddf5fb1142f9aecc28c6833c41a000efc5cb891bfd023a6a`.
+  Standard graph private evidence: `sha256:6970f3b123d35071498784bd176c94566ee81e83044db10a921d551d561e361c`.
+  Minimum-version lower-level transitive renewal private evidence:
+  `sha256:30728d431c7bdda86927ce440c4f32006afe239a1b77437ffb0f5292d7dffb25`.
+  Final Make passes 147 Elixir checks in 40.932 seconds with seventeen expected
+  opt-in skips; affected fixture and CI-policy checks pass all twenty cases in
+  0.331 seconds. Layout, Ruff formatting/lint, strict OpenSpec and public export
+  pass. Documentation review is current; verification passes authority, names
+  the stale complete receipt and three configured skips. End-cycle peer survey
+  succeeds; current unrelated forge items remain untouched. Both owned workers
+  are confirmed Halted/Stopped, disks retained. Root HEAD/index remain unchanged.
+  Next: implement the typed Mix capture decoder and qualify complete retained
+  native archive/lock/request/authorization/provider history reopening without
+  host execution. Renew the frozen Standard graph fixture on Linux/Windows in
+  parallel with that work, then address mixed/shared conflict authority and expose
+  canonical Mix selection/generation through full accepted bundle gates.
+
+  Standard graph minimum-version renewal now passes on the exact frozen
+  `369d778a7f6de0ca9a64caf8dbda43596e9c8a5d` snapshot: Linux 72 tests in
+  745.313 seconds and Windows 72 tests in 396.722 seconds, both without skips
+  on Elixir 1.18.0/OTP 27.0/Hex 2.5.1. Both owned VMs are Halted/Stopped
+  with no running VMI and persistent disks retained. These results qualify
+  the earlier graph/package implementation; they predate the capture decoder.
+
+- **ELIXIR-002 native Mix capture admission (in progress):** Implement a bounded,
+  inert native Mix build decoder using canonical directory-export bytes. Bind
+  historical request/grant and issued origin plan separately from current build
+  authority, acquired Hex archive checksums and lock, native process streams,
+  compiled provider closures and exact file/runtime inventories. Existing generic
+  capture authorization assumes request toolchain equals language compiler;
+  Standard Mix deliberately binds the complete Hex/Mix toolchain instead. Admit
+  that distinction only through the exact typed Mix target identity and require
+  native Mix evidence for such requests. Reject substitution before execution;
+  captured history grants no new build or runtime authority. Renew the frozen
+  earlier Standard graph snapshot on owned Linux/Windows workers independently.
+
+  Implemented the bounded native decoder and threaded independently supplied
+  current command contracts and retained provider exports through run/product
+  reopening. Preserve original issued Mix build observation provenance on cache
+  reuse; the current authorization check still binds the renewed plan and grant.
+  Convert archive/lock dependency failures to the stable capture error boundary.
+  Native macOS proof passes in 172.041 seconds for all three actual builds,
+  expired-origin cache reuse under renewed authority, no extraction/execution,
+  and six rehashed negatives (archive, stream, provider BEAM, runtime module,
+  public interface and failed phase). Private capture retention/replay is finalized below; this is build admission proof, not a complete accepted
+  qualification run. Owner regressions pass 115 cases with two expected skips;
+  final reader/Cargo/NPM checks pass 39 and 29 cases. Make passes 147 Elixir
+  cases with seventeen expected opt-in skips in 42.514 seconds. Layout, Ruff,
+  strict OpenSpec and public export pass. Minimum Standard graph renewal archive:
+  `sha256:6cda2d5e95adba010559d0e83c568fd7558c6577b55cd3eecce4a6f2d5f948a7`.
+  Next: qualify a complete accepted Mix run through portable bundle/importer
+  admission, then renew the decoder on minimum-version workers. Mixed providers,
+  independently compiled shared Hex conflicts, canonical generation, SDK/package
+  integration, hosted/latest matrix and current wheel/framework/root receipt
+  remain open. ELIXIR-002 remains active.
+
+  Reviewed lifecycle TCB: `sha256:8273e95419551a3b7771ad19280b7a56e9fc05c27e76a457ed21acd3e3aece13`.
+  Frozen capture source snapshot: `9ad4fa9cace5f7dab5e0bf914c6a8da65f2a8ccf`
+  (tree `927845492aa0ea4e27d58e55ae2444937128fab4`), bundle
+  `sha256:4a522bf33458917d9a51d149cd0d8451a46bfba3927c71e3e7e685677081cf83`.
+  Full declared verification passes authority/documentation review, reports the
+  stale complete project test receipt and three configured skips. End-cycle
+  peer survey and read-only forge inventory succeed; no work is collected,
+  and unrelated issues/reviews remain untouched. Active branch HEAD/index
+  remain preserved; both owned VMs remain stopped with their disks retained.
+
+  Final native replay proof passes in 171.756 seconds. Protected actual native
+  capture records and export bytes reopen all three builds with current source
+  after original source/artifact removal, under extraction/execution refusal mocks.
+  Sealed private capture evidence: `sha256:f0bb19dda4c9a05b42317506c7035aad2fb9386564d375087489a3e883433566`.
+  The next unchecked action remains complete accepted Mix run/importer admission.
+
+- **ELIXIR-002 accepted Mix lifecycle/capture integration (in progress):** Drive
+  Windows renewal exposed platform-dependent path ordering in directory exports
+  and native inventories. Normalize producers to relative POSIX string order,
+  add mixed-case and nested-prefix regression coverage, and renew native capture
+  qualification. Preserve canonical reader checks and exact content pins.
+
+  The repair passes 71 local reader/builder/lifecycle checks with two existing
+  optional skips; layout, lint/format, strict OpenSpec and public export pass.
+  The preceding accepted-lifecycle snapshot renews Linux native qualification
+  with 72 checks in 859.987 seconds and no skips. Repaired-source native renewal
+  on all three hosts, installed-wheel smoke and the full Python suite are active.
+  Current project authority verifies; the configured root receipt remains stale.
+  Repaired native macOS capture passes in 187.351 seconds. Windows passes archive
+  admission but exposes case-folded provider BEAM traversal in the runtime module
+  list; normalize the remaining native module producers and renew that proof.
+  The filename-order repair passes 28 reader/native-builder regressions with no
+  skips. Full-suite execution stops at the self-hosting snapshot-drift guard
+  because the BEAM producer repair changed source during the proof. Rerun that
+  gate from stable reviewed authority; do not treat it as a suite pass.
+  Final BEAM traversal renewal passes native Windows with 100 tests in 394.631
+  seconds and no skips, and macOS graph/capture with one test in 174.831 seconds.
+  Linux passes 100 checks in 753.815 seconds on the preceding archive-order
+  snapshot; final BEAM-source renewal is active. An actual initialized project
+  now provides a noneditable installed Standard binding, current Component lock,
+  independently authored native baseline, verifier-owned library oracle and
+  parity profile for the remaining two-run proof. Its driver must be rebound
+  through the reviewed operation after the final current wheel qualifies.
+
+  provider generation through a locked test-owned Mix library profile and the
+  actual Standard native test, execution, package and independent acceptance
+  stages. Retain real source, process and lifecycle records before retiring
+  custody, then reopen them through the portable capture/importer boundaries.
+  Begin with a dependency-free Mix library to isolate lifecycle provenance;
+  acquired Hex and transitive compiled closure remain separately qualified native
+  evidence and require full accepted graph coverage before broad completion.
+  Preserve current execution authorization, library oracle isolation and all
+  source/BOM/recipe/driver bindings. Canonical Mix selection stays gated until
+  the accepted qualification bundle is verified.
+
+  Native composition exposes a real projection/assembly defect: Mix libraries
+  correctly project a Python verification runtime around the selected Elixir
+  command, but the adapter required the outer runtime identity to equal Elixir.
+  Bind library runtime identity to both phase driver bindings and retain the
+  exact embedded Elixir command checks; direct application runtimes still bind
+  Elixir. Correct manual fixture runtime identities and add projected assembly
+  plus mismatched-driver refusal to the existing projection regression. This
+  repairs authority interpretation without weakening tool or grant custody.
+
+  The projection/assembly regression passes all fifteen affected cases. Current
+  native library/consumer and Standard transitive capture graph regression passes
+  two cases in 343.518 seconds, including the corrected driver identities.
+  A provider-generated dependency-free Mix library completes actual native
+  generated tests, import observation, packaging and three independently authored
+  acceptance cases; the typed accepted lifecycle reopens. Source and generation
+  records also reopen after original custody retirement. The private helper
+  initially omitted the disabled indexer's record capture, which the production
+  qualification adapter already attaches. A fresh generation run now retains
+  that index evidence before cleanup; no missing record is synthesized. Full
+  run/receipt/parity/importer admission remains a separate required gate.
+  Make passes 147 Elixir cases in 43.843 seconds with seventeen expected opt-in
+  skips. Layout, Ruff lint/format, strict OpenSpec and public export pass.
+
+  Fresh live capture now retains the real disabled-index observation. A bounded
+  canonical archive reopens the actual accepted lifecycle after all original
+  generation workspaces and artifact/package roots are removed. Pure readers
+  revalidate source and generation provenance, indexed authorization, source and
+  resolved BOMs, native Mix build, generated tests, execution, copied package
+  processes and the separately authored library oracle under extraction/execution
+  refusal mocks. Native lifecycle identity:
+  `sha256:270cec938fd867a20944171ae748060b0aac57f932696acbad0190b8f03af9f8`.
+  Record archive: `sha256:ed4d1f61a41d8bd8bebfde8f9894988bad920eae7318074114164e97fad8195f`.
+  Protected native evidence: `sha256:5a5518af8bf2e184659e5f10bf1ff61401690fc763c3bd136da8e18636df9908`.
+  This closes accepted native stage/capture integration for one dependency-free
+  Mix library. It does not establish two-clean-run receipt/parity or importer
+  admission; that remains the next unchecked acceptance action.
+
+  Current source snapshot: `66f753504ed506cf6d6c9dd06719b273d5cd7896`
+  (tree `a42d2a926ba893b977a95bafe6b7da26e55dce6b`), bundle
+  `sha256:82002b0ed241bf98af1fbaaf0f628761c04948af00682365c2fa8e5921b6585b`.
+  Reviewed driver TCB: `sha256:18e18ac065bdc1bd3eea64efdb337e86aa46b536b07bf7028f871d10eda7014f`.
+  Full verification passes authority/documentation review, names the stale full
+  project receipt and three configured skips. The installed-wheel gate requires
+  a clean Git revision and refuses the active dirty branch; run its exact gate
+  from a detached private qualification snapshot under the approved worktree
+  root instead. Retain that worktree while its installed qualification is live;
+  no landing, branch cleanup or collection is authorized. Native minimum-version
+  decoder/driver renewal now runs on both owned workers against the same frozen
+  source, after fresh VM/VMI/Pod UID-chain and readiness validation. Reap these
+  jobs and halt both workers when they finish; retain their persistent disks.
+
+- **ELIXIR-002 canonical Mix selection (in progress):** Two actual forced-generation
+  native Mix runs now produce real receipts and independent parity, and their full
+  library products reopen from bounded archive bytes after scratch retirement,
+  with host execution and extraction disabled. Qualification identity
+  `sha256:a3eac9a3207e293e49a16e5a41ead50433e016d3754c63f49217e9b98501a023`;
+  archive `sha256:5b1cc887679688488fd0a03710691233d05272ec731fa94d600e89ee3121c848`
+  (1,688,578 bytes). This clears the complete-bundle gate for canonical Mix Flavor
+  and generation skill exposure. Implement root/template parity and prove catalog
+  selection and initialized-project installation in an isolated development tree
+  while the preceding snapshot's full framework suite remains live. Importer
+  admission still needs legitimate signed source promotion and independently
+  reviewed consumer authority. The signed-human source review is pending.
+  Canonical catalog regression passes 11 cases in 23.425 seconds with no skips;
+  the complete initializer module passes 62 cases in 215.103 seconds with no
+  skips. Layout, public export, lint, formatting, strict OpenSpec, documentation
+  rendering, and root/template skill validation pass. The owner gate correctly
+  detects initializer mapping drift in the lifecycle-driver TCB; review its
+  nine added catalog-mapping lines and record the new pin before installed-wheel
+  qualification. The root full framework suite remains on its unchanged
+  preceding source snapshot; do not claim its receipt covers this new catalog.
+
+- **ELIXIR-002 current-toolchain Hex staging (in progress):** Build the exact
+  pinned Hex 2.5.1 source with the selected native Elixir/Mix installation for
+  OTP 29, retaining the OTP 27 prebuilt path. Verify source bytes and bounded
+  archive members before execution, isolate Mix homes, bind the native command,
+  and preserve an existing plugin on refusal. Prove refusal regressions and
+  actual source builds on all three platforms before advancing the newer CI
+  cells to Elixir 1.20.4 / OTP 29.1.1. The current Linux Bazel disk refusal is
+  an infrastructure issue; rerun using a task-owned cache on the data disk.
+  The corrected helper builds actual Hex 2.5.1 source successfully on macOS,
+  Linux and Windows with Elixir 1.20.4 / OTP 29.1.1. Its exact source archive
+  is `sha256:386936947eec8023eeff5c6ee936ea093a7a67592b93bc66eabd32eb9628c7a2`.
+  An initial versionless archive filename caused a fail-closed member refusal;
+  the versioned filename repair is covered by regression. Six staging cases and
+  twelve CI pin cases pass without skips; lint and formatting pass. Native
+  discovery independently loads the macOS result as Hex 2.5.1 and binds its
+  132 files. Latest native worker suites and Linux/Windows plugin discovery
+  remain pending. The Linux Bazel retry passes one actual conformance case in
+  45.815 seconds using a cache on the task-owned data disk. Do not convert the
+  original full-suite failure into a full latest-platform pass.
+  Canonical Mix installed-wheel qualification passes against revision
+  `2aeb08d167e0047627ba5c368c09d31416458d50`; wheel identity
+  `sha256:c0ec8e10f481b44e6a49a00ed217777bd6cee6526e8d7746f498113984a663db`.
+  An independent noneditable installation observes distribution
+  `sha256:4f94a07ecaa795b0cdfb385cae4d0c701f5be347e77c756b92b5933c88aa76c2`
+  with 985 members. This completes wheel/catalog qualification, while a new
+  canonical recipe's native generation and legitimate importer admission remain
+  separate gates. No published or hosted-CI attestation is claimed.
+
+- **ELIXIR-002 Mix library launcher guidance repair:** The canonical
+  two-run qualifier accepted its first native run, then refused the second
+  generated launcher: unconditional parallel compilation redefined a module
+  already loaded from the retained Mix runtime and the launcher halted on its
+  warnings. The selected Mix skill repeated the default source-only compiler
+  instruction. Correct only that build-system skill: Mix library launchers call
+  the retained compiled exports directly; standalone source-only library
+  launchers retain their closure compiler. Preserve module custody, warning
+  failures, native tests and independent acceptance. Validate shipped-template
+  parity and skill contracts, then renew real two-run qualification with the
+  new recipe identity. Retain the failed capture; do not edit generated source
+  or fabricate a successful receipt.
+  The repaired skill and shipped template are byte-identical at version 1.0.1.
+  Eleven catalog/initialization cases pass in 7.002 seconds without skips.
+  SkillEvaluator passes the root entry point, selected Mix skill and shipped
+  template. Two fresh provider-generated native runs now pass and their full
+  qualification products reopen without host execution. Qualification identity
+  `sha256:e4d9008269fae57f6afff338d71cdc3ec31f7a716bf101d784869958e11f977e`
+  binds archive
+  `sha256:fb23fadca976c374f2ce4ea47362c8e33d87bd7c54c6a13fc316b23a9f01a524`.
+  This proof uses the accepted canonical Mix wheel with a reviewed project-owned
+  1.0.1 skill override. Updated shipped-wheel acceptance and importer admission
+  remain separate gates; the earlier 1.0.0 failure remains retained.
+  Updated shipped-wheel smoke now passes for reviewed source
+  `6f4f53db91fe54d079a2a187efb10894290e0eb3`, wheel
+  `sha256:83c9553b73a463ba71fa2b0a687d7c069e6602ca430d94cb2773f370adca6418`
+  and installed distribution
+  `sha256:8385d85ebf7749fa0eeb53e622b45384def924dd8ca2ef39241ab5b057628cc1`.
+  The dedicated noneditable qualification environment uses that retained wheel.
+  Its fixture's exact reviewed Standard rebind plan was applied through the
+  public CLI; accepted-source membership and receipts remain stale until native
+  renewal. The earlier successful two-run archive retains its original binding.
+  A fresh empty library initialized through the accepted installed wheel selects
+  `lang-elixir` and `build-mix`, receives the shipped 1.0.1 Mix skill byte for
+  byte, and resolves the same installed Standard distribution without an
+  override. This proves installed selection/template custody; it does not
+  replace native generation or importer admission.
+
+- **ELIXIR-002 independently compiled shared Hex conflict:** Native macOS qualification passes using the real checksum-pinned Decimal 2.3.0 archive: independently compiled debug-information variants both execute arithmetic returning 42, while the authorized consumer refuses their divergent compiled bytes with `builder.mix_provider_conflict`. Versions, source checksums and application metadata remain equal. `make python-check PYTHON_TEST_PATTERN=test_elixir_mix_shared_qualification.py` passes one native test without skips. The six native CI cells now include this fixture and require all seventeen tests without skips; Linux/Windows renewal and hosted CI results remain pending.
+
+- **ELIXIR-002 mixed-provider dependency inventory custody:** The source-provider compiler now pins its compiled-dependency inventory across the native probe, alongside existing source, dependency-byte and consumer-authority guards. A regression reproduced inventory replacement before the repair and now proves refusal with `builder.mix_provider_changed` after exactly one probe, before source compilation. Five focused custody tests pass without skips. Reviewed lifecycle-driver identity is `sha256:8d94fa3a49d77e3422eecd73b955e08cb0e7a2644fbbd4ec2ab5c4a4babbee9c`. Full native mixed-graph qualification remains separate.
+
+- **ELIXIR-002 mixed graph assembly requirement:** Before explicit composition, `ArtifactBuildGraph`
+  required every manifest to use its selected exact build-driver identity, and
+  Standard project assembly refused multiple drivers. A default source-only
+  Elixir library binds the Python tree-build driver while a Mix producer binds
+  its native Hex/Mix driver. Qualification must preserve those measured bindings;
+  coercing manifest identities would not prove a complete mixed package graph.
+  This shared framework limitation also applies outside Elixir. The next mixed
+  graph action is to establish explicit authority for a composite driver and
+  package execution, then prove the native graph with source and producer
+  retirement. Separate successful import fixtures do not satisfy this gate.
+
+- **ELIXIR-002 active-branch integration (2026-10-08):** The prepared canonical
+  Mix catalog, shipped Mix skill 1.0.1, pinned Hex source staging, shared native
+  Hex conflict fixture and dependency-inventory custody repair are integrated into
+  the active branch. All 26 integration paths match their retained candidate byte
+  identities. Strict lint and formatting pass on the nine affected Python files;
+  the five source-provider custody tests pass on the integrated branch. The earlier
+  checkpoint repair run completed 3,093 tests with 11 skips and requested a fresh
+  complete run; its subsequent Make exit was 2, so it is not full-suite evidence.
+  The next action is fresh integrated regression and owner-gate qualification.
+  Direct management-host SSH succeeds, but VM jump connections still fail; latest
+  remote native results remain uncollected. Mixed graph assembly, retained importer
+  admission and required human source review remain open.
+
+- **ELIXIR-002 explicit composite graph authority (implemented; native proof open):**
+  Mixed-driver graphs retain each Component manifest unchanged and bind the exact
+  canonical driver set through a composition identity. Standard assembly derives
+  this set from finalized manifests; missing, extra, changed or unordered driver
+  bindings refuse. Single-driver graph bytes remain compatible. Twenty-seven
+  artifact contract tests and six wire-schema tests pass in the isolated candidate.
+  The fresh integrated full Python run stopped after sixteen tests because the
+  localhost HTTP fixture could not bind a TCP socket (`Operation not permitted`).
+  Native Mix library qualification independently refuses its TCP filesystem lock;
+  documentation validation cannot reach npm audit. These environmental failures
+  remain failures. Native mixed-provider packaging with source and producer
+  retirement, full regression, retained importer admission and human review remain
+  required; composite graph implementation alone does not close their gates.
+
+- **ELIXIR-002 composite graph integration evidence:** The explicit composition
+  contract, v2 schema and Standard graph assembly are now integrated into the
+  active branch. Six Make-managed affected groups pass 115 tests without skips:
+  artifact contracts (27), wire schemas (6), Standard lifecycle (40), retained
+  library exports (7), package/release contracts (21) and root integration (14).
+  Full lint/format, layout, OpenSpec, public-export and current driver/runner
+  checks pass. Current reviewed driver identity is
+  `sha256:a8417977e1701830caa83f0281bf3ed05d4a7c057865a0f755f7b569b6add012`.
+  Native mixed-graph execution is not established by these unit regressions.
+  Latest worker results, current installed-wheel native renewal, retained importer
+  admission, human source review and a complete current project receipt remain
+  unfinished.
+
+  After composite integration, the Elixir regression again passes 154 tests with
+  18 opt-in/tool skips. Read-only all-declared verification passes authority,
+  reports three configured skips and refuses the stale receipt. It is not a
+  complete qualification pass.
+
+- **ELIXIR-002 human source review accepted (2026-10-08):** The user accepted
+  the exact reviewed integer-addition library contract. The source inventory
+  remains `sha256:c5aa6ffddbef83eede20c60d4327b31df8b93e8714ad4aa9497e482606e9d33c`.
+  Public `litai spec attest`, `spec derive`, `spec review` and `spec accept`
+  verified its local source attestation, recorded the actual human decision,
+  resolved the static behavior uncertainty and accepted the reviewed graph.
+  Signed review identity is
+  `sha256:492d1096a1e4fc8a665c743b763c96b23b631fe3557e7d8d1bc535b9edd26119`;
+  accepted specification identity is
+  `sha256:f2227944064754f169a71992b04673878942409bb8297c83d63850ab05893fd5`.
+  The accepted authority is intent only and explicitly still requires native
+  qualification. Qualified provider promotion, current installed-wheel renewal,
+  retained importer admission and a current root receipt remain open.
+
+- **ELIXIR-002 native composite graph renewal (in progress):** Add a real
+  three-Component fixture combining a default source-only Elixir leaf, a compiled
+  Mix library with an authenticated Hex dependency and a compiled Mix consumer.
+  Preserve their distinct measured driver bindings, retire original source and
+  producer publications, then execute the retained root package and reject revoked
+  current authority. Extend each native CI cell to require all eighteen fixtures.
+  Qualify this exact source in a private remote checkout with independently measured
+  installed toolchains; leave the worker's existing repository and host tools intact.
+
+- **ELIXIR-002 mixed graph fixture and execution limits (2026-10-08):** The native
+  three-Component fixture now combines a source-only Elixir leaf with a Hex-backed
+  Mix bridge and Mix application. It requires exact two-driver graph composition,
+  execution after all original sources/publications retire, inert reopening of
+  retained indexed grants/plans/builds and source/resolved BOMs, and refusal after
+  current consumer-grant revocation. CI requires all eighteen native fixtures
+  without skips. The actual local native attempt builds the source-only leaf then
+  fails at bridge `deps.get`: Mix cannot acquire its TCP filesystem lock
+  (`:eperm`). Direct SSH inspection on the authorized remote host succeeds and
+  confirms Elixir 1.18.3/OTP 27; a private qualification directory was prepared,
+  but automatic approval review rejects source-transfer terminal input because
+  approval is required and the session policy is `Never`. The transfer receiver
+  exited without writing an archive; the existing remote checkout is unchanged.
+  Native mixed-graph proof, current installed-wheel renewal and independently
+  authorized retained importer admission remain open. Human intent acceptance
+  is already recorded and does not need repeating.
+  Current-source local regression completes 155 Elixir tests in 46.270 seconds
+  with 19 native/opt-in skips; the twelve CI-policy checks pass without skips.
+  Lint, formatting (1,316 files), lifecycle-driver and runner reviews, repository
+  layout and public-export checks pass. These partial gates do not replace the
+  eighteen required native fixtures or the complete current project receipt.
+
+- **ELIXIR-002 execution renewal and Bazel pin repair (2026-10-08, in progress):**
+  Execution access is restored. The current mixed source/Mix three-Component and
+  existing transitive graph fixtures pass on macOS: two tests, 324.367 seconds,
+  no skips, including inert retained evidence reopening after producer retirement.
+  Earlier latest-version worker logs were collected and independently rehashed:
+  Linux and Windows each pass 126 tests without skips on the older catalog snapshot.
+  The complete current source snapshot was transferred and all 2,354 file hashes
+  verified in a private remote checkout. Qualification staging exposed Bazelisk
+  selecting latest Bazel 9.3.0 outside a Bazel workspace instead of the repository's
+  9.2.0 pin. Repair the staging helper to bind the explicit repository version;
+  renew native gates with private caches containing only the selected version.
+
+- **ELIXIR-002 renewed execution evidence (2026-10-08):** The Bazel qualification
+  stager now explicitly selects the repository's 9.2.0 pin before downloading or
+  executing tools. Two refusal/environment regressions pass. All eighteen native
+  fixtures pass without skips on macOS Elixir 1.20.4/OTP 29.1.1 and an authorized
+  Linux host running Elixir 1.18.3/OTP 27. This includes the mixed source/Mix graph
+  and independently compiled shared-Hex conflict. Exact latest-version Linux and
+  Windows VM renewal is running; exact 1.18.0/OTP 27 jobs are prepared separately.
+  Current runtime/shipped-asset wheel qualification passes for private revision
+  `c7b63131b1f2d33668f0f410a990f04a96c94726`, wheel
+  `sha256:94e98e638c37391b48de61f2ae66cf2b1c06e7f54c23574b0ae4c039cf60ddaa`,
+  installed distribution
+  `sha256:971609d12afb197aa46d510bdeff43119ba729f161eec04134985cb5acd2b31c`.
+  Subsequent staging-helper tests and task-status prose are outside those installed
+  runtime assets. Two real forced-generation Mix runs pass independent parity;
+  their complete products reopen from bounded archived bytes after both producer
+  scratch trees retire. Qualification:
+  `sha256:e956b64cd58e4b2030f360f05c6a6b8bf2b3f7e0ec1fea458f06b99b7ce06dff`;
+  archive `sha256:fca1fde13bc13bee1427f90f1d007056e29a402b936bd232b3fd2a0949b0077c`
+  (1,690,021 bytes). Public signed source acceptance creates a source-free project,
+  but its first native qualification refuses generated empty license metadata.
+  Resolve the operator's package-license choice without changing the accepted
+  exact-sum behavior contract, then renew the reviewed generation inputs and
+  qualify that promotion. Independent retained importer admission, full framework
+  completion, hosted CI and the current complete root receipt remain open.
+  Documentation rendering and changed-skill evaluation pass; read-only project
+  verification passes authority review and reports the stale root receipt.
+
+- **ELIXIR-002 current native and accepted-source evidence renewal (2026-10-08):**
+  Current latest-version Linux and Windows VM runs each pass all eighteen native
+  fixtures without skips on Elixir 1.20.4/OTP 29.1.1 and Bazel 9.2.0. Complete
+  logs independently match durable supervisor identities
+  `sha256:0b57f20770c40d1947c9f67788816381b2083a8e823a511d3c6d7bd806c67f93`
+  and `sha256:902ae93e2f1cb7fc729b4b9d72fac1008b12ca0019bfb789971d1bf7ca490c50`.
+  Exact-minimum Windows Elixir 1.18.0/OTP 27.0 also passes eighteen without skips;
+  its verified complete log is
+  `sha256:3b2bf948c86ebd9350bc06a578801a4c1b2409149b1afdaceb864e3fc43de547`.
+  Exact-minimum Linux is in progress; exact-minimum macOS and hosted CI remain open.
+  Reviewed private qualification-package metadata uses Apache-2.0, matching the
+  repository, without changing the signed behavior contract. Public native
+  source promotion now qualifies with two genuine clean generation runs:
+  `sha256:2c8d95320c7baf629ab1d94375c87fb61b6b1015275a123763079c2b0a7bface`,
+  qualified projection
+  `sha256:7bfdcfbbe12c44f9c8ea13b66f0136e23d2ec10d2db8f0aad126928efbe34d61`.
+  Its bounded archive
+  `sha256:7ad08e428a848cd3e142460ed268df007db4ef29ba058d1bef108d3386410b29`
+  (1,676,885 bytes) reopens both complete products against independently resolved
+  current provider authority without execution or temporary extraction. A separate
+  guarded compiled Mix consumer performs an actual runtime library call after
+  producer and consumer source retirement and rejects changed provider BEAM bytes
+  with `builder.mix_artifact_changed`. This proves native consumption; public
+  retained Mix import/admission service qualification remains open.
+  The complete root lifecycle failed on an empty durable split-service generation;
+  a subsequent bounded diagnostic reports timeout and coding CLI network routing
+  failures. Retain both failures; neither is a passing root receipt. The full
+  framework suite continues without recorded failures. Next qualification action:
+  finish and collect the running minimum Linux and framework checks, then resolve
+  the live model connectivity failure before renewing the complete root lifecycle.
+
+- **ELIXIR-002 exact-minimum macOS renewal (in progress):** Build OTP 27.0
+  into a private prefix from its independently pinned source archive, stage
+  checksum-verified Elixir 1.18.0 and source-built Hex 2.5.1, and run the same
+  eighteen native fixtures with Bazel 9.2.0. Preserve ambient host installations.
+  Require a terminal zero result, eighteen JUnit cases with no failures/errors/skips
+  and an independently verified complete log before claiming this matrix cell.
+
+- **ELIXIR-002 complete-root renewal (in progress):** The real durable split-service
+  diagnostic retry passes all 30 checks after the earlier model transport failures.
+  Run the public complete-project rebuild with a new object/checkpoint root and
+  external runtime custody. Reuse generated-source cache bytes only through the
+  unchanged current admission, native build, test and acceptance gates. Preserve
+  the failed attempts and the standalone diagnostic; neither substitutes for the
+  complete fresh sample matrix and current root receipt.
+
+- **ELIXIR-002 root metadata guidance repair (in progress):** The fresh root
+  lifecycle with verified Bazel 9.2.0 fails closed when the service-stack generator
+  emits a framework test-manifest integer outside the canonical signed 64-bit
+  range. The recipe envelope already specifies manifest shape but omits numeric
+  representation bounds. Add the existing metadata limit explicitly to generation
+  guidance; keep specification-defined application arithmetic and the canonical
+  validator unchanged. Add a regression proving oversized manifest numbers remain
+  refused and bounded boundary values remain valid. Renew the reviewed driver,
+  affected Make checks, wheel and live sample/root evidence after this core prompt
+  repair. The preceding full suite passes 6,108 tests in 13,578.280 seconds with
+  57 normal skips; it predates this repair and is not fresh post-repair attestation.
+  Current native Elixir builders and catalogs pass all eighteen fixtures without
+  skips on all six local latest/minimum OS cells. Exact-minimum macOS complete-log
+  identity is
+  `sha256:f87d9c98951969ba4d4f4af14efc9859febe7dc595cce61d90c02d733f98bb30`;
+  exact-minimum Linux is
+  `sha256:d101e0e0e3e2925711007c3c2bba4ec06deb7ab94ba43cebc22edffc3b5228aa`.
+  Both owned qualification VMs are halted with persistent workspaces retained.
+  A separate retained consumer also passes eight actual runtime vectors, including
+  signed 32-bit extremes with signed 64-bit sums, after source retirement and
+  still refuses provider BEAM tampering.
+
+- **ELIXIR-002 metadata repair qualification renewal (2026-10-08):** The renewed
+  noneditable wheel passes smoke verification with identity
+  `sha256:a96c1e65060d27acf1e4e40dad8d89692f1687599044783937324a1559555ca9`.
+  Reviewed Standard rebind and documentation review preserve the signed human
+  acceptance and package target. Public source qualification
+  `sha256:6cacd46dd9f12f1aa6e59b4c92df3473eeec8356cbabae9b2798d98f20c0a04d`
+  passes two clean runs and current-provider archive reopening, including a
+  separate inert reopening with producer scratch absent throughout. The native
+  consumer passes eight signed-integer vectors after provider/source retirement
+  and refuses changed provider BEAM bytes. This remains a standalone consumer
+  proof; public retained Mix importer admission is still open.
+  The complete fresh root lifecycle passes 328 checks. Public receipt update
+  installs `sha256:383e0f7ee131d8479a0ce8efb76569117cbcdce6304f0bf6300918e0da010a6b`;
+  all declared gates pass with three configured skips. Documentation rendering
+  passes all 728 Mermaid diagrams. Two complete Linux framework shards pass
+  2,634 tests (92 skips) and 1,205 tests (14 skips), with independently verified
+  complete logs. The remaining shard fails closed on a guest Rust library
+  symlink introduced during disk-space repair; preserve that failure, replace
+  compiler directory links with real mount points, and retain the successful
+  eight-test native recheck. Install the missing native SDK prerequisite and
+  repeat the complete remaining shard with a fresh checkpoint. The owned Linux
+  worker remains active for that work; the Windows worker remains halted.
+  Hosted CI and public retained Mix importer admission remain separate open work.
+
+- **ELIXIR-002 complete local framework renewal (2026-10-09):** The fresh final
+  Linux shard passes 2,262 tests in 4,063.924 seconds with 18 normal skips after
+  the guest path repair and native SDK prerequisite installation. Its complete
+  retained log verifies against
+  `sha256:d494f9d43ae945ffacfef15124414c69470e3e305f113f3ad98e9a2d5ef6404a`.
+  All three disjoint shards pass and cover all 592 test files: 6,101 executed
+  test entries and 124 skips in total. Imported duplicate cases and class-level
+  skip accounting prevent treating this as a unique-test count. All 74 native
+  SDK entries execute in the fresh final shard, and the native retained-Cargo
+  test that refused the unsafe guest symlink now passes in that complete run.
+  The failed attempt and separate eight-test native recheck remain retained.
+  The current root receipt, new-wheel source qualification and retained Mix
+  consumer proof are unchanged; hosted CI and public retained Mix importer
+  admission remain open. Local qualification is not release attestation.

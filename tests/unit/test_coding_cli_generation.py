@@ -3384,6 +3384,43 @@ class CodingCliInvocationTests(unittest.TestCase):
                 )
         self.assertEqual(raised.exception.code, "coding_cli.generated_metadata_invalid")
 
+    def test_manifest_numeric_guidance_preserves_canonical_refusal(self):
+        prompt = recipe(flavor("python")).prompt()
+        self.assertIn("`-9223372036854775808` through `9223372036854775807`", prompt)
+        self.assertIn("These bounds apply to framework metadata", prompt)
+        self.assertIn("according to the specifications", prompt)
+        for number in (-(2**63) - 1, 2**63, 100000000000000000001):
+            with (
+                self.subTest(number=number),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                content = json.dumps({"cases": [{"arguments": [number]}]})
+                files = {GENERATED_TEST_SUITE_PATH: content}
+                with self.assertRaises(CodingCliError) as raised:
+                    coding_cli_adapter._canonicalize_generated_framework_metadata(
+                        Path(directory), files, GENERATED_TEST_SUITE_PATH
+                    )
+                self.assertEqual(
+                    raised.exception.code, "coding_cli.generated_metadata_invalid"
+                )
+                self.assertEqual(files[GENERATED_TEST_SUITE_PATH], content)
+                self.assertFalse((Path(directory) / GENERATED_TEST_SUITE_PATH).exists())
+
+    def test_manifest_canonical_integer_boundaries_remain_valid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / GENERATED_TEST_SUITE_PATH
+            path.parent.mkdir(parents=True)
+            value = {"cases": [{"arguments": [-(2**63), 2**63 - 1]}]}
+            content = json.dumps(value)
+            path.write_text(content, encoding="utf-8")
+            files = {GENERATED_TEST_SUITE_PATH: content}
+            coding_cli_adapter._canonicalize_generated_framework_metadata(
+                root, files, GENERATED_TEST_SUITE_PATH
+            )
+            self.assertEqual(files[GENERATED_TEST_SUITE_PATH], path.read_text())
+            self.assertEqual(json.loads(path.read_text()), value)
+
     def test_framework_metadata_normalization_sorts_bom_edges_without_repair(self):
         value = {
             "dependencies": [

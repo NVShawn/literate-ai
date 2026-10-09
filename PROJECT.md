@@ -62,7 +62,7 @@ development (2026-09-10):
 | Category | Current count | Notes |
 | --- | --- | --- |
 | Language Flavors | 9 (`lang-cpp`, `lang-elixir`, `lang-go`, `lang-javascript`, `lang-python`, `lang-rust`, `lang-swift`, `lang-typescript`, `lang-zig`) | Each pairs a language Flavor with a portable-application skill and a native/tree build strategy. Bare selectors (`+cpp`) still resolve. |
-| Build-system Flavors | 5 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
+| Build-system Flavors | 6 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-mix`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
 | OS Flavors | 3 (`os-linux`, `os-macos`, `os-windows`) | |
 | Packaging Flavors | 8 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
 | Toolchain Flavors | 4 (`toolchain-zig-cc`, `toolchain-swift-apple`, `toolchain-swift-linux`, `toolchain-swift-windows`) | |
@@ -72,10 +72,149 @@ development (2026-09-10):
 
 ## Current work
 
-ELIXIR-001 adds the portable Elixir/OTP application Flavor under Goal 5, including
-Standard script-tree build/runtime contracts and initialized-project assets. All
-eight focused tests pass, including native macOS smoke on Elixir 1.20.4/OTP 29;
-live generation and native Linux/Windows qualification remain release gates.
+ELIXIR-002 extends the portable Elixir/OTP application Flavor under Goal 5 with
+host prerequisite policy, sample/roundtrip selectors, inverse inventory and skills,
+and native qualification across three OS families. Native parser, artifact custody,
+Make and Bazel checks pass on macOS, Linux and Windows; Linux and Windows use
+Elixir 1.18.0/OTP 27.0. Live provider generation, independent acceptance and replay
+also pass. Live inverse translation remains unavailable in the current framework;
+hosted CI and the complete root-project lifecycle receipt remain open.
+The requested Rust/Python feature parity now includes tested adoption detection
+and importable library workflows qualified on macOS and minimum-version Linux
+and Windows workers. Live provider-generated library and consuming-application packaging
+and independent acceptance also pass. The optional ecosystem dependency/packaging
+workflow remains open; exact Mix toolchain custody passes native macOS and
+minimum-version Windows checks.
+Canonical Mix selection and its generation skill now follow accepted two-run native
+qualification and full bounded product reopening. Independent importer admission
+remains open, pending signed source promotion and consumer authority.
+Explicit Hex plugin custody and inert Mix lock/archive checks are implemented:
+macOS verifies plugin loadability and both checksums of an acquired Decimal package.
+Source admission detects declarative Mix dependencies and rejects unverified
+ecosystem evidence. A standalone authorized native Mix builder now verifies
+requirements and metadata, builds packages and retains compiled dependency trees;
+macOS source-retirement, integrity and selected-optional-edge fixtures pass.
+Typed Mix source and fresh acquired/runtime evidence now integrate with the
+source-to-resolved SBOM adapter, including native macOS graph and reuse checks.
+Standard Mix ports now bind native production to issued indexed grants and
+finalized plans, verify sealed cache reuse and supply retained runtime code paths.
+Native macOS Standard fixtures pass. Typed Mix command profiles now project locked
+tree exports, bind an explicitly staged Hex plugin to the selected Elixir toolchain,
+and assemble the production Standard runtime. A test-owned locked Flavor proves
+native source retirement and runtime dispatch on macOS and minimum-version Linux
+and Windows. All 36 focused Linux checks pass without skips, including the three
+native Mix fixtures.
+Windows qualification also repaired exact CRLF source custody and native BEAM DLL
+dependency inspection. The native Mix producer now retains compiled provider
+inputs with exact request bindings, byte guards, namespace collision checks and
+public-interface observation. Provider paths are restored after normal Mix
+code-path pruning and retained for source-retired runtime execution.
+The compiled-provider fixture passes on macOS and minimum-version Linux/Windows;
+all four native Mix conformance fixtures pass on macOS.
+Standard Mix consumers now bind published default Elixir source libraries to
+their direct public interfaces and compile retained package bytes under their
+issued consumer grants. Compiled imports and compilation evidence remain with
+the sealed consumer artifact after source retirement.
+The six CI matrix cells now stage a digest-pinned Hex plugin and require all
+eighteen native application/Mix fixtures without skips, retaining JUnit evidence.
+Hosted matrix results remain outstanding.
+Native Mix library producers now bind declared package/import authority, retain
+their locked Hex application closure, and publish Standard library exports.
+Consumers verify historical producer evidence under their current grants, retain
+compiled library/dependency paths, and execute after both source and producer
+publication retire. New native macOS library/consumer fixtures pass.
+Historical provider verification now resolves the exact issued producer plan
+retained with an older publication after a later rebuild changes source. This
+retained context does not authorize current compilation or execution.
+Retained provider directories now use a versioned shallow layout after native
+Windows renewal exposed a MAX_PATH failure; repaired consumer renewal now passes
+on macOS and minimum-version Linux/Windows.
+Mix package copies now bind independent native export identities to current consumer
+authority. Native macOS and minimum-version Linux/Windows consumers execute after
+original sources and artifacts retire; captured provider archives and exact
+source/resolved BOM records reopen, and package tampering and current-grant
+revocation refuse execution. Linux and Windows each pass 72 focused checks
+without skips on Elixir 1.18.0/OTP 27.0.
+Canonical catalog/generation, complete portable qualification-bundle integration,
+shared/mixed provider qualification, hosted
+CI and latest-version worker evidence remain open. A native library-to-library
+chain now proves identical shared Hex closures through direct and indirect imports,
+source/producer retirement and retained dependency
+tamper refusal on macOS and minimum-version Linux/Windows. Linux and Windows each
+pass 72 focused checks without skips on the exact transitive qualification snapshot.
+
+The native Standard three-Component transitive Mix graph now passes on macOS:
+actual issued plans retain leaf and bridge publication identities after historical
+producer grants/source retire. The full linked package executes after all original
+artifacts retire, and captured source/resolved BOMs reopen for all three nodes.
+Revoked current root authority refuses packaged execution. Minimum-version Standard
+graph renewal now passes on Linux and Windows, each with 72 tests and no skips.
+A bounded native Mix capture reader now reopens original issued plans/grants,
+locked Hex archives, provider application pins, process streams and runtime
+inventories without extraction or execution. Native macOS capture proof passes
+for all three nodes, including expired-origin cache reuse under a renewed grant
+and six rehashed tampering cases. Full accepted qualification-bundle/importer
+integration, decoder platform renewal, mixed provider coverage and canonical Mix
+generation remain required. Projected native Mix library assembly now
+binds the Python verification driver separately from its embedded Elixir command;
+its positive/negative projection regression and two native graph/library cases
+pass. A provider-generated Mix library completes actual generated tests, import
+observation, packaging and independent acceptance on macOS. Complete retained
+accepted-run qualification admission remains open.
+
+The active branch includes the canonical Mix catalog, shipped launcher skill
+1.0.1, pinned Hex source staging and compiled-dependency inventory custody repair.
+Explicit mixed-driver artifact composition preserves each Component's measured
+driver and legacy single-driver graph identities. The integrated
+artifact/schema/lifecycle/retained-library/package regression passes 115 tests.
+All eighteen native cases now pass without skips on macOS Elixir 1.20.4/OTP 29
+and an authorized Linux host running Elixir 1.18.3/OTP 27, using Bazel 9.2.0.
+This includes mixed source/Mix graph packaging, source/artifact retirement, inert
+retained plan/grant/build and BOM reopening, and current-grant revocation.
+Fresh latest-version Linux and Windows VM qualification also passes all eighteen
+native fixtures without skips on Elixir 1.20.4/OTP 29.1.1. Exact minimum-version
+Windows, Linux and macOS qualification each pass all eighteen on Elixir
+1.18.0/OTP 27.0. Complete logs were independently rehashed and
+checked against their durable results and eighteen-case JUnit reports.
+
+The preceding runtime snapshot and shipped assets pass installed-wheel qualification. Two
+actual forced-generation Mix runs under that noneditable wheel pass independent
+parity, and their complete retained products reopen after producer scratch
+retirement. Qualification identity is
+`sha256:e956b64cd58e4b2030f360f05c6a6b8bf2b3f7e0ec1fea458f06b99b7ce06dff`.
+The user's signed human review and intent acceptance now materialize a source-free
+project through public `litai spec accept`. Reviewed qualification package metadata
+uses Apache-2.0, matching this repository, and preserves the accepted behavior.
+Public `litai spec qualify` now qualifies that source promotion through two real
+generation runs. Qualification identity is
+`sha256:2c8d95320c7baf629ab1d94375c87fb61b6b1015275a123763079c2b0a7bface`.
+Both complete products pass independent current-provider resolution and inert
+archive reopening. A standalone guarded Mix consumer executes a runtime import
+after producer and consumer source retirement, and rejects a changed provider
+BEAM. These qualification identities precede the metadata guidance repair below.
+
+The generation envelope now states the existing signed 64-bit metadata bounds
+explicitly, while application behavior remains specification-defined. Its 132
+focused tests pass with two existing tool-dependent skips. The renewed wheel
+passes installed-wheel smoke verification, and its reviewed Standard rebind
+preserves the user's accepted source contract. Public source qualification
+`sha256:6cacd46dd9f12f1aa6e59b4c92df3473eeec8356cbabae9b2798d98f20c0a04d`
+passes two clean generation runs. Both retained products reopen under current
+authority after producer scratch retirement. The guarded native consumer passes
+eight signed-integer boundary cases after source retirement and rejects provider
+BEAM tampering; this does not implement public retained Mix importer admission.
+
+The complete fresh root lifecycle passes 328 checks and installs a current receipt
+through the public receipt update command. All declared gates pass, with three
+configured skips. Two renewed Linux framework shards pass 2,634 and 1,205 test
+entries. The fresh remaining shard passes 2,262 entries with 18 skips after
+correcting the guest's compiler-directory layout and installing its missing
+native SDK prerequisite. Together the three shards cover all 592 test files and
+pass 6,101 test entries with 124 normal skips; all 74 native SDK entries execute.
+The affected eight native retained-Cargo checks also pass. The earlier 6,108-test
+macOS pass predates the metadata guidance repair. All six local native Elixir
+latest/minimum cells pass; their builders and catalogs are unchanged. Hosted CI,
+public retained Mix importer admission remain open.
 
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework

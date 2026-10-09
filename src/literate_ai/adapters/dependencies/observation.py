@@ -1569,7 +1569,7 @@ class WindowsPeDependencyObserver:
         native_owners: dict[str, str] = {}
         launcher_runtime_edges: list[tuple[str, str]] = []
         for command in self.toolchain_commands:
-            path = _resolve_command(command)
+            path = _resolve_pe_toolchain_input(command)
             command_paths.append(path)
             if not _is_pe(path):
                 observed = _npm_toolchain_launcher_dependencies(
@@ -4238,6 +4238,36 @@ def is_host_native_executable(path: Path) -> bool:
     if sys.platform in {"win32", "cygwin"}:
         return _is_pe(path)
     return False
+
+
+def _resolve_pe_toolchain_input(command: Sequence[str]) -> Path:
+    """Observe an explicitly selected PE DLL without treating it as a command.
+
+    Windows BEAM ships its native runtime as a DLL. PATH/PATHEXT command
+    discovery cannot resolve that payload; it must be an exact absolute file
+    selection, with no arguments, links or reparse points.
+    """
+    if command and isinstance(command[0], str):
+        path = Path(command[0])
+        if path.suffix.casefold() == ".dll":
+            try:
+                if len(command) != 1 or not path.is_absolute() or ".." in path.parts:
+                    raise ValueError("PE DLL selection must be one absolute path")
+                require_safe_directory(path.parent)
+                node = path.lstat()
+                if (
+                    stat_is_link_or_reparse(node)
+                    or not stat.S_ISREG(node.st_mode)
+                    or not _is_pe(path)
+                ):
+                    raise ValueError("PE DLL selection must be a regular PE file")
+            except (OSError, ValueError, UnsafeFilesystemPathError) as exc:
+                raise DependencyObservationError(
+                    "dependencies.windows-toolchain-invalid",
+                    "selected PE toolchain DLL is missing, unsafe or invalid",
+                ) from exc
+            return path.resolve()
+    return _resolve_command(command)
 
 
 def _resolve_command(command: Sequence[str]) -> Path:

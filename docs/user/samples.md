@@ -111,7 +111,7 @@ identity-verified run tree: Git targets use a sibling `<repo>.litai-cache` direc
 working-tree targets use the configured matrix root's `cache/` directory.
 
 Use the host round-trip target only when the coding CLI is authenticated and Bazel plus
-all four implementation toolchains are available:
+all five implementation toolchains are available:
 
 ```console
 make roundtrip-host
@@ -119,14 +119,17 @@ make roundtrip-host
 
 That target does not require every application to be reversible. It uses the deliberately
 rich `regenerative-roundtrip` `literate-markdown` specification to generate, compile,
-run, and reverse Python, C++, Rust, and JavaScript on this host. Its strict frontmatter
-and canonical context graph exercise the readable provider on the forward path. The
+run, and reverse Python, C++, Rust, JavaScript, and Elixir on this host. Its strict
+frontmatter and canonical context graph exercise the readable provider on the forward path. The
 target first builds and installs the exact current wheel into an isolated environment;
 this binds every promoted project and clean qualification run to the framework and
 Standard policy bytes actually under test. An editable source checkout is deliberately
 not accepted as release lifecycle authority. Set `ROUNDTRIP_LANGUAGES=python` (or a
-comma-separated subset) while diagnosing one translator. The target fully promotes and
-regenerates every selected language result. It also runs the
+comma-separated subset) while diagnosing one translator. Live coding-CLI inverse
+translation is currently disabled in the framework, so this complete bidirectional
+target remains unavailable; forward qualification uses `scripts/run_samples.py`.
+The intended roundtrip fully promotes and regenerates every selected language
+result. It also runs the
 Python `service-stack` composition through a three-node
 inverse graph, promotion, composition, regeneration, build, and known-output check.
 Sample Component directories are flat peers beneath `samples/`. The `hello-component`
@@ -343,9 +346,9 @@ flowchart LR
     A --> R["1 Rust recipe"]
     A --> J["1 JavaScript recipe"]
     A --> F["1 Rust + JavaScript recipe"]
-    A --> X["1 four-language round-trip app"]
-    X --> XP["Python + C++ + Rust + JavaScript"]
-    P --> T["29 recipes × at least 6 cases ≥ 174 executions"]
+    A --> X["1 five-language round-trip app"]
+    X --> XP["Python + C++ + Rust + JavaScript + Elixir"]
+    P --> T["30 recipes × at least 6 cases ≥ 180 executions"]
     C --> T
     R --> T
     J --> T
@@ -356,7 +359,7 @@ flowchart LR
 The eleven portable applications each become a Python and a C++ recipe. The standalone
 dependency planner adds Rust, the standalone ledger workbench adds JavaScript, and the
 release dashboard exercises a Rust backend and JavaScript frontend together. Every
-recipe set also includes the rich regenerative-roundtrip app in all four standalone
+recipe set also includes the rich regenerative-roundtrip app in all five standalone
 languages; its generated trees are the stable source inputs for the credentialed
 semantic inverse test. Every
 recipe combines its language topology with the actual host OS Flavor and performs

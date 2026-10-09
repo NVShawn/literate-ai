@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/sample-execution-oracle@1",
-  "execution_interface_identity": "sha256:553160e940695a9697ad5c4b3249f8f662579344db12df9c069ccf5c68eb3105",
+  "execution_interface_identity": "sha256:0158085f03fb500f60a132618387a4007326693ae625fe254a24241028073481",
   "oracle_results": [
     {
       "case_id": "primary",

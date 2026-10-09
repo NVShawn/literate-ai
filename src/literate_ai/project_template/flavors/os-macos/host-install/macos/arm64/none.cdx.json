@@ -438,6 +438,46 @@
           "value": "opencode"
         }
       ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "pkg:generic/homebrew-elixir",
+      "name": "Elixir runtime",
+      "version": ">=1.18",
+      "properties": [
+        {
+          "name": "literate-ai:host-install:realization-kind",
+          "value": "native-package"
+        },
+        {
+          "name": "literate-ai:host-install:manager-package",
+          "value": "elixir"
+        },
+        {
+          "name": "literate-ai:host-install:base-capabilities",
+          "value": "[\"elixir\"]"
+        }
+      ]
+    },
+    {
+      "type": "application",
+      "bom-ref": "pkg:generic/homebrew-erlang",
+      "name": "Erlang/OTP runtime",
+      "version": ">=27",
+      "properties": [
+        {
+          "name": "literate-ai:host-install:realization-kind",
+          "value": "native-package"
+        },
+        {
+          "name": "literate-ai:host-install:manager-package",
+          "value": "erlang"
+        },
+        {
+          "name": "literate-ai:host-install:base-capabilities",
+          "value": "[\"erlang\"]"
+        }
+      ]
     }
   ],
   "dependencies": [
@@ -456,7 +496,9 @@
         "pkg:generic/brew-rust",
         "pkg:generic/codex-macos-aarch64",
         "pkg:generic/claude-code-macos-arm64",
-        "pkg:generic/opencode-macos-arm64"
+        "pkg:generic/opencode-macos-arm64",
+        "pkg:generic/homebrew-elixir",
+        "pkg:generic/homebrew-erlang"
       ]
     },
     {
@@ -509,6 +551,14 @@
     },
     {
       "ref": "pkg:generic/opencode-macos-arm64",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:generic/homebrew-elixir",
+      "dependsOn": []
+    },
+    {
+      "ref": "pkg:generic/homebrew-erlang",
       "dependsOn": []
     }
   ]

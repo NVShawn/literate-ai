@@ -60,7 +60,7 @@
           "minItems": 1,
           "maxItems": 256,
           "uniqueItems": true,
-          "items": {"type": "string", "maxLength": 512, "anyOf": [{"pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,126}$"}, {"pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"}]}
+          "items": {"type": "string", "maxLength": 512, "anyOf": [{"pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,126}$"}, {"pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"}, {"pattern": "^[a-z_][A-Za-z0-9_]*[!?]?$"}]}
         }
       }
     },
@@ -81,7 +81,11 @@
       },
       "if": {"properties": {"language": {"const": "cpp"}}},
       "then": {"properties": {"capabilities": {"items": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"}}}}}}},
-      "else": {"properties": {"capabilities": {"items": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,126}$"}}}}}}}
+      "else": {
+        "if": {"properties": {"language": {"const": "elixir"}}},
+        "then": {"properties": {"capabilities": {"items": {"properties": {"symbols": {"items": {"pattern": "^[a-z_][A-Za-z0-9_]*[!?]?$"}}}}}}},
+        "else": {"properties": {"capabilities": {"items": {"properties": {"symbols": {"items": {"pattern": "^[A-Za-z_$][A-Za-z0-9_$]{0,126}$"}}}}}}}
+      }
     },
     "libraryConsumerBinding": {
       "$id": "urn:literate-ai:schema:v2:library-consumer-binding@1",

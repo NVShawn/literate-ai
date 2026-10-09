@@ -54,6 +54,22 @@ def _read(content: bytes, **limits: int):
 
 
 class DirectoryExportReaderTests(unittest.TestCase):
+    def test_producer_uses_portable_string_order_for_nested_and_mixed_case_paths(self):
+        names = ("a/file", "a.bin", "Z.beam", "app.app")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for name in names:
+                path = root / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(name.encode())
+            content = directory_export_bytes(root)
+            files = _read(content)
+            self.assertEqual([item.path for item in files], sorted(names))
+            self.assertEqual(
+                encode_directory_export(files, max_bytes=len(content), max_entries=4),
+                content,
+            )
+
     def test_memory_writer_preserves_existing_bytes_after_source_cleanup(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

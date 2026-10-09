@@ -66,7 +66,7 @@ class PackagedSkillTests(unittest.TestCase):
         catalog = load_builtin_skill_catalog()
         selected = builtin_skill_set(
             catalog,
-            languages=("typescript", "python", "rust", "cpp"),
+            languages=("typescript", "python", "rust", "cpp", "elixir"),
         )
         resolved = resolve_skill_set(selected, catalog)
         self.assertEqual(
@@ -75,6 +75,7 @@ class PackagedSkillTests(unittest.TestCase):
                 *EXPECTED_SKILLS,
                 "language-python",
                 "language-cpp",
+                "language-elixir",
                 "language-rust",
                 "language-javascript",
             ),

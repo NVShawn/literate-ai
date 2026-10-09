@@ -110,9 +110,10 @@ MODEL_TRANSLATION_MODE = "source-intelligence-coding-cli"
 LEGACY_MODEL_TRANSLATION_MODE = "codegraph-coding-cli"
 INVERSE_EVIDENCE_CUSTODY_SCHEMA = "urn:literate-ai:schema:v1:inverse-evidence-custody"
 
-SUPPORTED_INVERSE_LANGUAGES = ("cpp", "javascript", "python", "rust")
+SUPPORTED_INVERSE_LANGUAGES = ("cpp", "elixir", "javascript", "python", "rust")
 LANGUAGE_SKILL_IDS = {
     "cpp": "language-cpp",
+    "elixir": "language-elixir",
     "javascript": "language-javascript",
     "python": "language-python",
     "rust": "language-rust",
@@ -3043,7 +3044,7 @@ def derive_model_checkout(
     if unsupported or not languages:
         raise SourceToSpecificationError(
             "model_translation.language_unsupported",
-            "model-backed source translation requires Python, C++, Rust, or "
+            "model-backed source translation requires Python, C++, Elixir, Rust, or "
             "JavaScript/TypeScript source",
         )
     ordered_skills = resolve_skill_set(skill_set, skill_catalog)

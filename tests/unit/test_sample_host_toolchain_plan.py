@@ -22,6 +22,7 @@ class SampleHostToolchainPlanTests(unittest.TestCase):
             (
                 "build-bazel",
                 "lang-cpp",
+                "lang-elixir",
                 "lang-javascript",
                 "lang-python",
                 "lang-rust",

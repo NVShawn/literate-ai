@@ -17,7 +17,7 @@ from .._validation import (
     string_value,
 )
 from ..blobs import BlobRef
-from ..identity import ContentIdentity, contract_identity
+from ..identity import ContentIdentity, canonical_identity, contract_identity
 from ..paths import canonical_relative_posix_path
 from ._common import canonical_identities, identity, portable_name, tuple_value
 from .assets import AuthoredBinaryAsset
@@ -1345,6 +1345,21 @@ class CompositeBuildRequest:
         )
 
 
+def artifact_driver_composition_identity(
+    drivers: tuple[ContentIdentity, ...],
+) -> ContentIdentity:
+    """Bind exact measured drivers without replacing Component build authority."""
+    canonical_identities(drivers, "ArtifactBuildGraph.driver_composition")
+    if not 2 <= len(drivers) <= 16384:
+        fail("ArtifactBuildGraph.driver_composition", "requires 2 to 16384 drivers")
+    return canonical_identity(
+        {
+            "schema": "literate-ai/artifact-driver-composition@1",
+            "drivers": [item.to_dict() for item in drivers],
+        }
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class ArtifactBuildGraph:
     """Build-system-neutral graph; driver selection is data, never a default here."""
@@ -1352,6 +1367,7 @@ class ArtifactBuildGraph:
     build_system_driver_identity: ContentIdentity
     manifests: tuple[ComponentBuildManifest, ...]
     link_plans: tuple[ExactLinkPlan, ...]
+    driver_composition: tuple[ContentIdentity, ...] = ()
 
     SCHEMA: ClassVar[str] = ARTIFACT_BUILD_GRAPH_SCHEMA
 
@@ -1377,7 +1393,26 @@ class ArtifactBuildGraph:
             )
         if any(not isinstance(item, ExactLinkPlan) for item in links):
             fail("ArtifactBuildGraph.link_plans", "must contain ExactLinkPlan values")
-        if any(
+        canonical_identities(
+            self.driver_composition, "ArtifactBuildGraph.driver_composition"
+        )
+        if self.driver_composition:
+            composition = artifact_driver_composition_identity(self.driver_composition)
+            measured = tuple(
+                sorted(
+                    {item.build_system_driver_identity for item in manifests},
+                    key=lambda item: item.uri,
+                )
+            )
+            if (
+                self.driver_composition != measured
+                or self.build_system_driver_identity != composition
+            ):
+                fail(
+                    "ArtifactBuildGraph.driver_composition",
+                    "must bind every and only measured manifest driver",
+                )
+        elif any(
             item.build_system_driver_identity != self.build_system_driver_identity
             for item in manifests
         ):
@@ -1443,12 +1478,17 @@ class ArtifactBuildGraph:
         return contract_identity(self)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        result = {
             "schema": self.SCHEMA,
             "build_system_driver_identity": self.build_system_driver_identity.to_dict(),
             "manifests": [item.to_dict() for item in self.manifests],
             "link_plans": [item.to_dict() for item in self.link_plans],
         }
+        if self.driver_composition:
+            result["driver_composition"] = [
+                item.to_dict() for item in self.driver_composition
+            ]
+        return result
 
     @classmethod
     def from_dict(
@@ -1461,7 +1501,10 @@ class ArtifactBuildGraph:
             required=frozenset(
                 {"build_system_driver_identity", "manifests", "link_plans"}
             ),
+            optional=frozenset({"driver_composition"}),
         )
+        if "driver_composition" in data and not data["driver_composition"]:
+            fail(f"{path}.driver_composition", "requires multiple drivers")
         return cls(
             build_system_driver_identity=ContentIdentity.from_dict(
                 data["build_system_driver_identity"],
@@ -1474,6 +1517,15 @@ class ArtifactBuildGraph:
             ),
             link_plans=parse_tuple(
                 data["link_plans"], f"{path}.link_plans", ExactLinkPlan.from_dict
+            ),
+            driver_composition=(
+                parse_tuple(
+                    data["driver_composition"],
+                    f"{path}.driver_composition",
+                    ContentIdentity.from_dict,
+                )
+                if "driver_composition" in data
+                else ()
             ),
         )
 

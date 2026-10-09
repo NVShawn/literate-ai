@@ -98,6 +98,7 @@ def _fixture(
     flavor_model: str | None = None,
     skill_model: str | None = None,
     library_names: frozenset[str] = frozenset(),
+    root_name: str = "application",
 ):
     component_models = component_models or {}
     implementation_skill_content = (
@@ -163,7 +164,10 @@ def _fixture(
             authoring_inputs=(flavor_model_reference,),
         )
     flavor = FlavorRevision(flavor_definition, None, ())
-    names = ("application", "service", "storage")
+    names = {
+        "application": ("application", "service", "storage"),
+        "service": ("service", "storage"),
+    }[root_name]
     requirements = {
         "application": (
             CapabilityRequirement(
@@ -209,10 +213,11 @@ def _fixture(
                 ),
             )
         authorings[name] = authoring
-    authorings["application"] = replace(
-        authorings["application"],
-        specification_roots=("component.md", "errors.md"),
-    )
+    if "application" in authorings:
+        authorings["application"] = replace(
+            authorings["application"],
+            specification_roots=("component.md", "errors.md"),
+        )
     contents: dict[str, bytes] = {}
     nodes = {}
     for name in names:
@@ -352,6 +357,8 @@ def _fixture(
         ("application", "service"),
         ("service", "storage"),
     ):
+        if consumer_name not in nodes:
+            continue
         consumer = nodes[consumer_name]
         provider = nodes[provider_name]
         requirement = requirements[consumer_name][0]
@@ -386,7 +393,7 @@ def _fixture(
         identity("invoice-cli-target"),
         identity("selection-policy"),
         identity("resolver"),
-        nodes["application"].revision.identity,
+        nodes[root_name].revision.identity,
         tuple(sorted(nodes.values(), key=lambda item: item.revision.identity.uri)),
         tuple(
             sorted(
@@ -403,7 +410,7 @@ def _fixture(
     )
     authority = LockedGenerationAuthority(
         lock,
-        authorings["application"],
+        authorings[root_name],
         lock.authorings,
         (flavor,),
         (),

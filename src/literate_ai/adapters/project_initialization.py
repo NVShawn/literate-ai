@@ -394,6 +394,7 @@ _LANGUAGE_FLAVOR_BY_MARKER = {
     "python": "flavor://literate-ai/lang-python",
     "rust": "flavor://literate-ai/lang-rust",
     "javascript": "flavor://literate-ai/lang-javascript",
+    "elixir": "flavor://literate-ai/lang-elixir",
 }
 
 
@@ -413,6 +414,8 @@ def detected_language_flavors(
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["cpp"])
     if "python" in languages:
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["python"])
+    if "elixir" in languages or (path / "mix.exs").is_file():
+        flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["elixir"])
     if flavors:
         return flavors
     if (path / "Cargo.toml").exists():
@@ -1093,6 +1096,12 @@ _TEMPLATE_FILES = {
         "flavors/build-make/standard-command-profile.json"
     ),
     "flavors/build-make/openspec/spec.md": "flavors/build-make/openspec/spec.md",
+    "flavors/build-mix/flavor.md": "flavors/build-mix/flavor.md",
+    "flavors/build-mix/hex.json": "flavors/build-mix/hex.json",
+    "flavors/build-mix/standard-command-profile.json": (
+        "flavors/build-mix/standard-command-profile.json"
+    ),
+    "flavors/build-mix/openspec/spec.md": "flavors/build-mix/openspec/spec.md",
     "flavors/build-cargo/flavor.md": "flavors/build-cargo/flavor.md",
     "flavors/build-cargo/host-toolchain.cdx.json": (
         "flavors/build-cargo/host-toolchain.cdx.json"
@@ -1136,6 +1145,9 @@ _TEMPLATE_FILES = {
     ),
     "flavors/lang-elixir/flavor.md": "flavors/lang-elixir/flavor.md",
     "flavors/lang-elixir/toolchain.json": "flavors/lang-elixir/toolchain.json",
+    "flavors/lang-elixir/host-toolchain.cdx.json": (
+        "flavors/lang-elixir/host-toolchain.cdx.json"
+    ),
     "flavors/lang-elixir/standard-command-profile.json": (
         "flavors/lang-elixir/standard-command-profile.json"
     ),
@@ -1313,6 +1325,9 @@ _TEMPLATE_FILES = {
     ),
     "skills/specification-to-source/make-build-system/SKILL.md": (
         "skills/specification-to-source/make-build-system/SKILL.md"
+    ),
+    "skills/specification-to-source/mix-build-system/SKILL.md": (
+        "skills/specification-to-source/mix-build-system/SKILL.md"
     ),
     "skills/specification-to-source/cargo-build-system/SKILL.md": (
         "skills/specification-to-source/cargo-build-system/SKILL.md"

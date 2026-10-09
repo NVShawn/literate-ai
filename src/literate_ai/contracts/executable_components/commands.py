@@ -18,6 +18,7 @@ from .._validation import (
     unique,
 )
 from ..cpp_libraries import CppLibraryLayout, is_cpp_name, validate_cpp_header
+from ..elixir_libraries import elixir_namespace, is_elixir_module, is_elixir_symbol
 from ..identity import ContentIdentity, canonical_identity, contract_identity
 from ._common import identity, portable_name, tuple_value
 
@@ -113,7 +114,11 @@ class LibraryCapabilityImport:
                 "must contain between 1 and 256 exported symbols",
             )
         for index, symbol in enumerate(symbols):
-            if _LIBRARY_SYMBOL.fullmatch(symbol) is None and not is_cpp_name(symbol):
+            if (
+                _LIBRARY_SYMBOL.fullmatch(symbol) is None
+                and not is_cpp_name(symbol)
+                and not is_elixir_symbol(symbol)
+            ):
                 fail(
                     f"LibraryCapabilityImport.symbols[{index}]",
                     "must be a portable language export identifier",
@@ -186,7 +191,22 @@ class LibraryImportSurface:
                 "must contain at least one LibraryCapabilityImport",
             )
         for capability in capabilities:
-            if self.language == "cpp":
+            if self.language == "elixir":
+                namespace = elixir_namespace(self.package)
+                if not is_elixir_module(capability.module) or not (
+                    capability.module == namespace
+                    or capability.module.startswith(namespace + ".")
+                ):
+                    fail(
+                        "LibraryImportSurface.module",
+                        "must remain inside the package namespace",
+                    )
+                if any(not is_elixir_symbol(symbol) for symbol in capability.symbols):
+                    fail(
+                        "LibraryImportSurface.symbols",
+                        "requires native Elixir identifiers",
+                    )
+            elif self.language == "cpp":
                 validate_cpp_header(
                     capability.module, label="LibraryImportSurface.header"
                 )
