@@ -84,6 +84,9 @@ class PlatformTemplate:
     # Windows only: paths Microsoft Defender must not scan in real time.
     # ``{workspace}`` is the worker's configured workspace.
     defender_exclusions: tuple[str, ...] = ()
+    # Windows only: executables whose file activity Defender must not scan.
+    # ``{python}`` is the real base interpreter behind the first template Python.
+    defender_process_exclusions: tuple[str, ...] = ()
 
 
 def _narrow_exclusion(entry: str) -> bool:
@@ -98,6 +101,39 @@ def _narrow_exclusion(entry: str) -> bool:
     else:
         return False
     return all(part not in {"", ".", ".."} for part in parts)
+
+
+# Executables a process exclusion must never name: shells, script hosts, and
+# system processes whose file activity would then go entirely unscanned.
+_DENIED_PROCESS_EXCLUSIONS = frozenset(
+    {
+        "cmd.exe",
+        "conhost.exe",
+        "cscript.exe",
+        "explorer.exe",
+        "mshta.exe",
+        "powershell.exe",
+        "pwsh.exe",
+        "regsvr32.exe",
+        "rundll32.exe",
+        "svchost.exe",
+        "wscript.exe",
+    }
+)
+
+
+def _narrow_process_exclusion(entry: str) -> bool:
+    """Whether a Defender process exclusion names one executable, never a pattern."""
+
+    if entry == "{python}":
+        return True
+    if not re.fullmatch(r"[A-Za-z]:\\[^*?%<>|\":/\x00-\x1f]+\.exe", entry, re.I):
+        return False
+    parts = entry[3:].split("\\")
+    return (
+        all(part not in {"", ".", ".."} and part == part.strip() for part in parts)
+        and parts[-1].casefold() not in _DENIED_PROCESS_EXCLUSIONS
+    )
 
 
 def _commands(value: object, path: str) -> tuple[TemplateCommand, ...]:
@@ -164,6 +200,7 @@ class WorkerTemplate:
                 "python",
                 "minimum_free_gib",
                 "defender_exclusions",
+                "defender_process_exclusions",
             }:
                 _fail(path_name, "requires commands and python")
             exclusions = raw.get("defender_exclusions", [])
@@ -180,6 +217,21 @@ class WorkerTemplate:
                     f"{path_name}.defender_exclusions",
                     "is Windows-only and lists {workspace} or a ~/ or absolute "
                     "directory below a drive root and home, without . or ..",
+                )
+            processes = raw.get("defender_process_exclusions", [])
+            if (
+                family != "windows"
+                and processes
+                or not isinstance(processes, list)
+                or any(
+                    not isinstance(item, str) or not _narrow_process_exclusion(item)
+                    for item in processes
+                )
+            ):
+                _fail(
+                    f"{path_name}.defender_process_exclusions",
+                    "is Windows-only and lists {python} or absolute .exe paths "
+                    "without wildcards, variables, . or ..",
                 )
             free = raw.get("minimum_free_gib")
             if free is not None and (type(free) is not int or not 0 < free < 100000):
@@ -204,6 +256,7 @@ class WorkerTemplate:
                 tuple(int(part) for part in python["minimum"].split(".")),
                 free,
                 tuple(exclusions),
+                tuple(processes),
             )
         return cls(platforms)
 
@@ -362,6 +415,36 @@ def _exclusion_path(worker: ExecutionWorker, entry: str) -> str:
     return f"[IO.Path]::GetFullPath({powershell_home_path(entry)}).TrimEnd('\\')"
 
 
+def _process_exclusion_path(platform: PlatformTemplate, entry: str) -> str:
+    """PowerShell assigning ``$px`` one declared process exclusion, or ``$null``.
+
+    ``{python}`` runs the template Python isolated (``-I -S``) so no site hook can
+    print text that would be taken for the path, and in UTF-8 mode so a non-ASCII
+    install path survives the pipe. The result must be a rooted, existing ``.exe``
+    that is not a Microsoft Store alias, whose image Defender would never match.
+    """
+
+    if entry != "{python}":
+        resolved = f"$px = {powershell_literal(entry)}"
+    else:
+        # Python 3.11+ always has sys._base_executable; no quotes survive PowerShell
+        # 5.1 native-argument passing, so the program uses none.
+        python = powershell_literal(platform.python_commands[0])
+        resolved = (
+            "$oe = [Console]::OutputEncoding; "
+            "[Console]::OutputEncoding = [Text.Encoding]::UTF8; "
+            f"$px = & {python} -I -S -X utf8 -c "
+            "'import os,sys;print(os.path.realpath(sys._base_executable))' 2>$null "
+            "| Select-Object -First 1; [Console]::OutputEncoding = $oe"
+        )
+    return (
+        f"{resolved}; if ($px) {{ $px = ([string]$px).Trim() }}; "
+        "if (-not ($px -and [IO.Path]::IsPathRooted($px) -and $px -like '*.exe' "
+        "-and $px -notlike '*\\WindowsApps\\*' -and "
+        "(Test-Path -LiteralPath $px -PathType Leaf))) { $px = $null }"
+    )
+
+
 def _probe_script(
     worker: ExecutionWorker,
     platform: PlatformTemplate | None,
@@ -438,6 +521,28 @@ def _probe_script(
                     "elseif ($have | Where-Object { $x -eq $_ -or $x.StartsWith($_ "
                     f"+ '\\') }}) {{ 'excl {index} present' }} else {{ 'excl "
                     f"{index} absent' }}"
+                )
+        if platform is not None and platform.defender_process_exclusions:
+            # The same fail-closed reading as path exclusions; a process
+            # exclusion matches one executable path exactly (case-insensitive).
+            lines.append(
+                "$pstate = 'unreadable'; if (-not (Get-Command Get-MpComputerStatus "
+                "-ErrorAction SilentlyContinue)) { $pstate = 'none' } else { try { "
+                "if (-not (Get-MpComputerStatus -ErrorAction Stop)"
+                ".RealTimeProtectionEnabled) { $pstate = 'none' } else { $pmp = "
+                "Get-MpPreference -ErrorAction Stop; $praw = @($pmp.ExclusionProcess"
+                " | Where-Object { $_ }); if (-not ($praw | Where-Object { $_ -like "
+                "'N/A*' })) { $pstate = 'readable' } } } catch {} }; $phave = @(); "
+                "if ($pstate -eq 'readable') { $phave = @($praw | ForEach-Object { "
+                "$_.ToLowerInvariant() }) }"
+            )
+            for index, entry in enumerate(platform.defender_process_exclusions):
+                lines.append(
+                    f"{_process_exclusion_path(platform, entry)}; "
+                    f"if ($pstate -ne 'readable') {{ 'pexcl {index} ' + $pstate }} "
+                    f"elseif (-not $px) {{ 'pexcl {index} unresolved' }} "
+                    "elseif ($phave -contains $px.ToLowerInvariant())"
+                    f" {{ 'pexcl {index} present' }} else {{ 'pexcl {index} absent' }}"
                 )
         lines.append(
             "$d = Get-PSDrive -Name ((Split-Path -Qualifier $HOME).TrimEnd(':')); "
@@ -556,6 +661,7 @@ class WorkerAligner:
         pythons: dict[str, str] = {}
         hashes: dict[int, str | None] = {}
         exclusions: dict[int, str] = {}
+        process_exclusions: dict[int, str] = {}
         free_kib: int | None = None
         for line in output.splitlines():
             if line.startswith("free ") and line[5:].strip().isdigit():
@@ -569,6 +675,8 @@ class WorkerAligner:
                 hashes[int(parts[1])] = None if parts[2] == "-" else parts[2].strip()
             elif len(parts) == 3 and parts[0] == "excl" and parts[1].isdigit():
                 exclusions[int(parts[1])] = parts[2].strip()
+            elif len(parts) == 3 and parts[0] == "pexcl" and parts[1].isdigit():
+                process_exclusions[int(parts[1])] = parts[2].strip()
         if completed.returncode or not found and commands:
             report.status = "unreachable"
             report.findings.append(
@@ -650,6 +758,28 @@ class WorkerAligner:
                         "administrator rights",
                         "added with --apply"
                         if state == "absent"
+                        else "connect as an administrator, then rerun",
+                    )
+                )
+            for index, entry in enumerate(platform.defender_process_exclusions):
+                state = process_exclusions.get(index, "unreadable")
+                if state in {"present", "none"}:
+                    continue
+                report.findings.append(
+                    Finding(
+                        "defender-process-exclusion",
+                        entry,
+                        "missing" if state == "absent" else "unchecked",
+                        "real-time scanning slows every file this executable opens"
+                        if state == "absent"
+                        else "the template Python did not resolve to an executable"
+                        if state == "unresolved"
+                        else "Defender exclusions are unreadable without "
+                        "administrator rights",
+                        "added with --apply"
+                        if state == "absent"
+                        else "run the detect-before-install bootstrap"
+                        if state == "unresolved"
                         else "connect as an administrator, then rerun",
                     )
                 )
@@ -764,6 +894,37 @@ class WorkerAligner:
             )
             report.applied.append(
                 f"exclude {entry} from Defender: exit {completed.returncode}"
+            )
+        excluded_processes = {
+            item.name
+            for item in report.findings
+            if item.kind == "defender-process-exclusion" and item.state == "missing"
+        }
+        for entry in () if platform is None else platform.defender_process_exclusions:
+            if entry not in excluded_processes or platform is None:
+                continue
+            completed = self._run(
+                worker,
+                powershell_command(
+                    f"{_process_exclusion_path(platform, entry)}; "
+                    "if (-not $px) { throw 'process exclusion did not resolve' }; "
+                    "Add-MpPreference -ExclusionProcess $px -ErrorAction Stop; "
+                    "'excluded ' + $px; $global:LASTEXITCODE = 0"
+                ),
+                _PROBE_TIMEOUT_SECONDS,
+            )
+            excluded_path = next(
+                (
+                    line[len("excluded ") :].strip()
+                    for line in completed.stdout.decode("utf-8", "replace").splitlines()
+                    if line.startswith("excluded ")
+                ),
+                "",
+            )
+            report.applied.append(
+                f"exclude process {entry}"
+                + (f" ({excluded_path})" if excluded_path else "")
+                + f" from Defender: exit {completed.returncode}"
             )
         stamp = self.clock().strftime("%Y%m%dT%H%M%SZ")
         stale = {

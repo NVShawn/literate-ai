@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- The worker template can declare Windows Defender process exclusions
+  (`defender_process_exclusions`): `{python}`, the real base interpreter behind the
+  template Python, or an absolute `.exe` path. `litai worker align` reports a missing
+  one and `--apply` adds it, naming the resolved executable. Shells and script hosts
+  are refused, and `{python}` must resolve to an existing non-Store `.exe`. The
+  repository template now excludes `{python}`. That covers every process of that
+  interpreter on the worker, not only gate work, so Defender no longer scans its pip,
+  stdlib or site-packages reads outside the excluded workspace.
+
 - Rejected generated candidates now record a bounded, redacted `diagnostic_excerpt`
   (compiler or Bazel output for build rejections; generated expected and observed values
   for generated-test mismatches) in retained evidence and in the next attempt's repair

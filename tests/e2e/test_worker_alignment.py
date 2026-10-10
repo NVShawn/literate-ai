@@ -239,6 +239,129 @@ class WindowsDefenderExclusionTests(unittest.TestCase):
                 with self.assertRaises(worker_alignment.WorkerAlignmentError):
                     WorkerTemplate.load(template)
 
+    def test_missing_process_exclusion_is_reported_then_added_for_python(self):
+        """Windows workers exclude the template's real base interpreter."""
+
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            template = root / "template.json"
+            template.write_text(
+                json.dumps(
+                    {
+                        "schema": "literate-ai/worker-template@1",
+                        "platforms": {
+                            "windows": {
+                                "commands": ["git"],
+                                "python": {"commands": ["python"], "minimum": "3.11"},
+                                "defender_process_exclusions": [
+                                    "{python}",
+                                    "C:\\Tools\\bazel.exe",
+                                ],
+                            }
+                        },
+                    }
+                )
+            )
+            scripts = []
+
+            class Runner:
+                """Answers the probe: Python lacks it, Bazel does not resolve."""
+
+                def run(self, argv, *, cwd, timeout_seconds):
+                    script = base64.b64decode(argv[-1].split()[-1]).decode("utf-16-le")
+                    scripts.append(script)
+                    stdout = (
+                        "cmd git C:\\git.exe\npython python 3.12.1\n"
+                        "pexcl 0 absent\npexcl 1 unresolved\nfree 999999999\n"
+                        if "ExclusionProcess" in script
+                        and "Add-MpPreference" not in script
+                        else ""
+                    )
+                    return SimpleNamespace(
+                        returncode=0, stdout=stdout.encode(), stderr=b""
+                    )
+
+            worker = SimpleNamespace(
+                worker_id="windows-worker",
+                endpoint="worker.invalid",
+                workspace="~/.litai",
+                transport="ssh",
+                requirements=SimpleNamespace(
+                    os_family="windows", cpu_architecture=None
+                ),
+            )
+            aligner = WorkerAligner(
+                WorkerTemplate.load(template),
+                UserAlignment.load(None),
+                coding_cli=None,
+                model=None,
+                cwd=root,
+                runner_factory=Runner,
+            )
+            with patch.object(
+                worker_alignment,
+                "ssh_arguments",
+                lambda _endpoint, command, *_a, **_k: tuple(command.split()),
+            ):
+                inspected = aligner.align((worker,), apply=False)
+                self.assertEqual(
+                    [
+                        (item["kind"], item["name"], item["state"])
+                        for item in inspected["workers"][0]["findings"]
+                    ],
+                    [
+                        ("defender-process-exclusion", "{python}", "missing"),
+                        (
+                            "defender-process-exclusion",
+                            "C:\\Tools\\bazel.exe",
+                            "unchecked",
+                        ),
+                    ],
+                )
+                # {python} resolves to the real base interpreter on the worker,
+                # isolated from site hooks, and must be an existing non-Store .exe.
+                probe = next(item for item in scripts if "ExclusionProcess" in item)
+                self.assertIn("-I -S -X utf8", probe)
+                self.assertIn("os.path.realpath(sys._base_executable)", probe)
+                self.assertIn("-PathType Leaf", probe)
+                self.assertIn("-notlike '*\\WindowsApps\\*'", probe)
+                self.assertFalse(any("Add-MpPreference" in item for item in scripts))
+                aligner.align((worker,), apply=True)
+            added = [item for item in scripts if "Add-MpPreference" in item]
+            # Only the missing {python} is added; the unresolved literal is not.
+            self.assertEqual(len(added), 1)
+            self.assertIn("-ExclusionProcess $px", added[0])
+            self.assertIn("sys._base_executable", added[0])
+            self.assertNotIn("bazel.exe", added[0])
+            # Process exclusions are Windows-only and name exactly one executable.
+            original = template.read_text()
+            for broken in (
+                original.replace('"windows"', '"linux"'),
+                *(
+                    original.replace(
+                        json.dumps("C:\\Tools\\bazel.exe"), json.dumps(entry)
+                    )
+                    for entry in (
+                        "C:\\Tools\\*.exe",
+                        "C:\\Tools",
+                        "%ProgramFiles%\\x.exe",
+                        "C:\\..\\x.exe",
+                        "bazel.exe",
+                        "{workspace}",
+                        "C:\\a\\file.exe:stream.exe",
+                        "C:\\a/b/c.exe",
+                        "C:\\a\\b\n.exe",
+                        "\\\\server\\share\\x.exe",
+                        "C:\\Windows\\System32\\cmd.exe",
+                        "C:\\Windows\\explorer.exe",
+                        "C:\\Windows\\System32\\WindowsPowerShell\\powershell.exe",
+                    )
+                ),
+            ):
+                template.write_text(broken)
+                with self.assertRaises(worker_alignment.WorkerAlignmentError):
+                    WorkerTemplate.load(template)
+
 
 if __name__ == "__main__":
     unittest.main()

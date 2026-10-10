@@ -13,8 +13,12 @@ with two declared sources of expectations and reports each gap with its remediat
 - **Repository prerequisites**: `literate.worker-template.json` (committed). Commands
   per OS family, a minimum Python, minimum free disk, where Windows tools live off
   `PATH`, and the paths Microsoft Defender must not scan in real time
-  (`defender_exclusions`; `{workspace}` is the worker's workspace). The Windows
-  release gate reads the same file, so tools are declared once.
+  (`defender_exclusions`; `{workspace}` is the worker's workspace) plus the executables
+  whose file activity it must not scan (`defender_process_exclusions`; `{python}` is
+  the real base interpreter behind the template Python, or an absolute `.exe` path;
+  shells and script hosts are refused). A process exclusion covers every process of
+  that executable on the worker, not only gate work, including packages it installs.
+  The Windows release gate reads the same file, so tools are declared once.
 - **User expectations** (private, never committed): the coding CLI and model in the
   project-scoped `test.json`, and `worker-alignment.json` in the user configuration
   root (`litai config paths` reports both). It names files every worker must hold, as
@@ -26,13 +30,15 @@ with two declared sources of expectations and reports each gap with its remediat
 1. `litai worker list`, then `litai worker align --all`. Inspection is read-only. It
    checks SSH reachability, required commands, Python, free disk, Windows Defender
    exclusions, every declared file by content hash, and makes one live model call
-   through the selected coding CLI on each worker. `--worker-id ID` narrows it; `--skip-model` skips the model call.
+   through the selected coding CLI on each worker. `--worker-id ID` narrows it;
+   `--skip-model` skips the model call.
 2. Read every finding; each carries a remediation. `aligned: true` with exit status 0
    is the only ready state.
 3. `litai worker align --all --apply` with the user's authorization. It runs only
-   declared installs for missing commands, adds missing Defender exclusions (an
-   administrator SSH session is required), and replaces only files whose bytes differ.
-   It backs the old copy up as `<file>.bak-<UTC>` and keeps secrets owner-only. It then
+   declared installs for missing commands, adds missing Defender path and process
+   exclusions (an administrator SSH session is required; the report names each
+   excluded executable), and replaces only files whose bytes differ. It backs the
+   old copy up as `<file>.bak-<UTC>` and keeps secrets owner-only. It then
    inspects again and reports what is true afterwards.
 4. Gaps that `--apply` does not own:
    - repository tools without a declared install: run the detect-before-install

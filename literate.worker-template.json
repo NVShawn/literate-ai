@@ -30,7 +30,8 @@
       ],
       "python": {"commands": ["python"], "minimum": "3.11"},
       "minimum_free_gib": 10,
-      "defender_exclusions": ["{workspace}"]
+      "defender_exclusions": ["{workspace}"],
+      "defender_process_exclusions": ["{python}"]
     }
   }
 }
