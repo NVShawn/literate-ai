@@ -56,6 +56,7 @@ from literate_ai.adapters.dependencies import (
     HostDependencyObservation,
     validate_cyclonedx_bom,
 )
+from literate_ai.adapters.dependencies.mix_resolution import MixDependencyObserver
 from literate_ai.adapters.dependencies.python_install import (
     PIP_INSTALLER,
     install_python_wheels,
@@ -2121,7 +2122,10 @@ class LocalStandardLifecyclePorts:
             if not path.is_file():
                 continue
             try:
-                content = path.read_text(encoding="utf-8")
+                # Dependency source inventories bind the original UTF-8 bytes.
+                # Universal-newline translation would change CRLF identities
+                # before comparison with the retained native artifact.
+                content = path.read_bytes().decode("utf-8")
             except UnicodeError:
                 continue
             files[path.relative_to(root).as_posix()] = content
@@ -2136,6 +2140,7 @@ class LocalStandardLifecyclePorts:
         artifact_digest: str | None = None,
         additional_build_evidence: Mapping[str, object] | None = None,
         python_observer: StandardPythonDependencyObserver | None = None,
+        mix_observer: MixDependencyObserver | None = None,
     ) -> CycloneDxBomBinding:
         source = self.source_trees.evidence(plan.request.source_tree_identity)
         from literate_ai.adapters.native_sdk_dependencies import (
@@ -2240,6 +2245,10 @@ class LocalStandardLifecyclePorts:
                 None if python_observer is None else python_observer.source
             ),
             python_dependency_observer=python_observer,
+            mix_source_authority=(
+                None if mix_observer is None else mix_observer.source
+            ),
+            mix_dependency_observer=mix_observer,
             allow_missing_cargo_lock=(
                 additional_build_evidence is not None
                 and additional_build_evidence.get("cargo_lifecycle_profile") is True
@@ -8134,9 +8143,13 @@ class LocalStandardLifecyclePorts:
             ]
         ).decode("utf-8")
         surface_document = canonical_json_bytes(surface.to_dict()).decode("utf-8")
-        suffix = {"python": ".py", "javascript": ".js", "rust": ".rs", "cpp": ".cpp"}[
-            oracle.language
-        ]
+        suffix = {
+            "python": ".py",
+            "javascript": ".js",
+            "rust": ".rs",
+            "cpp": ".cpp",
+            "elixir": ".exs",
+        }[oracle.language]
         acceptance_toolchain = contract.library_acceptance_toolchain_identity
         assert acceptance_toolchain is not None
         binding = self.tool_bindings[acceptance_toolchain.uri]

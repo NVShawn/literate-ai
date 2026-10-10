@@ -40,6 +40,7 @@ from .standard_local import (
     local_generated_source_tree_identity,
     local_tree_identity,
 )
+from .standard_mix import StandardMixLifecyclePorts, StandardMixTarget
 from .standard_npm import (
     StandardNpmDependencyEvidence,
     StandardNpmLifecycleError,
@@ -80,6 +81,8 @@ __all__ = [
     "StandardBazelTarget",
     "StandardCargoLifecyclePorts",
     "StandardCargoTarget",
+    "StandardMixLifecyclePorts",
+    "StandardMixTarget",
     "StandardNpmDependencyEvidence",
     "StandardNpmLifecycleError",
     "StandardNpmSourceAuthority",

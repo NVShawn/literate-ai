@@ -45,7 +45,7 @@ REQUIREMENTS = (
     / "acceptance"
     / "requirements.json"
 )
-LANGUAGES = ("python", "cpp", "rust", "javascript")
+LANGUAGES = ("python", "cpp", "rust", "javascript", "elixir")
 
 
 def selected_languages() -> tuple[str, ...]:
@@ -60,7 +60,7 @@ def selected_languages() -> tuple[str, ...]:
     ):
         raise ValueError(
             "LITERATE_AI_LIVE_ROUNDTRIP_LANGUAGES must be a unique comma-separated "
-            "subset of python, cpp, rust, javascript"
+            "subset of " + ", ".join(LANGUAGES)
         )
     return selected
 
@@ -337,7 +337,7 @@ class LiveBidirectionalRoundTripTests(unittest.TestCase):
         self.assertEqual(qualification["blockers"], [])
         return qualification
 
-    def test_four_languages_reach_semantic_and_regenerative_qualification(
+    def test_selected_languages_reach_semantic_and_regenerative_qualification(
         self,
     ) -> None:
         bazel = shutil.which("bazel") or shutil.which("bazelisk")

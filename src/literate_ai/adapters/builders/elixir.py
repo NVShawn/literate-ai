@@ -43,7 +43,12 @@ def _constraint(value: tuple[int, ...] | None) -> None:
         raise ValueError("Elixir version constraints must be numeric prefixes")
 
 
-def _probe(command: tuple[str, ...], environment: Mapping[str, str], timeout: float):
+def _probe(
+    command: tuple[str, ...],
+    environment: Mapping[str, str],
+    timeout: float,
+    launcher_command: tuple[str, ...] | None = None,
+):
     result = run_bounded_process(
         [*command, "-e", _PROBE],
         cwd=None,
@@ -89,7 +94,20 @@ def _probe(command: tuple[str, ...], environment: Mapping[str, str], timeout: fl
             raise ValueError("BEAM emulator binary is unavailable")
         if any(not isinstance(item, str) or not item for item in data["files"]):
             raise ValueError("invalid standard library paths")
-        paths = (Path(command[0]), vm, *(Path(item) for item in data["files"]))
+        launcher = Path((launcher_command or command)[0])
+        paths = (launcher, vm, *(Path(item) for item in data["files"]))
+        if launcher_command is not None:
+            paths += (Path(command[0]),)
+        # Elixir launches BEAM through a shell script (or a Windows batch file).
+        # Bind that interpreter as well; native dependency inspection must start
+        # from BEAM and the interpreter, never treat the script as a native image.
+        if os.name == "nt" and launcher.suffix.lower() in {".bat", ".cmd"}:
+            interpreter = shutil.which("cmd.exe", path=environment.get("PATH"))
+            if interpreter is None:
+                raise ValueError("batch interpreter is unavailable")
+            paths += (Path(interpreter),)
+        elif launcher.read_bytes().startswith(b"#!/bin/sh\n"):
+            paths += (Path(launcher.read_bytes().splitlines()[0][2:].decode()),)
         bindings = tuple(
             (str(path.resolve(strict=True)), executable_file_digest(path))
             for path in paths
@@ -112,25 +130,38 @@ class ElixirToolchain:
     version_info: tuple[int, int, int]
     otp_version: str
     file_bindings: tuple[tuple[str, str], ...]
+    launcher_command: tuple[str, ...] | None = None
+
+    @property
+    def native_dependency_commands(self) -> tuple[tuple[str, ...], ...]:
+        return ((self.file_bindings[1][0],),) + tuple(
+            (path,) for path, _ in self.file_bindings[5:]
+        )
 
     @property
     def identity(self) -> str:
         return canonical_identity(self.to_dict()).uri
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        value = {
             "command": list(self.command),
             "version": self.version,
             "version_info": list(self.version_info),
             "otp_version": self.otp_version,
             "file_bindings": [list(item) for item in self.file_bindings],
         }
+        if self.launcher_command is not None:
+            value["launcher_command"] = list(self.launcher_command)
+        return value
 
     def require_unchanged(self, environment: Mapping[str, str] | None = None) -> None:
         configured = dict(os.environ if environment is None else environment)
         try:
             observed = _probe(
-                self.command, configured, DEFAULT_ELIXIR_VERSION_TIMEOUT_SECONDS
+                self.command,
+                configured,
+                DEFAULT_ELIXIR_VERSION_TIMEOUT_SECONDS,
+                self.launcher_command,
             )
         except BuildError as exc:
             raise BuildError(
@@ -184,7 +215,35 @@ def discover_elixir_toolchain(
             "Elixir command was not found on PATH",
         )
     command = (os.path.abspath(found), *command[1:])
-    version, parts, otp, bindings = _probe(command, configured, timeout_seconds)
+    launcher_command = None
+    if os.name == "nt" and Path(command[0]).suffix.lower() in {".bat", ".cmd"}:
+        # cmd.exe cannot faithfully transport multiline code or arbitrary JSON
+        # through elixir.bat. Invoke its native Erlang entry point directly for
+        # framework phases, preserving the selected Elixir library installation.
+        erl = shutil.which("erl.exe", path=configured.get("PATH"))
+        if erl is None:
+            raise BuildError(
+                "builder.elixir_toolchain_unavailable", "Erlang launcher is unavailable"
+            )
+        launcher_command = command
+        library = Path(command[0]).parent.parent / "lib"
+        command = (
+            os.path.abspath(erl),
+            *shlex.split(configured.get("ELIXIR_ERL_OPTIONS", ""), posix=False),
+            "-noshell",
+            "-elixir_root",
+            str(library),
+            "-pa",
+            str(library / "elixir" / "ebin"),
+            "-s",
+            "elixir",
+            "start_cli",
+            "-extra",
+            *launcher_command[1:],
+        )
+    version, parts, otp, bindings = _probe(
+        command, configured, timeout_seconds, launcher_command
+    )
     if parts[: len(minimum_version)] < minimum_version or (
         required_version is not None
         and parts[: len(required_version)] != required_version
@@ -193,6 +252,8 @@ def discover_elixir_toolchain(
             "builder.elixir_version_unsupported",
             "Elixir does not satisfy the selected version constraints",
         )
-    toolchain = ElixirToolchain(command, version, parts, otp, bindings)
+    toolchain = ElixirToolchain(
+        command, version, parts, otp, bindings, launcher_command
+    )
     toolchain.require_unchanged(configured)
     return toolchain

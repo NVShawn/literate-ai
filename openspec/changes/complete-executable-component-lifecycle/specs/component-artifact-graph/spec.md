@@ -55,3 +55,21 @@ fail before the next executable stage.
 #### Scenario: Package SBOM omits a shared resource
 - **WHEN** the package manifest references a resource absent from its release SBOM closure
 - **THEN** release qualification fails before publication or deployment
+
+### Requirement: Mixed build drivers have explicit composition authority
+A graph containing manifests from multiple build drivers SHALL retain each
+manifest's exact driver identity and declare their canonical, complete driver
+composition. The graph's selected driver identity SHALL bind that composition's
+bytes. A missing, extra, changed or unordered composition SHALL fail validation.
+Single-driver graphs SHALL retain their existing identity and wire representation.
+Composition SHALL NOT issue execution grants or replace a Component's measured
+native driver. Package execution SHALL remain bound to the independently planned
+root package authority and the exact accepted artifact closure.
+
+#### Scenario: Source and compiled libraries use different measured drivers
+- **WHEN** accepted source-library and compiled-library manifests enter one graph
+- **THEN** assembly binds both exact drivers through explicit composition while retaining their original manifest identities
+
+#### Scenario: A mixed graph omits its source-library driver
+- **WHEN** the declared composition differs from the manifest driver set
+- **THEN** validation refuses the graph before package materialization or execution

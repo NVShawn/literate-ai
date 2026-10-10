@@ -677,6 +677,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
                         {flavor.value for flavor in recipe.flavors},
                     )
                 language_skills = {
+                    "elixir": "elixir-portable-application",
                     "python": "python-portable-application",
                     "cpp": "cpp17-portable-json-application",
                     "rust": "rust-portable-json-application",
@@ -771,6 +772,8 @@ class NeutralSampleLadderTests(unittest.TestCase):
                         else ({"swift"} if "swift" in item["languages"] else set())
                     )
                 )
+                if "elixir" in item["languages"]:
+                    expected_toolchains = {*expected_toolchains, "elixir"}
                 if "nvidia-cuda" in {flavor.value for flavor in recipe.flavors}:
                     expected_toolchains = {*expected_toolchains, "nvcc"}
                 self.assertEqual(

@@ -14,6 +14,7 @@ from literate_ai.contracts import (
 PORTABLE_APPLICATION_SCHEMA = "literate-ai/portable-application@2"
 SUPPORTED_IMPLEMENTATION_LANGUAGES = (
     "cpp",
+    "elixir",
     "go",
     "javascript",
     "python",
@@ -22,6 +23,7 @@ SUPPORTED_IMPLEMENTATION_LANGUAGES = (
 )
 _SOURCE_ENTRYPOINTS = {
     "cpp": "source/main.cpp",
+    "elixir": "source/main.exs",
     "go": "source/main.go",
     "javascript": "source/main.js",
     "python": "source/main.py",

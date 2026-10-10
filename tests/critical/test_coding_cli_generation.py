@@ -562,6 +562,29 @@ class CodingCliSelectionTests(unittest.TestCase):
 
 
 class CodingCliInvocationTests(unittest.TestCase):
+    def test_manifest_numeric_guidance_preserves_canonical_refusal(self):
+        # Invariant: out-of-range generated framework metadata is refused and
+        # never written, while the prompt states the existing signed 64-bit bounds.
+        prompt = recipe(flavor("python")).prompt()
+        self.assertIn("`-9223372036854775808` through `9223372036854775807`", prompt)
+        self.assertIn("These bounds apply to framework metadata", prompt)
+        for number in (-(2**63) - 1, 2**63, 100000000000000000001):
+            with (
+                self.subTest(number=number),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                content = json.dumps({"cases": [{"arguments": [number]}]})
+                files = {GENERATED_TEST_SUITE_PATH: content}
+                with self.assertRaises(CodingCliError) as raised:
+                    coding_cli_adapter._canonicalize_generated_framework_metadata(
+                        Path(directory), files, GENERATED_TEST_SUITE_PATH
+                    )
+                self.assertEqual(
+                    raised.exception.code, "coding_cli.generated_metadata_invalid"
+                )
+                self.assertEqual(files[GENERATED_TEST_SUITE_PATH], content)
+                self.assertFalse((Path(directory) / GENERATED_TEST_SUITE_PATH).exists())
+
     def setUp(self) -> None:
         host_prerequisite = mock.patch.object(
             coding_cli_adapter,

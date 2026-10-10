@@ -62,7 +62,7 @@ development (2026-09-10):
 | Category | Current count | Notes |
 | --- | --- | --- |
 | Language Flavors | 9 (`lang-cpp`, `lang-elixir`, `lang-go`, `lang-javascript`, `lang-python`, `lang-rust`, `lang-swift`, `lang-typescript`, `lang-zig`) | Each pairs a language Flavor with a portable-application skill and a native/tree build strategy. Bare selectors (`+cpp`) still resolve. |
-| Build-system Flavors | 5 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
+| Build-system Flavors | 6 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-mix`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
 | OS Flavors | 3 (`os-linux`, `os-macos`, `os-windows`) | |
 | Packaging Flavors | 9 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`, `package-zip`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
 | Toolchain Flavors | 4 (`toolchain-zig-cc`, `toolchain-swift-apple`, `toolchain-swift-linux`, `toolchain-swift-windows`) | |
@@ -91,9 +91,15 @@ standard package lifecycle. Exact accepted custody, both SBOMs, specifications,
 target identities and release authorization remain mandatory. Qualification is pending.
 
 ELIXIR-001 adds the portable Elixir/OTP application Flavor under Goal 5, including
-Standard script-tree build/runtime contracts and initialized-project assets. All
-eight focused tests pass, including native macOS smoke on Elixir 1.20.4/OTP 29;
-live generation and native Linux/Windows qualification remain release gates.
+Standard script-tree build/runtime contracts and initialized-project assets.
+ELIXIR-002 ([PR #45](https://github.com/jordanhubbard/literate-ai/pull/45)) adds the
+`build-mix` Flavor and `mix-build-system` skill: checksum-pinned Hex dependency
+locking, an authorized native Mix builder, Mix library exports bound to sealed
+producer identities and current consumer grants, and native qualification of
+transitive library graphs, packaging after source retirement, retained-evidence
+reopening and tamper/revocation refusal. The contributor reports all eighteen native
+Elixir/Mix fixtures passing on macOS, Linux and Windows at Elixir 1.18.0/OTP 27.0 and
+1.20.4/OTP 29.1.1. Hosted CI and public retained Mix importer admission remain open.
 
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework

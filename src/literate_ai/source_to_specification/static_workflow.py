@@ -40,6 +40,7 @@ from .workflow import SourceToSpecificationWorkflow
 _LANGUAGE_SKILL_IDS = {
     "python": "language-python",
     "cpp": "language-cpp",
+    "elixir": "language-elixir",
     "rust": "language-rust",
     "javascript": "language-javascript",
     "typescript": "language-javascript",

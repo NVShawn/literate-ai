@@ -5,7 +5,7 @@ metadata:
   author: "Literate AI maintainers <literate-ai-maintainers@users.noreply.github.com>"
 schema: "urn:literate-ai:schema:v1:specification-to-source-skill"
 skill_id: "elixir-portable-application"
-version: "1.0.0"
+version: "1.0.2"
 title: "Elixir portable JSON application"
 stages:
   - "generate"
@@ -48,3 +48,29 @@ script containing its helper modules and native tests at `EXPORT_PATH` (Make) or
 or leave helper paths pointing into the former generation workspace.
 A selected build-system Flavor may supply a reviewed wrapper or faithful build;
 it does not relax these dependency or source-custody requirements.
+
+For Bazel actions, read the exact executable from `LITAI_LANGUAGE_TOOL`; Standard
+supplies it through `--action_env` together with a PATH containing the bound BEAM
+installation. Do not assume an ambient `elixir` is visible in Bazel's sandbox.
+For Make, use the `LITAI_LANGUAGE_TOOL` make variable as one quoted executable.
+
+On Windows, keep Make/Bazel assembly code in an `.exs` file and pass its paths to
+the selected launcher. Framework runtime phases invoke the bound native Erlang
+entry point to preserve multiline code and JSON without batch-shell evaluation.
+
+For a library recipe, implement the exact locked import surface instead of a
+product JSON entrypoint. Keep public `.ex` modules beneath `source/<package>/`
+and inside the package's CamelCase namespace (`invoice_api` becomes `InvoiceApi`).
+Implement every declared function or macro name, including `?`/`!` suffixes when
+declared. Put helpers inside the same retained package closure. Keep
+`source/main.exs --litai-test` as the generated-test launcher; it must load retained
+modules relative to `__DIR__` and report the normal generated-test envelope.
+Compile the package's `.ex` closure with `Kernel.ParallelCompiler.compile/2` in
+that launcher so struct and macro dependencies work independently of file order.
+Define each module once; do not `Code.require_file` another package `.ex` file
+from within a file in that same compiled closure.
+The framework compiles the retained package closure for native import observation
+and runs a separately reviewed `.exs` acceptance harness; generated tests do not
+replace independent acceptance. Resolve library dependencies from the exact
+runtime-provided provider artifact roots in the recipe, never from ambient modules
+or a fetched Hex substitute.

@@ -33,6 +33,9 @@ from literate_ai.contracts.executable_components import (
     ReleaseArtifactSet,
     RuntimeRequirement,
 )
+from literate_ai.contracts.executable_components.artifacts import (
+    artifact_driver_composition_identity,
+)
 from literate_ai.contracts.executable_components.packages import (
     PackageEntrypoint,
     PackageInput,
@@ -469,11 +472,19 @@ def assemble_standard_project_artifacts(
         realize_manifest(plan.manifest, by_revision[uri].exports)
         for uri, plan in sorted(planned.items())
     )
-    drivers = {item.build_system_driver_identity for item in manifests}
-    if len(drivers) != 1:
-        raise ReleaseArtifactAssemblyError(
-            "one project artifact graph requires one exact build-system driver"
+    # A graph whose Components use different measured drivers (for example a
+    # Mix library consumed by a Make application) binds the exact driver set;
+    # single-driver graphs keep their existing identity.
+    drivers = tuple(
+        sorted(
+            {item.build_system_driver_identity for item in manifests},
+            key=lambda item: item.uri,
         )
+    )
+    composition = drivers if len(drivers) > 1 else ()
+    graph_driver = (
+        artifact_driver_composition_identity(composition) if composition else drivers[0]
+    )
     root_result = by_revision[component_lock.root_revision.uri]
     if not root_result.exports:
         raise ReleaseArtifactAssemblyError("root Component has no built export")
@@ -487,7 +498,8 @@ def assemble_standard_project_artifacts(
     primary_root = roots[0]
     if len(root_result.exports) > 1:
         graph = create_artifact_build_graph(
-            build_system_driver_identity=next(iter(drivers)),
+            build_system_driver_identity=graph_driver,
+            driver_composition=composition,
             manifests=manifests,
             assembly_dependencies=assembly_dependencies,
             link_roots=(),
@@ -504,7 +516,8 @@ def assemble_standard_project_artifacts(
         )
     else:
         graph = create_artifact_build_graph(
-            build_system_driver_identity=next(iter(drivers)),
+            build_system_driver_identity=graph_driver,
+            driver_composition=composition,
             manifests=manifests,
             assembly_dependencies=assembly_dependencies,
             link_roots=(primary_root.identity,),

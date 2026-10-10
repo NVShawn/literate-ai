@@ -93,6 +93,24 @@ base behavioral contracts and obeying axis cardinality.
   effective revision
 - **AND** the base Component identity and behavioral requirements remain unchanged
 
+### Requirement: Elixir adoption preserves inert language evidence
+
+Repository adoption planning SHALL recognize `.ex` and `.exs` sources as Elixir,
+propose the shipped `lang-elixir` Flavor, and retain all detected languages in
+mixed source trees. It SHALL exclude generated and hidden directories from source
+marker discovery. A `mix.exs` manifest SHALL expose a monorepo root candidate
+without evaluating the manifest or inferring executable Mix build authority.
+
+#### Scenario: An existing Elixir repository has a Make driver
+
+- **WHEN** read-only adoption planning observes Elixir source and a supported Make driver
+- **THEN** it proposes Elixir and Make Flavors without executing source or changing files
+
+#### Scenario: A Mix manifest has no supported retained driver
+
+- **WHEN** adoption observes only a Mix manifest
+- **THEN** it reports the Elixir language and candidate root while preserving the missing-driver gate
+
 ### Requirement: Source-to-specification separates target observations
 
 Source-to-specification analysis SHALL propose observed target-specific behavior as

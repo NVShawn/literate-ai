@@ -4,18 +4,24 @@ from __future__ import annotations
 
 import hashlib
 import unittest
+from dataclasses import replace
 
 from literate_ai.application.artifact_graph import (
     ArtifactAssemblyError,
     assemble_source_tree,
+    create_artifact_build_graph,
 )
+from literate_ai.contracts._validation import ContractValidationError
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.executable_components.artifacts import (
+    ArtifactBuildGraph,
     GeneratedTextFile,
     GeneratedTextTree,
+    artifact_driver_composition_identity,
 )
 from literate_ai.contracts.executable_components.assets import AuthoredBinaryAsset
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
+from tests.support import fixtures_test_artifact_graph_contracts as graph_fixtures
 
 
 def identity(label: str) -> ContentIdentity:
@@ -93,3 +99,77 @@ class SourceAssemblyTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class MixedDriverGraphTests(unittest.TestCase):
+    """A graph never silently mixes build drivers (contributed in PR #45).
+
+    Invariant: a multi-driver graph binds every and only measured manifest
+    driver through an explicit composition identity, and single-driver graphs
+    keep their existing wire identity.
+    """
+
+    def setUp(self) -> None:
+        self.fixture = graph_fixtures.ArtifactGraphTests()
+
+    def test_mixed_drivers_require_explicit_exact_composition(self) -> None:
+        fixture = self.fixture
+        library = fixture.export("source-library")
+        root = fixture.export("mix-root", (library,))
+        manifests = (
+            fixture.manifest(library),
+            replace(
+                fixture.manifest(root, (library,)),
+                build_system_driver_identity=identity("native-mix-driver"),
+            ),
+        )
+        drivers = tuple(
+            sorted(
+                {item.build_system_driver_identity for item in manifests},
+                key=lambda item: item.uri,
+            )
+        )
+        with self.assertRaisesRegex(ContractValidationError, "selected driver"):
+            create_artifact_build_graph(
+                build_system_driver_identity=fixture.driver,
+                manifests=manifests,
+                link_roots=(root.identity,),
+            )
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=artifact_driver_composition_identity(drivers),
+            driver_composition=drivers,
+            manifests=manifests,
+            link_roots=(root.identity,),
+        )
+        self.assertEqual(ArtifactBuildGraph.from_dict(graph.to_dict()), graph)
+        self.assertEqual(len(graph.link_plans[0].ordered_artifact_identities), 2)
+        for composition in (
+            drivers[:1],
+            tuple(reversed(drivers)),
+            tuple(
+                sorted((*drivers, identity("unplanned-driver")), key=lambda i: i.uri)
+            ),
+        ):
+            with (
+                self.subTest(composition=composition),
+                self.assertRaises(ContractValidationError),
+            ):
+                replace(graph, driver_composition=composition)
+        with self.assertRaises(ContractValidationError):
+            replace(graph, build_system_driver_identity=fixture.driver)
+        with self.assertRaises(ContractValidationError):
+            replace(graph, driver_composition=())
+
+    def test_single_driver_graph_retains_legacy_wire_identity(self) -> None:
+        fixture = self.fixture
+        root = fixture.export("legacy-root")
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=fixture.driver,
+            manifests=(fixture.manifest(root),),
+            link_roots=(root.identity,),
+        )
+        wire = graph.to_dict()
+        self.assertNotIn("driver_composition", wire)
+        self.assertEqual(graph.identity, canonical_identity(wire))
+        with self.assertRaises(ContractValidationError):
+            ArtifactBuildGraph.from_dict({**wire, "driver_composition": []})

@@ -134,6 +134,22 @@
   from a URL that refuses non-public repositories. The migration guide and ADR 0049 now
   give the one-time `make install` reinstall from the public repository (#18).
 
+- Elixir: add the `build-mix` Flavor and `mix-build-system` generation skill for
+  native Mix applications and libraries. Mix projects lock checksum-pinned Hex
+  dependencies, build through an authorized native Mix driver, and expose compiled
+  library exports that Standard consumers bind to sealed producer identities and
+  current consumer grants; transitive library graphs, packaging after source
+  retirement, retained-evidence reopening and tamper/revocation refusal are qualified
+  natively. CI adds native Elixir cells (minimum Elixir 1.18.0 / OTP 27.0 and newer
+  Elixir 1.20.4 / OTP 29.1.1). Contributed in #45.
+
+- Artifact graphs: explicitly bind mixed build-driver compositions while retaining
+  each Component's measured driver and existing single-driver identities.
+
+- Generation: state the existing signed 64-bit bounds for numeric framework
+  metadata, avoiding oversized generated test-manifest values while preserving
+  specification-defined application arithmetic and strict validation.
+
 ## 1.1.0 - 2026-10-04
 
 [README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.1.0/README.md)
@@ -161,8 +177,47 @@
 - Elixir: add `lang-elixir` with portable script-tree generation, syntax validation,
   Standard runtime/test dispatch, exact Elixir/OTP toolchain identities, and
   `init`/`flavor add` assets. Requires Elixir 1.18+ and Erlang/OTP 27+; native
-  macOS smoke verification passes with Elixir 1.20.4/OTP 29. Mix/Hex/Phoenix
-  are outside this dependency-free profile.
+  macOS smoke verification passes with Elixir 1.20.4/OTP 29. Add host prerequisite
+  SBOMs, Standard sample and roundtrip selection, inert inverse inventory/skills,
+  and opt-in native parser/custody/Make/Bazel qualification with a pinned three-OS
+  CI matrix. Extend those cells with digest-pinned Hex staging, sequential Mix
+  qualification and a gate rejecting skipped or incomplete native fixture evidence.
+  Linux and Windows minimum-version checks pass on Elixir 1.18.0/OTP
+  27.0; live provider generation, independent acceptance and replay pass on macOS.
+  Bind native dependency observation to BEAM and the launcher interpreter. Use
+  native Erlang transport on Windows to preserve multiline code and inert JSON.
+  Adoption plans recognize `.ex`, `.exs` and Mix manifest markers without
+  evaluating them; monorepo plans expose Mix roots as candidates.
+  Add exact Elixir library import namespaces and native exports, retained-package
+  import verification, and `.exs` independent library acceptance. Native tests
+  cover library source retirement and consuming applications using packaged roots.
+  Qualify libraries on minimum-version Linux/Windows and through live generation
+  of a library and consuming application. Add installation-bound Mix discovery
+  with complete shipped application byte guards and inert project discovery.
+  Add typed Mix source/dependency evidence and source-to-resolved BOM verification
+  using freshly rechecked acquired archives and compiled payloads. Add explicit
+  opt-in native Mix/Hex graph, relocation, tamper and runtime-retirement checks.
+  Add Standard Mix ports with exact plan/grant checks, sealed cache reuse and
+  retained runtime code paths. Add strict Mix command profiles, locked tree-export
+  projection, explicit Hex constraints and Standard runtime assembly, composing
+  with Cargo targets. Native macOS and minimum-version Linux/Windows locked-profile
+  fixtures pass. Preserve CRLF source identities and inspect the Windows BEAM
+  DLL as an exact PE payload, with executable discovery retained for commands.
+  Add typed compiled-provider inputs bound to acknowledged Mix build requests,
+  retained BEAM custody and native namespace/public-interface checks. Restore
+  exact provider paths through a framework compiler after Mix code-path pruning.
+  Qualify compiled-provider source retirement, request binding, missing exports,
+  namespace escape and retained-byte tampering on macOS and minimum-version
+  Linux/Windows.
+  Bind published default Elixir libraries to Standard Mix consumers, compile
+  their retained package source under the consumer grant, and preserve compiled
+  imports and compilation evidence with the sealed consumer artifact.
+  Canonical catalog selection and portable
+  package/capture integration remain open.
+  Mix/Hex/Phoenix are outside this dependency-free profile.
+
+- Native dependency custody: recheck streamed content on Linux as well as Windows
+  so a same-size rewrite cannot evade capture through unchanged timestamps.
 
 - Documentation tooling: update DOMPurify to 3.4.16. Gate the dependency audit
   through reviewed, expiring per-advisory exceptions. The only exception covers the
