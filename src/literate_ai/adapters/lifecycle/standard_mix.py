@@ -115,6 +115,9 @@ class StandardMixLifecyclePorts(StandardCargoLifecyclePorts):
     verifier and the exact finalized Standard authorization are checked at each
     phase. The standalone producer's tree digest stays distinct from Standard's
     source bundle and source tree identities.
+
+    Mix builds are local-only in 1.2: ``accept_build_intent`` refuses
+    worker-built Mix intents rather than transferring Hex acquisition authority.
     """
 
     def __init__(
@@ -217,6 +220,13 @@ class StandardMixLifecyclePorts(StandardCargoLifecyclePorts):
             ):
                 raise ValueError("Mix runtime identity differs from selected compiler")
 
+    def _source_bytes_exact(self, component_revision):
+        # Mix source authority is compared with retained native source bytes.
+        return (
+            component_revision.uri in self.mix_targets
+            or super()._source_bytes_exact(component_revision)
+        )
+
     def plan_finalization_inputs(self, intent, authorization):
         inputs = super().plan_finalization_inputs(intent, authorization)
         target = self.mix_targets.get(intent.component_revision.uri)
@@ -255,7 +265,9 @@ class StandardMixLifecyclePorts(StandardCargoLifecyclePorts):
                 "Mix package and SDK integration is not yet configured"
             )
         root = self.source_trees.resolve(source_candidate.tree_identity)
-        source = prepare_mix_source_authority(self._source_text_files(root))
+        source = prepare_mix_source_authority(
+            self._source_text_files(root, exact_bytes=True)
+        )
         custody = self.source_trees.evidence(source_candidate.tree_identity)
         resolver = CycloneDxLifecycleResolver(
             managed_graph=custody.managed_graph,
@@ -265,38 +277,64 @@ class StandardMixLifecyclePorts(StandardCargoLifecyclePorts):
         )
         resolver.validate_source(
             {
-                "files": self._source_text_files(root),
+                "files": self._source_text_files(root, exact_bytes=True),
                 "effective_revision_digest": generation_plan.component_revision.uri,
                 "source_bundle_digest": source_candidate.source_bundle_identity.uri,
             }
         )
-        old = super().create(
+        inputs = self.build_intent_inputs(
             execution_plan,
             generation_plan,
             source_candidate,
             provider_artifacts,
             package_artifacts,
         )
+        # Replace the generic request before registration so only the Mix
+        # intent and request are retained as evidence.
+        generic = inputs.create()
         request = replace(
-            old.build_request,
+            generic.build_request,
             builder_id=target.identity.uri,
             toolchain_digest=target.hex_toolchain.identity,
             requested_privileges=("execute-build-tools", "network-access"),
         )
-        intent = replace(old, build_request=request)
-        for mapping in (
-            self._intent_artifacts,
-            self._intent_package_artifacts,
-            self._library_consumer_bindings,
-        ):
-            mapping[intent.identity.uri] = mapping.pop(old.identity.uri)
+        intent = self._register_build_intent(
+            generation_plan, replace(generic, build_request=request), inputs
+        )
         self._mix_provider_sources[intent.identity.uri] = self._select_provider_sources(
             intent, provider_artifacts
         )
         self._mix_intents[intent.identity.uri] = intent
-        self._record_evidence(intent.to_dict())
-        self._record_evidence(request.to_dict())
         return intent
+
+    def accept_build_intent(
+        self,
+        execution_plan,
+        generation_plan,
+        source_candidate,
+        provider_artifacts,
+        package_artifacts,
+        intent,
+    ):
+        """Refuse worker-transferred Mix intents: Mix builds are local-only in 1.2.
+
+        The generic acceptance path would recreate an SDK-bound request and never
+        match the Mix-bound request, so it already fails closed. This override
+        makes that boundary explicit instead of reporting a misleading mismatch.
+        """
+        if generation_plan.component_revision.uri in self.mix_targets:
+            raise LocalStandardLifecycleError(
+                "Mix builds are local-only in this release; worker-built Mix "
+                "intents are not accepted"
+            )
+        return super().accept_build_intent(
+            execution_plan,
+            generation_plan,
+            source_candidate,
+            provider_artifacts,
+            package_artifacts,
+            intent,
+        )
 
     def _select_provider_sources(self, intent, providers):
         """Admit only registered, published Elixir library closures and exact edges."""
@@ -613,7 +651,8 @@ class StandardMixLifecyclePorts(StandardCargoLifecyclePorts):
             native = replace(native, artifact_path=export)
         source = prepare_mix_source_authority(
             self._source_text_files(
-                self.source_trees.resolve(plan.request.source_tree_identity)
+                self.source_trees.resolve(plan.request.source_tree_identity),
+                exact_bytes=True,
             )
         )
         observer = _MixObserver(

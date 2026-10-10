@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 import zlib
 from pathlib import Path
@@ -284,6 +286,107 @@ class ElixirCatalogTests(unittest.TestCase):
 
 
 class ElixirToolchainTests(unittest.TestCase):
+    def test_native_images_are_selected_by_role_not_position(self):
+        names = ("Kernel.beam", "sh", "elixir", "json.beam", "beam.smp", "JSON.beam")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bindings = tuple((str(root / name), "sha256:" + "0" * 64) for name in names)
+            tool = ElixirToolchain(
+                (str(root / "elixir"),), "1.18.0", (1, 18, 0), "27", bindings
+            )
+            self.assertEqual(
+                tool.native_dependency_commands,
+                ((str(root / "beam.smp"),), (str(root / "sh"),)),
+            )
+            for changed in (
+                bindings + ((str(root / "other/beam.smp"), "sha256:" + "1" * 64),),
+                tuple(item for item in bindings if not item[0].endswith("elixir")),
+                tuple(item for item in bindings if not item[0].endswith(".smp")),
+                bindings + ((str(root / "sh"), "sha256:" + "0" * 64),),
+            ):
+                with self.subTest(changed=changed), self.assertRaises(BuildError):
+                    _ = ElixirToolchain(
+                        (str(root / "elixir"),), "1.18.0", (1, 18, 0), "27", changed
+                    ).native_dependency_commands
+
+    def test_launcher_shebang_interpreter_is_parsed_or_refused(self):
+        from literate_ai.adapters.builders.elixir import _shebang_interpreters
+
+        with tempfile.TemporaryDirectory() as temporary:
+            launcher = Path(temporary) / "elixir"
+            for content, expected in (
+                (b"#!/bin/sh\nexec erl\n", (Path("/bin/sh"),)),
+                (b"#!/bin/sh\r\nexec erl\r\n", (Path("/bin/sh"),)),
+                (b"#! /bin/bash -e\n", (Path("/bin/bash"),)),
+                (b"\x7fELF native launcher", ()),
+                (
+                    b"#!/usr/bin/env sh\n",
+                    (Path("/usr/bin/env"), Path("/resolved/sh")),
+                ),
+            ):
+                launcher.write_bytes(content)
+                with (
+                    self.subTest(content=content),
+                    mock.patch(
+                        "literate_ai.adapters.builders.elixir.shutil.which",
+                        return_value="/resolved/sh",
+                    ),
+                ):
+                    self.assertEqual(_shebang_interpreters(launcher, {}), expected)
+            for content in (
+                b"#!sh\n",
+                b"#!\n",
+                b"#!/bin/sh -e -x\n",
+                b"#!/usr/bin/env -S sh\n",
+                b"#!/usr/bin/env\n",
+                b"#!/bin/sh" + b" " * 300 + b"\n",
+                b"#!/bin/\xffsh\n",
+            ):
+                launcher.write_bytes(content)
+                with self.subTest(content=content), self.assertRaises(ValueError):
+                    _shebang_interpreters(launcher, {})
+
+    def test_windows_erl_command_does_not_bake_ambient_erl_options(self):
+        from literate_ai.adapters.builders import elixir as module
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bat = root / "elixir/bin/elixir.bat"
+            bat.parent.mkdir(parents=True)
+            bat.write_bytes(b"@echo off")
+            erl = root / "erl.exe"
+            erl.write_bytes(b"MZ")
+            observed = ("1.18.0", (1, 18, 0), "27", ())
+            with (
+                # Only this module sees Windows; pathlib keeps the host flavor.
+                mock.patch.object(
+                    module,
+                    "os",
+                    types.SimpleNamespace(name="nt", path=os.path, environ=os.environ),
+                ),
+                mock.patch.object(
+                    module.shutil,
+                    "which",
+                    side_effect=lambda name, path=None: str(
+                        bat if name.endswith("elixir.bat") else erl
+                    ),
+                ),
+                mock.patch.object(module, "_probe", return_value=observed) as probe,
+                mock.patch.object(ElixirToolchain, "require_unchanged"),
+            ):
+                tool = module.discover_elixir_toolchain(
+                    {
+                        "PATH": "",
+                        "ELIXIR_ERL_OPTIONS": "-eval 'os:cmd(\"touch marker\")'",
+                    },
+                    pinned_command=(str(bat), "--no-halt"),
+                )
+            self.assertEqual(tool.launcher_command, (str(bat), "--no-halt"))
+            self.assertEqual(tool.command[:2], (str(erl), "-noshell"))
+            self.assertNotIn("-eval", tool.command)
+            self.assertEqual(tool.command[-2:], ("-extra", "--no-halt"))
+            self.assertEqual(probe.call_args.args[0], tool.command)
+
     def test_missing_toolchain_fails_closed(self):
         with tempfile.TemporaryDirectory() as temporary:
             with self.assertRaises(BuildError) as caught:

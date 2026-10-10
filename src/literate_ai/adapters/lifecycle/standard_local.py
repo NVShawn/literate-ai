@@ -2116,20 +2116,32 @@ class LocalStandardLifecyclePorts:
         )
 
     @staticmethod
-    def _source_text_files(root: Path) -> dict[str, str]:
+    def _source_text_files(root: Path, *, exact_bytes: bool = False) -> dict[str, str]:
+        """Return UTF-8 source text for dependency admission.
+
+        By default this keeps the established universal-newline reading, so
+        existing ecosystems' admission inputs are unchanged by checkout line
+        endings. ``exact_bytes`` is for owners (Mix) whose authority is later
+        compared with retained native source bytes; there CRLF must survive.
+        """
         files: dict[str, str] = {}
         for path in sorted(root.rglob("*")):
             if not path.is_file():
                 continue
             try:
-                # Dependency source inventories bind the original UTF-8 bytes.
-                # Universal-newline translation would change CRLF identities
-                # before comparison with the retained native artifact.
-                content = path.read_bytes().decode("utf-8")
+                content = (
+                    path.read_bytes().decode("utf-8")
+                    if exact_bytes
+                    else path.read_text(encoding="utf-8")
+                )
             except UnicodeError:
                 continue
             files[path.relative_to(root).as_posix()] = content
         return files
+
+    def _source_bytes_exact(self, component_revision: ContentIdentity) -> bool:
+        """Whether this Component's source admission binds exact bytes."""
+        return False
 
     def _resolve_and_write_sbom(
         self,
@@ -2202,7 +2214,10 @@ class LocalStandardLifecyclePorts:
                 "reserved resolved-SBOM evidence directory escaped artifact custody"
             )
         source_root = self.source_trees.resolve(plan.request.source_tree_identity)
-        files = self._source_text_files(source_root)
+        files = self._source_text_files(
+            source_root,
+            exact_bytes=self._source_bytes_exact(plan.component_revision),
+        )
         if files.get(CYCLONEDX_SOURCE_SBOM_PATH) is None:
             raise LocalStandardLifecycleError(
                 "admitted source tree lost its source CycloneDX BOM"

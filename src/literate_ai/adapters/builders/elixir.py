@@ -32,6 +32,40 @@ IO.puts(JSON.encode!(%{version: System.version(), otp: System.otp_release(),
   root: List.to_string(:code.root_dir()), files: files}))
 """
 _VERSION = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-[A-Za-z0-9.+-]+)?$")
+_VM_NAMES = frozenset({"beam.smp", "beam.smp.dll"})
+_MAX_SHEBANG_BYTES = 256
+
+
+def _shebang_interpreters(
+    launcher: Path, environment: Mapping[str, str]
+) -> tuple[Path, ...]:
+    """Return the absolute interpreter(s) a script launcher's shebang names.
+
+    Only ``#!/abs/interpreter [arg]`` and ``#!/abs/env name`` are accepted; any
+    other shebang is ambiguous and refused rather than guessed.
+    """
+    with launcher.open("rb") as stream:
+        head = stream.read(_MAX_SHEBANG_BYTES)
+    if not head.startswith(b"#!"):
+        return ()
+    line, newline, _ = head.partition(b"\n")
+    if not newline:
+        raise ValueError("launcher shebang exceeds its bound")
+    try:
+        tokens = line[2:].rstrip(b"\r").decode("utf-8").split()
+    except UnicodeDecodeError as exc:
+        raise ValueError("launcher shebang is not UTF-8") from exc
+    if not tokens or not Path(tokens[0]).is_absolute() or len(tokens) > 2:
+        raise ValueError("launcher shebang interpreter is ambiguous")
+    interpreter = Path(tokens[0])
+    if interpreter.name != "env":
+        return (interpreter,)
+    if len(tokens) != 2 or tokens[1].startswith("-"):
+        raise ValueError("launcher env shebang is ambiguous")
+    found = shutil.which(tokens[1], path=environment.get("PATH"))
+    if found is None:
+        raise ValueError("launcher env interpreter is unavailable")
+    return (interpreter, Path(found))
 
 
 def _constraint(value: tuple[int, ...] | None) -> None:
@@ -106,8 +140,8 @@ def _probe(
             if interpreter is None:
                 raise ValueError("batch interpreter is unavailable")
             paths += (Path(interpreter),)
-        elif launcher.read_bytes().startswith(b"#!/bin/sh\n"):
-            paths += (Path(launcher.read_bytes().splitlines()[0][2:].decode()),)
+        else:
+            paths += _shebang_interpreters(launcher, environment)
         bindings = tuple(
             (str(path.resolve(strict=True)), executable_file_digest(path))
             for path in paths
@@ -134,9 +168,38 @@ class ElixirToolchain:
 
     @property
     def native_dependency_commands(self) -> tuple[tuple[str, ...], ...]:
-        return ((self.file_bindings[1][0],),) + tuple(
-            (path,) for path, _ in self.file_bindings[5:]
-        )
+        """Native images by role: the one BEAM VM, then launch interpreters.
+
+        The script launcher and core ``.beam`` modules are retained byte
+        bindings, never native images. Ambiguous bindings are refused.
+        """
+
+        def canonical(path: str) -> str:
+            return os.path.normcase(os.path.realpath(path))
+
+        launcher = canonical((self.launcher_command or self.command)[0])
+        vms = []
+        interpreters = []
+        launchers = 0
+        for path, _ in self.file_bindings:
+            name = Path(path).name.lower()
+            if canonical(path) == launcher:
+                launchers += 1
+            elif name in _VM_NAMES:
+                vms.append(path)
+            elif not name.endswith(".beam"):
+                interpreters.append(path)
+        native = (*vms, *interpreters)
+        if (
+            len(vms) != 1
+            or launchers != 1
+            or len({canonical(path) for path in native}) != len(native)
+        ):
+            raise BuildError(
+                "builder.elixir_toolchain",
+                "Elixir bindings lack one unambiguous launcher and BEAM VM",
+            )
+        return tuple((path,) for path in native)
 
     @property
     def identity(self) -> str:
@@ -228,8 +291,9 @@ def discover_elixir_toolchain(
         launcher_command = command
         library = Path(command[0]).parent.parent / "lib"
         command = (
+            # Ambient ERL_*/ELIXIR_ERL_OPTIONS are never baked into the pinned
+            # command, matching the overrides stripped from native phases.
             os.path.abspath(erl),
-            *shlex.split(configured.get("ELIXIR_ERL_OPTIONS", ""), posix=False),
             "-noshell",
             "-elixir_root",
             str(library),

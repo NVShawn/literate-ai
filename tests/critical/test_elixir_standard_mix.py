@@ -41,8 +41,24 @@ class StandardMixAuthorityTests(unittest.TestCase):
         source.mkdir()
         content = b"IO.puts(42)\r\n# retained source\r\n"
         (source / "main.exs").write_bytes(content)
-        files = StandardMixLifecyclePorts._source_text_files(self.root)
+        files = StandardMixLifecyclePorts._source_text_files(
+            self.root, exact_bytes=True
+        )
         self.assertEqual(files["source/main.exs"].encode("utf-8"), content)
+        # Other ecosystems keep universal-newline admission text.
+        self.assertEqual(
+            StandardMixLifecyclePorts._source_text_files(self.root)["source/main.exs"],
+            "IO.puts(42)\n# retained source\n",
+        )
+
+    def test_only_mix_components_bind_exact_source_bytes(self):
+        ports, plan, _, _, _ = _system(self.root, verifier=AuthorizationRevocationSet())
+        from literate_ai.contracts import canonical_identity
+
+        self.assertTrue(ports._source_bytes_exact(plan.component_revision))
+        self.assertFalse(
+            ports._source_bytes_exact(canonical_identity({"other": "component"}))
+        )
 
     def test_source_bundle_and_canonical_tree_are_distinct(self):
         from literate_ai.adapters.builders.python import canonical_tree_digest
@@ -153,6 +169,76 @@ class StandardMixAuthorityTests(unittest.TestCase):
         ports._mix_finalized_plans.clear()
         with self.assertRaises(LocalStandardLifecycleError):
             ports._require_mix_authority(plan, require_source=False, require_live=False)
+
+    def test_plan_finalization_requires_the_contract_bound_mix_binding(self):
+        from literate_ai.application.standard_project_lifecycle import (
+            StandardProjectLifecycleError,
+        )
+
+        ports, plan, intent, authorization, _ = _system(
+            self.root, verifier=AuthorizationRevocationSet()
+        )
+        inputs = ports.plan_finalization_inputs(intent, authorization)
+        contract = ports._contract(plan.component_revision)
+        self.assertEqual(inputs.dependency_resolution, "mix")
+        self.assertEqual(
+            inputs.build_binding,
+            (
+                contract.locked_build_authority_identity.uri,
+                contract.build_system_toolchain_identity.uri,
+            ),
+        )
+        self.assertEqual(inputs.finalize().identity, plan.identity)
+        builder, toolchain = inputs.build_binding
+        for name, changes in (
+            ("mix without binding", {"build_binding": None}),
+            ("binding without mix", {"dependency_resolution": "npm"}),
+            ("binding without mix", {"dependency_resolution": "none"}),
+            ("malformed binding", {"build_binding": (builder,)}),
+            ("malformed binding", {"build_binding": [builder, toolchain]}),
+            ("malformed binding", {"build_binding": (builder, "")}),
+            ("foreign builder", {"build_binding": ("sha256:" + "0" * 64, toolchain)}),
+            ("foreign driver", {"build_binding": (builder, "sha256:" + "0" * 64)}),
+            ("swapped binding", {"build_binding": (toolchain, builder)}),
+        ):
+            with (
+                self.subTest(name, changes=changes),
+                self.assertRaises(StandardProjectLifecycleError) as caught,
+            ):
+                replace(inputs, **changes).finalize()
+            self.assertEqual(
+                caught.exception.code, "standard_lifecycle.plan_inputs_mismatch"
+            )
+
+    def test_only_the_mix_bound_intent_and_request_are_retained(self):
+        import json
+
+        from literate_ai.adapters.qualification_capture import (
+            QualificationEvidenceRecorder,
+        )
+
+        recorder = QualificationEvidenceRecorder(
+            max_bytes=32 * 1024 * 1024, max_records=1000
+        )
+        ports, _, intent, _, _ = _system(
+            self.root, verifier=AuthorizationRevocationSet(), evidence_recorder=recorder
+        )
+        requests = [
+            document
+            for document in (json.loads(item) for item in recorder._records.values())
+            if isinstance(document, dict)
+            and "builder_id" in document
+            and "requested_privileges" in document
+        ]
+        self.assertEqual(requests, [intent.build_request.to_dict()])
+        self.assertIn(intent.identity, recorder._records)
+
+    def test_worker_built_mix_intent_is_refused_as_local_only(self):
+        ports, plan, intent, _, _ = _system(
+            self.root, verifier=AuthorizationRevocationSet()
+        )
+        with self.assertRaisesRegex(LocalStandardLifecycleError, "local-only"):
+            ports.accept_build_intent(None, plan, None, (), (), intent)
 
     def test_runtime_without_external_checkpoint_is_rejected(self):
         ports, plan, _, _, source = _system(

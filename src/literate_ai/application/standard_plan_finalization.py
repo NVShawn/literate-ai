@@ -62,8 +62,10 @@ def finalize_standard_component_plan(
 
     ``build_binding`` is the exact ``(builder_id, toolchain_digest)`` pair a local
     ecosystem port (Mix) bound into the issued request. It is required for, and
-    only accepted with, ``mix`` dependency resolution; every other mode keeps the
-    generic SDK-bound builder and language-compiler toolchain.
+    only accepted with, ``mix`` dependency resolution, and must equal the
+    contract's ``(locked_build_authority_identity, build_system_toolchain_identity)``
+    so a port cannot substitute another builder or driver. Every other mode keeps
+    the generic SDK-bound builder and language-compiler toolchain.
     """
     network = dependency_resolution in {"npm", "mix"}
     if (dependency_resolution == "mix") != (build_binding is not None) or (
@@ -72,6 +74,13 @@ def finalize_standard_component_plan(
             not isinstance(build_binding, tuple)
             or len(build_binding) != 2
             or not all(isinstance(item, str) and item for item in build_binding)
+            # The binding is not caller-chosen authority: it must name exactly
+            # the contract's locked build authority and build-system driver.
+            or build_binding
+            != (
+                contract.locked_build_authority_identity.uri,
+                contract.build_system_toolchain_identity.uri,
+            )
         )
     ):
         raise StandardProjectLifecycleError(
