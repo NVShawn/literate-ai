@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Toolchain observation now accepts the npm `@bazel/bazelisk` launcher that the
+  installation guide recommends. Only the prebuilt binary bazelisk.js runs for the host,
+  selected by the Node runtime's own architecture, is observed as the native toolchain.
+  The package's other platform binaries are hashed as inert payload, and native files
+  anywhere else still refuse.
+- `litai project validate` and Flavor catalog loading discover the project skill catalog
+  once per operation instead of once per Component and Flavor (117 times for this
+  repository). This removes most of the filesystem metadata calls that made Windows
+  gates slow.
+
 - The worker template can declare Windows Defender process exclusions
   (`defender_process_exclusions`): `{python}`, the real base interpreter behind the
   template Python, or an absolute `.exe` path. `litai worker align` reports a missing

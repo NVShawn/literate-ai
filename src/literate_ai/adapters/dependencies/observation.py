@@ -3457,6 +3457,7 @@ def _npm_package_graph(
     dependency_resolver: NpmDependencyResolver | None = None,
     literal_dependency_resolver: NpmLiteralDependencyResolver | None = None,
     builtin_modules: frozenset[str] = NODE_BUILTIN_MODULES,
+    admitted_native_payload: Callable[[Path], bool] | None = None,
 ) -> tuple[HostDependencyObservation, dict[str, str], str]:
     root_package_root = root.resolve(strict=True)
     graph_root = (
@@ -3654,7 +3655,9 @@ def _npm_package_graph(
                     "dependencies.npm-graph-budget-exceeded",
                     "reachable npm graph exceeds the aggregate byte limit",
                 )
-            if name_or_magic_is_native_or_wasm(path.name, content[:8]):
+            if name_or_magic_is_native_or_wasm(path.name, content[:8]) and not (
+                admitted_native_payload is not None and admitted_native_payload(path)
+            ):
                 raise DependencyObservationError(
                     "dependencies.npm-native-payload-unsupported",
                     f"reachable npm implementation package contains a native or "
@@ -4812,6 +4815,60 @@ def _npm_launcher_package_root(launcher: Path, command: str) -> Path | None:
     return package_root
 
 
+_BAZELISK_PLATFORM_BINARY = re.compile(
+    r"bazelisk-(?:darwin|linux)_(?:amd64|arm64)|bazelisk-windows_(?:amd64|arm64)\.exe"
+)
+
+
+# Executable-header machine codes for the two architectures Bazelisk publishes.
+_ELF_MACHINES = {0x3E: "amd64", 0xB7: "arm64"}
+_MACHO_CPU_TYPES = {0x01000007: "amd64", 0x0100000C: "arm64"}
+_PE_MACHINES = {0x8664: "amd64", 0xAA64: "arm64"}
+
+
+def _executable_architecture(path: Path) -> str | None:
+    """The CPU architecture a single-architecture executable runs as, if known."""
+
+    try:
+        with path.open("rb") as stream:
+            header = stream.read(4096)
+    except OSError:
+        return None
+    if header[:4] == b"\x7fELF" and len(header) >= 20:
+        order = "little" if header[5] == 1 else "big"
+        return _ELF_MACHINES.get(int.from_bytes(header[18:20], order))
+    if header[:4] in {b"\xcf\xfa\xed\xfe", b"\xce\xfa\xed\xfe"} and len(header) >= 8:
+        return _MACHO_CPU_TYPES.get(int.from_bytes(header[4:8], "little"))
+    if header[:2] == b"MZ" and len(header) >= 64:
+        offset = int.from_bytes(header[60:64], "little")
+        if header[offset : offset + 4] == b"PE\0\0":
+            return _PE_MACHINES.get(
+                int.from_bytes(header[offset + 4 : offset + 6], "little")
+            )
+    return None
+
+
+def _bazelisk_host_binary_name(node: Path) -> str:
+    """The prebuilt binary bazelisk.js selects for this host and Node runtime.
+
+    bazelisk.js picks by ``process.platform`` and ``os.arch()``, the architecture
+    Node itself runs as, which can differ from the CPU under emulation (x64 Node
+    on Windows ARM64, Rosetta). The architecture therefore comes from the Node
+    executable's header; a universal or unrecognized Node refuses.
+    """
+
+    system = {"darwin": "darwin", "linux": "linux", "win32": "windows"}.get(
+        sys.platform
+    )
+    arch = _executable_architecture(node)
+    if system is None or arch is None:
+        raise DependencyObservationError(
+            "dependencies.toolchain-launcher-unsupported",
+            f"cannot tell which Bazelisk binary {node} selects on {sys.platform}",
+        )
+    return f"bazelisk-{system}_{arch}" + (".exe" if system == "windows" else "")
+
+
 def _npm_toolchain_launcher_dependencies(
     launcher: Path,
     command: str,
@@ -4858,16 +4915,39 @@ def _npm_toolchain_launcher_dependencies(
         ),
         package_root,
     )
-    packages, native_owners, package_ref = _npm_package_graph(
-        package_root,
-        native_predicate=native_predicate,
-        resolution_root=resolution_root,
-    )
+    # bazelisk.js runs exactly one prebuilt binary chosen by platform and
+    # architecture. That binary is the native owner whose closure is observed;
+    # the package's other platform binaries are hashed as inert payload. Native
+    # files anywhere else, including this package's dependencies, still refuse.
     node = _resolve_command(("node",))
     if not native_predicate(node):
         raise DependencyObservationError(
             "dependencies.toolchain-runtime-unbound",
             "the Bazelisk Node runtime is not an inspectable native binary",
+        )
+    payload_root = package_root.resolve(strict=True)
+    host_binary = payload_root / _bazelisk_host_binary_name(node)
+    if not host_binary.is_file() or host_binary.is_symlink():
+        raise DependencyObservationError(
+            "dependencies.toolchain-launcher-unsupported",
+            f"the Bazelisk npm package has no {host_binary.name} binary for this host",
+        )
+    packages, native_owners, package_ref = _npm_package_graph(
+        package_root,
+        native_predicate=lambda path: (
+            path.resolve() == host_binary and native_predicate(path)
+        ),
+        resolution_root=resolution_root,
+        admitted_native_payload=lambda path: (
+            path.parent.resolve() == payload_root
+            and _BAZELISK_PLATFORM_BINARY.fullmatch(path.name) is not None
+        ),
+    )
+    if str(host_binary) not in native_owners:
+        raise DependencyObservationError(
+            "dependencies.toolchain-runtime-unbound",
+            f"the Bazelisk host binary {host_binary.name} is not an inspectable "
+            "native binary",
         )
     observation = _normalized_observation(
         packages.components,

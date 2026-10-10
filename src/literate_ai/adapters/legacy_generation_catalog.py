@@ -1146,6 +1146,7 @@ def _referenced_skills(
     *,
     source: str,
     boundary: Path,
+    catalog_cache: dict[Path, frozenset[Path]] | None = None,
 ) -> tuple[RecipeSkill, ...]:
     references = tuple(
         item
@@ -1155,11 +1156,18 @@ def _referenced_skills(
     skills: list[RecipeSkill] = []
     resolved_boundary = boundary.resolve(strict=True)
     project = discover_project(root)
-    catalog_paths = (
-        frozenset(specification_to_source_skill_paths(project))
-        if project is not None
-        else None
-    )
+    catalog_paths: frozenset[Path] | None = None
+    if project is not None:
+        # One catalog load serves every entry of a single catalog read; the
+        # cache never outlives that read, so later drift is still observed.
+        # It only admits paths: each skill's bytes are still read and bound below.
+        catalog_paths = (
+            None if catalog_cache is None else catalog_cache.get(project.root)
+        )
+        if catalog_paths is None:
+            catalog_paths = frozenset(specification_to_source_skill_paths(project))
+            if catalog_cache is not None:
+                catalog_cache[project.root] = catalog_paths
     for reference in references:
         configured_path = root / reference.uri
         path = configured_path.resolve()
@@ -1208,12 +1216,18 @@ def _flavor_models(
     )
 
 
-def _flavor_skills(root: Path, definition: FlavorDefinition) -> tuple[RecipeSkill, ...]:
+def _flavor_skills(
+    root: Path,
+    definition: FlavorDefinition,
+    *,
+    catalog_cache: dict[Path, frozenset[Path]] | None = None,
+) -> tuple[RecipeSkill, ...]:
     return _referenced_skills(
         root,
         definition.authoring_inputs,
         source=f"Flavor {definition.coordinate.uri}",
         boundary=project_boundary(root, legacy=root),
+        catalog_cache=catalog_cache,
     )
 
 
@@ -1245,6 +1259,7 @@ def _reject_duplicate_canonical_flavors(
 def load_legacy_flavor_catalog_entries(
     roots: Sequence[Path],
 ) -> tuple[_LoadedFlavor, ...]:
+    catalog_cache: dict[Path, frozenset[Path]] = {}
     definition_paths: set[Path] = set()
     for configured in roots:
         if configured.is_symlink():
@@ -1383,7 +1398,7 @@ def load_legacy_flavor_catalog_entries(
             _flavor_models(root, definition),
             definition.conflicts,
             definition.coordinate.uri,
-            _flavor_skills(root, definition),
+            _flavor_skills(root, definition, catalog_cache=catalog_cache),
             revision_identity=revision.identity.uri,
             specification_set_identity=loaded.specification_set.identity.uri,
         )
