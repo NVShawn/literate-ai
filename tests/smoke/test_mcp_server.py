@@ -9,6 +9,7 @@ from unittest import mock
 
 from literate_ai.mcp_server import _TOOLS, _handle
 from literate_ai.version import DISTRIBUTION_VERSION
+from tests.support.symlinks import skip_unless_symlinks_followable
 
 
 class McpServerTests(unittest.TestCase):
@@ -52,6 +53,7 @@ class McpServerTests(unittest.TestCase):
                     )
                 self.assertIn("mcp.path_outside_root", result["error"]["message"])
                 dispatch.assert_not_called()
+            skip_unless_symlinks_followable(self, root)
             try:
                 (root / "escape").symlink_to(root.parent, target_is_directory=True)
             except OSError:
