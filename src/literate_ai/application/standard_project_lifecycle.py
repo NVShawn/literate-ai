@@ -3018,6 +3018,23 @@ class StandardProjectLifecycleService:
             else:
                 assert diagnostic is not None
                 assert self.candidate_repair_port is not None
+                assert failure is not None
+                # Close the rejected attempt before preparing its replacement, so a
+                # refused preparation still never leaves a passing stage as the head.
+                try:
+                    rejected_stage = StandardLifecycleStage(failure.phase.value)
+                except ValueError:
+                    rejected_stage = None
+                if rejected_stage is not None:
+                    self._record_stage(
+                        execution_plan,
+                        generation_plan,
+                        current,
+                        output,
+                        rejected_stage,
+                        failure.subject_identity,
+                        failure_code=failure.code,
+                    )
                 replacement = self.candidate_repair_port.prepare_repair(
                     prepared,
                     diagnostic,
@@ -3056,6 +3073,10 @@ class StandardProjectLifecycleService:
                     replacement.request.request.identity,
                     replacement.workspace.allocation_identity,
                 )
+                if self.checkpoint_recorder is not None:
+                    self.checkpoint_recorder.start_replacement(
+                        execution_plan.identity, generation_plan.component_revision
+                    )
                 current = replacement
                 continue
             return (

@@ -777,9 +777,13 @@ class ExpiredAuthorizationPorts(LifecyclePorts):
 class _CheckpointRecorder:
     def __init__(self):
         self.evidence = []
+        self.replacements = []
 
     def record(self, evidence):
         self.evidence.append(evidence)
+
+    def start_replacement(self, execution_plan_identity, component_revision):
+        self.replacements.append(component_revision)
 
 
 class _ContextEvidenceRecorder:

@@ -298,6 +298,13 @@ class StandardLifecycleCheckpointRecorder(Protocol):
 
     def record(self, evidence: StandardLifecycleStageEvidence) -> None: ...
 
+    def start_replacement(
+        self,
+        execution_plan_identity: ContentIdentity,
+        component_revision: ContentIdentity,
+    ) -> None:
+        """Open a fresh attempt before a repair candidate restarts its stages."""
+
 
 class StandardContextEvidenceRecorder(ComponentContextEvidenceRecorder, Protocol):
     @property

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `litai rebuild` now runs bounded candidate repair. Attaching durable checkpoints or
+  the source cache rebuilt the lifecycle service without its repair port, so a retryable
+  build or generated-test rejection failed the run after one candidate instead of
+  requesting up to two fresh replacements. The rejected attempt's checkpoint is closed as
+  failed and each replacement opens its own durable attempt, chained to the rejected one,
+  because it restarts at source generation. The rebuild result's `repair` field now
+  reports the replacements that ran instead of always `not-needed`.
+
 - Toolchain observation now accepts the npm `@bazel/bazelisk` launcher that the
   installation guide recommends. Only the prebuilt binary bazelisk.js runs for the host,
   selected by the Node runtime's own architecture, is observed as the native toolchain.

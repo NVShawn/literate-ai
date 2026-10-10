@@ -121,6 +121,19 @@ PROJECT_REBUILD_DAG_SCHEMA = "literate-ai/project-rebuild-dag@1"
 _PROVISIONAL_RECEIPT_FILENAME = "project-test-receipt.provisional.json"
 
 
+def _repair_report(lifecycle: object) -> dict[str, object]:
+    """Count the bounded replacement candidates the lifecycle actually ran."""
+
+    replacements = sum(
+        len(chain.attempts) - 1
+        for chain in getattr(lifecycle, "candidate_attempt_chains", ())
+    )
+    return {
+        "attempts": replacements,
+        "status": "repaired" if replacements else "not-needed",
+    }
+
+
 def _standard_rebuild_dag(
     prepared: Any, execution_plan: Any, lifecycle: Any
 ) -> dict[str, object]:
@@ -960,7 +973,7 @@ def _standard_rebuild_one_component(
                         for item in rebuilt.execution.lifecycle.node_results
                     },
                     "build_cache": dict(rebuilt.execution.local_build_cache_report),
-                    "repair": {"attempts": 0, "status": "not-needed"},
+                    "repair": _repair_report(rebuilt.execution.lifecycle),
                     "test_summary": rebuilt.receipt.summary.to_dict(),
                     "artifact": str(artifact),
                     "observed_toolchain_identities": [

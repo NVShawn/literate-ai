@@ -2800,6 +2800,12 @@ class PreparedStandardLifecycleCheckpointStore(Protocol):
 
     def record(self, evidence: StandardLifecycleStageEvidence) -> None: ...
 
+    def start_replacement(
+        self,
+        execution_plan_identity: ContentIdentity,
+        component_revision: ContentIdentity,
+    ) -> None: ...
+
 
 @dataclass(frozen=True, slots=True)
 class ExecutedStandardProject:
@@ -3418,6 +3424,7 @@ def compose_filesystem_standard_source_cache(
         source_cache_publisher=publisher,
         checkpoint_recorder=runtime.checkpoint_store,
         context_evidence_recorder=runtime.context_evidence_recorder,
+        candidate_repair_port=runtime.application.lifecycle.candidate_repair_port,
         clock=runtime.application.lifecycle.clock,
     )
     return replace(
@@ -3452,6 +3459,7 @@ def compose_filesystem_standard_lifecycle_checkpoints(
         source_cache_publisher=lifecycle.source_cache_publisher,
         checkpoint_recorder=store,
         context_evidence_recorder=runtime.context_evidence_recorder,
+        candidate_repair_port=lifecycle.candidate_repair_port,
         clock=lifecycle.clock,
     )
     return replace(runtime, application=application, checkpoint_store=store)
