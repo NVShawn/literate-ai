@@ -128,6 +128,9 @@ nodes across compatible private workers, provider-neutral local/LAN cache reuse 
 test, Bazel/sccache build, package, and container artifacts, and the exact-main
 release branch through published verification. Existing 1.1 entries remain historical
 evidence, not proof that their unchecked acceptance or stale release targets are done.
+By maintainer decision on 2026-10-10, three-way update merging (UPDATE-MERGE-002,
+issue #2) and production DAG dispatch with shared LAN-cache qualification
+(RELEASE-INTEGRATION-003, issue #4) are deferred to 1.3; 1.2 ships their foundations.
 
 NVIDIA-LIBS-001 extends Goals 2, 4, 5, and 6 with capability-first discovery,
 installation, and integration of NVIDIA accelerated libraries across supported

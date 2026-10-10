@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Deferred to 1.3 by maintainer decision: clean three-way update merging and reviewed
+  resolution application (issue #2; 1.2 keeps plan-only update reviews), and production
+  action DAG dispatch with multi-worker shared LAN-cache qualification (issue #4; 1.2
+  ships the scheduler and cache foundation).
+
 - `litai rebuild` now runs bounded candidate repair. Attaching durable checkpoints or
   the source cache rebuilt the lifecycle service without its repair port, so a retryable
   build or generated-test rejection failed the run after one candidate instead of

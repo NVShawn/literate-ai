@@ -4710,7 +4710,7 @@ branch switch, or release has been performed as part of this migration audit.
 
 Current migrated open reviews are #1, #8, #10, #14, #15 and #16. Three-way merging
 is tracked by issue #2 and production dispatch/shared LAN caches by issue #4, both
-in milestone 1.2. Migrated main is `47be22ea974b654c72bcf1e420e587d65eae08c1`;
+deferred to milestone 1.3 by maintainer decision on 2026-10-10. Migrated main is `47be22ea974b654c72bcf1e420e587d65eae08c1`;
 it includes changes absent from the archived main and needs reconciliation before
 landing. The peer-work command in this checkout still fails with
 `project.peer_work_git_failed` because no local `main` ref exists.
@@ -22546,14 +22546,14 @@ GitHub CI failure without relaxing identity checks.
 
 ### [ ] RELEASE-INTEGRATION-003 — Compose production DAG dispatch and shared LAN caches
 
-- **Release target:** 1.2.0
+- **Release target:** 1.3.0 (deferred from 1.2.0 by maintainer decision on 2026-10-10; 1.2 ships the scheduler and cache foundation)
 - **Priority:** P0
 - **GitHub issue:** [#4](https://github.com/jordanhubbard/literate-ai/issues/4) (migrated from NVIDIA-dev/literate-ai#498)
 - **Owner:** production lifecycle scheduling and shared-cache qualification
 - **Direction:** Route production command and SSH lifecycle actions through the accepted
   DAG, then qualify real cross-worker Bazel/sccache and verified immutable artifact reuse.
 - **Depends on:** accepted ADR 0044 and the existing scheduler/cache primitives;
-  this work blocks RELEASE-INTEGRATION-002.
+  deferred to 1.3, so it no longer blocks RELEASE-INTEGRATION-002.
 - **Maintainer direction (2026-09-29):** Complete the full existing 1.2 program
   before releasing. The earlier 1.3 deferral is superseded.
 - **Next action (in progress):** Split lifecycle phases into serializable dispatch
@@ -23666,6 +23666,8 @@ Make, along with lint and format checks. Full CI remains pending.
   failures remain unresolved and are not overridden by these unit results.
 
 ### [ ] UPDATE-MERGE-002 — Complete three-way update migration and release it
+
+- **Release target:** 1.3.0 (deferred from 1.2.0 by maintainer decision on 2026-10-10; issue #2; 1.2 ships plan-only update reviews)
 
   Historical transport recovery refinement (**GitHub issue:** [#36](https://github.com/jordanhubbard/literate-ai/issues/36)): spell safe GitHub SCP locators as the equivalent `ssh://git@github.com/owner/repository` URL when constructing historical fetch references, preserving the SSH transport, predecessor coordinates, exact revisions, original provenance and digest-only admission. Recorded URLs keep their transport; an unusable historical locator leaves the conflict unresolved. Focused initialization and catalog fixtures must prove recovery, transport preservation and rejection of wrong bytes. Upstream landing and release qualification remain separate gates.
   Local proof (1.2 integration, independent review): 8 focused update/merge tests pass, strict lint and formatting pass. Hosted review and published-wheel qualification are pending; the overall update migration item stays open.
