@@ -54,7 +54,7 @@
     "implementation_identity": {
       "schema": "urn:literate-ai:schema:v1:content-identity",
       "algorithm": "sha256",
-      "digest": "b30017891ee9ac7bfd1144faffd310d718a02a04b65bf110eee4ff52963738a5"
+      "digest": "947cad17cad6059822a6f6040e150374d892f4afba33ed08c54d0dc4d2534b93"
     },
     "argv": [
       "{python}",
@@ -164,7 +164,7 @@
     "schema": "literate-ai/repository-policy@1",
     "default_branch": "main",
     "main_state": "pre-release",
-    "pre_release_version": "1.1",
+    "pre_release_version": "1.2",
     "default_component": "samples/hello-component",
     "sample_component_roots": [
       "samples"
