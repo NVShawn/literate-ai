@@ -392,9 +392,11 @@ _BUILDER_DETAIL_BYTES = 4000
 # Directory part of an absolute POSIX, drive-letter, or UNC host path, also when
 # glued to a compiler flag (`-I/opt/x`, `/Fo:C:\x`); the basename stays so
 # `.../source/main.cpp:12: error` reads as `<host-path>/main.cpp:12: error`.
+# Directories left under an exact `<host-path>` root (`/tmp` on Linux) collapse too.
 _ABSOLUTE_HOST_PATH_DIRECTORY = re.compile(
     r"(?:(?<![\w.~:/\\>-])|(?<=-[IiLFo])|(?<=/F[eoa]:))"
-    r"(?:\\\\[^\s\\/]+[\\/]|[A-Za-z]:[\\/]|/)(?:[^\s:'\"\\/<>|]+[\\/])+"
+    r"(?:\\\\[^\s\\/]+[\\/]|[A-Za-z]:[\\/]|/|<host-path>[\\/])"
+    r"(?:[^\s:'\"\\/<>|]+[\\/])+"
 )
 _FILE_URL = re.compile(r"file://[^\s'\"<>]*")
 

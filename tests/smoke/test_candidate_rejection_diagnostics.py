@@ -90,6 +90,20 @@ class CandidateDiagnosticExcerptTests(unittest.TestCase):
         self.assertLessEqual(len(tail.encode("utf-8")), 4096)
         self.assertTrue(tail)
 
+    def test_directories_under_an_exact_temp_root_collapse(self) -> None:
+        """Linux's temp root is `/tmp`; its replacement must not keep the rest."""
+
+        with mock.patch.object(
+            sample_runner.tempfile, "gettempdir", return_value="/tmp"
+        ):
+            excerpt = _candidate_diagnostic_excerpt(
+                "/tmp/literate-ai-conformance-x/sample/source/main.cpp:12:3: error\n"
+                "C:\\tmp\\run\\main.cpp(4): error\n"
+            )
+        self.assertNotIn("literate-ai-conformance-x", excerpt)
+        self.assertIn("<host-path>/main.cpp:12:3: error", excerpt)
+        self.assertIn("<host-path>/main.cpp(4): error", excerpt)
+
     def test_excerpt_redacts_flag_unc_file_url_home_and_cut_head(self) -> None:
         home = str(Path.home())
         excerpt = _candidate_diagnostic_excerpt(
