@@ -269,7 +269,7 @@ class StandardPythonLifecycleTests(unittest.TestCase):
 
 
 class PinnedPipWheelSelectionTests(unittest.TestCase):
-    """Repacked bundled pip wheels skip instead of failing the exact lock."""
+    """Repacked bundled pip wheels skip, except where the release gate requires them."""
 
     def test_bundled_wheel_must_match_the_pinned_digest(self):
         from tests.support import pip_wheel
@@ -282,7 +282,7 @@ class PinnedPipWheelSelectionTests(unittest.TestCase):
             environment = {
                 key: value
                 for key, value in os.environ.items()
-                if key != "LITAI_TEST_PIP_WHEEL"
+                if key not in {"LITAI_TEST_PIP_WHEEL", "LITAI_REQUIRE_PINNED_PIP_WHEEL"}
             }
             with (
                 mock.patch.dict(os.environ, environment, clear=True),
@@ -298,6 +298,20 @@ class PinnedPipWheelSelectionTests(unittest.TestCase):
                 )
                 with mock.patch.object(pip_wheel, "PIP_INSTALLER", pinned):
                     self.assertEqual(pip_wheel.pinned_pip_wheel(), wheel.resolve())
+                # The release gate refuses to pass these tests by skipping.
+                with (
+                    mock.patch.dict(
+                        os.environ, {"LITAI_REQUIRE_PINNED_PIP_WHEEL": "1"}
+                    ),
+                    self.assertRaisesRegex(AssertionError, "different bytes"),
+                ):
+                    pip_wheel.pinned_pip_wheel()
+                # An explicit operator wheel must carry the pinned digest.
+                with (
+                    mock.patch.dict(os.environ, {"LITAI_TEST_PIP_WHEEL": str(wheel)}),
+                    self.assertRaisesRegex(AssertionError, "is not the PyPI"),
+                ):
+                    pip_wheel.pinned_pip_wheel()
                 wheel.unlink()
                 with self.assertRaisesRegex(unittest.SkipTest, "does not bundle"):
                     pip_wheel.pinned_pip_wheel()
