@@ -8,12 +8,27 @@ import json
 import tarfile
 import unittest
 from dataclasses import replace
+from unittest import mock
 
 from literate_ai.adapters.dependencies.acquisition import _generated_lock_projection
 from literate_ai.adapters.dependencies.admission import reconcile_generated_dependencies
-from literate_ai.adapters.dependencies.hex_archive import verify_hex_archive
-from literate_ai.adapters.dependencies.mix_lock import MixLock, MixLockedPackage
+from literate_ai.adapters.dependencies.hex_archive import (
+    verified_hex_contents,
+    verify_hex_archive,
+)
+from literate_ai.adapters.dependencies.mix_lock import (
+    MixLock,
+    MixLockedDependency,
+    MixLockedPackage,
+    render_mix_lock,
+)
+from literate_ai.adapters.dependencies.mix_resolution import (
+    admitted_mix_lock,
+    mix_dependency_property,
+    require_admitted_mix_lock,
+)
 from literate_ai.adapters.dependencies.types import DependencyObservationError
+from literate_ai.contracts.mix_projects import MixDependencyIntent, MixProjectIntent
 from tests.support.fixtures_test_elixir_mix_dependencies import (
     _entry,
     _lock,
@@ -204,6 +219,230 @@ class HexArchiveTests(unittest.TestCase):
                 package=replace(
                     package, outer_sha256=hashlib.sha256(content).hexdigest()
                 ),
+            )
+
+
+def _package_with_contents(members):
+    """Wrap gzip tar members in a checksum-consistent Hex v3 envelope."""
+    stream = io.BytesIO()
+    with tarfile.open(fileobj=stream, mode="w:gz") as tar:
+        for info, content in members:
+            tar.addfile(info, io.BytesIO(content) if content is not None else None)
+    files = {
+        "VERSION": b"3",
+        "metadata.config": b"native metadata",
+        "contents.tar.gz": stream.getvalue(),
+    }
+    inner = hashlib.sha256(b"".join(files.values())).hexdigest()
+    files["CHECKSUM"] = inner.upper().encode()
+    entries = list(files.items())
+    content, package, _ = _archive(entries)
+    return content, replace(package, inner_sha256=inner)
+
+
+def _file(name, content=b"bytes"):
+    info = tarfile.TarInfo(name)
+    info.size = len(content)
+    return info, content
+
+
+class VerifiedHexContentsTests(unittest.TestCase):
+    def test_regular_contents_are_decoded_from_verified_bytes(self):
+        directory = tarfile.TarInfo("lib")
+        directory.type = tarfile.DIRTYPE
+        content, package = _package_with_contents(
+            [(directory, None), _file("lib/decimal.ex", b"code"), _file("mix.exs")]
+        )
+        self.assertEqual(
+            verified_hex_contents(content, package=package),
+            {"lib/decimal.ex": b"code", "mix.exs": b"bytes"},
+        )
+        with self.assertRaises(DependencyObservationError):
+            verified_hex_contents(content + b"x", package=package)
+
+    def test_links_traversal_duplicates_and_special_names_fail(self):
+        link = tarfile.TarInfo("lib/link.ex")
+        link.type = tarfile.SYMTYPE
+        link.linkname = "../../outside"
+        hard = tarfile.TarInfo("lib/hard.ex")
+        hard.type = tarfile.LNKTYPE
+        hard.linkname = "mix.exs"
+        for members in (
+            [(link, None)],
+            [_file("mix.exs"), (hard, None)],
+            [_file("../outside.ex")],
+            [_file("/absolute.ex")],
+            [_file("lib/../../escape.ex")],
+            [_file("lib\\windows.ex")],
+            [_file("con:stream")],
+            [_file("mix.exs"), _file("mix.exs")],
+            [_file("lib"), _file("lib/nested.ex")],
+        ):
+            content, package = _package_with_contents(members)
+            with (
+                self.subTest(names=[info.name for info, _ in members]),
+                self.assertRaises(DependencyObservationError),
+            ):
+                verified_hex_contents(content, package=package)
+
+    def test_file_and_size_budgets_fail_closed(self):
+        content, package = _package_with_contents([_file("a.ex"), _file("b.ex")])
+        with (
+            mock.patch(
+                "literate_ai.adapters.dependencies.hex_archive._MAX_CONTENT_FILES", 1
+            ),
+            self.assertRaises(DependencyObservationError),
+        ):
+            verified_hex_contents(content, package=package)
+        with (
+            mock.patch(
+                "literate_ai.adapters.dependencies.hex_archive._MAX_CONTENT_BYTES", 6
+            ),
+            self.assertRaises(DependencyObservationError),
+        ):
+            verified_hex_contents(content, package=package)
+
+
+def _graph_project():
+    return MixProjectIntent(
+        "fixture",
+        "1.0.0",
+        "Mix dependency fixture",
+        ("MIT",),
+        (
+            MixDependencyIntent("decimal", "== 2.3.0"),
+            MixDependencyIntent("jason", "== 1.4.4"),
+        ),
+        links=(("Source", "https://example.invalid/fixture"),),
+    )
+
+
+_JASON_DECIMAL = MixLockedDependency("decimal", "~> 1.0 or ~> 2.0", True)
+
+
+def _pinned(name, version, inner, outer, dependencies=()):
+    return {
+        "bom-ref": "hex-" + name,
+        "name": name,
+        "purl": f"pkg:hex/{name}@{version}",
+        "version": version,
+        "hashes": [{"alg": "SHA-256", "content": outer}],
+        "properties": [
+            {"name": "literate-ai:mix-inner-sha256", "value": inner},
+            *(
+                {
+                    "name": "literate-ai:mix-dependency",
+                    "value": mix_dependency_property(item),
+                }
+                for item in dependencies
+            ),
+        ],
+    }
+
+
+def _exact_bom(**changes):
+    components = {
+        "decimal": _pinned("decimal", "2.3.0", "a" * 64, "b" * 64),
+        "jason": _pinned("jason", "1.4.4", "c" * 64, "d" * 64, (_JASON_DECIMAL,)),
+    }
+    for name, value in changes.items():
+        if value is None:
+            components.pop(name)
+        else:
+            components[name] = value
+    return json.dumps(
+        {
+            "components": list(components.values()),
+            "dependencies": [
+                {"ref": "root", "dependsOn": ["hex-decimal", "hex-jason"]},
+                {"ref": "hex-jason", "dependsOn": ["hex-decimal"]},
+            ],
+        }
+    ).encode()
+
+
+class AdmittedMixLockTests(unittest.TestCase):
+    def test_exact_bom_pins_render_the_native_lock_mix_fetches_against(self):
+        content, lock = admitted_mix_lock(_exact_bom(), project=_graph_project())
+        self.assertEqual(MixLock.from_bytes(content, project=_graph_project()), lock)
+        self.assertIn(b'"jason": {:hex, :jason, "1.4.4", "' + b"c" * 64, content)
+        self.assertIn(
+            b'[{:decimal, "~> 1.0 or ~> 2.0", '
+            b'[hex: :decimal, repo: "hexpm", optional: true]}]',
+            content,
+        )
+        self.assertEqual(
+            set(lock.edges),
+            {("@root", "decimal"), ("@root", "jason"), ("jason", "decimal")},
+        )
+        self.assertEqual(
+            render_mix_lock(tuple(reversed(lock.packages))),
+            render_mix_lock(lock.packages),
+        )
+
+    def test_ranges_and_incomplete_pins_never_authorize_acquisition(self):
+        exact = _pinned("decimal", "2.3.0", "a" * 64, "b" * 64)
+        ranged = {
+            key: value
+            for key, value in exact.items()
+            if key not in {"version", "hashes"}
+        } | {"purl": "pkg:hex/decimal", "versionRange": "vers:hex/>=2.3.0"}
+        for decimal in (
+            ranged,
+            {**exact, "version": ">= 2.3.0"},
+            {**exact, "purl": "pkg:hex/decimal@2.4.0"},
+            {**exact, "hashes": []},
+            {**exact, "hashes": [{"alg": "SHA-1", "content": "b" * 64}]},
+            {**exact, "properties": []},
+            {
+                **exact,
+                "properties": [
+                    *exact["properties"],
+                    {"name": "literate-ai:mix-dependency", "value": "{bad"},
+                ],
+            },
+        ):
+            with (
+                self.subTest(decimal=decimal),
+                self.assertRaises(DependencyObservationError) as caught,
+            ):
+                admitted_mix_lock(_exact_bom(decimal=decimal), project=_graph_project())
+            self.assertEqual(caught.exception.code, "dependencies.mix-pins-required")
+
+    def test_open_closure_and_undeclared_edges_fail(self):
+        required = MixLockedDependency("child", "~> 1.0", False)
+        for changes in (
+            {"decimal": None},
+            {"jason": _pinned("jason", "1.4.4", "c" * 64, "d" * 64, (required,))},
+            {"extra": _pinned("extra", "1.0.0", "e" * 64, "f" * 64)},
+        ):
+            with (
+                self.subTest(changes=sorted(changes)),
+                self.assertRaises(DependencyObservationError),
+            ):
+                admitted_mix_lock(_exact_bom(**changes), project=_graph_project())
+        document = json.loads(_exact_bom())
+        document["dependencies"].pop()
+        with self.assertRaisesRegex(DependencyObservationError, "omits an edge"):
+            admitted_mix_lock(json.dumps(document).encode(), project=_graph_project())
+
+    def test_native_lock_must_equal_the_admitted_pins(self):
+        _, admitted = admitted_mix_lock(_exact_bom(), project=_graph_project())
+        require_admitted_mix_lock(admitted, admitted)
+        decimal, jason = admitted.packages
+        for packages in (
+            (replace(decimal, version="2.3.1"), jason),
+            (replace(decimal, outer_sha256="0" * 64), jason),
+            (replace(decimal, inner_sha256="0" * 64), jason),
+            (decimal, replace(jason, dependencies=())),
+        ):
+            with (
+                self.subTest(packages=packages),
+                self.assertRaises(DependencyObservationError) as caught,
+            ):
+                require_admitted_mix_lock(MixLock(packages, admitted.edges), admitted)
+            self.assertEqual(
+                caught.exception.code, "dependencies.mix-lock-not-admitted"
             )
 
 

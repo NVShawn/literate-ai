@@ -103,10 +103,19 @@ projects and OTP release packaging require additional ecosystem/build policy.
 For declarative Mix packages, select `+flavor://literate-ai/build-mix` on the
 Component's build-system slot alongside `lang-elixir`. The selected Mix skill
 adds `source/mix-project.json` (`literate-ai/mix-project@1`) with application
-metadata and public Hex dependency requirements. The authorized lifecycle creates
-`mix.exs` and derives the lock in an external projection, freezes acquired Hex
-checksums, compiles and tests natively, and retains application/dependency artifacts.
+metadata and public Hex dependency requirements. The source CycloneDX BOM must pin
+every Hex package exactly: `version`, the outer archive SHA-256 in `hashes`, the
+`literate-ai:mix-inner-sha256` property and one canonical `literate-ai:mix-dependency`
+property per native requirement (a resolved BOM from an earlier build carries all
+of them). Version ranges alone are refused before any native process runs. The
+authorized lifecycle creates `mix.exs`, renders `mix.lock` from those pins and runs
+`mix deps.get` against it, so Hex fetches and checksum-checks only admitted
+versions. It then requires the native lock to equal the pins, replaces each
+extracted dependency with bytes decoded from its verified archive, and only then
+compiles and tests natively and retains application/dependency artifacts. A package
+the BOM wrongly omits is refused after `deps.get`, which has already fetched it.
 Generated source supplies neither executable Mix project authority nor a lock.
+Mix builds are local-only in 1.2: worker-transferred Mix build intents are refused.
 The Hex plugin must be explicitly staged and bound; ambient plugins are not accepted.
 This profile supports applications and locked Elixir library import surfaces.
 Phoenix conventions and OTP release assembly still require their own policy.

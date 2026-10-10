@@ -56,6 +56,7 @@ from literate_ai.security import (
     OriginAttestation,
     SecurityPolicy,
 )
+from tests.support.hex_pins import exact_hex_component
 
 
 class _NoHostPackages:
@@ -542,19 +543,7 @@ class ElixirMixQualificationTests(unittest.TestCase):
                 canonical_identity({"composition": "native-mix-qualification"}),
             )
             components = tuple(
-                {
-                    "type": "library",
-                    "bom-ref": "hex-" + name,
-                    "name": name,
-                    "purl": "pkg:hex/" + name,
-                    "isExternal": True,
-                    "versionRange": f"vers:hex/>={version}|<{int(version[0]) + 1}.0.0",
-                    "properties": [
-                        {"name": "literate-ai:dependency-kind", "value": "package"},
-                        {"name": "literate-ai:dependency-scope", "value": "runtime"},
-                    ],
-                }
-                for name, version in (("decimal", "2.3.0"), ("jason", "1.4.4"))
+                exact_hex_component(name) for name in ("decimal", "jason")
             )
             bom, _ = build_cyclonedx_bom(
                 lifecycle=CycloneDxLifecycle.SOURCE,

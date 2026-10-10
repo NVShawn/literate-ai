@@ -204,6 +204,16 @@ class MixResolutionTests(unittest.TestCase):
                     }
                 ]
             },
+            {
+                # Exact native requirement claims must also be observed.
+                "properties": [
+                    {
+                        "name": "literate-ai:mix-dependency",
+                        "value": '{"name":"child","optional":false,'
+                        '"requirement":"~> 1.0"}',
+                    }
+                ]
+            },
         ):
             document = json.loads(bom)
             document["components"][-1].update(changes)

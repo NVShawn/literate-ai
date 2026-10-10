@@ -246,3 +246,31 @@ class MixLock:
         if set(raw) != reached - {"@root"}:
             _fail("Mix lock contains packages outside the root dependency closure")
         return cls(tuple(packages), tuple(sorted(edges)))
+
+
+def render_mix_lock(packages: tuple[MixLockedPackage, ...]) -> bytes:
+    """Render inert native lock literals from already admitted exact packages.
+
+    The output uses only the public Hex tuple shape that ``MixLock`` accepts.
+    Callers still parse it with ``MixLock.from_bytes`` to bind the root closure.
+    """
+
+    entries = []
+    names = set()
+    for package in sorted(packages, key=lambda item: item.name):
+        if not isinstance(package, MixLockedPackage) or package.name in names:
+            _fail("Rendered Mix lock requires unique typed packages")
+        names.add(package.name)
+        dependencies = ", ".join(
+            f"{{:{dependency.name}, {json.dumps(dependency.requirement)}, "
+            f'[hex: :{dependency.name}, repo: "hexpm", '
+            f"optional: {'true' if dependency.optional else 'false'}]}}"
+            for dependency in sorted(package.dependencies, key=lambda item: item.name)
+        )
+        entries.append(
+            f'  "{package.name}": {{:hex, :{package.name}, '
+            f"{json.dumps(package.version)}, {json.dumps(package.inner_sha256)}, "
+            f'[:mix], [{dependencies}], "hexpm", '
+            f"{json.dumps(package.outer_sha256)}}},\n"
+        )
+    return ("%{\n" + "".join(entries) + "}\n").encode("utf-8")

@@ -5,13 +5,16 @@
 Generated Elixir source MUST contain one `source/mix-project.json` using
 `literate-ai/mix-project@1`. It MUST NOT contain `mix.exs`, `mix.lock`, or
 `.iex.exs`. The authorized lifecycle SHALL synthesize the executable project
-and derive its checksummed public Hex dependency lock outside admitted source.
+and render its checksummed public Hex dependency lock outside admitted source
+from exact source BOM pins (version, outer and inner checksums, requirements).
 
 #### Scenario: Build a locked Hex graph
 
 - **WHEN** an Elixir Component selects the Mix build-system Flavor
-- **THEN** the lifecycle resolves the inert dependency intent with its bound Hex plugin
-- **AND** freezes the derived lock before compilation and records exact archive checksums
+- **THEN** the lifecycle refuses Hex packages the source BOM does not pin exactly
+- **AND** fetches with its bound Hex plugin only against the rendered admitted lock
+- **AND** requires the acquired lock and archive checksums to equal those pins before compilation
+- **AND** compiles only dependency bytes re-extracted from the verified archives
 - **AND** runs native compilation with all output beneath the external object root
 - **AND** rejects source mutation, changed tools, or mismatched dependency evidence
 

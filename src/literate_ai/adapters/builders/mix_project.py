@@ -19,8 +19,15 @@ from literate_ai._filesystem import (
     require_safe_directory,
 )
 from literate_ai.adapters.dependencies.admission import reconcile_generated_dependencies
-from literate_ai.adapters.dependencies.hex_archive import verify_hex_archive
+from literate_ai.adapters.dependencies.hex_archive import (
+    verified_hex_contents,
+    verify_hex_archive,
+)
 from literate_ai.adapters.dependencies.mix_lock import MixLock
+from literate_ai.adapters.dependencies.mix_resolution import (
+    admitted_mix_lock,
+    require_admitted_mix_lock,
+)
 from literate_ai.contracts import (
     CYCLONEDX_SOURCE_SBOM_PATH,
     ContentIdentity,
@@ -201,6 +208,73 @@ def _require_metadata(metadata: object, lock: MixLock) -> None:
                 raise BuildError(
                     "builder.mix_metadata_mismatch", "Hex metadata edge differs"
                 )
+
+
+# Hex/Mix bookkeeping beside extracted package contents. They are copied from
+# the native extraction only as bounded regular files and are never compiled.
+_HEX_BOOKKEEPING = frozenset({".hex", ".fetch", "hex_metadata.config"})
+
+
+def _require_dependency_inventory(deps_root: Path, lock: MixLock) -> None:
+    """Require exactly one extracted directory per admitted package."""
+    names = {package.name for package in lock.packages}
+    if not names:
+        return
+    if path_is_link_or_reparse(deps_root) or not deps_root.is_dir():
+        raise BuildError(
+            "builder.mix_dependency_tree_invalid",
+            "Mix dependencies require a regular extraction directory",
+        )
+    present = {path.name for path in deps_root.iterdir()}
+    if present != names:
+        raise BuildError(
+            "builder.mix_dependency_tree_invalid",
+            "Mix extracted dependencies differ from the admitted lock",
+        )
+
+
+def _rebind_dependency_tree(destination: Path, contents: Mapping[str, bytes]) -> None:
+    """Replace Hex's extraction with bytes decoded from the verified archive.
+
+    Hex's own tree must already equal the verified contents, apart from bounded
+    regular bookkeeping files; links, extra files or changed bytes are refused.
+    Compilation then reads only the framework's fresh extraction.
+    """
+    extracted = _files(destination)
+    bookkeeping = {
+        name: content
+        for name, content in extracted.items()
+        if name not in contents and name in _HEX_BOOKKEEPING
+    }
+    if any(extracted.get(name) != content for name, content in contents.items()) or set(
+        extracted
+    ) - set(contents) - set(bookkeeping):
+        raise BuildError(
+            "builder.mix_dependency_tree_changed",
+            "Hex extracted tree differs from its verified archive contents",
+        )
+    fresh = destination.parent / f".{destination.name}.verified"
+    if fresh.exists():
+        raise BuildError(
+            "builder.mix_dependency_tree_invalid", "Verified extraction path exists"
+        )
+    fresh.mkdir()
+    for name, content in {**contents, **bookkeeping}.items():
+        target = fresh.joinpath(*name.split("/"))
+        if not target.resolve().is_relative_to(fresh.resolve()):
+            raise BuildError(
+                "builder.mix_dependency_tree_invalid",
+                "Verified dependency path escapes its extraction",
+            )
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+    shutil.rmtree(destination)
+    fresh.rename(destination)
+    if _files(destination) != {**contents, **bookkeeping}:
+        raise BuildError(
+            "builder.mix_dependency_tree_changed",
+            "Verified dependency extraction changed while it was written",
+        )
 
 
 @dataclass(frozen=True)
@@ -723,6 +797,9 @@ class GuardedMixBuilder:
             except UnicodeError:
                 continue
         reconcile_generated_dependencies(text_files, bom)
+        # Exact admitted pins become the framework-owned native lock before any
+        # native process runs; ranges never authorize acquisition.
+        admitted_lock_bytes, admitted_lock = admitted_mix_lock(bom, project=project)
         if library_import_surface is None and "source/main.exs" not in source_files:
             raise BuildError(
                 "builder.mix_entrypoint_missing", "Mix requires source/main.exs"
@@ -740,7 +817,9 @@ class GuardedMixBuilder:
         retained = staging / "retained"
         phases = []
         try:
-            shutil.copytree(source, projection)
+            # Preserve links so the projection check refuses them instead of
+            # silently copying bytes from outside the authorized source tree.
+            shutil.copytree(source, projection, symlinks=True)
             objects.mkdir()
             retained.mkdir()
             evidence = retained / ".literate/mix"
@@ -994,13 +1073,20 @@ class GuardedMixBuilder:
                             "builder.mix_provider_invalid",
                             "Provider application module origins differ",
                         )
-            run((*command, "deps.get"), cwd=projection / "source", phase="deps-get")
             lock_path = projection / "source/mix.lock"
-            lock_bytes = _read(lock_path) if project.dependencies else b"%{}\n"
-            if not project.dependencies:
-                lock_path.write_bytes(lock_bytes)
+            # Hex fetches only the locked versions and refuses archives whose
+            # checksums differ from this lock before Mix loads their project.
+            # ``--check-locked`` is not used: Mix compares whole lock terms
+            # (including requirement-list order) and raises only after fetching,
+            # so it adds no pre-fetch authority over the exact check below.
+            lock_path.write_bytes(admitted_lock_bytes)
+            run((*command, "deps.get"), cwd=projection / "source", phase="deps-get")
+            lock_bytes = _read(lock_path)
             derived_lock = lock_bytes
             lock = MixLock.from_bytes(lock_bytes, project=project)
+            # Exact BOM version/hash/closure admission happens immediately after
+            # acquisition and before any phase that compiles or loads packages.
+            require_admitted_mix_lock(lock, admitted_lock)
             reconcile_generated_dependencies(
                 {**text_files, "source/mix.lock": lock_bytes.decode()}, bom
             )
@@ -1008,10 +1094,15 @@ class GuardedMixBuilder:
             (evidence / "mix.exs").write_bytes(native_project)
             acquired = []
             archive_paths = []
+            _require_dependency_inventory(objects / "deps", lock)
             for package in lock.packages:
                 archive_name = f"{package.name}-{package.version}.tar"
                 content = _read(objects / "hex-home/packages/hexpm" / archive_name)
                 acquired.append(verify_hex_archive(content, package=package).to_dict())
+                _rebind_dependency_tree(
+                    objects / "deps" / package.name,
+                    verified_hex_contents(content, package=package),
+                )
                 archive_path = evidence / archive_name
                 archive_path.write_bytes(content)
                 archive_paths.append(str(archive_path))

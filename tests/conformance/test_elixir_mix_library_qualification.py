@@ -49,6 +49,7 @@ from literate_ai.security import (
     SecurityPolicy,
 )
 from tests.support.fixtures_test_elixir_mix_providers import _surface
+from tests.support.hex_pins import exact_hex_component
 
 
 def _source(root, *, library, name=None):
@@ -70,24 +71,7 @@ def _source(root, *, library, name=None):
         (),
         canonical_identity({"composition": name}),
     )
-    components = (
-        (
-            {
-                "type": "library",
-                "bom-ref": "hex-decimal",
-                "name": "decimal",
-                "purl": "pkg:hex/decimal",
-                "isExternal": True,
-                "versionRange": "vers:hex/>=2.3.0|<3.0.0",
-                "properties": [
-                    {"name": "literate-ai:dependency-kind", "value": "package"},
-                    {"name": "literate-ai:dependency-scope", "value": "runtime"},
-                ],
-            },
-        )
-        if library
-        else ()
-    )
+    components = (exact_hex_component("decimal"),) if library else ()
     bom, _ = build_cyclonedx_bom(
         lifecycle=CycloneDxLifecycle.SOURCE,
         managed_graph=graph,

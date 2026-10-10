@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
+import os
+import tarfile
 import tempfile
 import unittest
 from dataclasses import replace
@@ -47,6 +50,59 @@ from literate_ai.security import (
 
 _NOW = datetime(2026, 10, 6, tzinfo=UTC)
 _DIGEST = "sha256:" + "a" * 64
+_CONTENTS = {
+    "mix.exs": b"defmodule Decimal.MixProject do\nend\n",
+    "lib/decimal.ex": b"defmodule Decimal do\nend\n",
+}
+
+
+def _hex_package(contents=None, *, links=()):
+    """A synthetic Hex v3 archive; checksums are computed, never trusted."""
+    inner_stream = io.BytesIO()
+    with tarfile.open(fileobj=inner_stream, mode="w:gz") as tar:
+        for name, content in (contents or _CONTENTS).items():
+            info = tarfile.TarInfo(name)
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+        for name, target in links:
+            info = tarfile.TarInfo(name)
+            info.type = tarfile.SYMTYPE
+            info.linkname = target
+            tar.addfile(info)
+    files = {
+        "VERSION": b"3",
+        "metadata.config": b'{<<"name">>,<<"decimal">>}.\n',
+        "contents.tar.gz": inner_stream.getvalue(),
+    }
+    inner = hashlib.sha256(b"".join(files.values())).hexdigest()
+    files["CHECKSUM"] = inner.upper().encode()
+    outer_stream = io.BytesIO()
+    with tarfile.open(fileobj=outer_stream, mode="w") as tar:
+        for name, content in files.items():
+            info = tarfile.TarInfo(name)
+            info.size = len(content)
+            tar.addfile(info, io.BytesIO(content))
+    content = outer_stream.getvalue()
+    return content, inner, hashlib.sha256(content).hexdigest()
+
+
+def _exact_bom(inner, outer, *, version="2.3.0"):
+    return json.dumps(
+        {
+            "components": [
+                {
+                    "bom-ref": "hex-decimal",
+                    "name": "decimal",
+                    "purl": "pkg:hex/decimal@" + version,
+                    "version": version,
+                    "hashes": [{"alg": "SHA-256", "content": outer}],
+                    "properties": [
+                        {"name": "literate-ai:mix-inner-sha256", "value": inner}
+                    ],
+                }
+            ]
+        }
+    )
 
 
 class GuardedMixBuilderTests(unittest.TestCase):
@@ -165,7 +221,7 @@ class GuardedMixBuilderTests(unittest.TestCase):
         self.source = self.root / "generated"
         package = self.source / "source"
         package.mkdir(parents=True)
-        intent = MixProjectIntent(
+        self.intent = intent = MixProjectIntent(
             "fixture",
             "1.0.0",
             "Native Mix fixture",
@@ -176,9 +232,8 @@ class GuardedMixBuilderTests(unittest.TestCase):
         (package / "mix-project.json").write_text(json.dumps(intent.to_dict()))
         (package / "main.exs").write_text("IO.puts(:fixture)")
         (package / ".literate").mkdir()
-        (package / ".literate/sbom.cdx.json").write_text(
-            '{"components":[{"name":"decimal"}]}'
-        )
+        self.archive, inner, outer = _hex_package()
+        (package / ".literate/sbom.cdx.json").write_text(_exact_bom(inner, outer))
         elixir = ElixirToolchain(
             (str(self.root / "elixir"),),
             "1.18.0",
@@ -388,6 +443,190 @@ class GuardedMixBuilderTests(unittest.TestCase):
         ):
             self.build(*self.authority(), verifier=AuthorizationRevocationSet())
         self.assertEqual(list((self.root / "artifacts").iterdir()), [])
+
+    def test_version_range_bom_cannot_start_any_native_process(self):
+        self.ready_staged_fixture()
+        self.expected_calls = 0
+        path = self.source / "source/.literate/sbom.cdx.json"
+        path.write_text(
+            json.dumps(
+                {
+                    "components": [
+                        {
+                            "bom-ref": "hex-decimal",
+                            "name": "decimal",
+                            "purl": "pkg:hex/decimal",
+                            "versionRange": "vers:hex/>=2.3.0|<3.0.0",
+                        }
+                    ]
+                }
+            )
+        )
+        with (
+            mock.patch.object(HexToolchain, "require_unchanged"),
+            self.assertRaises(DependencyObservationError) as caught,
+        ):
+            self.build(*self.authority(), verifier=AuthorizationRevocationSet())
+        self.assertEqual(caught.exception.code, "dependencies.mix-pins-required")
+        self.assertFalse((self.root / "artifacts").exists())
+
+    def fetch(self, *, contents=None, extra=None, lock=None, link=None):
+        """Fake ``deps.get``: record the lock Mix saw, then cache and extract."""
+        seen = []
+
+        def run(argv, **kwargs):
+            if argv[-1] != "deps.get":
+                return BoundedProcessResult(1, b"", b"stop after admission")
+            seen.append((kwargs["cwd"] / "mix.lock").read_bytes())
+            environment = kwargs["environment"]
+            cache = Path(environment["HEX_HOME"]) / "packages/hexpm"
+            cache.mkdir(parents=True)
+            (cache / "decimal-2.3.0.tar").write_bytes(self.archive)
+            deps = Path(environment["MIX_DEPS_PATH"]) / "decimal"
+            for name, content in {
+                **(contents or _CONTENTS),
+                ".hex": b"hex bookkeeping",
+                **(extra or {}),
+            }.items():
+                target = deps / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
+            if link is not None:
+                os.symlink(self.root / "outside", deps / link)
+            if lock is not None:
+                (kwargs["cwd"] / "mix.lock").write_bytes(lock)
+            return BoundedProcessResult(0, b"", b"")
+
+        self.process.side_effect = run
+        return seen
+
+    def test_deps_get_runs_against_the_rendered_admitted_lock(self):
+        from literate_ai.adapters.dependencies.mix_lock import render_mix_lock
+
+        self.ready_staged_fixture()
+        self.expected_calls = 2
+        seen = self.fetch()
+        with (
+            mock.patch.object(HexToolchain, "require_unchanged"),
+            self.assertRaisesRegex(BuildError, "stop after admission"),
+        ):
+            self.build(*self.authority(), verifier=AuthorizationRevocationSet())
+        lock = MixLock.from_bytes(seen[0], project=self.intent)
+        package = lock.packages[0]
+        self.assertEqual(
+            seen[0],
+            render_mix_lock(
+                (
+                    MixLockedPackage(
+                        "decimal",
+                        "2.3.0",
+                        package.inner_sha256,
+                        hashlib.sha256(self.archive).hexdigest(),
+                        (),
+                    ),
+                )
+            ),
+        )
+        # The first native phase after acquisition is the inert archive probe.
+        self.assertEqual(
+            Path(self.process.call_args_list[1].args[0][-1]).name,
+            "dependency-probe.json",
+        )
+
+    def test_lock_drift_during_fetch_is_refused_before_any_other_phase(self):
+        self.ready_staged_fixture()
+        self.fetch(
+            lock=b'%{"decimal": {:hex, :decimal, "2.3.1", "'
+            + b"a" * 64
+            + b'", [:mix], [], "hexpm", "'
+            + b"b" * 64
+            + b'"}}'
+        )
+        with (
+            mock.patch.object(HexToolchain, "require_unchanged"),
+            self.assertRaises(DependencyObservationError) as caught,
+        ):
+            self.build(*self.authority(), verifier=AuthorizationRevocationSet())
+        self.assertEqual(caught.exception.code, "dependencies.mix-lock-not-admitted")
+
+    def test_extracted_tree_is_replaced_by_verified_archive_contents(self):
+        self.ready_staged_fixture()
+        self.expected_calls = 2
+        observed = {}
+        self.fetch()
+        fetch = self.process.side_effect
+
+        def run(argv, **kwargs):
+            if argv[-1] != "deps.get":
+                deps = Path(kwargs["cwd"]) / "deps/decimal"
+                observed.update(_files(deps))
+            return fetch(argv, **kwargs)
+
+        self.process.side_effect = run
+        with (
+            mock.patch.object(HexToolchain, "require_unchanged"),
+            mock.patch(
+                "literate_ai.adapters.builders.mix_project.shutil.rmtree",
+                wraps=__import__("shutil").rmtree,
+            ) as removed,
+            self.assertRaisesRegex(BuildError, "stop after admission"),
+        ):
+            self.build(*self.authority(), verifier=AuthorizationRevocationSet())
+        self.assertEqual(observed, {**_CONTENTS, ".hex": b"hex bookkeeping"})
+        self.assertTrue(
+            any(call.args[0].name == "decimal" for call in removed.call_args_list)
+        )
+
+    def test_changed_extra_or_linked_extraction_is_refused_before_compile(self):
+        for change in (
+            {"contents": {**_CONTENTS, "lib/decimal.ex": b"tampered"}},
+            {"extra": {"lib/injected.ex": b"defmodule Injected do end"}},
+            {"link": "lib/linked.ex"},
+        ):
+            with self.subTest(change=sorted(change)):
+                self.process.reset_mock()
+                if not Path(self.tool.ebin).exists():
+                    self.ready_staged_fixture()
+                self.expected_calls = 1
+                self.fetch(**change)
+                with (
+                    mock.patch.object(HexToolchain, "require_unchanged"),
+                    self.assertRaises(BuildError) as caught,
+                ):
+                    self.build(*self.authority(), verifier=AuthorizationRevocationSet())
+                self.assertIn(
+                    caught.exception.code,
+                    {
+                        "builder.mix_dependency_tree_changed",
+                        "builder.mix_payload_invalid",
+                    },
+                )
+                self.assertEqual(self.process.call_count, 1)
+
+    def test_source_projection_preserves_links_for_refusal(self):
+        self.ready_staged_fixture()
+        self.expected_calls = 0
+        link = self.source / "source/linked.exs"
+        real_copytree = __import__("shutil").copytree
+
+        def racing_copy(source, destination, *args, **kwargs):
+            if Path(destination).name != "projection":
+                return real_copytree(source, destination, *args, **kwargs)
+            os.symlink(self.source / "source/main.exs", link)
+            try:
+                return real_copytree(source, destination, *args, **kwargs)
+            finally:
+                link.unlink()
+
+        with (
+            mock.patch.object(HexToolchain, "require_unchanged"),
+            mock.patch(
+                "literate_ai.adapters.builders.mix_project.shutil.copytree",
+                side_effect=racing_copy,
+            ),
+            self.assertRaisesRegex(BuildError, "linked payloads"),
+        ):
+            self.build(*self.authority(), verifier=AuthorizationRevocationSet())
 
 
 class MixNativeMetadataTests(unittest.TestCase):

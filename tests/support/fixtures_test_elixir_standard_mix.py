@@ -32,6 +32,7 @@ from literate_ai.contracts import (
 from literate_ai.contracts.elixir_libraries import elixir_namespace
 from literate_ai.contracts.mix_projects import MixDependencyIntent, MixProjectIntent
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
+from tests.support.hex_pins import exact_hex_component
 from tests.support.standard_source_evidence_fixture import register_strict_source
 
 
@@ -182,21 +183,7 @@ def _system(
             )
     registry = LocalSourceTreeRegistry()
     components = (
-        tuple(
-            {
-                "type": "library",
-                "bom-ref": "hex-" + name,
-                "name": name,
-                "purl": "pkg:hex/" + name,
-                "isExternal": True,
-                "versionRange": "vers:hex/>=" + version,
-                "properties": [
-                    {"name": "literate-ai:dependency-kind", "value": "package"},
-                    {"name": "literate-ai:dependency-scope", "value": "runtime"},
-                ],
-            }
-            for name, version in (("decimal", "2.3.0"), ("jason", "1.4.4"))
-        )
+        tuple(exact_hex_component(name) for name in ("decimal", "jason"))
         if dependencies
         else ()
     )
@@ -396,20 +383,7 @@ def _system(
                 b'schema: "literate-ai/generated-test-results@1",'
                 b' cases: [%{case_id: "fixture-example", outcome: "passed"}]}))\n'
             )
-            provider_components = (
-                {
-                    "type": "library",
-                    "bom-ref": "hex-decimal",
-                    "name": "decimal",
-                    "purl": "pkg:hex/decimal",
-                    "isExternal": True,
-                    "versionRange": "vers:hex/>=2.3.0|<3.0.0",
-                    "properties": [
-                        {"name": "literate-ai:dependency-kind", "value": "package"},
-                        {"name": "literate-ai:dependency-scope", "value": "runtime"},
-                    ],
-                },
-            )
+            provider_components = (exact_hex_component("decimal"),)
         provider_candidate = register_strict_source(
             registry,
             provider_source,

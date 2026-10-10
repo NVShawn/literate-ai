@@ -72,6 +72,7 @@ from literate_ai.contracts.mix_projects import MixDependencyIntent, MixProjectIn
 from literate_ai.security import AuthorizationError, AuthorizationRevocationSet
 from tests.support.fixtures_test_component_node_generation_preparation import _fixture
 from tests.support.fixtures_test_elixir_standard_mix import _system
+from tests.support.hex_pins import exact_hex_component
 from tests.support.standard_source_evidence_fixture import register_strict_source
 
 
@@ -281,24 +282,7 @@ def _chain(root, tool, verifier, recorder, *, source_leaf=False):
             (source / "source/main.exs").write_text(
                 "IO.puts(BridgeApi.Math.add(20,22))\n"
             )
-        components = (
-            (
-                {
-                    "type": "library",
-                    "bom-ref": "hex-decimal",
-                    "name": "decimal",
-                    "purl": "pkg:hex/decimal",
-                    "isExternal": True,
-                    "versionRange": "vers:hex/>=2.3.0|<3.0.0",
-                    "properties": [
-                        {"name": "literate-ai:dependency-kind", "value": "package"},
-                        {"name": "literate-ai:dependency-scope", "value": "runtime"},
-                    ],
-                },
-            )
-            if index == hex_owner
-            else ()
-        )
+        components = (exact_hex_component("decimal"),) if index == hex_owner else ()
         candidates.append(
             register_strict_source(
                 registry,
