@@ -140,8 +140,18 @@
   library exports that Standard consumers bind to sealed producer identities and
   current consumer grants; transitive library graphs, packaging after source
   retirement, retained-evidence reopening and tamper/revocation refusal are qualified
-  natively. CI adds native Elixir cells (minimum Elixir 1.18.0 / OTP 27.0 and newer
-  Elixir 1.20.4 / OTP 29.1.1). Contributed in #45.
+  natively. CI runs all six native Elixir cells (Ubuntu, macOS and Windows; minimum
+  Elixir 1.18.0 / OTP 27.0 and newer Elixir 1.20.4 / OTP 29.1.1) on every pull
+  request. Mix acquisition is locked: the source BOM must pin each Hex package's
+  exact version, outer and inner checksums and requirements (ranges are refused),
+  `mix deps.get` runs against a framework-rendered `mix.lock`, and the native lock
+  must equal those pins before anything compiles. Each extracted dependency is
+  replaced by bytes from its verified archive (links, traversal and changed or
+  extra files are refused). Mix builds are local-only in 1.2; worker-built Mix
+  intents are refused. Mix plan finalization requires the builder/toolchain
+  binding to equal the contract's locked authority and build-system driver.
+  Byte-exact (CRLF-preserving) source reads apply only to Mix Components; other
+  ecosystems keep universal-newline admission text. Contributed in #45.
 
 - Artifact graphs: explicitly bind mixed build-driver compositions while retaining
   each Component's measured driver and existing single-driver identities.

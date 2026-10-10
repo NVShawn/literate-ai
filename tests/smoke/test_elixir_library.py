@@ -21,8 +21,10 @@ from unittest import mock
 
 from literate_ai.adapters.builders import discover_elixir_toolchain
 from literate_ai.adapters.component_acceptance import (
+    LIBRARY_SCHEMA,
     DeclaredLibraryAcceptanceCase,
     LibraryAcceptance,
+    load_library_acceptance,
 )
 from literate_ai.adapters.directory_artifacts import directory_export_bytes
 from literate_ai.adapters.lifecycle import (
@@ -139,6 +141,43 @@ class ElixirLibraryContractTests(unittest.TestCase):
                 AuthoredLibraryImport(
                     language, "invoice_api", "invoice.add", module, ("add!",)
                 )
+
+    def test_elixir_oracle_binds_the_reviewed_native_harness(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            harness = root / "harness.exs"
+            harness.write_text('IO.puts("reviewed harness")\n', encoding="utf-8")
+            document = {
+                "schema": LIBRARY_SCHEMA,
+                "component": "math-library",
+                "specification_set_identity": canonical_identity(
+                    {"specification": "library"}
+                ).uri,
+                "public_interface_identities": [
+                    canonical_identity({"interface": "library"}).uri
+                ],
+                "import_surface_identity": canonical_identity(
+                    {"surface": "library"}
+                ).uri,
+                "language": "elixir",
+                "harness": harness.name,
+                "harness_identity": (
+                    "sha256:" + hashlib.sha256(harness.read_bytes()).hexdigest()
+                ),
+                "cases": [
+                    {
+                        "case_id": "adds-two-values",
+                        "capability": "math.add",
+                        "arguments": [2, 3],
+                        "expected_result": 5,
+                    }
+                ],
+            }
+            path = root / "math-library.json"
+            path.write_text(json.dumps(document), encoding="utf-8")
+            oracle = load_library_acceptance(path, "math-library")
+            self.assertEqual(oracle.language, "elixir")
+            self.assertEqual(oracle.harness_content, harness.read_bytes())
 
 
 class ElixirLibraryNativeTests(unittest.TestCase):

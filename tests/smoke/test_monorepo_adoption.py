@@ -74,6 +74,16 @@ class MonorepoAdoptionTests(unittest.TestCase):
             for p in self.root.rglob("*")
         }
 
+    def test_mix_manifest_exposes_an_inert_monorepo_root_candidate(self):
+        root = self.root / "beam"
+        root.mkdir()
+        (root / "mix.exs").write_text('raise "must not execute"\n', encoding="utf-8")
+        candidates = build_root_candidates(inspect_harness(self.root))
+        candidate = next(item for item in candidates if item["root"] == "beam")
+        self.assertEqual(candidate["markers"], ["beam/mix.exs"])
+        self.assertEqual(candidate["authority"], "candidate-only")
+        self.assertFalse(candidate["selected"])
+
     def test_candidates_preserve_independent_markers_without_selecting_components(self):
         candidates = build_root_candidates(inspect_harness(self.root))
         self.assertEqual([c["root"] for c in candidates], [".", "kit", "runtime"])

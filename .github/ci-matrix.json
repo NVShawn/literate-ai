@@ -145,7 +145,7 @@
     "otp": "27.0",
     "otp_major": "27",
     "hex_args": "",
-    "pr": false
+    "pr": true
   },
   {
     "task": "elixir-native",
@@ -157,7 +157,7 @@
     "otp": "29.1.1",
     "otp_major": "29",
     "hex_args": "--build-from-source",
-    "pr": false
+    "pr": true
   },
   {
     "task": "elixir-native",
@@ -169,7 +169,7 @@
     "otp": "27.0",
     "otp_major": "27",
     "hex_args": "",
-    "pr": false
+    "pr": true
   },
   {
     "task": "elixir-native",
@@ -181,6 +181,6 @@
     "otp": "29.1.1",
     "otp_major": "29",
     "hex_args": "--build-from-source",
-    "pr": false
+    "pr": true
   }
 ]

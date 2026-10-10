@@ -585,6 +585,21 @@ class CodingCliInvocationTests(unittest.TestCase):
                 self.assertEqual(files[GENERATED_TEST_SUITE_PATH], content)
                 self.assertFalse((Path(directory) / GENERATED_TEST_SUITE_PATH).exists())
 
+    def test_manifest_canonical_integer_boundaries_remain_valid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / GENERATED_TEST_SUITE_PATH
+            path.parent.mkdir(parents=True)
+            value = {"cases": [{"arguments": [-(2**63), 2**63 - 1]}]}
+            content = json.dumps(value)
+            path.write_text(content, encoding="utf-8")
+            files = {GENERATED_TEST_SUITE_PATH: content}
+            coding_cli_adapter._canonicalize_generated_framework_metadata(
+                root, files, GENERATED_TEST_SUITE_PATH
+            )
+            self.assertEqual(files[GENERATED_TEST_SUITE_PATH], path.read_text())
+            self.assertEqual(json.loads(path.read_text()), value)
+
     def setUp(self) -> None:
         host_prerequisite = mock.patch.object(
             coding_cli_adapter,

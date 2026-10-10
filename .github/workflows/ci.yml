@@ -37,8 +37,9 @@ jobs:
           CI_BASE_REF: ${{ github.base_ref }}
         run: python3 scripts/select_ci_profile.py >> "$GITHUB_OUTPUT"
 
-  # Ordinary PRs use one Linux suite and named platform smoke evidence. Full qualification
-  # below remains mandatory for main/release pushes and release-branch PRs.
+  # Ordinary PRs use one Linux suite and named platform smoke evidence, plus every
+  # native Elixir cell (Linux, macOS and Windows). Full qualification below remains
+  # mandatory for main/release pushes and release-branch PRs.
   checks:
     needs: profile
     name: ${{ matrix.name }}
