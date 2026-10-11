@@ -315,3 +315,11 @@ class PinnedPipWheelSelectionTests(unittest.TestCase):
                 wheel.unlink()
                 with self.assertRaisesRegex(unittest.SkipTest, "does not bundle"):
                     pip_wheel.pinned_pip_wheel()
+                # An interpreter without the pinned version still skips in the gate.
+                with (
+                    mock.patch.dict(
+                        os.environ, {"LITAI_REQUIRE_PINNED_PIP_WHEEL": "1"}
+                    ),
+                    self.assertRaisesRegex(unittest.SkipTest, "does not bundle"),
+                ):
+                    pip_wheel.pinned_pip_wheel()
