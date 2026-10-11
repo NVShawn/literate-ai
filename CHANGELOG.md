@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `litai video build` and `litai video verify` now measure media from its decodable
+  samples instead of trusting container headers and receipt hashes. Build refuses a
+  scene clip with no video or audio samples (`video.media_empty`) or whose measured
+  video length differs from its narration (`video.media_duration`), and reports the
+  final film's measured video duration. Verify re-measures the film and refuses empty
+  streams, video that stops before its audio, receipt durations that differ from the
+  media, and narrated captions that outlast the picture, even when every artifact
+  digest matches. Other video failures keep `video.invalid`; the receipt schema is
+  unchanged.
+
 - Deferred to 1.3 by maintainer decision: clean three-way update merging and reviewed
   resolution application (issue #2; 1.2 keeps plan-only update reviews), and production
   action DAG dispatch with multi-worker shared LAN-cache qualification (issue #4; 1.2

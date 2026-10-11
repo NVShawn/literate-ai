@@ -23,8 +23,22 @@ RECEIPT = "literate-ai/video-course-result@1"
 _ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 
 
+MEDIA_EMPTY = "video.media_empty"
+MEDIA_DURATION = "video.media_duration"
+# Each rendered clip is narration plus this tail; the frame grid and AAC packet
+# size bound how far measured media may drift from it.
+_CLIP_TAIL = 0.15
+_CLIP_TOLERANCE = 0.25
+_MAX_SAMPLE_GAP = 0.5
+
+
 class VideoError(ValueError):
     """A course cannot be rendered or its evidence cannot be verified."""
+
+    def __init__(self, message: str, *, code: str = "video.invalid") -> None:
+        self.code = code
+        self.message = message
+        super().__init__(message)
 
 
 def _json(path: Path) -> dict[str, Any]:
@@ -200,11 +214,67 @@ def _probe(path: Path) -> dict[str, Any]:
     )
 
 
-def _duration(path: Path) -> float:
-    value = float(_probe(path)["format"]["duration"])
-    if not math.isfinite(value) or not 0 < value <= 7200:
-        raise VideoError("media duration must be finite and between zero and two hours")
-    return value
+def _measure(path: Path, kinds: tuple[str, ...]) -> dict[str, float]:
+    """Measure each required stream from its decodable samples, not its headers.
+
+    Container and stream headers can claim a duration while carrying no samples,
+    so a stream's duration is the end of its last timed packet. A required stream
+    that is absent, has no packets, starts late, or has a gap in its samples is
+    refused.
+    """
+    streams = _probe(path).get("streams", [])
+    indexes = {
+        kind: [s["index"] for s in streams if s.get("codec_type") == kind]
+        for kind in kinds
+    }
+    packets: dict[int, list[tuple[float, float]]] = {}
+    listing = _run(
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-show_entries",
+            "packet=stream_index,pts_time,duration_time",
+            "-of",
+            "csv=p=0",
+            str(path),
+        ]
+    )
+    for line in listing.splitlines():
+        fields = line.strip().split(",")
+        if len(fields) < 3 or not fields[0].isdigit():
+            continue
+        try:
+            start = float(fields[1])
+            length = float(fields[2]) if fields[2] not in {"", "N/A"} else 0.0
+        except ValueError:
+            continue
+        if math.isfinite(start) and math.isfinite(length):
+            packets.setdefault(int(fields[0]), []).append((start, max(length, 0.0)))
+    measured: dict[str, float] = {}
+    for kind in kinds:
+        samples = [item for index in indexes[kind] for item in packets.get(index, [])]
+        if not samples:
+            raise VideoError(
+                f"{path.name} has no decodable {kind} samples", code=MEDIA_EMPTY
+            )
+        starts = sorted(start for start, _ in samples)
+        end = max(start + length for start, length in samples)
+        gap = max(
+            (b - a for a, b in zip(starts, starts[1:], strict=False)), default=0.0
+        )
+        if starts[0] > _CLIP_TOLERANCE or gap > _MAX_SAMPLE_GAP:
+            raise VideoError(
+                f"{path.name} {kind} samples do not cover the media continuously",
+                code=MEDIA_DURATION,
+            )
+        if not 0 < end <= 7200:
+            raise VideoError(
+                f"{path.name} {kind} duration must be between zero and two hours",
+                code=MEDIA_DURATION,
+            )
+        measured[kind] = round(end, 6)
+    return measured
 
 
 def _stamp(seconds: float, *, vtt: bool = False) -> str:
@@ -246,6 +316,24 @@ def _slide(scene: dict, title: str, position: int, total: int) -> str:
     parts.append(text(65, 687, 18, f"Instructional demo  |  {position} / {total}"))
     parts.append("</svg>")
     return "\n".join(parts)
+
+
+def _measure_clip(path: Path, expected: float, clips: int = 1) -> float:
+    """Return measured video duration after checking it against narration."""
+    measured = _measure(path, ("video", "audio"))
+    # Concatenation may shift each joined clip by at most a frame.
+    tolerance = _CLIP_TOLERANCE + 0.05 * max(0, clips - 1)
+    if abs(measured["video"] - expected) > tolerance:
+        raise VideoError(
+            f"{path.name} video lasts {measured['video']:.3f}s but its narration "
+            f"needs {expected:.3f}s",
+            code=MEDIA_DURATION,
+        )
+    if abs(measured["audio"] - measured["video"]) > tolerance:
+        raise VideoError(
+            f"{path.name} audio and video durations disagree", code=MEDIA_DURATION
+        )
+    return measured["video"]
 
 
 def build_course(
@@ -382,7 +470,7 @@ def build_course(
                         ],
                         input_text=chunk,
                     )
-                seconds = _duration(narration)
+                seconds = _measure(narration, ("audio",))["audio"]
                 clip = stage / (stem + ".mp4")
                 if scene.get("recording"):
                     video_input = [
@@ -443,7 +531,7 @@ def build_course(
                     ]
                 )
                 cues.append((elapsed, elapsed + seconds, f"{speaker['name']}: {chunk}"))
-                clip_duration = _duration(clip)
+                clip_duration = _measure_clip(clip, seconds + _CLIP_TAIL)
                 elapsed += clip_duration
                 scene_elapsed += clip_duration
                 clips.append(clip)
@@ -524,6 +612,9 @@ def build_course(
             str(video),
         ]
     )
+    # The reported duration is the finished film's measured video, which must
+    # account for every scene clip that went into it.
+    film_seconds = _measure_clip(video, elapsed, len(clips))
     if (
         plan_course(manifest)["source_identity"] != plan["source_identity"]
         or _digest(font) != font_digest
@@ -538,7 +629,7 @@ def build_course(
         "renderer_sha256": _digest(Path(__file__)),
         "font_sha256": font_digest,
         "narration_backend": backend,
-        "duration_seconds": _duration(video),
+        "duration_seconds": film_seconds,
         "caption_count": len(cues),
         "embed_subtitles": document.get("embed_subtitles", True),
         "publication_authorized": False,
@@ -575,15 +666,25 @@ def verify_course(receipt: Path, *, manifest: Path | None = None) -> dict[str, A
         if _digest(_asset(receipt.parent, name)) != expected:
             raise VideoError(f"artifact digest mismatch: {name}")
     video = _asset(receipt.parent, f"{course_id}.mp4")
+    # Digest agreement only proves the bytes are the ones recorded. Acceptance
+    # also requires the film itself to carry continuous video and audio samples.
+    measured = _measure(video, ("video", "audio"))
+    seconds = measured["video"]
+    if abs(measured["audio"] - seconds) > _MAX_SAMPLE_GAP:
+        raise VideoError("audio and video durations disagree", code=MEDIA_DURATION)
     media = _probe(video)
     expected_streams = {"video", "audio"}
     if result.get("embed_subtitles", True):
         expected_streams.add("subtitle")
     if {stream["codec_type"] for stream in media["streams"]} != expected_streams:
         raise VideoError("video streams differ from the declared caption mode")
-    seconds = _duration(video)
-    if abs(seconds - result.get("duration_seconds", -1)) > 0.1:
-        raise VideoError("receipt duration differs from media")
+    duration = result.get("duration_seconds")
+    if (
+        isinstance(duration, bool)
+        or not isinstance(duration, (int, float))
+        or abs(seconds - duration) > 0.1
+    ):
+        raise VideoError("receipt duration differs from media", code=MEDIA_DURATION)
     captions = (receipt.parent / f"{course_id}.srt").read_text(encoding="utf-8")
     times = re.findall(
         r"(\d\d):(\d\d):(\d\d),(\d\d\d) --> (\d\d):(\d\d):(\d\d),(\d\d\d)", captions
@@ -595,9 +696,17 @@ def verify_course(receipt: Path, *, manifest: Path | None = None) -> dict[str, A
         numbers = [int(value) for value in values]
         start = numbers[0] * 3600 + numbers[1] * 60 + numbers[2] + numbers[3] / 1000
         end = numbers[4] * 3600 + numbers[5] * 60 + numbers[6] + numbers[7] / 1000
-        if start < previous or end <= start or end > seconds + 0.1:
+        if start < previous or end <= start:
             raise VideoError("captions overlap or escape media duration")
+        if end > seconds + 0.1:
+            raise VideoError(
+                "narrated captions outlast the measured video", code=MEDIA_DURATION
+            )
         previous = end
+    if seconds - previous > 1.0:
+        raise VideoError(
+            "media continues beyond the narrated captions", code=MEDIA_DURATION
+        )
     _run(["ffmpeg", "-v", "error", "-i", str(video), "-f", "null", "-"])
     return {
         "schema": "literate-ai/video-course-verification@1",

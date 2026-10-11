@@ -33,5 +33,7 @@ def video_from_args(args: Any) -> tuple[dict[str, Any], int]:
                 manifest=Path(args.manifest) if args.manifest else None,
             )
         return result, 0
-    except (VideoError, OSError, ValueError, TypeError, KeyError) as exc:
+    except VideoError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+    except (OSError, ValueError, TypeError, KeyError) as exc:
         raise CliFailure("video.invalid", str(exc)) from exc
