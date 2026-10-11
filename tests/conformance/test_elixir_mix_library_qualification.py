@@ -262,7 +262,7 @@ class ElixirMixLibraryQualificationTests(unittest.TestCase):
                 additional_components=tuple(
                     item
                     for item in json.loads(old_custody.source_bom_content)["components"]
-                    if item.get("purl") == "pkg:hex/decimal"
+                    if item.get("bom-ref") == "hex-decimal"
                 ),
                 root_dependency_refs=("hex-decimal",),
             )
