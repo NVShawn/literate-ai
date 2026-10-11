@@ -40,19 +40,18 @@ class RetainedNativeFileCustodyTests(unittest.TestCase):
         with (
             patch("os.read", side_effect=self._same_size_rewrite_during_first_read()),
             patch(f"{_MODULE}.sys.platform", "linux"),
-            patch(f"{_MODULE}.os.name", "posix"),
             patch(f"{_MODULE}._signature", return_value=("same",)),
             patch(f"{_MODULE}._stat_binding_identity", return_value=("same",)),
             self.assertRaisesRegex(ValueError, "custody-changed"),
         ):
             native_file_digest(self.file, 1024)
 
+    @unittest.skipIf(os.name == "nt", "Windows always rechecks content")
     def test_platform_without_recheck_relies_on_stat_metadata(self):
         """Control: the Linux refusal above comes from the content recheck."""
         with (
             patch("os.read", side_effect=self._same_size_rewrite_during_first_read()),
             patch(f"{_MODULE}.sys.platform", "darwin"),
-            patch(f"{_MODULE}.os.name", "posix"),
             patch(f"{_MODULE}._signature", return_value=("same",)),
             patch(f"{_MODULE}._stat_binding_identity", return_value=("same",)),
         ):

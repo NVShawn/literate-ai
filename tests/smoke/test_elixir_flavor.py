@@ -332,6 +332,12 @@ class ElixirToolchainTests(unittest.TestCase):
                         return_value="/resolved/sh",
                     ),
                 ):
+                    if os.name == "nt" and expected:
+                        # Windows never interprets a POSIX shebang; its rooted
+                        # path has no drive, so the launcher is refused.
+                        with self.assertRaises(ValueError):
+                            _shebang_interpreters(launcher, {})
+                        continue
                     self.assertEqual(_shebang_interpreters(launcher, {}), expected)
             for content in (
                 b"#!sh\n",
