@@ -1,6 +1,6 @@
 # Installation and first run
 
-New to Literate AI? Watch the [onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4) and the
+New to Literate AI? Watch the [onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4) and the
 [instructional courses](../courses/README.md) for a guided tour before installing.
 
 ## Requirements

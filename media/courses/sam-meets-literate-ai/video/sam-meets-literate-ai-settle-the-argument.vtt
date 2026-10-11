@@ -1,0 +1,273 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:23.840
+LitAI: Picture your next release. Agents write code overnight. By
+morning, every change has a written promise, independent acceptance,
+builds on Mac, Linux and Windows, an installed package that actually
+ran, and a receipt naming the exact commit all of that proved. Before
+anyone opens CI.
+
+00:00:24.000 --> 00:00:46.480
+LitAI: You review promises, not diffs. Every claim carries the
+evidence to challenge it. Code becomes something you can regenerate;
+the specification is what you defend in review. That's agentic
+development done properly, and Literate AI is the harness that makes
+it real.
+
+00:00:46.667 --> 00:01:00.987
+Sam: And there it is. The usual AI slop sales pitch. Agents overnight,
+promises instead of diffs. I've sat through four of these this
+quarter.
+
+00:01:01.167 --> 00:01:19.247
+Sam: I'm Sam. C++, Make, tests. My company is in a civil war: our CTO
+wants agent-first everything by Q3, and I lead the holdouts.
+Thursday's architecture review settles it.
+
+00:01:19.417 --> 00:01:27.257
+LitAI: Then let's settle it with evidence instead of volume. You bring
+the beliefs; I'll bring a terminal. One at a time.
+
+00:01:27.417 --> 00:01:36.057
+Sam: Start here. Agent code is slop. Nobody can review ten thousand
+generated lines, so nobody does.
+
+00:01:36.208 --> 00:01:58.528
+LitAI: Agreed. So don't start with the lines; review the promise. A
+Component states observable behavior: a greeting card takes a name and
+messages, returns a greeting, an identifier and word counts. Unicode
+whitespace included. No implementation in it.
+
+00:01:58.708 --> 00:02:03.268
+Sam: A requirements doc. Those rot the day after the kickoff meeting.
+
+00:02:03.458 --> 00:02:27.458
+LitAI: Not this one; every build is pinned to it. Flavors say how:
+Python and Make here, C++ and CMake next door. Change the promise and
+every lock pinned to it goes stale until it's rebuilt and verified.
+Change a Flavor and you still need a real toolchain and new tests. No
+magic porting.
+
+00:02:27.625 --> 00:02:29.705
+Sam: Fine. How would I even get it?
+
+00:02:29.875 --> 00:02:51.075
+LitAI: Clone the repository, make install, then litai doctor checks
+the result. Sign in to your coding CLI separately. The install panel
+is a walkthrough; the terminal sessions are recorded runs. Anything
+without a terminal is a walkthrough card.
+
+00:02:51.250 --> 00:03:00.690
+LitAI: Nothing changes without a plan. This is the real read-only
+create plan, pinned to a public parent commit.
+
+00:03:00.875 --> 00:03:06.235
+Sam: And I acknowledge it, and it writes files. Every tool writes
+files.
+
+00:03:06.417 --> 00:03:12.337
+LitAI: Every tool writes files. Few tell you exactly which ones before
+they do.
+
+00:03:12.500 --> 00:03:20.340
+Sam: Next. The agent writes the code and the tests, then congratulates
+itself. Homework graded by the student.
+
+00:03:20.500 --> 00:03:32.100
+LitAI: Rebuild calls your chosen coding agent, with explicit
+permission to run generated code in this disposable project. Edited
+replay; the waiting is compressed.
+
+00:03:32.250 --> 00:03:37.370
+LitAI: The generated code: normalize the recipient, count the words.
+
+00:03:37.542 --> 00:03:45.382
+LitAI: And its own tests. Useful, and exactly the homework you're
+worried about. So they aren't the judge.
+
+00:03:45.542 --> 00:03:51.622
+Sam: Green on the first try. Which is exactly what slop looks like.
+
+00:03:51.792 --> 00:04:07.872
+LitAI: Green by whose cases? These acceptance cases come from the
+promise, inherited and unmodified: two messages, six words, this
+identifier. They run separately from the agent's own tests.
+
+00:04:08.042 --> 00:04:12.522
+Sam: And if your judge were too lenient, you'd be green and smiling.
+
+00:04:12.708 --> 00:04:31.428
+LitAI: Yes. A lenient oracle or a wrong specification still passes; no
+harness catches that alone. This one puts them where your reviewers
+can. Skips are shown as skips, not passes.
+
+00:04:31.583 --> 00:04:51.663
+LitAI: And when the agent is the one that's wrong, 1.2 hands it the
+redacted compiler error and asks for a fresh candidate, at most twice
+more. Then it stops and tells you why. Not in this recording; this run
+didn't need it.
+
+00:04:51.833 --> 00:04:55.273
+Sam: And every edit means paying for another agent run.
+
+00:04:55.458 --> 00:05:03.458
+LitAI: Only for what changed. Here the source came back from the cache
+and the rebuild took under half a minute.
+
+00:05:03.625 --> 00:05:13.225
+Sam: Now the big one. We have CI. Forty jobs, a matrix, a dashboard.
+That's the safety net.
+
+00:05:13.375 --> 00:05:36.575
+LitAI: For most teams, CI is where they first learn the truth. Push
+and pray, queue for an hour, find Windows red, push a fix you never
+ran. The green run tested a merge commit, not the one you tagged. And
+the pipeline file is untested code holding production keys.
+
+00:05:36.750 --> 00:05:40.430
+Sam: Rude. Accurate, but rude.
+
+00:05:40.583 --> 00:06:09.703
+LitAI: So move the whole gate before CI. Here's how we ship Literate
+AI itself. One make release-check: lint, formatting, spec and docs
+checks, the full test suite, a wheel, a clean install, a real
+installed project, live samples, and a current test receipt. Your
+project declares its own gate; litai release check runs it on the
+exact prepared commit.
+
+00:06:09.875 --> 00:06:16.995
+Sam: That's not a checklist, it's a hostage situation. Nobody runs all
+that before every merge.
+
+00:06:17.167 --> 00:06:32.527
+LitAI: No human does. That's the superhuman part, and it's stamina,
+not judgment. Plan, generate, build, test, accept, package, release:
+every stage, every time, with a record.
+
+00:06:32.708 --> 00:06:46.548
+LitAI: It even caught us making this film. A test helper under the
+driver's reviewed code changed without a fresh review pin. Red at
+driver review, on a laptop, before CI ever saw it.
+
+00:06:46.708 --> 00:06:50.548
+Sam: So you push a fix and pray, like the rest of us.
+
+00:06:50.708 --> 00:07:10.468
+LitAI: Review, re-pin, resume. Passed gates are reused while you
+repair, then release evidence starts clean from gate one.
+
+00:07:10.625 --> 00:07:41.425
+LitAI: Then it repeats on machines you already own. That Linux box and
+a Windows desktop become workers through private configuration. When
+workers build, test and run everything, your laptop doesn't even need
+the toolchains. Release qualify covers what this machine can, then the
+workers, and uses CI only for what's left. The record names the exact
+commit.
+
+00:07:41.583 --> 00:07:43.663
+Sam: So CI becomes...
+
+00:07:43.833 --> 00:07:52.793
+LitAI: A confirmation, not a discovery. This recording qualified this
+Mac; the remote workers are a walkthrough.
+
+00:07:52.958 --> 00:07:59.278
+Sam: Fine. Even when it passes, I can't see what an agent did. It's a
+black box with a commit message.
+
+00:07:59.458 --> 00:08:22.498
+LitAI: litai render html. One file per view, no server. The authority
+graph shows every Component, Flavor and skill, with hash-checked
+previews of their sources. Health views cover locks and verification.
+
+00:08:22.667 --> 00:08:25.547
+Sam: Pretty. Somebody still has to babysit it.
+
+00:08:25.708 --> 00:08:41.148
+LitAI: It's rebuilt from the project's own records, and a declared
+page that goes stale blocks qualification, like this. Build-and-test
+run history isn't shipped yet; the graph and health views are.
+
+00:08:41.333 --> 00:08:49.813
+Sam: My real code is years of C++. Adoption means a rewrite and six
+months of regret.
+
+00:08:50.000 --> 00:09:04.560
+LitAI: TinyXML2, pinned to a public commit. The plan inspects before
+it touches anything: preserve the original, take a recovery point,
+wrap its real build and tests.
+
+00:09:04.750 --> 00:09:10.110
+Sam: Which tests? Swap CTest for an agent's opinion and Thursday's
+over.
+
+00:09:10.292 --> 00:09:17.812
+LitAI: Its own CMake build and its own CTest, on preserved source.
+Nothing replaced, nothing rewritten.
+
+00:09:18.000 --> 00:09:33.040
+LitAI: Retained: baseline evidence recorded, and the original source
+still governs releases. You can stop here for good. Later stages
+exist; none are shown complete here.
+
+00:09:33.208 --> 00:09:39.928
+Sam: And agents make the same mistake every Monday. They never learn.
+
+00:09:40.083 --> 00:10:01.443
+LitAI: Nothing retrains a model. A lesson becomes a reviewed change to
+its owner: the specification if behavior was missing, a Flavor if it's
+platform-specific, a skill if it's technique. litai learn proposes;
+your review admits.
+
+00:10:01.625 --> 00:10:04.585
+Sam: So 'learning' means a pull request.
+
+00:10:04.750 --> 00:10:09.630
+LitAI: Exactly. Reviewable, revertible, and it outlives the model.
+
+00:10:09.792 --> 00:10:13.872
+Sam: And your framework's rules rewrite my release some Tuesday.
+
+00:10:14.042 --> 00:10:27.002
+LitAI: They arrive as a plan. This recorded update compares what you
+inherited, what you changed and what's new upstream. Conflicts wait
+for you.
+
+00:10:27.167 --> 00:10:31.887
+Sam: And when the CTO's agents swarm the repo, who assigns the work?
+
+00:10:32.042 --> 00:10:44.282
+LitAI: Your forge. GitHub or GitLab issues and pull requests, by
+default. Agents open reviewed pull requests like everyone else.
+
+00:10:44.458 --> 00:10:55.658
+Sam: Last one. Demos stop at green. Our actual release artifact is
+still called final-final-really-final dot zip.
+
+00:10:55.833 --> 00:11:16.713
+LitAI: A local wheel, built and verified; no registry upload here. A
+real release is plan, prepare, check, publish: a release branch, a
+SemVer tag, and a check of what was actually published. Tests of one
+commit never qualify another.
+
+00:11:16.875 --> 00:11:22.075
+Sam: So our CTO is wrong. Agents don't get to ship on vibes.
+
+00:11:22.250 --> 00:11:23.370
+LitAI: And the holdouts?
+
+00:11:23.542 --> 00:11:30.822
+Sam: Also wrong. Hand-reading every generated line was never the
+safety net. Evidence is.
+
+00:11:31.000 --> 00:11:44.600
+LitAI: Argument settled. Before Thursday: install it, write one
+Component, render the graph, qualify on two machines. Bring the
+receipts.
+
+00:11:44.750 --> 00:11:47.950
+Sam: And final-final-really-final dot zip retires.
+
+00:11:48.125 --> 00:11:51.405
+LitAI: It had a good run. Unlike its tests.
+

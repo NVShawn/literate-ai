@@ -14,21 +14,24 @@ durable talent.
 
 ## Watch the onboarding video
 
-**[It Builds. Can We Ship It? — watch the 13:38 onboarding film](https://github.com/jordanhubbard/literate-ai/raw/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)**
+**[Settle the Argument. Before CI. — watch the 11:52 onboarding film](https://github.com/jordanhubbard/literate-ai/raw/v1.2.0/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4)**
 
-[![Watch Sam and LitAI in It Builds. Can We Ship It?](https://raw.githubusercontent.com/jordanhubbard/literate-ai/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/package/assets/shot-01.png)](https://github.com/jordanhubbard/literate-ai/raw/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)
+[![Watch Sam and LitAI in Settle the Argument. Before CI.](https://raw.githubusercontent.com/jordanhubbard/literate-ai/v1.2.0/media/courses/sam-meets-literate-ai/poster.png)](https://github.com/jordanhubbard/literate-ai/raw/v1.2.0/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4)
 
-Follow Sam, a skeptical software engineer, and LitAI, his evidence-minded guide,
-through setup, a first greenfield project, and adoption of TinyXML2. Real coding
-sessions appear as edited terminal replays, alongside walkthroughs of using machines
-you already own, updating projects, and connecting repositories. Two voices, captions,
-and a little engineering comedy make this one continuous introduction.
+LitAI opens with the big picture of agentic software development. Sam, a skeptical
+C++/Make engineer whose company is split over going agent-first, calls it the usual
+AI slop pitch, and his beliefs are settled one at a time with real terminal sessions
+recorded against the 1.2 build: reviewable promises, independent acceptance, the
+whole release gate before CI, `litai render html` views, adoption without a rewrite,
+learning as reviewed changes, and a locally built, verified release wheel; remote
+workers and the learning loop are labelled walkthroughs. The tutorial comes with the
+argument.
 
-[Chapters](https://github.com/jordanhubbard/literate-ai/blob/cf95311b863326ffd68064219b1d1ae34e89e2ff/docs/courses/play/CHAPTERS.md)
-· [Subtitles (SRT)](https://raw.githubusercontent.com/jordanhubbard/literate-ai/cf95311b863326ffd68064219b1d1ae34e89e2ff/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.srt)
-· [Leave timestamped feedback](https://github.com/jordanhubbard/literate-ai/pull/10)
+[Chapters](https://github.com/jordanhubbard/literate-ai/blob/v1.2.0/docs/courses/play/CHAPTERS.md)
+· [Subtitles (SRT)](https://raw.githubusercontent.com/jordanhubbard/literate-ai/v1.2.0/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.srt)
+· [Leave timestamped feedback](https://github.com/jordanhubbard/literate-ai/issues)
 
-This is the public-feedback edition; use the [getting-started guide](docs/user/getting-started.md)
+Use the [getting-started guide](docs/user/getting-started.md)
 for current commands. If your browser downloads the MP4, open it in your video player.
 
 ## Why Literate AI?

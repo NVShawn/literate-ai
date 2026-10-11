@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Instructional film: publish the 1.2 onboarding film, *Settle the Argument. Before
+  CI.* (11:52), in `media/courses/sam-meets-literate-ai/`. LitAI opens with the big
+  picture of agentic development, Sam dismisses it as the usual AI slop pitch, and
+  seven of his beliefs are settled with terminal sessions recorded against the 1.2
+  build: reviewable promises, independent acceptance, the full release gate before
+  CI, `litai render html` views, adoption without a rewrite, learning as reviewed
+  changes, and a locally built release wheel; remote workers and the learning loop
+  are labelled walkthroughs. Local neural voices only; the integrity receipt verifies.
+  The 1.1 feedback edition (13:38) remains at the `v1.1.0` tag.
+
 - `litai video build` and `litai video verify` now measure media from its decodable
   samples instead of trusting container headers and receipt hashes. Build refuses a
   scene clip with no video or audio samples (`video.media_empty`) or whose measured
