@@ -7,6 +7,7 @@ below speech, cues are brief, and each turn's mix is checked for loudness.
 
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -43,6 +44,7 @@ def bed(out: Path, seconds: float) -> Path:
     """Render the whole-film bed once, normalized far below speech."""
     if out.exists():
         return out
+    out.parent.mkdir(parents=True, exist_ok=True)
     ffmpeg(
         "-f",
         "lavfi",
@@ -66,6 +68,7 @@ def bed(out: Path, seconds: float) -> Path:
 def cue(kind: str, out: Path) -> Path:
     if out.exists():
         return out
+    out.parent.mkdir(parents=True, exist_ok=True)
     if kind == "whoosh":
         ffmpeg(
             "-f",
@@ -133,3 +136,55 @@ def mix(
         str(out),
     )
     return out
+
+
+def true_peak(path: Path) -> float:
+    done = subprocess.run(
+        [
+            "ffmpeg",
+            "-nostats",
+            "-i",
+            str(path),
+            "-af",
+            "ebur128=framelog=quiet:peak=true",
+            "-f",
+            "null",
+            "-",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    return float(re.findall(r"Peak:\s+(-?[\d.]+)", done.stderr)[-1])
+
+
+def headroom(path: Path, kbps: int, ceiling: float = -1.0) -> float:
+    """Trim a line's static gain until the film's AAC encode stays under ceiling.
+
+    Low-bitrate AAC overshoots some lines by up to 4 dB depending on exact sample
+    content; a trial encode at the film's settings predicts the build's peak.
+    Static gain only: no limiting, so speech is never distorted.
+    """
+    trial = path.with_suffix(".trial.m4a")
+    for _ in range(5):
+        ffmpeg(
+            "-i",
+            str(path),
+            "-c:a",
+            "aac",
+            "-ar",
+            str(RATE),
+            "-b:a",
+            f"{kbps}k",
+            str(trial),
+        )
+        peak = true_peak(trial)
+        if peak <= ceiling:
+            trial.unlink()
+            return peak
+        quieter = path.with_suffix(".gain.wav")
+        ffmpeg(
+            "-i", str(path), "-af", f"volume={ceiling - peak - 0.5:.2f}dB", str(quieter)
+        )
+        quieter.replace(path)
+    raise RuntimeError(f"{path.name}: encode still peaks at {peak} dBTP")

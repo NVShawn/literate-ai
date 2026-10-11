@@ -28,6 +28,7 @@ sys.path.insert(0, str(BASE))
 from scenes import cards, motion, sound  # noqa: E402
 
 ASSETS = BASE.parent / "assets"
+AUDIO_KBPS = 80
 # Illustrative 3D scenes (scenes/blender_scenes.py) for these shots.
 BLENDER_SHOTS = {
     "big-picture": "overnight",
@@ -60,7 +61,9 @@ def spoken_text(value):
         ("SSH", "S.S.H."),
         ("YAML", "yaml"),
         ("CTest", "C test"),
-        ("CMake", "C make"),
+        # "C make" lost its C and blurred the next words in ASR checks.
+        ("CMake", "C-make"),
+        ("Reviewable", "Review-able"),
         ("TinyXML2", "Tiny X.M.L. two"),
         ("Q3", "Q three"),
         ("SemVer", "sem-ver"),
@@ -657,6 +660,7 @@ def main():
                         if at < seconds - 0.4
                     ],
                 )
+                sound.headroom(mixed, AUDIO_KBPS)
                 scene["dialogue"][0]["audio"] = f"assets/{mixed.name}"
         elif turn["shot"] == "terminal":
             entry = evidence["excerpts"][turn["capture"]]
@@ -821,7 +825,7 @@ def main():
                 "id": story["id"] + ("-audition" if args.limit_turns else ""),
                 "title": story["title"],
                 "embed_subtitles": False,
-                "audio_bitrate_kbps": 80,
+                "audio_bitrate_kbps": AUDIO_KBPS,
                 "speakers": {"litai": {"name": "LitAI"}, "sam": {"name": "Sam"}},
                 "scenes": scenes,
                 "evidence": ["production.json", "sessions.json"],
