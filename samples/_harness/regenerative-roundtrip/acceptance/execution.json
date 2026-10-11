@@ -63,8 +63,7 @@
       "flavor://literate-ai/lang-python",
       "flavor://literate-ai/lang-cpp",
       "flavor://literate-ai/lang-rust",
-      "flavor://literate-ai/lang-javascript",
-      "flavor://literate-ai/lang-elixir"
+      "flavor://literate-ai/lang-javascript"
     ],
     "build.system": "flavor://literate-ai/build-bazel"
   },
