@@ -24,6 +24,19 @@ spec = importlib.util.spec_from_file_location(
 art = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(art)
 run, text, panel, arrow = art.run, art.text, art.panel, art.arrow
+sys.path.insert(0, str(BASE))
+from scenes import cards, motion, sound  # noqa: E402
+
+ASSETS = BASE.parent / "assets"
+# Illustrative 3D scenes (scenes/blender_scenes.py) for these shots.
+BLENDER_SHOTS = {
+    "big-picture": "overnight",
+    "cicd": "queue",
+    "pre-ci": "machines",
+    "workers": "machines",
+}
+# Recorded litai render html views (shoot.py), shown for these shots.
+HTML_SCREENS = ["graph-overview.png", "graph-selected.png", "verification-health.png"]
 
 
 def digest(path):
@@ -36,32 +49,66 @@ def caption(value):
 
 def spoken_text(value):
     """Pronunciation is a speech concern, never a mutation of commands/captions."""
-    value = re.sub(r"\bLitai\b", "Lit A. I.", value, flags=re.IGNORECASE)
-    value = re.sub(r"\bAI\b", "A. I.", value)
+    # Spaced initials ("A. I.") read as two sentences: "eh. I slop" and
+    # "literally, AI" in local ASR checks. Unspaced initials read as one word.
+    value = re.sub(r"\bLitai\b", "Lit A.I.", value, flags=re.IGNORECASE)
+    value = re.sub(r"\bAI\b", "A.I.", value)
+    value = re.sub(r"\bhtml\b", "H.T.M.L.", value, flags=re.IGNORECASE)
     for written, spoken in (
         ("C++", "C plus plus"),
-        ("CLI", "C. L. I."),
-        ("SSH", "S. S. H."),
+        ("CLI", "C.L.I."),
+        ("SSH", "S.S.H."),
         ("YAML", "yaml"),
         ("CTest", "C test"),
         ("CMake", "C make"),
-        ("TinyXML2", "Tiny X. M. L. two"),
+        ("TinyXML2", "Tiny X.M.L. two"),
+        ("Q3", "Q three"),
+        ("SemVer", "sem-ver"),
     ):
         value = value.replace(written, spoken)
     return value
 
 
+FILM = "SETTLE THE ARGUMENT. BEFORE CI."
 TITLES = {
-    "challenge": "Ten minutes. Keep your Makefile.",
+    "big-picture": "Agentic development, done properly",
+    "slop": "\u201cThe usual AI slop pitch\u201d",
+    "repair": "Rejected candidates come back with the error",
+    "cicd": "CI is where most teams first learn the truth",
+    "pre-ci": "The whole gate, before CI",
+    "html": "See what the agent did",
+    "learning": "Lessons become reviewed authority",
+    "challenge": "Thursday: settle the argument",
     "contract": "Component: the promise, not the implementation",
     "flavors": "Flavors: choose how that promise is built",
     "skills": "A catalog is not a prompt",
     "workers": "The machine you already own",
     "worker-config": "Private execution, portable intent",
     "updates": "Change without losing your decisions",
-    "lineage": "Inherit practice, not this cast",
+    "lineage": "Upstream changes arrive as plans",
     "orchestration": "Coordinate independent repositories",
     "adoption": "Earn the authority transition",
+}
+
+
+NOTES = {
+    "big-picture": "Developers decide • Code is a derived artifact",
+    "slop": "Seven beliefs • One terminal",
+    "repair": "Bounded • Diagnostics redacted • Then it stops",
+    "cicd": "The pipeline file is untested code with production keys",
+    "pre-ci": "make release-check  •  release evidence starts at gate one",
+    "html": "litai render html  •  one file, no server",
+    "learning": "No model retraining • Git is the memory",
+    "challenge": "Keep the tools. Challenge the claims.",
+    "contract": "Same observable behavior • Independent acceptance",
+    "flavors": "C++ + Make is another choice, not a free automatic port",
+    "skills": "Nested SKILL.md: parent guidance + focused child delta",
+    "workers": "REMOTE STEPS: WALKTHROUGH, NOT SSH EXECUTION",
+    "worker-config": "litai config paths  →  private configuration",
+    "updates": "PLAN → REVIEW → APPLY → REBUILD → VERIFY",
+    "lineage": "Exact parent revisions • Explicit overrides",
+    "orchestration": "Dependency order ≠ inheritance order",
+    "adoption": "Draft + review + independent parity before qualification",
 }
 
 
@@ -69,14 +116,49 @@ def custom_art(shot, active):
     parts = [
         '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">',
         '<rect width="1280" height="720" fill="#10192d"/>',
-        text(40, 45, "TEN MINUTES. KEEP YOUR MAKEFILE.", 18, "#37d8b7"),
+        text(40, 45, FILM, 18, "#37d8b7"),
         text(40, 115, TITLES[shot], 37),
         '<rect y="600" width="1280" height="120" fill="#080e1c"/>',
     ]
     labels = {
+        "big-picture": [
+            ("PROMISE", "Reviewed spec"),
+            ("PROOF", "3 platforms, pre-CI"),
+            ("RECEIPT", "Exact commit"),
+        ],
+        "slop": [
+            ("CTO", "Agent-first by Q3"),
+            ("THURSDAY", "Architecture review"),
+            ("SAM", "Leads the holdouts"),
+        ],
+        "repair": [
+            ("REJECTED", "Build or test fails"),
+            ("FEEDBACK", "Redacted error"),
+            ("RETRY", "At most twice more"),
+        ],
+        "cicd": [
+            ("PUSH", "And pray"),
+            ("QUEUE", "An hour later"),
+            ("RED", "Fix you never ran"),
+        ],
+        "pre-ci": [
+            ("CHECK", "Lint • specs • docs"),
+            ("TEST", "Suite • samples"),
+            ("SHIP", "Wheel • install • e2e"),
+        ],
+        "html": [
+            ("GRAPH", "Authority + sources"),
+            ("HEALTH", "Versions • locks"),
+            ("STALE", "Blocks qualification"),
+        ],
+        "learning": [
+            ("OBSERVE", "Typed evidence"),
+            ("PROPOSE", "litai learn"),
+            ("ADMIT", "Your review"),
+        ],
         "challenge": [
             ("LITAI", "Show the proof"),
-            ("10:00", "Earn the overhead"),
+            ("EVIDENCE", "Settles it"),
             ("SAM", "C++ • Make • Tests"),
         ],
         "contract": [
@@ -132,20 +214,9 @@ def custom_art(shot, active):
             text(x + 15, 315, label, 27, "#37d8b7"),
             text(x + 15, 365, detail, 21),
         ]
-        if index < 2 and shot not in {"skills", "challenge"}:
+        if index < 2 and shot not in {"skills", "challenge", "slop", "html"}:
             parts.append(arrow(x + 237, 333, 15))
-    note = {
-        "challenge": "Keep the tools. Challenge the claims.",
-        "contract": "Same observable behavior • Independent acceptance",
-        "flavors": "C++ + Make is another choice, not a free automatic port",
-        "skills": "Nested SKILL.md: parent guidance + focused child delta",
-        "workers": "REMOTE STEPS: WALKTHROUGH, NOT SSH EXECUTION",
-        "worker-config": "litai config paths  →  private configuration",
-        "updates": "PLAN → REVIEW → APPLY → REBUILD → VERIFY",
-        "lineage": "Exact parent revisions • Explicit overrides",
-        "orchestration": "Dependency order ≠ inheritance order",
-        "adoption": "Draft + review + independent parity before qualification",
-    }[shot]
+    note = NOTES[shot]
     parts += [
         text(280, 475, note, 22, "#ffbc6b"),
         text(50, 575, "LitAI", 22, "#37d8b7"),
@@ -157,6 +228,19 @@ def custom_art(shot, active):
     return "\n".join(parts)
 
 
+def provenance(entry):
+    """What a terminal-style page actually is; never call a file a recording."""
+    if "recorded_revision" in entry:
+        return f"RECORDED GATE LOG EXCERPT • REVISION {entry['recorded_revision']}"
+    if "file_sha256" in entry:
+        return "REPOSITORY FILE EXCERPT • EXACT LINES • HASH RECORDED"
+    if "evidence_sha256" in entry:
+        return "RECORDED HARNESS EVIDENCE • EXCERPT"
+    if entry.get("observed"):
+        return "RECORDED DIRECTORY LISTING • EXCERPT"
+    return "RECORDED EXECUTION • EDITED TERMINAL REPLAY • WAITING COMPRESSED"
+
+
 def terminal_art(entry, active, page):
     lines = entry["lines"]
     chunks = [lines[n : n + 14] for n in range(0, len(lines), 14)] or [[]]
@@ -164,26 +248,23 @@ def terminal_art(entry, active, page):
     parts = [
         '<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720">',
         '<rect width="1280" height="720" fill="#10192d"/>',
-        text(
-            35,
-            35,
-            "RECORDED EXECUTION • EDITED TERMINAL REPLAY • WAITING COMPRESSED",
-            18,
-            "#ffbc6b",
-        ),
+        text(35, 35, provenance(entry), 18, "#ffbc6b"),
         text(35, 85, entry["title"], 33),
         panel(25, 108, 1230, 475, "#080e1c"),
     ]
     for i, line in enumerate(selected):
         # Keep indentation at fixed cells; SVG whitespace is not terminal whitespace.
         pad = len(line) - len(line.lstrip(" "))
+        body = line.lstrip(" ")
         parts.append(
             '<g font-family="monospace">'
             + text(
                 45 + pad * 12,
                 146 + i * 29,
-                line.lstrip(" "),
-                21,
+                # The SVG reader swallows a leading quote too (JSON strings).
+                ("\u200b" + body) if body.startswith('"') else body,
+                # 0.6em monospace advance = the 12px cell used for indentation.
+                20,
                 "#37d8b7" if line.startswith("$") else "#e9edf5",
             )
             + "</g>"
@@ -234,11 +315,200 @@ def burn_caption(image, value, speaker, font):
     )
 
 
+def blender_clip(name, scenes, blender):
+    """Render (once) and encode an illustrative 3D scene; cached by its inputs."""
+    script = BASE / "scenes/blender_scenes.py"
+    key = hashlib.sha256((digest(script) + name + str(blender)).encode()).hexdigest()
+    clip = scenes / "blender" / f"{name}-{key[:12]}.mp4"
+    if not clip.exists():
+        frames = clip.with_suffix("")
+        run(
+            str(blender),
+            "-b",
+            "--factory-startup",
+            "-P",
+            str(script),
+            "--",
+            name,
+            str(frames),
+            "192",
+        )
+        motion.sequence(frames, clip)
+        motion.validate(clip, 192 / motion.FPS)
+    return clip
+
+
+def staged_art(turn, fonts, out):
+    """The diagram cards, re-set in the film's typefaces with both portraits."""
+    source = (
+        custom_art(turn["shot"], turn["speaker"])
+        if turn["shot"] in TITLES
+        else art.artwork(turn["shot"], turn["speaker"])
+    ).replace("LITERATE AI   /   GREENFIELD REVIEW CUT", FILM)
+    run("magick", "-font", str(fonts["label"]), "svg:-", str(out), source=source)
+    for speaker, filename, x in (
+        ("litai", "litai-guide.png", 15),
+        ("sam", "sam-engineer.png", 1020),
+    ):
+        active = speaker == turn["speaker"]
+        portrait = out.with_name(f"{out.stem}-{speaker}.png")
+        run(
+            "magick",
+            str(ASSETS / filename),
+            "-resize",
+            "265x340" if active else "235x300",
+            "-channel",
+            "A",
+            "-evaluate",
+            "multiply",
+            "1" if active else "0.45",
+            str(portrait),
+        )
+        y = 200 if active else 235
+        run(
+            "magick",
+            str(out),
+            str(portrait),
+            "-geometry",
+            f"+{x}+{y}",
+            "-composite",
+            str(out),
+        )
+        portrait.unlink()
+    return out
+
+
+def studio_scene(turn, stem, seconds, evidence, args, fonts, work, html_index):
+    """One turn as moving picture: chapter card, body, provenance and captions.
+
+    Returns the clip and the sound cues (kind, offset) that belong to it.
+    """
+    work.mkdir(parents=True, exist_ok=True)
+    total = seconds + 0.25
+    opening, clips, cues, overlays, remaining = [], [], [], [], total
+    if turn.get("chapter"):
+        span = min(3.0, total * 0.45)
+        card = cards.chapter_card(
+            turn["chapter"], turn["speaker"], ASSETS, fonts, work / "chapter.png"
+        )
+        opening.append(motion.still(card, span, work / "chapter.mp4", zoom=0.03))
+        cues.append(("whoosh", 0.0))
+        remaining -= span
+    start = total - remaining
+    shot = turn["shot"]
+    if shot == "terminal":
+        entry = evidence["excerpts"][turn["capture"]]
+        pages = []
+        for page in range(max(1, (len(entry["lines"]) + 13) // 14)):
+            frame = work / f"page-{page}.png"
+            run(
+                "magick",
+                "-font",
+                str(fonts["mono"]),
+                "svg:-",
+                str(frame),
+                source=terminal_art(entry, turn["speaker"], page),
+            )
+            pages.append(frame)
+        if turn["capture"] == "render-html" and args.screens:
+            # The rendered pages themselves: recorded output, not illustration.
+            for name in ("graph-overview.png", "verification-health.png"):
+                frame = work / f"screen-{name}"
+                cards.browser(
+                    args.screens / name,
+                    f"views/{name.split('-')[0]}"
+                    f"{'' if name.startswith('graph') else '-health'}.html"
+                    "   (recorded litai render html output)",
+                    fonts,
+                    frame,
+                )
+                pages.append(frame)
+        span = remaining / len(pages)
+        for index, frame in enumerate(pages):
+            clips.append(
+                motion.still(frame, span, work / f"page-{index}.mp4", zoom=0.015)
+            )
+            cues.append(("tick", start + index * span))
+        overlays.append(
+            (cards.closeup(turn["speaker"], ASSETS, work / "face.png", 92), 1172, 4)
+        )
+    elif shot in BLENDER_SHOTS and args.blender:
+        clip = blender_clip(BLENDER_SHOTS[shot], args.scenes, args.blender)
+        clips.append(motion.fit(clip, remaining, work / "scene.mp4"))
+        overlays += [
+            (
+                cards.tag(
+                    "ILLUSTRATION",
+                    "NOT A RECORDING  •  " + TITLES[shot].upper(),
+                    fonts,
+                    work / "tag.png",
+                ),
+                0,
+                0,
+            ),
+            (cards.closeup(turn["speaker"], ASSETS, work / "face.png", 116), 24, 468),
+        ]
+    elif shot == "html" and args.screens:
+        name = HTML_SCREENS[html_index % len(HTML_SCREENS)]
+        frame = cards.browser(
+            args.screens / name,
+            "views/graph.html   (recorded litai render html output)",
+            fonts,
+            work / "screen.png",
+        )
+        clips.append(motion.still(frame, remaining, work / "screen.mp4", zoom=0.03))
+        overlays += [
+            (
+                cards.tag(
+                    "RECORDED OUTPUT",
+                    "litai render html  •  sams-first-project",
+                    fonts,
+                    work / "tag.png",
+                ),
+                0,
+                0,
+            ),
+            (cards.closeup(turn["speaker"], ASSETS, work / "face.png", 92), 1172, 4),
+        ]
+    else:
+        frame = staged_art(turn, fonts, work / "art.png")
+        clips.append(motion.still(frame, remaining, work / "art.mp4", zoom=0.035))
+    # Provenance tags and close-ups belong to the body, never the chapter card.
+    body = motion.dress(
+        motion.join(clips, work / "joined.mp4"),
+        overlays,
+        remaining,
+        work / "body.mp4",
+        fade=False,
+    )
+    words = cards.caption(
+        caption(turn["text"]), turn["speaker"], fonts, work / "caption.png"
+    )
+    clip = motion.dress(
+        motion.join([*opening, body], work / "turn.mp4"),
+        [(words, 0, 0)],
+        total,
+        args.output / "assets" / f"{stem}.mp4",
+        fade=bool(turn.get("chapter")),
+    )
+    motion.validate(clip, total)
+    return clip, cues
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--font", type=Path, required=True)
+    # ImageMagick's -font overrides SVG font-family; terminals need fixed cells.
+    parser.add_argument("--mono-font", type=Path, help="terminal replay font")
+    parser.add_argument("--display-font", type=Path, help="titles and cards")
+    parser.add_argument("--label-font", type=Path, help="labels and diagrams")
+    # Studio mode: moving pictures, 3D scenes and sound; heavy assets stay here.
+    parser.add_argument("--scenes", type=Path, help="private studio asset directory")
+    parser.add_argument("--blender", type=Path, help="Blender executable for 3D")
+    parser.add_argument("--screens", type=Path, help="shoot.py screenshot directory")
+    parser.add_argument("--sound-bed", action="store_true", help="add the sound bed")
     parser.add_argument("--repository-image", type=Path, required=True)
     parser.add_argument("--evidence", type=Path, required=True)
     parser.add_argument("--audio-only", action="store_true")
@@ -260,6 +530,18 @@ def main():
     model = load_model(args.model.resolve(), model_type=engine)
     scenes, chapters = [], []
     elapsed = 0.0
+    fonts = {
+        "display": args.display_font or args.font,
+        "label": args.label_font or args.font,
+        "body": args.font,
+        "caption": args.font,
+        "mono": args.mono_font or args.font,
+    }
+    if args.scenes:
+        args.scenes = args.scenes.resolve()
+        args.output = root
+        bed = sound.bed(args.scenes / "sound/bed.wav", 1800) if args.sound_bed else None
+    html_index = 0
     turns = story["turns"][: args.limit_turns] if args.limit_turns else story["turns"]
     for i, turn in enumerate(turns, 1):
         print(f"Preparing {i}/{len(story['turns'])} {turn['shot']}", flush=True)
@@ -333,6 +615,7 @@ def main():
             )
             cache.write_text(key)
         seconds = sf.info(audio).duration + 0.15
+        offset = elapsed
         elapsed += seconds
         if args.audio_only:
             continue
@@ -346,7 +629,36 @@ def main():
                 }
             ],
         }
-        if turn["shot"] == "terminal":
+        if args.scenes:
+            _, cues = studio_scene(
+                turn,
+                stem,
+                seconds,
+                evidence,
+                args,
+                fonts,
+                args.scenes / "work" / stem,
+                html_index,
+            )
+            html_index += turn["shot"] == "html"
+            scene["recording"] = f"assets/{stem}.mp4"
+            if bed:
+                # Speech-only WAV stays beside the mix for listen.py checks.
+                mixed = assets / f"{stem}.mix.wav"
+                sound.mix(
+                    audio,
+                    mixed,
+                    bed,
+                    offset,
+                    seconds - 0.15,
+                    [
+                        (sound.cue(kind, args.scenes / f"sound/{kind}.wav"), at)
+                        for kind, at in cues
+                        if at < seconds - 0.4
+                    ],
+                )
+                scene["dialogue"][0]["audio"] = f"assets/{mixed.name}"
+        elif turn["shot"] == "terminal":
             entry = evidence["excerpts"][turn["capture"]]
             pages = max(1, (len(entry["lines"]) + 13) // 14)
             clips = []
@@ -355,7 +667,7 @@ def main():
                 run(
                     "magick",
                     "-font",
-                    str(args.font),
+                    str(args.mono_font or args.font),
                     "svg:-",
                     str(frame),
                     source=terminal_art(entry, turn["speaker"], page),
@@ -399,7 +711,7 @@ def main():
             )
             source = source.replace(
                 "LITERATE AI   /   GREENFIELD REVIEW CUT",
-                "TEN MINUTES. KEEP YOUR MAKEFILE.",
+                FILM,
             ).replace(
                 "Next: your first real coding session.",
                 "Keep the skepticism. Make it repeatable.",
@@ -476,6 +788,31 @@ def main():
         "review": "Revised Qwen voice audition: human listening approval pending",
         "audition": bool(args.limit_turns),
     }
+    if args.scenes:
+        production["studio"] = {
+            "credits": "CREDITS.md",
+            "fonts": {
+                role: {"file": path.name, "sha256": digest(path)}
+                for role, path in fonts.items()
+            },
+            "blender": run(str(args.blender), "--version").splitlines()[0]
+            if args.blender
+            else None,
+            "imagemagick": run("magick", "-version").splitlines()[0],
+            "ffmpeg": run("ffmpeg", "-version").splitlines()[0],
+            "scene_scripts": {
+                path.name: digest(path)
+                for path in sorted((BASE / "scenes").glob("*.py"))
+            },
+            "sound": "original; synthesized by scenes/sound.py, no third-party audio"
+            if args.sound_bed
+            else None,
+            "screens": "shoot.py captures of recorded litai render html output"
+            if args.screens
+            else None,
+            "labels": "3D scenes tagged ILLUSTRATION; terminal and screen pages "
+            "state their recorded source",
+        }
     (root / "production.json").write_text(json.dumps(production, indent=2) + "\n")
     (root / "course.json").write_text(
         json.dumps(

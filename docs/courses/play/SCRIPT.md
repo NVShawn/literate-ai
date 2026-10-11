@@ -1,231 +1,274 @@
-# Ten Minutes. Keep Your Makefile.
+# Settle the Argument. Before CI.
 
-Working script after Opus 5.5 critique. Target: ten minutes including pauses and demo holds.
-Recorded sessions retain their original pinned development-build evidence.
-Not a new published film or human-approved voice performance.
+Working script for the 1.2 film. Generated from `story.json`; edit that file, not this one.
+62 turns, 1313 spoken words; target about 13 minutes including pauses and demo holds.
+Terminal turns reuse the original recorded development-build sessions until fresh 1.2 captures exist.
+Not a rendered film or an approved voice performance.
 
-## Ten minutes. No faith required.
+## The big picture
 
-**01 · Sam** — *challenge*
+**01 · Litai** — *big-picture*
 
-I'm Sam. C++, make, tests. They work. You've got ten minutes to convince me I need another tool. The clock includes buzzwords.
+Picture your next release. Agents write code overnight. By morning, every change has a written promise, independent acceptance, builds on Mac, Linux and Windows, an installed package that actually ran, and a receipt naming the exact commit all of that proved. Before anyone opens CI.
 
-**02 · Litai** — *challenge*
+**02 · Litai** — *big-picture*
 
-I'm Litai, from Literate AI. Keep your tools; I'm selling a harness, not a religion. The interesting part is between an agent saying done and a product being ready.
+You review promises, not diffs. Every claim carries the evidence to challenge it. Code becomes something you can regenerate; the specification is what you defend in review. That's agentic development done properly, and Literate AI is the harness that makes it real.
 
-**03 · Sam** — *challenge*
+## The usual AI slop pitch
 
-My tests already tell me that. Are we adding YAML so a chatbot can feel supervised?
+**03 · Sam** — *slop*
 
-**04 · Litai** — *contract*
+And there it is. The usual AI slop sales pitch. Agents overnight, promises instead of diffs. I've sat through four of these this quarter.
 
-If your pipeline already proves every step, keep it. The gap is when an agent implements the wrong promise, tests that same misunderstanding, and calls the package shipped. Let's inspect one promise before generating anything.
+**04 · Sam** — *slop*
 
-**05 · Sam** — *contract*
+I'm Sam. C++, Make, tests. My company is in a civil war: our CTO wants agent-first everything by Q3, and I lead the holdouts. Thursday's architecture review settles it.
 
-You get one small example. Not a cathedral of configuration.
+**05 · Litai** — *slop*
 
-## One promise, two layers
+Then let's settle it with evidence instead of volume. You bring the beliefs; I'll bring a terminal. One at a time.
 
-**06 · Litai** — *contract*
+**06 · Sam** — *slop*
 
-One promise. A greeting card: a name and messages in; a greeting, a recipient identifier and counts out. That promise is the Component, Unicode whitespace included. It says nothing about how it's built.
+Start here. Agent code is slop. Nobody can review ten thousand generated lines, so nobody does.
 
-**07 · Sam** — *contract*
+## Belief one: nobody can review it
 
-So, a requirements file. We've had those since before the coffee machine had firmware.
+**07 · Litai** — *terminal / specification*
 
-**08 · Litai** — *flavors*
+Agreed. So don't start with the lines; review the promise. A Component states observable behavior: a greeting card takes a name and messages, returns a greeting, an identifier and word counts. Unicode whitespace included. No implementation in it.
 
-Yes, except this one is bound to the work. Flavors are the build choices: language, build system, platform, packaging. Swap a Flavor and you still need a real toolchain and new tests. No magic porting. The promise stays put.
+**08 · Sam** — *contract*
 
-**09 · Sam** — *flavors*
+A requirements doc. Those rot the day after the kickoff meeting.
 
-And your recorded example is Python. You brought Python to a C++ interview.
+**09 · Litai** — *flavors*
 
-**10 · Litai** — *flavors*
+Not this one; every build is pinned to it. Flavors say how: Python and Make here, C++ and CMake next door. Change the promise and every lock pinned to it goes stale until it's rebuilt and verified. Change a Flavor and you still need a real toolchain and new tests. No magic porting.
 
-Guilty. The smallest recorded run is Python plus Make. Your kind of code shows up in a few minutes: C++, CMake, CTest.
+**10 · Sam** — *clone*
 
-## Recorded greenfield session
+Fine. How would I even get it?
 
-**11 · Sam** — *clone*
+**11 · Litai** — *clone*
 
-Then stop drawing and run something. Starting with where I get it.
+Clone the repository, make install, then litai doctor checks the result. Sign in to your coding CLI separately. The install panel is a walkthrough; the terminal sessions are recorded runs. Anything without a terminal is a walkthrough card.
 
-**12 · Litai** — *clone*
+**12 · Litai** — *terminal / create-plan*
 
-Repository and commands are on screen. On macOS: Python three eleven or newer, Git and Make, then make install. This panel is a walkthrough. The terminal sessions are a recorded development build, revisions beside the film.
+Nothing changes without a plan. This is the real read-only create plan, pinned to a public parent commit.
 
-**13 · Sam** — *terminal / create-plan*
+**13 · Sam** — *terminal / create-apply*
 
-A development build. So, tomorrow's features on loan.
+And I acknowledge it, and it writes files. Every tool writes files.
 
-**14 · Litai** — *terminal / create-plan*
+**14 · Litai** — *terminal / create-apply*
 
-Possibly, which is why it's labeled. This is its real read-only create plan, pinned to a public parent commit. Destination and choices are reviewable; nothing applies until you acknowledge it.
+Every tool writes files. Few tell you exactly which ones before they do.
 
-**15 · Sam** — *terminal / create-apply*
+## Belief two: it grades its own homework
 
-Fine. Where's the actual agent writing code?
+**15 · Sam** — *terminal / generation*
+
+Next. The agent writes the code and the tests, then congratulates itself. Homework graded by the student.
 
 **16 · Litai** — *terminal / generation*
 
-Here. Rebuild invokes the selected coding agent, with explicit permission to run generated code in this disposable project. Edited replay; the waiting is compressed.
+Rebuild calls your chosen coding agent, with explicit permission to run generated code in this disposable project. Edited replay; the waiting is compressed.
 
-**17 · Sam** — *terminal / generation*
+**17 · Litai** — *terminal / source*
 
-A greeting card doesn't prove it can maintain my parser.
+The generated code: normalize the recipient, count the words.
 
-**18 · Litai** — *terminal / source*
+**18 · Litai** — *terminal / tests*
 
-It doesn't. It makes the mechanism inspectable before we touch your parser. This generated code normalizes the recipient and counts words.
+And its own tests. Useful, and exactly the homework you're worried about. So they aren't the judge.
 
-**19 · Litai** — *terminal / tests*
+**19 · Sam** — *terminal / rebuild*
 
-These generated tests are useful, but they're not our independent definition of correct.
+Green on the first try. Which is exactly what slop looks like.
 
-**20 · Sam** — *terminal / rebuild-failed*
+**20 · Litai** — *terminal / oracle*
 
-There. Red. Missing messages. Your ten-minute sales pitch appears to have developed a warranty claim.
+Green by whose cases? These acceptance cases come from the promise, inherited and unmodified: two messages, six words, this identifier. They run separately from the agent's own tests.
 
-**21 · Litai** — *terminal / rebuild-failed*
+**21 · Sam** — *terminal / oracle*
 
-Fair. The Component requires messages; the inherited acceptance case got that wrong. That's a defect in our starter, not the agent's. That recorded defect is tracked for an upstream fix.
+And if your judge were too lenient, you'd be green and smiling.
 
-**22 · Sam** — *terminal / oracle*
+**22 · Litai** — *terminal / verify*
 
-Hold on. Your independent check, the thing meant to catch the agent, was the broken part. And then you edited it until it went green.
+Yes. A lenient oracle or a wrong specification still passes; no harness catches that alone. This one puts them where your reviewers can. Skips are shown as skips, not passes.
 
-**23 · Litai** — *terminal / oracle*
+**23 · Litai** — *repair*
 
-Then judge my edit against the written contract, not the generated code: two messages, six words, this identifier. We corrected this disposable project's acceptance cases and reran. Local recovery, disclosed. That recorded parent still needs repair.
+And when the agent is the one that's wrong, 1.2 hands it the redacted compiler error and asks for a fresh candidate, at most twice more. Then it stops and tells you why. Not in this recording; this run didn't need it.
 
-**24 · Sam** — *terminal / rebuild*
+**24 · Sam** — *terminal / rebuild-refresh*
 
-And if it had been wrong the other way, too lenient, you'd be green and smiling.
+And every edit means paying for another agent run.
 
-**25 · Litai** — *terminal / verify*
+**25 · Litai** — *terminal / rebuild-refresh*
 
-Yes. A lenient oracle passes bad code, and so does a wrong specification; the harness can't detect either on its own. It puts the contract, the acceptance cases and the results where a reviewer can challenge them. Recorded results, skips included.
+Only for what changed. Here the source came back from the cache and the rebuild took under half a minute.
 
-**26 · Sam** — *terminal / package*
+## Belief three: CI is the safety net
 
-Green on your machine. My release checklist is longer than that.
+**26 · Sam** — *cicd*
 
-**27 · Litai** — *terminal / package-verify*
+Now the big one. We have CI. Forty jobs, a matrix, a dashboard. That's the safety net.
 
-Agreed. Local wheel and package verification; no registry upload. Publishing is a separate decision. Tests of one revision don't qualify another, and a green build doesn't prove the installed package works.
+**27 · Litai** — *cicd*
 
-## Brownfield without a rewrite
+For most teams, CI is where they first learn the truth. Push and pray, queue for an hour, find Windows red, push a fix you never ran. The green run tested a merge commit, not the one you tagged. And the pipeline file is untested code holding production keys.
 
-**28 · Sam** — *adoption*
+**28 · Sam** — *cicd*
 
-My real project already has years of C++. I'm not replacing that with an optimistic paragraph.
+Rude. Accurate, but rude.
 
-**29 · Litai** — *terminal / adopt-plan*
+**29 · Litai** — *terminal / release-check-recorded*
 
-Don't. Here is TinyXML2, pinned to the recorded public commit. The adoption plan inspects the existing project before mutation. We preserve the original implementation, establish a recovery point, and wrap its real build and tests.
+So move the whole gate before CI. Here's how we ship Literate AI itself. One make release-check: lint, formatting, spec and docs checks, the full test suite, a wheel, a clean install, a real installed project, live samples, and a current test receipt. Your project declares its own gate; litai release check runs it on the exact prepared commit.
 
-**30 · Sam** — *terminal / adopt-apply*
+**30 · Sam** — *pre-ci*
 
-Which tests? If you replace CTest with an agent congratulating itself, we're finished.
+That's not a checklist, it's a hostage situation. Nobody runs all that before every merge.
 
-**31 · Litai** — *terminal / ctest*
+**31 · Litai** — *pre-ci*
 
-Its own CMake targets and CTest, run on the preserved source. In rehearsal we also hit a bug in our CTest-summary parser; it was repaired and the harness run repeated.
+No human does. That's the superhuman part, and it's stamina, not judgment. Plan, generate, build, test, accept, package, release: every stage, every time, with a record.
 
-**32 · Sam** — *adoption*
+**32 · Litai** — *terminal / release-check*
 
-That's two bugs in your own tool in one demo. Why does it go anywhere near my CI?
+It even caught us making this film. A test helper under the driver's reviewed code changed without a fresh review pin. Red at driver review, on a laptop, before CI ever saw it.
 
-**33 · Litai** — *terminal / retained*
+**33 · Sam** — *terminal / release-check-resume*
 
-Fair count. It shouldn't, until a trial earns it. What a trial gets you: a repeatable baseline, recorded build and test evidence, and a written account of what's authoritative. Wrapped: the harness surrounds your code. Retained: that preserved code has its required baseline evidence.
+So you push a fix and pray, like the rest of us.
 
-**34 · Sam** — *adoption*
+**34 · Litai** — *terminal / release-check-resume*
 
-And then comes the upsell to a rewrite.
+Review, re-pin, resume. Passed gates are reused while you repair, then release evidence starts clean from gate one.
 
-**35 · Litai** — *adoption*
+**35 · Litai** — *terminal / qualify*
 
-There are later stages: draft specifications, regenerate, and qualify against independent evidence before authority moves. None of that is complete in this demo. You can stop at retained; your original source still governs releases.
+Then it repeats on machines you already own. That Linux box and a Windows desktop become workers through private configuration. When workers build, test and run everything, your laptop doesn't even need the toolchains. Release qualify covers what this machine can, then the workers, and uses CI only for what's left. The record names the exact commit.
 
-## Shared practice, workers, and two kinds of orchestration
+**36 · Sam** — *workers*
 
-**36 · Sam** — *lineage*
+So CI becomes...
 
-Fine. Now there's a framework-shaped pile of files beside my code, times every repository. Does my agent read that whole grab bag to fix a typo?
+**37 · Litai** — *workers*
 
-**37 · Litai** — *skills*
+A confirmation, not a discovery. This recording qualified this Mac; the remote workers are a walkthrough.
 
-No. Agent skills guide tasks like adoption or release; generation skills guide building one Component with its Flavors. Nested skills add focused guidance to their parents; a generation recipe pins its selected instructions. Shared rules come through tracked inheritance: framework, your team's conventions, then each product. This part is a diagram, not a run.
+## Belief four: it's a black box
 
-**38 · Sam** — *lineage*
+**38 · Sam** — *html*
 
-Inherited means Tuesday's upstream cleverness rewrites Monday's release.
+Fine. Even when it passes, I can't see what an agent did. It's a black box with a commit message.
 
-**39 · Litai** — *terminal / update*
+**39 · Litai** — *terminal / render-html*
 
-Not silently. A recorded revision isn't a live subscription. An update plan, like this recorded one, compares what you inherited, what you changed and what's new upstream. Conflicts wait for a decision. Upgrading the tool itself is separate, and an old receipt isn't fresh proof.
+litai render html. One file per view, no server. The authority graph shows every Component, Flavor and skill, with hash-checked previews of their sources. Health views cover locks and verification.
 
-**40 · Sam** — *lineage*
+**40 · Sam** — *html*
 
-And when two parents disagree?
+Pretty. Somebody still has to babysit it.
 
-**41 · Litai** — *lineage*
+**41 · Litai** — *terminal / qualify-stale*
 
-Ambiguous definitions are rejected. A product can override deliberately, with provenance. Prefer a narrow project rule to copying a whole policy. Inheritance shares practice; it doesn't remove review.
+It's rebuilt from the project's own records, and a declared page that goes stale blocks qualification, like this. Build-and-test run history isn't shipped yet; the graph and health views are.
 
-**42 · Sam** — *skills*
+## Belief five: adoption means a rewrite
 
-Including this video? Every project inherits two talking heads?
+**42 · Sam** — *adoption*
 
-**43 · Litai** — *skills*
+My real code is years of C++. Adoption means a rewrite and six months of regret.
 
-No. The video-production skill is reusable; this cast belongs to this repository. Your payment library is not contractually obliged to include a sarcastic man.
+**43 · Litai** — *terminal / adopt-plan*
 
-**44 · Sam** — *workers*
+TinyXML2, pinned to a public commit. The plan inspects before it touches anything: preserve the original, take a recovery point, wrap its real build and tests.
 
-I supply that service free. Now the bill: a cluster, a platform team, another subscription?
+**44 · Sam** — *terminal / adopt-apply*
 
-**45 · Litai** — *workers*
+Which tests? Swap CTest for an agent's opinion and Thursday's over.
 
-One machine, as this recording used. Compatible machines you already have can become workers: addresses and credentials in private configuration, then probe toolchains and agent access. Walkthrough, not an SSH run.
+**45 · Litai** — *terminal / ctest*
 
-**46 · Sam** — *pipeline*
+Its own CMake build and its own CTest, on preserved source. Nothing replaced, nothing rewritten.
 
-And Agentis, the orchestrator? Two systems supervising one agent sounds like two managers in one meeting.
+**46 · Litai** — *terminal / retained*
 
-**47 · Litai** — *pipeline*
+Retained: baseline evidence recorded, and the original source still governs releases. You can stop here for good. Later stages exist; none are shown complete here.
 
-Different jobs. The orchestrator assigns work. Literate AI structures specification, generation, checks and release evidence. A prompt saying be careful isn't a gate. No deployed Agentis integration is shown here.
+## Belief six: it never learns
 
-**48 · Sam** — *orchestration*
+**47 · Sam** — *learning*
 
-My product is three repositories that depend on each other. Is that inheritance, or more orchestration?
+And agents make the same mistake every Monday. They never learn.
 
-**49 · Litai** — *orchestration*
+**48 · Litai** — *learning*
 
-Repository orchestration, a different one from Agentis; sorry about the word. It records child pins and dependency order. Inheritance shares practice; Agentis assigns agent work. Three graphs. Each child still needs its own evidence. Diagram, not a deployment.
+Nothing retrains a model. A lesson becomes a reviewed change to its owner: the specification if behavior was missing, a Flavor if it's platform-specific, a skill if it's technique. litai learn proposes; your review admits.
 
-**50 · Sam** — *pipeline*
+**49 · Sam** — *learning*
 
-AI slop with a receipt is still AI slop.
+So 'learning' means a pull request.
 
-**51 · Litai** — *pipeline*
+**50 · Litai** — *learning*
 
-Yes. A receipt records checks; it doesn't certify taste, usefulness or requirements. Independent acceptance is how you challenge the output. Humans need that too. We've just been better at declining supervision.
+Exactly. Reviewable, revertible, and it outlives the model.
 
-**52 · Sam** — *challenge*
+**51 · Sam** — *lineage*
 
-Time. I won't migrate everything. I'll try one library at retained, compare the overhead, and keep my Makefile. If it's busywork, it goes.
+And your framework's rules rewrite my release some Tuesday.
 
-**53 · Litai** — *challenge*
+**52 · Litai** — *terminal / update*
 
-That's a fair trial. Start with one useful boundary, inspect the plan, keep a baseline, and judge the result. The pitch isn't trust the agent. It's make the claims testable, including mine.
+They arrive as a plan. This recorded update compares what you inherited, what you changed and what's new upstream. Conflicts wait for you.
 
-**54 · Sam** — *challenge*
+**53 · Sam** — *lineage*
 
-Don't look pleased. You've earned a trial, not a convert.
+And when the CTO's agents swarm the repo, who assigns the work?
+
+**54 · Litai** — *lineage*
+
+Your forge. GitHub or GitLab issues and pull requests, by default. Agents open reviewed pull requests like everyone else.
+
+## Belief seven: releases are where it breaks
+
+**55 · Sam** — *terminal / package*
+
+Last one. Demos stop at green. Our actual release artifact is still called final-final-really-final dot zip.
+
+**56 · Litai** — *terminal / package-verify*
+
+A local wheel, built and verified; no registry upload here. A real release is plan, prepare, check, publish: a release branch, a SemVer tag, and a check of what was actually published. Tests of one commit never qualify another.
+
+## Thursday
+
+**57 · Sam** — *challenge*
+
+So our CTO is wrong. Agents don't get to ship on vibes.
+
+**58 · Litai** — *challenge*
+
+And the holdouts?
+
+**59 · Sam** — *challenge*
+
+Also wrong. Hand-reading every generated line was never the safety net. Evidence is.
+
+**60 · Litai** — *challenge*
+
+Argument settled. Before Thursday: install it, write one Component, render the graph, qualify on two machines. Bring the receipts.
+
+**61 · Sam** — *challenge*
+
+And final-final-really-final dot zip retires.
+
+**62 · Litai** — *challenge*
+
+It had a good run. Unlike its tests.
