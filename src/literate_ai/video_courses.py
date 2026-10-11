@@ -240,6 +240,7 @@ def _measure(path: Path, kinds: tuple[str, ...]) -> dict[str, float]:
             str(path),
         ]
     )
+    untimed: set[int] = set()
     for line in listing.splitlines():
         fields = line.strip().split(",")
         if len(fields) < 3 or not fields[0].isdigit():
@@ -248,6 +249,7 @@ def _measure(path: Path, kinds: tuple[str, ...]) -> dict[str, float]:
             start = float(fields[1])
             length = float(fields[2]) if fields[2] not in {"", "N/A"} else 0.0
         except ValueError:
+            untimed.add(int(fields[0]))
             continue
         if math.isfinite(start) and math.isfinite(length):
             packets.setdefault(int(fields[0]), []).append((start, max(length, 0.0)))
@@ -255,15 +257,20 @@ def _measure(path: Path, kinds: tuple[str, ...]) -> dict[str, float]:
     for kind in kinds:
         samples = [item for index in indexes[kind] for item in packets.get(index, [])]
         if not samples:
+            detail = (
+                "timed"
+                if any(index in untimed for index in indexes[kind])
+                else "decodable"
+            )
             raise VideoError(
-                f"{path.name} has no decodable {kind} samples", code=MEDIA_EMPTY
+                f"{path.name} has no {detail} {kind} samples", code=MEDIA_EMPTY
             )
         starts = sorted(start for start, _ in samples)
         end = max(start + length for start, length in samples)
         gap = max(
             (b - a for a, b in zip(starts, starts[1:], strict=False)), default=0.0
         )
-        if starts[0] > _CLIP_TOLERANCE or gap > _MAX_SAMPLE_GAP:
+        if abs(starts[0]) > _CLIP_TOLERANCE or gap > _MAX_SAMPLE_GAP:
             raise VideoError(
                 f"{path.name} {kind} samples do not cover the media continuously",
                 code=MEDIA_DURATION,
@@ -318,11 +325,14 @@ def _slide(scene: dict, title: str, position: int, total: int) -> str:
     return "\n".join(parts)
 
 
-def _measure_clip(path: Path, expected: float, clips: int = 1) -> float:
-    """Return measured video duration after checking it against narration."""
+def _measure_clip(path: Path, expected: float) -> float:
+    """Return measured video duration after checking it against narration.
+
+    The film is held to the same fixed tolerance as each clip, never looser than
+    verification, so build cannot write a receipt that verify would refuse.
+    """
     measured = _measure(path, ("video", "audio"))
-    # Concatenation may shift each joined clip by at most a frame.
-    tolerance = _CLIP_TOLERANCE + 0.05 * max(0, clips - 1)
+    tolerance = _CLIP_TOLERANCE
     if abs(measured["video"] - expected) > tolerance:
         raise VideoError(
             f"{path.name} video lasts {measured['video']:.3f}s but its narration "
@@ -614,7 +624,7 @@ def build_course(
     )
     # The reported duration is the finished film's measured video, which must
     # account for every scene clip that went into it.
-    film_seconds = _measure_clip(video, elapsed, len(clips))
+    film_seconds = _measure_clip(video, elapsed)
     if (
         plan_course(manifest)["source_identity"] != plan["source_identity"]
         or _digest(font) != font_digest
