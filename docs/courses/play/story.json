@@ -1,7 +1,7 @@
 {
-  "id": "sam-meets-literate-ai-ten-minutes",
-  "title": "Ten Minutes. Keep Your Makefile.",
-  "target_seconds": 600,
+  "id": "sam-meets-literate-ai-settle-the-argument",
+  "title": "Settle the Argument. Before CI.",
+  "target_seconds": 780,
   "voices": {
     "litai": "Serena",
     "sam": "Ryan"
@@ -11,310 +11,360 @@
     "model": "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit",
     "directions": {
       "litai": "Speak in clear natural American English, as an experienced female engineer making a persuasive live demonstration to a skeptical colleague. Warm, brisk, direct, dry humor. Respond to the objection, never sound like an announcer. Do not laugh unless the words call for it.",
-      "sam": "Speak in natural American English, as an experienced male software engineer cross-examining a vendor's demonstration. Wry, skeptical, concise, alert. Real questions, not a narrator. Not hostile, not theatrical."
+      "sam": "Speak in natural American English, as an experienced male software engineer who has heard too many AI sales pitches. Starts irritated and dismissive, then cross-examines each answer. Wry, concise, alert; warms only when the evidence earns it. Not theatrical."
     }
   },
   "turns": [
     {
-      "speaker": "sam",
-      "shot": "challenge",
-      "chapter": "Ten minutes. No faith required.",
-      "text": "I'm Sam. C++, make, tests. They work. You've got ten minutes to convince me I need another tool. The clock includes buzzwords."
+      "speaker": "litai",
+      "shot": "big-picture",
+      "chapter": "The big picture",
+      "text": "Picture your next release. Agents write code overnight. By morning, every change has a written promise, independent acceptance, builds on Mac, Linux and Windows, an installed package that actually ran, and a receipt naming the exact commit all of that proved. Before anyone opens CI."
     },
     {
       "speaker": "litai",
-      "shot": "challenge",
-      "text": "I'm Litai, from Literate AI. Keep your tools; I'm selling a harness, not a religion. The interesting part is between an agent saying done and a product being ready."
+      "shot": "big-picture",
+      "text": "You review promises, not diffs. Every claim carries the evidence to challenge it. Code becomes something you can regenerate; the specification is what you defend in review. That's agentic development done properly, and Literate AI is the harness that makes it real."
     },
     {
       "speaker": "sam",
-      "shot": "challenge",
-      "text": "My tests already tell me that. Are we adding YAML so a chatbot can feel supervised?"
+      "shot": "slop",
+      "chapter": "The usual AI slop pitch",
+      "text": "And there it is. The usual AI slop sales pitch. Agents overnight, promises instead of diffs. I've sat through four of these this quarter."
+    },
+    {
+      "speaker": "sam",
+      "shot": "slop",
+      "text": "I'm Sam. C++, Make, tests. My company is in a civil war: our CTO wants agent-first everything by Q3, and I lead the holdouts. Thursday's architecture review settles it."
     },
     {
       "speaker": "litai",
-      "shot": "contract",
-      "text": "If your pipeline already proves every step, keep it. The gap is when an agent implements the wrong promise, tests that same misunderstanding, and calls the package shipped. Let's inspect one promise before generating anything."
+      "shot": "slop",
+      "text": "Then let's settle it with evidence instead of volume. You bring the beliefs; I'll bring a terminal. One at a time."
     },
     {
       "speaker": "sam",
-      "shot": "contract",
-      "text": "You get one small example. Not a cathedral of configuration."
+      "shot": "slop",
+      "text": "Start here. Agent code is slop. Nobody can review ten thousand generated lines, so nobody does."
     },
     {
       "speaker": "litai",
-      "shot": "contract",
-      "chapter": "One promise, two layers",
-      "text": "One promise. A greeting card: a name and messages in; a greeting, a recipient identifier and counts out. That promise is the Component, Unicode whitespace included. It says nothing about how it's built."
-    },
-    {
-      "speaker": "sam",
-      "shot": "contract",
-      "text": "So, a requirements file. We've had those since before the coffee machine had firmware."
-    },
-    {
-      "speaker": "litai",
-      "shot": "flavors",
-      "text": "Yes, except this one is bound to the work. Flavors are the build choices: language, build system, platform, packaging. Swap a Flavor and you still need a real toolchain and new tests. No magic porting. The promise stays put."
-    },
-    {
-      "speaker": "sam",
-      "shot": "flavors",
-      "text": "And your recorded example is Python. You brought Python to a C++ interview."
-    },
-    {
-      "speaker": "litai",
-      "shot": "flavors",
-      "text": "Guilty. The smallest recorded run is Python plus Make. Your kind of code shows up in a few minutes: C++, CMake, CTest."
-    },
-    {
-      "speaker": "sam",
-      "shot": "clone",
-      "chapter": "Recorded greenfield session",
-      "text": "Then stop drawing and run something. Starting with where I get it."
-    },
-    {
-      "speaker": "litai",
-      "shot": "clone",
-      "text": "Repository and commands are on screen. On macOS: Python three eleven or newer, Git and Make, then make install. This panel is a walkthrough. The terminal sessions are a recorded development build, revisions beside the film."
-    },
-    {
-      "speaker": "sam",
       "shot": "terminal",
-      "capture": "create-plan",
-      "text": "A development build. So, tomorrow's features on loan."
+      "chapter": "Belief one: nobody can review it",
+      "capture": "specification",
+      "text": "Agreed. So don't start with the lines; review the promise. A Component states observable behavior: a greeting card takes a name and messages, returns a greeting, an identifier and word counts. Unicode whitespace included. No implementation in it."
+    },
+    {
+      "speaker": "sam",
+      "shot": "contract",
+      "text": "A requirements doc. Those rot the day after the kickoff meeting."
+    },
+    {
+      "speaker": "litai",
+      "shot": "flavors",
+      "text": "Not this one; every build is pinned to it. Flavors say how: Python and Make here, C++ and CMake next door. Change the promise and every lock pinned to it goes stale until it's rebuilt and verified. Change a Flavor and you still need a real toolchain and new tests. No magic porting."
+    },
+    {
+      "speaker": "sam",
+      "shot": "clone",
+      "text": "Fine. How would I even get it?"
+    },
+    {
+      "speaker": "litai",
+      "shot": "clone",
+      "text": "Clone the repository, make install, then litai doctor checks the result. Sign in to your coding CLI separately. The install panel is a walkthrough; the terminal sessions are recorded runs. Anything without a terminal is a walkthrough card."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
       "capture": "create-plan",
-      "text": "Possibly, which is why it's labeled. This is its real read-only create plan, pinned to a public parent commit. Destination and choices are reviewable; nothing applies until you acknowledge it."
+      "text": "Nothing changes without a plan. This is the real read-only create plan, pinned to a public parent commit."
     },
     {
       "speaker": "sam",
       "shot": "terminal",
-      "text": "Fine. Where's the actual agent writing code?",
-      "capture": "create-apply"
+      "capture": "create-apply",
+      "text": "And I acknowledge it, and it writes files. Every tool writes files."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
-      "text": "Here. Rebuild invokes the selected coding agent, with explicit permission to run generated code in this disposable project. Edited replay; the waiting is compressed.",
-      "capture": "generation"
+      "capture": "create-apply",
+      "text": "Every tool writes files. Few tell you exactly which ones before they do."
     },
     {
       "speaker": "sam",
       "shot": "terminal",
-      "text": "A greeting card doesn't prove it can maintain my parser.",
-      "capture": "generation"
+      "chapter": "Belief two: it grades its own homework",
+      "capture": "generation",
+      "text": "Next. The agent writes the code and the tests, then congratulates itself. Homework graded by the student."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "generation",
+      "text": "Rebuild calls your chosen coding agent, with explicit permission to run generated code in this disposable project. Edited replay; the waiting is compressed."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
       "capture": "source",
-      "text": "It doesn't. It makes the mechanism inspectable before we touch your parser. This generated code normalizes the recipient and counts words."
+      "text": "The generated code: normalize the recipient, count the words."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
       "capture": "tests",
-      "text": "These generated tests are useful, but they're not our independent definition of correct."
-    },
-    {
-      "speaker": "sam",
-      "shot": "terminal",
-      "text": "There. Red. Missing messages. Your ten-minute sales pitch appears to have developed a warranty claim.",
-      "capture": "rebuild-failed"
-    },
-    {
-      "speaker": "litai",
-      "shot": "terminal",
-      "capture": "rebuild-failed",
-      "text": "Fair. The Component requires messages; the inherited acceptance case got that wrong. That's a defect in our starter, not the agent's. That recorded defect is tracked for an upstream fix."
-    },
-    {
-      "speaker": "sam",
-      "shot": "terminal",
-      "capture": "oracle",
-      "text": "Hold on. Your independent check, the thing meant to catch the agent, was the broken part. And then you edited it until it went green."
-    },
-    {
-      "speaker": "litai",
-      "shot": "terminal",
-      "capture": "oracle",
-      "text": "Then judge my edit against the written contract, not the generated code: two messages, six words, this identifier. We corrected this disposable project's acceptance cases and reran. Local recovery, disclosed. That recorded parent still needs repair."
+      "text": "And its own tests. Useful, and exactly the homework you're worried about. So they aren't the judge."
     },
     {
       "speaker": "sam",
       "shot": "terminal",
       "capture": "rebuild",
-      "text": "And if it had been wrong the other way, too lenient, you'd be green and smiling."
+      "text": "Green on the first try. Which is exactly what slop looks like."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "oracle",
+      "text": "Green by whose cases? These acceptance cases come from the promise, inherited and unmodified: two messages, six words, this identifier. They run separately from the agent's own tests."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "capture": "oracle",
+      "text": "And if your judge were too lenient, you'd be green and smiling."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
       "capture": "verify",
-      "text": "Yes. A lenient oracle passes bad code, and so does a wrong specification; the harness can't detect either on its own. It puts the contract, the acceptance cases and the results where a reviewer can challenge them. Recorded results, skips included."
+      "text": "Yes. A lenient oracle or a wrong specification still passes; no harness catches that alone. This one puts them where your reviewers can. Skips are shown as skips, not passes."
+    },
+    {
+      "speaker": "litai",
+      "shot": "repair",
+      "text": "And when the agent is the one that's wrong, 1.2 hands it the redacted compiler error and asks for a fresh candidate, at most twice more. Then it stops and tells you why. Not in this recording; this run didn't need it."
     },
     {
       "speaker": "sam",
       "shot": "terminal",
-      "capture": "package",
-      "text": "Green on your machine. My release checklist is longer than that."
+      "capture": "rebuild-refresh",
+      "text": "And every edit means paying for another agent run."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
-      "capture": "package-verify",
-      "text": "Agreed. Local wheel and package verification; no registry upload. Publishing is a separate decision. Tests of one revision don't qualify another, and a green build doesn't prove the installed package works."
+      "capture": "rebuild-refresh",
+      "text": "Only for what changed. Here the source came back from the cache and the rebuild took under half a minute."
+    },
+    {
+      "speaker": "sam",
+      "shot": "cicd",
+      "chapter": "Belief three: CI is the safety net",
+      "text": "Now the big one. We have CI. Forty jobs, a matrix, a dashboard. That's the safety net."
+    },
+    {
+      "speaker": "litai",
+      "shot": "cicd",
+      "text": "For most teams, CI is where they first learn the truth. Push and pray, queue for an hour, find Windows red, push a fix you never ran. The green run tested a merge commit, not the one you tagged. And the pipeline file is untested code holding production keys."
+    },
+    {
+      "speaker": "sam",
+      "shot": "cicd",
+      "text": "Rude. Accurate, but rude."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "release-check-recorded",
+      "text": "So move the whole gate before CI. Here's how we ship Literate AI itself. One make release-check: lint, formatting, spec and docs checks, the full test suite, a wheel, a clean install, a real installed project, live samples, and a current test receipt. Your project declares its own gate; litai release check runs it on the exact prepared commit."
+    },
+    {
+      "speaker": "sam",
+      "shot": "pre-ci",
+      "text": "That's not a checklist, it's a hostage situation. Nobody runs all that before every merge."
+    },
+    {
+      "speaker": "litai",
+      "shot": "pre-ci",
+      "text": "No human does. That's the superhuman part, and it's stamina, not judgment. Plan, generate, build, test, accept, package, release: every stage, every time, with a record."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "release-check",
+      "text": "It even caught us making this film. A test helper under the driver's reviewed code changed without a fresh review pin. Red at driver review, on a laptop, before CI ever saw it."
+    },
+    {
+      "speaker": "sam",
+      "shot": "terminal",
+      "capture": "release-check-resume",
+      "text": "So you push a fix and pray, like the rest of us."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "release-check-resume",
+      "text": "Review, re-pin, resume. Passed gates are reused while you repair, then release evidence starts clean from gate one."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "qualify",
+      "text": "Then it repeats on machines you already own. That Linux box and a Windows desktop become workers through private configuration. When workers build, test and run everything, your laptop doesn't even need the toolchains. Release qualify covers what this machine can, then the workers, and uses CI only for what's left. The record names the exact commit."
+    },
+    {
+      "speaker": "sam",
+      "shot": "workers",
+      "text": "So CI becomes..."
+    },
+    {
+      "speaker": "litai",
+      "shot": "workers",
+      "text": "A confirmation, not a discovery. This recording qualified this Mac; the remote workers are a walkthrough."
+    },
+    {
+      "speaker": "sam",
+      "shot": "html",
+      "chapter": "Belief four: it's a black box",
+      "text": "Fine. Even when it passes, I can't see what an agent did. It's a black box with a commit message."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "render-html",
+      "text": "litai render html. One file per view, no server. The authority graph shows every Component, Flavor and skill, with hash-checked previews of their sources. Health views cover locks and verification."
+    },
+    {
+      "speaker": "sam",
+      "shot": "html",
+      "text": "Pretty. Somebody still has to babysit it."
+    },
+    {
+      "speaker": "litai",
+      "shot": "terminal",
+      "capture": "qualify-stale",
+      "text": "It's rebuilt from the project's own records, and a declared page that goes stale blocks qualification, like this. Build-and-test run history isn't shipped yet; the graph and health views are."
     },
     {
       "speaker": "sam",
       "shot": "adoption",
-      "chapter": "Brownfield without a rewrite",
-      "text": "My real project already has years of C++. I'm not replacing that with an optimistic paragraph."
+      "chapter": "Belief five: adoption means a rewrite",
+      "text": "My real code is years of C++. Adoption means a rewrite and six months of regret."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
-      "text": "Don't. Here is TinyXML2, pinned to the recorded public commit. The adoption plan inspects the existing project before mutation. We preserve the original implementation, establish a recovery point, and wrap its real build and tests.",
-      "capture": "adopt-plan"
+      "capture": "adopt-plan",
+      "text": "TinyXML2, pinned to a public commit. The plan inspects before it touches anything: preserve the original, take a recovery point, wrap its real build and tests."
     },
     {
       "speaker": "sam",
       "shot": "terminal",
-      "text": "Which tests? If you replace CTest with an agent congratulating itself, we're finished.",
-      "capture": "adopt-apply"
+      "capture": "adopt-apply",
+      "text": "Which tests? Swap CTest for an agent's opinion and Thursday's over."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
       "capture": "ctest",
-      "text": "Its own CMake targets and CTest, run on the preserved source. In rehearsal we also hit a bug in our CTest-summary parser; it was repaired and the harness run repeated."
-    },
-    {
-      "speaker": "sam",
-      "shot": "adoption",
-      "text": "That's two bugs in your own tool in one demo. Why does it go anywhere near my CI?"
+      "text": "Its own CMake build and its own CTest, on preserved source. Nothing replaced, nothing rewritten."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
       "capture": "retained",
-      "text": "Fair count. It shouldn't, until a trial earns it. What a trial gets you: a repeatable baseline, recorded build and test evidence, and a written account of what's authoritative. Wrapped: the harness surrounds your code. Retained: that preserved code has its required baseline evidence."
+      "text": "Retained: baseline evidence recorded, and the original source still governs releases. You can stop here for good. Later stages exist; none are shown complete here."
     },
     {
       "speaker": "sam",
-      "shot": "adoption",
-      "text": "And then comes the upsell to a rewrite."
+      "shot": "learning",
+      "chapter": "Belief six: it never learns",
+      "text": "And agents make the same mistake every Monday. They never learn."
     },
     {
       "speaker": "litai",
-      "shot": "adoption",
-      "text": "There are later stages: draft specifications, regenerate, and qualify against independent evidence before authority moves. None of that is complete in this demo. You can stop at retained; your original source still governs releases."
+      "shot": "learning",
+      "text": "Nothing retrains a model. A lesson becomes a reviewed change to its owner: the specification if behavior was missing, a Flavor if it's platform-specific, a skill if it's technique. litai learn proposes; your review admits."
+    },
+    {
+      "speaker": "sam",
+      "shot": "learning",
+      "text": "So 'learning' means a pull request."
+    },
+    {
+      "speaker": "litai",
+      "shot": "learning",
+      "text": "Exactly. Reviewable, revertible, and it outlives the model."
     },
     {
       "speaker": "sam",
       "shot": "lineage",
-      "chapter": "Shared practice, workers, and two kinds of orchestration",
-      "text": "Fine. Now there's a framework-shaped pile of files beside my code, times every repository. Does my agent read that whole grab bag to fix a typo?"
-    },
-    {
-      "speaker": "litai",
-      "shot": "skills",
-      "text": "No. Agent skills guide tasks like adoption or release; generation skills guide building one Component with its Flavors. Nested skills add focused guidance to their parents; a generation recipe pins its selected instructions. Shared rules come through tracked inheritance: framework, your team's conventions, then each product. This part is a diagram, not a run."
-    },
-    {
-      "speaker": "sam",
-      "shot": "lineage",
-      "text": "Inherited means Tuesday's upstream cleverness rewrites Monday's release."
+      "text": "And your framework's rules rewrite my release some Tuesday."
     },
     {
       "speaker": "litai",
       "shot": "terminal",
       "capture": "update",
-      "text": "Not silently. A recorded revision isn't a live subscription. An update plan, like this recorded one, compares what you inherited, what you changed and what's new upstream. Conflicts wait for a decision. Upgrading the tool itself is separate, and an old receipt isn't fresh proof."
+      "text": "They arrive as a plan. This recorded update compares what you inherited, what you changed and what's new upstream. Conflicts wait for you."
     },
     {
       "speaker": "sam",
       "shot": "lineage",
-      "text": "And when two parents disagree?"
+      "text": "And when the CTO's agents swarm the repo, who assigns the work?"
     },
     {
       "speaker": "litai",
       "shot": "lineage",
-      "text": "Ambiguous definitions are rejected. A product can override deliberately, with provenance. Prefer a narrow project rule to copying a whole policy. Inheritance shares practice; it doesn't remove review."
+      "text": "Your forge. GitHub or GitLab issues and pull requests, by default. Agents open reviewed pull requests like everyone else."
     },
     {
       "speaker": "sam",
-      "shot": "skills",
-      "text": "Including this video? Every project inherits two talking heads?"
+      "shot": "terminal",
+      "chapter": "Belief seven: releases are where it breaks",
+      "capture": "package",
+      "text": "Last one. Demos stop at green. Our actual release artifact is still called final-final-really-final dot zip."
     },
     {
       "speaker": "litai",
-      "shot": "skills",
-      "text": "No. The video-production skill is reusable; this cast belongs to this repository. Your payment library is not contractually obliged to include a sarcastic man."
-    },
-    {
-      "speaker": "sam",
-      "shot": "workers",
-      "text": "I supply that service free. Now the bill: a cluster, a platform team, another subscription?"
-    },
-    {
-      "speaker": "litai",
-      "shot": "workers",
-      "text": "One machine, as this recording used. Compatible machines you already have can become workers: addresses and credentials in private configuration, then probe toolchains and agent access. Walkthrough, not an SSH run."
-    },
-    {
-      "speaker": "sam",
-      "shot": "pipeline",
-      "text": "And Agentis, the orchestrator? Two systems supervising one agent sounds like two managers in one meeting."
-    },
-    {
-      "speaker": "litai",
-      "shot": "pipeline",
-      "text": "Different jobs. The orchestrator assigns work. Literate AI structures specification, generation, checks and release evidence. A prompt saying be careful isn't a gate. No deployed Agentis integration is shown here."
-    },
-    {
-      "speaker": "sam",
-      "shot": "orchestration",
-      "text": "My product is three repositories that depend on each other. Is that inheritance, or more orchestration?"
-    },
-    {
-      "speaker": "litai",
-      "shot": "orchestration",
-      "text": "Repository orchestration, a different one from Agentis; sorry about the word. It records child pins and dependency order. Inheritance shares practice; Agentis assigns agent work. Three graphs. Each child still needs its own evidence. Diagram, not a deployment."
-    },
-    {
-      "speaker": "sam",
-      "shot": "pipeline",
-      "text": "AI slop with a receipt is still AI slop."
-    },
-    {
-      "speaker": "litai",
-      "shot": "pipeline",
-      "text": "Yes. A receipt records checks; it doesn't certify taste, usefulness or requirements. Independent acceptance is how you challenge the output. Humans need that too. We've just been better at declining supervision."
+      "shot": "terminal",
+      "capture": "package-verify",
+      "text": "A local wheel, built and verified; no registry upload here. A real release is plan, prepare, check, publish: a release branch, a SemVer tag, and a check of what was actually published. Tests of one commit never qualify another."
     },
     {
       "speaker": "sam",
       "shot": "challenge",
-      "text": "Time. I won't migrate everything. I'll try one library at retained, compare the overhead, and keep my Makefile. If it's busywork, it goes."
+      "chapter": "Thursday",
+      "text": "So our CTO is wrong. Agents don't get to ship on vibes."
     },
     {
       "speaker": "litai",
       "shot": "challenge",
-      "text": "That's a fair trial. Start with one useful boundary, inspect the plan, keep a baseline, and judge the result. The pitch isn't trust the agent. It's make the claims testable, including mine."
+      "text": "And the holdouts?"
     },
     {
       "speaker": "sam",
       "shot": "challenge",
-      "text": "Don't look pleased. You've earned a trial, not a convert."
+      "text": "Also wrong. Hand-reading every generated line was never the safety net. Evidence is."
+    },
+    {
+      "speaker": "litai",
+      "shot": "challenge",
+      "text": "Argument settled. Before Thursday: install it, write one Component, render the graph, qualify on two machines. Bring the receipts."
+    },
+    {
+      "speaker": "sam",
+      "shot": "challenge",
+      "text": "And final-final-really-final dot zip retires."
+    },
+    {
+      "speaker": "litai",
+      "shot": "challenge",
+      "text": "It had a good run. Unlike its tests."
     }
   ],
   "review": {
-    "model": "claude-opus-5-5",
-    "reviewed_draft_sha256": "91e2a902538bb089518ab98be6ab2aac0ac0cc6a8a27f451be1723332c230b26",
-    "verdict": "revise",
-    "status": "First review changes incorporated; not a second Opus approval"
+    "status": "1.2 rewrite; independent review pending"
   }
 }

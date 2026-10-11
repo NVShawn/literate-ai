@@ -7,22 +7,35 @@ the production craft; this document owns LitAI and Sam.
 
 ## Creative direction
 
-### Current revision: ten minutes to earn a trial
+### Current revision (1.2): settle the argument, before CI
 
-The continuous feedback cut was rejected as alternating exposition. Sam starts
-with a legitimate working toolchain: C++, Make and tests. He is not a straw man
-who thinks compilation equals shipping, and he must not explain LitAI's features
-for her. LitAI leads the demonstration and responds to his actual objection.
-Every major beat follows objection, visible evidence, counter-objection, bounded
-answer. She concedes real limits without hiding them in a closing disclaimer.
+The ten-minute "earn a small trial" cut spent too long persuading Sam that narrow
+wins justify adoption. The 1.2 film inverts that. LitAI opens with a compelling,
+concrete picture of agentic software development done properly: reviewed promises,
+independent acceptance, three-platform builds, an installed package that ran and a
+commit-bound receipt, all before CI. Sam reacts badly to "the usual AI slop sales
+pitch". He is the ringleader of the holdouts in an argument raging at his company
+(and across the industry): the CTO wants agent-first everything, and Thursday's
+architecture review decides.
 
-The value ladder is an inspectable behavior contract, target-specific technique,
-real generation challenged by independent acceptance, retained brownfield adoption,
-shared team practice through repository inheritance, and controlled evolution.
-The ending earns a small measurable trial, not a conversion speech. Target ten
-minutes including reaction beats and readable demo holds; do not achieve this by
-speeding up voices beyond comfortable comprehension. Opus reviews the complete
-script before the next voice audition is considered for a full render.
+LitAI then takes Sam's beliefs one at a time and settles each with evidence. Every
+debunk doubles as the tutorial step that proves it, so the audience learns
+installation, planning, generation, independent acceptance, bounded repair,
+pre-CI release gates, HTML views, brownfield adoption, learning and releases as a
+side effect of the argument. The seven beliefs are: agent code is unreviewable;
+the agent grades its own homework; CI is the safety net; an agent is a black box;
+adoption means a rewrite; agents never learn; and releases are where it breaks.
+The ending settles the argument both ways: agents do not ship on vibes, and
+hand-reading every generated line was never the safety net. Evidence is.
+
+Sam is not a straw man. He keeps real objections and the last laugh; LitAI still
+concedes real limits at the moment they matter (a lenient oracle passes, run-history
+controls are not shipped, remote steps are walkthroughs, later adoption stages are
+not shown complete). "Superhuman" means stamina, not judgment: the harness runs the
+whole gate every time. The CI chapter names conventional CI/CD pitfalls (push and
+pray, queue latency, discovering platform failures last, untested pipeline files
+holding production keys) and answers them with `make release-check` and
+`litai release qualify` (this host, then workers, then CI only where needed).
 
 Speech text and display text are separate. Pronounce AI as individual letters,
 likewise CLI and SSH; say C plus plus. Preserve literal commands in captions and
