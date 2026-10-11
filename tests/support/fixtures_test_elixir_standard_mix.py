@@ -54,6 +54,21 @@ def _tool(root):
     )
 
 
+def _library_and_consumer_plans(execution):
+    """Return the leaf library plan and its direct consumer, by graph edges.
+
+    Generation plans are not ordered provider-first, so selecting them by
+    position silently swaps the provider and its consumer.
+    """
+    plans = {plan.component_revision: plan for plan in execution.generation_plans}
+    for consumer in execution.generation_plans:
+        for edge in consumer.direct_generation_edges:
+            provider = plans.get(edge.provider_revision)
+            if provider is not None and not provider.direct_generation_edges:
+                return provider, consumer
+    return None, None
+
+
 def _system(
     root,
     *,
@@ -70,7 +85,8 @@ def _system(
         library_names=frozenset({"storage"}) if library else frozenset(),
         root_name="service" if package_root else "application",
     )
-    generation = execution.generation_plans[1 if library else 0]
+    provider_generation, consumer_generation = _library_and_consumer_plans(execution)
+    generation = consumer_generation if library else execution.generation_plans[0]
     provider_module = elixir_namespace(library_package) + ".Math"
     tool = tool or _tool(root)
     hex_binding = LocalComponentToolBinding.from_observed_toolchain(tool)
@@ -209,7 +225,6 @@ def _system(
         )
 
         python = LocalComponentToolBinding(sys.executable)
-        provider_generation = execution.generation_plans[0]
         edge = generation.direct_generation_edges[0]
         surface = LibraryImportSurface(
             "elixir",

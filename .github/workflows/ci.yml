@@ -552,6 +552,12 @@ jobs:
           bazelisk-cache: true
           cache-save: false
           repository-cache: true
+      - name: Pin Bazelisk to the repository's .bazelversion
+        if: matrix.task == 'cpp-native'
+        shell: bash
+        # Without a workspace marker at the root, Bazelisk ignores .bazelversion
+        # and resolves the latest release.
+        run: echo "USE_BAZEL_VERSION=$(tr -d '[:space:]' < .bazelversion)" >> "$GITHUB_ENV"
       - name: Create an isolated native qualification environment
         if: matrix.task == 'cpp-native'
         run: python -m venv .native-venv

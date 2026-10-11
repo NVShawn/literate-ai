@@ -183,7 +183,10 @@ class ElixirMixLibraryQualificationTests(unittest.TestCase):
         from tests.support.fixtures_test_component_node_generation_preparation import (
             _fixture,
         )
-        from tests.support.fixtures_test_elixir_standard_mix import _system
+        from tests.support.fixtures_test_elixir_standard_mix import (
+            _library_and_consumer_plans,
+            _system,
+        )
         from tests.support.standard_source_evidence_fixture import (
             register_strict_source,
         )
@@ -235,7 +238,7 @@ class ElixirMixLibraryQualificationTests(unittest.TestCase):
             snapshot, execution = _fixture(
                 library_names=frozenset({"storage"}), root_name="service"
             )
-            producer_generation = execution.generation_plans[0]
+            producer_generation, _ = _library_and_consumer_plans(execution)
             self.assertEqual(
                 producer_generation.component_revision, producer_plan.component_revision
             )
