@@ -3242,9 +3242,12 @@ def _run_tiered_qualification(
     covered: dict[str, dict[str, object]] = {}
     digests: list[str] = []
     runs: list[dict[str, object]] = []
+
     # One host run covers every required platform the host provides.
-    if plan.local:
+    def qualify_locally() -> tuple[list[str], list[dict[str, object]]]:
         assert host is not None
+        local_digests: list[str] = []
+        local_runs: list[dict[str, object]] = []
         for action in qualification.actions:
             argv = action.argv_for(host[0])
             assert argv is not None
@@ -3263,10 +3266,10 @@ def _run_tiered_qualification(
                     f"{completed.returncode}: "
                     + _release_gate_failure_detail(completed),
                 )
-            digests.extend(
+            local_digests.extend(
                 (_digest_text(completed.stdout), _digest_text(completed.stderr))
             )
-            runs.append(
+            local_runs.append(
                 {
                     "tier": "local",
                     "action": action.name,
@@ -3274,8 +3277,7 @@ def _run_tiered_qualification(
                     "evidence_node_id": node_id,
                 }
             )
-        for platform in plan.local:
-            covered[platform] = {"tier": "local"}
+        return local_digests, local_runs
 
     def qualify_on_workers(platform: str) -> dict[str, object] | None:
         for worker_id in plan.workers.get(platform, ()):
@@ -3305,13 +3307,29 @@ def _run_tiered_qualification(
             return {"worker_id": worker_id, "results": results}
         return None
 
+    # The host and every worker platform run concurrently; each is a separate
+    # machine, so serializing them only adds wall-clock time. The host gate
+    # stays on the calling thread: only the main thread receives
+    # KeyboardInterrupt, which is what tears down the host gate's process tree.
+    # A failure on any tier still fails the qualification, the host's first:
+    # leaving the executor waits for the workers, then re-raises it.
     pending = [
-        platform for platform in qualification.platforms if platform not in covered
+        platform for platform in qualification.platforms if platform not in plan.local
     ]
     with ThreadPoolExecutor(max_workers=max(1, len(pending))) as executor:
-        outcomes = dict(
-            zip(pending, executor.map(qualify_on_workers, pending), strict=True)
-        )
+        worker_futures = {
+            platform: executor.submit(qualify_on_workers, platform)
+            for platform in pending
+        }
+        if plan.local:
+            local_digests, local_runs = qualify_locally()
+            digests.extend(local_digests)
+            runs.extend(local_runs)
+            for platform in plan.local:
+                covered[platform] = {"tier": "local"}
+    outcomes = {
+        platform: future.result() for platform, future in worker_futures.items()
+    }
     for platform in pending:
         outcome = outcomes[platform]
         if outcome is None:
