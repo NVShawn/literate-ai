@@ -731,7 +731,8 @@ def build() -> Path:
         "litai rebuild now runs bounded candidate repair: a retryable build or generated-test "
         "rejection requests up to two fresh replacement candidates, each in its own durable "
         "attempt chained to the rejected one, and the rebuild result's repair field reports "
-        "the replacements that ran. The conformance sample runner retains a bounded, redacted "
+        "the replacements that ran. The repair prompt carries only a bounded, sanitized "
+        "failure fact. Separately, the conformance sample runner retains a bounded, redacted "
         "diagnostic excerpt — builder output for build rejections, generated expected and "
         "observed values for generated-test mismatches — in retained evidence and in the next "
         "attempt's repair feedback. Authority: src/literate_ai/adapters/candidate_repair.py, "
@@ -766,8 +767,9 @@ def build() -> Path:
         "(literate-ai/prompt-task@2). Remote live gates still require opencode but no longer "
         "require OPENAI_API_KEY (ADR 0017 amendment). Skill-catalog discovery now runs once "
         "per validation operation, removing most of the filesystem calls that slowed Windows "
-        "gates. Clean three-way update merging (issue #2) remains deferred to 1.3; 1.2 keeps "
-        "plan-only update reviews.",
+        "gates. Clean three-way update merging and reviewed resolution application (issue #2) "
+        "remain deferred to 1.3; in 1.2, conflict review is plan-only and update apply "
+        "preserves conflicts.",
     )
     heading(doc, 3, "Production containment backends")
     body(

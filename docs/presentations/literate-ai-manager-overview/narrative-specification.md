@@ -118,8 +118,8 @@ minor cuts, without claiming that `v1.2.0` is already published.
 The 1.2 edition SHALL keep the 1.1 foundation (bounded dependency-DAG scheduling,
 provider-neutral shared-cache authority, real local Debian packages, native CLI and
 gRPC acceptance, and repository-owned worktree placement) and SHALL describe the 1.2
-additions — bounded candidate repair with redacted diagnostic excerpts, cross-host
-action workers and the reference standard receiver, native Elixir/Mix builds with
+additions — bounded candidate repair from sanitized failure facts (the conformance
+harness separately retains redacted diagnostic excerpts), cross-host action workers and the reference standard receiver, native Elixir/Mix builds with
 checksum-pinned Hex dependencies, forge issues/PRs as the default tracker (ADR 0050),
 explicit SemVer release policy with tiered local-first qualification, and the
 fifteen-gate release check — while distinguishing them from production action-DAG

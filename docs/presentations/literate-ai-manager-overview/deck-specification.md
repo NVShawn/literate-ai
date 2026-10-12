@@ -131,8 +131,9 @@ collection with worktree and pull-request inspection. Keep 26 slides by revising
 ### Consequences (continued)
 
 23. The 1.2 release builds on the 1.1 scheduler, cache, Debian-package, and
-    native-acceptance foundation. It adds bounded candidate repair with redacted
-    diagnostic excerpts, cross-host action workers with a reference standard receiver,
+    native-acceptance foundation. It adds bounded candidate repair from sanitized failure
+    facts (the conformance harness separately retains redacted diagnostic excerpts),
+    cross-host action workers with a reference standard receiver,
     native Elixir/Mix builds with checksum-pinned Hex dependencies, and forge issues and
     pull requests as the default coordination channel (ADR 0050). Distinguish these
     implemented slices from production action-DAG dispatch and multi-worker LAN-cache

@@ -6,7 +6,8 @@ Remove audience-specific sections and repeated restatements of the same lifecycl
 Let product results, shown artifacts, and operating consequences carry the story. Make
 the deck aspirational and investment-oriented: on the 1.1 scheduler, shared-cache,
 Debian-package, native-acceptance, and worktree-placement foundation, 1.2 adds bounded
-candidate repair with redacted diagnostic excerpts, cross-host action workers with a
+candidate repair from sanitized failure facts (the conformance harness separately
+retains redacted diagnostic excerpts), cross-host action workers with a
 reference standard receiver, native Elixir/Mix builds with checksum-pinned Hex
 dependencies, and forge issues/PRs as the default coordination channel, while
 production DAG dispatch, real LAN qualification, three-way update merging, remote

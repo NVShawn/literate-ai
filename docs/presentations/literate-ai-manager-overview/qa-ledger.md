@@ -24,9 +24,18 @@ repository's 2026-09-26/27 "1.2.0" entries below, whose content shipped publicly
 - Inspected the complete 26-slide contact sheet plus full-resolution slides 4, 19, 23,
   and 25. Slide 23's first title draft wrapped into its subtitle and was shortened to
   one line. No new clipping, overflow, unintended overlap, or broken connector remains.
+- Independent agent review against the code at `041b3f09` confirmed the counts, help
+  list, repair limit, receiver, ADR 0050/0017 amendment, `prompt-task@2`, SemVer and
+  tiered qualification claims, and corrected three things: slide 23's REPAIR line and
+  the specs no longer imply that `litai rebuild` feeds raw redacted excerpts to repair
+  (the repair prompt carries a sanitized failure fact; excerpts are a conformance-harness
+  record); "plan-only update reviews" now says conflict review is plan-only and apply
+  preserves conflicts, since `litai update --apply` exists; and slide 23 gained a header
+  wash so the title and subtitle stay legible over the photograph. Slide 18 notes now
+  scope Debian construction to compatible Linux hosts. Acceptance re-passed 11/11.
 - Local artifact identities:
-  - PPTX: `sha256:d262745fff4f61ac6fd6147fce94e2af66a3560abcbf7d409095dbd65ee440a1`
-  - DOCX: `sha256:17c3921259a06240116409689dac6d17029e3c331fb0a2533eebaa9a20f084ef`
+  - PPTX: `sha256:ee7b402c7675d151f331e98517627d22229047d01df31959f68fb2788bc169e3`
+  - DOCX: `sha256:6a0d4a8f0e4c2e67ca214ea2aa1b5abb565bd1f5c3fd26672864554a03cad58c`
 - Google Workspace preflight, in-place publication, export-back verification, and the
   release-bound publication receipt are pending and were not attempted in this pass.
 

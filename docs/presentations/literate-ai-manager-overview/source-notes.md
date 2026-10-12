@@ -28,7 +28,9 @@ Implemented and safe to cite, in addition to the 1.1.0 and historical ledger bel
 - `litai rebuild` runs bounded candidate repair: a retryable build or generated-test
   rejection requests up to two fresh replacement candidates, each in its own durable
   attempt chained to the rejected one, and the rebuild result's `repair` field reports
-  the replacements that ran. Authority: `src/literate_ai/adapters/candidate_repair.py`,
+  the replacements that ran. The repair prompt carries only a bounded, sanitized
+  failure fact (`_safe_diagnostic`), never a raw excerpt. Authority:
+  `src/literate_ai/adapters/candidate_repair.py`,
   `src/literate_ai/contracts/executable_components/candidate_repair.py`,
   `src/literate_ai/cli/rebuild.py`.
 - The conformance sample runner records a bounded (4096-byte tail), redacted
@@ -81,7 +83,8 @@ Still must not be claimed:
 - That the stable Google Workspace pair contains this edition before explicit
   account-bound publication and export-back verification succeed.
 - Clean three-way update merging and reviewed resolution application (issue #2;
-  deferred to 1.3 — 1.2 keeps plan-only update reviews).
+  deferred to 1.3 — in 1.2, `--review-conflicts` is plan-only and `update --apply`
+  preserves conflicts by default).
 - Production action-DAG dispatch or multi-worker shared LAN-cache qualification
   (issue #4; deferred to 1.3 — 1.2 ships the scheduler and cache foundation).
 - Worker-built Mix, Hex as a package-provider Flavor, production FINALIZE grant

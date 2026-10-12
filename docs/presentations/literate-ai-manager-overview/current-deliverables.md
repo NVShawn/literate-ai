@@ -39,8 +39,8 @@ SHA-256. Trust the acceptance report for the digest of the exact committed artif
 | Slides | 26 local; 26 on export-back |
 | Notes slides | 26 local; 26 on export-back |
 | Narrative headings | 73 local, no skipped level; 73 required on export-back |
-| Local presentation size / SHA-256 | 1,376,276 bytes / `d262745fff4f61ac6fd6147fce94e2af66a3560abcbf7d409095dbd65ee440a1` |
-| Local narrative size / SHA-256 | 50,305 bytes / `17c3921259a06240116409689dac6d17029e3c331fb0a2533eebaa9a20f084ef` |
+| Local presentation size / SHA-256 | 1,376,406 bytes / `ee7b402c7675d151f331e98517627d22229047d01df31959f68fb2788bc169e3` |
+| Local narrative size / SHA-256 | 50,364 bytes / `6a0d4a8f0e4c2e67ca214ea2aa1b5abb565bd1f5c3fd26672864554a03cad58c` |
 | Geometry scan | 0 elements outside 1280 × 720; 0 overlapping text-bearing frames. Geometry-escape is not the overflow gate — `scripts/verify_document_pair.py` now checks both; `render_slides.py` prints an AABB overlap report for inspection. |
 
 ## Access record

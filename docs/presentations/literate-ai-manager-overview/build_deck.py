@@ -762,7 +762,7 @@ def build() -> Path:
     footer(s, 18)
     notes(s, [
         "Current litai help includes deterministic design, config, work, document, skills, and prompt surfaces alongside release, package, lifecycle, worker, graph, and source-to-specification commands. Diagnostic and connector verbs do not authorize a release.",
-        "Package plan is read-only. Package build reruns the accepted Standard lifecycle before constructing selected pip, Conan, or local Debian bytes beneath OBJ_DIR; package verify independently reopens them. None of these verbs publishes.",
+        "Package plan is read-only. Package build reruns the accepted Standard lifecycle before constructing selected pip, Conan, or (on compatible Linux hosts) Debian bytes beneath OBJ_DIR; package verify independently reopens them. None of these verbs publishes.",
         "Host configuration paths and 0.8.x migration are centralized behind litai config. make install reads a tuple-specific native prerequisite SBOM; make uninstall removes only manifest-owned Literate AI paths.",
         "Native build and package managers remain delegated execution engines, never specification authority.",
     ])
@@ -889,9 +889,10 @@ def build() -> Path:
     s = add_slide(C["ink"])
     add_image_cover(s, "engineering-section")
     wash(s, 0, 0, 700, H, 0.58)
+    wash(s, 700, 0, W - 700, 252, 0.62)
     title(s, "1.2 distributes exact work and bounds candidate repair.", "Candidate repair, cross-host action workers, native Mix builds, and forge coordination build on the 1.1 scheduler and cache.", True, 23)
     work = [
-        ("REPAIR", "Up to two fresh candidates, redacted excerpts"),
+        ("REPAIR", "Up to two fresh replacement candidates"),
         ("DISTRIBUTE", "BUILD → FINALIZE on admitted workers"),
         ("BUILD", "Elixir/Mix with checksum-pinned Hex"),
         ("COORDINATE", "Forge issues and PRs by default"),
@@ -901,15 +902,15 @@ def build() -> Path:
         line(s, 70, y, 8, 64, C["green2"] if i == 0 else C["orange"])
         text(s, a, 96, y, 480, 26, 18, C["white"], True)
         text(s, b, 96, y + 28, 480, 28, 15, C["fog"])
-    caption_bar(s, "1.2 slices; production DAG dispatch, LAN cache proof, and update merging move to 1.3.", 648, C["code"], C["orange2"], True)
+    caption_bar(s, "1.2 slices; production DAG dispatch, LAN cache proof, and clean update merging move to 1.3.", 648, C["code"], C["orange2"], True)
     footer(s, 23, True)
     notes(s, [
         "The 1.1 foundation remains: dependency-aware bounded scheduling, provider-neutral cache authority, real local Debian construction, native CLI and gRPC acceptance, and canonical worktree placement, plus native custody and the 1.0 operator/release boundaries.",
-        "REPAIR: litai rebuild turns a retryable build or generated-test rejection into up to two fresh replacement candidates, each a durable attempt chained to the rejected one. The conformance sample runner retains a bounded, redacted diagnostic excerpt and feeds it to the next attempt. Authority: src/literate_ai/adapters/candidate_repair.py and tests/conformance/support/sample_runner.py.",
+        "REPAIR: litai rebuild turns a retryable build or generated-test rejection into up to two fresh replacement candidates, each a durable attempt chained to the rejected one. The repair prompt carries only a bounded, sanitized failure fact; separately, the conformance sample runner retains a bounded, redacted diagnostic excerpt in its evidence and next-attempt feedback. Authority: src/literate_ai/adapters/candidate_repair.py and tests/conformance/support/sample_runner.py.",
         "DISTRIBUTE: when BUILD, TEST, EXECUTE and FINALIZE all run on admitted workers, rebuild derives toolchain identities, commands and native dependencies from the worker; python -m literate_ai.standard_receiver is the reference receiver for portable single-Component Make/Python projects. Production FINALIZE grant provisioning remains pending.",
         "BUILD: the build-mix Flavor pins each Hex package's exact version and checksums, refuses ranges, and requires the native lock to equal those pins before compiling. Mix builds are local-only in 1.2. Hex is a toolchain constraint and dependency input, not a package provider.",
         "COORDINATE: ADR 0050 makes forge issues and PRs/MRs the default tracker and agent channel; other trackers are overrides. prompt-task@2 is the generic external envelope. Remote live gates no longer require OPENAI_API_KEY.",
-        "Deferred to 1.3 by maintainer decision: production action-DAG dispatch with multi-worker shared LAN-cache qualification (#4) and clean three-way update merging (#2). Remote native-package custody, complete native-CLI lifecycle proof, and audited legacy-worktree retirement also remain open.",
+        "Deferred to 1.3 by maintainer decision: production action-DAG dispatch with multi-worker shared LAN-cache qualification (#4) and clean three-way update merging with reviewed resolution application (#2); in 1.2, conflict review is plan-only and update apply preserves conflicts. Remote native-package custody, complete native-CLI lifecycle proof, and audited legacy-worktree retirement also remain open.",
     ])
 
     # 24 - end state
