@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "catalog_id": "urn:literate-ai:schema-catalog:v2",
-  "release": "1.1.0",
+  "release": "1.2.0",
   "dialect": "https://json-schema.org/draft/2020-12/schema",
   "compatibility": "compatibility.json",
   "schemas": [
