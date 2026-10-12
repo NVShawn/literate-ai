@@ -23,7 +23,8 @@
   unchanged.
 
 - Deferred to 1.3 by maintainer decision: clean three-way update merging and reviewed
-  resolution application (issue #2; 1.2 keeps plan-only update reviews), and production
+  resolution application (issue #2; in 1.2 conflict review is plan-only and `litai update --apply` preserves
+  conflicts), and production
   action DAG dispatch with multi-worker shared LAN-cache qualification (issue #4; 1.2
   ships the scheduler and cache foundation).
 
@@ -54,10 +55,16 @@
   interpreter on the worker, not only gate work, so Defender no longer scans its pip,
   stdlib or site-packages reads outside the excluded workspace.
 
-- Rejected generated candidates now record a bounded, redacted `diagnostic_excerpt`
-  (compiler or Bazel output for build rejections; generated expected and observed values
-  for generated-test mismatches) in retained evidence and in the next attempt's repair
-  feedback. Previously only a diagnostic hash was kept, so neither showed the error.
+- The conformance sample runner now records a bounded, redacted `diagnostic_excerpt`
+  for rejected generated candidates (compiler or Bazel output for build rejections;
+  generated expected and observed values for generated-test mismatches) in retained
+  evidence and in the next attempt's repair feedback. Previously only a diagnostic hash
+  was kept, so neither showed the error. `litai rebuild` repair prompts still carry only
+  a short sanitized failure message.
+
+- Release qualification is local-first: `litai release check` defaults to the `tiered`
+  target when the release policy declares qualification (this host, then workers, then
+  CI), and `litai release qualify` runs that tiered qualification directly.
 
 - Forge issues and PRs/MRs are the documented default tracker and agent coordination
   channel (ADR 0050); other trackers or review systems are overrides. Landing now passes
