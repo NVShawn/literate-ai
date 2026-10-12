@@ -64,7 +64,9 @@
 
 - Release qualification is local-first: `litai release check` defaults to the `tiered`
   target when the release policy declares qualification (this host, then workers, then
-  CI), and `litai release qualify` runs that tiered qualification directly.
+  CI), and `litai release qualify` runs that tiered qualification directly. The host gate and
+  the worker gates run concurrently rather than host-first, so a three-platform release
+  check takes one gate's wall-clock time instead of two.
 
 - Forge issues and PRs/MRs are the documented default tracker and agent coordination
   channel (ADR 0050); other trackers or review systems are overrides. Landing now passes

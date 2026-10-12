@@ -215,7 +215,9 @@ controller sends a git bundle of only the commits it lacks over SCP, and the
 worker checks the revision out, removes untracked source files and keeps ignored
 caches such as `_build/`. The first sync sends the full history; later syncs send
 only new commits. The record pins the checkout path and keeps a sync transcript.
-A failing action is never retried on another tier. CI is optional while the host
+The host gate and every worker platform's gates run concurrently, since each
+tier is a separate machine; the record still lists the host's runs first. A
+failing action is never retried on another tier. CI is optional while the host
 and workers cover every cell. It becomes required only when some platform has no
 left tier (CI must then declare it, or qualification fails closed) or when the
 policy sets `ci.mandatory`.

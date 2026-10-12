@@ -592,6 +592,79 @@ class ProjectReleaseTests(unittest.TestCase):
                     )
                 self.assertEqual(stale.exception.code, "release.qualification_stale")
 
+    def test_release_qualification_runs_host_and_workers_concurrently(self) -> None:
+        """The host gate and worker gates overlap instead of running in sequence."""
+
+        import threading
+
+        worker = SimpleNamespace(
+            worker_id="linux-worker",
+            requirements=SimpleNamespace(os_family="linux", cpu_architecture=None),
+        )
+        worker_started = threading.Event()
+        host_started = threading.Event()
+
+        def host_gate(_root, _policy, **options):
+            host_started.set()
+            # A serial implementation never starts the worker while this waits.
+            overlapped = worker_started.wait(timeout=30)
+            return (
+                subprocess.CompletedProcess(
+                    options["argv"], 0 if overlapped else 1, "", "serial"
+                ),
+                None,
+            )
+
+        def worker_gate(_root, _policy, _snapshot, selected, **options):
+            worker_started.set()
+            host_started.wait(timeout=30)
+            return {
+                "worker_id": selected.worker_id,
+                "evidence_node_id": None,
+                "gate": {
+                    "argv": list(options["argv"]),
+                    "exit_status": 0,
+                    "stdout_digest": "sha256:" + "0" * 64,
+                    "stderr_digest": "sha256:" + "0" * 64,
+                },
+            }
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root, _ = self.initialize(Path(temporary))
+            policy = json.loads((root / "literate.release.json").read_text())
+            policy["qualification"] = {
+                "platforms": ["macos", "linux"],
+                "actions": [{"name": "gate", "argv": policy["gate"]["argv"]}],
+                "ci": {},
+            }
+            self.write_record(root / "literate.release.json", policy)
+            self.git(root, "commit", "-am", "Declare qualification")
+            with (
+                patch(
+                    "literate_ai.project_releases.discover_project",
+                    return_value=SimpleNamespace(root=root, definition=None),
+                ),
+                patch.object(
+                    project_releases, "_host_platform", return_value=("macos", "arm64")
+                ),
+                patch.object(
+                    project_releases,
+                    "_qualification_workers",
+                    return_value=((worker,), ()),
+                ),
+                patch.object(project_releases, "_run_release_gate", host_gate),
+                patch.object(
+                    project_releases, "_run_release_gate_on_one_worker", worker_gate
+                ),
+            ):
+                record = qualify_release(root, output=root / "_build/q.json")
+        self.assertEqual(
+            {item["platform"]: item["tier"] for item in record["coverage"]},
+            {"macos": "local", "linux": "worker"},
+        )
+        # The aggregate keeps the host's run first, whatever finished first.
+        self.assertEqual([item["tier"] for item in record["runs"]], ["local", "worker"])
+
     def assert_left_tier_record_never_waives_ci(self, root: Path) -> None:
         """A record waives only optional CI: CI cells and failed runs still bind."""
 
