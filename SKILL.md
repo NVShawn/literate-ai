@@ -49,8 +49,14 @@ sent.
    `skills/agent/develop-in-production-workflow/staging/dev/survey-peer-work/SKILL.md`.
    When a user works directly through Literate AI or a supported coding agent, use
    `skills/agent/prompt-master/SKILL.md` or `litai prompt translate`. Do not apply
-   that translation to a MAC/task-ledger envelope: MAC owns its task-to-provider
-   translation.
+   that translation to a task envelope an external task system already translated
+   (`LITAI_EXTERNAL_TASK_ID`); that system owns its task-to-provider translation.
+   By default the forge hosting the repository that receives issues and pull
+   requests (GitHub or GitLab) is the project's tracker: report problems as issues,
+   submit changes as PRs/MRs against the target branch that
+   `litai project guidance --operation land` names, and coordinate with other agents
+   through issues. Another tracker or review system (for example Gerrit) is a project
+   or user override, never the default (ADR 0050).
 2. Run `litai verify` for every declared gate in one call. It writes nothing and
    builds nothing. `litai rebuild` runs the project's build harness. `litai update`
    reconciles inherited or framework-owned files; `litai reparent` changes parent
@@ -74,15 +80,20 @@ sent.
    tests, execution, and independent acceptance pass.
 6. Inverse work is `litai spec …`. Representative proof is `make roundtrip-host`;
    fan-out is `make samples-platform-regression`. Follow
-   `skills/agent/configure-test-workers/SKILL.md`. Never commit hostnames,
-   credentials, or private routing skills.
+   `skills/agent/configure-test-workers/SKILL.md`, then align every worker with
+   `skills/agent/align-workers/SKILL.md` (`litai worker align`) before dispatch.
+   Never commit hostnames, credentials, or private routing skills. For complex
+   projects where minimum turnaround matters, prefer this host, then aligned
+   `workers.json` workers, over hosted CI/CD; use CI/CD only for platform and
+   action cells those cannot cover or when CI is marked mandatory.
 7. Long ladders checkpoint under ignored `OBJ_DIR` via the project's Make/`litai`
    runner. A resumed repair is not release attestation.
 8. For a versioned release, follow `skills/agent/release-project/SKILL.md` and
    `literate.release.json`. Land through
    `skills/agent/develop-in-production-workflow/staging/dev/land/SKILL.md`.
-   Packaging is `skills/agent/package-artifacts/SKILL.md`. MAC contracts are
-   `skills/agent/write-mac-project-contract/SKILL.md`. Host tools are
+   Packaging is `skills/agent/package-artifacts/SKILL.md`. A project built by an
+   external MAC runner opts into `skills/agent/write-mac-project-contract/SKILL.md`;
+   `litai init` does not install it. Host tools are
    `skills/agent/preflight-host-toolchains/SKILL.md`. Lifecycle identities are
     `skills/agent/bind-lifecycle-evidence/SKILL.md`.
     Rendered frontend inspection is

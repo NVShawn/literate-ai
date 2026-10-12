@@ -1,6 +1,6 @@
 # Installation and first run
 
-New to Literate AI? Watch the [onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4) and the
+New to Literate AI? Watch the [onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4) and the
 [instructional courses](../courses/README.md) for a guided tour before installing.
 
 ## Requirements
@@ -296,8 +296,25 @@ sudo ln -s /opt/node-v24.19.0-linux-x64/bin/codex /usr/local/bin/
 ```
 
 The resulting versions were Node 24.19.0/npm 11.17.0 and
-Codex 0.146.0. Existing system Chrome satisfied the sandboxed documentation fallback,
-so this host needed no browser installation. The later sample matrix populated the same
+Codex 0.146.0. Existing system Chrome satisfied the sandboxed documentation fallback
+at first. On 2026-10-09 the reprovisioned host had no system Chrome, and Puppeteer's
+managed Chrome 152 failed twice: first for missing shared libraries, then with "No
+usable sandbox" because `kernel.apparmor_restrict_unprivileged_userns = 1`. The same
+secure fallback as Ubuntu 26.04 restored the gate. Two independent downloads of the
+`current` package agreed on SHA-256
+`c58aa0f2cd66179c9f050e062c882d27aa9b9f8c2b7c73fee3498560b5ed0b38`
+(Chrome 155.0.8059.39-1); verify a new download the same way:
+
+```console
+curl -fL https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+  -o /tmp/google-chrome-stable_current_amd64.deb
+sha256sum /tmp/google-chrome-stable_current_amd64.deb
+sudo apt-get install -y --no-install-recommends \
+  /tmp/google-chrome-stable_current_amd64.deb
+```
+
+The package's own AppArmor profile grants user namespaces only to
+`/opt/google/chrome/chrome`, so the sandbox stays enabled. The later sample matrix populated the same
 direct Bazel 9.2.0 cache through pinned Bazelisk 1.28.1:
 
 ```console
@@ -323,7 +340,7 @@ The two Ubuntu workers are intentionally separate compatibility targets:
 | binutils | 2.42 | 2.46 | ELF parsing must tolerate both observer versions while binding the exact one used. |
 | Node/npm at start | absent | 22.22.2 / 10.9.7 | Unpinned discovery is not installation; 24.04 needed an authorized Node 24 bootstrap. |
 | Rust/Cargo after APT | 1.75.0 | 1.93.1 | Rust 2021 samples must compile on the older supported compiler unless a Flavor pins newer. |
-| Browser at start | Chrome 151.0.7922.71 | none usable by Puppeteer | Both keep the browser sandbox; 26.04 needed an authorized system package. |
+| Browser at start | Chrome 151.0.7922.71 (absent after the 2026-10-09 reprovision) | none usable by Puppeteer | Both keep the browser sandbox; each needed an authorized system package when Chrome was absent. |
 
 ### Windows 11
 

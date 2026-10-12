@@ -434,10 +434,12 @@ acceptance interface. It is useful implementation evidence, but it is neither du
 project source nor the verifier's acceptance oracle.
 
 An eventually passing sample execution records its total attempt count and an ordered
-list of versioned rejection records. Each rejection contains no raw diagnostic. All four
-kinds bind the failed run and generation-stage output. A validation rejection adds its
-allowlisted code plus candidate-tree, source-bundle, and generated-suite identities and
-proves that no lifecycle step was admitted. A behavior mismatch additionally
+list of versioned rejection records. Build and generated-test mismatch rejections carry
+a bounded, redacted `diagnostic_excerpt`; no other rejection carries raw diagnostic
+text. All four kinds bind the failed run and generation-stage output. A validation
+rejection adds its allowlisted code plus candidate-tree, source-bundle, and
+generated-suite identities and proves that no lifecycle step was admitted. A behavior
+mismatch additionally
 binds its source bundle, artifact, generated suite, case, and expected/observed result
 identities. An application nonzero record binds the same built subject plus its case,
 expected-result identity, application/backend role, `host_execution.nonzero_exit`,

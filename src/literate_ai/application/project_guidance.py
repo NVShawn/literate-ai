@@ -108,6 +108,7 @@ def _tracker_commands(
     *,
     merge_method: str,
     labels: tuple[str, ...],
+    target_branch: str,
 ) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
     argv: list[dict[str, object]] = []
     skips: list[dict[str, str]] = []
@@ -132,7 +133,13 @@ def _tracker_commands(
             )
         )
     elif operation == "land":
-        create = list(tracker.land_create)
+        # Name the target branch explicitly rather than trusting the forge's
+        # repository default to match the project's policy.
+        create = [
+            *tracker.land_create,
+            "--base" if tracker.forge == "github" else "--target-branch",
+            target_branch,
+        ]
         for label in labels:
             create.extend(("--label", label))
         merge = list(tracker.land_merge)
@@ -222,6 +229,7 @@ def project_guidance(path: Path, *, operation: str) -> dict[str, object]:
         tracker,
         merge_method=policy.merge_method.value,
         labels=policy.pull_request_labels,
+        target_branch=policy.default_branch,
     )
     if operation in {"develop", "land", "issue-close"}:
         argv.extend(tracker_argv)

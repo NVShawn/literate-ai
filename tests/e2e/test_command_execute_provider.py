@@ -8,13 +8,16 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+from literate_ai.adapters.accept_handoff import CompletedStagesAcceptHandoff
 from literate_ai.adapters.action_build_providers import materialize_provider_artifacts
 from literate_ai.adapters.action_build_result import import_build_result
 from literate_ai.adapters.action_dispatch_wire import record_identity
 from literate_ai.adapters.action_test_record import TestWorkerInput
 from literate_ai.adapters.builders._process import run_bounded_process
+from literate_ai.adapters.command_acceptor import CommandComponentAcceptor
 from literate_ai.adapters.command_executor import CommandComponentExecutor
 from literate_ai.adapters.command_indexer import CommandGenerationIndexer
+from literate_ai.adapters.command_tester import CommandComponentTester
 from literate_ai.adapters.execute_handoff import CompletedBuildExecuteHandoff
 from literate_ai.adapters.lifecycle import (
     LocalComponentToolBinding,
@@ -36,6 +39,7 @@ from literate_ai.contracts.execution_dispatch import (
 from literate_ai.storage import FileSystemCAS
 from tests.support import fixtures_test_action_execute_providers as provider_fixture
 from tests.support import fixtures_test_standard_local_command_adapter as local_fixture
+from tests.support.command_worker_fixture import _ACCEPT_CHILD
 from tests.support.fixtures_test_standard_project_factory import _command_contracts
 from tests.support.fixtures_test_standard_provider_worker import _CHILD
 
@@ -43,6 +47,8 @@ _RECEIVER = """
 import os, sys
 from literate_ai.action_worker import main
 from literate_ai.adapters.action_execute_worker import ConfiguredExecuteWorker
+from literate_ai.adapters.action_test_worker import ConfiguredTestWorker
+from literate_ai.adapters.action_accept_worker import ConfiguredAcceptWorker
 from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.contracts import canonical_identity
@@ -57,12 +63,35 @@ worker = ConfiguredExecuteWorker(
     launcher, (LocalComponentToolBinding(sys.executable),),
     environment=dict(os.environ),
 )
-raise SystemExit(main(execute_worker=worker))
+test_code = os.environ['TEST_CHILD']
+test_launcher = LocalComponentToolBinding(
+    sys.executable, ('-c', test_code),
+    authority_identity=canonical_identity(
+        {'runtime': runtime.identity, 'code': test_code}),
+    _authority_guard=runtime.require_unchanged,
+)
+test_worker = ConfiguredTestWorker(
+    test_launcher, (LocalComponentToolBinding(sys.executable),),
+    environment=dict(os.environ),
+)
+accept_code = os.environ['ACCEPT_CHILD']
+accept_launcher = LocalComponentToolBinding(
+    sys.executable, ('-c', accept_code),
+    authority_identity=canonical_identity(
+        {'runtime': runtime.identity, 'code': accept_code}),
+    _authority_guard=runtime.require_unchanged,
+)
+accept_worker = ConfiguredAcceptWorker(accept_launcher, environment=dict(os.environ))
+raise SystemExit(main(
+    execute_worker=worker, test_worker=test_worker, accept_worker=accept_worker,
+))
 """
 
 
 class CommandExecuteProviderTests(unittest.TestCase):
-    def test_live_child_returns_runtime_provider_proof_to_command_free_controller(self):
+    def test_live_children_accept_runtime_provider_proof_on_command_free_controller(
+        self,
+    ):
         f = provider_fixture.ExecuteProviderTests()
         self.addCleanup(f.doCleanups)
         f.preserve_sources = True
@@ -134,11 +163,13 @@ class CommandExecuteProviderTests(unittest.TestCase):
             environment=tuple(
                 ExecutionWorkerEnvironment(name, name, True)
                 for name in (
+                    "ACCEPT_CHILD",
                     "CHAIN_CONTRACTS",
                     "CHAIN_PROVIDERS",
                     "EXECUTE_CHILD",
                     "LITAI_ACTION_WORKER_IDENTITY",
                     "PYTHONPATH",
+                    "TEST_CHILD",
                 )
             ),
             command=(
@@ -162,6 +193,18 @@ class CommandExecuteProviderTests(unittest.TestCase):
         contracts.update({item.component_revision: item for item in f.contracts})
         environment = dict(os.environ) | {
             "PYTHONPATH": str(Path(__file__).resolve().parents[2] / "src"),
+            "ACCEPT_CHILD": _ACCEPT_CHILD.replace(
+                "import os, shutil",
+                "import os, shutil, json\n"
+                "from literate_ai.contracts import ComponentCommandContract",
+            ).replace(
+                "contracts=(build.inputs.contract,),",
+                "contracts=tuple(ComponentCommandContract.from_dict(item) "
+                "for item in json.loads(os.environ['CHAIN_CONTRACTS'])),",
+            ),
+            "TEST_CHILD": _CHILD.replace(
+                "literate_ai.build_worker", "literate_ai.test_worker"
+            ).replace("ComponentCommandPhase.BUILD", "ComponentCommandPhase.TEST"),
             "EXECUTE_CHILD": _CHILD.replace(
                 "literate_ai.build_worker", "literate_ai.execute_worker"
             ).replace("ComponentCommandPhase.BUILD", "ComponentCommandPhase.EXECUTE"),
@@ -189,7 +232,17 @@ class CommandExecuteProviderTests(unittest.TestCase):
             catalog=catalog,
             workers=(admitted,),
             identity=canonical_identity("admission"),
-            supports_phase=lambda selected, phase: phase is LifecycleActionKind.EXECUTE,
+            supports_phase=lambda selected, phase: (
+                phase
+                in (
+                    LifecycleActionKind.TEST,
+                    LifecycleActionKind.EXECUTE,
+                    LifecycleActionKind.ACCEPT,
+                )
+            ),
+            supports_test=lambda selected, tools: set(tools).issubset(
+                binding.toolchain_identity for binding in f.bindings
+            ),
             supports_execute=lambda selected, tools: set(tools).issubset(
                 binding.toolchain_identity for binding in f.bindings
             ),
@@ -203,6 +256,29 @@ class CommandExecuteProviderTests(unittest.TestCase):
             ports,
             handoff_for=CompletedBuildExecuteHandoff(builder, indexer, ports),
             result_source=lambda selected, reference: cas.get_bytes(reference),
+        )
+        tester = CommandComponentTester(
+            indexer,
+            admission,
+            ports,
+            handoff_for=builder.test_handoff,
+            result_source=lambda selected, reference: cas.get_bytes(reference),
+        )
+        acceptor = CommandComponentAcceptor(
+            indexer,
+            admission,
+            ports,
+            handoff_for=CompletedStagesAcceptHandoff(
+                indexer,
+                ports,
+                execution_input_for=CompletedBuildExecuteHandoff(
+                    builder, indexer, ports
+                ),
+            ),
+            result_source=lambda selected, reference: cas.get_bytes(reference),
+        )
+        acceptor.retain_execution_provider_evidence(
+            build.plan, value.scope, value.accepted_providers
         )
         executor.retain_execution_provider_evidence(
             build.plan, value.scope, value.accepted_providers
@@ -237,6 +313,7 @@ class CommandExecuteProviderTests(unittest.TestCase):
                 ports, "_run_locked", side_effect=AssertionError("local command")
             ),
         ):
+            tests = tester.test(build.plan, value.build_result.evidence.exports)
             result = executor.execute_scoped(
                 build.plan,
                 value.build_result.evidence.exports,
@@ -253,6 +330,17 @@ class CommandExecuteProviderTests(unittest.TestCase):
                 "known-output",
             )
             self.assertEqual(ports._execution_evidence[result.identity.uri], result)
+            with patch.object(
+                ports, "accept", side_effect=AssertionError("local ACCEPT")
+            ):
+                accepted = acceptor.accept(build.plan, tests.identity, result.identity)
+            self.assertEqual(accepted.generated_tests, tests)
+            self.assertEqual(accepted.execution, result)
+            self.assertEqual(accepted.build, value.build_result.evidence)
+            self.assertEqual(
+                accepted.execution.provider_artifact_identities,
+                tuple(item.identity for item in value.provider_artifacts),
+            )
         self.assertEqual(build.inputs.providers, ())
         self.assertEqual(ports.tool_bindings, {})
         self.assertEqual(list(jobs.iterdir()), [])

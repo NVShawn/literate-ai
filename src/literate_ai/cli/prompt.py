@@ -26,7 +26,7 @@ def prompt_translate_from_args(args) -> dict[str, Any]:
             project_root=Path(getattr(args, "project", ".")),
             component=getattr(args, "component", None),
             coding_cli=getattr(args, "coding_cli", None),
-            mac_envelope=bool(getattr(args, "mac_envelope", False)),
+            external_envelope=bool(getattr(args, "external_envelope", False)),
         )
     except PromptRoutingError as exc:
         raise CliFailure(exc.code, exc.message) from exc

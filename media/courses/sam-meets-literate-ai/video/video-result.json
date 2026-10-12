@@ -1,22 +1,22 @@
 {
   "schema": "literate-ai/video-course-result@1",
-  "course_id": "sam-meets-literate-ai",
-  "source_identity": "1014a00e21047fe11672020bdfe660daa189b627401f47aed2ec437b6f6dd154",
-  "renderer_sha256": "098bd698c75000ef39445a08f96a52e133f2c533613d1d350ab61b89d74101cd",
-  "font_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+  "course_id": "sam-meets-literate-ai-settle-the-argument",
+  "source_identity": "e19e11300d38a369d51362272774b7a79668368bf165b5498c7733eedbfd4a3d",
+  "renderer_sha256": "70add560a2d00ea2233871b21458ede1e398ed9ae2361a12655aaa775adf1740",
+  "font_sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82",
   "narration_backend": "recorded",
-  "duration_seconds": 818.096355,
-  "caption_count": 85,
+  "duration_seconds": 711.604655,
+  "caption_count": 62,
   "embed_subtitles": false,
   "publication_authorized": false,
   "artifacts": {
-    "sam-meets-literate-ai.mp4": "d23c1a39f8ee27423638caee670687c98f498af03c16bcb9cc3fc017f472f822",
-    "sam-meets-literate-ai.srt": "0f3d6b17f9f73548a441d73aa6f1d072b92d57eb781fe59c994b55d736af30ab",
-    "sam-meets-literate-ai.vtt": "7295282bf8fea45835eeb0951a9539be9ea80e647b597439feacff3277f89155"
+    "sam-meets-literate-ai-settle-the-argument.mp4": "163ec5a31921ded5e850493091c17991b31b8b1dd93aabce5689e5ff05bcf177",
+    "sam-meets-literate-ai-settle-the-argument.srt": "d6a10cd4a88dff5e967feffbaf627ef6f80d7e30627a05795cae18fb3b36a21b",
+    "sam-meets-literate-ai-settle-the-argument.vtt": "383d5598b9c39e5e653ae6e0938004d59d0fc5722afcd9e8b7217942f356fa4e"
   },
   "tools": {
-    "ffmpeg": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
-    "ffprobe": "ffprobe version 9.0.1 Copyright (c) 2007-2026 the FFmpeg developers",
-    "magick": "Version: ImageMagick 7.1.2-31 Q16-HDRI aarch64 8309dc92a:20260903 https://imagemagick.org"
+    "ffmpeg": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 9.0.2 Copyright (c) 2007-2026 the FFmpeg developers",
+    "magick": "Version: ImageMagick 7.1.2-33 Q16-HDRI aarch64 4bab3bc37:20261010 https://imagemagick.org"
   }
 }

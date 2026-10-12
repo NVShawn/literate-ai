@@ -225,6 +225,9 @@ def capture_worker_tool_dependencies(
     for binding in bindings:
         require_current()
         binding.require_unchanged()
+        # Read once: this property re-measures the tool, and the explicit
+        # checks before and after the observation already bound this binding.
+        tool_identity = binding.toolchain_identity
         overridden = {key.casefold() for key, _ in binding.environment}
         effective = {
             key: value
@@ -247,7 +250,7 @@ def capture_worker_tool_dependencies(
             ).observe({"artifact_path": empty}, root_ref=root_ref)
         WorkerToolDependencies(
             _graph_document(
-                tools=[binding.toolchain_identity.uri],
+                tools=[tool_identity.uri],
                 root=root_ref,
                 components=sorted(
                     observed.components, key=lambda item: item["bom-ref"]
@@ -258,9 +261,7 @@ def capture_worker_tool_dependencies(
         # Preserve separate loader contexts even when they contain the same image.
         remap = {
             item["bom-ref"]: "urn:literate-ai:worker-tool-dependency:"
-            + canonical_identity(
-                {"tool": binding.toolchain_identity.uri, "component": item}
-            ).digest
+            + canonical_identity({"tool": tool_identity.uri, "component": item}).digest
             for item in observed.components
         }
         if len(remap) != len(observed.components) or root_ref in remap:

@@ -19,8 +19,10 @@ from literate_ai.adapters.update_merge import (
     CHECKPOINT,
     UpdateBases,
     digest,
+    recover_bases,
 )
 from literate_ai.contracts import (
+    ContentIdentity,
     ProjectUpdateClassification,
 )
 from tests.support.fixtures_test_project_update_adapter import _origin
@@ -30,6 +32,90 @@ BASE = b"first\n" + b"context\n" * 10 + b"last\n"
 OURS = BASE.replace(b"first", b"local first")
 THEIRS = BASE.replace(b"last", b"upstream last")
 MERGED = OURS.replace(b"last", b"upstream last")
+
+
+class HistoricalTransportRecoveryTests(unittest.TestCase):
+    REVISION = "a" * 40
+
+    def recover(self, url, scope):
+        """Run base recovery for one recorded locator; return calls and bases."""
+        from types import SimpleNamespace
+
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        root = Path(directory.name)
+        bases = UpdateBases(root)
+        origin = replace(_origin("a", "1.0.0"), repository_url=url)
+        ref = f"git:{url}@{self.REVISION}"
+        if scope == "catalog":
+            bases.sources[".gitignore"] = ref
+        item = SimpleNamespace(
+            path=".gitignore",
+            classification=ProjectUpdateClassification.CONFLICT,
+            baseline_identity=ContentIdentity.parse_uri(digest(BASE)),
+        )
+        calls = []
+
+        def read(reference, paths):
+            calls.append((reference, paths))
+            return {"wrong": b"wrong bytes", "exact": BASE}
+
+        recover_bases(
+            root,
+            (item,),
+            bases,
+            read,
+            origin=origin if scope == "framework" else None,
+        )
+        self.assertEqual(origin.repository_url, url)
+        if scope == "catalog":
+            self.assertEqual(bases.sources[".gitignore"], ref)
+        self.assertFalse((root / CHECKPOINT).exists())
+        return calls, bases, item
+
+    def test_scp_initialization_and_catalog_recover_only_exact_historical_bytes(self):
+        for scope in ("framework", "catalog"):
+            with self.subTest(scope=scope):
+                calls, bases, item = self.recover(
+                    "git@github.com:NVIDIA-dev/literate-ai.git", scope
+                )
+                self.assertEqual(len(calls), 1)
+                reference, paths = calls[0]
+                self.assertEqual(
+                    reference.repository_url,
+                    "ssh://git@github.com/NVIDIA-dev/literate-ai",
+                )
+                self.assertEqual(reference.requested_revision, self.REVISION)
+                self.assertIn(".gitignore", paths)
+                self.assertEqual(bases.get(item.baseline_identity), BASE)
+                self.assertNotIn(digest(b"wrong bytes"), bases.blobs)
+
+    def test_recorded_urls_keep_their_transport(self):
+        for url in (
+            "ssh://git@github.com/owner/private.git",
+            "https://github.com/owner/public.git",
+            "ssh://git@git.example.com/team/repo.git",
+        ):
+            for scope in ("framework", "catalog"):
+                with self.subTest(url=url, scope=scope):
+                    calls, bases, item = self.recover(url, scope)
+                    self.assertEqual(
+                        [reference.repository_url for reference, _ in calls], [url]
+                    )
+                    self.assertEqual(bases.get(item.baseline_identity), BASE)
+
+    def test_unusable_historical_locator_leaves_conflict_unresolved(self):
+        for url in (
+            "git@git.example.com:team/repo.git",
+            "deploy@github.com:owner/repo.git",
+            "git@github.com:owner/repo/extra.git",
+            "relative/path",
+        ):
+            for scope in ("framework", "catalog"):
+                with self.subTest(url=url, scope=scope):
+                    calls, bases, item = self.recover(url, scope)
+                    self.assertEqual(calls, [])
+                    self.assertIsNone(bases.get(item.baseline_identity))
 
 
 class FrameworkMergeTests(unittest.TestCase):

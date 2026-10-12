@@ -79,6 +79,14 @@ user-chosen harnesses; that path is not the pinned fan-out test.
 
 ### 4. Remote pinned fan-out hard-wires OpenCode plus `OPENAI_API_KEY`
 
+**Amendment accepted 2026-10-09 (1.2):** remote fan-out still requires `opencode`,
+but no longer requires `OPENAI_API_KEY`. OpenCode resolves credentials for the pinned
+model's provider (for example a custom provider entry in the worker's OpenCode
+configuration) from its own configuration and auth store, which the controller cannot
+observe; a provider-specific key check rejected correctly configured workers. A missing
+credential now surfaces from OpenCode at generation. The text below retains the original
+decision for historical context.
+
 SSH workers that run the live release gates treat this as a prerequisite, not a guess:
 
 - `opencode` is on `PATH`
@@ -118,7 +126,9 @@ ADR only binds how live tests choose frame 0.
 
 - `0.7.0` `--target local` can close once POSIX workers have `opencode`,
   `OPENAI_API_KEY` in the SSH login environment, and `literate.test.json` names
-  `opencode` plus an explicit model.
+  `opencode` plus an explicit model. (Superseded in 1.2 by the decision 4 amendment:
+  workers need `opencode` configured for the pinned model's provider, not a specific
+  key.)
 - Two live runs of the same revision are comparable: same launcher, same model, unless
   the operator overrode both on the command line and recorded that in the invocation.
 - Maintainers keep a one-shot escape hatch (`--coding-cli` / `--model`) for experiments

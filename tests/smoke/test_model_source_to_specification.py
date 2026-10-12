@@ -24,6 +24,7 @@ from literate_ai.source_to_specification import (
     EvidenceReference,
     IntelligenceQueryRecord,
     ModelEvidence,
+    SourceFileClassification,
     SourceIntelligence,
     SourceToSpecificationError,
     builtin_skill_set,
@@ -288,6 +289,68 @@ class ModelSourceToSpecificationTests(unittest.TestCase):
             "exports.render = () => 'ok';\n",
             encoding="utf-8",
         )
+
+    def test_elixir_modules_scripts_and_native_tests_are_inert_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "tests").mkdir()
+            (root / "helper.ex").write_text(
+                "defmodule Helper do\n def value, do: 42\nend\n"
+            )
+            (root / "main.exs").write_text('raise "inventory must never execute"\n')
+            (root / "tests/litai_test.exs").write_text("nil\n")
+            entries = {item.path: item for item in inventory_source(root).entries}
+            self.assertEqual({item.language for item in entries.values()}, {"elixir"})
+            self.assertEqual(
+                entries["main.exs"].classification, SourceFileClassification.SOURCE
+            )
+            self.assertEqual(
+                entries["tests/litai_test.exs"].classification,
+                SourceFileClassification.TEST,
+            )
+            self.assertIn("value", entries["helper.ex"].symbols)
+            self.assertTrue(
+                any(
+                    item.flavor_id == "elixir"
+                    for item in entries["main.exs"].flavor_signals
+                )
+            )
+
+    def test_elixir_inverse_translation_binds_the_shipped_language_skill(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "main.exs").write_text(
+                "defmodule App do\n def run, do: 42\nend\nApp.run()\n"
+            )
+            catalog = dict(load_builtin_skill_catalog())
+            skill_set = builtin_skill_set(catalog, languages=("elixir",))
+            self.assertEqual(skill_set.skills[-1].skill_id, "language-elixir")
+            self.assertEqual(
+                (
+                    ROOT / "skills/source-to-specification/language-elixir/SKILL.md"
+                ).read_bytes(),
+                (
+                    ROOT
+                    / "src/literate_ai/source_to_specification/builtin_skills"
+                    / "language-elixir/SKILL.md"
+                ).read_bytes(),
+            )
+            runner = ScriptedTaskRunner()
+            result = derive_model_checkout(
+                source=root,
+                inventory=inventory_source(root),
+                origin_attestation_id=canonical_digest("elixir-origin"),
+                skill_set=skill_set,
+                skill_catalog=catalog,
+                intelligence_collector=FixtureCollector(),
+                translator=CodingCliInverseTranslator(
+                    model="test-model", task_runner=runner
+                ),
+            )
+            self.assertEqual(
+                tuple(journal.language for journal in result.journals), ("elixir",)
+            )
+            self.assertTrue(result.result.draft.statements)
 
     def test_four_language_calls_emit_journaled_base_and_flavor_drafts(self):
         with tempfile.TemporaryDirectory() as temporary:

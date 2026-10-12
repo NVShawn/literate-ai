@@ -15,6 +15,7 @@ from tests.support.fixtures_test_repository_orchestration import (
     repository,
     snapshot,
 )
+from tests.support.symlinks import skip_unless_symlinks_followable
 
 
 class RepositoryOrchestrationTests(unittest.TestCase):
@@ -121,6 +122,7 @@ class RepositoryOrchestrationTests(unittest.TestCase):
         self.uninitialized()
         outside = self.base / "outside"
         outside.mkdir()
+        skip_unless_symlinks_followable(self, self.base)
         try:
             (self.root / "children").symlink_to(outside, target_is_directory=True)
         except OSError:

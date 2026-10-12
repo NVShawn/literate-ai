@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/release-policy@2",
-  "version_scheme": "pep440",
+  "version_scheme": "semver",
   "version_authority": {
     "path": "src/literate_ai/version.py",
     "format": "python-constant",
@@ -58,6 +58,20 @@
   "gate": {
     "argv": ["make", "release-check"],
     "timeout_seconds": 172800
+  },
+  "qualification": {
+    "platforms": ["linux", "macos", "windows"],
+    "actions": [
+      {
+        "name": "release-gate",
+        "argv": ["make", "release-check"],
+        "windows_argv": ["python", "scripts/windows_release_gate.py"]
+      }
+    ],
+    "ci": {
+      "mandatory": false,
+      "platforms": ["linux", "macos", "windows"]
+    }
   },
   "artifact_gate": {
     "argv": ["make", "release-artifacts"],

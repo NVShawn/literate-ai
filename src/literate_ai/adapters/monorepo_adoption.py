@@ -35,6 +35,7 @@ _MARKERS = frozenset(
         "WORKSPACE",
         "WORKSPACE.bazel",
         "Cargo.toml",
+        "mix.exs",
         "go.mod",
         "package.json",
         "pyproject.toml",

@@ -19,6 +19,9 @@ from pathlib import Path
 
 UPDATE_AUTHORITY = "samples/hello-component/component.md"
 UPDATE_MARKER = b"\n<!-- Installed HTML parent-update acceptance fixture. -->\n"
+# Rendering verification health runs every gate twice; Windows filesystems are
+# materially slower, as for the self-hosting proof's candidate budget.
+COMMAND_TIMEOUT_SECONDS = 900 if os.name == "nt" else 300
 
 
 def run_command(
@@ -43,7 +46,7 @@ def run_command(
             env=diagnostic_environment,
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=COMMAND_TIMEOUT_SECONDS,
             check=False,
         )
     except subprocess.TimeoutExpired as exc:
@@ -52,14 +55,22 @@ def run_command(
         stderr = exc.stderr or b""
         if isinstance(stderr, bytes):
             stderr = stderr.decode("utf-8", errors="replace")
+        # The deadline goes last so callers keeping only a message tail see it.
         raise RuntimeError(
-            "installed HTML CLI exceeded its 300-second deadline; "
-            "last diagnostic output:\n" + stderr[-8000:]
+            "installed HTML CLI diagnostic output:\n"
+            + stderr[-8000:]
+            + f"\ninstalled HTML CLI {arguments[0]!r} exceeded its "
+            f"{COMMAND_TIMEOUT_SECONDS}-second deadline"
         ) from exc
     if completed.returncode != expected_exit:
+        # Debug events fill stderr; the result envelope on stdout goes last so
+        # callers keeping only a message tail still see it.
         raise RuntimeError(
-            "installed HTML CLI returned an unexpected exit: "
-            + (completed.stdout + completed.stderr)[-4000:]
+            f"installed HTML CLI {arguments[0]!r} exited {completed.returncode}, "
+            f"expected {expected_exit}; diagnostic tail:\n"
+            + completed.stderr[-2000:]
+            + "\nresult:\n"
+            + completed.stdout[-1500:]
         )
     payload = json.loads(completed.stdout)
     if (

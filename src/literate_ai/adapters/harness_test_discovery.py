@@ -113,8 +113,10 @@ def observe_test_collection(phase: str, stdout: bytes, stderr: bytes) -> dict[st
     if cargo:
         passed = sum(int(match.group(1)) for match in cargo)
         failed = sum(int(match.group(2)) for match in cargo)
-        skipped = sum(int(match.group(3)) for match in cargo)
-        return _counted_observation(passed, failed, skipped, 0)
+        # libtest excludes #[ignore] cases unless explicitly selected. They
+        # did not execute and cannot count as either passing or selected skips.
+        excluded = sum(int(match.group(3)) for match in cargo)
+        return {**_counted_observation(passed, failed, 0, 0), "excluded": excluded}
 
     ctest = _CTEST_OUTCOME.search(text)
     if ctest is not None:

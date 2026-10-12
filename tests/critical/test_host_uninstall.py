@@ -14,6 +14,7 @@ from literate_ai.adapters.host_uninstall import (
     uninstall_host,
 )
 from literate_ai.adapters.user_paths import HostInstallLayout
+from tests.support.symlinks import skip_unless_symlinks_followable
 
 
 def _installed_prefix(root: Path) -> tuple[Path, HostInstallLayout]:
@@ -64,6 +65,7 @@ class HostUninstallTests(unittest.TestCase):
             root = Path(temporary)
             prefix, layout = _installed_prefix(root)
             manifest = Path(layout.manifest)
+            skip_unless_symlinks_followable(self, root)
             manifest.unlink()
             manifest.symlink_to(root / "missing")
             with self.assertRaisesRegex(HostUninstallError, "symbolic links"):

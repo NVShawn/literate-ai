@@ -230,7 +230,10 @@ def enrich_merge(item, base: bytes | None, ours: bytes | None, theirs: bytes | N
 
 def recover_bases(root, files, bases, reader=None, origin=None):
     """Recover legacy identity-only bases, accepting only exact digest matches."""
+    from urllib.parse import urlsplit
+
     from literate_ai.contracts import CatalogImportsFile, RepositoryParentReference
+    from literate_ai.repository_urls import github_repository_coordinate
 
     from .project_initialization import _STARTER_TEMPLATE_FILES, _TEMPLATE_FILES
     from .repository_lineage import GitRepositoryLineageError
@@ -244,18 +247,31 @@ def recover_bases(root, files, bases, reader=None, origin=None):
     }
     if not missing or reader is None:
         return
+
+    def historical(url, revision):
+        # Recorded provenance may use GitHub's SCP spelling, which is not a URL.
+        # Spell it as the same SSH transport; never change an existing URL's
+        # transport, because a private repository may authenticate only over SSH.
+        coordinate = None if urlsplit(url).scheme else github_repository_coordinate(url)
+        if coordinate is not None:
+            url = "ssh://git@github.com/{}/{}".format(*coordinate)
+        try:
+            return RepositoryParentReference(url, revision)
+        except ValueError:
+            # An unusable historical locator leaves an explicit unresolved conflict.
+            return None
+
     groups = {}
     if origin is not None:
-        reference = RepositoryParentReference(
-            origin.repository_url, origin.git_revision
-        )
+        reference = historical(origin.repository_url, origin.git_revision)
         resources = {**_TEMPLATE_FILES, **_STARTER_TEMPLATE_FILES}
         paths = set(missing)
         paths.update(
             "src/literate_ai/project_template/" + resources.get(path, path)
             for path in missing
         )
-        groups[reference] = paths
+        if reference is not None:
+            groups[reference] = paths
     else:
         sources = dict(bases.sources)
         if (root / CatalogImportsFile.PATH).is_file():
@@ -268,11 +284,9 @@ def recover_bases(root, files, bases, reader=None, origin=None):
             url, separator, revision = ref[4:].rpartition("@")
             if not separator:
                 continue
-            paths = {path} if path in missing else set()
-            if paths:
-                groups.setdefault(
-                    RepositoryParentReference(url, revision), set()
-                ).update(paths)
+            reference = historical(url, revision) if path in missing else None
+            if reference is not None:
+                groups.setdefault(reference, set()).add(path)
     wanted = {identity.uri for identity in missing.values()}
     for reference, paths in groups.items():
         try:

@@ -352,10 +352,19 @@ def run(
     )
     if completed.returncode != 0:
         command = Path(args[0]).name if args else "subprocess"
-        detail = (completed.stderr or completed.stdout).strip()[-4000:]
+        # Debug events fill stderr, so the command's own error report is
+        # usually on stdout; keep both.
+        detail = "\n".join(
+            f"{name}: {text.strip()[-4000:]}"
+            for name, text in (
+                ("stdout", completed.stdout),
+                ("stderr", completed.stderr),
+            )
+            if text and text.strip()
+        )
         raise RuntimeError(
             f"wheel smoke command {command!r} failed with status "
-            f"{completed.returncode}: {detail}"
+            f"{completed.returncode}:\n{detail}"
         )
     return completed
 

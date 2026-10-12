@@ -220,18 +220,57 @@ class FilesystemStandardLifecycleCheckpointStore:
                     (None if previous_attempt is None else previous_attempt.identity),
                     None if latest is None else latest.identity,
                 )
-                reference = self.cas.put_manifest(attempt.to_dict())
-                if reference.digest != attempt.identity.digest:
-                    raise StandardLifecycleCheckpointError(
-                        "immutable attempt storage changed canonical bytes"
-                    )
-                self._write_head(
-                    self._attempt_head_path(
-                        execution_plan.identity, plan.component_revision
-                    ),
-                    reference,
+                self._publish_attempt(key, attempt)
+
+    def _publish_attempt(
+        self, key: str, attempt: StandardLifecycleAttemptEvidence
+    ) -> None:
+        reference = self.cas.put_manifest(attempt.to_dict())
+        if reference.digest != attempt.identity.digest:
+            raise StandardLifecycleCheckpointError(
+                "immutable attempt storage changed canonical bytes"
+            )
+        self._write_head(
+            self._attempt_head_path(
+                attempt.execution_plan_identity, attempt.component_revision
+            ),
+            reference,
+        )
+        self._attempts[key] = attempt
+        self._source_files.pop(key, None)
+
+    def start_replacement(
+        self,
+        execution_plan_identity: ContentIdentity,
+        component_revision: ContentIdentity,
+    ) -> None:
+        """Begin a fresh attempt for one bounded repair candidate of this node.
+
+        A replacement restarts at source generation, so it cannot append to the
+        attempt whose candidate was rejected.
+        """
+
+        key = self._key(execution_plan_identity, component_revision)
+        with self._lock:
+            current = self._attempts.get(key)
+            if current is None:
+                raise StandardLifecycleCheckpointError(
+                    "checkpoint attempt was not started"
                 )
-                self._attempts[key] = attempt
+            latest = self._read_head(execution_plan_identity, component_revision)
+            self._publish_attempt(
+                key,
+                StandardLifecycleAttemptEvidence(
+                    current.execution_plan_identity,
+                    current.component_revision,
+                    current.generation_plan_identity,
+                    current.generation_key_identity,
+                    current.recipe_identity,
+                    current.attempt + 1,
+                    current.identity,
+                    None if latest is None else latest.identity,
+                ),
+            )
 
     def latest(
         self,

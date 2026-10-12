@@ -5,18 +5,18 @@ metadata:
   author: "Literate AI maintainers <literate-ai-maintainers@users.noreply.github.com>"
 schema: "urn:literate-ai:schema:v1:specification-to-source-skill"
 skill_id: "python-portable-application"
-version: "1.4.11"
+version: "1.4.12"
 title: "Python portable application"
 stages:
   - "generate"
 dependencies:
   - schema: "urn:literate-ai:schema:v1:skill-reference"
     skill_id: "portable-application-implementation"
-    version: "1.8.3"
+    version: "1.8.4"
     identity:
       schema: "urn:literate-ai:schema:v1:content-identity"
       algorithm: "sha256"
-      digest: "3d393c054d241eda78df8789144e75476d3131ae1b2e404fa33c6b02ef66d4af"
+      digest: "55dece8843519c6ced884d7cd9eb5d8bff04ebccef055c74c5bfcf176ccd06cd"
 limitations:
   - "Do not require standard input, a shell, or environment-specific package installation."
   - "Do not rely on repository-local modules unless the execution contract explicitly permits them."
@@ -50,6 +50,17 @@ the selected callable itself accept no required arguments. Never point a zipapp 
 at `_cli(argv)` or another callable that requires an argument. The build's default target
 must still create the one self-contained runnable file at the framework-supplied exact
 `EXPORT_PATH`; running tests without creating that export is not a successful build.
+
+A single-file zipapp has no directory on disk: inside it, `Path(__file__).parent` is the
+archive file itself, so opening a packaged runtime-data asset beside `__file__` fails
+with `NotADirectoryError`, not `FileNotFoundError`. Read every asset embedded in the
+archive through `pkgutil.get_data` or `importlib.resources`, which work both from the
+archive and from the source tree. Keep those assets inside an importable package and
+name that package, as in `pkgutil.get_data("app", "data/bands.json")`; a top-level
+`__main__` script has no package to resolve them from. Generated tests that substitute inline data do not
+exercise this path, so `--litai-smoke` must load the real runtime-data assets, and the
+build's test target must run `--litai-smoke` against `EXPORT_PATH` as well as
+`--litai-test`.
 
 Before completing generation, walk PATH directories in their declared order. Within
 each directory consider both `python` and `python3`, select the first compatible Python

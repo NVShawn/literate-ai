@@ -19,9 +19,12 @@ class StandardActionPlanningTests(unittest.TestCase):
         self.addCleanup(self.fixture.doCleanups)
         self.fixture.admission.configure()
         self.pool = self.fixture.admission.pool()
+        cas = self.fixture.admission.source.cas
         self.adapter = self.fixture.assemble(
             action_workers=self.pool,
-            action_source_cas=self.fixture.admission.source.cas,
+            action_source_cas=cas,
+            # Admitted workers advertise LINK, which returns results explicitly.
+            action_result_source=lambda worker, ref: cas.get_bytes(ref),
         )
         self.runtime = self.adapter.runtime
         self.indexer = self.runtime.application.lifecycle.indexer

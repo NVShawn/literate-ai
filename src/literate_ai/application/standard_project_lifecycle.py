@@ -36,6 +36,7 @@ from literate_ai.application.source_generation_scheduling import (
     ComponentSourceGenerationExecution,
     ComponentSourceGenerationRunner,
     execute_component_source_generation_node,
+    reusable_source_generation_output,
     source_generation_terminal_result,
     validate_prepared_component_generation_node,
 )
@@ -48,10 +49,13 @@ from literate_ai.application.standard_lifecycle_ports import (
     AdmittedBuildAuthorizer,
     AdmittedBuildIntentDispatcher,
     AdmittedBuildPlanFinalizer,
+    AdmittedComponentAcceptor,
     AdmittedComponentBuilder,
     AdmittedComponentExecutor,
+    AdmittedComponentLinker,
     AdmittedComponentTester,
     AdmittedGenerationIndexer,
+    AdmittedSourceGenerator,
     BuildAuthorizer,
     BuildProviderEvidenceReceiver,
     CompleteAcceptedSourceCachePublisher,
@@ -60,6 +64,7 @@ from literate_ai.application.standard_lifecycle_ports import (
     ComponentBuildIntentFactory,
     ComponentBuildPlanFinalizer,
     ComponentExecutor,
+    ComponentLinker,
     ComponentTester,
     ExecutionProviderEvidenceReceiver,
     GenerationIndexer,
@@ -67,6 +72,7 @@ from literate_ai.application.standard_lifecycle_ports import (
     PackagedProjectExecutor,
     ProjectAdmitter,
     ProjectArtifactAssembler,
+    ProjectFinalizer,
     ProjectPackageCreator,
     ProjectReceiptIssuer,
     ProjectValidator,
@@ -1445,6 +1451,19 @@ def _layers(execution_plan: ComponentExecutionPlan) -> tuple[tuple[str, ...], ..
 
 
 @dataclass(frozen=True, slots=True)
+class _SourceGenerationReservation:
+    execute: Callable[[], object]
+    reservation: ReservedLifecycleOperation | None = None
+
+    def run(self):
+        return self.execute()
+
+    def release(self):
+        if self.reservation is not None:
+            self.reservation.release()
+
+
+@dataclass(frozen=True, slots=True)
 class _LifecycleStep:
     """One local operation; a continuation is never a serializable worker request."""
 
@@ -1481,6 +1500,8 @@ class StandardProjectLifecycleService:
         independent_project_acceptor: IndependentProjectAcceptor,
         admitter: ProjectAdmitter,
         receipt_issuer: ProjectReceiptIssuer,
+        component_linker: ComponentLinker | None = None,
+        project_finalizer: ProjectFinalizer | None = None,
         build_intent_dispatcher: AdmittedBuildIntentDispatcher | None = None,
         checkpoint_recorder: StandardLifecycleCheckpointRecorder | None = None,
         context_evidence_recorder: StandardContextEvidenceRecorder | None = None,
@@ -1498,6 +1519,8 @@ class StandardProjectLifecycleService:
         self.tester = tester
         self.executor = executor
         self.acceptor = acceptor
+        self.component_linker = component_linker
+        self.project_finalizer = project_finalizer
         self.source_cache_publisher = source_cache_publisher
         self.artifact_assembler = artifact_assembler
         self.package_creator = package_creator
@@ -1932,7 +1955,13 @@ class StandardProjectLifecycleService:
             scope = plan_standard_execution_inputs(
                 execution_plan, plan, exports, providers
             )
-            if isinstance(self.executor, ExecutionProviderEvidenceReceiver):
+            receivers = []
+            for receiver in (self.executor, self.acceptor):
+                if isinstance(receiver, ExecutionProviderEvidenceReceiver) and all(
+                    receiver is not previous for previous in receivers
+                ):
+                    receivers.append(receiver)
+            if receivers:
                 from literate_ai.application.standard_execution_inputs import (
                     plan_standard_execution_receipts,
                 )
@@ -1967,7 +1996,8 @@ class StandardProjectLifecycleService:
                         "standard_lifecycle.execution_provider_scope_mismatch",
                         "runtime receipts differ from current execution scope",
                     )
-                self.executor.retain_execution_provider_evidence(plan, scope, receipts)
+                for receiver in receivers:
+                    receiver.retain_execution_provider_evidence(plan, scope, receipts)
             all_inputs = {
                 item.identity.uri: item
                 for provider in providers
@@ -1996,9 +2026,32 @@ class StandardProjectLifecycleService:
             if component_worker_routing is None
             else {}
         )
+        link_nodes = (
+            {
+                node.component_revision.uri: node
+                for node in plan_lifecycle_action_dag(
+                    execution_plan, worker_ids=("local",)
+                )
+                if node.kind is LifecycleActionKind.LINK
+            }
+            if self.component_linker is not None
+            else {}
+        )
+        link_owners = {node.action_id: uri for uri, node in link_nodes.items()}
+        link_dependencies = {
+            uri: {
+                link_owners[action]
+                for action in node.predecessor_ids
+                if action in link_owners
+            }
+            for uri, node in link_nodes.items()
+        }
+        pending_links: set[str] = set()
+        linked: dict[str, ComponentBuildManifest] = {}
+        skipped_links: set[str] = set()
         pending = set(expected)
         with ThreadPoolExecutor(max_workers=max_parallelism) as pool:
-            while pending or futures or pending_steps:
+            while pending or futures or pending_steps or pending_links:
                 ready = sorted(
                     (
                         uri
@@ -2131,14 +2184,59 @@ class StandardProjectLifecycleService:
                         )
                     futures[future] = (uri, "lifecycle")
                 waiting_for_capacity = False
-                for uri in sorted(
-                    pending_steps,
-                    key=lambda item: local_action_order[
-                        (item, stage_kinds[pending_steps[item].stage])
-                    ],
-                ):
+                candidates = [
+                    (local_action_order[(uri, stage_kinds[step.stage])], uri, False)
+                    for uri, step in pending_steps.items()
+                ] + [(link_nodes[uri].identity.uri, uri, True) for uri in pending_links]
+                for _, uri, is_link in sorted(candidates):
                     if len(futures) >= max_parallelism:
                         break
+                    if is_link:
+                        required = link_dependencies[uri]
+                        if any(
+                            parent in skipped_links
+                            or (
+                                parent in results
+                                and results[parent].failure_code is not None
+                            )
+                            for parent in required
+                        ):
+                            pending_links.remove(uri)
+                            skipped_links.add(uri)
+                            continue
+                        if not required <= linked.keys():
+                            continue
+                        plan, result = planned[uri], results[uri]
+                        receipt = result.acceptance_evidence
+                        if not isinstance(receipt, StandardComponentAcceptanceEvidence):
+                            raise StandardProjectLifecycleError(
+                                "standard_lifecycle.link_acceptance_missing",
+                                "LINK requires typed current Component acceptance",
+                            )
+                        reservation = None
+                        try:
+                            if isinstance(
+                                self.component_linker, AdmittedComponentLinker
+                            ):
+                                reservation = self.component_linker.try_reserve_link(
+                                    plan, receipt
+                                )
+                                if reservation is None:
+                                    waiting_for_capacity = True
+                                    continue
+                            operation = (
+                                reservation.run
+                                if reservation is not None
+                                else partial(self.component_linker.link, plan, receipt)
+                            )
+                            future = pool.submit(copy_context().run, operation)
+                        except Exception:
+                            if reservation is not None:
+                                reservation.release()
+                            raise
+                        pending_links.remove(uri)
+                        futures[future] = (uri, "link")
+                        continue
                     step = pending_steps[uri]
                     required = (
                         dependencies[uri]
@@ -2195,7 +2293,7 @@ class StandardProjectLifecycleService:
                             "standard_lifecycle.dependency_deadlock",
                             "Component dependencies cannot make progress",
                         )
-                    if pending_steps:
+                    if pending_steps or pending_links:
                         # Capacity can be held by direct port callers outside this pool.
                         # Admission rechecks its finite deadline on each bounded retry.
                         time.sleep(0.01)
@@ -2207,6 +2305,20 @@ class StandardProjectLifecycleService:
                 )
                 for future in sorted(completed, key=lambda item: futures[item]):
                     uri, phase = futures.pop(future)
+                    if phase == "link":
+                        manifest = future.result()
+                        if not isinstance(
+                            manifest, ComponentBuildManifest
+                        ) or manifest != realize_manifest(
+                            planned[uri].manifest, results[uri].exports
+                        ):
+                            raise StandardProjectLifecycleError(
+                                "standard_lifecycle.link_manifest_mismatch",
+                                "LINK must return the exact accepted "
+                                "Component manifest",
+                            )
+                        linked[uri] = manifest
+                        continue
                     if phase == "step":
                         advance_step(uri, future)
                         continue
@@ -2259,6 +2371,12 @@ class StandardProjectLifecycleService:
                     if plan is not None:
                         planned[uri] = plan
                     results[uri] = result
+                    if (
+                        self.component_linker is not None
+                        and result.failure_code is None
+                        and result.acceptance_identity is not None
+                    ):
+                        pending_links.add(uri)
                     if (
                         component_worker_routing is not None
                         and result.acceptance_identity is not None
@@ -2329,6 +2447,11 @@ class StandardProjectLifecycleService:
                 "standard_lifecycle.project_plan_incomplete",
                 "root integration requires every exact Component build plan",
             )
+        if self.component_linker is not None and set(linked) != expected:
+            raise StandardProjectLifecycleError(
+                "standard_lifecycle.links_incomplete",
+                "project assembly requires every Component LINK result",
+            )
         from .release_artifacts import plan_standard_assembly_dependencies
 
         artifact_graph, link_plan = self.artifact_assembler.assemble_project_artifacts(
@@ -2381,50 +2504,77 @@ class StandardProjectLifecycleService:
                 "standard_lifecycle.package_creation_mismatch",
                 "project package must bind the exact lock, graph, link, and plan",
             )
-        root_test_identity = _require_identity(
-            self.root_integration_tester.test_root_integration(
+        if self.project_finalizer is not None:
+            root_integration = self.project_finalizer.finalize(
                 component_lock,
-                execution_plan,
                 project_plan,
+                artifact_graph,
                 package_plan,
                 package_result,
-            ),
-            "root generated integration test",
-        )
-        packaged_execution_identity = _require_identity(
-            self.packaged_project_executor.execute_packaged_project(
-                component_lock,
-                execution_plan,
-                project_plan,
-                package_plan,
-                package_result,
-            ),
-            "packaged project execution",
-        )
-        independent_acceptance_identity = _require_identity(
-            self.independent_project_acceptor.accept_project_independently(
-                component_lock,
-                execution_plan,
-                project_plan,
+            )
+            if not isinstance(root_integration, StandardRootIntegrationEvidence):
+                raise StandardProjectLifecycleError(
+                    "standard_lifecycle.finalization_invalid",
+                    "project finalizer must return typed verified root evidence",
+                )
+            if (
+                root_integration.component_lock_identity != component_lock.identity
+                or root_integration.execution_plan_identity != execution_plan.identity
+                or root_integration.project_build_plan_identity != project_plan.identity
+                or root_integration.artifact_graph != artifact_graph
+                or root_integration.link_plan != link_plan
+                or root_integration.package_plan != package_plan
+                or root_integration.package_result != package_result
+            ):
+                raise StandardProjectLifecycleError(
+                    "standard_lifecycle.finalization_mismatch",
+                    "project finalization differs from exact root package custody",
+                )
+        else:
+            root_test_identity = _require_identity(
+                self.root_integration_tester.test_root_integration(
+                    component_lock,
+                    execution_plan,
+                    project_plan,
+                    package_plan,
+                    package_result,
+                ),
+                "root generated integration test",
+            )
+            packaged_execution_identity = _require_identity(
+                self.packaged_project_executor.execute_packaged_project(
+                    component_lock,
+                    execution_plan,
+                    project_plan,
+                    package_plan,
+                    package_result,
+                ),
+                "packaged project execution",
+            )
+            independent_acceptance_identity = _require_identity(
+                self.independent_project_acceptor.accept_project_independently(
+                    component_lock,
+                    execution_plan,
+                    project_plan,
+                    package_plan,
+                    package_result,
+                    root_test_identity,
+                    packaged_execution_identity,
+                ),
+                "independent project acceptance",
+            )
+            root_integration = StandardRootIntegrationEvidence(
+                component_lock.identity,
+                execution_plan.identity,
+                project_plan.identity,
+                artifact_graph,
+                link_plan,
                 package_plan,
                 package_result,
                 root_test_identity,
                 packaged_execution_identity,
-            ),
-            "independent project acceptance",
-        )
-        root_integration = StandardRootIntegrationEvidence(
-            component_lock.identity,
-            execution_plan.identity,
-            project_plan.identity,
-            artifact_graph,
-            link_plan,
-            package_plan,
-            package_result,
-            root_test_identity,
-            packaged_execution_identity,
-            independent_acceptance_identity,
-        )
+                independent_acceptance_identity,
+            )
         publication_failed = False
         for uri in sorted(results):
             if uri in input_membership_identities and uri not in regenerate:
@@ -2868,6 +3018,23 @@ class StandardProjectLifecycleService:
             else:
                 assert diagnostic is not None
                 assert self.candidate_repair_port is not None
+                assert failure is not None
+                # Close the rejected attempt before preparing its replacement, so a
+                # refused preparation still never leaves a passing stage as the head.
+                try:
+                    rejected_stage = StandardLifecycleStage(failure.phase.value)
+                except ValueError:
+                    rejected_stage = None
+                if rejected_stage is not None:
+                    self._record_stage(
+                        execution_plan,
+                        generation_plan,
+                        current,
+                        output,
+                        rejected_stage,
+                        failure.subject_identity,
+                        failure_code=failure.code,
+                    )
                 replacement = self.candidate_repair_port.prepare_repair(
                     prepared,
                     diagnostic,
@@ -2906,6 +3073,10 @@ class StandardProjectLifecycleService:
                     replacement.request.request.identity,
                     replacement.workspace.allocation_identity,
                 )
+                if self.checkpoint_recorder is not None:
+                    self.checkpoint_recorder.start_replacement(
+                        execution_plan.identity, generation_plan.component_revision
+                    )
                 current = replacement
                 continue
             return (
@@ -2921,18 +3092,15 @@ class StandardProjectLifecycleService:
             )
         raise AssertionError("bounded repair loop must return")
 
-    def _generate_component_source(
-        self,
-        execution_plan: ComponentExecutionPlan,
-        generation_plan: ComponentGenerationPlan,
-        prepared: PreparedComponentGenerationNode[object, object],
-        candidate: StandardNodeAcceptedCandidate | None,
-        source_cache_membership: (
-            StandardSourceCacheMembership | StandardSourceAdmissionMembership | None
-        ),
-        source_generation_resume: SourceGenerationResumeCandidate | None,
-        regenerate: bool,
-    ) -> ComponentSourceGenerationExecution:
+    @staticmethod
+    def _source_generation_candidate(
+        execution_plan,
+        prepared,
+        candidate,
+        source_cache_membership,
+        source_generation_resume,
+        regenerate,
+    ):
         if source_cache_membership is None and candidate is not None:
             source_cache_membership = candidate.source_cache_membership
         if regenerate:
@@ -2956,11 +3124,35 @@ class StandardProjectLifecycleService:
             )
         elif source_generation_resume is not None:
             generation_candidate = source_generation_resume
+        return generation_candidate
+
+    def _generate_component_source(
+        self,
+        execution_plan: ComponentExecutionPlan,
+        generation_plan: ComponentGenerationPlan,
+        prepared: PreparedComponentGenerationNode[object, object],
+        candidate: StandardNodeAcceptedCandidate | None,
+        source_cache_membership: (
+            StandardSourceCacheMembership | StandardSourceAdmissionMembership | None
+        ),
+        source_generation_resume: SourceGenerationResumeCandidate | None,
+        regenerate: bool,
+        *,
+        runner: ComponentSourceGenerationRunner | None = None,
+    ) -> ComponentSourceGenerationExecution:
+        generation_candidate = self._source_generation_candidate(
+            execution_plan,
+            prepared,
+            candidate,
+            source_cache_membership,
+            source_generation_resume,
+            regenerate,
+        )
         execution = execute_component_source_generation_node(
             prepared,
             candidate=generation_candidate,
             explicitly_invalid=regenerate,
-            runner=self.generator,
+            runner=self.generator if runner is None else runner,
         )
         if execution.output is not None:
             self._record_stage(
@@ -3012,18 +3204,49 @@ class StandardProjectLifecycleService:
             source_cache_membership = None
             source_generation_resume = None
         if source_execution is None:
+
+            def generate(runner=None):
+                return self._generate_component_source(
+                    execution_plan,
+                    generation_plan,
+                    prepared,
+                    candidate,
+                    source_cache_membership,
+                    source_generation_resume,
+                    regenerate,
+                    runner=runner,
+                )
+
+            def reserve_generation():
+                resumable = self._source_generation_candidate(
+                    execution_plan,
+                    prepared,
+                    candidate,
+                    source_cache_membership,
+                    source_generation_resume,
+                    regenerate,
+                )
+                if (
+                    reusable_source_generation_output(
+                        prepared, resumable, explicitly_invalid=regenerate
+                    )
+                    is not None
+                ):
+                    return _SourceGenerationReservation(generate)
+                reservation = self.generator.try_reserve_generate(prepared)
+                if reservation is None:
+                    return None
+                return _SourceGenerationReservation(
+                    lambda: generate(lambda _: reservation.run()), reservation
+                )
+
             try:
                 source_execution = yield _LifecycleStep(
                     StandardLifecycleStage.SOURCE_GENERATION,
-                    lambda: self._generate_component_source(
-                        execution_plan,
-                        generation_plan,
-                        prepared,
-                        candidate,
-                        source_cache_membership,
-                        source_generation_resume,
-                        regenerate,
-                    ),
+                    generate,
+                    reserve=reserve_generation
+                    if isinstance(self.generator, AdmittedSourceGenerator)
+                    else None,
                 )
             except Exception as exc:
                 source_execution = ComponentSourceGenerationExecution(
@@ -3653,7 +3876,7 @@ class StandardProjectLifecycleService:
                         "standard_lifecycle.execution_scope_mismatch",
                         "execution must bind the current admitted runtime scope",
                     )
-                raw_execution.execution_authority.require_valid(now=self.clock())
+                raw_execution.require_authorized(now=self.clock())
             execution_evidence = (
                 raw_execution
                 if isinstance(raw_execution, StandardExecutionEvidence)
@@ -3706,6 +3929,11 @@ class StandardProjectLifecycleService:
                 StandardLifecycleStage.ACCEPT,
                 lambda: self.acceptor.accept(plan, test, execution),
                 require_current_authorization,
+                reserve=(
+                    lambda: self.acceptor.try_reserve_accept(plan, test, execution)
+                )
+                if isinstance(self.acceptor, AdmittedComponentAcceptor)
+                else None,
             )
             acceptance_evidence = (
                 raw_acceptance

@@ -32,6 +32,7 @@ from literate_ai.adapters.standard_rebuild import (
 from literate_ai.cli import main
 from literate_ai.contracts import (
     BlobRef,
+    ComponentCommandPhase,
     ProjectTestEvidence,
     ProjectTestReceipt,
     ProjectTestReceiptFinalizedCandidate,
@@ -602,6 +603,8 @@ class RebuildCliTests(unittest.TestCase):
                     },
                 )
                 ports = Mock()
+                # This controller runs Component commands itself.
+                ports.command_phases = tuple(ComponentCommandPhase)
                 ports.contracts = {revision.uri: contract}
                 ports.artifact_path.return_value = artifact
                 if product == "library":

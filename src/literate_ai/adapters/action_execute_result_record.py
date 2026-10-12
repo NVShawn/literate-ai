@@ -107,7 +107,7 @@ class ExecuteWorkerResult:
                 != standard_execution_runtime_identity(contract)
             ):
                 _invalid()
-            authority.require_valid(now=datetime.now(UTC))
+            evidence.require_authorized(now=datetime.now(UTC))
             deadline.remaining()
             return result
         except ActionWireError:

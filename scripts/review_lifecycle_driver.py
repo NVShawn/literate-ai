@@ -4,7 +4,9 @@
 ``lifecycle_driver.implementation_identity`` in ``literate.project.json`` is the exact
 project TCB that ``litai rebuild`` verifies before and after the host lifecycle. It goes
 stale on every change under the declared implementation paths, which is the control
-working: the pin asserts that a human reviewed the code trusted to drive the lifecycle.
+working: the pin asserts that the code trusted to drive the lifecycle was reviewed. An
+independent agent reviewer that did not author the drift satisfies this; no human is
+required.
 
 This reports what changed since the pin so review is possible, and re-pins only when
 asked. Re-pinning asserts review, so it is never the default.

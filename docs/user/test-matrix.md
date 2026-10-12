@@ -25,8 +25,10 @@ fails closed unless both a coding CLI and a model are explicit. Put durable defa
 project-scoped user `test.json` as `coding_cli` and `model` (see
 `literate.test.example.json` for inert placeholders). Precedence is `--coding-cli` /
 `--model`, then `CODING_CLI` / `LITAI_LIVE_MODEL`, then that file. PATH first-available
-search is not a live-test default. Remote SSH workers require `opencode` on `PATH` and
-`OPENAI_API_KEY` in the login environment; do not put keys in `workers.json`.
+search is not a live-test default. Remote SSH workers require `opencode` on `PATH`,
+configured with credentials for the pinned model's provider; opencode resolves them
+from its own configuration or auth store, so Literate AI requires no specific key. Do
+not put keys in `workers.json`.
 A one-shot `--coding-cli` / `--model` override does not rewrite the JSON file.
 
 ```console
@@ -36,17 +38,21 @@ LITAI_SESSION_ID=dev make samples \
 
 POSIX `--target local` release fan-out requires user `workers.json` with
 at least one SSH POSIX worker, `opencode` on that worker's `PATH`, and
-`OPENAI_API_KEY` in its login environment. Project user `test.json` must name that
-`opencode` plus model pair. Probe first, then check a prepared plan:
+opencode credentials for the pinned model's provider. Project user `test.json` must
+name that `opencode` plus model pair. Probe first, then check a prepared plan:
 
 ```console
 litai worker probe --all
 litai release check PLAN.json --target local --project .
 ```
 
+Each worker gate runs in a dedicated checkout, `<workspace>/release/<repository>`,
+that `litai release` syncs to the exact revision over SSH and SCP before the gate
+starts; you do not need to check out the release on the worker yourself.
+
 Without that catalog the gate fails closed (`release.target_unconfigured`). A JSON pin
 that is not `opencode` fails closed on the controller (`coding_cli.remote_prerequisite`)
-before the gate command is dispatched. Do not put `OPENAI_API_KEY` in
+before the gate command is dispatched. Do not put provider keys in
 `workers.json` or on the SSH command line.
 
 Before capability-gated work, run `litai worker probe --all`. It probes configured SSH

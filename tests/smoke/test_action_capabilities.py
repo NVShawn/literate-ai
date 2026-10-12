@@ -71,6 +71,7 @@ class ActionCapabilityTests(unittest.TestCase):
                 LifecycleActionKind.AUTHORIZE,
                 LifecycleActionKind.BUILD_INTENT,
                 LifecycleActionKind.INDEX,
+                LifecycleActionKind.LINK,
                 LifecycleActionKind.PLAN,
             ),
         )

@@ -38,6 +38,9 @@ def encode_tool_observation_response(
     test_worker=None,
     execute_worker=None,
     accept_worker=None,
+    generate_worker=None,
+    package_worker=None,
+    finalize_worker=None,
 ):
     deadline.remaining()
     if request.get("worker_identity") != expected_worker.uri:
@@ -53,6 +56,10 @@ def encode_tool_observation_response(
     test_profile = None if test_worker is None else test_worker.identity
     execute_profile = None if execute_worker is None else execute_worker.identity
     accept_profile = None if accept_worker is None else accept_worker.identity
+    generate_profile = None if generate_worker is None else generate_worker.identity
+    # The capability must equal the one plain --describe advertises.
+    package_profile = None if package_worker is None else package_worker.identity
+    finalize_profile = None if finalize_worker is None else finalize_worker.identity
     capability = encode_capability_response(
         request,
         deadline,
@@ -65,6 +72,9 @@ def encode_tool_observation_response(
         else None,
         execute_profile=execute_profile,
         accept_profile=accept_profile,
+        generate_profile=generate_profile,
+        package_profile=package_profile,
+        finalize_profile=finalize_profile,
         execute_toolchains=execute_worker.tools.identities if execute_worker else (),
         execute_standard_tools=execute_worker.standard_tools_identity
         if execute_worker
@@ -90,6 +100,9 @@ def encode_tool_observation_response(
         or (test_worker is not None and test_worker.identity != test_profile)
         or (execute_worker is not None and execute_worker.identity != execute_profile)
         or (accept_worker is not None and accept_worker.identity != accept_profile)
+        or (
+            generate_worker is not None and generate_worker.identity != generate_profile
+        )
     ):
         raise ActionWireError(
             "action_tools.observation_changed",

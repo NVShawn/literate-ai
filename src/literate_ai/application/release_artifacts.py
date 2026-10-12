@@ -12,6 +12,7 @@ from literate_ai.contracts import (
     ComponentLock,
     ComponentRevisionRef,
     ContentIdentity,
+    StandardComponentAcceptanceEvidence,
 )
 from literate_ai.contracts._validation import (
     contract_fields,
@@ -32,6 +33,9 @@ from literate_ai.contracts.executable_components import (
     ReleaseArtifactSet,
     RuntimeRequirement,
 )
+from literate_ai.contracts.executable_components.artifacts import (
+    artifact_driver_composition_identity,
+)
 from literate_ai.contracts.executable_components.packages import (
     PackageEntrypoint,
     PackageInput,
@@ -48,6 +52,7 @@ from .artifact_graph import (
 from .packaging import PackageBlobReader, verify_package_result
 from .standard_project_lifecycle import (
     StandardNodeLifecycleResult,
+    StandardProjectBuildPlan,
     StandardProjectLifecycleResult,
 )
 
@@ -356,6 +361,48 @@ def plan_standard_assembly_dependencies(
         raise ReleaseArtifactAssemblyError(
             "assembly requires every exact accepted Component"
         )
+    return _assembly_dependencies(
+        execution_plan,
+        {
+            revision: (item.exports, item.acceptance_identity)
+            for revision, item in accepted.items()
+        },
+    )
+
+
+def plan_accepted_assembly_dependencies(
+    execution_plan: ComponentExecutionPlan,
+    receipts: tuple[StandardComponentAcceptanceEvidence, ...],
+) -> tuple[ArtifactAssemblyDependency, ...]:
+    """Project verified acceptance receipts without fabricating lifecycle results."""
+    if (
+        not isinstance(execution_plan, ComponentExecutionPlan)
+        or not isinstance(receipts, tuple)
+        or any(
+            not isinstance(item, StandardComponentAcceptanceEvidence)
+            for item in receipts
+        )
+    ):
+        raise ReleaseArtifactAssemblyError(
+            "assembly requires typed acceptance receipts"
+        )
+    accepted = {
+        item.component_revision: (item.build.exports, item.identity)
+        for item in receipts
+    }
+    expected = {item.component_revision for item in execution_plan.generation_plans}
+    if (
+        len(accepted) != len(receipts)
+        or set(accepted) != expected
+        or any(not exports for exports, _ in accepted.values())
+    ):
+        raise ReleaseArtifactAssemblyError(
+            "assembly requires every exact accepted Component"
+        )
+    return _assembly_dependencies(execution_plan, accepted)
+
+
+def _assembly_dependencies(execution_plan, accepted):
     edges = {
         edge.identity.uri: edge
         for action in execution_plan.action_plans
@@ -364,24 +411,118 @@ def plan_standard_assembly_dependencies(
     }
     bindings = []
     for edge in edges.values():
-        consumer = accepted[edge.consumer_revision]
-        provider = accepted[edge.provider_revision]
-        if len(bindings) + len(consumer.exports) * len(provider.exports) > 16384:
+        consumer, _ = accepted[edge.consumer_revision]
+        provider, acceptance = accepted[edge.provider_revision]
+        if len(bindings) + len(consumer) * len(provider) > 16384:
             raise ReleaseArtifactAssemblyError(
                 "assembly dependencies exceed 16384 bindings"
             )
-        for output in consumer.exports:
-            for supplied in provider.exports:
+        for output in consumer:
+            for supplied in provider:
                 bindings.append(
                     ArtifactAssemblyDependency(
                         output.identity,
                         supplied.identity,
                         edge.kind,
                         edge.identity,
-                        provider.acceptance_identity,
+                        acceptance,
                     )
                 )
     return tuple(sorted(bindings, key=lambda item: item.identity.uri))
+
+
+def assemble_standard_project_artifacts(
+    component_lock: ComponentLock,
+    execution_plan: ComponentExecutionPlan,
+    project_build_plan: StandardProjectBuildPlan,
+    results: tuple[StandardNodeLifecycleResult, ...],
+    *,
+    primary_export_id: str,
+):
+    """Assemble pre-package link authority from exact accepted Component plans."""
+    if not isinstance(component_lock, ComponentLock):
+        raise TypeError("component_lock must be a ComponentLock")
+    if not isinstance(project_build_plan, StandardProjectBuildPlan):
+        raise TypeError("project_build_plan must be a StandardProjectBuildPlan")
+    if (
+        component_lock.identity != execution_plan.component_lock_identity
+        or project_build_plan.execution_plan_identity != execution_plan.identity
+    ):
+        raise ReleaseArtifactAssemblyError(
+            "project artifact assembly received foreign authority"
+        )
+    assembly_dependencies = plan_standard_assembly_dependencies(execution_plan, results)
+    by_revision = {item.component_revision.uri: item for item in results}
+    planned = {
+        item.component_revision.uri: item for item in project_build_plan.components
+    }
+    locked = {item.revision.identity.uri for item in component_lock.nodes}
+    if set(by_revision) != set(planned) or set(planned) != locked:
+        raise ReleaseArtifactAssemblyError(
+            "project artifact assembly requires every exact locked Component"
+        )
+    if any(
+        by_revision[uri].build_plan_identity != plan.identity
+        for uri, plan in planned.items()
+    ):
+        raise ReleaseArtifactAssemblyError(
+            "accepted node differs from its exact build plan"
+        )
+    manifests = tuple(
+        realize_manifest(plan.manifest, by_revision[uri].exports)
+        for uri, plan in sorted(planned.items())
+    )
+    # A graph whose Components use different measured drivers (for example a
+    # Mix library consumed by a Make application) binds the exact driver set;
+    # single-driver graphs keep their existing identity.
+    drivers = tuple(
+        sorted(
+            {item.build_system_driver_identity for item in manifests},
+            key=lambda item: item.uri,
+        )
+    )
+    composition = drivers if len(drivers) > 1 else ()
+    graph_driver = (
+        artifact_driver_composition_identity(composition) if composition else drivers[0]
+    )
+    root_result = by_revision[component_lock.root_revision.uri]
+    if not root_result.exports:
+        raise ReleaseArtifactAssemblyError("root Component has no built export")
+    roots = tuple(
+        item for item in root_result.exports if item.export_id == primary_export_id
+    )
+    if len(roots) != 1:
+        raise ReleaseArtifactAssemblyError(
+            "primary root export must resolve exactly once"
+        )
+    primary_root = roots[0]
+    if len(root_result.exports) > 1:
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=graph_driver,
+            driver_composition=composition,
+            manifests=manifests,
+            assembly_dependencies=assembly_dependencies,
+            link_roots=(),
+            link_root_groups=(
+                (
+                    primary_root.identity,
+                    *(
+                        item.identity
+                        for item in root_result.exports
+                        if item is not primary_root
+                    ),
+                ),
+            ),
+        )
+    else:
+        graph = create_artifact_build_graph(
+            build_system_driver_identity=graph_driver,
+            driver_composition=composition,
+            manifests=manifests,
+            assembly_dependencies=assembly_dependencies,
+            link_roots=(primary_root.identity,),
+        )
+    return graph, graph.link_plans[0]
 
 
 def create_standard_artifact_build_graph(

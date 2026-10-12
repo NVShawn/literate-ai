@@ -56,6 +56,7 @@ from literate_ai.adapters.dependencies import (
     HostDependencyObservation,
     validate_cyclonedx_bom,
 )
+from literate_ai.adapters.dependencies.mix_resolution import MixDependencyObserver
 from literate_ai.adapters.dependencies.python_install import (
     PIP_INSTALLER,
     install_python_wheels,
@@ -93,9 +94,7 @@ from literate_ai.adapters.source_evidence_validation import (
     SourceEvidenceValidationInputs,
 )
 from literate_ai.application.artifact_graph import (
-    create_artifact_build_graph,
     create_package_plan,
-    realize_manifest,
 )
 from literate_ai.application.standard_authorization import StandardAuthorizationInputs
 from literate_ai.application.standard_build_inputs import (
@@ -734,7 +733,9 @@ class RegisteredSourceGenerationRunner:
         self.registry = registry
 
     def __call__(self, prepared: object) -> SourceGenerationRunOutput:
-        output = self.delegate(prepared)
+        return self._register(prepared, self.delegate(prepared))
+
+    def _register(self, prepared, output):
         if not isinstance(output, SourceGenerationRunOutput):
             raise LocalStandardLifecycleError(
                 "source runner returned an invalid output"
@@ -1124,6 +1125,7 @@ class LocalStandardLifecyclePorts:
         self._npm_resolution_builds: dict[str, dict[str, object]] = {}
         self._artifact_checkpoints: dict[str, ContentIdentity] = {}
         self._project_packages: dict[str, LocalProjectPackageCustody] = {}
+        self.project_packager = None
         self.project_execution_stdout: dict[str, str] = {}
         self.execution_stdout: dict[str, str] = {}
         self.failure_diagnostics: dict[str, str] = {}
@@ -2114,17 +2116,32 @@ class LocalStandardLifecyclePorts:
         )
 
     @staticmethod
-    def _source_text_files(root: Path) -> dict[str, str]:
+    def _source_text_files(root: Path, *, exact_bytes: bool = False) -> dict[str, str]:
+        """Return UTF-8 source text for dependency admission.
+
+        By default this keeps the established universal-newline reading, so
+        existing ecosystems' admission inputs are unchanged by checkout line
+        endings. ``exact_bytes`` is for owners (Mix) whose authority is later
+        compared with retained native source bytes; there CRLF must survive.
+        """
         files: dict[str, str] = {}
         for path in sorted(root.rglob("*")):
             if not path.is_file():
                 continue
             try:
-                content = path.read_text(encoding="utf-8")
+                content = (
+                    path.read_bytes().decode("utf-8")
+                    if exact_bytes
+                    else path.read_text(encoding="utf-8")
+                )
             except UnicodeError:
                 continue
             files[path.relative_to(root).as_posix()] = content
         return files
+
+    def _source_bytes_exact(self, component_revision: ContentIdentity) -> bool:
+        """Whether this Component's source admission binds exact bytes."""
+        return False
 
     def _resolve_and_write_sbom(
         self,
@@ -2135,6 +2152,7 @@ class LocalStandardLifecyclePorts:
         artifact_digest: str | None = None,
         additional_build_evidence: Mapping[str, object] | None = None,
         python_observer: StandardPythonDependencyObserver | None = None,
+        mix_observer: MixDependencyObserver | None = None,
     ) -> CycloneDxBomBinding:
         source = self.source_trees.evidence(plan.request.source_tree_identity)
         from literate_ai.adapters.native_sdk_dependencies import (
@@ -2196,7 +2214,10 @@ class LocalStandardLifecyclePorts:
                 "reserved resolved-SBOM evidence directory escaped artifact custody"
             )
         source_root = self.source_trees.resolve(plan.request.source_tree_identity)
-        files = self._source_text_files(source_root)
+        files = self._source_text_files(
+            source_root,
+            exact_bytes=self._source_bytes_exact(plan.component_revision),
+        )
         if files.get(CYCLONEDX_SOURCE_SBOM_PATH) is None:
             raise LocalStandardLifecycleError(
                 "admitted source tree lost its source CycloneDX BOM"
@@ -2239,6 +2260,10 @@ class LocalStandardLifecyclePorts:
                 None if python_observer is None else python_observer.source
             ),
             python_dependency_observer=python_observer,
+            mix_source_authority=(
+                None if mix_observer is None else mix_observer.source
+            ),
+            mix_dependency_observer=mix_observer,
             allow_missing_cargo_lock=(
                 additional_build_evidence is not None
                 and additional_build_evidence.get("cargo_lifecycle_profile") is True
@@ -2661,6 +2686,11 @@ class LocalStandardLifecyclePorts:
             result.native_sdk_execution_identity = evidence
             self._record_evidence(plan.to_dict())
             return result
+
+    @property
+    def command_phases(self) -> tuple[ComponentCommandPhase, ...]:
+        """Component command phases this host may run; empty when workers run them."""
+        return tuple(sorted(self._command_phases, key=lambda item: item.value))
 
     def _require_command_phase(self, phase: ComponentCommandPhase) -> None:
         if phase not in self._command_phases:
@@ -4679,7 +4709,11 @@ class LocalStandardLifecyclePorts:
             provider_artifacts=providers,
             now=self.clock(),
         )
-        self._require_execution_authority(evidence.execution_authority, providers)
+        self._require_execution_authority(
+            evidence.execution_authority,
+            providers,
+            at=evidence.execution_authorized_at,
+        )
         for identity, content in records:
             self.retain_evidence_record(identity, content)
         admission_guard()
@@ -4692,7 +4726,11 @@ class LocalStandardLifecyclePorts:
             raise LocalStandardLifecycleError("transferred EXECUTE authority changed")
         if scope is None and self._intent_artifacts_for_plan(plan) != providers:
             raise LocalStandardLifecycleError("transferred EXECUTE providers changed")
-        self._require_execution_authority(evidence.execution_authority, providers)
+        self._require_execution_authority(
+            evidence.execution_authority,
+            providers,
+            at=evidence.execution_authorized_at,
+        )
         admission_guard()
         self._execution_evidence[evidence.identity.uri] = evidence
         self.execution_stdout[plan.component_revision.uri] = stdout
@@ -4998,10 +5036,14 @@ class LocalStandardLifecyclePorts:
         self,
         authority: StandardExecutionAuthority | None,
         providers: tuple[ArtifactExport, ...],
-    ) -> None:
+        *,
+        at: datetime | None = None,
+    ) -> datetime | None:
+        """Check the grant at ``at`` (default now); return the time checked."""
         if authority is None:
-            return
-        authority.require_valid(now=self.clock())
+            return None
+        checked = self.clock() if at is None else at
+        authority.require_valid(now=checked)
         if (
             tuple(item.identity for item in providers)
             != authority.input_scope.provider_artifact_identities
@@ -5057,6 +5099,7 @@ class LocalStandardLifecyclePorts:
                         )
                     scheduled.add(identity)
                     pending.append(dependency)
+        return checked
 
     def execute(
         self, plan: StandardComponentBuildPlan, exports: tuple[ArtifactExport, ...]
@@ -5092,7 +5135,7 @@ class LocalStandardLifecyclePorts:
                 export_path=artifact / contract.artifact_export.export_id,
                 providers=providers,
             )
-            self._require_execution_authority(authority, providers)
+            authorized_at = self._require_execution_authority(authority, providers)
         except Exception as error:
             self._record_failure_diagnostic(
                 plan.component_revision.uri, f"{type(error).__name__}: {error}"
@@ -5112,6 +5155,7 @@ class LocalStandardLifecyclePorts:
         ).identity
         evidence = StandardExecutionEvidence(
             execution_authority=authority,
+            execution_authorized_at=authorized_at,
             component_revision=plan.component_revision,
             build_evidence_identity=build.identity,
             provider_artifact_identities=tuple(
@@ -5188,7 +5232,7 @@ class LocalStandardLifecyclePorts:
                     providers=providers,
                     entrypoint_contract=entrypoint,
                 )
-                self._require_execution_authority(authority, providers)
+                authorized_at = self._require_execution_authority(authority, providers)
             except Exception as error:
                 self._record_failure_diagnostic(
                     plan.component_revision.uri,
@@ -5233,6 +5277,7 @@ class LocalStandardLifecyclePorts:
         root_export = by_export_id[contract.artifact_export.export_id]
         evidence = StandardExecutionEvidence(
             execution_authority=authority,
+            execution_authorized_at=authorized_at,
             component_revision=plan.component_revision,
             build_evidence_identity=build.identity,
             provider_artifact_identities=tuple(
@@ -5334,6 +5379,28 @@ class LocalStandardLifecyclePorts:
             self._record_evidence(evidence.to_dict())
         return evidence
 
+    def acceptance_stage_evidence(self, plan, test_identity, execution_identity):
+        """Read the exact registered stages without composing acceptance."""
+        self.build_execution_inputs(plan)
+        try:
+            tests = self._test_evidence[test_identity.uri]
+            execution = self._execution_evidence[execution_identity.uri]
+            build = self._build_evidence[tests.build_evidence_identity.uri]
+        except KeyError as exc:
+            raise LocalStandardLifecycleError(
+                "ACCEPT requires registered stages"
+            ) from exc
+        if (
+            self.build_evidence_for_test(plan, build.exports) != build
+            or execution.build_evidence_identity != build.identity
+            or tests.component_revision != plan.component_revision
+            or execution.component_revision != plan.component_revision
+            or tests.export_identities != build.export_identities
+            or execution.export_identities != build.export_identities
+        ):
+            raise LocalStandardLifecycleError("ACCEPT registered stages differ")
+        return build, tests, execution
+
     def admit_transferred_acceptance(
         self,
         *,
@@ -5428,76 +5495,25 @@ class LocalStandardLifecyclePorts:
     ) -> tuple[ArtifactBuildGraph, ExactLinkPlan]:
         """Assemble one exact multi-Component graph from accepted local exports."""
 
-        if not isinstance(component_lock, ComponentLock):
-            raise TypeError("component_lock must be a ComponentLock")
-        if not isinstance(project_build_plan, StandardProjectBuildPlan):
-            raise TypeError("project_build_plan must be a StandardProjectBuildPlan")
-        if (
-            component_lock.identity != execution_plan.component_lock_identity
-            or project_build_plan.execution_plan_identity != execution_plan.identity
-        ):
-            raise LocalStandardLifecycleError(
-                "project artifact assembly received foreign authority"
-            )
         from literate_ai.application.release_artifacts import (
-            plan_standard_assembly_dependencies,
+            ReleaseArtifactAssemblyError,
+            assemble_standard_project_artifacts,
         )
 
-        assembly_dependencies = plan_standard_assembly_dependencies(
-            execution_plan, results
-        )
-        by_revision = {item.component_revision.uri: item for item in results}
-        planned = {
-            item.component_revision.uri: item for item in project_build_plan.components
-        }
-        locked = {item.revision.identity.uri for item in component_lock.nodes}
-        if set(by_revision) != set(planned) or set(planned) != locked:
-            raise LocalStandardLifecycleError(
-                "project artifact assembly requires every exact locked Component"
+        if not isinstance(component_lock, ComponentLock):
+            raise TypeError("component_lock must be a ComponentLock")
+        try:
+            return assemble_standard_project_artifacts(
+                component_lock,
+                execution_plan,
+                project_build_plan,
+                results,
+                primary_export_id=self._contract(
+                    component_lock.root_revision
+                ).artifact_export.export_id,
             )
-        manifests = tuple(
-            realize_manifest(plan.manifest, by_revision[uri].exports)
-            for uri, plan in sorted(planned.items())
-        )
-        drivers = {item.build_system_driver_identity for item in manifests}
-        if len(drivers) != 1:
-            raise LocalStandardLifecycleError(
-                "one project artifact graph requires one exact build-system driver"
-            )
-        root_result = by_revision[component_lock.root_revision.uri]
-        if not root_result.exports:
-            raise LocalStandardLifecycleError("root Component has no built export")
-        root_contract = self._contract(component_lock.root_revision)
-        primary_root = next(
-            item
-            for item in root_result.exports
-            if item.export_id == root_contract.artifact_export.export_id
-        )
-        if len(root_result.exports) > 1:
-            graph = create_artifact_build_graph(
-                build_system_driver_identity=next(iter(drivers)),
-                manifests=manifests,
-                assembly_dependencies=assembly_dependencies,
-                link_roots=(),
-                link_root_groups=(
-                    (
-                        primary_root.identity,
-                        *(
-                            item.identity
-                            for item in root_result.exports
-                            if item is not primary_root
-                        ),
-                    ),
-                ),
-            )
-        else:
-            graph = create_artifact_build_graph(
-                build_system_driver_identity=next(iter(drivers)),
-                manifests=manifests,
-                assembly_dependencies=assembly_dependencies,
-                link_roots=(primary_root.identity,),
-            )
-        return graph, graph.link_plans[0]
+        except ReleaseArtifactAssemblyError as exc:
+            raise LocalStandardLifecycleError(str(exc)) from exc
 
     def _root_package_entrypoint(
         self, component_lock: ComponentLock
@@ -5785,7 +5801,16 @@ class LocalStandardLifecyclePorts:
                 return sdk_resources.read_blob(reference)
             return self.read_artifact_blob(reference)
 
-        result = DirectoryPackageAdapter().package(plan, read_blob=read_package_blob)
+        result = (
+            DirectoryPackageAdapter().package(plan, read_blob=read_package_blob)
+            if self.project_packager is None
+            else self.project_packager.package_local_inputs(
+                artifact_graph, plan, read_blob=read_package_blob
+            )
+        )
+        from literate_ai.application.packaging import verify_package_result
+
+        verify_package_result(plan, result, read_blob=read_package_blob)
         package_parent = self.object_root / "project-packages"
         package_parent.mkdir(parents=True, exist_ok=True)
         staging = Path(
@@ -8133,9 +8158,13 @@ class LocalStandardLifecyclePorts:
             ]
         ).decode("utf-8")
         surface_document = canonical_json_bytes(surface.to_dict()).decode("utf-8")
-        suffix = {"python": ".py", "javascript": ".js", "rust": ".rs", "cpp": ".cpp"}[
-            oracle.language
-        ]
+        suffix = {
+            "python": ".py",
+            "javascript": ".js",
+            "rust": ".rs",
+            "cpp": ".cpp",
+            "elixir": ".exs",
+        }[oracle.language]
         acceptance_toolchain = contract.library_acceptance_toolchain_identity
         assert acceptance_toolchain is not None
         binding = self.tool_bindings[acceptance_toolchain.uri]

@@ -41,6 +41,9 @@ class Stage5AcceptanceTests(unittest.TestCase):
                 # Generation is mocked here; skip the live-model preflight so it
                 # does not intercept the sample-acceptance paths under test.
                 "LITAI_SKIP_MODEL_PREFLIGHT": "1",
+                # A worker release gate marks itself remote, which demands
+                # remote model credentials before the mocked generator runs.
+                "LITAI_REMOTE_LIVE_GATE": "",
             },
             clear=False,
         )

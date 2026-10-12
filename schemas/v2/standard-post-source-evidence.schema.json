@@ -183,6 +183,7 @@
         "stderr_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"},
         "exit_code": {"const": 0},
         "execution_authority": {"$ref": "urn:literate-ai:schema:v2:standard-execution-authority"},
+        "execution_authorized_at": {"type": "string", "format": "date-time"},
         "provider_artifact_identities": {
           "type": "array",
           "maxItems": 16384,
@@ -196,6 +197,10 @@
           "items": {"$ref": "urn:literate-ai:schema:v2:standard-entrypoint-execution-evidence"}
         },
         "outcome": {"const": "passed"}
+      },
+      "dependentRequired": {
+        "execution_authority": ["execution_authorized_at"],
+        "execution_authorized_at": ["execution_authority"]
       }
     },
     "standard_entrypoint_execution_evidence": {

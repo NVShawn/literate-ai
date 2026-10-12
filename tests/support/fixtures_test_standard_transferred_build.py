@@ -45,6 +45,28 @@ from tests.support.fixtures_test_standard_local_command_adapter import (
 )
 
 
+def _leaf_generation_plan(execution):
+    """The first plan that consumes no provider, so it builds and runs alone.
+
+    Plans sort by content identity, which follows the real skill bytes the
+    fixture reads; the first plan can therefore be any Component in the chain.
+    """
+
+    consumers = {
+        edge.consumer_revision
+        for action in execution.action_plans
+        for edge in action.dependency_edges
+    }
+    return next(
+        (
+            plan
+            for plan in execution.generation_plans
+            if plan.component_revision not in consumers
+        ),
+        execution.generation_plans[0],
+    )
+
+
 class StandardTransferredBuildTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -52,7 +74,11 @@ class StandardTransferredBuildTests(unittest.TestCase):
         self.root = Path(temporary.name).resolve()
         producer_root = self.root / "producer"
         producer_root.mkdir()
-        self.producer, _, candidate, intent = _python_copy_lifecycle(producer_root)
+        _, execution = _fixture()
+        provider = _leaf_generation_plan(execution)
+        self.producer, _, candidate, intent = _python_copy_lifecycle(
+            producer_root, generation_plan=provider
+        )
         contract = next(iter(self.producer.contracts.values()))
         test_command = contract.command(ComponentCommandPhase.TEST)
         script = (
@@ -78,10 +104,7 @@ class StandardTransferredBuildTests(unittest.TestCase):
             contracts=(contract,),
             tool_bindings=tuple(self.producer.tool_bindings.values()),
         )
-        _, execution = _fixture()
-        intent = self.producer.create(
-            execution, execution.generation_plans[0], candidate, (), ()
-        )
+        intent = self.producer.create(execution, provider, candidate, (), ())
         authorization = self.producer.authorize(intent, _identity("index"))
         self.inputs = self.producer.plan_finalization_inputs(intent, authorization)
         self.plan = self.producer.finalize(intent, authorization)
@@ -99,10 +122,7 @@ class StandardTransferredBuildTests(unittest.TestCase):
             contracts=tuple(self.producer.contracts.values()),
             tool_bindings=tuple(self.producer.tool_bindings.values()),
         )
-        _, execution = _fixture()
-        received_intent = self.receiver.create(
-            execution, execution.generation_plans[0], candidate, (), ()
-        )
+        received_intent = self.receiver.create(execution, provider, candidate, (), ())
         self.receiver.accept_finalized_plan(received_intent, authorization, self.plan)
         self.artifact = self.receiver.object_root / "transferred"
         producer_artifact = self.producer.artifact_path(self.output.exports[0]).parent
@@ -316,7 +336,7 @@ class StandardTransferredBuildTests(unittest.TestCase):
         )
         _, execution = _fixture()
         intent = producer.create(
-            execution, execution.generation_plans[0], candidate, (), ()
+            execution, _leaf_generation_plan(execution), candidate, (), ()
         )
         authorization = producer.authorize(
             intent,
@@ -336,7 +356,7 @@ class StandardTransferredBuildTests(unittest.TestCase):
         )
         self.assertNotIn(build_tool.toolchain_identity.uri, receiver.tool_bindings)
         received_intent = receiver.create(
-            execution, execution.generation_plans[0], candidate, (), ()
+            execution, _leaf_generation_plan(execution), candidate, (), ()
         )
         receiver.accept_finalized_plan(received_intent, authorization, plan)
         worker_cas = FileSystemCAS(self.root / "scoped-worker-cas")
@@ -351,7 +371,7 @@ class StandardTransferredBuildTests(unittest.TestCase):
         )
         input_record = BuildWorkerInput(
             execution.identity,
-            execution.generation_plans[0].identity,
+            _leaf_generation_plan(execution).identity,
             candidate,
             plan,
             inputs,
@@ -359,7 +379,7 @@ class StandardTransferredBuildTests(unittest.TestCase):
             source.validation_inputs(candidate.tree_identity),
             custody.source_generation_identity,
             custody.identity,
-            execution.generation_plans[0],
+            _leaf_generation_plan(execution),
             execution,
         ).to_bytes()
         input_identity = record_identity(input_record)

@@ -2,8 +2,9 @@
 name: prompt-master
 description: >
   Translate a user's rough request into one bounded, provider-aware coding-agent task
-  when Literate AI is being used directly without a MAC task envelope. Do not use for
-  MAC-originated work, ordinary conversation, or to modify resolved project authority.
+  when Literate AI is being used directly without an external task envelope. Do not
+  use for work an external task system already translated, ordinary conversation, or
+  to modify resolved project authority.
 metadata:
   author: "Literate AI maintainers <literate-ai-maintainers@users.noreply.github.com>"
   upstream: "https://github.com/nidhinjs/prompt-master"
@@ -27,13 +28,16 @@ Apply this skill only when **all** of these are true:
 
 - the user is interacting directly with Literate AI or one of its supported coding
   agents;
-- no MAC/task-ledger envelope identifies an already translated task; and
+- no external task envelope (`LITAI_EXTERNAL_TASK_ID`, from an agent ledger or task
+  system) identifies an already translated task; and
 - the rough request must become a coding-agent task or implementation prompt.
 
-When MAC supplies the task, do not invoke this skill. MAC uses the upstream technique
-between its task and provider layers; translating again could alter scope, stop
-conditions, or correlation semantics. Consume the MAC task exactly as supplied, while
-keeping task/correlation IDs outside semantic generation and cache identities.
+When an external task system supplies the task, do not invoke this skill. Such a
+system translates between its own task and provider layers; translating again could
+alter scope, stop conditions, or correlation semantics. Consume the supplied task
+exactly, while keeping task/correlation IDs outside semantic generation and cache
+identities. A forge issue is not such an envelope: an issue filed by a user or agent is
+a rough request this skill may translate.
 
 ## Authority boundary
 

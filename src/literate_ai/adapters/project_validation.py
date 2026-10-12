@@ -443,7 +443,12 @@ def _catalog_file_identities(
     return tuple(report)
 
 
-def _validate_component_authoring(manifest: Path, project: Any) -> dict[str, object]:
+def _validate_component_authoring(
+    manifest: Path,
+    project: Any,
+    *,
+    admitted_cache: dict[str, frozenset[Path]] | None = None,
+) -> dict[str, object]:
     closure = PinnedInputClosure()
     try:
         content = closure.pin(
@@ -472,10 +477,17 @@ def _validate_component_authoring(manifest: Path, project: Any) -> dict[str, obj
                 "generate.skill_required",
                 "Component source generation requires a specification-to-source skill",
             )
-        try:
-            admitted_skills = frozenset(specification_to_source_skill_paths(project))
-        except ProjectError as exc:
-            _error(exc, "project.skill_invalid", "project skill catalog is invalid")
+        # One catalog load per validation run serves every Component; it is
+        # loaded lazily so a run without generating Components never loads it.
+        cached = None if admitted_cache is None else admitted_cache.get("skills")
+        if cached is None:
+            try:
+                cached = frozenset(specification_to_source_skill_paths(project))
+            except ProjectError as exc:
+                _error(exc, "project.skill_invalid", "project skill catalog is invalid")
+            if admitted_cache is not None:
+                admitted_cache["skills"] = cached
+        admitted_skills = cached
         for selector in generation_skills:
             selected = project.root.joinpath(*Path(selector.uri).parts).resolve()
             if selected not in admitted_skills:
@@ -756,6 +768,7 @@ class FilesystemProjectValidationAdapter:
         except Exception as exc:
             _error(exc, "generate.invalid_flavor", "Flavor catalog is invalid")
         components: list[dict[str, object]] = []
+        admitted_cache: dict[str, frozenset[Path]] = {}
         for root in project.roots("component"):
             authored_directories: set[Path] = set()
             for manifest in sorted(root.rglob("component.md")):
@@ -765,7 +778,11 @@ class FilesystemProjectValidationAdapter:
                         "Component authoring documents must be regular files",
                     )
                 authored_directories.add(manifest.parent)
-                components.append(_validate_component_authoring(manifest, project))
+                components.append(
+                    _validate_component_authoring(
+                        manifest, project, admitted_cache=admitted_cache
+                    )
+                )
             for manifest in sorted(root.rglob("component.json")):
                 if manifest.parent in authored_directories:
                     continue

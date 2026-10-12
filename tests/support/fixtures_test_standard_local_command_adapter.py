@@ -60,9 +60,9 @@ def copy_digest_cache_without_sidecars(source: Path, destination: Path) -> None:
         shutil.copytree(child, destination / child.name)
 
 
-def _python_copy_lifecycle(root: Path):
-    snapshot, execution = _fixture()
-    generation_plan = execution.generation_plans[0]
+def _python_copy_lifecycle(root: Path, *, prepared=None, generation_plan=None):
+    snapshot, execution = prepared or _fixture()
+    generation_plan = generation_plan or execution.generation_plans[0]
     binding = LocalComponentToolBinding(sys.executable)
     build_script = (
         "from pathlib import Path; import shutil,sys; "

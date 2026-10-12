@@ -116,6 +116,9 @@ class ActionExecutionConfigurationTests(unittest.TestCase):
         with source_cas_server(self.factory.admission.fixture.blobs) as (url, requests):
             self.configure(url)
             self.configuration["source_handoff"] = "http-cas"
+            self.configuration["result_sources"] = {
+                "index": {"kind": "http-cas", "endpoint": url, "allow_http": True}
+            }
             self.load()
             with patch.dict(os.environ, self.environment, clear=True):
                 adapter = self.factory.assemble()

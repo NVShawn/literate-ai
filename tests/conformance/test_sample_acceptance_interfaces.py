@@ -234,7 +234,7 @@ class SampleAcceptanceInterfaceTests(unittest.TestCase):
                 self.assertIn("Generation-safe invocation contract", prompt)
                 self.assertIn('"invocation_signatures"', prompt)
                 self.assertIn('"result_shape"', prompt)
-                self.assertIn('"arity":1', prompt)
+                self.assertIn('"arity": 1', prompt)
                 self.assertNotIn(interface_document.content, prompt)
                 self.assertNotIn(oracle_reference.uri, prompt)
                 self.assertNotIn(oracle_reference.identity.uri, prompt)

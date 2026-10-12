@@ -3301,7 +3301,7 @@
   "tests_before": 5,
   "kept_tests": 2,
   "location": "tests.smoke.test_prompt_routing",
-  "protects": "`litai prompt translate` wraps a request in a bounded envelope and fails closed on MAC envelopes/empty input."
+  "protects": "`litai prompt translate` wraps a request in a bounded envelope and fails closed on external task envelopes/empty input."
  },
  {
   "module": "tests.unit.test_provider_resolution",

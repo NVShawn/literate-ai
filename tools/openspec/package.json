@@ -10,7 +10,8 @@
   "devDependencies": {
     "@fission-ai/openspec": "1.7.0",
     "@mermaid-js/mermaid-cli": "11.16.0",
-    "puppeteer": "25.10.0"
+    "puppeteer": "25.10.0",
+    "yauzl": "3.4.0"
   },
   "scripts": {
     "dependencies:check": "node scripts/check-npm-audit.mjs",

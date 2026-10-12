@@ -23,6 +23,7 @@ from literate_ai.contracts.cargo_workspace import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.retained_cargo_tests import RetainedCargoTestTarget
+from tests.support.loader_environment import without_empty_loader_entries
 
 FILES = {
     "Cargo.toml": """[workspace]
@@ -88,7 +89,7 @@ class RetainedCargoNativeTestExecutionTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text)
         cls.environment = {
-            **os.environ,
+            **without_empty_loader_entries(os.environ),
             "CARGO_HOME": str(cls.root / "home"),
             "CARGO_TARGET_DIR": str(cls.root / "out"),
             "CARGO_NET_OFFLINE": "true",

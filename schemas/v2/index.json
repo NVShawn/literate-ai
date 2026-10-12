@@ -85,7 +85,8 @@
         "literate-ai/prepared-release@1",
         "literate-ai/prepared-release@2",
         "literate-ai/release-publication-receipt@1",
-        "literate-ai/release-published-verification@1"
+        "literate-ai/release-published-verification@1",
+        "literate-ai/release-qualification@1"
       ]
     },
     {
@@ -575,6 +576,7 @@
         "urn:literate-ai:schema:v2:standard-make-command-profile",
         "urn:literate-ai:schema:v2:standard-cmake-command-profile",
         "urn:literate-ai:schema:v2:standard-cargo-command-profile",
+        "urn:literate-ai:schema:v2:standard-mix-command-profile",
         "urn:literate-ai:schema:v2:standard-npm-command-profile",
         "urn:literate-ai:schema:v2:standard-python-wheel-command-profile",
         "urn:literate-ai:schema:v2:standard-platform-command-profile",

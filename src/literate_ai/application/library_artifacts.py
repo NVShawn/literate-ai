@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from literate_ai.contracts import ContentIdentity, CppLibraryLayout
+from literate_ai.contracts.elixir_libraries import elixir_namespace
 from literate_ai.contracts.executable_components.commands import (
     LibraryCapabilityImport,
     LibraryImportSurface,
@@ -55,7 +56,13 @@ def project_library_import_surface(
         relative = capability.removeprefix(prefix)
         segments = tuple(part.replace("-", "_") for part in relative.split("."))
         symbol = segments[-1]
-        if language == "python":
+        if language == "elixir":
+            module = (
+                elixir_namespace(package)
+                + "."
+                + "".join(part[:1].upper() + part[1:] for part in symbol.split("_"))
+            )
+        elif language == "python":
             module = f"{package}.{symbol}"
         elif language == "javascript":
             module = f"{package}/{symbol}"

@@ -62,7 +62,7 @@ development (2026-09-10):
 | Category | Current count | Notes |
 | --- | --- | --- |
 | Language Flavors | 9 (`lang-cpp`, `lang-elixir`, `lang-go`, `lang-javascript`, `lang-python`, `lang-rust`, `lang-swift`, `lang-typescript`, `lang-zig`) | Each pairs a language Flavor with a portable-application skill and a native/tree build strategy. Bare selectors (`+cpp`) still resolve. |
-| Build-system Flavors | 5 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
+| Build-system Flavors | 6 (`build-bazel`, `build-cargo`, `build-cmake`, `build-make`, `build-mix`, `build-repo-man`) | Goal 5 treats Bazel and Make as the first-class pair; Cargo, CMake, and repo-man remain cataloged. |
 | OS Flavors | 3 (`os-linux`, `os-macos`, `os-windows`) | |
 | Packaging Flavors | 9 (`package-apt`, `package-brew`, `package-cargo`, `package-chocolatey`, `package-conan`, `package-npm`, `package-pip`, `package-winget`, `package-zip`) | Canonical axis-prefixed names; do not keep flat alias directories beside them. |
 | Toolchain Flavors | 4 (`toolchain-zig-cc`, `toolchain-swift-apple`, `toolchain-swift-linux`, `toolchain-swift-windows`) | |
@@ -91,9 +91,15 @@ standard package lifecycle. Exact accepted custody, both SBOMs, specifications,
 target identities and release authorization remain mandatory. Qualification is pending.
 
 ELIXIR-001 adds the portable Elixir/OTP application Flavor under Goal 5, including
-Standard script-tree build/runtime contracts and initialized-project assets. All
-eight focused tests pass, including native macOS smoke on Elixir 1.20.4/OTP 29;
-live generation and native Linux/Windows qualification remain release gates.
+Standard script-tree build/runtime contracts and initialized-project assets.
+ELIXIR-002 ([PR #45](https://github.com/jordanhubbard/literate-ai/pull/45)) adds the
+`build-mix` Flavor and `mix-build-system` skill: checksum-pinned Hex dependency
+locking, an authorized native Mix builder, Mix library exports bound to sealed
+producer identities and current consumer grants, and native qualification of
+transitive library graphs, packaging after source retirement, retained-evidence
+reopening and tamper/revocation refusal. The contributor reports all eighteen native
+Elixir/Mix fixtures passing on macOS, Linux and Windows at Elixir 1.18.0/OTP 27.0 and
+1.20.4/OTP 29.1.1. Hosted CI and public retained Mix importer admission remain open.
 
 RELEASE-INVARIANTS-001 is a release-blocking repair under Goals 1, 4 and 6:
 enforce SemVer release identity and release-branch/tag ownership for the framework
@@ -122,6 +128,9 @@ nodes across compatible private workers, provider-neutral local/LAN cache reuse 
 test, Bazel/sccache build, package, and container artifacts, and the exact-main
 release branch through published verification. Existing 1.1 entries remain historical
 evidence, not proof that their unchecked acceptance or stale release targets are done.
+By maintainer decision on 2026-10-10, three-way update merging (UPDATE-MERGE-002,
+issue #2) and production DAG dispatch with shared LAN-cache qualification
+(RELEASE-INTEGRATION-003, issue #4) are deferred to 1.3; 1.2 ships their foundations.
 
 NVIDIA-LIBS-001 extends Goals 2, 4, 5, and 6 with capability-first discovery,
 installation, and integration of NVIDIA accelerated libraries across supported
@@ -235,7 +244,10 @@ HTML observability now passes the real installed-wheel parent-update journey:
 declared artifacts become stale after changed inherited authority, regenerate with
 current provenance, and open as one file in desktop/mobile browsers. The compact
 agent wrapper and read-only verification gate are implemented under OBSERVE-HTML-001.
-Hosted integration, broader observability phases and release qualification remain open.
+Historical graph and health-view hosted qualification is recorded. Remaining HTML
+work is durable build/test-run history, cross-project shell controls and later-view
+installed/browser qualification; the [reconciled umbrella](docs/roadmap/html-observability-completion.md)
+tracks these separately from full release qualification.
 Git-submodule orchestration now exposes read-only plan/check over exact child pins
 and explicit dependency declarations. Its typed modern-manifest binding now separates
 persistent child pins/relationships from local checkout observations and rejects

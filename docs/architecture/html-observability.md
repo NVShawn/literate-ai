@@ -3,8 +3,9 @@
 The accepted [HTML observability contract](../../schemas/v2/html-observability.schema.json)
 describes single-file, regenerable views over existing JSON. It does not introduce
 a planner, dashboard daemon, server, or new source of project authority. The
-[Phase 0/1 plan](../roadmap/observe-html-phase-0-1-plan.md) owns implementation and
-acceptance. `litai render html` and its staleness gate now share source loading and
+[archived Phase 0/1 plan](../history/roadmap/observe-html-phase-0-1-plan.md) records
+the graph implementation and acceptance. The [current scope audit](../roadmap/html-observability-completion.md)
+owns remaining umbrella obligations. `litai render html` and its staleness gate now share source loading and
 exact output reconstruction. The [active roadmap](../roadmap/active-work.md) records
 qualification by source revision; implemented views are not automatically release-qualified.
 Typed core records live in `literate_ai.contracts.html_observability`.

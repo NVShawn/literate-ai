@@ -1,6 +1,6 @@
 ---
 name: write-mac-project-contract
-description: Create or refresh a MAC-compatible .mac/project.yaml repository contract from an exact Literate AI post-build CycloneDX BOM. Use when connecting a Literate AI project to MAC runners or OpenShell-sandboxed execution, after build dependency resolution has produced the resolved BOM.
+description: Create or refresh a MAC-compatible .mac/project.yaml repository contract from an exact Literate AI post-build CycloneDX BOM. Use only when a project opts into MAC runners or OpenShell-sandboxed execution, after build dependency resolution has produced the resolved BOM; it is a build/test runner contract, not task tracking.
 metadata:
   author: Literate AI maintainers <literate-ai-maintainers@users.noreply.github.com>
 ---
@@ -13,7 +13,8 @@ second dependency-analysis path beside CycloneDX.
 
 ## Preconditions
 
-1. Read the project `SKILL.md` and its current work queue.
+1. Read the project `SKILL.md`. This contract only lets MAC runners build and test the
+   project; issues, reviews, and agent coordination stay on the project's tracker.
 2. Build the intended Component/Flavor selection successfully. Locate that lifecycle's
    exact `.literate/resolved-sbom.cdx.json` post-build artifact.
 3. Require the BOM to contain the complete component, selected-Flavor, selected-skill,

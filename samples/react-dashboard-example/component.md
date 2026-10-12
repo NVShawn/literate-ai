@@ -86,6 +86,7 @@ data.
 - **WHEN** the user deselects one previously selected statistic
 - **THEN** the dashboard still holds the complete previously fetched dataset and only
   the graph/table rendering changes
+- **AND** its fetch count, which includes the initial load, is still 1
 
 ### Requirement: Graph view overlays selected series
 

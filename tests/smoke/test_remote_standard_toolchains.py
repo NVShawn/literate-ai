@@ -139,7 +139,8 @@ class RemoteStandardToolchainTests(unittest.TestCase):
             )
             tool.require_unchanged()
         pool.environment["BUILD_SETTING"] = "changed"
-        with self.assertRaises(ActionWireError):
-            tool.require_unchanged()
+        # Discovery reads keep the cheap admission check; the closure guard
+        # probes the worker's live profile before trusting its dependencies.
+        tool.require_unchanged()
         with self.assertRaises(ActionWireError):
             closure.require_unchanged()

@@ -120,7 +120,7 @@ class RemoteStandardToolchains:
         )
 
         def verify(selectors):
-            admission.revalidate(worker)
+            admission.require_current(worker)
             current = probe_command_action_capabilities(
                 selected,
                 admission.deadline,
@@ -137,12 +137,15 @@ class RemoteStandardToolchains:
                 cwd=admission.cwd,
                 environment=admission.environment,
             )
-            admission.revalidate(worker)
+            admission.require_current(worker)
             return result
 
+        # Discovery reads use the cheap admission check. Each selector or
+        # dependency observation probes the worker's capability directly, and the
+        # dispatcher fully revalidates the worker at every action boundary.
         return cls(
             observed,
-            require_current=lambda: admission.revalidate(worker),
+            require_current=lambda: admission.require_current(worker),
             verify_selectors=verify,
         )
 

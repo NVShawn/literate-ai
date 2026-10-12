@@ -46,12 +46,14 @@ ACTION_OBSERVATION_TIMEOUT_SECONDS = 300
 CAPABILITY_PROTOCOL = "literate-ai/action-capabilities@1"
 MAX_CAPABILITY_BYTES = 32 * 1024
 _MAX_PROBE_SECONDS = 60
-_REQUEST = "literate-ai/action-capability-request@1"
+CAPABILITY_REQUEST_SCHEMA = "literate-ai/action-capability-request@1"
+_REQUEST = CAPABILITY_REQUEST_SCHEMA
 _RESPONSE = "literate-ai/action-capability-response@1"
 _SUPPORTED = (
     LifecycleActionKind.AUTHORIZE,
     LifecycleActionKind.BUILD_INTENT,
     LifecycleActionKind.INDEX,
+    LifecycleActionKind.LINK,
     LifecycleActionKind.PLAN,
 )
 
@@ -179,6 +181,9 @@ def encode_capability_response(
     execute_toolchains: tuple[ContentIdentity, ...] = (),
     execute_standard_tools: ContentIdentity | None = None,
     accept_profile: ContentIdentity | None = None,
+    generate_profile: ContentIdentity | None = None,
+    package_profile: ContentIdentity | None = None,
+    finalize_profile: ContentIdentity | None = None,
 ) -> bytes:
     if request["worker_identity"] != worker_identity.uri:
         raise ActionWireError(
@@ -194,7 +199,10 @@ def encode_capability_response(
     build = _phase_facts(build_profile, build_toolchains, build_standard_tools)
     test = _phase_facts(test_profile, test_toolchains, test_standard_tools)
     execute = _phase_facts(execute_profile, execute_toolchains, execute_standard_tools)
-    accept = _accept_facts(accept_profile)
+    accept = _profile_facts(accept_profile)
+    generate = _profile_facts(generate_profile)
+    package = _profile_facts(package_profile)
+    finalize = _profile_facts(finalize_profile)
     result = canonical_json_bytes(
         {
             "schema": _RESPONSE,
@@ -212,12 +220,18 @@ def encode_capability_response(
                     *((LifecycleActionKind.TEST,) if test else ()),
                     *((LifecycleActionKind.EXECUTE,) if execute else ()),
                     *((LifecycleActionKind.ACCEPT,) if accept else ()),
+                    *((LifecycleActionKind.GENERATE,) if generate else ()),
+                    *((LifecycleActionKind.PACKAGE,) if package else ()),
+                    *((LifecycleActionKind.FINALIZE,) if finalize else ()),
                 )
             ),
             **({"build": build} if build else {}),
             **({"test": test} if test else {}),
             **({"execute": execute} if execute else {}),
             **({"accept": accept} if accept else {}),
+            **({"generate": generate} if generate else {}),
+            **({"package": package} if package else {}),
+            **({"finalize": finalize} if finalize else {}),
             "source_handoff": ["filesystem-cas", "http-cas"]
             if http_source
             else ["filesystem-cas"],
@@ -229,7 +243,18 @@ def encode_capability_response(
     return result
 
 
-def _accept_facts(profile):
+def package_profile_identity(packager_identity: ContentIdentity) -> ContentIdentity:
+    if not isinstance(packager_identity, ContentIdentity):
+        raise TypeError("packager identity must be typed")
+    return canonical_identity(
+        {
+            "schema": "literate-ai/package-worker-profile@1",
+            "packager_identity": packager_identity.uri,
+        }
+    )
+
+
+def _profile_facts(profile):
     if profile is None:
         return None
     if not isinstance(profile, ContentIdentity):
@@ -283,6 +308,9 @@ class ActionWorkerCapabilities:
     execute_toolchains: tuple[ContentIdentity, ...] = ()
     execute_standard_tools: ContentIdentity | None = None
     accept_profile: ContentIdentity | None = None
+    generate_profile: ContentIdentity | None = None
+    package_profile: ContentIdentity | None = None
+    finalize_profile: ContentIdentity | None = None
 
     def __post_init__(self):
         if (
@@ -310,6 +338,9 @@ class ActionWorkerCapabilities:
                     LifecycleActionKind.TEST,
                     LifecycleActionKind.EXECUTE,
                     LifecycleActionKind.ACCEPT,
+                    LifecycleActionKind.GENERATE,
+                    LifecycleActionKind.PACKAGE,
+                    LifecycleActionKind.FINALIZE,
                 )
                 for item in self.actions
             )
@@ -337,7 +368,16 @@ class ActionWorkerCapabilities:
         if (LifecycleActionKind.EXECUTE in self.actions) != (execute is not None):
             _invalid()
 
-        accept = _accept_facts(self.accept_profile)
+        finalize = _profile_facts(self.finalize_profile)
+        if (LifecycleActionKind.FINALIZE in self.actions) != (finalize is not None):
+            _invalid()
+        package = _profile_facts(self.package_profile)
+        if (LifecycleActionKind.PACKAGE in self.actions) != (package is not None):
+            _invalid()
+        generate = _profile_facts(self.generate_profile)
+        if (LifecycleActionKind.GENERATE in self.actions) != (generate is not None):
+            _invalid()
+        accept = _profile_facts(self.accept_profile)
         if (LifecycleActionKind.ACCEPT in self.actions) != (accept is not None):
             _invalid()
 
@@ -353,7 +393,22 @@ class ActionWorkerCapabilities:
                 "actions": [item.value for item in self.actions],
                 "source_handoff": list(self.source_handoff),
                 **(
-                    {"accept": _accept_facts(self.accept_profile)}
+                    {"finalize": _profile_facts(self.finalize_profile)}
+                    if self.finalize_profile is not None
+                    else {}
+                ),
+                **(
+                    {"package": _profile_facts(self.package_profile)}
+                    if self.package_profile is not None
+                    else {}
+                ),
+                **(
+                    {"generate": _profile_facts(self.generate_profile)}
+                    if self.generate_profile is not None
+                    else {}
+                ),
+                **(
+                    {"accept": _profile_facts(self.accept_profile)}
                     if self.accept_profile is not None
                     else {}
                 ),
@@ -440,7 +495,8 @@ def decode_capability_response(
     value = _load(content)
     try:
         if (
-            set(value) - {"build", "test", "execute", "accept"}
+            set(value)
+            - {"build", "test", "execute", "accept", "generate", "package", "finalize"}
             != {
                 "schema",
                 "protocol",
@@ -483,6 +539,21 @@ def decode_capability_response(
                 or not isinstance(facts["toolchain_identities"], list)
             ):
                 _invalid()
+        finalize = value.get("finalize")
+        if "finalize" in value and (
+            not isinstance(finalize, dict) or set(finalize) != {"profile_identity"}
+        ):
+            _invalid()
+        package = value.get("package")
+        if "package" in value and (
+            not isinstance(package, dict) or set(package) != {"profile_identity"}
+        ):
+            _invalid()
+        generate = value.get("generate")
+        if "generate" in value and (
+            not isinstance(generate, dict) or set(generate) != {"profile_identity"}
+        ):
+            _invalid()
         accept = value.get("accept")
         if "accept" in value and (
             not isinstance(accept, dict) or set(accept) != {"profile_identity"}
@@ -519,6 +590,15 @@ def decode_capability_response(
                 test["standard_tools_identity"]
             )
             if test and "standard_tools_identity" in test
+            else None,
+            finalize_profile=ContentIdentity.parse_uri(finalize["profile_identity"])
+            if finalize
+            else None,
+            package_profile=ContentIdentity.parse_uri(package["profile_identity"])
+            if package
+            else None,
+            generate_profile=ContentIdentity.parse_uri(generate["profile_identity"])
+            if generate
             else None,
             accept_profile=ContentIdentity.parse_uri(accept["profile_identity"])
             if accept

@@ -23,8 +23,8 @@ boundaries. Keeping them separate is the important part.
 | Operator MCP catalog | `skills/agent/configure-operator-mcp/` | Agent discovering session MCPs and writing platform-resolved user `mcps.json` | No |
 | Release Jira association | `skills/agent/associate-release-jira/` | Agent associating a major/minor cut with Jira when that MCP is available | No |
 | Channel work ingest | `skills/agent/ingest-channel-work/` | Agent admitting inbound recipient envelopes into the queue | No |
-| MAC contract projection | `skills/agent/write-mac-project-contract/` | Agent connecting a project to MAC/OpenShell runners | No |
-| Direct prompt-to-task translation | `skills/agent/prompt-master/` plus `litai prompt translate` | Direct Literate AI/coding-agent user without a MAC task envelope | No |
+| MAC contract projection (opt-in; not installed by `litai init`) | `skills/agent/write-mac-project-contract/` | Agent connecting a project to MAC/OpenShell build/test runners | No |
+| Direct prompt-to-task translation | `skills/agent/prompt-master/` plus `litai prompt translate` | Direct Literate AI/coding-agent user, or a forge issue, without an external task envelope | No |
 | Specification to source | `<declared-skill-root>/specification-to-source/` | One exact generation recipe | Yes, only through a content pin |
 | Source to specification | `<declared-skill-root>/source-to-specification/` | The inverse authoring workflow | Only in that workflow |
 
@@ -157,18 +157,23 @@ skill, manifest, source, or PATH authority independently. If the BOM omits selec
 Flavor or skill dependencies, the upstream SBOM projection is incomplete and must be
 fixed there. MAC owns validation, runner routing, and OpenShell policy composition;
 Literate AI only supplies a compatible repository-contract view plus an identity
-sidecar binding it to the source BOM, resolved BOM, and resolved graph.
+sidecar binding it to the source BOM, resolved BOM, and resolved graph. It is a
+build/test runner contract only and is opt-in: `litai init` does not install it, and
+issues, reviews, and agent coordination stay on the project's tracker
+([ADR 0050](../decisions/0050-forge-issues-and-reviews-are-the-default-tracker.md)).
 
 The `prompt-master` Agent Skill adapts
 [`nidhinjs/prompt-master`](https://github.com/nidhinjs/prompt-master) 1.7.0 at exact
 upstream commit `d15eabbe5d2122eedc060bae8a771381e9873d1b` (MIT). It is a direct-use
-boundary only: when a user invokes Literate AI or a supported coding CLI without a MAC
-task envelope, the skill turns the rough request into one provider-aware task with
-scope, constraints, evidence, stop conditions, and a completion contract. It never
+boundary only: when a user invokes Literate AI or a supported coding CLI (or files a
+forge issue) without an external task envelope, the skill turns the rough request into
+one provider-aware task with scope, constraints, evidence, stop conditions, and a
+completion contract. It never
 enters the generation recipe and cannot paraphrase or replace locked Component,
-Flavor, skill, workflow, routing, or authorization authority. When MAC supplies the
-task, this skill is bypassed because MAC applies the same technique between its task and
-provider layers; task/correlation metadata remains outside semantic identities.
+Flavor, skill, workflow, routing, or authorization authority. When an external task
+system supplies an already translated task (`LITAI_EXTERNAL_TASK_ID`), this skill is
+bypassed because that system applies its own translation between its task and provider
+layers; task/correlation metadata remains outside semantic identities.
 
 ## Specification-to-source skills
 

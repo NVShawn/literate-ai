@@ -1073,6 +1073,35 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
                 graph.link_plans[0],
             )
 
+            from literate_ai.adapters.packaging import DirectoryPackageAdapter
+
+            def dispatch_package(remote_graph, remote_plan, *, read_blob):
+                self.assertEqual(remote_graph, graph)
+                self.assertEqual(remote_plan, package_plan)
+                return DirectoryPackageAdapter().package(
+                    remote_plan, read_blob=read_blob
+                )
+
+            ports.project_packager = mock.Mock()
+            ports.project_packager.package_local_inputs.side_effect = dispatch_package
+            remote_plan, remote_result = ports.create_project_package(
+                snapshot.authority.lock,
+                execution,
+                SimpleNamespace(),
+                graph,
+                graph.link_plans[0],
+            )
+            ports.project_packager.package_local_inputs.assert_called_once()
+            self.assertEqual(
+                (remote_plan, remote_result), (package_plan, package_result)
+            )
+            self.assertEqual(
+                ports.project_package_custody(
+                    remote_plan, remote_result
+                ).package_result,
+                package_result,
+            )
+
             self.assertTrue(ports.artifact_path(built.exports[0]).is_dir())
             self.assertEqual(len(tests.cases), 3)
             self.assertEqual(accepted.build.identity, built.evidence.identity)

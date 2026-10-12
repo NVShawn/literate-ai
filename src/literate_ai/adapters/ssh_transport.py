@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import re
 import shlex
 import subprocess
@@ -306,7 +307,40 @@ __all__ = [
     "SshProcessResult",
     "SshProcessRunner",
     "SshTransportError",
+    "powershell_command",
+    "powershell_home_path",
+    "powershell_literal",
     "scp_arguments",
     "scp_download_arguments",
     "ssh_arguments",
 ]
+
+
+def powershell_literal(value: str) -> str:
+    """Quote ``value`` as one verbatim PowerShell string.
+
+    PowerShell also treats U+2018 to U+201B as single quotes, so each is
+    doubled like ``'``; otherwise one could end the literal early.
+    """
+    return "'" + re.sub("(['\u2018-\u201b])", r"\1\1", value) + "'"
+
+
+def powershell_home_path(value: str) -> str:
+    if value.startswith(("~/", "~\\")):
+        relative = value[2:].replace("/", "\\")
+        return f"(Join-Path $HOME {powershell_literal(relative)})"
+    return powershell_literal(value)
+
+
+def powershell_command(script: str) -> str:
+    """Encode one PowerShell script for a Windows OpenSSH worker.
+
+    The script's last native exit status becomes the SSH exit status, and
+    progress records are suppressed so they never reach captured output.
+    """
+
+    body = f"$ProgressPreference = 'SilentlyContinue'; {script}; exit $LASTEXITCODE"
+    encoded = base64.b64encode(body.encode("utf-16-le")).decode("ascii")
+    return (
+        f"powershell.exe -NoLogo -NoProfile -NonInteractive -EncodedCommand {encoded}"
+    )

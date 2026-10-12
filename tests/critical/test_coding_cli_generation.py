@@ -308,6 +308,90 @@ class TestSourceIntelligenceProvider:
         )
 
 
+class SourceSbomAuthorityTests(unittest.TestCase):
+    """A model copy of the root is replaced; a repeated model component is not."""
+
+    def reconcile(self, mutate) -> dict:
+        value = recipe(flavor("python"))
+        canonical, _binding = build_cyclonedx_bom(
+            lifecycle=coding_cli_adapter.CycloneDxLifecycle.SOURCE,
+            managed_graph=value.managed_sbom_graph,
+            composition_aggregate="complete",
+        )
+        document = json.loads(canonical)
+        mutate(document)
+        path = coding_cli_adapter.CYCLONEDX_SOURCE_SBOM_PATH
+        files = {path: json.dumps(document)}
+        with tempfile.TemporaryDirectory() as raw:
+            workspace = Path(raw)
+            workspace.joinpath(path).parent.mkdir(parents=True)
+            coding_cli_adapter._reconcile_authoritative_source_sbom(
+                value, workspace, files
+            )
+        return json.loads(files[path])
+
+    def test_root_repeated_in_components_is_replaced(self):
+        def repeat_root(document):
+            document["components"].append(dict(document["metadata"]["component"]))
+
+        repaired = self.reconcile(repeat_root)
+
+        root = repaired["metadata"]["component"]["bom-ref"]
+        self.assertNotIn(root, [item["bom-ref"] for item in repaired["components"]])
+
+    def test_model_root_copy_cannot_alter_the_root(self):
+        canonical = self.reconcile(lambda document: None)
+
+        def altered_root(document):
+            copy = dict(document["metadata"]["component"])
+            copy["version"] = "9.9.9"
+            copy["hashes"] = [{"alg": "SHA-256", "content": "0" * 64}]
+            copy["properties"] = [{"name": "literate-ai:forged", "value": "x"}]
+            document["components"].append(copy)
+
+        self.assertEqual(self.reconcile(altered_root), canonical)
+
+    def test_third_party_component_cannot_claim_the_root_ref(self):
+        canonical = self.reconcile(lambda document: None)
+
+        def claim_root(document):
+            document["components"].append(
+                {
+                    "type": "library",
+                    "bom-ref": document["metadata"]["component"]["bom-ref"],
+                    "name": "impostor",
+                    "version": "1.0.0",
+                }
+            )
+
+        self.assertEqual(self.reconcile(claim_root), canonical)
+
+    def test_model_component_repeated_is_refused(self):
+        third_party = {
+            "type": "library",
+            "bom-ref": "pkg:pypi/example@1.0.0",
+            "name": "example",
+            "version": "1.0.0",
+        }
+
+        def repeat_component(document):
+            document["components"].extend([third_party, dict(third_party)])
+
+        with self.assertRaises(CodingCliError) as raised:
+            self.reconcile(repeat_component)
+        self.assertEqual(raised.exception.code, "coding_cli.generated_metadata_invalid")
+
+    def test_prompt_documents_fit_a_line_truncating_reader(self):
+        document = json.dumps({"items": ["x" * 40] * 200}).encode()
+
+        rendered = coding_cli_adapter._prompt_json(document)
+
+        self.assertEqual(json.loads(rendered), json.loads(document))
+        self.assertLess(max(map(len, rendered.splitlines())), 2000)
+        prompt = recipe(flavor("python")).prompt()
+        self.assertLess(max(map(len, prompt.splitlines())), 2000)
+
+
 class CodingCliSelectionTests(unittest.TestCase):
     def test_lifecycle_driver_receives_only_selected_provider_credentials(self):
         environment = {
@@ -327,6 +411,32 @@ class CodingCliSelectionTests(unittest.TestCase):
         self.assertEqual(result["ANTHROPIC_API_KEY"], "claude-secret")
         self.assertNotIn("OPENAI_API_KEY", result)
         self.assertNotIn("CURSOR_API_KEY", result)
+
+    def test_lifecycle_driver_defaults_to_the_live_selection_before_path(self):
+        with tempfile.TemporaryDirectory() as tools:
+            codex = Path(tools) / ("codex.exe" if os.name == "nt" else "codex")
+            codex.write_text("")
+            codex.chmod(0o755)
+            for environment, expected in (
+                ({"PATH": tools}, "opencode"),
+                ({"PATH": tools, "CODING_CLI": "claude"}, "claude"),
+            ):
+                with self.subTest(expected=expected):
+                    result = lifecycle_driver_environment(
+                        environment,
+                        tuple(environment),
+                        workspace=Path("/workspace"),
+                        default_coding_cli="opencode",
+                    )
+                    self.assertEqual(result["CODING_CLI"], expected)
+            with self.assertRaises(CodingCliError) as raised:
+                lifecycle_driver_environment(
+                    {"PATH": tools},
+                    ("PATH",),
+                    workspace=Path("/workspace"),
+                    default_coding_cli="bogus",
+                )
+            self.assertEqual(raised.exception.code, "coding_cli.unsupported")
 
     def test_lifecycle_driver_isolates_inherited_session_from_coding_cli(self):
         environment = {
@@ -354,8 +464,142 @@ class CodingCliSelectionTests(unittest.TestCase):
         self.assertNotIn("CODING_CLI", result)
         self.assertNotIn("ANTHROPIC_API_KEY", result)
 
+    def test_live_selection_never_pairs_a_cli_with_another_clis_model(self):
+        from literate_ai.adapters.live_test_selection import (
+            resolve_live_test_selection,
+        )
+
+        with tempfile.TemporaryDirectory() as raw:
+            config = Path(raw) / "test.json"
+            config.write_text(
+                json.dumps(
+                    {
+                        "schema": "literate-ai/global-test-matrix@3",
+                        "coding_cli": "opencode",
+                        "model": "provider/opencode-model",
+                    }
+                )
+            )
+
+            def resolve(environment, **flags):
+                return resolve_live_test_selection(
+                    environment=environment, test_config_path=config, **flags
+                )
+
+            # An ambient CODING_CLI must not borrow the configured opencode model.
+            with self.assertRaises(CodingCliError) as refused:
+                resolve({"CODING_CLI": "claude"})
+            self.assertEqual(
+                refused.exception.code, "coding_cli.test_selection_mismatch"
+            )
+            with self.assertRaises(CodingCliError):
+                resolve({}, coding_cli="claude")
+            # The configured pair, a matching pin, or a pinned model still bind.
+            for environment, flags, expected in (
+                ({}, {}, ("opencode", "provider/opencode-model")),
+                (
+                    {"CODING_CLI": "opencode"},
+                    {},
+                    ("opencode", "provider/opencode-model"),
+                ),
+                (
+                    {"CODING_CLI": "claude", "LITAI_LIVE_MODEL": "claude-model"},
+                    {},
+                    ("claude", "claude-model"),
+                ),
+                ({}, {"coding_cli": "claude", "model": "m"}, ("claude", "m")),
+            ):
+                with self.subTest(environment=environment, flags=flags):
+                    selection = resolve(environment, **flags)
+                    self.assertEqual((selection.coding_cli, selection.model), expected)
+
+    def test_opencode_missing_provider_key_is_typed_authentication(self):
+        output = (
+            "Error: OpenAI API key is missing. Pass it using the 'apiKey' "
+            "parameter or the OPENAI_API_KEY environment variable."
+        )
+        self.assertTrue(
+            coding_cli_adapter._coding_cli_authentication_required("opencode", output)
+        )
+
+    def test_remote_opencode_selection_requires_no_provider_credential(self):
+        from literate_ai.adapters.live_test_selection import (
+            resolve_live_test_selection,
+        )
+
+        with tempfile.TemporaryDirectory() as raw:
+            config = Path(raw) / "test.json"
+            config.write_text(
+                json.dumps(
+                    {
+                        "schema": "literate-ai/global-test-matrix@3",
+                        "coding_cli": "opencode",
+                        "model": "example-provider/vendor/model",
+                    }
+                )
+            )
+            # opencode resolves the provider's credential from its own
+            # configuration, so a remote gate never demands OPENAI_API_KEY.
+            selection = resolve_live_test_selection(
+                environment={"LITAI_REMOTE_LIVE_GATE": "1"},
+                test_config_path=config,
+            )
+            self.assertEqual(
+                (selection.coding_cli, selection.model),
+                ("opencode", "example-provider/vendor/model"),
+            )
+            # Remote gates still require opencode itself.
+            with self.assertRaises(CodingCliError) as refused:
+                resolve_live_test_selection(
+                    environment={
+                        "LITAI_REMOTE_LIVE_GATE": "1",
+                        "CODING_CLI": "claude",
+                        "LITAI_LIVE_MODEL": "claude-model",
+                    },
+                    test_config_path=config,
+                )
+            self.assertEqual(refused.exception.code, "coding_cli.remote_prerequisite")
+
 
 class CodingCliInvocationTests(unittest.TestCase):
+    def test_manifest_numeric_guidance_preserves_canonical_refusal(self):
+        # Invariant: out-of-range generated framework metadata is refused and
+        # never written, while the prompt states the existing signed 64-bit bounds.
+        prompt = recipe(flavor("python")).prompt()
+        self.assertIn("`-9223372036854775808` through `9223372036854775807`", prompt)
+        self.assertIn("These bounds apply to framework metadata", prompt)
+        for number in (-(2**63) - 1, 2**63, 100000000000000000001):
+            with (
+                self.subTest(number=number),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                content = json.dumps({"cases": [{"arguments": [number]}]})
+                files = {GENERATED_TEST_SUITE_PATH: content}
+                with self.assertRaises(CodingCliError) as raised:
+                    coding_cli_adapter._canonicalize_generated_framework_metadata(
+                        Path(directory), files, GENERATED_TEST_SUITE_PATH
+                    )
+                self.assertEqual(
+                    raised.exception.code, "coding_cli.generated_metadata_invalid"
+                )
+                self.assertEqual(files[GENERATED_TEST_SUITE_PATH], content)
+                self.assertFalse((Path(directory) / GENERATED_TEST_SUITE_PATH).exists())
+
+    def test_manifest_canonical_integer_boundaries_remain_valid(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / GENERATED_TEST_SUITE_PATH
+            path.parent.mkdir(parents=True)
+            value = {"cases": [{"arguments": [-(2**63), 2**63 - 1]}]}
+            content = json.dumps(value)
+            path.write_text(content, encoding="utf-8")
+            files = {GENERATED_TEST_SUITE_PATH: content}
+            coding_cli_adapter._canonicalize_generated_framework_metadata(
+                root, files, GENERATED_TEST_SUITE_PATH
+            )
+            self.assertEqual(files[GENERATED_TEST_SUITE_PATH], path.read_text())
+            self.assertEqual(json.loads(path.read_text()), value)
+
     def setUp(self) -> None:
         host_prerequisite = mock.patch.object(
             coding_cli_adapter,

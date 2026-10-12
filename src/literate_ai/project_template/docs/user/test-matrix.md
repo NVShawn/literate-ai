@@ -16,7 +16,8 @@ Live `litai rebuild` / sample generation in an initialized project fails closed 
 project-scoped user `test.json` (or `--coding-cli` / `--model`, or `CODING_CLI` /
 `LITAI_LIVE_MODEL`) names both a coding CLI and a model. Copy the inert
 `coding_cli` and `model` placeholders from `literate.test.example.json`. Remote
-workers require `opencode` and `OPENAI_API_KEY` in the login environment.
+workers require `opencode`, configured with credentials for the pinned model's
+provider (opencode resolves them; Literate AI does not require a specific key).
 
 A one-shot local override does not rewrite user `test.json`:
 

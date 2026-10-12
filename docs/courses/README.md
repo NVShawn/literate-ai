@@ -2,15 +2,17 @@
 
 ## Start here: the continuous video play
 
-**[Watch or download: It Builds. Can We Ship It?](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4)**
+**[Watch or download: Settle the Argument. Before CI.](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4)**
 
-Sam and LitAI introduce themselves, argue about agents and engineering habits,
-work through real greenfield and TinyXML2 sessions, and finish with updates,
-repository inheritance and orchestration. One continuous film, two neural voices,
-visible captions, and SRT/VTT sidecars. This is the **public feedback edition**.
-Running time: **13:38**. [Chapter timestamps](play/CHAPTERS.md).
+LitAI paints the big picture of agentic development; Sam, a skeptical C++/Make
+engineer, calls it the usual AI slop pitch, and seven of his beliefs are settled
+with real terminal sessions recorded against the 1.2 build; remote workers and the
+learning loop are labelled walkthroughs. One continuous film,
+two local neural voices, visible captions, and SRT/VTT sidecars. The 1.1 feedback
+edition (13:38) remains at the `v1.1.0` tag.
+Running time: **11:52**. [Chapter timestamps](play/CHAPTERS.md).
 
-[SRT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.srt) · [WebVTT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.vtt) ·
+[SRT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.srt) · [WebVTT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.vtt) ·
 [Production and limitations](play/README.md) · [Script](play/story.json) ·
 [Rebuildable manifest](../../media/courses/sam-meets-literate-ai/package/course.json) · [Session excerpts](../../media/courses/sam-meets-literate-ai/package/sessions.json) ·
 [Media receipt](../../media/courses/sam-meets-literate-ai/video/video-result.json)

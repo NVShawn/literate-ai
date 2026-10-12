@@ -68,6 +68,11 @@ class UserPaths:
         return self.config_root / "action-execution.json"
 
     @property
+    def worker_alignment(self) -> PurePath:
+        """Private files and installs every worker must hold; never committed."""
+        return self.config_root / "worker-alignment.json"
+
+    @property
     def mcp_catalog(self) -> PurePath:
         return self.config_root / "mcps.json"
 

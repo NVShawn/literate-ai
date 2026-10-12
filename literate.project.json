@@ -54,7 +54,7 @@
     "implementation_identity": {
       "schema": "urn:literate-ai:schema:v1:content-identity",
       "algorithm": "sha256",
-      "digest": "94f3d58700bc7781aad584b1fe0b89dc0be6bb48a6ffa046262cdabbec91a05e"
+      "digest": "1448030f2b4afbf97f20f03d32998442fdbd801ddb5440ac58c7536455233f3e"
     },
     "argv": [
       "{python}",
@@ -134,7 +134,7 @@
     "runner_identity": {
       "schema": "urn:literate-ai:schema:v1:content-identity",
       "algorithm": "sha256",
-      "digest": "39bb2e44349b3579e4b816bdb5bab75d3f804a3f27e4852c6f7ac90a071e8459"
+      "digest": "d42cfdaf6cf2285ad225c9a7c5327610490102fff5155a253ee191e5a6a5fe16"
     },
     "required_evidence_kinds": [
       "acceptance-result",
@@ -164,7 +164,7 @@
     "schema": "literate-ai/repository-policy@1",
     "default_branch": "main",
     "main_state": "pre-release",
-    "pre_release_version": "1.1",
+    "pre_release_version": "1.2",
     "default_component": "samples/hello-component",
     "sample_component_roots": [
       "samples"

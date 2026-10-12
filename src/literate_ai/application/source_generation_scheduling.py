@@ -327,6 +327,29 @@ def source_generation_terminal_result(
     )
 
 
+def reusable_source_generation_output(
+    prepared: PreparedComponentGenerationNode[Any, Any],
+    candidate: SourceGenerationResumeCandidate | None,
+    *,
+    explicitly_invalid: bool,
+) -> SourceGenerationRunOutput | None:
+    """Apply the same resume admission before reserving generation capacity."""
+    _, recipe_identity = _require_complete_node(prepared)
+    if candidate is not None and not isinstance(
+        candidate, SourceGenerationResumeCandidate
+    ):
+        raise SourceGenerationSchedulingError(
+            "source_schedule.candidate_invalid", "resume candidate must be typed"
+        )
+    if (
+        not explicitly_invalid
+        and candidate is not None
+        and _candidate_matches(candidate, prepared, recipe_identity)
+    ):
+        return candidate.output
+    return None
+
+
 def execute_component_source_generation_node(
     prepared: PreparedComponentGenerationNode[Any, Any],
     *,
@@ -338,28 +361,20 @@ def execute_component_source_generation_node(
     """Reuse or generate source for one complete prepared node, then stop."""
 
     _, recipe_identity = _require_complete_node(prepared)
-    if candidate is not None and not isinstance(
-        candidate, SourceGenerationResumeCandidate
-    ):
-        raise SourceGenerationSchedulingError(
-            "source_schedule.candidate_invalid",
-            "resume candidate must be typed",
-        )
+    reused = reusable_source_generation_output(
+        prepared, candidate, explicitly_invalid=explicitly_invalid
+    )
     if not callable(runner):
         raise TypeError("runner must be callable")
-    if (
-        not explicitly_invalid
-        and candidate is not None
-        and _candidate_matches(candidate, prepared, recipe_identity)
-    ):
+    if reused is not None:
         execution = ComponentSourceGenerationExecution(
             _result(
                 prepared,
                 recipe_identity,
                 SourceGenerationDisposition.REUSED,
-                output=candidate.output,
+                output=reused,
             ),
-            candidate.output,
+            reused,
         )
         if context_evidence_recorder is not None:
             context_evidence_recorder.record(prepared, execution.result)

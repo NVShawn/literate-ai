@@ -213,6 +213,7 @@ def create_artifact_build_graph(
     link_roots: Iterable[ContentIdentity],
     link_root_groups: Iterable[tuple[ContentIdentity, ...]] = (),
     assembly_dependencies: Iterable[ArtifactAssemblyDependency] = (),
+    driver_composition: tuple[ContentIdentity, ...] = (),
 ) -> ArtifactBuildGraph:
     """Canonicalize an arbitrary adapter's manifests and derive exact link closures."""
 
@@ -293,6 +294,7 @@ def create_artifact_build_graph(
         manifests=ordered_manifests,
         link_plans=tuple(links),
         assembly_dependencies=dependencies,
+        driver_composition=driver_composition,
     )
 
 

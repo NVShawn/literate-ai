@@ -73,8 +73,14 @@ symlinks. Do not include private addresses, tokens, or personal data.
 
 ## Acceptance and publication
 
-`verify` checks final hashes, picture/audio/subtitle streams, media duration,
-caption ordering and bounds, and a full decoder pass. Add `--manifest` to reject
+`build` measures every rendered scene clip and the final film from their decodable
+samples, not container headers, and reports the film's measured video duration.
+`verify` checks final hashes, then independently re-measures the film: picture and
+audio must carry continuous samples that agree in length, match the receipt
+duration, and cover every narrated caption. Matching hashes alone never accept
+media. Empty media fails with `video.media_empty`; missing, truncated, or
+mismatched durations fail with `video.media_duration`. It also checks streams,
+caption ordering, and a full decoder pass. Add `--manifest` to reject
 stale evidence or changed narration. This is an integrity check, not a signed
 attestation: a person must check claims, listen to speech, and inspect visual
 layout. A receipt does not prove a demo was actually executed and does not

@@ -9,6 +9,9 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+from literate_ai.adapters.accept_handoff import CompletedStagesAcceptHandoff
+from literate_ai.adapters.action_accept_result import import_accept_result
+from literate_ai.adapters.action_accept_worker import ConfiguredAcceptWorker
 from literate_ai.adapters.action_build_result import (
     BuildWorkerResult,
     capture_build_result,
@@ -23,8 +26,10 @@ from literate_ai.adapters.action_execute_record import ExecuteWorkerInput
 from literate_ai.adapters.action_execute_result import import_execute_result
 from literate_ai.adapters.action_execute_result_record import ExecuteWorkerResult
 from literate_ai.adapters.action_execute_worker import ConfiguredExecuteWorker
+from literate_ai.adapters.action_test_record import TestWorkerInput
 from literate_ai.adapters.build_handoff import capture_build_input
 from literate_ai.adapters.builders.python import discover_python_toolchain
+from literate_ai.adapters.execute_handoff import CompletedBuildExecuteHandoff
 from literate_ai.adapters.lifecycle import (
     LocalComponentToolBinding,
     LocalStandardLifecyclePorts,
@@ -39,6 +44,8 @@ from literate_ai.application.standard_execution_inputs import (
 from literate_ai.contracts import canonical_identity
 from literate_ai.storage import FileSystemCAS
 from tests.support.action_deadline import ACTION_TEST_DEADLINE
+from tests.support.command_worker_fixture import _ACCEPT_CHILD
+from tests.support.fixtures_test_action_accept_action import make_accept_request
 from tests.support.fixtures_test_action_execute_action import make_execute_request
 
 _CHILD = """
@@ -65,7 +72,7 @@ raise SystemExit(main(runtime_factory=runtime))
 """
 
 
-def assert_multi_execute_worker(case, ports, execution, plan, output):
+def assert_multi_execute_worker(case, ports, execution, plan, output, tests):
     root = ports.object_root.parent.resolve() / "worker-proof"
     root.mkdir()
     source_cas = FileSystemCAS(root / "source-cas")
@@ -225,4 +232,65 @@ def assert_multi_execute_worker(case, ports, execution, plan, output):
     case.assertEqual(evidence.execution_authority.input_scope, scope)
     case.assertEqual(controller.tool_bindings, {})
     case.assertEqual(controller._execution_evidence[evidence.identity.uri], evidence)
+    controller.admit_transferred_tests(
+        plan=plan,
+        exports=output.exports,
+        evidence=tests,
+        records=ports.retained_evidence_records(),
+        admission_guard=deadline.remaining,
+    )
+    builder = SimpleNamespace(test_handoff=lambda *args: TestWorkerInput(build, result))
+    handoff = CompletedStagesAcceptHandoff(
+        indexer,
+        controller,
+        execution_input_for=CompletedBuildExecuteHandoff(builder, indexer, controller),
+    )
+    handoff.retain_execution_provider_evidence(plan, scope, ())
+    accept_worker = ConfiguredAcceptWorker(
+        LocalComponentToolBinding(
+            sys.executable,
+            ("-c", _ACCEPT_CHILD),
+            authority_identity=canonical_identity(
+                {"runtime": runtime.identity, "code": _ACCEPT_CHILD}
+            ),
+            _authority_guard=runtime.require_unchanged,
+        ),
+        environment=dict(os.environ)
+        | {"PYTHONPATH": str(Path(__file__).resolve().parents[2] / "src")},
+    )
+    case.assertEqual(accept_worker.tools.identities, ())
+    with (
+        patch.object(controller, "accept", side_effect=AssertionError("local ACCEPT")),
+        patch.object(
+            controller, "_run_locked", side_effect=AssertionError("local command")
+        ),
+    ):
+        accept_input = handoff(plan, tests.identity, evidence.identity)
+        accept_request, accept_records = make_accept_request(accept_input, deadline)
+        accepted_content = accept_worker.execute(
+            request=accept_request,
+            deadline=deadline,
+            records=accept_records,
+            expected_worker_identity=accept_request.worker.worker_identity,
+            cas=worker_cas,
+            workspace_root=jobs,
+            blob_source=source_cas.get_bytes,
+        )
+        input_content = accept_input.to_bytes()
+        accepted = import_accept_result(
+            content=accepted_content,
+            result_identity=record_identity(accepted_content),
+            input_record=input_content,
+            input_identity=record_identity(input_content),
+            deadline=deadline,
+            ports=controller,
+            cas=controller_cas,
+            admission_guard=deadline.remaining,
+            blob_source=worker_cas.get_bytes,
+        )
+    case.assertEqual(accepted.generated_tests, tests)
+    case.assertEqual(accepted.execution, evidence)
+    case.assertEqual(accepted.build, result.evidence)
+    case.assertEqual(len(accepted.execution.entrypoint_evidence), 2)
+    case.assertEqual(list(jobs.iterdir()), [])
     return controller.execution_stdout[plan.component_revision.uri]

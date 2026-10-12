@@ -1038,3 +1038,794 @@ original component/edge observation; retain v1 decoding for stored evidence. The
 limit remains 4 MiB. V2 additionally bounds edge count at 65,536 and expanded edge JSON
 at 16 MiB before expansion, preventing a compact document from amplifying unchecked.
 This removes repeated reference text without omitting dependency or loader-context proof.
+
+ACCEPT participates in shared ready-queue admission through
+`AdmittedComponentAcceptor.try_reserve_accept(plan, test, execution)`. Exhausted
+capacity leaves the action ready without occupying a lifecycle executor thread.
+Reservations are released after success, invalid results or exceptions. Current
+authorization and exact source/BUILD/TEST/EXECUTE receipt validation remain applicable
+to reserved results, just as they are to local acceptance. The command acceptor owns
+worker selection and shares the existing admission pool; this protocol adds no pool.
+
+`CommandComponentAcceptor` uses the same admitted catalog and shared INDEX slots.
+Its private handoff must match current registered BUILD, TEST and EXECUTE stages,
+source candidate, execution plan and input authority before reservation and again
+around dispatch/import. Phase availability is checked before reserving capacity.
+Stage lookup is read-only and cannot compose a local acceptance receipt. Returned
+proof uses the explicit return transport and full controller ACCEPT admission;
+there is no local fallback on dispatch, proof or current-authority failure.
+
+Completed-stage ACCEPT handoff capture reconstructs canonical TEST and EXECUTE results
+from exact registered stages and the privately composed scoped EXECUTE input. Reopen
+both process proofs under current source, contract, scope and provider authority, and
+copy only records actually read by those verifiers into the handoff CAS. Unrelated
+retained dispatch records must not perturb input identity. Recheck stage/input/source
+authority during capture and before returning; this operation never calls local ACCEPT.
+
+The lifecycle delivers the same validated full runtime-provider receipt closure to
+each EXECUTE or ACCEPT adapter that declares receipt intake, including an ACCEPT
+worker paired with local execution. A shared receiver receives it once. Receipt
+refusal prevents execution and acceptance; dispatch cannot silently omit providers.
+
+The production factory selects command ACCEPT independently of BUILD, TEST and
+EXECUTE placement, wrapping local BUILD custody when necessary. ACCEPT receives
+validated scoped runtime receipts before execution, retains them under plan/scope
+identity, and composes its handoff through the completed-BUILD EXECUTE capture.
+Missing or changed receipts refuse dispatch. ACCEPT workers require an explicit
+result transport and share the admitted indexer's capacity pool.
+
+Runtime-only provider qualification carries locally produced BUILD custody through
+real command TEST, EXECUTE and ACCEPT children into a controller with no command
+tools. The private ACCEPT runtime supplies the full contract set while exposing no
+application tools. Acceptance preserves the exact tested/executed stages and the
+full runtime-provider identities; provider staging is cleaned after the operation.
+
+Placement qualification also runs local BUILD, TEST and scoped EXECUTE through the
+production completed-stage handoff into a tool-free ACCEPT child. Two-entrypoint
+qualification imports each EXECUTE observation, then runs ACCEPT and checks that
+its receipt retains both entrypoints and the exact generated-test evidence. Local
+acceptance and controller commands are disabled during these transfers.
+
+Source generation participates in the shared ready queue through optional
+`try_reserve_generate` capacity admission. Apply the same exact resume predicate
+before reserving: valid resumed source uses no worker slot. New work reserves
+without blocking other phases, then passes the reserved result through existing
+source-output identity and runtime-budget admission. Always release the reservation,
+including exceptions and refused outputs. This queue boundary is separate from the
+still-required remote generation input, execution and result-transfer implementation.
+
+The GENERATE input record binds the complete execution plan, selected generation
+plan, bounded request, recipe identity, opaque workspace allocation identity and
+prompt blob reference. It does not serialize a controller workspace locator or
+private runtime configuration. Envelope admission bounds the record and prompt
+reference and requires exact plan/request linkage. Before model egress, reopen the
+prompt bytes, verify each manifest segment, and recompute the complete context and
+budget decision using the existing authority projection. Self-consistent hashes
+alone do not establish valid prompt measurements. Execution additionally requires
+private recipe/definition resolution and a worker-owned workspace binding; the
+input record by itself does not implement remote generation.
+
+A private `GenerationWorkspaceBinding` maps an admitted GENERATE allocation to a
+canonical, empty worker directory while retaining the controller's opaque logical
+allocation identity. Pin both directory and parent nodes, bind the exact plan,
+request and concrete recipe, and verify prompt authority before constructing the
+worker preparation. The source runner checks freshness before generation and
+rechecks directory custody before and after recording output. Replaced directories
+cannot publish a candidate. Ordinary local generation keeps its original exact
+path/allocation check. The worker supervisor remains responsible for allocation
+and cleanup; this binding alone grants no remote model execution or recipe trust.
+
+GENERATION results bind the exact input record, typed source output and a sorted,
+unique bounded set of source/provenance record references. Check both candidate
+and provenance against the plan, request, recipe, allocation, lock and root; enforce
+the request's measured runtime limits. Capture the existing source bundle and its
+generation proof, then reopen it with the shared source and generation verifiers.
+Transferred records must exactly match declared identities and sizes: missing
+records, corrupt bytes and undeclared extras refuse. This establishes result
+custody; controller source registration and worker execution remain separate steps.
+
+The GENERATE worker operation verifies prompt bytes and authority before invoking
+its private runtime factory. Allocate one fresh owned directory beneath the pinned
+worker root, require a concrete source runner bound to that directory and the
+worker CAS, and run the existing source-generation output admission. A live private
+authority guard surrounds generation and result capture. Return only fully verified
+source/provenance records; clean owned staging on success or refusal, while leaving
+a substituted directory untouched. Process supervision, command routing and
+controller source registration still require their separate integration.
+
+GENERATE child supervision shares bounded stdin/stdout/stderr, finite deadlines,
+private control-variable replacement, launcher checks, cancellation and owned
+descendant termination with the other lifecycle children. Its authority comes from
+a mandatory private model-admission guard; BUILD/TEST/EXECUTE/ACCEPT retain their
+existing build-grant checks. The GENERATE entry point requires both a private
+runtime factory and guard, opens only supervisor-bound CAS/workspace paths, and
+returns generic failure diagnostics rather than private factory exceptions.
+
+GENERATE dispatch admission reconstructs the production action DAG and binds the
+selected worker, deadline, component, payload and bounded input before launching a
+child. Its graph node has no scheduling predecessors: locked interface authority
+is already present in the generation plan. The version-two dispatch record carries the exact
+input identity separately from predecessor results; this does not add a graph
+dependency. Requests without explicit inputs retain their version-one encoding
+and identity, and predecessor completeness checks remain unchanged. Child results
+must reopen against that same input, including the logical workspace allocation.
+Private runtime resolution and controller source import remain separate obligations.
+
+The configured GENERATE receiver binds a measured launcher, optional model tools,
+private environment and explicit model-authority identity. Its private admission
+callback receives the exact generation input before prompt transport and remains
+live during child supervision. Prompt hashes, authority projections and budgets
+are verified before job allocation. The one-shot action receiver accepts GENERATE
+only with this startup configuration and removes only directories it owns.
+Capability discovery and production runtime construction remain separate work.
+
+Capability discovery advertises GENERATE only when the receiver has its private
+startup configuration. The profile digest covers model authority, launcher,
+optional tools and private environment, without publishing their values. Combined
+BUILD tool, dependency and selector observations retain that same GENERATE profile
+and reject a profile change during observation. Capability advertisement does not
+authorize a model call; execution still requires input-specific private admission.
+
+Controller GENERATE import fetches only the bounded result's declared records,
+using an explicit return transport when a blob is absent locally. Corrupt local
+custody never triggers fallback. Verify every byte, source manifest and generation
+provenance relationship before publishing fetched records to the controller CAS;
+recheck live admission during transfer and publication. Storage or authority
+failure cannot return an admitted result. This immutable proof import does not
+register a source workspace or publish an accepted source-cache entry.
+
+Controller source publication binds the returned generation proof to the original
+prepared request, recipe and allocated workspace. Materialize the verified bundle
+in a private sibling stage, then run the existing tree, source-SBOM and generated-test
+validation before publishing into the still-empty allocation. Publication uses an
+exclusive rename so a concurrent destination is preserved. Register final source
+custody only after publication and live admission succeed; failed staging removes
+only the owned stage. This step does not publish accepted cache entries.
+
+`CommandSourceGenerator` shares the INDEX worker pool and slot reservations. Its
+nonblocking reservation path keeps occupied workers out of the lifecycle executor;
+direct calls acquire the same slots. Dispatch uses the production GENERATE node,
+explicit input records and current worker capability admission. Return transport is
+selected privately for the chosen worker, and results pass complete proof import,
+source staging and registry validation before returning to the lifecycle. Refusal
+never falls back to local generation. Production runtime and accepted-cache
+composition remain required before enabling this adapter in Standard rebuild.
+
+Standard source registration preserves optional GENERATE reservations. A worker
+admitted delegate receives a wrapper that exposes its nonblocking capacity check
+and registers the returned source after the reserved operation completes. A plain
+local delegate retains the ordinary registration wrapper and does not advertise
+worker admission. Releasing a reservation or failing registration releases the
+underlying worker slot; wrapping must never hide remote capacity from the ready queue.
+
+The command generator requires a private cache-key planner. Capture its exact
+recipe-bound derivation key before dispatch, recheck it during result transfer,
+and reject a worker result naming another planned coding-CLI request. Record the
+candidate-to-key mapping only after source import and registration succeed. The
+same adapter records typed, recipe-bound keys for restored candidates without
+allowing an existing candidate mapping to change. These methods support Standard's
+existing accepted-source publisher and restorer; generation itself publishes no
+accepted cache entry.
+
+Standard rebuild selects `CommandSourceGenerator` when live admission advertises
+GENERATE, requires explicit result transport, and composes the existing accepted
+source publisher/restorer around its key methods. Returned proof is imported into
+Standard's candidate CAS while prompt transfer and INDEX keep the admitted action
+CAS. The registration wrapper preserves shared-capacity admission. Retained-source
+input uses the explicitly reviewed transfer record; Standard passes its existing
+project, target and lock authorization into the command generator. The existing
+single-Component restriction on retained source remains in force.
+
+The command-generation integration fixture exercises live capability admission,
+HTTP prompt transfer, the configured receiver, a supervised child running the
+production source runner with a deterministic delegate, separate worker/controller
+CAS import, and subsequent command INDEX through the same pool. This verifies the
+transport and custody chain without external model calls. Qualification with
+private provider runtimes and full accepted-cache lifecycle remains separate
+from this fixture.
+
+The retained-generation transfer record carries the path-free retained-source
+metadata, exact review identity, and bounded CAS file references. Admission binds
+those references to the reviewed tree before fetching bytes, rejects nonportable
+or reserved paths, and enforces retained-source size limits. Reading verifies each
+blob and UTF-8 content before returning the complete tree. This record preserves
+input custody only; the private worker must still check current authorization and
+lifecycle acceptance remains separate. GENERATE input schema v2 embeds this
+record and binds its component lock to the execution plan; ordinary requests retain their v1 encoding. Private runtime and
+result admission require the requested generation mode and exact retained review
+identity. The startup admission guard remains responsible for current project and
+target authorization. Retained result proof reopens the exact reviewed metadata,
+binds its tree and component lock to the candidate and provenance, and requires
+the invocation, execution plan and stage request without claiming model output,
+route execution or provider evidence. Standard uses this proof path for retained
+remote generation.
+
+The configured GENERATE receiver and supervised operation fetch retained file
+references before allocating a generation workspace or constructing the private
+runtime. Only missing CAS blobs may use the explicit transfer source; corrupt
+local custody is an error. The whole retained tree is verified before fetched
+bytes enter worker CAS, with live admission and deadline checks around reads and
+writes. CAS transfer alone does not materialize the private retained-source root
+or grant lifecycle acceptance.
+
+The supervised operation materializes verified retained bytes in a separately
+owned input directory. The private runtime receives that captured input through
+its workspace binding and must use that exact object; the generation workspace
+remains empty until execution. Rechecks reject input mutation, and context cleanup
+removes only the owned input directory, preserving a foreign replacement. A real
+source-runner fixture verifies returned proof with the original input directory
+unavailable, no model call, and cleanup on success and mutation failure. Standard
+composition passes the exact retained authorization into the controller. The live
+command fixture covers both ordinary and retained generation, including HTTP file
+transfer, supervised private materialization, verified return import and INDEX
+through the same admitted pool. The retained child refuses any model call.
+
+Pre-package artifact assembly is a shared application operation over the exact
+Component lock, execution plan, project build plan, accepted results and primary
+root export ID. It checks complete accepted membership and each result's build
+plan identity before realizing manifests and deriving the link closure. The local
+adapter delegates to this operation. This is shared LINK logic; a command LINK
+receiver and its production scheduling composition remain to be implemented.
+
+The per-Component LINK input embeds the exact ACCEPT input and result descriptors,
+re-admits their stage bindings, and realizes the manifest from accepted exports.
+Its dependency-result references must name precisely the non-ACCEPT predecessors
+of that Component's production LINK node in canonical order. Unrelated Components
+cannot introduce a project-wide wait. This descriptor is not a completed link:
+worker proof reopening, dependency-result verification, result transport and
+production scheduling remain required before LINK is advertised by a receiver.
+
+LINK proof reopening uses the existing accepted-provider verifier to reopen source
+validation, BUILD, generated tests, EXECUTE and fixed-policy ACCEPT records, then
+checks the artifact archive against that proof. Live admission and authorization
+checks bracket transfer; a missing proof record, corrupt archive or lost authority
+cannot produce a verified Component manifest. This verifies the Component's own
+accepted artifacts; dependency LINK proof assembly and command dispatch remain
+separate required work.
+
+A LINK result descriptor binds its exact input record, ACCEPT result identity,
+realized Component manifest and ordered dependency LINK references. Result
+admission recomputes that descriptor from the admitted input and requires identical
+canonical bytes. This rejects substituted manifests, acceptance origins and
+predecessor results even when their envelope hashes are recomputed. Descriptor
+admission does not replace Component or dependency proof reopening.
+
+Dependency LINK traversal snapshots a bounded map of input/result bytes, admits
+each referenced descriptor against the same execution plan and exact action ID,
+and rejects missing or unrelated records before blob transfer. It then reopens
+each unique Component's accepted proof and artifact archive under live admission.
+Repeated references share verification; caller mutation cannot replace admitted
+record bytes during transfer. Initial qualification covers leaf and repeated-root
+closures; a real multi-Component dependency chain and command dispatch remain open.
+
+LINK dispatch admission binds the worker identity, deadline, canonical action
+payload, production DAG predecessor list and ordered predecessor result IDs. The
+first explicit input record is the Component's LINK handoff; additional records
+carry the exact reachable dependency input/result closure. Execution reopens that
+closure and the Component's own accepted artifact proof under live admission and
+cancellation, then returns the recomputed LINK result. The command receiver exposes this handler and advertises LINK as a built-in
+verification phase; production controller scheduling remains separate work.
+
+The encoded command LINK fixture transfers accepted proof and artifact bytes over
+HTTP into a separate worker CAS, verifies the returned result and leaves no
+workspace artifacts. Without local bytes or explicit transport, the receiver
+returns failure. LINK discovery requires no compiler or model launcher because
+it verifies existing accepted artifacts and executes no generated host code.
+
+The command ACCEPT controller exposes a typed LINK handoff only after complete
+return-proof import succeeds and current worker/stage checks pass. Lookup by exact
+acceptance identity rechecks the requested plan, TEST and EXECUTE evidence and
+re-admits the retained wire result. Failed imports expose no handoff, and later
+stage-custody changes refuse it. This preserves a verified boundary for the pending
+controller LINK reservation and scheduling integration.
+
+The command Component linker reserves from INDEX's admitted slot pool and takes
+its own ACCEPT input/result from a private verified handoff. Missing dependency
+LINK completion returns no ready reservation; completed dependency descriptors
+supply the exact transitive wire records. The controller rechecks handoff and
+worker authority, dispatches the production LINK node, admits the returned result,
+and independently reopens its complete proof before recording completion. A real
+command-receiver fixture covers leaf LINK, shared-capacity refusal and release,
+authority loss after reservation, and corrupt return-proof refusal. Standard
+ready-queue composition and a multi-Component link chain remain required.
+
+The Standard lifecycle can schedule a typed Component LINK port in the same
+executor as the source and acceptance stages. Accepted Component results become
+available to build and runtime consumers immediately; pending LINK work does not
+hold that acceptance behind a project-wide barrier. LINK dependencies come from
+the production action DAG. A reserved LINK operation consumes shared worker
+capacity before using an executor thread, and its returned manifest must exactly
+match the accepted Component exports. Project assembly and packaging wait for
+every successful Component LINK; a LINK failure cannot publish a package.
+
+Configured rebuild workers advertising LINK now select the shared-capacity
+command linker. Remote ACCEPT supplies its verified retained handoff. Local
+ACCEPT retains the exact completed receipt and reopens its source and stage proof
+before supplying LINK; it forwards runtime provider custody to the same completed
+stage handoff. LINK-only placement also installs the local build handoff and
+requires an explicit result transport. No remote ACCEPT worker is required for
+that placement.
+
+Controller LINK snapshots the complete accepted handoff before dispatch and
+rechecks it before and after proof return. Per-blob guards retain live worker
+admission, deadline, and proof-specific build authorization checks; they do not
+recursively recapture the entire accepted handoff for every record. The separate
+worker and controller both reopen the exact dependency proof closure. A changed
+handoff at completion refuses LINK even when all returned content hashes match.
+
+Ready Component LINK operations share canonical action-identity ordering with
+ready source and acceptance stages. LINK has no lower-priority second queue.
+Dependency and capacity checks still run before dispatch, so an unavailable
+worker does not occupy an executor thread or prevent another eligible action
+from using a free slot.
+
+The bounded `package-worker-input@1` descriptor retains the exact execution plan,
+artifact graph, and full PackagePlan, including resource executable flags, runtime
+requirements, and native-library layout. It requires the production PACKAGE
+node's complete ordered LINK result references, with no duplicate results, and
+reconstructs the package plan against the graph to reject substituted artifact
+bytes or graph authority. Descriptor admission does not establish acceptance:
+workers must independently reopen the referenced LINK proof closure before
+packaging or admitting a result.
+
+PACKAGE proof admission reopens every referenced LINK result and its complete
+accepted proof closure. It compares verified manifests to the supplied graph,
+derives late assembly bindings from typed acceptance receipts and the locked
+execution plan, and reconstructs the graph and link closures. A self-consistent
+package plan that omits required provider assembly edges is rejected. Receipt
+projection shares the lifecycle assembly implementation without manufacturing
+source-generation or lifecycle results.
+
+PACKAGE execution receives a privately composed package adapter and checks its
+identity against the admitted plan. It reopens LINK proof before reading package
+inputs, restricts reads to declared blobs, and bounds unique input and output
+bytes. Only missing CAS blobs use the explicit source transport; corrupt existing
+content is not replaced. New adapter-produced bytes are independently checked
+before CAS admission. The canonical `package-worker-result@1` binds the input
+identity and typed PackageResult; admission verifies exact plan metadata and every
+logical and output blob. This result check complements, and does not replace,
+LINK proof verification or archive-format-specific verification.
+
+PACKAGE dispatch validates the receiver worker, finite deadline, production root
+action and payload, exact ordered LINK predecessors, and the closed set of
+content-addressed input records before execution. Its input record is the first
+explicit input; the remaining records carry the complete LINK proof closure.
+Cancellation and live admission guard proof reads, input transfer, packaging, and
+result verification. A dispatch record supplies no adapter implementation.
+
+The command receiver accepts an optional privately constructed
+ConfiguredPackageWorker. Its fixed packager identity, adapter factory and live
+configuration guard come from startup composition, never from dispatch JSON.
+Wrong worker or packager authority, cancellation, and revoked configuration are
+rejected before adapter creation. Each dispatch receives a fresh adapter. An
+unconfigured receiver refuses PACKAGE explicitly; capability discovery and
+controller scheduling must separately admit this placement.
+
+PACKAGE capability facts include the privately configured package-worker profile
+only when PACKAGE is available. The phase and profile must occur together; the
+profile participates in capability identity, so a changed packager invalidates
+prior facts. Capability encoding rechecks private PACKAGE configuration before
+and after observation. Responses without PACKAGE retain their existing shape
+and identity semantics.
+
+Controller PACKAGE selection matches the exact requested packager profile before
+reserving capacity. A capability observation for another packager is ineligible,
+and later profile drift invalidates live admission. The LINK controller exposes
+PACKAGE custody only after every planned Component LINK has completed. It
+rechecks each accepted input, matches verified manifests to the proposed graph,
+and returns canonical input/result records in a caller-owned snapshot. An
+incomplete or changed acceptance chain cannot become a PACKAGE handoff.
+
+Controller PACKAGE result import reopens the complete LINK proof, checks the
+canonical result against exact package intent, and verifies every returned blob
+under live admission. It requires a private format verifier before accepting the
+result. Deterministic format verification independently reconstructs the package
+from declared inputs and compares the full result, rejecting arbitrary archive
+bytes even when their returned hashes and metadata are self-consistent. The
+verifier can read only the admitted logical/output closure. Missing blobs alone
+may use explicit return transport; revoked admission cannot complete import.
+
+`CommandProjectPackager` reserves from the INDEX/LINK shared capacity pool and
+selects only workers advertising the exact requested private packager profile.
+Its production PACKAGE request binds all completed LINK result identities, the
+canonical package input, execution plan, admission, and deadline. Both blocking
+and reservation-based entry points revalidate the handoff on execution. Worker
+admission is checked throughout result import; the full LINK handoff is checked
+before dispatch and before/after import. Failed dispatch or verification releases
+capacity and cannot return a package or invoke a local packaging fallback. Standard composes this controller when PACKAGE is advertised, requires completed
+command LINK proof and explicit result transport, and selects the exact directory
+packager profile. Local ports retain package-plan construction, resource capture,
+materialization and package custody. Before dispatch, the bridge bounds and
+publishes declared input bytes into CAS; after return it rechecks those bytes.
+The result is verified against the exact plan before any local materialization.
+SDK resource scopes, Python sealed resources, native layout and entrypoints stay
+on the existing plan/custody path. Configured PACKAGE does not silently fall back
+if LINK proof, the exact packager or return transport is unavailable.
+
+FINALIZE input descriptors use a bounded, closed canonical envelope carrying the
+complete Component lock and authored definitions needed to reconstruct it, the
+canonical project Component build plans, the exact PACKAGE input, and a referenced
+PACKAGE result identity. Admission checks the lock/root/execution identities,
+complete canonical Component membership and every realized manifest against the
+package graph. It preserves each full build plan rather than replacing it with a
+manifest projection. Descriptor admission does not prove PACKAGE output or LINK
+acceptance, grant permission to execute root integration tests, or establish final
+project acceptance. Those require independent proof reopening and the configured
+worker execution/acceptance boundary before FINALIZE can be composed in production.
+
+FINALIZE proof reopening snapshots and bounds the predecessor records, checks
+record identities, and compares every complete project build plan with its exact
+LINK input before blob transfer. A matching manifest alone is insufficient: the
+full plan also carries runtime and other invocation bindings. The PACKAGE importer
+then independently reopens all accepted LINK proof and verifies package format and
+bytes under live admission. Missing, additional or corrupt predecessor records,
+changed plans, and revoked admission refuse the handoff. The result is verified
+input/package custody, not root execution authorization or final acceptance.
+
+FINALIZE dispatch admission binds the selected receiver, deadline, production
+FINALIZE action/payload and its sole exact PACKAGE-result predecessor. The closed
+record set includes the explicit FINALIZE input and required LINK proof records;
+missing, extra or hash-mismatched records refuse admission. The action reopening
+boundary checks cancellation before proof transfer and maintains live admission
+through proof reopening. It returns verified input/package custody only and does
+not advertise FINALIZE capability or invoke root host commands.
+
+FINALIZE package materialization independently reopens the complete input proof
+before staging. Export shape comes from verified BUILD archive file tables: a
+regular file stays a file even when its bytes form a ZIP, while a directory export
+expands its canonical members beneath the exact package destination. Export bytes
+are rechecked against the declared BlobRef; package resources come from verified
+CAS reads. Aggregate byte/file bounds apply before staging. Canonical path checks
+and exclusive writes reject collisions and unsafe paths. Retained package-tree
+custody preserves intended modes (and observes physical modes on Windows), checks
+bytes before/after use, and removes only the owned stage on exit or failure. This
+step creates no execution grant and does not register root acceptance evidence.
+
+FINALIZE runtime-input materialization composes verified package custody with the
+root Component's exact generated source and test-suite registry. The root BUILD
+input is selected from independently verified LINK records, and every Component's
+full BUILD input is retained for private runtime/toolchain/SDK composition. Source
+reconstruction checks the accepted source-custody identity; the generated test suite
+comes from that same strict registry. Source and package bytes are rechecked before
+and after use and their disposable workspaces are cleaned up together. Source
+hydration/materialization supports a live admission guard at blob transfer and
+file-copy boundaries, in addition to current build-authority checks. This context
+still grants no host execution and records no root acceptance.
+
+The FINALIZE stage runner consumes the prepared input context and privately composed
+runtime ports. Before and after every stage it rechecks live admission, package
+and source custody, the exact root build plan/test suite and all configured command
+contracts. A mandatory private execution-authority callback must also succeed
+before and after each root test, packaged execution and independent acceptance
+call. Failed authority, changed custody, invalid stage identities or stage failure
+prevent downstream stages and final evidence. The runner constructs the existing
+typed root-integration evidence from the exact returned stage identities. Runtime
+construction, grant implementation, supervision and independent returned-evidence
+verification remain required before this runner is exposed through worker dispatch.
+
+Private FINALIZE runtime binding temporarily registers the exact prepared package,
+realized exports, root export, Component plans and provider inputs in Standard local
+ports. It requires the prepared source registry and exact locked command contracts,
+refuses overlapping registrations, and removes its registrations on normal or
+exceptional exit. SDK resources are reconstructed from private SDK consumer inputs
+and checked against the package; linked SDK scope retains exact plans/contracts.
+Python wheel targets require a private dependency observer bound to the root plan,
+authorization, source, contract, runtime and packaged resources. Missing SDK/Python
+runtime state is refused. This binding grants no execution: the stage runner still
+requires its separate authority callback, and worker supervision remains required.
+
+The private FINALIZE process supervisor admits the exact descriptor before launch
+and requires an explicit authority callback bound to that descriptor before, during,
+and after the child runs. It uses the shared bounded process runner for deadline,
+output bounds, cancellation and descendant termination. Reserved FINALIZE control
+variables are replaced case-insensitively. Callers still own proof admission and
+private grant validation; children must reopen proof and returned stdout remains
+untrusted pending independent result admission. No worker capability is advertised
+by this supervisor alone.
+
+FINALIZE result envelopes bind the exact input, lock, execution/project plans,
+artifact graph, package plan and original PACKAGE result receipt. The closed
+canonical descriptor includes bounded, unique, sorted evidence references retaining
+the root evidence and all three stage records. Descriptor admission does not attest
+the referenced bytes or independent oracle truth; receivers must reopen those
+records and the upstream package proof before trusting the result.
+
+FINALIZE return import reopens upstream PACKAGE/LINK custody before loading bounded
+returned evidence records. Only explicitly missing CAS blobs may be fetched; bad
+cached or transferred bytes are refused. Exact root evidence bytes must match the
+returned typed descriptor. A mandatory private stage verifier receives the reopened
+intent, root evidence and immutable record snapshot. Live admission is checked
+around reads and after verification; CAS presence alone is never acceptance. The
+private verifier still owns stage/oracle semantics and full proof closure.
+
+Portable FINALIZE stage verification checks exact successful process observations,
+all generated cases from reopened root source custody, and independent acceptance
+against current private oracle cases. It verifies stdout/result agreement, exact
+case identities and package/stage links. This verifier deliberately refuses other
+entrypoint kinds, multi-entrypoint records and SDK-specific observation shapes;
+those require their own semantic verifiers. It verifies reported evidence, not
+remote process authenticity, which still requires admitted worker authority.
+
+FINALIZE execution composition reconstructs verified inputs in an owned workspace,
+opens a private runtime context, scopes exact custody, executes the three root
+stages and retains bounded result evidence into CAS. The private runtime output
+root must be strictly inside the owned workspace. Source/package staging and
+registered custody are released on success or error; the factory owns runtime
+cleanup. This function requires explicit live admission and execution authority
+callbacks and must run under process supervision; it does not grant execution.
+
+The FINALIZE child entrypoint accepts bounded descriptor bytes on stdin and private
+CAS/workspace controls from its supervisor. Startup must provide the runtime
+factory, proof loader, package verifier and live authority callbacks; input bytes
+cannot select plugins. Proof lookup follows descriptor admission and execution
+reopens the returned records. Runtime diagnostics go to stderr; caught failures
+emit a generic refusal and no result bytes. Result descriptors and live admission
+are rechecked before stdout. Parent supervision remains required.
+
+The private FINALIZE proof loader retrieves only the PACKAGE receipt and each
+planned LINK result/input pair from staged CAS. Identity-only records obtain a
+bounded size from filesystem metadata before the CAS same-handle verified reader
+opens them. Record count and aggregate bytes are bounded, LINK descriptors are
+admitted, and live admission surrounds reads. It neither enumerates unrelated CAS
+objects nor fetches missing proof remotely. Execution still reopens all nested
+acceptance/artifact proof; descriptor loading alone conveys no trust.
+
+The portable command-chain qualification also launches the FINALIZE child through
+the bounded process supervisor. A private fixture startup composes the production
+proof loader, directory package verifier and Standard runtime. After child exit,
+the controller reconstructs custody and imports returned evidence through the
+portable semantic verifier. Fixture authority callbacks are synthetic; this proves
+process composition and returned proof, not production execution-grant admission.
+
+Private FINALIZE execution authority uses the existing BuildRequest/BuildAuthorization
+protocol with an execute-project privilege. The request binds the complete FINALIZE
+input identity (including exact package receipt, graph and component plans), root
+revision and measured private runtime identity. The runtime identity must cover
+commands, tools, oracles and configuration. Grant classification binds the same
+input identity. Each supervision/stage check rereads the private current grant,
+checks time/revocation/request/privileges/profile and reobserves runtime identity.
+This adapter issues no grants, accepts none from the wire and cannot substitute
+component BUILD/EXECUTE permission for project execution. Private startup still
+owns trusted grant lookup and runtime measurement.
+
+Portable FINALIZE runtime observation binds measured startup/tool registries,
+command contracts/phases, current private oracle identity and exact case identities,
+child environment, provider environment and dependency inventory. Specialized
+SDK/npm/Python/browser/service/shared-cache runtime configuration is refused until
+a corresponding complete observer exists. Callers must supply the actual child
+environment and measured startup registry on every observation; the returned
+identity contains no raw configuration values.
+
+Configured FINALIZE workers bind private launcher/environment/runtime-profile and
+authority/verifier callbacks. Dispatch admission precedes owned job creation.
+Preflight reconstructs verified package/source custody, stages exact predecessor
+records, supervises the private child and independently imports its returned proof
+while preflight custody remains live. Cleanup removes only the owned job. Current
+receiver admission, runtime profile, execution authority and cancellation are
+checked through this path. Capability advertisement/selection is separate.
+
+The one-shot action receiver routes FINALIZE only to an explicitly configured
+private FINALIZE worker. Unconfigured dispatch returns action_finalize.not_configured.
+The receiver rechecks its bound worker identity through the worker admission guard.
+A configured receiver advertises the exact private FINALIZE profile during
+capability discovery; an unconfigured receiver advertises no FINALIZE support.
+
+FINALIZE capability facts carry the exact configured private worker profile. The
+phase and profile must occur together; malformed, missing or unrelated facts are
+refused. Receiver discovery rechecks the profile after encoding, and worker-pool
+eligibility compares the requested profile exactly. Full capability revalidation
+continues to detect profile drift before dispatch.
+
+CommandProjectFinalizer derives exact FINALIZE intent from current LINK handoff,
+project/lock plans and the package receipt. It uses the indexer shared slot pool
+for blocking dispatch or nonblocking reservations, requires exact private-profile
+eligibility, and revalidates worker plus handoff around dispatch and import.
+Returned proof must pass private package/stage verifiers before records are retained.
+Failed workers/imports propagate without a local execution fallback.
+
+The Standard lifecycle accepts an optional ProjectFinalizer port after exact package
+creation. A configured finalizer owns all three root stages and must return typed
+verified root integration evidence. The service compares the complete lock,
+execution/project plans, artifact graph, link, package plan and package result
+before source publication, project admission or receipt issuance. Finalizer failure
+propagates without invoking local root-stage fallback. Unconfigured lifecycles retain
+the existing local stage sequence.
+
+The public Standard rebuild factory composes CommandProjectFinalizer when admitted
+workers support FINALIZE. It requires command LINK proof, an explicitly pinned
+private profile, a controller stage verifier, and result transport. Private action
+configuration supplies the profile and the named portable verifier policy; direct
+factory callers may instead supply private profile/verifier arguments. Mixing the
+two policies is refused. The factory never infers the expected profile from an
+arbitrary worker advertisement. FINALIZE result
+transport participates in the configured admitted-worker transport binding. The
+factory forwards the controller to the Standard project-finalizer port.
+
+The command-chain FINALIZE qualification probes the actual configured receiver
+profile, reserves shared controller capacity and dispatches through the real command
+transport. The receiver starts a supervised FINALIZE child; controller import then
+reopens proof and checks portable stage semantics. The fixture publishes its source
+CAS files through HTTP and reads returned records from the separate worker CAS.
+Worker hardware admission and execution permissions remain fixture-controlled.
+
+Configured FINALIZE workers exclude the receiver-owned LITAI_DISPATCH_PROTOCOL
+marker case-insensitively from their private environment and identity. Capability
+discovery and execution may use different wire protocols without changing the
+measured runtime; ordinary private environment values remain identity-bound.
+
+Private action execution configuration can pin a FINALIZE worker profile and
+select the built-in portable-application@1 verifier. The Standard factory supplies
+its own acceptance oracle and binds verification to the unchanged configuration.
+CommandProjectFinalizer accepts either an explicit stage verifier or a controller
+verification context, never both. The latter reconstructs package/root-source
+custody from verified proof in an owned temporary directory, performs stage proof
+checks, and removes that directory on success or refusal. Full LINK handoff checks
+bracket import; bounded per-read guards check current worker/profile/deadline.
+The command-chain fixture exercises this context through a real receiver and child.
+Production grant provisioning and complete CLI rebuild qualification remain open.
+
+Private startup may use FileFinalizeExecutionAuthority for both the configured
+parent execution callback and the child's require_stage callback. Its grant path
+is private startup state, never a request field. PrivateFinalizeGrantProvider
+reopens a bounded exact BuildAuthorization document on each check, rejects duplicate
+fields/nonregular files/links and same-read replacement, and pins the parent
+directory. Atomic grant-file replacement permits live revocation; replacement of
+the directory requires fresh startup. The existing exact-intent/runtime grant guard
+still decides validity. The adapter neither issues permission nor creates storage;
+the deployment must protect the operator-owned directory from generated code.
+A real supervised-child regression verifies that file revocation stops execution.
+
+The direct supervised-child qualification now provisions an exact test grant and
+uses FileFinalizeExecutionAuthority in both supervisor and child-stage checks.
+The child measures its actual portable ports/tools/oracle/environment after
+consuming and removing transport-only controls from the project-command environment.
+The same input/runtime grant succeeds in both processes. A revoked-file case bypasses
+the parent check and independently refuses at the child boundary, with workspace
+cleanup. The separate command-controller fixture still uses synthetic authority;
+this qualification does not complete deployment issuance or all startup wiring.
+
+PortableFinalizeRuntimeFactory provides reusable private child startup instead
+of requiring a custom runtime context for the portable case. Startup supplies
+reviewed contracts, observed tools/startup registry, independent oracle, pinned
+runtime identity, a private grant path outside the child workspace, and a live
+admission callback. The factory owns disposable LocalStandardLifecyclePorts,
+measures their actual runtime environment, validates file-backed grants before
+opening execution and at each stage, and restores transport controls on cleanup.
+A process-wide nonblocking lock prevents overlapping environment-mutating child
+runtimes. The full execution adapter still reopens transferred proof and binds
+exact runtime custody before running stages. This is a private composition API;
+it does not issue grants, select configuration from requests, or provision workers.
+
+PortableFinalizeParentAuthority is the receiver-side counterpart. Private
+receiver startup supplies the grant path, tools and oracle; ConfiguredFinalizeWorker
+supplies the exact child environment it will launch with. Before inputs are
+staged, admit() requires a current, unrevoked grant scoped to the exact input
+record, root revision and execute-project privilege, so an unauthorized request
+causes no staging I/O. Once inputs are staged, require() builds measurement-only
+portable ports from them in an owned directory, measures the same runtime the
+child will measure, and applies the complete grant guard on every later poll,
+including supervision of the running child. The parent therefore never relies on
+the child's own check. PortableFinalizeRuntimeFactory accepts no startup runtime
+pin for long-lived receivers, which cannot know per-project runtimes in advance;
+the operator grant then names the measured runtime on both sides. The real
+command-controller chain now uses this composition with a file grant: no grant,
+a grant for another runtime, and an atomically revoked grant are each refused by
+the receiver parent, and the exactly planned grant succeeds. Grant issuance
+remains an operator action; computing the exact request needs both the
+controller's records and the worker's private runtime.
+
+CommandProjectFinalizer.describe_grant obtains that request without executing.
+It builds the same dispatch request as execution and sends it with the
+read-only `--describe-finalize-grant` receiver mode. ConfiguredFinalizeWorker
+admits the request and checks live admission and profile, but no grant, since
+none exists yet. It stages the inputs, measures the runtime through
+plan_prepared_grant, removes everything it staged, and returns a bounded
+`literate-ai/finalize-grant-request@1` record as the action result. The
+dispatcher returns that record without recording it as a FINALIZE result. The
+controller accepts it only when the request reconstructs exactly from the planned
+intent with the reported runtime identity, so a receiver cannot obtain a grant for
+another input, revision, privilege set or builder. Whether the measured runtime
+is acceptable remains the operator's judgement.
+
+### Reference Standard receiver
+
+`python -I -m literate_ai.standard_receiver --config PRIVATE.json` is the
+supported receiver startup for portable Standard projects. The operator still
+provisions hosts, storage and placement (ADR 0044); this module only composes the
+existing configured workers from one bounded `literate-ai/standard-receiver@1`
+document naming worker CAS and workspace, enabled phases, the exact `python` and
+`make` executables, the child environment, the contract policy and, for FINALIZE,
+the grant path and a verifier-owned oracle copy. The document's byte identity is
+part of every measured child launcher's authority; a phase child re-enters the
+module with `--child PHASE` and refuses a changed document.
+
+Receiver tools follow the action-boundary rule. Python, Make and the receiver's
+own interpreter are fully measured (live probes and executable digests) when any
+receiver or child process starts, whenever executable metadata changes, and
+before the receiver emits a response, which it withholds if a tool changed. Reads
+in between compare executable metadata only. The optional `dependency_cache`
+names an operator-private file that carries native inspector facts (macOS
+`dyld_info`, Linux `readelf`, Windows `dumpbin` or `llvm-readobj`) across
+receiver processes, so each dependency observation does not re-inspect the whole
+closure. Facts are keyed exactly as in the in-process memo: the inspector's
+digest, the image path, and the image's content digest (with its symlink chain on
+macOS, or the boot session for dyld shared-cache images). ELF and PE images are
+keyed at their resolved path. Facts recorded while an inspector changed are
+dropped, and a file written on another platform is ignored. Because cached facts
+decide what a closure contains, the path must lie outside the workspace and CAS
+that actions write. A missing or malformed file is ignored and rewritten.
+
+The controller's action boundaries need not launch a separate capability probe.
+Each dispatch still checks route, catalog, hardware and storage health before and
+after the action, and sends the worker's admitted capability identity in the
+request (`lifecycle-action-wire-request@3`). The receiver measures its capability
+in process, exactly as `--describe` would, before running the action and again
+before responding; it refuses a mismatch and otherwise attests the identity in
+the response (`lifecycle-action-wire-response@2`). The controller accepts an
+attestation only when it equals the admitted identity. A response without one
+(from a receiver that does not attest, or one whose closing measurement failed)
+makes the controller fully revalidate the worker, probe included, before it
+admits the result. The reference receiver re-measures its tools before emitting
+any response, so its attestation covers the whole action. If the admission's
+environment, through which receiver configuration can arrive, has changed since
+admission, each boundary probes the worker fully with the current environment.
+
+Contracts arrive in the admitted request, as they do for FINALIZE. The
+`portable-starter@1` policy admits a contract only when its BUILD argv is exactly
+the packaged Make driver for this worker's own Make and Python, its TEST and
+EXECUTE argv are exactly the packaged Python runtime driver, its toolchain
+identities are this worker's, and the plan is a single Component without
+providers, entrypoint variants, library surfaces or native layouts. Anything else
+is refused before a command runs, so the request cannot nominate a host
+executable even through driver arguments. Multi-Component plans, provider edges,
+wheelhouses and native SDKs are out of scope for this policy.
+
+`--print-profiles` prints the private FINALIZE profile an operator pins in the
+controller's action-execution configuration. FINALIZE grants bind the exact
+input record, and that record is unique to one run because BUILD authorization
+identities carry their issue time. The controller therefore cannot be granted in
+advance: when the worker reports `action_finalize.grant_unavailable`, it describes
+the exact request on the slot it holds, writes it to the operator-owned
+`grant_request_path`, and re-dispatches every few seconds for up to
+`grant_wait_seconds` (never past the action deadline). The receiver parent refuses
+a missing grant before staging any input, so waiting costs no transfer. The
+operator reviews the request and runs `--issue-finalize-grant REQUEST --actor A
+--reason R`, which atomically writes a grant for exactly that request.
+
+Admission revalidation is split by cost. The command dispatcher runs the full
+storage-health check and capability probe before each dispatch and before any
+result is admitted; guards that run on every record or blob read use
+`CommandActionWorkerPool.require_current` (deadline, route, private catalog and
+hardware observation). A worker change during an action is still refused before
+its result is admitted. Qualification: `tests/e2e/test_cli_model_free_rebuild.py`
+runs real `litai rebuild --update-receipt` with a deterministic coding-CLI
+stand-in, every Component phase disabled on the controller, and BUILD, TEST,
+EXECUTE, ACCEPT, PACKAGE and FINALIZE on the reference receiver, including the
+described-request, operator grant and receipt commit.
+
+Cross-host toolchains: when BUILD, TEST, EXECUTE and FINALIZE all run on admitted
+workers, no Component or root command runs on the controller, so the Standard
+rebuild factory projects the locked toolchain closure from the first admitted
+BUILD worker (`project_remote_standard_toolchain_closure`) instead of the
+controller's host. That worker's BUILD configuration advertises its exact
+Standard tool inventory; locked tool identities, command paths, versions and
+native dependency graphs therefore describe the worker, and the reference
+receiver's contract policy compares requests against those same tools. The
+closure projects no local command phases: runtime assembly follows the closure's
+own scope, readiness takes command authority from the closure's live worker
+guard instead of local tool bindings, and the CLI omits a local
+`execution_command` because this host has no runtime to invoke. Mixed
+configurations (any of those phases local) keep the controller-local closure.
+Qualification runs the full CLI rebuild with a controller whose `make` fails, so
+local discovery cannot succeed.
+
+Making that path usable exposed three defects, now fixed: worker tool-observation,
+dependency and selector responses omitted the PACKAGE and FINALIZE profiles from
+their capability record, so any worker serving those phases advertised two
+different capability identities and was refused; configured tool workers
+re-captured Standard tool observations whenever their profile identity was read,
+including inside per-item guards (the profile now uses the startup observation;
+tool bytes stay live-checked through the registry and `observe_tools()` still
+re-captures at boundaries); and worker dependency capture re-measured each tool
+once per inspected dependency (about 1,400 interpreter probes), now once per
+tool with the existing checks before and after each observation.

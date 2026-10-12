@@ -102,8 +102,8 @@ lesson through the updated pinned input and invalidates only the affected deriva
 
 ## Relationship to an agent ledger
 
-An external ledger such as MAC may own conversations, tasks, recurrence statistics,
-retention, and organizational approvals. Literate AI owns the semantic proposal,
-authority classification, derivation identities, and proof that the accepted change
-passes its lifecycle. The ledger may recommend a lesson, but it cannot silently mutate
-a generation input. See [Literate AI and an agent ledger](agent-ledger-boundary.md).
+The agent ledger (forge issues by default, or an external ledger by override) may own
+conversations, tasks, recurrence statistics, retention, and organizational approvals.
+Literate AI owns the semantic proposal, authority classification, derivation
+identities, and proof that the accepted change passes its lifecycle. The ledger may
+recommend a lesson, but it cannot silently mutate a generation input. See [Literate AI and an agent ledger](agent-ledger-boundary.md).

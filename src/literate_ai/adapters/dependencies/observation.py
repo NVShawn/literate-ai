@@ -12,8 +12,10 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 from collections import deque
 from collections.abc import Callable, Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
@@ -597,22 +599,206 @@ def _python_distribution_component(
     }
 
 
-# Process-wide memo of dyld_info facts. A fact is reused only for identical inspector
-# bytes, arguments and image identity: an on-disk image by its materialized binding
-# (content digest and symlink chain), and a shared-cache-only image by the boot
-# session, because the dyld shared cache cannot change without a reboot.
-_DYLD_FACTS: dict[tuple[object, ...], object] = {}
-_DYLD_FACTS_LIMIT = 65536
+# Process-wide memo of native inspector facts. A fact is reused only for identical
+# inspector bytes, arguments and image identity. A macOS on-disk image is bound by
+# its materialized binding (content digest and symlink chain), and a
+# shared-cache-only image by the boot session, because the dyld shared cache cannot
+# change without a reboot. ELF and PE images are inspected at their resolved path
+# and bound by that path and their content digest.
+_INSPECTION_FACTS: dict[tuple[object, ...], object] = {}
+_INSPECTION_FACTS_LIMIT = 65536
+# Concurrent dyld_info inspections within one closure level.
+_INSPECTION_WORKERS = min(8, os.cpu_count() or 1)
 _BOOT_SESSION: list[str | None] = []
 
 
 _BOOT_SESSION_UUID = re.compile(r"^[0-9A-F]{8}(?:-[0-9A-F]{4}){3}-[0-9A-F]{12}$")
 
 
-def _remember_dyld_fact(key: tuple[object, ...], fact: object) -> None:
-    if len(_DYLD_FACTS) >= _DYLD_FACTS_LIMIT:
-        _DYLD_FACTS.clear()
-    _DYLD_FACTS[key] = fact
+def _remember_inspection_fact(key: tuple[object, ...], fact: object) -> None:
+    if len(_INSPECTION_FACTS) >= _INSPECTION_FACTS_LIMIT:
+        _INSPECTION_FACTS.clear()
+    _INSPECTION_FACTS[key] = fact
+
+
+def _forget_inspection_facts(inspector_digest: str) -> None:
+    """Drop facts recorded for an inspector that changed during observation."""
+
+    for key in [key for key in _INSPECTION_FACTS if key[1] == inspector_digest]:
+        _INSPECTION_FACTS.pop(key, None)
+
+
+def _content_fact_key(
+    kind: str, inspector_digest: str | None, path: Path, content_digest: str
+) -> tuple[object, ...] | None:
+    """Key one ELF or PE fact for an exact resolved image, when the tool is pinned."""
+
+    if not isinstance(inspector_digest, str):
+        return None
+    return (kind, inspector_digest, str(path), ("content", content_digest))
+
+
+# Optional operator-private file that carries the memo across worker processes.
+# Each receiver action or observation is a new process, so without it every
+# dependency observation re-inspects the whole closure. The file is trusted like
+# the worker's own configuration: it must live outside anything an action can
+# write. A missing, unreadable or malformed file is ignored and rewritten.
+DEPENDENCY_FACTS_SCHEMA = "literate-ai/dependency-facts@1"
+_MAX_DEPENDENCY_FACTS_BYTES = 64 * 1024 * 1024
+_PERSISTED: dict[str, object] = {}
+
+
+def use_persistent_dependency_facts(path: Path) -> None:
+    """Load and later save this process's inspector facts at one private path."""
+
+    path = Path(path)
+    if not path.is_absolute():
+        raise ValueError("dependency fact cache path must be absolute")
+    _PERSISTED.clear()
+    _PERSISTED["path"] = path
+    try:
+        if path.stat().st_size > _MAX_DEPENDENCY_FACTS_BYTES:
+            raise ValueError("dependency fact cache is oversized")
+        document = json.loads(path.read_bytes())
+        if (
+            not isinstance(document, dict)
+            or set(document) != {"schema", "platform", "entries"}
+            or document["schema"] != DEPENDENCY_FACTS_SCHEMA
+            or document["platform"] != sys.platform
+            or not isinstance(document["entries"], list)
+            or len(document["entries"]) > _INSPECTION_FACTS_LIMIT
+        ):
+            raise ValueError("dependency fact cache is malformed")
+        loaded = {}
+        for entry in document["entries"]:
+            key, fact = _decoded_inspection_entry(entry)
+            if key[3][0] == "shared-cache" and (
+                sys.platform != "darwin" or key[3][1] != _macos_boot_session()
+            ):
+                continue
+            loaded[key] = fact
+    except (OSError, ValueError, TypeError, KeyError, IndexError, RecursionError):
+        return
+    _INSPECTION_FACTS.update(loaded)
+    _PERSISTED["saved"] = len(_INSPECTION_FACTS)
+
+
+def _strings(value) -> tuple[str, ...]:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise ValueError("invalid string list")
+    return tuple(value)
+
+
+def _decoded_inspection_entry(entry):
+    kind, digest, path, identity = entry["key"]
+    fact = entry["fact"]
+    if not isinstance(digest, str) or not isinstance(path, str):
+        raise ValueError("invalid dependency fact key")
+    if kind in {"elf-image", "elf-header", "pe-imports"}:
+        if identity[0] != "content" or len(identity) != 2:
+            raise ValueError("invalid image identity")
+        if not isinstance(identity[1], str):
+            raise ValueError("invalid image digest")
+        bound = ("content", identity[1])
+        if kind == "elf-header":
+            fact = None if fact is None else _strings(fact)
+            if fact is not None and len(fact) != 2:
+                raise ValueError("invalid ELF architecture")
+        elif kind == "elf-image":
+            build_id, architecture, needed, search_paths, runpath, interpreter = fact
+            if (
+                not isinstance(build_id, str | None)
+                or not isinstance(runpath, bool)
+                or not isinstance(interpreter, str | None)
+                or len(_strings(architecture)) != 2
+            ):
+                raise ValueError("invalid ELF fact")
+            fact = (
+                build_id,
+                _strings(architecture),
+                _strings(needed),
+                _strings(search_paths),
+                runpath,
+                interpreter,
+            )
+        else:
+            if not isinstance(fact, list):
+                raise ValueError("invalid PE fact")
+            fact = tuple((str(name), bool(delayed)) for name, delayed in fact)
+        return (kind, digest, path, bound), fact
+    if kind not in {"inspect", "validate"}:
+        raise ValueError("invalid dependency fact kind")
+    if identity[0] == "shared-cache" and len(identity) == 2:
+        if not isinstance(identity[1], str):
+            raise ValueError("invalid boot session")
+        bound = ("shared-cache", identity[1])
+    elif identity[0] == "file" and len(identity) == 2:
+        resolved, content, chain = identity[1]
+        if not isinstance(resolved, str) or not isinstance(content, str):
+            raise ValueError("invalid image binding")
+        bound = (
+            "file",
+            _MachOMaterializedFile(
+                resolved,
+                content,
+                tuple(
+                    (str(link), str(target), tuple(int(item) for item in status))
+                    for link, target, status in chain
+                ),
+            ),
+        )
+    else:
+        raise ValueError("invalid image identity")
+    if kind == "validate":
+        if not isinstance(fact, bool):
+            raise ValueError("invalid validation fact")
+    else:
+        uuids, linked, rpaths = fact
+        fact = (
+            tuple((str(arch), str(uuid)) for arch, uuid in uuids),
+            tuple((str(load), bool(weak)) for load, weak in linked),
+            tuple(str(item) for item in rpaths),
+        )
+    return (kind, digest, path, bound), fact
+
+
+def _save_persistent_dependency_facts() -> None:
+    path = _PERSISTED.get("path")
+    if not isinstance(path, Path) or _PERSISTED.get("saved") == len(_INSPECTION_FACTS):
+        return
+    entries = []
+    for (kind, digest, image, identity), fact in list(_INSPECTION_FACTS.items()):
+        if identity[0] == "file":
+            binding = identity[1]
+            identity = (
+                "file",
+                (
+                    binding.resolved_path,
+                    binding.content_identity,
+                    binding.symlink_chain,
+                ),
+            )
+        entries.append({"key": [kind, digest, image, identity], "fact": fact})
+    document = {
+        "schema": DEPENDENCY_FACTS_SCHEMA,
+        "platform": sys.platform,
+        "entries": entries,
+    }
+    try:
+        descriptor, temporary = tempfile.mkstemp(
+            prefix=".dependency-facts-", dir=path.parent
+        )
+        try:
+            with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+                json.dump(document, stream, separators=(",", ":"))
+            os.replace(temporary, path)
+        except BaseException:
+            Path(temporary).unlink(missing_ok=True)
+            raise
+    except OSError:
+        # The cache only saves work; failing to write it never fails observation.
+        return
+    _PERSISTED["saved"] = len(_INSPECTION_FACTS)
 
 
 def _macos_boot_session() -> str | None:
@@ -944,6 +1130,7 @@ class MacOsMachODependencyObserver:
                 launcher_runtime_edges=launcher_runtime_edges,
             )
         )
+        _save_persistent_dependency_facts()
         return _normalized_observation(components, edges)
 
     def _closure(
@@ -962,24 +1149,18 @@ class MacOsMachODependencyObserver:
             if runtime and "build" in seed_paths[path]:
                 pending.append((path, executable_roots[path], (), False))
         processed: set[tuple[str, str, tuple[str, ...], bool]] = set()
-        while pending:
-            path, executable_dir, inherited_rpaths, runtime = pending.popleft()
-            state = (path, executable_dir, inherited_rpaths, runtime)
-            if state in processed:
-                continue
-            processed.add(state)
-            image = images.get(path)
-            if image is None:
-                image = self._inspect(path)
-                images[path] = image
+
+        def links(state):
+            path, executable_dir, inherited_rpaths, runtime = state
             loader_dir = str(Path(path).parent)
             rpaths = self._expanded_rpaths(
-                image.rpaths,
+                images[path].rpaths,
                 loader_dir=loader_dir,
                 executable_dir=executable_dir,
                 inherited_rpaths=inherited_rpaths,
             )
-            for load_path, weak in image.linked_paths:
+            targets = []
+            for load_path, weak in images[path].linked_paths:
                 target = self._resolve_load_path(
                     load_path,
                     loader_dir=loader_dir,
@@ -988,10 +1169,30 @@ class MacOsMachODependencyObserver:
                     weak=weak,
                     loader_paths=loader_paths if runtime else None,
                 )
-                if target is None:
-                    continue
-                edges.add((path, target))
-                pending.append((target, executable_dir, rpaths, runtime))
+                if target is not None:
+                    targets.append((target, executable_dir, rpaths, runtime))
+            return targets
+
+        # Every inspection and link resolution in one breadth-first level is
+        # independent, so each level runs concurrently. Results merge in queue
+        # order, and the first failure in that order is the one raised.
+        _macos_boot_session()
+        with ThreadPoolExecutor(max_workers=_INSPECTION_WORKERS) as pool:
+            while pending:
+                level = []
+                while pending:
+                    state = pending.popleft()
+                    if state not in processed:
+                        processed.add(state)
+                        level.append(state)
+                fresh = tuple(
+                    dict.fromkeys(path for path, *_ in level if path not in images)
+                )
+                images.update(zip(fresh, pool.map(self._inspect, fresh), strict=True))
+                for state, targets in zip(level, pool.map(links, level), strict=True):
+                    for target in targets:
+                        edges.add((state[0], target[0]))
+                        pending.append(target)
         return tuple(images[path] for path in sorted(images)), tuple(sorted(edges))
 
     @staticmethod
@@ -1033,7 +1234,7 @@ class MacOsMachODependencyObserver:
         # Inspect each image once. The sectioned output supports all three facts;
         # starting a second inspector for load commands adds no authority.
         key = self._dyld_fact_key("inspect", path, binding_before)
-        cached = _DYLD_FACTS.get(key) if key is not None else None
+        cached = _INSPECTION_FACTS.get(key) if key is not None else None
         if cached is None:
             summary = self._run_dyld(
                 ("-uuid", "-linked_dylibs", "-load_commands", path)
@@ -1057,7 +1258,7 @@ class MacOsMachODependencyObserver:
                 f"Mach-O image changed during inspection: {path}",
             )
         if key is not None and cached is None:
-            _remember_dyld_fact(key, (uuids, linked, rpaths))
+            _remember_inspection_fact(key, (uuids, linked, rpaths))
         return _MachOImage(path, uuids, linked, rpaths, binding_before)
 
     def _dyld_fact_key(
@@ -1148,7 +1349,7 @@ class MacOsMachODependencyObserver:
         accepted = cache.get(candidate) if isinstance(cache, dict) else None
         if accepted is None:
             key = self._validation_fact_key(candidate)
-            accepted = _DYLD_FACTS.get(key) if key is not None else None
+            accepted = _INSPECTION_FACTS.get(key) if key is not None else None
             if accepted is None:
                 try:
                     self._run_dyld(("-validate_only", candidate))
@@ -1157,7 +1358,7 @@ class MacOsMachODependencyObserver:
                 else:
                     accepted = True
                 if key is not None and key == self._validation_fact_key(candidate):
-                    _remember_dyld_fact(key, accepted)
+                    _remember_inspection_fact(key, accepted)
             if isinstance(cache, dict):
                 cache[candidate] = accepted
         return accepted
@@ -1351,11 +1552,14 @@ class LinuxElfDependencyObserver:
                 "dependencies.linux-seed-missing",
                 "no generated, runtime, compiler, or lifecycle ELF binary was observed",
             )
-        images, image_edges = self._closure(readelf, seeds, loader_cache)
+        images, image_edges = self._closure(
+            readelf, seeds, loader_cache, readelf_digest=readelf_digest
+        )
         if (
             _file_digest(readelf) != readelf_digest
             or _file_digest(ldconfig) != ldconfig_digest
         ):
+            _forget_inspection_facts(readelf_digest)
             raise DependencyObservationError(
                 "dependencies.linux-inspector-changed",
                 "readelf or ldconfig changed during dependency observation",
@@ -1381,6 +1585,7 @@ class LinuxElfDependencyObserver:
                 launcher_runtime_edges=launcher_runtime_edges,
             )
         )
+        _save_persistent_dependency_facts()
         return _normalized_observation(components, edges)
 
     def _closure(
@@ -1388,6 +1593,8 @@ class LinuxElfDependencyObserver:
         readelf: Path,
         seeds: Mapping[str, set[str]],
         loader_cache: Mapping[str, tuple[str, ...]],
+        *,
+        readelf_digest: str | None = None,
     ) -> tuple[tuple[_ElfImage, ...], tuple[tuple[str, str], ...]]:
         images: dict[str, _ElfImage] = {}
         edges: set[tuple[str, str]] = set()
@@ -1406,7 +1613,7 @@ class LinuxElfDependencyObserver:
             processed.add(context)
             image = images.get(path)
             if image is None:
-                image = _inspect_elf(readelf, Path(path))
+                image = _inspect_elf(readelf, Path(path), readelf_digest=readelf_digest)
                 images[path] = image
             own_paths: list[str] = []
             for raw in image.search_paths:
@@ -1438,7 +1645,10 @@ class LinuxElfDependencyObserver:
             targets: list[str] = []
             if image.interpreter is not None:
                 interpreter = _resolve_exact_elf_candidate(
-                    (image.interpreter,), image.architecture, readelf
+                    (image.interpreter,),
+                    image.architecture,
+                    readelf,
+                    readelf_digest=readelf_digest,
                 )
                 edges.add((path, interpreter))
                 pending.append((interpreter, interpreter, (), runtime))
@@ -1462,7 +1672,10 @@ class LinuxElfDependencyObserver:
                         )
                     targets.append(
                         _resolve_exact_elf_candidate(
-                            (str(direct),), image.architecture, readelf
+                            (str(direct),),
+                            image.architecture,
+                            readelf,
+                            readelf_digest=readelf_digest,
                         )
                     )
                     continue
@@ -1472,7 +1685,10 @@ class LinuxElfDependencyObserver:
                     candidates.extend(str(root / name) for root in self.library_roots)
                 targets.append(
                     _resolve_exact_elf_candidate(
-                        tuple(candidates), image.architecture, readelf
+                        tuple(candidates),
+                        image.architecture,
+                        readelf,
+                        readelf_digest=readelf_digest,
                     )
                 )
             for target in targets:
@@ -1648,7 +1864,7 @@ class WindowsPeDependencyObserver:
         native_owners: dict[str, str] = {}
         launcher_runtime_edges: list[tuple[str, str]] = []
         for command in self.toolchain_commands:
-            path = _resolve_command(command)
+            path = _resolve_pe_toolchain_input(command)
             command_paths.append(path)
             if not _is_pe(path):
                 observed = _npm_toolchain_launcher_dependencies(
@@ -1727,6 +1943,7 @@ class WindowsPeDependencyObserver:
             api_set_schema=api_set_schema,
         )
         if _file_digest(inspector.path) != inspector.digest:
+            _forget_inspection_facts(inspector.digest)
             raise DependencyObservationError(
                 "dependencies.windows-inspector-changed",
                 "the PE dependency inspector changed during observation",
@@ -1871,6 +2088,7 @@ class WindowsPeDependencyObserver:
             )
             if binding.target_path is not None:
                 edges.append((contract_ref, refs[binding.target_path]))
+        _save_persistent_dependency_facts()
         return _normalized_observation(components, edges)
 
 
@@ -2225,7 +2443,9 @@ def _is_elf(path: Path) -> bool:
     return _stable_file_bytes(path, limit=4) == b"\x7fELF"
 
 
-def _inspect_elf(readelf: Path, path: Path) -> _ElfImage:
+def _inspect_elf(
+    readelf: Path, path: Path, *, readelf_digest: str | None = None
+) -> _ElfImage:
     try:
         exact_path = path.resolve(strict=True)
     except OSError as exc:
@@ -2237,57 +2457,79 @@ def _inspect_elf(readelf: Path, path: Path) -> _ElfImage:
             "dependencies.elf-image-invalid", f"ELF image {path} is unsafe or invalid"
         )
     image_digest = _file_digest(exact_path)
-    header = _run_bounded_tool(
-        readelf, ("-h", str(exact_path)), code="dependencies.readelf-header-failed"
+    key = _content_fact_key("elf-image", readelf_digest, exact_path, image_digest)
+    cached = _INSPECTION_FACTS.get(key) if key is not None else None
+    if cached is None:
+        header = _run_bounded_tool(
+            readelf, ("-h", str(exact_path)), code="dependencies.readelf-header-failed"
+        )
+        architecture = _parse_readelf_architecture(header)
+        if architecture is None:
+            raise DependencyObservationError(
+                "dependencies.readelf-header-invalid",
+                f"readelf omitted the architecture of {exact_path}",
+            )
+        dynamic = _run_bounded_tool(
+            readelf, ("-d", str(exact_path)), code="dependencies.readelf-dynamic-failed"
+        )
+        needed, search_paths = parse_readelf_dynamic(dynamic)
+        program_headers = _run_bounded_tool(
+            readelf, ("-l", str(exact_path)), code="dependencies.readelf-program-failed"
+        )
+        interpreter_match = re.search(
+            r"\[Requesting program interpreter:\s*([^]]+)]", program_headers
+        )
+        notes = _run_bounded_tool(
+            readelf, ("-n", str(exact_path)), code="dependencies.readelf-notes-failed"
+        )
+        build_id = re.search(r"^\s*Build ID:\s*([0-9A-Fa-f]+)\s*$", notes, re.MULTILINE)
+        cached = (
+            build_id.group(1).casefold() if build_id is not None else None,
+            architecture,
+            needed,
+            search_paths,
+            bool(re.search(r"\(RUNPATH\)", dynamic)),
+            (
+                interpreter_match.group(1).strip()
+                if interpreter_match is not None
+                else None
+            ),
+        )
+        if _file_digest(exact_path) != image_digest:
+            raise DependencyObservationError(
+                "dependencies.elf-image-changed",
+                f"ELF image changed during inspection: {exact_path}",
+            )
+        if key is not None:
+            _remember_inspection_fact(key, cached)
+    build_id, architecture, needed, search_paths, runpath_present, interpreter = cached
+    return _ElfImage(
+        path=str(exact_path),
+        exact_identity=(
+            f"build-id:{build_id}" if build_id is not None else image_digest
+        ),
+        architecture=architecture,
+        needed=needed,
+        search_paths=search_paths,
+        runpath_present=runpath_present,
+        interpreter=interpreter,
     )
+
+
+def _parse_readelf_architecture(header: str) -> tuple[str, str] | None:
     elf_class = re.search(r"^\s*Class:\s*(\S+)\s*$", header, re.MULTILINE)
     machine = re.search(r"^\s*Machine:\s*(.+?)\s*$", header, re.MULTILINE)
     if elf_class is None or machine is None:
-        raise DependencyObservationError(
-            "dependencies.readelf-header-invalid",
-            f"readelf omitted the architecture of {exact_path}",
-        )
-    dynamic = _run_bounded_tool(
-        readelf, ("-d", str(exact_path)), code="dependencies.readelf-dynamic-failed"
-    )
-    needed, search_paths = parse_readelf_dynamic(dynamic)
-    program_headers = _run_bounded_tool(
-        readelf, ("-l", str(exact_path)), code="dependencies.readelf-program-failed"
-    )
-    interpreter_match = re.search(
-        r"\[Requesting program interpreter:\s*([^]]+)]", program_headers
-    )
-    notes = _run_bounded_tool(
-        readelf, ("-n", str(exact_path)), code="dependencies.readelf-notes-failed"
-    )
-    build_id = re.search(r"^\s*Build ID:\s*([0-9A-Fa-f]+)\s*$", notes, re.MULTILINE)
-    exact_identity = (
-        f"build-id:{build_id.group(1).casefold()}"
-        if build_id is not None
-        else image_digest
-    )
-    if _file_digest(exact_path) != image_digest:
-        raise DependencyObservationError(
-            "dependencies.elf-image-changed",
-            f"ELF image changed during inspection: {exact_path}",
-        )
-    return _ElfImage(
-        path=str(exact_path),
-        exact_identity=exact_identity,
-        architecture=(elf_class.group(1), machine.group(1)),
-        needed=needed,
-        search_paths=search_paths,
-        runpath_present=bool(re.search(r"\(RUNPATH\)", dynamic)),
-        interpreter=(
-            interpreter_match.group(1).strip()
-            if interpreter_match is not None
-            else None
-        ),
-    )
+        return None
+    return (elf_class.group(1), machine.group(1))
 
 
 def _resolve_exact_elf_candidate(
-    candidates: Sequence[str], architecture: tuple[str, str], readelf: Path
+    candidates: Sequence[str],
+    architecture: tuple[str, str],
+    readelf: Path,
+    *,
+    readelf_digest: str | None = None,
 ) -> str:
     for raw in _ordered_unique(candidates):
         candidate = Path(raw)
@@ -2299,16 +2541,26 @@ def _resolve_exact_elf_candidate(
             continue
         if exact.is_symlink() or not exact.is_file() or not _is_elf(exact):
             continue
-        header = _run_bounded_tool(
-            readelf, ("-h", str(exact)), code="dependencies.readelf-header-failed"
+        # A candidate's architecture is a fact of its bytes, so a cached header
+        # is reused only for the same resolved path and content digest.
+        key = _content_fact_key(
+            "elf-header", readelf_digest, exact, _file_digest(exact)
         )
-        elf_class = re.search(r"^\s*Class:\s*(\S+)\s*$", header, re.MULTILINE)
-        machine = re.search(r"^\s*Machine:\s*(.+?)\s*$", header, re.MULTILINE)
-        if (
-            elf_class is not None
-            and machine is not None
-            and (elf_class.group(1), machine.group(1)) == architecture
-        ):
+        if key is not None and key in _INSPECTION_FACTS:
+            observed = _INSPECTION_FACTS[key]
+        else:
+            observed = _parse_readelf_architecture(
+                _run_bounded_tool(
+                    readelf,
+                    ("-h", str(exact)),
+                    code="dependencies.readelf-header-failed",
+                )
+            )
+            if key is not None and key == _content_fact_key(
+                "elf-header", readelf_digest, exact, _file_digest(exact)
+            ):
+                _remember_inspection_fact(key, observed)
+        if observed == architecture:
             return str(exact)
     raise DependencyObservationError(
         "dependencies.elf-import-unresolved",
@@ -2666,12 +2918,16 @@ def _pe_closure(
                 "dependencies.pe-image-invalid", f"PE image {path} is unsafe or invalid"
             )
         image_digest = _file_digest(path)
-        imports = _inspect_pe_imports(inspector, path)
-        if _file_digest(path) != image_digest:
-            raise DependencyObservationError(
-                "dependencies.pe-image-changed",
-                f"PE image changed during inspection: {path}",
-            )
+        key = _content_fact_key("pe-imports", inspector.digest, path, image_digest)
+        imports = _INSPECTION_FACTS.get(key)
+        if imports is None:
+            imports = _inspect_pe_imports(inspector, path)
+            if _file_digest(path) != image_digest:
+                raise DependencyObservationError(
+                    "dependencies.pe-image-changed",
+                    f"PE image changed during inspection: {path}",
+                )
+            _remember_inspection_fact(key, imports)
         image = _PeImage(path_string, image_digest, imports)
         images[path_string] = image
         for name, delayed in imports:
@@ -3201,6 +3457,7 @@ def _npm_package_graph(
     dependency_resolver: NpmDependencyResolver | None = None,
     literal_dependency_resolver: NpmLiteralDependencyResolver | None = None,
     builtin_modules: frozenset[str] = NODE_BUILTIN_MODULES,
+    admitted_native_payload: Callable[[Path], bool] | None = None,
 ) -> tuple[HostDependencyObservation, dict[str, str], str]:
     root_package_root = root.resolve(strict=True)
     graph_root = (
@@ -3398,7 +3655,9 @@ def _npm_package_graph(
                     "dependencies.npm-graph-budget-exceeded",
                     "reachable npm graph exceeds the aggregate byte limit",
                 )
-            if name_or_magic_is_native_or_wasm(path.name, content[:8]):
+            if name_or_magic_is_native_or_wasm(path.name, content[:8]) and not (
+                admitted_native_payload is not None and admitted_native_payload(path)
+            ):
                 raise DependencyObservationError(
                     "dependencies.npm-native-payload-unsupported",
                     f"reachable npm implementation package contains a native or "
@@ -4319,6 +4578,36 @@ def is_host_native_executable(path: Path) -> bool:
     return False
 
 
+def _resolve_pe_toolchain_input(command: Sequence[str]) -> Path:
+    """Observe an explicitly selected PE DLL without treating it as a command.
+
+    Windows BEAM ships its native runtime as a DLL. PATH/PATHEXT command
+    discovery cannot resolve that payload; it must be an exact absolute file
+    selection, with no arguments, links or reparse points.
+    """
+    if command and isinstance(command[0], str):
+        path = Path(command[0])
+        if path.suffix.casefold() == ".dll":
+            try:
+                if len(command) != 1 or not path.is_absolute() or ".." in path.parts:
+                    raise ValueError("PE DLL selection must be one absolute path")
+                require_safe_directory(path.parent)
+                node = path.lstat()
+                if (
+                    stat_is_link_or_reparse(node)
+                    or not stat.S_ISREG(node.st_mode)
+                    or not _is_pe(path)
+                ):
+                    raise ValueError("PE DLL selection must be a regular PE file")
+            except (OSError, ValueError, UnsafeFilesystemPathError) as exc:
+                raise DependencyObservationError(
+                    "dependencies.windows-toolchain-invalid",
+                    "selected PE toolchain DLL is missing, unsafe or invalid",
+                ) from exc
+            return path.resolve()
+    return _resolve_command(command)
+
+
 def _resolve_command(command: Sequence[str]) -> Path:
     if not command or not isinstance(command[0], str) or not command[0]:
         raise DependencyObservationError(
@@ -4556,6 +4845,60 @@ def _npm_launcher_package_root(launcher: Path, command: str) -> Path | None:
     return package_root
 
 
+_BAZELISK_PLATFORM_BINARY = re.compile(
+    r"bazelisk-(?:darwin|linux)_(?:amd64|arm64)|bazelisk-windows_(?:amd64|arm64)\.exe"
+)
+
+
+# Executable-header machine codes for the two architectures Bazelisk publishes.
+_ELF_MACHINES = {0x3E: "amd64", 0xB7: "arm64"}
+_MACHO_CPU_TYPES = {0x01000007: "amd64", 0x0100000C: "arm64"}
+_PE_MACHINES = {0x8664: "amd64", 0xAA64: "arm64"}
+
+
+def _executable_architecture(path: Path) -> str | None:
+    """The CPU architecture a single-architecture executable runs as, if known."""
+
+    try:
+        with path.open("rb") as stream:
+            header = stream.read(4096)
+    except OSError:
+        return None
+    if header[:4] == b"\x7fELF" and len(header) >= 20:
+        order = "little" if header[5] == 1 else "big"
+        return _ELF_MACHINES.get(int.from_bytes(header[18:20], order))
+    if header[:4] in {b"\xcf\xfa\xed\xfe", b"\xce\xfa\xed\xfe"} and len(header) >= 8:
+        return _MACHO_CPU_TYPES.get(int.from_bytes(header[4:8], "little"))
+    if header[:2] == b"MZ" and len(header) >= 64:
+        offset = int.from_bytes(header[60:64], "little")
+        if header[offset : offset + 4] == b"PE\0\0":
+            return _PE_MACHINES.get(
+                int.from_bytes(header[offset + 4 : offset + 6], "little")
+            )
+    return None
+
+
+def _bazelisk_host_binary_name(node: Path) -> str:
+    """The prebuilt binary bazelisk.js selects for this host and Node runtime.
+
+    bazelisk.js picks by ``process.platform`` and ``os.arch()``, the architecture
+    Node itself runs as, which can differ from the CPU under emulation (x64 Node
+    on Windows ARM64, Rosetta). The architecture therefore comes from the Node
+    executable's header; a universal or unrecognized Node refuses.
+    """
+
+    system = {"darwin": "darwin", "linux": "linux", "win32": "windows"}.get(
+        sys.platform
+    )
+    arch = _executable_architecture(node)
+    if system is None or arch is None:
+        raise DependencyObservationError(
+            "dependencies.toolchain-launcher-unsupported",
+            f"cannot tell which Bazelisk binary {node} selects on {sys.platform}",
+        )
+    return f"bazelisk-{system}_{arch}" + (".exe" if system == "windows" else "")
+
+
 def _npm_toolchain_launcher_dependencies(
     launcher: Path,
     command: str,
@@ -4602,16 +4945,39 @@ def _npm_toolchain_launcher_dependencies(
         ),
         package_root,
     )
-    packages, native_owners, package_ref = _npm_package_graph(
-        package_root,
-        native_predicate=native_predicate,
-        resolution_root=resolution_root,
-    )
+    # bazelisk.js runs exactly one prebuilt binary chosen by platform and
+    # architecture. That binary is the native owner whose closure is observed;
+    # the package's other platform binaries are hashed as inert payload. Native
+    # files anywhere else, including this package's dependencies, still refuse.
     node = _resolve_command(("node",))
     if not native_predicate(node):
         raise DependencyObservationError(
             "dependencies.toolchain-runtime-unbound",
             "the Bazelisk Node runtime is not an inspectable native binary",
+        )
+    payload_root = package_root.resolve(strict=True)
+    host_binary = payload_root / _bazelisk_host_binary_name(node)
+    if not host_binary.is_file() or host_binary.is_symlink():
+        raise DependencyObservationError(
+            "dependencies.toolchain-launcher-unsupported",
+            f"the Bazelisk npm package has no {host_binary.name} binary for this host",
+        )
+    packages, native_owners, package_ref = _npm_package_graph(
+        package_root,
+        native_predicate=lambda path: (
+            path.resolve() == host_binary and native_predicate(path)
+        ),
+        resolution_root=resolution_root,
+        admitted_native_payload=lambda path: (
+            path.parent.resolve() == payload_root
+            and _BAZELISK_PLATFORM_BINARY.fullmatch(path.name) is not None
+        ),
+    )
+    if str(host_binary) not in native_owners:
+        raise DependencyObservationError(
+            "dependencies.toolchain-runtime-unbound",
+            f"the Bazelisk host binary {host_binary.name} is not an inspectable "
+            "native binary",
         )
     observation = _normalized_observation(
         packages.components,

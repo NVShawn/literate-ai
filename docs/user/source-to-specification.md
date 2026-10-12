@@ -335,7 +335,7 @@ the real integration reproducible:
 | Installed source-inventory test | A real temporary mirror is inventoried and content-bound | `make validate` |
 | Regenerative parity | Two empty, cache-bypassed source generations per language compile/run through Python, C++, Rust, and JavaScript and match independently observed baseline output, including invalid input | `make validate` |
 | Live model integration | Unavailable; coding-cli inverse translation fails closed | n/a |
-| Live bidirectional promotion | One stable application spec generates, builds, tests, and runs in Python, C++, Rust, and JavaScript; every generated tree is translated back and compared against the complete normalized requirement graph; every inverse spec is promoted and completes two new spec-only build/test/parity runs to reach fungible authority | `LITERATE_AI_RUN_LIVE_ROUNDTRIP=1 CODING_CLI=codex PYTHONPATH=src python -m unittest tests.conformance.test_live_bidirectional_roundtrip` |
+| Live bidirectional promotion | One stable application spec generates, builds, tests, and runs in Python, C++, Rust, JavaScript, and Elixir; every generated tree is translated back and compared against the complete normalized requirement graph; every inverse spec is promoted and completes two new spec-only build/test/parity runs to reach fungible authority | `LITERATE_AI_RUN_LIVE_ROUNDTRIP=1 CODING_CLI=codex PYTHONPATH=src python -m unittest tests.conformance.test_live_bidirectional_roundtrip` |
 | Live composed promotion | The invoice sample generates, reverses into three evidence-bound Components and two capability edges, promotes the full graph, composes it normally, regenerates, builds, tests, and matches known output | `LITERATE_AI_RUN_LIVE_COMPOSED_ROUNDTRIP=1 CODING_CLI=codex PYTHONPATH=src python -m unittest tests.conformance.test_live_composed_roundtrip` |
 
 The live commands spend coding-agent calls and require the selected CLI to be installed
@@ -409,3 +409,9 @@ the next inverse-authoring run, or preserve it as a baseline. Change accepted sp
 Flavor requirements, review exact skills when technique changes, then regenerate the
 implementation and suite together. The separate verifier oracle remains independent
 acceptance evidence.
+
+Elixir `.ex` and `.exs` files have inert inventory, behavioral-surface discovery and
+an independent language skill. The live roundtrip selector accepts `elixir`.
+The public coding-CLI inverse translator is currently unavailable for every
+language; selecting Elixir does not bypass that gate or count fixture observations
+as live inverse qualification.

@@ -158,6 +158,12 @@ class BoundActionExecution:
         default_factory=dict, repr=False
     )
 
+    finalize_profile: ContentIdentity | None = None
+    # Operator-owned file where a refused FINALIZE writes the exact grant request.
+    finalize_grant_request_path: Path | None = field(default=None, repr=False)
+    # Bounded wait for that grant inside the same rebuild; 0 means fail at once.
+    finalize_grant_wait_seconds: int = 0
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(
@@ -184,14 +190,22 @@ class BoundActionExecution:
                 not isinstance(phase, LifecycleActionKind)
                 or phase
                 not in (
+                    LifecycleActionKind.GENERATE,
                     LifecycleActionKind.BUILD,
                     LifecycleActionKind.TEST,
                     LifecycleActionKind.EXECUTE,
+                    LifecycleActionKind.ACCEPT,
+                    LifecycleActionKind.LINK,
+                    LifecycleActionKind.PACKAGE,
+                    LifecycleActionKind.FINALIZE,
                 )
                 for phase in phases
             )
         ):
-            raise ValueError("result transport requires BUILD/TEST/EXECUTE phases")
+            raise ValueError(
+                "result transport requires "
+                "GENERATE/BUILD/TEST/EXECUTE/ACCEPT/LINK/PACKAGE/FINALIZE phases"
+            )
         self.require_unchanged()
         admitted = {
             worker.worker_id: pool.catalog.worker(worker.worker_id)
@@ -402,7 +416,7 @@ def load_action_execution(
         document = _document(original)
         if (
             not isinstance(document, dict)
-            or set(document) - {"result_sources"}
+            or set(document) - {"result_sources", "finalize"}
             != {
                 "schema",
                 "source_cas_root",
@@ -429,6 +443,34 @@ def load_action_execution(
             )
         ):
             raise ValueError("invalid health configuration map")
+        finalize = document.get("finalize")
+        finalize_profile = None
+        grant_request_path = None
+        grant_wait_seconds = 0
+        if "finalize" in document:
+            if (
+                not isinstance(finalize, dict)
+                or not {"profile_identity", "verifier"}
+                <= set(finalize)
+                <= {
+                    "profile_identity",
+                    "verifier",
+                    "grant_request_path",
+                    "grant_wait_seconds",
+                }
+                or finalize["verifier"] != "portable-application@1"
+            ):
+                raise ValueError("invalid FINALIZE policy")
+            finalize_profile = ContentIdentity.parse_uri(finalize["profile_identity"])
+            if "grant_request_path" in finalize:
+                grant_request_path = _path(finalize["grant_request_path"])
+            grant_wait_seconds = finalize.get("grant_wait_seconds", 0)
+            if (
+                type(grant_wait_seconds) is not int
+                or not 0 <= grant_wait_seconds <= 3600
+                or (grant_wait_seconds and grant_request_path is None)
+            ):
+                raise ValueError("invalid FINALIZE grant wait")
         return BoundActionExecution(
             path,
             original,
@@ -445,6 +487,9 @@ def load_action_execution(
             ),
             MappingProxyType(configured),
             _result_sources(document.get("result_sources", {}), configured),
+            finalize_profile,
+            grant_request_path,
+            grant_wait_seconds,
         )
     except ActionExecutionConfigurationError:
         raise

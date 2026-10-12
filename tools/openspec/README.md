@@ -7,8 +7,11 @@ framework package and are not required to install, import, or run the kernel.
 
 Contributor tooling requires Node.js 22.12 or newer (CI uses Node 24). Puppeteer
 25 removes the vulnerable `extract-zip` and js-yaml dependency chains from the
-lock. These are documentation-tool requirements, not changes
-to generated applications' selected runtimes. Keep browser sandbox defaults enabled.
+lock. Puppeteer then extracts its browser with a host `unzip`, so the lock pins the
+optional `yauzl` extractor instead; hosts without `unzip` would otherwise leave an empty
+browser folder that fails every later render. These are documentation-tool requirements,
+not changes to generated applications' selected runtimes. Keep browser sandbox defaults
+enabled.
 
 `make documentation-check` first audits the staged locked dependency graph. High or
 critical findings, or an unavailable audit service, fail the gate; do not substitute

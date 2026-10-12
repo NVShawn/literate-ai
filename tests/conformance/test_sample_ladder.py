@@ -133,6 +133,31 @@ def tree_digest(root: Path) -> str:
     return digest.hexdigest()
 
 
+def _prompt_documents(prompt: str):
+    """Yield the JSON documents a generation prompt embeds on their own lines."""
+
+    decoder = json.JSONDecoder()
+    lines = prompt.splitlines(keepends=True)
+    offset = 0
+    for line in lines:
+        if line.strip() in {"{", "["}:
+            try:
+                yield decoder.raw_decode(prompt, offset + line.index(line.strip()))[0]
+            except ValueError:
+                pass
+        offset += len(line)
+
+
+def _contains(value, target) -> bool:
+    if value == target:
+        return True
+    if isinstance(value, dict):
+        return any(_contains(item, target) for item in value.values())
+    if isinstance(value, list):
+        return any(_contains(item, target) for item in value)
+    return False
+
+
 class NeutralSampleLadderTests(unittest.TestCase):
     def setUp(self) -> None:
         evidence_environment = mock.patch.dict(
@@ -652,6 +677,7 @@ class NeutralSampleLadderTests(unittest.TestCase):
                         {flavor.value for flavor in recipe.flavors},
                     )
                 language_skills = {
+                    "elixir": "elixir-portable-application",
                     "python": "python-portable-application",
                     "cpp": "cpp17-portable-json-application",
                     "rust": "rust-portable-json-application",
@@ -746,6 +772,8 @@ class NeutralSampleLadderTests(unittest.TestCase):
                         else ({"swift"} if "swift" in item["languages"] else set())
                     )
                 )
+                if "elixir" in item["languages"]:
+                    expected_toolchains = {*expected_toolchains, "elixir"}
                 if "nvidia-cuda" in {flavor.value for flavor in recipe.flavors}:
                     expected_toolchains = {*expected_toolchains, "nvcc"}
                 self.assertEqual(
@@ -799,9 +827,12 @@ class NeutralSampleLadderTests(unittest.TestCase):
                     signature = generated_test_invocation_signature(
                         invocation["arguments"]
                     )
-                    self.assertIn(
-                        canonical_json_bytes(signature).decode("utf-8"),
-                        prompt,
+                    self.assertTrue(
+                        any(
+                            _contains(document, signature)
+                            for document in _prompt_documents(prompt)
+                        ),
+                        signature,
                     )
                 if item["sample_id"] == "regenerative-roundtrip":
                     self.assertIn(

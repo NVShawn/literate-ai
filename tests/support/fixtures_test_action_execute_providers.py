@@ -79,7 +79,16 @@ class ExecuteProviderTests(unittest.TestCase):
             provider_contract,
             component_revision=generation.component_revision,
             commands=tuple(
-                command if item.phase is ComponentCommandPhase.EXECUTE else item
+                command
+                if item.phase is ComponentCommandPhase.EXECUTE
+                else replace(
+                    item,
+                    argv=tuple(
+                        arg.replace("'known-output'", "'consumer'") for arg in item.argv
+                    ),
+                )
+                if item.phase is ComponentCommandPhase.TEST
+                else item
                 for item in provider_contract.commands
             ),
         )
