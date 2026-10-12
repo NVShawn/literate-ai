@@ -1,7 +1,7 @@
 class LiterateAi < Formula
   include Language::Python::Virtualenv
 
-  LITERATE_AI_VERSION = "1.2.0"
+  LITERATE_AI_VERSION = "1.3.0"
 
   desc "Specification-led software lifecycle control plane"
   homepage "https://github.com/jordanhubbard/literate-ai"
