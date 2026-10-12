@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.2.0 - 2026-10-12
+
+[README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.2.0/README.md)
+
 - Instructional film: publish the 1.2 onboarding film, *Settle the Argument. Before
   CI.* (11:52), in `media/courses/sam-meets-literate-ai/`. LitAI opens with the big
   picture of agentic development, Sam dismisses it as the usual AI slop pitch, and
