@@ -12,7 +12,7 @@ import sys
 import tempfile
 import time
 import tomllib
-from concurrent.futures import ThreadPoolExecutor, as_completed, wait
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
@@ -3308,24 +3308,25 @@ def _run_tiered_qualification(
         return None
 
     # The host and every worker platform run concurrently; each is a separate
-    # machine, so serializing them only adds wall-clock time. A failure on any
-    # tier still fails the qualification, the host's first.
+    # machine, so serializing them only adds wall-clock time. The host gate
+    # stays on the calling thread: only the main thread receives
+    # KeyboardInterrupt, which is what tears down the host gate's process tree.
+    # A failure on any tier still fails the qualification, the host's first:
+    # leaving the executor waits for the workers, then re-raises it.
     pending = [
         platform for platform in qualification.platforms if platform not in plan.local
     ]
-    with ThreadPoolExecutor(max_workers=max(1, len(pending) + 1)) as executor:
-        local_future = executor.submit(qualify_locally) if plan.local else None
+    with ThreadPoolExecutor(max_workers=max(1, len(pending))) as executor:
         worker_futures = {
             platform: executor.submit(qualify_on_workers, platform)
             for platform in pending
         }
-        wait([*worker_futures.values(), *([local_future] if local_future else [])])
-    if local_future is not None:
-        local_digests, local_runs = local_future.result()
-        digests.extend(local_digests)
-        runs.extend(local_runs)
-        for platform in plan.local:
-            covered[platform] = {"tier": "local"}
+        if plan.local:
+            local_digests, local_runs = qualify_locally()
+            digests.extend(local_digests)
+            runs.extend(local_runs)
+            for platform in plan.local:
+                covered[platform] = {"tier": "local"}
     outcomes = {
         platform: future.result() for platform, future in worker_futures.items()
     }

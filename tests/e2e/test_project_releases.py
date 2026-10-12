@@ -604,7 +604,10 @@ class ProjectReleaseTests(unittest.TestCase):
         worker_started = threading.Event()
         host_started = threading.Event()
 
+        host_threads: list[threading.Thread] = []
+
         def host_gate(_root, _policy, **options):
+            host_threads.append(threading.current_thread())
             host_started.set()
             # A serial implementation never starts the worker while this waits.
             overlapped = worker_started.wait(timeout=30)
@@ -664,6 +667,9 @@ class ProjectReleaseTests(unittest.TestCase):
         )
         # The aggregate keeps the host's run first, whatever finished first.
         self.assertEqual([item["tier"] for item in record["runs"]], ["local", "worker"])
+        # Only the main thread receives KeyboardInterrupt, which is what tears
+        # down the host gate's process tree; the host gate must stay there.
+        self.assertEqual(host_threads, [threading.main_thread()])
 
     def assert_left_tier_record_never_waives_ci(self, root: Path) -> None:
         """A record waives only optional CI: CI cells and failed runs still bind."""
