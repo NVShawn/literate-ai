@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -728,6 +729,11 @@ class ProjectReleaseTests(unittest.TestCase):
             )
         self.assertEqual(refused.exception.code, "release.rc_ci_failed")
 
+    # The worker is simulated with a local POSIX bash; on hosted Windows runners
+    # `bash` resolves to the WSL launcher in System32, which has no distribution.
+    @unittest.skipIf(
+        os.name == "nt", "simulates a Linux worker with a local POSIX bash"
+    )
     def test_worker_release_checkout_syncs_exact_revisions_incrementally(self) -> None:
         """A worker gets the exact revision without touching its own checkout."""
 
