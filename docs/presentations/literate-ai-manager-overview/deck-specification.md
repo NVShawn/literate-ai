@@ -111,7 +111,8 @@ collection with worktree and pull-request inspection. Keep 26 slides by revising
 
 ### Release engineering (labeled technical sequence)
 
-19. Release checks resume from where they stopped, not from zero.
+19. Release checks resume from where they stopped, not from zero. Draw every name in
+    the current Makefile `RELEASE_GATES` list (15 as of 1.2.0).
 20. Release Policy: writable `main`, exact-main RCs, and locked release lines. Preserve
     the one-gate target diagram while making the policy explicit: only README Release
     Engineers merge or create/publish major/minor; configured loose writers get only a
@@ -129,12 +130,14 @@ collection with worktree and pull-request inspection. Keep 26 slides by revising
 
 ### Consequences (continued)
 
-23. The 1.2 release adds bounded dependency-DAG scheduling, provider-neutral shared
-    cache authority, real local Debian packages, native CLI acceptance, native gRPC
-    acceptance, and repository-owned worktree placement. Distinguish these implemented
-    slices from incomplete production command/SSH composition, real LAN warm-cache
-    qualification, remote native-package custody, complete native-CLI lifecycle proof,
-    and audited legacy-worktree retirement.
+23. The 1.2 release builds on the 1.1 scheduler, cache, Debian-package, and
+    native-acceptance foundation. It adds bounded candidate repair with redacted
+    diagnostic excerpts, cross-host action workers with a reference standard receiver,
+    native Elixir/Mix builds with checksum-pinned Hex dependencies, and forge issues and
+    pull requests as the default coordination channel (ADR 0050). Distinguish these
+    implemented slices from production action-DAG dispatch and multi-worker LAN-cache
+    qualification and three-way update merging (deferred to 1.3), worker-built Mix,
+    production FINALIZE grant provisioning, and remote native-package custody.
 24. The end state is a living portfolio of intent.
 25. Start with one demanding application. Build for the portfolio.
 26. Build the system that builds the software.
@@ -143,8 +146,9 @@ collection with worktree and pull-request inspection. Keep 26 slides by revising
 
 The two-week horizon is a target, not a readiness guarantee. It covers four connected outcomes:
 
-1. Exercise installed 1.2 scheduling, cache, package, and native-acceptance slices
-   against a demanding downstream application and carry them through explicit evidence.
+1. Exercise installed 1.2 repair, cross-host worker, scheduling, cache, package, and
+   native-acceptance slices against a demanding downstream application and carry them
+   through explicit evidence.
 2. Realize the production-containment contract as supported host backends.
 3. Automate multi-entrypoint deployment and durable-service operations without
    weakening their separate authority boundaries.

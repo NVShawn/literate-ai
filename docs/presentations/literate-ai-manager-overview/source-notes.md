@@ -1,5 +1,93 @@
 # Factual claim ledger
 
+## 1.2.0 edition (2026-10-11)
+
+This is the major/minor document-pair regeneration required before the `1.2.0` cut.
+`v1.1.0` is published. The repository still declares `1.1.0` while the 1.2 line is
+prepared (`src/literate_ai/version.py`); this edition describes implemented candidate
+authority and evidence recorded under `CHANGELOG.md`'s Unreleased section, not a claim
+that tag `v1.2.0` has already been published. Both local members are regenerated and
+verified together. The stable Google Workspace resources retain the 1.1.0 edition until
+the explicit account-bound in-place update and export-back verification complete.
+
+Counts re-verified against current authority for this edition:
+
+- The Makefile `RELEASE_GATES` list is **15** names: `public-export-check` now runs
+  second, after `repository-layout-check` (#55). Previous ledger value: 14.
+- Six build-system Flavors (`flavors/build-*`): Bazel, GNU Make, CMake, Cargo, Mix, and
+  repo-man. `build-mix` is new in 1.2. Previous ledger value: five.
+- Package providers remain nine (`flavors/package-*`: pip, Conan, apt, Homebrew, WinGet,
+  Chocolatey, Cargo, npm, ZIP). Hex is **not** a package-provider Flavor: `build-mix`
+  contributes a `hex` toolchain constraint (`flavors/build-mix/hex.json`, Hex `>=2.5,<3`),
+  and Hex packages are checksum-pinned dependency inputs that Mix acquisition admits,
+  not an output packaging format.
+- Language Flavors remain nine and OS families remain three.
+
+Implemented and safe to cite, in addition to the 1.1.0 and historical ledger below:
+
+- `litai rebuild` runs bounded candidate repair: a retryable build or generated-test
+  rejection requests up to two fresh replacement candidates, each in its own durable
+  attempt chained to the rejected one, and the rebuild result's `repair` field reports
+  the replacements that ran. Authority: `src/literate_ai/adapters/candidate_repair.py`,
+  `src/literate_ai/contracts/executable_components/candidate_repair.py`,
+  `src/literate_ai/cli/rebuild.py`.
+- The conformance sample runner records a bounded (4096-byte tail), redacted
+  `diagnostic_excerpt` for rejected generated candidates — builder output for build
+  rejections, generated expected/observed values for generated-test mismatches — in
+  retained evidence and in the next attempt's repair feedback. Authority:
+  `tests/conformance/support/sample_runner.py`,
+  `tests/smoke/test_candidate_rejection_diagnostics.py`.
+- Cross-host action workers: when BUILD, TEST, EXECUTE and FINALIZE all run on admitted
+  workers, `litai rebuild` derives locked toolchain identities, commands and native
+  dependencies from the worker, so the controller needs none of the project's tools.
+  `python -m literate_ai.standard_receiver` is a reference action receiver for portable
+  single-Component Make/Python Standard projects. FINALIZE grants are checked in the
+  receiver's parent and child. Production worker grant provisioning and complete CLI
+  rebuild qualification remain pending. Authority: `src/literate_ai/standard_receiver.py`,
+  `docs/architecture/component-execution-plans.md`.
+- The `build-mix` Flavor and `mix-build-system` skill build native Elixir Mix
+  applications and libraries. The source BOM pins each Hex package's exact version,
+  checksums and requirements (ranges refused); the native lock must equal those pins
+  before anything compiles; extracted dependencies are replaced by verified archive
+  bytes. Mix builds are local-only in 1.2; worker-built Mix intents are refused.
+  Authority: `flavors/build-mix/`, `skills/specification-to-source/mix-build-system/`.
+- Forge issues and PRs/MRs are the default tracker and agent-coordination channel
+  (ADR 0050, `docs/decisions/0050-forge-issues-and-reviews-are-the-default-tracker.md`);
+  Gerrit or another tracker is an override. Landing passes the policy target branch.
+  `litai prompt translate` recognizes the generic external envelope
+  (`--external-envelope` / `LITAI_EXTERNAL_TASK_ID`, schema
+  `literate-ai/prompt-task@2`; `src/literate_ai/application/prompt_routing.py`).
+- Release operations require an explicit SemVer policy (`literate.release.json`
+  `version_scheme: semver`). When the policy declares `qualification`, `litai release
+  check` defaults to a tiered target: each platform × action cell is covered by the
+  leftmost tier that can run it — the host running the coding CLI, then one
+  `workers.json` worker per remaining platform, then CI — and `litai release qualify`
+  records exact-HEAD coverage. Authority: `docs/architecture/project-releases.md`,
+  `src/literate_ai/project_releases.py`.
+- Remote live gates still require `opencode` but no longer require `OPENAI_API_KEY`;
+  OpenCode resolves the pinned provider's credentials from its own configuration (ADR
+  0017 amendment, 2026-10-09).
+- `litai project validate` and Flavor catalog loading discover the project skill catalog
+  once per operation instead of once per Component and Flavor, removing most of the
+  filesystem metadata calls that made Windows gates slow.
+- The 1.2 onboarding film, *Settle the Argument. Before CI.* (11:52), is published in
+  the repository at `media/courses/sam-meets-literate-ai/` with a verifying integrity
+  receipt; remote workers and the learning loop are labelled walkthroughs.
+
+Still must not be claimed:
+
+- That `v1.2.0` is published before release publication and independent
+  `verify-published` succeed.
+- That the stable Google Workspace pair contains this edition before explicit
+  account-bound publication and export-back verification succeed.
+- Clean three-way update merging and reviewed resolution application (issue #2;
+  deferred to 1.3 — 1.2 keeps plan-only update reviews).
+- Production action-DAG dispatch or multi-worker shared LAN-cache qualification
+  (issue #4; deferred to 1.3 — 1.2 ships the scheduler and cache foundation).
+- Worker-built Mix, Hex as a package-provider Flavor, production FINALIZE grant
+  provisioning, remote native-package custody, or GitLab release-gate dispatch.
+- Invented productivity, cost, quality, throughput, or ROI percentages.
+
 ## 1.1.0 edition (2026-10-04)
 
 This is the major/minor document-pair regeneration required before the `1.1.0`
@@ -333,18 +421,20 @@ Still must not be claimed:
 - Invented productivity, cost, quality, or ROI percentages.
 - That the published Slides copy is current until this edition's import is verified.
 
-Release-check gates: the Makefile `RELEASE_GATES` list is **14** names. There is no
-`codegraph-ready` gate. An earlier 26-slide local rebuild drew 15 abbreviated chips
-including `codegraph`; that drawing is stale relative to current authority.
+Release-check gates: the Makefile `RELEASE_GATES` list is **15** names as of 1.2.0
+(`public-export-check` added after `repository-layout-check`; it was 14 through 1.1.0).
+There is no `codegraph-ready` gate. An earlier 26-slide local rebuild drew 15 abbreviated
+chips including `codegraph`; that drawing is stale relative to current authority.
 
 The live Flavor surface (counts measure catalog area, not maturity or Cartesian
-qualification), re-verified against `flavors/` for 1.1.0: nine language Flavors (Python
+qualification), re-verified against `flavors/` for 1.2.0: nine language Flavors (Python
 3.11+, C++17, Rust 2021, JavaScript with Node.js 20+, TypeScript, Swift with
 Apple/Linux/Windows toolchain realizations, Go, Zig, and Elixir with Erlang/OTP 27+);
-five build-system Flavors (Bazel, GNU Make, CMake, Cargo, repo-man); three OS families
-(macOS, Linux, Windows); nine package providers (pip, Conan, apt, Homebrew, WinGet,
-Chocolatey, Cargo, npm, ZIP). Native
-construction remains pip wheels and Conan cache archives.
+six build-system Flavors (Bazel, GNU Make, CMake, Cargo, Mix, repo-man); three OS
+families (macOS, Linux, Windows); nine package providers (pip, Conan, apt, Homebrew,
+WinGet, Chocolatey, Cargo, npm, ZIP). Hex is a `build-mix` toolchain constraint and
+pinned dependency input, not a package provider. Native construction remains pip wheels
+and Conan cache archives, plus the local Debian path recorded in the 1.1.0 edition.
 
 The `narrative` member is realized locally with `python-docx` (`build_narrative.py`).
 The Codex `documents` plugin remains unavailable under the organizational spend cap and
@@ -404,7 +494,8 @@ release-engineering slides (19-22) `deck-specification.md` already called for bu
   chips for the Makefile `RELEASE_GATES` list, plus a mono excerpt distinguishing
   `python-check`'s content-hash checkpoint from `release-check`'s coarser gate-name-only
   checkpoint. The 2026-08-19 drawing listed 15 chips including `codegraph`; current
-  authority is the 14-gate list without `codegraph-ready` (see the 0.7.1 edition entry).
+  authority is the 15-gate list (as of 1.2.0) without `codegraph-ready` (see the 0.7.1
+  edition entry).
 - **20 — dual dispatch targets:** `litai release check --target local|github` fanning
   into a private-worker-fleet panel and a GitHub Actions panel that converge on the same
   `make release-check` command, naming `--target gitlab` as recognized-but-unsupported.
@@ -537,15 +628,18 @@ re-import remain open follow-up work in a fully-tooled environment.
 - Generated source is treated as an untrusted candidate and cache hits are revalidated against current gates.
 - Pre-build and post-build CycloneDX evidence are supported.
 - The live language Flavor matrix is Python 3.11+, C++17, Rust 2021, JavaScript with
-  Node.js 20+, Swift with explicit Apple/Linux/Windows toolchain realizations, and Go.
-- The live build-system Flavor matrix is Bazel, GNU Make, CMake, and Cargo. Bazel is a
-  removable preference, never hard-coded authority.
+  Node.js 20+, TypeScript, Swift with explicit Apple/Linux/Windows toolchain
+  realizations, Go, Zig, and Elixir with Erlang/OTP 27+.
+- The live build-system Flavor matrix is Bazel, GNU Make, CMake, Cargo, Mix, and
+  repo-man. Bazel is a removable preference, never hard-coded authority.
 - The live operating-system Flavor matrix is macOS, Linux, and Windows.
-- The packaging Flavor catalog contains pip wheels, Conan, apt, Homebrew, WinGet, and
-  Chocolatey. Compatible providers compose as independent selections. The current CLI
-  provides exact, read-only multi-provider package planning and Standard-lifecycle-backed
-  native construction/independent verification for deterministic pip wheels and portable
-  Conan cache archives. Apt, Homebrew, WinGet, and Chocolatey construction remains open.
+- The packaging Flavor catalog contains pip wheels, Conan, apt, Homebrew, WinGet,
+  Chocolatey, Cargo, npm, and deterministic ZIP archives. Compatible providers compose as
+  independent selections. The current CLI provides exact, read-only multi-provider
+  package planning and Standard-lifecycle-backed native construction/independent
+  verification for deterministic pip wheels and portable Conan cache archives, plus local
+  Debian construction on compatible Linux hosts. Homebrew, WinGet, and Chocolatey
+  construction remains open.
 - The current private user-owned inventory configures six workers spanning macOS ARM64,
   Windows 11 CPU/GPU, Ubuntu 24.04 CPU/GPU, and Ubuntu 26.04 CPU. This is configuration
   evidence, not a claim that the full Cartesian product has passed.
@@ -574,11 +668,12 @@ re-import remain open follow-up work in a fully-tooled environment.
 
 ## CLI, graph, and fan-out claims used
 
-- Current `litai help` exposes: `help`, `version`, `design`, `release`, `package`,
-  `flavor`, `perf`, `matrix`, `config`, `work`, `document`, `worker`, `init`, `cache`,
-  `skills`, `prompt`, `catalog`, `graph`, `build`, `test`, `run`, `verify`, `update`,
-  `reparent`, `learn`, `lock`, `component`, `clean`, `really-clean`, `project`, `plan`,
-  `generate`, `rebuild`, `profile`, and `spec`. Diagnostic and deterministic connector
+- Current `litai help` exposes: `help`, `version`, `status`, `doctor`, `orchestrate`,
+  `onboard`, `design`, `release`, `package`, `flavor`, `perf`, `matrix`, `config`,
+  `work`, `video`, `document`, `worker`, `init`, `cache`, `skills`, `prompt`, `catalog`,
+  `graph`, `render`, `build`, `test`, `run`, `verify`, `update`, `reparent`, `learn`,
+  `lock`, `component`, `clean`, `really-clean`, `project`, `plan`, `generate`,
+  `rebuild`, `profile`, and `spec` (re-verified for 1.2.0). Diagnostic and deterministic connector
   verbs do not authorize a release.
 - `litai release evidence explain|index|show|prune` inspects or reclaims the
   append-only release evidence ledger. These are diagnostic and retention commands;

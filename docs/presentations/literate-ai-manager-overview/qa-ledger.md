@@ -1,5 +1,35 @@
 # QA ledger
 
+## 2026-10-11 1.2.0 (public) repair, cross-host worker, and Mix edition accepted; publication pending
+
+This is the public repository's 1.2.0 edition. It is distinct from the private
+repository's 2026-09-26/27 "1.2.0" entries below, whose content shipped publicly as
+`1.1.0`.
+
+- Revalidated `source-notes.md` against the merged 1.2 line (`1d22e1c1`). Corrected
+  counts: Makefile `RELEASE_GATES` 14 → 15 (`public-export-check`); build-system Flavors
+  5 → 6 (`build-mix`). Package providers stay nine; Hex is recorded as a `build-mix`
+  toolchain constraint and pinned dependency input, not a package provider.
+- Revised slide 23 (and its narrative counterpart, a new 8.1.3 heading) to the 1.2
+  slices: bounded candidate repair with redacted diagnostic excerpts, cross-host action
+  workers and the reference standard receiver, Elixir/Mix with checksum-pinned Hex, and
+  forge issues/PRs as the default coordination channel. Production DAG dispatch with LAN
+  cache qualification (#4) and three-way update merging (#2) are labelled as deferred to
+  1.3. Slide 19 now draws all 15 gates; slides 4, 18, 20, and 25 and their notes carry
+  the updated counts, tiered local-first qualification, and 1.2 labels. 26 slides kept.
+- Independent document-pair acceptance passed all 11 scenarios: 26 slides at
+  1280x720, zero escaping elements, zero overlapping text-bearing frames, notes on
+  26/26 slides, 73 narrative headings with no skipped level, no unresolved
+  placeholders, and no credential material.
+- Inspected the complete 26-slide contact sheet plus full-resolution slides 4, 19, 23,
+  and 25. Slide 23's first title draft wrapped into its subtitle and was shortened to
+  one line. No new clipping, overflow, unintended overlap, or broken connector remains.
+- Local artifact identities:
+  - PPTX: `sha256:d262745fff4f61ac6fd6147fce94e2af66a3560abcbf7d409095dbd65ee440a1`
+  - DOCX: `sha256:17c3921259a06240116409689dac6d17029e3c331fb0a2533eebaa9a20f084ef`
+- Google Workspace preflight, in-place publication, export-back verification, and the
+  release-bound publication receipt are pending and were not attempted in this pass.
+
 ## 2026-09-27 1.2.0 published in place and export-back verified
 
 - Repeated the pair-wide Google Workspace preflight as the configured authorized publisher against

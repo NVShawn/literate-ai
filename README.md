@@ -47,9 +47,10 @@ without flattening every implementation detail into one model context.
 `litai onboard adopt PATH` before explicitly applying its plan. `make bootstrap`
 is the maintainer setup for this checkout.
 
-A stakeholder-facing overview is also maintained separately. The 1.1.0 edition was
-published in place and export-back verified against its checked-in presentation and
-narrative at these stable links:
+A stakeholder-facing overview is also maintained separately. The 1.2.0 edition is
+regenerated and locally accepted in the authoring package; its in-place publication is
+pending, so these stable links still carry the published, export-back-verified 1.1.0
+edition:
 [slides](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
 and
 [narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk).
