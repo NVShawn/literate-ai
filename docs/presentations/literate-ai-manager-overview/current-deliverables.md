@@ -1,13 +1,13 @@
 # Current deliverables
 
-The checked-in members below are the locally accepted **1.2.0 repair, cross-host worker,
-and Mix edition**. Its in-place publication to the stable Google Workspace resources is
-pending; until it completes and is export-back verified, those resources carry the
-published 1.1.0 edition. Their stable IDs and links do not change.
+The checked-in members below are the published **1.2.0 repair, cross-host worker,
+and Mix edition**. Both stable Google Workspace resources were refreshed in place on
+2026-10-11 and export-back verified against these accepted local members. Their stable
+IDs and links did not change.
 
-- Native Google Slides (1.1.0 edition published; 1.2.0 refresh pending): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
+- Native Google Slides (1.2.0 edition): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
   — stable ID; 26 slides / 26 notes pages required on export-back.
-- Native Google Doc (1.1.0 edition published; 1.2.0 refresh pending): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
+- Native Google Doc (1.2.0 edition): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
   — stable ID; 73 headings with no skipped level required on export-back of the 1.2.0 edition.
 - Generated PowerPoint:
   [literate-ai-manager-and-engineering-overview.pptx](literate-ai-manager-and-engineering-overview.pptx)
@@ -30,7 +30,7 @@ SHA-256. Trust the acceptance report for the digest of the exact committed artif
 | Component | `component://literate-ai/literate-ai-overview` (terminal) |
 | Capability | `literate-ai.document-pair` |
 | Ecosystem | `google-workspace` |
-| Edition | 1.2.0 (local candidate accepted 2026-10-11; in-place publication and export-back pending) |
+| Edition | 1.2.0 (published in place and export-back verified, 2026-10-11) |
 | Members | `presentation`, `narrative` |
 | Local presentation | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.pptx` |
 | Local narrative | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.docx` |

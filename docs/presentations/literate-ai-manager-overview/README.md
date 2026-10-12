@@ -4,13 +4,10 @@ This is the reproducible authoring package for the current manager and engineeri
 document pair: a `presentation` member (Google Slides deck) and a `narrative` member
 (Google Doc), per `component://literate-ai/literate-ai-overview`'s declared realization.
 
-**1.2.0 edition.** Tag `v1.1.0` is published. This package now carries the locally
-accepted 1.2.0 edition (bounded candidate repair, cross-host action workers, Elixir/Mix,
+**1.2.0 edition.** This package carries the published 1.2.0 edition (bounded candidate repair, cross-host action workers, Elixir/Mix,
 forge coordination, and the fifteen-gate release check on the 1.1 scheduler/cache/
-package/native-acceptance foundation). The stable Google Workspace pair below still
-carries the published 1.1.0 edition until the 1.2.0 in-place refresh and export-back
-verification complete. This package does not claim that tag `v1.2.0` is already
-published. Later patch cuts on the `1.2.x` line keep these same published locations.
+package/native-acceptance foundation). The stable Google Workspace pair below was refreshed in place to this edition and
+export-back verified on 2026-10-11. Later patch cuts on the `1.2.x` line keep these same published locations.
 
 Published presentation: [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
 

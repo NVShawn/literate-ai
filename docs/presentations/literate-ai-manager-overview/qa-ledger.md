@@ -1,6 +1,13 @@
 # QA ledger
 
-## 2026-10-11 1.2.0 (public) repair, cross-host worker, and Mix edition accepted; publication pending
+## 2026-10-11 1.2.0 (public) edition published
+
+- Read-only preflight confirmed the active account and both stable resources. The
+  authorized in-place update (`--release-version 1.2.0`, source revision `04abf951`)
+  completed both members; export-back read 26 slides / 26 notes pages and 73 headings,
+  matching the accepted local members. The release-bound receipt is complete.
+
+## 2026-10-11 1.2.0 (public) repair, cross-host worker, and Mix edition accepted
 
 This is the public repository's 1.2.0 edition. It is distinct from the private
 repository's 2026-09-26/27 "1.2.0" entries below, whose content shipped publicly as
