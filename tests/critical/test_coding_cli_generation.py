@@ -534,7 +534,7 @@ class CodingCliSelectionTests(unittest.TestCase):
                     {
                         "schema": "literate-ai/global-test-matrix@3",
                         "coding_cli": "opencode",
-                        "model": "nvidia-inference/vendor/model",
+                        "model": "example-provider/vendor/model",
                     }
                 )
             )
@@ -546,7 +546,7 @@ class CodingCliSelectionTests(unittest.TestCase):
             )
             self.assertEqual(
                 (selection.coding_cli, selection.model),
-                ("opencode", "nvidia-inference/vendor/model"),
+                ("opencode", "example-provider/vendor/model"),
             )
             # Remote gates still require opencode itself.
             with self.assertRaises(CodingCliError) as refused:

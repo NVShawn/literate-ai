@@ -66,7 +66,7 @@ OPENSPEC ?= $(OPENSPEC_RUNTIME_DIR)/node_modules/.bin/openspec
 SAMPLE_PYTHON := tests/conformance/support/sample_runner.py scripts/run_samples.py tests/conformance/support/self_hosting_proof.py scripts/run_source_to_specification_fixtures.py scripts/capture_migration_baseline.py scripts/refresh_migration_characterization.py scripts/fanout_samples.py scripts/remote_sample_worker.py scripts/remote_source_guard.py scripts/install_litai.py scripts/uninstall_litai.py scripts/installed_project_smoke.py scripts/installed_roundtrip.py scripts/run_checkpointed_gates.py scripts/run_checkpointed_unittests.py scripts/check_public_export.py
 PACKAGE_SAMPLE_PATTERNS ?= --sample hello-component --sample generated-library --sample dependency-planner
 MATRIX_FLAVORS ?= --flavor=os.*
-RELEASE_GATES := repository-layout-check python-check lint format-check openspec-check documentation-check driver-review skills-check installed-e2e wheel-check install-check installed-project-e2e samples test-receipt-current
+RELEASE_GATES := repository-layout-check public-export-check python-check lint format-check openspec-check documentation-check driver-review skills-check installed-e2e wheel-check install-check installed-project-e2e samples test-receipt-current
 RELEASE_CHECKPOINT := $(OBJ_DIR)/release-checkpoint.json
 PYTHON_TEST_CHECKPOINT := $(OBJ_DIR)/python-test-checkpoint.json
 PYTHON_TEST_PATTERN ?= test*.py

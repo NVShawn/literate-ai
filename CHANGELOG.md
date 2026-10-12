@@ -75,6 +75,10 @@
   missing provider key reported by OpenCode is now
   `coding_cli.authentication_required`.
 
+- `make release-check` now runs `public-export-check`, so an organization-internal
+  reference in tracked files fails the release gate instead of surfacing only at
+  export (#55).
+
 - Retained Cargo receipts report unselected ignored cases as explicit exclusions,
   preserving strict selected-test failures and empty-suite rejection.
 
