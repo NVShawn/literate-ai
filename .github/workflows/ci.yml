@@ -189,14 +189,14 @@ jobs:
         run: make wheel-check PYTHON=python
       - name: Upload the smoke-tested wheel and exact manifest
         if: matrix.task == 'conformance'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: qualified-wheel-${{ matrix.os }}-${{ matrix.python }}
           path: _build/ci-wheels
           if-no-files-found: error
       - name: Upload release evidence
         if: matrix.task == 'conformance' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-evidence-${{ matrix.os }}-${{ matrix.python }}
           path: _build/evidence
@@ -236,7 +236,7 @@ jobs:
           tests.critical.test_guarded_builder.GuardedCppBuilderTests
       - name: Upload smoke diagnostics (not release evidence)
         if: matrix.task == 'platform-smoke' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: platform-smoke-diagnostics-${{ matrix.os }}
           path: _build/evidence
@@ -383,14 +383,14 @@ jobs:
         run: python scripts/wheel_smoke.py
       - name: Upload the smoke-tested wheel and exact manifest
         if: matrix.task == 'windows-gates'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: qualified-wheel-windows-3.12
           path: _build/ci-wheels
           if-no-files-found: error
       - name: Upload release evidence
         if: matrix.task == 'windows-gates' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: windows-release-evidence
           path: _build/evidence
@@ -527,7 +527,7 @@ jobs:
           python scripts/profile_pytest.py logs/profile-${{ matrix.group }}.ndjson logs/profile-report-${{ matrix.group }}.json -- --splits 3 --group ${{ matrix.group }} --durations-path=.test_durations tests/e2e tests/smoke tests/critical tests/conformance
       - name: Upload the profiling trace and hotspot report
         if: matrix.task == 'windows-tests' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: windows-conformance-profile-${{ matrix.group }}
           path: |
@@ -635,7 +635,7 @@ jobs:
               )
       - name: Upload native qualification evidence
         if: matrix.task == 'cpp-native' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: native-cpp-qualification-${{ matrix.os }}
           path: cpp-native-qualification.xml
@@ -728,7 +728,7 @@ jobs:
               raise SystemExit("Elixir native qualification must pass all eighteen fixtures")
       - name: Upload qualification evidence
         if: matrix.task == 'elixir-native' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: elixir-${{ matrix.os }}-${{ matrix.elixir }}
           path: |
@@ -819,14 +819,14 @@ jobs:
         run: make wheel-check PYTHON=python
       - name: Upload qualified wheel
         if: matrix.gates != 'tests'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: qualified-wheel-macos-${{ matrix.python }}-${{ matrix.group }}
           path: _build/ci-wheels
           if-no-files-found: error
       - name: Upload full qualification diagnostics
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: macos-qualification-${{ matrix.python }}-${{ matrix.group }}
           path: |
