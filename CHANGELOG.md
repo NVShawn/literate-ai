@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Windows offline Python wheel installation preserves architecture discovery
+  variables so CPython 3.11's isolated target probe matches the selected runtime.
+
 ## 1.2.0 - 2026-10-12
 
 [README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.2.0/README.md)
