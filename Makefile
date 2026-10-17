@@ -66,7 +66,7 @@ OPENSPEC ?= $(OPENSPEC_RUNTIME_DIR)/node_modules/.bin/openspec
 SAMPLE_PYTHON := tests/conformance/support/sample_runner.py scripts/run_samples.py tests/conformance/support/self_hosting_proof.py scripts/run_source_to_specification_fixtures.py scripts/capture_migration_baseline.py scripts/refresh_migration_characterization.py scripts/fanout_samples.py scripts/remote_sample_worker.py scripts/remote_source_guard.py scripts/install_litai.py scripts/uninstall_litai.py scripts/installed_project_smoke.py scripts/installed_roundtrip.py scripts/run_checkpointed_gates.py scripts/run_checkpointed_unittests.py scripts/check_public_export.py
 PACKAGE_SAMPLE_PATTERNS ?= --sample hello-component --sample generated-library --sample dependency-planner
 MATRIX_FLAVORS ?= --flavor=os.*
-RELEASE_GATES := repository-layout-check python-check lint format-check openspec-check documentation-check driver-review skills-check installed-e2e wheel-check install-check installed-project-e2e samples test-receipt-current
+RELEASE_GATES := repository-layout-check public-export-check python-check lint format-check openspec-check documentation-check driver-review skills-check installed-e2e wheel-check install-check installed-project-e2e samples test-receipt-current
 RELEASE_CHECKPOINT := $(OBJ_DIR)/release-checkpoint.json
 PYTHON_TEST_CHECKPOINT := $(OBJ_DIR)/python-test-checkpoint.json
 PYTHON_TEST_PATTERN ?= test*.py
@@ -153,7 +153,7 @@ python-check: python-version $(DEV_PREREQUISITE) ## Validate the Python framewor
 	$(RUN_PYTHON_COMMAND) -X pycache_prefix="$(OBJ_DIR)/pycache" -m compileall -q src tests
 	$(RUN_PYTHON_COMMAND) -m py_compile $(SAMPLE_PYTHON)
 	$(RUN_PYTHON_COMMAND) scripts/check_host_path_policy.py .
-	PYTHONPATH=src $(STEP) python-check -- $(RUN_PYTHON_COMMAND) scripts/run_checkpointed_unittests.py --state "$(PYTHON_TEST_CHECKPOINT)" --start-directory tests --pattern "$(PYTHON_TEST_PATTERN)" --verbosity "$(PYTHON_TEST_VERBOSITY)"
+	LITAI_REQUIRE_PINNED_PIP_WHEEL=1 PYTHONPATH=src $(STEP) python-check -- $(RUN_PYTHON_COMMAND) scripts/run_checkpointed_unittests.py --state "$(PYTHON_TEST_CHECKPOINT)" --start-directory tests --pattern "$(PYTHON_TEST_PATTERN)" --verbosity "$(PYTHON_TEST_VERBOSITY)"
 
 .PHONY: finite-acceptance-check
 finite-acceptance-check: python-version $(RUNTIME_PREREQUISITE) ## Verify fractional application/library acceptance and identity compatibility.
@@ -232,7 +232,7 @@ samples: python-version $(RUNTIME_PREREQUISITE) ## Run the live sample matrix di
 samples-packages: python-version $(RUNTIME_PREREQUISITE) ## Build selected samples end to end, then construct and verify their pip/Conan packages.
 	BUILD_DIR="$(BUILD_DIR)" OBJ_DIR="$(OBJ_DIR)" $(RUN_PYTHON_COMMAND) scripts/run_samples.py --allow-host-execution --native-package $(PACKAGE_SAMPLE_PATTERNS) $(SAMPLE_FLAVORS)
 
-roundtrip-host: python-version $(RUNTIME_PREREQUISITE) ## Forward/inverse all four languages under an exact installed wheel; set ROUNDTRIP_LANGUAGES to select a subset.
+roundtrip-host: python-version $(RUNTIME_PREREQUISITE) ## Forward/inverse qualified languages under an exact installed wheel; set ROUNDTRIP_LANGUAGES to select a subset.
 	BUILD_DIR="$(BUILD_DIR)" OBJ_DIR="$(OBJ_DIR)" $(PYTHON_COMMAND) scripts/installed_roundtrip.py --repository "$(CURDIR)" $(if $(ROUNDTRIP_LANGUAGES),--languages "$(ROUNDTRIP_LANGUAGES)",)
 
 samples-platform-regression: python-version $(RUNTIME_PREREQUISITE) ## Fan the canonical sample concurrently to configured macOS, Linux, and Windows targets; override SAMPLE with a glob.

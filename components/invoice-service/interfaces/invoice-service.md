@@ -9,6 +9,10 @@ Python entrypoint as `python <path> <argument>`) and SHALL NOT execute the path
 directly as an operating-system binary; the provider artifact is not guaranteed to
 carry a runtime-specific execute shebang.
 
+`LITAI_CAPABILITY_INVOICE_SERVICE` is bound when the consumer executes, not while
+its generated tests run; those tests SHALL exercise the consumer against an in-test
+stub of this process contract.
+
 The entrypoint accepts one UTF-8 JSON argument array containing an invoice request. The
 request has an `items` array of `sku`, non-negative integer `quantity`, and non-negative
 integer `unit_price_cents` values plus integer `discount_basis_points`. It writes exactly

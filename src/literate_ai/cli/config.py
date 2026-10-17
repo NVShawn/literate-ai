@@ -60,6 +60,7 @@ def _paths_from_args(args: Any) -> dict[str, object]:
             "worker_config": str(paths.worker_config),
             "worker_provisioner": str(paths.worker_provisioner),
             "worker_provisioning": str(paths.worker_provisioning),
+            "worker_alignment": str(paths.worker_alignment),
             "shared_cache_config": str(paths.shared_cache_config),
             "test_config": str(
                 paths.project_test_config(project.definition.project_id)

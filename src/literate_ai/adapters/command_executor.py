@@ -217,7 +217,7 @@ class CommandComponentExecutor:
         input_identity = record_identity(content)
 
         def current():
-            self.indexer.revalidate_worker(worker)
+            self.indexer.require_worker_current(worker)
             if self._handoff(
                 plan, exports, scope, providers
             ) != value or not self.admission.supports_execute(

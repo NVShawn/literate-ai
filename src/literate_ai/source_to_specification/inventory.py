@@ -35,6 +35,8 @@ _SOURCE_LANGUAGES = {
     ".cc": "cpp",
     ".cpp": "cpp",
     ".cs": "csharp",
+    ".ex": "elixir",
+    ".exs": "elixir",
     ".go": "go",
     ".h": "c",
     ".hpp": "cpp",

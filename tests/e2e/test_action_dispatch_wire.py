@@ -76,15 +76,17 @@ def request_fixture(worker=None, catalog=None, deadline=None):
 _WORKER = """
 import json, os, pathlib, subprocess, sys, time
 from literate_ai.adapters.action_dispatch_wire import (
-    decode_action_request, encode_action_response, record_identity,
+    attest_action_response, decode_attested_action_request,
+    encode_action_response, record_identity,
 )
+from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.identity import canonical_json_bytes
 mode = sys.argv[1]
 wire = (
     pathlib.Path(sys.argv[2]).read_bytes()
     if len(sys.argv) > 2 else sys.stdin.buffer.read()
 )
-request, deadline, records = decode_action_request(wire)
+request, deadline, records, capability = decode_attested_action_request(wire)
 if mode == "sleep":
     child = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
     pathlib.Path("started.json").write_text(json.dumps([os.getpid(), child.pid]))
@@ -109,6 +111,12 @@ if mode == "corrupt":
     value = json.loads(response)
     value["result_identity"] = record_identity(b"foreign").uri
     response = canonical_json_bytes(value)
+if mode == "attest":
+    response = attest_action_response(response, request, capability)
+if mode == "misattest":
+    response = attest_action_response(
+        response, request, canonical_identity("changed runtime")
+    )
 sys.stdout.buffer.write(response)
 """
 
@@ -123,7 +131,9 @@ class CommandActionDispatchTests(unittest.TestCase):
         self.results = {}
         self.admissions = []
 
-    def dispatcher(self, mode="ok", *, request_file=False, duration=60):
+    def dispatcher(
+        self, mode="ok", *, request_file=False, duration=60, attested_boundary=None
+    ):
         command = (sys.executable, str(self.script), mode)
         if request_file:
             command += ("{request_file}",)
@@ -150,6 +160,7 @@ class CommandActionDispatchTests(unittest.TestCase):
                 {identity: content}
             ),
             revalidate_worker=self.admissions.append,
+            attested_boundary=attested_boundary,
             environment={
                 **os.environ,
                 "PRIVATE_TEST_TOKEN": "synthetic-token",
@@ -171,6 +182,34 @@ class CommandActionDispatchTests(unittest.TestCase):
                 self.assertEqual(result["bound_token"], "synthetic-token")
                 self.assertEqual(record_identity(content), outcome.result_identity)
         self.assertEqual(len(self.admissions), 4)
+
+    def test_attested_capability_replaces_boundary_probes_only_when_exact(self):
+        admitted = canonical_identity("admitted runtime")
+        boundaries = []
+
+        def boundary(worker):
+            boundaries.append(worker)
+            return admitted
+
+        for mode, recorded, probes in (
+            ("attest", True, 0),
+            ("ok", True, 1),
+            ("misattest", False, 0),
+        ):
+            with self.subTest(mode=mode):
+                self.results.clear()
+                self.admissions.clear()
+                boundaries.clear()
+                dispatcher, request = self.dispatcher(mode, attested_boundary=boundary)
+                if recorded:
+                    dispatcher.dispatch(request)
+                else:
+                    with self.assertRaisesRegex(ActionWireError, "runtime"):
+                        dispatcher.dispatch(request)
+                self.assertEqual(bool(self.results), recorded)
+                # A receiver that does not attest is probed after the action.
+                self.assertEqual(len(self.admissions), probes)
+                self.assertEqual(len(boundaries), 2 if mode == "attest" else 1)
 
     def test_corrupt_worker_result_never_enters_result_store(self):
         dispatcher, request = self.dispatcher("corrupt")

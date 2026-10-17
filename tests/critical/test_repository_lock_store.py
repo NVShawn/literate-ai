@@ -15,6 +15,7 @@ from literate_ai.adapters.repository_orchestration import (
 from literate_ai.contracts.identity import canonical_json_bytes
 from tests.support import fixtures_test_repository_lock_planning as fixtures
 from tests.support.fixtures_test_repository_orchestration import snapshot
+from tests.support.symlinks import skip_unless_symlinks_followable
 
 
 class RepositoryLockStoreTests(unittest.TestCase):
@@ -58,6 +59,7 @@ class RepositoryLockStoreTests(unittest.TestCase):
     def test_link_destination_does_not_modify_its_target(self):
         target = self.base / "foreign.json"
         target.write_bytes(b"foreign")
+        skip_unless_symlinks_followable(self, self.base)
         try:
             self.store.path.symlink_to(target)
         except OSError:

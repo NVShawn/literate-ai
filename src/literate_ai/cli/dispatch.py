@@ -981,6 +981,33 @@ def _parser() -> JsonArgumentParser:
         "--model",
         help="override the model from project-scoped user config for this check",
     )
+    worker_align = worker_commands.add_parser(
+        "align",
+        help=(
+            "inventory workers against the repository worker template and your "
+            "private expectations; --apply installs and syncs what is missing"
+        ),
+    )
+    worker_align_selection = worker_align.add_mutually_exclusive_group()
+    worker_align_selection.add_argument("--worker-id", action="append", default=[])
+    worker_align_selection.add_argument("--all", action="store_true")
+    worker_align.add_argument("--worker-config", help="absolute worker catalog")
+    worker_align.add_argument(
+        "--template", help="repository worker template (default: project root)"
+    )
+    worker_align.add_argument(
+        "--alignment", help="private worker-alignment.json (default: user config)"
+    )
+    worker_align.add_argument(
+        "--apply",
+        action="store_true",
+        help="install missing declared commands and sync differing files",
+    )
+    worker_align.add_argument(
+        "--skip-model",
+        action="store_true",
+        help="skip the live coding-CLI model call on each worker",
+    )
     worker_wheelhouse = worker_commands.add_parser(
         "wheelhouse",
         help="export one manifest-pinned offline Standard worker dependency closure",
@@ -1136,7 +1163,7 @@ def _parser() -> JsonArgumentParser:
             "Flavor selector to install and use as a project default "
             "(e.g. python, macos, javascript); repeat for multiple. "
             "Known selectors: bazel, cmake, make, repo.sh (build system); cpp, "
-            "javascript, python, rust (language); linux, macos, windows (OS); "
+            "elixir, javascript, python, rust (language); linux, macos, windows (OS); "
             "google-workspace, microsoft-365 (service)."
         ),
     )
@@ -1271,11 +1298,14 @@ def _parser() -> JsonArgumentParser:
     )
     prompt_translate = prompt_commands.add_parser(
         "translate",
-        help="apply prompt-master to a direct request; bypass MAC task envelopes",
+        help=(
+            "apply prompt-master to a direct request; bypass externally translated "
+            "task envelopes"
+        ),
         description=(
-            "Wrap skills/agent/prompt-master as a deterministic command. "
-            "MAC-originated envelopes fail closed so Literate AI does not apply a "
-            "second translation layer."
+            "Wrap skills/agent/prompt-master as a deterministic command. Task "
+            "envelopes already translated by an external task system fail closed "
+            "so Literate AI does not apply a second translation layer."
         ),
     )
     prompt_translate.add_argument("--project", default=".")
@@ -1286,9 +1316,14 @@ def _parser() -> JsonArgumentParser:
         help="provider name recorded in the task envelope (not a model call)",
     )
     prompt_translate.add_argument(
+        "--external-envelope",
         "--mac-envelope",
+        dest="external_envelope",
         action="store_true",
-        help="declare that MAC already translated this task and refuse a second pass",
+        help=(
+            "declare that an external task system already translated this task "
+            "and refuse a second pass (--mac-envelope is a deprecated alias)"
+        ),
     )
     prompt_translate.add_argument(
         "--file",

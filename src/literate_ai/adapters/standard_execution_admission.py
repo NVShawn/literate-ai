@@ -54,7 +54,8 @@ def verify_transferred_execution(
             or providers != scope.provider_artifact_identities
         ):
             raise ValueError("transferred EXECUTE authority differs")
-        authority.require_valid(now=now)
+        # The grant must have covered the execution when it ran.
+        evidence.require_authorized(now=now)
     for identity, document in (
         (build.identity, build.to_dict()),
         (evidence.identity, evidence.to_dict()),

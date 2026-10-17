@@ -178,3 +178,22 @@ class ActionBuildSourceTests(unittest.TestCase):
                 self.fail("expired source was admitted")
         fetch.assert_not_called()
         self.assertEqual(list(self.workspace.iterdir()), [])
+
+    def test_revocation_during_fetch_stops_before_source_admission(self):
+        revoked = False
+
+        def guard():
+            if revoked:
+                raise ActionWireError("fixture.revoked", "source admission revoked")
+
+        def fetch(reference):
+            nonlocal revoked
+            content = self.controller_cas.get_bytes(reference)
+            revoked = True
+            return content
+
+        with self.assertRaises(ActionWireError) as error:
+            with self.scope(blob_source=fetch, admission_guard=guard):
+                self.fail("revoked source was admitted")
+        self.assertEqual(error.exception.code, "fixture.revoked")
+        self.assertEqual(list(self.workspace.iterdir()), [])

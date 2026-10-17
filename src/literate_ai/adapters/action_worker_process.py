@@ -32,8 +32,6 @@ def run_admitted_worker_process(
     if phase not in {"BUILD", "TEST", "EXECUTE", "ACCEPT"}:
         raise ValueError("unsupported authorized child phase")
     code_prefix = "action_" + phase.lower()
-    tools = WorkerToolchainRegistry((launcher,))
-    launcher_identity = tools.identities
     grant = inputs.authorization.grant
     request = inputs.intent.build_request
 
@@ -52,6 +50,83 @@ def run_admitted_worker_process(
                 f"{phase} grant is no longer current",
             ) from exc
 
+    return _run_worker_process(
+        phase=phase,
+        launcher=launcher,
+        input_record=input_record,
+        input_identity=input_identity,
+        deadline=deadline,
+        cwd=cwd,
+        environment=environment,
+        clock=clock,
+        cas_root=cas_root,
+        workspace_root=workspace_root,
+        require_current=require_current,
+        expires_at=grant.expires_at,
+    )
+
+
+def run_guarded_generation_process(
+    *,
+    launcher,
+    input_record,
+    input_identity,
+    deadline,
+    cwd,
+    environment,
+    admission_guard,
+    cancelled=lambda: False,
+    clock=lambda: datetime.now(UTC),
+    cas_root=None,
+    workspace_root=None,
+):
+    """GENERATION uses current private model authority, never a BUILD grant."""
+    if not callable(admission_guard):
+        raise TypeError("GENERATION requires private authority admission")
+
+    def require_current():
+        if cancelled():
+            raise ActionWireError(
+                "action_generate.cancelled", "GENERATE action was cancelled"
+            )
+        deadline.remaining(now=clock())
+        admission_guard()
+        deadline.remaining(now=clock())
+
+    return _run_worker_process(
+        phase="GENERATE",
+        launcher=launcher,
+        input_record=input_record,
+        input_identity=input_identity,
+        deadline=deadline,
+        cwd=cwd,
+        environment=environment,
+        clock=clock,
+        cas_root=cas_root,
+        workspace_root=workspace_root,
+        require_current=require_current,
+        expires_at=deadline.expires_at,
+    )
+
+
+def _run_worker_process(
+    *,
+    phase,
+    launcher,
+    input_record,
+    input_identity,
+    deadline,
+    cwd,
+    environment,
+    clock,
+    cas_root,
+    workspace_root,
+    require_current,
+    expires_at,
+):
+    code_prefix = "action_" + phase.lower()
+    tools = WorkerToolchainRegistry((launcher,))
+    launcher_identity = tools.identities
     require_current()
     child_environment = dict(environment)
     child_environment.update(launcher.environment)
@@ -85,7 +160,7 @@ def run_admitted_worker_process(
     }
     child_environment.update(control_environment)
     now = clock()
-    timeout = min(deadline.remaining(now=now), (grant.expires_at - now).total_seconds())
+    timeout = min(deadline.remaining(now=now), (expires_at - now).total_seconds())
     try:
         completed = run_bounded_process(
             launcher.command,

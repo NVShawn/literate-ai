@@ -236,6 +236,7 @@ _TRANSIENT_GENERATION_ERROR_CODES = frozenset(
     {
         "coding_cli.generated_javascript_bundle_module_missing",
         "coding_cli.generated_metadata_invalid",
+        "coding_cli.generated_rust_bazel_crate_root_ambiguous",
         "coding_cli.generation_failed",
         "coding_cli.non_utf8_source",
         "coding_cli.timeout",
@@ -245,6 +246,18 @@ _TRANSIENT_GENERATION_ERROR_CODES = frozenset(
         "generated_tests.expected_result_shape_mismatch",
     }
 )
+
+
+def _prompt_json(document: bytes) -> str:
+    """Indent canonical JSON so no prompt line outgrows a coding CLI's file reader.
+
+    Coding CLIs read the prompt file with line-truncating tools (opencode cuts
+    lines at 2000 characters); a minified document past that limit reaches the
+    model cut short. Generated JSON is parsed and canonicalized, so indentation
+    changes nothing the framework compares.
+    """
+
+    return json.dumps(json.loads(document), indent=2, ensure_ascii=False)
 
 
 def _reset_generation_output_root(root: Path) -> None:
@@ -881,6 +894,12 @@ class GenerationRecipe:
             "`urn:literate-ai:schema:v1:generated-test-suite`, the exact recipe",
             f"identity `{self.identity}`, and generation mode",
             f"`{MAJOR_REBUILD_GENERATION_MODE}`.",
+            "Numeric framework metadata values must be signed 64-bit integers:",
+            "`-9223372036854775808` through `9223372036854775807`, inclusive.",
+            "Floating-point values are forbidden. Choose manifest arguments and",
+            "complete expected results within this canonical JSON range.",
+            "These bounds apply to framework metadata; implement application behavior",
+            "according to the specifications.",
             "",
             "Generate 3 through 256 cases. Every case must have exactly `case_id`,",
             "`category`, `specification_refs`, `arguments`, and `expected_result`.",
@@ -940,13 +959,13 @@ class GenerationRecipe:
                     "surface; do not translate a one-object argument into multiple",
                     "positional parameters or vice versa.",
                     "",
-                    canonical_json_bytes(execution_contract).decode("utf-8"),
+                    _prompt_json(canonical_json_bytes(execution_contract)),
                 ]
             )
         if self.managed_sbom_graph is not None:
-            managed_graph = canonical_json_bytes(
-                self.managed_sbom_graph.to_dict()
-            ).decode("utf-8")
+            managed_graph = _prompt_json(
+                canonical_json_bytes(self.managed_sbom_graph.to_dict())
+            )
             authority_components, authority_edges = _recipe_authority_sbom(self)
             minimal_source_bom, _minimal_binding = build_cyclonedx_bom(
                 lifecycle=CycloneDxLifecycle.SOURCE,
@@ -960,14 +979,15 @@ class GenerationRecipe:
                 # ``incomplete_third_party_only``.
                 composition_aggregate="complete",
             )
-            minimal_source_bom_text = minimal_source_bom.decode("utf-8")
+            minimal_source_bom_text = _prompt_json(minimal_source_bom)
             sections.extend(
                 [
                     "",
                     "## Required CycloneDX source SBOM",
                     "",
-                    f"Create `{CYCLONEDX_SOURCE_SBOM_PATH}` as canonical minified",
-                    "JSON conforming strictly to CycloneDX 1.7, with `$schema`",
+                    f"Create `{CYCLONEDX_SOURCE_SBOM_PATH}` as JSON (the framework",
+                    "canonicalizes its whitespace) conforming strictly to",
+                    "CycloneDX 1.7, with `$schema`",
                     f"exactly `{CYCLONEDX_SCHEMA_URI}`, `bomFormat` `CycloneDX`,",
                     "`specVersion` `1.7`, and BOM `version` 1. The metadata must",
                     "contain exactly lifecycle phase `pre-build`, the exact",
@@ -1030,7 +1050,9 @@ class GenerationRecipe:
                     "property, and scope properties. Preserve every managed edge's",
                     "exact source, target, dependency kind, optionality, and",
                     "relationship identity as dependency-edge evidence on its source",
-                    "component. The owner map is total: even a managed Component with",
+                    "component. The `root-component` node is the BOM's",
+                    "`metadata.component` only; never repeat it in `components`.",
+                    "The owner map is total: even a managed Component with",
                     "no repository-source children remains an explicit dependency",
                     "leaf. Additional dependency nodes and edges may connect to this",
                     "subgraph but may not replace, collapse, or alter it:",
@@ -1651,7 +1673,9 @@ def _reconcile_authoritative_source_sbom(
             for component in canonical_document["components"]
         }
         authority_refs = {managed_graph.root_ref, *canonical_components}
-        model_inventory_refs = {managed_graph.root_ref}
+        # A model copy of the root, like a copy of any authority component, is
+        # replaced below rather than refused as a duplicate of metadata.component.
+        model_inventory_refs: set[str] = set()
         third_party_components: dict[str, dict[str, object]] = {}
         reserved_kinds = {
             *(component.kind.value for component in managed_graph.components),
@@ -3812,6 +3836,10 @@ _CODING_CLI_AUTHENTICATION_FAILURE_PHRASES = {
         "run 'opencode auth login'",
         "missing api key",
         "no api key found",
+        # The AI SDK's provider loader: "<Provider> API key is missing. Pass it
+        # using the 'apiKey' parameter or the <NAME>_API_KEY environment
+        # variable." Remote gates rely on this, not on a key precheck.
+        "api key is missing",
     ),
 }
 _CODING_CLI_QUOTA_DENIAL_PHRASES = {
@@ -4102,8 +4130,13 @@ def lifecycle_driver_environment(
     requested_keys: Sequence[str],
     *,
     workspace: Path,
+    default_coding_cli: str | None = None,
 ) -> dict[str, str]:
-    """Apply the coding-CLI credential and host-tool policy to a lifecycle driver."""
+    """Apply the coding-CLI credential and host-tool policy to a lifecycle driver.
+
+    An unset `CODING_CLI` takes `default_coding_cli`, the caller's live-test
+    selection, before the first coding CLI on PATH.
+    """
 
     unknown = set(requested_keys) - LIFECYCLE_DRIVER_ENVIRONMENT_KEYS
     if unknown:
@@ -4119,6 +4152,8 @@ def lifecycle_driver_environment(
             "LITAI_CODING_PROVIDER must be coding-cli or inherited-session",
         )
     selected = environment.get("CODING_CLI", "").strip()
+    if not selected and coding_provider != "inherited-session":
+        selected = default_coding_cli or ""
     if selected and selected not in CODING_CLIS:
         raise CodingCliError(
             "coding_cli.unsupported",

@@ -62,9 +62,10 @@ versions and publishes the repository authority that can reproduce those artifac
 explicit mirrors, permitted semantic transitions, one shell-free gate command, changelog
 authority, tag policy, Git remote, an optional provider adapter, an optional continuous
 contribution disposition contract, and policy-bound release collateral. Its
-`version_scheme` is explicit: Python distributions can select canonical PEP 440 while
-ordinary initialized projects select Semantic Versioning. Every mirror must contain the
-same canonical spelling under the selected scheme. Derived projects
+`version_scheme` must explicitly select `semver` for release operations. Historical
+PEP 440 policies remain readable, but require an explicit policy and version-binding
+migration before releasing. Every mirror must contain the same canonical SemVer
+spelling. Derived projects
 receive their own policy during `litai init`; they do not inherit this repository's
 version number, remote, or provider.
 
@@ -78,8 +79,7 @@ must use the ordinary unqualified Cargo names; stale version-qualified reference
 are rejected. Missing, ambiguous, sourced or drifted entries
 fail before any planned file is replaced. Dependency collections must be lists of
 strings. Selected package versions and their replacements must be canonical SemVer,
-even under a PEP 440 project policy; no automatic version spelling conversion is
-performed. Preparation changes only selected
+and no automatic version spelling conversion is performed. Preparation changes only selected
 version strings and preserves unrelated dependency versions, comments and line
 endings. Declare every workspace package sharing the release version.
 
@@ -170,18 +170,81 @@ stateDiagram-v2
 - `litai release publish PREPARED --authorize-external-write` revalidates the exact
   commit, policy, contribution state, and collateral, creates an annotated or signed tag,
   performs ordinary non-forced Git pushes, and then calls the optional provider adapter.
-  Its receipt distinguishes Git publication from provider publication.
+  Before tagging or pushing, it independently checks the prepared canonical version,
+  policy tag prefix and declared release-line requirements. Publication and read-only
+  verification share this check; rehashing a prepared record cannot authorize an
+  unrelated tag name. Its receipt distinguishes Git publication from provider publication.
 - `litai release verify-published PREPARED` is read-only. It requires the remote
   annotated tag and named release-line branch to select the prepared revision, and
-  the configured provider release and policy-bound collateral to remain valid. It never
-  retags.
+  the configured provider release and policy-bound collateral to remain valid. It
+  independently checks the canonical version and policy tag prefix and re-applies
+  declared release-line policy before reading remote refs. A self-consistently
+  rehashed record cannot substitute an unrelated tag or bypass a declared release
+  branch requirement merely because those refs select the same commit. It never retags.
 
 `make release RELEASE_PLAN=/path/to/plan.json` is a thin alias for the check phase.
 The Makefile does not contain a second release implementation.
 
-## Release line when `default_branch` is declared
+## Tiered qualification: local first, CI only when needed
 
-A policy that names `default_branch` has opted into trunk-based cuts. All product
+A release policy may declare `qualification`: the platforms the release must provide
+(N, each `linux`, `macos` or `windows`, optionally suffixed with a CPU architecture
+such as `linux-x86_64`), the actions that must pass on each (M, named argument
+vectors such as code generation, build and test; the policy `gate` by default), and
+the platforms an exact-revision CI run covers. Every one of the N x M cells is
+covered by the leftmost tier that can run it:
+
+1. the host running the coding CLI covers the platforms it provides;
+2. one configured `workers.json` SSH worker covers each remaining platform, tried in
+   worker-id order; a worker that is unreachable or cannot be synced falls through to
+   the next worker, then to CI;
+3. a successful exact-revision CI run covers its declared platforms.
+
+A runner proves a platform only through facts it declares or observes; a worker
+without a declared architecture cannot satisfy an architecture-qualified platform.
+An action's `argv` runs on Linux and macOS. Windows runners have no POSIX shell, so
+an action runs there only through its own `windows_argv`; a Windows host or worker
+covers a platform only when every action declares one, and otherwise leaves it to
+CI. Windows workers run their command through PowerShell over OpenSSH, with the
+same live-test environment as POSIX workers.
+
+Release gates never run in an operator's own checkout. Before each worker gate,
+`litai release` syncs a dedicated checkout at `<workspace>/release/<repository>`
+to the exact revision: the worker reports the revision it last synced, the
+controller sends a git bundle of only the commits it lacks over SCP, and the
+worker checks the revision out, removes untracked source files and keeps ignored
+caches such as `_build/`. The first sync sends the full history; later syncs send
+only new commits. The record pins the checkout path and keeps a sync transcript.
+The host gate and every worker platform's gates run concurrently, since each
+tier is a separate machine; the record still lists the host's runs first. A
+failing action is never retried on another tier. CI is optional while the host
+and workers cover every cell. It becomes required only when some platform has no
+left tier (CI must then declare it, or qualification fails closed) or when the
+policy sets `ci.mandatory`.
+
+`litai release check` uses this tiered target whenever the policy declares
+`qualification` and no explicit `--target` is given; the prepared record lists every
+cell, the tier that covered it, and whether CI was required. `litai release qualify`
+runs the same matrix at the exact clean `HEAD` and writes a revision-bound
+`literate-ai/release-qualification@1` record. `litai release rc` and `litai release
+merge-pr` accept that record with `--qualification FILE`: when it covers every cell
+without CI, RC tagging does not require a green CI run, and a release-line merge is
+not blocked by pending or absent checks. A check that completed and failed still
+blocks the merge. Without such a record both commands require CI as before.
+
+This repository declares `linux`, `macos` and `windows`. `make release-check`
+needs a POSIX shell, so its `windows_argv` is `scripts/windows_release_gate.py`,
+which runs exactly the steps hosted CI runs for Windows (the `windows-gates` and
+`windows-tests` jobs): tool preflight, an isolated environment, compilation, lint
+and format, OpenSpec and documentation checks, the installed-wheel smoke test and
+the full test suite. It never installs system tools; a missing MSVC, Rust, LLVM,
+Node or Git is a preflight failure. With a reachable Windows worker at the exact
+revision, the repository's release needs no CI.
+
+## Versioned release lines
+
+Every release belongs on `release/<major>.<minor>.x`, including releases using
+historical policies. When repository policy declares `default_branch`, product
 work lands on that branch. `plan` may run there only to cut a *missing*
 `release/<major>.<minor>.x` line. `prepare` creates that branch from the plan
 revision and checks it out, then writes declared paths. `check` and `publish`
@@ -190,12 +253,16 @@ already exists, planning on the trunk fails with
 `release.default_branch_cut_forbidden` — cherry-pick onto the existing line
 with `litai release backport` and plan there. A per-patch name such as
 `release/0.7.0` fails `release.branch_not_release_line`. Projects that omit
-`default_branch` keep checkout-agnostic planning.
+`default_branch` must check out the matching release line before planning. They
+cannot create a line implicitly from an arbitrary branch. Historical plans without
+a release-line field do not bypass preparation, check, publication, or published
+verification branch requirements.
 
 Use `litai release state` to inspect Free or Pre-release state and `litai release state
 set --mode pre-release --pre-release-version MAJOR.MINOR` for an authorized transition.
 `litai release rc --version VERSION --authorize-external-write` creates an annotated RC
-tag only after the exact `main` HEAD is green. These commands do not configure forge
+tag only after the exact `main` HEAD is green, or when `--qualification FILE` names a
+tiered record that covers every platform and action without CI. These commands do not configure forge
 protection.
 
 ## Who decides release content

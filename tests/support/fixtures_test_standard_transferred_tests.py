@@ -48,7 +48,7 @@ class StandardTransferredTestTests(unittest.TestCase):
             fixture.plan.request.source_tree_identity
         ).candidate
         intent = controller.create(
-            execution, execution.generation_plans[0], candidate, (), ()
+            execution, build_fixture._leaf_generation_plan(execution), candidate, (), ()
         )
         controller.accept_finalized_plan(
             intent, fixture.inputs.authorization, fixture.plan

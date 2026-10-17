@@ -68,7 +68,7 @@ class ActionExecuteExecutionTests(unittest.TestCase):
         _, execution = _fixture()
         build_input = BuildWorkerInput(
             execution.identity,
-            execution.generation_plans[0].identity,
+            build_fixture._leaf_generation_plan(execution).identity,
             custody.candidate,
             f.plan,
             f.inputs,
@@ -76,7 +76,7 @@ class ActionExecuteExecutionTests(unittest.TestCase):
             source.validation_inputs(custody.candidate.tree_identity),
             custody.source_generation_identity,
             custody.identity,
-            execution.generation_plans[0],
+            build_fixture._leaf_generation_plan(execution),
             execution,
         )
         raw_input = build_input.to_bytes()

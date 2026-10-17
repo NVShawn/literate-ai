@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any, ClassVar
 
@@ -809,6 +810,10 @@ class StandardExecutionEvidence:
 
     provider_artifact_identities: tuple[ContentIdentity, ...] = ()
     execution_authority: StandardExecutionAuthority | None = None
+    # When the executor last verified the grant, after the command completed.
+    # Consumers check the grant at this time, so a slow pipeline that reuses
+    # the evidence after the grant expires is not refused.
+    execution_authorized_at: datetime | None = None
 
     SCHEMA: ClassVar[str] = STANDARD_EXECUTION_EVIDENCE_SCHEMA
 
@@ -849,6 +854,22 @@ class StandardExecutionEvidence:
                     "StandardExecutionEvidence.execution_authority",
                     "must bind exact execution inputs",
                 )
+            authorized = self.execution_authorized_at
+            grant = authority.grant
+            if (
+                not isinstance(authorized, datetime)
+                or authorized.utcoffset() is None
+                or not grant.issued_at <= authorized < grant.expires_at
+            ):
+                fail(
+                    "StandardExecutionEvidence.execution_authorized_at",
+                    "must be an aware time within the execution grant",
+                )
+        elif self.execution_authorized_at is not None:
+            fail(
+                "StandardExecutionEvidence.execution_authorized_at",
+                "requires an execution authority",
+            )
         if self.root_export_identity not in self.export_identities:
             fail(
                 "StandardExecutionEvidence.root_export_identity",
@@ -879,6 +900,26 @@ class StandardExecutionEvidence:
                     "must cover every and only exact built export",
                 )
 
+    def require_authorized(self, *, now: datetime) -> None:
+        """Require the grant to have covered this execution when it ran.
+
+        The time must not be in the future, so evidence cannot claim an
+        execution the grant has yet to authorize.
+        """
+
+        authority = self.execution_authority
+        if authority is None:
+            return
+        assert self.execution_authorized_at is not None
+        if not isinstance(now, datetime) or now.utcoffset() is None:
+            fail("StandardExecutionEvidence.require_authorized", "needs an aware now")
+        if self.execution_authorized_at.astimezone(UTC) > now.astimezone(UTC):
+            fail(
+                "StandardExecutionEvidence.execution_authorized_at",
+                "must not be in the future",
+            )
+        authority.require_valid(now=self.execution_authorized_at)
+
     @property
     def identity(self) -> ContentIdentity:
         return contract_identity(self)
@@ -901,6 +942,11 @@ class StandardExecutionEvidence:
         }
         if self.execution_authority is not None:
             result["execution_authority"] = self.execution_authority.to_dict()
+        if self.execution_authorized_at is not None:
+            # UTC, so the identity never depends on the executor's offset.
+            result["execution_authorized_at"] = self.execution_authorized_at.astimezone(
+                UTC
+            ).isoformat()
         if self.provider_artifact_identities:
             result["provider_artifact_identities"] = [
                 item.to_dict() for item in self.provider_artifact_identities
@@ -941,10 +987,18 @@ class StandardExecutionEvidence:
                     "entrypoint_evidence",
                     "provider_artifact_identities",
                     "execution_authority",
+                    "execution_authorized_at",
                 }
             ),
         )
+        authorized = data.get("execution_authorized_at")
+        if authorized is not None:
+            try:
+                authorized = datetime.fromisoformat(authorized)
+            except (TypeError, ValueError):
+                fail(f"{path}.execution_authorized_at", "must be an ISO time")
         return cls(
+            execution_authorized_at=authorized,
             execution_authority=(
                 StandardExecutionAuthority.from_dict(
                     data["execution_authority"], path=f"{path}.execution_authority"

@@ -1,8 +1,9 @@
 """Translate a direct user prompt into one bounded provider task envelope.
 
 This is the deterministic product wiring for ``skills/agent/prompt-master``.
-It cannot call a model, mutate locked authority, or authorize execution. MAC
-task envelopes bypass it entirely.
+It cannot call a model, mutate locked authority, or authorize execution. Task
+envelopes already translated by an external agent ledger or task system bypass it
+entirely.
 """
 
 from __future__ import annotations
@@ -14,8 +15,11 @@ from typing import Any
 
 from literate_ai.projects import ProjectError, discover_project
 
-PROMPT_TASK_SCHEMA = "literate-ai/prompt-task@1"
-MAC_TASK_ENVIRONMENT = "LITAI_MAC_TASK_ID"
+PROMPT_TASK_SCHEMA = "literate-ai/prompt-task@2"
+EXTERNAL_TASK_ENVIRONMENT = "LITAI_EXTERNAL_TASK_ID"
+# Deprecated 1.1 spelling, still honored so an existing integration that sets it
+# is never translated twice.
+_LEGACY_EXTERNAL_TASK_ENVIRONMENTS = ("LITAI_MAC_TASK_ID",)
 PROMPT_MASTER_SKILL = "skills/agent/prompt-master/SKILL.md"
 
 
@@ -35,15 +39,19 @@ def translate_direct_prompt(
     project_root: Path | None = None,
     component: str | None = None,
     coding_cli: str | None = None,
-    mac_envelope: bool = False,
+    external_envelope: bool = False,
 ) -> dict[str, Any]:
     """Return one provider-aware task envelope from a rough direct request."""
 
     configured = os.environ if environment is None else environment
-    if mac_envelope or str(configured.get(MAC_TASK_ENVIRONMENT, "")).strip():
+    if external_envelope or any(
+        str(configured.get(name, "")).strip()
+        for name in (EXTERNAL_TASK_ENVIRONMENT, *_LEGACY_EXTERNAL_TASK_ENVIRONMENTS)
+    ):
         raise PromptRoutingError(
-            "prompt_routing.mac_envelope_bypass",
-            "MAC already translated this task; do not run prompt-master again",
+            "prompt_routing.external_envelope_bypass",
+            "an external task system already translated this task; do not run "
+            "prompt-master again",
         )
     outcome = " ".join(request.split())
     if not outcome:
@@ -111,13 +119,13 @@ def translate_direct_prompt(
         "outcome": outcome,
         "starting_state": starting,
         "authority": authority,
-        "mac_bypass": False,
+        "external_envelope_bypass": False,
         "task": task,
     }
 
 
 __all__ = [
-    "MAC_TASK_ENVIRONMENT",
+    "EXTERNAL_TASK_ENVIRONMENT",
     "PROMPT_MASTER_SKILL",
     "PROMPT_TASK_SCHEMA",
     "PromptRoutingError",

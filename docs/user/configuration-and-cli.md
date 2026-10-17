@@ -55,6 +55,7 @@ litai release contributions disposition
 litai release plan
 litai release prepare
 litai release check
+litai release qualify
 litai release publish
 litai release verify-published
 litai release backport
@@ -128,6 +129,7 @@ litai video plan
 litai video build
 litai video verify
 litai worker verify-model
+litai worker align
 litai worker resolve-nvidia
 litai worker list
 litai worker show
@@ -199,8 +201,10 @@ not duplicates. `spec skills` and `skills evaluate` collide in naming only.
 Do not split `--convert` off `init`. Do not add staging/production CLI verbs;
 those remain project workflow catalogs.
 
-`literate.release.json` selects either canonical `semver` or `pep440` version syntax,
-declares every mirrored version field, and separates read-only planning, local
+`literate.release.json` must select canonical `semver` version syntax for release
+operations. Historical `pep440` policies remain readable but must be explicitly
+migrated before releasing. The policy declares every mirrored version field and
+separates read-only planning, local
 preparation, exact gate evidence, and explicitly authorized publication. See
 [Project release protocol](../architecture/project-releases.md).
 
@@ -568,12 +572,13 @@ root-integration acceptance still remain.
 | `release contributions disposition --kind issue\|review --number N --version VERSION --decision include\|defer --milestone NAME --reason TEXT [--branch NAME ...] --authorize-external-write` | Set one tracker milestone and append the matching machine-readable release disposition; this is the explicitly authorized mutating half of the continuous sweep. |
 | `release plan (--bump patch\|minor\|major \| --version VERSION)` | Read the project policy and emit a content-identified release plan without mutation. When the policy names `default_branch`, a plan from that trunk records `release_line.create: true` only if `release/<major>.<minor>.x` for the planned version is absent. |
 | `release prepare PLAN` | Update only the plan's declared version and changelog authority; never commit, tag, push, or publish. When `release_line.create` is true, create that branch from the plan revision, check it out, then write. |
-| `release check PLAN [--output FILE]` | Require one exact clean prepared commit, constrain its diff, and run the declared gate into a compact prepared-release record. |
-| `release publish PREPARED --authorize-external-write` | Revalidate the prepared commit, create and push its tag without force, then invoke the optional provider adapter. |
+| `release check PLAN [--output FILE] [--target local\|github\|tiered]` | Require one exact clean prepared commit, constrain its diff, and run the declared gate into a compact prepared-release record. When the release policy declares `qualification`, every platform x action cell is covered by this host first, then `workers.json` workers, then CI only when needed or mandatory; the host and worker gates run concurrently. |
+| `release qualify [--output FILE]` | Cover the release policy's platform x action matrix at exact clean `HEAD`, preferring this host, then workers, then CI, and write a revision-bound qualification record. |
+| `release publish PREPARED --authorize-external-write` | Revalidate the prepared commit, create and push its tag without force, then invoke the optional provider adapter. GitHub publication and verification require prerelease status to match the prepared version; unpublished drafts remain invalid. |
 | `release verify-published PREPARED` | Read-only: require the remote annotated tag, release-line branch, and optional GitHub release to match the prepared identity. Never retags. |
 | `release backport COMMIT... --to BRANCH [--from REF]` | Cherry-pick already-landed commit(s) onto a release branch in an isolated worktree, creating the branch from `--from` first if it doesn't exist yet. Never pushes. |
 | `release backport-status BRANCH [--against REF]` | List commits on `--against` (default `HEAD`) not yet cherry-picked onto `BRANCH`, using patch-id equivalence so already-backported fixes drop off the list even though cherry-pick gives them a new SHA. |
-| `release rc --version VERSION --authorize-external-write` | Create and push an annotated release-candidate tag only from exact green `main` HEAD for the configured Pre-release target. |
+| `release rc --version VERSION [--qualification FILE] --authorize-external-write` | Create and push an annotated release-candidate tag only from exact `main` HEAD for the configured Pre-release target, after green CI or a qualification record that covers every platform and action without CI. |
 | `release state [--project PATH]` | Read Free/Pre-release state, target, branch, writability, release-line lockdown, and patch authorization mode. |
 | `release state set --mode free\|pre-release [--pre-release-version MAJOR.MINOR]` | Atomically set the release state as a README Release Engineer; Pre-release requires the target and Free forbids it. |
 | `rebuild SPECIFICATION --project PATH --runtime-root DIR --candidate-receipt FILE --allow-host-execution [--build-dir DIR] [--obj-dir DIR] [--flavor=+NAME ...] [--model MODEL]` | Run the project-authorized complete SDLC under one enclosing model default and validate its external passing-receipt candidate. |
@@ -660,7 +665,7 @@ under qualification.
 
 Standard rebuild selects worker indexing when the optional private
 `action-execution.json` exists under the user configuration root. Override that path
-with `LITAI_ACTION_EXECUTION_CONFIG`. Every field below is required:
+with `LITAI_ACTION_EXECUTION_CONFIG`. Fields are required unless marked optional:
 
 | Field | Value |
 | --- | --- |
@@ -670,7 +675,8 @@ with `LITAI_ACTION_EXECUTION_CONFIG`. Every field below is required:
 | `duration_seconds` | Whole action-pool lifetime, from 1 through 86400 seconds |
 | `maximum_hardware_age_seconds` | Maximum hardware-observation age, from 1 through 86400 seconds |
 | `health_configurations` | Map of worker IDs to absolute private health-policy file paths |
-| `result_sources` | Optional map of worker IDs to explicit BUILD result transports; required for each admitted BUILD worker |
+| `result_sources` | Optional map of worker IDs to explicit result transports; required for every selected remote phase that returns artifacts or evidence |
+| `finalize` | Optional pinned `profile_identity` and named `verifier` policy for remote project finalization |
 
 A result transport is `{"kind":"shared-cas"}` when worker artifacts are available
 in `source_cas_root`, or `{"kind":"http-cas","endpoint":"https://cache.example/cas"}`
@@ -682,6 +688,20 @@ Configured BUILD is selected automatically, shares INDEX worker capacity, and ve
 result bytes before artifact admission. A worker advertising BUILD without explicit
 result transport is refused. Full remote provider/SDK runtime qualification remains
 unfinished in the current development line.
+
+Remote FINALIZE policy has exactly two fields: `profile_identity` is the reviewed
+configured worker profile's `sha256:` identity, and `verifier` is
+`portable-application@1`. This selects the controller's built-in verifier for a
+single portable application, using the independent acceptance oracle supplied by
+the normal Standard rebuild path. The controller reopens the exact package and
+root generated-test source before checking returned evidence. Other runtime kinds
+require additional verifiers and currently refuse this policy. The profile must
+be pinned from trusted worker configuration; a capability advertisement alone does
+not establish trust. A selected policy without an admitted FINALIZE worker refuses
+instead of switching to local finalization. Command LINK and explicit result
+transport are also required. Changed private configuration invalidates verification.
+This policy does not configure worker startup or issue execution grants; production
+grant wiring and full CLI rebuild qualification remain under development.
 
 The existing worker-catalog path override still applies. Automatic admission collects
 live hardware from matching, explicitly opted-in command or SSH workers with a configured
@@ -737,6 +757,21 @@ Before a live qualification run, use `litai worker verify-model` to resolve the
 configured coding CLI and model and execute one bounded, non-source-writing preflight.
 It fails before generation when the model identifier is unavailable. This command is
 explicitly live; ordinary `make python-check` verification does not invoke it.
+
+`litai worker align [--all | --worker-id ID ...] [--apply] [--skip-model]` checks each
+configured worker against two declared sources of expectations. The repository's
+`literate.worker-template.json` declares commands per OS family, a minimum Python and
+free disk, and Windows tool locations off `PATH`. Your private `worker-alignment.json`
+(reported by `litai config paths`) declares files every worker must hold, from source
+paths you choose, with `secret: true` for credentials, and the argv that installs each
+missing command per OS family. It also checks the coding CLI and model from your
+project-scoped test configuration with one live call per worker. Inspection is
+read-only; findings carry remediations and the exit status is nonzero until every
+worker is aligned. `--apply` runs only your declared installs for missing commands
+and replaces only files whose bytes differ, after backing up the previous copy. It
+then inspects again. Secret contents never appear in reports; only hash prefixes do.
+Align never deletes worker data; low disk points to `litai worker health` and
+`litai worker cleanup`.
 
 `BUILD_DIR` defaults to `generated/` beneath the project. `OBJ_DIR` defaults to
 `_build/` beneath the project. Export either to place its cache elsewhere; relative values remain
@@ -2362,3 +2397,13 @@ an explicit local limit remains supported. Per-worker index reservations prevent
 waiting indexes from occupying shared lifecycle threads. Complete-node transports
 retain their existing integer dispatch default; this does not claim that every
 lifecycle phase already executes remotely.
+
+### Retained Cargo test selection
+
+Retained test evidence records Cargo's `ignored` count as `excluded`, separately
+from the selected `total`, `passed`, and `failed` counters. Rust excludes
+`#[ignore]` cases from the default run; explicitly selecting them executes them
+and produces ordinary pass/fail outcomes. An ignored-only suite still has zero
+selected tests and cannot qualify. Failed selected tests and runtime-skipped or
+known-failure outcomes remain blocking; excluded cases are never claimed as
+passed. See [Rust test selection](https://doc.rust-lang.org/book/ch11-02-running-tests.html#ignoring-tests-unless-specifically-requested).

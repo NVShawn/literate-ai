@@ -54,6 +54,7 @@ from .go import (
     GuardedGoBuilder,
     discover_go_toolchain,
 )
+from .hex import HexToolchain, discover_hex_toolchain
 from .javascript import (
     DEFAULT_JAVASCRIPT_BUILD_TIMEOUT_SECONDS,
     DEFAULT_NODE_MINIMUM_VERSION,
@@ -82,6 +83,14 @@ from .materialization import (
     ArtifactMaterializationError,
     MaterializedArtifactRoot,
     materialize_artifact_plan,
+)
+from .mix import MixToolchain, discover_mix_toolchain
+from .mix_project import (
+    GuardedMixBuilder,
+    MixBuildArtifact,
+    MixProviderApplication,
+    MixProviderLibrary,
+    verify_mix_artifact,
 )
 from .python import (
     UNSANDBOXED_HOST_BUILD_PRIVILEGES,
@@ -180,10 +189,12 @@ __all__ = [
     "GoBuildArtifact",
     "ElixirToolchain",
     "GoToolchain",
+    "HexToolchain",
     "GuardedCppBuilder",
     "GuardedGoBuilder",
     "GuardedJavaScriptBuilder",
     "GuardedJavaScriptRoleBuilder",
+    "GuardedMixBuilder",
     "GuardedPythonBuilder",
     "GuardedRustBuilder",
     "GuardedRustJavaScriptBuilder",
@@ -191,6 +202,10 @@ __all__ = [
     "JavaScriptBuildArtifact",
     "MaterializedArtifactRoot",
     "MakeToolchain",
+    "MixToolchain",
+    "MixBuildArtifact",
+    "MixProviderLibrary",
+    "MixProviderApplication",
     "NativeBuildArtifact",
     "NodeToolchain",
     "NpmToolchain",
@@ -203,6 +218,7 @@ __all__ = [
     "UNSANDBOXED_HOST_BUILD_PRIVILEGES",
     "UNSANDBOXED_HOST_BUILD_PROFILE",
     "canonical_tree_digest",
+    "discover_mix_toolchain",
     "bazel_resolver_identity",
     "controlled_node_environment",
     "discover_cpp_toolchain",
@@ -211,6 +227,7 @@ __all__ = [
     "discover_cmake_toolchain",
     "discover_elixir_toolchain",
     "discover_go_toolchain",
+    "discover_hex_toolchain",
     "discover_node_toolchain",
     "discover_npm_toolchain",
     "discover_make_toolchain",
@@ -223,4 +240,5 @@ __all__ = [
     "require_unsandboxed_host_build_authorization",
     "run_bounded_process",
     "validate_composite_build_invocation",
+    "verify_mix_artifact",
 ]

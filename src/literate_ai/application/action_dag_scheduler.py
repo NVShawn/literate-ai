@@ -153,6 +153,7 @@ class LifecycleActionDispatchRequest:
     slot: int
     predecessor_result_identities: tuple[ContentIdentity, ...]
     deadline_identity: ContentIdentity
+    input_record_identities: tuple[ContentIdentity, ...] = ()
 
     def __post_init__(self) -> None:
         if (
@@ -165,8 +166,14 @@ class LifecycleActionDispatchRequest:
             or not isinstance(self.deadline_identity, ContentIdentity)
             or any(
                 not isinstance(item, ContentIdentity)
-                for item in self.predecessor_result_identities
+                for item in (
+                    *self.predecessor_result_identities,
+                    *self.input_record_identities,
+                )
             )
+            or not isinstance(self.input_record_identities, tuple)
+            or len(set(self.input_record_identities))
+            != len(self.input_record_identities)
         ):
             raise ActionDagSchedulingError(
                 "action_dag.request_invalid", "dispatch request is not typed"
@@ -180,7 +187,20 @@ class LifecycleActionDispatchRequest:
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
-                "schema": "literate-ai/lifecycle-action-dispatch-request@1",
+                "schema": (
+                    "literate-ai/lifecycle-action-dispatch-request@2"
+                    if self.input_record_identities
+                    else "literate-ai/lifecycle-action-dispatch-request@1"
+                ),
+                **(
+                    {
+                        "input_record_identities": [
+                            item.uri for item in self.input_record_identities
+                        ]
+                    }
+                    if self.input_record_identities
+                    else {}
+                ),
                 "schedule_identity": self.schedule_identity.uri,
                 "action_identity": self.action.identity.uri,
                 "worker_identity": self.worker.identity.uri,

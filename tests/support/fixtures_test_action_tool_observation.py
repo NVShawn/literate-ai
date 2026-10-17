@@ -41,6 +41,8 @@ from literate_ai.adapters.action_build_worker import ConfiguredBuildWorker
 from literate_ai.adapters.action_test_worker import ConfiguredTestWorker
 from literate_ai.adapters.action_execute_worker import ConfiguredExecuteWorker
 from literate_ai.adapters.action_accept_worker import ConfiguredAcceptWorker
+from literate_ai.adapters.action_generate_worker import ConfiguredGenerateWorker
+from literate_ai.contracts import canonical_identity
 from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 tool = discover_python_toolchain(pinned_command=(sys.executable,))
@@ -51,8 +53,12 @@ test_worker = ConfiguredTestWorker(binding, (binding,), environment=dict(os.envi
 execute_worker = ConfiguredExecuteWorker(
     binding, (binding,), environment=dict(os.environ))
 accept_worker = ConfiguredAcceptWorker(binding, environment=dict(os.environ))
+generate_worker = ConfiguredGenerateWorker(binding, environment=dict(os.environ),
+    authority_identity=canonical_identity("private-model-authority"),
+    admission_guard=lambda value: None)
 raise SystemExit(main(build_worker=worker, test_worker=test_worker,
-    execute_worker=execute_worker, accept_worker=accept_worker))
+    execute_worker=execute_worker, accept_worker=accept_worker,
+    generate_worker=generate_worker))
 """
 
 
@@ -127,6 +133,7 @@ class ActionToolObservationTests(unittest.TestCase):
                 self.assertIsNotNone(admitted.test_profile)
                 self.assertIsNotNone(admitted.execute_profile)
                 self.assertIsNotNone(admitted.accept_profile)
+                self.assertIsNotNone(admitted.generate_profile)
                 with patch(
                     "literate_ai.adapters.action_tool_observation.run_command_observation",
                     wraps=run_command_observation,

@@ -1,5 +1,51 @@
 # QA ledger
 
+## 2026-10-11 1.2.0 (public) edition published
+
+- Read-only preflight confirmed the active account and both stable resources. The
+  authorized in-place update (`--release-version 1.2.0`, source revision `04abf951`)
+  completed both members; export-back read 26 slides / 26 notes pages and 73 headings,
+  matching the accepted local members. The release-bound receipt is complete.
+
+## 2026-10-11 1.2.0 (public) repair, cross-host worker, and Mix edition accepted
+
+This is the public repository's 1.2.0 edition. It is distinct from the private
+repository's 2026-09-26/27 "1.2.0" entries below, whose content shipped publicly as
+`1.1.0`.
+
+- Revalidated `source-notes.md` against the merged 1.2 line (`1d22e1c1`). Corrected
+  counts: Makefile `RELEASE_GATES` 14 → 15 (`public-export-check`); build-system Flavors
+  5 → 6 (`build-mix`). Package providers stay nine; Hex is recorded as a `build-mix`
+  toolchain constraint and pinned dependency input, not a package provider.
+- Revised slide 23 (and its narrative counterpart, a new 8.1.3 heading) to the 1.2
+  slices: bounded candidate repair with redacted diagnostic excerpts, cross-host action
+  workers and the reference standard receiver, Elixir/Mix with checksum-pinned Hex, and
+  forge issues/PRs as the default coordination channel. Production DAG dispatch with LAN
+  cache qualification (#4) and three-way update merging (#2) are labelled as deferred to
+  1.3. Slide 19 now draws all 15 gates; slides 4, 18, 20, and 25 and their notes carry
+  the updated counts, tiered local-first qualification, and 1.2 labels. 26 slides kept.
+- Independent document-pair acceptance passed all 11 scenarios: 26 slides at
+  1280x720, zero escaping elements, zero overlapping text-bearing frames, notes on
+  26/26 slides, 73 narrative headings with no skipped level, no unresolved
+  placeholders, and no credential material.
+- Inspected the complete 26-slide contact sheet plus full-resolution slides 4, 19, 23,
+  and 25. Slide 23's first title draft wrapped into its subtitle and was shortened to
+  one line. No new clipping, overflow, unintended overlap, or broken connector remains.
+- Independent agent review against the code at `041b3f09` confirmed the counts, help
+  list, repair limit, receiver, ADR 0050/0017 amendment, `prompt-task@2`, SemVer and
+  tiered qualification claims, and corrected three things: slide 23's REPAIR line and
+  the specs no longer imply that `litai rebuild` feeds raw redacted excerpts to repair
+  (the repair prompt carries a sanitized failure fact; excerpts are a conformance-harness
+  record); "plan-only update reviews" now says conflict review is plan-only and apply
+  preserves conflicts, since `litai update --apply` exists; and slide 23 gained a header
+  wash so the title and subtitle stay legible over the photograph. Slide 18 notes now
+  scope Debian construction to compatible Linux hosts. Acceptance re-passed 11/11.
+- Local artifact identities:
+  - PPTX: `sha256:ee7b402c7675d151f331e98517627d22229047d01df31959f68fb2788bc169e3`
+  - DOCX: `sha256:6a0d4a8f0e4c2e67ca214ea2aa1b5abb565bd1f5c3fd26672864554a03cad58c`
+- Google Workspace preflight, in-place publication, export-back verification, and the
+  release-bound publication receipt are pending and were not attempted in this pass.
+
 ## 2026-09-27 1.2.0 published in place and export-back verified
 
 - Repeated the pair-wide Google Workspace preflight as the configured authorized publisher against

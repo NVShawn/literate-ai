@@ -12,11 +12,11 @@ stages:
 dependencies:
   - schema: "urn:literate-ai:schema:v1:skill-reference"
     skill_id: "portable-application-implementation"
-    version: "1.8.3"
+    version: "1.8.4"
     identity:
       schema: "urn:literate-ai:schema:v1:content-identity"
       algorithm: "sha256"
-      digest: "3d393c054d241eda78df8789144e75476d3131ae1b2e404fa33c6b02ef66d4af"
+      digest: "55dece8843519c6ced884d7cd9eb5d8bff04ebccef055c74c5bfcf176ccd06cd"
 limitations:
   - "Do not use npm packages, network access, standard input, a shell, eval, dynamic code loading, timers, locale-sensitive ordering, or operating-system-specific APIs."
   - "Do not emit logs or presentation text alongside the single JSON result on standard output."

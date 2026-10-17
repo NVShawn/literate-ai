@@ -128,7 +128,12 @@ class ActionExecuteResultTests(unittest.TestCase):
         )
         fetch = Mock(side_effect=AssertionError("fetch before grant admission"))
         changed = replace(
-            result, evidence=replace(result.evidence, execution_authority=None)
+            result,
+            evidence=replace(
+                result.evidence,
+                execution_authority=None,
+                execution_authorized_at=None,
+            ),
         ).to_bytes()
         with self.assertRaises(ActionWireError):
             self.import_result(

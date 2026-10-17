@@ -110,5 +110,77 @@
     "python": "3.12",
     "group": 0,
     "pr": true
+  },
+  {
+    "task": "elixir-native",
+    "name": "Elixir 1.18.0 / OTP 27.0 / ubuntu-24.04",
+    "os": "ubuntu-24.04",
+    "python": "3.12",
+    "group": 0,
+    "elixir": "1.18.0",
+    "otp": "27.0",
+    "otp_major": "27",
+    "hex_args": "",
+    "pr": true
+  },
+  {
+    "task": "elixir-native",
+    "name": "Elixir 1.20.4 / OTP 29.1.1 / ubuntu-24.04",
+    "os": "ubuntu-24.04",
+    "python": "3.12",
+    "group": 0,
+    "elixir": "1.20.4",
+    "otp": "29.1.1",
+    "otp_major": "29",
+    "hex_args": "--build-from-source",
+    "pr": true
+  },
+  {
+    "task": "elixir-native",
+    "name": "Elixir 1.18.0 / OTP 27.0 / macos-15",
+    "os": "macos-15",
+    "python": "3.12",
+    "group": 0,
+    "elixir": "1.18.0",
+    "otp": "27.0",
+    "otp_major": "27",
+    "hex_args": "",
+    "pr": true
+  },
+  {
+    "task": "elixir-native",
+    "name": "Elixir 1.20.4 / OTP 29.1.1 / macos-15",
+    "os": "macos-15",
+    "python": "3.12",
+    "group": 0,
+    "elixir": "1.20.4",
+    "otp": "29.1.1",
+    "otp_major": "29",
+    "hex_args": "--build-from-source",
+    "pr": true
+  },
+  {
+    "task": "elixir-native",
+    "name": "Elixir 1.18.0 / OTP 27.0 / windows-2022",
+    "os": "windows-2022",
+    "python": "3.12",
+    "group": 0,
+    "elixir": "1.18.0",
+    "otp": "27.0",
+    "otp_major": "27",
+    "hex_args": "",
+    "pr": true
+  },
+  {
+    "task": "elixir-native",
+    "name": "Elixir 1.20.4 / OTP 29.1.1 / windows-2022",
+    "os": "windows-2022",
+    "python": "3.12",
+    "group": 0,
+    "elixir": "1.20.4",
+    "otp": "29.1.1",
+    "otp_major": "29",
+    "hex_args": "--build-from-source",
+    "pr": true
   }
 ]

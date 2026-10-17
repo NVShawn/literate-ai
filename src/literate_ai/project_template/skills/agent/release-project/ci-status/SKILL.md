@@ -24,4 +24,8 @@ shard YAML is `ci-test-plan`, not this skill.
    start a second CI system.
 
 A clean local `make` target is necessary, never sufficient, for production
-posture or a versioned cut.
+posture or a versioned cut. When the release policy declares `qualification`,
+`litai release qualify` is the authority instead: a record whose host and
+worker tiers cover every platform and action makes CI optional for that exact
+revision. CI is required only for cells no left tier covers or when the policy
+marks CI mandatory, and a completed failing CI run still blocks.

@@ -5,8 +5,8 @@ as a disposable, verifiable build artifact. The shortest useful introduction sta
 from an installed release wheel, checks the host, and follows one reviewed onboarding
 plan into either a new project or an adopted source tree.
 
-Prefer to watch first? The 13:38 onboarding film,
-[It Builds. Can We Ship It?](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai.mp4), follows a real
+Prefer to watch first? The 11:52 onboarding film,
+[Settle the Argument. Before CI.](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4), follows a real
 greenfield session and a real TinyXML2 adoption. The
 [instructional courses](../courses/README.md) break the same ground into short lessons:
 [your first greenfield project](../courses/01-greenfield-first-project/01-greenfield-first-project.mp4),

@@ -348,16 +348,18 @@ output, and missing process evidence.
 Bzlmod resolver/evidence, toolchain/framework, unknown-code, and already-admitted
 failures are also terminal; only the static authority/declaration allowlist qualifies.
 
-Any of those rejections gives that language variant a fresh empty root and the unchanged
-recipe, never earlier source, diagnostics, expectations, or verifier facts, for at most
-three total attempts. Every other failure—including independent acceptance—remains
+Any of those rejections gives that language variant a fresh empty root, the unchanged
+recipe, and the earlier rejection records with their bounded, redacted
+`diagnostic_excerpt`, never earlier source or verifier facts, for at most three total
+attempts. Every other failure—including independent acceptance—remains
 fail-stop, and no rejected tree can enter workspace or source cache.
 
 An eventually passing `literate-ai/conformance-report@7` records the attempt count and
-ordered compact `literate-ai/generated-candidate-rejection@1` records without raw
-diagnostics. Exhaustion persists a content-identified
-`literate-ai/generated-candidate-attempts@1` envelope below the external attempt root
-before failing. The Git receipt binds the final report identity; it does not retain
+ordered compact `literate-ai/generated-candidate-rejection@1` records whose only
+diagnostic text is that bounded, redacted excerpt. Exhaustion persists a
+content-identified `literate-ai/generated-candidate-attempts@1` envelope below the
+external attempt root before failing. The Git receipt binds the final report identity;
+it does not retain
 rejected source or diagnostic text.
 
 The direct sample command emits its conformance report but does not mutate this

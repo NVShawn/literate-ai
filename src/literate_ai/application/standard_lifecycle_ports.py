@@ -20,6 +20,7 @@ from literate_ai.contracts.executable_components import (
     ArtifactBuildGraph,
     ArtifactExport,
     CandidateRepairDiagnostic,
+    ComponentBuildManifest,
     ComponentContextBenchmarkRecord,
     ComponentExecutionPlan,
     ComponentGenerationPlan,
@@ -43,6 +44,9 @@ from literate_ai.contracts.standard_post_source_evidence import (
     StandardComponentAcceptanceEvidence,
     StandardExecutionEvidence,
     StandardGeneratedTestExecutionEvidence,
+)
+from literate_ai.contracts.standard_root_integration import (
+    StandardRootIntegrationEvidence,
 )
 
 if TYPE_CHECKING:
@@ -97,6 +101,16 @@ class ReservedLifecycleOperation(Protocol):
     def run(self) -> object: ...
 
     def release(self) -> None: ...
+
+
+@runtime_checkable
+class AdmittedSourceGenerator(Protocol):
+    """Reserve new generation; the lifecycle independently admits returned output."""
+
+    def try_reserve_generate(
+        self,
+        prepared: PreparedComponentGenerationNode[object, object],
+    ) -> ReservedLifecycleOperation | None: ...
 
 
 @runtime_checkable
@@ -192,7 +206,7 @@ class ComponentTester(Protocol):
 
 @runtime_checkable
 class ExecutionProviderEvidenceReceiver(Protocol):
-    """Retain the full accepted runtime closure before EXECUTE reservation."""
+    """Receive the full runtime closure for EXECUTE or ACCEPT before execution."""
 
     def retain_execution_provider_evidence(
         self,
@@ -231,6 +245,18 @@ class ScopedComponentExecutor(Protocol):
     ) -> StandardExecutionEvidence: ...
 
 
+@runtime_checkable
+class AdmittedComponentAcceptor(Protocol):
+    """Reserve ACCEPT capacity before occupying a lifecycle executor thread."""
+
+    def try_reserve_accept(
+        self,
+        plan: StandardComponentBuildPlan,
+        test_identity: ContentIdentity,
+        execution_identity: ContentIdentity,
+    ) -> ReservedLifecycleOperation | None: ...
+
+
 class ComponentAcceptor(Protocol):
     def accept(
         self,
@@ -238,6 +264,27 @@ class ComponentAcceptor(Protocol):
         test_identity: ContentIdentity,
         execution_identity: ContentIdentity,
     ) -> ContentIdentity | StandardComponentAcceptanceEvidence: ...
+
+
+class ComponentLinker(Protocol):
+    """Return the exact realized manifest after accepted proof verification."""
+
+    def link(
+        self,
+        plan: StandardComponentBuildPlan,
+        receipt: StandardComponentAcceptanceEvidence,
+    ) -> ComponentBuildManifest: ...
+
+
+@runtime_checkable
+class AdmittedComponentLinker(Protocol):
+    """Reserve LINK capacity without occupying a lifecycle executor thread."""
+
+    def try_reserve_link(
+        self,
+        plan: StandardComponentBuildPlan,
+        receipt: StandardComponentAcceptanceEvidence,
+    ) -> ReservedLifecycleOperation | None: ...
 
 
 class AcceptedSourceCachePublisher(Protocol):
@@ -250,6 +297,13 @@ class StandardLifecycleCheckpointRecorder(Protocol):
     """Persist a typed stage boundary without granting authority to skip replay."""
 
     def record(self, evidence: StandardLifecycleStageEvidence) -> None: ...
+
+    def start_replacement(
+        self,
+        execution_plan_identity: ContentIdentity,
+        component_revision: ContentIdentity,
+    ) -> None:
+        """Open a fresh attempt before a repair candidate restarts its stages."""
 
 
 class StandardContextEvidenceRecorder(ComponentContextEvidenceRecorder, Protocol):
@@ -322,6 +376,19 @@ class ProjectPackageCreator(Protocol):
         artifact_graph: ArtifactBuildGraph,
         link_plan: ExactLinkPlan,
     ) -> tuple[PackagePlan, PackageResult]: ...
+
+
+class ProjectFinalizer(Protocol):
+    """Return independently verified root-stage evidence for one exact package."""
+
+    def finalize(
+        self,
+        component_lock: ComponentLock,
+        project_build_plan: StandardProjectBuildPlan,
+        artifact_graph: ArtifactBuildGraph,
+        package_plan: PackagePlan,
+        package_result: PackageResult,
+    ) -> StandardRootIntegrationEvidence: ...
 
 
 class RootIntegrationTester(Protocol):

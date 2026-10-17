@@ -371,6 +371,10 @@ class FilesystemStandardRebuildAdapter:
                 getattr(exc, "code", "standard_rebuild.independent_acceptance_failed"),
                 getattr(exc, "message", str(exc)),
             ) from exc
+        except ActionWireError as exc:
+            # Project-level remote phases (PACKAGE, FINALIZE) run outside the
+            # per-Component failure capture; keep their typed refusal.
+            raise FilesystemStandardRebuildError(exc.code, str(exc)) from exc
         if not execution.lifecycle.successful:
             failures = tuple(
                 item.failure_evidence
@@ -472,6 +476,9 @@ class FilesystemStandardRebuildAdapter:
 
 
 _RUNTIME_TARGET_ID = "standard-local"
+# Same bounds as filesystem qualification capture.
+_ACTION_EVIDENCE_MAX_BYTES = 256 * 1024 * 1024
+_ACTION_EVIDENCE_MAX_RECORDS = 100_000
 
 
 def _resolved_source_cache(
@@ -572,6 +579,8 @@ def assemble_filesystem_standard_rebuild_adapter(
     action_workers: CommandActionWorkerPool | None = None,
     action_source_cas: FileSystemCAS | None = None,
     action_result_source=None,
+    action_finalize_profile: ContentIdentity | None = None,
+    action_finalize_verifier=None,
     binding: ResolvedStandardProjectLifecycleDriver | None = None,
     independent_acceptance_oracle: LocalIndependentAcceptanceOracle | None = None,
     pipeline_model: str | None = None,
@@ -659,6 +668,10 @@ def assemble_filesystem_standard_rebuild_adapter(
                 "action_execution.admission_failed",
                 "configured command indexing could not be admitted",
             ) from exc
+    remote_generate = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.GENERATE)
+        for worker in action_workers.workers
+    )
     remote_build = action_workers is not None and any(
         action_workers.supports_phase(worker, LifecycleActionKind.BUILD)
         for worker in action_workers.workers
@@ -671,7 +684,86 @@ def assemble_filesystem_standard_rebuild_adapter(
         action_workers.supports_phase(worker, LifecycleActionKind.EXECUTE)
         for worker in action_workers.workers
     )
-    if remote_build or remote_test or remote_execute:
+    remote_accept = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.ACCEPT)
+        for worker in action_workers.workers
+    )
+    remote_link = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.LINK)
+        for worker in action_workers.workers
+    )
+    remote_package = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.PACKAGE)
+        for worker in action_workers.workers
+    )
+    remote_finalize = action_workers is not None and any(
+        action_workers.supports_phase(worker, LifecycleActionKind.FINALIZE)
+        for worker in action_workers.workers
+    )
+    if (
+        action_execution is not None
+        and action_execution.finalize_profile is not None
+        and not remote_finalize
+    ):
+        raise FilesystemStandardRebuildError(
+            "standard_rebuild.finalize_unavailable",
+            "configured FINALIZE policy has no admitted FINALIZE worker",
+        )
+    finalize_verification = None
+    if remote_finalize:
+        if (
+            action_execution is not None
+            and action_execution.finalize_profile is not None
+        ):
+            if (
+                action_finalize_profile is not None
+                or action_finalize_verifier is not None
+            ):
+                raise FilesystemStandardRebuildError(
+                    "standard_rebuild.finalize_policy_ambiguous",
+                    "configured FINALIZE policy cannot be overridden by callbacks",
+                )
+            from .action_finalize_verification import PortableFinalizeVerification
+
+            try:
+                finalize_verification = PortableFinalizeVerification(
+                    oracle=independent_acceptance_oracle,
+                    workspace_root=object_root,
+                    require_configuration=action_execution.require_unchanged,
+                )
+            except (TypeError, ValueError) as exc:
+                raise FilesystemStandardRebuildError(
+                    "standard_rebuild.finalize_oracle_missing",
+                    "configured FINALIZE requires a controller-owned acceptance oracle",
+                ) from exc
+            action_finalize_profile = action_execution.finalize_profile
+        if not remote_link:
+            raise FilesystemStandardRebuildError(
+                "standard_rebuild.finalize_link_missing",
+                "command FINALIZE requires completed command LINK proof",
+            )
+        if not isinstance(action_finalize_profile, ContentIdentity) or (
+            finalize_verification is None and not callable(action_finalize_verifier)
+        ):
+            raise FilesystemStandardRebuildError(
+                "standard_rebuild.finalize_authority_missing",
+                "command FINALIZE requires exact private profile and stage verifier",
+            )
+    if remote_package and not remote_link:
+        raise FilesystemStandardRebuildError(
+            "standard_rebuild.package_link_missing",
+            "command PACKAGE requires completed command LINK proof",
+        )
+    if (
+        remote_generate
+        or remote_build
+        or remote_test
+        or remote_execute
+        or remote_accept
+        or remote_link
+        or remote_package
+        or remote_finalize
+    ):
         if action_result_source is None and action_execution is not None:
             try:
                 action_result_source = action_execution.build_result_source(
@@ -680,9 +772,14 @@ def assemble_filesystem_standard_rebuild_adapter(
                     phases=tuple(
                         phase
                         for phase, enabled in (
+                            (LifecycleActionKind.GENERATE, remote_generate),
                             (LifecycleActionKind.BUILD, remote_build),
                             (LifecycleActionKind.TEST, remote_test),
                             (LifecycleActionKind.EXECUTE, remote_execute),
+                            (LifecycleActionKind.ACCEPT, remote_accept),
+                            (LifecycleActionKind.LINK, remote_link),
+                            (LifecycleActionKind.PACKAGE, remote_package),
+                            (LifecycleActionKind.FINALIZE, remote_finalize),
                         )
                         if enabled
                     ),
@@ -692,7 +789,8 @@ def assemble_filesystem_standard_rebuild_adapter(
         if not callable(action_result_source):
             raise FilesystemStandardRebuildError(
                 "standard_rebuild.result_source_missing",
-                "BUILD/TEST/EXECUTE requires explicit worker result transport",
+                "GENERATE/BUILD/TEST/EXECUTE/ACCEPT/LINK/PACKAGE/FINALIZE requires "
+                "explicit worker result transport",
             )
     source_generation = FilesystemStandardSourceGenerationAdapter.from_environment(
         project_root=project.root,
@@ -713,11 +811,38 @@ def assemble_filesystem_standard_rebuild_adapter(
     candidate_cas = FileSystemCAS(candidate_cas_root)
     assets = admit_locked_authored_assets(snapshot, cas=candidate_cas)
     planned = planning.plan(snapshot, assets=assets)
-    closure = project_locked_standard_toolchain_closure(
-        snapshot,
-        planned.execution_plan,
-        native_sdk_inputs=prepared.native_sdk_inputs,
-    )
+    if remote_build and remote_test and remote_execute and remote_finalize:
+        # No Component or root command runs on this host, so derive every locked tool
+        # identity, command and dependency from the admitted worker that will
+        # build; a controller on another host need not have those tools.
+        from .remote_standard_toolchains import (
+            project_remote_standard_toolchain_closure,
+        )
+
+        builder = next(
+            worker
+            for worker in action_workers.workers
+            if action_workers.supports_phase(worker, LifecycleActionKind.BUILD)
+        )
+        try:
+            closure = project_remote_standard_toolchain_closure(
+                snapshot,
+                planned.execution_plan,
+                action_workers,
+                builder,
+                native_sdk_inputs=prepared.native_sdk_inputs,
+            )
+        except (ActionWireError, ValueError) as exc:
+            raise FilesystemStandardRebuildError(
+                getattr(exc, "code", "standard_rebuild.remote_toolchains_invalid"),
+                str(exc),
+            ) from exc
+    else:
+        closure = project_locked_standard_toolchain_closure(
+            snapshot,
+            planned.execution_plan,
+            native_sdk_inputs=prepared.native_sdk_inputs,
+        )
     generator, _local_cache = source_generation.runner(
         snapshot,
         planned.execution_plan,
@@ -737,6 +862,18 @@ def assemble_filesystem_standard_rebuild_adapter(
             action_workers,
         )
     )
+    if remote_generate:
+        from .command_generator import CommandSourceGenerator
+
+        generator = CommandSourceGenerator(
+            indexer,
+            action_workers,
+            cache_key_provider=generator.planned_cache_key,
+            result_source=action_result_source,
+            candidate_cas=candidate_cas,
+            retained_source=retained_source,
+            retained_source_authorization=retained_source_authorization,
+        )
     shared_cache = load_shared_cache()
     if shared_cache is not None and (
         closure.cargo_targets
@@ -778,6 +915,18 @@ def assemble_filesystem_standard_rebuild_adapter(
         runtime,
         checkpoint_root=checkpoint_root,
     )
+    if action_workers is not None:
+        # Remote phases hand verified evidence back to local ports, which retain
+        # it only in a bounded recorder installed before any build. Qualification
+        # may replace this recorder with its own before building.
+        from .qualification_capture import QualificationEvidenceRecorder
+
+        runtime.lifecycle_ports.retain_evidence_with(
+            QualificationEvidenceRecorder(
+                max_bytes=_ACTION_EVIDENCE_MAX_BYTES,
+                max_records=_ACTION_EVIDENCE_MAX_RECORDS,
+            )
+        )
     if action_workers is not None and any(
         action_workers.supports_phase(worker, LifecycleActionKind.BUILD_INTENT)
         for worker in action_workers.workers
@@ -817,7 +966,9 @@ def assemble_filesystem_standard_rebuild_adapter(
             result_source=action_result_source,
         )
     lifecycle = runtime.application.lifecycle
-    if (remote_test or remote_execute) and not remote_build:
+    if (
+        remote_test or remote_execute or remote_accept or remote_link
+    ) and not remote_build:
         from .local_test_handoff import LocalBuildTestHandoff
 
         lifecycle.builder = LocalBuildTestHandoff(
@@ -846,6 +997,87 @@ def assemble_filesystem_standard_rebuild_adapter(
             ),
             result_source=action_result_source,
         )
+    if remote_accept:
+        from .accept_handoff import CompletedStagesAcceptHandoff
+        from .command_acceptor import CommandComponentAcceptor
+        from .execute_handoff import CompletedBuildExecuteHandoff
+
+        lifecycle.acceptor = CommandComponentAcceptor(
+            indexer,
+            action_workers,
+            runtime.lifecycle_ports,
+            handoff_for=CompletedStagesAcceptHandoff(
+                indexer,
+                runtime.lifecycle_ports,
+                execution_input_for=CompletedBuildExecuteHandoff(
+                    lifecycle.builder, indexer, runtime.lifecycle_ports
+                ),
+            ),
+            result_source=action_result_source,
+        )
+    if remote_link:
+        from .command_linker import CommandComponentLinker
+
+        if not remote_accept:
+            from .accept_handoff import CompletedStagesAcceptHandoff
+            from .execute_handoff import CompletedBuildExecuteHandoff
+            from .local_accept_handoff import LocalAcceptanceLinkHandoff
+
+            lifecycle.acceptor = LocalAcceptanceLinkHandoff(
+                lifecycle.acceptor,
+                indexer,
+                runtime.lifecycle_ports,
+                handoff_for=CompletedStagesAcceptHandoff(
+                    indexer,
+                    runtime.lifecycle_ports,
+                    execution_input_for=CompletedBuildExecuteHandoff(
+                        lifecycle.builder, indexer, runtime.lifecycle_ports
+                    ),
+                ),
+            )
+        lifecycle.component_linker = CommandComponentLinker(
+            indexer,
+            action_workers,
+            handoff_for=lifecycle.acceptor.link_handoff,
+            result_source=action_result_source,
+        )
+    if remote_package or remote_finalize:
+        from functools import partial
+
+        from .action_package_result import verify_deterministic_package
+        from .command_packager import CommandProjectPackager
+        from .packaging import DirectoryPackageAdapter
+
+        verify_package = partial(
+            verify_deterministic_package, adapter_factory=DirectoryPackageAdapter
+        )
+        if remote_package:
+            runtime.lifecycle_ports.project_packager = CommandProjectPackager(
+                lifecycle.component_linker,
+                verify_package=verify_package,
+                result_source=action_result_source,
+            )
+        if remote_finalize:
+            from .command_finalizer import CommandProjectFinalizer
+
+            lifecycle.project_finalizer = CommandProjectFinalizer(
+                lifecycle.component_linker,
+                profile_identity=action_finalize_profile,
+                verify_package=verify_package,
+                verify_stages=action_finalize_verifier,
+                stage_verifier_context=finalize_verification,
+                result_source=action_result_source,
+                grant_request_path=(
+                    None
+                    if action_execution is None
+                    else action_execution.finalize_grant_request_path
+                ),
+                grant_wait_seconds=(
+                    0
+                    if action_execution is None
+                    else action_execution.finalize_grant_wait_seconds
+                ),
+            )
     return FilesystemStandardRebuildAdapter(
         project=project,
         binding=selected_binding,

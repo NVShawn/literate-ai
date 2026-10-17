@@ -9,6 +9,10 @@ Python entrypoint as `python <path> <argument>`) and SHALL NOT execute the path
 directly as an operating-system binary; the provider artifact is not guaranteed to
 carry a runtime-specific execute shebang.
 
+`LITAI_CAPABILITY_MONEY_CALCULATION` is bound when the consumer executes, not while
+its generated tests run; those tests SHALL exercise the consumer against an in-test
+stub of this process contract.
+
 The entrypoint accepts one UTF-8 JSON argument array containing a non-negative integer
 subtotal in cents and a discount in basis points from 0 through 10000. It writes exactly
 one JSON object with integer `subtotal_cents`, `discount_cents`, and `total_cents` fields.

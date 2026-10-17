@@ -166,6 +166,9 @@ def validate_rust_bazel_source_closure(files: Mapping[str, str]) -> None:
                     f"generated {rule_kind} in {build_path} declares no statically "
                     "verifiable Rust sources",
                 )
+            _require_unambiguous_rust_crate_root(
+                rule_kind, body, declared, build_path=build_path
+            )
             for source in sorted(declared):
                 _require_declared_module_closure(
                     source,
@@ -514,6 +517,53 @@ def _declared_rust_sources(
             ):
                 declared.add(candidate)
     return declared
+
+
+def _require_unambiguous_rust_crate_root(
+    rule_kind: str,
+    body: str,
+    declared: set[PurePosixPath],
+    *,
+    build_path: str,
+) -> None:
+    """Reject a multi-source rules_rust target whose crate root Bazel cannot infer.
+
+    Without ``crate_root``, rules_rust picks the sole source, else the kind's
+    default root (``main.rs`` for binaries and harness-free tests, ``lib.rs`` for
+    libtest tests), else ``<name>.rs`` or ``<crate_name>.rs``. Anything else fails
+    analysis with "please use `crate_root`", which retry feedback reports only as
+    an opaque Bazel analysis failure. ``crate`` cannot be combined with ``srcs``,
+    so this check leaves that already-invalid shape to Bazel.
+    """
+
+    if len(declared) <= 1:
+        return
+    if (
+        _attribute_expression(body, "crate_root") is not None
+        or _attribute_expression(body, "crate") is not None
+    ):
+        return
+    name = _literal_attribute(body, "name")
+    if name is None:
+        return
+    default_root = "main.rs"
+    if rule_kind == "rust_test":
+        harness = _attribute_expression(body, "use_libtest_harness")
+        if harness is None or harness.strip() == "True":
+            default_root = "lib.rs"
+        elif harness.strip() != "False":
+            return
+    crate_name = _literal_attribute(body, "crate_name") or name
+    candidates = sorted({default_root, f"{name}.rs", f"{crate_name}.rs"})
+    if any(source.name in candidates for source in declared):
+        return
+    raise GeneratedSourceValidationError(
+        "coding_cli.generated_rust_bazel_crate_root_ambiguous",
+        f"generated {rule_kind} {name!r} in {build_path} lists "
+        f"{len(declared)} Rust srcs but none is {' or '.join(candidates)}, so "
+        "rules_rust cannot infer the crate root; set crate_root explicitly "
+        '(for example crate_root = "main.rs")',
+    )
 
 
 def _unescape_starlark_string(value: str) -> str:

@@ -11,8 +11,6 @@ from functools import lru_cache
 from pathlib import Path
 from urllib.parse import urljoin
 
-from jsonschema import Draft202012Validator
-from jsonschema.exceptions import SchemaError
 from referencing import Registry, Resource
 from referencing.exceptions import CannotDetermineSpecification, Unresolvable
 
@@ -857,6 +855,10 @@ def _verify_schema_documents(
                 )
             loaded.append((path, value))
         supporting = (*documents, *loaded)
+
+    # jsonschema compiles format grammars on import; load it only to check.
+    from jsonschema import Draft202012Validator
+    from jsonschema.exceptions import SchemaError
 
     registry = Registry()
     for path, document in supporting:

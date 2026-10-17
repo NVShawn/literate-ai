@@ -5,6 +5,168 @@
 - Windows offline Python wheel installation preserves architecture discovery
   variables so CPython 3.11's isolated target probe matches the selected runtime.
 
+## 1.2.0 - 2026-10-12
+
+[README.md](https://github.com/jordanhubbard/literate-ai/blob/v1.2.0/README.md)
+
+- Instructional film: publish the 1.2 onboarding film, *Settle the Argument. Before
+  CI.* (11:52), in `media/courses/sam-meets-literate-ai/`. LitAI opens with the big
+  picture of agentic development, Sam dismisses it as the usual AI slop pitch, and
+  seven of his beliefs are settled with terminal sessions recorded against the 1.2
+  build: reviewable promises, independent acceptance, the full release gate before
+  CI, `litai render html` views, adoption without a rewrite, learning as reviewed
+  changes, and a locally built release wheel; remote workers and the learning loop
+  are labelled walkthroughs. Local neural voices only; the integrity receipt verifies.
+  The 1.1 feedback edition (13:38) remains at the `v1.1.0` tag.
+
+- `litai video build` and `litai video verify` now measure media from its decodable
+  samples instead of trusting container headers and receipt hashes. Build refuses a
+  scene clip with no video or audio samples (`video.media_empty`) or whose measured
+  video length differs from its narration (`video.media_duration`), and reports the
+  final film's measured video duration. Verify re-measures the film and refuses empty
+  streams, video that stops before its audio, receipt durations that differ from the
+  media, and narrated captions that outlast the picture, even when every artifact
+  digest matches. Other video failures keep `video.invalid`; the receipt schema is
+  unchanged.
+
+- Deferred to 1.3 by maintainer decision: clean three-way update merging and reviewed
+  resolution application (issue #2; in 1.2 conflict review is plan-only and `litai update --apply` preserves
+  conflicts), and production
+  action DAG dispatch with multi-worker shared LAN-cache qualification (issue #4; 1.2
+  ships the scheduler and cache foundation).
+
+- `litai rebuild` now runs bounded candidate repair. Attaching durable checkpoints or
+  the source cache rebuilt the lifecycle service without its repair port, so a retryable
+  build or generated-test rejection failed the run after one candidate instead of
+  requesting up to two fresh replacements. The rejected attempt's checkpoint is closed as
+  failed and each replacement opens its own durable attempt, chained to the rejected one,
+  because it restarts at source generation. The rebuild result's `repair` field now
+  reports the replacements that ran instead of always `not-needed`.
+
+- Toolchain observation now accepts the npm `@bazel/bazelisk` launcher that the
+  installation guide recommends. Only the prebuilt binary bazelisk.js runs for the host,
+  selected by the Node runtime's own architecture, is observed as the native toolchain.
+  The package's other platform binaries are hashed as inert payload, and native files
+  anywhere else still refuse.
+- `litai project validate` and Flavor catalog loading discover the project skill catalog
+  once per operation instead of once per Component and Flavor (117 times for this
+  repository). This removes most of the filesystem metadata calls that made Windows
+  gates slow.
+
+- The worker template can declare Windows Defender process exclusions
+  (`defender_process_exclusions`): `{python}`, the real base interpreter behind the
+  template Python, or an absolute `.exe` path. `litai worker align` reports a missing
+  one and `--apply` adds it, naming the resolved executable. Shells and script hosts
+  are refused, and `{python}` must resolve to an existing non-Store `.exe`. The
+  repository template now excludes `{python}`. That covers every process of that
+  interpreter on the worker, not only gate work, so Defender no longer scans its pip,
+  stdlib or site-packages reads outside the excluded workspace.
+
+- The conformance sample runner now records a bounded, redacted `diagnostic_excerpt`
+  for rejected generated candidates (compiler or Bazel output for build rejections;
+  generated expected and observed values for generated-test mismatches) in retained
+  evidence and in the next attempt's repair feedback. Previously only a diagnostic hash
+  was kept, so neither showed the error. `litai rebuild` repair prompts still carry only
+  a short sanitized failure message.
+
+- Release qualification is local-first: `litai release check` defaults to the `tiered`
+  target when the release policy declares qualification (this host, then workers, then
+  CI), and `litai release qualify` runs that tiered qualification directly. The host gate and
+  the worker gates run concurrently rather than host-first, so a three-platform release
+  check takes one gate's wall-clock time instead of two.
+
+- Forge issues and PRs/MRs are the documented default tracker and agent coordination
+  channel (ADR 0050); other trackers or review systems are overrides. Landing now passes
+  the policy target branch (`gh pr create --base`, `glab mr create --target-branch`).
+  `litai prompt translate` recognizes `--external-envelope` / `LITAI_EXTERNAL_TASK_ID`
+  (error `prompt_routing.external_envelope_bypass`, envelope `prompt-task@2`); the MAC
+  spellings remain deprecated aliases. `litai init` no longer installs the opt-in
+  `write-mac-project-contract` skill; `litai update` keeps an existing copy unless the
+  parent does not ship it and it is unedited. Projects whose forge default branch is not
+  `main` must declare `repository_policy.default_branch`, which landing now targets.
+
+- Remote live gates no longer require `OPENAI_API_KEY` in the worker login
+  environment. They still require `opencode`, which resolves credentials for the
+  pinned model's provider from its own configuration (ADR 0017 amendment). A
+  missing provider key reported by OpenCode is now
+  `coding_cli.authentication_required`.
+
+- `make release-check` now runs `public-export-check`, so an organization-internal
+  reference in tracked files fails the release gate instead of surfacing only at
+  export (#55).
+
+- Retained Cargo receipts report unselected ignored cases as explicit exclusions,
+  preserving strict selected-test failures and empty-suite rejection.
+
+- Cross-host workers: when BUILD, TEST, EXECUTE and FINALIZE all run on admitted
+  workers, `litai rebuild` derives locked toolchain identities, commands and
+  native dependencies from the worker instead of the controller host, which then
+  needs none of the project's tools. Workers serving PACKAGE or FINALIZE are no
+  longer refused for tool observation, and worker dependency observation is
+  several times faster.
+
+- Add `python -m literate_ai.standard_receiver`, a reference action receiver for
+  portable Standard projects configured by one private operator document. It
+  runs BUILD, TEST, EXECUTE, ACCEPT, PACKAGE and FINALIZE for single-Component
+  Make/Python projects and refuses any contract that names a tool, driver or
+  layout other than the packaged profiles for the worker's own tools.
+
+- `litai rebuild` with admitted action workers: install the bounded evidence
+  recorder remote phases need (every such rebuild previously failed at BUILD),
+  report project-level PACKAGE/FINALIZE refusals as typed CLI errors instead of
+  tracebacks, and run the full worker health and capability probe once per
+  action boundary instead of on every guarded read.
+
+- FINALIZE grants: when a worker has no grant, the controller writes the exact
+  request to an operator-owned path and waits a bounded time for the operator to
+  grant it with `--issue-finalize-grant`, then continues in the same run.
+
+- FINALIZE receivers check private grants in the parent as well as the child.
+  Before staging, the grant must be current and scoped to the exact input,
+  revision and privilege; after staging, the parent measures the child's portable
+  runtime and applies the full guard on every poll. The command-controller chain
+  now runs with real file grants instead of synthetic permission callbacks.
+
+- A describe-only FINALIZE dispatch reports the exact grant request a receiver
+  measured, without executing, so an operator can authorize precisely that
+  runtime. The controller refuses descriptions for any other input, revision,
+  privilege set or builder.
+
+- Reconcile HTML observability scope: distinguish delivered graph/health views
+  from remaining run-history, dashboard controls and later-view qualification.
+
+- Require the versioned release line even for historical policies without a
+  default branch; refuse arbitrary-branch plans and legacy-plan preparation.
+
+- Require explicit SemVer policy for release operations, including legacy policies;
+  retain historical policy inspection and migrate the framework policy to SemVer.
+
+- Release publication and published verification independently validate
+  policy-bound tag names and declared release-line requirements. Altered prepared
+  records are rejected before tagging or pushing, even when substituted refs
+  select the same prepared commit.
+
+- Provide a portable FINALIZE child startup adapter with private contracts/tools,
+  measured runtime grants, owned output cleanup and stage authority checks.
+  Operator provisioning and full CLI qualification remain pending.
+
+- Add private file-backed FINALIZE grant lookup with live revocation checks for
+  parent supervision and child stages. Grant issuance and deployment provisioning
+  remain separate requirements.
+
+- Add a pinned private FINALIZE policy for Standard rebuild with controller-owned
+  portable package/test/oracle verification. Production worker grant provisioning
+  and complete CLI rebuild qualification remain pending.
+
+- Update: recover digest-verified historical bases recorded with GitHub's SCP
+  spelling (`git@github.com:owner/repository`) over the same SSH transport, while
+  preserving the original repository, revision and provenance. Recorded URLs keep
+  their transport, and an unusable historical locator leaves the conflict
+  unresolved instead of aborting the update (#36).
+
+- Release: classify SemVer numbered drafts with SemVer precedence and match GitHub
+  prerelease publication/verification to the prepared version without relaxing gates (#38).
+
 - Windows installation: report inaccessible declared native-tool search directories
   as actionable host-install errors instead of uncaught tracebacks. Document the
   PowerShell source-install entry point and activation-free wheel commands.
@@ -16,6 +178,32 @@
   because the archived `NVIDIA-dev/literate-ai` is internal and 1.0.x downloads wheels
   from a URL that refuses non-public repositories. The migration guide and ADR 0049 now
   give the one-time `make install` reinstall from the public repository (#18).
+
+- Elixir: add the `build-mix` Flavor and `mix-build-system` generation skill for
+  native Mix applications and libraries. Mix projects lock checksum-pinned Hex
+  dependencies, build through an authorized native Mix driver, and expose compiled
+  library exports that Standard consumers bind to sealed producer identities and
+  current consumer grants; transitive library graphs, packaging after source
+  retirement, retained-evidence reopening and tamper/revocation refusal are qualified
+  natively. CI runs all six native Elixir cells (Ubuntu, macOS and Windows; minimum
+  Elixir 1.18.0 / OTP 27.0 and newer Elixir 1.20.4 / OTP 29.1.1) on every pull
+  request. Mix acquisition is locked: the source BOM must pin each Hex package's
+  exact version, outer and inner checksums and requirements (ranges are refused),
+  `mix deps.get` runs against a framework-rendered `mix.lock`, and the native lock
+  must equal those pins before anything compiles. Each extracted dependency is
+  replaced by bytes from its verified archive (links, traversal and changed or
+  extra files are refused). Mix builds are local-only in 1.2; worker-built Mix
+  intents are refused. Mix plan finalization requires the builder/toolchain
+  binding to equal the contract's locked authority and build-system driver.
+  Byte-exact (CRLF-preserving) source reads apply only to Mix Components; other
+  ecosystems keep universal-newline admission text. Contributed in #45.
+
+- Artifact graphs: explicitly bind mixed build-driver compositions while retaining
+  each Component's measured driver and existing single-driver identities.
+
+- Generation: state the existing signed 64-bit bounds for numeric framework
+  metadata, avoiding oversized generated test-manifest values while preserving
+  specification-defined application arithmetic and strict validation.
 
 ## 1.1.0 - 2026-10-04
 
@@ -44,8 +232,47 @@
 - Elixir: add `lang-elixir` with portable script-tree generation, syntax validation,
   Standard runtime/test dispatch, exact Elixir/OTP toolchain identities, and
   `init`/`flavor add` assets. Requires Elixir 1.18+ and Erlang/OTP 27+; native
-  macOS smoke verification passes with Elixir 1.20.4/OTP 29. Mix/Hex/Phoenix
-  are outside this dependency-free profile.
+  macOS smoke verification passes with Elixir 1.20.4/OTP 29. Add host prerequisite
+  SBOMs, Standard sample and roundtrip selection, inert inverse inventory/skills,
+  and opt-in native parser/custody/Make/Bazel qualification with a pinned three-OS
+  CI matrix. Extend those cells with digest-pinned Hex staging, sequential Mix
+  qualification and a gate rejecting skipped or incomplete native fixture evidence.
+  Linux and Windows minimum-version checks pass on Elixir 1.18.0/OTP
+  27.0; live provider generation, independent acceptance and replay pass on macOS.
+  Bind native dependency observation to BEAM and the launcher interpreter. Use
+  native Erlang transport on Windows to preserve multiline code and inert JSON.
+  Adoption plans recognize `.ex`, `.exs` and Mix manifest markers without
+  evaluating them; monorepo plans expose Mix roots as candidates.
+  Add exact Elixir library import namespaces and native exports, retained-package
+  import verification, and `.exs` independent library acceptance. Native tests
+  cover library source retirement and consuming applications using packaged roots.
+  Qualify libraries on minimum-version Linux/Windows and through live generation
+  of a library and consuming application. Add installation-bound Mix discovery
+  with complete shipped application byte guards and inert project discovery.
+  Add typed Mix source/dependency evidence and source-to-resolved BOM verification
+  using freshly rechecked acquired archives and compiled payloads. Add explicit
+  opt-in native Mix/Hex graph, relocation, tamper and runtime-retirement checks.
+  Add Standard Mix ports with exact plan/grant checks, sealed cache reuse and
+  retained runtime code paths. Add strict Mix command profiles, locked tree-export
+  projection, explicit Hex constraints and Standard runtime assembly, composing
+  with Cargo targets. Native macOS and minimum-version Linux/Windows locked-profile
+  fixtures pass. Preserve CRLF source identities and inspect the Windows BEAM
+  DLL as an exact PE payload, with executable discovery retained for commands.
+  Add typed compiled-provider inputs bound to acknowledged Mix build requests,
+  retained BEAM custody and native namespace/public-interface checks. Restore
+  exact provider paths through a framework compiler after Mix code-path pruning.
+  Qualify compiled-provider source retirement, request binding, missing exports,
+  namespace escape and retained-byte tampering on macOS and minimum-version
+  Linux/Windows.
+  Bind published default Elixir libraries to Standard Mix consumers, compile
+  their retained package source under the consumer grant, and preserve compiled
+  imports and compilation evidence with the sealed consumer artifact.
+  Canonical catalog selection and portable
+  package/capture integration remain open.
+  Mix/Hex/Phoenix are outside this dependency-free profile.
+
+- Native dependency custody: recheck streamed content on Linux as well as Windows
+  so a same-size rewrite cannot evade capture through unchanged timestamps.
 
 - Documentation tooling: update DOMPurify to 3.4.16. Gate the dependency audit
   through reviewed, expiring per-advisory exceptions. The only exception covers the

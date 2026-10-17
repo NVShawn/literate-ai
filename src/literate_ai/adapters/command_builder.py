@@ -135,7 +135,7 @@ class CommandComponentBuilder:
 
     def _execute(self, plan, provider_artifacts, worker, slot):
         def require_worker():
-            self.indexer.revalidate_worker(worker)
+            self.indexer.require_worker_current(worker)
             if not self.admission.supports_build(
                 worker,
                 required_build_toolchains(

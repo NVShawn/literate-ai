@@ -355,6 +355,64 @@ class CommandActionAdmissionTests(unittest.TestCase):
                 pool.revalidate(worker)
             self.assertEqual(raised.exception.code, "action_admission.runtime_changed")
 
+    def test_package_requires_exact_packager_and_profile_drift_revokes_admission(self):
+        from literate_ai.adapters.action_capabilities import package_profile_identity
+
+        self.configure()
+        pool = self.pool()
+        worker = pool.workers[0]
+        original = pool._facts[worker.worker_id]
+        packager = canonical_identity("packager")
+        self.assertFalse(pool.supports_package(worker, packager))
+        configured = replace(
+            original,
+            actions=tuple(sorted((*original.actions, LifecycleActionKind.PACKAGE))),
+            package_profile=package_profile_identity(packager),
+        )
+        pool._facts[worker.worker_id] = configured
+        self.assertTrue(pool.supports_package(worker, packager))
+        self.assertFalse(
+            pool.supports_package(worker, canonical_identity("other-packager"))
+        )
+        with patch(
+            "literate_ai.adapters.action_admission.probe_command_action_capabilities",
+            return_value=replace(
+                configured,
+                package_profile=package_profile_identity(canonical_identity("changed")),
+            ),
+        ):
+            with self.assertRaises(ActionWireError) as error:
+                pool.revalidate(worker)
+            self.assertEqual(error.exception.code, "action_admission.runtime_changed")
+
+    def test_finalize_requires_exact_profile_and_profile_drift_revokes_admission(self):
+        self.configure()
+        pool = self.pool()
+        worker = pool.workers[0]
+        original = pool._facts[worker.worker_id]
+        packager = canonical_identity("packager")
+        self.assertFalse(pool.supports_finalize(worker, packager))
+        configured = replace(
+            original,
+            actions=tuple(sorted((*original.actions, LifecycleActionKind.FINALIZE))),
+            finalize_profile=packager,
+        )
+        pool._facts[worker.worker_id] = configured
+        self.assertTrue(pool.supports_finalize(worker, packager))
+        self.assertFalse(
+            pool.supports_finalize(worker, canonical_identity("other-packager"))
+        )
+        with patch(
+            "literate_ai.adapters.action_admission.probe_command_action_capabilities",
+            return_value=replace(
+                configured,
+                finalize_profile=canonical_identity("changed"),
+            ),
+        ):
+            with self.assertRaises(ActionWireError) as error:
+                pool.revalidate(worker)
+            self.assertEqual(error.exception.code, "action_admission.runtime_changed")
+
 
 if __name__ == "__main__":
     unittest.main()

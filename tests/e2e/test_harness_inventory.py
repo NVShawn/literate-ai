@@ -279,8 +279,11 @@ class ConvertHarnessSliceTests(unittest.TestCase):
             for name in ("kit", "runtime"):
                 root = target / name
                 root.mkdir()
+                # The running interpreter, not `python3`: on Windows that name
+                # can resolve to the Microsoft Store alias instead of Python.
+                python = Path(sys.executable).as_posix()
                 (root / "Makefile").write_text(
-                    "all:\n\t@true\ntest:\n\t@python3 -m unittest discover -v\n",
+                    f'all:\n\t@true\ntest:\n\t@"{python}" -m unittest discover -v\n',
                     encoding="utf-8",
                 )
                 (root / "value.py").write_text("VALUE = 1\n", encoding="utf-8")

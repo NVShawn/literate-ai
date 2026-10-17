@@ -46,12 +46,18 @@ def materialize_build_source(
     workspace_root: Path,
     blob_source: Callable[[BlobRef], bytes] | None = None,
     clock: Callable[[], datetime] = lambda: datetime.now(UTC),
+    admission_guard: Callable[[], None] = lambda: None,
 ) -> Iterator[LocalSourceTreeRegistry]:
     """Yield verified source custody; this operation grants no host execution."""
 
+    if not callable(admission_guard):
+        raise TypeError("BUILD source requires a callable admission guard")
+
     def require_current():
         deadline.remaining()
+        admission_guard()
         validate_standard_build_authority(plan, inputs, now=clock())
+        deadline.remaining()
 
     require_current()
     if (
@@ -74,6 +80,7 @@ def materialize_build_source(
         cas=cas,
         workspace_root=workspace_root,
         blob_source=blob_source,
+        require_current=require_current,
     ) as root:
         require_current()
         registry = LocalSourceTreeRegistry()

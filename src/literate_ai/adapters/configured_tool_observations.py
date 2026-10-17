@@ -56,6 +56,11 @@ class ConfiguredToolObservations:
         guard()
         return value
 
+    @property
+    def initial(self):
+        """The observation measured at startup and compared by every capture."""
+        return self._initial
+
     def capture(self, *, require_current):
         value = self._capture(require_current)
         if value != self._initial:

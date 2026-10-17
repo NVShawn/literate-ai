@@ -1,0 +1,37 @@
+{
+  "schema": "literate-ai/worker-template@1",
+  "platforms": {
+    "linux": {
+      "commands": ["git", "make", "node", "npm"],
+      "python": {"commands": ["python3"], "minimum": "3.11"},
+      "minimum_free_gib": 10
+    },
+    "macos": {
+      "commands": ["git", "make", "node", "npm"],
+      "python": {"commands": ["python3"], "minimum": "3.11"},
+      "minimum_free_gib": 10
+    },
+    "windows": {
+      "commands": [
+        "git",
+        "node",
+        "npm",
+        {
+          "name": "cl",
+          "vswhere": "VC\\Tools\\MSVC\\**\\bin\\Hostx64\\x64\\cl.exe"
+        },
+        {"name": "rustc", "extra_paths": ["C:\\ProgramData\\chocolatey\\bin"]},
+        {"name": "llvm-readobj", "extra_paths": ["C:\\Program Files\\LLVM\\bin"]},
+        {"name": "sh", "extra_paths": ["C:\\Program Files\\Git\\bin"]},
+        {
+          "name": "mkdir",
+          "fallback_paths": ["C:\\Program Files\\Git\\usr\\bin"]
+        }
+      ],
+      "python": {"commands": ["python"], "minimum": "3.11"},
+      "minimum_free_gib": 10,
+      "defender_exclusions": ["{workspace}"],
+      "defender_process_exclusions": ["{python}"]
+    }
+  }
+}

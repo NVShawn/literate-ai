@@ -9,6 +9,7 @@
     { "$ref": "urn:literate-ai:schema:v2:standard-make-command-profile" },
     { "$ref": "urn:literate-ai:schema:v2:standard-cmake-command-profile" },
     { "$ref": "urn:literate-ai:schema:v2:standard-cargo-command-profile" },
+    { "$ref": "urn:literate-ai:schema:v2:standard-mix-command-profile" },
     { "$ref": "urn:literate-ai:schema:v2:standard-npm-command-profile" },
     { "$ref": "urn:literate-ai:schema:v2:standard-python-wheel-command-profile" },
     { "$ref": "urn:literate-ai:schema:v2:standard-platform-command-profile" },
@@ -142,6 +143,18 @@
           ]
         },
         "binary": { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/portableName" }
+      }
+    },
+    "mix": {
+      "$id": "urn:literate-ai:schema:v2:standard-mix-command-profile",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema", "target", "toolchain", "manifest"],
+      "properties": {
+        "schema": { "const": "urn:literate-ai:schema:v2:standard-mix-command-profile" },
+        "target": { "const": "mix" },
+        "toolchain": { "const": "hex" },
+        "manifest": { "const": "source/mix-project.json" }
       }
     },
     "npm": {

@@ -12,6 +12,8 @@ metadata:
 
 # CI test plan
 
+For complex projects where minimum turnaround matters, prefer user-supplied runners over hosted CI/CD workers: the host running the coding CLI first, then aligned `workers.json` workers, and CI/CD only for platform and action cells those cannot cover or when the project marks CI mandatory. See `skills/agent/align-workers/SKILL.md`.
+
 Run `litai project ci-plan [PATH] [--mode shard|impact|compose]`. Python owns
 framework detection, the per-framework availability table, durations-seed vs
 native-partition notes, and fail-closed impact selection. Nested `shard` and

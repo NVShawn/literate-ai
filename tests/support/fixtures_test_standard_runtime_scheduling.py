@@ -49,6 +49,7 @@ class ScopedRuntimePorts(ContractEvidenceLifecyclePorts):
             original,
             provider_artifact_identities=scope.provider_artifact_identities,
             execution_authority=authority,
+            execution_authorized_at=now,
         )
         self.typed_acceptances[plan.component_revision.uri] = replace(
             self.typed_acceptances[plan.component_revision.uri], execution=result

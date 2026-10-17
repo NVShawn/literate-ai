@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from literate_ai.adapters.builders import BuildError, run_bounded_process
+from literate_ai.adapters.live_test_selection import configured_test_coding_cli
 from literate_ai.adapters.models import CodingCliError, lifecycle_driver_environment
 from literate_ai.contracts import (
     ContentIdentity,
@@ -478,6 +479,29 @@ class BoundExternalProjectLifecycleDriver:
             )
 
 
+def _configured_coding_cli(
+    project: LoadedProject,
+    driver: ProjectLifecycleDriver,
+    source_environment: Mapping[str, str],
+) -> str | None:
+    """Name the CLI the driver's live selection will pair with its model.
+
+    Resolve from only the keys the driver receives, so both read the same test
+    configuration; PATH order must not pick a CLI the configured model is not for.
+    """
+
+    if str(source_environment.get("CODING_CLI", "")).strip():
+        return None
+    environment = {
+        key: source_environment[key]
+        for key in driver.environment_keys
+        if key in source_environment
+    }
+    return configured_test_coding_cli(
+        environment=environment, project_root=project.root
+    )
+
+
 def bind_external_project_lifecycle_driver(
     project: LoadedProject,
     driver: ProjectLifecycleDriver,
@@ -490,6 +514,9 @@ def bind_external_project_lifecycle_driver(
             source_environment,
             driver.environment_keys,
             workspace=project.root,
+            default_coding_cli=_configured_coding_cli(
+                project, driver, source_environment
+            ),
         )
     except CodingCliError as exc:
         raise ProjectLifecycleDriverAdapterError(exc.code, exc.message) from exc

@@ -78,7 +78,10 @@ base. If your change touches anything under `src/literate_ai/` (or another decla
 implementation path), that pin goes stale and `make driver-review` (part of
 `make python-check`) fails with a message naming the drifted files.
 
-Fix it by re-pinning after you've reviewed what changed:
+Fix it by re-pinning after what changed has been reviewed. The review must not be
+the author's own: an independent agent reviewer that did not write the drift is
+sufficient, and no human is required. Name the reviewer and what it covered in the
+re-pin commit, and fix its confirmed findings first:
 
 ```
 make driver-review-record
@@ -173,7 +176,11 @@ qualifies all of Python 3.14. Full qualification also retains both Linux Python 
 Windows test shards and Windows packaging gates. `make release-check` remains
 unchanged. Use a manual CI run on a candidate branch when full platform evidence is needed
 before merging. Require full successful exact-commit qualification before release;
-a green ordinary PR smoke job is not a substitute.
+a green ordinary PR smoke job is not a substitute. Qualification means every platform
+and action in `literate.release.json` `qualification` passed on the exact commit,
+covered first by the release host, then by `workers.json` workers, and by CI only for
+what those cannot provide or when the policy makes CI mandatory. Windows workers run
+`scripts/windows_release_gate.py`, the same steps CI runs for Windows.
 
 macOS conformance partitions have a 120-minute step budget and the single-job Linux
 suites 180 minutes, leaving time within the job for

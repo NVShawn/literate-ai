@@ -103,7 +103,7 @@ class SharedArtifactCacheTests(unittest.TestCase):
 import sys
 from dataclasses import replace
 from pathlib import Path
-from tests.critical.test_shared_artifact_cache import _configuration, _manifest
+from tests.support.fixtures_test_shared_artifact_cache import _configuration, _manifest
 from literate_ai.adapters.cache.shared_artifacts import LocalSharedArtifactCache
 from literate_ai.contracts.identity import canonical_identity
 config = replace(_configuration(), maximum_bytes=6000)

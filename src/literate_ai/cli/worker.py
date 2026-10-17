@@ -97,6 +97,8 @@ def worker_from_args(args: Any) -> tuple[dict[str, object], int]:
         return _acknowledge_from_args(args)
     if args.worker_command == "verify-model":
         return _verify_model_from_args(args)
+    if args.worker_command == "align":
+        return _align_from_args(args)
     if args.worker_command != "probe":
         raise CliFailure("cli.usage", "a worker command is required")
     failures: list[WorkerCapabilityProbeError] = []
@@ -191,6 +193,80 @@ def _resolve_nvidia_from_args(args: Any) -> tuple[dict[str, object], int]:
         ) from exc
     except NvidiaStackError as exc:
         raise CliFailure(exc.code, exc.message) from exc
+
+
+def _align_from_args(args: Any) -> tuple[dict[str, object], int]:
+    """Inventory and optionally align workers with every declared expectation."""
+
+    import os
+
+    from literate_ai.adapters.live_test_selection import try_resolve_live_test_selection
+    from literate_ai.adapters.models.coding_cli import CodingCliError
+    from literate_ai.adapters.worker_alignment import (
+        TEMPLATE_FILE,
+        UserAlignment,
+        WorkerAligner,
+        WorkerAlignmentError,
+        WorkerTemplate,
+    )
+    from literate_ai.projects import ProjectError, discover_project
+
+    try:
+        project = discover_project(Path.cwd())
+        catalog = load_execution_worker_catalog(
+            resolve_worker_config_path(explicit=args.worker_config)
+        )
+        selected = (
+            tuple(catalog.worker(item) for item in args.worker_id)
+            if args.worker_id
+            else catalog.workers
+        )
+        workers = tuple(
+            worker
+            for worker in selected
+            if worker.endpoint is not None and worker.workspace is not None
+        )
+        default_template = project.root / TEMPLATE_FILE
+        # A project that declares no worker prerequisites still checks the user's
+        # own expectations; an explicitly named template must exist.
+        template = (
+            WorkerTemplate.load(Path(args.template))
+            if args.template
+            else WorkerTemplate.load(default_template)
+            if default_template.exists()
+            else WorkerTemplate({})
+        )
+        alignment = UserAlignment.load(
+            Path(args.alignment)
+            if args.alignment
+            else Path(resolve_user_paths(environment=os.environ).worker_alignment)
+        )
+        selection = try_resolve_live_test_selection(
+            project_root=project.root, ignore_environment_pins=True
+        )
+    except WorkerAlignmentError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+    except (
+        ProjectError,
+        UserPathError,
+        UserAssetPathError,
+        ExecutionDispatchAdapterError,
+        CodingCliError,
+        ValueError,
+    ) as exc:
+        raise CliFailure(
+            getattr(exc, "code", "worker_alignment.unavailable"),
+            getattr(exc, "message", str(exc)),
+        ) from exc
+    aligner = WorkerAligner(
+        template,
+        alignment,
+        coding_cli=None if selection is None else selection.coding_cli,
+        model=None if selection is None else selection.model,
+        cwd=project.root,
+    )
+    report = aligner.align(workers, apply=args.apply, check_model=not args.skip_model)
+    return report, 0 if report["aligned"] else 1
 
 
 def _verify_model_from_args(args: Any) -> tuple[dict[str, object], int]:

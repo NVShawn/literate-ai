@@ -2103,7 +2103,6 @@ def main() -> int:
             environment=os.environ,
             project_root=repository,
             require_opencode=args.coding_cli is None,
-            require_openai_api_key=False,
             ignore_environment_pins=True,
         )
     except CodingCliError as exc:

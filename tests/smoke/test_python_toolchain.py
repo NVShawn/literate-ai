@@ -12,6 +12,7 @@ from unittest.mock import patch
 
 from literate_ai.adapters.builders import BuildError, discover_python_toolchain
 from literate_ai.adapters.builders import python as python_builder_module
+from tests.support.symlinks import symlinks_followable
 
 
 def _install_python_alias(directory: Path, name: str) -> Path:
@@ -22,9 +23,11 @@ def _install_python_alias(directory: Path, name: str) -> Path:
         if os.name == "nt"
         else sys.executable
     )
-    try:
+    if symlinks_followable(directory):
         alias.symlink_to(runtime)
-    except OSError:
+    else:
+        # Copy where links cannot be created or followed (WinError 1463 over
+        # Windows OpenSSH), so discovery still sees a real interpreter.
         shutil.copy2(runtime, alias)
         alias.chmod(alias.stat().st_mode | 0o111)
     return alias

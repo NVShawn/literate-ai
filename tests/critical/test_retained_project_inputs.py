@@ -14,6 +14,7 @@ from literate_ai.contracts.retained_project import (
     RetainedProjectManifest,
     RetainedProjectMember,
 )
+from tests.support.symlinks import skip_unless_symlinks_followable
 
 
 class RetainedProjectInputTests(unittest.TestCase):
@@ -53,6 +54,7 @@ class RetainedProjectInputTests(unittest.TestCase):
 
     @unittest.skipUnless(hasattr(os, "symlink"), "Host has no symlink support")
     def test_links_and_redirected_parents_rejected(self):
+        skip_unless_symlinks_followable(self, self.base)
         (self.root / "src" / "link").symlink_to(self.root / "assets" / "image.bin")
         with self.assertRaises(ValueError):
             self.discover()

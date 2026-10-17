@@ -247,8 +247,8 @@ The strongest parts should be preserved:
 - the Component versus repository-only dependency distinction;
 - pre-build and post-build CycloneDX evidence preserving the managed graph;
 - source-derived specifications remaining drafts until explicit review; and
-- the clean boundary between Literate AI as derivation engine and MAC as agent and task
-  ledger.
+- the clean boundary between Literate AI as derivation engine and the agent and task
+  ledger (forge issues and reviews by default; an external ledger by override).
 
 ## Hard-constraint assessment
 

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from ._validation import fail, fields, string_tuple, string_value
 from .cpp_libraries import is_cpp_name, validate_cpp_header
+from .elixir_libraries import elixir_namespace, is_elixir_module, is_elixir_symbol
 from .executable_components._common import portable_name, tuple_value
 
 
@@ -18,7 +19,7 @@ class AuthoredLibraryImport:
 
     def __post_init__(self) -> None:
         string_value(self.language, "AuthoredLibraryImport.language")
-        if self.language not in {"python", "javascript", "rust", "cpp"}:
+        if self.language not in {"python", "javascript", "rust", "cpp", "elixir"}:
             fail("AuthoredLibraryImport.language", "unsupported library language")
         portable_name(self.capability, "AuthoredLibraryImport.capability")
         string_value(self.package, "AuthoredLibraryImport.package", max_length=255)
@@ -29,7 +30,16 @@ class AuthoredLibraryImport:
         )
         if re.fullmatch(package_pattern, self.package) is None:
             fail("AuthoredLibraryImport.package", "invalid native package name")
-        if self.language == "cpp":
+        if self.language == "elixir":
+            namespace = elixir_namespace(self.package)
+            if not is_elixir_module(self.module) or not (
+                self.module == namespace or self.module.startswith(namespace + ".")
+            ):
+                fail(
+                    "AuthoredLibraryImport.module",
+                    "must remain inside the package namespace",
+                )
+        elif self.language == "cpp":
             validate_cpp_header(self.module, label="AuthoredLibraryImport.module")
             if not self.module.startswith(self.package + "/"):
                 fail(
@@ -63,7 +73,9 @@ class AuthoredLibraryImport:
             not 1 <= len(symbols) <= 256
             or symbols != tuple(sorted(set(symbols)))
             or any(
-                not is_cpp_name(symbol)
+                not is_elixir_symbol(symbol)
+                if self.language == "elixir"
+                else not is_cpp_name(symbol)
                 if self.language == "cpp"
                 else re.fullmatch(identifier, symbol) is None
                 for symbol in symbols

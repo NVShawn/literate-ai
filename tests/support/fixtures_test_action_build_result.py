@@ -71,7 +71,7 @@ class ActionBuildResultTests(unittest.TestCase):
             self.worker.source_trees.validation_inputs(custody.candidate.tree_identity),
             custody.source_generation_identity,
             custody.identity,
-            execution.generation_plans[0],
+            transfer_fixture._leaf_generation_plan(execution),
             execution,
         )
         self.input_record = self.input.to_bytes()
@@ -84,7 +84,11 @@ class ActionBuildResultTests(unittest.TestCase):
             tool_bindings=tuple(self.worker.tool_bindings.values()),
         )
         intent = self.controller.create(
-            execution, execution.generation_plans[0], custody.candidate, (), ()
+            execution,
+            transfer_fixture._leaf_generation_plan(execution),
+            custody.candidate,
+            (),
+            (),
         )
         self.controller.accept_finalized_plan(
             intent, fixture.inputs.authorization, fixture.plan

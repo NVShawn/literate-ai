@@ -73,6 +73,32 @@ class ProjectGuidanceTests(unittest.TestCase):
         commands = {item["id"]: item["argv"] for item in result["argv"]}
         self.assertEqual(commands["ci-status"][4], revision)
 
+    def test_land_review_create_names_the_policy_target_branch(self) -> None:
+        for url, expected in (
+            (
+                "https://github.com/example/project.git",
+                ["gh", "pr", "create", "--base", "trunk"],
+            ),
+            (
+                "https://gitlab.com/example/project.git",
+                ["glab", "mr", "create", "--target-branch", "trunk"],
+            ),
+        ):
+            with self.subTest(url=url), tempfile.TemporaryDirectory() as directory:
+                root = self.project(
+                    Path(directory),
+                    writers=[],
+                    default_branch="trunk",
+                    pull_request_labels=[],
+                )
+                subprocess.run(
+                    ("git", "-C", str(root), "remote", "add", "origin", url),
+                    check=True,
+                )
+                result = project_guidance(root, operation="land")
+                commands = {item["id"]: item["argv"] for item in result["argv"]}
+                self.assertEqual(commands["review-create"], expected)
+
 
 if __name__ == "__main__":
     unittest.main()

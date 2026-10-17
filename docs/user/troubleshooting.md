@@ -155,9 +155,11 @@ It recognizes exactly four versioned rejection kinds:
   second compile-and-link canary succeeds with the same pinned compiler and linker.
 
 The driver discards the complete candidate and repeats that language variant in a new
-empty attempt root. It uses the unchanged recipe and does not send the previous source,
-tests, mismatch, compiler diagnostic, or verifier-only facts to the coding CLI. The
-limit is three total attempts.
+empty attempt root with the unchanged recipe. The coding CLI receives the earlier
+rejection records, including their bounded, redacted `diagnostic_excerpt` (compiler
+output, or the generated test's expected and observed values). It never receives the
+previous source or tests, or any verifier-only fact. The limit is three total
+attempts.
 
 If the canary also fails, the toolchain or environment remains a plausible cause and the
 builder returns terminal `builder.cpp_compile_failed`. Authentication, missing-tool,

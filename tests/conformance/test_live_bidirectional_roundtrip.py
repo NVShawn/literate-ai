@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from contextlib import nullcontext
 from pathlib import Path
+from unittest import mock
 
 from literate_ai.adapters.models import CodingCliSemanticComparator
 from literate_ai.cli import main
@@ -45,7 +46,7 @@ REQUIREMENTS = (
     / "acceptance"
     / "requirements.json"
 )
-LANGUAGES = ("python", "cpp", "rust", "javascript")
+LANGUAGES = ("python", "cpp", "rust", "javascript", "elixir")
 
 
 def selected_languages() -> tuple[str, ...]:
@@ -60,7 +61,7 @@ def selected_languages() -> tuple[str, ...]:
     ):
         raise ValueError(
             "LITERATE_AI_LIVE_ROUNDTRIP_LANGUAGES must be a unique comma-separated "
-            "subset of python, cpp, rust, javascript"
+            "subset of " + ", ".join(LANGUAGES)
         )
     return selected
 
@@ -337,7 +338,7 @@ class LiveBidirectionalRoundTripTests(unittest.TestCase):
         self.assertEqual(qualification["blockers"], [])
         return qualification
 
-    def test_four_languages_reach_semantic_and_regenerative_qualification(
+    def test_selected_languages_reach_semantic_and_regenerative_qualification(
         self,
     ) -> None:
         bazel = shutil.which("bazel") or shutil.which("bazelisk")
@@ -502,6 +503,21 @@ class LiveBidirectionalRoundTripTests(unittest.TestCase):
                     expected=expected,
                 )
             (root / "semantic-report.json").write_text(json.dumps(reports, indent=2))
+
+
+class LiveRoundTripSelectionTests(unittest.TestCase):
+    """Model-free checks of the live round-trip language selector."""
+
+    def test_elixir_is_an_explicit_roundtrip_selection(self) -> None:
+        with mock.patch.dict(
+            "os.environ", {"LITERATE_AI_LIVE_ROUNDTRIP_LANGUAGES": "elixir"}
+        ):
+            self.assertEqual(selected_languages(), ("elixir",))
+        with mock.patch.dict(
+            "os.environ", {"LITERATE_AI_LIVE_ROUNDTRIP_LANGUAGES": "elixir,elixir"}
+        ):
+            with self.assertRaises(ValueError):
+                selected_languages()
 
 
 if __name__ == "__main__":

@@ -32,6 +32,40 @@ IO.puts(JSON.encode!(%{version: System.version(), otp: System.otp_release(),
   root: List.to_string(:code.root_dir()), files: files}))
 """
 _VERSION = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:-[A-Za-z0-9.+-]+)?$")
+_VM_NAMES = frozenset({"beam.smp", "beam.smp.dll"})
+_MAX_SHEBANG_BYTES = 256
+
+
+def _shebang_interpreters(
+    launcher: Path, environment: Mapping[str, str]
+) -> tuple[Path, ...]:
+    """Return the absolute interpreter(s) a script launcher's shebang names.
+
+    Only ``#!/abs/interpreter [arg]`` and ``#!/abs/env name`` are accepted; any
+    other shebang is ambiguous and refused rather than guessed.
+    """
+    with launcher.open("rb") as stream:
+        head = stream.read(_MAX_SHEBANG_BYTES)
+    if not head.startswith(b"#!"):
+        return ()
+    line, newline, _ = head.partition(b"\n")
+    if not newline:
+        raise ValueError("launcher shebang exceeds its bound")
+    try:
+        tokens = line[2:].rstrip(b"\r").decode("utf-8").split()
+    except UnicodeDecodeError as exc:
+        raise ValueError("launcher shebang is not UTF-8") from exc
+    if not tokens or not Path(tokens[0]).is_absolute() or len(tokens) > 2:
+        raise ValueError("launcher shebang interpreter is ambiguous")
+    interpreter = Path(tokens[0])
+    if interpreter.name != "env":
+        return (interpreter,)
+    if len(tokens) != 2 or tokens[1].startswith("-"):
+        raise ValueError("launcher env shebang is ambiguous")
+    found = shutil.which(tokens[1], path=environment.get("PATH"))
+    if found is None:
+        raise ValueError("launcher env interpreter is unavailable")
+    return (interpreter, Path(found))
 
 
 def _constraint(value: tuple[int, ...] | None) -> None:
@@ -43,7 +77,12 @@ def _constraint(value: tuple[int, ...] | None) -> None:
         raise ValueError("Elixir version constraints must be numeric prefixes")
 
 
-def _probe(command: tuple[str, ...], environment: Mapping[str, str], timeout: float):
+def _probe(
+    command: tuple[str, ...],
+    environment: Mapping[str, str],
+    timeout: float,
+    launcher_command: tuple[str, ...] | None = None,
+):
     result = run_bounded_process(
         [*command, "-e", _PROBE],
         cwd=None,
@@ -89,7 +128,20 @@ def _probe(command: tuple[str, ...], environment: Mapping[str, str], timeout: fl
             raise ValueError("BEAM emulator binary is unavailable")
         if any(not isinstance(item, str) or not item for item in data["files"]):
             raise ValueError("invalid standard library paths")
-        paths = (Path(command[0]), vm, *(Path(item) for item in data["files"]))
+        launcher = Path((launcher_command or command)[0])
+        paths = (launcher, vm, *(Path(item) for item in data["files"]))
+        if launcher_command is not None:
+            paths += (Path(command[0]),)
+        # Elixir launches BEAM through a shell script (or a Windows batch file).
+        # Bind that interpreter as well; native dependency inspection must start
+        # from BEAM and the interpreter, never treat the script as a native image.
+        if os.name == "nt" and launcher.suffix.lower() in {".bat", ".cmd"}:
+            interpreter = shutil.which("cmd.exe", path=environment.get("PATH"))
+            if interpreter is None:
+                raise ValueError("batch interpreter is unavailable")
+            paths += (Path(interpreter),)
+        else:
+            paths += _shebang_interpreters(launcher, environment)
         bindings = tuple(
             (str(path.resolve(strict=True)), executable_file_digest(path))
             for path in paths
@@ -112,25 +164,67 @@ class ElixirToolchain:
     version_info: tuple[int, int, int]
     otp_version: str
     file_bindings: tuple[tuple[str, str], ...]
+    launcher_command: tuple[str, ...] | None = None
+
+    @property
+    def native_dependency_commands(self) -> tuple[tuple[str, ...], ...]:
+        """Native images by role: the one BEAM VM, then launch interpreters.
+
+        The script launcher and core ``.beam`` modules are retained byte
+        bindings, never native images. Ambiguous bindings are refused.
+        """
+
+        def canonical(path: str) -> str:
+            return os.path.normcase(os.path.realpath(path))
+
+        launcher = canonical((self.launcher_command or self.command)[0])
+        vms = []
+        interpreters = []
+        launchers = 0
+        for path, _ in self.file_bindings:
+            name = Path(path).name.lower()
+            if canonical(path) == launcher:
+                launchers += 1
+            elif name in _VM_NAMES:
+                vms.append(path)
+            elif not name.endswith(".beam"):
+                interpreters.append(path)
+        native = (*vms, *interpreters)
+        if (
+            len(vms) != 1
+            or launchers != 1
+            or len({canonical(path) for path in native}) != len(native)
+        ):
+            raise BuildError(
+                "builder.elixir_toolchain",
+                "Elixir bindings lack one unambiguous launcher and BEAM VM",
+            )
+        return tuple((path,) for path in native)
 
     @property
     def identity(self) -> str:
         return canonical_identity(self.to_dict()).uri
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        value = {
             "command": list(self.command),
             "version": self.version,
             "version_info": list(self.version_info),
             "otp_version": self.otp_version,
             "file_bindings": [list(item) for item in self.file_bindings],
         }
+        if self.launcher_command is not None:
+            value["launcher_command"] = list(self.launcher_command)
+        return value
 
     def require_unchanged(self, environment: Mapping[str, str] | None = None) -> None:
         configured = dict(os.environ if environment is None else environment)
         try:
             observed = _probe(
-                self.command, configured, DEFAULT_ELIXIR_VERSION_TIMEOUT_SECONDS
+                self.command,
+                configured,
+                DEFAULT_ELIXIR_VERSION_TIMEOUT_SECONDS,
+                self.launcher_command,
             )
         except BuildError as exc:
             raise BuildError(
@@ -184,7 +278,36 @@ def discover_elixir_toolchain(
             "Elixir command was not found on PATH",
         )
     command = (os.path.abspath(found), *command[1:])
-    version, parts, otp, bindings = _probe(command, configured, timeout_seconds)
+    launcher_command = None
+    if os.name == "nt" and Path(command[0]).suffix.lower() in {".bat", ".cmd"}:
+        # cmd.exe cannot faithfully transport multiline code or arbitrary JSON
+        # through elixir.bat. Invoke its native Erlang entry point directly for
+        # framework phases, preserving the selected Elixir library installation.
+        erl = shutil.which("erl.exe", path=configured.get("PATH"))
+        if erl is None:
+            raise BuildError(
+                "builder.elixir_toolchain_unavailable", "Erlang launcher is unavailable"
+            )
+        launcher_command = command
+        library = Path(command[0]).parent.parent / "lib"
+        command = (
+            # Ambient ERL_*/ELIXIR_ERL_OPTIONS are never baked into the pinned
+            # command, matching the overrides stripped from native phases.
+            os.path.abspath(erl),
+            "-noshell",
+            "-elixir_root",
+            str(library),
+            "-pa",
+            str(library / "elixir" / "ebin"),
+            "-s",
+            "elixir",
+            "start_cli",
+            "-extra",
+            *launcher_command[1:],
+        )
+    version, parts, otp, bindings = _probe(
+        command, configured, timeout_seconds, launcher_command
+    )
     if parts[: len(minimum_version)] < minimum_version or (
         required_version is not None
         and parts[: len(required_version)] != required_version
@@ -193,6 +316,8 @@ def discover_elixir_toolchain(
             "builder.elixir_version_unsupported",
             "Elixir does not satisfy the selected version constraints",
         )
-    toolchain = ElixirToolchain(command, version, parts, otp, bindings)
+    toolchain = ElixirToolchain(
+        command, version, parts, otp, bindings, launcher_command
+    )
     toolchain.require_unchanged(configured)
     return toolchain

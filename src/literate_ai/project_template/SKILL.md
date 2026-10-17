@@ -45,8 +45,14 @@ sent.
    `skills/agent/develop-in-production-workflow/staging/dev/survey-peer-work/SKILL.md`.
    When a user works directly through Literate AI or a supported coding agent, use
    `skills/agent/prompt-master/SKILL.md` or `litai prompt translate`. Do not apply
-   that translation to a MAC/task-ledger envelope: MAC owns its task-to-provider
-   translation.
+   that translation to a task envelope an external task system already translated
+   (`LITAI_EXTERNAL_TASK_ID`); that system owns its task-to-provider translation.
+   By default the forge hosting the repository that receives issues and pull
+   requests (GitHub or GitLab) is the project's tracker: report problems as issues,
+   submit changes as PRs/MRs against the target branch that
+   `litai project guidance --operation land` names, and coordinate with other agents
+   through issues. Another tracker or review system (for example Gerrit) is a project
+   or user override, never the default.
 2. Run `litai verify` for declared gates in one call. `litai rebuild` produces the
    artifact. `litai update` reconciles inherited and framework files; `litai reparent`
    changes parent authority. After an intentional non-editable framework-wheel upgrade,
@@ -73,8 +79,7 @@ sent.
 8. For a release, follow `skills/agent/release-project/SKILL.md` and
    `literate.release.json`. Land through
    `skills/agent/develop-in-production-workflow/staging/dev/land/SKILL.md`.
-   Packaging is `skills/agent/package-artifacts/SKILL.md`. MAC contracts are
-   `skills/agent/write-mac-project-contract/SKILL.md`. Use the installed CLI's
+   Packaging is `skills/agent/package-artifacts/SKILL.md`. Use the installed CLI's
    host-tool preflight; that framework-maintainer skill is not in this subset.
     Rendered frontend inspection is
     `skills/agent/verify-frontend-browser/SKILL.md` after execution authorization.

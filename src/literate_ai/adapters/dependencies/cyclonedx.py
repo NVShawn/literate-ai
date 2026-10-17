@@ -5,9 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
+from functools import cache
 
 from cyclonedx.schema import SchemaVersion
-from cyclonedx.validation.json import JsonStrictValidator
 
 from literate_ai.contracts.identity import (
     SCHEMA_PREFIX,
@@ -84,7 +84,13 @@ _REPOSITORY_RESOLUTION_PROPERTIES = (
     (LITERATE_REPOSITORY_SOURCE_CACHE_PROPERTY, "cache_record_identity"),
 )
 
-_STRICT_VALIDATOR = JsonStrictValidator(SchemaVersion.V1_7)
+
+@cache
+def _strict_validator():
+    # jsonschema compiles format grammars on import; load it only to validate.
+    from cyclonedx.validation.json import JsonStrictValidator
+
+    return JsonStrictValidator(SchemaVersion.V1_7)
 
 
 class CycloneDxBomError(RuntimeError):
@@ -182,7 +188,7 @@ def _validate_cyclonedx_bom_one(
         raise CycloneDxBomError("sbom.root-invalid", "CycloneDX BOM must be an object")
     _require_standard_header(document)
     try:
-        schema_errors = _STRICT_VALIDATOR.validate_str(
+        schema_errors = _strict_validator().validate_str(
             content.decode("utf-8"), all_errors=True
         )
         errors = tuple(schema_errors or ())

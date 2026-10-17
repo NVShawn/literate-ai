@@ -4,10 +4,10 @@ This is the reproducible authoring package for the current manager and engineeri
 document pair: a `presentation` member (Google Slides deck) and a `narrative` member
 (Google Doc), per `component://literate-ai/literate-ai-overview`'s declared realization.
 
-**1.1.0 edition.** The stable Google Workspace pair now contains this accepted
-scheduling/cache/package/native-acceptance edition; both members were refreshed in
-place and export-back verified. Later patch cuts on the `1.1.x` line keep these same
-published locations.
+**1.2.0 edition.** This package carries the published 1.2.0 edition (bounded candidate repair, cross-host action workers, Elixir/Mix,
+forge coordination, and the fifteen-gate release check on the 1.1 scheduler/cache/
+package/native-acceptance foundation). The stable Google Workspace pair below was refreshed in place to this edition and
+export-back verified on 2026-10-11. Later patch cuts on the `1.2.x` line keep these same published locations.
 
 Published presentation: [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
 
@@ -45,8 +45,9 @@ current edition also carries the implemented doctor/status/onboard operator fron
 explicit brownfield authority stages, native SDK and compiled-library custody, retained
 source lifecycle progress, exact worker-routing/remote-receipt slices, bounded action-DAG
 scheduling, shared-cache authority, real local Debian packages, native CLI and gRPC
-acceptance, and repository-owned worktree placement. Local acceptance and the state of
-the 1.1.0 publication receipt are recorded in
+acceptance, repository-owned worktree placement, bounded candidate repair, cross-host
+action workers, native Mix builds, and forge-default coordination. Local acceptance and
+the state of the 1.2.0 publication receipt are recorded in
 [the QA ledger](qa-ledger.md).
 
 Visual inputs: [cover](assets/cover-hero.png),

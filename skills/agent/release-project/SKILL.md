@@ -19,6 +19,12 @@ Follow nested deltas instead of inventing Git or CI: `backport/`,
 `notify-descendants/`. Landing on the trunk is
 `develop-in-production-workflow/staging/dev/land/`.
 
+When the release policy declares `qualification`, run `litai worker align --all`
+first, then `litai release qualify`. It covers each platform and action on this
+host, then on aligned `workers.json` workers, and uses CI only for what those
+cannot cover or when CI is mandatory. For complex projects this is the
+fastest-turnaround path; do not wait on hosted CI that the record makes optional.
+
 1. Follow `ci-status/SKILL.md`, inspect the projected plan, and follow
    `skills/agent/associate-release-jira/SKILL.md` for this major/minor.
    Begin with `litai release contributions sweep`: inspect every open issue and

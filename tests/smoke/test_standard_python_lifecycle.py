@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
 import sys
+import tempfile
 import unittest
 from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
@@ -263,3 +266,60 @@ class StandardPythonLifecycleTests(unittest.TestCase):
             self.ports.execution_command(self.plan, output.exports)
         with self.assertRaises(LocalStandardLifecycleError):
             self.ports.build(self.plan, ())
+
+
+class PinnedPipWheelSelectionTests(unittest.TestCase):
+    """Repacked bundled pip wheels skip, except where the release gate requires them."""
+
+    def test_bundled_wheel_must_match_the_pinned_digest(self):
+        from tests.support import pip_wheel
+
+        with tempfile.TemporaryDirectory() as temporary:
+            package = Path(temporary) / "ensurepip"
+            (package / "_bundled").mkdir(parents=True)
+            wheel = package / "_bundled" / pip_wheel.PINNED_PIP_WHEEL
+            wheel.write_bytes(b"repacked distributor wheel")
+            environment = {
+                key: value
+                for key, value in os.environ.items()
+                if key not in {"LITAI_TEST_PIP_WHEEL", "LITAI_REQUIRE_PINNED_PIP_WHEEL"}
+            }
+            with (
+                mock.patch.dict(os.environ, environment, clear=True),
+                mock.patch.object(
+                    pip_wheel.ensurepip, "__file__", str(package / "__init__.py")
+                ),
+            ):
+                with self.assertRaisesRegex(unittest.SkipTest, "different bytes"):
+                    pip_wheel.pinned_pip_wheel()
+                pinned = replace(
+                    PIP_INSTALLER,
+                    sha256=hashlib.sha256(wheel.read_bytes()).hexdigest(),
+                )
+                with mock.patch.object(pip_wheel, "PIP_INSTALLER", pinned):
+                    self.assertEqual(pip_wheel.pinned_pip_wheel(), wheel.resolve())
+                # The release gate refuses to pass these tests by skipping.
+                with (
+                    mock.patch.dict(
+                        os.environ, {"LITAI_REQUIRE_PINNED_PIP_WHEEL": "1"}
+                    ),
+                    self.assertRaisesRegex(AssertionError, "different bytes"),
+                ):
+                    pip_wheel.pinned_pip_wheel()
+                # An explicit operator wheel must carry the pinned digest.
+                with (
+                    mock.patch.dict(os.environ, {"LITAI_TEST_PIP_WHEEL": str(wheel)}),
+                    self.assertRaisesRegex(AssertionError, "is not the PyPI"),
+                ):
+                    pip_wheel.pinned_pip_wheel()
+                wheel.unlink()
+                with self.assertRaisesRegex(unittest.SkipTest, "does not bundle"):
+                    pip_wheel.pinned_pip_wheel()
+                # An interpreter without the pinned version still skips in the gate.
+                with (
+                    mock.patch.dict(
+                        os.environ, {"LITAI_REQUIRE_PINNED_PIP_WHEEL": "1"}
+                    ),
+                    self.assertRaisesRegex(unittest.SkipTest, "does not bundle"),
+                ):
+                    pip_wheel.pinned_pip_wheel()

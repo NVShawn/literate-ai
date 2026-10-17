@@ -33,6 +33,7 @@ emits versioned JSON. `release-project` wraps `litai release`; nested deltas
 wrap backport, evidence, advance, CI status, published verify, and descendant
 notify. `package-artifacts` wraps `litai package`. `ci-test-plan` wraps
 `litai project ci-plan`. `survey-peer-work` wraps `litai project peer-work`.
+`align-workers` wraps `litai worker align`.
 Mutagenic Jira/Slack/Outlook notify is `litai` itself when the operator
 catalog lists those servers; nested skills wrap that CLI and must not
 re-post the same envelopes.

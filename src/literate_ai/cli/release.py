@@ -28,6 +28,7 @@ from literate_ai.project_releases import (
     merge_release_pull_request,
     prepare_release,
     publish_release,
+    qualify_release,
     release_state,
     set_release_state,
     verify_published_release,
@@ -197,6 +198,8 @@ def _release_from_args_body(args: argparse.Namespace) -> tuple[dict[str, Any], i
                 ),
                 0,
             )
+        if args.release_command == "qualify":
+            return qualify_release(Path(args.project), output=Path(args.output)), 0
         if args.release_command == "rc":
             return (
                 create_release_candidate(
@@ -204,6 +207,9 @@ def _release_from_args_body(args: argparse.Namespace) -> tuple[dict[str, Any], i
                     version=args.version,
                     actor=args.actor,
                     authorize_external_write=args.authorize_external_write,
+                    qualification=(
+                        Path(args.qualification) if args.qualification else None
+                    ),
                 ),
                 0,
             )
@@ -226,6 +232,9 @@ def _release_from_args_body(args: argparse.Namespace) -> tuple[dict[str, Any], i
                     number=args.number,
                     actor=args.actor,
                     authorize_external_write=args.authorize_external_write,
+                    qualification=(
+                        Path(args.qualification) if args.qualification else None
+                    ),
                 ),
                 0,
             )
@@ -399,9 +408,10 @@ def add_release_parser(commands: argparse._SubParsersAction) -> None:
         choices=sorted(RELEASE_TARGETS),
         default=None,
         help=(
-            "explicit release-gate execution target; overrides the project's "
-            "declared ci_targets preference, which itself overrides today's "
-            "default of running the gate on the invoking machine "
+            "explicit release-gate execution target; overrides the default, "
+            "which is tiered when the release policy declares qualification "
+            "(this host, then workers, then CI), else the project's declared "
+            "ci_targets preference, else the invoking machine "
             "(gitlab is recognized but not yet supported)"
         ),
     )
@@ -491,6 +501,28 @@ def add_release_parser(commands: argparse._SubParsersAction) -> None:
     )
     rc.add_argument("--actor", default=None, help="assert authenticated GitHub login")
     rc.add_argument("--authorize-external-write", action="store_true")
+    rc.add_argument(
+        "--qualification",
+        default=None,
+        help=(
+            "exact-HEAD record from `litai release qualify`; when its host and "
+            "worker tiers cover every platform and action, CI is not required"
+        ),
+    )
+
+    qualify = release_commands.add_parser(
+        "qualify",
+        help=(
+            "cover the declared platform x action matrix at exact HEAD, "
+            "preferring this host, then workers.json workers, then CI"
+        ),
+    )
+    qualify.add_argument("--project", default=".")
+    qualify.add_argument(
+        "--output",
+        default="_build/release/qualification.json",
+        help="qualification record (default: _build/release/qualification.json)",
+    )
 
     state = release_commands.add_parser("state", help="inspect or set release state")
     state_commands = state.add_subparsers(dest="state_command")
@@ -516,6 +548,14 @@ def add_release_parser(commands: argparse._SubParsersAction) -> None:
         "--actor", default=None, help="assert authenticated GitHub login"
     )
     merge_pr.add_argument("--authorize-external-write", action="store_true")
+    merge_pr.add_argument(
+        "--qualification",
+        default=None,
+        help=(
+            "record from `litai release qualify` for the PR head; when it covers "
+            "every platform and action without CI, pending checks do not block"
+        ),
+    )
     backport.add_argument("--project", default=".")
     backport.add_argument(
         "--to", required=True, help="release branch to cherry-pick onto"

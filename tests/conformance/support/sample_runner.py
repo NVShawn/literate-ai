@@ -7,6 +7,7 @@ import fnmatch
 import hashlib
 import json
 import os
+import re
 import shutil
 import stat
 import subprocess
@@ -247,7 +248,7 @@ from literate_ai.contracts import (
     rebuild_project_authority_identity,
     source_cache_model_selector,
 )
-from literate_ai.diagnostics import report_progress
+from literate_ai.diagnostics import redact_secrets, report_progress
 from literate_ai.evidence_ledger import (
     EvidenceNode,
     attach_run,
@@ -377,11 +378,67 @@ _RETRYABLE_MODEL_STAGE_CONTRACT_FAILURE_CODES = frozenset(
         "coding_cli.generated_cpp_bazel_output_collision",
         "coding_cli.generated_cpp_bazel_hdrs_unsupported",
         "coding_cli.generated_cpp_bazel_workspace_include_unsupported",
+        "coding_cli.generated_rust_bazel_crate_root_ambiguous",
         "generated_tests.acceptance_signature_missing",
         "generated_tests.duplicate_arguments",
         "generated_tests.expected_result_shape_mismatch",
     }
 )
+# A rejected candidate carries a bounded, redacted tail of its build or test
+# diagnostic so evidence and the next attempt's repair feedback show the actual
+# error (CANDIDATE-DIAG-001). Builders already bound their output to ~4000 bytes.
+_CANDIDATE_DIAGNOSTIC_EXCERPT_BYTES = 4096
+_BUILDER_DETAIL_BYTES = 4000
+# Directory part of an absolute POSIX, drive-letter, or UNC host path, also when
+# glued to a compiler flag (`-I/opt/x`, `/Fo:C:\x`); the basename stays so
+# `.../source/main.cpp:12: error` reads as `<host-path>/main.cpp:12: error`.
+# Directories left under an exact `<host-path>` root (`/tmp` on Linux) collapse too.
+_ABSOLUTE_HOST_PATH_DIRECTORY = re.compile(
+    r"(?:(?<![\w.~:/\\>-])|(?<=-[IiLFo])|(?<=/F[eoa]:))"
+    r"(?:\\\\[^\s\\/]+[\\/]|[A-Za-z]:[\\/]|/|<host-path>[\\/])"
+    r"(?:[^\s:'\"\\/<>|]+[\\/])+"
+)
+_FILE_URL = re.compile(r"file://[^\s'\"<>]*")
+
+
+def _host_path_roots() -> tuple[tuple[str, str], ...]:
+    """Exact host roots, longest first; they may contain spaces a regex cannot see."""
+
+    roots: dict[str, str] = {}
+    for value, label in (
+        (str(Path(__file__).resolve().parents[3]), "<repository>"),
+        (str(Path.cwd()), "<host-path>"),
+        (tempfile.gettempdir(), "<host-path>"),
+        (str(Path.home()), "<home>"),
+    ):
+        for spelling in {value, value.replace("\\", "/")}:
+            if len(spelling) > 3:
+                roots.setdefault(spelling, label)
+    return tuple(sorted(roots.items(), key=lambda item: -len(item[0])))
+
+
+def _candidate_diagnostic_excerpt(text: str, *, cut_head: bool = False) -> str:
+    """Bounded, secret- and host-path-redacted tail of one rejection diagnostic.
+
+    ``cut_head`` marks text whose producer already kept only its tail; the first
+    line may then be a fragment of a path or secret that redaction cannot
+    recognize, so it is dropped.
+    """
+
+    if cut_head:
+        text = text.partition("\n")[2]
+    redacted = redact_secrets(text)
+    for root, label in _host_path_roots():
+        redacted = redacted.replace(root, label)
+    user = os.environ.get("USER") or os.environ.get("USERNAME")
+    if user and len(user) > 2:
+        redacted = re.sub(rf"(?<![\w-]){re.escape(user)}(?![\w-])", "<user>", redacted)
+    redacted = _FILE_URL.sub("file://<host-path>", redacted)
+    redacted = _ABSOLUTE_HOST_PATH_DIRECTORY.sub("<host-path>/", redacted)
+    tail = redacted.encode("utf-8")[-_CANDIDATE_DIAGNOSTIC_EXCERPT_BYTES:]
+    return tail.decode("utf-8", errors="ignore")
+
+
 _GENERATED_SOURCE_BUILD_FAILURE_CODES = frozenset(
     {
         "builder.bazel_analyze_failed",
@@ -460,10 +517,19 @@ class _GeneratedBehaviorMismatch(SampleFailure):
         self.expected_result_identity = canonical_identity(expected_result).uri
         self.observed_result_identity = canonical_identity(observed_result).uri
         self.rejection_kind = "generated-test-behavior-mismatch"
+        # Both values come from the candidate's own generated test and binary, so
+        # showing them to repair discloses no verifier-only expectation.
         self.case_evidence = {
             "case_id": self.case_id,
             "expected_result_identity": self.expected_result_identity,
             "observed_result_identity": self.observed_result_identity,
+            "diagnostic_excerpt": _candidate_diagnostic_excerpt(
+                json.dumps(
+                    {"expected": expected_result, "observed": observed_result},
+                    sort_keys=True,
+                    default=str,
+                )
+            ),
         }
         super().__init__(
             "compiled generated candidate disagreed with its generated expectation "
@@ -3786,12 +3852,19 @@ def _generated_candidate_rejection(
         "build_failure_code": build_failure_code,
         "candidate_tree_identity": source_identities["candidate_tree_identity"],
         "source_bundle_digest": source_identities["source_bundle_digest"],
+        "diagnostic_excerpt": _candidate_diagnostic_excerpt(
+            str(cause),
+            # Builders keep the last 4000 bytes of output; a message that long was
+            # cut, so its first line may be a partial path or secret.
+            cut_head=len(str(cause).encode("utf-8")) >= _BUILDER_DETAIL_BYTES,
+        ),
     }
     return {
         **common,
         "rejection_kind": "generated-source-build-rejected",
         "build_failure_code": build_failure_code,
         **source_identities,
+        "diagnostic_excerpt": diagnostic["diagnostic_excerpt"],
         "diagnostic_identity": canonical_identity(diagnostic).uri,
     }
 
@@ -7704,7 +7777,9 @@ def run_sample(
                     raise SampleFailure(str(exc)) from exc
             executions_list.append(portfolio_execution)
             continue
-        if sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES:
+        if sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES or variant.languages == (
+            "elixir",
+        ):
             with _sample_evidence_phase(
                 evidence_run=attach_run(),
                 sample_id=sample_id,
@@ -9235,8 +9310,10 @@ def plan_derivation_manifest(
                 keys.extend(key for key, _lock in planned_nodes)
                 lock_identities.update(lock for _key, lock in planned_nodes)
                 continue
-            if sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES or (
-                sample_id == "service-stack" and variant.variant_id == "python"
+            if (
+                variant.languages == ("elixir",)
+                or sample_id in _STANDARD_SINGLE_COMPONENT_SAMPLES
+                or (sample_id == "service-stack" and variant.variant_id == "python")
             ):
                 planned_nodes = _plan_standard_sample_derivations(
                     sample_root=sample_root,

@@ -199,7 +199,13 @@ def directory_export_bytes(root: Path) -> bytes:
     if not root.is_dir():
         raise ValueError("directory artifact export is empty")
     files = []
-    for path in sorted(root.rglob("*")):
+    # The reader's canonical member order is the relative POSIX string order.
+    # Path ordering is per-component and case-insensitive on Windows, so it
+    # would emit exports (for example ``lib/x`` before ``lib.rs``) that the
+    # shared reader rejects.
+    for path in sorted(
+        root.rglob("*"), key=lambda path: path.relative_to(root).as_posix()
+    ):
         if path_is_link_or_reparse(path):
             raise ValueError("artifact exports cannot contain links")
         if path.is_dir():
@@ -253,7 +259,10 @@ def require_transported_library_package(
     blob = product.artifact_export.blob
     if len(content) != blob.size or hashlib.sha256(content).hexdigest() != blob.digest:
         raise ValueError("transported library package differs from the accepted blob")
-    files = sorted(path for path in artifact.rglob("*") if path.is_file())
+    files = sorted(
+        (path for path in artifact.rglob("*") if path.is_file()),
+        key=lambda path: path.relative_to(artifact).as_posix(),
+    )
     if executable_by_path is not None and set(executable_by_path) != {
         path.relative_to(artifact).as_posix() for path in files
     }:

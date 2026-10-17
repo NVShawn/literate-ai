@@ -6,10 +6,11 @@ import sys
 import tempfile
 import unittest
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from unittest.mock import patch
 
+from literate_ai.adapters.accept_handoff import CompletedStagesAcceptHandoff
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
@@ -20,6 +21,7 @@ from literate_ai.adapters.action_hardware import (
     probe_command_hardware,
 )
 from literate_ai.adapters.builders._process import run_bounded_process
+from literate_ai.adapters.command_acceptor import CommandComponentAcceptor
 from literate_ai.adapters.command_builder import CommandComponentBuilder
 from literate_ai.adapters.command_executor import CommandComponentExecutor
 from literate_ai.adapters.command_indexer import CommandGenerationIndexer
@@ -65,6 +67,7 @@ from literate_ai.action_worker import main
 from literate_ai.adapters.action_build_worker import ConfiguredBuildWorker
 from literate_ai.adapters.action_test_worker import ConfiguredTestWorker
 from literate_ai.adapters.action_execute_worker import ConfiguredExecuteWorker
+from literate_ai.adapters.action_accept_worker import ConfiguredAcceptWorker
 from literate_ai.adapters.builders.python import discover_python_toolchain
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
 from literate_ai.contracts import canonical_identity
@@ -99,14 +102,42 @@ execute_worker = ConfiguredExecuteWorker(
     execute_launcher, (LocalComponentToolBinding(sys.executable),),
     environment=dict(os.environ),
 )
+accept_code = os.environ['ACCEPT_CHILD']
+accept_launcher = LocalComponentToolBinding(
+    sys.executable, ('-c', accept_code),
+    authority_identity=canonical_identity({'runtime':runtime.identity,'code':accept_code}),
+    _authority_guard=runtime.require_unchanged,
+)
+accept_worker = ConfiguredAcceptWorker(accept_launcher, environment=dict(os.environ))
 raise SystemExit(main(
+    accept_worker=accept_worker,
     build_worker=worker, test_worker=test_worker, execute_worker=execute_worker,
 ))
 """
 
 
+_ACCEPT_CHILD = """
+import os, shutil
+from pathlib import Path
+from contextlib import contextmanager
+from literate_ai.accept_worker import main
+from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
+@contextmanager
+def factory(build, registry, recorder):
+    ports = LocalStandardLifecyclePorts(
+        source_trees=registry,
+        object_root=Path(os.environ['LITAI_ACCEPT_WORKSPACE'])/'objects',
+        contracts=(build.inputs.contract,), tool_bindings=(), command_phases=(),
+    )
+    ports.retain_evidence_with(recorder)
+    try: yield ports
+    finally: shutil.rmtree(ports.object_root)
+raise SystemExit(main(runtime_factory=factory))
+"""
+
+
 class CommandBuildWorkerTests(unittest.TestCase):
-    def test_data_only_controller_dispatches_real_build_test_and_execute(self):
+    def test_data_only_controller_dispatches_real_build_test_execute_and_accept(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
             snapshot, execution = _fixture()
@@ -184,6 +215,7 @@ class CommandBuildWorkerTests(unittest.TestCase):
                 environment=tuple(
                     ExecutionWorkerEnvironment(name, name, True)
                     for name in (
+                        "ACCEPT_CHILD",
                         "BUILD_CHILD",
                         "CHAIN_CONTRACTS",
                         "CHAIN_PROVIDERS",
@@ -198,6 +230,7 @@ class CommandBuildWorkerTests(unittest.TestCase):
             environment = dict(
                 os.environ,
                 PYTHONPATH=str(Path(__file__).resolve().parents[2] / "src"),
+                ACCEPT_CHILD=_ACCEPT_CHILD,
                 BUILD_CHILD=_CHILD,
                 EXECUTE_CHILD=_CHILD.replace(
                     "literate_ai.build_worker", "literate_ai.execute_worker"
@@ -225,7 +258,7 @@ class CommandBuildWorkerTests(unittest.TestCase):
                 phase=LifecycleActionKind.INDEX,
                 source_handoff="filesystem-cas",
                 target_profile="host",
-                maximum_hardware_age=ACTION_TEST_DEADLINE,
+                maximum_hardware_age=ACTION_TEST_DEADLINE + timedelta(minutes=5),
                 cwd=root,
                 environment=environment,
             )
@@ -304,6 +337,19 @@ class CommandBuildWorkerTests(unittest.TestCase):
                 handoff_for=CompletedBuildExecuteHandoff(builder, indexer, ports),
             )
 
+            acceptor = CommandComponentAcceptor(
+                indexer,
+                admission,
+                ports,
+                handoff_for=CompletedStagesAcceptHandoff(
+                    indexer,
+                    ports,
+                    execution_input_for=CompletedBuildExecuteHandoff(
+                        builder, indexer, ports
+                    ),
+                ),
+            )
+
             def checked(*args, **kwargs):
                 result = run_bounded_process(*args, **kwargs)
                 self.assertEqual(result.returncode, 0, result.stderr)
@@ -343,6 +389,16 @@ class CommandBuildWorkerTests(unittest.TestCase):
                     ports._execution_evidence[execution_result.identity.uri],
                     execution_result,
                 )
+                acceptor.retain_execution_provider_evidence(plan, scope, ())
+                with patch.object(
+                    ports, "accept", side_effect=AssertionError("local ACCEPT")
+                ):
+                    accepted = acceptor.accept(
+                        plan, test_result.identity, execution_result.identity
+                    )
+                self.assertEqual(accepted.build.identity, output.build_identity)
+                self.assertEqual(accepted.generated_tests, test_result)
+                self.assertEqual(accepted.execution, execution_result)
             self.assertEqual(ports.tool_bindings, {})
             self.assertFalse(ports.locked_command_authority_is_current())
             self.assertEqual(

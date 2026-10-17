@@ -1341,7 +1341,7 @@ Dependencies: `OPS-300`.
 - [ ] Hash-chain or Merkle-bind events and retain incomplete crashes as non-releasable.
 - [ ] Keep journals outside spec/source identity and expose a separately redacted
   customer explanation.
-- [ ] Keep optional MAC/task correlation outside semantic generation/cache identities.
+- [ ] Keep optional issue/task correlation outside semantic generation/cache identities.
 
 Acceptance evidence uses secret canaries and proves every forward, inverse, repair, and
 repository-planning model call appears in a complete journal.
@@ -1720,8 +1720,9 @@ flowchart LR
 - Do not make source deletion a qualification side effect.
 - Do not make Bazel, CodeGraph, or a particular coding CLI universal domain invariants.
 - Do not claim complete dynamic dependency knowledge without a bounded observer.
-- Do not build a task/agent ledger inside Literate AI; integrate with MAC through
-  external correlation and evidence references.
+- Do not build a task/agent ledger inside Literate AI; use the forge's issues and
+  reviews by default, or an external ledger by override, through correlation and
+  evidence references.
 - Do not retain every historical generated test. Retain compact execution history and
   regenerate the current suite at major rebuilds.
 - Do not promise deterministic LLM output. Promise exact inputs, bounded attempts,

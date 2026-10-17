@@ -12,6 +12,7 @@ from pathlib import Path
 
 from literate_ai.cli import main
 from tests.support.root_parent_adapter import root_parent_for_fixture_project
+from tests.support.symlinks import skip_unless_symlinks_followable
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CATALOG_FIELDS = (
@@ -438,6 +439,7 @@ class ProjectCliTests(unittest.TestCase):
             subroot = target / "skills" / "specification-to-source"
             if subroot.exists():
                 shutil.rmtree(subroot)
+            skip_unless_symlinks_followable(self, root)
             try:
                 subroot.symlink_to(external, target_is_directory=True)
             except OSError as exc:

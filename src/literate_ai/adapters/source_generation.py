@@ -60,6 +60,7 @@ from literate_ai.generated_tests import (
 )
 from literate_ai.storage import FileSystemCAS, StorageError
 
+from .generation_workspace import GenerationWorkspaceBinding
 from .retained_source import RetainedSourceInput
 
 _MANIFEST_RECORD_SCHEMA = "literate-ai/generated-source-manifest-record@1"
@@ -242,6 +243,7 @@ class CachedCodingCliSourceGenerationRunner:
         invocation_provider: SourceGenerationInvocationProvider,
         assets: tuple[AuthoredBinaryAsset, ...] = (),
         retained_source: RetainedSourceInput | None = None,
+        workspace_binding: GenerationWorkspaceBinding | None = None,
     ) -> None:
         if not isinstance(generator, CachedCodingCliSourceGenerator):
             raise TypeError("generator must be a CachedCodingCliSourceGenerator")
@@ -258,6 +260,11 @@ class CachedCodingCliSourceGenerationRunner:
                 "source_generation.indexing_enabled",
                 "source-only generation requires coding-CLI source indexing to be off",
             )
+        if workspace_binding is not None and not isinstance(
+            workspace_binding, GenerationWorkspaceBinding
+        ):
+            raise TypeError("workspace binding must be privately admitted")
+        self.workspace_binding = workspace_binding
         self.generator = generator
         self.retained_source = retained_source
         self.cas = cas
@@ -371,7 +378,10 @@ class CachedCodingCliSourceGenerationRunner:
                 "source_generation.recipe_invalid",
                 "prepared node recipe must be a GenerationRecipe",
             )
-        self._require_fresh_workspace(prepared)
+        if self.workspace_binding is None:
+            self._require_fresh_workspace(prepared)
+        else:
+            self.workspace_binding.require_current(prepared, fresh=True)
         invocation = self.invocation_provider(prepared)
         if not isinstance(invocation, CodingCliSourceGenerationInvocation):
             raise CachedCodingCliSourceGenerationError(
@@ -379,6 +389,8 @@ class CachedCodingCliSourceGenerationRunner:
                 "invocation provider must return a typed exact invocation",
             )
         self._require_invocation_matches_node(prepared, invocation)
+        if self.workspace_binding is not None:
+            self.workspace_binding.require_current(prepared, fresh=True)
         if self.retained_source is not None:
             key = self.planned_cache_key(prepared)
             if self.assets_by_revision:
@@ -400,6 +412,8 @@ class CachedCodingCliSourceGenerationRunner:
                 with destination.open("xb") as stream:
                     stream.write(content)
             self.retained_source.require_unchanged()
+            if self.workspace_binding is not None:
+                self.workspace_binding.require_current(prepared)
             self._candidate_cache_keys[output.candidate_identity.uri] = key
             return output
         stage_request = invocation.stage_request
@@ -410,6 +424,8 @@ class CachedCodingCliSourceGenerationRunner:
             stage_request=stage_request,
             bounded_prompt=bounded_prompt,
         )
+        if self.workspace_binding is not None:
+            self.workspace_binding.require_current(prepared, fresh=True)
         generation = self.generator.generate(
             prepared.recipe,
             output_root=Path(prepared.workspace.locator),
@@ -417,12 +433,16 @@ class CachedCodingCliSourceGenerationRunner:
             stage_request=stage_request,
             bounded_prompt=bounded_prompt,
         )
+        if self.workspace_binding is not None:
+            self.workspace_binding.require_current(prepared)
         output = self._record(
             prepared,
             invocation,
             generation,
             planned_request_identity=cache_key.request_identity,
         )
+        if self.workspace_binding is not None:
+            self.workspace_binding.require_current(prepared)
         self._candidate_cache_keys[output.candidate_identity.uri] = cache_key
         self._pending_candidates[output.candidate_identity.uri] = (
             output.candidate,

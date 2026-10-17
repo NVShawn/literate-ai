@@ -106,6 +106,7 @@ lists the per-project fields and their defaults.
 - [Accepted native CLI Component acceptance](decisions/0047-native-cli-component-acceptance.md)
 - [Accepted retained-project Standard lifecycle](decisions/0048-retained-project-standard-lifecycle.md)
 - [Accepted repository succession](decisions/0049-repository-succession.md)
+- [Accepted forge issues and reviews as the default tracker](decisions/0050-forge-issues-and-reviews-are-the-default-tracker.md)
 - [User-directed work loop](architecture/user-directed-work-loop.md)
 - [Project release protocol](architecture/project-releases.md)
 - [Skill architecture](architecture/skills.md)

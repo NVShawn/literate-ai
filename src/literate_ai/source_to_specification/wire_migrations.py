@@ -12,8 +12,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from jsonschema import Draft202012Validator
-from jsonschema.exceptions import SchemaError, ValidationError
 from referencing import Registry, Resource
 from referencing.exceptions import Unresolvable
 
@@ -234,6 +232,10 @@ def _wire_schema_registry() -> Registry:
 def _validate_wire_document(
     document: Mapping[str, Any], schema_uri: str, *, code: str
 ) -> None:
+    # jsonschema compiles format grammars on import; load it only to validate.
+    from jsonschema import Draft202012Validator
+    from jsonschema.exceptions import SchemaError, ValidationError
+
     registry = _wire_schema_registry()
     try:
         schema = registry.contents(schema_uri)

@@ -1,47 +1,173 @@
 {
-  "model": "mlx-community/Kokoro-82M-bf16",
-  "snapshot": "a71e4d38b236d968966a2002c4c895dbd12b1c3c",
+  "model": "mlx-community/Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit",
+  "snapshot": "Qwen3-TTS-12Hz-1.7B-CustomVoice-4bit@f35faf19b0cc",
   "voices": {
-    "litai": "af_heart",
-    "sam": "am_fenrir"
+    "litai": "Serena",
+    "sam": "Ryan"
   },
   "mlx_audio": "0.5.7",
   "synthetic": true,
   "cloud_speech": false,
-  "story_sha256": "87243f221f68a1003652f71f69bcb6cd815fec041f4239bc952af9c4b69c7b48",
-  "producer_sha256": "cbdb58c3dad625a8888f21fc5c080ced8fa2a3a0efcfed8feca0ca1ff44d0db1",
+  "story_sha256": "4de0a21fbdf3470e49f8f6375f757d1a46756ff0482d84133bdb73aae4e6702d",
+  "producer_sha256": "a00b07d84d8a884048b790989c7ef7f653b775e0fbd2434e9147603da5243c4d",
   "chapters": [
     {
-      "title": "Meet the travelers",
+      "title": "The big picture",
       "scene": 1,
       "approx_seconds": 0.0
     },
     {
-      "title": "Acquire and prepare",
-      "scene": 13,
-      "approx_seconds": 103.03
+      "title": "The usual AI slop pitch",
+      "scene": 3,
+      "approx_seconds": 46.62
     },
     {
-      "title": "A real greenfield coding session",
-      "scene": 24,
-      "approx_seconds": 189.88
+      "title": "Belief one: nobody can review it",
+      "scene": 7,
+      "approx_seconds": 96.1
     },
     {
-      "title": "Use the machines you already own",
-      "scene": 45,
-      "approx_seconds": 410.03
+      "title": "Belief two: it grades its own homework",
+      "scene": 15,
+      "approx_seconds": 192.18
     },
     {
-      "title": "Adopt a real C++ project",
-      "scene": 51,
-      "approx_seconds": 464.45
+      "title": "Belief three: CI is the safety net",
+      "scene": 26,
+      "approx_seconds": 303.11
     },
     {
-      "title": "The morning after the demo",
-      "scene": 67,
-      "approx_seconds": 623.95
+      "title": "Belief four: it's a black box",
+      "scene": 38,
+      "approx_seconds": 472.27
+    },
+    {
+      "title": "Belief five: adoption means a rewrite",
+      "scene": 42,
+      "approx_seconds": 520.55
+    },
+    {
+      "title": "Belief six: it never learns",
+      "scene": 47,
+      "approx_seconds": 572.26
+    },
+    {
+      "title": "Belief seven: releases are where it breaks",
+      "scene": 55,
+      "approx_seconds": 643.38
+    },
+    {
+      "title": "Thursday",
+      "scene": 57,
+      "approx_seconds": 675.76
     }
   ],
   "edition": "public feedback; not framework release qualification",
-  "review": "94-second voice/style audition accepted by user; full-cut audience review pending"
+  "speech_directions": {
+    "litai": "Speak in clear natural American English, as an experienced female engineer making a persuasive live demonstration to a skeptical colleague. Warm, brisk, direct, dry humor. Respond to the objection, never sound like an announcer. Do not laugh unless the words call for it.",
+    "sam": "Speak in natural American English, as an experienced male software engineer who has heard too many AI sales pitches. Starts irritated and dismissive, then cross-examines each answer. Wry, concise, alert; warms only when the evidence earns it. Not theatrical."
+  },
+  "spoken_text": [
+    "Picture your next release. Agents write code overnight. By morning, every change has a written promise, independent acceptance, builds on Mac, Linux and Windows, an installed package that actually ran, and a receipt naming the exact commit all of that proved. Before anyone opens CI.",
+    "You review promises, not diffs. Every claim carries the evidence to challenge it. Code becomes something you can regenerate; the specification is what you defend in review. That's agentic development done properly, and Literate A.I. is the harness that makes it real.",
+    "And there it is. The usual A.I. slop sales pitch. Agents overnight, promises instead of diffs. I've sat through four of these this quarter.",
+    "I'm Sam. C plus plus, Make, tests. My company is in a civil war: our CTO wants agent-first everything by Q three, and I lead the holdouts. Thursday's architecture review settles it.",
+    "Then let's settle it with evidence instead of volume. You bring the beliefs; I'll bring a terminal. One at a time.",
+    "Start here. Agent code is slop. Nobody can review ten thousand generated lines, so nobody does.",
+    "Agreed. So don't start with the lines; review the promise. A Component states observable behavior: a greeting card takes a name and messages, returns a greeting, an identifier and word counts. Unicode whitespace included. No implementation in it.",
+    "A requirements doc. Those rot the day after the kickoff meeting.",
+    "Not this one; every build is pinned to it. Flavors say how: Python and Make here, C plus plus and C-make next door. Change the promise and every lock pinned to it goes stale until it's rebuilt and verified. Change a Flavor and you still need a real toolchain and new tests. No magic porting.",
+    "Fine. How would I even get it?",
+    "Clone the repository, make install, then Lit A.I. doctor checks the result. Sign in to your coding C.L.I. separately. The install panel is a walkthrough; the terminal sessions are recorded runs. Anything without a terminal is a walkthrough card.",
+    "Nothing changes without a plan. This is the real read-only create plan, pinned to a public parent commit.",
+    "And I acknowledge it, and it writes files. Every tool writes files.",
+    "Every tool writes files. Few tell you exactly which ones before they do.",
+    "Next. The agent writes the code and the tests, then congratulates itself. Homework graded by the student.",
+    "Rebuild calls your chosen coding agent, with explicit permission to run generated code in this disposable project. Edited replay; the waiting is compressed.",
+    "The generated code: normalize the recipient, count the words.",
+    "And its own tests. Useful, and exactly the homework you're worried about. So they aren't the judge.",
+    "Green on the first try. Which is exactly what slop looks like.",
+    "Green by whose cases? These acceptance cases come from the promise, inherited and unmodified: two messages, six words, this identifier. They run separately from the agent's own tests.",
+    "And if your judge were too lenient, you'd be green and smiling.",
+    "Yes. A lenient oracle or a wrong specification still passes; no harness catches that alone. This one puts them where your reviewers can. Skips are shown as skips, not passes.",
+    "And when the agent is the one that's wrong, 1.2 hands it the redacted compiler error and asks for a fresh candidate, at most twice more. Then it stops and tells you why. Not in this recording; this run didn't need it.",
+    "And every edit means paying for another agent run.",
+    "Only for what changed. Here the source came back from the cache and the rebuild took under half a minute.",
+    "Now the big one. We have CI. Forty jobs, a matrix, a dashboard. That's the safety net.",
+    "For most teams, CI is where they first learn the truth. Push and pray, queue for an hour, find Windows red, push a fix you never ran. The green run tested a merge commit, not the one you tagged. And the pipeline file is untested code holding production keys.",
+    "Rude. Accurate, but rude.",
+    "So move the whole gate before CI. Here's how we ship Literate A.I. itself. One make release-check: lint, formatting, spec and docs checks, the full test suite, a wheel, a clean install, a real installed project, live samples, and a current test receipt. Your project declares its own gate; Lit A.I. release check runs it on the exact prepared commit.",
+    "That's not a checklist, it's a hostage situation. Nobody runs all that before every merge.",
+    "No human does. That's the superhuman part, and it's stamina, not judgment. Plan, generate, build, test, accept, package, release: every stage, every time, with a record.",
+    "It even caught us making this film. A test helper under the driver's reviewed code changed without a fresh review pin. Red at driver review, on a laptop, before CI ever saw it.",
+    "So you push a fix and pray, like the rest of us.",
+    "Review, re-pin, resume. Passed gates are reused while you repair, then release evidence starts clean from gate one.",
+    "Then it repeats on machines you already own. That Linux box and a Windows desktop become workers through private configuration. When workers build, test and run everything, your laptop doesn't even need the toolchains. Release qualify covers what this machine can, then the workers, and uses CI only for what's left. The record names the exact commit.",
+    "So CI becomes...",
+    "A confirmation, not a discovery. This recording qualified this Mac; the remote workers are a walkthrough.",
+    "Fine. Even when it passes, I can't see what an agent did. It's a black box with a commit message.",
+    "Lit A.I. render H.T.M.L.. One file per view, no server. The authority graph shows every Component, Flavor and skill, with hash-checked previews of their sources. Health views cover locks and verification.",
+    "Pretty. Somebody still has to babysit it.",
+    "It's rebuilt from the project's own records, and a declared page that goes stale blocks qualification, like this. Build-and-test run history isn't shipped yet; the graph and health views are.",
+    "My real code is years of C plus plus. Adoption means a rewrite and six months of regret.",
+    "Tiny X.M.L. two, pinned to a public commit. The plan inspects before it touches anything: preserve the original, take a recovery point, wrap its real build and tests.",
+    "Which tests? Swap C test for an agent's opinion and Thursday's over.",
+    "Its own C-make build and its own C test, on preserved source. Nothing replaced, nothing rewritten.",
+    "Retained: baseline evidence recorded, and the original source still governs releases. You can stop here for good. Later stages exist; none are shown complete here.",
+    "And agents make the same mistake every Monday. They never learn.",
+    "Nothing retrains a model. A lesson becomes a reviewed change to its owner: the specification if behavior was missing, a Flavor if it's platform-specific, a skill if it's technique. Lit A.I. learn proposes; your review admits.",
+    "So 'learning' means a pull request.",
+    "Exactly. Review-able, revertible, and it outlives the model.",
+    "And your framework's rules rewrite my release some Tuesday.",
+    "They arrive as a plan. This recorded update compares what you inherited, what you changed and what's new upstream. Conflicts wait for you.",
+    "And when the CTO's agents swarm the repo, who assigns the work?",
+    "Your forge. GitHub or GitLab issues and pull requests, by default. Agents open reviewed pull requests like everyone else.",
+    "Last one. Demos stop at green. Our actual release artifact is still called final-final-really-final dot zip.",
+    "A local wheel, built and verified; no registry upload here. A real release is plan, prepare, check, publish: a release branch, a sem-ver tag, and a check of what was actually published. Tests of one commit never qualify another.",
+    "So our CTO is wrong. Agents don't get to ship on vibes.",
+    "And the holdouts?",
+    "Also wrong. Hand-reading every generated line was never the safety net. Evidence is.",
+    "Argument settled. Before Thursday: install it, write one Component, render the graph, qualify on two machines. Bring the receipts.",
+    "And final-final-really-final dot zip retires.",
+    "It had a good run. Unlike its tests."
+  ],
+  "review": "Revised Qwen voice audition: human listening approval pending",
+  "audition": false,
+  "studio": {
+    "credits": "CREDITS.md",
+    "fonts": {
+      "display": {
+        "file": "InterDisplay-Bold.ttf",
+        "sha256": "b74c8e0dd744b3347faca4c96bc7b2e32f7d6f62300a79b1d1a99331e44a5bc4"
+      },
+      "label": {
+        "file": "Inter-SemiBold.ttf",
+        "sha256": "78a843fade9d4612a5567302fb595b56976eb5fcebf4fea5a5912d638bafcde3"
+      },
+      "body": {
+        "file": "Inter-Regular.ttf",
+        "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82"
+      },
+      "caption": {
+        "file": "Inter-Regular.ttf",
+        "sha256": "40d692fce188e4471e2b3cba937be967878f631ad3ebbbdcd587687c7ebe0c82"
+      },
+      "mono": {
+        "file": "JetBrainsMono-Regular.ttf",
+        "sha256": "a0bf60ef0f83c5ed4d7a75d45838548b1f6873372dfac88f71804491898d138f"
+      }
+    },
+    "blender": "Blender 5.2.2 LTS",
+    "imagemagick": "Version: ImageMagick 7.1.2-33 Q16-HDRI aarch64 4bab3bc37:20261010 https://imagemagick.org",
+    "ffmpeg": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "scene_scripts": {
+      "blender_scenes.py": "3ceac82bd1592821d37ae6e1dd58b457c91250ddf46f6ffd74d03932f04e1da5",
+      "cards.py": "e49231082a1063c19131759df36ccae3030b31714234379c65b6401cf1c6e551",
+      "motion.py": "922fdad2287e29b29fe0410b1d763fca8ba7a2fdd23a6622c5dadf4d58e4aa9c",
+      "sound.py": "9c2df7d61e65bea6462ae6ac1107ea5737fb35f3eab01949eb63895c0b944b8e"
+    },
+    "sound": "original; synthesized by scenes/sound.py, no third-party audio",
+    "screens": "shoot.py captures of recorded litai render html output",
+    "labels": "3D scenes tagged ILLUSTRATION; terminal and screen pages state their recorded source"
+  }
 }

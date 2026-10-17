@@ -33,7 +33,8 @@ class StandardPlanFinalizationInputs:
     contract: ComponentCommandContract
     providers: tuple[ArtifactExport, ...]
     package_artifacts: tuple[ArtifactExport, ...]
-    dependency_resolution: Literal["none", "npm", "python"]
+    dependency_resolution: Literal["none", "npm", "python", "mix"]
+    build_binding: tuple[str, str] | None = None
 
     def finalize(self) -> StandardComponentBuildPlan:
         return finalize_standard_component_plan(
@@ -43,6 +44,7 @@ class StandardPlanFinalizationInputs:
             self.providers,
             self.package_artifacts,
             dependency_resolution=self.dependency_resolution,
+            build_binding=self.build_binding,
         )
 
 
@@ -53,11 +55,46 @@ def finalize_standard_component_plan(
     providers: tuple[ArtifactExport, ...],
     package_artifacts: tuple[ArtifactExport, ...],
     *,
-    dependency_resolution: Literal["none", "npm", "python"],
+    dependency_resolution: Literal["none", "npm", "python", "mix"],
+    build_binding: tuple[str, str] | None = None,
 ) -> StandardComponentBuildPlan:
-    """Construct a plan without host paths, controller maps, or process execution."""
+    """Construct a plan without host paths, controller maps, or process execution.
+
+    ``build_binding`` is the exact ``(builder_id, toolchain_digest)`` pair a local
+    ecosystem port (Mix) bound into the issued request. It is required for, and
+    only accepted with, ``mix`` dependency resolution, and must equal the
+    contract's ``(locked_build_authority_identity, build_system_toolchain_identity)``
+    so a port cannot substitute another builder or driver. Every other mode keeps
+    the generic SDK-bound builder and language-compiler toolchain.
+    """
+    network = dependency_resolution in {"npm", "mix"}
+    if (dependency_resolution == "mix") != (build_binding is not None) or (
+        build_binding is not None
+        and (
+            not isinstance(build_binding, tuple)
+            or len(build_binding) != 2
+            or not all(isinstance(item, str) and item for item in build_binding)
+            # The binding is not caller-chosen authority: it must name exactly
+            # the contract's locked build authority and build-system driver.
+            or build_binding
+            != (
+                contract.locked_build_authority_identity.uri,
+                contract.build_system_toolchain_identity.uri,
+            )
+        )
+    ):
+        raise StandardProjectLifecycleError(
+            "standard_lifecycle.plan_inputs_mismatch",
+            "plan inputs differ from exact intent and authorization",
+        )
+    expected_builder, expected_toolchain = build_binding or (
+        native_sdk_consumer_build_identity(
+            contract.locked_build_authority_identity, intent.native_sdk_input_identities
+        ).uri,
+        contract.language_compiler_identity.uri,
+    )
     if (
-        dependency_resolution not in {"none", "npm", "python"}
+        dependency_resolution not in {"none", "npm", "python", "mix"}
         or contract.component_revision != intent.component_revision
         or authorization.build_intent_identity != intent.identity
         or authorization.build_request_identity != intent.build_request_identity
@@ -65,18 +102,14 @@ def finalize_standard_component_plan(
         != intent.provider_artifact_identities
         or tuple(item.identity for item in package_artifacts)
         != intent.package_artifact_identities
-        or intent.build_request.toolchain_digest
-        != contract.language_compiler_identity.uri
-        or intent.build_request.builder_id
-        != native_sdk_consumer_build_identity(
-            contract.locked_build_authority_identity, intent.native_sdk_input_identities
-        ).uri
+        or intent.build_request.toolchain_digest != expected_toolchain
+        or intent.build_request.builder_id != expected_builder
         or intent.build_request.allowed_outputs
         != tuple(sorted(shape.export_id for shape in contract.artifact_export_shapes()))
         or intent.build_request.requested_privileges
         != (
             ("execute-build-tools", "network-access")
-            if dependency_resolution == "npm"
+            if network
             else ("execute-build-tools",)
         )
     ):
@@ -177,7 +210,7 @@ def finalize_standard_component_plan(
             (BuildSubActionKind.RESOLVE_DEPENDENCIES, resolve_action.action_id),
             (BuildSubActionKind.COMPILE, action.action_id),
         )
-        if dependency_resolution == "npm":
+        if network:
             requested_privileges = (
                 BuildPrivilege.EXECUTE_BUILD_TOOLS,
                 BuildPrivilege.NETWORK_ACCESS,

@@ -180,6 +180,7 @@ class LockedGenerationCliTests(unittest.TestCase):
             )
             prompt = prepared.recipe.prompt()
             self.assertNotIn('{"stdout":"hello\\n"}', prompt)
+            self.assertNotIn('"stdout": "hello\\n"', prompt)
             self.assertNotIn("Generation-safe invocation contract", prompt)
 
     def test_missing_stale_and_mismatched_locks_fail_before_agent_invocation(

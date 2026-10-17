@@ -13,7 +13,7 @@ from literate_ai.adapters.action_dispatch_wire import (
     MAX_ACTION_WIRE_BYTES,
     ActionDispatchDeadline,
     ActionWireError,
-    decode_action_response,
+    decode_attested_action_response,
     encode_action_request,
 )
 from literate_ai.adapters.action_transport import (
@@ -90,6 +90,8 @@ class CommandLifecycleActionDispatcher:
         record_result: Callable[[ContentIdentity, bytes], None],
         revalidate_worker: Callable[[LifecycleActionWorker], None],
         environment: Mapping[str, str] | None = None,
+        attested_boundary: Callable[[LifecycleActionWorker], ContentIdentity]
+        | None = None,
     ) -> None:
         if not isinstance(catalog, ExecutionWorkerCatalog) or not isinstance(
             deadline, ActionDispatchDeadline
@@ -119,6 +121,10 @@ class CommandLifecycleActionDispatcher:
         self.input_records = input_records
         self.record_result = record_result
         self.revalidate_worker = revalidate_worker
+        # When set, boundaries skip the separate capability probe: the receiver
+        # measures the admitted capability in process and attests it. A response
+        # without that attestation falls back to full revalidation.
+        self.attested_boundary = attested_boundary
         self.environment = dict(os.environ if environment is None else environment)
         self._lock = threading.Lock()
         self._active: dict[ContentIdentity, threading.Event] = {}
@@ -164,6 +170,22 @@ class CommandLifecycleActionDispatcher:
     def dispatch(
         self, request: LifecycleActionDispatchRequest
     ) -> LifecycleActionDispatchOutcome:
+        return self._exchange(request, mode=None)[0]
+
+    def describe(
+        self, request: LifecycleActionDispatchRequest, *, mode: str
+    ) -> LifecycleActionDispatchOutcome | bytes:
+        """Run a read-only receiver mode; its result is returned, never recorded."""
+        if mode != "--describe-finalize-grant":
+            raise ActionWireError(
+                "action_transport.mode_invalid", "unsupported receiver mode"
+            )
+        outcome, result_record = self._exchange(request, mode=mode)
+        return outcome if result_record is None else result_record
+
+    def _exchange(
+        self, request: LifecycleActionDispatchRequest, *, mode: str | None
+    ) -> tuple[LifecycleActionDispatchOutcome, bytes | None]:
         worker = self._selection(request)
         self.deadline.remaining()
         event = threading.Event()
@@ -178,13 +200,25 @@ class CommandLifecycleActionDispatcher:
                 )
             self._active[request.identity] = event
         try:
-            self.revalidate_worker(request.worker)
+            capability = None
+            if self.attested_boundary is None:
+                self.revalidate_worker(request.worker)
+            else:
+                capability = self.attested_boundary(request.worker)
+                if not isinstance(capability, ContentIdentity):
+                    raise ActionWireError(
+                        "action_dispatch.admission_mismatch",
+                        "attested boundary returned no admitted capability",
+                    )
             content = encode_action_request(
-                request, self.deadline, self.input_records(request)
+                request,
+                self.deadline,
+                self.input_records(request),
+                capability=capability,
             )
             environment = self._environment(worker)
             with tempfile.TemporaryDirectory(prefix="litai-action-") as directory:
-                argv = action_receiver_command(worker, self.deadline)
+                argv = action_receiver_command(worker, self.deadline, mode=mode)
                 stdin = content
                 if "{request_file}" in argv:
                     path = Path(directory) / "request.json"
@@ -195,19 +229,29 @@ class CommandLifecycleActionDispatcher:
                     )
                     stdin = None
                 output = self._run(argv, environment, stdin, event)
-            outcome, result_record = decode_action_response(output, request)
+            outcome, result_record, attested = decode_attested_action_response(
+                output, request
+            )
             self.deadline.remaining()
-            self.revalidate_worker(request.worker)
+            if attested is None:
+                self.revalidate_worker(request.worker)
+            elif attested != capability or (
+                self.attested_boundary(request.worker) != capability
+            ):
+                raise ActionWireError(
+                    "action_admission.runtime_changed",
+                    "worker runtime or supported capabilities changed",
+                )
             with self._lock:
                 if event.is_set():
                     raise ActionWireError(
                         "action_dispatch.cancelled", "action was cancelled"
                     )
                 self.deadline.remaining()
-                if result_record is not None:
+                if mode is None and result_record is not None:
                     assert outcome.result_identity is not None
                     self.record_result(outcome.result_identity, result_record)
-            return outcome
+            return outcome, result_record
         finally:
             with self._lock:
                 self._active.pop(request.identity, None)

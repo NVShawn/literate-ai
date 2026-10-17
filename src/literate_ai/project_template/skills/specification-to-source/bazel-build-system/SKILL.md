@@ -5,7 +5,7 @@ metadata:
   author: "Literate AI maintainers <literate-ai-maintainers@users.noreply.github.com>"
 schema: "urn:literate-ai:schema:v1:specification-to-source-skill"
 skill_id: "bazel-build-system"
-version: "1.6.8"
+version: "1.6.9"
 title: "Bazel-preferred build-system design"
 stages:
   - "plan"
@@ -18,6 +18,7 @@ limitations:
   - "Always set main explicitly on every rules_python py_binary and py_test target. The path must name an executable Python source also present in srcs; never rely on target-name-based entrypoint inference."
   - "For aspect_rules_js js_binary and js_test, set entry_point to the executable JavaScript source. These rules do not accept srcs; place additional runtime files in data when needed."
   - "For every rules_rust rust_binary or rust_test, declare every Rust source file reachable through mod or #[path] from the crate root in srcs. A Rust module declaration does not make the file visible inside Bazel's sandbox."
+  - "Set crate_root explicitly on every rules_rust rust_binary or rust_test whose srcs list more than one Rust file. Bazel infers a root only from the default main.rs (rust_binary) or lib.rs (libtest rust_test), or a file named after the target (name.rs or crate_name.rs); a rust_test compiling main.rs plus tests/litai_test.rs without crate_root fails analysis."
   - "Do not treat this preference or its reviewed ruleset baselines as authority over an explicit Component specification or selected Flavor."
   - "Do not claim fine-grained Bazel dependency tracking when Bazel merely wraps a native build."
   - "Treat every literal bazel_dep version as a requested version subject to Bzlmod Minimal Version Selection, not proof of the final selected version."
@@ -85,6 +86,15 @@ For Rust, treat the crate root's complete module graph as declared inputs. If
 `tests/litai_test.rs` in `srcs`. Apply the same rule recursively to ordinary `mod`
 declarations and other explicit paths. Bazel does not infer these Rust source files;
 omitting one creates an incomplete sandbox even when direct `rustc` can see the file.
+
+Once `srcs` lists more than one Rust file, rules_rust must be told which one is the
+crate root. It infers the root only from the rule's default (`main.rs` for
+`rust_binary`, `lib.rs` for a `rust_test` using the libtest harness) or a file named
+after the target, `<name>.rs` or `<crate_name>.rs`. A `rust_test` named
+`behavior_test` with `srcs = ["main.rs", "tests/litai_test.rs"]` therefore fails
+analysis with "Couldn't find lib.rs or behavior_test.rs among `srcs`, please use
+`crate_root`". Set `crate_root` explicitly, for example `crate_root = "main.rs"`, on
+every `rust_binary` and `rust_test` whose `srcs` list more than one Rust file.
 
 Do not confuse two integrations: wrapping a native build under Bazel provides one coarse cached action, while native fine-grained Bazel targets provide materially better dependency tracking. Prefer fine-grained targets when they faithfully preserve ecosystem semantics, but use an honest wrapper or native build when translation would be brittle or misleading.
 

@@ -189,7 +189,10 @@ class StandardLifecycleStageEvidence:
 
 @dataclass(frozen=True, slots=True)
 class StandardLifecycleAttemptEvidence:
-    """One process attempt, including attempts that stop before source exists."""
+    """One process attempt or bounded repair replacement for one Component.
+
+    Includes attempts that stop before source exists.
+    """
 
     execution_plan_identity: ContentIdentity
     component_revision: ContentIdentity

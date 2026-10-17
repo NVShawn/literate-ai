@@ -8,7 +8,10 @@ from dataclasses import replace
 from datetime import timedelta
 from pathlib import Path
 
-from literate_ai.adapters.action_capabilities import probe_command_action_capabilities
+from literate_ai.adapters.action_capabilities import (
+    package_profile_identity,
+    probe_command_action_capabilities,
+)
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
@@ -74,6 +77,9 @@ class CommandActionWorkerPool:
         self.target_profile = target_profile
         self.cwd = cwd
         self.environment = dict(os.environ if environment is None else environment)
+        # The receiver's configuration can arrive through this environment, so an
+        # attested boundary is valid only while it is the one admission probed.
+        self._admitted_environment = dict(self.environment)
         self.maximum_hardware_age = maximum_hardware_age
         deadline.remaining()
         self.catalog = catalog_loader()
@@ -218,6 +224,25 @@ class CommandActionWorkerPool:
         """Read admitted facts; dispatch still revalidates their complete identity."""
         return worker in self.workers and phase in self._facts[worker.worker_id].actions
 
+    def supports_package(
+        self, worker: LifecycleActionWorker, packager_identity: ContentIdentity
+    ) -> bool:
+        """Match the exact private packager before reserving shared capacity."""
+        expected = package_profile_identity(packager_identity)
+        return self.supports_phase(worker, LifecycleActionKind.PACKAGE) and (
+            self._facts[worker.worker_id].package_profile == expected
+        )
+
+    def supports_finalize(
+        self, worker: LifecycleActionWorker, profile_identity: ContentIdentity
+    ) -> bool:
+        """Match exact private FINALIZE configuration before reserving capacity."""
+        if not isinstance(profile_identity, ContentIdentity):
+            raise TypeError("FINALIZE selection requires an exact profile identity")
+        return self.supports_phase(worker, LifecycleActionKind.FINALIZE) and (
+            self._facts[worker.worker_id].finalize_profile == profile_identity
+        )
+
     def supports_build(self, worker: LifecycleActionWorker, toolchains) -> bool:
         """Require every exact BUILD tool before reserving shared capacity."""
         return self.supports_phase(worker, LifecycleActionKind.BUILD) and set(
@@ -236,7 +261,13 @@ class CommandActionWorkerPool:
             toolchains
         ).issubset(self._facts[worker.worker_id].execute_toolchains)
 
-    def revalidate(self, worker: LifecycleActionWorker) -> None:
+    def require_current(self, worker: LifecycleActionWorker) -> None:
+        """Cheap per-read admission: deadline, route, catalog and hardware.
+
+        Guards that run on every record or blob read use this. The full
+        storage-health and capability probe in revalidate() runs at each action
+        boundary, before dispatch and before any result is admitted.
+        """
         self.deadline.remaining()
         if (
             worker not in self.workers
@@ -260,6 +291,27 @@ class CommandActionWorkerPool:
                 "hardware observation is no longer the admitted observation",
             )
         self.hardware_observations = hardware
+        self.deadline.remaining()
+
+    def attested_boundary(self, worker: LifecycleActionWorker) -> ContentIdentity:
+        """Action-boundary admission whose capability the receiver measures.
+
+        Runs every revalidate() check except the capability probe and returns the
+        admitted capability identity. The caller must send it with the action and
+        accept the action only when the receiver attests that it measured exactly
+        this capability before and after the action; otherwise it must revalidate.
+        """
+        if self.environment != self._admitted_environment:
+            # Dispatchers may hold an older copy, so probe with the current one.
+            self.revalidate(worker)
+        else:
+            self.require_current(worker)
+            self._health(self.catalog.worker(worker.worker_id))
+            self.deadline.remaining()
+        return self._facts[worker.worker_id].capability_identity
+
+    def revalidate(self, worker: LifecycleActionWorker) -> None:
+        self.require_current(worker)
         selected = self.catalog.worker(worker.worker_id)
         self._health(selected)
         if (

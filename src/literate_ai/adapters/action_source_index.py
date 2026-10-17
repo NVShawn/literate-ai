@@ -156,21 +156,33 @@ def materialize_action_source(
     cas: FileSystemCAS,
     workspace_root: Path,
     blob_source: Callable[[BlobRef], bytes] | None = None,
+    require_current: Callable[[], None] = lambda: None,
 ) -> Iterator[Path]:
     """Materialize exact bounded source bytes with disposable filesystem custody."""
+    if not callable(require_current):
+        raise TypeError("source materialization requires a callable authority guard")
+    require_current()
     require_safe_directory(workspace_root)
     hydrate_action_source(
-        files, expected_tree, deadline, cas=cas, blob_source=blob_source
+        files,
+        expected_tree,
+        deadline,
+        cas=cas,
+        blob_source=blob_source,
+        require_current=require_current,
     )
     with tempfile.TemporaryDirectory(prefix="source-", dir=workspace_root) as scratch:
         root = Path(scratch)
         for item in files:
+            require_current()
             deadline.remaining()
             target = root.joinpath(*item.path.split("/"))
             target.parent.mkdir(parents=True, exist_ok=True)
             cas.copy_to(item.blob, target)
+        require_current()
         deadline.remaining()
         yield root
+        require_current()
         deadline.remaining()
 
 

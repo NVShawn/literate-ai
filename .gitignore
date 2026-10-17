@@ -37,6 +37,9 @@ dist/
 /cache/
 /requests/
 /runs/
+/work/
+# Release-gate checkouts synced by `litai release` (project_releases.py).
+/release/
 
 # Primary sample application sources are generated from OpenSpec at runtime.
 /samples/*/source/

@@ -1,7 +1,15 @@
 # Literate AI and an agent ledger
 
-Literate AI is a derivation engine. An agent ledger such as MAC is a control plane.
-They meet at one content-addressed run boundary; neither system subsumes the other.
+Literate AI is a derivation engine. An agent ledger is a control plane. They meet at
+one content-addressed run boundary; neither system subsumes the other.
+
+By default the ledger is the forge that hosts the repository receiving issues and pull
+requests, GitHub or GitLab as `litai project tracker inspect` detects it: issues record
+problems and requests and coordinate agents, and PRs/MRs submit changes against the
+project's target branch. A project or user may override that default with an external
+agent ledger, another task tracker, or another review system such as Gerrit
+([ADR 0050](../decisions/0050-forge-issues-and-reviews-are-the-default-tracker.md)).
+Everything below applies to whichever ledger is in effect.
 
 ```mermaid
 flowchart LR
@@ -38,10 +46,11 @@ prompt, Flavor set, route, or authorization.
 Before this join boundary, direct and ledger-driven requests take different prompt
 translation paths. A user invoking Literate AI or a supported coding agent directly may
 use the pinned `skills/agent/prompt-master/` adapter to sharpen a rough request into a
-bounded provider task. A MAC-originated request bypasses that adapter: MAC applies its
-own prompt-master step between the task and provider layers and supplies an already
-translated task envelope. Literate AI never applies both paths to one request, and
-neither path can change locked derivation authority or grant execution privilege.
+bounded provider task, and a forge issue is such a direct request. A request from an
+external task system that already translated it (`LITAI_EXTERNAL_TASK_ID`) bypasses
+that adapter: that system applied its own translation between its task and provider
+layers. Literate AI never applies both paths to one request, and neither path can
+change locked derivation authority or grant execution privilege.
 
 ## Join protocol
 
@@ -59,9 +68,9 @@ paths or mutable URLs:
 - terminal outcome plus an identity for the complete journal.
 
 Large blobs belong in an immutable content-addressed store. Each system stores the
-identities and typed relations it owns. MAC can register Literate AI results as artifact
-and evidence records without copying source or teaching its task schema about build
-internals.
+identities and typed relations it owns. A ledger can register Literate AI results as
+artifact and evidence records (an issue or PR/MR comment by default) without copying
+source or teaching its task schema about build internals.
 
 Task and correlation identifiers join records across systems but are not semantic
 generation inputs. They stay in envelope metadata and are excluded from derivation,
@@ -71,15 +80,15 @@ under another task must not manufacture different content.
 ```mermaid
 sequenceDiagram
     participant User
-    participant MAC as Agent ledger
+    participant Ledger as Agent ledger (forge issues by default)
     participant LAI as Literate AI
     participant CAS as Immutable artifact store
-    User->>MAC: Request or iterate
-    MAC->>LAI: Start exact derivation request
+    User->>Ledger: Request or iterate
+    Ledger->>LAI: Start exact derivation request
     LAI->>CAS: Store prompts, responses, decisions, trees, evidence
     CAS-->>LAI: Content identities
-    LAI-->>MAC: Signed run envelope and result identities
-    MAC-->>User: Status, approvals, and customer explanation
+    LAI-->>Ledger: Signed run envelope and result identities
+    Ledger-->>User: Status, approvals, and customer explanation
 ```
 
 ## Journals and customer explanations
