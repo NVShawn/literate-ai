@@ -158,7 +158,18 @@ def install_python_wheels(
     """
     environment = {
         key: os.environ[key]
-        for key in ("PATH", "SystemRoot", "WINDIR", "TEMP", "TMP", "LANG", "LC_ALL")
+        for key in (
+            "PATH",
+            "SystemRoot",
+            "WINDIR",
+            "TEMP",
+            "TMP",
+            "LANG",
+            "LC_ALL",
+            # CPython 3.11 uses these to discover Windows machine architecture.
+            "PROCESSOR_ARCHITECTURE",
+            "PROCESSOR_ARCHITEW6432",
+        )
         if key in os.environ
     }
     environment.update(

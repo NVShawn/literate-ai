@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Windows offline Python wheel installation preserves architecture discovery
+  variables so CPython 3.11's isolated target probe matches the selected runtime.
+
 - Windows installation: report inaccessible declared native-tool search directories
   as actionable host-install errors instead of uncaught tracebacks. Document the
   PowerShell source-install entry point and activation-free wheel commands.

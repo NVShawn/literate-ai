@@ -26227,3 +26227,21 @@ ZIP provider CI follow-up: review the seven changed lifecycle-driver inputs (ZIP
 - **Next action:** Push the integration commit, verify its required CI, and land
   through the authorized writer using merge semantics. Integration CI remains
   pending until evidence is observed.
+
+### [ ] WINDOWS-PROBE-001 — Preserve Windows architecture in isolated Python wheel installation
+
+- **GitHub issue:** [#63](https://github.com/jordanhubbard/literate-ai/issues/63)
+- **Priority:** P1
+- **Owner:** Framework Python dependency installer
+- **Direction:** Fix the Windows offline installer target probe failure on CPython 3.11.
+- **Conclusion:** Retain only Windows architecture discovery inputs alongside the existing controlled environment; keep target identity and wheel custody validation strict. Supports PROJECT.md Goals 1 and 4.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Preserve PROCESSOR_ARCHITECTURE and PROCESSOR_ARCHITEW6432 in the installer subprocess environment.
+- **Evidence:**
+  - [x] Reproduce the failure and pass actual offline installation, cleanup and tamper checks on native Windows CPython 3.11.
+- **Observed evidence:** The unmodified offline-install test failed at target
+  parsing. After the repair, all 14 real-installer and shared fixture tests pass,
+  including target identity equality, wrapper tamper rejection and cleanup.
+- **Next action:** Land through exact-commit CI, then backport to the current
+  supported release before qualifying a replacement non-editable distribution.
