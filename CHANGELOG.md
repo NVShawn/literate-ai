@@ -6,6 +6,11 @@
   capacity records and hardware observations. The bounded hardware probe uses
   named FreeBSD sysctls and reports GPU probing as unqualified. Native lifecycle,
   toolchain realization and release qualification remain in progress (#67).
+- Add a FreeBSD OS Flavor, native project defaults and private user paths; permit
+  FreeBSD worker/matrix/release selection without substituting another OS. Native
+  alignment avoids interactive Bash startup and can use FreeBSD `sha256`. Storage
+  and pressure receivers accept the native OS identity, measure CPU ticks,
+  conservative memory and swap counters, and retain unsupported quota evidence.
 
 - Windows offline Python wheel installation preserves architecture discovery
   variables so CPython 3.11's isolated target probe matches the selected runtime.

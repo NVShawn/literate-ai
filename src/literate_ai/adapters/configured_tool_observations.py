@@ -17,9 +17,12 @@ class ConfiguredToolObservations:
             raise TypeError("Standard observations require a worker tool registry")
         self.registry = registry
         self.tools = MappingProxyType(dict(tools))
-        self.platform = {"darwin": "macos", "win32": "windows", "linux": "linux"}.get(
-            sys.platform
-        )
+        self.platform = {
+            "darwin": "macos",
+            "win32": "windows",
+            "linux": "linux",
+            "freebsd": "freebsd",
+        }.get("freebsd" if sys.platform.startswith("freebsd") else sys.platform)
         self._initial = self._capture(lambda: None)
 
     def _capture(self, require_current):

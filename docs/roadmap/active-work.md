@@ -27722,3 +27722,22 @@ These are local regression evidence, not native lifecycle qualification. Alignme
 inspection found unrelated unavailable/low-space workers; no remediation or cleanup
 was applied. Next: OS Flavor, host/toolchain realization and alignment, storage and
 pressure observations, then native installed-wheel lifecycle and rejection proof.
+
+FreeBSD native checkpoint: the development CLI registered a real SSH FreeBSD worker;
+read-only alignment passed the full declared FreeBSD command/Python/disk template
+with no installs, file synchronization or coding-model call. The first attempt
+correctly timed out at 120 seconds in interactive Bash startup; a native `/bin/sh`
+transport correction made alignment pass. Hardware probing reports FreeBSD
+16.0-CURRENT, x86_64, 8 CPUs and 8145 MiB. The request-bound storage receiver measured
+all four roles and preserved unsupported native quota status; three pressure
+samples measured CPU ticks, conservative memory and zero swap throughput. These
+are live receiver observations from the development source, not installed-wheel
+lifecycle or release qualification. Private endpoint and raw observations stay
+outside repository authority.
+
+The next native gate is an exact non-editable framework wheel, native toolchain
+realization and isolated build/test plus failed-input rejection. Remaining work
+also includes retained lifecycle admission/custody, supported sandbox behavior,
+FreeBSD install SBOMs and quota qualification, and existing-platform CI. The OS
+Flavor explicitly refuses assumptions about Linux procfs/GNU utilities. Swift
+requires an explicit FreeBSD toolchain rather than an invented default.

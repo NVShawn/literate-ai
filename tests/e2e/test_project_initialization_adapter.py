@@ -44,6 +44,39 @@ def initialize_project(*args, **kwargs):
 
 
 class FilesystemProjectInitializationAdapterTests(unittest.TestCase):
+    def test_freebsd_host_selects_freebsd_flavor_and_rejects_implicit_swift(self):
+        with mock.patch("sys.platform", "freebsd16"):
+            self.assertEqual(
+                host_platform_selector(), "+flavor://literate-ai/os-freebsd"
+            )
+            self.assertIn(
+                "+flavor://literate-ai/os-freebsd", apply_init_flavor_defaults(())
+            )
+            with self.assertRaisesRegex(
+                ProjectInitializationError, "explicitly selected toolchain"
+            ):
+                apply_init_flavor_defaults(("+swift",))
+
+    def test_freebsd_starter_contains_real_platform_profile(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "bsd"
+            FilesystemProjectInitializationAdapter(
+                standard_binding_provider=lambda: None,
+                initialization_origin_provider=self._origin,
+            ).initialize(
+                target,
+                flavor_selectors=("+freebsd", "+python", "+make"),
+                source_intelligence_provider="none",
+            )
+            profile = json.loads(
+                (
+                    target / "flavors/os-freebsd/standard-command-profile.json"
+                ).read_text()
+            )
+            self.assertEqual(profile["target"], "freebsd")
+            self.assertEqual(profile["executable_suffix"], "")
+            self.assertTrue((target / "flavors/os-freebsd/openspec/spec.md").is_file())
+
     @staticmethod
     def _origin() -> ProjectInitializationOrigin:
         return ProjectInitializationOrigin(

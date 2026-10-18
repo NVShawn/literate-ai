@@ -175,7 +175,8 @@ def _invoke(
                     remote_command,
                     timeout,
                     transport=worker.transport,
-                    login_shell=not windows,
+                    login_shell=worker.requirements.os_family
+                    not in {"freebsd", "windows"},
                 ),
                 timeout,
             )

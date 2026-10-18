@@ -14,7 +14,7 @@
   "$defs": {
     "qualification_platform": {
       "type": "string",
-      "pattern": "^(linux|macos|windows)(-[a-z0-9_]{1,32})?$"
+      "pattern": "^(freebsd|linux|macos|windows)(-[a-z0-9_]{1,32})?$"
     },
     "qualification_policy": {
       "type": "object", "additionalProperties": false,

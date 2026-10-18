@@ -1152,6 +1152,8 @@ def _managed_tool_root(
         if target.operating_system == "windows"
         else "macos"
         if target.operating_system == "macos"
+        else "freebsd"
+        if target.operating_system == "freebsd"
         else "linux"
     )
     return Path(

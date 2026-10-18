@@ -14,7 +14,9 @@ from pathlib import Path
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--platform-flavor", required=True, choices=("linux", "macos", "windows")
+        "--platform-flavor",
+        required=True,
+        choices=("freebsd", "linux", "macos", "windows"),
     )
     parser.add_argument("--sample", action="append", default=[], metavar="GLOB")
     parser.add_argument("--flavor", action="append", default=[], metavar="SELECTOR")

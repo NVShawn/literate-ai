@@ -42,7 +42,7 @@ TEMPLATE_FILE = "literate.worker-template.json"
 TEMPLATE_SCHEMA = "literate-ai/worker-template@1"
 ALIGNMENT_SCHEMA = "literate-ai/worker-alignment@1"
 REPORT_SCHEMA = "literate-ai/worker-alignment-report@1"
-OS_FAMILIES = ("linux", "macos", "windows")
+OS_FAMILIES = ("freebsd", "linux", "macos", "windows")
 _COMMAND = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$")
 _PROBE_TIMEOUT_SECONDS = 120
 _MODEL_TIMEOUT_SECONDS = 300
@@ -330,7 +330,10 @@ class UserAlignment:
                 or not families
                 or not set(families) <= set(OS_FAMILIES)
             ):
-                _fail(f"{item_path}.os_families", "must name linux, macos or windows")
+                _fail(
+                    f"{item_path}.os_families",
+                    "must name freebsd, linux, macos or windows",
+                )
             secret = item.get("secret", False)
             if type(secret) is not bool:
                 _fail(f"{item_path}.secret", "must be a boolean")
@@ -568,7 +571,7 @@ def _probe_script(
         target = '"$HOME"/' + shlex.quote(item.destination[2:])
         lines.append(
             f'if [ -f {target} ]; then echo "file {index} $( (sha256sum 2>/dev/null'
-            f' || shasum -a 256) < {target} | cut -c1-64)"; '
+            f' || shasum -a 256 2>/dev/null || sha256 -q) < {target} | cut -c1-64)"; '
             f'else echo "file {index} -"; fi'
         )
     lines.append('echo "free $(df -Pk "$HOME" | awk \'NR==2 {print $4}\')"')
@@ -611,10 +614,12 @@ class WorkerAligner:
         return self.runner_factory().run(
             ssh_arguments(
                 worker.endpoint,
-                command,
+                "/bin/sh -c " + shlex.quote(command)
+                if worker.requirements.os_family == "freebsd"
+                else command,
                 timeout,
                 transport=worker.transport,
-                login_shell=not _windows(worker),
+                login_shell=worker.requirements.os_family not in {"freebsd", "windows"},
             ),
             cwd=self.cwd,
             timeout_seconds=timeout,
@@ -663,9 +668,13 @@ class WorkerAligner:
         exclusions: dict[int, str] = {}
         process_exclusions: dict[int, str] = {}
         free_kib: int | None = None
+        observed_os = None
         for line in output.splitlines():
             if line.startswith("free ") and line[5:].strip().isdigit():
                 free_kib = int(line[5:].strip())
+            if line.startswith("os "):
+                parts_os = line.strip().split()
+                observed_os = parts_os[1] if len(parts_os) > 1 else None
             parts = line.strip().split(" ", 2)
             if len(parts) == 3 and parts[0] == "cmd":
                 found[parts[1]] = None if parts[2] == "-" else parts[2]
@@ -688,6 +697,15 @@ class WorkerAligner:
                 )
             )
             return report, found
+        if family == "freebsd" and observed_os != "FreeBSD":
+            report.findings.append(
+                Finding(
+                    "platform",
+                    "freebsd",
+                    "mismatch",
+                    "the native inventory did not identify a FreeBSD kernel",
+                )
+            )
         installs = {
             item.command for item in self.user.installs if item.os_family == family
         }

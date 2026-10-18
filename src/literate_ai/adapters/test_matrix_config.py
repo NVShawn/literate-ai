@@ -9,7 +9,7 @@ from typing import Any
 
 GLOBAL_TEST_MATRIX_SCHEMA = "literate-ai/global-test-matrix@3"
 MAX_GLOBAL_TEST_MATRIX_BYTES = 1024 * 1024
-_PLATFORMS = frozenset({"linux", "macos", "windows"})
+_PLATFORMS = frozenset({"freebsd", "linux", "macos", "windows"})
 _SOURCE_MODES = frozenset({"working-tree", "git"})
 
 

@@ -4,6 +4,28 @@ Private test matrices map the repository's sample and lifecycle gates onto opera
 workers without making hostnames, credentials, or private routing part of project
 authority.
 
+## FreeBSD workers
+
+FreeBSD workers may be physical machines or virtual guests. Their OS Flavor is
+`flavor://literate-ai/os-freebsd`; their execution requirement is `freebsd`,
+regardless of the hypervisor host. Use a dedicated build worker for packages and
+images, disposable guests for installation/upgrade/rollback, and physical targets
+for hardware acceptance. QEMU guests can be registered through private SSH worker
+configuration; the optional provisioner command owns guest creation and cleanup.
+Registration never implicitly creates a VM.
+
+The FreeBSD repository template requires native Git, GNU Make (`gmake`), the base
+C compiler, Node/npm and Python 3.11+. FreeBSD inventory and resource collection use
+noninteractive native commands, not interactive Bash startup. `--skip-model`
+alignment proves only declared tool/file readiness; it does not qualify a coding
+CLI or provider. Generation needs its separately configured and qualified runner.
+
+FreeBSD initialization, registration, alignment and resource observations are under
+active qualification in issue #67. End-to-end installed-wheel build/test, retained
+source custody and release qualification remain required; a hardware probe is not
+a substitute for those gates. Native quota observation is explicitly unsupported
+and requiring capacity policies continue to hold rather than infer no quotas.
+
 ## Configure workers and selections
 
 Copy `literate.workers.example.json` to user `workers.json` and replace its SSH

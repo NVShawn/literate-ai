@@ -467,10 +467,12 @@ class SshLifecycleRequestHandler:
         return self._run_argv(
             ssh_arguments(
                 worker.endpoint,
-                command,
+                "/bin/sh -c " + shlex.quote(command)
+                if worker.requirements.os_family == "freebsd"
+                else command,
                 deadline.remaining(),
                 transport=worker.transport,
-                login_shell=worker.requirements.os_family != "windows",
+                login_shell=worker.requirements.os_family not in {"freebsd", "windows"},
             ),
             cwd,
             deadline,

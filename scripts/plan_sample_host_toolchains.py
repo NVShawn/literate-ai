@@ -13,7 +13,7 @@ from pathlib import Path
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--platform", required=True, choices=("linux", "macos", "windows")
+        "--platform", required=True, choices=("freebsd", "linux", "macos", "windows")
     )
     parser.add_argument("--sample", action="append", default=[])
     parser.add_argument("--flavor", action="append", default=[])

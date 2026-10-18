@@ -365,3 +365,58 @@ class WindowsDefenderExclusionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FreeBSDAlignmentTests(unittest.TestCase):
+    def test_native_template_inspection_rejects_wrong_or_missing_os(self):
+        from literate_ai.contracts import (
+            ExecutionRequirements,
+            ExecutionWorker,
+            ExecutionWorkerKind,
+        )
+
+        root = Path(__file__).resolve().parents[2]
+        worker = ExecutionWorker(
+            "bsd",
+            ExecutionWorkerKind.SSH,
+            requirements=ExecutionRequirements(os_family="freebsd"),
+            endpoint="user@bsd.invalid",
+            workspace="~/litai",
+        )
+        template = WorkerTemplate.load(root / "literate.worker-template.json")
+        self.assertIn(
+            "gmake", [item.name for item in template.platforms["freebsd"].commands]
+        )
+        self.assertNotIn(
+            "make", [item.name for item in template.platforms["freebsd"].commands]
+        )
+        for os_line, expected in (
+            ("os FreeBSD amd64", True),
+            ("os Linux x86_64", False),
+            ("", False),
+        ):
+            with self.subTest(os_line=os_line):
+                output = "\n".join(
+                    [
+                        "cmd git /usr/local/bin/git",
+                        "cmd gmake /usr/local/bin/gmake",
+                        "cmd cc /usr/bin/cc",
+                        "cmd node /usr/local/bin/node",
+                        "cmd npm /usr/local/bin/npm",
+                        "python python3 3.11.14",
+                        "free 100000000",
+                        os_line,
+                    ]
+                )
+                aligner = WorkerAligner(
+                    template, UserAlignment(), coding_cli=None, model=None, cwd=root
+                )
+                with patch.object(
+                    aligner,
+                    "_run",
+                    return_value=SimpleNamespace(
+                        returncode=0, stdout=output.encode(), stderr=b""
+                    ),
+                ):
+                    report = aligner.align((worker,), apply=False, check_model=False)
+                self.assertEqual(report["aligned"], expected, report)
