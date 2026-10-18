@@ -27703,9 +27703,9 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Depends on:** none
 - **Implementation:**
   - [x] Reconcile every open issue and review into a current ordered 1.3 plan
-  - [ ] Implement and qualify Python library wheel dependencies (issue 47)
+  - [x] Implement and qualify Python library wheel dependencies (issue 47)
   - [ ] Complete remaining scoped fixes and qualification in dependency order
-  - [ ] Integrate reviewed maintenance PRs and preserve unresolved worktree evidence
+  - [x] Integrate reviewed maintenance PRs and preserve unresolved worktree evidence
 - **Evidence:**
   - [ ] Every open issue and review has a linked queue owner and current release disposition
   - [ ] Meaningful focused tests and required consolidated qualification pass for changed behavior
@@ -27717,17 +27717,24 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
 - **GitHub issue:** [#65](https://github.com/jordanhubbard/literate-ai/issues/65)
-- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
-
+- **Current release target:** 1.3.0
 - **Priority:** P1
-- **Owner:** framework authority and qualification named by the linked issue
-- **Direction:** Support target-specific Python backend imports during retained-source admission
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
-- **Depends on:** none
+- **Owner:** Python packaging command profile, source admission and Standard artifact custody (Goals 1 and 4)
+- **Direction:** Retain cross-platform source and complete marked dependency intent while admitting only the selected target's supported runtime projection.
+- **Conclusion:** Add an opt-in, locked packaging-profile source projection. The adjacent bounded manifest binds the complete wheel-lock marker environment and exact excluded Python backend bytes with a reason. Preserve the original source and requirements; omit reviewed backend files only from the build projection. Do not infer Python control-flow reachability or invent installed import aliases. Without explicit selection, retain complete conservative import scanning.
+- **Depends on:** existing Python wheel-profile source, target and retained artifact custody; no dependency on draft FreeBSD PR 68
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [x] Bind explicit projection selection and manifest bytes to the profile, source authority and retained dependency evidence
+  - [x] Resolve root requirement markers against the selected lock environment while preserving the full authored declarations
+  - [x] Build only the declared target projection and keep original source identity and artifact/cache/acceptance checks mandatory
+  - [x] Document the public profile and refusal behavior; update initialized schema copies if required
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Linux target fixture admits a projected application with an absent Darwin-only SDK and retains the full requirement declaration
+  - [x] Missing active imports, stale excluded bytes, unsafe paths, unknown fields and changed target environments refuse
+  - [x] Actual build, test, execute and independent acceptance use sealed projected artifacts; changed projection and cache payload refuse
+  - [ ] Meaningful focused, complete local, installed and exact-head CI qualification before landing
+
+- **Current evidence:** Thirteen focused projection tests pass locally, including raw-CRLF exclusion custody, all three supported manifest forms, active-import refusal, target/tag drift, strict JSON bounds, application cache reuse and relocated library independent acceptance after source/wheelhouse retirement. Twelve existing Python resolver/lifecycle/projection tests and four broader dependency lifecycle tests pass. Lint/format, repository layout/export, 21 Node tests, 121 Mermaid renders and strict OpenSpec pass; the lifecycle driver and documentation authority reviews are current. Complete local, native Linux, installed and exact-head CI qualification are the next action; no terminal release or retained-project claim is made.
 
 ### [ ] TEST-PARALLEL-001 — Run release-gate tests in parallel (checkpointed, fail-fast)
 

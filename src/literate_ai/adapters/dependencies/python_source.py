@@ -16,6 +16,7 @@ from packaging.specifiers import InvalidSpecifier, SpecifierSet
 from packaging.utils import canonicalize_name
 
 from .python_lock import PythonWheelLock, _requirement, parse_python_wheel_lock
+from .python_projection import PythonSourceProjection, prepare_python_source_projection
 from .types import DependencyObservationError
 
 _MAX_MANIFEST_BYTES = 1024 * 1024
@@ -31,6 +32,7 @@ _AUTHORITIES = {
     "uv.lock",
     "pylock.toml",
     "python-wheel-lock.json",
+    "python-source-projection.json",
     "pip.conf",
     "pip.ini",
 }
@@ -143,6 +145,7 @@ class PythonSourceAuthority:
     manifest_sha256: str
     lock_sha256: str
     lock: PythonWheelLock
+    projection: PythonSourceProjection | None = None
 
 
 def prepare_python_source_authority(
@@ -150,6 +153,7 @@ def prepare_python_source_authority(
     *,
     manifest_path: str,
     lock_path: str,
+    projection_path: str | None = None,
 ) -> PythonSourceAuthority:
     """Check one profile-selected manifest and lock without filesystem or execution.
 
@@ -163,6 +167,10 @@ def prepare_python_source_authority(
     lock_file = _path(lock_path, {"python-wheel-lock.json"})
     if manifest.parent != lock_file.parent:
         _fail("Python manifest and lock must share one package root")
+    if projection_path is not None:
+        projection_file = _path(projection_path, {"python-source-projection.json"})
+        if projection_file.parent != manifest.parent:
+            _fail("Python projection must share the selected package root")
     for path in files:
         if not isinstance(path, str):
             _fail("Source inventory paths must be strings")
@@ -170,7 +178,7 @@ def prepare_python_source_authority(
         is_authority = name in _AUTHORITY_NAMES or (
             name.startswith("pylock.") and name.endswith(".toml")
         )
-        if is_authority and path not in {manifest_path, lock_path}:
+        if is_authority and path not in {manifest_path, lock_path, projection_path}:
             _fail("Source inventory contains an unselected Python dependency authority")
     content, lock_content = files.get(manifest_path), files.get(lock_path)
     if not isinstance(content, str) or not isinstance(lock_content, str):
@@ -189,4 +197,9 @@ def prepare_python_source_authority(
         hashlib.sha256(content.encode("utf-8")).hexdigest(),
         hashlib.sha256(lock_content.encode("utf-8")).hexdigest(),
         lock,
+        (
+            prepare_python_source_projection(files, path=projection_path, lock=lock)
+            if projection_path is not None
+            else None
+        ),
     )
