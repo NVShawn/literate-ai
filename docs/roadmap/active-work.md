@@ -23195,7 +23195,7 @@ GitHub CI failure without relaxing identity checks.
 
 ### [ ] WORKER-PROBE-DIAGNOSTICS-001 — Preserve actionable SSH probe failures
 
-- **Release target:** 1.2.0
+- **Release target:** 1.3.0
 - **Priority:** P0
 - **GitHub issue:** [#3](https://github.com/jordanhubbard/literate-ai/issues/3) (migrated from NVIDIA-dev/literate-ai#505)
 - **Owner:** worker capability probes, SSH transport diagnostics, and CLI rendering
@@ -23209,14 +23209,14 @@ GitHub CI failure without relaxing identity checks.
 - **Next action (in progress):** Complete consistency and installed/hosted qualification
   before landing the diagnostic repair.
 - **Implementation:**
-  - [ ] Carry worker ID, SSH exit status, bounded stderr, and redacted transport cause
+  - [x] Carry worker ID, SSH exit status, bounded stderr, and redacted transport cause
         through individual and `--all` probe results.
-  - [ ] Render distinct remediation for unknown/changed host keys, rejected
+  - [x] Render distinct remediation for unknown/changed host keys, rejected
         credentials, name resolution, connection refusal, and timeout.
 - **Evidence:**
-  - [ ] Multi-worker regressions identify only the failing worker and retain each SSH
+  - [x] Multi-worker regressions identify only the failing worker and retain each SSH
         exit-255 diagnostic without secrets or unbounded output.
-  - [ ] Real first-contact and registered-host probes demonstrate that host-key setup
+  - [x] Real first-contact and registered-host probes demonstrate that host-key setup
         is not misreported as failure of unrelated workers.
 
 - **Local evidence:** Seventeen focused capability/CLI tests pass. A real SSH probe
@@ -23228,6 +23228,8 @@ GitHub CI failure without relaxing identity checks.
 - **Qualification follow-up:** Resolve or explicitly exclude the zero-memory GPU
   observation under RELEASE-INTEGRATION-003 capability admission; do not silently
   substitute invented capacity in order to admit that worker.
+
+- **Current qualification:** Four capability tests cover every named SSH cause, bounds/redaction and mixed healthy/failed routing. Fresh strict empty-known-host refusal followed by normal registered-host success passes on the combined 1.3 source. Exact combined CI remains pending; the parent stays open until integration qualification.
 
 ### [ ] QUALIFICATION-ECONOMY-001 — Make exact qualification affordable and observable
 
@@ -27708,6 +27710,9 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   - [ ] Every open issue and review has a linked queue owner and current release disposition
   - [ ] Meaningful focused tests and required consolidated qualification pass for changed behavior
   - [ ] Remaining release and acceptance blockers remain explicit until proven complete
+
+- **GitHub pull request:** [#66](https://github.com/jordanhubbard/literate-ai/pull/66), including the reviewed ancestry of #60–#62.
+- **Policy reconciliation:** Correct stale repository pre-release target 1.2 to 1.3 through the public release-state command; record native and installed qualification without claiming final release readiness.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
