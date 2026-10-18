@@ -220,7 +220,15 @@ def _generated_lock_projection(
                 "Python wheel lock requires exactly one corresponding manifest",
             )
         authority = prepare_python_source_authority(
-            files, manifest_path=manifests[0], lock_path=lock_path
+            files,
+            manifest_path=manifests[0],
+            lock_path=lock_path,
+            projection_path=(
+                python_source_authority.projection.path
+                if python_source_authority is not None
+                and python_source_authority.projection is not None
+                else None
+            ),
         )
         # Source consistency is not a substitute for independently observed
         # target, acquired bytes and installed environment custody.

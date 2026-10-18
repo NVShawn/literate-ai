@@ -2141,7 +2141,8 @@ class LocalStandardLifecyclePorts:
 
     def _source_bytes_exact(self, component_revision: ContentIdentity) -> bool:
         """Whether this Component's source admission binds exact bytes."""
-        return False
+        target = self.python_targets.get(component_revision.uri)
+        return target is not None and target.source_projection is not None
 
     def _resolve_and_write_sbom(
         self,
@@ -2921,9 +2922,14 @@ class LocalStandardLifecyclePorts:
     def _admit_python_source(self, revision, source_identity):
         target = self.python_targets[revision.uri]
         root = self.source_trees.resolve(source_identity)
-        files = self._source_text_files(root)
+        files = self._source_text_files(
+            root, exact_bytes=target.source_projection is not None
+        )
         authority = prepare_python_source_authority(
-            files, manifest_path=target.manifest, lock_path=target.lockfile
+            files,
+            manifest_path=target.manifest,
+            lock_path=target.lockfile,
+            projection_path=target.source_projection,
         )
         observe_python_wheel_target(self._python_toolchain(target)).require_lock(
             authority.lock
@@ -3051,6 +3057,27 @@ class LocalStandardLifecyclePorts:
         workspace.mkdir()
         objects.mkdir()
         try:
+            build_source = source
+            if authority.projection is not None:
+                build_source = staging / "projected-source"
+                shutil.copytree(source, build_source)
+                for relative in authority.projection.excluded_paths:
+                    (build_source / relative).unlink()
+                expected_files = {
+                    path: content
+                    for path, content in self._source_text_files(
+                        source, exact_bytes=True
+                    ).items()
+                    if path not in authority.projection.excluded_paths
+                }
+                if (
+                    self._source_text_files(build_source, exact_bytes=True)
+                    != expected_files
+                ):
+                    raise LocalStandardLifecycleError(
+                        "Python build projection differs from reviewed source"
+                    )
+            projected_identity = local_generated_source_tree_identity(build_source)
             with ExitStack() as streams:
                 sources = {
                     package.name: streams.enter_context(
@@ -3078,7 +3105,7 @@ class LocalStandardLifecyclePorts:
             result = self._run_locked(
                 contract,
                 ComponentCommandPhase.BUILD,
-                source_root=source,
+                source_root=build_source,
                 object_root=objects,
                 artifact_root=workspace,
                 export_path=workspace / shape.export_id,
@@ -3088,6 +3115,10 @@ class LocalStandardLifecyclePorts:
             if local_generated_source_tree_identity(source) != source_identity:
                 raise LocalStandardLifecycleError(
                     "Python build mutated admitted source"
+                )
+            if local_generated_source_tree_identity(build_source) != projected_identity:
+                raise LocalStandardLifecycleError(
+                    "Python build mutated its reviewed projection"
                 )
             self._python_observers[str(workspace.resolve())]()
             self._write_artifact_manifest(

@@ -728,6 +728,7 @@ class StandardPythonWheelCommandProfile:
     toolchain: str
     manifest: str
     lockfile: str
+    source_projection: str | None = None
 
     SCHEMA: ClassVar[str] = STANDARD_PYTHON_WHEEL_COMMAND_PROFILE_SCHEMA
 
@@ -760,6 +761,21 @@ class StandardPythonWheelCommandProfile:
                 "StandardPythonWheelCommandProfile.lockfile",
                 "must name python-wheel-lock.json beside the selected manifest",
             )
+        if self.source_projection is not None:
+            projection = PurePosixPath(
+                _relative_path(
+                    self.source_projection,
+                    "StandardPythonWheelCommandProfile.source_projection",
+                )
+            )
+            if (
+                projection.name != "python-source-projection.json"
+                or projection.parent != manifest.parent
+            ):
+                fail(
+                    "StandardPythonWheelCommandProfile.source_projection",
+                    "must name python-source-projection.json beside the manifest",
+                )
 
     @property
     def identity(self) -> ContentIdentity:
@@ -772,6 +788,11 @@ class StandardPythonWheelCommandProfile:
             "toolchain": self.toolchain,
             "manifest": self.manifest,
             "lockfile": self.lockfile,
+            **(
+                {"source_projection": self.source_projection}
+                if self.source_projection is not None
+                else {}
+            ),
         }
 
     @classmethod
@@ -783,12 +804,18 @@ class StandardPythonWheelCommandProfile:
             path=path,
             schema_uri=cls.SCHEMA,
             required=frozenset({"target", "toolchain", "manifest", "lockfile"}),
+            optional=frozenset({"source_projection"}),
         )
         return cls(
             portable_name(data["target"], f"{path}.target"),
             portable_name(data["toolchain"], f"{path}.toolchain"),
             _relative_path(data["manifest"], f"{path}.manifest"),
             _relative_path(data["lockfile"], f"{path}.lockfile"),
+            (
+                _relative_path(data["source_projection"], f"{path}.source_projection")
+                if "source_projection" in data
+                else None
+            ),
         )
 
 

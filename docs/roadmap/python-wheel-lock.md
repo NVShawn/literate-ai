@@ -309,3 +309,46 @@ the downstream Python application blocker until the above integration passes.
   incomplete full gate, not a suite pass or release qualification.
 - An earlier broad attempt was invalidated by concurrent source edits during
   self-hosting. The later run kept the source frozen and passed that replay.
+
+
+## Explicit target source projection
+
+An explicit wheel packaging profile may opt into a reviewed source projection:
+
+```json
+{
+  "schema": "urn:literate-ai:schema:v2:standard-python-wheel-command-profile",
+  "target": "pip",
+  "toolchain": "python",
+  "manifest": "source/requirements.txt",
+  "lockfile": "source/python-wheel-lock.json",
+  "source_projection": "source/python-source-projection.json"
+}
+```
+
+The adjacent projection uses schema `literate-ai/python-source-projection@1` and
+exactly four fields: `schema`, `environment`, `tags` and `excluded`. Copy the full
+`environment` object and expanded, sorted `tags` array from the selected wheel lock.
+Each excluded record contains exactly `path`, `sha256` and `reason`: a canonical
+source-inventory-relative `.py` path within the package root, its lowercase SHA-256
+of raw bytes (including line endings), and a nonempty review reason of at most 512
+characters. The exclusion list is sorted by path, unique even under case folding,
+nonempty and bounded to 4,096 records. The UTF-8 JSON manifest is bounded to 1 MiB;
+duplicate/unknown fields, missing source, stale hashes and target drift refuse.
+
+For a Linux application whose common entry point selects a Darwin backend only on
+Darwin, list the exact Darwin backend file(s) in this Linux projection. The original
+source and complete requirements, including the Darwin SDK's requirement marker,
+remain retained and unchanged. Admission resolves active root requirements using
+the exact locked target. A private derived build tree omits only the selected
+files; the exported artifact keeps the projection manifest and full requirements.
+No installed alias is fabricated for the absent SDK. An active import of that SDK
+still fails admission. Projecting a required runtime or test file does not excuse
+failure of build, generated tests, execution or independent acceptance.
+
+The profile identity binds projection selection; original source custody binds its
+bytes, excluded bytes and complete requirements. `python-dependencies.json` retains
+`projection_path` and `projection_sha256` beside the existing manifest/lock custody.
+Cache reuse and relocated-package acceptance reopen sealed artifact and target
+custody. Without a locked `source_projection` selection, complete conservative
+source scanning remains in force; no Python control-flow reachability is inferred.

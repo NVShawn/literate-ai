@@ -115,12 +115,14 @@ def _locked_snapshot(
     accelerator: str | None = None,
     package_npm: bool = False,
     package_python: bool = False,
+    python_source_projection: bool = False,
     generation_ready: bool = False,
     no_entrypoint: bool = False,
     cpp_library_kind: str | None = None,
     duplicate_entrypoint: bool = False,
 ):
     component, flavors = _fixture(root)
+    python_projection_path = "source/python-source-projection.json"
     if generation_ready:
         document = component / "component.md"
         document.write_text(
@@ -343,6 +345,11 @@ def _locked_snapshot(
                         "toolchain": "python",
                         "manifest": "source/requirements.txt",
                         "lockfile": "source/python-wheel-lock.json",
+                        **(
+                            {"source_projection": python_projection_path}
+                            if python_source_projection
+                            else {}
+                        ),
                     }
                 ),
                 encoding="utf-8",

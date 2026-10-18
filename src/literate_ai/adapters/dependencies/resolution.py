@@ -207,6 +207,7 @@ class CycloneDxLifecycleResolver:
             source_content,
             allow_missing_cargo_lock=self.allow_missing_cargo_lock,
             runtime_python_imports=self.runtime_python_imports,
+            python_source_authority=self.python_source_authority,
         )
         lock_projection = _generated_lock_projection(
             files,
@@ -328,6 +329,7 @@ class CycloneDxLifecycleResolver:
                         "literate-ai:python-top-level-import", ()
                     )
                 ),
+                python_source_authority=self.python_source_authority,
             )
         mix_observed = HostDependencyObservation((), ())
         mix_evidence = None

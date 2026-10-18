@@ -171,3 +171,51 @@ scoped evidence SHALL NOT replace a qualifying current receipt.
 #### Scenario: Later release attempt fails
 - **WHEN** a current qualifying receipt exists and a later run fails packaging
 - **THEN** the prior receipt remains current and the failed run remains separately inspectable
+
+
+### Requirement: Explicit target-bound Python source projection
+
+A locked Python wheel packaging profile MAY select one adjacent
+`python-source-projection.json`. Its bounded, inert, strict manifest MUST bind the
+complete wheel-lock marker environment and tags, plus a unique inventory of
+excluded Python backend paths, exact source hashes and review reasons.
+
+#### Scenario: A projection requires locked selection
+- **WHEN** a source projection manifest is supplied without an explicit locked packaging-profile selection
+- **THEN** admission refuses the unselected authority
+
+### Requirement: Target-selected Python dependency declarations
+
+Python source authority MUST preserve complete original files and requirement
+declarations. Root requirement markers MUST resolve using the exact locked target
+environment. Active imports MUST retain source-BOM and real installed-payload
+evidence requirements. Without explicit projection selection, admission MUST
+conservatively inspect every source file rather than infer control-flow reachability.
+
+#### Scenario: Linux projection retains Darwin dependency intent
+- **WHEN** an explicitly projected Linux application declares a Darwin-only SDK and excludes its exact Darwin backend bytes
+- **THEN** admission uses the Linux closure and the full source declarations remain retained
+- **AND** unguarded active imports of the missing SDK still refuse
+
+### Requirement: Derived Python source projection custody
+
+Only explicitly selected backend files MAY be omitted from a derived Python build
+tree. Projection selection, manifest bytes, target and original source MUST remain
+bound to build/cache and retained dependency custody. The original source MUST
+remain unchanged by build. Test, execution, independent acceptance and artifact
+reopening MUST retain their existing gates.
+
+#### Scenario: Relocated artifacts retain projection custody
+- **WHEN** a projected Python artifact is packaged and relocated after original source retirement
+- **THEN** independent acceptance reopens sealed projection and dependency custody
+- **AND** changed projection or artifact bytes refuse
+
+### Requirement: Python source projection refusal boundaries
+
+Missing active imports, changed targets, stale excluded bytes and unsafe projection
+inputs MUST refuse before acquisition or build. Source comments and inferred
+Python control flow MUST NOT supply projection authority or bypass validation.
+
+#### Scenario: A projection cannot authorize a changed target or source
+- **WHEN** the selected marker environment or an excluded backend's bytes differ from the manifest
+- **THEN** admission refuses before acquisition or build

@@ -60,6 +60,7 @@ class StandardPythonTarget:
     manifest: str
     lockfile: str
     python_command: tuple[str, ...]
+    source_projection: str | None = None
 
     def __post_init__(self) -> None:
         for field in fields(self):
@@ -67,7 +68,7 @@ class StandardPythonTarget:
                 if not isinstance(getattr(self, field.name), ContentIdentity):
                     raise TypeError("Python target requires exact content identities")
         profile = StandardPythonWheelCommandProfile(
-            "pip", "python", self.manifest, self.lockfile
+            "pip", "python", self.manifest, self.lockfile, self.source_projection
         )
         if profile.identity != self.packaging_profile_identity:
             raise ValueError("Python target paths differ from the locked profile")
@@ -95,6 +96,11 @@ class StandardPythonTarget:
             "python_command": list(self.python_command),
             "installer_filename": PIP_INSTALLER.filename,
             "installer_sha256": PIP_INSTALLER.sha256,
+            **(
+                {"source_projection": self.source_projection}
+                if self.source_projection is not None
+                else {}
+            ),
         }
 
     @property
@@ -174,6 +180,14 @@ def _source_document(source: PythonSourceAuthority) -> dict[str, str]:
         "lock_path": source.lock_path,
         "manifest_sha256": source.manifest_sha256,
         "lock_sha256": source.lock_sha256,
+        **(
+            {
+                "projection_path": source.projection.path,
+                "projection_sha256": source.projection.sha256,
+            }
+            if source.projection is not None
+            else {}
+        ),
     }
 
 
