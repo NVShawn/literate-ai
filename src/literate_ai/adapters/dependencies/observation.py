@@ -29,6 +29,7 @@ from literate_ai._filesystem import (
     require_safe_directory,
     stat_is_link_or_reparse,
 )
+from literate_ai.adapters.freebsd_loader_paths import FreeBsdLoaderPaths
 from literate_ai.adapters.linux_loader_paths import LinuxLoaderPaths
 from literate_ai.adapters.macos_loader_paths import MacOsLoaderPaths
 from literate_ai.adapters.user_paths import resolve_host_system_paths
@@ -849,6 +850,7 @@ class PortableHostDependencyObserver:
         windows_environment: Mapping[str, str] | None = None,
         macos_loader_paths: MacOsLoaderPaths | None = None,
         linux_loader_paths: LinuxLoaderPaths | None = None,
+        freebsd_loader_paths: FreeBsdLoaderPaths | None = None,
         artifact_files: Sequence[Path] | None = None,
     ) -> None:
         self.toolchain_commands = tuple(tuple(item) for item in toolchain_commands)
@@ -866,6 +868,11 @@ class PortableHostDependencyObserver:
         ):
             raise ValueError("Linux loader paths must be a typed projection")
         self.linux_loader_paths = linux_loader_paths
+        if freebsd_loader_paths is not None and not isinstance(
+            freebsd_loader_paths, FreeBsdLoaderPaths
+        ):
+            raise ValueError("FreeBSD loader paths must be a typed projection")
+        self.freebsd_loader_paths = freebsd_loader_paths
         self.artifact_files = _explicit_artifact_files(artifact_files)
 
     def observe(
@@ -885,6 +892,16 @@ class PortableHostDependencyObserver:
                 lifecycle_commands=self.lifecycle_commands,
                 library_roots=self.library_roots,
                 loader_paths=self.linux_loader_paths,
+                artifact_files=self.artifact_files,
+            ).observe(build, root_ref=root_ref)
+        elif sys.platform.startswith("freebsd"):
+            from .freebsd import FreeBsdElfDependencyObserver
+
+            native = FreeBsdElfDependencyObserver(
+                toolchain_commands=self.toolchain_commands,
+                lifecycle_commands=self.lifecycle_commands,
+                library_roots=self.library_roots,
+                loader_paths=self.freebsd_loader_paths,
                 artifact_files=self.artifact_files,
             ).observe(build, root_ref=root_ref)
         elif sys.platform in {"win32", "cygwin"}:
@@ -2266,6 +2283,8 @@ def _run_bounded_tool(
     code: str,
     allowed_returncodes: frozenset[int] = frozenset({0}),
 ) -> str:
+    from literate_ai.adapters.builders import BuildError, run_bounded_process
+
     if not tool.is_absolute() or tool.is_symlink() or not tool.is_file():
         raise DependencyObservationError(
             "dependencies.inspector-unsafe",
@@ -2277,15 +2296,18 @@ def _run_bounded_tool(
             environment[name] = value
     tool_identity = _file_digest(tool)
     try:
-        completed = subprocess.run(
+        completed = run_bounded_process(
             [str(tool), *arguments],
-            stdin=subprocess.DEVNULL,
-            capture_output=True,
-            timeout=30,
-            check=False,
-            env=environment,
+            cwd=None,
+            environment=environment,
+            timeout_seconds=30,
+            stdout_limit_bytes=_MAX_TOOL_OUTPUT,
+            stderr_limit_bytes=_MAX_TOOL_OUTPUT,
+            error_prefix=code,
+            terminate_descendants=True,
+            trace=False,
         )
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except (OSError, BuildError) as exc:
         raise DependencyObservationError(
             code, f"dependency inspector {tool} could not complete"
         ) from exc
@@ -4571,7 +4593,7 @@ def is_host_native_executable(path: Path) -> bool:
 
     if sys.platform == "darwin":
         return _is_macho(path)
-    if sys.platform.startswith("linux"):
+    if sys.platform.startswith(("linux", "freebsd")):
         return _is_elf(path)
     if sys.platform in {"win32", "cygwin"}:
         return _is_pe(path)

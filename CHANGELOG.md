@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- FreeBSD native dependency inspection binds ELF imports, interpreter, hints,
+  global library maps and explicit loader paths without running target images.
+  Changed loader inputs, unresolved imports and unqualified controls refuse.
+  Worker/cache-tool and retained native guards carry FreeBSD loader context.
+  Native inspector processes enforce stream budgets and terminate owned process
+  trees on timeout or overflow.
+
 - Add an internal retained-project command workspace with exact plan authorization,
   captured tools, isolated scratch/home, bounded process trees and revalidated
   input/export custody. Profiles reject overlapping output owners and payloads

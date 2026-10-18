@@ -10,6 +10,7 @@ from literate_ai.adapters.dependencies import (
     HostDependencyObservation,
     PortableHostDependencyObserver,
 )
+from literate_ai.adapters.freebsd_loader_paths import FreeBsdLoaderPaths
 from literate_ai.adapters.linux_loader_paths import LinuxLoaderPaths
 from literate_ai.adapters.macos_loader_paths import MacOsLoaderPaths
 from literate_ai.contracts import (
@@ -246,6 +247,9 @@ def capture_worker_tool_dependencies(
                 else None,
                 linux_loader_paths=LinuxLoaderPaths.from_environment(effective)
                 if sys.platform.startswith("linux")
+                else None,
+                freebsd_loader_paths=FreeBsdLoaderPaths.from_environment(effective)
+                if sys.platform.startswith("freebsd")
                 else None,
             ).observe({"artifact_path": empty}, root_ref=root_ref)
         WorkerToolDependencies(

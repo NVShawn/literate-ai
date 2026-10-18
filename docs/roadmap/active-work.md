@@ -27789,12 +27789,30 @@ reviewed plan and explicit candidate parent revision; it selects the FreeBSD OS
 Flavor and pins the actual installed Standard distribution. Neither result is a
 complete native application build/test/accept/package or release receipt.
 
-Dependency observation audit: `PortableHostDependencyObserver` still refuses
-FreeBSD, and native executable recognition omits its ELF format. Qualifying the
+The initial dependency observation audit found `PortableHostDependencyObserver`
+refusing FreeBSD and native executable recognition omitting its ELF format. Qualifying the
 native dependency closure requires a FreeBSD loader/inspector owner and current
 native evidence; Linux loader-cache semantics cannot stand in for FreeBSD hints
 and library mappings. This remains part of FREEBSD-001 before native lifecycle
 qualification, alongside the missing host-install realization.
+
+Loader implementation checkpoint: bind the native readelf/ldconfig tools,
+FreeBSD hints search order, default library directories and recursively included
+global libmap rules; revalidate loader inputs and exact ELF closure after
+inspection. Preserve typed refusal for unmodeled loader controls, constrained or
+ambiguous mappings, unsafe paths, changed configuration and unresolved imports.
+Do not execute target binaries or reuse Linux cache parsing as FreeBSD evidence.
+The local FreeBSD group passes 22 tests with its one actual-FreeBSD case skipped
+on macOS. Three real inspector-process tests enforce cleared loader/Python
+environment, output overflow and deadline/tree ownership. Existing alignment (4),
+worker-tool dependencies (1), compiler-cache dependencies (2), retained native
+custody (2) and retained Cargo test execution (2) groups pass. Native inspection,
+installed-wheel lifecycle, supported sandbox/capacity policies and retained
+receipt/release qualification remain open.
+
+The installed `d4d67a9f` native CLI now also completes public sample `lock` and
+`plan`, selecting FreeBSD authority. This is native planning evidence, not a
+generated application or current lifecycle receipt.
 
 FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
 a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,

@@ -21,6 +21,11 @@ quota, paging or pressure observation SHALL remain explicitly unsupported or
 unavailable and SHALL NOT become proof of capacity or successful acceptance.
 Hardware acceptance SHALL require the actual target hardware where specified.
 
+Native ELF dependency evidence SHALL bind the FreeBSD inspector, hints, library
+maps and selected library bytes. Inspection SHALL NOT execute target binaries.
+Unsupported loader controls and ambiguous mappings SHALL refuse qualification;
+Linux loader-cache semantics SHALL NOT substitute for FreeBSD loader evidence.
+
 #### Scenario: Unsupported capability
 
 - **WHEN** a required native observation cannot be measured

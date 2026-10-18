@@ -15,10 +15,20 @@ configuration; the optional provisioner command owns guest creation and cleanup.
 Registration never implicitly creates a VM.
 
 The FreeBSD repository template requires native Git and Git LFS, GNU Make (`gmake`), the base
-C compiler, Node/npm and Python 3.11+. FreeBSD inventory and resource collection use
+C compiler, native `readelf`/`ldconfig`, Node/npm and Python 3.11+. FreeBSD inventory and resource collection use
 noninteractive native commands, not interactive Bash startup. `--skip-model`
 alignment proves only declared tool/file readiness; it does not qualify a coding
 CLI or provider. Generation needs its separately configured and qualified runner.
+
+Native ELF observation reads the FreeBSD hints directory order and recursively
+included global library maps, binds the inspector/configuration/library bytes,
+and rechecks library search candidates. It supports RPATH/RUNPATH, `$ORIGIN` and
+explicit `LD_LIBRARY_PATH`. It never runs a target image to discover dependencies.
+Constrained, conflicting or chained library maps, other loader environment
+controls, other ABI interpreters, unmodeled dynamic tokens, filters and
+`NODEFLIB` remain explicit refusals. These restrictions follow the observed
+[FreeBSD loader contract](https://github.com/freebsd/freebsd-src/blob/main/libexec/rtld-elf/rtld.1);
+they do not qualify an arbitrary loader configuration or a complete lifecycle.
 
 FreeBSD initialization, registration, alignment and resource observations are under
 active qualification in issue #67. End-to-end installed-wheel build/test, retained
@@ -31,7 +41,7 @@ and requiring capacity policies continue to hold rather than infer no quotas.
 Copy `literate.workers.example.json` to user `workers.json` and replace its SSH
 placeholders with user-owned endpoints and workspaces. Copy
 `literate.test.example.json` to project-scoped user `test.json` and select those exact
-worker IDs with their matching `linux`, `macos`, or `windows` platform Flavors. The
+worker IDs with their matching `freebsd`, `linux`, `macos`, or `windows` platform Flavors. The
 resolved paths are reported by `litai init`: Linux/macOS default to
 `${XDG_CONFIG_HOME:-$HOME/.config}/literate-ai`, while Windows uses the user's Roaming
 AppData Known Folder. `LITAI_CONFIG_DIR` is an absolute override.

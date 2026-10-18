@@ -401,6 +401,8 @@ class FreeBSDAlignmentTests(unittest.TestCase):
                         "cmd git /usr/local/bin/git",
                         "cmd git-lfs /usr/local/bin/git-lfs",
                         "cmd gmake /usr/local/bin/gmake",
+                        "cmd readelf /usr/bin/readelf",
+                        "cmd ldconfig /sbin/ldconfig",
                         "cmd cc /usr/bin/cc",
                         "cmd node /usr/local/bin/node",
                         "cmd npm /usr/local/bin/npm",

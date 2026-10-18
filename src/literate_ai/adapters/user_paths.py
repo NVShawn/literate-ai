@@ -105,6 +105,26 @@ class HostSystemPaths:
 
 
 @dataclass(frozen=True, slots=True)
+class FreeBsdLoaderSystemPaths:
+    ldconfig: PurePath
+    hints: PurePath
+    libmap: PurePath
+    defaults: tuple[PurePath, ...]
+    interpreter: PurePath
+
+
+def resolve_freebsd_loader_system_paths() -> FreeBsdLoaderSystemPaths:
+    """Native FreeBSD runtime-loader policy, independent of user configuration."""
+    return FreeBsdLoaderSystemPaths(
+        PurePosixPath("/sbin/ldconfig"),
+        PurePosixPath("/var/run/ld-elf.so.hints"),
+        PurePosixPath("/etc/libmap.conf"),
+        (PurePosixPath("/lib"), PurePosixPath("/usr/lib")),
+        PurePosixPath("/libexec/ld-elf.so.1"),
+    )
+
+
+@dataclass(frozen=True, slots=True)
 class HostPaths(UserPaths):
     """All per-user host-native roots owned by the platform policy surface."""
 
@@ -619,6 +639,7 @@ def _windows_known_folder(kind: str) -> Path:
 
 
 __all__ = [
+    "FreeBsdLoaderSystemPaths",
     "APPLICATION_DIRECTORY",
     "CONFIG_DIRECTORY_ENVIRONMENT",
     "HOST_INSTALL_MANIFEST_SCHEMA",
@@ -632,6 +653,7 @@ __all__ = [
     "prepare_user_directory",
     "resolve_host_paths",
     "resolve_host_system_paths",
+    "resolve_freebsd_loader_system_paths",
     "resolve_user_home",
     "resolve_user_paths",
 ]
