@@ -2292,6 +2292,16 @@ platform tag, such as `freebsd_16_0_current_amd64`. Foreign FreeBSD dependencies
 that condition on kernel release/version require native target observations;
 export refuses to infer those values from the wheel tag or the controller.
 
+### Worker file-transfer routing
+
+A worker's `transport` selects its private SSH-compatible program for commands
+and for SCP source/evidence transfers. SCP remains the transfer executable; for
+a nondefault program, the framework passes it with `scp -S`. This also applies to
+release checkout synchronization and alignment file copies. The program must
+accept OpenSSH flags and support the endpoint's SCP/SFTP session. Routing data,
+SSH configuration and credentials stay private. The default `ssh` selection keeps
+normal OpenSSH arguments and verification behavior.
+
 ### Private worker registration and connectivity
 
 Video walkthrough:

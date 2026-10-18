@@ -980,6 +980,7 @@ class RetainedHarnessSshExecutor:
                             worker.endpoint,
                             f"{incoming}/{name}",
                             deadline.remaining(),
+                            transport=worker.transport,
                         ),
                         cwd,
                         deadline,

@@ -27767,3 +27767,28 @@ the FreeBSD package layout. Real offline pip resolution, tamper and direct-URL
 refusal tests pass in the local bootstrap group. This does not yet qualify the
 native installed-wheel lifecycle. The earlier wheel-smoke run refused because the
 checkout changed during execution; a new frozen revision must run that gate.
+
+### [ ] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
+
+- **GitHub issue:** [#69](https://github.com/jordanhubbard/literate-ai/issues/69)
+
+- **Priority:** P1
+- **Owner:** worker SSH transport and artifact custody
+- **Direction:** Use the same private configured SSH-compatible route for commands, source staging and evidence retrieval.
+- **Conclusion:** SCP may remain the fixed transfer executable, but must carry the selected SSH program for nondefault worker transports; direct default routing cannot establish the registered worker identity.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
+- **Evidence:**
+  - [ ] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
+
+WORKER-SCP-001 implementation checkpoint: SCP helpers accept a validated optional
+SSH program and the selected worker transport now reaches source staging,
+evidence retrieval, retained-harness staging, release synchronization and alignment
+file copies. Default OpenSSH argv stays unchanged. Canonical local checks pass
+SSH/custody (5 tests), alignment (4) and release synchronization (17), including
+custom-route uploads/downloads and transport-injection refusal. A live FreeBSD
+SSH/SFTP round trip through the configured route uploaded a 63-byte gzip fixture,
+matched its remote SHA-256 and downloaded identical bytes. The result is explicitly
+transport-only, not a complete native lifecycle receipt. Full installed native
+source/build/test/evidence qualification and existing-platform CI remain open.

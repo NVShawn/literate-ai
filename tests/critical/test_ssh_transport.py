@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -8,11 +9,44 @@ from unittest.mock import patch
 from literate_ai.adapters.ssh_transport import (
     BoundedSshProcessRunner,
     SshTransportError,
+    scp_arguments,
+    scp_download_arguments,
     ssh_arguments,
 )
 
 
 class SshTransportTests(unittest.TestCase):
+    def test_scp_routes_upload_and_download_through_the_selected_ssh_program(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.bin"
+            source.write_bytes(b"source")
+            calls = (
+                (scp_arguments, (source, "user@host.example", "/job/source.bin", 9)),
+                (
+                    scp_download_arguments,
+                    (
+                        "user@host.example",
+                        "/job/remote-evidence.tar.gz",
+                        root / "evidence",
+                        9,
+                    ),
+                ),
+            )
+            for function, args in calls:
+                with self.subTest(helper=function.__name__):
+                    default = function(*args)
+                    self.assertEqual(default, function(*args, transport="ssh"))
+                    routed = function(*args, transport="private-route")
+                    self.assertEqual(routed[:3], ("scp", "-S", "private-route"))
+                    self.assertEqual(routed[3:], default[1:])
+                    for invalid in ("", "../ssh", "ssh -oProxyCommand=x", "ssh;exit"):
+                        with self.assertRaises(SshTransportError) as caught:
+                            function(*args, transport=invalid)
+                        self.assertEqual(
+                            caught.exception.code, "execution.ssh_transport_invalid"
+                        )
+
     def test_ssh_argv_rejects_an_unsafe_transport_name(self) -> None:
         for invalid in ("", "ssh -oProxyCommand=x", "../ssh", "ssh;rm -rf /"):
             with self.subTest(invalid=invalid):

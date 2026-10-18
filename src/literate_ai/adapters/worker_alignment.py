@@ -993,7 +993,11 @@ class WorkerAligner:
         assert worker.endpoint is not None
         copied = self.runner_factory().run(
             scp_arguments(
-                item.source, worker.endpoint, relative, _PROBE_TIMEOUT_SECONDS
+                item.source,
+                worker.endpoint,
+                relative,
+                _PROBE_TIMEOUT_SECONDS,
+                transport=worker.transport,
             ),
             cwd=self.cwd,
             timeout_seconds=_PROBE_TIMEOUT_SECONDS,

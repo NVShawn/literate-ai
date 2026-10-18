@@ -767,7 +767,7 @@ class ProjectReleaseTests(unittest.TestCase):
             )
             uploads = []
 
-            def scp(source, _endpoint, destination, _timeout):
+            def scp(source, _endpoint, destination, _timeout, **_kwargs):
                 uploads.append(Path(source).stat().st_size)
                 return ("cp", str(source), str(home / destination))
 

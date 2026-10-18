@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Worker source uploads, evidence downloads, release checkout synchronization and
+  alignment file copies carry the configured SSH program through SCP. Default
+  OpenSSH arguments remain unchanged; invalid transport names still refuse.
+
 - Add offline worker wheelhouse export from reviewed native-built wheels. It
   snapshots and verifies local candidates, resolves without a package index,
   rejects direct URLs and redirected files, and retains closure/installed-file

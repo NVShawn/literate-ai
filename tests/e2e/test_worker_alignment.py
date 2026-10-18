@@ -119,7 +119,7 @@ class WorkerAlignmentTests(unittest.TestCase):
                 patch.object(
                     worker_alignment,
                     "scp_arguments",
-                    lambda source, _endpoint, destination, _timeout: (
+                    lambda source, _endpoint, destination, _timeout, **_kwargs: (
                         "cp",
                         str(source),
                         str(home / destination),
