@@ -69,6 +69,26 @@ class WorkerRegistryCliTests(unittest.TestCase):
         if os.name != "nt":
             self.assertEqual(self.path.stat().st_mode & 0o777, 0o600)
 
+    def test_freebsd_registration_roundtrips_without_linux_identity(self):
+        status, _ = self.cli(
+            "add",
+            "bsd",
+            "--endpoint",
+            "user@bsd.invalid",
+            "--workspace",
+            "~/litai",
+            "--os",
+            "freebsd",
+        )
+        self.assertEqual(status, 0)
+        catalog = read_registry(self.path)
+        self.assertEqual(catalog.worker("bsd").requirements.os_family, "freebsd")
+        status, _ = self.cli("update", "bsd", "--slots", "2")
+        self.assertEqual(status, 0)
+        self.assertEqual(
+            read_registry(self.path).worker("bsd").requirements.os_family, "freebsd"
+        )
+
     def test_parallel_writers_do_not_lose_registrations(self):
         def add(index):
             worker = ExecutionWorker(f"local-{index}", ExecutionWorkerKind.LOCAL)

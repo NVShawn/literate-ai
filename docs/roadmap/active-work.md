@@ -27698,3 +27698,27 @@ revision with an incremental git bundle over SCP, leaving the operator's checkou
 alone. Measured on real workers: first full sync 30 s (windows-11); re-sync of an
 unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 2.4 s and 11.3 s.
+
+### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
+
+- **GitHub issue:** [#67](https://github.com/jordanhubbard/literate-ai/issues/67)
+- **Priority:** P1
+- **Owner:** OS Flavor, worker contracts, host tooling and native lifecycle
+- **Direction:** Support FreeBSD as an explicit native execution platform, including remote or virtualized workers, without mislabeling it as Linux.
+- **Conclusion:** Implement platform identity end to end, including registration, realization, probes, health, execution, package and acceptance custody. Existing platform regressions and real native proof are required.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Add FreeBSD OS and target contracts and Flavor; implement CLI registration, probing, paths, toolchains and alignment; support native storage and pressure checks; qualify isolated build/test/artifact and retained lifecycle execution.
+- **Evidence:**
+  - [ ] Real FreeBSD SSH registration and alignment pass; native build/test and failed-input/test rejection are retained; cleanup is bounded; existing Linux/macOS/Windows suites pass; exact installed wheel and CI qualify the change.
+
+FreeBSD implementation checkpoint: explicit OS identity now reaches worker CRUD,
+execution requirements, hardware observations, capacity records and corresponding
+JSON schemas. The hardware program checks `uname -s` before named FreeBSD sysctls,
+normalizes amd64, and leaves GPU probing explicitly unqualified. Local canonical
+`make python-check` runs pass the worker tests (29), worker CRUD (4) and dispatch
+contracts (3); shell-program tests cover named-query output and wrong-OS refusal.
+These are local regression evidence, not native lifecycle qualification. Alignment
+inspection found unrelated unavailable/low-space workers; no remediation or cleanup
+was applied. Next: OS Flavor, host/toolchain realization and alignment, storage and
+pressure observations, then native installed-wheel lifecycle and rejection proof.

@@ -72,6 +72,15 @@ development (2026-09-10):
 
 ## Current work
 
+FREEBSD-001 adds a fourth first-class OS platform and native worker/target
+support under Goals 1, 4 and 5. This includes truthful FreeBSD identity,
+registration, host/toolchain realization, bounded native observations, isolated
+execution and current artifact/acceptance evidence. It is open; registering a
+POSIX endpoint or passing mocked dispatch tests alone does not establish support.
+See framework issue #67 and the active queue. Existing three-platform behavior
+and retained-source authority must remain intact.
+
+
 WINDOWS-INSTALL-001 and CI-FIXTURE-001 complete Goals 1 and 4's native Windows
 installation and core CLI qualification slice. All 20 full CI jobs pass on
 Windows, Linux and macOS at `e4f58b7`, including native installation and installed

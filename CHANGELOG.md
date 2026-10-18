@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add explicit FreeBSD identity to worker registration, execution requirements,
+  capacity records and hardware observations. The bounded hardware probe uses
+  named FreeBSD sysctls and reports GPU probing as unqualified. Native lifecycle,
+  toolchain realization and release qualification remain in progress (#67).
+
 - Windows offline Python wheel installation preserves architecture discovery
   variables so CPython 3.11's isolated target probe matches the selected runtime.
 

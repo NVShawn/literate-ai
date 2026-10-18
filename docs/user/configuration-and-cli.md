@@ -2286,6 +2286,16 @@ Static workers are a complete supported mode: register machines the user or an
 administrator has already provisioned. An empty catalog is also valid. These
 operations do not require provisioning rights.
 
+Worker registration accepts `--os freebsd` for a physical FreeBSD machine or a
+FreeBSD guest reached over SSH. Its hardware probe uses `freebsd-version -u`,
+`uname` and named CPU/memory sysctls; `amd64` is reported as `x86_64`.
+The program rejects a non-FreeBSD kernel before collecting hardware. GPU probing
+on FreeBSD is currently unqualified and reports `not-applicable` with a diagnostic;
+it does not establish GPU availability. Registration and hardware inventory alone
+are not native build/test or release qualification. FreeBSD toolchain realization
+and lifecycle qualification are tracked in framework issue #67.
+
+
 Optional dynamic provisioning uses an organization-owned local command. It is disabled
 by default and must be explicitly enabled in the user's `worker-provisioner.json`
 (`litai config paths` shows its location). Static CRUD, SSH tests, and normal dispatch
