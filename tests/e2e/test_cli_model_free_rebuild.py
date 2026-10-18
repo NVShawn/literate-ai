@@ -141,6 +141,72 @@ class ModelFreeRebuildTests(unittest.TestCase):
         self.assertTrue(result["passed"], result)
         self.assertTrue(result["receipt_committed"], result)
 
+    def test_retained_without_agent_preserves_receipt_on_stale_or_failed_input(
+        self,
+    ):
+        from tests.support.fixtures_retained_native import (
+            author_retained_native_fixture,
+        )
+
+        source = self.root / "retained"
+        author_retained_native_fixture(self.project, source)
+        (self.root / "tools/claude").unlink()
+        self.environment["CODING_CLI"] = "no-generation-provider"
+        with patch(
+            "literate_ai.adapters.models.coding_cli.select_coding_cli",
+            side_effect=AssertionError("retained source discovered a coding agent"),
+        ):
+            status, plan = self.rebuild(
+                "--retained-source", str(source), "--retained-source-plan"
+            )
+            self.assertEqual(status, 0, plan)
+            authorization = plan["result"]["authorization_identity"]
+            status, accepted = self.rebuild(
+                "--retained-source",
+                str(source),
+                "--authorize-retained-source",
+                authorization,
+            )
+            self.assertEqual(status, 0, accepted)
+            self.assertTrue(accepted["result"]["passed"])
+            self.assertTrue(accepted["result"]["receipt_committed"])
+            receipt = self.project / "verification/current.json"
+            previous = receipt.read_bytes()
+            program = source / "main.py"
+            program.write_text(
+                program.read_text().replace(
+                    "'Hello, '+name+'!'",
+                    "'Broken, '+name+'!'",
+                )
+            )
+            status, stale = self.rebuild(
+                "--retained-source",
+                str(source),
+                "--authorize-retained-source",
+                authorization,
+            )
+            self.assertNotEqual(status, 0, stale)
+            self.assertEqual(
+                stale["error"]["code"], "retained_source.authorization_mismatch"
+            )
+            self.assertEqual(receipt.read_bytes(), previous)
+            status, plan = self.rebuild(
+                "--retained-source", str(source), "--retained-source-plan"
+            )
+            self.assertEqual(status, 0, plan)
+            status, failed = self.rebuild(
+                "--retained-source",
+                str(source),
+                "--authorize-retained-source",
+                plan["result"]["authorization_identity"],
+            )
+            self.assertNotEqual(status, 0, failed)
+            self.assertEqual(
+                failed["error"]["code"], "standard_rebuild.lifecycle_failed"
+            )
+            self.assertIn("generated-test.failed", failed["error"]["message"])
+            self.assertEqual(receipt.read_bytes(), previous)
+
     def admit_worker(self, command, *, finalize=None):
         """Register one private command worker the CLI must admit and use.
 

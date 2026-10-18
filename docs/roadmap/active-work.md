@@ -27799,6 +27799,9 @@ agent or relabel the separately verified Git LFS artifact as a package.
 The CMake realization uses the observed native `cmake-core` command package;
 the extra local tuple test verifies that mapping. Native application execution
 still needs the retained-provider correction tracked in RETAINED-ADMISSION-002.
+At `cb38faee`, all eight native host-install tests pass without skips, including
+that CMake mapping. The log SHA-256 is
+`e0a59929cf5e41c3574e9b87291b49744a05b5b12d0f27df01991864368b4330`.
 The pip wrapper regression passes through the canonical Make runner: a real child
 process receives the original pip arguments and package-source/compiler limits,
 excludes parent Make control variables, and preserves the child's failing status.
@@ -27856,6 +27859,11 @@ Separately, frozen `77e4dac8` completes the full canonical Python suite: 1500
 tests, 37 platform/tool skips, zero failures. That earlier full-suite result does
 not qualify the later retained-command or loader changes; the current exact
 candidate must receive its own full regression and installed-wheel qualification.
+The frozen `89278c96` candidate now completes its canonical full Python suite:
+1533 tests, 38 platform/tool skips and zero failures. Its log SHA-256 is
+`0cb708f5735bd66f54299721043e4e3e650fd13ff62a3ca4cfbc6c0e23fbd499`.
+That exact result covers the loader/workspace foundation at that revision,
+not later host-install or model-free retained-source changes.
 
 FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
 a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
@@ -27922,7 +27930,7 @@ source/build/test/evidence qualification and existing-platform CI remain open.
 - **Conclusion:** The installed native CLI eagerly selects a coding agent before attaching retained source. Preserve distinct original-input provenance and all post-admission gates; do not fabricate an agent or model-generated evidence.
 - **Depends on:** Issue #70; existing retained-source authority and Standard lifecycle owners
 - **Implementation:**
-  - [ ] Add explicit model-free retained source planning and execution wiring while leaving ordinary generation discovery unchanged.
+  - [x] Add explicit model-free retained source planning and execution wiring while leaving ordinary generation discovery unchanged.
 - **Evidence:**
   - [ ] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
 
@@ -27938,3 +27946,26 @@ generation model-scope, workflow invocation and cache-key owners currently assum
 a coding provider; integrate a typed retained origin through these shared owners
 without removing build/test/SBOM/acceptance checks or admitting regenerative cache
 membership. This remains distinct from full mixed retained-project work in #22.
+The stronger failed-behavior regression exposed automatic replacement retrying
+the same retained bytes after their native test failed, obscuring that failure
+with a competing-custody error. Retained-origin rejection must be terminal in the
+shared lifecycle owner; a changed source tree requires a new exact review.
+Preserve the original test failure, prior receipt and ordinary generated-candidate
+replacement behavior instead of weakening registry custody or accepting any
+generic failure as failed-test evidence.
+
+Local implementation checkpoint: a non-executable retained selection binds its
+exact review, fixed no-model scope and invocation identity. It never discovers an
+agent, inherits a model, invokes generation or claims accepted-cache authority.
+The common lifecycle makes retained-origin rejection terminal and preserves the
+original failure. Six focused guard tests, six public CLI rebuild tests, four
+existing repair tests, source-cache trust (1), model/workflow (3), planning (1)
+and locked-generation (3) checks pass through the canonical Make runner. The CLI
+test compiles real retained Python, executes current native cases and independent
+acceptance, verifies exact stale-authorization and generated-test failure codes,
+and preserves the prior receipt after both rejections. Its log SHA-256 is
+`3c92417a0366bbc1892f46e16a0e0c366f696e5454577a3ea9542adc8e6aa24a`.
+The editable-test distribution seam is not installed-wheel evidence: native
+offline bootstrap, reviewed rebind, complete positive/rejection execution and
+current matrix qualification remain open. Full mixed retained projects remain
+separately unqualified under #22.

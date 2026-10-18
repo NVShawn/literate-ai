@@ -72,6 +72,7 @@ from literate_ai.contracts import (
     index_backend_ecosystems,
     source_cache_model_selector,
 )
+from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
 from literate_ai.diagnostics import (
     inherited_verbose_environment,
     log_operation,
@@ -96,6 +97,7 @@ from .generated_source_validation import (
 )
 
 if TYPE_CHECKING:
+    from literate_ai.adapters.retained_source import RetainedSourceInput
     from literate_ai.application import GenerationExecutionPlan
 
 CODING_CLIS = ("codex", "claude", "cursor-agent", "opencode")
@@ -2156,6 +2158,45 @@ class CodingCliSelection:
 
 
 @dataclass(frozen=True, slots=True)
+class RetainedSourceSelection:
+    """An exact input review, with no executable or model-provider claim."""
+
+    retained_source: RetainedSourceInput
+
+    def __post_init__(self) -> None:
+        from literate_ai.adapters.retained_source import RetainedSourceInput
+
+        if not isinstance(self.retained_source, RetainedSourceInput):
+            raise TypeError("retained selection requires an exact retained input")
+        self.require_unchanged()
+
+    @property
+    def name(self) -> str:
+        return RETAINED_SOURCE_PROVIDER
+
+    @property
+    def tool_binding_identity(self) -> str:
+        # Shared source-key plumbing calls this a tool binding. Its schema makes
+        # the retained origin explicit and never supplies an executable digest.
+        return self.identity
+
+    @property
+    def identity(self) -> str:
+        return canonical_identity(self.to_dict()).uri
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "schema": "literate-ai/retained-source-selection@1",
+            "origin": self.name,
+            "review_identity": self.retained_source.identity.uri,
+            "generation_provider": None,
+        }
+
+    def require_unchanged(self) -> None:
+        self.retained_source.require_unchanged()
+
+
+@dataclass(frozen=True, slots=True)
 class AcceptedSourceCodingCliSelection:
     """Portable lookup-only selection reconstructed from accepted cache authority."""
 
@@ -2892,6 +2933,21 @@ class CodingCliSourceGenerator:
         runtime._accepted_source_lookup_only = True
         return runtime
 
+    @classmethod
+    def for_retained_source(
+        cls, retained_source: RetainedSourceInput
+    ) -> CodingCliSourceGenerator:
+        """Reuse source admission metadata without creating a model transport."""
+        runtime = cls.__new__(cls)
+        runtime.environment = {}
+        runtime.selection = RetainedSourceSelection(retained_source)
+        runtime.source_intelligence_mode = "off"
+        runtime.source_intelligence_provider = None
+        runtime._accepted_source_lookup_only = False
+        runtime._retained_source_only = True
+        runtime.cacheable = False
+        return runtime
+
     def generate(
         self,
         recipe: GenerationRecipe,
@@ -2901,6 +2957,11 @@ class CodingCliSourceGenerator:
         stage_request: Mapping[str, object] | None = None,
         bounded_prompt: bytes | None = None,
     ) -> CodingCliGeneration:
+        if getattr(self, "_retained_source_only", False):
+            raise CodingCliError(
+                "retained_source.generation_forbidden",
+                "retained-source admission cannot invoke a generation provider",
+            )
         if self._accepted_source_lookup_only:
             raise CodingCliError(
                 "coding_cli.accepted_source_only",
@@ -4388,6 +4449,15 @@ def _coding_cli_binding_prompt(
     *,
     prompt_override: str | None = None,
 ) -> str:
+    if isinstance(selection, RetainedSourceSelection):
+        selection.require_unchanged()
+        return (
+            "# Exact retained-source input binding\n\n"
+            f"Review identity: `{selection.retained_source.identity.uri}`\n"
+            "No coding agent, executable or model is selected or invoked.\n"
+            "Retained input remains untrusted until current lifecycle admission.\n\n"
+            + (recipe.prompt() if prompt_override is None else prompt_override)
+        )
     isolation = selection.isolation
     limitations = "\n".join(f"- {item}" for item in isolation.limitations)
     return (
@@ -4449,6 +4519,20 @@ def _planned_generation_prompt(
             "coding_cli.stage_unavailable",
             "coding CLI stage request is absent from the exact execution plan",
         )
+    if isinstance(selection, RetainedSourceSelection):
+        selection.require_unchanged()
+        return canonical_json_bytes(
+            {
+                "schema": "literate-ai/retained-source-invocation@1",
+                "review_identity": selection.retained_source.identity.uri,
+                "recipe_identity": recipe.identity,
+                "execution_plan_identity": execution_plan.identity.uri,
+                "stage_request": stage_request,
+                "context_identity": "sha256:"
+                + hashlib.sha256(prepared_prompt.encode()).hexdigest(),
+                "model_invocations": [],
+            }
+        ).decode("utf-8")
     sections = [
         "# Pinned Literate AI model-stage execution",
         "",

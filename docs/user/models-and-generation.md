@@ -349,6 +349,26 @@ CODING_CLI=codex litai generate path/to/component \
   --flavor=+flavor://literate-ai/os-linux
 ```
 
+### Exact retained source
+
+For exact input that you supply, `litai rebuild COMPONENT --retained-source PATH
+--retained-source-plan` reviews a bounded UTF-8 tree without granting admission.
+Execute with the returned `--authorize-retained-source sha256:...` identity and
+`--allow-host-execution`. This path uses no coding agent or model, and rejects a
+pipeline `--model` override. Retained input has its own non-executable selection,
+fixed no-model planning identity and provenance; it is never a model response or
+an ordinary regenerative cache candidate. The complete current test manifest and
+source SBOM must bind the current retained recipe. A changed recipe or source tree
+requires current metadata and a fresh input review, never reuse of an old approval.
+Native compilation, behavior tests, execution and independent acceptance still run;
+missing or failed evidence cannot replace a previous passing receipt.
+Rejected retained input does not trigger automatic candidate replacement; correcting
+it requires changed input and a fresh exact review.
+
+This small retained-source route does not admit a complete adopted repository
+with binary assets, SDKs and original build/test inventories. That distinct
+retained-project lifecycle remains under qualification.
+
 ### Clean major rebuilds
 
 A major rebuild is replacement, not incremental patching. The output directory starts

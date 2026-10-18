@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Exact retained-source rebuilds use a distinct non-executable input selection
+  without discovering or invoking a coding agent. The fixed no-model scope and
+  source binding preserve retained provenance, current recipe/test/SBOM checks,
+  native execution and independent acceptance. Model overrides and generation
+  calls refuse; original-source full-project qualification remains separate.
+
 - Add a native FreeBSD x86-64 `pkg` host-install realization and honor its
   `gmake` probe. OS tuples require the complete selected non-alternative tool
   closure and at least one declared coding agent; unsupported explicit agents

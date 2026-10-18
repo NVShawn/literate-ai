@@ -6,6 +6,28 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Retained source has no generation provider
+Exact retained-source execution SHALL bind the reviewed input as a distinct,
+non-executable source selection. It SHALL NOT discover, authenticate or invoke a
+coding agent, select a model, or represent retained bytes as a model response or
+previously accepted cache entry. Ordinary generation SHALL retain its provider
+requirements. Source classification, immutable custody, native dependency/SBOM
+checks, compilation, complete current tests, execution and independent acceptance
+SHALL remain mandatory after retained-source admission.
+Retained-origin rejection SHALL be terminal for that exact input; automatic
+candidate replacement SHALL NOT regenerate or recopy unchanged retained bytes.
+Changed retained input requires a new review and authorization, and the original
+failure evidence SHALL remain the reported rejection.
+
+#### Scenario: Native build worker has no coding agent
+- **WHEN** a worker receives exact retained source and its current authorization
+- **THEN** provider discovery is unnecessary and the normal post-source gates run
+- **AND** stale input, failed tests or missing acceptance prevent a passing receipt
+
+#### Scenario: Retained input attempts to select a model
+- **WHEN** retained-source execution supplies a pipeline model override
+- **THEN** the incompatible selection is rejected rather than invoking a provider
+
 ### Requirement: Worker routing preserves one exact Component graph
 Worker assignments SHALL bind every and only planned Component revision to an exact
 worker and private catalog identity, target profile and locked Flavor selection.
