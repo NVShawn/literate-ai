@@ -6,6 +6,20 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Retained project tests cover the original reviewed inventory
+Retained-project planning SHALL bind the configured project receipt policy,
+complete declared test cases, permitted skips, action owners and sealed report
+paths. Runtime SHALL derive outcomes from those exact reports. Missing, extra,
+duplicate or failed cases and unauthorized skips SHALL prevent acceptance.
+
+#### Scenario: A successful command omits an original test
+- **WHEN** a retained test action exits zero but its report omits a reviewed case
+- **THEN** the lifecycle rejects the report before independent acceptance
+
+#### Scenario: Original tests report only skips
+- **WHEN** permitted skips leave fewer actual passes than the configured minimum
+- **THEN** the lifecycle refuses rather than counting skips as passes
+
 ### Requirement: Python discovery supports versioned native commands
 Without an explicit command pin, Python discovery SHALL inspect each PATH
 directory in order, preferring `python3`, then `python`, then numerically descending

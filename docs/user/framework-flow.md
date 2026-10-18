@@ -122,6 +122,27 @@ retained review identity rather than a regenerative source key. A passing run
 does not establish regenerative equivalence. `--update-receipt` still requires
 the complete Standard lifecycle to pass; the read-only plan grants no admission.
 
+### Retained whole projects (qualification in progress)
+
+Whole-project retained planning uses a streaming binary-capable manifest and an
+explicit command profile, separately from the small UTF-8 source mode above. Its
+`test-policy` input must bind the configured project receipt policy's identity,
+every original case and owning test action, any exact permitted skip reason, and
+the report path sealed by each test action. Action inventories name the actual
+cases; a suite label or successful command exit does not establish coverage.
+
+The internal command workspace reads bounded, identity-checked reports using
+`literate-ai/retained-project-test-report@1`. Each report names its action and
+the complete case outcomes (`passed`, `failed`, or explicitly permitted `skipped`).
+Missing, extra or duplicate cases, unknown outcomes, failed cases and unauthorized
+skips stop later work. Only actual passes satisfy the project's minimum; baseline
+exceptions cannot be relabeled as passing tests.
+
+This test gate is not a lifecycle receipt. Public whole-project execution still
+refuses with `retained_project.execution_not_qualified` until native SDK/SBOM,
+independent acceptance, retained-origin receipt, package and release consumers
+are qualified. Original source and conversion authority remain unchanged.
+
 ### Target and worker selection
 
 `litai build`, `litai test`, and `litai run` keep two independent choices explicit.

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -17,12 +19,21 @@ from literate_ai.adapters.builders import BuildError
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
-from literate_ai.contracts import ContentIdentity, canonical_identity
+from literate_ai.contracts import (
+    ContentIdentity,
+    ProjectTestReceiptPolicy,
+    canonical_identity,
+    canonical_json_bytes,
+)
 from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.contracts.retained_project_lifecycle import (
     RetainedProjectAction,
     RetainedProjectPlan,
     RetainedProjectProfile,
+)
+from literate_ai.contracts.retained_project_tests import (
+    RetainedProjectExpectedCase,
+    RetainedProjectTestPolicy,
 )
 
 
@@ -37,6 +48,15 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         cls.addClassCleanup(temporary.cleanup)
         root = Path(temporary.name)
         source = root / "fixture.c"
+        report = json.dumps(
+            {
+                "schema": "literate-ai/retained-project-test-report@1",
+                "action": "tests",
+                "cases": [
+                    {"id": "original-suite", "outcome": "passed", "reason": None}
+                ],
+            }
+        )
         source.write_text(
             "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n"
             "int main(int n, char **v) {\n"
@@ -55,6 +75,16 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             ' if (!strcmp(v[1], "check")) {\n'
             '  FILE *f = fopen(v[2], "rb"); if (!f) return 3;\n'
             "  int c = fgetc(f); fclose(f); return c == EOF ? 4 : 0;\n"
+            " }\n"
+            ' if ((!strcmp(v[1], "test") || !strcmp(v[1], "report")) && n == 4) {\n'
+            '  if (!strcmp(v[1], "test")) {\n'
+            '   FILE *app = fopen(v[2], "rb"); if (!app) return 3;\n'
+            "   int c = fgetc(app); fclose(app); if (c != 'b') return 4;\n"
+            '   FILE *f = fopen(v[3], "wb"); if (!f) return 5;\n'
+            f"   fputs({json.dumps(report)}, f); return fclose(f) ? 6 : 0;\n"
+            "  }\n"
+            '  FILE *f = fopen(v[2], "wb"); if (!f) return 5;\n'
+            "  fputs(v[3], f); return fclose(f) ? 6 : 0;\n"
             " }\n"
             ' FILE *f = fopen(v[2], "wb"); if (!f) return 5;\n'
             " fputs(v[1], f); return fclose(f) ? 6 : 0;\n"
@@ -79,9 +109,23 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         (self.source / "src/main.txt").write_bytes(b"original\x00asset")
         shutil.copyfile(self.fixture_binary, self.source / "tools/runner")
         (self.source / "tools/runner").chmod(0o755)
+        self.configured_test_policy = ProjectTestReceiptPolicy(
+            "retained-fixture",
+            "1.0.0",
+            canonical_identity("runner"),
+            ("test-report", "test-runner"),
+            1,
+        )
+        self.test_policy = RetainedProjectTestPolicy(
+            self.configured_test_policy.identity,
+            (RetainedProjectExpectedCase("original-suite", "tests"),),
+            (("tests", "test-result.json"),),
+        )
+        policy_bytes = canonical_json_bytes(self.test_policy.to_dict())
+        (self.source / "test-policy.json").write_bytes(policy_bytes)
         self.manifest = discover_retained_project_inputs(
             self.source,
-            {"src": "source", "tools": "toolchain"},
+            {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             RetainedProjectLimits(100, 64 * 1024 * 1024, 128 * 1024 * 1024),
         )
         self.actions = (
@@ -99,10 +143,10 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                 "tests",
                 "test",
                 "shell",
-                ("check", "{output_root}/app.bin"),
+                ("test", "{output_root}/app.bin", "{output_root}/test-result.json"),
                 ("build",),
                 ("original-suite",),
-                (),
+                ("test-result.json",),
                 10,
             ),
             RetainedProjectAction(
@@ -128,7 +172,11 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         )
         self.profile = RetainedProjectProfile(
             "host",
-            *(canonical_identity(n) for n in range(5)),
+            *(canonical_identity(n) for n in range(3)),
+            ContentIdentity.parse_uri(
+                "sha256:" + hashlib.sha256(policy_bytes).hexdigest()
+            ),
+            canonical_identity(4),
             (
                 (
                     "shell",
@@ -167,6 +215,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                 "current_plan": lambda: self.current,
                 "authorization": self.plan.identity.uri,
                 "allow_host_execution": True,
+                "test_receipt_policy": self.configured_test_policy,
                 **changes,
             },
         )
@@ -201,6 +250,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                 current_plan=lambda: self.plan,
                 authorization=self.plan.identity.uri,
                 allow_host_execution=True,
+                test_receipt_policy=self.configured_test_policy,
             )
         self.plan = replace(
             self.plan,
@@ -259,6 +309,13 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         )
         self.assertNotIn("conversion", {p.name for p in self.source.iterdir()})
         self.assertEqual(len({o.identity for o in workspace.observations}), 4)
+        self.assertEqual(len(workspace.test_reports), 1)
+        verified = workspace.test_reports[0]
+        self.assertEqual(verified.report.passed, 1)
+        self.assertEqual(verified.report.skipped, 0)
+        self.assertEqual(
+            verified.observation_identity, workspace.observations[1].identity
+        )
         with self.assertRaisesRegex(ValueError, "no-next-action"):
             workspace.execute_next()
 
@@ -272,6 +329,94 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         self.assertEqual(len(raised.exception.observations), 2)
         self.assertEqual(raised.exception.observations[-1].result.returncode, 9)
         self.assertEqual(raised.exception.observations[-1].result.stderr, b"failed")
+        self.assertFalse((workspace.outputs / "docs.txt").exists())
+        with self.assertRaisesRegex(ValueError, "no-next-action"):
+            workspace.execute_next()
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("cc"), "C process fixture")
+    def test_zero_exit_without_complete_passing_cases_stops_lifecycle(self):
+        case = {"id": "original-suite", "outcome": "passed", "reason": None}
+        report = {
+            "schema": "literate-ai/retained-project-test-report@1",
+            "action": "tests",
+            "cases": [case],
+        }
+        invalid = (
+            {**report, "cases": []},
+            {**report, "cases": [{**case, "id": "other"}]},
+            {**report, "cases": [case, {**case, "id": "other"}]},
+            {**report, "cases": [case, case]},
+            {**report, "cases": [{**case, "outcome": "failed"}]},
+            {
+                **report,
+                "cases": [{**case, "outcome": "skipped", "reason": "exception"}],
+            },
+            {**report, "cases": [{**case, "outcome": "xfail"}]},
+            {**report, "action": "another"},
+            {**report, "passed": True},
+        )
+        for document in invalid:
+            with self.subTest(document=document):
+                self.alter_action(
+                    1,
+                    argv=(
+                        "report",
+                        "{output_root}/test-result.json",
+                        json.dumps(document, separators=(",", ":")),
+                    ),
+                )
+                workspace = self.workspace()
+                workspace.execute_next()
+                with self.assertRaisesRegex(
+                    execution.RetainedProjectExecutionError, "test-report-rejected"
+                ) as raised:
+                    workspace.execute_next()
+                self.assertEqual(len(raised.exception.observations), 2)
+                self.assertEqual(raised.exception.observations[-1].result.returncode, 0)
+                self.assertFalse((workspace.outputs / "docs.txt").exists())
+                self.assertFalse(workspace.test_reports)
+                with self.assertRaisesRegex(ValueError, "no-next-action"):
+                    workspace.execute_next()
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("cc"), "C process fixture")
+    def test_all_permitted_skips_stop_before_docs_and_acceptance(self):
+        policy = replace(
+            self.test_policy,
+            cases=(RetainedProjectExpectedCase("original-suite", "tests", "platform"),),
+        )
+        content = canonical_json_bytes(policy.to_dict())
+        (self.source / "test-policy.json").write_bytes(content)
+        self.manifest = discover_retained_project_inputs(
+            self.source,
+            {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
+            self.manifest.limits,
+        )
+        self.plan = replace(
+            self.plan,
+            manifest_identity=self.manifest.identity,
+            profile=replace(
+                self.plan.profile,
+                test_policy_identity=ContentIdentity.parse_uri(
+                    "sha256:" + hashlib.sha256(content).hexdigest()
+                ),
+            ),
+        )
+        self.profile = self.plan.profile
+        report = {
+            "schema": "literate-ai/retained-project-test-report@1",
+            "action": "tests",
+            "cases": [
+                {"id": "original-suite", "outcome": "skipped", "reason": "platform"}
+            ],
+        }
+        self.alter_action(
+            1, argv=("report", "{output_root}/test-result.json", json.dumps(report))
+        )
+        workspace = self.workspace()
+        workspace.execute_next()
+        with self.assertRaisesRegex(ValueError, "passes-below-project-minimum"):
+            workspace.execute_next()
+        self.assertEqual(workspace.test_reports[0].report.passed, 0)
         self.assertFalse((workspace.outputs / "docs.txt").exists())
         with self.assertRaisesRegex(ValueError, "no-next-action"):
             workspace.execute_next()

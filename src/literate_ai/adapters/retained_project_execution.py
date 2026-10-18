@@ -25,7 +25,16 @@ from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
     verify_retained_project_inputs,
 )
-from literate_ai.contracts import ContentIdentity, canonical_identity
+from literate_ai.adapters.retained_project_testing import (
+    RetainedProjectVerifiedTestReport,
+    read_retained_project_test_policy,
+    read_retained_project_test_report,
+)
+from literate_ai.contracts import (
+    ContentIdentity,
+    ProjectTestReceiptPolicy,
+    canonical_identity,
+)
 from literate_ai.contracts.retained_project import RetainedProjectManifest
 from literate_ai.contracts.retained_project_lifecycle import (
     RetainedProjectAction,
@@ -91,6 +100,7 @@ class RetainedProjectExecutionWorkspace:
         current_plan: Callable[[], RetainedProjectPlan],
         authorization: str,
         allow_host_execution: bool,
+        test_receipt_policy: ProjectTestReceiptPolicy,
     ) -> None:
         if allow_host_execution is not True:
             raise RetainedProjectExecutionError(
@@ -107,7 +117,12 @@ class RetainedProjectExecutionWorkspace:
         self._output_bytes = 0
         self._output_manifest: RetainedProjectManifest | None = None
         self._failed = False
+        self._test_reports: list[RetainedProjectVerifiedTestReport] = []
+        self._configured_test_policy = test_receipt_policy
         self._require_current_plan()
+        self._test_policy = read_retained_project_test_policy(
+            source, manifest, plan.profile, test_receipt_policy
+        )
         require_safe_directory(parent)
         self.root = Path(tempfile.mkdtemp(prefix="retained-run-", dir=parent))
         try:
@@ -149,6 +164,10 @@ class RetainedProjectExecutionWorkspace:
     @property
     def observations(self) -> tuple[RetainedProjectCommandObservation, ...]:
         return tuple(self._observations)
+
+    @property
+    def test_reports(self) -> tuple[RetainedProjectVerifiedTestReport, ...]:
+        return tuple(self._test_reports)
 
     def _require_current(self) -> None:
         for directory in (
@@ -240,6 +259,11 @@ class RetainedProjectExecutionWorkspace:
         action = self.plan.profile.actions[len(self.observations)]
         try:
             self._require_current()
+            if action.stage == "accept":
+                self._test_policy.require_complete(
+                    (item.report for item in self.test_reports),
+                    self._configured_test_policy,
+                )
             binding = self._tools[action.tool]
             replacements = {
                 "{input_root}": str(self.inputs),
@@ -297,6 +321,30 @@ class RetainedProjectExecutionWorkspace:
                 if produced
                 else None
             )
+            if action.stage == "test":
+                try:
+                    if self._output_manifest is None:
+                        raise ValueError("retained.tests.sealed-report-missing")
+                    report = read_retained_project_test_report(
+                        self.outputs,
+                        self._output_manifest,
+                        self._test_policy,
+                        action_id=action.action_id,
+                        plan_identity=self.plan.identity,
+                        observation_identity=observation.identity,
+                    )
+                    self._test_reports.append(report)
+                    if len(self.test_reports) == len(self._test_policy.reports):
+                        self._test_policy.require_complete(
+                            (item.report for item in self.test_reports),
+                            self._configured_test_policy,
+                        )
+                    self._require_current()
+                except (ValueError, TypeError, OSError) as exc:
+                    raise RetainedProjectExecutionError(
+                        "retained.execution.test-report-rejected: " + str(exc),
+                        self.observations,
+                    ) from exc
             return observation
         except BaseException:
             self._failed = True

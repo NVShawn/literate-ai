@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Retained-project planning binds the original case inventory and skip permissions
+  to the configured project receipt policy. The command workspace reopens sealed
+  test reports and refuses missing, extra, duplicate or failed cases, unauthorized
+  skips and too few actual passes before acceptance. Command exits and baseline
+  exceptions cannot stand in for tests. Full retained-project receipt, SBOM and
+  release qualification remain pending.
+
 - Python toolchain discovery supports versioned commands such as FreeBSD's
   `python3.12` without requiring an unversioned compatibility alias. Explicit
   pins, PATH directory preference and actual runtime identity checks remain

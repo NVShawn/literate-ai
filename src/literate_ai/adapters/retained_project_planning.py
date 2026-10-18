@@ -12,6 +12,9 @@ from literate_ai.adapters.component_lock_application import (
 from literate_ai.adapters.conversion_authority import FilesystemConversionAuthorityStore
 from literate_ai.adapters.project_validation import validated_project_authority_identity
 from literate_ai.adapters.retained_project_inputs import verify_retained_project_inputs
+from literate_ai.adapters.retained_project_testing import (
+    read_retained_project_test_policy,
+)
 from literate_ai.adapters.standard_lifecycle_binding import (
     ResolvedStandardProjectLifecycleDriver,
 )
@@ -103,10 +106,10 @@ def plan_retained_project(
         raise ValueError("Retained SDK/toolchain closure is incomplete or changed")
     if profile.dependency_identity != retained_role_identity(manifest, {"dependency"}):
         raise ValueError("Retained dependency closure is incomplete or changed")
-    for role, identity in (
-        ("test-policy", profile.test_policy_identity),
-        ("release-policy", profile.release_policy_identity),
-    ):
+    read_retained_project_test_policy(
+        project.root, manifest, profile, project.definition.test_receipt_policy
+    )
+    for role, identity in (("release-policy", profile.release_policy_identity),):
         policy = [member for member in manifest.members if member.role == role]
         if (
             len(policy) != 1

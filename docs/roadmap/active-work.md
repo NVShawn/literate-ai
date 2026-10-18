@@ -25884,6 +25884,27 @@ log SHA-256 is `59a98595401b8de649db3b1ec785951cd99bb1b4dd2bc55b5d9ad70d54a05bc7
 The five current CLI rebuild regressions pass locally. Public retained execution
 remains closed pending the existing SBOM/acceptance/receipt consumers.
 
+Current integration audit: action labels and zero exit codes do not prove a
+complete original test inventory. The next required runtime gate binds a typed
+reviewed case/skip policy to the project's configured receipt policy, exact test
+actions and sealed report outputs. Planning must reject an unrelated policy or
+an incomplete action inventory; execution must reject missing/extra/duplicate
+cases, failed outcomes, unauthorized skips and insufficient actual passes before
+independent acceptance. Reuse streaming input/output custody and the existing
+retained-case validator. A baseline exception cannot become a passing result.
+Qualify real compiled command execution and failed-report refusal, then continue
+the separate native SDK/SBOM, independent acceptance, retained receipt, package
+and release consumers before removing the public execution guard.
+
+The integrated case gate passes 28 local retained-project checks, including actual
+compiled command execution, zero-exit invalid reports and an all-permitted-skips
+report that cannot satisfy the configured minimum. Existing retained Cargo test
+execution (2) and CLI rebuild (5) checks pass. The retained-project log SHA-256 is
+`4fc8ca009b891766183b60916302860a7148f55629c6f2817b75a7d970e71663`.
+Policies and reports use bounded streaming custody and duplicate-key rejection;
+verified case observations bind their actual command and report bytes. These
+checks qualify this internal gate locally, not the complete public lifecycle.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).
@@ -28007,6 +28028,23 @@ requirements retain separate scenarios. On the integrated tree, all six public
 CLI rebuild cases, six retained-source guard cases and seven combined worker
 probe cases pass. Strict OpenSpec, lint, formatting and repository-layout checks
 pass. Exact installed-wheel/native and final release qualification remain open.
+
+Subsequent native evidence: qualified wheel `88fc4bb6` installs its 37 verified
+distributions offline. After reviewed public rebind and documentation review, its
+public retained-source rebuild compiles, passes three original behavior cases
+and independent acceptance with neither coding agents nor a Python override or
+unversioned Python alias. Its receipt identity is
+`sha256:584a9f38989bfa3ec4edd9cb2128762f6b995e4ceb459327deca314c447bd522`.
+The automatic-discovery rejection run remains in progress. The preceding exact
+`d96f6b8b` wheel, with an explicit native Python pin, passed both stale-review and
+freshly authorized failed-behavior checks while preserving the passing receipt;
+the retained evidence archive SHA-256 is
+`6fe64332a65d644fbe85114b2b2eb93ef3af51be6076316bbf0fca597c108d12`.
+Separately, the complete frozen `d96f6b8b` Python suite passed 1,578 tests with 38
+platform/tool skips; log SHA-256
+`3b7603d5171be3e9c5bd4641c240c7af4276a7250229c9408ff5d9a2bb995293`.
+That broad baseline does not qualify later changes or full mixed retained
+projects under #22, typed SSH custody under #69, or a downstream release.
 
 ### [ ] RELEASE-INTEGRATION-004 — Reconcile and execute the 1.3 release backlog
 
