@@ -27902,3 +27902,29 @@ SSH/SFTP round trip through the configured route uploaded a 63-byte gzip fixture
 matched its remote SHA-256 and downloaded identical bytes. The result is explicitly
 transport-only, not a complete native lifecycle receipt. Full installed native
 source/build/test/evidence qualification and existing-platform CI remain open.
+
+### [ ] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
+
+- **GitHub issue:** [#70](https://github.com/jordanhubbard/literate-ai/issues/70)
+- **Priority:** P0
+- **Owner:** Standard source planning and retained admission
+- **Direction:** Exact authorized retained source must build, test and accept without discovering or invoking a model provider.
+- **Conclusion:** The installed native CLI eagerly selects a coding agent before attaching retained source. Preserve distinct original-input provenance and all post-admission gates; do not fabricate an agent or model-generated evidence.
+- **Depends on:** Issue #70; existing retained-source authority and Standard lifecycle owners
+- **Implementation:**
+  - [ ] Add explicit model-free retained source planning and execution wiring while leaving ordinary generation discovery unchanged.
+- **Evidence:**
+  - [ ] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
+
+Installed native checkpoint: the exact qualified wheel at `89278c96` bootstraps
+37 verified distributions offline. Public Standard rebind and documentation review
+complete, and the retained-source review returns an exact authorization identity.
+Authorized execution then refuses with `coding_cli.unavailable` before compilation.
+Assembly constructs `FilesystemStandardSourceGenerationAdapter.from_environment`
+before attaching the reviewed retained input. The correction must give retained
+input its own non-executable source selection and avoid representing it as an
+accepted cache entry, inherited IDE response or model-generated payload. The
+generation model-scope, workflow invocation and cache-key owners currently assume
+a coding provider; integrate a typed retained origin through these shared owners
+without removing build/test/SBOM/acceptance checks or admitting regenerative cache
+membership. This remains distinct from full mixed retained-project work in #22.
