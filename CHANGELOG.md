@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- FreeBSD filter/auxiliary observations bind loader contexts rather than changing
+  shared native file records. SDK projection preserves every program/image/target
+  fact, rebinds portable paths and context hashes, and keeps actual file conflicts
+  fatal. This corrects the native SDK/consumer observation conflict; native
+  qualification remains required.
+
 - Managed CycloneDX graphs distinguish original retained projects from Component
   revisions. A retained root binds the reviewed plan and complete Component-lock
   inventory, preserves shared dependency authority and rejects origin substitution

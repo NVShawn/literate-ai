@@ -36,3 +36,17 @@ Linux loader-cache semantics SHALL NOT substitute for FreeBSD loader evidence.
 - **WHEN** a required native observation cannot be measured
 - **THEN** its status states that limitation and the requiring gate cannot claim
   qualification from a fabricated successful measurement
+
+### Requirement: Loader context is distinct from native file identity
+
+Program-specific filter and auxiliary observations SHALL bind explicit image,
+program and target references in a context-identified loader record. Shared native
+file records SHALL retain their exact file identity. SDK relocation SHALL rebind
+portable context paths and references without losing filter facts. Actual file
+identity conflicts SHALL still refuse.
+
+#### Scenario: SDK and consumer observe the same system library
+
+- **WHEN** different programs produce distinct potential filter observations
+- **THEN** both contexts remain represented alongside the shared exact file
+- **AND** relocation preserves every image, program and target relationship

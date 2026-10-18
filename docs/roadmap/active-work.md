@@ -27813,6 +27813,22 @@ at `02c1abb8` passes eight SDK checks, then the public consumer lifecycle fails
 because SDK and host dependency observations conflict. Diagnose the differing
 identity/loader-context fields and preserve both exact file and context custody;
 do not ignore conflicting records. This is the next FreeBSD action in progress.
+Read-only native reproduction identifies only `freebsd-filtee` property differences
+on identical libc/libthr file records. Program-specific filter facts belong to a
+context-bound loader record, with explicit image/program/target references. Move
+them without discarding facts; SDK relocation must remap embedded image references
+and portable paths, then rebind the projected context identity and graph edges.
+Retain strict conflict rejection for actual file differences. The private native
+diagnostic's canonical identity is
+`sha256:bb15c3747c640fd416fe65174bd3fac347e3a528532d6d115e40b59fe5c9d89a`.
+The correction passes all 31 local SDK tests without skips, including relocation
+and original-source consumer/package execution. The FreeBSD loader group passes
+17 checks with one native-only skip on macOS; two-program context merging preserves
+both inventories and actual differing file hashes still refuse. The SDK and loader
+log SHA-256 values are
+`60f740e6ecf6625cd90b858cc99fa813eebdc0d396b5ee044ff0b1da87916f40`
+and `682354c938909f8da72f082d2cff60d53db108c251bcecc225490c6ebad93b37`.
+Exact native two-context observation, SDK and complete suite reruns remain required.
 The native retained-project group separately passes all 36 tests; its log SHA-256
 is `9c817b88c1bdd7f9f0a6678f85662133a76a8803d574f37f5076733b0494075d`.
 The frozen installed-wheel check for `02c1abb8` also passes; native SDK and full

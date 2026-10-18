@@ -20,6 +20,7 @@ from literate_ai.adapters.dependencies.freebsd_loader import (
 )
 from literate_ai.adapters.dependencies.types import DependencyObservationError
 from literate_ai.adapters.freebsd_loader_paths import FreeBsdLoaderPaths
+from literate_ai.adapters.native_sdk_dependencies import merge_sdk_host_observations
 from literate_ai.adapters.user_paths import FreeBsdLoaderSystemPaths
 
 
@@ -268,6 +269,43 @@ class FreeBsdDependencyTests(unittest.TestCase):
                 DependencyObservationError, "candidates changed"
             ):
                 self.observe()
+
+    def test_shared_images_merge_without_losing_program_filter_contexts(self):
+        library = self.image(self.library / "libfilter.so.1")
+        self.image(self.library / "libfiltee.so.1")
+        self.extra_dynamic[str(library)] = "(FILTER) Library: [libfiltee.so.1]\n"
+        self.needed[str(self.app)] = ("libfilter.so.1",)
+        second = self.image(self.root / "second", ("libfilter.so.1",))
+        second.chmod(0o755)
+        first = self.observe()
+        other = self.observe(toolchain_commands=((str(second),),))
+        merged = merge_sdk_host_observations(first, other)
+        contexts = [c for c in merged.components if c["type"] == "data"]
+        self.assertEqual(len(contexts), 2)
+        counts = []
+        for context in contexts:
+            state = next(
+                p["value"]
+                for p in context["properties"]
+                if p["name"] == "literate-ai:freebsd-loader-state"
+            )
+            records = json.loads(state)["filtees"]
+            counts.append(len(records))
+            self.assertTrue(
+                all(
+                    set(r) == {"image", "program", "kind", "name", "target", "loading"}
+                    for r in records
+                )
+            )
+        self.assertEqual(sorted(counts), [1, 2])
+        for component in merged.components:
+            if component["type"] == "file":
+                self.assertFalse(
+                    any(
+                        p["name"] == "literate-ai:freebsd-filtee"
+                        for p in component["properties"]
+                    )
+                )
 
     def test_origin_paths_resolve_without_running_the_image(self):
         own = self.artifacts / "private"

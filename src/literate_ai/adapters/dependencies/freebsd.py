@@ -136,6 +136,7 @@ class FreeBsdElfDependencyObserver:
             readelf, seeds, state, selected
         )
         refs = {path: elf._elf_ref(image) for path, image in images.items()}
+        filter_records = []
         for path, image in images.items():
             component = elf._elf_component(
                 image, refs[path], scopes=tuple(sorted(seeds.get(path, {"system"})))
@@ -144,18 +145,14 @@ class FreeBsdElfDependencyObserver:
                 {"name": "literate-ai:native-platform", "value": "freebsd"}
             )
             for program, kind, name, target in sorted(filtees.get(path, ())):
-                component["properties"].append(
+                filter_records.append(
                     {
-                        "name": "literate-ai:freebsd-filtee",
-                        "value": canonical_json_bytes(
-                            {
-                                "program": refs[program],
-                                "kind": kind,
-                                "name": name,
-                                "target": refs[target],
-                                "loading": "potential",
-                            }
-                        ).decode("utf-8"),
+                        "image": refs[path],
+                        "program": refs[program],
+                        "kind": kind,
+                        "name": name,
+                        "target": refs[target],
+                        "loading": "potential",
                     }
                 )
             components.append(component)
@@ -169,7 +166,12 @@ class FreeBsdElfDependencyObserver:
                 launcher_runtime_edges=runtime_edges,
             )
         )
-        projection = {"loader": state.projection(), "paths": selected.to_environment()}
+        filter_records.sort(key=canonical_json_bytes)
+        projection = {
+            "loader": state.projection(),
+            "paths": selected.to_environment(),
+            "filtees": filter_records,
+        }
         identity = canonical_identity(projection)
         ref = "urn:literate-ai:freebsd-loader-state:" + identity.digest
         components.append(
@@ -187,6 +189,13 @@ class FreeBsdElfDependencyObserver:
                         "name": "literate-ai:freebsd-loader-state",
                         "value": canonical_json_bytes(projection).decode("utf-8"),
                     },
+                    *(
+                        {
+                            "name": "literate-ai:freebsd-filtee",
+                            "value": canonical_json_bytes(record).decode("utf-8"),
+                        }
+                        for record in filter_records
+                    ),
                 ],
             }
         )
