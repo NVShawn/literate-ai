@@ -261,8 +261,8 @@
     },
     {
       "type": "application",
-      "bom-ref": "urn:literate-ai:host-install:freebsd:package:cmake",
-      "name": "FreeBSD cmake",
+      "bom-ref": "urn:literate-ai:host-install:freebsd:package:cmake-core",
+      "name": "FreeBSD cmake-core",
       "version": ">=3.25,<5",
       "properties": [
         {
@@ -271,7 +271,7 @@
         },
         {
           "name": "literate-ai:host-install:manager-package",
-          "value": "cmake"
+          "value": "cmake-core"
         },
         {
           "name": "literate-ai:host-install:base-capabilities",
@@ -296,7 +296,7 @@
         "urn:literate-ai:host-install:freebsd:package:node24",
         "urn:literate-ai:host-install:freebsd:package:npm-node24",
         "urn:literate-ai:host-install:freebsd:package:rust",
-        "urn:literate-ai:host-install:freebsd:package:cmake"
+        "urn:literate-ai:host-install:freebsd:package:cmake-core"
       ]
     },
     {
@@ -332,7 +332,7 @@
       "dependsOn": []
     },
     {
-      "ref": "urn:literate-ai:host-install:freebsd:package:cmake",
+      "ref": "urn:literate-ai:host-install:freebsd:package:cmake-core",
       "dependsOn": []
     }
   ]

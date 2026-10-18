@@ -74,6 +74,13 @@ class FreeBSDHostInstallTests(unittest.TestCase):
             ):
                 parse_host_install_sbom(document, base=self.sbom.base, catalog=catalog)
 
+    def test_cmake_uses_native_command_package(self):
+        _, sbom = host_install.load_host_install_sbom(
+            self.root / "flavors", self.sbom.target, flavor_names=("build-cmake",)
+        )
+        requirement = next(p for p in sbom.packages if p.capability == "cmake")
+        self.assertEqual(requirement.manager_package, "cmake-core")
+
     def test_explicit_unrealized_provider_refuses_before_probe(self):
         def forbidden(*args, **kwargs):
             self.fail("unsupported provider must not probe or run an ambient command")

@@ -27783,12 +27783,22 @@ installation. Honor tuple-specific command probes so FreeBSD's base `make` canno
 satisfy the GNU Make capability. Qualify parsing, selection, package provenance,
 consent and native observation; unavailable packages remain missing rather than
 becoming a fabricated ready host.
-The canonical local host-install group passes 10 tests, including a full simulated
+The canonical local host-install group passes 11 tests, including a full simulated
 consent/install/re-observation flow that rejects a successful package-manager exit
 when the installed coding-agent version remains too old. Lint, formatting,
 repository-layout, strict OpenSpec and reviewed driver/documentation authority
 checks pass. These are local contract tests; native package observation and the
 installed lifecycle remain separate qualification requirements.
+At `c8290fa5`, the seven new tests also pass on actual FreeBSD without skips;
+their log SHA-256 is
+`56f5466e02971defa689fc3415f3523d594f9e6aa0f273249dc96807720957b1`.
+Read-only native package observation proves Python/venv, Git and GNU Make but
+correctly reports overall host readiness false: Codex is absent and the aligned
+official Git LFS binary has no `pkg` provenance. It does not install an unused
+agent or relabel the separately verified Git LFS artifact as a package.
+The CMake realization uses the observed native `cmake-core` command package;
+the extra local tuple test verifies that mapping. Native application execution
+still needs the retained-provider correction tracked in RETAINED-ADMISSION-002.
 The pip wrapper regression passes through the canonical Make runner: a real child
 process receives the original pip arguments and package-source/compiler limits,
 excludes parent Make control variables, and preserves the child's failing status.
