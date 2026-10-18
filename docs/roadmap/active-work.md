@@ -27781,6 +27781,19 @@ refusal tests pass in the local bootstrap group. This does not yet qualify the
 native installed-wheel lifecycle. The earlier wheel-smoke run refused because the
 checkout changed during execution; a new frozen revision must run that gate.
 
+Installed-wheel checkpoint: frozen revision `77e4dac8` passes isolated
+`make wheel-check`. Wheel SHA-256 is
+`2e06aa79f3f08d0a388a0c760593d3154b3d5bf6be69fc9d6019c3f561520860`;
+normalized framework distribution identity is
+`5936ed45cd3b17703e763cf717fbf35d073f74328b1201c10b95080f3fb8ad09`.
+Offline export from reviewed FreeBSD cp312 wheels produces closure
+`c5ba582637d19451cb4aa5a8e8913306fa97571a84a9144a880219bdd1f92bcc`.
+An actual FreeBSD bootstrap installs that closure into a separate non-editable
+runtime and verifies all installed RECORD content and the exact framework
+identity. This qualifies wheel installation only; native lifecycle, source and
+evidence custody, retained receipts and release enforcement remain open. The
+subsequent Make-environment correction is not part of that wheel's evidence.
+
 ### [ ] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
 
 - **GitHub issue:** [#69](https://github.com/jordanhubbard/literate-ai/issues/69)
