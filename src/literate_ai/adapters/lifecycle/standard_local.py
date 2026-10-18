@@ -8253,6 +8253,26 @@ class LocalStandardLifecyclePorts:
                     surface_document,
                     cases_document,
                 )
+            if contract.component_revision.uri in self.python_targets:
+                from .standard_runtime import STANDARD_PYTHON_WHEEL_HARNESS_DRIVER
+
+                # Reopen retained payload custody at its current package location.
+                # The normal command projection revalidates the complete artifact,
+                # dependency manifest, installed files, source and selected target.
+                self._packaged_argv(custody, ComponentCommandPhase.EXECUTE)
+                command = (
+                    *binding.command,
+                    "-I",
+                    "-S",
+                    "-B",
+                    "-c",
+                    STANDARD_PYTHON_WHEEL_HARNESS_DRIVER,
+                    str(export.parent),
+                    str(harness),
+                    str(export),
+                    surface_document,
+                    cases_document,
+                )
             resources = getattr(custody, "native_sdk_resources", None)
             if resources is not None and resources.inputs:
                 with self._packaged_sdk_command(

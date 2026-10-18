@@ -6,21 +6,11 @@ linked roadmap documents. Follow
 direction. Check an item only when its evidence is
 recorded; Git preserves prior states.
 
-**Current release: 1.1.0.** Execute the
-[SDLC audit delivery program](1.1-sdlc-audit.md) in dependency order. It includes
-the graded architecture/onboarding/intelligence/research assessment, all audit
-findings, PLUGIN-001 and existing 1.1 commitments. The dated banners below are
-historical context and do not override 1.1 scope or SemVer policy.
-
-**Full integration directive:** the maintainer now assigns every unresolved queue
-item, including older and partially complete obligations, to 1.1.0 under
-RELEASE-INTEGRATION-001. Per-item previous targets retain historical context only.
-Four incorrectly closed parents with unchecked acceptance were reopened rather than
-discarding their remaining evidence requirements. Resolve historical release tasks
-through verified evidence and annotated disposition, not by recreating obsolete tags.
-All open reviews/issues and unmerged branch work must be integrated or otherwise
-resolved with preserved evidence before terminal closure; checking this queue is
-not permission to fabricate test results or silently discard unique branch work.
+**Current development release: 1.3.0.** [RELEASE-INTEGRATION-004](#release-integration-004-reconcile-and-execute-the-13-release-backlog)
+owns the [current 1.3 scope and execution order](1.3-integration.md). The
+2026-10-18 public-tracker reconciliation includes all 20 open issues and PRs
+#60–#62, with #47 first. Existing unchecked acceptance remains open; historical
+1.1/1.2 directives and evidence do not establish 1.3 readiness.
 
 **Maintainer approvals, 2026-09-13:** ADR 0011 is accepted for 1.1, including
 opt-in `literate-markdown@2` domain metadata and typed acceptance while preserving
@@ -23205,7 +23195,7 @@ GitHub CI failure without relaxing identity checks.
 
 ### [ ] WORKER-PROBE-DIAGNOSTICS-001 — Preserve actionable SSH probe failures
 
-- **Release target:** 1.2.0
+- **Release target:** 1.3.0
 - **Priority:** P0
 - **GitHub issue:** [#3](https://github.com/jordanhubbard/literate-ai/issues/3) (migrated from NVIDIA-dev/literate-ai#505)
 - **Owner:** worker capability probes, SSH transport diagnostics, and CLI rendering
@@ -23219,14 +23209,14 @@ GitHub CI failure without relaxing identity checks.
 - **Next action (in progress):** Complete consistency and installed/hosted qualification
   before landing the diagnostic repair.
 - **Implementation:**
-  - [ ] Carry worker ID, SSH exit status, bounded stderr, and redacted transport cause
+  - [x] Carry worker ID, SSH exit status, bounded stderr, and redacted transport cause
         through individual and `--all` probe results.
-  - [ ] Render distinct remediation for unknown/changed host keys, rejected
+  - [x] Render distinct remediation for unknown/changed host keys, rejected
         credentials, name resolution, connection refusal, and timeout.
 - **Evidence:**
-  - [ ] Multi-worker regressions identify only the failing worker and retain each SSH
+  - [x] Multi-worker regressions identify only the failing worker and retain each SSH
         exit-255 diagnostic without secrets or unbounded output.
-  - [ ] Real first-contact and registered-host probes demonstrate that host-key setup
+  - [x] Real first-contact and registered-host probes demonstrate that host-key setup
         is not misreported as failure of unrelated workers.
 
 - **Local evidence:** Seventeen focused capability/CLI tests pass. A real SSH probe
@@ -23238,6 +23228,8 @@ GitHub CI failure without relaxing identity checks.
 - **Qualification follow-up:** Resolve or explicitly exclude the zero-memory GPU
   observation under RELEASE-INTEGRATION-003 capability admission; do not silently
   substitute invented capacity in order to admit that worker.
+
+- **Current qualification:** Four capability tests cover every named SSH cause, bounds/redaction and mixed healthy/failed routing. Fresh strict empty-known-host refusal followed by normal registered-host success passes on the combined 1.3 source. Exact combined CI remains pending; the parent stays open until integration qualification.
 
 ### [ ] QUALIFICATION-ECONOMY-001 — Make exact qualification affordable and observable
 
@@ -23666,6 +23658,9 @@ Make, along with lint and format checks. Full CI remains pending.
   failures remain unresolved and are not overridden by these unit results.
 
 ### [ ] UPDATE-MERGE-002 — Complete three-way update migration and release it
+
+- **GitHub issue:** [#2](https://github.com/jordanhubbard/literate-ai/issues/2)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
 
 - **Release target:** 1.3.0 (deferred from 1.2.0 by maintainer decision on 2026-10-10; issue #2; 1.2 ships plan-only update reviews)
 
@@ -27698,3 +27693,263 @@ revision with an incremental git bundle over SCP, leaving the operator's checkou
 alone. Measured on real workers: first full sync 30 s (windows-11); re-sync of an
 unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 2.4 s and 11.3 s.
+
+### [ ] RELEASE-INTEGRATION-004 — Reconcile and execute the 1.3 release backlog
+
+- **Priority:** P0
+- **Owner:** release integration, roadmap, and contribution dispositions
+- **Direction:** Complete pending 1.3 work and review open issues and PRs for scope.
+- **Conclusion:** Use current public tracker and exact implementation evidence, prioritize issue 47, include new issue 65 and maintenance PRs, and preserve all outstanding acceptance gates. Release publication remains a separate human scheduling decision.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Reconcile every open issue and review into a current ordered 1.3 plan
+  - [ ] Implement and qualify Python library wheel dependencies (issue 47)
+  - [ ] Complete remaining scoped fixes and qualification in dependency order
+  - [ ] Integrate reviewed maintenance PRs and preserve unresolved worktree evidence
+- **Evidence:**
+  - [ ] Every open issue and review has a linked queue owner and current release disposition
+  - [ ] Meaningful focused tests and required consolidated qualification pass for changed behavior
+  - [ ] Remaining release and acceptance blockers remain explicit until proven complete
+
+- **GitHub pull request:** [#66](https://github.com/jordanhubbard/literate-ai/pull/66), including the reviewed ancestry of #60–#62.
+- **Policy reconciliation:** Correct stale repository pre-release target 1.2 to 1.3 through the public release-state command; record native and installed qualification without claiming final release readiness.
+
+### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
+
+- **GitHub issue:** [#65](https://github.com/jordanhubbard/literate-ai/issues/65)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Support target-specific Python backend imports during retained-source admission
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+### [ ] TEST-PARALLEL-001 — Run release-gate tests in parallel (checkpointed, fail-fast)
+
+- **GitHub issue:** [#56](https://github.com/jordanhubbard/literate-ai/issues/56)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Run release-gate tests in parallel (checkpointed, fail-fast)
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+### [ ] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
+
+- **GitHub issue:** [#53](https://github.com/jordanhubbard/literate-ai/issues/53)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Mermaid documentation check scans gitignored build output (generated/)
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+### [ ] SOURCE-CREDENTIAL-001 — Distinguish credential literals from Python assignment expressions
+
+- **GitHub issue:** [#52](https://github.com/jordanhubbard/literate-ai/issues/52)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Distinguish credential literals from Python assignment expressions
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Execution decision:** Use inert Python AST positions to distinguish assignments of credential-free expressions from literal credentials. Exempt only exact assignment matches with no string/bytes literal in their value; preserve uncertain-language, syntax-error, secret-literal and filename exclusions. An entirely excluded inventory must produce a typed classification diagnostic without matched content.
+
+- **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
+
+- **Adversarial review repair:** A literal-free assignment must not exempt a different credential literal elsewhere in the file. Add mixed assignment/dictionary/keyword/default and embedded-private-key controls, then renew qualification.
+
+### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
+
+- **GitHub issue:** [#51](https://github.com/jordanhubbard/literate-ai/issues/51)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** litai test --target host: generation returns empty source when the coding CLI refuses shell use
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Execution decision:** Use the existing bounded/redacted failure path for empty generation, retain stdout and stderr refusal evidence, and report the selected isolation profile. Preserve the deliberate no-retry policy for deterministic empty output. Verify refusal text, both streams, credential redaction and one attempt.
+
+- **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
+
+### [ ] HTML-CANVAS-001 — litai render html graph canvas does not grow with its row
+
+- **GitHub issue:** [#50](https://github.com/jordanhubbard/literate-ai/issues/50)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** litai render html graph canvas does not grow with its row
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+### [ ] HTML-VERSION-001 — version-check HTML view can never be current at a clean commit
+
+- **GitHub issue:** [#49](https://github.com/jordanhubbard/literate-ai/issues/49)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** version-check HTML view can never be current at a clean commit
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+### [ ] NATIVE-CHILD-UPDATE-001 — Support reviewed updates to registered native child projects
+
+- **GitHub issue:** [#48](https://github.com/jordanhubbard/literate-ai/issues/48)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Support reviewed updates to registered native child projects
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
+
+- **GitHub issue:** [#47](https://github.com/jordanhubbard/literate-ai/issues/47)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P0
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Support verified Python wheel dependencies for library Components
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+### [ ] README-PARENT-001 — Ensure project README links to its actual parent repository through a reusable skill
+
+- **GitHub issue:** [#46](https://github.com/jordanhubbard/literate-ai/issues/46)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Ensure project README links to its actual parent repository through a reusable skill
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Current design:** Route initialization/adoption/update/reparent agent workflows through a reusable parent-README skill. Its inert plan/apply helper reads validated direct-parent lineage, preserves authored README bytes outside its managed block, and requires an explicit browser URL for local-only parent identities.
+- **Installed-runtime correction:** Expose the helper through `litai project parent-readme` so isolated framework installations do not require an ambient Python import. Renew CLI and installed-launcher evidence before landing.
+- **Implementation:**
+  - [x] Route initialized and maintainer agent workflows through the reusable parent-README skill and read-only plan / authorized apply helper
+  - [x] Cover actual initialized/reparented projects, arbitrary and multiple parents, authored prose, idempotency, local URL evidence and unsafe inputs
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+### [ ] WORKER-GPU-MEMORY-001 — Preserve unavailable NVIDIA GPU memory in POSIX worker observations
+
+- **GitHub issue:** [#44](https://github.com/jordanhubbard/literate-ai/issues/44)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Preserve unavailable NVIDIA GPU memory in POSIX worker observations
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
+
+- **GitHub issue:** [#43](https://github.com/jordanhubbard/literate-ai/issues/43)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Add native Windows ARM64 host-install realization
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+### [ ] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
+
+- **GitHub issue:** [#27](https://github.com/jordanhubbard/literate-ai/issues/27)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Repository refresh input checks re-walk gitlink inventory with thousands of git launches
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Current investigation:** Replace repeated discovery of already-bound Git inventory with bounded re-observation of exact retained bytes and metadata. Keep fresh configuration/HEAD/cleanliness/worktree observations, exact root authority recomputation, complete index/parent/ref/reflog custody, and fail closed on any drift. Measure real subprocess count and all refresh tamper cases before accepting the optimization.
+- **Implementation:**
+  - [x] Revalidate bound file/metadata custody instead of rediscovering unchanged Git inventory
+  - [x] Retain full discovery twice at preparation and fresh Git fallback for included configuration, packed commits and shared worktree registries
+  - [x] Meet the reported real-Git journey budget: 427 launches, 8.9 seconds; retain a <=500-launch regression
+  - [x] Pass the existing 24 refresh tests in 210.8 seconds and expanded seven-test input/ref/registration/locator/configuration/object controls
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+### [ ] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
+
+- **GitHub issue:** [#24](https://github.com/jordanhubbard/literate-ai/issues/24)
+- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+
+- **Priority:** P1
+- **Owner:** framework authority and qualification named by the linked issue
+- **Direction:** Remove the temporary braces audit exception once a patched release exists
+- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Upgrade OpenSpec without weakening strict validation; split existing overlong requirements while preserving every normative sentence
+  - [x] Implement the linked issue contract without relaxing existing validation
+- **Evidence:**
+  - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.

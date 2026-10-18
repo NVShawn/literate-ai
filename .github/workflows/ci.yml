@@ -87,7 +87,7 @@ jobs:
           else
             printf 'changed=false\n' >> "$GITHUB_OUTPUT"
           fi
-      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         if: matrix.task == 'skill-evaluation'
         with:
           version: "0.12.4"
@@ -123,7 +123,7 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: pyproject.toml
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: matrix.task == 'sample-composition'
         with:
           node-version: "24"
@@ -163,7 +163,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: pyproject.toml
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: matrix.task == 'conformance'
         with:
           node-version: "24"
@@ -189,14 +189,14 @@ jobs:
         run: make wheel-check PYTHON=python
       - name: Upload the smoke-tested wheel and exact manifest
         if: matrix.task == 'conformance'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: qualified-wheel-${{ matrix.os }}-${{ matrix.python }}
           path: _build/ci-wheels
           if-no-files-found: error
       - name: Upload release evidence
         if: matrix.task == 'conformance' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-evidence-${{ matrix.os }}-${{ matrix.python }}
           path: _build/evidence
@@ -236,7 +236,7 @@ jobs:
           tests.critical.test_guarded_builder.GuardedCppBuilderTests
       - name: Upload smoke diagnostics (not release evidence)
         if: matrix.task == 'platform-smoke' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: platform-smoke-diagnostics-${{ matrix.os }}
           path: _build/evidence
@@ -253,7 +253,7 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: pyproject.toml
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: matrix.task == 'windows-gates'
         with:
           node-version: "24"
@@ -383,14 +383,14 @@ jobs:
         run: python scripts/wheel_smoke.py
       - name: Upload the smoke-tested wheel and exact manifest
         if: matrix.task == 'windows-gates'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: qualified-wheel-windows-3.12
           path: _build/ci-wheels
           if-no-files-found: error
       - name: Upload release evidence
         if: matrix.task == 'windows-gates' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: windows-release-evidence
           path: _build/evidence
@@ -413,7 +413,7 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: pyproject.toml
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         if: matrix.task == 'windows-tests'
         with:
           node-version: "24"
@@ -527,7 +527,7 @@ jobs:
           python scripts/profile_pytest.py logs/profile-${{ matrix.group }}.ndjson logs/profile-report-${{ matrix.group }}.json -- --splits 3 --group ${{ matrix.group }} --durations-path=.test_durations tests/e2e tests/smoke tests/critical tests/conformance
       - name: Upload the profiling trace and hotspot report
         if: matrix.task == 'windows-tests' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: windows-conformance-profile-${{ matrix.group }}
           path: |
@@ -635,7 +635,7 @@ jobs:
               )
       - name: Upload native qualification evidence
         if: matrix.task == 'cpp-native' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: native-cpp-qualification-${{ matrix.os }}
           path: cpp-native-qualification.xml
@@ -728,7 +728,7 @@ jobs:
               raise SystemExit("Elixir native qualification must pass all eighteen fixtures")
       - name: Upload qualification evidence
         if: matrix.task == 'elixir-native' && (always())
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: elixir-${{ matrix.os }}-${{ matrix.elixir }}
           path: |
@@ -783,7 +783,7 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
           cache-dependency-path: pyproject.toml
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: "24"
           package-manager-cache: false
@@ -819,14 +819,14 @@ jobs:
         run: make wheel-check PYTHON=python
       - name: Upload qualified wheel
         if: matrix.gates != 'tests'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: qualified-wheel-macos-${{ matrix.python }}-${{ matrix.group }}
           path: _build/ci-wheels
           if-no-files-found: error
       - name: Upload full qualification diagnostics
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: macos-qualification-${{ matrix.python }}-${{ matrix.group }}
           path: |

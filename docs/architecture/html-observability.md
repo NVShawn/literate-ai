@@ -223,7 +223,11 @@ Existing foreign dashboard output is preserved rather than overwritten.
 The `version-check` surface supports the `health` view at version `1.0.0` for a
 selected project. It calls the existing `check_versions(require_project=True)`
 producer, validates its [published report schema](../../schemas/v2/version-check.schema.json),
-and binds the canonical JSON bytes by content identity. The report retains its
+and binds a stable semantic projection by content identity. The projection uses
+the package version as its CLI version label and leaves Git HEAD unset, so writing
+and committing the page cannot invalidate it. The standalone `version-check`
+command still reports the exact development revision and working-tree dirtiness.
+The projection retains all version and tag verdicts and nested diagnostics, and its
 `literate-ai/version-check@1` discriminator and every nested diagnostic. Rendering
 does not recalculate the producer's overall `ok` or convert an unavailable release
 tag into a failure when the command's policy permits an unreleased checkout.
@@ -234,7 +238,7 @@ have an independent overall boolean; the view labels them as diagnostics rather
 than inventing a passing verdict. All content is readable without JavaScript or
 network access. This surface requires no external assets and supports `inline-only`.
 
-The shared publication, cache and staleness machinery binds the exact report,
+The shared publication, cache and staleness machinery binds this projected report,
 renderer and view. Changed reports are stale; edited visible bytes with borrowed
 provenance remain unpinned. The generation timestamp describes an observation,
 not a continuously monitored result. Version agreement does not run project builds,

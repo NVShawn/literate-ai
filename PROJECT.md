@@ -72,6 +72,14 @@ development (2026-09-10):
 
 ## Current work
 
+The current development release is **1.3.0**. [RELEASE-INTEGRATION-004](docs/roadmap/1.3-integration.md)
+owns the 2026-10-18 reconciliation of all 20 open public issues and three green
+dependency PRs. Verified Python wheel dependencies for library Components (#47)
+are first priority; target-specific retained Python imports (#65) are included.
+Every open issue has a queue owner. Remaining implementation, native qualification,
+proposed-ADR acceptance and release evidence remain open. Older status below is
+historical context and does not override this release scope.
+
 WINDOWS-INSTALL-001 and CI-FIXTURE-001 complete Goals 1 and 4's native Windows
 installation and core CLI qualification slice. All 20 full CI jobs pass on
 Windows, Linux and macOS at `e4f58b7`, including native installation and installed

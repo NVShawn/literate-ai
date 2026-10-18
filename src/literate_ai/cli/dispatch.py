@@ -364,6 +364,7 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             documentation_update_from_args,
             mac_project_contract_from_args,
             parent_checkout_from_args,
+            parent_readme_from_args,
             project_ci_plan_from_args,
             project_guidance_from_args,
             project_lifecycle_from_args,
@@ -385,6 +386,8 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             return project_lifecycle_from_args(args), 0
         if args.project_command == "source-intelligence":
             return project_source_intelligence_from_args(args), 0
+        if args.project_command == "parent-readme":
+            return parent_readme_from_args(args), 0
         if args.project_command == "documentation-review":
             return documentation_review_from_args(args), 0
         if args.project_command == "documentation-update":
@@ -1998,6 +2001,15 @@ def _parser() -> JsonArgumentParser:
     )
     project_documentation_update.add_argument(
         "--model", help="explicit coding-CLI model for authorized reconciliation"
+    )
+    project_parent_readme = project_commands.add_parser(
+        "parent-readme",
+        help="plan or apply root README links to declared direct parents",
+    )
+    project_parent_readme.add_argument("path", nargs="?", default=".")
+    project_parent_readme.add_argument("--apply", action="store_true")
+    project_parent_readme.add_argument(
+        "--browser-url", action="append", default=[], metavar="REPOSITORY=URL"
     )
     project_documentation_review = project_commands.add_parser("documentation-review")
     project_documentation_review.add_argument("path", nargs="?", default=".")

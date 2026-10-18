@@ -29,7 +29,8 @@ button:focus-visible, select:focus-visible, #graph-canvas:focus-visible {
 .graph-navigation { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
 .graph-workspace { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   border: 1px solid #cbd8d4; border-radius: 8px; overflow: hidden; background: white; }
-#graph-canvas { height: 470px; min-width: 0; position: relative; background: #fafcfb; }
+#graph-canvas { min-height: 470px; min-width: 0; position: relative;
+  background: #fafcfb; }
 #node-inspector { padding: 20px; min-width: 0; border-left: 1px solid #cbd8d4; }
 .graph-workspace:has(#graph-canvas[hidden]) { grid-template-columns: minmax(0, 1fr); }
 .graph-workspace:has(#graph-canvas[hidden]) #node-inspector { border-left: 0; }
@@ -42,7 +43,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 12px 0;
 #graph-status, #graph-summary { font-size: .9rem; }
 @media (max-width: 700px) {
   .graph-workspace { grid-template-columns: minmax(0, 1fr); }
-  #graph-canvas { height: 350px; }
+  #graph-canvas { min-height: 350px; }
   #node-inspector { border-left: 0; border-top: 1px solid #cbd8d4; }
 }
 """.strip()

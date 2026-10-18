@@ -102,6 +102,10 @@ sent.
 When verifying this repository's Python package, use `make python-check` (session
 venv under `$(OBJ_DIR)/python-envs/$(LITAI_SESSION_KEY)`), not an ad hoc venv.
 
+After successful initialization, adoption, update or reparenting, follow
+`skills/agent/maintain-parent-readme/SKILL.md` to reconcile the root README's
+links to the project's actual declared parents.
+
 ## Author specifications without boilerplate
 
 Keep each Component focused on observable product intent. Start with one

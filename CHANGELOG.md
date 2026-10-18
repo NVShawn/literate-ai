@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Refresh revalidation re-reads exact retained custody without rediscovering an
+  unchanged Git graph; the reported real-Git journey stays below 500 launches.
+
+- Project agent workflows reconcile root README links to their actual direct
+  parents through a reusable read-only-plan/authorized-apply helper.
+
+- Source inventory distinguishes credential-free Python assignment expressions
+  from credential literals without executing the source. Entirely excluded static
+  inventories return an actionable classification error.
+- Empty coding-CLI output reports bounded, redacted refusal text from stdout and
+  stderr together with the selected isolation profile.
+
+- Explicit Python wheel profiles now support importable library Components through
+  offline build, generated tests, isolated import execution and independent
+  acceptance from relocated packages with retained dependency and SBOM custody.
+- Version-health HTML stays current after committing its render; authority graphs
+  stretch to fill taller inspector panels on desktop.
+- Worker GPU observations preserve unavailable NVIDIA memory as unknown on POSIX
+  and Windows instead of converting it to zero or rejecting the observation.
+- Documentation checks inspect tracked Markdown in Git checkouts. OpenSpec 1.14.3
+  removes the vulnerable braces dependency chain and its temporary audit exception;
+  strict specification validation remains required.
+
 - Windows offline Python wheel installation preserves architecture discovery
   variables so CPython 3.11's isolated target probe matches the selected runtime.
 

@@ -343,6 +343,18 @@ def _load_version_check(
             )
         )
         Draft202012Validator(schema["$defs"]["report"]).validate(document)
+        # Render a stable semantic projection: committing the page must not
+        # itself change either its identity or bytes. The standalone CLI report
+        # retains the development/dirty label and exact HEAD. All version/tag
+        # verdicts and diagnostics remain; the renderer binds the distribution.
+        document = {
+            **document,
+            "distribution": {
+                **document["distribution"],
+                "cli_version": document["distribution"]["package_version"],
+            },
+            "tag": {**document["tag"], "head": None},
+        }
         binding = HtmlSourceBinding(
             _VERSION_CHECK.surface_id,
             _VERSION_CHECK.source_schema,
