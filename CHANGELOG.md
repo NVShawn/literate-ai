@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Project agent workflows reconcile root README links to their actual direct
+  parents through a reusable read-only-plan/authorized-apply helper.
+
 - Source inventory distinguishes credential-free Python assignment expressions
   from credential literals without executing the source. Entirely excluded static
   inventories return an actionable classification error.

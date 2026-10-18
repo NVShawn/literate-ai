@@ -27877,8 +27877,10 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Ensure project README links to its actual parent repository through a reusable skill
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
 - **Depends on:** none
+- **Current design:** Route initialization/adoption/update/reparent agent workflows through a reusable parent-README skill. Its inert plan/apply helper reads validated direct-parent lineage, preserves authored README bytes outside its managed block, and requires an explicit browser URL for local-only parent identities.
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [x] Route initialized and maintainer agent workflows through the reusable parent-README skill and read-only plan / authorized apply helper
+  - [x] Cover actual initialized/reparented projects, arbitrary and multiple parents, authored prose, idempotency, local URL evidence and unsafe inputs
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 

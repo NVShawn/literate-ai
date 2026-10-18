@@ -80,3 +80,29 @@ hand-authored external driver.
 #### Scenario: Fresh project follows the golden path
 - **WHEN** a user initializes a project, authors a minimal Component, locks it, and rebuilds it
 - **THEN** the standard lifecycle produces a tested accepted result using installed framework services
+
+
+### Requirement: Parent repository README workflow
+The framework SHALL route project initialization, adoption, update and reparenting agent workflows through a reusable parent-README maintenance skill. The helper SHALL read validated direct-parent authority, produce a read-only plan by default, and reconcile descriptive clickable browser links only with apply authorization.
+
+#### Scenario: Authorized workflow follow-up
+- **WHEN** a parent-changing workflow succeeds and its README follow-up is authorized
+- **THEN** the helper reconciles links from current direct-parent authority
+
+### Requirement: Preserve authored README content and parent link currency
+The helper SHALL preserve authored README content, avoid duplicate links, represent every direct parent, and remove its managed attribution when parent authority becomes empty.
+
+#### Scenario: Arbitrary parent changes
+- **WHEN** a project's declared parent changes from one repository to another
+- **THEN** authorized reconciliation replaces its managed link with the current parent's browser URL and preserves authored content
+
+#### Scenario: Root project and repeated reconciliation
+- **WHEN** a project has no declared parent or reconciliation is repeated without changes
+- **THEN** the helper invents no parent and performs no unnecessary write
+
+### Requirement: Explicit browser identity for local-only parents
+The helper SHALL require an explicit browser URL when the declared repository identity has no derivable network browser location.
+
+#### Scenario: Local parent lacks browser evidence
+- **WHEN** the parent identity is a local file URL and no browser override is supplied
+- **THEN** the helper refuses without writing a fabricated parent link
