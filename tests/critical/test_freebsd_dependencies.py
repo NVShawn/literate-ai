@@ -205,6 +205,37 @@ class FreeBsdDependencyTests(unittest.TestCase):
         self.rpaths[str(self.app)] = ("RPATH", str(own))
         self.assertTrue({str(a), str(b)} <= self.native_paths(self.observe()))
 
+    def test_filter_and_auxiliary_targets_are_resolved_and_explicitly_potential(self):
+        for kind in ("FILTER", "AUXILIARY"):
+            with self.subTest(kind=kind):
+                dep = self.image(self.library / "libfiltee.so.1")
+                self.app.write_bytes(b"\x7fELF" + kind.encode())
+                self.extra_dynamic[str(self.app)] = (
+                    f"({kind}) Library: [libfiltee.so.1]\n"
+                )
+                result = self.observe()
+                self.assertIn(str(dep), self.native_paths(result))
+                records = [
+                    json.loads(p["value"])
+                    for c in result.components
+                    for p in c.get("properties", ())
+                    if p["name"] == "literate-ai:freebsd-filtee"
+                ]
+                self.assertEqual(len(records), 1)
+                self.assertEqual(records[0]["kind"], kind.lower())
+                self.assertEqual(records[0]["loading"], "potential")
+                self.assertIn(
+                    records[0]["target"], {c["bom-ref"] for c in result.components}
+                )
+
+    def test_unresolved_or_malformed_filtee_cannot_be_silently_omitted(self):
+        for value in ("(FILTER) Library: [missing.so.1]\n", "(AUXILIARY) malformed\n"):
+            with self.subTest(value=value):
+                self.app.write_bytes(b"\x7fELF" + value.encode())
+                self.extra_dynamic[str(self.app)] = value
+                with self.assertRaises(DependencyObservationError):
+                    self.observe()
+
     def test_observation_components_validate_against_cyclonedx_17(self):
         from literate_ai.adapters.dependencies.cyclonedx import _strict_validator
 

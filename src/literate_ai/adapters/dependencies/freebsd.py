@@ -132,7 +132,7 @@ class FreeBsdElfDependencyObserver:
                 seeds.setdefault(name, set()).update({"build", "toolchain"})
         add(readelf, {"build", "toolchain"})
         add(ldconfig, {"build", "toolchain"})
-        images, image_edges, hashes, candidates = self._closure(
+        images, image_edges, hashes, candidates, filtees = self._closure(
             readelf, seeds, state, selected
         )
         refs = {path: elf._elf_ref(image) for path, image in images.items()}
@@ -143,6 +143,21 @@ class FreeBsdElfDependencyObserver:
             component["properties"].append(
                 {"name": "literate-ai:native-platform", "value": "freebsd"}
             )
+            for program, kind, name, target in sorted(filtees.get(path, ())):
+                component["properties"].append(
+                    {
+                        "name": "literate-ai:freebsd-filtee",
+                        "value": canonical_json_bytes(
+                            {
+                                "program": refs[program],
+                                "kind": kind,
+                                "name": name,
+                                "target": refs[target],
+                                "loading": "potential",
+                            }
+                        ).decode("utf-8"),
+                    }
+                )
             components.append(component)
         edges.extend(
             elf._native_dependency_edges(
@@ -227,6 +242,8 @@ class FreeBsdElfDependencyObserver:
         images = {}
         hashes = {}
         dynamic = {}
+        filters = {}
+        filtees = {}
         edges = set()
         processed = set()
         witnesses = {}
@@ -246,12 +263,18 @@ class FreeBsdElfDependencyObserver:
                 dynamic[path] = elf._run_bounded_tool(
                     readelf, ("-d", path), code="dependencies.freebsd-readelf-dynamic"
                 )
-                if re.search(
-                    r"\((?:FILTER|AUXILIARY)\)|NODEFLIB|NODEFAULTLIB", dynamic[path]
-                ):
+                if re.search(r"NODEFLIB|NODEFAULTLIB", dynamic[path]):
                     _fail(
                         "dynamic-unsupported", "ELF image uses unqualified loader flags"
                     )
+                filters[path] = []
+                for line in dynamic[path].splitlines():
+                    if not re.search(r"\((?:FILTER|AUXILIARY)\)", line):
+                        continue
+                    match = re.search(r"\((FILTER|AUXILIARY)\).*?\[([^]]+)]", line)
+                    if match is None:
+                        _fail("filtee-invalid", "ELF inspector omitted a filtee name")
+                    filters[path].append((match[1].lower(), match[2]))
                 images[path] = elf._inspect_elf(
                     readelf, Path(path), readelf_digest=digest
                 )
@@ -302,7 +325,14 @@ class FreeBsdElfDependencyObserver:
                 )
                 edges.add((path, interpreter))
                 pending.append((interpreter, interpreter))
-            for name in current.needed:
+            # Include potentially lazy filter/auxiliary imports in the complete
+            # static closure. Missing filtees refuse qualification; their runtime
+            # fallback behavior is not fabricated as a successful observation.
+            imports = tuple(
+                dict.fromkeys((*current.needed, *(n for _, n in filters[path])))
+            )
+            for requested in imports:
+                name = requested
                 name = state.maps.get(name, name)
                 if any(ord(c) < 32 for c in name):
                     _fail("import-unsupported", "ELF import uses an unqualified token")
@@ -338,9 +368,14 @@ class FreeBsdElfDependencyObserver:
                         "One process would select conflicting libraries",
                     )
                 sonames[key] = target
+                for kind, original in filters[path]:
+                    if original == requested:
+                        filtees.setdefault(path, set()).add(
+                            (program, kind, original, target)
+                        )
                 edges.add((path, target))
                 pending.append((target, program))
         for path, expected in hashes.items():
             if elf._file_digest(Path(path)) != expected:
                 _fail("image-changed", "Native ELF image changed during inspection")
-        return images, tuple(sorted(edges)), hashes, witnesses
+        return images, tuple(sorted(edges)), hashes, witnesses, filtees

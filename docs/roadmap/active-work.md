@@ -27814,6 +27814,14 @@ The installed `d4d67a9f` native CLI now also completes public sample `lock` and
 `plan`, selecting FreeBSD authority. This is native planning evidence, not a
 generated application or current lifecycle receipt.
 
+The first real loader run at `e1a6e254` correctly refused FreeBSD 16 libc's
+`AUXILIARY` record for libsys. The observer now resolves filter and auxiliary
+targets recursively, retains their kinds and potential-loading status, and
+refuses unresolved or malformed filtee records. The local dependency group passes
+16 cases with the actual-FreeBSD case skipped on macOS; the corrected native run
+must still pass. This does not convert potential loader edges into observed
+runtime execution or acceptance evidence.
+
 FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
 a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
 then declared installs added only gmake and the existing Node-24-compatible npm.

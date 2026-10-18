@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- FreeBSD native dependency inspection binds ELF imports, interpreter, hints,
+- FreeBSD native dependency inspection binds ELF imports (including potential
+  filter/auxiliary targets), interpreter, hints,
   global library maps and explicit loader paths without running target images.
   Changed loader inputs, unresolved imports and unqualified controls refuse.
   Worker/cache-tool and retained native guards carry FreeBSD loader context.

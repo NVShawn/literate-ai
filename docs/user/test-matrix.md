@@ -24,8 +24,10 @@ Native ELF observation reads the FreeBSD hints directory order and recursively
 included global library maps, binds the inspector/configuration/library bytes,
 and rechecks library search candidates. It supports RPATH/RUNPATH, `$ORIGIN` and
 explicit `LD_LIBRARY_PATH`. It never runs a target image to discover dependencies.
+Filter and auxiliary library targets are retained as potential imports, including
+their recursive closure; that label does not assert that lazy loading occurred.
 Constrained, conflicting or chained library maps, other loader environment
-controls, other ABI interpreters, unmodeled dynamic tokens, filters and
+controls, other ABI interpreters, unmodeled dynamic tokens, unresolved filtees and
 `NODEFLIB` remain explicit refusals. These restrictions follow the observed
 [FreeBSD loader contract](https://github.com/freebsd/freebsd-src/blob/main/libexec/rtld-elf/rtld.1);
 they do not qualify an arbitrary loader configuration or a complete lifecycle.
