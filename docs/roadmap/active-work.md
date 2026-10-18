@@ -25939,6 +25939,23 @@ ordinary-origin/forged-claim refusal. Its log SHA-256 is
 Existing CycloneDX checks (2), dependency lifecycle checks (4) and schema catalog
 checks (2) pass. Full runtime SBOM observation/custody remains open.
 
+The next integration action in progress connects this graph to actual filesystem
+planning. Extend the existing current-lock owner to expose its verified immutable
+lock objects while preserving the identity-only API and catalog-selection rules.
+Derive the retained planning result's managed graph from exactly those locks and
+the reviewed plan, and expose it through the read-only public planning response.
+Keep current-authority revalidation and the unqualified execution refusal. Test
+real lock loading/staleness and graph/result origin consistency; a graph response
+does not issue source/resolved runtime evidence or a receipt.
+The bridge passes six current-lock/planning checks, all 46 retained-project checks
+and five CLI rebuild regressions. Actual catalog/lock reads reject stale persisted
+inputs and retain unselected catalog behavior; the positive planning fixture uses
+explicit unit-test validation/conversion/distribution authority and issues no
+receipt. Current-lock and retained-group log SHA-256 values are
+`036806237ddfa2a12ae7f7225f3e003cb008224f5fa18c4414db9d68579abf02`
+and `99a97e57211a7cf809aa346daee87f5504516316c7f371b7a25998f34d023783`.
+Installed public whole-project and runtime SBOM qualification remain required.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).

@@ -144,6 +144,12 @@ edge authority. The existing CycloneDX source/resolved transition checks preserv
 this distinction. A managed graph describes authority; it does not establish the
 observed native SDK/toolchain closure or issue an acceptance receipt.
 
+The read-only retained planning response includes `managed_sbom_graph` alongside
+the plan and authorization identity. It derives that graph from the same verified
+persisted Component locks, not supplied graph metadata or unlocked catalog entries.
+Current project definitions and lock inputs must remain unchanged. This response
+does not authorize execution or attest a resolved runtime dependency closure.
+
 The internal command workspace reads bounded, identity-checked reports using
 `literate-ai/retained-project-test-report@1`. Each report names its action and
 the complete case outcomes (`passed`, `failed`, or explicitly permitted `skipped`).

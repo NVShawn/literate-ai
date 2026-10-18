@@ -22,6 +22,11 @@ lifecycle acceptance.
 - **WHEN** the existing verifier admits the exact source and resolved BOM pair
 - **THEN** the retained root binding and locked dependency authority remain unchanged
 
+#### Scenario: The operator reviews retained project planning
+- **WHEN** the read-only public retained planner validates current filesystem authority
+- **THEN** its response includes the managed graph derived from the same verified Component locks and reviewed plan
+- **AND** absent catalog locks remain unselected, stale persisted locks refuse, and planning issues no lifecycle receipt
+
 ### Requirement: Retained planning binds actual release authority
 The retained release-policy input SHALL be the canonical configured policy used
 by the existing release owner. Planning SHALL parse its exact reviewed bytes,

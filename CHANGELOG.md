@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Read-only retained planning exposes its managed SBOM graph from the same verified
+  current Component locks as the reviewed plan. Identity-only lock readers retain
+  their API and stale-input checks. A stale loaded project or mismatched graph
+  refuses; planning still grants no execution or lifecycle receipt.
+
 - FreeBSD filter/auxiliary observations bind loader contexts rather than changing
   shared native file records. SDK projection preserves every program/image/target
   fact, rebinds portable paths and context hashes, and keeps actual file conflicts

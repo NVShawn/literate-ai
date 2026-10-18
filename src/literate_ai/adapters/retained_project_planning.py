@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 from literate_ai.adapters.component_lock_application import (
     current_project_component_lock_identities,
+    current_project_component_locks,
 )
 from literate_ai.adapters.conversion_authority import FilesystemConversionAuthorityStore
 from literate_ai.adapters.project_validation import validated_project_authority_identity
@@ -28,7 +30,11 @@ from literate_ai.contracts.retained_project_lifecycle import (
     RetainedProjectPlan,
     RetainedProjectProfile,
 )
-from literate_ai.projects import LoadedProject
+from literate_ai.contracts.retained_project_sbom import (
+    project_retained_project_managed_graph,
+)
+from literate_ai.contracts.sbom import CycloneDxManagedGraph, ManagedComponentKind
+from literate_ai.projects import LoadedProject, ProjectConfigurationStore
 
 
 def retained_role_identity(
@@ -46,7 +52,35 @@ def retained_role_identity(
     )
 
 
-def plan_retained_project(
+@dataclass(frozen=True, slots=True)
+class RetainedProjectPlanningResult:
+    plan: RetainedProjectPlan
+    managed_sbom_graph: CycloneDxManagedGraph
+
+    def __post_init__(self):
+        if not isinstance(self.plan, RetainedProjectPlan) or not isinstance(
+            self.managed_sbom_graph, CycloneDxManagedGraph
+        ):
+            raise TypeError("retained planning requires a typed plan and managed graph")
+        root = next(c for c in self.managed_sbom_graph.components if c.kind.is_root)
+        if (
+            self.managed_sbom_graph.resolved_graph_identity != self.plan.identity
+            or root.kind is not ManagedComponentKind.RETAINED_PROJECT
+            or root.identity != self.plan.identity
+        ):
+            raise ValueError("retained.planning.managed-graph-mismatch")
+
+    def to_dict(self):
+        return {
+            "plan": self.plan.to_dict(),
+            "managed_sbom_graph": self.managed_sbom_graph.to_dict(),
+            "authorization_identity": self.plan.identity.uri,
+            "admitted": False,
+            "release_authority": "original-source",
+        }
+
+
+def plan_retained_project_with_graph(
     project: LoadedProject,
     binding: ResolvedStandardProjectLifecycleDriver,
     manifest: RetainedProjectManifest,
@@ -56,7 +90,7 @@ def plan_retained_project(
     target: str,
     profile_path: Path,
     profile_bytes: bytes,
-) -> RetainedProjectPlan:
+) -> RetainedProjectPlanningResult:
     """Validate current authority and complete retained inputs without acquisition.
 
     No native SDK builder, model provider, process runner, or cache writer is called.
@@ -64,11 +98,14 @@ def plan_retained_project(
     """
     if profile.target != target or profile.worker_identity != worker_identity:
         raise ValueError("Retained profile names another target or worker")
+    if ProjectConfigurationStore(project.root).read().definition != project.definition:
+        raise ValueError("retained.planning.project-definition-changed")
     binding.require_unchanged()
     project_identity = validated_project_authority_identity(
         project.root, synchronize_source_intelligence=False
     )
-    locks = current_project_component_lock_identities(project)
+    current_locks = current_project_component_locks(project)
+    locks = tuple(lock.identity for lock in current_locks)
     conversion = FilesystemConversionAuthorityStore(project.root).load_optional()
     if conversion is None or conversion.project_id != project.definition.project_id:
         raise ValueError(
@@ -127,7 +164,8 @@ def plan_retained_project(
         )
     # Re-open all authority after streaming input capture, including conversion state.
     if (
-        validated_project_authority_identity(
+        ProjectConfigurationStore(project.root).read().definition != project.definition
+        or validated_project_authority_identity(
             project.root, synchronize_source_intelligence=False
         )
         != project_identity
@@ -137,7 +175,7 @@ def plan_retained_project(
     ):
         raise ValueError("Project authority changed during retained planning")
     binding.require_unchanged()
-    return RetainedProjectPlan(
+    plan = RetainedProjectPlan(
         project.definition.project_id,
         project_identity,
         locks,
@@ -146,3 +184,33 @@ def plan_retained_project(
         manifest.identity,
         profile,
     )
+    return RetainedProjectPlanningResult(
+        plan,
+        project_retained_project_managed_graph(
+            plan, current_locks, version=project.definition.version
+        ),
+    )
+
+
+def plan_retained_project(
+    project: LoadedProject,
+    binding: ResolvedStandardProjectLifecycleDriver,
+    manifest: RetainedProjectManifest,
+    profile: RetainedProjectProfile,
+    *,
+    worker_identity: ContentIdentity,
+    target: str,
+    profile_path: Path,
+    profile_bytes: bytes,
+) -> RetainedProjectPlan:
+    """Preserve the identity-only planning API with the same complete graph checks."""
+    return plan_retained_project_with_graph(
+        project,
+        binding,
+        manifest,
+        profile,
+        worker_identity=worker_identity,
+        target=target,
+        profile_path=profile_path,
+        profile_bytes=profile_bytes,
+    ).plan

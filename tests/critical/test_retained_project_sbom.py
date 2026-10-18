@@ -11,11 +11,6 @@ from literate_ai.adapters.dependencies import (
     validate_cyclonedx_bom,
 )
 from literate_ai.contracts import CycloneDxLifecycle, canonical_identity
-from literate_ai.contracts.retained_project_lifecycle import (
-    RetainedProjectAction,
-    RetainedProjectPlan,
-    RetainedProjectProfile,
-)
 from literate_ai.contracts.retained_project_sbom import (
     project_retained_project_managed_graph,
 )
@@ -24,60 +19,13 @@ from literate_ai.contracts.sbom import (
     ManagedComponentKind,
     project_component_lock_managed_graph,
 )
-from tests.support.fixtures_test_component_lock_contracts import component_lock
+from tests.support.fixtures_retained_project_sbom import retained_project_sbom_fixture
 from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class RetainedProjectSbomTests(unittest.TestCase):
     def setUp(self):
-        lock = component_lock()
-        dependency = next(
-            n for n in lock.nodes if n.revision.identity != lock.root_revision
-        )
-        second = replace(
-            lock,
-            root_revision=dependency.revision.identity,
-            nodes=(dependency,),
-            edges=(),
-            _authorings=(dependency.revision.definition,),
-        )
-        self.locks = (lock, second)
-        profile = RetainedProjectProfile(
-            "host",
-            *(canonical_identity(n) for n in range(5)),
-            (("tool", "sdk/tool", canonical_identity("tool")),),
-            (
-                RetainedProjectAction(
-                    "build", "build", "tool", (), (), ("app",), ("app",), 10
-                ),
-                RetainedProjectAction(
-                    "test", "test", "tool", (), ("build",), ("case",), (), 10
-                ),
-                RetainedProjectAction(
-                    "docs", "docs", "tool", (), ("build",), ("manual",), (), 10
-                ),
-                RetainedProjectAction(
-                    "accept",
-                    "accept",
-                    "tool",
-                    (),
-                    ("test", "docs"),
-                    ("verifier",),
-                    (),
-                    10,
-                ),
-            ),
-            ("app",),
-        )
-        self.plan = RetainedProjectPlan(
-            "original-project",
-            canonical_identity("project authority"),
-            tuple(item.identity for item in self.locks),
-            canonical_identity("original conversion"),
-            canonical_identity("standard binding"),
-            canonical_identity("original binary manifest"),
-            profile,
-        )
+        self.plan, self.locks = retained_project_sbom_fixture()
 
     def graph(self):
         return project_retained_project_managed_graph(
