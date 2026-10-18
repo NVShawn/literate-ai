@@ -27822,6 +27822,17 @@ refuses unresolved or malformed filtee records. The local dependency group passe
 must still pass. This does not convert potential loader edges into observed
 runtime execution or acceptance evidence.
 
+At `fbb31213`, the real FreeBSD run passes all 24 FreeBSD tests without skips,
+including compilation and static inspection of a native program's actual
+interpreter/libc/libsys closure. All three real inspector-process tests pass on
+FreeBSD as well. Native log SHA-256 identities are
+`2e58a611bfb3e9b490ff94b7330c248e108be3395f2564fd18578cb8d249a66b`
+and `540257cdfb43cd8a484acd885249e7f015732cb975c989cf5bac38db1bd6f4e2`.
+Separately, frozen `77e4dac8` completes the full canonical Python suite: 1500
+tests, 37 platform/tool skips, zero failures. That earlier full-suite result does
+not qualify the later retained-command or loader changes; the current exact
+candidate must receive its own full regression and installed-wheel qualification.
+
 FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
 a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
 then declared installs added only gmake and the existing Node-24-compatible npm.
