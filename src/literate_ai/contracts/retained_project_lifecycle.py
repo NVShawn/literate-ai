@@ -180,6 +180,10 @@ class RetainedProjectProfile:
             raise ValueError(
                 "Build, tests, docs and independent acceptance are required"
             )
+        canonical_relative_posix_paths(
+            (output for action in self.actions for output in action.outputs),
+            label="retained sealed output ownership",
+        )
         ancestors: dict[str, set[str]] = {}
         build_ids = {
             action.action_id for action in self.actions if action.stage == "build"
@@ -207,6 +211,15 @@ class RetainedProjectProfile:
         canonical_relative_posix_paths(
             self.package_inventory, label="retained package inventory"
         )
+        outputs = tuple(output for action in self.actions for output in action.outputs)
+        for member in self.package_inventory:
+            if not any(
+                member == output
+                or member.startswith(output + "/")
+                or output.startswith(member + "/")
+                for output in outputs
+            ):
+                raise ValueError("Package inventory has no declared output producer")
 
     def to_dict(self) -> dict[str, object]:
         return {

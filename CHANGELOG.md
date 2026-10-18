@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add an internal retained-project command workspace with exact plan authorization,
+  captured tools, isolated scratch/home, bounded process trees and revalidated
+  input/export custody. Profiles reject overlapping output owners and payloads
+  without declared producers. Public retained execution and release qualification
+  remain unavailable pending SBOM, independent acceptance and receipt integration.
+
 - Contributor dependency builds isolate parent Make flags from pip subprocesses,
   allowing native Rust builds to establish their own jobserver while preserving
   explicit compiler limits and package-source settings.

@@ -25871,6 +25871,19 @@ does not close this runtime requirement or transfer retained release authority.
 lifecycle owners and share common post-admission gates; do not fabricate generated
 source, generated tests, cache membership or an ordinary regenerative receipt.
 
+Execution work in progress: add an isolated retained command workspace using the
+existing streaming snapshot, Standard tool binding and bounded process owners.
+Every action must use the reviewed graph and captured tool, recheck current plan
+and original/snapshot inputs, and retain exact command/output observations. These
+observations are not acceptance receipts: SBOM, independent acceptance, package,
+public CLI and release consumers must still be integrated before execution can
+qualify. No conversion record or ordinary generated-source membership may change.
+The canonical local retained-project group passes 16 tests. A compiled fixture
+actually runs the complete declared command graph; failed tests, stale plans,
+source/snapshot mutations, substituted tools, undeclared/missing/redirected
+exports, sealed-export mutation, output overflow and incomplete profiles refuse.
+This is command-owner evidence only, not an installed public lifecycle receipt.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).
@@ -27762,6 +27775,14 @@ process receives the original pip arguments and package-source/compiler limits,
 excludes parent Make control variables, and preserves the child's failing status.
 Lint, format, repository-layout and reviewed driver-pin checks pass locally; the
 corrected native contributor build remains pending.
+
+Native Make correction checkpoint: revision `ba085be6` finishes its real FreeBSD
+contributor dependency installation, including native gRPC and Ruff builds, and
+passes `make python-check`'s eight FreeBSD tests. A qualified non-editable wheel at
+`d4d67a9f` also completes public native `onboard create` plan/apply with an exact
+reviewed plan and explicit candidate parent revision; it selects the FreeBSD OS
+Flavor and pins the actual installed Standard distribution. Neither result is a
+complete native application build/test/accept/package or release receipt.
 
 FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
 a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
