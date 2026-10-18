@@ -174,6 +174,7 @@ def project_native_sdk_dependencies(
     root_prefix = exact_root.as_posix() + "/"
     native_prefix = str(exact_root) + ("\\" if "\\" in str(exact_root) else "/")
     path_property = {
+        "freebsd": "literate-ai:elf-path",
         "linux": "literate-ai:elf-path",
         "macos": "literate-ai:macho-path",
         "windows": "literate-ai:pe-path",

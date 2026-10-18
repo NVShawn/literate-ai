@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Native SDK layouts, acquisition and dependency evidence support explicit
+  FreeBSD targets and versioned FreeBSD host names. Runtime inspection uses the
+  native ELF observer while retaining OS and architecture refusal; independent
+  consumer acceptance remains required.
+
 - The sample ladder recognizes native FreeBSD hosts and selects the FreeBSD OS
   Flavor in recipe planning and explicit receiver checks, preserving foreign-OS
   sample filtering. Native execution qualification remains separate.

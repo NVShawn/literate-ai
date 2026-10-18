@@ -23,8 +23,9 @@ from literate_ai.contracts.native_sdks import NativeSdkSnapshot
 from literate_ai.storage.cas import FileSystemCAS
 
 _ARCHITECTURES = {"x86_64", "arm64"}
-_OPERATING_SYSTEMS = {"linux", "macos", "windows"}
+_OPERATING_SYSTEMS = {"freebsd", "linux", "macos", "windows"}
 _PATH_PROPERTIES = {
+    "freebsd": "literate-ai:elf-path",
     "linux": "literate-ai:elf-path",
     "macos": "literate-ai:macho-path",
     "windows": "literate-ai:pe-path",
@@ -57,7 +58,7 @@ def _pe_architecture(path: Path) -> str:
 
 def _architectures(properties: list[dict[str, str]], operating_system: str) -> set[str]:
     values = {item["name"]: item["value"] for item in properties}
-    if operating_system == "linux":
+    if operating_system in {"freebsd", "linux"}:
         architecture = values.get("literate-ai:elf-architecture")
         return {
             "ELF64/Advanced Micro Devices X86-64": {"x86_64"},
@@ -101,6 +102,8 @@ def observe_native_sdk_runtime(
     host_os = {"darwin": "macos", "win32": "windows", "cygwin": "windows"}.get(
         sys.platform, sys.platform
     )
+    if sys.platform.startswith("freebsd"):
+        host_os = "freebsd"
     host_arch = {"amd64": "x86_64", "aarch64": "arm64"}.get(
         platform.machine().lower(), platform.machine().lower()
     )

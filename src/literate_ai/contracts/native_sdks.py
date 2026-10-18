@@ -204,6 +204,7 @@ class NativeSdkBuildLayout:
 
     def __post_init__(self) -> None:
         if self.operating_system not in {
+            "freebsd",
             "linux",
             "macos",
             "windows",

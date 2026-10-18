@@ -95,6 +95,21 @@ SBOMs SHALL fail before harness execution.
 - **THEN** the relocated package still passes the library's independent verifier
 - **AND** deleting retained package files causes refusal before execution
 
+### Requirement: FreeBSD SDK admission preserves native target identity
+
+Native SDK layouts and acquisition SHALL support an explicit FreeBSD target,
+normalize versioned native host names, and refuse foreign host/architecture
+execution. Runtime observation SHALL use FreeBSD ELF loader closure and retain
+the FreeBSD OS identity in dependency evidence. ELF format alone SHALL NOT
+establish ABI compatibility, consumer acceptance or execution permission.
+
+#### Scenario: A native FreeBSD SDK is relocated
+
+- **WHEN** an authorized SDK is built, captured and relocated on its selected FreeBSD host
+- **THEN** runtime observation binds exact native ELF bytes and dependency closure
+- **AND** altered bytes, incompatible architecture or a different OS host are refused
+- **AND** independent consumer execution remains required for acceptance
+
 ### Requirement: Worker routing preserves one exact Component graph
 Worker assignments SHALL bind every and only planned Component revision to an exact
 worker and private catalog identity, target profile and locked Flavor selection.

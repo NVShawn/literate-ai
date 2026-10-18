@@ -27762,10 +27762,19 @@ sample filtering. Local canonical sample checks pass (10 tests, six explicitly
 opt-in execution skips), including actual FreeBSD recipe composition and receiver
 OS mismatch refusal. The stable run log SHA-256 is
 `09478ca743d0b335c6e93fd04958356119e886fea10601d8e62d274cca1f8f92`.
-Native rerun qualification is the next action in progress. Separately, native SDK
+Native rerun qualification is active on a frozen checkout. The next implementation
+action in progress is native SDK target support: native SDK
 layout, acquisition, runtime architecture inspection and SBOM path properties
-still omit FreeBSD; qualify those owners before claiming native mixed-project
-dependency closure. The installed `88fc4bb6` retained-source run passed actual
+still omit FreeBSD. Extend the shared layout/schema, host matching, ELF architecture
+inspection and dependency projection, then run real native build/relocation and
+consumer tests with wrong-target and changed-byte refusals. Qualify those owners
+before claiming native mixed-project dependency closure. Local canonical SDK
+regressions pass all 26 tests without skips, covering real native builds,
+relocation, dependency graphs and consumer/package acceptance. The run log SHA-256
+is `e97160621cc467d9c74f6fe881958c2825d22e6256422ff7a15188de087588d0`.
+These are macOS regressions, not FreeBSD SDK qualification; the exact native
+build/relocation/consumer run remains required.
+The installed `88fc4bb6` retained-source run passed actual
 native tests and independently refused both stale authorization and failing
 behavior while preserving its previous receipt. The retained 11-file native proof
 archive has SHA-256
