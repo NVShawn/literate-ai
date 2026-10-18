@@ -27780,6 +27780,8 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
 
+- **Adversarial review repair:** A literal-free assignment must not exempt a different credential literal elsewhere in the file. Add mixed assignment/dictionary/keyword/default and embedded-private-key controls, then renew qualification.
+
 ### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
 
 - **GitHub issue:** [#51](https://github.com/jordanhubbard/literate-ai/issues/51)

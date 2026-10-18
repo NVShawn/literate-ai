@@ -77,6 +77,15 @@ _SENSITIVE_PATTERN = re.compile(
     rb"(?i)(?:api[_-]?key|access[_-]?token|client[_-]?secret|private[_-]?key)"
     rb"\s*[:=]\s*['\"]?[A-Za-z0-9+/_.-]{12,}"
 )
+_CREDENTIAL_NAME = re.compile(
+    r"(?i)(?:api[_-]?key|access[_-]?token|client[_-]?secret|private[_-]?key|"
+    r"password|passwd|credentials?|secret|token)"
+)
+_CREDENTIAL_TEXT = re.compile(
+    _CREDENTIAL_NAME.pattern + r"['\"]?\s*[:=]\s*(?:['\"][^'\"]+['\"]|"
+    r"[A-Za-z0-9+/_.-]{12,})"
+)
+_PRIVATE_KEY_MATERIAL = re.compile(rb"-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----")
 _PROMPT_INJECTION_PATTERN = re.compile(
     r"(?i)(?:ignore\s+(?:all\s+)?previous\s+instructions|"
     r"system\s+prompt|you\s+are\s+(?:now\s+)?(?:chatgpt|an?\s+llm)|"
@@ -295,16 +304,97 @@ def _signals(path: str, text: str, language: str | None) -> tuple[FlavorSignal, 
     return tuple(sorted(result, key=lambda item: (item.axis, item.flavor_id)))
 
 
+def _python_credential_literals(tree: ast.AST) -> bool:
+    def credential_name(name: str | None) -> bool:
+        if name is None:
+            return False
+        normalized = name.lower().replace("-", "_")
+        return bool(_CREDENTIAL_NAME.fullmatch(normalized)) or normalized.endswith(
+            (
+                "_api_key",
+                "_access_token",
+                "_client_secret",
+                "_private_key",
+                "_password",
+                "_passwd",
+                "_credentials",
+                "_secret",
+                "_token",
+            )
+        )
+
+    def literal(value: ast.AST | None) -> bool:
+        if value is None:
+            return False
+        if isinstance(value, ast.Constant):
+            return (
+                value.value is not None
+                and not isinstance(value.value, bool)
+                and (not isinstance(value.value, (str, bytes)) or bool(value.value))
+            )
+        if isinstance(value, ast.Dict):
+            return any(literal(item) for item in value.values)
+        return any(literal(item) for item in ast.iter_child_nodes(value))
+
+    for node in ast.walk(tree):
+        fields: list[tuple[str | None, ast.AST | None]] = []
+        if isinstance(node, (ast.Assign, ast.AnnAssign, ast.NamedExpr)):
+            targets = node.targets if isinstance(node, ast.Assign) else (node.target,)
+            for target in targets:
+                fields.extend(
+                    (item.id if isinstance(item, ast.Name) else item.attr, node.value)
+                    for item in ast.walk(target)
+                    if isinstance(item, (ast.Name, ast.Attribute))
+                )
+        elif isinstance(node, ast.keyword):
+            fields.append((node.arg, node.value))
+        elif isinstance(node, ast.Dict):
+            fields.extend(
+                (key.value, value)
+                for key, value in zip(node.keys, node.values, strict=True)
+                if isinstance(key, ast.Constant) and isinstance(key.value, str)
+            )
+        elif isinstance(node, ast.arguments):
+            arguments = (*node.posonlyargs, *node.args)
+            fields.extend(
+                (argument.arg, value)
+                for argument, value in zip(
+                    arguments[len(arguments) - len(node.defaults) :],
+                    node.defaults,
+                    strict=True,
+                )
+            )
+            fields.extend(
+                (argument.arg, value)
+                for argument, value in zip(
+                    node.kwonlyargs, node.kw_defaults, strict=True
+                )
+            )
+        elif isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if _CREDENTIAL_TEXT.search(node.value):
+                return True
+        if any(credential_name(name) and literal(value) for name, value in fields):
+            return True
+    return False
+
+
 def _sensitive_content(content: bytes, language: str | None) -> bool:
-    matches = tuple(_SENSITIVE_PATTERN.finditer(content[:1048576]))
-    if not matches:
-        return False
-    if language != "python" or len(content) > 2 * 1024 * 1024:
+    if _PRIVATE_KEY_MATERIAL.search(content):
         return True
+    matches = tuple(_SENSITIVE_PATTERN.finditer(content[:1048576]))
+    if language != "python":
+        return bool(matches)
+    if len(content) > 2 * 1024 * 1024:
+        return bool(matches)
     try:
         text = content.decode("utf-8")
+        if not matches and not _CREDENTIAL_NAME.search(text):
+            return False
         tree = ast.parse(text)
     except (UnicodeDecodeError, SyntaxError, ValueError, RecursionError):
+        return True
+    # Disproving one heuristic match must never hide other literal credentials.
+    if _python_credential_literals(tree):
         return True
     # AST columns are UTF-8 byte offsets, matching the inventory byte scanner.
     starts = [0]

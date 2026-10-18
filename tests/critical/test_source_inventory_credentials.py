@@ -25,6 +25,40 @@ def request():
 
 
 class SourceInventoryCredentialTests(unittest.TestCase):
+    def test_safe_binding_does_not_hide_other_credential_literals(self):
+        for extra in (
+            "credentials = {'api_key': 'credential_literal_12345'}\n",
+            "credentials = {'api_key': 'x'}\n",
+            "configure(api_key='x')\n",
+            "def configure(api_key='x'): pass\n",
+            "def configure(*, api_key='x'): pass\n",
+            "api_key: str = 'x'\n",
+            "password = 'fixture-password'\n",
+            'data = \'{"api_key":"x"}\'\n',
+            "material = '-----BEGIN OPENSSH PRIVATE KEY-----'\n",
+        ):
+            with self.subTest(extra=extra), tempfile.TemporaryDirectory() as temporary:
+                path = Path(temporary) / "backend.py"
+                path.write_text(FIXTURE + extra, encoding="utf-8")
+                self.assertEqual(
+                    inventory_source(path).entries[0].classification,
+                    SourceFileClassification.SENSITIVE,
+                )
+
+    def test_nonliteral_mapping_and_empty_defaults_remain_eligible(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "backend.py"
+            path.write_text(
+                FIXTURE
+                + "credentials = {'api_key': configuration()}\n"
+                + "def configure(api_key=None, *, password=''): pass\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                inventory_source(path).entries[0].classification,
+                SourceFileClassification.SOURCE,
+            )
+
     def derive(self, root, inventory):
         catalog = load_builtin_skill_catalog()
         return derive_static_checkout(
