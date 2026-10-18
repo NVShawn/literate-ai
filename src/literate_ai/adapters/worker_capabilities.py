@@ -254,7 +254,7 @@ gpu_status=absent; gpu_json='[]'; diagnostic=null
 if command -v nvidia-smi >/dev/null 2>&1; then
   output=$(nvidia-smi --query-gpu=index,name,uuid,memory.total,compute_cap,driver_version --format=csv,noheader,nounits 2>&1) && gpu_status=ok || gpu_status=degraded  # noqa: E501
   if [ "$gpu_status" = ok ]; then
-    gpu_json=$(printf '%s\n' "$output" | awk -F', *' 'BEGIN{printf "["}{if(NR>1)printf ","; gsub(/\\/,"\\\\",$2); gsub(/"/,"\\\"",$2); printf "{\"index\":%d,\"model\":\"%s\",\"uuid\":\"%s\",\"memory_mib\":%d,\"compute_capability\":\"%s\",\"driver_version\":\"%s\"}",$1,$2,$3,$4,$5,$6}END{printf "]"}')  # noqa: E501
+    gpu_json=$(printf '%s\n' "$output" | awk -F', *' 'BEGIN{printf "["}{if(NR>1)printf ","; gsub(/\\/,"\\\\",$2); gsub(/"/,"\\\"",$2); printf "{\"index\":%d,\"model\":\"%s\",\"uuid\":\"%s\",\"memory_mib\":%s,\"compute_capability\":\"%s\",\"driver_version\":\"%s\"}",$1,$2,$3,($4=="[N/A]" || $4=="N/A" ? "null" : $4),$5,$6}END{printf "]"}')  # noqa: E501
   else diagnostic='"nvidia-smi is installed but its device query failed"'; fi
 fi
 printf '{"os_name":"%s","os_version":"%s","architecture":"%s","physical_cores":%s,"logical_cores":%s,"memory_mib":%s,"nvidia_status":"%s","gpus":%s,"diagnostic":%s}\n' "$name" "$version" "$(uname -m)" "$physical" "$(getconf _NPROCESSORS_ONLN)" "$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo)" "$gpu_status" "$gpu_json" "$diagnostic"'''  # noqa: E501
@@ -280,7 +280,7 @@ $devices=@(); $status='absent'; $diagnostic=$null
 if ($null -ne $smi) {
   $lines=@(& $smi.Source --query-gpu=index,name,uuid,memory.total,compute_cap,driver_version --format=csv,noheader,nounits 2>&1)  # noqa: E501
   if ($LASTEXITCODE -eq 0) {
-    $status='ok'; foreach($line in $lines){$v=$line -split ',\s*'; $devices += [ordered]@{index=[int]$v[0];model=$v[1];uuid=$v[2];memory_mib=[int]$v[3];compute_capability=$v[4];driver_version=$v[5]}}  # noqa: E501
+    $status='ok'; foreach($line in $lines){$v=$line -split ',\s*'; $memory=if($v[3] -in @('[N/A]','N/A')){$null}else{[int]$v[3]}; $devices += [ordered]@{index=[int]$v[0];model=$v[1];uuid=$v[2];memory_mib=$memory;compute_capability=$v[4];driver_version=$v[5]}}  # noqa: E501
   } else {$status='degraded';$diagnostic='nvidia-smi is installed but its device query failed'}  # noqa: E501
 }
 [ordered]@{os_name=$os.Caption;os_version=$release;architecture=$env:PROCESSOR_ARCHITECTURE;physical_cores=($cpus|Measure-Object NumberOfCores -Sum).Sum;logical_cores=($cpus|Measure-Object NumberOfLogicalProcessors -Sum).Sum;memory_mib=[math]::Floor($cs.TotalPhysicalMemory/1MB);nvidia_status=$status;gpus=$devices;diagnostic=$diagnostic}|ConvertTo-Json -Compress -Depth 5"""  # noqa: E501
@@ -292,7 +292,7 @@ def _device(value: dict[str, object], *, vendor: str) -> ObservedGpuDevice:
         str(value["model"]),
         int(value["index"]),
         str(value["uuid"]),
-        int(value["memory_mib"]),
+        None if value["memory_mib"] is None else int(value["memory_mib"]),
         str(value["compute_capability"]),
         str(value["driver_version"]),
     )

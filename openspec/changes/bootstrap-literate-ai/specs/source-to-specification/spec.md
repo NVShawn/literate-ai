@@ -1,5 +1,25 @@
 ## ADDED Requirements
 
+### Requirement: Python inventory distinguishes assignments from credential literals
+
+Inert source inventory SHALL preserve literal credentials and private-key material
+as excluded evidence. An exact Python assignment of a literal-free expression MAY
+disprove a credential-literal pattern through a complete parsed syntax tree without
+execution. Invalid syntax, uncertain languages and unmatched patterns SHALL remain
+conservatively excluded. The inventory policy identity SHALL bind this distinction.
+
+#### Scenario: Tuple assignment receives configuration values
+
+- **WHEN** a Python function assigns `endpoint, model, api_key = configuration()`
+- **THEN** inventory admits the credential-free source without evaluating it
+- **AND** renaming only `api_key` does not change its eligibility for static derivation
+
+#### Scenario: Every inventory entry is excluded
+
+- **WHEN** no entry can supply a behavioral source contract after classification
+- **THEN** static derivation returns `workflow.inventory_excluded` with classification guidance
+- **AND** it does not fabricate requirements or reveal matched credential values
+
 ### Requirement: Source-to-specification is a separate first-class bounded context
 
 The framework SHALL implement inverse specification authoring under

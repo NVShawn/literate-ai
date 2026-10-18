@@ -142,6 +142,36 @@ STANDARD_PYTHON_WHEEL_RUNTIME_DRIVER = (
     "sys.argv=[str(path),*arguments];runpy.run_path(str(path),run_name='__main__')"
 )
 
+# Independent verifier code owns its import of the library itself. Add only the
+# retained dependency closure here, under the same isolated startup as runtime.
+STANDARD_PYTHON_WHEEL_HARNESS_DRIVER = (
+    "import pathlib,runpy,sys;"
+    "artifact,harness,*arguments=sys.argv[1:];"
+    "packages=pathlib.Path(artifact)/'python-runtime'/'site';"
+    "packages.is_dir() or sys.exit('verified Python payload is absent');"
+    "sys.path.insert(0,str(packages));"
+    "sys.argv=[harness,*arguments];runpy.run_path(harness,run_name='__main__')"
+)
+
+STANDARD_PYTHON_WHEEL_LIBRARY_IMPORT_DRIVER = """
+import base64,importlib,json,pathlib,sys,zlib
+artifact,export,encoded=sys.argv[1:]
+source=(pathlib.Path(export)/'source').resolve(strict=True)
+packages=pathlib.Path(artifact)/'python-runtime'/'site'
+if not packages.is_dir(): raise RuntimeError('verified Python payload is absent')
+sys.path[:0]=[str(source),str(packages)]
+surface=json.loads(zlib.decompress(base64.urlsafe_b64decode(encoded)))
+observed=[]
+for capability in surface['capabilities']:
+    module=importlib.import_module(capability['module'])
+    origin=pathlib.Path(module.__file__).resolve(strict=True)
+    if source not in origin.parents:
+        raise RuntimeError('library import escaped the exact artifact')
+    for symbol in capability['symbols']: getattr(module,symbol)
+    observed.append(capability['capability'])
+print(json.dumps(dict(schema='literate-ai/library-import-observation@1',capabilities=observed)))
+"""
+
 # The child stdio is inherited rather than captured so a one-shot generated command
 # writes directly to the lifecycle driver's descriptors. Persistent-service acceptance
 # unwraps this driver through ``direct_service_process_argv`` below: readiness and
@@ -241,5 +271,7 @@ __all__ = [
     "STANDARD_PYTHON_SDK_RUNTIME_DRIVER",
     "STANDARD_PYTHON_SDK_LIBRARY_IMPORT_DRIVER",
     "STANDARD_PYTHON_WHEEL_RUNTIME_DRIVER",
+    "STANDARD_PYTHON_WHEEL_HARNESS_DRIVER",
+    "STANDARD_PYTHON_WHEEL_LIBRARY_IMPORT_DRIVER",
     "direct_service_process_argv",
 ]

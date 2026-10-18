@@ -562,6 +562,44 @@ class CodingCliSelectionTests(unittest.TestCase):
 
 
 class CodingCliInvocationTests(unittest.TestCase):
+    def test_empty_generation_reports_redacted_refusal_from_both_streams_once(self):
+        secret = "fixture-credential-must-not-escape"
+        with tempfile.TemporaryDirectory() as directory:
+            with (
+                mock.patch.object(
+                    coding_cli_adapter.shutil, "which", return_value=sys.executable
+                ),
+                mock.patch.object(
+                    coding_cli_adapter,
+                    "_run_bounded",
+                    return_value=SimpleNamespace(
+                        returncode=0,
+                        stdout=b"x" * 10000
+                        + b" source read was truncated "
+                        + secret.encode(),
+                        stderr=b"shell use is prohibited " + secret.encode(),
+                    ),
+                ) as run,
+                self.assertRaises(CodingCliError) as caught,
+            ):
+                CodingCliSourceGenerator(
+                    environment={
+                        "CODING_CLI": "codex",
+                        "PATH": "/tools",
+                        "OPENAI_API_KEY": secret,
+                    }
+                ).generate(
+                    recipe(flavor("python")), output_root=Path(directory) / "output"
+                )
+            self.assertEqual(caught.exception.code, "coding_cli.empty_generation")
+            message = str(caught.exception)
+            self.assertIn("source read was truncated", message)
+            self.assertIn("shell use is prohibited", message)
+            self.assertIn("codex-workspace-sandbox-clean-config", message)
+            self.assertNotIn(secret, message)
+            self.assertLess(len(message), 5000)
+            self.assertEqual(run.call_count, 1)
+
     def test_manifest_numeric_guidance_preserves_canonical_refusal(self):
         # Invariant: out-of-range generated framework metadata is refused and
         # never written, while the prompt states the existing signed 64-bit bounds.

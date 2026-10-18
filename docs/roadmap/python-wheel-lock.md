@@ -17,8 +17,13 @@ explicit `pip` packaging selection using the `python` toolchain. It names one
 requirements/static-pyproject manifest and adjacent `python-wheel-lock.json`.
 The locked projector binds the packaging Flavor/profile, interpreter command and
 identity, installer pin, and source paths in `StandardPythonTarget` and the
-toolchain closure. It refuses competing build/packaging/compiler profiles,
-libraries and multiple entrypoints before tool discovery. Dependency-free Python
+toolchain closure. It refuses competing build/packaging/compiler profiles and
+multiple entrypoints before tool discovery. Explicit profiles also support Python
+libraries without converting them to application entrypoints: generated tests,
+declared module/symbol import observations and the verifier-owned independent
+harness run with `-I -S -B` and only the retained dependency payload added to the
+interpreter's standard-library search paths. Package relocation reopens exact
+sealed dependency custody before independent acceptance. Dependency-free Python
 and the shipped `package-pip` Flavor are unchanged; no wheel profile is enabled
 in that Flavor or installed distribution by this patch.
 

@@ -563,6 +563,46 @@ def _assert_installed_model_scope_plan(
     }
 
 
+def _assert_installed_parent_readme(
+    *, project, repository, launcher, root, environment
+):
+    """Exercise attribution through an isolated installed CLI launcher."""
+    path = project / "README.md"
+    before = path.read_bytes() if path.exists() else None
+    arguments = (
+        str(launcher),
+        "--json",
+        "project",
+        "parent-readme",
+        str(project),
+        "--browser-url",
+        f"{repository.as_uri()}=https://example.test/installed-parent",
+    )
+    planned = _run(*arguments, cwd=root, environment=environment).get("result")
+    if not isinstance(planned, dict) or not planned.get("changed"):
+        raise RuntimeError("installed parent README fixture did not plan a change")
+    if (path.read_bytes() if path.exists() else None) != before:
+        raise RuntimeError("parent README planning changed authored content")
+    applied = _run(*arguments, "--apply", cwd=root, environment=environment).get(
+        "result"
+    )
+    current = _run(*arguments, cwd=root, environment=environment).get("result")
+    if (
+        not isinstance(applied, dict)
+        or not applied.get("applied")
+        or not isinstance(current, dict)
+        or current.get("changed")
+    ):
+        raise RuntimeError("installed parent README reconciliation is not idempotent")
+    after = path.read_bytes()
+    if (
+        before is not None and not after.startswith(before)
+    ) or b"](<https://example.test/installed-parent>)" not in after:
+        raise RuntimeError(
+            "installed parent README lost authored prose or its parent link"
+        )
+
+
 def _main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repository", type=Path, required=True)
@@ -616,6 +656,13 @@ def _main() -> int:
             "--from",
             parent_source,
             cwd=root,
+            environment=environment,
+        )
+        _assert_installed_parent_readme(
+            project=project,
+            repository=repository,
+            launcher=launcher,
+            root=root,
             environment=environment,
         )
         validated = _run(

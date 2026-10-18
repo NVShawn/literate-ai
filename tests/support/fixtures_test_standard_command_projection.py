@@ -449,7 +449,6 @@ class StandardCommandProjectionTests(unittest.TestCase):
     def test_python_wheel_conflicts_fail_before_tool_discovery(self):
         for options in (
             {"build_system": "make"},
-            {"no_entrypoint": True},
             {"duplicate_entrypoint": True},
         ):
             with (

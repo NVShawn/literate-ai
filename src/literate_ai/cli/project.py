@@ -965,6 +965,39 @@ def project_source_intelligence_from_args(args) -> dict[str, Any]:
         raise CliFailure(exc.code, exc.message) from exc
 
 
+def parent_readme_from_args(args) -> dict[str, Any]:
+    """Use the installed runtime to reconcile the selected project's README."""
+    from literate_ai.adapters.parent_readme import (
+        ParentReadmeError,
+        parse_browser_urls,
+        reconcile_parent_readme,
+    )
+    from literate_ai.adapters.repository_lineage import RepositoryLineageStoreError
+
+    try:
+        project = discover_project(Path(args.path))
+        if project is None:
+            raise CliFailure(
+                "project.not_found", "no canonical project found from the selected path"
+            )
+        return reconcile_parent_readme(
+            project.root,
+            apply=args.apply,
+            browser_urls=parse_browser_urls(args.browser_url),
+        )
+    except CliFailure:
+        raise
+    except ParentReadmeError as exc:
+        raise CliFailure("project.parent_readme_invalid", str(exc)) from exc
+    except (ProjectError, RepositoryLineageStoreError) as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise CliFailure(
+            "project.parent_readme_invalid",
+            "parent authority or README is unavailable or invalid",
+        ) from exc
+
+
 def documentation_review_from_args(args) -> dict[str, Any]:
     """Calculate or atomically record the validated current review marker."""
 
@@ -1395,6 +1428,7 @@ __all__ = [
     "documentation_update_from_args",
     "init_project_from_args",
     "parent_checkout_from_args",
+    "parent_readme_from_args",
     "project_ci_plan_from_args",
     "project_guidance_from_args",
     "project_peer_work_from_args",

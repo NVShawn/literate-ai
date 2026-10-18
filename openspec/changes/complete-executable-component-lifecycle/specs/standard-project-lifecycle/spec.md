@@ -11,13 +11,7 @@ Exact retained-source execution SHALL bind the reviewed input as a distinct,
 non-executable source selection. It SHALL NOT discover, authenticate or invoke a
 coding agent, select a model, or represent retained bytes as a model response or
 previously accepted cache entry. Ordinary generation SHALL retain its provider
-requirements. Source classification, immutable custody, native dependency/SBOM
-checks, compilation, complete current tests, execution and independent acceptance
-SHALL remain mandatory after retained-source admission.
-Retained-origin rejection SHALL be terminal for that exact input; automatic
-candidate replacement SHALL NOT regenerate or recopy unchanged retained bytes.
-Changed retained input requires a new review and authorization, and the original
-failure evidence SHALL remain the reported rejection.
+requirements.
 
 #### Scenario: Native build worker has no coding agent
 - **WHEN** a worker receives exact retained source and its current authorization
@@ -27,6 +21,54 @@ failure evidence SHALL remain the reported rejection.
 #### Scenario: Retained input attempts to select a model
 - **WHEN** retained-source execution supplies a pipeline model override
 - **THEN** the incompatible selection is rejected rather than invoking a provider
+
+### Requirement: Retained admission preserves post-source gates
+Source classification, immutable custody, native dependency/SBOM checks,
+compilation, complete current tests, execution and independent acceptance SHALL
+remain mandatory after retained-source admission.
+
+#### Scenario: Retained behavior violates its specification
+- **WHEN** retained code passes input review but fails a current test or acceptance
+- **THEN** it cannot produce a passing receipt or replace a previous passing receipt
+
+### Requirement: Retained rejection never regenerates unchanged input
+Retained-origin rejection SHALL be terminal for that exact input. Automatic
+candidate replacement SHALL NOT regenerate or recopy unchanged retained bytes.
+Changed retained input requires a new review and authorization. The original
+failure evidence SHALL remain the reported rejection.
+
+#### Scenario: Native tests reject exact retained bytes
+- **WHEN** a retained candidate fails native behavior tests
+- **THEN** the lifecycle reports that test rejection without a replacement attempt
+- **AND** the existing source-custody checks remain enforced
+
+### Requirement: Python wheel libraries retain import authority and runtime custody
+
+An explicit Python wheel command profile SHALL admit a library without inventing an
+application entrypoint. Its locked commands SHALL preserve the declared module and
+symbol surface. Offline dependency resolution, exact retained payload verification,
+source and resolved SBOM validation, and isolated Python startup SHALL precede
+generated tests and import execution. Ambient site-packages SHALL NOT supply custody.
+
+#### Scenario: Library depends on a pinned Python wheel
+
+- **WHEN** a reviewed Python library selects an explicit wheel profile
+- **THEN** generated tests and declared module imports use its exact retained dependencies
+- **AND** competing build profiles and multiple application entrypoints remain refused
+
+### Requirement: Independent Python library acceptance reopens packaged dependencies
+
+Independent acceptance of a wheel-backed Python library SHALL execute its exact
+verifier-owned harness against the sealed package and retained dependency payload
+using isolated Python startup. Relocation SHALL NOT require the original generated
+tree, artifact or wheelhouse. Missing or modified output, dependency evidence or
+SBOMs SHALL fail before harness execution.
+
+#### Scenario: Relocated package survives source retirement
+
+- **WHEN** the original source, artifact and wheelhouse are removed after packaging
+- **THEN** the relocated package still passes the library's independent verifier
+- **AND** deleting retained package files causes refusal before execution
 
 ### Requirement: Worker routing preserves one exact Component graph
 Worker assignments SHALL bind every and only planned Component revision to an exact
@@ -44,7 +86,16 @@ substituting a different target or implementation.
 The existing lifecycle DAG SHALL determine a consumer's artifact and packaging
 predecessors. A handoff SHALL include their exact accepted product identities and
 exports, bound to the consumer assignment and routing identity. It SHALL exclude
-unrelated siblings and generation-only private implementation products. The importer
+unrelated siblings and generation-only private implementation products.
+
+#### Scenario: Consumer-scoped artifact handoff
+
+- **WHEN** a consumer receives its accepted predecessor products
+- **THEN** the handoff binds the consumer assignment and route and excludes unrelated siblings
+
+### Requirement: Artifact import verifies exact bytes and metadata
+
+The importer
 SHALL verify each blob's size and digest, retain its unchanged export/ABI/target
 metadata, and verify destination bytes before issuing a bound import receipt.
 An import receipt alone SHALL NOT assert native compatibility or lifecycle acceptance.
@@ -65,6 +116,14 @@ contract JSON v1 SHALL remain integer-only. Existing integer-only acceptance ide
 SHALL remain unchanged. Non-finite product values SHALL fail before actuation or before
 accepting an observed result; serializing a number as an application string is not a
 substitute for accepting the numeric value.
+
+#### Scenario: Finite product data declaration
+
+- **WHEN** an oracle declares finite fractional arguments and expected results
+- **THEN** acceptance preserves their numeric values and existing integer-only contract identities
+
+### Requirement: Product numeric comparison preserves exact distinctions
+
 Comparison SHALL accept exactly equal integer and floating-point JSON values without
 rewriting invocation or evidence bytes. It SHALL distinguish booleans from numbers,
 preserve the sign of negative zero and introduce no numeric tolerance or rounding.

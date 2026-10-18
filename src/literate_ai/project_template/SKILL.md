@@ -88,6 +88,10 @@ This is a derived project: use the installed `litai` CLI plus this project's
 declared package metadata, locks, Flavors, and test configuration. Do not assume
 the framework's `Makefile` or contributor bootstrap scripts.
 
+After successful initialization, adoption, update or reparenting, follow
+`skills/agent/maintain-parent-readme/SKILL.md` to reconcile the root README's
+links to the project's actual declared parents.
+
 ## Author specifications without boilerplate
 
 Begin a Component with one readable `component.md`. Exact resolution belongs in

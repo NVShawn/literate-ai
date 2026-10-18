@@ -24,6 +24,7 @@ from .contracts import (
     canonical_digest,
     canonical_value,
 )
+from .errors import SourceToSpecificationError
 from .inventory import (
     FlavorSignal,
     SourceFileClassification,
@@ -451,6 +452,13 @@ def derive_static_checkout(
 ) -> StaticDerivation:
     """Run every reviewed built-in skill over exact inert inventory evidence."""
 
+    if not any(_declared_coverage(entry)[0] is None for entry in inventory.entries):
+        raise SourceToSpecificationError(
+            "workflow.inventory_excluded",
+            "No behavioral source remains after inventory classification. "
+            "Inspect sensitive, binary and implementation-detail classifications; "
+            "excluded content cannot supply specification requirements.",
+        )
     selected_path = Path(source).resolve()
     root = selected_path if selected_path.is_dir() else selected_path.parent
     snapshot = inventory.identity

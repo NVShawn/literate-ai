@@ -135,6 +135,24 @@ class RefreshReferenceObservation:
 
 
 @dataclass(frozen=True, slots=True)
+class RefreshConfigurationObservation:
+    path: Path
+    signature: tuple[int, ...] | None
+    content_digest: str | None
+
+
+def _configuration_file(path: Path) -> RefreshConfigurationObservation:
+    observed = _file(path, optional=True)
+    return RefreshConfigurationObservation(
+        path,
+        observed.signature,
+        None
+        if observed.content is None
+        else "sha256:" + hashlib.sha256(observed.content).hexdigest(),
+    )
+
+
+@dataclass(frozen=True, slots=True)
 class RefreshGitObservation:
     root: Path
     root_node: tuple[int, int, int]
@@ -151,15 +169,20 @@ class RefreshGitObservation:
     references: tuple[RefreshReferenceObservation, ...]
     packed_references: RefreshFileObservation
     hydrated_lfs: tuple[HydratedLfsObservation, ...]
+    common_locator: RefreshFileObservation
+    loose_commit: RefreshFileObservation | None
+    configuration_files: tuple[RefreshConfigurationObservation, ...] | None
 
 
-def _configuration(root: Path, *, clean: bool) -> str:
+def _configuration_snapshot(root: Path, *, clean: bool) -> tuple[str, bool]:
     raw = _git(root, "config", "--null", "--list", "--includes")
     if raw and not raw.endswith(b"\0"):
         _fail("refresh_input_invalid", "Git configuration observation is incomplete")
+    includes = False
     for entry in raw.split(b"\0")[:-1]:
         key, _, value = entry.partition(b"\n")
         normalized = key.lower()
+        includes = includes or normalized.startswith((b"include.", b"includeif."))
         if normalized == b"extensions.refstorage" and value != b"files":
             _fail(
                 "refresh_refs_unsupported",
@@ -185,23 +208,43 @@ def _configuration(root: Path, *, clean: bool) -> str:
                     "nonexecuting cleanliness inspection refuses external filters",
                 )
     # Configuration can contain credentials and host paths; retain only a digest.
-    return "sha256:" + hashlib.sha256(raw).hexdigest()
+    return "sha256:" + hashlib.sha256(raw).hexdigest(), includes
+
+
+def _configuration(root: Path, *, clean: bool) -> str:
+    return _configuration_snapshot(root, clean=clean)[0]
+
+
+def _configuration_files(git_directory, common_directory, includes):
+    if includes:
+        return None
+    try:
+        return tuple(
+            _configuration_file(path)
+            for path in (common_directory / "config", git_directory / "config.worktree")
+        )
+    except (OSError, UnsafeFilesystemPathError, OrchestrationInventoryError):
+        return None
 
 
 def _clean(
-    root: Path, reservations: WriteReservationSet | None = None
+    root: Path,
+    reservations: WriteReservationSet | None = None,
+    *,
+    index_flags_verified: bool = False,
 ) -> tuple[HydratedLfsObservation, ...]:
-    flags = _git(root, "ls-files", "-v", "-z")
-    if flags and not flags.endswith(b"\0"):
-        _fail("refresh_input_invalid", "Git index flags observation is incomplete")
-    for entry in flags.split(b"\0")[:-1]:
-        if len(entry) < 3 or entry[1:2] != b" ":
-            _fail("refresh_input_invalid", "Git index flag is malformed")
-        if entry[:1].islower() or entry[:1] == b"S":
-            _fail(
-                "refresh_hidden_changes",
-                "refresh refuses assume-unchanged and skip-worktree index entries",
-            )
+    if not index_flags_verified:
+        flags = _git(root, "ls-files", "-v", "-z")
+        if flags and not flags.endswith(b"\0"):
+            _fail("refresh_input_invalid", "Git index flags observation is incomplete")
+        for entry in flags.split(b"\0")[:-1]:
+            if len(entry) < 3 or entry[1:2] != b" ":
+                _fail("refresh_input_invalid", "Git index flag is malformed")
+            if entry[:1].islower() or entry[:1] == b"S":
+                _fail(
+                    "refresh_hidden_changes",
+                    "refresh refuses assume-unchanged and skip-worktree index entries",
+                )
     # Inspect nested children ourselves before invoking any status there. Git's
     # recursive status could otherwise execute a nested child's content filter.
     status = _git(
@@ -238,6 +281,14 @@ def _clean(
     return tuple(hydrated)
 
 
+def _loose_commit(common_directory: Path, commit: str) -> RefreshFileObservation | None:
+    try:
+        return _file(common_directory / "objects" / commit[:2] / commit[2:])
+    except (OSError, UnsafeFilesystemPathError, OrchestrationInventoryError):
+        # Packed/alternate/redirected stores retain live Git object verification.
+        return None
+
+
 def _observe_git(
     root: Path, *, clean: bool, reservations: WriteReservationSet | None = None
 ) -> RefreshGitObservation:
@@ -264,7 +315,7 @@ def _observe_git(
     index = _file(index_path)
     boundary_path = root / ".git"
     boundary = _node(boundary_path) if boundary_path.is_dir() else _file(boundary_path)
-    configuration = _configuration(root, clean=clean)
+    configuration, includes = _configuration_snapshot(root, clean=clean)
     commit = _oid(_git(root, "rev-parse", "--verify", "HEAD^{commit}").strip())
     reference = (
         _git(root, "rev-parse", "--symbolic-full-name", "HEAD")
@@ -301,6 +352,9 @@ def _observe_git(
         references,
         packed,
         hydrated_lfs,
+        _file(git_directory / "commondir", optional=True, maximum_bytes=4096),
+        _loose_commit(common_directory, commit),
+        _configuration_files(git_directory, common_directory, includes),
     )
 
 
@@ -318,6 +372,7 @@ class PreparedRepositoryRefresh:
     worktrees: tuple[RefreshWorktreeRegistry, ...]
     reflogs: tuple[RefreshReflogObservation, ...]
     metadata_directories: tuple[RefreshDirectoryObservation, ...]
+    gitmodules: tuple[RefreshFileObservation, ...]
 
 
 def _observe(
@@ -340,11 +395,13 @@ def _observe(
     repository_lock = _file(store.path, optional=True)
     root_git = _observe_git(root, clean=False, reservations=reservations)
     children: list[RefreshGitObservation] = []
+    gitmodules: list[RefreshFileObservation] = []
 
     def visit(parent: Path, *, depth: int) -> None:
         if depth > 16:
             _fail("refresh_limit_exceeded", "refresh nesting exceeds its depth bound")
         inventory = inspect_gitlink_inventory(parent)
+        gitmodules.append(_file(parent / ".gitmodules", optional=True))
         for child in inventory.children:
             if child.checked_out_commit is None:
                 _fail("refresh_child_missing", "refresh requires initialized children")
@@ -388,6 +445,7 @@ def _observe(
         worktrees,
         reflogs,
         directories,
+        tuple(gitmodules),
     )
 
 
@@ -395,8 +453,20 @@ def _observe_checked(
     root: Path,
     request: RepositoryRefreshRequest,
     reservations: WriteReservationSet | None = None,
+    *,
+    prepared: PreparedRepositoryRefresh | None = None,
 ) -> PreparedRepositoryRefresh:
     try:
+        if prepared is not None:
+            from .repository_refresh_revalidation import revalidate_bound_refresh
+
+            if (
+                root != prepared.repository.root
+                or request != prepared.authority.request
+            ):
+                raise TypeError("refresh revalidation requires the original request")
+            revalidate_bound_refresh(prepared, reservations)
+            return prepared
         return _observe(root, request, reservations)
     except OrchestrationInventoryError:
         raise
@@ -419,7 +489,10 @@ def prepare_repository_refresh(
     if not isinstance(request, RepositoryRefreshRequest):
         raise TypeError("refresh preparation requires typed explicit intent")
     prepared = _observe_checked(Path(root).absolute(), request)
-    require_repository_refresh_inputs_unchanged(prepared)
+    # Independent complete discovery establishes the baseline before reusing any
+    # locator. This also binds observations taken on either side of a Git read.
+    if _observe_checked(prepared.repository.root, request) != prepared:
+        _fail("inputs_changed", "refresh inputs changed during preparation")
     return prepared
 
 
@@ -436,7 +509,10 @@ def require_repository_refresh_inputs_unchanged(
         reservations.verify_all()
     if (
         _observe_checked(
-            prepared.repository.root, prepared.authority.request, reservations
+            prepared.repository.root,
+            prepared.authority.request,
+            reservations,
+            prepared=prepared,
         )
         != prepared
     ):

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { mkdtemp, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
@@ -9,6 +9,7 @@ import { pathToFileURL } from "node:url";
 
 import { renderMermaid } from "@mermaid-js/mermaid-cli";
 import puppeteer from "puppeteer";
+import { markdownFiles } from "./markdown-files.mjs";
 
 import {
   conciseMermaidError,
@@ -16,50 +17,7 @@ import {
   sourceLineForMermaidError,
 } from "./mermaid-fences.mjs";
 
-const SKIPPED_DIRECTORIES = new Set([
-  ".codegraph",
-  ".git",
-  ".mypy_cache",
-  ".nox",
-  ".pytest_cache",
-  ".ruff_cache",
-  ".tox",
-  ".venv",
-  "__pycache__",
-  "_build",
-  "dist",
-  "node_modules",
-  "venv",
-]);
 const UTF8 = new TextDecoder("utf-8", { fatal: true });
-
-async function markdownFiles(root) {
-  const files = [];
-  async function visit(directory) {
-    const entries = await readdir(directory, { withFileTypes: true });
-    entries.sort((left, right) => left.name.localeCompare(right.name, "en"));
-    for (const entry of entries) {
-      const candidate = path.join(directory, entry.name);
-      if (entry.isSymbolicLink()) {
-        continue;
-      }
-      if (entry.isDirectory()) {
-        if (!SKIPPED_DIRECTORIES.has(entry.name)) {
-          await visit(candidate);
-        }
-        continue;
-      }
-      if (
-        entry.isFile() &&
-        [".md", ".markdown"].includes(path.extname(entry.name).toLowerCase())
-      ) {
-        files.push(candidate);
-      }
-    }
-  }
-  await visit(root);
-  return files;
-}
 
 function sourceLabel(root, filename) {
   return path.relative(root, filename).split(path.sep).join("/");

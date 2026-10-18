@@ -62,6 +62,14 @@ manifest's exact driver identity and declare their canonical, complete driver
 composition. The graph's selected driver identity SHALL bind that composition's
 bytes. A missing, extra, changed or unordered composition SHALL fail validation.
 Single-driver graphs SHALL retain their existing identity and wire representation.
+
+#### Scenario: Mixed driver inventory binding
+
+- **WHEN** a graph contains products from distinct measured drivers
+- **THEN** its exact canonical composition retains every manifest driver identity
+
+### Requirement: Driver composition preserves execution authority
+
 Composition SHALL NOT issue execution grants or replace a Component's measured
 native driver. Package execution SHALL remain bound to the independently planned
 root package authority and the exact accepted artifact closure.

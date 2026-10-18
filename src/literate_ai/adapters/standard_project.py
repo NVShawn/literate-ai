@@ -92,6 +92,7 @@ from literate_ai.adapters.lifecycle.standard_runtime import (
     STANDARD_PYTHON_RUNTIME_DRIVER as _STANDARD_PYTHON_RUNTIME_DRIVER,
 )
 from literate_ai.adapters.lifecycle.standard_runtime import (
+    STANDARD_PYTHON_WHEEL_LIBRARY_IMPORT_DRIVER,
     STANDARD_PYTHON_WHEEL_RUNTIME_DRIVER,
 )
 from literate_ai.adapters.locked_generation_authority import (
@@ -1505,13 +1506,13 @@ def _command_contract(
         or language.artifact_layout is not StandardArtifactLayout.TREE
         or build_system is not None
         or npm_profile is not None
-        or library_surface is not None
-        or len(entrypoints) != 1
+        or (library_surface is None and len(entrypoints) != 1)
         or accelerator_toolchain
     ):
         raise StandardCommandProjectionError(
             "standard_command.python_wheel_profile_unsupported",
-            "Python wheels require one Python application entrypoint without a "
+            "Python wheels require a Python library or one application entrypoint "
+            "without a "
             "competing build-system, compiler or packaging profile",
         )
     export_id = f"artifact-{plan.component_revision.digest[:20]}"
@@ -1973,8 +1974,34 @@ def _command_contract(
                 *argv[3:],
             )
 
-        test_argv = wheel_argv(test_argv)
-        execute_argv = wheel_argv(execute_argv)
+        if library_surface is not None:
+            test_argv = (
+                "{tool}",
+                "-I",
+                "-S",
+                "-B",
+                "-c",
+                STANDARD_PYTHON_WHEEL_RUNTIME_DRIVER,
+                "{artifact_root}",
+                "{export_path}",
+                "tree",
+                "source/main.py",
+                "--litai-test",
+            )
+            execute_argv = (
+                "{tool}",
+                "-I",
+                "-S",
+                "-B",
+                "-c",
+                STANDARD_PYTHON_WHEEL_LIBRARY_IMPORT_DRIVER,
+                "{artifact_root}",
+                "{export_path}",
+                _encoded_library_import_surface(library_surface),
+            )
+        else:
+            test_argv = wheel_argv(test_argv)
+            execute_argv = wheel_argv(execute_argv)
     if cpp_library:
         test_argv = (
             "{tool}",
@@ -2378,7 +2405,10 @@ def project_locked_standard_toolchain_closure(
             or language.artifact_layout is not StandardArtifactLayout.TREE
             or build_system is not None
             or npm_profile is not None
-            or len(authoring.entrypoints) != 1
+            or not (
+                len(authoring.entrypoints) == 1
+                or (not authoring.entrypoints and authoring.resolved_kind == "library")
+            )
             or (
                 accelerator is not None
                 and language.target in accelerator.applies_to_languages
@@ -2386,7 +2416,8 @@ def project_locked_standard_toolchain_closure(
         ):
             raise StandardCommandProjectionError(
                 "standard_command.python_wheel_profile_unsupported",
-                "Python wheels require one Python application entrypoint without a "
+                "Python wheels require a Python library or one application entrypoint "
+                "without a "
                 "competing build-system, compiler or packaging profile",
             )
         if not authoring.entrypoints and npm_profile is not None:

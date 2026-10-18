@@ -30,6 +30,13 @@ review specifications, validate, lock, plan, rebuild, release, inspect status an
 cancel runs, and retrieve specifications, interfaces, resources, artifacts, receipts, and
 releases without importing CLI-private helpers or application-specific code.
 
+#### Scenario: Provider-neutral project service access
+
+- **WHEN** an IDE requests project operations
+- **THEN** the service exposes the structured operations without CLI-private helpers
+
+### Requirement: Project services preserve canonical Component authoring
+
 Project creation, specification editing, and source-promotion operations SHALL preserve
 the canonical `component.md`-first authoring form. They SHALL NOT manufacture parallel
 JSON/OpenSpec/acceptance authoring files for a simple Component, and SHALL add another
@@ -49,6 +56,14 @@ Source-to-specification promotion SHALL create canonical multi-Component project
 reviewed node kinds, entrypoints, public interfaces, resource ownership, dependency edges,
 target intent, and acceptance boundaries. A library SHALL NOT be promoted as an
 application, and a cross-Component edge SHALL NOT be admitted without a complete contract.
+
+#### Scenario: Source-derived library promotion
+
+- **WHEN** reviewed source identifies an importable library
+- **THEN** promotion preserves its kind and complete public dependency contracts
+
+### Requirement: Promoted Components retain canonical document boundaries
+
 Each promoted Component SHALL use one `component.md` by default; recovered named public or
 domain boundaries MAY be retained as explicit additional documents without recreating the
 retired peer-file layout.
@@ -65,3 +80,45 @@ hand-authored external driver.
 #### Scenario: Fresh project follows the golden path
 - **WHEN** a user initializes a project, authors a minimal Component, locks it, and rebuilds it
 - **THEN** the standard lifecycle produces a tested accepted result using installed framework services
+
+
+### Requirement: Parent repository README workflow
+The framework SHALL route project initialization, adoption, update and reparenting agent workflows through a reusable parent-README maintenance skill. The helper SHALL read validated direct-parent authority, produce a read-only plan by default, and reconcile descriptive clickable browser links only with apply authorization.
+
+#### Scenario: Authorized workflow follow-up
+- **WHEN** a parent-changing workflow succeeds and its README follow-up is authorized
+- **THEN** the helper reconciles links from current direct-parent authority
+
+### Requirement: Preserve authored README content and parent link currency
+The helper SHALL preserve authored README content, avoid duplicate links, represent every direct parent, and remove its managed attribution when parent authority becomes empty.
+
+#### Scenario: Arbitrary parent changes
+- **WHEN** a project's declared parent changes from one repository to another
+- **THEN** authorized reconciliation replaces its managed link with the current parent's browser URL and preserves authored content
+
+#### Scenario: Root project and repeated reconciliation
+- **WHEN** a project has no declared parent or reconciliation is repeated without changes
+- **THEN** the helper invents no parent and performs no unnecessary write
+
+### Requirement: Explicit browser identity for local-only parents
+The helper SHALL require an explicit browser URL when the declared repository identity has no derivable network browser location.
+
+#### Scenario: Local parent lacks browser evidence
+- **WHEN** the parent identity is a local file URL and no browser override is supplied
+- **THEN** the helper refuses without writing a fabricated parent link
+
+
+### Requirement: Refresh revalidation preserves exact retained custody
+Repository refresh MAY reuse previously discovered metadata locations only while rechecking their exact locator bytes, nodes and current configuration. It SHALL revalidate indexes, reference chains, Gitlink authority, registered worktrees, reflogs, source cleanliness and project authority before each custody boundary without repeated discovery of unchanged facts.
+
+#### Scenario: Revalidation inputs drift
+- **WHEN** index, reference, worktree registration, Gitlink, repository locator or project authority inputs change after preparation
+- **THEN** refresh refuses before mutation and does not treat cached discovery as current evidence
+
+
+### Requirement: Installed parent README entry point
+The parent-README workflow SHALL use an installed `litai project parent-readme` entry point, including isolated framework installations whose modules are unavailable to ambient Python. It SHALL discover the selected canonical project and preserve the helper's read-only default and explicit apply boundary.
+
+#### Scenario: Isolated framework installation
+- **WHEN** the installed launcher reconciles a project's parent README
+- **THEN** planning and authorized application run in the installed framework runtime without importing the SDK through ambient Python

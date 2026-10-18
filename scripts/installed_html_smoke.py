@@ -581,6 +581,17 @@ def qualify_version_health(litai: Path, project: Path, distribution: str) -> dic
         report = command(
             "version", "check", "--project", str(project), "--require-project"
         )
+        # HTML deliberately projects away revision/dirtiness observations so a
+        # render can be committed without immediately becoming stale. Verify the
+        # public producer's remaining semantic report independently here.
+        report = {
+            **report,
+            "distribution": {
+                **report["distribution"],
+                "cli_version": report["distribution"]["package_version"],
+            },
+            "tag": {**report["tag"], "head": None},
+        }
         result = command(
             "render",
             "html",
