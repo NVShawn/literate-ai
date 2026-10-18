@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Refresh revalidation re-reads exact retained custody without rediscovering an
+  unchanged Git graph; the reported real-Git journey stays below 500 launches.
+
 - Project agent workflows reconcile root README links to their actual direct
   parents through a reusable read-only-plan/authorized-apply helper.
 

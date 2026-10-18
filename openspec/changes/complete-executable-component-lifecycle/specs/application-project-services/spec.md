@@ -106,3 +106,11 @@ The helper SHALL require an explicit browser URL when the declared repository id
 #### Scenario: Local parent lacks browser evidence
 - **WHEN** the parent identity is a local file URL and no browser override is supplied
 - **THEN** the helper refuses without writing a fabricated parent link
+
+
+### Requirement: Refresh revalidation preserves exact retained custody
+Repository refresh MAY reuse previously discovered metadata locations only while rechecking their exact locator bytes, nodes and current configuration. It SHALL revalidate indexes, reference chains, Gitlink authority, registered worktrees, reflogs, source cleanliness and project authority before each custody boundary without repeated discovery of unchanged facts.
+
+#### Scenario: Revalidation inputs drift
+- **WHEN** index, reference, worktree registration, Gitlink, repository locator or project authority inputs change after preparation
+- **THEN** refresh refuses before mutation and does not treat cached discovery as current evidence

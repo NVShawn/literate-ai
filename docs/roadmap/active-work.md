@@ -27926,8 +27926,12 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Repository refresh input checks re-walk gitlink inventory with thousands of git launches
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
 - **Depends on:** none
+- **Current investigation:** Replace repeated discovery of already-bound Git inventory with bounded re-observation of exact retained bytes and metadata. Keep fresh configuration/HEAD/cleanliness/worktree observations, exact root authority recomputation, complete index/parent/ref/reflog custody, and fail closed on any drift. Measure real subprocess count and all refresh tamper cases before accepting the optimization.
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [x] Revalidate bound file/metadata custody instead of rediscovering unchanged Git inventory
+  - [x] Retain full discovery twice at preparation and fresh Git fallback for included configuration, packed commits and shared worktree registries
+  - [x] Meet the reported real-Git journey budget: 427 launches, 8.9 seconds; retain a <=500-launch regression
+  - [x] Pass the existing 24 refresh tests in 210.8 seconds and expanded seven-test input/ref/registration/locator/configuration/object controls
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
