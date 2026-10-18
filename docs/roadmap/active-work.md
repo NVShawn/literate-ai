@@ -27741,3 +27741,21 @@ also includes retained lifecycle admission/custody, supported sandbox behavior,
 FreeBSD install SBOMs and quota qualification, and existing-platform CI. The OS
 Flavor explicitly refuses assumptions about Linux procfs/GNU utilities. Swift
 requires an explicit FreeBSD toolchain rather than an invented default.
+
+FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
+a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
+then declared installs added only gmake and the existing Node-24-compatible npm.
+Git LFS was added to the FreeBSD prerequisite inventory. The feed's old vulnerable
+Git LFS was not installed; declared alignment installed the official FreeBSD amd64
+3.8.0 archive only after matching its published SHA-256, then alignment passed.
+Private installation commands/endpoints remain outside authority. The native VM
+has 20 CPUs, about 80 GiB RAM and 277 GiB free; no old images/evidence were removed.
+
+Bootstrap now accepts a bounded verified offline native wheel source for export,
+while normal closure identity, no-index installation and installed RECORD checks
+remain in force. FreeBSD platform tags no longer inherit Linux dependency markers
+and native receiver tags must match exactly. Versioned Python discovery supports
+the FreeBSD package layout. Real offline pip resolution, tamper and direct-URL
+refusal tests pass in the local bootstrap group. This does not yet qualify the
+native installed-wheel lifecycle. The earlier wheel-smoke run refused because the
+checkout changed during execution; a new frozen revision must run that gate.

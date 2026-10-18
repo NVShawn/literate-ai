@@ -18,6 +18,7 @@ import re
 import shutil
 import signal
 import subprocess
+import sysconfig
 import tempfile
 import venv
 import zipfile
@@ -486,9 +487,16 @@ def _host_target_compatible(target: dict[str, object]) -> bool:
         return selected_platform.casefold().startswith("macosx_") and (
             selected_platform.casefold().endswith((machine, "universal2"))
         )
-    return selected_platform.casefold().startswith(
-        ("linux_", "manylinux_", "musllinux_")
-    ) and selected_platform.casefold().endswith(machine)
+    if os.sys.platform.startswith("freebsd"):
+        native = re.sub(r"[-.\s]", "_", sysconfig.get_platform()).casefold()
+        return selected_platform.casefold() == native
+    return (
+        os.sys.platform.startswith("linux")
+        and selected_platform.casefold().startswith(
+            ("linux_", "manylinux_", "musllinux_")
+        )
+        and selected_platform.casefold().endswith(machine)
+    )
 
 
 def verify_worker_wheelhouse(
@@ -735,7 +743,36 @@ def _target_marker_environment(
                 "sys_platform": "darwin",
             }
         )
-    elif selected:
+    elif selected.startswith("freebsd_"):
+        match = re.fullmatch(
+            r"freebsd_([0-9]+)_([0-9]+)(?:_[a-z0-9]+)*_"
+            r"(amd64|i386|arm64|aarch64|powerpc64|powerpc64le|riscv64)",
+            selected,
+        )
+        if match is None:
+            raise WorkerBootstrapError(
+                "worker.wheelhouse_target_invalid", "FreeBSD target tag is malformed"
+            )
+        native_freebsd = (
+            os.sys.platform.startswith("freebsd")
+            and selected == re.sub(r"[-.\s]", "_", sysconfig.get_platform()).casefold()
+        )
+        environment.update(
+            {
+                "os_name": "posix",
+                "platform_machine": machine,
+                "platform_system": "FreeBSD",
+                "sys_platform": "freebsd" + match[1],
+                # Wheel platform tags do not prove the kernel build/version string.
+                "platform_release": environment["platform_release"]
+                if native_freebsd
+                else "",
+                "platform_version": environment["platform_version"]
+                if native_freebsd
+                else "",
+            }
+        )
+    elif selected.startswith(("linux_", "manylinux_", "musllinux_")):
         environment.update(
             {
                 "os_name": "posix",
@@ -743,6 +780,10 @@ def _target_marker_environment(
                 "platform_system": "Linux",
                 "sys_platform": "linux",
             }
+        )
+    elif selected:
+        raise WorkerBootstrapError(
+            "worker.wheelhouse_target_invalid", "unrecognized target platform tag"
         )
     return environment
 
@@ -756,6 +797,7 @@ def _close_target_requirements(
     python_version: str | None,
     implementation: str | None,
     abi: str | None,
+    resolution_arguments: tuple[str, ...] = (),
 ) -> None:
     from packaging.requirements import InvalidRequirement, Requirement
 
@@ -797,6 +839,18 @@ def _close_target_requirements(
                         "wheelhouse dependency metadata is invalid",
                     ) from exc
                 selected_extras = extras | {""}
+                if (platform or "").startswith(
+                    "freebsd_"
+                ) and requirement.marker is not None:
+                    for field in ("platform_release", "platform_version"):
+                        if not marker_environment[field] and re.search(
+                            r"\b" + field + r"\b", str(requirement.marker)
+                        ):
+                            raise WorkerBootstrapError(
+                                "worker.wheelhouse_marker_unproven",
+                                "FreeBSD kernel-version markers require "
+                                "native target observation",
+                            )
                 if requirement.marker is not None and not any(
                     requirement.marker.evaluate(
                         {**marker_environment, "extra": selected_extra}
@@ -835,6 +889,7 @@ def _close_target_requirements(
                 "--dest",
                 os.fspath(wheelhouse),
                 *target_arguments,
+                *resolution_arguments,
                 *sorted(missing),
             )
         )
@@ -893,6 +948,56 @@ def _download_wheels(command: tuple[str, ...]) -> None:
         ) from exc
 
 
+def _require_offline_requirements(entry: dict[str, object]) -> None:
+    from packaging.requirements import InvalidRequirement, Requirement
+
+    for raw in entry["requires_dist"]:
+        try:
+            requirement = Requirement(str(raw))
+        except InvalidRequirement as exc:
+            raise WorkerBootstrapError(
+                "worker.wheelhouse_requirement_invalid",
+                "offline wheel requirements are invalid",
+            ) from exc
+        if requirement.url is not None:
+            raise WorkerBootstrapError(
+                "worker.wheelhouse_requirement_invalid",
+                "offline wheels cannot request direct URLs",
+            )
+
+
+def _stage_local_wheels(source: Path, destination: Path) -> tuple[str, ...]:
+    """Snapshot reviewed native wheels before resolving an offline closure."""
+    root = Path(source)
+    try:
+        if root.absolute() != root.resolve(strict=True) or not root.is_dir():
+            raise ValueError("redirected wheel source")
+        candidates = []
+        for candidate in root.iterdir():
+            if len(candidates) >= 1024 or not _WHEEL_FILENAME.fullmatch(candidate.name):
+                raise ValueError("wheel source must contain at most 1024 wheels")
+            candidates.append(candidate)
+        if not candidates:
+            raise ValueError("empty wheel source")
+        destination.mkdir()
+        total = 0
+        for candidate in sorted(candidates):
+            content = _read_stable(candidate)
+            total += len(content)
+            if total > _MAX_WHEEL_BYTES:
+                raise ValueError("local wheel source exceeds the closure byte limit")
+            entry = _inspect_wheel(candidate, _digest(content), required_name=None)
+            _require_offline_requirements(entry)
+            (destination / candidate.name).write_bytes(content)
+    except (OSError, ValueError) as exc:
+        raise WorkerBootstrapError(
+            "worker.wheelhouse_source_invalid",
+            "local wheel source must be a bounded non-redirected directory "
+            "of verified wheels",
+        ) from exc
+    return ("--no-index", "--find-links", os.fspath(destination))
+
+
 def export_worker_wheelhouse(
     framework_wheel: Path,
     output: Path,
@@ -902,6 +1007,7 @@ def export_worker_wheelhouse(
     python_version: str | None = None,
     implementation: str | None = None,
     abi: str | None = None,
+    wheel_directory: Path | None = None,
 ) -> tuple[Path, str]:
     """Resolve and pin an exact coordinator-owned binary dependency closure."""
 
@@ -921,7 +1027,26 @@ def export_worker_wheelhouse(
         tempfile.mkdtemp(prefix=f".{destination.name}.export-", dir=destination.parent)
     )
     resolver: Path | None = None
+    local_wheels: Path | None = None
     try:
+        # Validate target identity before acquiring dependencies or invoking pip.
+        _target_marker_environment(
+            platform=platform,
+            python_version=python_version,
+            implementation=implementation,
+        )
+        resolution_arguments: tuple[str, ...] = ()
+        if wheel_directory is not None:
+            framework = Path(framework_wheel)
+            _require_offline_requirements(
+                _inspect_wheel(
+                    framework,
+                    _digest(_read_stable(framework)),
+                    required_name="literate-ai",
+                )
+            )
+            local_wheels = temporary.with_name(temporary.name + ".native")
+            resolution_arguments = _stage_local_wheels(wheel_directory, local_wheels)
         resolver, downloader = _wheelhouse_downloader(destination.parent)
         command = [
             *downloader,
@@ -939,12 +1064,14 @@ def export_worker_wheelhouse(
                 abi=abi,
             )
         )
+        command.extend(resolution_arguments)
         command.append(os.fspath(Path(framework_wheel).resolve(strict=True)))
         _download_wheels(tuple(command))
         _close_target_requirements(
             temporary,
             downloader=downloader,
             framework_name=Path(framework_wheel).name,
+            resolution_arguments=resolution_arguments,
             platform=platform,
             python_version=python_version,
             implementation=implementation,
@@ -998,6 +1125,8 @@ def export_worker_wheelhouse(
     finally:
         if resolver is not None:
             shutil.rmtree(resolver, ignore_errors=True)
+        if local_wheels is not None:
+            shutil.rmtree(local_wheels, ignore_errors=True)
     return destination / "worker-wheelhouse.json", identity
 
 

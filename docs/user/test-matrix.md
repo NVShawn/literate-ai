@@ -14,7 +14,7 @@ for hardware acceptance. QEMU guests can be registered through private SSH worke
 configuration; the optional provisioner command owns guest creation and cleanup.
 Registration never implicitly creates a VM.
 
-The FreeBSD repository template requires native Git, GNU Make (`gmake`), the base
+The FreeBSD repository template requires native Git and Git LFS, GNU Make (`gmake`), the base
 C compiler, Node/npm and Python 3.11+. FreeBSD inventory and resource collection use
 noninteractive native commands, not interactive Bash startup. `--skip-model`
 alignment proves only declared tool/file readiness; it does not qualify a coding

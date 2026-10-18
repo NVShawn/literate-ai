@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import os
+import subprocess
+import sys
+import tempfile
 import unittest
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from unittest.mock import patch
 
 from literate_ai.adapters.application_settings import resolve_app_settings_path
@@ -50,6 +53,40 @@ class FreeBSDPlatformTests(unittest.TestCase):
                 environment={}, home=PurePosixPath("/usr/home/tester")
             )
         self.assertEqual(str(paths.config_root), "/usr/home/tester/.config/literate-ai")
+
+    @unittest.skipIf(os.name == "nt", "POSIX interpreter discovery")
+    def test_make_bootstrap_finds_freebsd_versioned_python_and_preserves_alias(self):
+        script = (
+            Path(__file__).resolve().parents[2] / "scripts/find-compatible-python.sh"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            uname = root / "uname"
+            uname.write_text("#!/bin/sh\necho FreeBSD\n")
+            uname.chmod(0o700)
+            versioned = root / "python3.12"
+            versioned.symlink_to(sys.executable)
+            environment = {**os.environ, "PATH": str(root) + ":/usr/bin:/bin"}
+            result = subprocess.run(
+                ("/bin/sh", str(script)),
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=10,
+            )
+            self.assertEqual(result.stdout.strip(), str(versioned))
+            alias = root / "python3"
+            alias.symlink_to(sys.executable)
+            result = subprocess.run(
+                ("/bin/sh", str(script)),
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=10,
+            )
+            self.assertEqual(result.stdout.strip(), str(alias))
 
     def test_freebsd_matrix_and_release_require_native_worker(self):
         matrix = GlobalTestMatrix.from_dict(

@@ -383,6 +383,9 @@ def _wheelhouse_from_args(args: Any) -> tuple[dict[str, object], int]:
             Path(args.framework_wheel),
             Path(args.output),
             framework_distribution_identity=args.distribution_identity,
+            wheel_directory=None
+            if args.wheel_directory is None
+            else Path(args.wheel_directory),
             platform=args.platform,
             python_version=args.python_version,
             implementation=args.implementation,

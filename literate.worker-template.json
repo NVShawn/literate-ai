@@ -2,7 +2,7 @@
   "schema": "literate-ai/worker-template@1",
   "platforms": {
     "freebsd": {
-      "commands": ["git", "gmake", "cc", "node", "npm"],
+      "commands": ["git", "git-lfs", "gmake", "cc", "node", "npm"],
       "python": {"commands": ["python3", "python3.11", "python3.12", "python3.13"], "minimum": "3.11"},
       "minimum_free_gib": 10
     },

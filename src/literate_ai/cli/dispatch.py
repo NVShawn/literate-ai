@@ -1023,6 +1023,10 @@ def _parser() -> JsonArgumentParser:
     worker_wheelhouse_export.add_argument("--python-version")
     worker_wheelhouse_export.add_argument("--implementation")
     worker_wheelhouse_export.add_argument("--abi")
+    worker_wheelhouse_export.add_argument(
+        "--wheel-directory",
+        help="resolve offline from a reviewed directory of native dependency wheels",
+    )
     worker_bootstrap = worker_commands.add_parser(
         "bootstrap",
         help="install one exact verified Standard worker dependency closure",

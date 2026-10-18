@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Add offline worker wheelhouse export from reviewed native-built wheels. It
+  snapshots and verifies local candidates, resolves without a package index,
+  rejects direct URLs and redirected files, and retains closure/installed-file
+  verification. FreeBSD platform tags now supply FreeBSD dependency markers and
+  must match the receiver's native tag; unknown targets cannot become Linux.
+- FreeBSD Make bootstrap discovers versioned Python packages when the optional
+  unversioned meta port is absent, preserving existing PATH/alias preference.
+
 - Add explicit FreeBSD identity to worker registration, execution requirements,
   capacity records and hardware observations. The bounded hardware probe uses
   named FreeBSD sysctls and reports GPU probing as unqualified. Native lifecycle,

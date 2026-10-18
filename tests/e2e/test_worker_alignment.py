@@ -399,6 +399,7 @@ class FreeBSDAlignmentTests(unittest.TestCase):
                 output = "\n".join(
                     [
                         "cmd git /usr/local/bin/git",
+                        "cmd git-lfs /usr/local/bin/git-lfs",
                         "cmd gmake /usr/local/bin/gmake",
                         "cmd cc /usr/bin/cc",
                         "cmd node /usr/local/bin/node",

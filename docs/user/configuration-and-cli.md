@@ -2276,6 +2276,22 @@ make release-check
 
 See [Installation](installation.md) for Python and contributor-tool requirements.
 
+### Native dependency wheel sources
+
+`litai worker wheelhouse export --wheel-directory /absolute/native-wheels` resolves
+an offline closure from reviewed wheels built for the selected worker. The source
+must be a non-redirected directory containing only wheel files. Export snapshots
+and validates their content, refuses direct-URL dependencies and uses pip with
+`--no-index`; it does not compile sources or weaken bootstrap verification.
+Use explicit `--platform`, `--python-version`, `--implementation` and `--abi`
+for a foreign target, then transfer the resulting manifest and exact wheels for
+normal identity-bound worker bootstrap. Building those native wheels is a separate
+reviewed build action; a controller's Linux/macOS binary cannot satisfy a FreeBSD
+wheel requirement. FreeBSD receiver compatibility requires its exact native
+platform tag, such as `freebsd_16_0_current_amd64`. Foreign FreeBSD dependencies
+that condition on kernel release/version require native target observations;
+export refuses to infer those values from the wheel tag or the controller.
+
 ### Private worker registration and connectivity
 
 Video walkthrough:

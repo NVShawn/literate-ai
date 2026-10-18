@@ -2,6 +2,11 @@
 
 # Follow PATH directory order. Within each directory, prefer python3 over python.
 remaining=${PATH-}
+python_candidates='python3 python'
+# FreeBSD packages expose versioned interpreters without the optional python3 meta port.
+if [ "$(uname -s 2>/dev/null)" = FreeBSD ]; then
+    python_candidates="$python_candidates python3.14 python3.13 python3.12 python3.11"
+fi
 resolver_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 case $remaining in
     *';'*) separator=';' ;;
@@ -30,7 +35,7 @@ while :; do
     if [ -z "$directory" ]; then
         directory=.
     fi
-    for name in python3 python; do
+    for name in $python_candidates; do
         for suffix in '' .exe; do
             candidate=$directory/$name$suffix
             if [ -f "$candidate" ] && [ -x "$candidate" ] && \
