@@ -174,6 +174,18 @@ def reconcile_parent_readme(
     }
 
 
+def parse_browser_urls(values: list[str]) -> dict[str, str]:
+    overrides: dict[str, str] = {}
+    for item in values:
+        key, separator, value = item.partition("=")
+        if not separator or key in overrides:
+            raise ParentReadmeError(
+                "browser overrides require unique REPOSITORY=URL values"
+            )
+        overrides[key] = value
+    return overrides
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", type=Path, default=Path("."))
@@ -183,14 +195,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     try:
-        overrides = {}
-        for item in args.browser_url:
-            key, separator, value = item.partition("=")
-            if not separator or key in overrides:
-                raise ParentReadmeError(
-                    "browser overrides require unique REPOSITORY=URL values"
-                )
-            overrides[key] = value
+        overrides = parse_browser_urls(args.browser_url)
         result = reconcile_parent_readme(
             args.project, apply=args.apply, browser_urls=overrides
         )

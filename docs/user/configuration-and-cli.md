@@ -81,6 +81,7 @@ litai project validate
 litai project lifecycle rebind-standard
 litai project documentation-update
 litai project documentation-review
+litai project parent-readme
 litai project tracker inspect
 litai project peer-work
 litai project worktree location
@@ -535,6 +536,7 @@ root-integration acceptance still remain.
 | `project source-intelligence check [PATH] [--binary COMMAND]` | Verify the configured external provider, current source binding, and project-local artifact without changing the project. |
 | `project documentation-update [PATH] [--apply --allow-model-egress] [--model MODEL]` | Produce a deterministic, read-only documentation-drift plan by default; with both explicit authorizations, request bounded documentation-only replacements from the selected coding CLI. |
 | `project documentation-review [PATH] [--record]` | Calculate the exact marker for the current reviewed authority and documentation graph; `--record` atomically replaces the one existing marker and verifies it became current. |
+| `project parent-readme [PATH] [--apply] [--browser-url REPOSITORY=URL]` | Plan or reconcile root README links to validated direct parents using the installed framework runtime; preserve authored content and require explicit browser identity for local-only parents. |
 | `spec scxml-review CHART [--trace SIDECAR ...]` | Read-only bounded structural validation and supported-subset trace replay for one exact SCXML 1.0 chart and its explicit JSON sidecars. |
 | `project test-receipt run-retained CANDIDATE [--project PATH] [--evidence PATH] [--worker-id ID] [--worker-config PATH] [--timeout-seconds N] [--known-failure-report PATH] [--harness-workspace-link DESTINATION=SOURCE ...]` | Execute a qualified converted project's exact admitted harness in a disposable authored-source copy and emit one outer-finalized candidate plus external run evidence. `local` remains controller-local; every other ID must select an exact configured POSIX SSH worker. Admitted `uv` stages and Ninja declarations in their evidence scripts receive the framework's pinned, digest-verified Linux x86-64 runtime tools without changing the worker installation. External sibling projections remain local-only in this first remote slice. |
 | `project test-receipt update CANDIDATE [--project PATH]` | Atomically replace the configured receipt with an exact passing candidate. |
@@ -1671,6 +1673,18 @@ litai project documentation-review . --record
 
 Then run `litai project validate .` and commit the reviewed documentation. Planning or
 applying documentation updates never claims that a person performed this final review.
+
+### Parent README links
+
+After successful initialization, adoption, update or reparenting, use
+`litai project parent-readme PATH` to plan descriptive root README links to the
+project's declared direct parents. Add `--apply` with file-write authorization,
+then repeat the plan to verify idempotency. Authored prose remains outside the
+helper's managed attribution block; root projects receive no invented parent.
+For a local-only parent or a forge with a different browser address, supply
+`--browser-url REPOSITORY=URL` for that declared parent using its verified browser
+URL. The installed launcher supplies the framework runtime, including isolated
+installations.
 
 ### Project test receipts
 

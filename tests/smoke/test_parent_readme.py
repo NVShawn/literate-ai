@@ -82,6 +82,65 @@ class ParentReadmeTests(unittest.TestCase):
             self.assertEqual(report["parent_urls"], ["https://example.test/child"])
             self.assertNotIn("example.test/root", (root / "README.md").read_text())
 
+    def test_public_cli_discovers_project_and_applies_idempotently(self):
+        from tests.smoke.test_project_reparenting import initialize_root
+        from tests.support.fixtures_test_repository_lineage import fixture
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "project"
+            initialize_root(root)
+            selection, _, _, lineage = fixture()
+            FilesystemRepositoryLineageStore(root).replace(selection, lineage)
+            nested = root / "nested"
+            nested.mkdir()
+
+            def run(*arguments):
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        "-m",
+                        "literate_ai.cli",
+                        "project",
+                        "parent-readme",
+                        str(nested),
+                        *arguments,
+                    ],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                return json.loads(result.stdout)["result"]
+
+            self.assertTrue(run()["changed"])
+            self.assertFalse((root / "README.md").exists())
+            self.assertTrue(run("--apply")["applied"])
+            self.assertFalse(run()["changed"])
+            self.assertIn(
+                "https://example.test/child", (root / "README.md").read_text()
+            )
+
+    def test_public_cli_refuses_missing_project(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "literate_ai.cli",
+                    "project",
+                    "parent-readme",
+                    directory,
+                    "--apply",
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stderr)
+            self.assertEqual(report["error"]["code"], "project.not_found")
+            self.assertFalse((Path(directory) / "README.md").exists())
+
     def test_plan_create_apply_and_repeat_for_arbitrary_ssh_parent(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

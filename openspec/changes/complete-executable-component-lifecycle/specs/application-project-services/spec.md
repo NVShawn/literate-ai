@@ -114,3 +114,11 @@ Repository refresh MAY reuse previously discovered metadata locations only while
 #### Scenario: Revalidation inputs drift
 - **WHEN** index, reference, worktree registration, Gitlink, repository locator or project authority inputs change after preparation
 - **THEN** refresh refuses before mutation and does not treat cached discovery as current evidence
+
+
+### Requirement: Installed parent README entry point
+The parent-README workflow SHALL use an installed `litai project parent-readme` entry point, including isolated framework installations whose modules are unavailable to ambient Python. It SHALL discover the selected canonical project and preserve the helper's read-only default and explicit apply boundary.
+
+#### Scenario: Isolated framework installation
+- **WHEN** the installed launcher reconciles a project's parent README
+- **THEN** planning and authorized application run in the installed framework runtime without importing the SDK through ambient Python

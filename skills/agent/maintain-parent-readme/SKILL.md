@@ -8,7 +8,7 @@ metadata:
 # Maintain parent README links
 
 Inherits `../SKILL.md`. After successful initialization, adoption, update or
-reparenting, run `python -m literate_ai.adapters.parent_readme --project PATH`.
+reparenting, run `litai project parent-readme PATH`.
 It reads the validated parent selection and lineage and emits a read-only plan.
 With the workflow's existing file-write authorization, add `--apply`, then rerun
 the plan to verify no remaining change. Do not run it for a failed or staged
