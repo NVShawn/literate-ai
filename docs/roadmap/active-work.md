@@ -25839,6 +25839,8 @@ repository-owned default branch. Full 1.2 qualification and release remain open.
 
 ### [ ] RETAINED-PROJECT-001 — Admit retained projects through explicit Standard lifecycle authority
 
+Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), reopened after checking the public handler on current main.
+
 - **Priority:** P0
 - **Owner:** framework lifecycle, retained custody, package and release verification
 - **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
@@ -25859,6 +25861,12 @@ record, worker/target, SDK/toolchain/dependency closure and original policy inpu
 `make python-check` passes 23 retained input/planning tests and 33 existing rebuild
 CLI regressions. Execution still fails closed: typed retained runtime/receipt, SBOM,
 package and release consumers and full installed-CLI qualification remain open.
+Current execution audit: both current main and this branch still validate plan
+authorization and then unconditionally raise
+`retained_project.execution_not_qualified` in `cli/retained_project.py`. Issue #22
+was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
+does not close this runtime requirement or transfer retained release authority.
+
 **Next action:** integrate a distinct retained-origin entry into the existing Standard
 lifecycle owners and share common post-admission gates; do not fabricate generated
 source, generated tests, cache membership or an ordinary regenerative receipt.
