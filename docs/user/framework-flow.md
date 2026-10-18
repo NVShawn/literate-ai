@@ -131,6 +131,11 @@ every original case and owning test action, any exact permitted skip reason, and
 the report path sealed by each test action. Action inventories name the actual
 cases; a suite label or successful command exit does not establish coverage.
 
+The sole `release-policy` input must be the configured `literate.release.json`,
+with the profile binding its exact bytes. Planning reuses the existing release
+policy parser and repository-branch checks. An alternative hashed file cannot
+replace the project's release gates or grant publication permission.
+
 The internal command workspace reads bounded, identity-checked reports using
 `literate-ai/retained-project-test-report@1`. Each report names its action and
 the complete case outcomes (`passed`, `failed`, or explicitly permitted `skipped`).

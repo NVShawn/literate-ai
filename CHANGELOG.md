@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retained-project planning binds the actual configured release policy and
+  repository branch. Alternate policy files, duplicate JSON keys, stale bytes
+  and substituted release authority refuse before execution. Retained metadata
+  shares bounded streaming custody; publication remains separately gated.
+
 - Native SDK layouts, acquisition and dependency evidence support explicit
   FreeBSD targets and versioned FreeBSD host names. Runtime inspection uses the
   native ELF observer while retaining OS and architecture refusal; independent

@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import io
-import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from literate_ai.adapters.retained_project_inputs import _stream
+from literate_ai.adapters.retained_project_metadata import (
+    read_retained_project_document,
+)
 from literate_ai.contracts import (
     ContentIdentity,
     ProjectTestReceiptPolicy,
@@ -26,26 +26,13 @@ from literate_ai.contracts.retained_project_tests import (
 _MAXIMUM_DOCUMENT_BYTES = 16 * 1024 * 1024
 
 
-def _unique_object(items):
-    result = {}
-    for key, value in items:
-        if key in result:
-            raise ValueError("retained.tests.duplicate-json-key")
-        result[key] = value
-    return result
-
-
 def _document(root: Path, member: RetainedProjectMember):
-    buffer = io.BytesIO()
-    size, mode, digest = _stream(
-        root, member.path, _MAXIMUM_DOCUMENT_BYTES, output=buffer
+    return read_retained_project_document(
+        root,
+        member,
+        maximum_bytes=_MAXIMUM_DOCUMENT_BYTES,
+        error_prefix="retained.tests",
     )
-    if (size, mode, digest) != (member.size, member.mode, member.sha256):
-        raise ValueError("retained.tests.document-changed")
-    try:
-        return json.loads(buffer.getvalue(), object_pairs_hook=_unique_object)
-    except (ValueError, TypeError, RecursionError):
-        raise ValueError("retained.tests.document-invalid") from None
 
 
 def read_retained_project_test_policy(

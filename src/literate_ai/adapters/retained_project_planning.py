@@ -12,6 +12,9 @@ from literate_ai.adapters.component_lock_application import (
 from literate_ai.adapters.conversion_authority import FilesystemConversionAuthorityStore
 from literate_ai.adapters.project_validation import validated_project_authority_identity
 from literate_ai.adapters.retained_project_inputs import verify_retained_project_inputs
+from literate_ai.adapters.retained_project_release import (
+    read_retained_project_release_policy,
+)
 from literate_ai.adapters.retained_project_testing import (
     read_retained_project_test_policy,
 )
@@ -109,15 +112,9 @@ def plan_retained_project(
     read_retained_project_test_policy(
         project.root, manifest, profile, project.definition.test_receipt_policy
     )
-    for role, identity in (("release-policy", profile.release_policy_identity),):
-        policy = [member for member in manifest.members if member.role == role]
-        if (
-            len(policy) != 1
-            or ContentIdentity.parse_uri("sha256:" + policy[0].sha256) != identity
-        ):
-            raise ValueError(
-                "Retained policy requires exactly one current original policy input"
-            )
+    read_retained_project_release_policy(
+        project.root, manifest, profile.release_policy_identity
+    )
     required_roles = {
         "source",
         "build-definition",

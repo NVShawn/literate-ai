@@ -6,6 +6,17 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Retained planning binds actual release authority
+The retained release-policy input SHALL be the canonical configured policy used
+by the existing release owner. Planning SHALL parse its exact reviewed bytes,
+retain the profile's byte identity and validate current repository policy.
+An unrelated hashed policy, duplicate-key document, changed policy or conflicting
+release branch SHALL refuse. Planning SHALL NOT authorize publication.
+
+#### Scenario: An alternate retained policy would bypass the configured release gate
+- **WHEN** a retained manifest declares a different file as its release policy
+- **THEN** planning refuses before executing commands or issuing evidence
+
 ### Requirement: Retained project tests cover the original reviewed inventory
 Retained-project planning SHALL bind the configured project receipt policy,
 complete declared test cases, permitted skips, action owners and sealed report

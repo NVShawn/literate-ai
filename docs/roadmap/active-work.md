@@ -25905,6 +25905,22 @@ Policies and reports use bounded streaming custody and duplicate-key rejection;
 verified case observations bind their actual command and report bytes. These
 checks qualify this internal gate locally, not the complete public lifecycle.
 
+Release-authority audit: retained planning currently accepts any single hashed
+`release-policy` member, even when it is unrelated to the policy consumed by
+`litai release`. The next implementation action in progress binds that role to
+the canonical configured release-policy path and its current typed policy,
+including repository-branch consistency. Reuse bounded streamed metadata custody;
+reject duplicate JSON keys, stale bytes, alternate paths and policy substitutions.
+This is a prerequisite to retained-origin receipt/publication integration, not
+permission to publish or advance conversion authority.
+
+The release-policy correction and shared metadata reader pass all 36 local
+retained-project checks without skips, including compiled commands and the
+existing test report/skip refusal cases. The log SHA-256 is
+`a6ee25e110d2ae4253e979057e6ab7afb7ffa40639d389aefa3abffbe59a0afa`.
+Native qualification of this revision and full retained lifecycle integration
+remain required.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).
