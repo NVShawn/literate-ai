@@ -1913,6 +1913,7 @@ def _command_contract(
             python_profile.manifest,
             python_profile.lockfile,
             compiler.command,
+            python_profile.source_projection,
         )
     # ADR 0026: multiple entrypoints are now first-class. The top-level command
     # fields still project the primary (root) entrypoint verbatim so single-

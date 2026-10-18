@@ -105,6 +105,11 @@
   and pressure receivers accept the native OS identity, measure CPU ticks,
   conservative memory and swap counters, and retain unsupported quota evidence.
 
+- Python packaging: explicit target-bound source projection preserves cross-platform
+  requirements and original source while building only reviewed backend files;
+  active imports still require source-BOM and real installed-payload evidence.
+
+
 - Refresh revalidation re-reads exact retained custody without rediscovering an
   unchanged Git graph; the reported real-Git journey stays below 500 launches.
 

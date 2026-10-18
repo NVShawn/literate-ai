@@ -200,6 +200,12 @@
             { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
             { "pattern": "^(?:[^/]+/)*python-wheel-lock\\.json$" }
           ]
+        },
+        "source_projection": {
+          "allOf": [
+            { "$ref": "urn:literate-ai:schema:v2:standard-command-profile-contracts#/$defs/relativePath" },
+            { "pattern": "^(?:[^/]+/)*python-source-projection\\.json$" }
+          ]
         }
       }
     },

@@ -37,6 +37,7 @@ from tests.support.standard_source_evidence_fixture import register_strict_sourc
 
 class StandardPythonLifecycleTests(unittest.TestCase):
     library = False
+    source_projection = False
 
     @classmethod
     def setUpClass(cls):
@@ -60,6 +61,7 @@ class StandardPythonLifecycleTests(unittest.TestCase):
             projection_fixtures._locked_snapshot(
                 self.root,
                 package_python=True,
+                python_source_projection=self.source_projection,
                 no_entrypoint=self.library,
                 generation_ready=True,
                 platform=(

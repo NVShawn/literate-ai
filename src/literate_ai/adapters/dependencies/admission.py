@@ -15,6 +15,7 @@ from literate_ai.contracts.mix_projects import MixProjectIntent
 
 from .javascript_imports import javascript_package_imports
 from .mix_lock import MixLock
+from .python_source import PythonSourceAuthority, prepare_python_source_authority
 from .types import DependencyObservationError, _normalized_package_name
 
 _PYTHON_REQUIREMENT = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)")
@@ -41,6 +42,7 @@ def reconcile_generated_dependencies(
     allow_missing_cargo_lock: bool = False,
     runtime_python_imports: frozenset[str] = frozenset(),
     observed_python_imports: frozenset[str] | None = None,
+    python_source_authority: PythonSourceAuthority | None = None,
 ) -> None:
     """Fail when generated dependency declarations/imports vanish from the BOM."""
 
@@ -50,13 +52,28 @@ def reconcile_generated_dependencies(
     document = json.loads(source_bom_content)
     available = _bom_package_names(document)
     available_python_imports = available | _bom_python_import_names(document)
+    excluded: tuple[str, ...] = ()
+    if python_source_authority is not None:
+        selected = python_source_authority
+        checked = prepare_python_source_authority(
+            files,
+            manifest_path=selected.manifest_path,
+            lock_path=selected.lock_path,
+            projection_path=selected.projection.path if selected.projection else None,
+        )
+        if checked != selected:
+            raise DependencyObservationError(
+                "dependencies.python-source-invalid",
+                "Python source differs from selected lifecycle authority",
+            )
+        excluded = selected.projection.excluded_paths if selected.projection else ()
     declared: set[str] = set()
     locked: set[str] = set()
     imported: set[str] = set()
     text_files = {
         path: content
         for path, content in files.items()
-        if isinstance(path, str) and isinstance(content, str)
+        if isinstance(path, str) and isinstance(content, str) and path not in excluded
     }
     local_python_modules = {
         _normalized_package_name(PurePosixPath(path).stem)
@@ -113,7 +130,16 @@ def reconcile_generated_dependencies(
     project_package_names: set[str] = set()
     for path, content in text_files.items():
         name = PurePosixPath(path).name
-        if name in {"requirements.txt", "requirements.in"}:
+        if (
+            python_source_authority is not None
+            and path == python_source_authority.manifest_path
+        ):
+            declared.update(
+                child
+                for parent, child in python_source_authority.lock.edges
+                if parent == "@root"
+            )
+        elif name in {"requirements.txt", "requirements.in"}:
             declared.update(_python_requirements(content))
         elif name == "pyproject.toml":
             declared.update(_pyproject_dependencies(content))
