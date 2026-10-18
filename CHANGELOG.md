@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The sample ladder recognizes native FreeBSD hosts and selects the FreeBSD OS
+  Flavor in recipe planning and explicit receiver checks, preserving foreign-OS
+  sample filtering. Native execution qualification remains separate.
+
 - Retained-project planning binds the original case inventory and skip permissions
   to the configured project receipt policy. The command workspace reopens sealed
   test reports and refuses missing, extra, duplicate or failed cases, unauthorized

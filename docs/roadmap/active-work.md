@@ -27754,6 +27754,25 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Evidence:**
   - [ ] Real FreeBSD SSH registration and alignment pass; native build/test and failed-input/test rejection are retained; cleanup is bounded; existing Linux/macOS/Windows suites pass; exact installed wheel and CI qualify the change.
 
+The full native Python run at `c75fac59` stopped in sample recipe planning:
+the conformance runner rejects `freebsd16` before selecting the existing FreeBSD
+Flavor. Extend host discovery, OS catalog and explicit receiver selection together;
+exercise real recipe composition with FreeBSD identity and preserve foreign-OS
+sample filtering. Local canonical sample checks pass (10 tests, six explicitly
+opt-in execution skips), including actual FreeBSD recipe composition and receiver
+OS mismatch refusal. The stable run log SHA-256 is
+`09478ca743d0b335c6e93fd04958356119e886fea10601d8e62d274cca1f8f92`.
+Native rerun qualification is the next action in progress. Separately, native SDK
+layout, acquisition, runtime architecture inspection and SBOM path properties
+still omit FreeBSD; qualify those owners before claiming native mixed-project
+dependency closure. The installed `88fc4bb6` retained-source run passed actual
+native tests and independently refused both stale authorization and failing
+behavior while preserving its previous receipt. The retained 11-file native proof
+archive has SHA-256
+`232ffc7e1a5fb98d9f3bfb0b4bfa85a5ec70efe79d91c911d719b8f0e87f4fbb`.
+That small-component proof does
+not close full-project or release qualification.
+
 Additional execution audit: the existing retained legacy-harness SSH connector
 still allows only Linux and macOS, and its optional Ninja/uv runtime artifacts
 are Linux x86_64 binaries. First-class FreeBSD support must reach both coordinator

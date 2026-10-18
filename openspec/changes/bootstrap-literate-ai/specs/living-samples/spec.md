@@ -21,6 +21,16 @@ Generated application source SHALL NOT be cached in this repository.
 Each primary sample SHALL perform deterministic application work beyond returning a
 fixture marker. Its portable base behavior SHALL avoid platform-only dependencies, and
 Linux, macOS, and Windows requirements SHALL be independently content-pinned Flavors.
+FreeBSD host discovery SHALL retain its own OS identity and select the independently
+content-pinned FreeBSD Flavor. Explicit receiver platform checks SHALL accept
+FreeBSD without permitting a mismatched host or a foreign-OS sample.
+
+#### Scenario: Native FreeBSD recipe planning
+
+- **WHEN** the host reports a versioned FreeBSD platform such as `freebsd16`
+- **THEN** sample discovery and recipe planning select the FreeBSD OS Flavor
+- **AND** samples pinned to a different OS remain excluded
+- **AND** planning alone does not attest compilation, execution or acceptance
 
 #### Scenario: A supported host runs the sample ladder
 
