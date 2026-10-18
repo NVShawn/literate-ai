@@ -27869,6 +27869,35 @@ artifact custody and bounded cleanup. Supporting a source-only harness does not
 qualify unimplemented native runtime-tool providers or replace the stronger
 mixed-project lifecycle required by RETAINED-PROJECT-001.
 
+The connector repair is in progress: admit explicit FreeBSD SSH workers and check
+the observed receiver OS and any configured CPU architecture before harness
+execution, as well as when admitting its result. Bind optional tool archives to
+their selected OS/architecture; unsupported providers must refuse before network
+transfer, and the receiver must independently reject a foreign tool archive.
+Source-only harnesses need no optional binary provider. Qualify native command
+execution, changed input/failure refusal and cleanup separately; this connector
+does not substitute for retained-project Standard lifecycle admission.
+
+The repair passes seven local platform/receiver checks, including actual unittest
+execution, failed behavior, source mutation, pre-transfer provider refusal and
+cleanup, plus all 13 existing retained-harness checks. Platform-selection tests
+explicitly simulate FreeBSD on the local host; they are not native acceptance.
+The respective log SHA-256 values are
+`8edd27e07caf124129b239cd6e81c91693b3d3becf3ff1ec1cd74a92b664595a`
+and `e97073c9dfaf6e83c11fafacf743c6b747f3a20bb8ded5cf4936bf68ae94fbae`.
+Native and installed public connector qualification remain required.
+
+The preceding loader-context correction at `f30cbe96` passes all 31 SDK checks
+on actual FreeBSD in 1972.523 seconds, including the formerly failing consumer
+lifecycle and relocation. Its log SHA-256 is
+`f91bf793f17d6d01c5f52d1729174c729b05f603b1354d87fae0a3660de1e0d4`.
+The same native revision passes all 43 retained-project checks in 14.079 seconds
+(log SHA-256 `944001f7988f898f0fa57e1fc71cd435c9a8fe319bc42686b3990174f0154c30`).
+Its complete native Python ladder remains running; this evidence does not cover
+the later current-lock bridge or connector repair. The separately frozen wheel
+qualification at `9000d9b2` passes with qualified wheel identity
+`sha256:9264357d0ac3eb0e3eb09c4735ab428ec44c7f4bd726755adcb56a7998a49afd`.
+
 Installed-wheel execution at `d96f6b8b` no longer discovers a coding agent, but
 refuses before compilation because the shared Python builder searches only
 `python3` and `python`. The aligned native worker exposes the actual interpreter

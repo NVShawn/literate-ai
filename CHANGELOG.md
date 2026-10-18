@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Retained-harness SSH routing admits explicit FreeBSD workers and checks the
+  receiver OS and configured CPU architecture before commands run. Optional
+  Ninja/uv archives bind their native platform; unavailable providers refuse
+  before transfer, and receivers reject foreign binaries. Source-only harnesses
+  do not require an optional tool provider. Full retained-project lifecycle and
+  native installed-connector qualification remain separate gates.
+
 - Read-only retained planning exposes its managed SBOM graph from the same verified
   current Component locks as the reviewed plan. Identity-only lock readers retain
   their API and stale-input checks. A stale loaded project or mismatched graph

@@ -19,6 +19,21 @@ until an authorized declared installation provides the required version.
 - **THEN** build and acceptance execute in that FreeBSD environment
 - **AND** the virtualization host's OS does not substitute for guest identity
 
+### Requirement: Retained-harness native routing
+
+Retained-harness SSH execution SHALL admit an explicitly selected FreeBSD worker
+and preserve its actual OS identity. The receiver SHALL reject a different OS or
+configured CPU architecture before executing harness commands. Optional packaged
+runtime tools SHALL bind OS and architecture; a missing native provider SHALL
+refuse before transfer, and a foreign tool archive SHALL refuse at the receiver.
+Source-only harnesses SHALL NOT require an unused optional runtime provider.
+
+#### Scenario: FreeBSD retained harness without optional runtime tools
+
+- **WHEN** an authorized retained harness selects an explicit FreeBSD SSH worker
+- **THEN** its source-only command graph can execute with native platform evidence
+- **AND** Linux tool binaries cannot substitute for a missing FreeBSD provider
+
 ### Requirement: Truthful native capability evidence
 
 Worker observations SHALL use named bounded FreeBSD queries. An unsupported GPU,

@@ -87,7 +87,7 @@ MAX_RETAINED_INVENTORY_BYTES = 32 * 1024 * 1024
 MAX_RETAINED_DIAGNOSTIC_CHARS = 32_768
 MAX_RETAINED_PHASES = 128
 _RETAINED_CLEANUP_TIMEOUT_SECONDS = 300
-_RUNTIME_TOOLS_SCHEMA = "literate-ai/retained-runtime-tools@1"
+_RUNTIME_TOOLS_SCHEMA = "literate-ai/retained-runtime-tools@2"
 _NINJA_REQUIREMENT = "ninja==1.13.2"
 _UV_REQUIREMENT = "uv==0.12.12"
 _LINUX_X86_64_TOOL_WHEELS = {
@@ -337,9 +337,18 @@ def _download_runtime_tool(descriptor: dict[str, object]) -> bytes:
 
 def _runtime_tool_files(
     requirements: tuple[str, ...],
+    *,
+    os_family: str | None,
+    cpu_architecture: str | None,
 ) -> tuple[DirectoryExportFile, ...]:
     if not requirements:
         return ()
+    if os_family != "linux" or _architecture(cpu_architecture) != "x86_64":
+        raise RetainedHarnessRemoteError(
+            "retained_receipt.runtime_dependency_unsupported",
+            "no pinned retained runtime tool provider supports the selected OS "
+            "and explicit CPU architecture",
+        )
     if any(
         requirement not in _LINUX_X86_64_TOOL_WHEELS for requirement in requirements
     ):
@@ -366,6 +375,8 @@ def _runtime_tool_files(
         binaries.append(DirectoryExportFile(path, binary, 0o755))
     manifest = {
         "schema": _RUNTIME_TOOLS_SCHEMA,
+        "operating_system": "linux",
+        "architecture": "x86_64",
         "requirements": list(requirements),
         "artifacts": artifacts,
     }
@@ -404,6 +415,26 @@ def _platform_observation() -> dict[str, str]:
         "python_implementation": platform.python_implementation().casefold(),
         "python_version": platform.python_version(),
     }
+
+
+def _architecture(value: str | None) -> str | None:
+    return {"amd64": "x86_64", "arm64": "aarch64"}.get(value, value)
+
+
+def _require_worker_platform(worker: ExecutionWorker, observed: dict[str, str]) -> None:
+    _require_posix_ssh_worker(worker)
+    expected_os = {"linux": "linux", "macos": "darwin", "freebsd": "freebsd"}[
+        str(worker.requirements.os_family)
+    ]
+    architecture = worker.requirements.cpu_architecture
+    if observed["operating_system"] != expected_os or (
+        architecture is not None
+        and _architecture(observed["machine"]) != _architecture(architecture)
+    ):
+        raise RetainedHarnessRemoteError(
+            "retained_receipt.remote_platform_mismatch",
+            "remote retained execution reports a different OS or CPU architecture",
+        )
 
 
 def _validated_platform(value: object) -> dict[str, str]:
@@ -656,7 +687,7 @@ def _require_posix_ssh_worker(worker: ExecutionWorker) -> None:
             "retained_receipt.worker_os_unsupported",
             "remote retained execution does not yet support Windows workers",
         )
-    if family not in {"linux", "macos"}:
+    if family not in {"linux", "macos", "freebsd"}:
         raise RetainedHarnessRemoteError(
             "retained_receipt.worker_os_unsupported",
             "remote retained execution requires an explicit POSIX worker OS",
@@ -682,14 +713,7 @@ def validate_retained_remote_result(
             "remote retained result does not bind the exact request, source, "
             "and worker",
         )
-    expected_os = {"linux": "linux", "macos": "darwin"}[
-        str(worker.requirements.os_family)
-    ]
-    if result.platform["operating_system"] != expected_os:
-        raise RetainedHarnessRemoteError(
-            "retained_receipt.remote_platform_mismatch",
-            "remote retained result reports a different operating system",
-        )
+    _require_worker_platform(worker, result.platform)
 
 
 def _source_archive(
@@ -773,6 +797,8 @@ def _runtime_archive(
     *,
     inventory: dict[str, object] | None = None,
     source_root: Path | None = None,
+    os_family: str | None = None,
+    cpu_architecture: str | None = None,
 ) -> tuple[ContentIdentity, int]:
     """Create one canonical bounded ZIP containing the coordinator package."""
 
@@ -840,7 +866,9 @@ def _runtime_archive(
         retained_harness_runtime_requirements(
             inventory or {},
             source_root=source_root,
-        )
+        ),
+        os_family=os_family,
+        cpu_architecture=cpu_architecture,
     )
     files = (*package_files, *tool_files)
     if sum(len(item.content) for item in files) > MAX_RETAINED_RUNTIME_CONTENT_BYTES:
@@ -930,6 +958,8 @@ class RetainedHarnessSshExecutor:
                 runtime_path,
                 inventory=inventory,
                 source_root=source_root,
+                os_family=worker.requirements.os_family,
+                cpu_architecture=worker.requirements.cpu_architecture,
             )
             request = RetainedHarnessRemoteRequest(
                 project_id,
@@ -1263,14 +1293,31 @@ def _with_retained_runtime_tools(
         if (
             manifest_file.content != canonical_json_bytes(manifest) + b"\n"
             or not isinstance(manifest, dict)
-            or set(manifest) != {"schema", "requirements", "artifacts"}
+            or set(manifest)
+            != {
+                "schema",
+                "operating_system",
+                "architecture",
+                "requirements",
+                "artifacts",
+            }
             or manifest["schema"] != _RUNTIME_TOOLS_SCHEMA
             or manifest["requirements"] != list(requirements)
             or not isinstance(manifest["artifacts"], list)
             or not manifest["artifacts"]
         ):
             raise ValueError
-        selected_architecture = platform.machine().casefold().replace("amd64", "x86_64")
+        selected_architecture = _architecture(platform.machine().casefold())
+        if (
+            manifest["operating_system"] != platform.system().casefold()
+            or manifest["operating_system"] != "linux"
+            or manifest["architecture"] != selected_architecture
+            or selected_architecture != "x86_64"
+        ):
+            raise RetainedHarnessRemoteError(
+                "retained_receipt.runtime_dependency_unsupported",
+                "the retained runtime tool provider does not support this receiver",
+            )
         required_names = {
             str(_LINUX_X86_64_TOOL_WHEELS[requirement]["name"])
             for requirement in requirements
@@ -1435,6 +1482,7 @@ def execute_retained_harness_receiver(
             "retained_receipt.remote_identity_mismatch",
             "retained request binds a different worker",
         )
+    _require_worker_platform(worker, _platform_observation())
     if (
         inventory.get("schema") != HARNESS_INVENTORY_SCHEMA
         or canonical_identity(inventory) != request.inventory_identity
