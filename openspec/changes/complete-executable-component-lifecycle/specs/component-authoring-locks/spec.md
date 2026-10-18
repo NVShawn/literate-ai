@@ -12,7 +12,16 @@ portable metadata and its Markdown body is the default behavioral specification 
 The document SHALL describe provided and required capabilities, Flavor slots,
 entrypoints, resources, skills, workflow, routing, and acceptance intent without embedding
 selected provider revisions, concrete Flavor selections, mutable cache locations, or
-host-specific tool paths. Additional specification or interface documents SHALL be
+host-specific tool paths.
+
+#### Scenario: Portable unresolved authoring
+
+- **WHEN** one Component is selected for distinct valid targets
+- **THEN** its authored identity stays portable and target selections belong in locks
+
+### Requirement: Additional authored documents require named boundaries
+
+Additional specification or interface documents SHALL be
 admitted only for named domain, module, protocol, or independently consumed public
 Component boundaries and SHALL NOT duplicate the default body.
 

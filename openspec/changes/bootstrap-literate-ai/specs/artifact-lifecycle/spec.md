@@ -29,8 +29,24 @@ Every generated source tree SHALL contain canonical CycloneDX 1.7 JSON at
 have a separate CycloneDX 1.7 `post-build` document with exact resolved versions. Both
 documents SHALL include the root Component, every Literate-AI-managed Component and
 repository-source dependency, and the complete direct and transitive dependency graph.
+
+#### Scenario: Source and resolved inventory
+
+- **WHEN** a generated tree and its build enter SBOM validation
+- **THEN** both documents contain the complete managed and transitive inventory
+
+### Requirement: Source and resolved SBOMs preserve managed graph authority
+
 Both documents SHALL bind the same exact `ComponentComposition` identity; managed
 Component membership or relationships cannot grow or change after source generation.
+
+#### Scenario: Resolution retains source graph binding
+
+- **WHEN** a source BOM is resolved after a native build
+- **THEN** its managed composition identity and relationships remain unchanged
+
+### Requirement: Managed SBOM relationship evidence is complete
+
 For every managed relationship, namespaced evidence SHALL bind its source, target,
 dependency kind, optionality, and exact relationship identity even when standard
 CycloneDX `dependsOn` deduplicates the same node pair. The post-build document SHALL bind

@@ -23,7 +23,11 @@ from literate_ai.application.artifact_graph import (
     create_artifact_build_graph,
     realize_manifest,
 )
-from literate_ai.contracts import BuildPrivilege, BuildSubActionKind
+from literate_ai.contracts import (
+    BuildPrivilege,
+    BuildSubActionKind,
+    ComponentCommandPhase,
+)
 from tests.support import fixtures_test_python_install as wheel_fixtures
 from tests.support import (
     fixtures_test_standard_command_projection as projection_fixtures,
@@ -32,6 +36,8 @@ from tests.support.standard_source_evidence_fixture import register_strict_sourc
 
 
 class StandardPythonLifecycleTests(unittest.TestCase):
+    library = False
+
     @classmethod
     def setUpClass(cls):
         wheel_fixtures.PythonInstallerIntegrationTests.setUpClass()
@@ -54,6 +60,7 @@ class StandardPythonLifecycleTests(unittest.TestCase):
             projection_fixtures._locked_snapshot(
                 self.root,
                 package_python=True,
+                no_entrypoint=self.library,
                 generation_ready=True,
                 platform=(
                     "windows"
@@ -123,6 +130,28 @@ class StandardPythonLifecycleTests(unittest.TestCase):
             "else:\n print(json.dumps(dict(component='verified-wheels')))\n",
             encoding="utf-8",
         )
+        if self.library:
+            surface = self.closure.contracts[0].library_import_surface
+            capability = surface.capabilities[0]
+            module = self.source / "source" / Path(*capability.module.split("."))
+            module.parent.mkdir(parents=True, exist_ok=True)
+            for parent in module.parents:
+                if parent == self.source / "source":
+                    break
+                (parent / "__init__.py").touch()
+            module.with_suffix(".py").write_text(
+                "import example,helper\n"
+                f"def {capability.symbols[0]}(left,right):\n"
+                " return left+right+example.VALUE+helper.VALUE\n",
+                encoding="utf-8",
+            )
+            main = self.source / "source/main.py"
+            main.write_text(
+                f"from {capability.module} import {capability.symbols[0]}\n"
+                f"assert {capability.symbols[0]}(2,3)==7\n"
+                + main.read_text(encoding="utf-8"),
+                encoding="utf-8",
+            )
         self.components = tuple(
             {
                 "type": "library",
@@ -250,7 +279,11 @@ class StandardPythonLifecycleTests(unittest.TestCase):
         tested = self.ports.test(self.plan, output.exports)
         self.assertIsNotNone(tested)
         self.assertIsNotNone(self.ports.execute(self.plan, output.exports))
-        command = self.ports.execution_command(self.plan, output.exports)
+        command = (
+            self.closure.contracts[0].command(ComponentCommandPhase.EXECUTE)
+            if self.library
+            else self.ports.execution_command(self.plan, output.exports)
+        )
         self.assertIn("-I", command.argv)
         reused = self.ports.build(self.plan, ())
         self.assertEqual(reused.exports, output.exports)
@@ -263,9 +296,124 @@ class StandardPythonLifecycleTests(unittest.TestCase):
             "VALUE = 99\n", encoding="utf-8"
         )
         with self.assertRaisesRegex(LocalStandardLifecycleError, "sealed artifact"):
-            self.ports.execution_command(self.plan, output.exports)
+            if self.library:
+                self.ports.execute(self.plan, output.exports)
+            else:
+                self.ports.execution_command(self.plan, output.exports)
         with self.assertRaises(LocalStandardLifecycleError):
             self.ports.build(self.plan, ())
+
+
+class StandardPythonLibraryLifecycleTests(StandardPythonLifecycleTests):
+    library = True
+
+    def oracle(self):
+        from literate_ai.adapters.component_acceptance import (
+            DeclaredLibraryAcceptanceCase,
+            LibraryAcceptance,
+        )
+        from literate_ai.contracts import ContentIdentity
+
+        lock = self.snapshot.authority.lock
+        node = next(
+            item for item in lock.nodes if item.revision.identity == lock.root_revision
+        )
+        surface = self.closure.contracts[0].library_import_surface
+        harness = (
+            b"import importlib,json,pathlib,sys\n"
+            b"export,surface,cases=sys.argv[1],json.loads(sys.argv[2]),json.loads(sys.argv[3])\n"
+            b"assert sys.flags.isolated and sys.flags.no_site\n"
+            b"sys.path.insert(0,str(pathlib.Path(export)/'source'))\n"
+            b"capability=surface['capabilities'][0]\n"
+            b"module=importlib.import_module(capability['module'])\n"
+            b"origin=pathlib.Path(module.__file__).resolve()\n"
+            b"assert pathlib.Path(export).resolve() in origin.parents\n"
+            b"function=getattr(module,capability['symbols'][0])\n"
+            b"print(json.dumps(dict(schema='literate-ai/library-acceptance-results@1',cases=[\n"
+            b" dict(case_id=case['case_id'],capability=case['capability'],\n"
+            b" result=function(*case['arguments']))\n"
+            b" for case in cases])))\n"
+        )
+        return LibraryAcceptance(
+            node.revision.coordinate.name,
+            node.revision.specification_set_identity,
+            tuple(
+                sorted(
+                    (item.identity for item in node.revision.public_interfaces),
+                    key=lambda item: item.uri,
+                )
+            ),
+            surface.identity,
+            "python",
+            ContentIdentity.parse_uri("sha256:" + hashlib.sha256(harness).hexdigest()),
+            harness,
+            (
+                DeclaredLibraryAcceptanceCase(
+                    "wheel-library-add", surface.capabilities[0].capability, [2, 3], 7
+                ),
+            ),
+        )
+
+    def accept(self, plan, result):
+        from literate_ai.contracts import canonical_identity
+
+        self.ports.independent_acceptance_oracle = self.oracle()
+        return self.ports.accept_project_independently(
+            self.snapshot.authority.lock,
+            self.execution,
+            SimpleNamespace(),
+            plan,
+            result,
+            canonical_identity({"root-test": True}),
+            canonical_identity({"packaged-execution": True}),
+        )
+
+    def test_independent_acceptance_after_source_and_wheelhouse_retirement(self):
+        output = self.build()
+        self.ports.test(self.plan, output.exports)
+        package_plan, package_result, custody = self.package(output)
+        old_root = custody.root
+        relocated = old_root.with_name("relocated Python library")
+        old_root.rename(relocated)
+        custody = replace(
+            custody,
+            root=relocated,
+            artifact_paths={
+                key: relocated / path.relative_to(old_root)
+                for key, path in custody.artifact_paths.items()
+            },
+        )
+        self.ports._project_packages[package_result.identity.uri] = custody
+        shutil.rmtree(self.artifact)
+        shutil.rmtree(self.source)
+        shutil.rmtree(self.wheelhouse)
+        # An injected ambient package/startup hook must not satisfy dependencies
+        # or execute inside any of the three isolated library phases.
+        ambient = self.root / "ambient"
+        ambient.mkdir()
+        (ambient / "sitecustomize.py").write_text(
+            "raise RuntimeError('ambient startup')\n"
+        )
+        with mock.patch.dict(os.environ, {"PYTHONPATH": str(ambient)}):
+            self.assertIsNotNone(self.accept(package_plan, package_result))
+        artifact = custody.artifact_paths[output.exports[0].identity.uri].parent
+        paths = [
+            artifact / "python-runtime/site/example/__init__.py",
+            artifact / "python-dependencies.json",
+            artifact / ".literate/resolved-sbom.cdx.json",
+            custody.artifact_paths[output.exports[0].identity.uri]
+            / "source/.literate/sbom.cdx.json",
+            custody.artifact_paths[output.exports[0].identity.uri] / "source/main.py",
+        ]
+        for path in paths:
+            with self.subTest(path=path.relative_to(artifact)):
+                content = path.read_bytes()
+                path.unlink()
+                try:
+                    with self.assertRaises(LocalStandardLifecycleError):
+                        self.accept(package_plan, package_result)
+                finally:
+                    path.write_bytes(content)
 
 
 class PinnedPipWheelSelectionTests(unittest.TestCase):

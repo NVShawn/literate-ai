@@ -30,6 +30,13 @@ review specifications, validate, lock, plan, rebuild, release, inspect status an
 cancel runs, and retrieve specifications, interfaces, resources, artifacts, receipts, and
 releases without importing CLI-private helpers or application-specific code.
 
+#### Scenario: Provider-neutral project service access
+
+- **WHEN** an IDE requests project operations
+- **THEN** the service exposes the structured operations without CLI-private helpers
+
+### Requirement: Project services preserve canonical Component authoring
+
 Project creation, specification editing, and source-promotion operations SHALL preserve
 the canonical `component.md`-first authoring form. They SHALL NOT manufacture parallel
 JSON/OpenSpec/acceptance authoring files for a simple Component, and SHALL add another
@@ -49,6 +56,14 @@ Source-to-specification promotion SHALL create canonical multi-Component project
 reviewed node kinds, entrypoints, public interfaces, resource ownership, dependency edges,
 target intent, and acceptance boundaries. A library SHALL NOT be promoted as an
 application, and a cross-Component edge SHALL NOT be admitted without a complete contract.
+
+#### Scenario: Source-derived library promotion
+
+- **WHEN** reviewed source identifies an importable library
+- **THEN** promotion preserves its kind and complete public dependency contracts
+
+### Requirement: Promoted Components retain canonical document boundaries
+
 Each promoted Component SHALL use one `component.md` by default; recovered named public or
 domain boundaries MAY be retained as explicit additional documents without recreating the
 retired peer-file layout.

@@ -67,7 +67,16 @@ authorization before source or evidence crosses a network boundary.
 The coding-CLI adapter SHALL support `codex`, `claude`, `cursor-agent`, and `opencode`
 as explicit model-transport providers. Explicit `CODING_CLI` selection SHALL fail
 without fallback when its executable is unavailable; otherwise deterministic `PATH`
-discovery SHALL use that provider order. Every provider binding SHALL preserve the
+discovery SHALL use that provider order.
+
+#### Scenario: Explicit provider selection
+
+- **WHEN** an explicit provider executable is unavailable
+- **THEN** selection fails without fallback
+
+### Requirement: Provider bindings retain exact transport custody
+
+Every provider binding SHALL preserve the
 exact executable and content identity, provider-specific model option, bounded process
 and output custody, provider-scoped credentials, stable authentication diagnostics,
 and an honest non-hermetic isolation profile.

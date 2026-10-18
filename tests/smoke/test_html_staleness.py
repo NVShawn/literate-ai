@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -15,7 +16,9 @@ from literate_ai.adapters.html_emitter import HtmlEmission, emit_html
 from literate_ai.adapters.html_framework import HtmlFrameworkObservation
 from literate_ai.cli import dispatch
 from literate_ai.contracts.html_observability import (
+    HtmlRenderRequest,
     HtmlStalenessReport,
+    HtmlView,
 )
 from tests.support import fixtures_test_html_observability_schema as schema_tests
 from tests.support.fixtures_test_html_emitter import DISTRIBUTION, STAMP, request
@@ -23,6 +26,69 @@ from tests.support.fixtures_test_html_render import _project
 
 
 class HtmlStalenessTests(unittest.TestCase):
+    def test_version_check_remains_current_after_render_and_commit(self):
+        self.request = HtmlRenderRequest(
+            "version-check",
+            HtmlView("health", "1.0.0", "project", "literate-ai"),
+            "version.html",
+            "off",
+            "inline-only",
+        )
+        self.declare(self.request)
+        self.output = self.root / "version.html"
+        manifest = self.root / "literate.project.json"
+        definition = json.loads(manifest.read_text())
+        definition.pop("lifecycle_driver", None)
+        definition.pop("test_receipt_policy", None)
+        manifest.write_text(json.dumps(definition))
+
+        def git(*args):
+            return subprocess.run(
+                ["git", "-C", str(self.root), *args],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+
+        git("init", "--quiet")
+        git("add", ".")
+        git(
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "--quiet",
+            "-m",
+            "Initial authority",
+        )
+        with mock.patch(
+            "literate_ai.version_check.cli_version_label",
+            return_value="1.3.0 (development source; dirty)",
+        ):
+            self.render()
+            self.assert_report("current")
+        git("add", "version.html")
+        git(
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=fixture@example.invalid",
+            "commit",
+            "--quiet",
+            "-m",
+            "Retain version view",
+        )
+        with mock.patch(
+            "literate_ai.version_check.cli_version_label",
+            return_value="1.3.0 (development source)",
+        ):
+            self.assert_report("current")
+            definition["version"] = "1.3.1"
+            manifest.write_text(json.dumps(definition))
+            self.assert_report("stale")
+
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)

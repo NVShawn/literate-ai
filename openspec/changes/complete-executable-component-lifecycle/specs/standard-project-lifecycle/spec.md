@@ -6,6 +6,34 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Python wheel libraries retain import authority and runtime custody
+
+An explicit Python wheel command profile SHALL admit a library without inventing an
+application entrypoint. Its locked commands SHALL preserve the declared module and
+symbol surface. Offline dependency resolution, exact retained payload verification,
+source and resolved SBOM validation, and isolated Python startup SHALL precede
+generated tests and import execution. Ambient site-packages SHALL NOT supply custody.
+
+#### Scenario: Library depends on a pinned Python wheel
+
+- **WHEN** a reviewed Python library selects an explicit wheel profile
+- **THEN** generated tests and declared module imports use its exact retained dependencies
+- **AND** competing build profiles and multiple application entrypoints remain refused
+
+### Requirement: Independent Python library acceptance reopens packaged dependencies
+
+Independent acceptance of a wheel-backed Python library SHALL execute its exact
+verifier-owned harness against the sealed package and retained dependency payload
+using isolated Python startup. Relocation SHALL NOT require the original generated
+tree, artifact or wheelhouse. Missing or modified output, dependency evidence or
+SBOMs SHALL fail before harness execution.
+
+#### Scenario: Relocated package survives source retirement
+
+- **WHEN** the original source, artifact and wheelhouse are removed after packaging
+- **THEN** the relocated package still passes the library's independent verifier
+- **AND** deleting retained package files causes refusal before execution
+
 ### Requirement: Worker routing preserves one exact Component graph
 Worker assignments SHALL bind every and only planned Component revision to an exact
 worker and private catalog identity, target profile and locked Flavor selection.
@@ -22,7 +50,16 @@ substituting a different target or implementation.
 The existing lifecycle DAG SHALL determine a consumer's artifact and packaging
 predecessors. A handoff SHALL include their exact accepted product identities and
 exports, bound to the consumer assignment and routing identity. It SHALL exclude
-unrelated siblings and generation-only private implementation products. The importer
+unrelated siblings and generation-only private implementation products.
+
+#### Scenario: Consumer-scoped artifact handoff
+
+- **WHEN** a consumer receives its accepted predecessor products
+- **THEN** the handoff binds the consumer assignment and route and excludes unrelated siblings
+
+### Requirement: Artifact import verifies exact bytes and metadata
+
+The importer
 SHALL verify each blob's size and digest, retain its unchanged export/ABI/target
 metadata, and verify destination bytes before issuing a bound import receipt.
 An import receipt alone SHALL NOT assert native compatibility or lifecycle acceptance.
@@ -43,6 +80,14 @@ contract JSON v1 SHALL remain integer-only. Existing integer-only acceptance ide
 SHALL remain unchanged. Non-finite product values SHALL fail before actuation or before
 accepting an observed result; serializing a number as an application string is not a
 substitute for accepting the numeric value.
+
+#### Scenario: Finite product data declaration
+
+- **WHEN** an oracle declares finite fractional arguments and expected results
+- **THEN** acceptance preserves their numeric values and existing integer-only contract identities
+
+### Requirement: Product numeric comparison preserves exact distinctions
+
 Comparison SHALL accept exactly equal integer and floating-point JSON values without
 rewriting invocation or evidence bytes. It SHALL distinguish booleans from numbers,
 preserve the sign of negative zero and introduce no numeric tolerance or rounding.
