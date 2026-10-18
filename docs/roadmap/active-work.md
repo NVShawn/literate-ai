@@ -25883,6 +25883,11 @@ actually runs the complete declared command graph; failed tests, stale plans,
 source/snapshot mutations, substituted tools, undeclared/missing/redirected
 exports, sealed-export mutation, output overflow and incomplete profiles refuse.
 This is command-owner evidence only, not an installed public lifecycle receipt.
+At revision `92b56bf5`, the same 16-test group also passes on actual FreeBSD,
+including compilation and execution of the captured native fixture. The native
+log SHA-256 is `59a98595401b8de649db3b1ec785951cd99bb1b4dd2bc55b5d9ad70d54a05bc7`.
+The five current CLI rebuild regressions pass locally. Public retained execution
+remains closed pending the existing SBOM/acceptance/receipt consumers.
 
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
@@ -27783,6 +27788,13 @@ passes `make python-check`'s eight FreeBSD tests. A qualified non-editable wheel
 reviewed plan and explicit candidate parent revision; it selects the FreeBSD OS
 Flavor and pins the actual installed Standard distribution. Neither result is a
 complete native application build/test/accept/package or release receipt.
+
+Dependency observation audit: `PortableHostDependencyObserver` still refuses
+FreeBSD, and native executable recognition omits its ELF format. Qualifying the
+native dependency closure requires a FreeBSD loader/inspector owner and current
+native evidence; Linux loader-cache semantics cannot stand in for FreeBSD hints
+and library mappings. This remains part of FREEBSD-001 before native lifecycle
+qualification, alongside the missing host-install realization.
 
 FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
 a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
