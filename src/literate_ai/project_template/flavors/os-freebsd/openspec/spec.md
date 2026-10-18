@@ -7,6 +7,11 @@ on FreeBSD unless its own specification requires native interfaces. Linux procfs
 GNU utilities and Linux ABI compatibility SHALL NOT be presumed available.
 Native extensions SHALL target the selected FreeBSD architecture and userland.
 GNU Make requirements SHALL resolve to `gmake`, distinct from the base BSD make.
+Native installation SHALL read the FreeBSD `pkg` realization for the exact supported
+architecture. Package provenance and behavioral probes must both pass. Coding-agent
+providers without a native realization remain unavailable; Linux agent binaries
+SHALL NOT substitute for native support. A missing or older package remains missing
+until an authorized declared installation provides the required version.
 
 #### Scenario: Physical or virtual FreeBSD worker
 

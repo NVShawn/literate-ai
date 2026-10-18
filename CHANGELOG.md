@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add a native FreeBSD x86-64 `pkg` host-install realization and honor its
+  `gmake` probe. OS tuples require the complete selected non-alternative tool
+  closure and at least one declared coding agent; unsupported explicit agents
+  fail before probing or installation. Package-manager success still requires
+  current package provenance and behavioral/version verification.
+
 - FreeBSD native dependency inspection binds ELF imports (including potential
   filter/auxiliary targets), interpreter, hints,
   global library maps and explicit loader paths without running target images.

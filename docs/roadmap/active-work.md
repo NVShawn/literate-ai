@@ -27775,6 +27775,20 @@ Isolate pip dependency builds from the parent Make flags, preserve explicit comp
 resource limits and package-source policy, and qualify the corrected canonical
 native `make python-check` path. Native onboarding also reports the missing
 FreeBSD host-install realization; this remains required host-toolchain work.
+Host-install implementation now in progress: declare the native `pkg` tuple and
+its supported coding-agent alternatives instead of borrowing Linux binaries.
+Require the complete non-alternative capability closure and at least one declared
+agent provider; an explicit unavailable provider must refuse before probing or
+installation. Honor tuple-specific command probes so FreeBSD's base `make` cannot
+satisfy the GNU Make capability. Qualify parsing, selection, package provenance,
+consent and native observation; unavailable packages remain missing rather than
+becoming a fabricated ready host.
+The canonical local host-install group passes 10 tests, including a full simulated
+consent/install/re-observation flow that rejects a successful package-manager exit
+when the installed coding-agent version remains too old. Lint, formatting,
+repository-layout, strict OpenSpec and reviewed driver/documentation authority
+checks pass. These are local contract tests; native package observation and the
+installed lifecycle remain separate qualification requirements.
 The pip wrapper regression passes through the canonical Make runner: a real child
 process receives the original pip arguments and package-source/compiler limits,
 excludes parent Make control variables, and preserves the child's failing status.
