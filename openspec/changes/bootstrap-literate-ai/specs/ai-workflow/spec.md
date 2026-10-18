@@ -1,5 +1,19 @@
 ## ADDED Requirements
 
+### Requirement: Empty generation preserves bounded refusal diagnostics
+
+An empty coding-CLI generation SHALL fail with its typed generation error and a
+bounded, redacted diagnostic from both output streams. The diagnostic SHALL identify
+the selected isolation profile and permission/prompt checks without exposing secrets
+or changing execution policy. A deterministic empty result SHALL NOT be silently
+retried as a transient process failure.
+
+#### Scenario: Coding CLI refuses shell use without writing output
+
+- **WHEN** the CLI exits successfully, writes no source and reports a permission refusal
+- **THEN** the error retains its reason and isolation profile from one attempt
+- **AND** credential values in either stream are redacted before excerpting or retention
+
 ### Requirement: Workflows are versioned typed DAGs
 
 The framework SHALL execute arbitrary versioned workflow DAGs with typed immutable stage

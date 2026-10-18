@@ -3193,17 +3193,21 @@ class CodingCliSourceGenerator:
         except CodingCliError as exc:
             if exc.code != "coding_cli.empty_generation":
                 raise
-            # A CLI that exits zero and writes nothing has almost always explained
-            # itself on stdout — most usefully when it refused the task. Surface a
-            # bounded excerpt so the reason does not require re-running the whole
-            # matrix under hand instrumentation.
+            # An empty successful exit can carry a refusal in either stream.
+            # Reuse the same redacted, bounded diagnostic and retained transcript
+            # as other CLI failures, without retrying deterministic policy denials.
+            detail = _coding_cli_failure_detail(
+                coding_cli=self.selection.name,
+                code=exc.code,
+                output=failure_output,
+                environment=diagnostic_environment,
+            )
             raise CodingCliError(
                 exc.code,
                 f"{exc.message}; {self.selection.name} exited "
-                f"{completed.returncode} and last said: "
-                + " ".join(completed.stdout.decode("utf-8", errors="replace").split())[
-                    -1200:
-                ],
+                f"{completed.returncode}. Isolation profile: "
+                f"{self.selection.isolation.profile}. Check provider tool "
+                f"permissions and prompt limits.{detail}",
             ) from exc
         try:
             validate_cpp_bazel_rule_attributes(files)

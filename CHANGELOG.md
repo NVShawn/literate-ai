@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Source inventory distinguishes credential-free Python assignment expressions
+  from credential literals without executing the source. Entirely excluded static
+  inventories return an actionable classification error.
+- Empty coding-CLI output reports bounded, redacted refusal text from stdout and
+  stderr together with the selected isolation profile.
+
 - Explicit Python wheel profiles now support importable library Components through
   offline build, generated tests, isolated import execution and independent
   acceptance from relocated packages with retained dependency and SBOM custody.

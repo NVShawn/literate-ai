@@ -15,10 +15,12 @@ from literate_ai.adapters.worker_capabilities import (
     WorkerCapabilityProbeError,
     _device,
     probe_worker_capabilities,
+    probe_worker_catalog,
 )
 from literate_ai.contracts import (
     ExecutionRequirements,
     ExecutionWorker,
+    ExecutionWorkerCatalog,
     ExecutionWorkerKind,
 )
 
@@ -34,6 +36,69 @@ def worker(worker_id: str, family: str) -> ExecutionWorker:
 
 
 class WorkerCapabilityTests(unittest.TestCase):
+    def test_ssh_failures_preserve_cause_worker_and_exit_status(self):
+        for diagnostic, cause in (
+            ("Host key verification failed.", "host-key-verification"),
+            ("REMOTE HOST IDENTIFICATION HAS CHANGED!", "changed-host-key"),
+            ("Permission denied (publickey).", "authentication"),
+            ("Could not resolve hostname fixture.invalid", "name-resolution"),
+            ("Connection refused", "connection-refused"),
+            ("Connection timed out", "timeout"),
+        ):
+            with (
+                self.subTest(cause=cause),
+                self.assertRaises(WorkerCapabilityProbeError) as caught,
+            ):
+                probe_worker_capabilities(
+                    worker("failed", "linux"),
+                    runner=lambda *_, diagnostic=diagnostic: subprocess.CompletedProcess(
+                        ("ssh",),
+                        255,
+                        b"",
+                        diagnostic.encode(),
+                    ),
+                )
+            self.assertEqual(caught.exception.worker_id, "failed")
+            self.assertIn("SSH exited 255", caught.exception.message)
+            self.assertIn(cause, caught.exception.message)
+            self.assertIn(diagnostic, caught.exception.message)
+
+    def test_catalog_retains_healthy_observation_and_identifies_only_failed_worker(
+        self,
+    ):
+        document = dict(
+            os_name="ubuntu",
+            os_version="24.04",
+            architecture="x86_64",
+            physical_cores=2,
+            logical_cores=2,
+            memory_mib=4096,
+            nvidia_status="absent",
+            gpus=[],
+            diagnostic=None,
+        )
+
+        def runner(argv, _seconds):
+            if "user@failed.example" in argv:
+                return subprocess.CompletedProcess(
+                    argv, 255, b"", b"Host key verification failed."
+                )
+            return subprocess.CompletedProcess(
+                argv, 0, json.dumps(document).encode(), b""
+            )
+
+        errors = []
+        result = probe_worker_catalog(
+            ExecutionWorkerCatalog(
+                (worker("failed", "linux"), worker("healthy", "linux"))
+            ),
+            runner=runner,
+            errors=errors,
+        )
+        self.assertEqual([item.worker_id for item in result.workers], ["healthy"])
+        self.assertEqual([item.worker_id for item in errors], ["failed"])
+        self.assertIn("host-key-verification", errors[0].message)
+
     def test_native_gpu_serializer_preserves_unknown_and_known_memory(self):
         for memory in ("[N/A]", "N/A", "8192", "query-failed"):
             with (

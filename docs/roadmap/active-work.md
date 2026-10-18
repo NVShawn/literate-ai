@@ -27767,9 +27767,13 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Execution decision:** Use inert Python AST positions to distinguish assignments of credential-free expressions from literal credentials. Exempt only exact assignment matches with no string/bytes literal in their value; preserve uncertain-language, syntax-error, secret-literal and filename exclusions. An entirely excluded inventory must produce a typed classification diagnostic without matched content.
+
+- **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
 
 ### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
 
@@ -27782,9 +27786,13 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Execution decision:** Use the existing bounded/redacted failure path for empty generation, retain stdout and stderr refusal evidence, and report the selected isolation profile. Preserve the deliberate no-retry policy for deterministic empty output. Verify refusal text, both streams, credential redaction and one attempt.
+
+- **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
 
 ### [ ] HTML-CANVAS-001 — litai render html graph canvas does not grow with its row
 

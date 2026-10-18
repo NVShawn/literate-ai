@@ -133,7 +133,7 @@ class SourceInventoryEntry:
 class SourceInventory:
     entries: tuple[SourceInventoryEntry, ...]
     excluded_directories: tuple[str, ...]
-    inventory_policy_id: str = "static-checkout-inventory@1"
+    inventory_policy_id: str = "static-checkout-inventory@2"
 
     @property
     def identity(self) -> str:
@@ -295,6 +295,36 @@ def _signals(path: str, text: str, language: str | None) -> tuple[FlavorSignal, 
     return tuple(sorted(result, key=lambda item: (item.axis, item.flavor_id)))
 
 
+def _sensitive_content(content: bytes, language: str | None) -> bool:
+    matches = tuple(_SENSITIVE_PATTERN.finditer(content[:1048576]))
+    if not matches:
+        return False
+    if language != "python" or len(content) > 2 * 1024 * 1024:
+        return True
+    try:
+        text = content.decode("utf-8")
+        tree = ast.parse(text)
+    except (UnicodeDecodeError, SyntaxError, ValueError, RecursionError):
+        return True
+    # AST columns are UTF-8 byte offsets, matching the inventory byte scanner.
+    starts = [0]
+    for newline in re.finditer(rb"\r\n|\r|\n", content):
+        starts.append(newline.end())
+    safe_bindings: set[int] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        # Only an expression with no embedded literal can disprove
+        # this literal-credential match. Calls and names are never evaluated.
+        if any(isinstance(value, ast.Constant) for value in ast.walk(node.value)):
+            continue
+        for target in node.targets:
+            for value in ast.walk(target):
+                if isinstance(value, ast.Name):
+                    safe_bindings.add(starts[value.lineno - 1] + value.col_offset)
+    return any(match.start() not in safe_bindings for match in matches)
+
+
 def _classify(
     relative: str, content: bytes, size: int
 ) -> tuple[SourceFileClassification, str | None, str]:
@@ -305,7 +335,7 @@ def _classify(
     if (
         name in _SENSITIVE_NAMES
         or suffix in {".key", ".pem", ".p12", ".pfx"}
-        or _SENSITIVE_PATTERN.search(content[:1048576])
+        or _sensitive_content(content, language)
     ):
         return SourceFileClassification.SENSITIVE, language, ""
     if b"\0" in content[:8192]:
