@@ -45,18 +45,19 @@ class WorkerCapabilityTests(unittest.TestCase):
             ("Connection refused", "connection-refused"),
             ("Connection timed out", "timeout"),
         ):
+
+            def runner(*_args, diagnostic=diagnostic):
+                return subprocess.CompletedProcess(
+                    ("ssh",), 255, b"", diagnostic.encode()
+                )
+
             with (
                 self.subTest(cause=cause),
                 self.assertRaises(WorkerCapabilityProbeError) as caught,
             ):
                 probe_worker_capabilities(
                     worker("failed", "linux"),
-                    runner=lambda *_, diagnostic=diagnostic: subprocess.CompletedProcess(
-                        ("ssh",),
-                        255,
-                        b"",
-                        diagnostic.encode(),
-                    ),
+                    runner=runner,
                 )
             self.assertEqual(caught.exception.worker_id, "failed")
             self.assertIn("SSH exited 255", caught.exception.message)
