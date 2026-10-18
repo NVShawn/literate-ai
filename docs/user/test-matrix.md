@@ -20,6 +20,12 @@ noninteractive native commands, not interactive Bash startup. `--skip-model`
 alignment proves only declared tool/file readiness; it does not qualify a coding
 CLI or provider. Generation needs its separately configured and qualified runner.
 
+Native Python build discovery also accepts versioned commands such as
+`python3.12`; an unversioned alias is unnecessary. Within each PATH directory,
+`python3` and `python` precede numerically descending versioned commands. Explicit
+pins remain authoritative, and every selected executable must pass actual runtime
+version and identity checks.
+
 Native ELF observation reads the FreeBSD hints directory order and recursively
 included global library maps, binds the inspector/configuration/library bytes,
 and rechecks library search candidates. It supports RPATH/RUNPATH, `$ORIGIN` and

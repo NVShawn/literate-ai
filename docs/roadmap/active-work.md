@@ -27733,6 +27733,39 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Evidence:**
   - [ ] Real FreeBSD SSH registration and alignment pass; native build/test and failed-input/test rejection are retained; cleanup is bounded; existing Linux/macOS/Windows suites pass; exact installed wheel and CI qualify the change.
 
+Additional execution audit: the existing retained legacy-harness SSH connector
+still allows only Linux and macOS, and its optional Ninja/uv runtime artifacts
+are Linux x86_64 binaries. First-class FreeBSD support must reach both coordinator
+and receiver validation and preserve the actual remote platform identity. Bind
+optional runtime tool acquisition to the selected worker's OS and architecture;
+never send Linux executables to a FreeBSD guest. Qualify the public installed
+connector with native retained commands, failure and changed-input rejection,
+artifact custody and bounded cleanup. Supporting a source-only harness does not
+qualify unimplemented native runtime-tool providers or replace the stronger
+mixed-project lifecycle required by RETAINED-PROJECT-001.
+
+Installed-wheel execution at `d96f6b8b` no longer discovers a coding agent, but
+refuses before compilation because the shared Python builder searches only
+`python3` and `python`. The aligned native worker exposes the actual interpreter
+as `python3.12`, with neither unversioned alias. Extend ordered PATH discovery to
+versioned Python commands, preserving authoritative explicit pins, actual runtime
+version/digest checks and per-directory preference. Qualify real interpreter
+discovery with only versioned launchers, then repeat the exact installed native
+lifecycle and rejection checks; do not create a compatibility symlink or bypass
+toolchain admission.
+The same attempt exposed an uncaught builder exception at the public CLI boundary.
+Preserve its typed refusal as a JSON CLI failure instead of an unstructured
+traceback; no receipt may be issued when toolchain admission fails.
+The correction passes seven real-interpreter discovery checks and all seven
+public CLI rebuild regressions, including structured toolchain refusal without
+receipt issuance. Their log SHA-256 values are
+`2b741be11d25f19952bc4f44aa3ce11fff5aa753b4570350f008219697758de7`
+and `e088baa4de593e6ce69f7d6ae27055deb1fb6d619d8d08bde5fa5687367ecd30`.
+Lint, formatting, layout, strict OpenSpec, documentation and reviewed TCB checks
+pass. Native automatic-discovery qualification still requires a new exact wheel;
+a diagnostic run with an explicit native Python pin is separate evidence for
+agent-free retained execution and cannot close that discovery gate.
+
 FreeBSD implementation checkpoint: explicit OS identity now reaches worker CRUD,
 execution requirements, hardware observations, capacity records and corresponding
 JSON schemas. The hardware program checks `uname -s` before named FreeBSD sysctls,

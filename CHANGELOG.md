@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Python toolchain discovery supports versioned commands such as FreeBSD's
+  `python3.12` without requiring an unversioned compatibility alias. Explicit
+  pins, PATH directory preference and actual runtime identity checks remain
+  authoritative. Builder admission failures return typed CLI JSON instead of an
+  uncaught traceback.
+
 - Exact retained-source rebuilds use a distinct non-executable input selection
   without discovering or invoking a coding agent. The fixed no-model scope and
   source binding preserve retained provenance, current recipe/test/SBOM checks,

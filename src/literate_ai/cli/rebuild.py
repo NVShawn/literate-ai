@@ -10,6 +10,7 @@ from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
+from literate_ai.adapters.builders import BuildError
 from literate_ai.adapters.component_lock_application import (
     ProjectComponentLockSetError,
     current_project_component_lock_identities,
@@ -1009,6 +1010,8 @@ def _standard_rebuild_one_component(
                 ) from exc
             except (CodingCliError, RetainedSourceError) as exc:
                 raise CliFailure(exc.code, exc.message) from exc
+            except BuildError as exc:
+                raise CliFailure(exc.code, str(exc)) from exc
             except LocalStandardLifecycleError as exc:
                 raise CliFailure(
                     getattr(

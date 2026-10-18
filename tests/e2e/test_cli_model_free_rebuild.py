@@ -141,6 +141,38 @@ class ModelFreeRebuildTests(unittest.TestCase):
         self.assertTrue(result["passed"], result)
         self.assertTrue(result["receipt_committed"], result)
 
+    def test_toolchain_admission_failure_is_a_typed_public_refusal(self):
+        from literate_ai.adapters.builders import BuildError
+        from tests.support.fixtures_retained_native import (
+            author_retained_native_fixture,
+        )
+
+        source = self.root / "retained"
+        author_retained_native_fixture(self.project, source)
+        status, plan = self.rebuild(
+            "--retained-source", str(source), "--retained-source-plan"
+        )
+        self.assertEqual(status, 0, plan)
+        with patch(
+            "literate_ai.adapters.standard_rebuild."
+            "project_locked_standard_toolchain_closure",
+            side_effect=BuildError(
+                "builder.python_toolchain_unavailable", "no qualifying Python command"
+            ),
+        ):
+            status, refused = self.rebuild(
+                "--retained-source",
+                str(source),
+                "--authorize-retained-source",
+                plan["result"]["authorization_identity"],
+            )
+
+        self.assertNotEqual(status, 0, refused)
+        self.assertEqual(
+            refused["error"]["code"], "builder.python_toolchain_unavailable"
+        )
+        self.assertFalse((self.project / "verification/current.json").exists())
+
     def test_retained_without_agent_preserves_receipt_on_stale_or_failed_input(
         self,
     ):

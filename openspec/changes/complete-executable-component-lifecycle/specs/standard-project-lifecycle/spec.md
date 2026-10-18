@@ -6,6 +6,17 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Python discovery supports versioned native commands
+Without an explicit command pin, Python discovery SHALL inspect each PATH
+directory in order, preferring `python3`, then `python`, then numerically descending
+`python3.MINOR` commands within that directory. Actual runtime version and identity
+checks SHALL remain mandatory. An explicit command SHALL never fall back.
+
+#### Scenario: Native worker has only a versioned Python command
+- **WHEN** an aligned worker provides `python3.12` without unversioned aliases
+- **THEN** Python discovery probes and admits that actual runtime if it qualifies
+- **AND** unrelated command names and invalid explicit pins cannot supply fallback
+
 ### Requirement: Retained source has no generation provider
 Exact retained-source execution SHALL bind the reviewed input as a distinct,
 non-executable source selection. It SHALL NOT discover, authenticate or invoke a
