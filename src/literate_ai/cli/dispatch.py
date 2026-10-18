@@ -1167,7 +1167,8 @@ def _parser() -> JsonArgumentParser:
             "Flavor selector to install and use as a project default "
             "(e.g. python, macos, javascript); repeat for multiple. "
             "Known selectors: bazel, cmake, make, repo.sh (build system); cpp, "
-            "elixir, javascript, python, rust (language); linux, macos, windows (OS); "
+            "elixir, javascript, python, rust (language); "
+            "freebsd, linux, macos, windows (OS); "
             "google-workspace, microsoft-365 (service)."
         ),
     )

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Contributor dependency builds isolate parent Make flags from pip subprocesses,
+  allowing native Rust builds to establish their own jobserver while preserving
+  explicit compiler limits and package-source settings.
+
 - Worker source uploads, evidence downloads, release checkout synchronization and
   alignment file copies carry the configured SSH program through SCP. Default
   OpenSSH arguments remain unchanged; invalid transport names still refuse.

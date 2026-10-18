@@ -90,11 +90,11 @@ really-clean: python-version ## Remove OBJ_DIR and generated sources from BUILD_
 
 $(RUNTIME_STAMP): pyproject.toml
 	$(PYTHON_COMMAND) -m venv "$(PYTHON_ENV)"
-	$(RUN_PYTHON_COMMAND) -m pip install -e .
+	$(RUN_PYTHON_COMMAND) scripts/run_pip.py install -e .
 	@touch "$@"
 
 $(DEV_STAMP): $(RUNTIME_STAMP) pyproject.toml
-	$(RUN_PYTHON_COMMAND) -m pip install -e ".[dev]"
+	$(RUN_PYTHON_COMMAND) scripts/run_pip.py install -e ".[dev]"
 	@touch "$@"
 
 bootstrap: install dev-install tools-install skill-evaluator-install validate ## First-time setup: install all runtime and contributor tools, then validate.
@@ -112,7 +112,7 @@ ifneq ($(strip $(RUNTIME_PREREQUISITE)),)
 dev-install: $(DEV_PREREQUISITE) ## Install pinned Python contributor tools.
 else
 dev-install: ## Install pinned Python contributor tools.
-	$(RUN_PYTHON_COMMAND) -m pip install -e ".[dev]"
+	$(RUN_PYTHON_COMMAND) scripts/run_pip.py install -e ".[dev]"
 endif
 
 install-check: python-version $(RUNTIME_PREREQUISITE) ## Install to a temporary PREFIX and verify init/validate/lock/plan.

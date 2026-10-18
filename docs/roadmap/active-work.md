@@ -27750,6 +27750,19 @@ FreeBSD install SBOMs and quota qualification, and existing-platform CI. The OS
 Flavor explicitly refuses assumptions about Linux procfs/GNU utilities. Swift
 requires an explicit FreeBSD toolchain rather than an invented default.
 
+Native contributor execution exposed inherited GNU Make control variables leaking
+into pip's Rust source builds: the jemalloc build consumed the outer command-line
+test selector before Cargo's appended jobserver flags and treated `-j` as a target.
+Isolate pip dependency builds from the parent Make flags, preserve explicit compiler
+resource limits and package-source policy, and qualify the corrected canonical
+native `make python-check` path. Native onboarding also reports the missing
+FreeBSD host-install realization; this remains required host-toolchain work.
+The pip wrapper regression passes through the canonical Make runner: a real child
+process receives the original pip arguments and package-source/compiler limits,
+excludes parent Make control variables, and preserves the child's failing status.
+Lint, format, repository-layout and reviewed driver-pin checks pass locally; the
+corrected native contributor build remains pending.
+
 FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
 a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
 then declared installs added only gmake and the existing Node-24-compatible npm.
