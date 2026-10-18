@@ -25921,6 +25921,24 @@ existing test report/skip refusal cases. The log SHA-256 is
 Native qualification of this revision and full retained lifecycle integration
 remain required.
 
+SBOM integration is the next implementation action in progress. Existing managed
+CycloneDX graphs require a Component root; inserting a project/manifest digest as
+a Component revision would misstate provenance. Add a distinct retained-project
+root kind and binding property, derive its identity from the reviewed retained
+plan, and merge every current Component-lock graph without changing dependency
+identities. Reuse the existing CycloneDX builder/verifier and its source-to-resolved
+transition checks. Qualify retained-origin/ordinary-origin separation, exact lock
+coverage, overlapping-graph consistency and forged managed claims. This graph
+foundation does not prove native tool/SDK closure, independent acceptance or a
+release receipt; those runtime integrations remain mandatory.
+
+The distinct-root graph passes seven focused checks, including exact lock closure,
+overlap merging/conflict refusal, schema roundtrip, source/resolved transition and
+ordinary-origin/forged-claim refusal. Its log SHA-256 is
+`0b7ac5c4d203eb985ba7a4dea1a23f4808d4a3ea4918683b8b5d81ea1cd1cc1b`.
+Existing CycloneDX checks (2), dependency lifecycle checks (4) and schema catalog
+checks (2) pass. Full runtime SBOM observation/custody remains open.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).
@@ -27778,8 +27796,10 @@ sample filtering. Local canonical sample checks pass (10 tests, six explicitly
 opt-in execution skips), including actual FreeBSD recipe composition and receiver
 OS mismatch refusal. The stable run log SHA-256 is
 `09478ca743d0b335c6e93fd04958356119e886fea10601d8e62d274cca1f8f92`.
-Native rerun qualification is active on a frozen checkout. The next implementation
-action in progress is native SDK target support: native SDK
+Native sample rerun passes all 10 checks (six explicit opt-in execution skips),
+with log SHA-256
+`c94310bd9e4f5e9af0459991efca3976864911a4043569e0198c3877e6006d1e`.
+Native SDK target support reaches the following owners: native SDK
 layout, acquisition, runtime architecture inspection and SBOM path properties
 still omit FreeBSD. Extend the shared layout/schema, host matching, ELF architecture
 inspection and dependency projection, then run real native build/relocation and
@@ -27788,8 +27808,15 @@ before claiming native mixed-project dependency closure. Local canonical SDK
 regressions pass all 26 tests without skips, covering real native builds,
 relocation, dependency graphs and consumer/package acceptance. The run log SHA-256
 is `e97160621cc467d9c74f6fe881958c2825d22e6256422ff7a15188de087588d0`.
-These are macOS regressions, not FreeBSD SDK qualification; the exact native
-build/relocation/consumer run remains required.
+These are macOS regressions, not FreeBSD SDK qualification. The exact native run
+at `02c1abb8` passes eight SDK checks, then the public consumer lifecycle fails
+because SDK and host dependency observations conflict. Diagnose the differing
+identity/loader-context fields and preserve both exact file and context custody;
+do not ignore conflicting records. This is the next FreeBSD action in progress.
+The native retained-project group separately passes all 36 tests; its log SHA-256
+is `9c817b88c1bdd7f9f0a6678f85662133a76a8803d574f37f5076733b0494075d`.
+The frozen installed-wheel check for `02c1abb8` also passes; native SDK and full
+suite qualification remain required.
 The installed `88fc4bb6` retained-source run passed actual
 native tests and independently refused both stale authorization and failing
 behavior while preserving its previous receipt. The retained 11-file native proof

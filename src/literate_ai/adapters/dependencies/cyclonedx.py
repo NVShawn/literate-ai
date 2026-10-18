@@ -32,6 +32,7 @@ from literate_ai.contracts.sbom import (
     LITERATE_REPOSITORY_SOURCE_SNAPSHOT_PROPERTY,
     LITERATE_REPOSITORY_SOURCE_TREE_PROPERTY,
     LITERATE_RESOLVED_GRAPH_IDENTITY_PROPERTY,
+    LITERATE_RETAINED_PROJECT_PROPERTY,
     LITERATE_SOURCE_BOM_IDENTITY_PROPERTY,
     CycloneDxBomBinding,
     CycloneDxLifecycle,
@@ -57,6 +58,7 @@ _DEPENDENCY_KINDS = frozenset(
         "runtime",
         "system",
         "root-component",
+        "retained-project",
         "skill",
     }
 )
@@ -430,9 +432,7 @@ def build_cyclonedx_bom(
         if resolution is not None:
             properties.extend(_repository_resolution_properties(resolution))
         component: dict[str, object] = {
-            "type": (
-                "application" if item.kind is ManagedComponentKind.ROOT else "library"
-            ),
+            "type": ("application" if item.kind.is_root else "library"),
             "bom-ref": item.bom_ref,
             "name": item.name,
             "properties": properties,
@@ -449,7 +449,7 @@ def build_cyclonedx_bom(
                 "sbom.resolution-missing",
                 "post-build repository inventory requires an exact source lock",
             )
-        if item.kind is ManagedComponentKind.ROOT:
+        if item.kind.is_root:
             component["isExternal"] = False
             root_document = component
         else:
@@ -987,7 +987,14 @@ def _require_dependency_classification(
                 "every CycloneDX inventory object needs one dependency kind",
             )
         if ref == root_ref:
-            if kinds != (ManagedComponentKind.ROOT.value,) or scopes:
+            if (
+                kinds[0]
+                not in {
+                    ManagedComponentKind.ROOT.value,
+                    ManagedComponentKind.RETAINED_PROJECT.value,
+                }
+                or scopes
+            ):
                 raise CycloneDxBomError(
                     "sbom.dependency-scope-invalid",
                     "CycloneDX root dependency classification is invalid",
@@ -1038,6 +1045,7 @@ def _require_managed_graph(
             for property_name in (
                 LITERATE_COMPONENT_REVISION_PROPERTY,
                 LITERATE_REPOSITORY_DEPENDENCY_PROPERTY,
+                LITERATE_RETAINED_PROJECT_PROPERTY,
             )
             for value in props.get(property_name, ())
         )
@@ -1047,6 +1055,7 @@ def _require_managed_graph(
                 or claims
                 or ref.startswith("urn:literate-ai:component:")
                 or ref.startswith("urn:literate-ai:repository-source:")
+                or ref.startswith("urn:literate-ai:retained-project:")
             ):
                 raise CycloneDxBomError(
                     "sbom.managed-identity-claimed",

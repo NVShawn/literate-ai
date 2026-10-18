@@ -136,6 +136,14 @@ with the profile binding its exact bytes. Planning reuses the existing release
 policy parser and repository-branch checks. An alternative hashed file cannot
 replace the project's release gates or grant publication permission.
 
+Retained managed SBOM graphs use the `retained-project` root kind and
+`literate-ai:retained-project` binding instead of a Component-revision claim. The
+root identifies the reviewed plan, including the original manifest and complete
+Component-lock inventory. Shared locked dependencies keep their identities and
+edge authority. The existing CycloneDX source/resolved transition checks preserve
+this distinction. A managed graph describes authority; it does not establish the
+observed native SDK/toolchain closure or issue an acceptance receipt.
+
 The internal command workspace reads bounded, identity-checked reports using
 `literate-ai/retained-project-test-report@1`. Each report names its action and
 the complete case outcomes (`passed`, `failed`, or explicitly permitted `skipped`).

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Managed CycloneDX graphs distinguish original retained projects from Component
+  revisions. A retained root binds the reviewed plan and complete Component-lock
+  inventory, preserves shared dependency authority and rejects origin substitution
+  and forged managed claims. Runtime dependency and release qualification remain
+  separate gates.
+
 - Retained-project planning binds the actual configured release policy and
   repository branch. Alternate policy files, duplicate JSON keys, stale bytes
   and substituted release authority refuse before execution. Retained metadata

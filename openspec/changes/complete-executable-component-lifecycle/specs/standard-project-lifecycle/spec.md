@@ -6,6 +6,22 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Retained SBOM roots preserve original-source provenance
+A retained managed CycloneDX graph SHALL bind its distinct retained-project root
+to the reviewed plan and complete current Component-lock inventory. Its root SHALL
+NOT claim a Component revision. Shared dependencies SHALL retain identities, edge
+authority and merged scopes. Conflicts, omitted locks and forged managed claims
+SHALL refuse. Graph construction SHALL NOT establish observed native closure or
+lifecycle acceptance.
+
+#### Scenario: An ordinary Component receipt attempts to consume retained provenance
+- **WHEN** a retained-project BOM is verified against an ordinary Component graph
+- **THEN** verification refuses the different managed root and binding authority
+
+#### Scenario: A retained graph traverses the source and resolved BOM transition
+- **WHEN** the existing verifier admits the exact source and resolved BOM pair
+- **THEN** the retained root binding and locked dependency authority remain unchanged
+
 ### Requirement: Retained planning binds actual release authority
 The retained release-policy input SHALL be the canonical configured policy used
 by the existing release owner. Planning SHALL parse its exact reviewed bytes,
