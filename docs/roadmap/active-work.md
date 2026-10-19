@@ -28300,6 +28300,13 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **GitHub pull request:** [#66](https://github.com/jordanhubbard/literate-ai/pull/66), including the reviewed ancestry of #60–#62.
 - **Policy reconciliation:** Correct stale repository pre-release target 1.2 to 1.3 through the public release-state command; record native and installed qualification without claiming final release readiness.
 
+- **PR #68 reconciliation (in progress):** Merge current main into the published
+  FreeBSD review in an isolated integration checkout. Preserve both sides' release
+  notes, traceability and work evidence; renew authority reviews and test custody
+  rather than carrying a receipt for another tree. Qualify the automatically merged
+  Python projection, worker observations and test-runner changes before pushing.
+  Active, uncommitted retained SDK/package work remains outside this reconciliation.
+
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
 - **GitHub issue:** [#65](https://github.com/jordanhubbard/literate-ai/issues/65)
