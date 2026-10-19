@@ -112,7 +112,10 @@ from this slice; see [the queue](docs/roadmap/active-work.md).
 retained-project Standard lifecycle admission route under Goals 1, 4 and 6.
 The directing human accepted this design on 2026-10-02. Implementation and full
 qualification remain open under RETAINED-PROJECT-001; conversion and release-authority
-gates remain unchanged.
+gates remain unchanged. An opt-in verifier policy now binds selected locks and
+executes exact cases against sealed retained build exports, checking output and
+native dependency drift. This internal gate does not qualify public execution,
+SDK/BOM admission, retained receipts or package/release consumption.
 
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the

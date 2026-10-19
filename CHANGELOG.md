@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add opt-in independent retained-export acceptance. Bind withheld verifier bytes
+  and selected Component locks; run bounded executable cases with exact binary
+  stdin, exit, stdout and stderr checks. Revalidate source/export custody and
+  native dependencies, reject stale or incomplete policies, and preserve legacy
+  profile identities. Public execution, retained receipts and package/release
+  qualification remain separate open gates.
+
 - Add explicit internal POSIX source-symlink custody. Retain relative target
   text and its identity without traversing directory aliases; reject missing,
   escaping, cyclic or redirected inputs and preserve links in immutable snapshots.

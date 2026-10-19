@@ -37,6 +37,17 @@ from literate_ai.contracts.sbom import retained_project_bom_ref
 _MAX_OBSERVATION_BYTES = 16 * 1024 * 1024
 
 
+def _observer(commands, environment):
+    return PortableHostDependencyObserver(
+        toolchain_commands=commands,
+        lifecycle_commands=(),
+        windows_environment=environment,
+        macos_loader_paths=MacOsLoaderPaths.from_environment(environment),
+        linux_loader_paths=LinuxLoaderPaths.from_environment(environment),
+        freebsd_loader_paths=FreeBsdLoaderPaths.from_environment(environment),
+    )
+
+
 class RetainedProjectDependencyError(ValueError):
     """Retained command dependency custody could not be established or retained."""
 
@@ -151,15 +162,8 @@ class RetainedProjectDependencyGuard:
             verify_retained_project_inputs(self._inputs, self._manifest)
             for binding in self._tools:
                 binding.require_unchanged()
-            observer = PortableHostDependencyObserver(
-                toolchain_commands=tuple(binding.command for binding in self._tools),
-                lifecycle_commands=(),
-                windows_environment=self._environment,
-                macos_loader_paths=MacOsLoaderPaths.from_environment(self._environment),
-                linux_loader_paths=LinuxLoaderPaths.from_environment(self._environment),
-                freebsd_loader_paths=FreeBsdLoaderPaths.from_environment(
-                    self._environment
-                ),
+            observer = _observer(
+                tuple(binding.command for binding in self._tools), self._environment
             )
             observation = observer.observe(
                 {"artifact_path": str(self._inputs)},
@@ -219,3 +223,23 @@ class RetainedProjectDependencyGuard:
             raise RetainedProjectDependencyError(
                 "retained.dependencies.observation-changed"
             )
+
+
+def retained_export_dependency_identity(root, manifest, plan, environment):
+    """Freeze actual exported native dependencies; this is not SDK/BOM admission."""
+    verify_retained_project_inputs(root, manifest)
+    root_ref = retained_project_bom_ref(plan.identity)
+    observation = _observer((), environment).observe(
+        {"artifact_path": str(root)}, root_ref=root_ref
+    )
+    payload = _freeze(observation, root_ref)
+    verify_retained_project_inputs(root, manifest)
+    return canonical_identity(
+        {
+            "schema": "literate-ai/retained-export-dependency-observation@1",
+            "plan_identity": plan.identity.uri,
+            "output_manifest_identity": manifest.identity.uri,
+            "environment_identity": canonical_identity(dict(environment)).uri,
+            "observation": json.loads(payload),
+        }
+    )

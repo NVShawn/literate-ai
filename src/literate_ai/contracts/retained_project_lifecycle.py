@@ -124,11 +124,16 @@ class RetainedProjectProfile:
     tools: tuple[tuple[str, str, ContentIdentity], ...]
     actions: tuple[RetainedProjectAction, ...]
     package_inventory: tuple[str, ...]
+    acceptance_policy_identity: ContentIdentity | None = None
 
     SCHEMA: ClassVar[str] = "literate-ai/retained-project-profile@1"
 
     def __post_init__(self) -> None:
         _name(self.target)
+        if self.acceptance_policy_identity is not None and not isinstance(
+            self.acceptance_policy_identity, ContentIdentity
+        ):
+            raise TypeError("Retained acceptance policy requires a typed identity")
         for identity in (
             self.worker_identity,
             self.toolchain_identity,
@@ -222,7 +227,7 @@ class RetainedProjectProfile:
                 raise ValueError("Package inventory has no declared output producer")
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        value = {
             "schema": self.SCHEMA,
             "authority_mode": "retained-project",
             "target": self.target,
@@ -238,6 +243,9 @@ class RetainedProjectProfile:
             "actions": [action.to_dict() for action in self.actions],
             "package_inventory": list(self.package_inventory),
         }
+        if self.acceptance_policy_identity is not None:
+            value["acceptance_policy_identity"] = self.acceptance_policy_identity.uri
+        return value
 
     @property
     def identity(self) -> ContentIdentity:
@@ -245,6 +253,11 @@ class RetainedProjectProfile:
 
     @classmethod
     def from_dict(cls, value: object) -> RetainedProjectProfile:
+        optional = (
+            {"acceptance_policy_identity"}
+            if isinstance(value, dict) and "acceptance_policy_identity" in value
+            else set()
+        )
         value = _fields(
             value,
             {
@@ -259,7 +272,8 @@ class RetainedProjectProfile:
                 "tools",
                 "actions",
                 "package_inventory",
-            },
+            }
+            | optional,
         )
         if (
             value["schema"] != cls.SCHEMA
@@ -298,6 +312,9 @@ class RetainedProjectProfile:
                 RetainedProjectAction.from_dict(action) for action in value["actions"]
             ),
             tuple(value["package_inventory"]),
+            ContentIdentity.parse_uri(value["acceptance_policy_identity"])
+            if optional
+            else None,
         )
 
 

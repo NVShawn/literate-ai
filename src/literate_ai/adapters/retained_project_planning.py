@@ -17,6 +17,9 @@ from literate_ai.adapters.locked_generation_authority import (
     FilesystemLockedGenerationAuthorityReader,
 )
 from literate_ai.adapters.project_validation import validated_project_authority_identity
+from literate_ai.adapters.retained_project_acceptance import (
+    read_retained_acceptance_policy,
+)
 from literate_ai.adapters.retained_project_inputs import verify_retained_project_inputs
 from literate_ai.adapters.retained_project_release import (
     read_retained_project_release_policy,
@@ -206,6 +209,7 @@ def plan_retained_project_with_graph(
     read_retained_project_test_policy(
         project.root, manifest, profile, project.definition.test_receipt_policy
     )
+    read_retained_acceptance_policy(project.root, profile, locks, manifest)
     read_retained_project_release_policy(
         project.root, manifest, profile.release_policy_identity
     )

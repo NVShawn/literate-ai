@@ -60,12 +60,25 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         )
         source.write_text(
             "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n"
+            "#include <sys/stat.h>\n"
             "int main(int n, char **v) {\n"
             ' if (getenv("LITAI_FIXTURE_SECRET")) return 99;\n'
             " if (n < 2) return 2;\n"
+            ' if (!strcmp(v[1], "echo")) {\n'
+            "  int c; while ((c = getchar()) != EOF) if (putchar(c) == EOF) return 7;\n"
+            "  return ferror(stdin) ? 8 : 0;\n"
+            " }\n"
             ' if (!strcmp(v[1], "empty")) return 0;\n'
             ' if (!strcmp(v[1], "fail")) {fputs("failed", stderr); return 9;}\n'
             " if (n < 3) return 2;\n"
+            ' if (!strcmp(v[1], "export")) {\n'
+            '  FILE *in = fopen(v[0], "rb"), *out = fopen(v[2], "wb");\n'
+            "  if (!in || !out) return 10;\n"
+            "  int c; while ((c = fgetc(in)) != EOF)\n"
+            "    if (fputc(c, out) == EOF) return 11;\n"
+            "  if (ferror(in) || fclose(out) || fclose(in)) return 12;\n"
+            "  return chmod(v[2], 0755) ? 13 : 0;\n"
+            " }\n"
             ' if (!strcmp(v[1], "extra") && n == 4) {\n'
             '  FILE *f = fopen(v[3], "wb"); if (!f) return 5;\n'
             '  fputs("extra", f); fclose(f);\n'

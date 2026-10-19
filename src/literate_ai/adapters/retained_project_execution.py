@@ -19,6 +19,10 @@ from literate_ai._filesystem import require_safe_directory
 from literate_ai.adapters.builders import run_bounded_process
 from literate_ai.adapters.builders._process import BoundedProcessResult
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
+from literate_ai.adapters.retained_project_acceptance import (
+    read_retained_acceptance_policy,
+    verify_retained_acceptance_action,
+)
 from literate_ai.adapters.retained_project_dependencies import (
     RetainedProjectDependencyGuard,
 )
@@ -123,10 +127,14 @@ class RetainedProjectExecutionWorkspace:
         self._output_manifest: RetainedProjectManifest | None = None
         self._failed = False
         self._test_reports: list[RetainedProjectVerifiedTestReport] = []
+        self._acceptance_observations = []
         self._configured_test_policy = test_receipt_policy
         self._require_current_plan()
         self._test_policy = read_retained_project_test_policy(
             source, manifest, plan.profile, test_receipt_policy
+        )
+        self._acceptance_policy = read_retained_acceptance_policy(
+            source, plan.profile, plan.component_locks, manifest
         )
         require_safe_directory(parent)
         self.root = Path(tempfile.mkdtemp(prefix="retained-run-", dir=parent))
@@ -182,6 +190,10 @@ class RetainedProjectExecutionWorkspace:
         return tuple(self._test_reports)
 
     @property
+    def acceptance_observations(self):
+        return tuple(self._acceptance_observations)
+
+    @property
     def dependency_observation(self):
         return self._dependencies.observation
 
@@ -199,6 +211,13 @@ class RetainedProjectExecutionWorkspace:
         ):
             require_safe_directory(directory)
         self._require_current_plan()
+        if (
+            read_retained_acceptance_policy(
+                self.source, self.plan.profile, self.plan.component_locks, self.manifest
+            )
+            != self._acceptance_policy
+        ):
+            raise RetainedProjectExecutionError("retained.acceptance.policy-changed")
         verify_retained_project_inputs(self.source, self.manifest)
         verify_retained_project_inputs(self.inputs, self.manifest)
         for binding in self._tools.values():
@@ -370,6 +389,22 @@ class RetainedProjectExecutionWorkspace:
                         "retained.execution.test-report-rejected: " + str(exc),
                         self.observations,
                     ) from exc
+            if action.stage == "accept" and self._acceptance_policy is not None:
+                if self._output_manifest is None:
+                    raise RetainedProjectExecutionError(
+                        "retained.acceptance.outputs-missing"
+                    )
+                self._acceptance_observations.extend(
+                    verify_retained_acceptance_action(
+                        self._acceptance_policy,
+                        self.plan,
+                        action.action_id,
+                        self.outputs,
+                        self._output_manifest,
+                        environment=self._environment(),
+                        require_current=self._require_current,
+                    )
+                )
             return observation
         except BaseException:
             self._failed = True

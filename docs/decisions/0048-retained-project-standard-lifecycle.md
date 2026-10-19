@@ -137,3 +137,31 @@ and new destination files have identical contents.
 This input custody extension does not admit native actions, executable tool
 aliases, per-unit packages or retained lifecycle acceptance. The public execution
 refusal and independent source/SDK/variant/receipt gates remain unchanged.
+
+
+## Explicit independent acceptance of retained exports
+
+Profiles may opt into `acceptance_policy_identity`, the exact SHA-256 of
+`verification/retained-project-acceptance.json`. Omitted fields preserve legacy
+profile and plan identities. An explicit null or malformed identity refuses.
+The verifier file must be outside every retained manifest root and is never
+materialized into the command input snapshot. Planning and execution reopen its
+bounded exact bytes; duplicate JSON keys, redirection and drift refuse.
+
+The typed policy binds the complete selected Component-lock tuple and exactly
+the case inventory of every acceptance action. Cases name regular executable
+exports produced by build actions and selected by the package inventory. Each
+case specifies bounded argv and binary stdin, exact exit/stdout/stderr expectations
+and a deadline. Execute it only after complete declared tests and documentation,
+with the existing bounded process owner and explicit credential-free environment.
+Revalidate original inputs, tools, policy and sealed exports at command boundaries;
+observe exported native dependencies before and after execution and reject drift.
+Retain bounded actual results, including mismatched cases, with their content
+identities; failed-case observations cannot become successful lifecycle evidence.
+
+These observations are independent executable-case evidence, not retained
+lifecycle receipts, complete source/resolved BOM admission, qualified SDK products
+or packaged-artifact acceptance. They never advance conversion or release
+authority. The public retained execution refusal remains while these later
+consumers are integrated and qualified. Legacy profiles produce no new independent
+acceptance observation merely by labeling a zero-exit command as acceptance.

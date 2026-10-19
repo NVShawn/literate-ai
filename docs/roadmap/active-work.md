@@ -25866,6 +25866,22 @@ does not close this runtime requirement or transfer retained release authority.
 lifecycle owners and share common post-admission gates; do not fabricate generated
 source, generated tests, cache membership or an ordinary regenerative receipt.
 
+Independent acceptance implementation: add an explicit opt-in verifier policy
+whose exact bytes and selected Component locks are bound to the retained plan.
+Keep it outside the materialized retained inputs. Run bounded cases against sealed
+build exports, checking exact exit/stdout/stderr and current input/output/native
+dependency custody. Reject stale policies, missing cases and substituted outputs.
+Legacy profile identities and the public execution refusal remain unchanged;
+SDK/BOM admission, retained receipts, package and release consumers remain open.
+The local canonical retained-project group passes 68 checks. Fourteen current
+focused acceptance checks pass, including a retained build/test/docs command
+sequence followed by execution of its compiled native fixture export, exact
+binary stdin/stdout, expected nonzero exits, bounded output and failed-result
+custody. This is internal gate coverage; full-suite, installed-wheel and native
+qualification remain required.
+
+
+
 Execution work in progress: add an isolated retained command workspace using the
 existing streaming snapshot, Standard tool binding and bounded process owners.
 Every action must use the reviewed graph and captured tool, recheck current plan
