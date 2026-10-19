@@ -28583,6 +28583,25 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   separate, unfinished gates. Hosted checks on the pushed revision remain required
   evidence to inspect before any eventual landing.
 
+
+- **PR #68 final qualification (in progress):** Finish the review against the
+  current retained/native package and SSH receiver corrections through `ab15e04e`.
+  Renew the complete local and actual FreeBSD regression, canonical-origin
+  installed-wheel evidence, current framework lifecycle receipt and exact-head
+  hosted checks before landing. Preserve the existing open acceptance contracts
+  for public full-project execution, complete native source/ports unit packaging
+  and downstream system installation/rollback; these are not established by
+  internal infrastructure tests. Final title, description and completion claims
+  must match the gates actually exercised. Active peer checkouts retain their
+  work and evidence.
+  Native full regression at `ab15e04e` exposed a cancellation fixture race:
+  its one-second process deadline could expire during cold interpreter/ledger
+  startup, before the fixture's existing fifteen-second readiness budget.
+  Give the process deadline a finite bound above readiness and preserve actual
+  timeout/SIGINT, descendant cleanup and nested-evidence assertions. Production
+  command deadlines and cancellation behavior remain unchanged. Renew the focused
+  native fixture and complete native regression before landing.
+
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
 - **GitHub issue:** [#65](https://github.com/jordanhubbard/literate-ai/issues/65)
