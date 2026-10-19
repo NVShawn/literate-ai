@@ -1033,6 +1033,8 @@ def _runtime_recipe(
 def _host_os() -> str:
     if sys.platform.startswith("linux"):
         return "linux"
+    if sys.platform.startswith("freebsd"):
+        return "freebsd"
     if sys.platform == "darwin":
         return "macos"
     if sys.platform in {"win32", "cygwin"}:

@@ -14,6 +14,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
+from literate_ai.adapters import retained_project_dependencies as dependencies
 from literate_ai.adapters import retained_project_execution as execution
 from literate_ai.adapters.builders import BuildError
 from literate_ai.adapters.retained_project_inputs import (
@@ -302,6 +303,10 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                 self.assertEqual(observed.result.returncode, 0)
                 self.assertEqual(observed.tool_identity, self.profile.tools[0][2])
                 self.assertEqual(observed.plan_identity, self.plan.identity)
+                self.assertEqual(
+                    observed.dependency_identity, workspace.dependency_identity
+                )
+                self.assertTrue(workspace.dependency_observation.components)
                 self.assertNotIn("LITAI_FIXTURE_SECRET", workspace._environment())
         self.assertEqual((workspace.outputs / "app.bin").read_bytes(), b"build")
         self.assertEqual(
@@ -316,6 +321,35 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         self.assertEqual(
             verified.observation_identity, workspace.observations[1].identity
         )
+        with self.assertRaisesRegex(ValueError, "no-next-action"):
+            workspace.execute_next()
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("cc"), "C process fixture")
+    def test_native_dependency_drift_refuses_before_command(self):
+        workspace = self.workspace()
+        changed = workspace.dependency_observation
+        changed.components[0]["name"] = "changed native dependency"
+        with patch.object(dependencies, "PortableHostDependencyObserver") as factory:
+            factory.return_value.observe.return_value = changed
+            with patch.object(execution, "run_bounded_process") as process:
+                with self.assertRaisesRegex(ValueError, "observation-changed"):
+                    workspace.execute_next()
+                process.assert_not_called()
+        with self.assertRaisesRegex(ValueError, "no-next-action"):
+            workspace.execute_next()
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("cc"), "C process fixture")
+    def test_native_dependency_drift_after_real_success_refuses_observation(self):
+        workspace = self.workspace()
+        before = workspace.dependency_observation
+        changed = workspace.dependency_observation
+        changed.components[0]["name"] = "changed native dependency"
+        with patch.object(dependencies, "PortableHostDependencyObserver") as factory:
+            factory.return_value.observe.side_effect = (before, changed)
+            with self.assertRaisesRegex(ValueError, "observation-changed"):
+                workspace.execute_next()
+        self.assertEqual((workspace.outputs / "app.bin").read_bytes(), b"build")
+        self.assertEqual(workspace.observations, ())
         with self.assertRaisesRegex(ValueError, "no-next-action"):
             workspace.execute_next()
 

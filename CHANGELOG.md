@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Retained command execution observes captured native dependencies using its
+  sanitized environment, freezes the graph and rejects dependency or command
+  context drift before and after each process. Command observations bind that
+  graph identity. This adds runtime custody; SDK/BOM admission and retained-origin
+  acceptance, receipt, package and release qualification remain required.
+
+- Snapshot replication's core platform check accepts native FreeBSD while still
+  refusing foreign Flavors and unsupported hosts.
+
 - FreeBSD exclusive directory publication uses the native no-replace rename,
   preserving concurrently created destinations. Missing OS/filesystem support
   remains an error with no replacing fallback.

@@ -27,6 +27,28 @@ lifecycle acceptance.
 - **THEN** its response includes the managed graph derived from the same verified Component locks and reviewed plan
 - **AND** absent catalog locks remain unselected, stale persisted locks refuse, and planning issues no lifecycle receipt
 
+### Requirement: Retained commands bind observed native dependencies
+The retained workspace SHALL observe captured native tools and inputs through
+the existing host observer using its sanitized command environment. The graph
+SHALL be immutable, revalidated around every command and identity-bound to the
+command record. Missing, malformed or changed observations SHALL refuse.
+
+#### Scenario: A library changes while retained commands execute
+- **WHEN** the native dependency observation differs before or after a command
+- **THEN** the workspace refuses the changed closure and cannot resume as green
+
+#### Scenario: The coordinator has ambient loader injection
+- **WHEN** inherited loader controls are absent from the sanitized command environment
+- **THEN** native observation also excludes those controls
+
+### Requirement: Native observations retain admission boundaries
+Native drift custody SHALL NOT substitute for SDK admission, source/resolved
+BOM verification, independent acceptance or retained-origin receipt issuance.
+
+#### Scenario: Native observation succeeds without independent acceptance
+- **WHEN** native command observations pass but lifecycle admission remains incomplete
+- **THEN** no lifecycle receipt or package/release authority is issued
+
 ### Requirement: Retained planning binds actual release authority
 The retained release-policy input SHALL be the canonical configured policy used
 by the existing release owner. Planning SHALL parse its exact reviewed bytes,

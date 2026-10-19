@@ -19,6 +19,9 @@ from literate_ai._filesystem import require_safe_directory
 from literate_ai.adapters.builders import run_bounded_process
 from literate_ai.adapters.builders._process import BoundedProcessResult
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
+from literate_ai.adapters.retained_project_dependencies import (
+    RetainedProjectDependencyGuard,
+)
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
     capture_retained_project_inputs,
@@ -53,6 +56,7 @@ class RetainedProjectCommandObservation:
     action: RetainedProjectAction
     tool_identity: ContentIdentity
     environment_identity: ContentIdentity
+    dependency_identity: ContentIdentity
     result: BoundedProcessResult
     output_manifest: RetainedProjectManifest | None
 
@@ -60,11 +64,12 @@ class RetainedProjectCommandObservation:
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
-                "schema": "literate-ai/retained-command-observation@1",
+                "schema": "literate-ai/retained-command-observation@2",
                 "plan_identity": self.plan_identity.uri,
                 "action": self.action.to_dict(),
                 "tool_identity": self.tool_identity.uri,
                 "environment_identity": self.environment_identity.uri,
+                "dependency_identity": self.dependency_identity.uri,
                 "exit_code": self.result.returncode,
                 "stdout": hashlib.sha256(self.result.stdout).hexdigest(),
                 "stderr": hashlib.sha256(self.result.stderr).hexdigest(),
@@ -151,6 +156,13 @@ class RetainedProjectExecutionWorkspace:
                 self._tools[name] = LocalComponentToolBinding(
                     str(self.inputs / path), authority_identity=identity
                 )
+            self._dependencies = RetainedProjectDependencyGuard(
+                self.inputs,
+                self.manifest,
+                self.plan,
+                tuple(self._tools[name] for name in sorted(self._tools)),
+                self._environment(),
+            )
             self._require_current()
         except BaseException:
             _remove_tree(self.root)
@@ -169,6 +181,14 @@ class RetainedProjectExecutionWorkspace:
     def test_reports(self) -> tuple[RetainedProjectVerifiedTestReport, ...]:
         return tuple(self._test_reports)
 
+    @property
+    def dependency_observation(self):
+        return self._dependencies.observation
+
+    @property
+    def dependency_identity(self) -> ContentIdentity:
+        return self._dependencies.identity
+
     def _require_current(self) -> None:
         for directory in (
             self.root,
@@ -183,6 +203,10 @@ class RetainedProjectExecutionWorkspace:
         verify_retained_project_inputs(self.inputs, self.manifest)
         for binding in self._tools.values():
             binding.require_unchanged()
+        self._dependencies.require_unchanged(
+            environment=self._environment(),
+            tools=tuple(self._tools[name] for name in sorted(self._tools)),
+        )
         if self._output_manifest is not None:
             verify_retained_project_inputs(self.outputs, self._output_manifest)
 
@@ -301,6 +325,7 @@ class RetainedProjectExecutionWorkspace:
                 action,
                 binding.toolchain_identity,
                 canonical_identity(environment),
+                self.dependency_identity,
                 result,
                 outputs,
             )

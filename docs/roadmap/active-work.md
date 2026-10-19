@@ -25967,6 +25967,30 @@ a regenerative execution plan or generated-source wrapper. The public execution
 refusal must remain until those integrations and installed mixed-project evidence
 pass.
 
+Native dependency observation is the implementation action in progress. The
+internal workspace currently guards captured executable bytes but never observes
+the libraries those commands actually load. Reuse PortableHostDependencyObserver
+over exact captured SDK/toolchain/dependency members and tool commands, with
+loader controls derived from the sanitized command environment, not the caller.
+Freeze the observation as canonical bytes, reobserve around each command, reject
+drift before retaining success, and bind its identity to every command record.
+Qualify actual compiled command execution and simulated dependency mutation,
+malformed graphs, ambient loader injection and mutable-observation refusal.
+This runtime drift gate does not itself admit SDK products, original-language
+dependency declarations, independent acceptance or a release receipt; those
+remain required before opening public retained execution.
+
+The implemented gate passes seven focused observation/refusal checks and all
+55 local retained-project checks, including compiled commands and dependency
+mutation before execution and after a real zero exit. All five CLI rebuild
+regressions pass. The final retained-group log SHA-256 is
+`e99ca19a687467bef93103217337ab551bce7a93ebff8762921f44afeb743eb6`;
+the CLI regression log SHA-256 is
+`0c419a01d33d77f0b76711b8b2dd826ed65d63f3139ad8dda618b3acb8193a29`.
+Original SDK admission and public retained execution remain open. A local snapshot replay attempt correctly rejected source drift
+after a command-observation identity edit during that test. Repeat it from a
+frozen checkout; this rejected attempt supplies no replay qualification.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).
@@ -27949,6 +27973,18 @@ The sequential wider retained/current-lock/snapshot/full native ladder remains
 active at that frozen revision; later phases are not yet qualified. A separate
 frozen local full-suite/wheel ladder runs at `9fc8596f`, so its results cannot
 qualify the later snapshot/publication changes.
+
+Native `75fd75cc` renewal passes all 94 retained checks without skips in
+1878.469 seconds and all six current-lock checks in 25.696 seconds. Snapshot
+replay then reaches a second missing FreeBSD selector in the actual core
+`self_hosting._host_os`, after the proof/helper selection correction. The first
+two snapshot checks pass; repeated replay refuses `freebsd16` before its build.
+Repair this core selector in progress and test actual FreeBSD Flavor admission,
+wrong-OS Flavor refusal and unknown-host refusal before native replay renewal.
+The separate frozen `9fc8596f` local suite and wheel check pass: 1,651 tests,
+38 platform/tool skips, 3042.666 seconds; wheel identity
+`sha256:6ce5de959cbb171a77ff8bce2e1db7d90b7ce38b0a7b72cfe0f27742c8c46225`.
+These exact-revision results do not qualify later runtime changes.
 
 Installed-wheel execution at `d96f6b8b` no longer discovers a coding agent, but
 refuses before compilation because the shared Python builder searches only
