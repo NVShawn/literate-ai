@@ -101,7 +101,9 @@ The `ci-test-plan` Agent Skill (with nested `shard` and `impact` deltas) wraps
 `litai project ci-plan`. Python detects test frameworks and records which maintained
 shard or impact mechanism exists — pytest-split, Jest `--shard`, Go test-split,
 cargo-nextest `slice` partitions, gtest-parallel, or an explicit unavailable result
-for Swift and for this repository's linear checkpointed unittest runner. Impact
+for Swift and for this repository's checkpointed unittest runner. That runner
+parallelizes modules within one checkpoint ledger; this does not expose CI shard
+partitions. Impact
 selection fails closed to the full suite when its map is missing or untrusted, then
 sharding parallelizes what remains. The skill never enters a generation prompt.
 

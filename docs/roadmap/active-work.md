@@ -28300,12 +28300,15 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **GitHub pull request:** [#66](https://github.com/jordanhubbard/literate-ai/pull/66), including the reviewed ancestry of #60–#62.
 - **Policy reconciliation:** Correct stale repository pre-release target 1.2 to 1.3 through the public release-state command; record native and installed qualification without claiming final release readiness.
 
-- **PR #68 reconciliation (in progress):** Merge current main into the published
+- **PR #68 reconciliation (conflicts resolved; qualification in progress):** Merge current main into the published
   FreeBSD review in an isolated integration checkout. Preserve both sides' release
   notes, traceability and work evidence; renew authority reviews and test custody
   rather than carrying a receipt for another tree. Qualify the automatically merged
   Python projection, worker observations and test-runner changes before pushing.
   Active, uncommitted retained SDK/package work remains outside this reconciliation.
+  The merged integration passes 36 focused tests, source/style/layout and authority
+  reviews, both changed-skill admissions, strict OpenSpec and all 121 rendered
+  Mermaid diagrams. Full frozen-tree qualification is the next action.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
@@ -28337,12 +28340,30 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
 - **Direction:** Run release-gate tests in parallel (checkpointed, fail-fast)
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
-- **Depends on:** none
+- **Conclusion:** The current installed checkpoint runner executes the entire suite in one process. Add bounded process-level module scheduling while preserving one controller-owned marker ledger and source/context binding. Keep the existing serial API for in-memory suites; make CLI/Make worker count explicit, defaulting to the available CPU count. The Windows gate retains pytest/JUnit and uses isolated file-group workers with fail-fast.
+- **Depends on:** existing pin dispatch, known-failure contracts and owned-process-tree cleanup
+- **Next action (in progress):** Collect final-source native timing comparisons and require the full exact-head CI matrix before landing. The complete local suite, installed wheel and newly current lifecycle receipt have passed; eight-core Windows performance acceptance remains pending capacity.
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [x] Execute importable module groups in private process/temp/object environments with explicit serial barriers and configurable worker count.
+  - [x] Record validated per-case outcomes only in the parent; retain exact failure/skip/subtest/fixture counts and bounded diagnostics.
+  - [x] Stop dispatch on failure, terminate only owned worker/descendant processes, and preserve completed repair markers.
+  - [x] Keep known-failure/context/release-evidence behavior and required repaired-exit-2 followed by a clean from-zero pass.
+  - [x] Integrate Make and Windows pytest worker configuration, audit fixed shared state, and document limits and wheel-check timing findings.
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Real processes prove overlap, isolation, serial barriers, deterministic failure order, fail-fast child cleanup, crash/protocol refusal and out-of-order resume.
+  - [ ] Serial and parallel runs produce identical ordered case outcomes and receipt summaries, including duplicates, class/module fixtures and subtests.
+  - [ ] Measure the complete framework suite and native Linux/Windows gates on aligned workers; demonstrate the requested speedup without dropped or doubled cases.
+  - [ ] Pass complete local, installed-wheel, exact-head CI and a newly current lifecycle receipt before landing.
+
+- **Development evidence:** Seventeen focused checkpoint tests pass, covering real process overlap, private scratch/configuration, serial barriers, per-case out-of-order repair (including retained skips), owned descendant termination, crash/protocol refusal, duplicate object occurrences, fixture/subtest parity, known-failure contexts, release-evidence bypass and Windows entry-point configuration. The initial full-suite attempt exposed project-authority inheritance from scratch directories beneath the checkout; scratch now lives outside it. A later exploratory run stopped at 730 tests because source was edited while its immutable self-hosting proof ran. This is not a complete-suite pass or a performance claim. Freeze source before final qualification. Review also covered multiple cleanup failures and skipped teardown after a failing body: failure precedence is retained, other workers stop immediately, and the failing module has a bounded cleanup-report window. Make retains an ordered sidecar report even after successful repair markers reset.
+
+- **Review follow-up:** Eighteen focused checkpoint tests pass. A deterministic 100-case stream reproduced failure starvation before bounded polling; the controller now observes the other module's reported failure after at most eight passing-case callbacks, stops execution, and retains all 100 already-flushed passes. Class/module teardown skips preserve completed body outcomes, and subtest diagnostics retain their parameter labels. The earlier `9ce03a77` and `58849d2d` candidates each passed the complete 1,547-test macOS suite with 35 declared skips, plus installed-wheel qualification; final source adds the fairness regression and requires fresh complete qualification.
+
+- **Final local qualification:** Frozen implementation `7652c2ed` passed the complete macOS suite: 1,548 selected, 1,513 passed, 35 declared skips and zero failures in 879.384 seconds. All 18 focused checkpoint cases, repository/export checks, lint/format, OpenSpec, 121 documentation diagrams, 21 Node tests and current driver/runner reviews pass. Installed wheel `sha256:c4dc5f2f1e8161554727af03bd792177b9bd37a368d9829c345f9a5ff8ba2df4` passes its full qualification and installed two-process probe (four selected, two passed, two skipped). A fresh finalized host lifecycle passes 230 tests; supported receipt promotion, candidate comparison, require-current and `litai verify` pass. This does not establish native eight-core Windows timing or the full serial/parallel three-host acceptance.
+
+- **Wheel timing investigation:** The initial macOS candidate recorded 552.19 seconds in subprocess spans; installed HTML observability accounted for 289.41 seconds. Those HTML scenarios mutate the same golden project and cannot safely be fanned out without separate fixture custody. Independent environment setup offers a smaller opportunity. These observations came from a busy macOS host and do not establish a Windows wheel speedup. Native gate timings and the requested performance target remain open.
+
+- **Native Windows follow-up:** The four-worker gate stopped after 575 passes, 45 skips and 579 passing subtests when the real Cargo accounting fixture exceeded its 60-second compiler deadline. An isolated unchanged probe passes: cold compile 32.594 seconds, cached compile 0.469 seconds. The fixture now allows 180 seconds on Windows (60 elsewhere) and uses existing owned-process-tree cleanup on timeout. This is a test-fixture timing correction, not native performance acceptance; the final gate must be rerun. The failed job evidence is retained and its finite on-demand task is confirmed removed.
 
 ### [ ] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
 
@@ -28597,3 +28618,27 @@ regressions also pass. This is complete selected input discovery/validation and
 small-fixture snapshot custody; it is not a full source-tree snapshot, canonical
 native catalog registration or Component action/package/lifecycle acceptance.
 Full-suite, installed and native qualification remain separate gates.
+
+### [x] RECEIPT-REFRESH-001 — Refresh the current project test receipt through the complete lifecycle
+
+- **Priority:** P1
+- **Owner:** Project receipt lifecycle and generated-test guidance
+- **Direction:** Fix the stale current project receipt.
+- **Conclusion:** A fresh lifecycle run rejected a generated case ID colliding with independent acceptance. Clarify generated case naming while preserving all refusal checks, then earn and promote a newly finalized passing candidate.
+  A later run exposed a missing retry classification for rejected JavaScript bundle
+  modules. Use the existing three-candidate budget and retain refusal evidence;
+  authentication and post-build failures remain terminal.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Keep generated implementation case IDs distinct from independent verifier IDs.
+  - [x] Retry missing JavaScript bundle modules within the existing bounded policy.
+  - [x] Review and record the exact runner source closure after the retry change.
+  - [x] Promote only a newly finalized all-passing lifecycle candidate.
+- **Evidence:**
+  - [x] Complete the host-eligible sample lifecycle and pass test-receipt check, require-current and litai verify.
+- **Recorded result:** Commit `597250a9` promotes the finalized passing 22-sample host
+  lifecycle (228 tests, 26 component locks, all required evidence roles). Supported
+  candidate check and require-current pass; `litai verify` reports two passes, zero
+  failures and three configured skips. The complete framework suite reports 1,525
+  tests with 37 skips; installing Elixir enables the nine class-setup omissions and
+  all 19 explicitly gated Elixir cases, including native Make, Bazel and Mix proof.
