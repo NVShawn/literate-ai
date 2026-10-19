@@ -10,6 +10,10 @@ from typing import Any
 
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 from literate_ai.contracts.paths import canonical_relative_posix_paths
+from literate_ai.contracts.retained_component_ownership import (
+    RetainedComponentOwner,
+    validate_retained_ownership,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,6 +74,7 @@ class RetainedProjectManifest:
     members: tuple[RetainedProjectMember, ...]
     limits: RetainedProjectLimits
     directories: tuple[str, ...] = ()
+    component_ownership: tuple[RetainedComponentOwner, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.limits, RetainedProjectLimits):
@@ -89,6 +94,16 @@ class RetainedProjectManifest:
             sorted(self.directories)
         ):
             raise ValueError("Retained directories must be ordered")
+        roots = set(self.roots)
+        directories = set(self.directories)
+
+        def declared_root(name: str) -> str | None:
+            while name:
+                if name in roots:
+                    return name
+                name = name.rpartition("/")[0]
+            return None
+
         # Directories may be ancestors; validate aliases separately from files.
         aliases: set[str] = set()
         for directory in self.directories:
@@ -96,10 +111,7 @@ class RetainedProjectManifest:
             if directory.casefold() in aliases:
                 raise ValueError("Colliding retained directories")
             aliases.add(directory.casefold())
-            if not any(
-                directory == root or directory.startswith(root + "/")
-                for root in self.roots
-            ):
+            if declared_root(directory) is None:
                 raise ValueError("Retained directory outside declared roots")
         names = tuple(member.path for member in self.members)
         canonical_relative_posix_paths(names, label="retained members")
@@ -109,31 +121,23 @@ class RetainedProjectManifest:
         if any(root not in nodes for root in self.roots):
             raise ValueError("Retained root absent from manifest")
         for name in nodes:
-            root = next(
-                (
-                    root
-                    for root in self.roots
-                    if name == root or name.startswith(root + "/")
-                ),
-                None,
-            )
+            root = declared_root(name)
             if root is None:
                 raise ValueError("Retained node outside declared roots")
             while name != root:
                 name = name.rsplit("/", 1)[0]
-                if name not in self.directories:
+                if name not in directories:
                     raise ValueError("Retained directory inventory is incomplete")
+        # Checking every file against every directory is quadratic on complete
+        # native trees. Walk directory ancestors against an indexed file set.
+        files = {name.casefold() for name in names}
+        for directory in self.directories:
+            ancestor = directory.casefold()
+            while ancestor:
+                if ancestor in files:
+                    raise ValueError("Retained file/directory collision")
+                ancestor = ancestor.rpartition("/")[0]
         for member in self.members:
-            if member.path.casefold() in aliases or any(
-                d.casefold().startswith(member.path.casefold() + "/")
-                for d in self.directories
-            ):
-                raise ValueError("Retained file/directory collision")
-            if not any(
-                member.path == root or member.path.startswith(root + "/")
-                for root in self.roots
-            ):
-                raise ValueError("Retained member outside declared roots")
             if member.size > self.limits.max_file_bytes:
                 raise ValueError("Retained input exceeds per-file bound")
         if (
@@ -141,15 +145,25 @@ class RetainedProjectManifest:
             or sum(m.size for m in self.members) > self.limits.max_total_bytes
         ):
             raise ValueError("Retained input exceeds aggregate bound")
+        if type(self.component_ownership) is not tuple:
+            raise TypeError("Typed retained Component ownership tuple required")
+        if self.component_ownership:
+            validate_retained_ownership(self.component_ownership, nodes)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        value = {
             "schema": "literate-ai/retained-project-manifest@1",
             "roots": list(self.roots),
             "directories": list(self.directories),
             "members": [m.to_dict() for m in self.members],
             "limits": self.limits.to_dict(),
         }
+        # Omitted legacy extension preserves existing manifest/plan identities.
+        if self.component_ownership:
+            value["component_ownership"] = [
+                owner.to_dict() for owner in self.component_ownership
+            ]
+        return value
 
     @property
     def identity(self) -> ContentIdentity:
@@ -157,7 +171,16 @@ class RetainedProjectManifest:
 
     @classmethod
     def from_dict(cls, value: Any) -> RetainedProjectManifest:
-        _fields(value, {"schema", "roots", "members", "limits", "directories"})
+        required = {"schema", "roots", "members", "limits", "directories"}
+        _fields(
+            value,
+            required
+            | (
+                {"component_ownership"}
+                if isinstance(value, dict) and "component_ownership" in value
+                else set()
+            ),
+        )
         if (
             value["schema"] != "literate-ai/retained-project-manifest@1"
             or not isinstance(value["roots"], list)
@@ -165,9 +188,20 @@ class RetainedProjectManifest:
             or not isinstance(value["directories"], list)
         ):
             raise ValueError("Invalid retained input manifest")
+        if "component_ownership" in value and (
+            not isinstance(value["component_ownership"], list)
+            or not value["component_ownership"]
+        ):
+            raise ValueError(
+                "Explicit retained Component ownership must be a nonempty array"
+            )
         return cls(
             tuple(value["roots"]),
             tuple(RetainedProjectMember.from_dict(m) for m in value["members"]),
             RetainedProjectLimits.from_dict(value["limits"]),
             tuple(value["directories"]),
+            tuple(
+                RetainedComponentOwner.from_dict(owner)
+                for owner in value.get("component_ownership", ())
+            ),
         )

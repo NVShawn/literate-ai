@@ -95,3 +95,21 @@ The directing human explicitly accepted this ADR on 2026-10-02: “I accept the 
 Acceptance permits implementation and its tests under ADR 0006. It does not itself
 authorize a release, claim qualification, or merge a PR. Implementation and full
 qualification remain open under RETAINED-PROJECT-001.
+
+## Canonical per-Component input ownership
+
+An optional retained manifest ownership map binds normalized input prefixes to
+exact authored Component coordinates and identities from the actual project
+catalog. The most specific declared prefix owns each retained file and directory;
+there must be one owner for every input, with no duplicate/aliased or unused
+prefixes. Unknown or stale Component references fail planning. The ownership map
+is part of retained manifest identity; changing a rule invalidates the reviewed
+plan. Original file roles, byte/mode custody and selected target locks remain
+independent. Legacy manifests omit this opt-in field and retain their identities.
+
+This is input ownership, not a second Component catalog, native dependency
+inference, target/action binding, pkg production or independent acceptance. A
+complete native Component model still requires these later gates and shared
+consumer relationships. The public execution refusal stays in force until the
+retained lifecycle is qualified. Full-tree owners must also retain bounded
+validation cost rather than comparing every file with every directory.

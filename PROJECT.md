@@ -72,6 +72,12 @@ development (2026-09-10):
 
 ## Current work
 
+RETAINED-CATALOG-001 (issue #74) extends Goals 1, 4 and 6 with complete
+retained-input ownership by exact canonical Components. Coverage must use the
+real authored catalog, preserve target-specific lock and source authority
+boundaries, and scale to complete native trees. Native action, package and
+independent acceptance qualification remain required beyond ownership planning.
+
 FREEBSD-001 adds a fourth first-class OS platform and native worker/target
 support under Goals 1, 4 and 5. This includes truthful FreeBSD identity,
 registration, host/toolchain realization, bounded native observations, isolated

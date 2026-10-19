@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Retained manifests can bind every file and directory to exact canonical
+  Component authoring through explicit ownership prefixes. Planning rejects
+  uncovered inputs and unknown/stale catalog owners while preserving original
+  source authority, selected locks and the unqualified execution refusal. Legacy
+  manifest identities stay unchanged. Indexed directory validation removes the
+  file-by-directory cross product for large native input trees.
+
 - Retained command execution observes captured native dependencies using its
   sanitized environment, freezes the graph and rejects dependency or command
   context drift before and after each process. Command observations bind that

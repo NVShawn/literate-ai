@@ -35,6 +35,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
 )
 from literate_ai.contracts.operator_adoption import ConversionAuthorityStage
+from literate_ai.contracts.retained_component_ownership import RetainedComponentOwner
 from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.contracts.retained_project_tests import (
     RetainedProjectExpectedCase,
@@ -208,6 +209,66 @@ class CurrentComponentLockTests(unittest.TestCase):
                 profile_path=profile_path,
                 profile_bytes=profile_bytes,
             )
+            # Ownership references the actual filesystem catalog and changes the
+            # reviewed plan; it does not create a new catalog or execution grant.
+            lock = current_project_component_locks(self.project)[0]
+            authoring = next(
+                n.revision.definition
+                for n in lock.nodes
+                if n.revision.identity == lock.root_revision
+            )
+            owned_manifest = replace(
+                manifest,
+                component_ownership=tuple(
+                    RetainedComponentOwner(
+                        prefix, authoring.coordinate, authoring.identity
+                    )
+                    for prefix in sorted(roots)
+                ),
+            )
+            owned_result = plan_retained_project_with_graph(
+                self.project,
+                binding,
+                owned_manifest,
+                profile,
+                worker_identity=profile.worker_identity,
+                target=profile.target,
+                profile_path=profile_path,
+                profile_bytes=profile_bytes,
+            )
+            self.assertNotEqual(result.plan.identity, owned_result.plan.identity)
+            self.assertEqual(owned_result.owned_components, (authoring.identity,))
+            self.assertEqual(
+                owned_result.owned_inputs,
+                len(manifest.members) + len(manifest.directories),
+            )
+            self.assertFalse(
+                owned_result.to_dict()["component_ownership"]["native_action_admission"]
+            )
+            self.assertFalse(owned_result.to_dict()["admitted"])
+            stale_manifest = replace(
+                owned_manifest,
+                component_ownership=tuple(
+                    replace(
+                        owner,
+                        authoring_identity=canonical_identity(
+                            "changed canonical authority"
+                        ),
+                    )
+                    for owner in owned_manifest.component_ownership
+                ),
+            )
+            with self.assertRaisesRegex(ValueError, "component-missing-or-stale"):
+                plan_retained_project_with_graph(
+                    self.project,
+                    binding,
+                    stale_manifest,
+                    profile,
+                    worker_identity=profile.worker_identity,
+                    target=profile.target,
+                    profile_path=profile_path,
+                    profile_bytes=profile_bytes,
+                )
         self.assertEqual(
             result.plan.component_locks,
             current_project_component_lock_identities(self.project),

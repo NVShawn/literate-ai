@@ -28546,3 +28546,31 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+### [ ] RETAINED-CATALOG-001 — Bind complete retained input ownership to canonical Component catalogs
+
+- **GitHub issue:** [#74](https://github.com/jordanhubbard/literate-ai/issues/74)
+
+- **Priority:** P1
+- **Owner:** retained input contracts and canonical catalog planning
+- **Direction:** Represent complete native source trees through canonical Components while retaining original implementation authority and selected target locks.
+- **Conclusion:** Add exact canonical Component ownership to retained input manifests and revalidate it against the actual authored catalog during planning. This is input coverage only; selected native actions, packages, independent acceptance and scale qualification remain separate requirements under issue #74.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [x] Bind typed ownership rules to exact canonical Component authoring identities and all retained file/directory inputs
+  - [x] Revalidate ownership against the actual canonical catalog through retained planning without changing legacy identities or execution refusal
+  - [ ] Integrate selected native actions, variants, per-unit packages and independent acceptance with bounded full-catalog scale
+- **Evidence:**
+  - [ ] Canonical catalog fixtures reject unknown/stale owners, uncovered or ambiguous inputs and changed shared ownership; existing retained planning remains compatible
+  - [ ] Public installed CLI and native multi-component execution, package custody and complete-tree scale qualification pass before closing issue #74
+
+Current ownership checkpoint: ten portable contract tests include 40,000 files,
+8,001 directories and 8,001 ownership rules; 55 retained-project regressions and
+six actual-catalog lock/planning tests pass locally. The full Python gate passes
+1,684 tests with 36 skips in 3,095.295 seconds. Authority validation passes; the
+configured lifecycle receipt remains stale. The catalog planning fixture
+uses real authored files/locks with explicit test trust for distribution,
+conversion and project validation; it is not installed/native qualification.
+Native selected actions, shared consumer/variant binding, per-unit package
+products, installed CLI and complete native-tree admission remain open. No
+retained execution or package acceptance is inferred from coverage.

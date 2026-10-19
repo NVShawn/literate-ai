@@ -10,8 +10,12 @@ from pathlib import Path
 from literate_ai.adapters.component_lock_application import (
     current_project_component_lock_identities,
     current_project_component_locks,
+    project_component_roots,
 )
 from literate_ai.adapters.conversion_authority import FilesystemConversionAuthorityStore
+from literate_ai.adapters.locked_generation_authority import (
+    FilesystemLockedGenerationAuthorityReader,
+)
 from literate_ai.adapters.project_validation import validated_project_authority_identity
 from literate_ai.adapters.retained_project_inputs import verify_retained_project_inputs
 from literate_ai.adapters.retained_project_release import (
@@ -25,6 +29,9 @@ from literate_ai.adapters.standard_lifecycle_binding import (
 )
 from literate_ai.contracts import ContentIdentity, canonical_identity
 from literate_ai.contracts.operator_adoption import ConversionAuthorityStage
+from literate_ai.contracts.retained_component_ownership import (
+    require_registered_retained_owners,
+)
 from literate_ai.contracts.retained_project import RetainedProjectManifest
 from literate_ai.contracts.retained_project_lifecycle import (
     RetainedProjectPlan,
@@ -56,6 +63,9 @@ def retained_role_identity(
 class RetainedProjectPlanningResult:
     plan: RetainedProjectPlan
     managed_sbom_graph: CycloneDxManagedGraph
+    owned_components: tuple[ContentIdentity, ...] = ()
+    owned_inputs: int = 0
+    ownership_catalog_identity: ContentIdentity | None = None
 
     def __post_init__(self):
         if not isinstance(self.plan, RetainedProjectPlan) or not isinstance(
@@ -69,15 +79,53 @@ class RetainedProjectPlanningResult:
             or root.identity != self.plan.identity
         ):
             raise ValueError("retained.planning.managed-graph-mismatch")
+        if (
+            type(self.owned_components) is not tuple
+            or any(
+                not isinstance(item, ContentIdentity) for item in self.owned_components
+            )
+            or self.owned_components
+            != tuple(sorted(set(self.owned_components), key=lambda i: i.uri))
+        ):
+            raise ValueError("retained.planning.invalid-ownership-summary")
+        if type(self.owned_inputs) is not int or (
+            (
+                self.owned_components
+                and (
+                    self.owned_inputs <= 0
+                    or not isinstance(self.ownership_catalog_identity, ContentIdentity)
+                )
+            )
+            or (
+                not self.owned_components
+                and (
+                    self.owned_inputs != 0
+                    or self.ownership_catalog_identity is not None
+                )
+            )
+        ):
+            raise ValueError("retained.planning.invalid-ownership-summary")
 
     def to_dict(self):
-        return {
+        value = {
             "plan": self.plan.to_dict(),
             "managed_sbom_graph": self.managed_sbom_graph.to_dict(),
             "authorization_identity": self.plan.identity.uri,
             "admitted": False,
             "release_authority": "original-source",
         }
+        if self.owned_components:
+            value["component_ownership"] = {
+                "state": "ownership-validated",
+                "catalog_identity": self.ownership_catalog_identity.uri,
+                "registered_component_authorings": [
+                    identity.uri for identity in self.owned_components
+                ],
+                "input_nodes": self.owned_inputs,
+                "native_action_admission": False,
+                "acceptance": "not-qualified",
+            }
+        return value
 
 
 def plan_retained_project_with_graph(
@@ -106,6 +154,15 @@ def plan_retained_project_with_graph(
     )
     current_locks = current_project_component_locks(project)
     locks = tuple(lock.identity for lock in current_locks)
+    ownership_catalog = None
+    owned_components = ()
+    if manifest.component_ownership:
+        ownership_catalog = FilesystemLockedGenerationAuthorityReader().load_catalog(
+            project_component_roots(project)[0]
+        )
+        owned_components = require_registered_retained_owners(
+            manifest.component_ownership, ownership_catalog.authorings
+        )
     conversion = FilesystemConversionAuthorityStore(project.root).load_optional()
     if conversion is None or conversion.project_id != project.definition.project_id:
         raise ValueError(
@@ -175,6 +232,8 @@ def plan_retained_project_with_graph(
     ):
         raise ValueError("Project authority changed during retained planning")
     binding.require_unchanged()
+    if ownership_catalog is not None:
+        ownership_catalog.require_unchanged()
     plan = RetainedProjectPlan(
         project.definition.project_id,
         project_identity,
@@ -189,6 +248,11 @@ def plan_retained_project_with_graph(
         project_retained_project_managed_graph(
             plan, current_locks, version=project.definition.version
         ),
+        owned_components,
+        len(manifest.members) + len(manifest.directories) if owned_components else 0,
+        ownership_catalog.catalog_audit_identity
+        if ownership_catalog is not None
+        else None,
     )
 
 
