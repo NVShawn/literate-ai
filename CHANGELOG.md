@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Join complete retained command, test, independent acceptance and source/resolved
+  BOM observations with sealed final exports. Refuse partial or mixed runs, missing
+  package members and changed source/export/native dependency custody. The joined
+  record preserves original authority; SDK, receipt and package admission remain open.
+
 - Bind retained command execution to exact source and resolved CycloneDX
   observations before tests. Preserve original source identity, full input/build
   export manifests, declared SDK/dependency files and frozen native graphs;

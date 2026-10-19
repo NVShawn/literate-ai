@@ -25862,9 +25862,20 @@ authorization and then unconditionally raise
 was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
 does not close this runtime requirement or transfer retained release authority.
 
-**Next action:** integrate a distinct retained-origin entry into the existing Standard
-lifecycle owners and share common post-admission gates; do not fabricate generated
-source, generated tests, cache membership or an ordinary regenerative receipt.
+**Next action in progress:** qualify the completed-run boundary on native FreeBSD,
+then integrate SDK and distinct retained-origin receipt/package consumers into the
+existing Standard lifecycle. Do not fabricate generated source, tests or cache membership.
+
+The completed-run boundary now joins the full ordered command transcript, original
+test policy and reports, independent cases, both BOMs and sealed final exports.
+It revalidates live custody and final native dependency observations; partial or
+failed runs, mixed observations and missing package members refuse. Nested exports
+retain canonical producer roots while package selection may name their parent
+directory. All 91 local retained-project checks pass (116.818 seconds), including
+nine completed-run cases with real compiled exports. Lint/format, authority/driver
+review, both OpenSpec changes, all 121 diagrams and 21 documentation-tool checks
+pass. Native and full-suite qualification remain open. The joined record is not
+SDK admission, a lifecycle receipt, package acceptance or public execution authority.
 
 Source/resolved BOM integration in progress: project exact retained input and
 SDK/dependency-file declarations through the existing retained managed graph and

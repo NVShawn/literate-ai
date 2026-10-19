@@ -30,6 +30,7 @@ from literate_ai.adapters.retained_project_boms import (
 from literate_ai.adapters.retained_project_dependencies import (
     RetainedProjectDependencyGuard,
     observe_retained_export_dependencies,
+    retained_export_dependency_identity,
 )
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
@@ -227,6 +228,47 @@ class RetainedProjectExecutionWorkspace:
     @property
     def dependency_identity(self) -> ContentIdentity:
         return self._dependencies.identity
+
+    def completed_run(self):
+        """Join a complete current run; this grants no receipt or package authority."""
+        from literate_ai.adapters.retained_project_completion import (
+            RetainedProjectCompletedRun,
+        )
+
+        if self._failed or len(self.observations) != len(self.plan.profile.actions):
+            raise RetainedProjectExecutionError("retained.completion.run-incomplete")
+        if (
+            self.source_bom is None
+            or self.resolved_bom is None
+            or self._acceptance_policy is None
+            or self._output_manifest is None
+        ):
+            raise RetainedProjectExecutionError(
+                "retained.completion.boms-and-independent-acceptance-required"
+            )
+        self._require_current()
+        result = RetainedProjectCompletedRun(
+            self.source_bom,
+            self.resolved_bom,
+            self.observations,
+            self._test_policy,
+            self._configured_test_policy,
+            self.test_reports,
+            self._acceptance_policy,
+            self.acceptance_observations,
+            self._output_manifest,
+        )
+        if (
+            retained_export_dependency_identity(
+                self.outputs, self._output_manifest, self.plan, self._environment()
+            )
+            != self.acceptance_observations[-1].dependency_identity
+        ):
+            raise RetainedProjectExecutionError(
+                "retained.completion.export-dependencies-changed"
+            )
+        self._require_current()
+        return result
 
     def _require_current(self) -> None:
         for directory in (

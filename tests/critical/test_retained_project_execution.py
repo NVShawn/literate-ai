@@ -71,7 +71,12 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             ' if (!strcmp(v[1], "empty")) return 0;\n'
             ' if (!strcmp(v[1], "fail")) {fputs("failed", stderr); return 9;}\n'
             " if (n < 3) return 2;\n"
-            ' if (!strcmp(v[1], "export")) {\n'
+            ' if (!strcmp(v[1], "export") || !strcmp(v[1], "export-nested")) {\n'
+            '  if (!strcmp(v[1], "export-nested")) {\n'
+            "   char *dir = strdup(v[2]); if (!dir) return 14;\n"
+            "   char *slash = strrchr(dir, '/'); if (!slash) return 15;\n"
+            "   *slash = 0; int rc = mkdir(dir, 0700); free(dir); if (rc) return 16;\n"
+            "  }\n"
             '  FILE *in = fopen(v[0], "rb"), *out = fopen(v[2], "wb");\n'
             "  if (!in || !out) return 10;\n"
             "  int c; while ((c = fgetc(in)) != EOF)\n"

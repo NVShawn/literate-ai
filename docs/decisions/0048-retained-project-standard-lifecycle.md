@@ -198,3 +198,25 @@ packaged payloads, issue retained lifecycle receipts or enable public retained
 execution. Those consumers must retain their independent current-authority and
 qualification gates. Legacy command profiles remain unchanged when the managed
 graph is omitted; no new BOM acceptance is implied on that path.
+
+
+## Whole-run evidence join
+
+The live retained workspace may join observations only after every declared action
+has completed successfully, both source/resolved BOMs exist and the explicit
+independent verifier has run. Bind the complete ordered command transcript, original
+test policy and reports, verifier policy and actual case results, the build-stage
+BOM closure and sealed final exports. Require exact plan and observation identities;
+reject missing/foreign stages, failed cases, missing selected package members or
+changed previously sealed outputs. Canonical producer roots remain distinct from
+ancestor directories included while inspecting the complete export tree.
+
+Reopen current plan, original and snapshot inputs, tools, policies and exports at
+this boundary, and reobserve final native export dependencies against the last
+independent case. Return an immutable joined record; mutating its rendered mapping
+cannot rewrite its identities. A standalone record checks internal relationships;
+it cannot authenticate facts transported from a different process or worker.
+
+This join is input to later SDK, receipt and package admission, not a substitute
+for them. It issues no lifecycle receipt, permits no conversion-stage transition
+and leaves the public retained execution guard in force.

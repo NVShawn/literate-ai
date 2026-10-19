@@ -119,6 +119,9 @@ SDK producer admission, retained receipts or package/release consumption.
 An additional internal bridge now binds exact input/build-export manifests and
 frozen native observations to source/resolved CycloneDX documents before tests;
 it preserves retained origin without issuing lifecycle acceptance.
+A completed-run boundary now checks the full ordered command graph, exact original
+test and verifier results, both BOMs and final exports together, then revalidates
+current custody. Its record is not SDK admission or a lifecycle receipt.
 
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
