@@ -4,6 +4,7 @@ import hashlib
 import json
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 from literate_ai.adapters.models import GenerationRecipe, RecipeDocument
 from literate_ai.contracts import (
@@ -13,8 +14,10 @@ from literate_ai.contracts import (
 )
 from literate_ai.projects import project_boundary
 from tests.conformance.support.sample_runner import (
+    SampleFailure,
     _coding_skills,
     _execution_contract,
+    _independent_verification_cases,
     _load_sample,
     sample_harness_manifest,
     sample_harness_oracle,
@@ -81,6 +84,37 @@ def _sample_roots() -> tuple[Path, ...]:
 
 
 class SampleAcceptanceInterfaceTests(unittest.TestCase):
+    def test_generated_case_names_cannot_conflate_independent_evidence(self):
+        invocations = [{"case_id": "unicode-ordering", "arguments": [{}]}]
+        oracles = [{"expected_result": {"value": 1}}]
+        probe = SimpleNamespace(
+            case_id="post-build-probe", arguments=[{}], expected_result={"value": 2}
+        )
+        for collision in ("unicode-ordering", "post-build-probe"):
+            with (
+                self.subTest(collision=collision),
+                self.assertRaisesRegex(SampleFailure, "must be disjoint"),
+            ):
+                _independent_verification_cases(
+                    invocations, oracles, probe, reserved_case_ids=(collision,)
+                )
+        cases = _independent_verification_cases(
+            invocations,
+            oracles,
+            probe,
+            reserved_case_ids=(
+                "generated-unicode-ordering",
+                "generated-post-build-probe",
+            ),
+        )
+        self.assertEqual(
+            [(case[0], case[3]) for case in cases],
+            [
+                ("unicode-ordering", "pinned-oracle"),
+                ("post-build-probe", "post-build-runtime-oracle"),
+            ],
+        )
+
     def test_interfaces_and_verifier_oracles_have_disjoint_exact_authority(self):
         roots = _sample_roots()
         discovered_names = {root.name for root in roots}

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Project verification refreshes the current receipt through the complete
+  host-eligible sample lifecycle, with reviewed driver and runner bindings.
+
+- Generation guidance gives implementation-test cases distinct names from
+  independent acceptance cases. Windows GPU probe tests allow bounded time for
+  cold PowerShell startup on busy runners.
+- Sample generation retries a rejected JavaScript bundle with a missing local
+  module within the existing three-candidate limit, retaining rejection evidence.
+
 - Python packaging: explicit target-bound source projection preserves cross-platform
   requirements and original source while building only reviewed backend files;
   active imports still require source-BOM and real installed-payload evidence.

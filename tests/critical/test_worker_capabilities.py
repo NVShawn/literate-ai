@@ -155,7 +155,8 @@ class WorkerCapabilityTests(unittest.TestCase):
                     capture_output=True,
                     text=True,
                     env=environment,
-                    timeout=10,
+                    # Cold PowerShell startup can exceed ten seconds on busy CI.
+                    timeout=30 if os.name == "nt" else 10,
                     check=True,
                 )
                 devices = json.loads(result.stdout)
