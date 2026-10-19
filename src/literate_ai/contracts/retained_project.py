@@ -250,6 +250,18 @@ class RetainedProjectManifest:
     def identity(self) -> ContentIdentity:
         return canonical_identity(self.to_dict())
 
+    def role_identity(self, roles: set[str]) -> ContentIdentity:
+        """Bind the exact declared closure for the selected ownership roles."""
+        return canonical_identity(
+            {
+                "schema": "literate-ai/retained-role-closure@1",
+                "roles": sorted(roles),
+                "members": [
+                    member.to_dict() for member in self.members if member.role in roles
+                ],
+            }
+        )
+
     @classmethod
     def from_dict(cls, value: Any) -> RetainedProjectManifest:
         required = {"schema", "roots", "members", "limits", "directories"}

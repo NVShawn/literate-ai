@@ -23,8 +23,13 @@ from literate_ai.adapters.retained_project_acceptance import (
     read_retained_acceptance_policy,
     verify_retained_acceptance_action,
 )
+from literate_ai.adapters.retained_project_boms import (
+    RetainedProjectSourceBom,
+    resolve_retained_project_bom,
+)
 from literate_ai.adapters.retained_project_dependencies import (
     RetainedProjectDependencyGuard,
+    observe_retained_export_dependencies,
 )
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
@@ -38,6 +43,7 @@ from literate_ai.adapters.retained_project_testing import (
     read_retained_project_test_report,
 )
 from literate_ai.contracts import (
+    ComponentLock,
     ContentIdentity,
     ProjectTestReceiptPolicy,
     canonical_identity,
@@ -47,6 +53,7 @@ from literate_ai.contracts.retained_project_lifecycle import (
     RetainedProjectAction,
     RetainedProjectPlan,
 )
+from literate_ai.contracts.sbom import CycloneDxManagedGraph
 
 # These budgets are framework policy and therefore part of the exact Standard
 # distribution binding in the reviewed plan, rather than ambient runner options.
@@ -110,12 +117,18 @@ class RetainedProjectExecutionWorkspace:
         authorization: str,
         allow_host_execution: bool,
         test_receipt_policy: ProjectTestReceiptPolicy,
+        managed_graph: CycloneDxManagedGraph | None = None,
+        component_locks: tuple[ComponentLock, ...] | None = None,
     ) -> None:
         if allow_host_execution is not True:
             raise RetainedProjectExecutionError(
                 "retained.execution.authorization-required"
             )
         plan.require_authorization(authorization)
+        if (managed_graph is None) != (component_locks is None):
+            raise RetainedProjectExecutionError(
+                "retained.bom.graph-and-locks-required-together"
+            )
         if manifest.identity != plan.manifest_identity:
             raise RetainedProjectExecutionError("retained.execution.manifest-mismatch")
         self.source = source
@@ -136,6 +149,12 @@ class RetainedProjectExecutionWorkspace:
         self._acceptance_policy = read_retained_acceptance_policy(
             source, plan.profile, plan.component_locks, manifest
         )
+        self._source_bom = (
+            RetainedProjectSourceBom(plan, manifest, managed_graph, component_locks)
+            if managed_graph is not None
+            else None
+        )
+        self._resolved_bom = None
         require_safe_directory(parent)
         self.root = Path(tempfile.mkdtemp(prefix="retained-run-", dir=parent))
         try:
@@ -192,6 +211,14 @@ class RetainedProjectExecutionWorkspace:
     @property
     def acceptance_observations(self):
         return tuple(self._acceptance_observations)
+
+    @property
+    def source_bom(self):
+        return self._source_bom
+
+    @property
+    def resolved_bom(self):
+        return self._resolved_bom
 
     @property
     def dependency_observation(self):
@@ -302,6 +329,14 @@ class RetainedProjectExecutionWorkspace:
         action = self.plan.profile.actions[len(self.observations)]
         try:
             self._require_current()
+            if (
+                action.stage in {"test", "docs", "accept"}
+                and self.source_bom is not None
+                and self.resolved_bom is None
+            ):
+                raise RetainedProjectExecutionError(
+                    "retained.bom.build-resolution-required"
+                )
             if action.stage == "accept":
                 self._test_policy.require_complete(
                     (item.report for item in self.test_reports),
@@ -365,6 +400,31 @@ class RetainedProjectExecutionWorkspace:
                 if produced
                 else None
             )
+            if action.stage == "build" and self.source_bom is not None:
+                completed = {item.action.action_id for item in self.observations}
+                builds = {
+                    item.action_id
+                    for item in self.plan.profile.actions
+                    if item.stage == "build"
+                }
+                if builds <= completed:
+                    if self._output_manifest is None:
+                        raise RetainedProjectExecutionError(
+                            "retained.bom.build-exports-missing"
+                        )
+                    self._resolved_bom = resolve_retained_project_bom(
+                        self.source_bom,
+                        self._output_manifest,
+                        self._dependencies.observation,
+                        observe_retained_export_dependencies(
+                            self.outputs,
+                            self._output_manifest,
+                            self.plan,
+                            self._environment(),
+                            allow_empty=True,
+                        ),
+                    )
+                    self._require_current()
             if action.stage == "test":
                 try:
                     if self._output_manifest is None:
