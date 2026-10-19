@@ -5,6 +5,8 @@ These contracts identify inputs, never acceptance or conversion authority.
 
 from __future__ import annotations
 
+import hashlib
+import posixpath
 from dataclasses import dataclass
 from typing import Any
 
@@ -48,23 +50,63 @@ class RetainedProjectMember:
     mode: int
     sha256: str
     role: str
+    symlink_target: str | None = None
 
     def __post_init__(self) -> None:
         canonical_relative_posix_paths((self.path,), label="retained member")
         if type(self.size) is not int or not 0 <= self.size < 2**63:
             raise ValueError("Invalid retained input size")
-        if type(self.mode) is not int or self.mode not in (0o644, 0o755):
-            raise ValueError("Retained mode must be normalized 0644 or 0755")
+        if self.symlink_target is None:
+            if type(self.mode) is not int or self.mode not in (0o644, 0o755):
+                raise ValueError("Retained mode must be normalized 0644 or 0755")
+        else:
+            target = self.symlink_target
+            if (
+                not isinstance(target, str)
+                or not target
+                or target.startswith("/")
+                or any(c in target for c in ("\\", ":", "\x00"))
+                or any(ord(c) < 32 for c in target)
+                or len(target.encode("utf-8")) > 4096
+                or type(self.mode) is not int
+                or self.mode != 0o120000
+            ):
+                raise ValueError(
+                    "Retained symlink requires bounded relative target text"
+                )
+            data = target.encode("utf-8")
+            if (
+                self.size != len(data)
+                or self.sha256 != hashlib.sha256(data).hexdigest()
+            ):
+                raise ValueError("Retained symlink target identity does not match")
         ContentIdentity.parse_uri("sha256:" + self.sha256)
         if not isinstance(self.role, str) or not self.role.strip():
             raise ValueError("Retained input requires an ownership role")
 
     def to_dict(self) -> dict[str, object]:
-        return {name: getattr(self, name) for name in self.__slots__}
+        return {
+            name: getattr(self, name)
+            for name in self.__slots__
+            if name != "symlink_target" or self.symlink_target is not None
+        }
+
+    @property
+    def symlink_destination(self) -> str | None:
+        if self.symlink_target is None:
+            return None
+        return posixpath.normpath(
+            posixpath.join(posixpath.dirname(self.path), self.symlink_target)
+        )
 
     @classmethod
     def from_dict(cls, value: Any) -> RetainedProjectMember:
-        _fields(value, set(cls.__slots__))
+        fields = set(cls.__slots__) - {"symlink_target"}
+        if isinstance(value, dict) and "symlink_target" in value:
+            if not isinstance(value["symlink_target"], str):
+                raise ValueError("Explicit retained symlink target must be text")
+            fields.add("symlink_target")
+        _fields(value, fields)
         return cls(**value)
 
 
@@ -149,6 +191,45 @@ class RetainedProjectManifest:
             raise TypeError("Typed retained Component ownership tuple required")
         if self.component_ownership:
             validate_retained_ownership(self.component_ownership, nodes)
+        links = {
+            member.path: member.symlink_destination
+            for member in self.members
+            if member.symlink_target is not None
+        }
+        if any(target not in nodes for target in links.values()):
+            raise ValueError(
+                "Retained symlink target is outside the declared input closure"
+            )
+        for member in self.members:
+            if member.symlink_target is None:
+                continue
+            cursor = member.path.split("/")[:-1]
+            parts = member.symlink_target.split("/")
+            for index, part in enumerate(parts):
+                if part in ("", "."):
+                    continue
+                if part == "..":
+                    if not cursor:
+                        raise ValueError(
+                            "Retained symlink traverses outside the input tree"
+                        )
+                    cursor.pop()
+                else:
+                    cursor.append(part)
+                    if index < len(parts) - 1 and "/".join(cursor) not in directories:
+                        raise ValueError(
+                            "Retained symlink traverses a link or non-directory"
+                        )
+        resolved: set[str] = set()
+        for start in links:
+            current = start
+            chain: set[str] = set()
+            while current in links and current not in resolved:
+                if current in chain:
+                    raise ValueError("Retained symlink target cycle")
+                chain.add(current)
+                current = links[current]
+            resolved.update(chain)
 
     def to_dict(self) -> dict[str, object]:
         value = {

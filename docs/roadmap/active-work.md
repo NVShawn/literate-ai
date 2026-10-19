@@ -28566,11 +28566,27 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 Current ownership checkpoint: ten portable contract tests include 40,000 files,
 8,001 directories and 8,001 ownership rules; 55 retained-project regressions and
-six actual-catalog lock/planning tests pass locally. The full Python gate passes
-1,684 tests with 36 skips in 3,095.295 seconds. Authority validation passes; the
+six actual-catalog lock/planning tests pass locally. At ownership revision `3badbdb7`,
+the full Python gate passes 1,684 tests with 36 skips in 3,095.295 seconds.
+Authority validation passes; the
 configured lifecycle receipt remains stale. The catalog planning fixture
 uses real authored files/locks with explicit test trust for distribution,
 conversion and project validation; it is not installed/native qualification.
 Native selected actions, shared consumer/variant binding, per-unit package
 products, installed CLI and complete native-tree admission remain open. No
 retained execution or package acceptance is inferred from coverage.
+
+
+Source-link admission checkpoint for RETAINED-CATALOG-001: the pinned FreeBSD
+source tree has 138 Git symlinks, all pointing to present internal inputs. Add
+explicit bounded POSIX target-text/kind custody, closure/cycle validation and
+snapshot preservation while leaving discovery opt-in, legacy identities and
+public execution refusal unchanged. All twelve new checks pass, including the real
+114,644-file, 9,856-directory source corpus and all 138 Git link targets in
+226.888 seconds. Its manifest identity is
+`sha256:ec88abe4c9ca60865255eaf39922385193c83829b688c809001e8a6332110a7a`.
+The 55 retained-project, ten ownership and six actual-catalog lock/planning
+regressions also pass. This is complete selected input discovery/validation and
+small-fixture snapshot custody; it is not a full source-tree snapshot, canonical
+native catalog registration or Component action/package/lifecycle acceptance.
+Full-suite, installed and native qualification remain separate gates.

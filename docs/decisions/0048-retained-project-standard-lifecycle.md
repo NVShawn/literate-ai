@@ -113,3 +113,27 @@ complete native Component model still requires these later gates and shared
 consumer relationships. The public execution refusal stays in force until the
 retained lifecycle is qualified. Full-tree owners must also retain bounded
 validation cost rather than comparing every file with every directory.
+
+
+## Explicit internal source symlinks
+
+Retained members may explicitly bind POSIX symlink target text, normalized Git
+link mode 120000 and the byte size/SHA-256 of that text. Links are input nodes,
+never an instruction to traverse more of the host filesystem during inventory.
+Every destination must exist in the declared input closure. Reject absolute or
+escaping paths, missing destinations, cycles, and intermediate link/non-directory
+traversal; final link chains may terminate at an admitted regular file or directory.
+A directory link does not duplicate or recursively enumerate its contents.
+
+Filesystem discovery requires explicit `allow_internal_symlinks=True`; its default
+refusal is unchanged. POSIX capture stores target text in immutable content blobs
+and recreates links after copying regular files. Original and snapshot trees are
+revalidated, including target text, kind and mutation during reads. Native Windows
+link materialization is unsupported and refuses explicitly. Absent optional member
+fields preserve legacy wire identities. Ownership rules cover links as ordinary
+input nodes, and a changed link target invalidates the manifest even when the old
+and new destination files have identical contents.
+
+This input custody extension does not admit native actions, executable tool
+aliases, per-unit packages or retained lifecycle acceptance. The public execution
+refusal and independent source/SDK/variant/receipt gates remain unchanged.

@@ -75,7 +75,10 @@ development (2026-09-10):
 RETAINED-CATALOG-001 (issue #74) extends Goals 1, 4 and 6 with complete
 retained-input ownership by exact canonical Components. Coverage must use the
 real authored catalog, preserve target-specific lock and source authority
-boundaries, and scale to complete native trees. Native action, package and
+boundaries, and scale to complete native trees. Explicit POSIX symlink custody
+must retain bounded relative target text, complete internal target coverage and
+immutable snapshots; it must not dereference source links or weaken default
+refusal and legacy identities. Native action, package and
 independent acceptance qualification remain required beyond ownership planning.
 
 FREEBSD-001 adds a fourth first-class OS platform and native worker/target

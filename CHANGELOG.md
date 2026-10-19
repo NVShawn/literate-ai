@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add explicit internal POSIX source-symlink custody. Retain relative target
+  text and its identity without traversing directory aliases; reject missing,
+  escaping, cyclic or redirected inputs and preserve links in immutable snapshots.
+  Default discovery refusal, legacy identities and public execution refusal
+  remain unchanged. Native Windows link materialization remains unsupported.
+
 - Retained manifests can bind every file and directory to exact canonical
   Component authoring through explicit ownership prefixes. Planning rejects
   uncovered inputs and unknown/stale catalog owners while preserving original
