@@ -27746,7 +27746,7 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Run release-gate tests in parallel (checkpointed, fail-fast)
 - **Conclusion:** The current installed checkpoint runner executes the entire suite in one process. Add bounded process-level module scheduling while preserving one controller-owned marker ledger and source/context binding. Keep the existing serial API for in-memory suites; make CLI/Make worker count explicit, defaulting to the available CPU count. The Windows gate retains pytest/JUnit and uses isolated file-group workers with fail-fast.
 - **Depends on:** existing pin dispatch, known-failure contracts and owned-process-tree cleanup
-- **Next action (in progress):** Collect final-source native timing comparisons and require the full exact-head CI matrix before landing. The complete local suite, installed wheel and newly current lifecycle receipt have passed; eight-core Windows performance acceptance remains pending capacity.
+- **Next action (in progress):** Finish native Windows parity and the eight-core Windows performance acceptance. PR #73 is merged after its full exact-head matrix passed; post-merge main CI remains queued and the sixteen-core worker remains held for disk capacity.
 - **Implementation:**
   - [x] Execute importable module groups in private process/temp/object environments with explicit serial barriers and configurable worker count.
   - [x] Record validated per-case outcomes only in the parent; retain exact failure/skip/subtest/fixture counts and bounded diagnostics.
@@ -27769,7 +27769,9 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Native Windows follow-up:** The four-worker gate stopped after 575 passes, 45 skips and 579 passing subtests when the real Cargo accounting fixture exceeded its 60-second compiler deadline. An isolated unchanged probe passes: cold compile 32.594 seconds, cached compile 0.469 seconds. The fixture now allows 180 seconds on Windows (60 elsewhere) and uses existing owned-process-tree cleanup on timeout. This is a test-fixture timing correction, not native performance acceptance; the final gate must be rerun. The failed job evidence is retained and its finite on-demand task is confirmed removed.
 
-### [ ] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
+- **Landed and native comparison checkpoint:** [PR #73](https://github.com/jordanhubbard/literate-ai/pull/73) merged as `90d5b6e9dcf155af28301b3e4d4b67863bf70d25` after all 26 jobs passed in [exact-head CI](https://github.com/jordanhubbard/literate-ai/actions/runs/39207384350). The final macOS comparison at `77b06857` is 879.384 seconds parallel versus 3,136.970 serial (3.567x). The eight-worker Linux comparison at `7652c2ed` is 629.442 versus 2,649.103 seconds (4.209x). Both preserve all selected ordered outcomes and summary counts. These implementations match the landed runner source; the later Windows Cargo fixture deadline correction is recorded separately above. The current four-core Windows parallel pass is awaiting its serial comparison and does not satisfy the required eight-core Windows performance target. Issue #56 remains open.
+
+### [x] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
 
 - **GitHub issue:** [#53](https://github.com/jordanhubbard/literate-ai/issues/53)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -27782,9 +27784,11 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+- **Completion evidence:** The landed tracked-Markdown filter is unchanged from main `90d5b6e9dcf155af28301b3e4d4b67863bf70d25`. Its regression proves that invalid Mermaid fences in ignored `generated/` and `.worktrees/` directories, plus untracked Markdown, do not change the selected file set; tracked edits and deletions are respected and exported trees keep their bounded fallback. `make documentation-check` passes all 21 Node tests and renders 121 diagrams from 608 tracked Markdown files. The original implementation also passed the 26-job main matrix at `450d2a3f` ([run](https://github.com/jordanhubbard/literate-ai/actions/runs/39195452379)); later source has no change to this filter or its regression. The existing Unreleased changelog records the behavior. This completes #53 acceptance, not the wider 1.3 release gate.
 
 ### [ ] SOURCE-CREDENTIAL-001 — Distinguish credential literals from Python assignment expressions
 
@@ -28039,10 +28043,13 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
 - **Conclusion:** An installed-wheel native journey exposed an uncaught authority-reader exception for a Component file argument. Normalize supported file entry points or report a bounded CLI error before provider invocation; preserve project and symlink boundaries.
 - **Depends on:** none
+- **Next action (in progress):** Normalize Standard Component file input, preserve lexical symlink refusals and qualify bounded preparation errors before generation.
 - **Implementation:**
-  - [ ] Resolve the documented Component entry point before locked authority loading and normalize invalid-input diagnostics.
+  - [x] Resolve the documented Component entry point before locked authority loading and normalize invalid-input diagnostics.
 - **Evidence:**
   - [ ] Installed-wheel file and directory cases, unsafe paths and no provider invocation on invalid input.
+
+- **Local evidence:** The full unchanged production-source suite passes: 1,580 selected, 1,545 passed, 35 skips and no failures in 779.102 seconds. Eight focused CLI tests cover file/directory equivalence, lexical symlink refusals (including relative paths), unavailable/outside/unrelated inputs and a real missing-Component authority error before lifecycle assembly. The missing-authority assertion is strengthened after the full run and rerun in the focused group. Static/export/style checks, strict specifications, current driver/runner/documentation reviews, 21 Node tests and all 121 Mermaid diagrams pass. Installed-wheel file entry-point acceptance, refreshed lifecycle receipt and exact-head hosted CI remain open.
 
 ### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
 

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Rebuild CLI: accept a Component's `component.md` path for Standard rebuild and report invalid locked authority without an uncaught exception. Reject symlink entry points before resolving them.
+
 - Registered native children support reviewed Standard rebinds that coordinate the
   parent registry. Signed promotion replacements retain the previous unqualified
   child as recovery evidence and refuse stale inputs or qualified destinations.
