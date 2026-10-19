@@ -25866,6 +25866,19 @@ does not close this runtime requirement or transfer retained release authority.
 lifecycle owners and share common post-admission gates; do not fabricate generated
 source, generated tests, cache membership or an ordinary regenerative receipt.
 
+Source/resolved BOM integration in progress: project exact retained input and
+SDK/dependency-file declarations through the existing retained managed graph and
+CycloneDX owners before execution, then bind actual frozen tool and export-native
+observations after the complete build and before tests. Preserve original origin,
+input/output manifests and policy identities; reject forged graphs, stale or
+substituted documents and native observation conflicts. This gate does not itself
+admit SDK producers, qualify a retained receipt or enable public execution.
+Thirteen focused BOM checks pass locally, including actual compiled-fixture
+build exports and data-only exports resolved before tests. The complete retained
+regression group now passes 82 checks (62.963 seconds).
+Native and installed qualification of this new bridge remain open.
+
+
 Independent acceptance implementation: add an explicit opt-in verifier policy
 whose exact bytes and selected Component locks are bound to the retained plan.
 Keep it outside the materialized retained inputs. Run bounded cases against sealed

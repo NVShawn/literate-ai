@@ -165,3 +165,36 @@ or packaged-artifact acceptance. They never advance conversion or release
 authority. The public retained execution refusal remains while these later
 consumers are integrated and qualified. Legacy profiles produce no new independent
 acceptance observation merely by labeling a zero-exit command as acceptance.
+
+
+## Retained source and resolved BOM custody
+
+An explicit managed retained graph may bind command execution to pre-build source
+and post-build resolved CycloneDX documents. Reuse the existing strict CycloneDX
+construction and transition validators. Preserve the retained project root and
+selected Component graph, reconstructed from the actual ordered lock tuple;
+reject a substituted graph even when it keeps the retained root. Never replace the retained project with a Component
+revision or generated-source candidate.
+
+The source document binds the complete input-manifest identity and every declared
+SDK/toolchain/dependency file. Tool modes and digests and the complete role
+closures must match the reviewed plan. The manifest represents the full binary
+and source input inventory without duplicating every source file as a BOM node.
+Runtime materialization still verifies those input bytes through its existing
+streaming owner.
+
+After the complete declared build, capture the sealed build-export manifest and
+merge frozen tool/native-export observations through the existing native graph
+owner. Produce and validate the resolved document against the exact source BOM
+before running tests or documentation. Explicitly data-only exports may have no
+native images; an empty tool observation remains invalid. Retain immutable BOM
+bytes, native observation bytes and their exact identities. Reject substituted
+BOMs, graph/source mismatches, conflicting or dangling native graphs and forged
+managed claims. Later test/documentation exports do not rewrite the frozen
+build-stage observation.
+
+This internal observation gate does not admit SDK producers, qualify final
+packaged payloads, issue retained lifecycle receipts or enable public retained
+execution. Those consumers must retain their independent current-authority and
+qualification gates. Legacy command profiles remain unchanged when the managed
+graph is omitted; no new BOM acceptance is implied on that path.

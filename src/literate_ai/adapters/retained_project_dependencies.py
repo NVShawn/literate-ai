@@ -225,15 +225,37 @@ class RetainedProjectDependencyGuard:
             )
 
 
-def retained_export_dependency_identity(root, manifest, plan, environment):
-    """Freeze actual exported native dependencies; this is not SDK/BOM admission."""
+def observe_retained_export_dependencies(
+    root, manifest, plan, environment, *, allow_empty=False
+):
+    """Observe sealed exports; an explicitly data-only closure may have no images."""
     verify_retained_project_inputs(root, manifest)
     root_ref = retained_project_bom_ref(plan.identity)
     observation = _observer((), environment).observe(
         {"artifact_path": str(root)}, root_ref=root_ref
     )
-    payload = _freeze(observation, root_ref)
+    if (
+        allow_empty
+        and isinstance(observation, HostDependencyObservation)
+        and (observation.components == () and observation.edges == ())
+    ):
+        payload = canonical_json_bytes({"components": [], "edges": []})
+    else:
+        payload = _freeze(observation, root_ref)
     verify_retained_project_inputs(root, manifest)
+    value = json.loads(payload)
+    return HostDependencyObservation(
+        tuple(value["components"]), tuple(tuple(edge) for edge in value["edges"])
+    )
+
+
+def retained_export_dependency_identity(root, manifest, plan, environment):
+    """Freeze actual exported native dependencies; this is not SDK/BOM admission."""
+    observation = observe_retained_export_dependencies(
+        root, manifest, plan, environment
+    )
+    root_ref = retained_project_bom_ref(plan.identity)
+    payload = _freeze(observation, root_ref)
     return canonical_identity(
         {
             "schema": "literate-ai/retained-export-dependency-observation@1",

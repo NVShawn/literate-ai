@@ -51,15 +51,7 @@ def retained_role_identity(
     manifest: RetainedProjectManifest, roles: set[str]
 ) -> ContentIdentity:
     """Bind the complete declared byte closure for a set of input ownership roles."""
-    return canonical_identity(
-        {
-            "schema": "literate-ai/retained-role-closure@1",
-            "roles": sorted(roles),
-            "members": [
-                member.to_dict() for member in manifest.members if member.role in roles
-            ],
-        }
-    )
+    return manifest.role_identity(roles)
 
 
 @dataclass(frozen=True, slots=True)

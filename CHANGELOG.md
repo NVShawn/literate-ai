@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Bind retained command execution to exact source and resolved CycloneDX
+  observations before tests. Preserve original source identity, full input/build
+  export manifests, declared SDK/dependency files and frozen native graphs;
+  reject drift, graph conflicts and managed-origin substitution. SDK admission,
+  final package evidence, retained receipts and public execution remain open.
+
 - Add opt-in independent retained-export acceptance. Bind withheld verifier bytes
   and selected Component locks; run bounded executable cases with exact binary
   stdin, exit, stdout and stderr checks. Revalidate source/export custody and

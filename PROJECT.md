@@ -115,7 +115,10 @@ qualification remain open under RETAINED-PROJECT-001; conversion and release-aut
 gates remain unchanged. An opt-in verifier policy now binds selected locks and
 executes exact cases against sealed retained build exports, checking output and
 native dependency drift. This internal gate does not qualify public execution,
-SDK/BOM admission, retained receipts or package/release consumption.
+SDK producer admission, retained receipts or package/release consumption.
+An additional internal bridge now binds exact input/build-export manifests and
+frozen native observations to source/resolved CycloneDX documents before tests;
+it preserves retained origin without issuing lifecycle acceptance.
 
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
