@@ -95,7 +95,10 @@ construction. Public provider dispatch, retained integration, native execution
 qualification and whole-system package coverage remain open.
 The initial public pkg plan/build/verify route now composes the same provider
 through the accepted Standard lifecycle on local native host targets. Actual
-native construction and installed public-path qualification remain required.
+native format construction, independent ELF library metadata inspection and
+reopened compiled executable/shared-library payload cases now pass on FreeBSD.
+Public batch/provider plumbing also passes with an injected lifecycle. Complete
+installed public-path and retained-provider qualification remain required.
 
 The current development release is **1.3.0**. [RELEASE-INTEGRATION-004](docs/roadmap/1.3-integration.md)
 owns the current public issue and review scope. The first implementation batch

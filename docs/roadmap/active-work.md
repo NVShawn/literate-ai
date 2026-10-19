@@ -25901,6 +25901,12 @@ using four isolated module workers. Its log SHA-256 is
 This includes the native pkg/public-dispatch foundation and incoming main-line
 changes; it excludes the subsequent extended-tar-metadata correction and does
 not substitute for native construction or installed-wheel qualification.
+At `ace6e5402683dba4120c5da8e6fb3fbc621516aa`, the full Python suite passes
+1,797 tests with 40 declared skips in 1,054.891 seconds, including the extended
+tar-metadata correction. Its log SHA-256 is
+`51c611509b6432db64566d06fcd177d9234435b251087d6978eed007adc8b9a6`.
+This baseline precedes the native owner/timestamp correction and independent ELF
+library metadata reader; those retain their own native/full/installed gates.
 Local receipt checkpoint: all 109 retained-project tests pass in 373.215 seconds,
 including ten receipt cases and the source-link execution regression. Actual
 compiled exports survive scratch retirement and CAS relocation; stale authority,
@@ -28071,6 +28077,18 @@ shared library, internal-provider filtering and execution of the reopened
 package payload. Those three native construction cases and the public CLI
 group remain the next execution gate. OpenSpec, documentation, lint/format,
 layout/export and reviewed driver/documentation authority checks pass locally.
+At exact revision `e0ca3ba04dd57c9fce7d92e8891a909ae3c1e85f`, all 24 native
+format/ELF checks pass on actual FreeBSD without skips in 10.190 seconds. This
+includes repeat construction, native pkg query, reopened compiled payloads and
+a real linked shared library whose internal provision removes its external
+requirement. All seven public CLI checks also pass without skips in 3.927
+seconds. The native CLI construction case deliberately injects lifecycle
+evidence, so it qualifies batch/provider plumbing rather than full installed
+Standard admission. The combined native log SHA-256 is
+`e3d3801876e73ea5e8b6d2cd536c94ca5bcc102c7a87f2045584073e4704d4e5`.
+The next qualification action is the current full regression and actual native
+installed-wheel gate; retained pkg composition, complete per-unit source/ports
+packages, public installed lifecycle and release consumers remain open.
 
 The full native Python run at `c75fac59` stopped in sample recipe planning:
 the conformance runner rejects `freebsd16` before selecting the existing FreeBSD

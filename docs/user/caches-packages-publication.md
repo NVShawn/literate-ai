@@ -500,8 +500,9 @@ and content digest mismatches fail before release preparation. Outputs remain in
 Select `--flavor=+package-pkg` for native pkg plans. The development implementation
 constructs on a local FreeBSD worker with the native `host` target and an existing
 `pkg-static`; tool discovery runs before the accepted build lifecycle. Remote
-package dispatch and named/cross targets currently refuse. Native construction
-and installed public-CLI qualification remain open in FREEBSD-001.
+package dispatch and named/cross targets currently refuse. Initial native format
+construction and reopened payload checks pass; installed public-CLI lifecycle
+qualification remains open in FREEBSD-001.
 
 ```console
 litai package plan COMPONENT --target host --flavor=+package-pkg
