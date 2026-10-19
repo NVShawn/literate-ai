@@ -37,6 +37,7 @@ from literate_ai.contracts import (
     StandardProjectLifecycleDriver,
     load_current_standard_lifecycle_policy,
 )
+from tests.support.host_platform import host_os_family
 from tests.support.loader_environment import without_empty_loader_entries
 
 FAKE_CLAUDE = Path(__file__).resolve().parents[1] / "support" / "fake_claude.py"
@@ -288,7 +289,7 @@ class ModelFreeRebuildTests(unittest.TestCase):
         catalog.write_bytes(
             canonical_json_bytes(ExecutionWorkerCatalog((worker,)).to_dict())
         )
-        family = {"darwin": "macos", "linux": "linux"}[sys.platform]
+        family = host_os_family()
         observations = private / "worker-observations.json"
         observations.write_bytes(
             canonical_json_bytes(

@@ -28613,6 +28613,12 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   supported promotion and candidate recheck pass after the test-only repair.
   Final native regression and isolated installed-wheel renewal remain in progress;
   no pending native or hosted result is counted as passing.
+  The repaired native full run passes cancellation and then finds a shared
+  worker-health fixture rejecting versioned `freebsd16`. Audit fixture selectors
+  together, centralize truthful test host-family selection, renew worker-health,
+  configured finalize, model-free rebuild and projected-command cases on the
+  actual guest, and preserve unsupported-host refusal rather than aliasing another
+  POSIX OS. Optional Elixir fixtures must also retain the real host identity.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
