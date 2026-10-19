@@ -25991,6 +25991,19 @@ Original SDK admission and public retained execution remain open. A local snapsh
 after a command-observation identity edit during that test. Repeat it from a
 frozen checkout; this rejected attempt supplies no replay qualification.
 
+The frozen `01285c9b` correction passes all three local snapshot checks in
+531.896 seconds, including repeated clean replay. Its log SHA-256 is
+`efc0354f5cb151ab2b4baa08f083d02c14706824cce9fca28e67e6460f3221e3`.
+Installed-wheel qualification passes from that same unchanged checkout; wheel
+identity is `sha256:22d78d4992a9e7112679d17f0d28f1169aa84581db88b55e36d392034a88bdd7`
+and qualified manifest identity is
+`sha256:3d9e2343fe36961baf9138052ed368d551a4cccad8942958a3c34e545ced13d1`.
+Native renewal and a separate frozen full local suite remain in progress.
+Next admission work must bind producer-backed SDK inputs from the current locks,
+observe sealed build exports and integrate source/resolved BOM custody before
+independent acceptance and retained-origin receipts. Input observation alone
+does not establish those boundaries; public retained execution remains closed.
+
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
 Upstream: [issue #17](https://github.com/jordanhubbard/literate-ai/issues/17).

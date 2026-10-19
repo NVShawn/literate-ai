@@ -150,6 +150,13 @@ persisted Component locks, not supplied graph metadata or unlocked catalog entri
 Current project definitions and lock inputs must remain unchanged. This response
 does not authorize execution or attest a resolved runtime dependency closure.
 
+The internal command workspace freezes host-native dependency observations for
+captured tools and inputs using its sanitized command environment. It rechecks
+that graph and the command context before and after each process, and binds the
+observation identity to the command record. Dependency drift refuses even after
+a zero exit. Returned observation dictionaries cannot mutate the frozen record.
+This does not qualify SDK products or establish the native closure of built exports.
+
 The internal command workspace reads bounded, identity-checked reports using
 `literate-ai/retained-project-test-report@1`. Each report names its action and
 the complete case outcomes (`passed`, `failed`, or explicitly permitted `skipped`).
