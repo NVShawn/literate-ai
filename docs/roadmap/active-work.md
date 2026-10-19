@@ -27967,9 +27967,13 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Owner:** Project receipt lifecycle and generated-test guidance
 - **Direction:** Fix the stale current project receipt.
 - **Conclusion:** A fresh lifecycle run rejected a generated case ID colliding with independent acceptance. Clarify generated case naming while preserving all refusal checks, then earn and promote a newly finalized passing candidate.
+  A later run exposed a missing retry classification for rejected JavaScript bundle
+  modules. Use the existing three-candidate budget and retain refusal evidence;
+  authentication and post-build failures remain terminal.
 - **Depends on:** none
 - **Implementation:**
   - [ ] Keep generated implementation case IDs distinct from independent verifier IDs.
+  - [ ] Retry missing JavaScript bundle modules within the existing bounded policy.
   - [ ] Promote only a newly finalized all-passing lifecycle candidate.
 - **Evidence:**
   - [ ] Complete the host-eligible sample lifecycle and pass test-receipt check, require-current and litai verify.
