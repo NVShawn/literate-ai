@@ -55,7 +55,7 @@ from tests.critical import test_retained_project_execution as commands
 from tests.support import fixtures_test_component_lock_contracts as locked
 
 
-def package_lock(specification):
+def package_lock(specification, provider="zip"):
     authoring = locked.component_authoring("retained-package")
     authoring = replace(
         authoring,
@@ -87,7 +87,7 @@ def package_lock(specification):
         ),
         selected_flavor_revisions=tuple(
             sorted(
-                (locked.identity("flavor-rust"), locked.identity("flavor-zip")),
+                (locked.identity("flavor-rust"), locked.identity("flavor-" + provider)),
                 key=lambda v: v.uri,
             )
         ),
@@ -106,9 +106,9 @@ def package_lock(specification):
                 slot,
                 (
                     SelectedNodeFlavor(
-                        "zip" if slot.axis is FlavorAxis.PACKAGING else "rust",
+                        provider if slot.axis is FlavorAxis.PACKAGING else "rust",
                         locked.identity(
-                            "flavor-zip"
+                            "flavor-" + provider
                             if slot.axis is FlavorAxis.PACKAGING
                             else "flavor-rust"
                         ),
@@ -151,7 +151,9 @@ class RetainedProjectPackageTests(unittest.TestCase):
         specification = b"# Retained package\nPreserve original bytes and behavior.\n"
         (f.source / "specs").mkdir()
         (f.source / "specs/retained-package.md").write_bytes(specification)
-        self.lock = package_lock(specification)
+        self.lock = package_lock(
+            specification, provider=getattr(self, "package_provider", "zip")
+        )
         self.fixture.locks = (self.lock,)
         roles = {
             "src": "source",

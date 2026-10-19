@@ -99,6 +99,12 @@ native format construction, independent ELF library metadata inspection and
 reopened compiled executable/shared-library payload cases now pass on FreeBSD.
 Public batch/provider plumbing also passes with an injected lifecycle. Complete
 installed public-path and retained-provider qualification remain required.
+Development retained pkg composition now joins live local admission to that
+native provider, preserving accepted payload and receipt/BOM/run custody and
+binding the native projection and tool metadata. Its initial portable checks
+pass; actual native construction, installed/public retained execution and
+per-unit source/ports package qualification remain open. Existing ZIP plan/result
+wire identities are preserved.
 
 The current development release is **1.3.0**. [RELEASE-INTEGRATION-004](docs/roadmap/1.3-integration.md)
 owns the current public issue and review scope. The first implementation batch

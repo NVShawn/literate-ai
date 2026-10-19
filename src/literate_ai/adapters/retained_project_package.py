@@ -1,4 +1,4 @@
-"""Project live retained custody through the existing exact ZIP provider."""
+"""Shared live retained package custody and the existing exact ZIP provider."""
 
 from __future__ import annotations
 
@@ -22,15 +22,23 @@ from literate_ai.contracts.retained_project_package import RetainedProjectPackag
 _EVIDENCE = ".literate-ai"
 
 
-class RetainedProjectZipPackage:
+class _RetainedProjectPackage:
     """No source promotion, native runtime execution or publication authority.
 
-    The package plan/result use a distinct origin while the existing ZIP provider
+    The package plan/result use a distinct origin while the selected provider
     owns construction and independent archive verification. This owner requires
     live local admission even when a parsed plan/result has matching identities.
     """
 
-    def __init__(self, admission, *, provider_lock_identity, provider_revision):
+    def __init__(
+        self,
+        admission,
+        *,
+        provider_lock_identity,
+        provider_revision,
+        provider,
+        packager_identity,
+    ):
         if not isinstance(admission, AdmittedRetainedProject):
             raise TypeError("retained.package.live-admission-required")
         self.admission = admission
@@ -42,17 +50,16 @@ class RetainedProjectZipPackage:
             raise ValueError("retained.package.selected-provider-lock-required")
         node = next(v for v in lock.nodes if v.revision.identity == lock.root_revision)
         if not any(
-            value.value == "zip" and value.flavor_revision == provider_revision
+            value.value == provider and value.flavor_revision == provider_revision
             for slot in node.target_flavor_selection.slots
             if slot.slot.axis is FlavorAxis.PACKAGING
             for value in slot.selected
         ):
-            raise ValueError("retained.package.locked-zip-provider-required")
+            raise ValueError(f"retained.package.locked-{provider}-provider-required")
         if any(
             v.target_profile_identity != lock.target_profile_identity for v in locks
         ):
             raise ValueError("retained.package.mixed-target-locks")
-        self.adapter = NativeZipPackageAdapter()
         self._metadata = {}
         target = lock.target_profile_identity
         inputs = []
@@ -108,9 +115,15 @@ class RetainedProjectZipPackage:
             admission.receipt.identity,
         )
         for name, reference in admission.receipt.roots:
+            role = "retained-evidence"
+            if provider == "pkg":
+                role = {
+                    "source-bom": "cyclonedx-source-sbom",
+                    "resolved-bom": "cyclonedx-resolved-sbom",
+                }.get(name, role)
             append(
                 f"{_EVIDENCE}/{name}.json",
-                "retained-evidence",
+                role,
                 reference,
                 ContentIdentity.parse_uri(reference.identity),
             )
@@ -157,8 +170,9 @@ class RetainedProjectZipPackage:
             provider_lock_identity,
             provider_revision,
             target,
-            self.adapter.packager_identity,
+            packager_identity,
             tuple(sorted(inputs, key=lambda v: v.path)),
+            provider,
         )
         admission.require_current()
 
@@ -194,7 +208,7 @@ class RetainedProjectZipPackage:
                 self.admission.store.copy_to(item.blob, path)
                 path.chmod(0o755 if item.executable else 0o644)
             self.require_current()
-            result = self.adapter.package(self.plan, materialized_root=stage)
+            result = self._package(stage, workspace)
             for artifact in result.artifacts:
                 reference = self.admission.store.put_bytes(
                     self.adapter.read_created_blob(artifact.blob),
@@ -217,8 +231,34 @@ class RetainedProjectZipPackage:
         verify_package_result(
             self.plan, result, read_blob=self.admission.store.get_bytes
         )
-        self.adapter.verify_bytes(
+        self._verify_archive(
             result, self.admission.store.get_bytes(result.artifacts[0].blob)
         )
         self.require_current()
         return result
+
+    def _package(self, stage, workspace):
+        raise NotImplementedError
+
+    def _verify_archive(self, result, content):
+        raise NotImplementedError
+
+
+class RetainedProjectZipPackage(_RetainedProjectPackage):
+    """Construct the existing ZIP representation from live retained custody."""
+
+    def __init__(self, admission, *, provider_lock_identity, provider_revision):
+        self.adapter = NativeZipPackageAdapter()
+        super().__init__(
+            admission,
+            provider_lock_identity=provider_lock_identity,
+            provider_revision=provider_revision,
+            provider="zip",
+            packager_identity=self.adapter.packager_identity,
+        )
+
+    def _package(self, stage, workspace):
+        return self.adapter.package(self.plan, materialized_root=stage)
+
+    def _verify_archive(self, result, content):
+        self.adapter.verify_bytes(result, content)

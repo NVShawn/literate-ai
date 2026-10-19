@@ -531,6 +531,17 @@ is native format and declared-plan bindings; build-lifecycle admission and relea
 approval remain separate. The [FreeBSD qualification work](../roadmap/active-work.md#freebsd-001-add-first-class-freebsd-native-workers-and-targets)
 records the remaining evidence.
 
+The development retained-package backend can also construct the native format
+from a live locally admitted run with an exact selected `pkg` Flavor lock.
+It preserves the distinct retained receipt origin, accepted payload,
+specifications, both BOMs and run records, and retains the native projection
+and tool metadata in the same CAS. Construction and reinspection refuse stale
+source, plans, input blobs or native tooling. Parsed receipt JSON grants no
+admission. This backend connection is under native qualification; it does not
+enable the public retained-project execution path, infer per-unit runtime
+package coordinates, install packages or authorize publication. Existing ZIP
+wire identities and its selected-provider checks are unchanged.
+
 ## Publication
 
 Publication is an explicit, resumable operation over exact immutable objects. A

@@ -520,19 +520,20 @@ class FreeBsdPkgToolBinding:
             raise PackagingError("native pkg version/ABI probe failed")
         return text
 
+    def to_dict(self):
+        return {
+            "schema": "literate-ai/freebsd-pkg-tool@1",
+            "executable_sha256": self.executable_digest,
+            "version": self.version,
+            "abi": self.abi,
+            "architecture": self.architecture,
+            "configuration": "empty",
+            "plugins": False,
+        }
+
     @property
     def identity(self):
-        return canonical_identity(
-            {
-                "schema": "literate-ai/freebsd-pkg-tool@1",
-                "executable_sha256": self.executable_digest,
-                "version": self.version,
-                "abi": self.abi,
-                "architecture": self.architecture,
-                "configuration": "empty",
-                "plugins": False,
-            }
-        )
+        return canonical_identity(self.to_dict())
 
     def require_unchanged(self):
         if _tool_file(self.executable) != self.executable_digest:

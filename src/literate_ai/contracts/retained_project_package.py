@@ -43,10 +43,13 @@ class RetainedProjectPackagePlan(_ArchiveShape):
     target_identity: ContentIdentity
     packager_identity: ContentIdentity
     inputs: tuple[PackageInput, ...]
+    provider: str = "zip"
 
     SCHEMA: ClassVar[str] = "literate-ai/retained-project-package-plan@1"
 
     def __post_init__(self):
+        if self.provider not in {"zip", "pkg"}:
+            raise ValueError("retained.package.unsupported-provider")
         for name in self._identity_fields():
             if not isinstance(getattr(self, name), ContentIdentity):
                 raise TypeError("retained.package.typed-identities-required")
@@ -69,7 +72,7 @@ class RetainedProjectPackagePlan(_ArchiveShape):
         return {
             "schema": self.SCHEMA,
             "authority_mode": "retained-project",
-            "provider": "zip",
+            "provider": self.provider,
             "release_authorized": False,
             **{name: getattr(self, name).uri for name in self._identity_fields()},
             "inputs": [v.to_dict() for v in self.inputs],
@@ -89,7 +92,7 @@ class RetainedProjectPackagePlan(_ArchiveShape):
         if (
             value["schema"] != cls.SCHEMA
             or value["authority_mode"] != "retained-project"
-            or value["provider"] != "zip"
+            or value["provider"] not in {"zip", "pkg"}
             or value["release_authorized"] is not False
             or not isinstance(value["inputs"], list)
             or len(value["inputs"]) > 100_000
@@ -98,6 +101,7 @@ class RetainedProjectPackagePlan(_ArchiveShape):
         return cls(
             *(ContentIdentity.parse_uri(value[n]) for n in cls._identity_fields()),
             tuple(PackageInput.from_dict(v) for v in value["inputs"]),
+            value["provider"],
         )
 
 

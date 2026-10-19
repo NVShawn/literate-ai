@@ -308,3 +308,24 @@ This archive integration does not supply native pkg construction, installation,
 remote receipt authentication, release approval or whole-system memory/scale
 qualification. Those remain explicit prerequisites for their corresponding
 public lifecycle operations.
+
+## Retained FreeBSD package projection
+
+The local retained package owner may select the existing native pkg provider only
+when the actual selected Component lock names the exact pkg Flavor revision.
+Preserve ZIP plan/result wire identities. Native plans retain the distinct
+retained origin and bind the exact accepted payload, specifications, receipt and
+all run records, with explicitly typed source and resolved BOM inputs. Bind the
+native package metadata, full installed-path projection, ABI and static tool
+identity through the existing native provider; never substitute an ordinary
+generated Component revision for retained origin.
+
+Construction and reinspection require live local retained admission and unchanged
+native tooling. Retain constructed bytes in the same CAS and recheck current
+source/plan and input blobs before and after packaging. Parsed receipt or package
+JSON grants no runtime admission. Reuse the native archive inspector, including
+independent ELF/checksum/metadata verification, rather than adding another parser.
+This backend integration does not install or publish, authenticate remote
+receipts, enable public retained execution, infer a complete per-unit package
+dependency graph, or qualify source/ports components. Those require their existing
+separate contracts and actual native/installed qualification.

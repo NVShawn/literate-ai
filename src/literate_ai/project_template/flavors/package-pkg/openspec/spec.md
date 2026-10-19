@@ -13,6 +13,21 @@ coordinates, unsupported targets and source-authority substitution SHALL refuse.
 - **WHEN** an external runtime requirement lacks one accepted native package coordinate
 - **THEN** planning refuses without consulting or installing ambient packages
 
+### Requirement: Preserve retained package origin
+
+A retained-project native package backend SHALL require live local admission
+and an exact selected pkg Flavor lock. It SHALL preserve the accepted payload,
+authored specifications, both BOMs and retained receipt/run evidence, retaining
+the native projection and bound tool metadata. It SHALL reuse native construction
+and independent inspection without replacing retained identity with generated
+Component identity or granting installation, publication or public execution.
+Existing ZIP plan/result wire identities SHALL remain unchanged.
+
+#### Scenario: A parsed receipt requests native construction
+
+- **WHEN** a caller supplies decoded receipt data without live current admission
+- **THEN** native packaging refuses before executing the native tool
+
 ### Requirement: Construct without modifying the host
 
 Construction SHALL require a matching FreeBSD worker and captured native tool,

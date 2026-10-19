@@ -25862,15 +25862,31 @@ authorization and then unconditionally raise
 was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
 does not close this runtime requirement or transfer retained release authority.
 
-**Next action in progress:** connect the local retained admission to the existing
-ZIP provider through distinct retained package plan/result contracts. Bind a
+**Next action in progress:** connect local retained admission to the existing
+native FreeBSD pkg provider without changing existing ZIP wire identities. Bind a
 packaging Flavor actually selected by a current Component lock, exact accepted
 payload, authored specifications, both BOMs and retained receipt evidence. Reuse
-the provider's construction and independent archive verification; never place a
+the provider's construction and independent native inspection; never place a
 retained project identity in a generated Component revision field. Qualify repeat,
 relocation, stale authority, resource collision and rehashed archive tampering.
-Native pkg, bounded whole-system scale, installed CLI and release integration
-remain required after this archive-provider slice; no publication grant is added.
+The ZIP backend slice below is complete at its recorded scope. Native pkg
+composition, bounded whole-system scale, installed CLI and release integration
+remain open; no publication grant is added. A native-format result or decoded
+receipt must never replace live retained admission or per-unit package evidence.
+
+Retained pkg backend checkpoint: live custody now delegates native construction
+and inspection to the existing provider, with an exact selected pkg Flavor lock,
+accepted payload/specifications, both BOMs and complete receipt/run records.
+The native projection and tool metadata are retained in CAS and required during
+reinspection. Existing ZIP wire identities are preserved. Four portable retained
+pkg checks pass (five selected, one actual-native case skipped); all eight ZIP
+package checks pass, and 21 portable native format/ELF checks pass (24 selected,
+three native construction cases skipped). Actual native retained construction,
+the full current regression, installed/public lifecycle and per-unit source/ports
+execution remain unqualified. The native retained test must prove repeatable
+construction, reopened payload execution and missing-projection refusal without
+mocking native tools before this backend can receive native qualification.
+
 Archive checkpoint: all 117 retained-project checks pass locally in 464.220
 seconds, including eight actual archive cases. They prove read-only planning,
 byte-identical repeat construction, executable payload preservation, complete

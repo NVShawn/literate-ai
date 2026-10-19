@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Connect development retained-run package custody to the existing native
+  FreeBSD pkg builder and inspector. Require live admission and the selected
+  pkg Flavor lock; retain both BOMs, receipt/run evidence, native projection
+  and tool metadata. Preserve ZIP wire identities. Native construction,
+  installed/public lifecycle and per-unit source/ports qualification remain open.
+
 - Independently inspect accepted FreeBSD ELF payloads when checking native pkg
   required/provided library metadata. Reject substituted, missing or duplicate
   names and malformed ELF tables; exclude internal libraries from external
