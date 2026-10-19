@@ -385,7 +385,9 @@ attestation, even when the automatic pin comparison would invalidate most prior 
 
 `make python-check` uses `PYTHON_TEST_WORKERS=auto` (the available CPU count).
 Use `make python-check PYTHON_TEST_WORKERS=4` to bound concurrency, or `1` for
-serial debugging. The installed checkpoint adapter accepts `python --workers N`
+serial debugging. Each run retains its ordered case totals in
+`OBJ_DIR/python-test-report.json` (override `PYTHON_TEST_REPORT` to choose a path).
+The installed checkpoint adapter accepts `python --workers N`
 and `--worker-timeout SECONDS` (a finite, positive per-module deadline, default
 3600 seconds). The Python `run_unittest_suite` API keeps its serial default so
 in-memory test classes remain supported; explicit parallel suites must contain

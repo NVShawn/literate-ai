@@ -773,6 +773,7 @@ class _CheckpointResult(unittest.TextTestResult):
         self._invalidate_keys = invalidate_keys
         self._active_keys: dict[int, str] = {}
         self._finished_keys: set[str] = set()
+        self._failed_keys: set[str] = set()
         self._subtest_skipped: set[int] = set()
         self._record = record
         self._record_outcome = record_outcome
@@ -805,7 +806,8 @@ class _CheckpointResult(unittest.TextTestResult):
 
     def _record_known(self, test: unittest.TestCase) -> None:
         for key in self._keys_for(test):
-            self._record(key)
+            if key not in self._failed_keys:
+                self._record(key)
 
     def addSuccess(self, test: unittest.TestCase) -> None:  # noqa: N802
         super().addSuccess(test)
@@ -877,6 +879,10 @@ class _CheckpointResult(unittest.TextTestResult):
                 else []
             )
         for key in keys:
+            if status is TestOutcomeStatus.FAILED:
+                self._failed_keys.add(key)
+            elif key in self._failed_keys:
+                continue
             self._record_outcome(key, status, failure_identity)
             self._finished_keys.add(key)
 

@@ -81,8 +81,10 @@ class RunningModule:
     sequence: int = 0
     terminal: set[int] = field(default_factory=set)
     begun: set[int] = field(default_factory=set)
+    statuses: dict[int, str] = field(default_factory=dict)
     done: bool = False
     failed: bool = False
+    invalid: bool = False
 
 
 def available_workers(value: str | int = "auto") -> int:
@@ -309,8 +311,15 @@ class ParallelSuite:
         if status is not None:
             for index in indices:
                 if index in worker.terminal:
-                    raise ValueError("worker emitted duplicate terminal outcomes")
+                    previous = worker.statuses[index]
+                    if previous != "failed" or status not in {"failed", "skipped"}:
+                        raise ValueError("worker emitted duplicate terminal outcomes")
+                    if status == "skipped":
+                        # A skipped teardown still contributes a raw skip, but
+                        # cannot downgrade the case's already observed failure.
+                        continue
                 worker.terminal.add(index)
+                worker.statuses[index] = status
                 self.outcome(index, event)
         test = (
             RemoteTest(str(event["description"]), indices[0])
@@ -382,6 +391,7 @@ class ParallelSuite:
         self.outcome(worker.group.indices[0], event)
         result.errors.append((self.tests[worker.group.indices[0]], message + "\n"))
         worker.failed = self.failed = True
+        worker.invalid = True
         print(f"\n{message}; output retained at {worker.root}", file=self.stream)
 
     def _close(self, worker: RunningModule) -> None:
@@ -396,6 +406,38 @@ class ParallelSuite:
         finally:
             worker.ownership.release()
             worker.log.close()
+
+    def _finish_failures(self, result: Any) -> None:
+        # Other modules stop immediately. Give the failing module's ordinary
+        # teardown/cleanup callbacks a bounded chance to report additional
+        # diagnostics; unittest itself has already stopped case dispatch.
+        for worker in tuple(self.active):
+            if not worker.failed:
+                self._close(worker)
+                self.active.remove(worker)
+        deadline = time.monotonic() + 5
+        for worker in self.active:
+            if worker.invalid:
+                continue
+            try:
+                worker_deadline = min(deadline, worker.started + self.timeout)
+                while time.monotonic() < worker_deadline:
+                    if (worker.root / "output.log").stat().st_size > MAX_LOG_BYTES:
+                        raise ValueError("worker output exceeds its bound")
+                    self._drain(worker, result)
+                    if worker.process.poll() is not None:
+                        self._drain(worker, result)
+                        if not worker.done:
+                            raise ValueError("worker exited without a complete report")
+                        events = worker.root / "events.jsonl"
+                        if events.exists() and events.stat().st_size != worker.offset:
+                            raise ValueError("worker left an incomplete event")
+                        if worker.process.returncode != 1:
+                            raise ValueError("worker exit contradicts its report")
+                        break
+                    time.sleep(0.01)
+            except (OSError, ValueError, TimeoutError) as exc:
+                self._error(worker, exc, result)
 
     def __call__(self, result: Any) -> Any:
         print(
@@ -430,6 +472,7 @@ class ParallelSuite:
                     except (OSError, ValueError, TimeoutError) as exc:
                         self._error(worker, exc, result)
                 if self.failed:
+                    self._finish_failures(result)
                     break
                 for worker in finished:
                     self._close(worker)
@@ -472,6 +515,9 @@ class ParallelSuite:
             self.active.clear()
         # Report failures by discovery order, irrespective of worker completion order.
         order = {id(test): index for index, test in enumerate(self.tests)}
+        result.unexpectedSuccesses.sort(
+            key=lambda test: order.get(id(test), len(order))
+        )
         for records in (result.failures, result.errors):
             records.sort(
                 key=lambda pair: getattr(

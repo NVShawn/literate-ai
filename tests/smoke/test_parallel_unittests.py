@@ -456,6 +456,22 @@ raise SystemExit(run_unittest_suite(unittest.TestSuite([test, test]),
                     def test_a(self):
                         with self.subTest(part=1): self.fail("subtest")
             """,
+            "failure_and_teardown_error": """
+                class Tests(unittest.TestCase):
+                    def tearDown(self): raise RuntimeError("teardown")
+                    def test_a(self): self.fail("body")
+            """,
+            "failure_and_teardown_skip": """
+                class Tests(unittest.TestCase):
+                    def tearDown(self): self.skipTest("teardown skip")
+                    def test_a(self): self.fail("body")
+            """,
+            "multiple_cleanup_errors": """
+                class Tests(unittest.TestCase):
+                    def test_a(self):
+                        self.addCleanup(lambda: self.fail("cleanup one"))
+                        self.addCleanup(lambda: self.fail("cleanup two"))
+            """,
             "unexpected_success": """
                 class Tests(unittest.TestCase):
                     @unittest.expectedFailure
@@ -471,7 +487,12 @@ raise SystemExit(run_unittest_suite(unittest.TestSuite([test, test]),
                     result = self.run_suite(workers=workers)
                     report = json.loads(self.report.read_text())
                     observed.append(
-                        (result.returncode, report["summary"], report["outcomes"])
+                        (
+                            result.returncode,
+                            report["summary"],
+                            report["outcomes"],
+                            result.stderr.strip().splitlines()[-1],
+                        )
                     )
                 self.assertEqual(observed[0], observed[1])
 
