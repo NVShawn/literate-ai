@@ -13,15 +13,24 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 from dataclasses import replace
 from html.parser import HTMLParser
 from pathlib import Path
 
 UPDATE_AUTHORITY = "samples/hello-component/component.md"
 UPDATE_MARKER = b"\n<!-- Installed HTML parent-update acceptance fixture. -->\n"
-# Rendering verification health runs every gate twice; Windows filesystems are
-# materially slower, as for the self-hosting proof's candidate budget.
-COMMAND_TIMEOUT_SECONDS = 900 if os.name == "nt" else 300
+
+
+def _command_timeout(platform_name: str) -> int:
+    # Rendering health runs every gate twice. Native FreeBSD and Windows need
+    # the larger finite budget; failures still retain their diagnostic tails.
+    return (
+        900 if platform_name == "win32" or platform_name.startswith("freebsd") else 300
+    )
+
+
+COMMAND_TIMEOUT_SECONDS = _command_timeout(sys.platform)
 
 
 def run_command(

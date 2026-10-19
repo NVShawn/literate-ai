@@ -27936,6 +27936,13 @@ platform names and preserve existing platform expectations, then execute the
 actual native installed-wheel gate. This does not qualify retained lifecycle
 receipts or release publication.
 
+Native installed HTML verification at `8f572841` exceeded the 300-second
+per-command harness deadline after two full gate passes. Captured passes took
+about 123 seconds each, with authority and lock checks making steady progress;
+the worker retained ample resources. Give FreeBSD the same finite 900-second
+installed-command budget already used on Windows, retain diagnostic tails and
+qualify the new exact wheel. The failed run remains failure evidence.
+
 
 - **GitHub issue:** [#67](https://github.com/jordanhubbard/literate-ai/issues/67)
 - **Priority:** P1
