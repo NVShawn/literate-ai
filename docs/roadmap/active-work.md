@@ -27941,6 +27941,15 @@ Native exact-revision replay/publication/retained and full-suite renewal remain
 required. The earlier diagram renderer timeout passes an unchanged retry with
 all 121 diagrams; no timeout or check was relaxed.
 
+At exact revision `75fd75cc`, actual FreeBSD passes all five native exclusive
+publication checks in 0.242 seconds, including the post-precheck destination race
+and successful stage identity preservation. The log SHA-256 is
+`e5ade638d3400bce14dd48ffc25a5ebba4d71ee60652f2a3a6c0d50018cef603`.
+The sequential wider retained/current-lock/snapshot/full native ladder remains
+active at that frozen revision; later phases are not yet qualified. A separate
+frozen local full-suite/wheel ladder runs at `9fc8596f`, so its results cannot
+qualify the later snapshot/publication changes.
+
 Installed-wheel execution at `d96f6b8b` no longer discovers a coding agent, but
 refuses before compilation because the shared Python builder searches only
 `python3` and `python`. The aligned native worker exposes the actual interpreter
