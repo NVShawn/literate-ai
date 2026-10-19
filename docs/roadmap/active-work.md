@@ -27744,12 +27744,22 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
 - **Direction:** Run release-gate tests in parallel (checkpointed, fail-fast)
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
-- **Depends on:** none
+- **Conclusion:** The current installed checkpoint runner executes the entire suite in one process. Add bounded process-level module scheduling while preserving one controller-owned marker ledger and source/context binding. Keep the existing serial API for in-memory suites; make CLI/Make worker count explicit, defaulting to the available CPU count. The Windows gate retains pytest/JUnit and uses isolated file-group workers with fail-fast.
+- **Depends on:** existing pin dispatch, known-failure contracts and owned-process-tree cleanup
+- **Next action (in progress):** Qualify the implemented runner with the complete immutable suite, installed wheel, native timing comparisons and a fresh lifecycle receipt before landing.
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [ ] Execute importable module groups in private process/temp/object environments with explicit serial barriers and configurable worker count.
+  - [ ] Record validated per-case outcomes only in the parent; retain exact failure/skip/subtest/fixture counts and bounded diagnostics.
+  - [ ] Stop dispatch on failure, terminate only owned worker/descendant processes, and preserve completed repair markers.
+  - [ ] Keep known-failure/context/release-evidence behavior and required repaired-exit-2 followed by a clean from-zero pass.
+  - [ ] Integrate Make and Windows pytest worker configuration, audit fixed shared state, and document limits and wheel-check timing findings.
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [ ] Real processes prove overlap, isolation, serial barriers, deterministic failure order, fail-fast child cleanup, crash/protocol refusal and out-of-order resume.
+  - [ ] Serial and parallel runs produce identical ordered case outcomes and receipt summaries, including duplicates, class/module fixtures and subtests.
+  - [ ] Measure the complete framework suite and native Linux/Windows gates on aligned workers; demonstrate the requested speedup without dropped or doubled cases.
+  - [ ] Pass complete local, installed-wheel, exact-head CI and a newly current lifecycle receipt before landing.
+
+- **Development evidence:** Seventeen focused checkpoint tests pass, covering real process overlap, private scratch/configuration, serial barriers, per-case out-of-order repair (including retained skips), owned descendant termination, crash/protocol refusal, duplicate object occurrences, fixture/subtest parity, known-failure contexts, release-evidence bypass and Windows entry-point configuration. The initial full-suite attempt exposed project-authority inheritance from scratch directories beneath the checkout; scratch now lives outside it. A later exploratory run stopped at 730 tests because source was edited while its immutable self-hosting proof ran. This is not a complete-suite pass or a performance claim. Freeze source before final qualification.
 
 ### [ ] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
 

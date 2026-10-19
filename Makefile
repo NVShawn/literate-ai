@@ -71,6 +71,7 @@ RELEASE_CHECKPOINT := $(OBJ_DIR)/release-checkpoint.json
 PYTHON_TEST_CHECKPOINT := $(OBJ_DIR)/python-test-checkpoint.json
 PYTHON_TEST_PATTERN ?= test*.py
 PYTHON_TEST_VERBOSITY ?= 1
+PYTHON_TEST_WORKERS ?= auto
 RELEASE_PLAN ?=
 RELEASE_PREPARED ?= $(OBJ_DIR)/release/prepared.json
 
@@ -153,7 +154,7 @@ python-check: python-version $(DEV_PREREQUISITE) ## Validate the Python framewor
 	$(RUN_PYTHON_COMMAND) -X pycache_prefix="$(OBJ_DIR)/pycache" -m compileall -q src tests
 	$(RUN_PYTHON_COMMAND) -m py_compile $(SAMPLE_PYTHON)
 	$(RUN_PYTHON_COMMAND) scripts/check_host_path_policy.py .
-	LITAI_REQUIRE_PINNED_PIP_WHEEL=1 PYTHONPATH=src $(STEP) python-check -- $(RUN_PYTHON_COMMAND) scripts/run_checkpointed_unittests.py --state "$(PYTHON_TEST_CHECKPOINT)" --start-directory tests --pattern "$(PYTHON_TEST_PATTERN)" --verbosity "$(PYTHON_TEST_VERBOSITY)"
+	LITAI_REQUIRE_PINNED_PIP_WHEEL=1 PYTHONPATH=src $(STEP) python-check -- $(RUN_PYTHON_COMMAND) scripts/run_checkpointed_unittests.py --state "$(PYTHON_TEST_CHECKPOINT)" --start-directory tests --pattern "$(PYTHON_TEST_PATTERN)" --verbosity "$(PYTHON_TEST_VERBOSITY)" --workers "$(PYTHON_TEST_WORKERS)"
 
 .PHONY: finite-acceptance-check
 finite-acceptance-check: python-version $(RUNTIME_PREREQUISITE) ## Verify fractional application/library acceptance and identity compatibility.

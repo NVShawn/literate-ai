@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Checkpointed Python tests support isolated module processes, configurable CPU-based
+  concurrency and serial barriers. The controller preserves ordered outcomes and
+  repair markers, including skipped cases and duplicate instances, and stops owned
+  worker trees on failure. The Windows gate exposes pytest worker configuration;
+  wheel smoke can retain operation timings and exercises the installed parallel runner.
+
 - Project verification refreshes the current receipt through the complete
   host-eligible sample lifecycle, with reviewed driver and runner bindings.
 

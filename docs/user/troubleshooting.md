@@ -381,6 +381,42 @@ persistent SSH worker fleet (`litai release check --target local`): reset every 
 checkpoint whenever you resync it to new source before trusting its next release
 attestation, even when the automatic pin comparison would invalidate most prior work.
 
+### Configure parallel test execution
+
+`make python-check` uses `PYTHON_TEST_WORKERS=auto` (the available CPU count).
+Use `make python-check PYTHON_TEST_WORKERS=4` to bound concurrency, or `1` for
+serial debugging. The installed checkpoint adapter accepts `python --workers N`
+and `--worker-timeout SECONDS` (a finite, positive per-module deadline, default
+3600 seconds). The Python `run_unittest_suite` API keeps its serial default so
+in-memory test classes remain supported; explicit parallel suites must contain
+importable cases with stable test IDs.
+
+A process runs each test module, preserving its module and class fixtures. Workers
+have separate temporary, object, build and operator-configuration directories.
+Scratch directories live outside the checkout so temporary projects do not inherit
+the repository's authority through ancestor discovery. Successful modules remove
+their scratch directories; failed or cancelled modules retain them for diagnosis.
+Bounded event streams and output logs stay beside the checkpoint under `workers/`.
+The controller alone writes checkpoints, in observed completion order. Reports keep
+discovery order. A crash, malformed report or deadline failure cannot turn partial
+module output into a passing repair marker. Failure stops new dispatch and
+terminates owned worker process trees. Cases that did not report an outcome rerun
+on repair; validated outcomes survive deliberate cancellation. A crashed or invalid
+worker loses its module markers. Final evidence still requires the fresh full run.
+
+Set `LITAI_TEST_SERIAL = True` on a test module or class when it needs exclusive
+access to shared host state. Its entire module runs alone between completed module
+groups. Prefer temporary fixture roots and dynamically assigned ports. This marker
+applies to the checkpoint adapter; pytest has its own scheduling rules.
+
+The native Windows release gate accepts `--test-workers auto|N`, also defaulting
+from `PYTHON_TEST_WORKERS`. Its pytest step uses file-group workers, a private
+base temporary directory, fail-fast and the existing JUnit report. `1` disables
+xdist. Its pytest gate has no checkpoint resume contract; the Make adapter retains
+that contract. Parallel repair still exits 2 after finishing a resumed run and
+requires a fresh from-zero pass for release evidence. Worker count does not bypass
+known-failure context checks or `--release-evidence`.
+
 ### A classified failure wastes every repair rerun
 
 Do not turn a known failure into `unittest.skip`, `xfail`, or an ignored process
