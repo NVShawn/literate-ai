@@ -28053,6 +28053,25 @@ The relevant native
 and [ELF analysis](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_elf.c)
 owners define those semantics.
 
+Shared-library metadata binding is now in progress: inspect bounded accepted
+ELF64 payload sections without execution or extraction, validate the selected
+FreeBSD architecture, and derive exact DT_NEEDED/DT_SONAME inventories. Compare
+both native manifests against those inventories, excluding libraries supplied
+inside the same package. Reject malformed or unsupported ELF authority and
+extra/missing/rehashed library metadata. Native executable and shared-library
+construction must qualify this independent reader; this is format/dependency
+metadata verification, not a substitute for retained lifecycle admission.
+Twenty-one portable checks pass (24 selected tests with three native-only
+skips), including hostile ELF offsets/counts, truncation, target drift,
+termination/SONAME ambiguity and rehashed native library substitutions. The
+reader also independently matches all seven checksums and the exact libc
+requirement in the retained actual native diagnostic archive; that read does
+not replace actual construction. Native coverage now includes a real linked
+shared library, internal-provider filtering and execution of the reopened
+package payload. Those three native construction cases and the public CLI
+group remain the next execution gate. OpenSpec, documentation, lint/format,
+layout/export and reviewed driver/documentation authority checks pass locally.
+
 The full native Python run at `c75fac59` stopped in sample recipe planning:
 the conformance runner rejects `freebsd16` before selecting the existing FreeBSD
 Flavor. Extend host discovery, OS catalog and explicit receiver selection together;

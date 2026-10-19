@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Independently inspect accepted FreeBSD ELF payloads when checking native pkg
+  required/provided library metadata. Reject substituted, missing or duplicate
+  names and malformed ELF tables; exclude internal libraries from external
+  requirements. Native and installed qualification remain in progress.
+
 - Match development FreeBSD pkg inspection to native manifest timestamps and
   reproducible numeric owner encoding, requiring explicit root/wheel names.
   Native shared-library metadata integration and qualification remain open.

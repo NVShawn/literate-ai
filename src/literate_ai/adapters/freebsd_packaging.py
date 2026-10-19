@@ -18,6 +18,7 @@ from urllib.parse import unquote
 
 from literate_ai.adapters.builders import run_bounded_process
 from literate_ai.adapters.exclusive_directory import directory_node
+from literate_ai.adapters.freebsd_package_elf import inspect_freebsd_package_elf
 from literate_ai.adapters.packaging import (
     logical_package_files,
     package_result_for,
@@ -877,6 +878,7 @@ class FreeBsdPackageAdapter:
         )
         manifests, seen, regular = {}, set(), set()
         manifest_files = {}
+        required_libraries, provided_libraries = set(), set()
         try:
             with tarfile.open(fileobj=io.BytesIO(content), mode="r:xz") as archive:
                 for index, member in enumerate(archive):
@@ -984,6 +986,11 @@ class FreeBsdPackageAdapter:
                         raise PackagingError(
                             "FreeBSD payload or native checksum differs"
                         )
+                    required, provided = inspect_freebsd_package_elf(
+                        stream, size, self.projection.abi
+                    )
+                    required_libraries.update(required)
+                    provided_libraries.update(provided)
                 archive.fileobj.seek(archive.offset)
                 padding = 0
                 while tail := archive.fileobj.read(1024 * 1024):
@@ -1013,8 +1020,31 @@ class FreeBsdPackageAdapter:
             "files",
             "flatsize",
             "licenselogic",
-        } or set(compact) - set(expected_metadata) - {"flatsize", "licenselogic"}:
+            "shlibs_required",
+            "shlibs_provided",
+        } or set(compact) - set(expected_metadata) - {
+            "flatsize",
+            "licenselogic",
+            "shlibs_required",
+            "shlibs_provided",
+        }:
             raise PackagingError("FreeBSD native manifest has undeclared fields/hooks")
+        for name, expected_libraries in (
+            ("shlibs_required", required_libraries - provided_libraries),
+            ("shlibs_provided", provided_libraries),
+        ):
+            expected_libraries = sorted(expected_libraries)
+            for manifest in (full, compact):
+                actual = manifest.get(name, [])
+                if (
+                    not isinstance(actual, list)
+                    or any(not isinstance(value, str) for value in actual)
+                    or sorted(actual) != expected_libraries
+                ):
+                    raise PackagingError(
+                        "FreeBSD native shared libraries differ "
+                        "from accepted ELF payload"
+                    )
         if (
             full.get("flatsize") != sum(v.blob.size for v in files.values())
             or compact.get("flatsize") != full.get("flatsize")

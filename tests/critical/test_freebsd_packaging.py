@@ -3,6 +3,7 @@
 import copy
 import hashlib
 import io
+import json
 import lzma
 import platform
 import shutil
@@ -36,6 +37,7 @@ from literate_ai.contracts.executable_components.packages import (
     PackageKind,
 )
 from tests.support import fixtures_test_package_adapters as fixture_types
+from tests.support.fixtures_test_freebsd_package_elf import freebsd_package_elf
 from tests.support.fixtures_test_package_release_contracts import _identity
 
 _EPOCH = 946684800
@@ -316,6 +318,51 @@ class FreeBsdPackagingTests(unittest.TestCase):
                 result, content = self.archive(substitute)
                 with self.assertRaisesRegex(PackagingError, "unsafe metadata/type"):
                     self.adapter.verify_bytes(self.plan, result, content)
+
+    def test_shared_library_metadata_must_match_accepted_elf_payload(self):
+        content = freebsd_package_elf(
+            needed=("libexternal.so.1", "libown.so.2"), soname="libown.so.2"
+        )
+        reference = BlobRef(hashlib.sha256(content).hexdigest(), len(content))
+        entrypoint = self.source_plan.entrypoints[0].path
+        self.source_plan = replace(
+            self.source_plan,
+            inputs=tuple(
+                replace(value, blob=reference) if value.path == entrypoint else value
+                for value in self.source_plan.inputs
+            ),
+        )
+        self.contents[reference.identity] = content
+        self.bind(self.tool)
+
+        def metadata(full, compact, rows):
+            for document in (full, compact):
+                document["shlibs_required"] = ["libexternal.so.1"]
+                document["shlibs_provided"] = ["libown.so.2"]
+
+        result, content = self.archive(metadata)
+        self.adapter.verify_bytes(self.plan, result, content)
+        for field in ("shlibs_required", "shlibs_provided"):
+            for names in ([], ["libsubstituted.so.9"], ["libown.so.2"] * 2):
+                with self.subTest(field=field, names=names):
+
+                    def substitute(full, compact, rows, field=field, names=names):
+                        metadata(full, compact, rows)
+                        full[field] = compact[field] = names
+
+                    result, content = self.archive(substitute)
+                    with self.assertRaisesRegex(
+                        PackagingError, "shared libraries differ"
+                    ):
+                        self.adapter.verify_bytes(self.plan, result, content)
+
+    def test_non_elf_payload_cannot_claim_native_shared_libraries(self):
+        def substitute(full, compact, rows):
+            full["shlibs_required"] = compact["shlibs_required"] = ["libextra.so.1"]
+
+        result, content = self.archive(substitute)
+        with self.assertRaisesRegex(PackagingError, "shared libraries differ"):
+            self.adapter.verify_bytes(self.plan, result, content)
 
     def test_projection_rejects_wrong_abi_missing_bom_and_path_aliases(self):
         options = dict(
@@ -647,3 +694,100 @@ class NativeFreeBsdPackageTests(unittest.TestCase):
             f.adapter.package(
                 f.plan, materialized_root=self.materialized, object_root=f.root
             )
+
+    def test_native_package_provided_library_is_not_an_external_requirement(self):
+        f = self.fixture
+        library = f.root / "liblitai_fixture.so.1"
+        library_source = f.root / "library.c"
+        library_source.write_text("int meaning(void) { return 42; }\n")
+        subprocess.run(
+            (
+                shutil.which("cc"),
+                "-shared",
+                "-fPIC",
+                "-Wl,-soname,liblitai_fixture.so.1",
+                str(library_source),
+                "-o",
+                str(library),
+            ),
+            check=True,
+            capture_output=True,
+            timeout=30,
+        )
+        source, binary = f.root / "library-app.c", f.root / "library-app"
+        source.write_text(
+            "#include <stdio.h>\nint meaning(void);\n"
+            "int main(void) { if (meaning() != 42) return 1; "
+            'puts("native-shlib"); return 0; }\n'
+        )
+        subprocess.run(
+            (
+                shutil.which("cc"),
+                str(source),
+                str(library),
+                "-Wl,-rpath,$ORIGIN/../lib",
+                "-o",
+                str(binary),
+            ),
+            check=True,
+            capture_output=True,
+            timeout=30,
+        )
+        replacements = {
+            f.source_plan.entrypoints[0].path: binary.read_bytes(),
+            "lib/common.bin": library.read_bytes(),
+        }
+        inputs = []
+        for item in f.source_plan.inputs:
+            if item.path in replacements:
+                content = replacements[item.path]
+                reference = BlobRef(hashlib.sha256(content).hexdigest(), len(content))
+                f.contents[reference.identity] = content
+                item = replace(item, blob=reference)
+            inputs.append(item)
+        f.source_plan = replace(f.source_plan, inputs=tuple(inputs))
+        f.bind(f.tool)
+        f.projection = replace(
+            f.projection,
+            payload=tuple(
+                sorted(
+                    (
+                        replace(entry, installed_path="/usr/local/lib/" + library.name)
+                        if entry.input_path == "lib/common.bin"
+                        else entry
+                        for entry in f.projection.payload
+                    ),
+                    key=lambda entry: entry.installed_path,
+                )
+            ),
+        )
+        f.adapter = FreeBsdPackageAdapter(f.projection, f.tool)
+        f.plan = replace(f.source_plan, packager_identity=f.adapter.packager_identity)
+        for item in f.plan.inputs:
+            path = self.materialized / item.path
+            path.write_bytes(f.contents[item.blob.identity])
+            path.chmod(0o755 if item.executable else 0o644)
+        result = f.adapter.package(
+            f.plan, materialized_root=self.materialized, object_root=f.root
+        )
+        content = f.adapter.read_created_blob(result.artifacts[0].blob)
+        relocated = f.root / "reopened-library-package"
+        with tarfile.open(fileobj=io.BytesIO(content), mode="r:xz") as packed:
+            manifest = json.load(packed.extractfile("+MANIFEST"))
+            self.assertEqual(manifest["shlibs_required"], ["libc.so.7"])
+            self.assertEqual(manifest["shlibs_provided"], [library.name])
+            members = {"/" + member.name.lstrip("./"): member for member in packed}
+            for entry in f.projection.payload:
+                path = relocated / entry.installed_path[1:]
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(
+                    packed.extractfile(members[entry.installed_path]).read()
+                )
+                path.chmod(entry.mode)
+        observed = subprocess.run(
+            (str(relocated / "usr/local/bin/app"),),
+            check=True,
+            capture_output=True,
+            timeout=10,
+        )
+        self.assertEqual(observed.stdout, b"native-shlib\n")

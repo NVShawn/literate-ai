@@ -40,6 +40,11 @@ hooks, links, special files and rehashed payload/manifest tampering SHALL refuse
 Extended tar metadata SHALL NOT add ACLs, file flags, extended attributes or
 other unplanned installation semantics. Standard PAX encodings SHALL reproduce
 the exact accepted member path, size, timestamp and root ownership.
+Native required/provided shared-library metadata SHALL match an independent,
+bounded inspection of DT_NEEDED and DT_SONAME in the accepted ELF payloads.
+Libraries provided inside the package SHALL NOT become external requirements.
+Malformed or unsupported ELF targets, extra/missing library names and duplicate
+native library metadata SHALL refuse without extracting or executing target code.
 
 #### Scenario: The archive is changed and rehashed
 
@@ -50,3 +55,8 @@ the exact accepted member path, size, timestamp and root ownership.
 
 - **WHEN** an archive retains accepted payload bytes and normal ownership/modes but adds extended file flags, ACLs or attributes
 - **THEN** independent verification rejects the unplanned metadata
+
+#### Scenario: A package substitutes its native shared-library requirements
+
+- **WHEN** the native manifests change required or provided library names while retaining accepted ELF bytes and a new matching outer digest
+- **THEN** independent verification rejects the metadata mismatch

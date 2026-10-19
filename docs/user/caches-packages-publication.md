@@ -518,7 +518,14 @@ The initial provider uses finite archive limits and refuses links or hooks.
 
 Verification compares the retained plan and package result, then inspects the
 native manifests, complete file inventory, ownership/modes/timestamps, accepted
-digests and native checksums without installing the package. Its reported scope
+digests and native checksums without installing the package. It also checks
+native required/provided library names against bounded independent
+ELF inspection, without extracting or executing target code. The current reader
+supports native FreeBSD ELF64 little-endian amd64/aarch64 payloads; unsupported
+variants and malformed dynamic tables refuse. Internal providers are excluded
+from external requirements. This metadata check does not resolve libraries or
+replace the accepted dependency BOM.
+The reported verification scope
 is native format and declared-plan bindings; build-lifecycle admission and release
 approval remain separate. The [FreeBSD qualification work](../roadmap/active-work.md#freebsd-001-add-first-class-freebsd-native-workers-and-targets)
 records the remaining evidence.
