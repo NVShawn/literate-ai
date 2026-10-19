@@ -29004,3 +29004,24 @@ documentation authority marker had not been refreshed after these documentation
 changes. Its managed review marker is now refreshed and project authority
 validation passes. This failed run is retained separately; full renewal remains
 required before native deployment.
+
+### [ ] LOCK-TARGET-001 — Verify the committed Component target
+
+- **GitHub issue:** [#79](https://github.com/jordanhubbard/literate-ai/issues/79)
+
+- **Priority:** P0
+- **Owner:** Project lock-health observation
+- **Direction:** Report current non-host locks accurately without rewriting their target or weakening verification.
+- **Conclusion:** Read the committed target through the typed catalog-bound lock owner, then reuse current project selector and lock/audit checks. Preserve stale project configuration and input refusal.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Use the catalog-validated committed target in read-only project lock health.
+- **Evidence:**
+  - [x] A real non-host project lock passes verify/status and exact lock checks; dependency, target/audit and project selector drift still refuse.
+  - [ ] Complete full-regression and installed/native renewal before deployment.
+
+**Partial evidence:** All seven lock-health regression checks pass, including
+six real non-host target/current-policy/refusal checks and the existing installed
+HTML lock-state fixture. Three project-verification checks also pass. Lint,
+format, repository layout and public-export checks pass. No native build,
+package or release admission is claimed by lock-health verification.

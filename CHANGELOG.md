@@ -7,6 +7,10 @@
   original release authority; reject legacy conversion transitions. Execution
   and native qualification gates remain unchanged.
 
+- Verify committed Component locks against their declared target while retaining
+  current project Flavor-policy and resolution-audit checks. Valid non-host locks
+  no longer become stale merely because project verification assumed `host`.
+
 - Invoke explicitly configured FreeBSD SSH action receivers through the native
   command shell, preserving literal arguments without requiring interactive Bash.
   Native capability/index receiver renewal remains in progress.
