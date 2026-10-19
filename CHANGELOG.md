@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Project verification refreshes the current receipt through the complete
+  host-eligible sample lifecycle, with reviewed driver and runner bindings.
+
 - Generation guidance gives implementation-test cases distinct names from
   independent acceptance cases. Windows GPU probe tests allow bounded time for
   cold PowerShell startup on busy runners.

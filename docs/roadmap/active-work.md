@@ -27961,7 +27961,7 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
-### [ ] RECEIPT-REFRESH-001 — Refresh the current project test receipt through the complete lifecycle
+### [x] RECEIPT-REFRESH-001 — Refresh the current project test receipt through the complete lifecycle
 
 - **Priority:** P1
 - **Owner:** Project receipt lifecycle and generated-test guidance
@@ -27975,6 +27975,12 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   - [x] Keep generated implementation case IDs distinct from independent verifier IDs.
   - [x] Retry missing JavaScript bundle modules within the existing bounded policy.
   - [x] Review and record the exact runner source closure after the retry change.
-  - [ ] Promote only a newly finalized all-passing lifecycle candidate.
+  - [x] Promote only a newly finalized all-passing lifecycle candidate.
 - **Evidence:**
-  - [ ] Complete the host-eligible sample lifecycle and pass test-receipt check, require-current and litai verify.
+  - [x] Complete the host-eligible sample lifecycle and pass test-receipt check, require-current and litai verify.
+- **Recorded result:** Commit `597250a9` promotes the finalized passing 22-sample host
+  lifecycle (228 tests, 26 component locks, all required evidence roles). Supported
+  candidate check and require-current pass; `litai verify` reports two passes, zero
+  failures and three configured skips. The complete framework suite reports 1,525
+  tests with 37 skips; installing Elixir enables the nine class-setup omissions and
+  all 19 explicitly gated Elixir cases, including native Make, Bazel and Mix proof.
