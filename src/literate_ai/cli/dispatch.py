@@ -1928,6 +1928,10 @@ def _parser() -> JsonArgumentParser:
     )
     project_standard_rebind.add_argument("--project", default=".")
     project_standard_rebind.add_argument(
+        "--registered-parent",
+        help="bind the reviewed child update to its adopted parent's exact registry",
+    )
+    project_standard_rebind.add_argument(
         "--output",
         help="write the plan to a new JSON file for review before apply",
     )

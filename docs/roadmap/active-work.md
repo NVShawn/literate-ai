@@ -27869,11 +27869,18 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Owner:** framework authority and qualification named by the linked issue
 - **Direction:** Support reviewed updates to registered native child projects
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
-- **Depends on:** none
+- **Depends on:** exact adopted-project native registry, reviewed Standard lifecycle rebind and signed source promotion evidence
+- **Next action (in progress):** Complete the installed-wheel tiny-library rebind/replacement journey and its verifier-owned oracle, then refresh lifecycle and package qualification.
+- **Current design:** Plan exact parent/child updates before mutation. Manifest readers must reject special files before opening them and use nonblocking opens where available so unsafe metadata cannot stall an update. Coordinate a registered child lifecycle rebind under the native registry lock; never derive a replacement registration from arbitrary changed files. Source promotion replacement must name the exact unqualified prior promotion, require a new current source review, retain recovery evidence and refuse any qualified destination. Retain exact before/after metadata for coordinated rebinds so an old promotion audit can be checked against its original manifest without treating that old audit as current qualification.
 - **Implementation:**
-  - [ ] Implement the linked issue contract without relaxing existing validation
+  - [x] Bind coordinated lifecycle rebind plans to the exact parent registry and prior child definition.
+  - [x] Apply and roll back child definition and registration together under the existing registry custody boundary.
+  - [x] Add reviewed replacement of an exact unqualified promotion with retained recovery evidence; keep qualified children immutable.
+  - [ ] Prove the tiny Python library journey, independent oracle and drift/symlink/rollback refusals.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Development evidence:** Twenty focused cases pass within the broader regression group (eighteen new registered-child cases plus two existing Standard rebind regressions). The public CLI refuses uncoordinated registered-child updates and accepts explicit `--registered-parent` planning/apply. Exact-byte rollback covers failed registry writes, failed final validation and post-write installed-distribution drift, including noncanonical original whitespace. Changed registry/child inputs, symlinks and drift during observation refuse. Nested project selection resolves the actual registered root. Special-file metadata refuses without blocking, tampered plans and missing authorization preserve both inputs, and rollback preserves a concurrent registry edit instead of overwriting it. Successful rebinds retain identity-bound before/after metadata; retention failure, history collision and indirect custody restore both authorities without replacing retained history. The related configuration, registry, adopted-promotion and project CLI regression group passes (34 tests in 25.616 seconds). Eleven signed-promotion replacement cases also pass, including a reviewed Python import-map change, exact old-tree retention, post-registration rollback, safe retry, stale source/review/child refusals and preservation of a concurrent child edit. The consolidated package suite passes with 1,577 selected tests: 1,542 passed and 35 declared skips; repository/export checks, lint/format, OpenSpec and driver/runner reviews pass. This is development evidence only; the complete installed-wheel tiny-library journey with its verifier oracle, current lifecycle receipt and installed-package qualification remain open.
 
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
@@ -28002,3 +28009,21 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   failures and three configured skips. The complete framework suite reports 1,525
   tests with 37 skips; installing Elixir enables the nine class-setup omissions and
   all 19 explicitly gated Elixir cases, including native Make, Bazel and Mix proof.
+
+### [ ] RETAINED-CATALOG-001 — Model complete retained native trees as canonical Component catalogs
+
+- **GitHub issue:** [#74](https://github.com/jordanhubbard/literate-ai/issues/74)
+- **Current release target:** 1.3.0
+- **Next action:** Inspect the #22 typed retained-lock and managed-graph evidence before implementing whole-tree catalog integration.
+
+- **Priority:** P1
+- **Owner:** framework retained-project, Component catalog and typed native lock authorities
+- **Direction:** Account for every selected tracked source/support input and native build unit through canonical Components, preserving original source authority and explicit ownership.
+- **Conclusion:** Include GitHub issue #74 in the 1.3 retained-project program after #22 typed lock and managed-graph integration. Catalog coverage, source admission, selected execution, independent acceptance, packaging and release remain separate evidence boundaries.
+- **Depends on:** RETAINED-PROJECT-001 and GitHub #22 typed lock and managed native graph integration
+- **Implementation:**
+  - [ ] Define complete deterministic ownership and shared-input accounting without treating directory structure as the native dependency DAG.
+  - [ ] Resolve conditional dependencies, bootstrap relationships, target/configuration variants and selected dependency closures through existing canonical authorities.
+  - [ ] Prove bounded scale, invalidation and fail-closed ownership/dependency checks with a real native multi-Component fixture.
+- **Evidence:**
+  - [ ] Complete coverage and selected-closure native build plus independent acceptance; preserve the unqualified execution guard until its gates pass.

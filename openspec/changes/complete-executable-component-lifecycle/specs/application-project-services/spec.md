@@ -6,6 +6,75 @@ Provides software-neutral project and application services that higher-level too
 
 ## ADDED Requirements
 
+### Requirement: Registered child lifecycle updates coordinate exact parent authority
+
+The framework SHALL provide an explicit reviewed Standard lifecycle rebind for a
+registered native child. Its plan SHALL bind the exact parent manifest, registry,
+prior child manifest and proposed binding. Apply SHALL revalidate those inputs
+under the registry lock and update the child and its registration together.
+
+#### Scenario: Reviewed child framework rebind preserves parent validation
+- **WHEN** an operator applies a current registered-child lifecycle rebind plan
+- **THEN** the parent registry binds the exact updated child definition
+- **AND** existing receipt and accepted-source evidence remain stale until rebuilt
+
+#### Scenario: Uncoordinated child rebind
+- **WHEN** a registered child rebind omits its explicit registered parent
+- **THEN** the command refuses before mutation
+
+### Requirement: Registered child update failures preserve prior authority
+
+Failed updates SHALL restore the prior child and registration bytes. Unsafe paths,
+stale plans and changed metadata SHALL refuse. Arbitrary edited child files SHALL
+NOT refresh a registration. Concurrent changes outside the transaction SHALL
+remain untouched and produce an explicit rollback-conflict diagnostic.
+
+#### Scenario: Registry update fails after the child changed
+- **WHEN** the registry write or final validation fails without concurrent mutation
+- **THEN** both the child manifest and registry retain their exact prior bytes
+
+#### Scenario: Registered metadata changes after review
+- **WHEN** the parent, child or registry differs from the reviewed plan
+- **THEN** apply refuses without silently updating that changed registration
+
+#### Scenario: Special or indirect metadata
+- **WHEN** registered metadata is a symlink, reparse point or special file
+- **THEN** the update refuses without following it or waiting for a writer
+
+### Requirement: Coordinated rebinds retain historical metadata custody
+
+A changing rebind SHALL retain the exact before/after child and registry metadata
+as identity-bound historical custody. Failure to retain that history SHALL roll
+back the update. Historical metadata SHALL NOT make an old receipt or promotion
+audit current. An unchanged rebind SHALL preserve metadata without new history.
+
+#### Scenario: Rebind history cannot be retained
+- **WHEN** history storage fails or its destination conflicts with prior custody
+- **THEN** the child and registration retain their prior bytes and existing history remains untouched
+
+### Requirement: Replacing an unqualified promotion preserves reviewed recovery custody
+
+Source promotion SHALL offer an explicit reviewed replacement path for the exact
+unqualified native child registered by an adopted parent. Replacement SHALL bind
+the prior registry, child and promotion identities to current signed source-review
+evidence. It SHALL retain the prior promotion as recovery evidence, coordinate the
+replacement and registration, and roll back a failed update.
+
+#### Scenario: A reviewed import declaration replaces an unqualified child
+- **WHEN** a tiny source-derived Python library receives a new current signed review
+- **THEN** only its exact reviewed unqualified promotion is replaced and registered
+- **AND** the revised child runs its verifier-owned oracle before qualification
+
+### Requirement: Qualified or stale child promotion cannot be replaced
+
+Replacement SHALL refuse qualified children, stale review or source evidence,
+changed prior authority, unsafe paths and symlinks. It SHALL NOT overwrite a
+qualified child or weaken the independent verifier-owned acceptance oracle.
+
+#### Scenario: Qualified or stale replacement is refused
+- **WHEN** the prior child is qualified or replacement custody has drifted
+- **THEN** promotion refuses and preserves prior child authority and registration
+
 ### Requirement: Applications are root Components
 The framework SHALL represent an application as a selected root Component and target lock
 over an exact dependency graph. Multiple application roots MAY share Components inside one

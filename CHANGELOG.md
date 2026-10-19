@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Registered native children support reviewed Standard rebinds that coordinate the
+  parent registry. Signed promotion replacements retain the previous unqualified
+  child as recovery evidence and refuse stale inputs or qualified destinations.
+
 - Checkpointed Python tests support isolated module processes, configurable CPU-based
   concurrency and serial barriers. The controller preserves ordered outcomes and
   repair markers, including skipped cases and duplicate instances, and stops owned

@@ -150,6 +150,11 @@ PROJECT_INITIALIZATION_SCHEMA = "literate-ai/project-initialization@6"
 def project_lifecycle_from_args(args) -> dict[str, Any]:
     """Plan or apply a reviewed Standard lifecycle distribution rebind."""
 
+    from literate_ai.adapters.native_project_updates import (
+        apply_registered_standard_rebind,
+        plan_registered_standard_rebind,
+        registered_parent_for_child,
+    )
     from literate_ai.application.standard_lifecycle_rebind import (
         StandardLifecycleRebindError,
         apply_standard_lifecycle_rebind,
@@ -157,6 +162,12 @@ def project_lifecycle_from_args(args) -> dict[str, Any]:
     )
 
     try:
+        parent = getattr(args, "registered_parent", None)
+        if parent is None and registered_parent_for_child(Path(args.project)):
+            raise CliFailure(
+                "standard_rebind.registered_parent_required",
+                "registered native child updates require --registered-parent PROJECT",
+            )
         if args.apply:
             if args.output is not None:
                 raise CliFailure(
@@ -189,9 +200,13 @@ def project_lifecycle_from_args(args) -> dict[str, Any]:
                     "standard_rebind.plan_invalid",
                     "reviewed rebind plan must be a JSON object",
                 )
-            return apply_standard_lifecycle_rebind(
-                Path(args.project),
-                plan,
+            apply = apply_standard_lifecycle_rebind
+            positional = (Path(args.project), plan)
+            if parent is not None:
+                apply = apply_registered_standard_rebind
+                positional = (Path(parent), Path(args.project), plan)
+            return apply(
+                *positional,
                 authorize_rebind=args.authorize_rebind,
                 distribution_observer=observe_installed_framework_distribution,
                 origin_observer=observe_installed_framework_origin,
@@ -206,8 +221,13 @@ def project_lifecycle_from_args(args) -> dict[str, Any]:
                 "standard_rebind.authorization_unexpected",
                 "--authorize-rebind is accepted only with --apply",
             )
-        result = plan_standard_lifecycle_rebind(
-            Path(args.project),
+        planner = plan_standard_lifecycle_rebind
+        positional = (Path(args.project),)
+        if parent is not None:
+            planner = plan_registered_standard_rebind
+            positional = (Path(parent), Path(args.project))
+        result = planner(
+            *positional,
             distribution_observer=observe_installed_framework_distribution,
             origin_observer=observe_installed_framework_origin,
         )

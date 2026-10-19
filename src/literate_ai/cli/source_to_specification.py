@@ -2765,6 +2765,14 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             )
         return response, 0
     if command == "accept":
+        replacement_path = getattr(args, "replace_native_child", None)
+        replacement_planning = getattr(args, "plan_native_child_replacement", False)
+        replacement_requested = replacement_path is not None or replacement_planning
+        if replacement_requested and args.integrate_project is None:
+            raise CliFailure(
+                "promotion.replacement_parent_required",
+                "native child replacement requires --integrate-project",
+            )
         bundle, result = _unwrap_bundle(args.bundle)
         standalone = bundle.get("source_kind") == "standalone-local"
         if standalone:
@@ -2839,9 +2847,10 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 ).load_optional()
             except ConversionAuthorityError as exc:
                 raise CliFailure(exc.code, exc.message) from exc
-            if (
-                integration_state is None
-                or integration_state.stage is not ConversionAuthorityStage.RETAINED
+            if integration_state is None or integration_state.stage not in (
+                {ConversionAuthorityStage.RETAINED, ConversionAuthorityStage.DRAFTED}
+                if replacement_requested
+                else {ConversionAuthorityStage.RETAINED}
             ):
                 raise CliFailure(
                     "promotion.integration_stage_invalid",
@@ -2881,9 +2890,15 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                     "promoted project must be separate from source and accepted set",
                 )
             if project_target.exists() or project_target.is_symlink():
+                if not replacement_requested:
+                    raise CliFailure(
+                        "promotion.project_target_exists",
+                        "promoted project target must not already exist",
+                    )
+            elif replacement_requested:
                 raise CliFailure(
-                    "promotion.project_target_exists",
-                    "promoted project target must not already exist",
+                    "promotion.replacement_child_missing",
+                    "replacement requires an existing registered child",
                 )
         if not standalone and result.request.source_snapshot_id != _source_identity(
             source_root
@@ -3044,6 +3059,79 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             expected_base_specification_set_id=result.request.previous_specification_set_id,
         )
         guard = SourceTreeFingerprint(source_root)
+        replacement_plan = None
+        replacement_request = None
+        effective_project_id = args.project_id
+        if replacement_requested:
+            from literate_ai.adapters.native_child_replacement import (
+                plan_native_child_replacement,
+            )
+            from literate_ai.projects import load_project
+
+            effective_project_id = (
+                args.project_id or load_project(project_target).definition.project_id
+            )
+            profile_value = (
+                _read_json(args.qualification_profile)
+                if args.qualification_profile is not None
+                else None
+            )
+            if profile_value is not None:
+                LocalQualificationProfile.from_dict(profile_value)
+            replacement_request = {
+                "source_snapshot_id": specification.source_snapshot_id,
+                "specification_set_id": specification.specification_set_id,
+                "review_id": specification.review_id,
+                "review_identity": canonical_digest(review_to_wire(review)),
+                "bundle_identity": canonical_digest(bundle),
+                "target": str(target),
+                "project_id": effective_project_id,
+                "qualification_profile_identity": canonical_digest(profile_value),
+                "qualification_target": args.qualification_target,
+                "flavors": list(args.flavor),
+            }
+
+            def replacement_guard():
+                guard.require_unchanged()
+                observed_source = (
+                    inventory_source(selected_source).identity
+                    if standalone
+                    else _source_identity(source_root)
+                )
+                if observed_source != specification.source_snapshot_id:
+                    raise CliFailure(
+                        "cli.source_drift", "reviewed source changed before replacement"
+                    )
+                current_profile = (
+                    _read_json(args.qualification_profile)
+                    if args.qualification_profile is not None
+                    else None
+                )
+                if (
+                    canonical_digest(current_profile)
+                    != replacement_request["qualification_profile_identity"]
+                ):
+                    raise CliFailure(
+                        "promotion.replacement_profile_changed",
+                        "reviewed qualification profile changed",
+                    )
+
+            replacement_guard()
+            current_plan = plan_native_child_replacement(
+                integration_project.root, project_target, replacement_request
+            )
+            if replacement_planning:
+                return current_plan, 0
+            replacement_plan = _read_json(replacement_path)
+            if replacement_plan.get("schema") == CLI_RESULT_SCHEMA:
+                replacement_plan = _object(
+                    replacement_plan.get("result"), "replacement plan"
+                )
+            if replacement_plan != current_plan:
+                raise CliFailure(
+                    "promotion.replacement_plan_stale",
+                    "reviewed replacement plan is no longer current",
+                )
         parent = target.parent
         parent.mkdir(parents=True, exist_ok=True)
         staging = Path(tempfile.mkdtemp(prefix=f".{target.name}.", dir=parent))
@@ -3132,26 +3220,44 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                         ).load()
                     except RepositoryLineageStoreError as exc:
                         raise CliFailure(exc.code, exc.message) from exc
-                promoted_project = _create_promoted_project(
-                    accepted_root=target,
-                    project_target=project_target,
-                    result=result,
-                    flavor_drafts=flavor_drafts,
-                    project_id=args.project_id,
-                    qualification_profile=(
-                        Path(args.qualification_profile).resolve(strict=True)
-                        if args.qualification_profile is not None
-                        else None
-                    ),
-                    qualification_target=args.qualification_target,
-                    qualification_flavors=tuple(args.flavor),
-                    specification_set_id=specification.specification_set_id,
-                    review_id=specification.review_id,
-                    translation=translation,
-                    inverse_evidence_custody=inverse_evidence_custody,
-                    parent_selection=parent_selection,
-                )
-                if integration_project is not None:
+
+                def create_promoted(destination):
+                    return _create_promoted_project(
+                        accepted_root=target,
+                        project_target=destination,
+                        result=result,
+                        flavor_drafts=flavor_drafts,
+                        project_id=effective_project_id,
+                        qualification_profile=(
+                            Path(args.qualification_profile).resolve(strict=True)
+                            if args.qualification_profile is not None
+                            else None
+                        ),
+                        qualification_target=args.qualification_target,
+                        qualification_flavors=tuple(args.flavor),
+                        specification_set_id=specification.specification_set_id,
+                        review_id=specification.review_id,
+                        translation=translation,
+                        inverse_evidence_custody=inverse_evidence_custody,
+                        parent_selection=parent_selection,
+                    )
+
+                if replacement_plan is not None:
+                    from literate_ai.adapters.native_child_replacement import (
+                        apply_native_child_replacement,
+                    )
+
+                    promoted_project = apply_native_child_replacement(
+                        integration_project.root,
+                        project_target,
+                        replacement_plan,
+                        replacement_request,
+                        create=create_promoted,
+                        source_guard=replacement_guard,
+                    )
+                else:
+                    promoted_project = create_promoted(project_target)
+                if integration_project is not None and replacement_plan is None:
                     from literate_ai.adapters.conversion_authority import (
                         ConversionAuthorityError,
                         register_native_project,
@@ -3171,6 +3277,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 # must never let this caller delete someone else's installed child.
                 if (
                     integration_project is not None
+                    and replacement_plan is None
                     and promoted_project is not None
                     and project_target.exists()
                 ):
@@ -3675,6 +3782,17 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
             "atomically create and register a source-free native child project "
             "inside an existing retained adopted project"
         ),
+    )
+    replacement_mode = accept.add_mutually_exclusive_group()
+    replacement_mode.add_argument(
+        "--plan-native-child-replacement",
+        action="store_true",
+        help="plan replacement of an exact unqualified registered child",
+    )
+    replacement_mode.add_argument(
+        "--replace-native-child",
+        metavar="PLAN",
+        help="apply a reviewed child replacement plan and retain recovery evidence",
     )
     accept.add_argument("--project-id")
     accept.add_argument(
