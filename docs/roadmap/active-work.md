@@ -28988,7 +28988,7 @@ suite and native execution before exposing it to the operator workstation.
   - [x] Prove preserved source files, exact metadata-only writes, stale-plan refusal, collision/dirty/unsafe-root refusal and permanent refusal of regenerative conversion transitions.
   - [x] Run existing adoption and retained planning regression gates.
   - [ ] Run full regression and native/installed renewal gates.
-  - [ ] Initialize an actual native source project only after authoring and validation.
+  - [x] Initialize an actual native source project only after authoring and validation.
 
 **Partial evidence:** The managed Python gate passes all 22 adoption checks,
 including nine real Git/worktree and public-command original-adoption checks.
@@ -28997,7 +28997,14 @@ planning with a distinct authority-bound identity and no execution admission.
 Repository lint, format, layout and public-export checks pass. Ordinary rebuild
 refuses the original stage and directs the operator to retained planning.
 **Next action in progress:** full regression qualification before native
-deployment; actual source-project authoring/admission remains unfinished.
+deployment; complete source-project coverage and native admission remain unfinished.
+
+An actual original native source tree now has three validated, current locked
+unit contracts and the explicit original authority projection. Applying its
+reviewed Git/project-bound plan created only authority/evidence metadata and
+preserved tracked source bytes. This demonstrates initial authoring/adoption;
+complete tree ownership, native execution and per-unit pkg qualification remain
+unfinished and are not inferred from those three locks.
 
 The initial full regression stopped after 1,287 tests because the repository's
 documentation authority marker had not been refreshed after these documentation
