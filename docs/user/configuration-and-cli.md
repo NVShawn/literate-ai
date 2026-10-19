@@ -653,6 +653,9 @@ opt into its capability probe with
 `"action_protocol": "literate-ai/lifecycle-action-wire@1"`; omitting this field retains
 the existing worker document and identity. SSH workers additionally declare
 `action_command`, a literal argv array naming their worker-owned action receiver.
+Explicit FreeBSD action workers invoke that argv through the native SSH command
+shell without interactive Bash. Use executable paths available in that native
+environment; absolute paths avoid reliance on login-dotfile tool discovery.
 This is separate from `lifecycle_executable`; legacy SSH workers remain ineligible.
 The receiver's private environment owns its identity and credentials. SSH requests
 travel over stdin, and controller environment bindings are not forwarded to that

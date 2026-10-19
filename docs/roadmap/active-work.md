@@ -27971,6 +27971,19 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 ### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
 
+Current native renewal at `d833ebd0` stopped after 232 tests (one error, 26
+skips) because the real SSH-receiver fixture exhausted its capability deadline.
+An isolated rerun reproduced the same 60-second failure. Receiver import and
+code hashing complete independently; even `bash -lic true` hangs on this native
+host. Select direct literal SSH invocation for explicit FreeBSD action workers
+and make the real receiver fixture declare its actual host. Preserve existing
+Linux/macOS login-path behavior, request bytes and deadline/cleanup gates; renew
+the actual native fixture and complete suite before claiming qualification.
+Four local SSH checks now pass in 3.350 seconds, including real receiver
+capability, dispatch and indexing through the FreeBSD native-shell seam, literal
+special-character arguments and workspace cleanup. This is controller-host
+transport evidence; actual FreeBSD renewal remains pending.
+
 Installed-wheel qualification correction: production initialization explicitly
 selects the FreeBSD OS Flavor, but the wheel smoke comparator still defaults to
 Linux outside macOS/Windows. Correct the comparator, cover FreeBSD versioned

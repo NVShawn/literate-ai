@@ -79,7 +79,10 @@ def action_receiver_command(
             command,
             deadline.remaining(),
             transport=worker.transport,
-            login_shell=not windows,
+            # FreeBSD receivers use their exact configured argv through sshd's
+            # native command shell. Interactive Bash is not a platform prerequisite
+            # and can wait indefinitely in a pipe-only session.
+            login_shell=worker.requirements.os_family not in {"windows", "freebsd"},
         )
     except SshTransportError as exc:
         raise ActionWireError(

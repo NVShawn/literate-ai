@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Invoke explicitly configured FreeBSD SSH action receivers through the native
+  command shell, preserving literal arguments without requiring interactive Bash.
+  Native capability/index receiver renewal remains in progress.
+
 - Add development retained-profile runtime library paths rooted in captured
   SDK/toolchain/dependency inputs. Bind POSIX tool execution and native dependency
   inspection to the same reviewed search order while preserving credential-free
