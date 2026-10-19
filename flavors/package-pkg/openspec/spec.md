@@ -20,6 +20,10 @@ use isolated staging and fixed timestamps/compression, and preserve planned file
 paths, root ownership and executable modes. It SHALL disable native tool plugins,
 use explicit configuration, bound process output/time and execute no install
 hooks, package installation or publication.
+For the native pkg 2.8 encoding, both header owner names SHALL be explicitly
+root/wheel. Manifest entries SHALL use numeric IDs zero and zero timestamps;
+payload entries SHALL use reproducible numeric IDs 65534 and the planned fixed
+timestamp. Numeric IDs SHALL NOT replace installation owner-name authority.
 
 #### Scenario: The native tool changes
 

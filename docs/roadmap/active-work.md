@@ -28028,6 +28028,31 @@ including ACL/file-flag/xattr refusal and accepted standard PAX encodings. Actua
 native format compatibility remains part of the pending FreeBSD construction
 gate.
 
+Native construction at `2152af97` fails its first actual package inspection;
+the dependent public CLI group therefore did not run. A separately retained
+diagnostic archive (SHA-256
+`bacd265e033efe95df4559b05dd6a3fff428e517a834ab11a754dc5bf88a2ff1`)
+matches pkg 2.8.4's source: metadata entries have zero timestamps and numeric
+root ownership, while payload entries use fixed numeric IDs 65534 with mandatory
+root/wheel names. Installation resolves those names. Correct that precise
+encoding rather than accepting arbitrary numeric IDs or absent names. The tool
+also emits `shlibs_required` from the real dynamic binary; preserve refusal until
+independent accepted-payload inspection binds the exact native library metadata.
+No positive native package qualification is claimed.
+The native failure log SHA-256 is
+`00627918c6120c0caa9f08e4e0f45f3ba9768de3a097077d515a6ad46d02c355`.
+Fourteen portable format checks now pass (16 selected tests, two native-only
+skips), including mandatory root/wheel names and exact fixed-ID/timestamp
+refusal. Driver/documentation review, lint/format, layout/export, OpenSpec and
+the full documentation gate pass. Renew actual native construction after
+binding the shared-library metadata; do not claim this encoding correction
+alone qualifies the provider.
+The relevant native
+[packing](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/packing.c),
+[installation](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_add.c)
+and [ELF analysis](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_elf.c)
+owners define those semantics.
+
 The full native Python run at `c75fac59` stopped in sample recipe planning:
 the conformance runner rejects `freebsd16` before selecting the existing FreeBSD
 Flavor. Extend host discovery, OS catalog and explicit receiver selection together;

@@ -629,16 +629,16 @@ def _require_single_xz_frame(content, maximum_expanded_bytes):
         ) from exc
 
 
-def _require_tar_metadata(member):
+def _require_tar_metadata(member, *, numeric_owner, timestamp):
     # PAX records are not ordinary members. libarchive can interpret attributes
     # that tarfile leaves only in pax_headers, so inspecting uid/mode alone does
     # not cover the metadata a native package consumer might apply.
     standard = {
         "path": member.name,
         "size": str(member.size),
-        "mtime": str(_EPOCH),
-        "uid": "0",
-        "gid": "0",
+        "mtime": str(timestamp),
+        "uid": str(numeric_owner),
+        "gid": str(numeric_owner),
         "uname": "root",
         "gname": "wheel",
     }
@@ -882,17 +882,25 @@ class FreeBsdPackageAdapter:
                 for index, member in enumerate(archive):
                     if index >= _MAX_MEMBERS + 2:
                         raise PackagingError("FreeBSD archive exceeds member bound")
-                    _require_tar_metadata(member)
                     path = _archive_path(member.name)
+                    is_manifest = path in {"/+MANIFEST", "/+COMPACT_MANIFEST"}
+                    # pkg 2.8's packing owner encodes metadata as zero-time root
+                    # entries and payloads with reproducible nobody numeric IDs.
+                    # Installation resolves mandatory root/wheel names instead.
+                    numeric_owner = 0 if is_manifest else 65534
+                    timestamp = 0 if is_manifest else self.projection.source_date_epoch
+                    _require_tar_metadata(
+                        member, numeric_owner=numeric_owner, timestamp=timestamp
+                    )
                     if path in seen:
                         raise PackagingError("FreeBSD archive has duplicate members")
                     seen.add(path)
                     if (
-                        member.uid != 0
-                        or member.gid != 0
-                        or member.uname not in {"", "root"}
-                        or member.gname not in {"", "wheel"}
-                        or member.mtime != self.projection.source_date_epoch
+                        member.uid != numeric_owner
+                        or member.gid != numeric_owner
+                        or member.uname != "root"
+                        or member.gname != "wheel"
+                        or member.mtime != timestamp
                         or not (member.isfile() or member.isdir())
                         or member.sparse is not None
                     ):

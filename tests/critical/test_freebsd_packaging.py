@@ -126,8 +126,8 @@ class FreeBsdPackagingTests(unittest.TestCase):
                     entry.installed_path[1:],
                     body,
                     entry.mode,
-                    0,
-                    0,
+                    65534,
+                    65534,
                     "root",
                     "wheel",
                     _EPOCH,
@@ -154,7 +154,7 @@ class FreeBsdPackagingTests(unittest.TestCase):
                         0,
                         "root",
                         "wheel",
-                        _EPOCH,
+                        0,
                     ],
                 )
             for row in rows:
@@ -298,13 +298,24 @@ class FreeBsdPackagingTests(unittest.TestCase):
                 "path": member.name,
                 "size": str(member.size),
                 "mtime": str(_EPOCH),
-                "uid": "0",
-                "gid": "0",
+                "uid": "65534",
+                "gid": "65534",
                 "uname": "root",
                 "gname": "wheel",
             }
         )
         self.adapter.verify_bytes(self.plan, result, content)
+
+    def test_native_owner_names_and_fixed_numeric_encoding_cannot_be_substituted(self):
+        for index, value in ((3, 0), (4, 0), (5, ""), (6, ""), (7, 0)):
+            with self.subTest(index=index, value=value):
+
+                def substitute(full, compact, rows, index=index, value=value):
+                    rows[0][index] = value
+
+                result, content = self.archive(substitute)
+                with self.assertRaisesRegex(PackagingError, "unsafe metadata/type"):
+                    self.adapter.verify_bytes(self.plan, result, content)
 
     def test_projection_rejects_wrong_abi_missing_bom_and_path_aliases(self):
         options = dict(

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Match development FreeBSD pkg inspection to native manifest timestamps and
+  reproducible numeric owner encoding, requiring explicit root/wheel names.
+  Native shared-library metadata integration and qualification remain open.
+
 - Reject unplanned ACLs, file flags and extended attributes in development
   FreeBSD pkg archives, even when payload bytes and the outer digest match.
   Standard PAX fields must preserve the exact declared member metadata.
