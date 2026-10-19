@@ -247,6 +247,65 @@ class FreeBsdPackagingTests(unittest.TestCase):
                 with self.assertRaises(PackagingError):
                     self.adapter.verify_bytes(self.plan, result, content)
 
+    def repack_with_pax(self, headers):
+        result, content = self.archive()
+        output = io.BytesIO()
+        with (
+            tarfile.open(fileobj=io.BytesIO(content), mode="r:xz") as source,
+            tarfile.open(
+                fileobj=output, mode="w:xz", format=tarfile.PAX_FORMAT
+            ) as target,
+        ):
+            for member in source:
+                if not member.name.startswith("+"):
+                    member.pax_headers = headers(member)
+                target.addfile(member, source.extractfile(member))
+        content = output.getvalue()
+        artifact = result.artifacts[0]
+        result = replace(
+            result,
+            artifacts=(
+                replace(
+                    artifact,
+                    blob=replace(
+                        artifact.blob,
+                        digest=hashlib.sha256(content).hexdigest(),
+                        size=len(content),
+                    ),
+                ),
+            ),
+        )
+        return result, content
+
+    def test_unplanned_extended_tar_attributes_refuse_after_outer_rehash(self):
+        for key, value in (
+            ("SCHILY.fflags", "uchg"),
+            ("SCHILY.acl.access", "user::rwx,group::r--,other::r--"),
+            ("SCHILY.xattr.user.unplanned", "unaccepted"),
+            ("LIBARCHIVE.xattr.user.unplanned", "dW5hY2NlcHRlZA=="),
+            ("unplanned-provider-field", "unaccepted"),
+        ):
+            with self.subTest(key=key):
+                result, content = self.repack_with_pax(
+                    lambda member, key=key, value=value: {key: value}
+                )
+                with self.assertRaisesRegex(PackagingError, "extended tar metadata"):
+                    self.adapter.verify_bytes(self.plan, result, content)
+
+    def test_standard_pax_fields_preserve_exact_planned_member_metadata(self):
+        result, content = self.repack_with_pax(
+            lambda member: {
+                "path": member.name,
+                "size": str(member.size),
+                "mtime": str(_EPOCH),
+                "uid": "0",
+                "gid": "0",
+                "uname": "root",
+                "gname": "wheel",
+            }
+        )
+        self.adapter.verify_bytes(self.plan, result, content)
+
     def test_projection_rejects_wrong_abi_missing_bom_and_path_aliases(self):
         options = dict(
             package="litai-fixture",

@@ -629,6 +629,26 @@ def _require_single_xz_frame(content, maximum_expanded_bytes):
         ) from exc
 
 
+def _require_tar_metadata(member):
+    # PAX records are not ordinary members. libarchive can interpret attributes
+    # that tarfile leaves only in pax_headers, so inspecting uid/mode alone does
+    # not cover the metadata a native package consumer might apply.
+    standard = {
+        "path": member.name,
+        "size": str(member.size),
+        "mtime": str(_EPOCH),
+        "uid": "0",
+        "gid": "0",
+        "uname": "root",
+        "gname": "wheel",
+    }
+    if any(
+        key not in standard or value != standard[key]
+        for key, value in member.pax_headers.items()
+    ):
+        raise PackagingError("FreeBSD archive contains unplanned extended tar metadata")
+
+
 class FreeBsdPackageAdapter:
     """Construct actual native packages, inspect without installation or execution."""
 
@@ -862,6 +882,7 @@ class FreeBsdPackageAdapter:
                 for index, member in enumerate(archive):
                     if index >= _MAX_MEMBERS + 2:
                         raise PackagingError("FreeBSD archive exceeds member bound")
+                    _require_tar_metadata(member)
                     path = _archive_path(member.name)
                     if path in seen:
                         raise PackagingError("FreeBSD archive has duplicate members")

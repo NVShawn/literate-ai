@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reject unplanned ACLs, file flags and extended attributes in development
+  FreeBSD pkg archives, even when payload bytes and the outer digest match.
+  Standard PAX fields must preserve the exact declared member metadata.
+
 - Route the development package-pkg Flavor through public plan/build/verify.
   Preflight native tooling before rebuilding; bind both BOMs and native projection
   evidence through the accepted lifecycle. Initial construction requires a local

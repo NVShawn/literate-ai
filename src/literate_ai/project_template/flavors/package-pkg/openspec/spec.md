@@ -33,8 +33,16 @@ extracting or executing it. It SHALL check exact dependencies, provenance,
 canonical file ownership/modes/timestamps, bounded member sizes, native file
 checksums and accepted input digests. Unsafe paths, duplicate or extra members,
 hooks, links, special files and rehashed payload/manifest tampering SHALL refuse.
+Extended tar metadata SHALL NOT add ACLs, file flags, extended attributes or
+other unplanned installation semantics. Standard PAX encodings SHALL reproduce
+the exact accepted member path, size, timestamp and root ownership.
 
 #### Scenario: The archive is changed and rehashed
 
 - **WHEN** native metadata or a payload member differs despite a matching new outer digest
 - **THEN** independent verification rejects the package
+
+#### Scenario: A rehashed archive adds file flags through PAX
+
+- **WHEN** an archive retains accepted payload bytes and normal ownership/modes but adds extended file flags, ACLs or attributes
+- **THEN** independent verification rejects the unplanned metadata

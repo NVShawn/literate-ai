@@ -28001,6 +28001,18 @@ native inspection refuses without it. The final native-format group passes 13
 checks with its two explicit native-only skips. Native/public installed execution
 remains unqualified until those cases run on FreeBSD.
 
+Native package inspection follow-up: reject unplanned extended tar
+attributes, including ACLs, file flags and extended attributes. Python's tar
+reader exposes these separately from normal ownership/mode fields, so checking
+only those fields can admit metadata outside the accepted projection. Preserve
+bounded standard PAX encodings only when they reproduce the exact accepted
+member fields. The regression first reproduced acceptance of an unplanned file
+flag after rewriting the outer package digest. After correction, thirteen
+portable format checks pass (15 selected tests with two native-only skips),
+including ACL/file-flag/xattr refusal and accepted standard PAX encodings. Actual
+native format compatibility remains part of the pending FreeBSD construction
+gate.
+
 The full native Python run at `c75fac59` stopped in sample recipe planning:
 the conformance runner rejects `freebsd16` before selecting the existing FreeBSD
 Flavor. Extend host discovery, OS catalog and explicit receiver selection together;
