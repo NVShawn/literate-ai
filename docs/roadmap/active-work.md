@@ -28619,6 +28619,17 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   configured finalize, model-free rebuild and projected-command cases on the
   actual guest, and preserve unsupported-host refusal rather than aliasing another
   POSIX OS. Optional Elixir fixtures must also retain the real host identity.
+  The fixture audit at `f05a8390` passes the complete host suite: 1,831
+  selected, 1,789 passed, 42 skipped and zero failures in 1,375.551 seconds;
+  log SHA-256 `a1f10e27fde77b9c149528e5d5e632db2e54e35275ee7b282ef0c77c82fb13c6`. Actual FreeBSD passes the
+  four worker-health cases and both configured-finalize cases without skips.
+  Its worker-toolchain/operator-grant case then exhausts the fixture's health
+  admission budget before reaching FINALIZE. Both job clones pass Git connectivity
+  checks but inherit four borrowed object stores; transient pack-index warnings
+  were retained. Compare the unchanged fixture budget on a fully independent
+  `--dissociate` checkout before attributing the refusal to runtime behavior or
+  changing timing. Native full-suite and isolated installed-wheel qualification
+  remain open.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
