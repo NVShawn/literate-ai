@@ -47,6 +47,9 @@ def _observer(commands, environment, *, artifact_files=None):
         linux_loader_paths=LinuxLoaderPaths.from_environment(environment),
         freebsd_loader_paths=FreeBsdLoaderPaths.from_environment(environment),
         artifact_files=artifact_files,
+        toolchain_runtime_paths=any(
+            key in environment for key in ("LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH")
+        ),
     )
 
 

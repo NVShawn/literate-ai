@@ -35,6 +35,9 @@ from literate_ai.adapters.retained_project_dependencies import (
     observe_retained_export_dependencies,
     retained_export_dependency_identity,
 )
+from literate_ai.adapters.retained_project_environment import (
+    captured_runtime_environment,
+)
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
     capture_retained_project_inputs,
@@ -450,6 +453,9 @@ class RetainedProjectExecutionWorkspace:
         # Do not inherit credentials, compiler/loader injection, user dotfiles,
         # Python paths or the caller's command search path.
         return {
+            **captured_runtime_environment(
+                self.inputs, self.manifest, self.plan.profile
+            ),
             "PATH": os.pathsep.join(
                 sorted(
                     {str(Path(tool.executable).parent) for tool in self._tools.values()}

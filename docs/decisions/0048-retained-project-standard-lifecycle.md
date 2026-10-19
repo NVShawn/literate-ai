@@ -96,6 +96,35 @@ Acceptance permits implementation and its tests under ADR 0006. It does not itse
 authorize a release, claim qualification, or merge a PR. Implementation and full
 qualification remain open under RETAINED-PROJECT-001.
 
+## Captured native runtime search paths
+
+Profiles may opt into an ordered `runtime_library_paths` tuple of at most 32
+canonical input-relative directory names. Omission preserves existing wire
+identities and the credential-free default environment. Each selected directory
+must exist directly in the captured manifest, contain selected files, and contain
+only SDK, toolchain or dependency members. Missing, aliased, redirected, source,
+test or output directories refuse. A profile cannot supply arbitrary environment
+variables or import the caller's loader state.
+
+On Linux and FreeBSD the execution owner projects these directories to
+`LD_LIBRARY_PATH`; on macOS it uses `DYLD_LIBRARY_PATH`. Other hosts refuse this
+opt-in until their loader selection is explicitly implemented. The projected
+paths are rooted in the immutable captured snapshot and retain declared search
+order. The same environment reaches commands, dependency observers, SDK scopes
+and independent acceptance. Existing input and native dependency guards bracket
+execution, and the profile/plan and environment identities bind the selection.
+The macOS/Linux observer explicitly selects the runtime search context for
+captured build tools; its own host inspectors keep their independent host
+context. The existing FreeBSD observer already projects selected paths for
+its native tool closure.
+
+This permits captured native tools to select captured shared libraries without
+inheriting ambient compiler/loader injection. It does not prove a complete
+compiler closure, suppress system loader fallback, admit SDK products, establish
+tool source-build provenance, or qualify public retained execution. Compiler
+resource directories, sysroots, startup/link inputs and relocated execution
+remain separate explicit requirements.
+
 ## Canonical per-Component input ownership
 
 An optional retained manifest ownership map binds normalized input prefixes to

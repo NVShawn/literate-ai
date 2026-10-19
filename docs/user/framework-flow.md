@@ -164,6 +164,17 @@ Missing, extra or duplicate cases, unknown outcomes, failed cases and unauthoriz
 skips stop later work. Only actual passes satisfy the project's minimum; baseline
 exceptions cannot be relabeled as passing tests.
 
+Development profiles can explicitly select `runtime_library_paths`, an ordered
+list of up to 32 captured input directories. Every directory must contain only
+SDK, toolchain or dependency members. The command owner projects these paths to
+the POSIX loader variable and passes the same context to native dependency
+inspection, SDK scopes and acceptance. It never inherits loader variables from
+the caller. Missing, redirected, source/output or empty directories refuse;
+unsupported hosts refuse the opt-in. Omission preserves legacy identities and
+default environments. This selects captured runtime libraries for native tools;
+it does not suppress system fallback or establish complete compiler/sysroot
+provenance. Native/installed qualification remains open under RETAINED-LOADER-001.
+
 Development retained independent acceptance can opt in to a `filesystem` case.
 It binds private input bytes, expected file lengths and SHA-256 values, optional
 permission checks, directory/absence expectations and explicit resource limits.

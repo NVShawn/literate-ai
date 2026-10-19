@@ -28931,3 +28931,30 @@ strict OpenSpec, 21 Node checks and all 121 documentation diagrams pass.
 **Next action in progress:** freeze and run the exact-head full suite, then
 qualify native and installed behavior without advancing public
 execution, conversion, release or source/ports unit admission.
+
+### [ ] RETAINED-LOADER-001 — Bind captured native runtime search paths in retained profiles
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+
+- **Priority:** P0
+- **Owner:** Retained lifecycle profile and execution environment
+- **Direction:** Run captured native compilers and tools against their selected shared-library closure without inheriting ambient loader injection.
+- **Conclusion:** Add opt-in ordered input-relative runtime directories to the reviewed profile; validate captured role ownership and bind their projected POSIX loader environment to existing dependency observations. Preserve legacy identities and refuse unsupported hosts. SDK admission and public execution remain separate.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [x] Define bounded canonical path selection and unchanged legacy wire identities.
+  - [x] Project only captured toolchain/SDK/dependency directories through the existing credential-free environment.
+- **Evidence:**
+  - [x] Run a real linked private tool in a retained workspace and reject undeclared, redirected, changed and unsupported search paths; preserve default behavior.
+  - [ ] Run retained regression, authority/style/documentation gates and native renewal before qualification.
+
+Five focused checks pass, including a compiled private-library tool that fails
+without its declared loader path and passes all four actual retained commands
+with captured paths. All 139 retained checks pass locally (138 passed, one
+native-only pkg construction skip) in 240.266 seconds. The original probe exposed
+that macOS/Linux observers assumed host loader paths for build tools; explicit
+tool runtime context now matches execution, while host inspectors retain their
+separate context. Lint/format, layout/export and strict specifications pass;
+all 121 documentation diagrams render. Native/installed renewal remains open.
+**Next action in progress:** qualify this exact implementation through the full
+suite and native execution before exposing it to the operator workstation.

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add development retained-profile runtime library paths rooted in captured
+  SDK/toolchain/dependency inputs. Bind POSIX tool execution and native dependency
+  inspection to the same reviewed search order while preserving credential-free
+  defaults and legacy identities. Native/installed qualification remains open.
+
 - Add development retained filesystem acceptance cases with private fixtures,
   actual size/content/mode observations and unchanged legacy case identities.
   Reject zero-exit wrong products, fixture substitution, unsafe nodes, extra

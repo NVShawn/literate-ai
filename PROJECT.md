@@ -88,6 +88,13 @@ sealed exports. Focused local file-effect and SDK-scope checks pass. Full curren
 native/installed and original-source composition qualification remain open;
 these observations do not confer per-unit source/package or release admission.
 
+RETAINED-LOADER-001 binds explicit captured SDK/toolchain/dependency runtime
+directories to native command execution and dependency observation under Goals
+1 and 4. Default environments and legacy profile identities remain unchanged.
+The local private-library tool fixture passes all retained command stages;
+native/installed renewal, complete compiler/sysroot closure and SDK admission
+remain separate requirements.
+
 FREEBSD-001 adds a fourth first-class OS platform and native worker/target
 support under Goals 1, 4 and 5. This includes truthful FreeBSD identity,
 registration, host/toolchain realization, bounded native observations, isolated

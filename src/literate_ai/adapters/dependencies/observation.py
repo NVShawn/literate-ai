@@ -852,6 +852,7 @@ class PortableHostDependencyObserver:
         linux_loader_paths: LinuxLoaderPaths | None = None,
         freebsd_loader_paths: FreeBsdLoaderPaths | None = None,
         artifact_files: Sequence[Path] | None = None,
+        toolchain_runtime_paths: bool = False,
     ) -> None:
         self.toolchain_commands = tuple(tuple(item) for item in toolchain_commands)
         self.lifecycle_commands = tuple(lifecycle_commands)
@@ -874,6 +875,9 @@ class PortableHostDependencyObserver:
             raise ValueError("FreeBSD loader paths must be a typed projection")
         self.freebsd_loader_paths = freebsd_loader_paths
         self.artifact_files = _explicit_artifact_files(artifact_files)
+        if type(toolchain_runtime_paths) is not bool:
+            raise TypeError("Toolchain runtime-path selection requires a boolean")
+        self.toolchain_runtime_paths = toolchain_runtime_paths
 
     def observe(
         self, build: Mapping[str, object], *, root_ref: str
@@ -885,6 +889,7 @@ class PortableHostDependencyObserver:
                 library_roots=self.library_roots,
                 loader_paths=self.macos_loader_paths,
                 artifact_files=self.artifact_files,
+                toolchain_runtime_paths=self.toolchain_runtime_paths,
             ).observe(build, root_ref=root_ref)
         elif sys.platform.startswith("linux"):
             native = LinuxElfDependencyObserver(
@@ -893,6 +898,7 @@ class PortableHostDependencyObserver:
                 library_roots=self.library_roots,
                 loader_paths=self.linux_loader_paths,
                 artifact_files=self.artifact_files,
+                toolchain_runtime_paths=self.toolchain_runtime_paths,
             ).observe(build, root_ref=root_ref)
         elif sys.platform.startswith("freebsd"):
             from .freebsd import FreeBsdElfDependencyObserver
@@ -971,6 +977,7 @@ class MacOsMachODependencyObserver:
         library_roots: Sequence[Path] = (),
         artifact_files: Sequence[Path] | None = None,
         loader_paths: MacOsLoaderPaths | None = None,
+        toolchain_runtime_paths: bool = False,
     ) -> None:
         self.toolchain_commands = tuple(tuple(item) for item in toolchain_commands)
         self.lifecycle_commands = tuple(lifecycle_commands)
@@ -980,6 +987,14 @@ class MacOsMachODependencyObserver:
         if loader_paths is not None and not isinstance(loader_paths, MacOsLoaderPaths):
             raise ValueError("macOS loader paths must be a typed projection")
         self.loader_paths = loader_paths
+        if type(toolchain_runtime_paths) is not bool or (
+            toolchain_runtime_paths and loader_paths is None
+        ):
+            raise ValueError(
+                "Toolchain runtime paths require explicit loader authority"
+            )
+        self.toolchain_runtime_paths = toolchain_runtime_paths
+        self._inspector_paths = ()
         if not self.xcrun_command:
             raise ValueError("xcrun command cannot be empty")
 
@@ -1006,6 +1021,7 @@ class MacOsMachODependencyObserver:
             )
         dyld_digest = _file_digest(dyld_info)
         self._dyld_info = dyld_info
+        self._inspector_paths = tuple(str(p.resolve()) for p in (xcrun, dyld_info))
         self._dyld_digest = dyld_digest
         self._validated_paths: dict[str, bool] = {}
         artifact_root = _artifact_root(build)
@@ -1161,9 +1177,16 @@ class MacOsMachODependencyObserver:
         loader_paths = getattr(self, "loader_paths", None)
         pending: deque[tuple[str, str, tuple[str, ...], bool]] = deque()
         for path in sorted(executable_roots):
-            runtime = loader_paths is not None and "runtime" in seed_paths[path]
+            selected_tool = (
+                getattr(self, "toolchain_runtime_paths", False)
+                and path not in getattr(self, "_inspector_paths", ())
+                and "build" in seed_paths[path]
+            )
+            runtime = loader_paths is not None and (
+                "runtime" in seed_paths[path] or selected_tool
+            )
             pending.append((path, executable_roots[path], (), runtime))
-            if runtime and "build" in seed_paths[path]:
+            if runtime and "build" in seed_paths[path] and not selected_tool:
                 pending.append((path, executable_roots[path], (), False))
         processed: set[tuple[str, str, tuple[str, ...], bool]] = set()
 
@@ -1460,6 +1483,7 @@ class LinuxElfDependencyObserver:
         library_roots: Sequence[Path] = (),
         loader_paths: LinuxLoaderPaths | None = None,
         artifact_files: Sequence[Path] | None = None,
+        toolchain_runtime_paths: bool = False,
     ) -> None:
         self.toolchain_commands = tuple(tuple(item) for item in toolchain_commands)
         self.lifecycle_commands = tuple(lifecycle_commands)
@@ -1467,6 +1491,14 @@ class LinuxElfDependencyObserver:
         if loader_paths is not None and not isinstance(loader_paths, LinuxLoaderPaths):
             raise ValueError("Linux loader paths must be a typed projection")
         self.loader_paths = loader_paths
+        if type(toolchain_runtime_paths) is not bool or (
+            toolchain_runtime_paths and loader_paths is None
+        ):
+            raise ValueError(
+                "Toolchain runtime paths require explicit loader authority"
+            )
+        self.toolchain_runtime_paths = toolchain_runtime_paths
+        self._inspector_paths = ()
         self.artifact_files = _explicit_artifact_files(artifact_files)
 
     def observe(
@@ -1478,6 +1510,7 @@ class LinuxElfDependencyObserver:
                 "ELF dependency observation requires a Linux host",
             )
         readelf = _resolved_bound_tool("readelf")
+        self._inspector_paths = (str(readelf),)
         readelf_digest = _file_digest(readelf)
         ldconfig = _find_linux_ldconfig()
         ldconfig_digest = _file_digest(ldconfig)
@@ -1618,9 +1651,16 @@ class LinuxElfDependencyObserver:
         processed: set[tuple[str, str, bool]] = set()
         pending: deque[tuple[str, str, tuple[str, ...], bool]] = deque()
         for path, scopes in sorted(seeds.items()):
-            runtime = self.loader_paths is not None and "runtime" in scopes
+            selected_tool = (
+                getattr(self, "toolchain_runtime_paths", False)
+                and path not in getattr(self, "_inspector_paths", ())
+                and "build" in scopes
+            )
+            runtime = self.loader_paths is not None and (
+                "runtime" in scopes or selected_tool
+            )
             pending.append((path, path, (), runtime))
-            if runtime and "build" in scopes:
+            if runtime and "build" in scopes and not selected_tool:
                 pending.append((path, path, (), False))
         while pending:
             path, seed, inherited, runtime = pending.popleft()
