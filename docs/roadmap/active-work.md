@@ -27952,8 +27952,36 @@ qualify the new exact wheel. The failed run remains failure evidence.
 - **Depends on:** none
 - **Implementation:**
   - [ ] Add FreeBSD OS and target contracts and Flavor; implement CLI registration, probing, paths, toolchains and alignment; support native storage and pressure checks; qualify isolated build/test/artifact and retained lifecycle execution.
+  - [ ] Add a real FreeBSD pkg provider with exact selected target ABI, explicit dependency coordinates, payload/ownership/mode projection, bound native tool and independent metadata/content/checksum inspection. Prove actual construction and package-tool inspection on FreeBSD before public qualification.
 - **Evidence:**
   - [ ] Real FreeBSD SSH registration and alignment pass; native build/test and failed-input/test rejection are retained; cleanup is bounded; existing Linux/macOS/Windows suites pass; exact installed wheel and CI qualify the change.
+
+Native package implementation in progress: project accepted files and both BOMs
+through a FreeBSD-specific provider, bind the static native pkg executable and
+ABI, construct only in isolated staging without installing, and independently
+inspect the resulting native archive. Retain original source/Component authority;
+reject missing dependency coordinates, hooks, extra files, ownership/mode drift
+and rehashed manifest/payload substitutions. Native pkg format inspection follows
+the selected tool version's upstream contracts, including its actual file-checksum
+encoding. Retained-provider/public CLI composition and per-unit source/ports
+qualification remain separate required integrations.
+Format references are the selected pkg 2.8.4
+[file-checksum implementation](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_checksum.c),
+[native manifest emitter](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_manifest.c)
+and [package construction owner](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_create.c).
+Ten portable checks pass, including bound-plan/result substitution, rehashed
+payload/metadata/native-checksum changes, owner/mode drift, hooks, duplicate/extra
+members and trailing tar/XZ data. Both actual native construction cases remain
+unexecuted on this macOS host; the dedicated FreeBSD slot is still qualifying the
+earlier retained receipt/archive revision. No native pkg pass is inferred.
+The package-provider regression group passes 58 checks (two explicit native-only
+skips) before the final executable-mode/tool-drift additions. Native construction,
+full-current-revision regression, installed and public-dispatch qualification
+remain open. Keep this development provider out of qualification claims until
+the actual FreeBSD construction/query/payload cases execute successfully.
+All 14 initialization checks also pass with the new provider authority and bundled
+template. Public/provider composition must reopen current accepted lifecycle
+custody; parsed batch/plan/result assertions alone must not supply admission.
 
 The full native Python run at `c75fac59` stopped in sample recipe planning:
 the conformance runner rejects `freebsd16` before selecting the existing FreeBSD

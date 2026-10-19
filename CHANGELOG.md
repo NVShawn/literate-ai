@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add development FreeBSD pkg projection and native construction/inspection
+  primitives, binding ABI, dependencies, ownership, modes, both BOMs and static
+  native tooling. Reject substituted plans/results, unsafe members, hooks,
+  checksum drift and trailing archive data. Native qualification and public
+  provider integration remain in progress.
+
 - Package locally admitted retained runs through the existing ZIP provider using
   distinct retained-origin plans/results. Bind the selected packaging Flavor,
   exact accepted payload, authored specifications, both BOMs and receipt evidence;

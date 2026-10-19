@@ -88,6 +88,11 @@ execution and current artifact/acceptance evidence. It is open; registering a
 POSIX endpoint or passing mocked dispatch tests alone does not establish support.
 See framework issue #67 and the active queue. Existing three-platform behavior
 and retained-source authority must remain intact.
+A native pkg provider is being implemented under the same issue, with explicit
+ABI/dependency/payload projection, bound static pkg tooling and independent
+manifest/file/checksum inspection. Portable format checks do not establish native
+construction. Public provider dispatch, retained integration, native execution
+qualification and whole-system package coverage remain open.
 
 The current development release is **1.3.0**. [RELEASE-INTEGRATION-004](docs/roadmap/1.3-integration.md)
 owns the current public issue and review scope. The first implementation batch
