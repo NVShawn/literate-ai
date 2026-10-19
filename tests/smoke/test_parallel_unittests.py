@@ -173,6 +173,9 @@ class ParallelUnittestTests(unittest.TestCase):
                     with Path("executions").open("a") as log:
                         log.write("a\\n")
                 def test_b_crash(self):
+                    if Path("fail-before-crash").exists():
+                        self.addCleanup(lambda: os._exit(7))
+                        self.fail("body failed before cleanup crashed")
                     if not Path("fixed").exists():
                         os._exit(7)
         """,
@@ -180,10 +183,19 @@ class ParallelUnittestTests(unittest.TestCase):
         result = self.run_suite()
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn("without a complete report", result.stderr)
+        failed = json.loads(self.report.read_text())["outcomes"]
+        self.assertEqual(len(failed), 1)
+        self.assertTrue(failed[0]["test_key"].endswith("test_b_crash"))
         (self.root / "fixed").touch()
         result = self.run_suite()
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual((self.root / "executions").read_text(), "a\na\n")
+        (self.root / "fail-before-crash").touch()
+        result = self.run_suite()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        failed = json.loads(self.report.read_text())["outcomes"]
+        self.assertEqual(len(failed), 1)
+        self.assertTrue(failed[0]["test_key"].endswith("test_b_crash"))
 
     def test_deadline_is_nonpassing(self) -> None:
         self.module(

@@ -387,14 +387,28 @@ class ParallelSuite:
     def _error(self, worker: RunningModule, error: BaseException, result: Any) -> None:
         from literate_ai.contracts.identity import canonical_identity
 
+        # Attribute a crash to its active case, or to the case whose failing
+        # teardown/cleanup was still running, rather than inventing a failure
+        # for an earlier success or a case that never started.
+        index = worker.group.indices[0]
+        candidates = (
+            worker.begun - worker.terminal,
+            {i for i, status in worker.statuses.items() if status == "failed"},
+            set(worker.group.indices) - worker.terminal,
+        )
+        for group in candidates:
+            matching = next((i for i in worker.group.indices if i in group), None)
+            if matching is not None:
+                index = matching
+                break
         self.invalidate(worker.group.indices)
         message = f"parallel test worker failed: {error}"
         event = {
             "status": "failed",
             "failure_identity": canonical_identity({"worker_error": message}).uri,
         }
-        self.outcome(worker.group.indices[0], event)
-        result.errors.append((self.tests[worker.group.indices[0]], message + "\n"))
+        self.outcome(index, event)
+        result.errors.append((self.tests[index], message + "\n"))
         worker.failed = self.failed = True
         worker.invalid = True
         print(f"\n{message}; output retained at {worker.root}", file=self.stream)
@@ -541,8 +555,10 @@ class ParallelSuite:
         )
         for records in (result.failures, result.errors):
             records.sort(
-                key=lambda pair: getattr(
-                    pair[0], "order", order.get(id(pair[0]), len(order))
+                key=lambda pair: (
+                    pair[0].order
+                    if isinstance(pair[0], RemoteTest)
+                    else order.get(id(pair[0]), len(order))
                 )
             )
         return result
