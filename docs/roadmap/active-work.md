@@ -25862,12 +25862,25 @@ authorization and then unconditionally raise
 was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
 does not close this runtime requirement or transfer retained release authority.
 
-**Next action in progress:** mint distinct local retained-origin receipts only
-from complete current runs, retain exact source/export/BOM/command evidence in
-the existing CAS, and admit sealed payload materialization for package consumers.
-Reject stale authority and incomplete/corrupt retention; decoded receipt JSON
-alone must not grant admission. Native SDK qualification remains pending.
-Public package/release integration follows without generated-source authority transfer.
+**Next action in progress:** connect the local retained admission to the existing
+ZIP provider through distinct retained package plan/result contracts. Bind a
+packaging Flavor actually selected by a current Component lock, exact accepted
+payload, authored specifications, both BOMs and retained receipt evidence. Reuse
+the provider's construction and independent archive verification; never place a
+retained project identity in a generated Component revision field. Qualify repeat,
+relocation, stale authority, resource collision and rehashed archive tampering.
+Native pkg, bounded whole-system scale, installed CLI and release integration
+remain required after this archive-provider slice; no publication grant is added.
+Archive checkpoint: all 117 retained-project checks pass locally in 464.220
+seconds, including eight actual archive cases. They prove read-only planning,
+byte-identical repeat construction, executable payload preservation, complete
+retained run records/specifications/BOMs, scratch retirement/CAS relocation,
+stale authority and rehashed archive tamper rejection. Empty selected payload
+directories refuse rather than being silently dropped by the file-only ZIP
+provider. The existing package-provider group also passes 47 checks before the
+final run-record/empty-directory additions. Lint/format, authority validation,
+driver/documentation review, OpenSpec and documentation checks pass. Native,
+installed/public CLI, release and whole-system scale qualification remain open.
 Local receipt checkpoint: all 109 retained-project tests pass in 373.215 seconds,
 including ten receipt cases and the source-link execution regression. Actual
 compiled exports survive scratch retirement and CAS relocation; stale authority,
@@ -25890,6 +25903,10 @@ completion retains fresh checks of the most recent verifier grants. SDK-bound
 BOM execution rejects missing producer owners before target commands run.
 All 98 local retained-project checks pass (243.802 seconds), including seven new
 SDK policy/execution cases with a real compiled SDK and its transitive library.
+At exact revision `015582a0740550d73fcf4577f6ca54b741c6e68d`, all 98 also pass
+on actual FreeBSD without skips in 1,907.301 seconds. The native log SHA-256 is
+`ca4260601e3d6c4628d7449adb9188ad994fd6513601cb3dbe97ec7a3900194f`.
+This qualifies the SDK checkpoint, not later receipt/package changes.
 Both existing SDK execution regressions pass (38.770 seconds). The initial focused
 run also passed seven existing producer checks. Lint/format, authority/driver
 review, both OpenSpec changes, all 121 diagrams and 21 documentation-tool tests

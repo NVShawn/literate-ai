@@ -70,6 +70,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             "  return ferror(stdin) ? 8 : 0;\n"
             " }\n"
             ' if (!strcmp(v[1], "empty")) return 0;\n'
+            ' if (!strcmp(v[1], "directory") && n == 3) return mkdir(v[2], 0755);\n'
             ' if (!strcmp(v[1], "fail")) {fputs("failed", stderr); return 9;}\n'
             ' if (!strcmp(v[1], "scale") && n == 4) {\n'
             "  void *lib = dlopen(v[2], RTLD_NOW | RTLD_LOCAL);\n"

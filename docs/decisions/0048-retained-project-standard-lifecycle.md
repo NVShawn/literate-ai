@@ -286,3 +286,25 @@ its regular native images for existing observation APIs without following aliase
 retain exact link text and target validation. An explicit empty native-image
 selection describes data-only inputs. Default unselected tree observation still
 rejects symlinks.
+
+## Retained package provider integration
+
+An admitted retained run may project its sealed package inventory into a distinct
+retained package plan/result. Bind the original retained plan and receipt, the
+exact target, packager implementation and a packaging Flavor selected by the root
+node of one actual selected Component lock. A retained project is never encoded
+as a generated Component revision or artifact graph. A parsed package record is
+not admission, execution authority or a release grant.
+
+For ZIP, reuse the existing provider's canonical construction and independent
+member/metadata/hash verification. Include exact selected authored specifications,
+source/resolved BOMs, receipt and input/output manifests under a reserved evidence
+namespace alongside the accepted payload. Reject namespace collisions, missing
+specification bytes, mismatched lock/provider/target, stale original authority and
+changed retained blobs. Revalidate admission before and after construction and
+verification. Preserve both ordinary package contracts and their wire identities.
+
+This archive integration does not supply native pkg construction, installation,
+remote receipt authentication, release approval or whole-system memory/scale
+qualification. Those remain explicit prerequisites for their corresponding
+public lifecycle operations.

@@ -19,6 +19,10 @@ from literate_ai.contracts.executable_components.packages import (
     PackageResult,
 )
 from literate_ai.contracts.identity import ContentIdentity
+from literate_ai.contracts.retained_project_package import (
+    RetainedProjectPackagePlan,
+    RetainedProjectPackageResult,
+)
 
 
 class PackagingError(ValueError):
@@ -80,7 +84,22 @@ def verify_package_result(
 ) -> PackageResult:
     """Recheck a package result against its exact plan and immutable bytes."""
 
-    exact = {
+    if isinstance(plan, RetainedProjectPackagePlan):
+        if not isinstance(result, RetainedProjectPackageResult) or result.plan != plan:
+            raise PackagingError("retained package result differs from exact plan")
+        exact = {}
+    elif isinstance(plan, PackagePlan) and isinstance(result, PackageResult):
+        exact = _component_package_bindings(plan, result)
+    else:
+        raise PackagingError("package plan and result origins differ")
+    for label, (actual, expected) in exact.items():
+        if actual != expected:
+            raise PackagingError(f"package result {label} identity mismatch")
+    return _verify_package_files(plan, result, read_blob=read_blob)
+
+
+def _component_package_bindings(plan, result):
+    return {
         "package plan": (result.package_plan_identity, plan.identity),
         "root Component": (
             result.root_component_revision,
@@ -97,9 +116,9 @@ def verify_package_result(
         ),
         "packager": (result.packager_identity, plan.packager_identity),
     }
-    for label, (actual, expected) in exact.items():
-        if actual != expected:
-            raise PackagingError(f"package result {label} identity mismatch")
+
+
+def _verify_package_files(plan, result, *, read_blob):
     if result.package_kind is not plan.package_kind:
         raise PackagingError("package result kind differs from its exact plan")
     if result.entrypoints != plan.entrypoints:

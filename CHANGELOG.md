@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Package locally admitted retained runs through the existing ZIP provider using
+  distinct retained-origin plans/results. Bind the selected packaging Flavor,
+  exact accepted payload, authored specifications, both BOMs and receipt evidence;
+  retain and independently verify archive bytes. Read-only planning and current
+  source checks preserve original authority. Native pkg, installed/public lifecycle
+  and whole-system scale qualification remain open.
+
 - Mint distinct local retained-origin receipts from complete current runs. Stream
   original source/link bytes and sealed exports into the existing CAS, retain both
   BOMs and command/test/verifier evidence, and reconstruct exact package inputs

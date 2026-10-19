@@ -132,6 +132,12 @@ and actual run evidence in CAS. Its in-process admission can reconstruct package
 inputs after scratch retirement and storage relocation, while rechecking original
 authority. Decoded receipts do not grant remote or regenerative admission; native
 package/public CLI and installed qualification remain open.
+A distinct retained package plan/result now projects a locally admitted run
+through the existing ZIP provider, with an actually selected packaging Flavor,
+authored specifications, both BOMs and receipt/manifests. Planning is read-only;
+construction retains plan/result/archive in CAS and independently verifies the
+archive. Native pkg, complete-system scale, installed CLI and release integration
+remain open; this does not transfer original source authority.
 
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
