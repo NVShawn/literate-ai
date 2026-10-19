@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Generation guidance gives implementation-test cases distinct names from
+  independent acceptance cases. Windows GPU probe tests allow bounded time for
+  cold PowerShell startup on busy runners.
+
 - Python packaging: explicit target-bound source projection preserves cross-platform
   requirements and original source while building only reviewed backend files;
   active imports still require source-BOM and real installed-payload evidence.

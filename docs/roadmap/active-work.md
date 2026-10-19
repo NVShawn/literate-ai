@@ -27960,3 +27960,16 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+### [ ] RECEIPT-REFRESH-001 — Refresh the current project test receipt through the complete lifecycle
+
+- **Priority:** P1
+- **Owner:** Project receipt lifecycle and generated-test guidance
+- **Direction:** Fix the stale current project receipt.
+- **Conclusion:** A fresh lifecycle run rejected a generated case ID colliding with independent acceptance. Clarify generated case naming while preserving all refusal checks, then earn and promote a newly finalized passing candidate.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Keep generated implementation case IDs distinct from independent verifier IDs.
+  - [ ] Promote only a newly finalized all-passing lifecycle candidate.
+- **Evidence:**
+  - [ ] Complete the host-eligible sample lifecycle and pass test-receipt check, require-current and litai verify.
