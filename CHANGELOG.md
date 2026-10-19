@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Route the development package-pkg Flavor through public plan/build/verify.
+  Preflight native tooling before rebuilding; bind both BOMs and native projection
+  evidence through the accepted lifecycle. Initial construction requires a local
+  FreeBSD host target; native and installed qualification remain in progress.
+
 - Add development FreeBSD pkg projection and native construction/inspection
   primitives, binding ABI, dependencies, ownership, modes, both BOMs and static
   native tooling. Reject substituted plans/results, unsafe members, hooks,

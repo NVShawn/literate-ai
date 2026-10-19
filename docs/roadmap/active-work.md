@@ -25881,6 +25881,11 @@ provider. The existing package-provider group also passes 47 checks before the
 final run-record/empty-directory additions. Lint/format, authority validation,
 driver/documentation review, OpenSpec and documentation checks pass. Native,
 installed/public CLI, release and whole-system scale qualification remain open.
+At exact receipt-integration revision `cdd7379225496c2fb4d311e4eab72598e262e623`,
+the full Python suite passes 1,752 tests with 37 declared skips in 3,734.087
+seconds. Its log SHA-256 is
+`972479448ccad40736528806d1c6352620954703c844d567a54f943e59a8d425`.
+This baseline excludes the later archive/native-pkg and incoming main-line changes.
 Local receipt checkpoint: all 109 retained-project tests pass in 373.215 seconds,
 including ten receipt cases and the source-link execution regression. Actual
 compiled exports survive scratch retirement and CAS relocation; stale authority,
@@ -27982,6 +27987,19 @@ the actual FreeBSD construction/query/payload cases execute successfully.
 All 14 initialization checks also pass with the new provider authority and bundled
 template. Public/provider composition must reopen current accepted lifecycle
 custody; parsed batch/plan/result assertions alone must not supply admission.
+Next public integration in progress: select pkg through its actual Flavor,
+preflight the native tool before rebuilding, and delegate construction to the
+existing accepted-lifecycle observer with both BOMs. Scope initial construction
+to a local native host target; refuse remote package dispatch and named/cross
+targets until separately qualified. Verification inspects the bound plan and
+native bytes without granting publication or reconstructing lifecycle admission
+from batch JSON. Native and installed public-path evidence remain mandatory.
+The public CLI group passes seven checks (one explicit native-only skip), and
+the package-provider group passes 64 checks (three native-only skips). A further
+optional-codec regression proves ordinary CLI import works without lzma while
+native inspection refuses without it. The final native-format group passes 13
+checks with its two explicit native-only skips. Native/public installed execution
+remains unqualified until those cases run on FreeBSD.
 
 The full native Python run at `c75fac59` stopped in sample recipe planning:
 the conformance runner rejects `freebsd16` before selecting the existing FreeBSD

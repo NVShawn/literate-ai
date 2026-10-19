@@ -7,6 +7,7 @@ import lzma
 import platform
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -465,6 +466,26 @@ class FreeBsdPackagingTests(unittest.TestCase):
             self.assertRaisesRegex(PackagingError, "worker ABI changed"),
         ):
             self.tool.require_unchanged()
+
+    def test_optional_xz_codec_is_needed_only_when_native_inspection_runs(self):
+        observed = subprocess.run(
+            (
+                sys.executable,
+                "-c",
+                "import sys; sys.modules['lzma'] = None; "
+                "import literate_ai.cli.package; print('pkg-cli-import-ok')",
+            ),
+            check=True,
+            capture_output=True,
+            timeout=30,
+        )
+        self.assertEqual(observed.stdout.strip(), b"pkg-cli-import-ok")
+        result, content = self.archive()
+        with (
+            patch.dict(sys.modules, {"lzma": None}),
+            self.assertRaisesRegex(PackagingError, "requires Python's lzma codec"),
+        ):
+            self.adapter.verify_bytes(self.plan, result, content)
 
 
 @unittest.skipUnless(

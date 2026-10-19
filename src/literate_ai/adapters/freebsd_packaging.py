@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import io
 import json
-import lzma
 import os
 import platform
 import re
@@ -45,6 +44,16 @@ _VERSION = re.compile(r"[0-9][0-9A-Za-z.+,_-]{0,127}\Z")
 _ABI = re.compile(r"FreeBSD:[1-9][0-9]*:(?:amd64|aarch64)\Z")
 _MAX_METADATA = 16 * 1024 * 1024
 _MAX_MEMBERS = 100_000
+
+
+def _xz_codec():
+    try:
+        import lzma
+    except ImportError as exc:
+        raise PackagingError(
+            "native pkg inspection requires Python's lzma codec"
+        ) from exc
+    return lzma
 
 
 def _absolute(path):
@@ -473,6 +482,7 @@ class FreeBsdPkgToolBinding:
     def discover(cls, command="pkg-static"):
         if platform.system().casefold() != "freebsd":
             raise PackagingError("native pkg discovery requires FreeBSD")
+        _xz_codec()
         selected = shutil.which(command)
         if selected is None:
             raise PackagingError(
@@ -596,6 +606,7 @@ def _manifest_files(document):
 
 
 def _require_single_xz_frame(content, maximum_expanded_bytes):
+    lzma = _xz_codec()
     decoder = lzma.LZMADecompressor(format=lzma.FORMAT_XZ, memlimit=128 * 1024**2)
     offset = total = 0
     try:
