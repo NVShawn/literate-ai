@@ -24,10 +24,11 @@ from tests.support.fixtures_test_standard_command_projection import (
     _locked_snapshot,
     _observation,
 )
+from tests.support.host_platform import host_os_family
 
 NATIVE = os.environ.get("LITERATE_AI_ELIXIR_QUALIFICATION") == "1"
 BUILD_SYSTEMS = os.environ.get("LITERATE_AI_ELIXIR_BUILD_SYSTEMS") == "1"
-HOST = {"darwin": "macos", "win32": "windows"}.get(__import__("sys").platform, "linux")
+HOST = host_os_family()
 
 _HELPER = "defmodule Fixture do\n  def sum(a, b), do: a + b\nend\n"
 _TESTS = """unless Fixture.sum(20, 22) == 42, do: raise "addition failed"

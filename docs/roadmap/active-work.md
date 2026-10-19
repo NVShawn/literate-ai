@@ -28602,6 +28602,26 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   command deadlines and cancellation behavior remain unchanged. Renew the focused
   native fixture and complete native regression before landing.
 
+  Host qualification at `ab15e04e` passes all 1,830 selected cases: 1,788
+  passed and 42 skipped in 1,056.253 seconds (log SHA-256
+  `59a10aef8739236f15175dccf83acb5bd84eec99fff7a9b2073f3e3bc1608446`).
+  The repaired cancellation fixture at `d030edee` passes locally, retaining both
+  real interruption modes. Source/style/layout, strict OpenSpec, documentation
+  and authority reviews pass; the offline installed CLI gate is current.
+  The canonical-origin wheel passes installed qualification on the host, with
+  identity `sha256:857a60dd082b002118314cdfb6ea7cd4453b1c6669a10573b6c834188091717c`.
+  A newly finalized 228-test host lifecycle supplies current receipt
+  `sha256:1e55274f9b726a089fdf93e5a3a68e5a2cee4f4414cda836fab8d4c0f6a822db`;
+  supported promotion and candidate recheck pass after the test-only repair.
+  Final native regression and isolated installed-wheel renewal remain in progress;
+  no pending native or hosted result is counted as passing.
+  The repaired native full run passes cancellation and then finds a shared
+  worker-health fixture rejecting versioned `freebsd16`. Audit fixture selectors
+  together, centralize truthful test host-family selection, renew worker-health,
+  configured finalize, model-free rebuild and projected-command cases on the
+  actual guest, and preserve unsupported-host refusal rather than aliasing another
+  POSIX OS. Optional Elixir fixtures must also retain the real host identity.
+
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
 - **GitHub issue:** [#65](https://github.com/jordanhubbard/literate-ai/issues/65)
