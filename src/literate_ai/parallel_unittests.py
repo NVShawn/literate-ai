@@ -26,6 +26,7 @@ PROTOCOL = "literate-ai/parallel-unittest@1"
 MAX_LOG_BYTES = 16 * 1024 * 1024
 MAX_EVENT_BYTES = 256 * 1024
 MAX_EVENTS_BYTES = 64 * 1024 * 1024
+EVENTS_PER_POLL = 8
 EVENT_KINDS = frozenset(
     {
         "start",
@@ -40,6 +41,7 @@ EVENT_KINDS = frozenset(
         "subtest_skip",
         "subtest_end",
         "fixture_skip",
+        "fixture_teardown_skip",
         "fixture_error",
         "done",
     }
@@ -260,7 +262,7 @@ class ParallelSuite:
             worker.begun.add(indices[0])
             result.testsRun += 1
             return
-        fixture = kind in {"fixture_skip", "fixture_error"}
+        fixture = kind in {"fixture_skip", "fixture_teardown_skip", "fixture_error"}
         if not fixture and any(i not in worker.begun for i in indices):
             raise ValueError("worker outcome precedes test start")
         if "status" not in event:
@@ -270,6 +272,7 @@ class ParallelSuite:
             "success": "passed",
             "skip": "skipped",
             "fixture_skip": "skipped",
+            "fixture_teardown_skip": None,
             "expected_failure": "skipped",
             "subtest_skip": None,
             "subtest_end": "skipped",
@@ -293,7 +296,7 @@ class ParallelSuite:
         }:
             if not isinstance(event.get("detail"), str) or len(event["detail"]) > 32768:
                 raise ValueError("worker failure diagnostic is invalid")
-        if kind in {"skip", "subtest_skip", "fixture_skip"}:
+        if kind in {"skip", "subtest_skip", "fixture_skip", "fixture_teardown_skip"}:
             if not isinstance(event.get("reason"), str) or len(event["reason"]) > 4096:
                 raise ValueError("worker skip lacks a bounded reason")
         if kind == "fixture_error":
@@ -323,7 +326,7 @@ class ParallelSuite:
                 self.outcome(index, event)
         test = (
             RemoteTest(str(event["description"]), indices[0])
-            if fixture
+            if fixture or kind in {"subtest_failure", "subtest_error", "subtest_skip"}
             else self.tests[indices[0]]
         )
         if kind in {
@@ -348,7 +351,7 @@ class ParallelSuite:
             result.unexpectedSuccesses.append(test)
             worker.failed = self.failed = True
             self._display(event, "u")
-        elif kind in {"skip", "subtest_skip", "fixture_skip"}:
+        elif kind in {"skip", "subtest_skip", "fixture_skip", "fixture_teardown_skip"}:
             reason = event.get("reason")
             if not isinstance(reason, str):
                 raise ValueError("worker skip lacks a reason")
@@ -360,24 +363,26 @@ class ParallelSuite:
         elif kind == "success":
             self._display(event, "." if self.verbosity < 2 else "ok")
 
-    def _drain(self, worker: RunningModule, result: Any) -> None:
+    def _drain(self, worker: RunningModule, result: Any) -> bool:
+        """Consume a bounded batch; return whether more bytes await validation."""
         path = worker.root / "events.jsonl"
         if not path.exists():
-            return
+            return False
         if path.stat().st_size > MAX_EVENTS_BYTES:
             raise ValueError("worker event stream exceeds its bound")
         with path.open("rb") as stream:
             stream.seek(worker.offset)
-            while True:
+            for _ in range(EVENTS_PER_POLL):
                 line = stream.readline(MAX_EVENT_BYTES + 1)
                 if not line:
-                    break
+                    return False
                 if len(line) > MAX_EVENT_BYTES:
                     raise ValueError("worker event exceeds its bound")
                 if not line.endswith(b"\n"):
-                    break
+                    return False
                 self._event(worker, json.loads(line), result)
                 worker.offset = stream.tell()
+        return worker.offset < path.stat().st_size
 
     def _error(self, worker: RunningModule, error: BaseException, result: Any) -> None:
         from literate_ai.contracts.identity import canonical_identity
@@ -411,10 +416,12 @@ class ParallelSuite:
         # Other modules stop immediately. Give the failing module's ordinary
         # teardown/cleanup callbacks a bounded chance to report additional
         # diagnostics; unittest itself has already stopped case dispatch.
+        cancelled: list[RunningModule] = []
         for worker in tuple(self.active):
             if not worker.failed:
                 self._close(worker)
                 self.active.remove(worker)
+                cancelled.append(worker)
         deadline = time.monotonic() + 5
         for worker in self.active:
             if worker.invalid:
@@ -426,7 +433,8 @@ class ParallelSuite:
                         raise ValueError("worker output exceeds its bound")
                     self._drain(worker, result)
                     if worker.process.poll() is not None:
-                        self._drain(worker, result)
+                        if self._drain(worker, result):
+                            continue
                         if not worker.done:
                             raise ValueError("worker exited without a complete report")
                         events = worker.root / "events.jsonl"
@@ -438,6 +446,18 @@ class ParallelSuite:
                     time.sleep(0.01)
             except (OSError, ValueError, TimeoutError) as exc:
                 self._error(worker, exc, result)
+
+        # Execution has stopped. Preserve complete per-case records already
+        # flushed before cancellation, without starving the failing worker's
+        # diagnostics. An interrupted final line supplies no reusable outcome.
+        while cancelled and time.monotonic() < deadline:
+            for worker in tuple(cancelled):
+                try:
+                    if not self._drain(worker, result):
+                        cancelled.remove(worker)
+                except (OSError, ValueError) as exc:
+                    self._error(worker, exc, result)
+                    cancelled.remove(worker)
 
     def __call__(self, result: Any) -> Any:
         print(
@@ -455,7 +475,8 @@ class ParallelSuite:
                         if time.monotonic() - worker.started > self.timeout:
                             raise TimeoutError("worker exceeded its finite deadline")
                         if worker.process.poll() is not None:
-                            self._drain(worker, result)
+                            if self._drain(worker, result):
+                                continue
                             if (
                                 worker.root / "events.jsonl"
                             ).exists() and worker.offset != (

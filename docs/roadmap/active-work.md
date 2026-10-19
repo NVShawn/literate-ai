@@ -27748,11 +27748,11 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Depends on:** existing pin dispatch, known-failure contracts and owned-process-tree cleanup
 - **Next action (in progress):** Qualify the implemented runner with the complete immutable suite, installed wheel, native timing comparisons and a fresh lifecycle receipt before landing.
 - **Implementation:**
-  - [ ] Execute importable module groups in private process/temp/object environments with explicit serial barriers and configurable worker count.
-  - [ ] Record validated per-case outcomes only in the parent; retain exact failure/skip/subtest/fixture counts and bounded diagnostics.
-  - [ ] Stop dispatch on failure, terminate only owned worker/descendant processes, and preserve completed repair markers.
-  - [ ] Keep known-failure/context/release-evidence behavior and required repaired-exit-2 followed by a clean from-zero pass.
-  - [ ] Integrate Make and Windows pytest worker configuration, audit fixed shared state, and document limits and wheel-check timing findings.
+  - [x] Execute importable module groups in private process/temp/object environments with explicit serial barriers and configurable worker count.
+  - [x] Record validated per-case outcomes only in the parent; retain exact failure/skip/subtest/fixture counts and bounded diagnostics.
+  - [x] Stop dispatch on failure, terminate only owned worker/descendant processes, and preserve completed repair markers.
+  - [x] Keep known-failure/context/release-evidence behavior and required repaired-exit-2 followed by a clean from-zero pass.
+  - [x] Integrate Make and Windows pytest worker configuration, audit fixed shared state, and document limits and wheel-check timing findings.
 - **Evidence:**
   - [ ] Real processes prove overlap, isolation, serial barriers, deterministic failure order, fail-fast child cleanup, crash/protocol refusal and out-of-order resume.
   - [ ] Serial and parallel runs produce identical ordered case outcomes and receipt summaries, including duplicates, class/module fixtures and subtests.
@@ -27760,6 +27760,10 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   - [ ] Pass complete local, installed-wheel, exact-head CI and a newly current lifecycle receipt before landing.
 
 - **Development evidence:** Seventeen focused checkpoint tests pass, covering real process overlap, private scratch/configuration, serial barriers, per-case out-of-order repair (including retained skips), owned descendant termination, crash/protocol refusal, duplicate object occurrences, fixture/subtest parity, known-failure contexts, release-evidence bypass and Windows entry-point configuration. The initial full-suite attempt exposed project-authority inheritance from scratch directories beneath the checkout; scratch now lives outside it. A later exploratory run stopped at 730 tests because source was edited while its immutable self-hosting proof ran. This is not a complete-suite pass or a performance claim. Freeze source before final qualification. Review also covered multiple cleanup failures and skipped teardown after a failing body: failure precedence is retained, other workers stop immediately, and the failing module has a bounded cleanup-report window. Make retains an ordered sidecar report even after successful repair markers reset.
+
+- **Review follow-up:** Eighteen focused checkpoint tests pass. A deterministic 100-case stream reproduced failure starvation before bounded polling; the controller now observes the other module's reported failure after at most eight passing-case callbacks, stops execution, and retains all 100 already-flushed passes. Class/module teardown skips preserve completed body outcomes, and subtest diagnostics retain their parameter labels. The earlier `9ce03a77` and `58849d2d` candidates each passed the complete 1,547-test macOS suite with 35 declared skips, plus installed-wheel qualification; final source adds the fairness regression and requires fresh complete qualification.
+
+- **Wheel timing investigation:** The initial macOS candidate recorded 552.19 seconds in subprocess spans; installed HTML observability accounted for 289.41 seconds. Those HTML scenarios mutate the same golden project and cannot safely be fanned out without separate fixture custody. Independent environment setup offers a smaller opportunity. These observations came from a busy macOS host and do not establish a Windows wheel speedup. Native gate timings and the requested performance target remain open.
 
 ### [ ] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
 

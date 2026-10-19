@@ -402,7 +402,7 @@ Bounded event streams and output logs stay beside the checkpoint under `workers/
 The controller alone writes checkpoints, in observed completion order. Reports keep
 discovery order. A crash, malformed report or deadline failure cannot turn partial
 module output into a passing repair marker. Failure stops new dispatch and
-terminates owned worker process trees. Cases that did not report an outcome rerun
+terminates owned worker process trees. Cases without a validated outcome rerun
 on repair; validated outcomes survive deliberate cancellation. A crashed or invalid
 worker loses its module markers. Final evidence still requires the fresh full run.
 

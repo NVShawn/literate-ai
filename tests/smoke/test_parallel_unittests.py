@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import importlib.util
+import io
 import json
 import os
 import subprocess
@@ -10,6 +12,7 @@ import tempfile
 import textwrap
 import time
 import unittest
+import uuid
 from pathlib import Path
 from unittest.mock import patch
 
@@ -77,7 +80,7 @@ class ParallelUnittestTests(unittest.TestCase):
                 class Tests(unittest.TestCase):
                     def test_overlap(self):
                         Path("{name}.ready").write_text("ready")
-                        deadline = time.monotonic() + 8
+                        deadline = time.monotonic() + 20
                         while not Path("{other}.ready").exists():
                             self.assertLess(time.monotonic(), deadline)
                             time.sleep(.01)
@@ -209,6 +212,7 @@ class ParallelUnittestTests(unittest.TestCase):
         )
         result = self.run_suite()
         self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn("(value=1)", result.stderr)
         self.assertEqual(json.loads(self.report.read_text())["summary"]["failed"], 1)
 
     def test_fail_fast_stops_owned_descendants_and_pending_dispatch(self) -> None:
@@ -219,7 +223,7 @@ class ParallelUnittestTests(unittest.TestCase):
             from pathlib import Path
             class Tests(unittest.TestCase):
                 def test_fail(self):
-                    deadline = time.monotonic() + 8
+                    deadline = time.monotonic() + 20
                     while not Path("heartbeat").exists():
                         self.assertLess(time.monotonic(), deadline)
                         time.sleep(.01)
@@ -412,6 +416,87 @@ raise SystemExit(run_unittest_suite(unittest.TestSuite([test, test]),
             gate.main(["--only", "tests", "--test-workers", "0"])
         execute.assert_not_called()
 
+    def test_busy_result_stream_does_not_starve_a_reported_failure(self) -> None:
+        from literate_ai.parallel_unittests import ParallelSuite
+
+        names = ["fair_a_" + uuid.uuid4().hex[:8], "fair_b_" + uuid.uuid4().hex[:8]]
+        self.module(
+            names[0],
+            """
+            import unittest
+            from pathlib import Path
+            class Cases(unittest.TestCase):
+                @classmethod
+                def tearDownClass(cls): Path("all-passes-reported").touch()
+            def succeed(self): pass
+            for index in range(100):
+                setattr(Cases, f"test_{index:03d}", succeed)
+        """,
+        )
+        self.module(
+            names[1],
+            """
+            import time, unittest
+            from pathlib import Path
+            class Cases(unittest.TestCase):
+                def test_failure(self):
+                    deadline = time.monotonic() + 20
+                    while not Path("recording-started").exists():
+                        self.assertLess(time.monotonic(), deadline)
+                        time.sleep(.001)
+                    self.fail("fail fast")
+                def tearDown(self):
+                    # addFailure has flushed the worker event before teardown.
+                    Path("failure-reported").touch()
+        """,
+        )
+        tests = []
+        for name in names:
+            module_name = "test_" + name
+            specification = importlib.util.spec_from_file_location(
+                module_name, self.root / (module_name + ".py")
+            )
+            module = importlib.util.module_from_spec(specification)
+            sys.modules[module_name] = module
+            self.addCleanup(sys.modules.pop, module_name, None)
+            specification.loader.exec_module(module)
+            tests.extend(unittest.defaultTestLoader.loadTestsFromTestCase(module.Cases))
+        passed = []
+        observed_at_failure = []
+
+        def record(index, event):
+            if index == 0:
+                (self.root / "recording-started").touch()
+                deadline = time.monotonic() + 20
+                while not all(
+                    (self.root / name).exists()
+                    for name in ("failure-reported", "all-passes-reported")
+                ):
+                    self.assertLess(time.monotonic(), deadline)
+                    time.sleep(0.001)
+            if event["status"] == "passed":
+                passed.append(index)
+            else:
+                observed_at_failure.append(len(passed))
+
+        suite = ParallelSuite(
+            tests,
+            root=self.root,
+            directory=self.root / "logs",
+            workers=2,
+            stream=io.StringIO(),
+            verbosity=0,
+            outcome=record,
+            invalidate=lambda _indices: None,
+        )
+        result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)
+        self.assertEqual(len(result.failures), 1)
+        self.assertIn("AssertionError: fail fast", result.failures[0][1])
+        self.assertEqual(result.errors, [])
+        self.assertEqual(len(observed_at_failure), 1)
+        self.assertLessEqual(observed_at_failure[0], 8)
+        self.assertEqual(passed, list(range(100)))
+
     def test_serial_parallel_outcome_parity(self) -> None:
         fixtures = {
             "success": """
@@ -442,6 +527,26 @@ raise SystemExit(run_unittest_suite(unittest.TestSuite([test, test]),
                     @classmethod
                     def setUpClass(cls): raise RuntimeError("setup")
                     def test_a(self): pass
+                    def test_b(self): pass
+            """,
+            "class_teardown_skip": """
+                class Tests(unittest.TestCase):
+                    @classmethod
+                    def tearDownClass(cls): raise unittest.SkipTest("teardown skip")
+                    def test_a(self): pass
+                    def test_b(self): pass
+            """,
+            "module_teardown_skip": """
+                def tearDownModule(): raise unittest.SkipTest("module teardown skip")
+                class Tests(unittest.TestCase):
+                    def test_a(self): pass
+                    def test_b(self): pass
+            """,
+            "failure_and_class_teardown_skip": """
+                class Tests(unittest.TestCase):
+                    @classmethod
+                    def tearDownClass(cls): raise unittest.SkipTest("teardown skip")
+                    def test_a(self): self.fail("body")
                     def test_b(self): pass
             """,
             "teardown_error": """

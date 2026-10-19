@@ -58,7 +58,7 @@ def main() -> int:
             nonlocal sequence
             record = {"schema": PROTOCOL, "sequence": sequence, "kind": kind, **values}
             if test is not None:
-                record["description"] = test.id()
+                record.setdefault("description", test.id())
             events.write(json.dumps(record, ensure_ascii=True) + "\n")
             events.flush()
             sequence += 1
@@ -92,10 +92,18 @@ def main() -> int:
                             "fixture outcome does not match selected cases"
                         )
                     if kind == "skip":
-                        selected = [i for i in selected if i not in completed]
-                        if not selected:
-                            raise ValueError("fixture skip followed completed cases")
-                        kind = "fixture_skip"
+                        if test.id().startswith(
+                            ("tearDownClass (", "tearDownModule (")
+                        ):
+                            kind = "fixture_teardown_skip"
+                            status = None
+                        else:
+                            selected = [i for i in selected if i not in completed]
+                            if not selected:
+                                raise ValueError(
+                                    "fixture skip followed completed cases"
+                                )
+                            kind = "fixture_skip"
                     else:
                         values["invalidate"] = list(selected)
                         selected = [
@@ -125,6 +133,7 @@ def main() -> int:
                     parent or test,
                     None if parent else "skipped",
                     reason=str(reason)[:4096],
+                    description=test.id()[:4096],
                 )
 
             def addExpectedFailure(self, test, err):  # noqa: N802
@@ -136,13 +145,14 @@ def main() -> int:
                     detail=self._exc_info_to_string(err, test)[:32768],
                 )
 
-            def failure(self, kind, test, err):
+            def failure(self, kind, test, err, **values):
                 self.outcome(
                     kind,
                     test,
                     "failed",
                     failure_identity=_failure_identity(err).uri,
                     detail=self._exc_info_to_string(err, test)[:32768],
+                    **values,
                 )
 
             def addFailure(self, test, err):  # noqa: N802
@@ -161,7 +171,7 @@ def main() -> int:
                         if issubclass(err[0], test.failureException)
                         else "subtest_error"
                     )
-                    self.failure(kind, test, err)
+                    self.failure(kind, test, err, description=subtest.id()[:4096])
 
             def addUnexpectedSuccess(self, test):  # noqa: N802
                 super().addUnexpectedSuccess(test)

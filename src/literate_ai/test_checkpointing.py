@@ -816,6 +816,11 @@ class _CheckpointResult(unittest.TextTestResult):
 
     def addSkip(self, test: unittest.TestCase, reason: str) -> None:  # noqa: N802
         super().addSkip(test, reason)
+        if id(test) not in self._active_keys and test.id().startswith(
+            ("tearDownClass (", "tearDownModule (")
+        ):
+            # A skipped teardown is a fixture diagnostic, not a skipped body.
+            return
         parent = getattr(test, "test_case", None)
         if parent is not None:
             self._subtest_skipped.add(id(parent))
@@ -866,6 +871,8 @@ class _CheckpointResult(unittest.TextTestResult):
         failure_identity: ContentIdentity | None = None,
     ) -> None:
         keys = self._keys_for(test)
+        if status is TestOutcomeStatus.SKIPPED and id(test) not in self._active_keys:
+            keys = [key for key in keys if key not in self._finished_keys]
         if status is TestOutcomeStatus.FAILED and id(test) not in self._active_keys:
             self._invalidate_keys(keys)
             keys = (
