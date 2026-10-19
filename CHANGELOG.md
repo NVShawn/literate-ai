@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add development original-source adoption with a reviewed Git/project-bound
+  plan and metadata-only apply. Preserve the existing source hierarchy and
+  original release authority; reject legacy conversion transitions. Execution
+  and native qualification gates remain unchanged.
+
 - Invoke explicitly configured FreeBSD SSH action receivers through the native
   command shell, preserving literal arguments without requiring interactive Bash.
   Native capability/index receiver renewal remains in progress.

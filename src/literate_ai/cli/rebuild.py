@@ -1482,6 +1482,14 @@ def _rebuild_from_args_body(
         conversion_authority is not None
         and conversion_authority.stage is not ConversionAuthorityStage.QUALIFIED
     ):
+        if conversion_authority.stage is ConversionAuthorityStage.ORIGINAL:
+            raise CliFailure(
+                "rebuild.conversion_authority_not_qualified",
+                "This project retains original-source authority; review an explicit "
+                "--retained-project manifest and --retained-project-profile with "
+                "--retained-project-plan. Original adoption does not "
+                "qualify execution.",
+            )
         raise CliFailure(
             "rebuild.conversion_authority_not_qualified",
             "adopted project remains original-source authoritative at conversion stage "

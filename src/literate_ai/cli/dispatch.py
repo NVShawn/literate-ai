@@ -406,6 +406,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             from .operator import conversion_authority_from_args
 
             return conversion_authority_from_args(args), 0
+        if args.project_command == "adopt-original":
+            from .original_adoption import original_adoption_from_args
+
+            return original_adoption_from_args(args), 0
         if args.project_command == "retained-scope":
             from .operator import retained_scope_from_args
 
@@ -2089,6 +2093,13 @@ def _parser() -> JsonArgumentParser:
     )
     project_parent_checkout.add_argument("--project", default=".")
     _add_repository_fetch_deadline_arguments(project_parent_checkout)
+    project_original = project_commands.add_parser(
+        "adopt-original", help="bind original-source authority without moving the tree"
+    )
+    project_original.add_argument("--project", default=".")
+    project_original.add_argument("--apply", action="store_true")
+    project_original.add_argument("--acknowledge", action="store_true")
+    project_original.add_argument("--expected-plan-identity")
     project_convert_stage = project_commands.add_parser(
         "convert-stage", help="show or explicitly advance adopted-project authority"
     )

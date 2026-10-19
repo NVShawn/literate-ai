@@ -209,6 +209,24 @@ class CurrentComponentLockTests(unittest.TestCase):
                 profile_path=profile_path,
                 profile_bytes=profile_bytes,
             )
+            # Original-source authority may plan the same locked retained inputs,
+            # but its distinct initial choice changes the reviewed plan identity.
+            conversion.stage = ConversionAuthorityStage.ORIGINAL
+            conversion.identity = canonical_identity("original authority")
+            original_result = plan_retained_project_with_graph(
+                self.project,
+                binding,
+                manifest,
+                profile,
+                worker_identity=profile.worker_identity,
+                target=profile.target,
+                profile_path=profile_path,
+                profile_bytes=profile_bytes,
+            )
+            self.assertNotEqual(result.plan.identity, original_result.plan.identity)
+            self.assertFalse(original_result.to_dict()["admitted"])
+            conversion.stage = ConversionAuthorityStage.RETAINED
+            conversion.identity = canonical_identity("test conversion authority")
             # Ownership references the actual filesystem catalog and changes the
             # reviewed plan; it does not create a new catalog or execution grant.
             lock = current_project_component_locks(self.project)[0]

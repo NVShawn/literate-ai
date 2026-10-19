@@ -96,6 +96,30 @@ Acceptance permits implementation and its tests under ADR 0006. It does not itse
 authorize a release, claim qualification, or merge a PR. Implementation and full
 qualification remain open under RETAINED-PROJECT-001.
 
+## In-place original-source authority
+
+An already-authored canonical project may explicitly select initial `original`
+authority through a reviewed `project adopt-original` plan/apply operation. This
+mode preserves the original hierarchy and build definitions rather than invoking
+the legacy quarantine/wrapper conversion. The plan binds validated project
+authority and the clean Git root's current commit/tree. Applying requires that
+exact plan identity and acknowledgment, revalidates those facts, and creates only
+the original-adoption evidence and authority projection under `.literate`.
+
+`original` is a separate initial authority choice, not a conversion milestone or
+baseline/acceptance claim. It has no prior state and no transition into the legacy
+wrapped/retained/drafted/qualified chain. Existing stages and their identities
+remain unchanged. A project in original mode continues to reject ordinary
+regenerative rebuilds; retained planning/execution still need their complete
+input, lock, SDK/toolchain, original-test, independent acceptance, receipt,
+package and release gates. This adoption never runs the existing build, chooses
+language/packaging Flavors, changes source bytes or claims full catalog coverage.
+
+The Git snapshot records the initial adoption boundary, not future build
+acceptance. Subsequent edits remain original-authoritative and must earn current
+retained plans/receipts with their actual bytes. Existing conversion/adoption
+authority cannot be silently replaced by this operation.
+
 ## Captured native runtime search paths
 
 Profiles may opt into an ordered `runtime_library_paths` tuple of at most 32

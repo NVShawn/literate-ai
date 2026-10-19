@@ -124,6 +124,22 @@ the complete Standard lifecycle to pass; the read-only plan grants no admission.
 
 ### Retained whole projects (qualification in progress)
 
+For an existing source tree whose hierarchy must remain in place, first author
+and validate its canonical project metadata, then commit the source and metadata.
+`litai project adopt-original --project PATH` produces a read-only plan binding
+the validated project authority and clean Git commit/tree. Review its identity,
+then repeat with `--apply --acknowledge --expected-plan-identity sha256:...`.
+Apply writes only original-adoption evidence and conversion-authority metadata;
+it does not move source, build, contact a model, or qualify execution. Dirty
+trees, stale plans, unsafe roots and existing authority refuse. Preserve failed
+evidence for diagnosis rather than overwriting it.
+
+The independent initial `original` stage keeps release authority with original
+source. It has no successor in the legacy wrapped/retained/drafted/qualified
+conversion chain. After current locks exist, use explicit retained-project
+manifest/profile planning. Regenerative rebuild and unqualified retained
+execution remain blocked; this adoption record is not a build or test receipt.
+
 Whole-project retained planning uses a streaming binary-capable manifest and an
 explicit command profile, separately from the small UTF-8 source mode above. Its
 `test-policy` input must bind the configured project receipt policy's identity,

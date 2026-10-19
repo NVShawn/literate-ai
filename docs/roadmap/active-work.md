@@ -28971,3 +28971,36 @@ separate context. Lint/format, layout/export and strict specifications pass;
 all 121 documentation diagrams render. Native/installed renewal remains open.
 **Next action in progress:** qualify this exact implementation through the full
 suite and native execution before exposing it to the operator workstation.
+
+### [ ] ORIGINAL-ADOPT-001 — Bind original project authority without relocating source
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+
+- **Priority:** P0
+- **Owner:** Original-source adoption contracts, project command and conversion authority store
+- **Direction:** Preserve conventional native source trees while adopting explicit retained project authority through the framework.
+- **Conclusion:** Add an independent original initial authority stage and read-only Git/project-bound plan with acknowledged apply. Preserve original files and hierarchy, forbid transitions into legacy conversion stages, and leave retained execution, SDK, receipt and release gates unchanged.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [x] Define original initial authority semantics without changing existing wrapped/retained/drafted/qualified wire identities.
+  - [x] Expose a reviewed in-place original-source plan/apply command over an already-authored canonical project; bind project authority and clean Git commit/tree without executing its build.
+- **Evidence:**
+  - [x] Prove preserved source files, exact metadata-only writes, stale-plan refusal, collision/dirty/unsafe-root refusal and permanent refusal of regenerative conversion transitions.
+  - [x] Run existing adoption and retained planning regression gates.
+  - [ ] Run full regression and native/installed renewal gates.
+  - [ ] Initialize an actual native source project only after authoring and validation.
+
+**Partial evidence:** The managed Python gate passes all 22 adoption checks,
+including nine real Git/worktree and public-command original-adoption checks.
+All six current-lock/planning checks pass, including original-stage retained
+planning with a distinct authority-bound identity and no execution admission.
+Repository lint, format, layout and public-export checks pass. Ordinary rebuild
+refuses the original stage and directs the operator to retained planning.
+**Next action in progress:** full regression qualification before native
+deployment; actual source-project authoring/admission remains unfinished.
+
+The initial full regression stopped after 1,287 tests because the repository's
+documentation authority marker had not been refreshed after these documentation
+changes. Its managed review marker is now refreshed and project authority
+validation passes. This failed run is retained separately; full renewal remains
+required before native deployment.
