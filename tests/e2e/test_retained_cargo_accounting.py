@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import shutil
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
+from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.harness_test_discovery import observe_test_collection
 from tests.support.fixtures_test_retained_harness_receipts import (
     _adapter,
@@ -65,8 +66,12 @@ class RetainedCargoAccountingTests(unittest.TestCase):
                 ([], 1, 1),
                 (["--", "--include-ignored"], 2, 0),
             ):
-                result = subprocess.run(
-                    ["cargo", "test", *extra], cwd=root, capture_output=True, timeout=60
+                # A cold native Windows compile took 32.6 seconds in isolation;
+                # concurrent compiler startup needs a bounded allowance above 60s.
+                result = run_with_tree_kill(
+                    ["cargo", "test", *extra],
+                    cwd=root,
+                    timeout=180 if os.name == "nt" else 60,
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 observed = observe_test_collection("test", result.stdout, result.stderr)
