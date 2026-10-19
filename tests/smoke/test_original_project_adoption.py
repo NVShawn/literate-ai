@@ -1,9 +1,11 @@
 """Original authority preserves real source and never grants conversion execution."""
 
-import subprocess
+import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from literate_ai.adapters.conversion_authority import (
     ConversionAuthorityError,
@@ -18,6 +20,7 @@ from literate_ai.contracts import canonical_json_bytes
 from literate_ai.contracts.operator_adoption import ConversionAuthorityStage
 from tests.smoke.test_operator_adoption import invoke
 from tests.smoke.test_project_reparenting import initialize_root
+from tests.support.fixtures_test_repository_orchestration import git as fixture_git
 
 
 class OriginalProjectAdoptionTests(unittest.TestCase):
@@ -34,12 +37,24 @@ class OriginalProjectAdoptionTests(unittest.TestCase):
         self.commit()
 
     def git(self, *args):
-        return subprocess.run(
-            ["git", "-c", "core.fsmonitor=false", "-C", str(self.root), *args],
-            capture_output=True,
-            check=True,
-            timeout=20,
-        ).stdout
+        return fixture_git(self.root, "-c", "core.fsmonitor=false", *args)
+
+    def test_fixture_git_does_not_detach_maintenance_during_cleanup(self):
+        self.git("config", "maintenance.auto", "true")
+        self.git("config", "gc.auto", "1")
+        trace = self.root.parent / "git-trace.jsonl"
+        with mock.patch.dict(os.environ, {"GIT_TRACE2_EVENT": str(trace)}):
+            self.source.write_text("int main(void) { return 2; }\n")
+            self.git("add", ".")
+            self.commit()
+        events = [json.loads(line) for line in trace.read_text().splitlines()]
+        self.assertTrue(any(event.get("event") == "start" for event in events))
+        children = [
+            event["argv"] for event in events if event.get("event") == "child_start"
+        ]
+        self.assertFalse(
+            any("maintenance" in argv or "gc" in argv for argv in children), children
+        )
 
     def commit(self):
         self.git(
@@ -189,8 +204,6 @@ class OriginalProjectAdoptionTests(unittest.TestCase):
         self.assertEqual(document["result"]["authority"]["stage"], "original")
 
     def test_source_mutation_between_evidence_and_authority_is_refused(self):
-        from unittest import mock
-
         from literate_ai.adapters import original_project_adoption as owner
 
         plan = plan_original_project_adoption(self.root)

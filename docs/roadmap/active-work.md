@@ -29058,6 +29058,15 @@ missing from the CLI reference inventory. Both its inventory entry and usage
 table are now documented; both CLI-help checks pass. The failed full log is
 retained separately, and exact combined full renewal remains required.
 
+The next full run reached 1,634 tests before fixture cleanup found a recreated
+Git `objects/info/packs` file after its assertions passed. The original-adoption
+fixture now uses the existing shared Git helper with automatic maintenance and
+GC disabled. A real Git trace check enables repository auto-maintenance policy
+and proves the fixture still starts no maintenance/GC child. All ten original
+adoption checks pass; ordinary cleanup and source-integrity assertions remain
+strict. This test-only repair changes no production execution policy. Full
+renewal is still required; none of the interrupted runs is counted as passing.
+
 ### [ ] LOCK-TARGET-001 — Verify the committed Component target
 
 - **GitHub issue:** [#79](https://github.com/jordanhubbard/literate-ai/issues/79)
