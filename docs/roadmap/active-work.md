@@ -27972,8 +27972,9 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   authentication and post-build failures remain terminal.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Keep generated implementation case IDs distinct from independent verifier IDs.
-  - [ ] Retry missing JavaScript bundle modules within the existing bounded policy.
+  - [x] Keep generated implementation case IDs distinct from independent verifier IDs.
+  - [x] Retry missing JavaScript bundle modules within the existing bounded policy.
+  - [x] Review and record the exact runner source closure after the retry change.
   - [ ] Promote only a newly finalized all-passing lifecycle candidate.
 - **Evidence:**
   - [ ] Complete the host-eligible sample lifecycle and pass test-receipt check, require-current and litai verify.
