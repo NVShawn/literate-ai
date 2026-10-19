@@ -28630,6 +28630,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   `--dissociate` checkout before attributing the refusal to runtime behavior or
   changing timing. Native full-suite and isolated installed-wheel qualification
   remain open.
+  The independent replay also exhausts the unchanged 600-second action deadline
+  during BUILD (745.833 seconds including fixture setup). Give this actual
+  FreeBSD integration fixture a finite 1,800-second action/observation budget;
+  other hosts retain 600 seconds. Its operator watcher must remain available for
+  that same budget and stop when rebuild ends, including exceptional exits.
+  Keep production deadlines, health admission, exact grant requests and the
+  prohibition on controller-local phases intact. Renew focused host/native
+  qualification and the complete regression before counting this repair green.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
