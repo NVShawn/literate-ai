@@ -198,3 +198,91 @@ packaged payloads, issue retained lifecycle receipts or enable public retained
 execution. Those consumers must retain their independent current-authority and
 qualification gates. Legacy command profiles remain unchanged when the managed
 graph is omitted; no new BOM acceptance is implied on that path.
+
+
+## Whole-run evidence join
+
+The live retained workspace may join observations only after every declared action
+has completed successfully, both source/resolved BOMs exist and the explicit
+independent verifier has run. Bind the complete ordered command transcript, original
+test policy and reports, verifier policy and actual case results, the build-stage
+BOM closure and sealed final exports. Require exact plan and observation identities;
+reject missing/foreign stages, failed cases, missing selected package members or
+changed previously sealed outputs. Canonical producer roots remain distinct from
+ancestor directories included while inspecting the complete export tree.
+
+Reopen current plan, original and snapshot inputs, tools, policies and exports at
+this boundary, and reobserve final native export dependencies against the last
+independent case. Return an immutable joined record; mutating its rendered mapping
+cannot rewrite its identities. A standalone record checks internal relationships;
+it cannot authenticate facts transported from a different process or worker.
+
+This join is input to later SDK, receipt and package admission, not a substitute
+for them. It issues no lifecycle receipt, permits no conversion-stage transition
+and leaves the public retained execution guard in force.
+
+
+## Producer-backed retained SDK inputs
+
+An opt-in manifest member with role `sdk-policy` binds canonically ordered exact
+Component-lock/SDK-consumer-input pairs to disjoint relative placement prefixes.
+Planning reads its bounded, duplicate-key-free bytes without acquisition. Runtime
+requires existing live `NativeSdkConsumerInputs` owners for the complete ordered
+lock tuple; a caller-supplied SDK snapshot or ambient library is insufficient.
+The policy must cover exactly the selected producer products. Every SDK-role
+member must match its product file size, digest and executable mode, and each
+placement must have the complete file/directory closure without extra files,
+links or empty directories. Prefix lookup walks indexed ancestors.
+
+Materialize and inspect through the existing owner, then bind the same verified
+product/runtime observations to the identical retained snapshot files. Reuse the
+existing native SDK execution manifest and command scope for every retained
+command and independent verifier case. Its actual request binds the selected
+consumer, retained manifest, exact command, environment, tool and plan; the
+caller supplies the existing explicit authorization and evidence-retention ports.
+The adapter never acquires/builds a producer or creates its own grants. Check live
+producer revocations before and after execution, and revalidate the most recent
+verifier grants at whole-run completion without repeating their commands.
+
+Bind SDK source admission, repository resolution, license, target and native
+dependency evidence into the resolved BOM using existing SDK merge/CycloneDX
+owners. Command/case records and the whole-run record bind SDK execution and final
+authority-check identities. Omitted optional fields retain legacy wire identities.
+BOM-bound execution with SDK members or selected external repository sources
+requires producer bindings; observation-only legacy execution does not gain an
+admission or receipt. This internal join reuses producer admission but does not
+itself qualify a retained receipt, final package or public execution route.
+
+
+## Local retained receipts and package-input custody
+
+Only a complete current live retained workspace may mint the distinct
+`retained-project-receipt` contract. It binds the exact plan/run, input and final
+export manifests, selected payload manifest, source/resolved BOMs and original
+verifier bytes. Retain canonical command/test/verifier records and actual binary
+streams, with SDK execution and fresh final authority-check records when selected.
+Use existing streamed CAS storage and revalidate the live run after retention;
+partial work, missing SDK evidence or changed bytes cannot mint admission.
+
+The receipt preserves original source authority, exact passing/authorized-skip
+counts and a `local-runtime` verification scope. It is not an ordinary generated
+project receipt, advances no conversion stage and grants no publication. Parsing
+its JSON never reconstructs the in-process local admission capability. Remote
+receipt authentication and native package/public CLI consumption remain separate
+qualification requirements.
+
+Package consumers may reopen original plan/source/verifier authority and every
+retained blob, then materialize only the declared sealed payload using bounded
+CAS copies. Preserve modes and directory structure, including selected parent
+directories. Reuse exclusive directory publication so an existing/concurrent
+destination is not replaced. Verify complete payload inventory and bytes before
+and after publication. Scratch may be discarded and CAS relocated while original
+project authority stays current; stale source/policy/plan or corrupt metadata/data
+blocks consumption. This materialization is package input, not a native package,
+installation or release.
+
+A complete admitted manifest may include explicit internal source links. Select
+its regular native images for existing observation APIs without following aliases;
+retain exact link text and target validation. An explicit empty native-image
+selection describes data-only inputs. Default unselected tree observation still
+rejects symlinks.

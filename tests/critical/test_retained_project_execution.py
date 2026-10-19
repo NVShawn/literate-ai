@@ -61,6 +61,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         source.write_text(
             "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n"
             "#include <sys/stat.h>\n"
+            "#include <dlfcn.h>\n"
             "int main(int n, char **v) {\n"
             ' if (getenv("LITAI_FIXTURE_SECRET")) return 99;\n'
             " if (n < 2) return 2;\n"
@@ -70,8 +71,22 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             " }\n"
             ' if (!strcmp(v[1], "empty")) return 0;\n'
             ' if (!strcmp(v[1], "fail")) {fputs("failed", stderr); return 9;}\n'
+            ' if (!strcmp(v[1], "scale") && n == 4) {\n'
+            "  void *lib = dlopen(v[2], RTLD_NOW | RTLD_LOCAL);\n"
+            "  if (!lib) { fputs(dlerror(), stderr); return 17; }\n"
+            '  double (*scale)(double,double) = dlsym(lib, "vendor_math_scale");\n'
+            "  if (!scale || scale(1.5, 3) != 4.5) return 18;\n"
+            '  FILE *f = fopen(v[3], "wb"); if (!f) return 19;\n'
+            '  fprintf(f, "%.1f", scale(1.5, 3));\n'
+            "  if (fclose(f) || dlclose(lib)) return 20; return 0;\n"
+            " }\n"
             " if (n < 3) return 2;\n"
-            ' if (!strcmp(v[1], "export")) {\n'
+            ' if (!strcmp(v[1], "export") || !strcmp(v[1], "export-nested")) {\n'
+            '  if (!strcmp(v[1], "export-nested")) {\n'
+            "   char *dir = strdup(v[2]); if (!dir) return 14;\n"
+            "   char *slash = strrchr(dir, '/'); if (!slash) return 15;\n"
+            "   *slash = 0; int rc = mkdir(dir, 0700); free(dir); if (rc) return 16;\n"
+            "  }\n"
             '  FILE *in = fopen(v[0], "rb"), *out = fopen(v[2], "wb");\n'
             "  if (!in || !out) return 10;\n"
             "  int c; while ((c = fgetc(in)) != EOF)\n"

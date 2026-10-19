@@ -4531,7 +4531,7 @@ def _explicit_artifact_files(files):
         return None
     if (
         not isinstance(files, Sequence)
-        or not 1 <= len(files) <= 4096
+        or not 0 <= len(files) <= 4096
         or any(
             not isinstance(path, Path) or not path.is_absolute() or ".." in path.parts
             for path in files

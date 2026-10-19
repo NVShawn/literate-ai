@@ -13,6 +13,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from literate_ai.adapters.dependencies import PortableHostDependencyObserver
+from literate_ai.adapters.dependencies.observation import is_host_native_executable
 from literate_ai.adapters.dependencies.types import (
     DependencyObservationError,
     HostDependencyObservation,
@@ -37,7 +38,7 @@ from literate_ai.contracts.sbom import retained_project_bom_ref
 _MAX_OBSERVATION_BYTES = 16 * 1024 * 1024
 
 
-def _observer(commands, environment):
+def _observer(commands, environment, *, artifact_files=None):
     return PortableHostDependencyObserver(
         toolchain_commands=commands,
         lifecycle_commands=(),
@@ -45,6 +46,7 @@ def _observer(commands, environment):
         macos_loader_paths=MacOsLoaderPaths.from_environment(environment),
         linux_loader_paths=LinuxLoaderPaths.from_environment(environment),
         freebsd_loader_paths=FreeBsdLoaderPaths.from_environment(environment),
+        artifact_files=artifact_files,
     )
 
 
@@ -163,7 +165,18 @@ class RetainedProjectDependencyGuard:
             for binding in self._tools:
                 binding.require_unchanged()
             observer = _observer(
-                tuple(binding.command for binding in self._tools), self._environment
+                tuple(binding.command for binding in self._tools),
+                self._environment,
+                artifact_files=(
+                    tuple(
+                        self._inputs / member.path
+                        for member in self._manifest.members
+                        if member.symlink_target is None
+                        and is_host_native_executable(self._inputs / member.path)
+                    )
+                    if any(m.symlink_target is not None for m in self._manifest.members)
+                    else None
+                ),
             )
             observation = observer.observe(
                 {"artifact_path": str(self._inputs)},

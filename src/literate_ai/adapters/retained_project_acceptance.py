@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Callable, Mapping
+from contextlib import nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 
 from literate_ai.adapters.builders import run_bounded_process
 from literate_ai.adapters.builders._process import BoundedProcessResult
+from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
 from literate_ai.adapters.retained_project_dependencies import (
     retained_export_dependency_identity,
 )
@@ -82,12 +84,15 @@ class RetainedProjectAcceptanceObservation:
     stderr_identity: ContentIdentity
     exit_code: int
     result: BoundedProcessResult
+    native_sdk_executions: tuple[ContentIdentity, ...] = ()
 
     def __post_init__(self):
         for field in self.__slots__:
-            if field not in {"exit_code", "result"} and not isinstance(
-                getattr(self, field), ContentIdentity
-            ):
+            if field not in {
+                "exit_code",
+                "result",
+                "native_sdk_executions",
+            } and not isinstance(getattr(self, field), ContentIdentity):
                 raise TypeError("retained.acceptance.typed-observation-required")
         if type(self.exit_code) is not int or not -(2**31) <= self.exit_code < 2**32:
             raise ValueError("retained.acceptance.exit-invalid")
@@ -100,21 +105,31 @@ class RetainedProjectAcceptanceObservation:
             != "sha256:" + hashlib.sha256(self.result.stderr).hexdigest()
         ):
             raise ValueError("retained.acceptance.result-identity-mismatch")
+        if type(self.native_sdk_executions) is not tuple or any(
+            not isinstance(v, ContentIdentity) for v in self.native_sdk_executions
+        ):
+            raise TypeError("retained.acceptance.typed-sdk-executions-required")
+
+    def to_dict(self):
+        return {
+            "schema": "literate-ai/retained-independent-acceptance-observation@1",
+            **{
+                field: getattr(self, field).uri
+                for field in self.__slots__
+                if field not in {"exit_code", "result", "native_sdk_executions"}
+            },
+            "exit_code": self.exit_code,
+            "lifecycle_receipt": False,
+            **(
+                {"native_sdk_executions": [v.uri for v in self.native_sdk_executions]}
+                if self.native_sdk_executions
+                else {}
+            ),
+        }
 
     @property
     def identity(self):
-        return canonical_identity(
-            {
-                "schema": "literate-ai/retained-independent-acceptance-observation@1",
-                **{
-                    field: getattr(self, field).uri
-                    for field in self.__slots__
-                    if field not in {"exit_code", "result"}
-                },
-                "exit_code": self.exit_code,
-                "lifecycle_receipt": False,
-            }
-        )
+        return canonical_identity(self.to_dict())
 
 
 def verify_retained_acceptance_action(
@@ -126,6 +141,7 @@ def verify_retained_acceptance_action(
     *,
     environment: Mapping[str, str],
     require_current: Callable[[], None],
+    command_scope=None,
 ):
     policy.require_profile(plan.profile, plan.component_locks)
     cases = tuple(case for case in policy.cases if case.action_id == action_id)
@@ -148,18 +164,36 @@ def verify_retained_acceptance_action(
             str(executable),
             *(arg.replace("{output_root}", str(outputs)) for arg in case.argv),
         )
-        result = run_bounded_process(
-            command,
-            cwd=outputs,
-            environment=environment,
-            timeout_seconds=case.timeout_seconds,
-            stdout_limit_bytes=MAX_ACCEPTANCE_STREAM_BYTES,
-            stderr_limit_bytes=MAX_ACCEPTANCE_STREAM_BYTES,
-            input_bytes=case.stdin,
-            input_limit_bytes=MAX_ACCEPTANCE_STREAM_BYTES,
-            error_prefix="retained.acceptance",
-            terminate_descendants=True,
+        context = (
+            nullcontext(None)
+            if command_scope is None
+            else command_scope(
+                command,
+                tool=LocalComponentToolBinding(
+                    str(executable),
+                    authority_identity=ContentIdentity.parse_uri(
+                        "sha256:" + member.sha256
+                    ),
+                ),
+                cwd=outputs,
+                environment=environment,
+                action_identity=case.identity,
+                phase="accept",
+            )
         )
+        with context as sdk_scope:
+            result = run_bounded_process(
+                command,
+                cwd=outputs,
+                environment=environment,
+                timeout_seconds=case.timeout_seconds,
+                stdout_limit_bytes=MAX_ACCEPTANCE_STREAM_BYTES,
+                stderr_limit_bytes=MAX_ACCEPTANCE_STREAM_BYTES,
+                input_bytes=case.stdin,
+                input_limit_bytes=MAX_ACCEPTANCE_STREAM_BYTES,
+                error_prefix="retained.acceptance",
+                terminate_descendants=True,
+            )
         require_current()
         after = retained_export_dependency_identity(
             outputs, manifest, plan, environment
@@ -182,6 +216,7 @@ def verify_retained_acceptance_action(
                 ),
                 result.returncode,
                 result,
+                sdk_scope.evidence_identities if sdk_scope is not None else (),
             )
         )
         if (result.returncode, result.stdout, result.stderr) != (

@@ -24,6 +24,7 @@ from literate_ai.adapters.retained_project_inputs import verify_retained_project
 from literate_ai.adapters.retained_project_release import (
     read_retained_project_release_policy,
 )
+from literate_ai.adapters.retained_project_sdks import read_retained_sdk_policy
 from literate_ai.adapters.retained_project_testing import (
     read_retained_project_test_policy,
 )
@@ -205,6 +206,8 @@ def plan_retained_project_with_graph(
     read_retained_project_release_policy(
         project.root, manifest, profile.release_policy_identity
     )
+    if any(member.role == "sdk-policy" for member in manifest.members):
+        read_retained_sdk_policy(project.root, manifest, locks)
     required_roles = {
         "source",
         "build-definition",

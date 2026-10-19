@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Mint distinct local retained-origin receipts from complete current runs. Stream
+  original source/link bytes and sealed exports into the existing CAS, retain both
+  BOMs and command/test/verifier evidence, and reconstruct exact package inputs
+  after scratch retirement or CAS relocation. Reject stale source/policy/plan,
+  corruption and destination replacement. Receipt JSON alone grants no admission.
+- Observe explicitly admitted source symlinks through the verified manifest
+  selection of regular native files, preserving default tree-symlink refusal.
+
+- Bind retained SDK files to exact selected producer products and selected locks.
+  Reuse live SDK materialization, native inspection and revocable per-command
+  authorization for both declared commands and independent verifier cases; carry
+  repository source proofs into the resolved BOM and recheck grants at completion.
+  SDK-bound runs reject missing producers, substituted files and incomplete
+  closures. Retained receipt, package and public execution qualification remain open.
+
+- Join complete retained command, test, independent acceptance and source/resolved
+  BOM observations with sealed final exports. Refuse partial or mixed runs, missing
+  package members and changed source/export/native dependency custody. The joined
+  record preserves original authority; SDK, receipt and package admission remain open.
+
 - Bind retained command execution to exact source and resolved CycloneDX
   observations before tests. Preserve original source identity, full input/build
   export manifests, declared SDK/dependency files and frozen native graphs;

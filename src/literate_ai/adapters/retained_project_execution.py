@@ -12,13 +12,16 @@ import hashlib
 import os
 import tempfile
 from collections.abc import Callable
+from contextlib import nullcontext
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 from literate_ai._filesystem import require_safe_directory
 from literate_ai.adapters.builders import run_bounded_process
 from literate_ai.adapters.builders._process import BoundedProcessResult
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
+from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.adapters.retained_project_acceptance import (
     read_retained_acceptance_policy,
     verify_retained_acceptance_action,
@@ -30,6 +33,7 @@ from literate_ai.adapters.retained_project_boms import (
 from literate_ai.adapters.retained_project_dependencies import (
     RetainedProjectDependencyGuard,
     observe_retained_export_dependencies,
+    retained_export_dependency_identity,
 )
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
@@ -37,6 +41,7 @@ from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
     verify_retained_project_inputs,
 )
+from literate_ai.adapters.retained_project_sdks import RetainedProjectNativeSdkInputs
 from literate_ai.adapters.retained_project_testing import (
     RetainedProjectVerifiedTestReport,
     read_retained_project_test_policy,
@@ -70,26 +75,54 @@ class RetainedProjectCommandObservation:
     dependency_identity: ContentIdentity
     result: BoundedProcessResult
     output_manifest: RetainedProjectManifest | None
+    native_sdk_inputs_identity: ContentIdentity | None = None
+    native_sdk_executions: tuple[ContentIdentity, ...] = ()
+
+    def __post_init__(self):
+        if (
+            (
+                self.native_sdk_inputs_identity is not None
+                and not isinstance(self.native_sdk_inputs_identity, ContentIdentity)
+            )
+            or type(self.native_sdk_executions) is not tuple
+            or any(
+                not isinstance(v, ContentIdentity) for v in self.native_sdk_executions
+            )
+        ):
+            raise TypeError("retained.sdk.typed-command-evidence-required")
+        if self.native_sdk_inputs_identity is None and self.native_sdk_executions:
+            raise ValueError("retained.sdk.command-input-binding-required")
+
+    def to_dict(self):
+        return {
+            "schema": "literate-ai/retained-command-observation@2",
+            "plan_identity": self.plan_identity.uri,
+            "action": self.action.to_dict(),
+            "tool_identity": self.tool_identity.uri,
+            "environment_identity": self.environment_identity.uri,
+            "dependency_identity": self.dependency_identity.uri,
+            "exit_code": self.result.returncode,
+            "stdout": hashlib.sha256(self.result.stdout).hexdigest(),
+            "stderr": hashlib.sha256(self.result.stderr).hexdigest(),
+            "output_manifest": self.output_manifest.identity.uri
+            if self.output_manifest
+            else None,
+            "acceptance_receipt": False,
+            **(
+                {
+                    "native_sdk_inputs_identity": self.native_sdk_inputs_identity.uri,
+                    "native_sdk_executions": [
+                        v.uri for v in self.native_sdk_executions
+                    ],
+                }
+                if self.native_sdk_inputs_identity is not None
+                else {}
+            ),
+        }
 
     @property
-    def identity(self) -> ContentIdentity:
-        return canonical_identity(
-            {
-                "schema": "literate-ai/retained-command-observation@2",
-                "plan_identity": self.plan_identity.uri,
-                "action": self.action.to_dict(),
-                "tool_identity": self.tool_identity.uri,
-                "environment_identity": self.environment_identity.uri,
-                "dependency_identity": self.dependency_identity.uri,
-                "exit_code": self.result.returncode,
-                "stdout": hashlib.sha256(self.result.stdout).hexdigest(),
-                "stderr": hashlib.sha256(self.result.stderr).hexdigest(),
-                "output_manifest": (
-                    self.output_manifest.identity.uri if self.output_manifest else None
-                ),
-                "acceptance_receipt": False,
-            }
-        )
+    def identity(self):
+        return canonical_identity(self.to_dict())
 
 
 class RetainedProjectExecutionError(ValueError):
@@ -119,6 +152,9 @@ class RetainedProjectExecutionWorkspace:
         test_receipt_policy: ProjectTestReceiptPolicy,
         managed_graph: CycloneDxManagedGraph | None = None,
         component_locks: tuple[ComponentLock, ...] | None = None,
+        native_sdk_owners: tuple[NativeSdkConsumerInputs, ...] | None = None,
+        native_sdk_authorize=None,
+        native_sdk_record=None,
     ) -> None:
         if allow_host_execution is not True:
             raise RetainedProjectExecutionError(
@@ -131,6 +167,38 @@ class RetainedProjectExecutionWorkspace:
             )
         if manifest.identity != plan.manifest_identity:
             raise RetainedProjectExecutionError("retained.execution.manifest-mismatch")
+        sdk_selected = native_sdk_owners is not None
+        sdk_required = managed_graph is not None and (
+            any(m.role == "sdk" for m in manifest.members)
+            or any(
+                node.revision.repository_sources
+                for lock in component_locks
+                for node in lock.nodes
+            )
+        )
+        if sdk_required and not sdk_selected:
+            raise RetainedProjectExecutionError(
+                "retained.sdk.producer-bindings-required"
+            )
+        if sdk_selected != any(m.role == "sdk-policy" for m in manifest.members):
+            raise RetainedProjectExecutionError(
+                "retained.sdk.policy-and-owners-required-together"
+            )
+        if (
+            sdk_selected
+            and (
+                managed_graph is None
+                or component_locks is None
+                or not callable(native_sdk_authorize)
+                or not callable(native_sdk_record)
+            )
+        ) or (
+            not sdk_selected
+            and (native_sdk_authorize is not None or native_sdk_record is not None)
+        ):
+            raise RetainedProjectExecutionError(
+                "retained.sdk.bound-graph-and-command-authority-required"
+            )
         self.source = source
         self.manifest = manifest
         self.plan = plan
@@ -142,6 +210,9 @@ class RetainedProjectExecutionWorkspace:
         self._test_reports: list[RetainedProjectVerifiedTestReport] = []
         self._acceptance_observations = []
         self._configured_test_policy = test_receipt_policy
+        self._native_sdks = None
+        self._native_sdk_authorize = native_sdk_authorize
+        self._native_sdk_record = native_sdk_record
         self._require_current_plan()
         self._test_policy = read_retained_project_test_policy(
             source, manifest, plan.profile, test_receipt_policy
@@ -190,6 +261,15 @@ class RetainedProjectExecutionWorkspace:
                 tuple(self._tools[name] for name in sorted(self._tools)),
                 self._environment(),
             )
+            if sdk_selected:
+                self._native_sdks = RetainedProjectNativeSdkInputs(
+                    self.inputs,
+                    manifest,
+                    plan,
+                    component_locks,
+                    native_sdk_owners,
+                    parent=self.root,
+                )
             self._require_current()
         except BaseException:
             _remove_tree(self.root)
@@ -228,6 +308,67 @@ class RetainedProjectExecutionWorkspace:
     def dependency_identity(self) -> ContentIdentity:
         return self._dependencies.identity
 
+    def _sdk_command_scope(
+        self, argv, *, tool, cwd, environment, action_identity, phase
+    ):
+        if self._native_sdks is None:
+            return nullcontext(None)
+        return self._native_sdks.command_scope(
+            tuple(argv),
+            tool=tool,
+            cwd=cwd,
+            environment=environment,
+            action_identity=action_identity,
+            phase=phase,
+            authorize=self._native_sdk_authorize,
+            clock=lambda: datetime.now(UTC),
+            record=self._native_sdk_record,
+        )
+
+    def completed_run(self):
+        """Join a complete current run; this grants no receipt or package authority."""
+        from literate_ai.adapters.retained_project_completion import (
+            RetainedProjectCompletedRun,
+        )
+
+        if self._failed or len(self.observations) != len(self.plan.profile.actions):
+            raise RetainedProjectExecutionError("retained.completion.run-incomplete")
+        if (
+            self.source_bom is None
+            or self.resolved_bom is None
+            or self._acceptance_policy is None
+            or self._output_manifest is None
+        ):
+            raise RetainedProjectExecutionError(
+                "retained.completion.boms-and-independent-acceptance-required"
+            )
+        self._require_current()
+        result = RetainedProjectCompletedRun(
+            self.source_bom,
+            self.resolved_bom,
+            self.observations,
+            self._test_policy,
+            self._configured_test_policy,
+            self.test_reports,
+            self._acceptance_policy,
+            self.acceptance_observations,
+            self._output_manifest,
+            self._native_sdks.final_checks(self._native_sdk_record)
+            if self._native_sdks is not None
+            else None,
+        )
+        if (
+            retained_export_dependency_identity(
+                self.outputs, self._output_manifest, self.plan, self._environment()
+            )
+            != self.acceptance_observations[-1].dependency_identity
+        ):
+            raise RetainedProjectExecutionError(
+                "retained.completion.export-dependencies-changed"
+            )
+        self._require_current()
+        return result
+
     def _require_current(self) -> None:
         for directory in (
             self.root,
@@ -253,6 +394,8 @@ class RetainedProjectExecutionWorkspace:
             environment=self._environment(),
             tools=tuple(self._tools[name] for name in sorted(self._tools)),
         )
+        if self._native_sdks is not None:
+            self._native_sdks.require_unchanged()
         if self._output_manifest is not None:
             verify_retained_project_inputs(self.outputs, self._output_manifest)
 
@@ -357,16 +500,24 @@ class RetainedProjectExecutionWorkspace:
             remaining = _TOTAL_OUTPUT_BYTES - self._output_bytes
             if remaining < 2:
                 raise RetainedProjectExecutionError("retained.execution.output-budget")
-            result = run_bounded_process(
+            with self._sdk_command_scope(
                 (*binding.command, *argv),
+                tool=binding,
                 cwd=self.objects,
                 environment=environment,
-                timeout_seconds=action.timeout_seconds,
-                stdout_limit_bytes=min(_PROCESS_OUTPUT_BYTES, remaining // 2),
-                stderr_limit_bytes=min(_PROCESS_OUTPUT_BYTES, remaining // 2),
-                error_prefix="retained.execution",
-                terminate_descendants=True,
-            )
+                action_identity=canonical_identity(action.to_dict()),
+                phase=action.stage,
+            ) as sdk_scope:
+                result = run_bounded_process(
+                    (*binding.command, *argv),
+                    cwd=self.objects,
+                    environment=environment,
+                    timeout_seconds=action.timeout_seconds,
+                    stdout_limit_bytes=min(_PROCESS_OUTPUT_BYTES, remaining // 2),
+                    stderr_limit_bytes=min(_PROCESS_OUTPUT_BYTES, remaining // 2),
+                    error_prefix="retained.execution",
+                    terminate_descendants=True,
+                )
             self._output_bytes += len(result.stdout) + len(result.stderr)
             # Revalidate before treating even a zero exit as an observation of
             # the admitted inputs. Previously sealed exports may not be edited.
@@ -382,6 +533,8 @@ class RetainedProjectExecutionWorkspace:
                 self.dependency_identity,
                 result,
                 outputs,
+                self._native_sdks.identity if self._native_sdks is not None else None,
+                sdk_scope.evidence_identities if sdk_scope is not None else (),
             )
             self._observations.append(observation)
             if result.returncode != 0 or self._output_bytes > _TOTAL_OUTPUT_BYTES:
@@ -423,6 +576,9 @@ class RetainedProjectExecutionWorkspace:
                             self._environment(),
                             allow_empty=True,
                         ),
+                        sdk_dependencies=self._native_sdks.dependencies
+                        if self._native_sdks is not None
+                        else (),
                     )
                     self._require_current()
             if action.stage == "test":
@@ -463,6 +619,9 @@ class RetainedProjectExecutionWorkspace:
                         self._output_manifest,
                         environment=self._environment(),
                         require_current=self._require_current,
+                        command_scope=self._sdk_command_scope
+                        if self._native_sdks is not None
+                        else None,
                     )
                 )
             return observation

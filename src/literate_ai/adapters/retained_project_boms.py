@@ -8,7 +8,11 @@ from dataclasses import dataclass, field
 
 from literate_ai.adapters.dependencies import build_cyclonedx_bom
 from literate_ai.adapters.dependencies.types import HostDependencyObservation
-from literate_ai.adapters.native_sdk_dependencies import merge_sdk_host_observations
+from literate_ai.adapters.native_sdk_dependencies import (
+    NativeSdkDependencyEvidence,
+    merge_native_sdk_dependencies,
+    merge_sdk_host_observations,
+)
 from literate_ai.adapters.retained_project_dependencies import _freeze
 from literate_ai.contracts import (
     ComponentLock,
@@ -185,6 +189,7 @@ class RetainedProjectResolvedBom:
     output_manifest: RetainedProjectManifest
     tool_observation: bytes = field(repr=False)
     export_observation: bytes = field(repr=False)
+    sdk_dependencies: tuple[NativeSdkDependencyEvidence, ...] = ()
     content: bytes = field(init=False, repr=False)
     binding: CycloneDxBomBinding = field(init=False)
 
@@ -197,6 +202,15 @@ class RetainedProjectResolvedBom:
         tools = _observation(self.tool_observation, graph.root_ref)
         exports = _observation(self.export_observation, graph.root_ref, export=True)
         observed = merge_sdk_host_observations(tools, exports)
+        if type(self.sdk_dependencies) is not tuple or any(
+            not isinstance(item, NativeSdkDependencyEvidence)
+            for item in self.sdk_dependencies
+        ):
+            raise TypeError("retained.bom.typed-sdk-dependencies-required")
+        sdk_observation, resolutions = merge_native_sdk_dependencies(
+            self.sdk_dependencies
+        )
+        observed = merge_sdk_host_observations(observed, sdk_observation)
         declared = _declared_inputs(self.source.manifest)
         output = _manifest_component(self.output_manifest, "output")
         content, binding = build_cyclonedx_bom(
@@ -208,6 +222,7 @@ class RetainedProjectResolvedBom:
                 *((graph.root_ref, item["bom-ref"]) for item in (*declared, output)),
                 *observed.edges,
             ),
+            repository_resolutions=resolutions,
         )
         object.__setattr__(self, "content", content)
         object.__setattr__(self, "binding", binding)
@@ -226,6 +241,15 @@ class RetainedProjectResolvedBom:
                 + hashlib.sha256(self.export_observation).hexdigest(),
                 "sdk_admitted": False,
                 "lifecycle_receipt": False,
+                **(
+                    {
+                        "sdk_dependencies": [
+                            item.identity.uri for item in self.sdk_dependencies
+                        ]
+                    }
+                    if self.sdk_dependencies
+                    else {}
+                ),
             }
         )
 
@@ -234,7 +258,9 @@ class RetainedProjectResolvedBom:
             raise ValueError("retained.bom.resolved-content-changed")
 
 
-def resolve_retained_project_bom(source, output_manifest, tools, exports):
+def resolve_retained_project_bom(
+    source, output_manifest, tools, exports, *, sdk_dependencies=()
+):
     if not isinstance(source, RetainedProjectSourceBom):
         raise TypeError("retained.bom.typed-source-required")
     return RetainedProjectResolvedBom(
@@ -242,4 +268,5 @@ def resolve_retained_project_bom(source, output_manifest, tools, exports):
         output_manifest,
         _freeze(tools, source.managed_graph.root_ref),
         _frozen_export(exports, source.managed_graph.root_ref),
+        sdk_dependencies,
     )
