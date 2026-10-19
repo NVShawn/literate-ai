@@ -110,29 +110,26 @@ class RetainedProjectAcceptanceObservation:
         ):
             raise TypeError("retained.acceptance.typed-sdk-executions-required")
 
+    def to_dict(self):
+        return {
+            "schema": "literate-ai/retained-independent-acceptance-observation@1",
+            **{
+                field: getattr(self, field).uri
+                for field in self.__slots__
+                if field not in {"exit_code", "result", "native_sdk_executions"}
+            },
+            "exit_code": self.exit_code,
+            "lifecycle_receipt": False,
+            **(
+                {"native_sdk_executions": [v.uri for v in self.native_sdk_executions]}
+                if self.native_sdk_executions
+                else {}
+            ),
+        }
+
     @property
     def identity(self):
-        return canonical_identity(
-            {
-                "schema": "literate-ai/retained-independent-acceptance-observation@1",
-                **{
-                    field: getattr(self, field).uri
-                    for field in self.__slots__
-                    if field not in {"exit_code", "result", "native_sdk_executions"}
-                },
-                "exit_code": self.exit_code,
-                "lifecycle_receipt": False,
-                **(
-                    {
-                        "native_sdk_executions": [
-                            v.uri for v in self.native_sdk_executions
-                        ]
-                    }
-                    if self.native_sdk_executions
-                    else {}
-                ),
-            }
-        )
+        return canonical_identity(self.to_dict())
 
 
 def verify_retained_acceptance_action(

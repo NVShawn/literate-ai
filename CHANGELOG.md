@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Mint distinct local retained-origin receipts from complete current runs. Stream
+  original source/link bytes and sealed exports into the existing CAS, retain both
+  BOMs and command/test/verifier evidence, and reconstruct exact package inputs
+  after scratch retirement or CAS relocation. Reject stale source/policy/plan,
+  corruption and destination replacement. Receipt JSON alone grants no admission.
+- Observe explicitly admitted source symlinks through the verified manifest
+  selection of regular native files, preserving default tree-symlink refusal.
+
 - Bind retained SDK files to exact selected producer products and selected locks.
   Reuse live SDK materialization, native inspection and revocable per-command
   authorization for both declared commands and independent verifier cases; carry

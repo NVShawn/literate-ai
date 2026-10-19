@@ -93,37 +93,36 @@ class RetainedProjectCommandObservation:
         if self.native_sdk_inputs_identity is None and self.native_sdk_executions:
             raise ValueError("retained.sdk.command-input-binding-required")
 
+    def to_dict(self):
+        return {
+            "schema": "literate-ai/retained-command-observation@2",
+            "plan_identity": self.plan_identity.uri,
+            "action": self.action.to_dict(),
+            "tool_identity": self.tool_identity.uri,
+            "environment_identity": self.environment_identity.uri,
+            "dependency_identity": self.dependency_identity.uri,
+            "exit_code": self.result.returncode,
+            "stdout": hashlib.sha256(self.result.stdout).hexdigest(),
+            "stderr": hashlib.sha256(self.result.stderr).hexdigest(),
+            "output_manifest": self.output_manifest.identity.uri
+            if self.output_manifest
+            else None,
+            "acceptance_receipt": False,
+            **(
+                {
+                    "native_sdk_inputs_identity": self.native_sdk_inputs_identity.uri,
+                    "native_sdk_executions": [
+                        v.uri for v in self.native_sdk_executions
+                    ],
+                }
+                if self.native_sdk_inputs_identity is not None
+                else {}
+            ),
+        }
+
     @property
-    def identity(self) -> ContentIdentity:
-        return canonical_identity(
-            {
-                "schema": "literate-ai/retained-command-observation@2",
-                "plan_identity": self.plan_identity.uri,
-                "action": self.action.to_dict(),
-                "tool_identity": self.tool_identity.uri,
-                "environment_identity": self.environment_identity.uri,
-                "dependency_identity": self.dependency_identity.uri,
-                "exit_code": self.result.returncode,
-                "stdout": hashlib.sha256(self.result.stdout).hexdigest(),
-                "stderr": hashlib.sha256(self.result.stderr).hexdigest(),
-                "output_manifest": (
-                    self.output_manifest.identity.uri if self.output_manifest else None
-                ),
-                "acceptance_receipt": False,
-                **(
-                    {
-                        "native_sdk_inputs_identity": (
-                            self.native_sdk_inputs_identity.uri
-                        ),
-                        "native_sdk_executions": [
-                            v.uri for v in self.native_sdk_executions
-                        ],
-                    }
-                    if self.native_sdk_inputs_identity is not None
-                    else {}
-                ),
-            }
-        )
+    def identity(self):
+        return canonical_identity(self.to_dict())
 
 
 class RetainedProjectExecutionError(ValueError):

@@ -127,6 +127,11 @@ producer/consumer owners, carries source resolutions into the BOM and delegates
 command/verifier authorization and revocation checks to their existing owner.
 SDK inputs require their exact selected lock/product/file closure; public retained
 execution and receipt/package qualification remain open.
+A distinct local retained receipt now retains exact source, sealed exports, BOMs
+and actual run evidence in CAS. Its in-process admission can reconstruct package
+inputs after scratch retirement and storage relocation, while rechecking original
+authority. Decoded receipts do not grant remote or regenerative admission; native
+package/public CLI and installed qualification remain open.
 
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the

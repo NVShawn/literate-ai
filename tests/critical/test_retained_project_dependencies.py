@@ -1,6 +1,7 @@
 """Immutable native observations and command-context drift; no SDK admission."""
 
 import os
+import shutil
 import tempfile
 import unittest
 from dataclasses import replace
@@ -8,6 +9,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters import retained_project_dependencies as dependencies
+from literate_ai.adapters.dependencies import PortableHostDependencyObserver
 from literate_ai.adapters.dependencies.types import (
     DependencyObservationError,
     HostDependencyObservation,
@@ -19,6 +21,7 @@ from literate_ai.adapters.retained_project_inputs import (
 from literate_ai.contracts import ContentIdentity
 from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.contracts.sbom import retained_project_bom_ref
+from tests.critical import test_retained_project_execution as execution_fixtures
 from tests.support.fixtures_retained_project_sbom import retained_project_sbom_fixture
 
 
@@ -171,3 +174,50 @@ class RetainedProjectDependencyTests(unittest.TestCase):
         with patch.object(dependencies, "_MAX_OBSERVATION_BYTES", 1):
             with self.assertRaisesRegex(ValueError, "observation-budget"):
                 self.guard()
+
+
+@unittest.skipUnless(
+    os.name != "nt" and shutil.which("cc"), "requires native POSIX fixture"
+)
+class RetainedDependencyLinkTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        execution_fixtures.RetainedProjectExecutionTests.setUpClass()
+        cls.addClassCleanup(
+            execution_fixtures.RetainedProjectExecutionTests.doClassCleanups
+        )
+
+    def test_only_verified_manifest_selection_can_observe_a_tree_with_source_links(
+        self,
+    ):
+        fixture = execution_fixtures.RetainedProjectExecutionTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        (fixture.source / "src/alias").symlink_to("main.txt")
+        fixture.manifest = discover_retained_project_inputs(
+            fixture.source,
+            {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
+            fixture.manifest.limits,
+            allow_internal_symlinks=True,
+        )
+        fixture.plan = replace(
+            fixture.plan, manifest_identity=fixture.manifest.identity
+        )
+        fixture.current = fixture.plan
+        tool = (str(fixture.source / "tools/runner"),)
+        with self.assertRaisesRegex(DependencyObservationError, "symlinks"):
+            PortableHostDependencyObserver(toolchain_commands=(tool,)).observe(
+                {"artifact_path": str(fixture.source)}, root_ref="urn:fixture:default"
+            )
+        empty = PortableHostDependencyObserver(
+            toolchain_commands=(tool,), artifact_files=()
+        ).observe(
+            {"artifact_path": str(fixture.source)},
+            root_ref="urn:fixture:explicit-empty",
+        )
+        self.assertTrue(empty.components)
+        workspace = fixture.workspace()
+        for _ in fixture.plan.profile.actions:
+            workspace.execute_next()
+        self.assertTrue((workspace.inputs / "src/alias").is_symlink())
+        self.assertTrue(workspace.dependency_observation.components)

@@ -75,19 +75,20 @@ class RetainedProjectVerifiedTestReport:
         ) or not isinstance(self.report, RetainedProjectTestReport):
             raise TypeError("retained.tests.typed-coverage-required")
 
+    def to_dict(self):
+        return dict(
+            schema="literate-ai/retained-project-verified-tests@1",
+            plan_identity=self.plan_identity.uri,
+            policy_identity=self.policy_identity.uri,
+            observation_identity=self.observation_identity.uri,
+            blob_identity=self.blob_identity.uri,
+            report=self.report.to_dict(),
+            acceptance_receipt=False,
+        )
+
     @property
     def identity(self):
-        return canonical_identity(
-            dict(
-                schema="literate-ai/retained-project-verified-tests@1",
-                plan_identity=self.plan_identity.uri,
-                policy_identity=self.policy_identity.uri,
-                observation_identity=self.observation_identity.uri,
-                blob_identity=self.blob_identity.uri,
-                report=self.report.to_dict(),
-                acceptance_receipt=False,
-            )
-        )
+        return canonical_identity(self.to_dict())
 
 
 def read_retained_project_test_report(

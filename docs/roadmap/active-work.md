@@ -25862,9 +25862,25 @@ authorization and then unconditionally raise
 was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
 does not close this runtime requirement or transfer retained release authority.
 
-**Next action in progress:** qualify producer-backed retained SDK execution on
-native FreeBSD, then integrate distinct retained-origin receipt/package consumers
-into Standard execution. Do not fabricate generated source, tests or cache membership.
+**Next action in progress:** mint distinct local retained-origin receipts only
+from complete current runs, retain exact source/export/BOM/command evidence in
+the existing CAS, and admit sealed payload materialization for package consumers.
+Reject stale authority and incomplete/corrupt retention; decoded receipt JSON
+alone must not grant admission. Native SDK qualification remains pending.
+Public package/release integration follows without generated-source authority transfer.
+Local receipt checkpoint: all 109 retained-project tests pass in 373.215 seconds,
+including ten receipt cases and the source-link execution regression. Actual
+compiled exports survive scratch retirement and CAS relocation; stale authority,
+corrupt payloads, missing SDK records and existing destination collisions refuse.
+Lint/format, project authority, driver/documentation review, OpenSpec and the full
+documentation gate pass. This establishes local admission and exact payload
+materialization only. Full-suite, native and installed qualification, native
+package construction and public package/release consumers remain open.
+The source-link receipt fixture exposed a runtime gap: the native observer still
+walks and rejects approved source symlinks. Project the complete verified manifest
+onto its regular native files through the existing explicit selection interface;
+retain link text/target validation and default unselected-tree refusal. Explicit
+data-only native selections must remain empty rather than traversing links.
 
 The SDK join now binds the complete selected lock/product/file/mode closure to
 captured inputs, reuses existing producer materialization and native inspection,

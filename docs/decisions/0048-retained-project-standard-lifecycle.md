@@ -252,3 +252,37 @@ BOM-bound execution with SDK members or selected external repository sources
 requires producer bindings; observation-only legacy execution does not gain an
 admission or receipt. This internal join reuses producer admission but does not
 itself qualify a retained receipt, final package or public execution route.
+
+
+## Local retained receipts and package-input custody
+
+Only a complete current live retained workspace may mint the distinct
+`retained-project-receipt` contract. It binds the exact plan/run, input and final
+export manifests, selected payload manifest, source/resolved BOMs and original
+verifier bytes. Retain canonical command/test/verifier records and actual binary
+streams, with SDK execution and fresh final authority-check records when selected.
+Use existing streamed CAS storage and revalidate the live run after retention;
+partial work, missing SDK evidence or changed bytes cannot mint admission.
+
+The receipt preserves original source authority, exact passing/authorized-skip
+counts and a `local-runtime` verification scope. It is not an ordinary generated
+project receipt, advances no conversion stage and grants no publication. Parsing
+its JSON never reconstructs the in-process local admission capability. Remote
+receipt authentication and native package/public CLI consumption remain separate
+qualification requirements.
+
+Package consumers may reopen original plan/source/verifier authority and every
+retained blob, then materialize only the declared sealed payload using bounded
+CAS copies. Preserve modes and directory structure, including selected parent
+directories. Reuse exclusive directory publication so an existing/concurrent
+destination is not replaced. Verify complete payload inventory and bytes before
+and after publication. Scratch may be discarded and CAS relocated while original
+project authority stays current; stale source/policy/plan or corrupt metadata/data
+blocks consumption. This materialization is package input, not a native package,
+installation or release.
+
+A complete admitted manifest may include explicit internal source links. Select
+its regular native images for existing observation APIs without following aliases;
+retain exact link text and target validation. An explicit empty native-image
+selection describes data-only inputs. Default unselected tree observation still
+rejects symlinks.
