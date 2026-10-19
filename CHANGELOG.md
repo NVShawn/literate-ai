@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- FreeBSD exclusive directory publication uses the native no-replace rename,
+  preserving concurrently created destinations. Missing OS/filesystem support
+  remains an error with no replacing fallback.
+
+- Snapshot-replication conformance shares native Flavor selection across its
+  proof and failure tests, including versioned FreeBSD hosts. Unsupported hosts
+  continue to refuse rather than inheriting another OS's authority.
+
 - Retained-harness SSH routing admits explicit FreeBSD workers and checks the
   receiver OS and configured CPU architecture before commands run. Optional
   Ninja/uv archives bind their native platform; unavailable providers refuse

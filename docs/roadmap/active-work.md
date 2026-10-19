@@ -27909,6 +27909,38 @@ the later current-lock bridge or connector repair. The separately frozen wheel
 qualification at `9000d9b2` passes with qualified wheel identity
 `sha256:9264357d0ac3eb0e3eb09c4735ab428ec44c7f4bd726755adcb56a7998a49afd`.
 
+The full native ladder at `f30cbe96` then stops after 43 checks (30 normal skips):
+the self-hosting snapshot conformance helper rejects `freebsd16` before its
+negative lifecycle test. Both that helper and the separate replication proof
+duplicate an OS selector without FreeBSD. Repair their shared platform selection
+in progress, preserving explicit unsupported-host refusal and the native Flavor;
+qualify the real snapshot replay and failure group before resuming the full
+ladder. The previously successful SDK/retained groups do not establish full-suite
+success. Keep the native slot free until the repaired exact revision is ready.
+
+The snapshot selector passes its focused platform check and all three actual
+local snapshot conformance tests in 563.317 seconds, including repeated clean
+replays and negative custody checks (log SHA-256
+`e21bd8157394065082a4840cff031a15eff797b7c7f8412ffc75f5b15e748c38`).
+The native `9fc8596f` retained-group run stops at its first Cargo publication
+rollback test, before the connector checks: `exclusive_directory._native_rename`
+supports only Darwin/Linux. The worker exposes FreeBSD `renameat2` and header
+`AT_RENAME_NOREPLACE=0x0001`. Add that native publication path in progress and
+qualify real success, a destination appearing after prechecks, unsupported API
+refusal and original Cargo rollback. Preserve descriptor/source guards and refuse
+unsupported kernels/filesystems; no check-then-replacing-rename fallback.
+The failed native retained log SHA-256 is
+`476e4275a2fc838a199dc4a0ea9d46939d4287aa77020c10ed0def7f36da5be3`.
+The [FreeBSD rename contract](https://man.freebsd.org/cgi/man.cgi?manpath=FreeBSD+15.1-STABLE&query=renameat&sektion=2)
+documents no-replace behavior and unsupported-filesystem refusal. Five local
+publication checks pass, including a real destination-creation race and exact
+stage identity, plus the original Cargo rollback test. Their log SHA-256 values
+are `91ab2035360d7396068fc187cd304f1c7fcbbb3a1b987488bb15c37611ebc79b`
+and `5baef7cbc18942278d9315e39fcb8f415906dc39406c5f5413d93184a987db14`.
+Native exact-revision replay/publication/retained and full-suite renewal remain
+required. The earlier diagram renderer timeout passes an unchanged retry with
+all 121 diagrams; no timeout or check was relaxed.
+
 Installed-wheel execution at `d96f6b8b` no longer discovers a coding agent, but
 refuses before compilation because the shared Python builder searches only
 `python3` and `python`. The aligned native worker exposes the actual interpreter

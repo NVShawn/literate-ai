@@ -38,6 +38,24 @@ _MAX_STANDARD_LIBRARY_ROOTS = 4
 _MAX_DENIED_PACKAGE_ROOTS = 4
 _PACKAGE_DIRECTORY_NAMES = frozenset({"site-packages", "dist-packages"})
 
+
+def platform_flavor(repo_root: Path) -> Path:
+    """Select this host's actual Flavor; never substitute another POSIX OS."""
+    if sys.platform.startswith("linux"):
+        host_os = "linux"
+    elif sys.platform.startswith("freebsd"):
+        host_os = "freebsd"
+    elif sys.platform == "darwin":
+        host_os = "macos"
+    elif sys.platform in {"win32", "cygwin"}:
+        host_os = "windows"
+    else:
+        raise SelfHostSampleError(
+            f"unsupported snapshot-replication platform: {sys.platform}"
+        )
+    return repo_root / "flavors" / f"os-{host_os}" / "flavor.md"
+
+
 _INTERPRETER_LAYOUT_PROBE = r"""
 import json
 import sys
@@ -1078,17 +1096,7 @@ def execute_replication_proof(
     original_tree = FrozenPackageTree.capture(original_package)
     component = sample_root / "component.md"
     proof, skills = _replication_inputs(sample_root)
-    if sys.platform.startswith("linux"):
-        host_os = "linux"
-    elif sys.platform == "darwin":
-        host_os = "macos"
-    elif sys.platform in {"win32", "cygwin"}:
-        host_os = "windows"
-    else:
-        raise SelfHostSampleError(
-            f"unsupported snapshot-replication platform: {sys.platform}"
-        )
-    platform_flavor = repo_root / "flavors" / f"os-{host_os}" / "flavor.md"
+    selected_platform_flavor = platform_flavor(repo_root)
     # Keep disposable custody roots short on Windows. Stable evidence uses
     # Windows. Stable evidence uses workspace references and content identities,
     # not these host-local path labels.
@@ -1098,7 +1106,7 @@ def execute_replication_proof(
         component_path=component,
         skills_path=skills,
         proof_path=proof,
-        platform_flavor_path=platform_flavor,
+        platform_flavor_path=selected_platform_flavor,
         runtime_root=generation_one_root,
         workspace_reference="snapshot-replication/generation-one",
         host_build_acknowledged=host_build_acknowledged,
@@ -1131,7 +1139,7 @@ def execute_replication_proof(
             "--proof",
             str(proof),
             "--platform-flavor",
-            str(platform_flavor),
+            str(selected_platform_flavor),
             "--runtime-root",
             str(generation_two_root),
             "--workspace-reference",

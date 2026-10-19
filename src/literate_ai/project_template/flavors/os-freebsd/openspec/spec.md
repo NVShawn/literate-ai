@@ -6,6 +6,9 @@ The application SHALL use portable filesystem, temporary-storage and UTF-8 APIs
 on FreeBSD unless its own specification requires native interfaces. Linux procfs,
 GNU utilities and Linux ABI compatibility SHALL NOT be presumed available.
 Native extensions SHALL target the selected FreeBSD architecture and userland.
+Snapshot-replication conformance SHALL select the native FreeBSD Flavor for
+versioned FreeBSD host names, retain unsupported-host refusal, and execute the
+same replay and negative custody checks as other supported hosts.
 GNU Make requirements SHALL resolve to `gmake`, distinct from the base BSD make.
 Native installation SHALL read the FreeBSD `pkg` realization for the exact supported
 architecture. Package provenance and behavioral probes must both pass. Coding-agent
@@ -18,6 +21,18 @@ until an authorized declared installation provides the required version.
 - **WHEN** `platform.os=freebsd` is selected for a physical machine or a guest
 - **THEN** build and acceptance execute in that FreeBSD environment
 - **AND** the virtualization host's OS does not substitute for guest identity
+
+### Requirement: Exclusive directory publication
+
+Native directory publication SHALL use FreeBSD's `renameat2` with
+`AT_RENAME_NOREPLACE`, preserving descriptor-bound parent and source custody.
+A destination created after prechecks SHALL remain untouched. Missing native
+support or an unsupported filesystem SHALL refuse without a replacing fallback.
+
+#### Scenario: Concurrent publication destination
+
+- **WHEN** another writer creates the destination before the native rename
+- **THEN** publication refuses and preserves both that destination and its stage
 
 ### Requirement: Retained-harness native routing
 
