@@ -28593,6 +28593,13 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   internal infrastructure tests. Final title, description and completion claims
   must match the gates actually exercised. Active peer checkouts retain their
   work and evidence.
+  Native full regression at `ab15e04e` exposed a cancellation fixture race:
+  its one-second process deadline could expire during cold interpreter/ledger
+  startup, before the fixture's existing fifteen-second readiness budget.
+  Give the process deadline a finite bound above readiness and preserve actual
+  timeout/SIGINT, descendant cleanup and nested-evidence assertions. Production
+  command deadlines and cancellation behavior remain unchanged. Renew the focused
+  native fixture and complete native regression before landing.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 

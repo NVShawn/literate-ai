@@ -47,7 +47,9 @@ try:
         path="release/gate",
         operation="release.gate",
         tee=sys.argv[2] == "true",
-        timeout=1.0 if sys.argv[3] == "timeout" else None,
+        # Include cold interpreter/ledger startup without racing the fixture's
+        # fifteen-second readiness budget. Still time out the live process tree.
+        timeout=20.0 if sys.argv[3] == "timeout" else None,
     )
 except (KeyboardInterrupt, subprocess.TimeoutExpired) as exc:
     run.close("failed")
@@ -97,7 +99,7 @@ class EvidenceCancellationTests(unittest.TestCase):
                         if reason == "signal":
                             os.kill(owner.pid, signal.SIGINT)
                         self.assertEqual(
-                            owner.wait(timeout=10), 130 if reason == "signal" else 124
+                            owner.wait(timeout=30), 130 if reason == "signal" else 124
                         )
                         for name, pid in pids.items():
                             observed = subprocess.run(
