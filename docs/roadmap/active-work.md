@@ -27870,17 +27870,19 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Support reviewed updates to registered native child projects
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
 - **Depends on:** exact adopted-project native registry, reviewed Standard lifecycle rebind and signed source promotion evidence
-- **Next action (in progress):** Complete the installed-wheel tiny-library rebind/replacement journey and its verifier-owned oracle, then refresh lifecycle and package qualification.
+- **Next action (in progress):** Land the exact tested change through full hosted CI; retain the child as unqualified until separate regenerative qualification completes.
 - **Current design:** Plan exact parent/child updates before mutation. Manifest readers must reject special files before opening them and use nonblocking opens where available so unsafe metadata cannot stall an update. Coordinate a registered child lifecycle rebind under the native registry lock; never derive a replacement registration from arbitrary changed files. Source promotion replacement must name the exact unqualified prior promotion, require a new current source review, retain recovery evidence and refuse any qualified destination. Retain exact before/after metadata for coordinated rebinds so an old promotion audit can be checked against its original manifest without treating that old audit as current qualification.
 - **Implementation:**
   - [x] Bind coordinated lifecycle rebind plans to the exact parent registry and prior child definition.
   - [x] Apply and roll back child definition and registration together under the existing registry custody boundary.
   - [x] Add reviewed replacement of an exact unqualified promotion with retained recovery evidence; keep qualified children immutable.
-  - [ ] Prove the tiny Python library journey, independent oracle and drift/symlink/rollback refusals.
+  - [x] Prove the tiny Python library journey, independent oracle and drift/symlink/rollback refusals.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-- **Development evidence:** Twenty focused cases pass within the broader regression group (eighteen new registered-child cases plus two existing Standard rebind regressions). The public CLI refuses uncoordinated registered-child updates and accepts explicit `--registered-parent` planning/apply. Exact-byte rollback covers failed registry writes, failed final validation and post-write installed-distribution drift, including noncanonical original whitespace. Changed registry/child inputs, symlinks and drift during observation refuse. Nested project selection resolves the actual registered root. Special-file metadata refuses without blocking, tampered plans and missing authorization preserve both inputs, and rollback preserves a concurrent registry edit instead of overwriting it. Successful rebinds retain identity-bound before/after metadata; retention failure, history collision and indirect custody restore both authorities without replacing retained history. The related configuration, registry, adopted-promotion and project CLI regression group passes (34 tests in 25.616 seconds). Eleven signed-promotion replacement cases also pass, including a reviewed Python import-map change, exact old-tree retention, post-registration rollback, safe retry, stale source/review/child refusals and preservation of a concurrent child edit. The consolidated package suite passes with 1,577 selected tests: 1,542 passed and 35 declared skips; repository/export checks, lint/format, OpenSpec and driver/runner reviews pass. This is development evidence only; the complete installed-wheel tiny-library journey with its verifier oracle, current lifecycle receipt and installed-package qualification remain open.
+- **Development evidence:** Twenty focused cases pass within the broader regression group (eighteen new registered-child cases plus two existing Standard rebind regressions). The public CLI refuses uncoordinated registered-child updates and accepts explicit `--registered-parent` planning/apply. Exact-byte rollback covers failed registry writes, failed final validation and post-write installed-distribution drift, including noncanonical original whitespace. Changed registry/child inputs, symlinks and drift during observation refuse. Nested project selection resolves the actual registered root. Special-file metadata refuses without blocking, tampered plans and missing authorization preserve both inputs, and rollback preserves a concurrent registry edit instead of overwriting it. Successful rebinds retain identity-bound before/after metadata; retention failure, history collision and indirect custody restore both authorities without replacing retained history. The related configuration, registry, adopted-promotion and project CLI regression group passes (34 tests in 25.616 seconds). Eleven signed-promotion replacement cases also pass, including a reviewed Python import-map change, exact old-tree retention, post-registration rollback, safe retry, stale source/review/child refusals and preservation of a concurrent child edit. The consolidated package suite passes with 1,577 selected tests: 1,542 passed and 35 declared skips; repository/export checks, lint/format, OpenSpec and driver/runner reviews pass. Local qualification is complete; exact-head hosted CI and landing remain open.
+
+- **Installed-wheel acceptance:** Implementation `e3a9da73a95ad976b3b423fcec9ea8b1a59f2d77` passed the real macOS tiny-library journey across two noneditable 1.3.0 distribution payloads. The registered child rebind preserved current parent validation. A signed `tiny.app` to `tiny.api` import-map revision replaced only the exact unqualified child and retained its complete prior tree. A separately reviewed native Python profile correction retained the failed-profile tree too. The native Standard rebuild passed in 134.536 seconds, including its verifier-owned isolated interpreter, module-origin assertion and expected result 7; the native child receipt is current with 3 passing tests and `verify` passes. This is one successful rebuild, not regenerative qualification: the child remains `DERIVED_SOURCE_RETAINED` and parent release authority remains with the retained source. Qualified-child refusal is covered by deterministic policy tests. The framework lifecycle receipt is current with 225 passing tests, and installed-wheel smoke passes (wheel `sha256:3ad725ea83cfe48ac652ca15ebd2449b3743c2242a5315e9e1b4a96973233a19`). Local proof custody: `sha256:fd6986f3bac434f0bc6a69b2979054cf9372376df0cb6e74fb0e4a14892a3100`. Native acceptance also exposed separately scoped 1.3 issues [#75](https://github.com/jordanhubbard/literate-ai/issues/75) and [#76](https://github.com/jordanhubbard/literate-ai/issues/76).
 
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
@@ -28027,3 +28029,31 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   - [ ] Prove bounded scale, invalidation and fail-closed ownership/dependency checks with a real native multi-Component fixture.
 - **Evidence:**
   - [ ] Complete coverage and selected-closure native build plus independent acceptance; preserve the unqualified execution guard until its gates pass.
+
+### [ ] REBUILD-ENTRY-001 — Normalize or safely reject Component file entry points in Standard rebuild
+
+- **Priority:** P1
+- **Owner:** framework rebuild CLI
+- **GitHub issue:** [#75](https://github.com/jordanhubbard/literate-ai/issues/75)
+- **Current release target:** 1.3.0
+- **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
+- **Conclusion:** An installed-wheel native journey exposed an uncaught authority-reader exception for a Component file argument. Normalize supported file entry points or report a bounded CLI error before provider invocation; preserve project and symlink boundaries.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Resolve the documented Component entry point before locked authority loading and normalize invalid-input diagnostics.
+- **Evidence:**
+  - [ ] Installed-wheel file and directory cases, unsafe paths and no provider invocation on invalid input.
+
+### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
+
+- **Priority:** P1
+- **Owner:** framework library profiles and generation preparation
+- **GitHub issue:** [#76](https://github.com/jordanhubbard/literate-ai/issues/76)
+- **Current release target:** 1.3.0
+- **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
+- **Conclusion:** The default promoted Bazel profile exports a file while library test preparation requires a directory, wasting generation retries. Reject unsupported profile combinations before generation or provide a supported directory export without weakening acceptance.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Validate library artifact shape against the selected build profile before generation and provide actionable profile selection.
+- **Evidence:**
+  - [ ] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
