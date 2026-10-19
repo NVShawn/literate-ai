@@ -27779,17 +27779,16 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
 - **Direction:** Mermaid documentation check scans gitignored build output (generated/)
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Conclusion:** Implemented for 1.3; the acceptance evidence below completes this work item while preserving its fail-closed authority boundaries.
 - **Depends on:** none
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
   - [x] Run the issue acceptance cases and required integration qualification before closing
 
-
 - **Completion evidence:** The landed tracked-Markdown filter is unchanged from main `90d5b6e9dcf155af28301b3e4d4b67863bf70d25`. Its regression proves that invalid Mermaid fences in ignored `generated/` and `.worktrees/` directories, plus untracked Markdown, do not change the selected file set; tracked edits and deletions are respected and exported trees keep their bounded fallback. `make documentation-check` passes all 21 Node tests and renders 121 diagrams from 608 tracked Markdown files. The original implementation also passed the 26-job main matrix at `450d2a3f` ([run](https://github.com/jordanhubbard/literate-ai/actions/runs/39195452379)); later source has no change to this filter or its regression. The existing Unreleased changelog records the behavior. This completes #53 acceptance, not the wider 1.3 release gate.
 
-### [ ] SOURCE-CREDENTIAL-001 — Distinguish credential literals from Python assignment expressions
+### [x] SOURCE-CREDENTIAL-001 — Distinguish credential literals from Python assignment expressions
 
 - **GitHub issue:** [#52](https://github.com/jordanhubbard/literate-ai/issues/52)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -27797,18 +27796,20 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
 - **Direction:** Distinguish credential literals from Python assignment expressions
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Conclusion:** Implemented for 1.3; the acceptance evidence below completes this work item while preserving its fail-closed authority boundaries.
 - **Depends on:** none
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Execution decision:** Use inert Python AST positions to distinguish assignments of credential-free expressions from literal credentials. Exempt only exact assignment matches with no string/bytes literal in their value; preserve uncertain-language, syntax-error, secret-literal and filename exclusions. An entirely excluded inventory must produce a typed classification diagnostic without matched content.
 
 - **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
 
 - **Adversarial review repair:** A literal-free assignment must not exempt a different credential literal elsewhere in the file. Add mixed assignment/dictionary/keyword/default and embedded-private-key controls, then renew qualification.
+
+- **Acceptance evidence:** All five inert inventory/derivation regression tests pass against the noneditable combined wheel. The complete original Python tuple-binding counterexample and its variable-rename control both derive, with a top-level execution sentinel proving the inspected source is not run. Literal credentials (including short values), numeric/call/quoted literals, private-key material/names, malformed Python, uncertain-language controls and non-ASCII offsets retain conservative exclusion. Entirely excluded inventories report `workflow.inventory_excluded` without exposing matched values. Operator MCP configuration is isolated and disabled for these tests. The complete local suite and installed package gate pass; the first implementation batch already landed through its full required CI. This completes #52 acceptance, independently of release readiness.
 
 ### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
 
@@ -27904,7 +27905,7 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
-### [ ] README-PARENT-001 — Ensure project README links to its actual parent repository through a reusable skill
+### [x] README-PARENT-001 — Ensure project README links to its actual parent repository through a reusable skill
 
 - **GitHub issue:** [#46](https://github.com/jordanhubbard/literate-ai/issues/46)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -27912,7 +27913,7 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
 - **Direction:** Ensure project README links to its actual parent repository through a reusable skill
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Conclusion:** Implemented for 1.3; the acceptance evidence below completes this work item while preserving its fail-closed authority boundaries.
 - **Depends on:** none
 - **Current design:** Route initialization/adoption/update/reparent agent workflows through a reusable parent-README skill. Its inert plan/apply helper reads validated direct-parent lineage, preserves authored README bytes outside its managed block, and requires an explicit browser URL for local-only parent identities.
 - **Installed-runtime correction:** Expose the helper through `litai project parent-readme` so isolated framework installations do not require an ambient Python import. Renew CLI and installed-launcher evidence before landing.
@@ -27920,9 +27921,11 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   - [x] Route initialized and maintainer agent workflows through the reusable parent-README skill and read-only plan / authorized apply helper
   - [x] Cover actual initialized/reparented projects, arbitrary and multiple parents, authored prose, idempotency, local URL evidence and unsafe inputs
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
-### [ ] WORKER-GPU-MEMORY-001 — Preserve unavailable NVIDIA GPU memory in POSIX worker observations
+- **Acceptance evidence:** The existing reusable maintenance skill and initialized instructions route successful initialization/adoption/update/reparent operations through actual direct-parent attribution. All ten regression cases pass against the noneditable combined wheel, including its public CLI, arbitrary repository URLs/hosts, explicit local browser overrides, multiple parents, no invented parent, missing/stale README handling, authored text preservation, idempotency, symlink refusal and reparent reconciliation. Resolver-dependent cases use controlled lineage fixtures. The complete local suite and installed package gate also pass; the first implementation batch already landed through its full required CI. This completes the README behavior acceptance, independently of the broader 1.3 release gate.
+
+### [x] WORKER-GPU-MEMORY-001 — Preserve unavailable NVIDIA GPU memory in POSIX worker observations
 
 - **GitHub issue:** [#44](https://github.com/jordanhubbard/literate-ai/issues/44)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -27930,14 +27933,14 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
 - **Direction:** Preserve unavailable NVIDIA GPU memory in POSIX worker observations
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Conclusion:** Implemented for 1.3; the acceptance evidence below completes this work item while preserving its fail-closed authority boundaries.
 - **Depends on:** none
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
-- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+- **Acceptance evidence:** All four worker-capability regressions pass against the noneditable combined wheel. The real POSIX shell/awk serializer fixture preserves `[N/A]` and `N/A` as JSON null, retains positive 8192 MiB and handles a failed query without inventing capacity. Typed GPU construction accepts the unknown-memory result while preserving its available model metadata; OS/CPU observation remains independent. The Windows serializer was inspected and likewise maps unavailable memory to null. This source is unchanged from main `450d2a3f`, whose full 26-job matrix passed, including the native Windows serializer fixture. The existing Unreleased changelog records this behavior. This completes #44 acceptance; it is not a physical GPU workload qualification.
 
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
@@ -28042,15 +28045,18 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
 - **Conclusion:** An installed-wheel native journey exposed an uncaught authority-reader exception for a Component file argument. Normalize supported file entry points or report a bounded CLI error before provider invocation; preserve project and symlink boundaries.
 - **Depends on:** none
-- **Next action (in progress):** Qualify both native rebuild follow-ups together, including the installed CLI profile refusal, real file-entry-point oracle, current lifecycle receipt and full exact-head CI.
+- **Next action (in progress):** Land the qualified combined change after #77 and its full exact-head hosted CI.
 - **Implementation:**
   - [x] Resolve the documented Component entry point before locked authority loading and normalize invalid-input diagnostics.
 - **Evidence:**
-  - [ ] Installed-wheel file and directory cases, unsafe paths and no provider invocation on invalid input.
+  - [ ] Pass full exact-head hosted CI and land the reviewed combined change.
+  - [x] Installed-wheel file and directory cases, unsafe paths and no provider invocation on invalid input.
 
-- **Local evidence:** The full unchanged production-source suite passes: 1,580 selected, 1,545 passed, 35 skips and no failures in 779.102 seconds. Eight focused CLI tests cover file/directory equivalence, lexical symlink refusals (including relative paths), unavailable/outside/unrelated inputs and a real missing-Component authority error before lifecycle assembly. The missing-authority assertion is strengthened after the full run and rerun in the focused group. Static/export/style checks, strict specifications, current driver/runner/documentation reviews, 21 Node tests and all 121 Mermaid diagrams pass. Installed-wheel file entry-point acceptance, refreshed lifecycle receipt and exact-head hosted CI remain open.
+- **Local evidence:** The full unchanged production-source suite passes: 1,580 selected, 1,545 passed, 35 skips and no failures in 779.102 seconds. Eight focused CLI tests cover file/directory equivalence, lexical symlink refusals (including relative paths), unavailable/outside/unrelated inputs and a real missing-Component authority error before lifecycle assembly. The missing-authority assertion is strengthened after the full run and rerun in the focused group. Static/export/style checks, strict specifications, current driver/runner/documentation reviews, 21 Node tests and all 121 Mermaid diagrams pass. The subsequent combined acceptance is recorded below; hosted CI and landing remain open.
 
-- **Installed native file-input evidence:** Noneditable implementation `a46e5e3b8780f21184da6cd4fdb807351b61622a` passes the copied tiny-library `component.md` rebuild in 72.058 seconds after reviewed Standard rebind and documentation renewal. Its existing verifier-owned harness remains unchanged (`sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`), including isolated startup, module origin and expected value 7. Generated tests, independent acceptance, current three-test receipt and `verify` pass. This is a standalone copied-library check, separate from #48 registered-parent evidence, and it does not execute the #76 refusal case. Retained proof identity: `sha256:e2230e775cbf47ad5a70442ac6def65a3917b0336296d627d9feb3fb1d508e1d`. The merged implementation still requires its own combined installed qualification.
+- **Installed native file-input evidence:** Noneditable implementation `a46e5e3b8780f21184da6cd4fdb807351b61622a` passes the copied tiny-library `component.md` rebuild in 72.058 seconds after reviewed Standard rebind and documentation renewal. Its existing verifier-owned harness remains unchanged (`sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`), including isolated startup, module origin and expected value 7. Generated tests, independent acceptance, current three-test receipt and `verify` pass. This is a standalone copied-library check, separate from #48 registered-parent evidence, and it does not execute the #76 refusal case. Retained proof identity: `sha256:e2230e775cbf47ad5a70442ac6def65a3917b0336296d627d9feb3fb1d508e1d`. The combined installed qualification is recorded below.
+
+- **Acceptance evidence:** Combined implementation `8746155526cecb46de83202fc26cd4733b13dd62` passes the full 1,582-case suite (1,547 passed, 35 skipped, no failures; 648.937 seconds), all 19 focused cases, the installed wheel (`sha256:456a7bea81cf93d42892eab9cfd1926f86642281e2a6c133f73d44258584eb93`), strict source/specification/review gates and all 121 diagrams. The installed CLI refuses the exact retained incompatible Bazel library profile before generation. A separate supported native profile rebuilds through its `component.md` path with the unchanged isolated, module-origin-checking oracle and expected value 7. Its current native receipt has 4 passing tests and `verify` passes. Installed API regressions also pass all eight entry-point and four profile cases. The fresh framework lifecycle receipt is current with 231 passing tests; candidate comparison and `verify` pass. Native proof custody: `sha256:4007c044d3fd7ed8c18bc4a7e451a5ec2812c0feb71074af7bb379cfa16b2e28`. This is one successful rebuild per temporary fixture, not regenerative qualification. Full hosted CI and landing remain open.
 
 ### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
 
@@ -28061,12 +28067,15 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
 - **Conclusion:** The default promoted Bazel profile exports a file while library test preparation requires a directory, wasting generation retries. Reject unsupported profile combinations before generation or provide a supported directory export without weakening acceptance.
 - **Depends on:** none
-- **Next action (in progress):** Qualify both native rebuild follow-ups together, including the installed CLI profile refusal, real file-entry-point oracle, current lifecycle receipt and full exact-head CI.
+- **Next action (in progress):** Land the qualified combined change after #77 and its full exact-head hosted CI.
 - **Implementation:**
   - [x] Validate library artifact shape against the selected build profile before generation and provide actionable profile selection.
 - **Evidence:**
-  - [ ] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
+  - [ ] Pass full exact-head hosted CI and land the reviewed combined change.
+  - [x] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
 
-- **Local evidence:** The standalone profile implementation passes all 11 focused projection/CLI tests, including pre-discovery refusal of Bazel and Make file profiles on Linux, Windows and macOS, unchanged native directory exports and existing wheel-library acceptance. The full standalone suite passes 1,579 selected cases: 1,544 passed, 35 skipped and no failures in 703.524 seconds. Static/export/style, strict specifications, driver/runner/documentation reviews, all 121 diagrams and the pinned root skill evaluation pass. Exact production/test source slices are consolidated with the #75 entry-point fix; the combined suite, lifecycle receipt, installed native journey and hosted CI remain required.
+- **Local evidence:** The standalone profile implementation passes all 11 focused projection/CLI tests, including pre-discovery refusal of Bazel and Make file profiles on Linux, Windows and macOS, unchanged native directory exports and existing wheel-library acceptance. The full standalone suite passes 1,579 selected cases: 1,544 passed, 35 skipped and no failures in 703.524 seconds. Static/export/style, strict specifications, driver/runner/documentation reviews, all 121 diagrams and the pinned root skill evaluation pass. Exact production/test source slices are consolidated with the #75 entry-point fix; subsequent combined acceptance is recorded below, with hosted CI and landing still open.
 
-- **Combined checkpoint:** All 19 focused entry-point/profile/qualification cases pass in 9.795 seconds. The combined source passes layout/export, strict lint/format, specifications and current driver/runner/documentation review. The source slices preserve both standalone implementations exactly. Full combined qualification remains pending.
+- **Combined checkpoint:** All 19 focused entry-point/profile/qualification cases pass in 9.795 seconds. The combined source passes layout/export, strict lint/format, specifications and current driver/runner/documentation review. The source slices preserve both standalone implementations exactly. Combined local qualification is complete as recorded below; hosted CI and landing remain open.
+
+- **Acceptance evidence:** The full combined evidence is recorded under REBUILD-ENTRY-001 immediately above. The installed CLI rejects the exact retained default Bazel library profile before generation and accepts the supported native directory profile through real generated tests and unchanged independent acceptance. All four installed profile tests pass across the declared Linux, Windows and macOS projections, including existing wheel behavior. The 1,582-case combined suite, package check and fresh current framework receipt pass; full hosted CI and landing remain open.
