@@ -28300,15 +28300,22 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **GitHub pull request:** [#66](https://github.com/jordanhubbard/literate-ai/pull/66), including the reviewed ancestry of #60–#62.
 - **Policy reconciliation:** Correct stale repository pre-release target 1.2 to 1.3 through the public release-state command; record native and installed qualification without claiming final release readiness.
 
-- **PR #68 reconciliation (conflicts resolved; qualification in progress):** Merge current main into the published
-  FreeBSD review in an isolated integration checkout. Preserve both sides' release
-  notes, traceability and work evidence; renew authority reviews and test custody
-  rather than carrying a receipt for another tree. Qualify the automatically merged
-  Python projection, worker observations and test-runner changes before pushing.
-  Active, uncommitted retained SDK/package work remains outside this reconciliation.
-  The merged integration passes 36 focused tests, source/style/layout and authority
-  reviews, both changed-skill admissions, strict OpenSpec and all 121 rendered
-  Mermaid diagrams. Full frozen-tree qualification is the next action.
+- **PR #68 reconciliation (conflicts resolved and locally qualified):** Merged
+  current main `90d5b6e9` into published FreeBSD head `545c4ae6` in an isolated
+  integration checkout; frozen source is `89f80bfb`. Both contributions' release
+  notes and work evidence remain intact, and driver, runner and documentation
+  authority were renewed. The automatically merged Python projection, worker
+  observations and test runner pass 36 focused tests and the full suite: 1,714
+  selected, 1,677 passed, 37 skipped, zero failed. Source/style/layout, strict
+  OpenSpec, both changed-skill admissions, 21 documentation tests and 121 rendered
+  Mermaid diagrams pass. Installed-wheel and offline installed-CLI checks pass;
+  the tested wheel identity is
+  `sha256:d360ac91896fbfc2a909f50172d1cf9c34f692a83a8c90476fff07dc5bd7d8e5`.
+  A fresh host lifecycle passes 229 tests and supplies the finalized current
+  receipt through the supported promotion command. This reconciles the published
+  review; active retained SDK/package work and native FreeBSD acceptance remain
+  separate, unfinished gates. Hosted checks on the pushed revision remain required
+  evidence to inspect before any eventual landing.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
