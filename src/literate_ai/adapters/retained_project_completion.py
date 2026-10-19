@@ -17,7 +17,11 @@ from literate_ai.adapters.retained_project_execution import (
 from literate_ai.adapters.retained_project_testing import (
     RetainedProjectVerifiedTestReport,
 )
-from literate_ai.contracts import ProjectTestReceiptPolicy, canonical_identity
+from literate_ai.contracts import (
+    ContentIdentity,
+    ProjectTestReceiptPolicy,
+    canonical_identity,
+)
 from literate_ai.contracts.retained_project import RetainedProjectManifest
 from literate_ai.contracts.retained_project_acceptance import (
     RetainedProjectAcceptancePolicy,
@@ -61,6 +65,7 @@ class RetainedProjectCompletedRun:
     acceptance_policy: RetainedProjectAcceptancePolicy
     acceptance_observations: tuple[RetainedProjectAcceptanceObservation, ...]
     output_manifest: RetainedProjectManifest
+    native_sdk_final_check_identity: ContentIdentity | None = None
 
     def __post_init__(self):
         if (
@@ -101,6 +106,25 @@ class RetainedProjectCompletedRun:
             or len({item.dependency_identity for item in self.observations}) != 1
         ):
             raise ValueError("retained.completion.command-context-mismatch")
+        sdk_mode = any(m.role == "sdk-policy" for m in self.source_bom.manifest.members)
+        sdk_identities = {item.native_sdk_inputs_identity for item in self.observations}
+        if (
+            len(sdk_identities) != 1
+            or (None in sdk_identities) == sdk_mode
+            or (
+                sdk_mode
+                and not isinstance(
+                    self.native_sdk_final_check_identity, ContentIdentity
+                )
+            )
+            or (not sdk_mode and self.native_sdk_final_check_identity is not None)
+        ):
+            raise ValueError("retained.completion.sdk-authority-mismatch")
+        sdk_counts = {len(item.native_sdk_executions) for item in self.observations}
+        if len(sdk_counts) != 1 or bool(next(iter(sdk_counts))) != bool(
+            self.resolved_bom.sdk_dependencies
+        ):
+            raise ValueError("retained.completion.sdk-command-closure-mismatch")
         roots = []
         stage_manifests = {}
         build_manifest = None
@@ -177,6 +201,8 @@ class RetainedProjectCompletedRun:
         for case, item in zip(
             expected_cases, self.acceptance_observations, strict=True
         ):
+            if len(item.native_sdk_executions) not in sdk_counts:
+                raise ValueError("retained.completion.sdk-case-closure-mismatch")
             if (
                 item.plan_identity != plan.identity
                 or item.policy_identity != self.acceptance_policy.identity
@@ -209,6 +235,15 @@ class RetainedProjectCompletedRun:
             "sdk_admitted": False,
             "lifecycle_receipt": False,
             "release_authority": "original-source",
+            **(
+                {
+                    "native_sdk_final_check_identity": (
+                        self.native_sdk_final_check_identity.uri
+                    )
+                }
+                if self.native_sdk_final_check_identity is not None
+                else {}
+            ),
         }
 
     @property

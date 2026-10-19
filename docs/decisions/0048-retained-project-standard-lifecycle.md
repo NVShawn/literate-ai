@@ -220,3 +220,35 @@ it cannot authenticate facts transported from a different process or worker.
 This join is input to later SDK, receipt and package admission, not a substitute
 for them. It issues no lifecycle receipt, permits no conversion-stage transition
 and leaves the public retained execution guard in force.
+
+
+## Producer-backed retained SDK inputs
+
+An opt-in manifest member with role `sdk-policy` binds canonically ordered exact
+Component-lock/SDK-consumer-input pairs to disjoint relative placement prefixes.
+Planning reads its bounded, duplicate-key-free bytes without acquisition. Runtime
+requires existing live `NativeSdkConsumerInputs` owners for the complete ordered
+lock tuple; a caller-supplied SDK snapshot or ambient library is insufficient.
+The policy must cover exactly the selected producer products. Every SDK-role
+member must match its product file size, digest and executable mode, and each
+placement must have the complete file/directory closure without extra files,
+links or empty directories. Prefix lookup walks indexed ancestors.
+
+Materialize and inspect through the existing owner, then bind the same verified
+product/runtime observations to the identical retained snapshot files. Reuse the
+existing native SDK execution manifest and command scope for every retained
+command and independent verifier case. Its actual request binds the selected
+consumer, retained manifest, exact command, environment, tool and plan; the
+caller supplies the existing explicit authorization and evidence-retention ports.
+The adapter never acquires/builds a producer or creates its own grants. Check live
+producer revocations before and after execution, and revalidate the most recent
+verifier grants at whole-run completion without repeating their commands.
+
+Bind SDK source admission, repository resolution, license, target and native
+dependency evidence into the resolved BOM using existing SDK merge/CycloneDX
+owners. Command/case records and the whole-run record bind SDK execution and final
+authority-check identities. Omitted optional fields retain legacy wire identities.
+BOM-bound execution with SDK members or selected external repository sources
+requires producer bindings; observation-only legacy execution does not gain an
+admission or receipt. This internal join reuses producer admission but does not
+itself qualify a retained receipt, final package or public execution route.

@@ -7,7 +7,7 @@ import shutil
 import tempfile
 from collections.abc import Callable, Iterator, Mapping
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from types import MappingProxyType
@@ -74,6 +74,15 @@ class NativeSdkCommandScope:
     argv: tuple[str, ...]
     environment: Mapping[str, str]
     evidence_identity: ContentIdentity | None = None
+    _revalidate: Callable[[], object] | None = field(
+        default=None, repr=False, compare=False
+    )
+
+    def require_current(self):
+        """Recheck this live grant without granting or repeating its command."""
+        if self._revalidate is None:
+            raise ValueError("SDK command scope has no live authority verifier")
+        return self._revalidate()
 
 
 @dataclass(frozen=True, slots=True)
@@ -233,7 +242,9 @@ class NativeSdkExecutionInputs:
             }
 
         before = require_authority()
-        scope = NativeSdkCommandScope(argv, MappingProxyType(selected_environment))
+        scope = NativeSdkCommandScope(
+            argv, MappingProxyType(selected_environment), _revalidate=require_authority
+        )
         try:
             yield scope
         finally:

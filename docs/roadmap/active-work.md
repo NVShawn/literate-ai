@@ -25862,9 +25862,23 @@ authorization and then unconditionally raise
 was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
 does not close this runtime requirement or transfer retained release authority.
 
-**Next action in progress:** qualify the completed-run boundary on native FreeBSD,
-then integrate SDK and distinct retained-origin receipt/package consumers into the
-existing Standard lifecycle. Do not fabricate generated source, tests or cache membership.
+**Next action in progress:** qualify producer-backed retained SDK execution on
+native FreeBSD, then integrate distinct retained-origin receipt/package consumers
+into Standard execution. Do not fabricate generated source, tests or cache membership.
+
+The SDK join now binds the complete selected lock/product/file/mode closure to
+captured inputs, reuses existing producer materialization and native inspection,
+and delegates per-command and verifier grants plus live revocation checks to
+the existing SDK execution owner. Source resolutions flow into the resolved BOM;
+completion retains fresh checks of the most recent verifier grants. SDK-bound
+BOM execution rejects missing producer owners before target commands run.
+All 98 local retained-project checks pass (243.802 seconds), including seven new
+SDK policy/execution cases with a real compiled SDK and its transitive library.
+Both existing SDK execution regressions pass (38.770 seconds). The initial focused
+run also passed seven existing producer checks. Lint/format, authority/driver
+review, both OpenSpec changes, all 121 diagrams and 21 documentation-tool tests
+pass. The configured lifecycle receipt remains stale. Native/installed/full-suite
+qualification and distinct retained receipt/package consumers remain open.
 
 The completed-run boundary now joins the full ordered command transcript, original
 test policy and reports, independent cases, both BOMs and sealed final exports.

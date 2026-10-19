@@ -122,6 +122,11 @@ it preserves retained origin without issuing lifecycle acceptance.
 A completed-run boundary now checks the full ordered command graph, exact original
 test and verifier results, both BOMs and final exports together, then revalidates
 current custody. Its record is not SDK admission or a lifecycle receipt.
+An explicit retained SDK policy now joins captured files to existing live SDK
+producer/consumer owners, carries source resolutions into the BOM and delegates
+command/verifier authorization and revocation checks to their existing owner.
+SDK inputs require their exact selected lock/product/file closure; public retained
+execution and receipt/package qualification remain open.
 
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the
