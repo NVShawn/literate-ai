@@ -27767,6 +27767,8 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Wheel timing investigation:** The initial macOS candidate recorded 552.19 seconds in subprocess spans; installed HTML observability accounted for 289.41 seconds. Those HTML scenarios mutate the same golden project and cannot safely be fanned out without separate fixture custody. Independent environment setup offers a smaller opportunity. These observations came from a busy macOS host and do not establish a Windows wheel speedup. Native gate timings and the requested performance target remain open.
 
+- **Native Windows follow-up:** The four-worker gate stopped after 575 passes, 45 skips and 579 passing subtests when the real Cargo accounting fixture exceeded its 60-second compiler deadline. An isolated unchanged probe passes: cold compile 32.594 seconds, cached compile 0.469 seconds. The fixture now allows 180 seconds on Windows (60 elsewhere) and uses existing owned-process-tree cleanup on timeout. This is a test-fixture timing correction, not native performance acceptance; the final gate must be rerun. The failed job evidence is retained and its finite on-demand task is confirmed removed.
+
 ### [ ] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
 
 - **GitHub issue:** [#53](https://github.com/jordanhubbard/literate-ai/issues/53)
