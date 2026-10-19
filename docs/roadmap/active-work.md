@@ -27786,7 +27786,6 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Evidence:**
   - [x] Run the issue acceptance cases and required integration qualification before closing
 
-- **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
 - **Completion evidence:** The landed tracked-Markdown filter is unchanged from main `90d5b6e9dcf155af28301b3e4d4b67863bf70d25`. Its regression proves that invalid Mermaid fences in ignored `generated/` and `.worktrees/` directories, plus untracked Markdown, do not change the selected file set; tracked edits and deletions are respected and exported trees keep their bounded fallback. `make documentation-check` passes all 21 Node tests and renders 121 diagrams from 608 tracked Markdown files. The original implementation also passed the 26-job main matrix at `450d2a3f` ([run](https://github.com/jordanhubbard/literate-ai/actions/runs/39195452379)); later source has no change to this filter or its regression. The existing Unreleased changelog records the behavior. This completes #53 acceptance, not the wider 1.3 release gate.
 
@@ -28043,13 +28042,15 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
 - **Conclusion:** An installed-wheel native journey exposed an uncaught authority-reader exception for a Component file argument. Normalize supported file entry points or report a bounded CLI error before provider invocation; preserve project and symlink boundaries.
 - **Depends on:** none
-- **Next action (in progress):** Normalize Standard Component file input, preserve lexical symlink refusals and qualify bounded preparation errors before generation.
+- **Next action (in progress):** Qualify both native rebuild follow-ups together, including the installed CLI profile refusal, real file-entry-point oracle, current lifecycle receipt and full exact-head CI.
 - **Implementation:**
   - [x] Resolve the documented Component entry point before locked authority loading and normalize invalid-input diagnostics.
 - **Evidence:**
   - [ ] Installed-wheel file and directory cases, unsafe paths and no provider invocation on invalid input.
 
 - **Local evidence:** The full unchanged production-source suite passes: 1,580 selected, 1,545 passed, 35 skips and no failures in 779.102 seconds. Eight focused CLI tests cover file/directory equivalence, lexical symlink refusals (including relative paths), unavailable/outside/unrelated inputs and a real missing-Component authority error before lifecycle assembly. The missing-authority assertion is strengthened after the full run and rerun in the focused group. Static/export/style checks, strict specifications, current driver/runner/documentation reviews, 21 Node tests and all 121 Mermaid diagrams pass. Installed-wheel file entry-point acceptance, refreshed lifecycle receipt and exact-head hosted CI remain open.
+
+- **Installed native file-input evidence:** Noneditable implementation `a46e5e3b8780f21184da6cd4fdb807351b61622a` passes the copied tiny-library `component.md` rebuild in 72.058 seconds after reviewed Standard rebind and documentation renewal. Its existing verifier-owned harness remains unchanged (`sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`), including isolated startup, module origin and expected value 7. Generated tests, independent acceptance, current three-test receipt and `verify` pass. This is a standalone copied-library check, separate from #48 registered-parent evidence, and it does not execute the #76 refusal case. Retained proof identity: `sha256:e2230e775cbf47ad5a70442ac6def65a3917b0336296d627d9feb3fb1d508e1d`. The merged implementation still requires its own combined installed qualification.
 
 ### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
 
@@ -28060,7 +28061,12 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
 - **Conclusion:** The default promoted Bazel profile exports a file while library test preparation requires a directory, wasting generation retries. Reject unsupported profile combinations before generation or provide a supported directory export without weakening acceptance.
 - **Depends on:** none
+- **Next action (in progress):** Qualify both native rebuild follow-ups together, including the installed CLI profile refusal, real file-entry-point oracle, current lifecycle receipt and full exact-head CI.
 - **Implementation:**
-  - [ ] Validate library artifact shape against the selected build profile before generation and provide actionable profile selection.
+  - [x] Validate library artifact shape against the selected build profile before generation and provide actionable profile selection.
 - **Evidence:**
   - [ ] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
+
+- **Local evidence:** The standalone profile implementation passes all 11 focused projection/CLI tests, including pre-discovery refusal of Bazel and Make file profiles on Linux, Windows and macOS, unchanged native directory exports and existing wheel-library acceptance. The full standalone suite passes 1,579 selected cases: 1,544 passed, 35 skipped and no failures in 703.524 seconds. Static/export/style, strict specifications, driver/runner/documentation reviews, all 121 diagrams and the pinned root skill evaluation pass. Exact production/test source slices are consolidated with the #75 entry-point fix; the combined suite, lifecycle receipt, installed native journey and hosted CI remain required.
+
+- **Combined checkpoint:** All 19 focused entry-point/profile/qualification cases pass in 9.795 seconds. The combined source passes layout/export, strict lint/format, specifications and current driver/runner/documentation review. The source slices preserve both standalone implementations exactly. Full combined qualification remains pending.

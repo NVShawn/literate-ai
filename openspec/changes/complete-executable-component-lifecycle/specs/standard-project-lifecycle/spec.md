@@ -6,6 +6,22 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Python library planning refuses incompatible file export profiles
+
+Standard command planning SHALL refuse a Python library build profile whose export
+is a single file before tool discovery or generation. The diagnostic SHALL name the
+directory import contract and a supported native Python or Python wheel profile.
+Native directory exports and explicit wheel custody SHALL preserve their existing
+import, test, package and independent acceptance requirements.
+
+#### Scenario: A promoted Python library inherits a Bazel file profile
+
+- **WHEN** a Python library selects the single-file Bazel build profile
+- **THEN** planning refuses before tool discovery and provider invocation
+- **AND** selecting the supported native Python profile retains a directory export
+
+
+
 ### Requirement: Standard rebuild accepts canonical Component entry points safely
 
 Standard rebuild SHALL interpret a Component directory and its `component.md` file

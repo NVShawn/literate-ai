@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Python libraries: reject single-file build profiles before generation and identify supported directory or wheel profiles, avoiding futile rebuild retries.
+
 - Rebuild CLI: accept a Component's `component.md` path for Standard rebuild and report invalid locked authority without an uncaught exception. Reject symlink entry points before resolving them.
 
 - Registered native children support reviewed Standard rebinds that coordinate the

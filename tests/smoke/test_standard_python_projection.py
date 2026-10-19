@@ -61,6 +61,63 @@ class StandardPythonProjectionTests(unittest.TestCase):
                                 contract.library_import_surface.language, "python"
                             )
 
+    def test_file_export_library_profiles_fail_before_discovery_on_each_os(self):
+        for platform in ("linux", "windows", "macos"):
+            for build_system in ("bazel", "make"):
+                with (
+                    self.subTest(platform=platform, build_system=build_system),
+                    tempfile.TemporaryDirectory() as temporary,
+                ):
+                    _, snapshot, execution = _locked_snapshot(
+                        Path(temporary),
+                        platform=platform,
+                        build_system=build_system,
+                        no_entrypoint=True,
+                    )
+                    discover = mock.Mock(
+                        side_effect=AssertionError("tool discovery forbidden")
+                    )
+                    with self.assertRaises(StandardCommandProjectionError) as caught:
+                        project_locked_standard_toolchain_closure(
+                            snapshot,
+                            execution,
+                            host_platform=platform,
+                            toolchain_discoverer=discover,
+                            dependency_observer=_observation,
+                        )
+                    self.assertEqual(
+                        caught.exception.code,
+                        "standard_command.python_library_export_profile_unsupported",
+                    )
+                    self.assertIn("--flavor=-bazel", caught.exception.message)
+                    discover.assert_not_called()
+
+    def test_native_python_library_keeps_its_directory_export_on_each_os(self):
+        for platform in ("linux", "windows", "macos"):
+            with (
+                self.subTest(platform=platform),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                _, snapshot, execution = _locked_snapshot(
+                    Path(temporary),
+                    platform=platform,
+                    no_entrypoint=True,
+                )
+                closure = project_locked_standard_toolchain_closure(
+                    snapshot,
+                    execution,
+                    host_platform=platform,
+                    toolchain_discoverer=lambda name, *_: _tool(name),
+                    dependency_observer=_observation,
+                )
+                contract = closure.contracts[0]
+                self.assertTrue(contract.is_library)
+                self.assertEqual(
+                    contract.artifact_export.media_type,
+                    "application/vnd.literate-ai.python-package-tree",
+                )
+                self.assertEqual(contract.library_import_surface.language, "python")
+
     def test_competing_profiles_and_multiple_entrypoints_fail_before_discovery(self):
         for options in (
             {"build_system": "make", "no_entrypoint": True},
