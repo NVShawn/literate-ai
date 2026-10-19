@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import tomllib
 import venv
 from contextlib import contextmanager
@@ -283,6 +284,41 @@ print(json.dumps({"round_trip": True, "tamper_rejected": True,
 """
 
 
+_TIMING_REPORT: Path | None = None
+_TIMINGS: list[dict[str, object]] = []
+
+
+@contextmanager
+def _timed(label: str):
+    started = time.monotonic()
+    successful = False
+    try:
+        yield
+        successful = True
+    finally:
+        if _TIMING_REPORT is not None:
+            _TIMINGS.append(
+                {
+                    "stage": label,
+                    "seconds": round(time.monotonic() - started, 6),
+                    "successful": successful,
+                }
+            )
+            _TIMING_REPORT.parent.mkdir(parents=True, exist_ok=True)
+            _write_canonical_json(
+                _TIMING_REPORT,
+                {
+                    "schema": "literate-ai/wheel-smoke-timings@1",
+                    "spans": _TIMINGS,
+                },
+            )
+
+
+def _create_environment(directory: Path) -> None:
+    with _timed("venv.create"):
+        venv.EnvBuilder(with_pip=True).create(directory)
+
+
 def _remotes_stripped_parent(repository: Path, destination: Path, revision: str) -> str:
     """Return a local ``--from`` locator that cannot follow ``origin`` to GitHub."""
 
@@ -342,31 +378,34 @@ def run(
     cwd: Path | None = None,
     env: dict[str, str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
-    completed = subprocess.run(
-        args,
-        cwd=cwd,
-        check=False,
-        text=True,
-        capture_output=True,
-        env=env if env is not None else _subprocess_environment(),
-    )
-    if completed.returncode != 0:
-        command = Path(args[0]).name if args else "subprocess"
-        # Debug events fill stderr, so the command's own error report is
-        # usually on stdout; keep both.
-        detail = "\n".join(
-            f"{name}: {text.strip()[-4000:]}"
-            for name, text in (
-                ("stdout", completed.stdout),
-                ("stderr", completed.stderr),
+    # Record stable operation labels, never argv, credentials or workspace paths.
+    label = f"subprocess.{sys._getframe(1).f_code.co_name}.{Path(args[0]).name}"
+    with _timed(label):
+        completed = subprocess.run(
+            args,
+            cwd=cwd,
+            check=False,
+            text=True,
+            capture_output=True,
+            env=env if env is not None else _subprocess_environment(),
+        )
+        if completed.returncode != 0:
+            command = Path(args[0]).name if args else "subprocess"
+            # Debug events fill stderr, so the command's own error report is
+            # usually on stdout; keep both.
+            detail = "\n".join(
+                f"{name}: {text.strip()[-4000:]}"
+                for name, text in (
+                    ("stdout", completed.stdout),
+                    ("stderr", completed.stderr),
+                )
+                if text and text.strip()
             )
-            if text and text.strip()
-        )
-        raise RuntimeError(
-            f"wheel smoke command {command!r} failed with status "
-            f"{completed.returncode}:\n{detail}"
-        )
-    return completed
+            raise RuntimeError(
+                f"wheel smoke command {command!r} failed with status "
+                f"{completed.returncode}:\n{detail}"
+            )
+        return completed
 
 
 def _write_canonical_json(path: Path, value: dict[str, object]) -> None:
@@ -411,6 +450,55 @@ def _installed_cli_result(litai: Path, *args: str, cwd: Path) -> dict[str, objec
     return result
 
 
+@_timed("scenario.installed_parallel_checkpoint")
+def assert_installed_parallel_checkpoint(python: Path, root: Path) -> dict[str, object]:
+    fixture = root / "parallel-tests"
+    fixture.mkdir()
+    (fixture / "test_a.py").write_text(
+        "import unittest\nclass Cases(unittest.TestCase):\n"
+        "    def test_pass(self): pass\n"
+        "    @unittest.skip('intentional')\n"
+        "    def test_skip(self): pass\n",
+        encoding="utf-8",
+    )
+    (fixture / "test_b.py").write_text(
+        "import unittest\nclass Cases(unittest.TestCase):\n"
+        "    @unittest.expectedFailure\n"
+        "    def test_expected(self): self.fail('expected')\n"
+        "    def test_subtest(self):\n"
+        "        with self.subTest(part=1): self.assertTrue(True)\n",
+        encoding="utf-8",
+    )
+    report_path = fixture / "report.json"
+    run(
+        str(python),
+        "-m",
+        "literate_ai.test_checkpointing",
+        "python",
+        "--state",
+        str(fixture / "state.json"),
+        "--start-directory",
+        ".",
+        "--workers",
+        "2",
+        "--report",
+        str(report_path),
+        cwd=fixture,
+    )
+    summary = json.loads(report_path.read_text(encoding="utf-8"))["summary"]
+    if summary != {
+        "selected": 4,
+        "executed": 2,
+        "passed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "skipped": 2,
+    }:
+        raise RuntimeError("installed parallel checkpoint runner changed case totals")
+    return summary
+
+
+@_timed("scenario.assert_installed_repository_refresh")
 def assert_installed_repository_refresh(litai: Path, root: Path) -> dict[str, object]:
     """Prove reviewed Gitlink refresh and clean-clone reuse via installed surfaces."""
 
@@ -757,6 +845,7 @@ def assert_installed_repository_refresh(litai: Path, root: Path) -> dict[str, ob
     }
 
 
+@_timed("scenario.assert_installed_operator_golden_paths")
 def assert_installed_operator_golden_paths(
     litai: Path,
     root: Path,
@@ -1006,6 +1095,7 @@ def assert_lifecycle_does_not_require_project_codegraph(
     return {"continued_without_index": "run"}
 
 
+@_timed("scenario.bootstrap_real_worker_runtime")
 def bootstrap_real_worker_runtime(
     root: Path, wheel: Path, distribution_identity: str
 ) -> tuple[Path | None, dict[str, object] | None]:
@@ -1051,6 +1141,7 @@ def bootstrap_real_worker_runtime(
     }
 
 
+@_timed("scenario.bootstrap_uv_tool_worker_runtime")
 def bootstrap_uv_tool_worker_runtime(
     root: Path, wheel: Path, distribution_identity: str
 ) -> dict[str, object] | None:
@@ -1207,6 +1298,7 @@ def assert_standard_project_version_check(
     }
 
 
+@_timed("scenario.assert_installed_graph_exports")
 def assert_installed_graph_exports(
     litai: Path,
     project: Path,
@@ -1463,11 +1555,19 @@ def _host_flavor(platform_name: str) -> str:
 
 
 def _main() -> int:
+    global _TIMING_REPORT
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--wheel", type=Path, help="qualify these already-built wheel bytes"
     )
+    parser.add_argument(
+        "--timing-report",
+        type=Path,
+        help="retain bounded operation timing spans without command arguments",
+    )
     arguments = parser.parse_args()
+    _TIMING_REPORT = arguments.timing_report
+    _TIMINGS.clear()
     repository = Path(__file__).resolve().parents[1]
     configuration = tomllib.loads(
         (repository / "pyproject.toml").read_text(encoding="utf-8")
@@ -1538,7 +1638,7 @@ def _main() -> int:
             raise RuntimeError("wheel build did not produce exactly one distribution")
         tested_wheel_identity = file_identity(wheel_files[0])
         environment = root / "environment"
-        venv.EnvBuilder(with_pip=True).create(environment)
+        _create_environment(environment)
         scripts = environment / ("Scripts" if sys.platform == "win32" else "bin")
         python = scripts / ("python.exe" if sys.platform == "win32" else "python")
         litai = scripts / ("litai.exe" if sys.platform == "win32" else "litai")
@@ -1571,6 +1671,7 @@ def _main() -> int:
         ).stdout
         if "python" not in checkpoint_help or "gates" not in checkpoint_help:
             raise RuntimeError("installed wheel omitted the checkpoint runner contract")
+        parallel_checkpoint = assert_installed_parallel_checkpoint(python, root)
         standard_binding = json.loads(
             run(str(python), "-c", STANDARD_BINDING_PROBE, cwd=root).stdout
         )
@@ -1590,7 +1691,7 @@ def _main() -> int:
             root, wheel_files[0], standard_binding["distribution"]
         )
         second_environment = root / "environment-two"
-        venv.EnvBuilder(with_pip=True).create(second_environment)
+        _create_environment(second_environment)
         second_scripts = second_environment / (
             "Scripts" if sys.platform == "win32" else "bin"
         )
@@ -1635,7 +1736,7 @@ def _main() -> int:
                 "repeated wheel build did not produce exactly one distribution"
             )
         repeated_environment = root / "environment-repeated-build"
-        venv.EnvBuilder(with_pip=True).create(repeated_environment)
+        _create_environment(repeated_environment)
         repeated_scripts = repeated_environment / (
             "Scripts" if sys.platform == "win32" else "bin"
         )
@@ -2303,6 +2404,7 @@ def _main() -> int:
                     "retained_manifest": retained_manifest.relative_to(
                         repository
                     ).as_posix(),
+                    "parallel_checkpoint": parallel_checkpoint,
                     "operator_golden_paths": operator_golden_paths,
                     "repository_refresh": repository_refresh,
                     "html_observability": html_observability,

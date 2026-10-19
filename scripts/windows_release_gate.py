@@ -127,7 +127,18 @@ def main(argv: list[str] | None = None) -> int:
         default=ROOT / "_build/python-envs/windows-release-gate",
         help="isolated virtual environment for the gate",
     )
+    parser.add_argument(
+        "--test-workers",
+        default=os.environ.get("PYTHON_TEST_WORKERS", "auto"),
+        help="pytest processes: auto (CPU count) or a positive integer; 1 is serial",
+    )
     args = parser.parse_args(argv)
+    if args.test_workers != "auto" and (
+        not args.test_workers.isascii()
+        or not args.test_workers.isdecimal()
+        or int(args.test_workers) < 1
+    ):
+        parser.error("--test-workers must be auto or a positive integer")
     selected = tuple(args.only or STEPS)
     environment = dict(os.environ)
     commands = _template_commands()
@@ -230,6 +241,10 @@ def main(argv: list[str] | None = None) -> int:
                     "-m",
                     "pytest",
                     "-q",
+                    "-n",
+                    "0" if args.test_workers == "1" else args.test_workers,
+                    "--dist=loadfile",
+                    "--maxfail=1",
                     f"--basetemp={TEMPORARY / 'pytest'}",
                     f"--junitxml={ROOT / '_build/windows-tests.xml'}",
                     *_TEST_ROOTS,

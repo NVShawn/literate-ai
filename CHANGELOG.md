@@ -52,6 +52,20 @@
   native dependencies, reject stale or incomplete policies, and preserve legacy
   profile identities. Public execution, retained receipts and package/release
   qualification remain separate open gates.
+- Checkpointed Python tests support isolated module processes, configurable CPU-based
+  concurrency and serial barriers. The controller preserves ordered outcomes and
+  repair markers, including skipped cases and duplicate instances, and stops owned
+  worker trees on failure. The Windows gate exposes pytest worker configuration;
+  wheel smoke can retain operation timings and exercises the installed parallel runner.
+
+- Project verification refreshes the current receipt through the complete
+  host-eligible sample lifecycle, with reviewed driver and runner bindings.
+
+- Generation guidance gives implementation-test cases distinct names from
+  independent acceptance cases. Windows GPU probe tests allow bounded time for
+  cold PowerShell startup on busy runners.
+- Sample generation retries a rejected JavaScript bundle with a missing local
+  module within the existing three-candidate limit, retaining rejection evidence.
 
 - Add explicit internal POSIX source-symlink custody. Retain relative target
   text and its identity without traversing directory aliases; reject missing,

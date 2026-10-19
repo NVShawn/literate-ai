@@ -757,7 +757,9 @@ class _CheckpointResult(unittest.TextTestResult):
         self,
         *args: object,
         passed: list[str],
-        test_keys: dict[int, str],
+        test_keys: dict[int, list[str]],
+        case_ids: Mapping[str, str],
+        invalidate_keys: Callable[[Sequence[str]], None],
         record: Callable[[str], None],
         record_outcome: Callable[
             [str, TestOutcomeStatus, ContentIdentity | None], None
@@ -766,24 +768,65 @@ class _CheckpointResult(unittest.TextTestResult):
     ) -> None:
         super().__init__(*args, **kwargs)
         self._passed = passed
-        self._test_keys = test_keys
+        self._test_keys = {key: list(values) for key, values in test_keys.items()}
+        self._case_ids = case_ids
+        self._invalidate_keys = invalidate_keys
+        self._active_keys: dict[int, str] = {}
+        self._finished_keys: set[str] = set()
+        self._failed_keys: set[str] = set()
+        self._subtest_skipped: set[int] = set()
         self._record = record
         self._record_outcome = record_outcome
 
-    def _record_known(self, test: unittest.TestCase) -> None:
-        key = self._test_keys.get(id(test))
+    def startTest(self, test: unittest.TestCase) -> None:  # noqa: N802
+        super().startTest(test)
+        self._subtest_skipped.discard(id(test))
+        keys = self._test_keys.get(id(test), [])
+        if keys:
+            self._active_keys[id(test)] = keys.pop(0)
+
+    def stopTest(self, test: unittest.TestCase) -> None:  # noqa: N802
+        if id(test) in self._subtest_skipped and not any(
+            key in self._finished_keys for key in self._keys_for(test)
+        ):
+            self._record_result(test, TestOutcomeStatus.SKIPPED)
+            self._record_known(test)
+        super().stopTest(test)
+
+    def _keys_for(self, test: unittest.TestCase) -> list[str]:
+        key = self._active_keys.get(id(test))
         if key is not None:
-            self._record(key)
+            return [key]
+        scope = test.id().partition(" (")[2].removesuffix(")")
+        return [
+            key
+            for key, name in self._case_ids.items()
+            if scope and name.startswith(scope + ".")
+        ]
+
+    def _record_known(self, test: unittest.TestCase) -> None:
+        for key in self._keys_for(test):
+            if key not in self._failed_keys:
+                self._record(key)
 
     def addSuccess(self, test: unittest.TestCase) -> None:  # noqa: N802
         super().addSuccess(test)
-        self._record_known(test)
         self._record_result(test, TestOutcomeStatus.PASSED)
+        self._record_known(test)
 
     def addSkip(self, test: unittest.TestCase, reason: str) -> None:  # noqa: N802
         super().addSkip(test, reason)
-        self._record_known(test)
-        self._record_result(test, TestOutcomeStatus.SKIPPED)
+        if id(test) not in self._active_keys and test.id().startswith(
+            ("tearDownClass (", "tearDownModule (")
+        ):
+            # A skipped teardown is a fixture diagnostic, not a skipped body.
+            return
+        parent = getattr(test, "test_case", None)
+        if parent is not None:
+            self._subtest_skipped.add(id(parent))
+        else:
+            self._record_result(test, TestOutcomeStatus.SKIPPED)
+            self._record_known(test)
 
     def addExpectedFailure(  # noqa: N802
         self,
@@ -791,8 +834,8 @@ class _CheckpointResult(unittest.TextTestResult):
         err: tuple[type[BaseException], BaseException, object],
     ) -> None:
         super().addExpectedFailure(test, err)
-        self._record_known(test)
         self._record_result(test, TestOutcomeStatus.SKIPPED)
+        self._record_known(test)
 
     def addFailure(  # noqa: N802
         self,
@@ -810,15 +853,55 @@ class _CheckpointResult(unittest.TextTestResult):
         super().addError(test, err)
         self._record_result(test, TestOutcomeStatus.FAILED, _failure_identity(err))
 
+    def addSubTest(self, test, subtest, err) -> None:  # noqa: N802
+        super().addSubTest(test, subtest, err)
+        if err is not None:
+            self._record_result(test, TestOutcomeStatus.FAILED, _failure_identity(err))
+
+    def addUnexpectedSuccess(self, test) -> None:  # noqa: N802
+        super().addUnexpectedSuccess(test)
+        self._record_result(
+            test, TestOutcomeStatus.FAILED, _unexpected_success_identity()
+        )
+
     def _record_result(
         self,
         test: unittest.TestCase,
         status: TestOutcomeStatus,
         failure_identity: ContentIdentity | None = None,
     ) -> None:
-        key = self._test_keys.get(id(test))
-        if key is not None:
+        keys = self._keys_for(test)
+        if status is TestOutcomeStatus.SKIPPED and id(test) not in self._active_keys:
+            keys = [key for key in keys if key not in self._finished_keys]
+        if status is TestOutcomeStatus.FAILED and id(test) not in self._active_keys:
+            self._invalidate_keys(keys)
+            keys = (
+                [
+                    next(
+                        (key for key in keys if key not in self._finished_keys),
+                        keys[-1],
+                    )
+                ]
+                if keys
+                else []
+            )
+        for key in keys:
+            if status is TestOutcomeStatus.FAILED:
+                self._failed_keys.add(key)
+            elif key in self._failed_keys:
+                continue
             self._record_outcome(key, status, failure_identity)
+            self._finished_keys.add(key)
+
+
+def _unexpected_success_identity() -> ContentIdentity:
+    return canonical_identity(
+        {
+            "schema": "literate-ai/test-failure-fingerprint@1",
+            "exception": "unittest.unexpectedSuccess",
+            "message": "expected failure unexpectedly succeeded",
+        }
+    )
 
 
 def _failure_identity(
@@ -891,7 +974,15 @@ def run_unittest_suite(
     release_evidence: bool = False,
     report_path: Path | None = None,
     now: datetime | None = None,
+    workers: str | int = 1,
+    worker_timeout: float = 3600,
 ) -> int:
+    from literate_ai.parallel_unittests import ParallelSuite, available_workers
+
+    worker_count = available_workers(workers)
+    if not 0 < worker_timeout < float("inf"):
+        raise ValueError("worker timeout must be positive and finite")
+    state_path = state_path.resolve()
     tests = tuple(_flatten(suite))
     test_ids = tuple(test.id() for test in tests)
     if not test_ids:
@@ -904,9 +995,9 @@ def run_unittest_suite(
         test_keys.append(
             test_id if totals[test_id] == 1 else f"{test_id}#{occurrences[test_id]}"
         )
-    test_key_by_object = {
-        id(test): key for test, key in zip(tests, test_keys, strict=True)
-    }
+    test_key_by_object: dict[int, list[str]] = {}
+    for test, key in zip(tests, test_keys, strict=True):
+        test_key_by_object.setdefault(id(test), []).append(key)
     root = project_root or Path.cwd()
     if pin is None:
         bound, source_complete = _resolve_unittest_pin(root, test_keys, tests)
@@ -961,8 +1052,21 @@ def run_unittest_suite(
         )
 
     completed_set = set(passed)
+    previous_outcomes = (
+        {item.test_key: item for item in markers.last_report.outcomes}
+        if markers.last_report is not None
+        and markers.last_report.pin_identity == bound.identity
+        else {}
+    )
     outcomes = {
-        key: KnownTestFailureOutcome(key, TestOutcomeStatus.PASSED) for key in passed
+        key: (
+            previous_outcomes[key]
+            if key in previous_outcomes
+            and previous_outcomes[key].status
+            in {TestOutcomeStatus.PASSED, TestOutcomeStatus.SKIPPED}
+            else KnownTestFailureOutcome(key, TestOutcomeStatus.PASSED)
+        )
+        for key in passed
     }
     outcomes.update(
         {
@@ -976,8 +1080,30 @@ def run_unittest_suite(
         }
     )
 
+    def make_report() -> KnownTestFailureReport:
+        ordered_outcomes = tuple(outcomes[key] for key in test_keys if key in outcomes)
+        counts = Counter(item.status for item in ordered_outcomes)
+        return KnownTestFailureReport(
+            suite="python-unittest",
+            pin_identity=bound.identity,
+            context_identity=context_identity,
+            release_evidence=release_evidence,
+            summary=KnownTestFailureSummary(
+                selected=len(test_keys),
+                executed=(
+                    counts[TestOutcomeStatus.PASSED] + counts[TestOutcomeStatus.FAILED]
+                ),
+                passed=counts[TestOutcomeStatus.PASSED],
+                failed=counts[TestOutcomeStatus.FAILED],
+                known_failed=counts[TestOutcomeStatus.KNOWN_FAILURE],
+                skipped=counts[TestOutcomeStatus.SKIPPED],
+            ),
+            outcomes=ordered_outcomes,
+        )
+
     def record(test_key: str) -> None:
         completed_set.add(test_key)
+        markers.last_report = make_report()
         service.record_step(bound, test_key)
 
     def record_outcome(
@@ -989,16 +1115,82 @@ def run_unittest_suite(
             test_key, status, failure_identity=failure_identity
         )
 
+    def invalidate_keys(invalid_keys: Sequence[str]) -> None:
+        invalid = set(invalid_keys)
+        completed_set.difference_update(invalid)
+        for key in invalid:
+            if key in outcomes and outcomes[key].status is not TestOutcomeStatus.FAILED:
+                outcomes.pop(key)
+        marker = markers.load(bound.identity)
+        if marker is not None:
+            markers.completion_order = [
+                key for key in markers.completion_order if key not in invalid
+            ]
+            markers.last_report = make_report()
+            markers.save(
+                PinMarker(
+                    bound.identity,
+                    tuple(key for key in marker.completed_steps if key not in invalid),
+                )
+            )
+
     class Result(_CheckpointResult):
         def __init__(self, *args: object, **kwargs: object) -> None:
             super().__init__(
                 *args,
                 passed=passed,
-                test_keys=test_key_by_object,
+                test_keys={
+                    identity: [
+                        key
+                        for key in keys
+                        if key not in passed_set and key not in annotations
+                    ]
+                    for identity, keys in test_key_by_object.items()
+                },
+                case_ids={
+                    key: name
+                    for key, name in zip(test_keys, test_ids, strict=True)
+                    if key not in passed_set and key not in annotations
+                },
+                invalidate_keys=invalidate_keys,
                 record=record,
                 record_outcome=record_outcome,
                 **kwargs,
             )
+
+    if worker_count > 1:
+        selected = [
+            (test, key)
+            for test, key in zip(tests, test_keys, strict=True)
+            if key not in passed_set and key not in annotations
+        ]
+
+        def worker_outcome(index: int, event: Mapping[str, object]) -> None:
+            key = selected[index][1]
+            status = TestOutcomeStatus(str(event["status"]))
+            identity = event.get("failure_identity")
+            record_outcome(
+                key,
+                status,
+                ContentIdentity.parse_uri(str(identity)) if identity else None,
+            )
+            if status in {TestOutcomeStatus.PASSED, TestOutcomeStatus.SKIPPED}:
+                record(key)
+
+        def invalidate(indices: Sequence[int]) -> None:
+            invalidate_keys([selected[index][1] for index in indices])
+
+        remaining = ParallelSuite(
+            [test for test, _key in selected],
+            root=root,
+            directory=state_path.parent / "workers",
+            workers=worker_count,
+            stream=stream,
+            verbosity=verbosity,
+            outcome=worker_outcome,
+            invalidate=invalidate,
+            timeout=worker_timeout,
+        )
 
     result = unittest.TextTestRunner(
         stream=stream,
@@ -1016,25 +1208,7 @@ def run_unittest_suite(
             release_evidence=release_evidence,
             now=now,
         )
-    ordered_outcomes = tuple(outcomes[key] for key in test_keys if key in outcomes)
-    counts = Counter(item.status for item in ordered_outcomes)
-    report = KnownTestFailureReport(
-        suite="python-unittest",
-        pin_identity=bound.identity,
-        context_identity=context_identity,
-        release_evidence=release_evidence,
-        summary=KnownTestFailureSummary(
-            selected=len(test_keys),
-            executed=(
-                counts[TestOutcomeStatus.PASSED] + counts[TestOutcomeStatus.FAILED]
-            ),
-            passed=counts[TestOutcomeStatus.PASSED],
-            failed=counts[TestOutcomeStatus.FAILED],
-            known_failed=counts[TestOutcomeStatus.KNOWN_FAILURE],
-            skipped=counts[TestOutcomeStatus.SKIPPED],
-        ),
-        outcomes=ordered_outcomes,
-    )
+    report = make_report()
     _write_known_failure_report(report_path, report)
     markers.record_report(report)
     if not result.wasSuccessful():
@@ -1070,6 +1244,8 @@ def discover_and_run_unittests(
     context_identity: ContentIdentity | None = None,
     release_evidence: bool = False,
     report_path: Path | None = None,
+    workers: str | int = 1,
+    worker_timeout: float = 3600,
 ) -> int:
     root = top_level_directory or Path.cwd()
     suite = unittest.defaultTestLoader.discover(
@@ -1088,6 +1264,8 @@ def discover_and_run_unittests(
         context_identity=context_identity,
         release_evidence=release_evidence,
         report_path=report_path,
+        workers=workers,
+        worker_timeout=worker_timeout,
     )
 
 
@@ -1099,6 +1277,10 @@ def _parser() -> argparse.ArgumentParser:
     python.add_argument("--start-directory", default="tests")
     python.add_argument("--pattern", default="test*.py")
     python.add_argument("--verbosity", type=int, default=1)
+    python.add_argument(
+        "--workers", default=os.environ.get("PYTHON_TEST_WORKERS", "auto")
+    )
+    python.add_argument("--worker-timeout", type=float, default=3600)
     python.add_argument("--context-identity")
     python.add_argument("--report", type=Path)
     python.add_argument(
@@ -1135,6 +1317,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             context_identity=context_identity,
             release_evidence=arguments.release_evidence,
             report_path=arguments.report,
+            workers=arguments.workers,
+            worker_timeout=arguments.worker_timeout,
         )
     if arguments.reset:
         reset_checkpoint(state_path)
