@@ -81,6 +81,13 @@ immutable snapshots; it must not dereference source links or weaken default
 refusal and legacy identities. Native action, package and
 independent acceptance qualification remain required beyond ownership planning.
 
+RETAINED-FS-001 extends Goals 1 and 4 with independent observation of retained
+products' filesystem effects. Development cases bind private fixtures, exact
+file state and bounded observation without changing legacy case identities or
+sealed exports. Focused local file-effect and SDK-scope checks pass. Full current,
+native/installed and original-source composition qualification remain open;
+these observations do not confer per-unit source/package or release admission.
+
 FREEBSD-001 adds a fourth first-class OS platform and native worker/target
 support under Goals 1, 4 and 5. This includes truthful FreeBSD identity,
 registration, host/toolchain realization, bounded native observations, isolated

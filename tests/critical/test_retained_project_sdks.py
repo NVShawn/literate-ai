@@ -36,6 +36,7 @@ from literate_ai.security import AuthorizationError, BuildAuthorization, Securit
 from tests.critical import test_retained_project_completion as completion
 from tests.critical import test_retained_project_execution as commands
 from tests.support import fixtures_test_native_sdk_source_build as producer_fixtures
+from tests.support.fixtures_test_retained_filesystem import select_filesystem_case
 
 
 class RetainedSdkPolicyTests(unittest.TestCase):
@@ -244,6 +245,16 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
         final = self.documents[result.native_sdk_final_check_identity.uri]
         self.assertTrue(final["checks"])
         self.assertFalse(result.to_dict()["lifecycle_receipt"])
+
+    def test_private_filesystem_case_preserves_live_sdk_command_scope(self):
+        select_filesystem_case(self.completed)
+        workspace, result = self.finish()
+        (observed,) = result.acceptance_observations
+        self.assertEqual(observed.filesystem_observation.entries[0].size, 3)
+        self.assertEqual(len(observed.native_sdk_executions), 1)
+        self.assertEqual((workspace.outputs / "scale.txt").read_bytes(), b"4.5")
+        self.assertEqual(len(self.grants), 6)
+        self.assertEqual(list(workspace.objects.glob("verifier-case-*")), [])
 
     def test_rehashed_substituted_sdk_bytes_are_not_the_selected_producer(self):
         path = (

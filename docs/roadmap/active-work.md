@@ -28902,3 +28902,32 @@ Full-suite, installed and native qualification remain separate gates.
   failures and three configured skips. The complete framework suite reports 1,525
   tests with 37 skips; installing Elixir enables the nine class-setup omissions and
   all 19 explicitly gated Elixir cases, including native Make, Bazel and Mix proof.
+
+### [ ] RETAINED-FS-001 — Observe retained product filesystem effects through private verifier cases
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+- **Priority:** P0
+- **Owner:** Retained acceptance contracts and bounded verifier owner
+- **Direction:** Qualify original filesystem utilities without replacing file effects with successful process exits; framework issue #22 owns retained lifecycle integration.
+- **Conclusion:** Add opt-in private case fixtures and bounded file-state expectations to independent retained acceptance. Preserve legacy identities and sealed exports; retain actual observations and reject mismatches, unsafe nodes and resource overruns. Public execution, source admission and release authority remain separate.
+- **Depends on:** Existing retained command, SDK and acceptance owners under RETAINED-PROJECT-001; this capability does not wait for the broader program to close.
+- **Implementation:**
+  - [x] Define typed optional filesystem fixtures, expectations and explicit limits with unchanged legacy case wire identities.
+  - [x] Run sealed products in fresh owned case workspaces through existing process and SDK owners; independently observe bounded no-follow file states and retain mismatch evidence.
+- **Evidence:**
+  - [x] Real programs demonstrate resize and content preservation; an always-zero wrong product, extra files, links, aliases, changed fixtures and exceeded budgets refuse.
+  - [ ] Legacy retained cases, SDK scope, receipt/package custody and native installed qualification remain correct; no per-unit source or release completion is inferred.
+
+Local development evidence: all 11 focused filesystem cases pass, including
+real compiled writes, repeated private fixtures, zero-exit wrong-output refusal,
+pre-execution fixture substitution, link/special-node and resource/mutation
+refusal, whole-run substitution and receipt retention. All eight SDK cases also
+pass, including a real selected producer and the new private case through live
+command scope. A first whole-run probe exposed that private HOME/temporary paths
+change dependency context; separate run/case bindings now preserve both checks.
+The complete retained regression passes 134 tests (133 passed, one actual-native
+pkg construction case skipped) in 231.322 seconds. Lint/format, layout/export,
+strict OpenSpec, 21 Node checks and all 121 documentation diagrams pass.
+**Next action in progress:** freeze and run the exact-head full suite, then
+qualify native and installed behavior without advancing public
+execution, conversion, release or source/ports unit admission.

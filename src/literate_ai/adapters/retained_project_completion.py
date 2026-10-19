@@ -198,11 +198,22 @@ class RetainedProjectCompletedRun:
         )
         if len(expected_cases) != len(self.acceptance_observations):
             raise ValueError("retained.completion.complete-acceptance-required")
+        from literate_ai.adapters.retained_project_filesystem import (
+            retained_filesystem_matches,
+        )
+
         for case, item in zip(
             expected_cases, self.acceptance_observations, strict=True
         ):
             if len(item.native_sdk_executions) not in sdk_counts:
                 raise ValueError("retained.completion.sdk-case-closure-mismatch")
+            if (case.filesystem is None) != (item.filesystem_observation is None) or (
+                case.filesystem is not None
+                and not retained_filesystem_matches(
+                    case.filesystem, item.filesystem_observation
+                )
+            ):
+                raise ValueError("retained.completion.filesystem-observation-mismatch")
             if (
                 item.plan_identity != plan.identity
                 or item.policy_identity != self.acceptance_policy.identity

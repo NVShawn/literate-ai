@@ -9,6 +9,7 @@ from typing import ClassVar
 
 from .identity import ContentIdentity, canonical_identity
 from .paths import canonical_relative_posix_paths
+from .retained_project_filesystem import RetainedFilesystemCase
 from .retained_project_lifecycle import RetainedProjectProfile, _fields, _name
 
 MAX_ACCEPTANCE_STREAM_BYTES = 64 * 1024
@@ -39,8 +40,13 @@ class RetainedProjectAcceptanceCase:
     expected_stdout: bytes
     expected_stderr: bytes
     timeout_seconds: int
+    filesystem: RetainedFilesystemCase | None = None
 
     def __post_init__(self):
+        if self.filesystem is not None and not isinstance(
+            self.filesystem, RetainedFilesystemCase
+        ):
+            raise TypeError("retained.acceptance.typed-filesystem-case-required")
         _name(self.case_id)
         _name(self.action_id)
         canonical_relative_posix_paths(
@@ -77,6 +83,11 @@ class RetainedProjectAcceptanceCase:
             "expected_stdout": base64.b64encode(self.expected_stdout).decode("ascii"),
             "expected_stderr": base64.b64encode(self.expected_stderr).decode("ascii"),
             "timeout_seconds": self.timeout_seconds,
+            **(
+                {"filesystem": self.filesystem.to_dict()}
+                if self.filesystem is not None
+                else {}
+            ),
         }
 
     @property
@@ -85,6 +96,10 @@ class RetainedProjectAcceptanceCase:
 
     @classmethod
     def from_dict(cls, value):
+        filesystem = None
+        if isinstance(value, dict) and "filesystem" in value:
+            value = dict(value)
+            filesystem = RetainedFilesystemCase.from_dict(value.pop("filesystem"))
         value = _fields(
             value,
             {
@@ -111,6 +126,7 @@ class RetainedProjectAcceptanceCase:
             _decode(value["expected_stdout"]),
             _decode(value["expected_stderr"]),
             value["timeout_seconds"],
+            filesystem,
         )
 
 

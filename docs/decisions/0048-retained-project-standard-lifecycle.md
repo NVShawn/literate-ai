@@ -329,3 +329,27 @@ This backend integration does not install or publish, authenticate remote
 receipts, enable public retained execution, infer a complete per-unit package
 dependency graph, or qualify source/ports components. Those require their existing
 separate contracts and actual native/installed qualification.
+
+## Independent filesystem effects
+
+An opt-in retained acceptance case may declare bounded private input files and
+exact expected regular-file, directory or absent states. Bind fixture bytes,
+file lengths/hashes, optional permission expectations and explicit entry/per-file/
+aggregate limits to verifier policy. Cases without this field preserve their
+existing identities and execution behavior.
+
+Execute the sealed product in a fresh verifier-owned case directory under the
+existing object workspace. Bind an explicit case-root argument substitution and
+private HOME/temporary paths only for opted-in cases. Keep the existing SDK
+command scope, process-tree/output/deadline limits and source/export/dependency
+revalidation. Never let case effects modify accepted exports or reuse a prior
+case directory. This is observation and cooperative custody, not a hostile-code
+filesystem sandbox or a new privilege grant.
+
+Independently enumerate and hash bounded actual states without following links.
+Reject aliases, redirects, hardlinks, special nodes, cross-device traversal, mutation,
+unexpected output and resource overruns. A zero exit with wrong size/content is
+a failed case. Retain immutable actual filesystem observations with ordinary
+process results, including mismatches, and recheck their policy binding during
+whole-run completion and receipt retention. Existing independent authority,
+original test coverage, source/SDK admission and release gates remain mandatory.

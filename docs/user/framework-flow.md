@@ -164,6 +164,20 @@ Missing, extra or duplicate cases, unknown outcomes, failed cases and unauthoriz
 skips stop later work. Only actual passes satisfy the project's minimum; baseline
 exceptions cannot be relabeled as passing tests.
 
+Development retained independent acceptance can opt in to a `filesystem` case.
+It binds private input bytes, expected file lengths and SHA-256 values, optional
+permission checks, directory/absence expectations and explicit resource limits.
+The sealed product runs in a fresh case directory; `{case_root}` is substituted
+only for opted-in cases. Fixtures are rechecked after SDK authorization and before
+launch. Actual bounded file states are observed without following links and kept
+with the process evidence. Wrong contents or size fail even after a zero exit;
+extra output, unsafe nodes, changed fixtures and resource overruns also refuse.
+The ordinary run and private case environments retain separate native dependency
+bindings, so private HOME/temporary paths do not weaken final source/export checks.
+Legacy cases keep their wire identities. Native/installed filesystem qualification
+remains open under RETAINED-FS-001; this is cooperative custody, not a hostile-code
+filesystem sandbox or permission to execute with greater privileges.
+
 This test gate is not a lifecycle receipt. Public whole-project execution still
 refuses with `retained_project.execution_not_qualified` until native SDK/SBOM,
 independent acceptance, retained-origin receipt, package and release consumers

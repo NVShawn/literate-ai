@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add development retained filesystem acceptance cases with private fixtures,
+  actual size/content/mode observations and unchanged legacy case identities.
+  Reject zero-exit wrong products, fixture substitution, unsafe nodes, extra
+  output and exceeded budgets; retain actual facts in receipts and preserve
+  separate run/case dependency bindings. Native/installed qualification is open.
+
 - Connect development retained-run package custody to the existing native
   FreeBSD pkg builder and inspector. Require live admission and the selected
   pkg Flavor lock; retain both BOMs, receipt/run evidence, native projection

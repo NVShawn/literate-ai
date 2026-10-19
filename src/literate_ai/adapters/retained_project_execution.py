@@ -622,6 +622,7 @@ class RetainedProjectExecutionWorkspace:
                         command_scope=self._sdk_command_scope
                         if self._native_sdks is not None
                         else None,
+                        case_parent=self.objects,
                     )
                 )
             return observation
