@@ -25881,11 +25881,26 @@ provider. The existing package-provider group also passes 47 checks before the
 final run-record/empty-directory additions. Lint/format, authority validation,
 driver/documentation review, OpenSpec and documentation checks pass. Native,
 installed/public CLI, release and whole-system scale qualification remain open.
+At exact archive/receipt revision
+`f2f3c3ba0a764d72d87542f886a639f6db7c5447`, all 117 retained-project tests
+also pass on actual FreeBSD without skips in 3,887.772 seconds. The native log
+SHA-256 is
+`d30ee2356f4cf5dc89dedb2b1ac08c15837e7f0b4b69b66f64a9b09d4247356a`.
+This renews native receipt, payload materialization, ZIP archive and SDK custody
+coverage at that revision. It does not qualify later native pkg/public CLI
+changes, the installed wheel or complete source/ports unit execution.
 At exact receipt-integration revision `cdd7379225496c2fb4d311e4eab72598e262e623`,
 the full Python suite passes 1,752 tests with 37 declared skips in 3,734.087
 seconds. Its log SHA-256 is
 `972479448ccad40736528806d1c6352620954703c844d567a54f943e59a8d425`.
 This baseline excludes the later archive/native-pkg and incoming main-line changes.
+The reconciled revision `bd5d77764ab094d549fb729cb8d72b3a4c0617d7` passes
+the complete Python suite: 1,795 tests with 40 declared skips in 1,027.566 seconds,
+using four isolated module workers. Its log SHA-256 is
+`b76f369c354a95495857f561ea0480de605f95165413163e7315585c6032faae`.
+This includes the native pkg/public-dispatch foundation and incoming main-line
+changes; it excludes the subsequent extended-tar-metadata correction and does
+not substitute for native construction or installed-wheel qualification.
 Local receipt checkpoint: all 109 retained-project tests pass in 373.215 seconds,
 including ten receipt cases and the source-link execution regression. Actual
 compiled exports survive scratch retirement and CAS relocation; stale authority,
