@@ -27858,6 +27858,14 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 ### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
 
+Installed-wheel qualification correction: production initialization explicitly
+selects the FreeBSD OS Flavor, but the wheel smoke comparator still defaults to
+Linux outside macOS/Windows. Correct the comparator, cover FreeBSD versioned
+platform names and preserve existing platform expectations, then execute the
+actual native installed-wheel gate. This does not qualify retained lifecycle
+receipts or release publication.
+
+
 - **GitHub issue:** [#67](https://github.com/jordanhubbard/literate-ai/issues/67)
 - **Priority:** P1
 - **Owner:** OS Flavor, worker contracts, host tooling and native lifecycle

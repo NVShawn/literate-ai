@@ -1451,6 +1451,17 @@ def _retain_qualified_wheel(
     return manifest
 
 
+def _host_flavor(platform_name: str) -> str:
+    """Independent wheel-smoke expectation for the native OS Flavor."""
+    if platform_name == "win32":
+        return "windows"
+    if platform_name == "darwin":
+        return "macos"
+    if platform_name.startswith("freebsd"):
+        return "freebsd"
+    return "linux"
+
+
 def _main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -1889,13 +1900,7 @@ def _main() -> int:
         manifest = json.loads(
             (project / "literate.project.json").read_text(encoding="utf-8")
         )
-        host_flavor = (
-            "windows"
-            if sys.platform == "win32"
-            else "macos"
-            if sys.platform == "darwin"
-            else "linux"
-        )
+        host_flavor = _host_flavor(sys.platform)
         host_selector = f"+flavor://literate-ai/os-{host_flavor}"
         expected_default_selectors = [
             "+flavor://literate-ai/lang-python",

@@ -7,10 +7,24 @@ import tomllib
 import unittest
 from pathlib import Path, PurePosixPath
 
+from scripts.wheel_smoke import _host_flavor
 from tools.build_backend.literate_ai_build_backend import distribution_origin_bytes
 
 
 class CleanWheelSourceProjectionTests(unittest.TestCase):
+    def test_installed_wheel_expectations_keep_freebsd_explicit(self) -> None:
+        for platform_name, expected in (
+            ("win32", "windows"),
+            ("darwin", "macos"),
+            ("linux", "linux"),
+            ("linux2", "linux"),
+            ("freebsd", "freebsd"),
+            ("freebsd14", "freebsd"),
+            ("freebsd16", "freebsd"),
+        ):
+            with self.subTest(platform_name=platform_name):
+                self.assertEqual(_host_flavor(platform_name), expected)
+
     def test_every_template_data_file_is_admitted_by_wheel_package_data(self) -> None:
         repository = Path(__file__).resolve().parents[2]
         definition = tomllib.loads(
