@@ -28621,6 +28621,8 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   configured finalize, model-free rebuild and projected-command cases on the
   actual guest, and preserve unsupported-host refusal rather than aliasing another
   POSIX OS. Optional Elixir fixtures must also retain the real host identity.
+  These predecessor results do not qualify the later original-adoption or
+  committed-target verification changes recorded below.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
@@ -29051,6 +29053,11 @@ changes. Its managed review marker is now refreshed and project authority
 validation passes. This failed run is retained separately; full renewal remains
 required before native deployment.
 
+The combined renewal then reached 1,470 tests and found the new public verb
+missing from the CLI reference inventory. Both its inventory entry and usage
+table are now documented; both CLI-help checks pass. The failed full log is
+retained separately, and exact combined full renewal remains required.
+
 ### [ ] LOCK-TARGET-001 — Verify the committed Component target
 
 - **GitHub issue:** [#79](https://github.com/jordanhubbard/literate-ai/issues/79)
@@ -29071,3 +29078,17 @@ six real non-host target/current-policy/refusal checks and the existing installe
 HTML lock-state fixture. Three project-verification checks also pass. Lint,
 format, repository layout and public-export checks pass. No native build,
 package or release admission is claimed by lock-health verification.
+
+### [ ] TRACKER-REPO-001 — Bind forge commands to the selected repository
+
+- **GitHub issue:** [#80](https://github.com/jordanhubbard/literate-ai/issues/80)
+
+- **Priority:** P1
+- **Owner:** Tracker command generation
+- **Direction:** Preserve the chosen fork/origin identity in generated issue and review CLI commands.
+- **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; use explicit repository arguments as the current operator mitigation.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
+- **Evidence:**
+  - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.

@@ -89,6 +89,7 @@ litai project parent checkout
 litai project ci-plan
 litai project guidance
 litai project mac-contract
+litai project adopt-original
 litai project convert-stage show
 litai project convert-stage advance
 litai project source-intelligence sync
@@ -518,6 +519,7 @@ root-integration acceptance still remain.
 | `project validate [PATH]` | Non-mutating validation of the discovered project, catalogs, pins, skills, and generation inputs. |
 | `project tracker inspect [PATH]` | Read Git remotes and name `gh` or `glab` plus issue/review/CI/land argv. Unknown hosts skip tracker work fail closed. |
 | `project lifecycle rebind-standard [PLAN] [--project PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard binding update without mutation, or compare-and-swap an explicitly reviewed plan while changing only lifecycle and derived receipt-policy authority. |
+| `project adopt-original [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review a validated canonical project's clean Git commit/tree and explicitly select original source authority with metadata-only writes. Preserve source layout; refuse stale plans, dirty or unsafe roots, existing evidence/authority and legacy conversion transitions. This grants no execution or release admission. |
 | `project convert-stage show [--project PATH]` | Read the canonical evidence-bound conversion authority state for an adopted project. |
 | `project convert-stage advance --to retained\|drafted\|qualified [--project PATH]` | Advance exactly one adjacent stage after independently verifying the current receipt or Component-promotion evidence. No command silently promotes a tree. |
 | `project retained-scope refresh [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review exact added/removed retained-source paths and input identities, then revalidate and rebind scope and receipt policy without changing source or historical conversion evidence. |
