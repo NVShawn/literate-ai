@@ -205,10 +205,26 @@ Legacy cases keep their wire identities. Native/installed filesystem qualificati
 remains open under RETAINED-FS-001; this is cooperative custody, not a hostile-code
 filesystem sandbox or permission to execute with greater privileges.
 
-This test gate is not a lifecycle receipt. Public whole-project execution still
-refuses with `retained_project.execution_not_qualified` until native SDK/SBOM,
-independent acceptance, retained-origin receipt, package and release consumers
-are qualified. Original source and conversion authority remain unchanged.
+The development local route joins the existing command workspace, complete
+original-test coverage, independent acceptance, both BOMs and live retained
+receipt admission. It requires the exact reviewed plan authorization plus
+`--allow-host-execution` and reopens current manifest/profile/project/worker
+authority throughout execution. Planning stays read-only. Explicit worker health
+policy uses the existing preflight and active-job polling owner.
+
+Local execution keeps its run under `OBJ_DIR/retained-project-runs` and immutable
+receipt/payload custody under `BUILD_DIR/retained-project-cas`. The run's separate
+`command-diagnostics.json` index points to actual stdout/stderr and command
+observations, including failed commands; that diagnostic index grants no admission.
+The returned retained receipt preserves original authority and cannot replace an
+ordinary generated receipt. Package construction and publication remain separate.
+
+Remote workers and selected SDK inputs without their required live producer
+bindings refuse; this entry never falls back to local execution or ambient SDK
+discovery. Full canonical-project/installed CLI, native and package/release
+qualification remain open under RETAINED-PROJECT-001. The development handler
+checks use the real execution/admission owners but fixture project discovery, so
+they do not qualify those remaining boundaries.
 
 ### Target and worker selection
 

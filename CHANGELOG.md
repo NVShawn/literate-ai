@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Connect development local retained execution to the existing live workspace
+  and receipt owners, with fresh authority checks and retained command streams.
+  Original authority is preserved; canonical installed CLI, native and public
+  package/release qualification remain open.
+
 - Add development original-source adoption with a reviewed Git/project-bound
   plan and metadata-only apply. Preserve the existing source hierarchy and
   original release authority; reject legacy conversion transitions. Execution

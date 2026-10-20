@@ -215,7 +215,7 @@ identities; failed-case observations cannot become successful lifecycle evidence
 These observations are independent executable-case evidence, not retained
 lifecycle receipts, complete source/resolved BOM admission, qualified SDK products
 or packaged-artifact acceptance. They never advance conversion or release
-authority. The public retained execution refusal remains while these later
+authority. Full public retained execution qualification remains open while these later
 consumers are integrated and qualified. Legacy profiles produce no new independent
 acceptance observation merely by labeling a zero-exit command as acceptance.
 

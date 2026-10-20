@@ -25844,6 +25844,10 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
+    - [x] Connect explicit local retained execution to live workspace admission,
+      preserving original authority, exact re-planning and retained CAS custody.
+      Reject unsupported remote/SDK execution rather than falling back to local
+      execution or ambient tools; preserve failed run evidence.
   - [ ] Bind package and release custody to retained origin without conversion advancement
 - **Evidence:**
   - [ ] Public installed CLI mixed source and binary fixture passes complete build, test, docs and deterministic package lifecycle with repeat, invalidation and relocation checks
@@ -25856,14 +25860,20 @@ record, worker/target, SDK/toolchain/dependency closure and original policy inpu
 `make python-check` passes 23 retained input/planning tests and 33 existing rebuild
 CLI regressions. Execution still fails closed: typed retained runtime/receipt, SBOM,
 package and release consumers and full installed-CLI qualification remain open.
-Current execution audit: both current main and this branch still validate plan
-authorization and then unconditionally raise
-`retained_project.execution_not_qualified` in `cli/retained_project.py`. Issue #22
-was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
-does not close this runtime requirement or transfer retained release authority.
+The baseline audit at `7c5cbd29` verified unconditional public execution refusal.
+This branch connects the development local route to existing live execution and
+receipt admission, with exact plan/host authorization, fresh authority reads and
+captured command diagnostics. Eight owner checks and three handler-wiring checks
+pass locally in 30.151 seconds with actual command/admission owners, including
+pre-execution refusal when independent acceptance is absent. The handler tests fixture
+project discovery; canonical installed CLI qualification remains open, as do SDK
+producer binding, remote retained dispatch and public package/release composition.
+Issue #22 remains open. FreeBSD receiver/bootstrap qualification does not close
+these runtime requirements or transfer retained release authority.
 
-**Next action in progress:** connect local retained admission to the existing
-native FreeBSD pkg provider without changing existing ZIP wire identities. Bind a
+**Next action in progress:** qualify the canonical installed local retained route,
+then join its selected SDK and package authority through the existing owners.
+The native FreeBSD pkg provider keeps existing ZIP wire identities. Bind a
 packaging Flavor actually selected by a current Component lock, exact accepted
 payload, authored specifications, both BOMs and retained receipt evidence. Reuse
 the provider's construction and independent native inspection; never place a
