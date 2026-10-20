@@ -29520,3 +29520,17 @@ exact required CI remain landing gates.
   - [ ] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged.
 
 **Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
+
+### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
+
+**GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
+
+- **Priority:** P1
+- **Owner:** Accepted-source provider reconstruction
+- **Direction:** Make accepted-source-only build consume a qualified retained source entry and export its artifact.
+- **Conclusion:** Issue #97 reproduces an admitted retained origin being rejected by the coding-CLI provider allowlist. Preserve RetainedSourceSelection semantics with no executable or model claim; merely adding a provider spelling is insufficient. Keep independent acceptance, origin/tree/tool bindings and unknown-provider refusal intact. This remains separate from the original-adoption work in PR #81.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [ ] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
+- **Evidence:**
+  - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
