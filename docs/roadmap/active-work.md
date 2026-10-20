@@ -28673,6 +28673,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   Make discovery owner instead of the first executable named `make`; preserve
   unchanged-tool success and changed-tool response withholding. This is a test
   fixture repair; production discovery and authority closures remain unchanged.
+  The repaired fresh native run then passes 1,121 cases, all seven receiver
+  custody cases and all four native package cases, before an immediate descendant
+  state observation races asynchronous SIGKILL delivery. An unchanged isolated
+  three-run probe observes one child as running at return and absent 10 ms later;
+  the other two runs pass. Use a shared finite five-second observation bound in
+  both cancellation fixtures, retain no-result, parent-exit, descendant absence/
+  zombie and ledger assertions, and report the last state on failure. Production
+  cancellation remains unchanged. Expose the runner's existing start-directory
+  selector through Make so the unqualified E2E suite can run early alongside a
+  fresh complete regression; every selected native case still requires renewal.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
