@@ -29174,3 +29174,36 @@ separate context. Lint/format, layout/export and strict specifications pass;
 all 121 documentation diagrams render. Native/installed renewal remains open.
 **Next action in progress:** qualify this exact implementation through the full
 suite and native execution before exposing it to the operator workstation.
+
+### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
+
+Upstream: [issue #90](https://github.com/jordanhubbard/literate-ai/issues/90).
+
+- **Priority:** P0, release blocker
+- **Direction:** Keep complete native receiver observation within its existing
+  300-second production limit, including cold PE import inspection.
+- **Conclusion:** Inspect independent images in bounded concurrent frontiers,
+  then merge results in deterministic queue order through the existing loader
+  resolution and graph owners. Preserve fresh image hashes before/after inspection,
+  exact inspector identity, content-bound fact reuse, API-set/delay-import rules,
+  failure cleanup and live-profile invalidation. Do not increase timeouts or skip
+  the actual receiver case.
+- **Diagnostic evidence:** On source `0d683978`, 208 serial native inspections
+  consume 251.876 of 270.172 measured seconds; path resolution consumes 8.319.
+  These are wrapper timings around actual operations, not acceptance. The
+  diagnostic stopped at its own bound; the original SSH session later timed out,
+  and its final diagnostic file was read through a separate bounded probe.
+- **Implementation:**
+  - [x] Reuse bounded native-inspection concurrency for PE closure frontiers.
+  - [x] Retain deterministic graph facts and reject image/inspector substitution.
+- **Evidence:**
+  - [x] Deterministic thread overlap, serial/parallel graph equivalence and
+    mutation refusal pass alongside existing dependency/custody regressions.
+    All ten custody checks pass, including three new parallel PE cases; focused
+    host tool-dependency, actual receiver and PE input checks also pass. Static,
+    export/layout, strict OpenSpec and supported driver/document reviews pass.
+    This source is a local native-qualification candidate: its new finalized
+    lifecycle receipt and native Windows acceptance remain pending.
+  - [ ] Cold native Windows capture and the real admitted receiver/live-profile
+    test complete within existing limits; collect source-bound reports.
+  - [ ] Renew driver review, finalized host receipt, full regression and exact CI.
