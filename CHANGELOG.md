@@ -4,7 +4,7 @@
 
 - Let adopted projects establish their first Standard lifecycle binding through
   the reviewed installed-wheel plan/apply command, preserving the complete policy
-  and rejecting partial configuration or stale authority.
+  and rejecting missing receipt paths, partial configuration or stale authority.
 
 - Bind development local retained runs to fresh actual worker observations and
   selected OS/architecture policies, rejecting mismatches before commands.

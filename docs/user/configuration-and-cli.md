@@ -1472,8 +1472,10 @@ An adopted project with neither a lifecycle driver nor a test receipt policy can
 the same plan/apply operation to establish its first Standard binding. The reviewed
 plan records both configured fields as `null`, then derives both new fields from the
 observed installed distribution and its complete Standard policy. A partly configured
-project is refused. First binding preserves existing source, conversion and release
-authority and produces no build or test receipt.
+project is refused. The project must already declare a `test_receipt` output path;
+planning refuses a missing path before it offers a plan that cannot be applied.
+First binding preserves existing source, conversion and release authority and
+produces no build or test receipt.
 
 For a custom (non-Standard) receipt suite, rebind preserves its suite ID/version,
 required evidence kinds, and minimum test count. An independent harness runner stays

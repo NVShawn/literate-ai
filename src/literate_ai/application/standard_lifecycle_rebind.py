@@ -162,6 +162,12 @@ def _configured_authority(definition):
     driver = definition.lifecycle_driver
     receipt = definition.test_receipt_policy
     if driver is None and receipt is None:
+        if definition.test_receipt is None:
+            _error(
+                "standard_rebind.test_receipt_path_required",
+                "project must configure a test_receipt path before first "
+                "Standard binding",
+            )
         return driver, receipt
     if not isinstance(driver, StandardProjectLifecycleDriver):
         _error(

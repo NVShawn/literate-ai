@@ -25847,12 +25847,23 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
     - [x] Admit the first reviewed installed-wheel Standard binding for an adopted
       project whose driver and receipt policy are both absent. Reject partial
       configuration and policy downgrade; preserve original source authority.
-      Focused CLI and rollback checks pass. The full local Python regression passes
+      Focused CLI and rollback checks pass. At `4613eda2447eca5ad02b1abee2130375b83b29de`,
+      the full local Python regression passes
       1,835 tests with 42 skips (1,877 selected) in 702.401 seconds. Log SHA-256:
       `2f1555e13548a267a931cb1ed810888c8bcb95aef23446681f7e2c6b3874a7f1`;
       report SHA-256:
       `acb392e8ea9679c65793244a5e44166c2dc8059eca03e0c4582c1ad95a056739`.
-      Installed source-fork use remains open.
+      Actual installed source-fork use then found a missing project-owned
+      `test_receipt` path. The source fork now declares that path; the framework
+      planner also refuses its absence before apply. Seven focused binding checks
+      pass. The full local regression for the added preflight passes 1,836 tests
+      with 42 skips (1,878 selected) in 788.241 seconds. Log SHA-256:
+      `927c0e587dfba70adfc8b138e0051a0e994bc0b7176ecfc368ba799f75674160`;
+      report SHA-256:
+      `a42bb14e781ba2308c3ad5d3b5c885d765c5c11f67d272e0b549b159794b7125`.
+      The source fork's first binding succeeded using the prior installed
+      `4613eda2` wheel, and the HP's isolated CLI validated it on FreeBSD.
+      Final wheel and native worker qualification remain open.
     - [x] Connect explicit local retained execution to live workspace admission,
       preserving original authority, exact re-planning and retained CAS custody.
       Reject unsupported remote/SDK execution rather than falling back to local

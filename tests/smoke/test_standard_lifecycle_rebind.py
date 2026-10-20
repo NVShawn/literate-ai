@@ -280,6 +280,19 @@ class StandardLifecycleRebindTests(unittest.TestCase):
             self.plan()
         self.assertEqual(rejected.exception.code, "standard_rebind.binding_required")
 
+    def test_initial_binding_requires_receipt_path_during_read_only_plan(self) -> None:
+        self.unbind()
+        store = ProjectConfigurationStore(self.root)
+        snapshot = store.discover(self.root)
+        store.update(snapshot, replace(snapshot.definition, test_receipt=None))
+        before = (self.root / "literate.project.json").read_bytes()
+        with self.assertRaises(StandardLifecycleRebindError) as rejected:
+            self.plan()
+        self.assertEqual(
+            rejected.exception.code, "standard_rebind.test_receipt_path_required"
+        )
+        self.assertEqual((self.root / "literate.project.json").read_bytes(), before)
+
     def test_initial_binding_rolls_back_on_installed_authority_drift(self) -> None:
         self.unbind()
         plan = self.plan()
