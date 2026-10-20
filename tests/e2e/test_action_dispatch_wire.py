@@ -36,6 +36,7 @@ from literate_ai.contracts.execution_dispatch import (
 )
 from literate_ai.contracts.identity import canonical_identity
 from tests.support.action_deadline import ACTION_TEST_DEADLINE
+from tests.support.process_state import stopped_process_state
 
 
 def request_fixture(worker=None, catalog=None, deadline=None):
@@ -293,13 +294,10 @@ class CommandActionDispatchTests(unittest.TestCase):
             root_pid, child_pid = json.loads(marker.read_text())
             with self.assertRaises(ProcessLookupError):
                 os.kill(root_pid, 0)
-            # A reparented child may briefly be a zombie; it must not be running.
-            observed = __import__("subprocess").run(
-                ["ps", "-o", "stat=", "-p", str(child_pid)],
-                capture_output=True,
-                text=True,
-                check=False,
-            )
+            # SIGKILL delivery and descendant exit are asynchronous. A reparented
+            # child may briefly be a zombie; it must stop within the finite bound.
+            observed = stopped_process_state(child_pid)
             self.assertTrue(
-                not observed.stdout.strip() or observed.stdout.strip().startswith("Z")
+                not observed or observed.startswith("Z"),
+                ("child still running after cancellation", child_pid, observed),
             )

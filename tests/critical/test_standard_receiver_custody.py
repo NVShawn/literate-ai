@@ -14,6 +14,7 @@ import io
 import json
 import os
 import secrets
+import shlex
 import shutil
 import sys
 import tempfile
@@ -33,6 +34,7 @@ from literate_ai.adapters.action_dispatch_wire import (
     decode_attested_action_response,
     encode_action_request,
 )
+from literate_ai.adapters.builders.make import discover_make_toolchain
 from literate_ai.adapters.dependencies import observation
 from literate_ai.adapters.standard_receiver_config import (
     StandardReceiverConfigError,
@@ -42,14 +44,18 @@ from literate_ai.contracts import canonical_identity, canonical_json_bytes
 from tests.support.fixtures_test_action_generate_action import make_generate_request
 
 
-@unittest.skipIf(os.name == "nt" or shutil.which("make") is None, "POSIX make")
+@unittest.skipIf(
+    os.name == "nt" or not (shutil.which("make") or shutil.which("gmake")),
+    "POSIX GNU Make",
+)
 class StandardReceiverCustodyTests(unittest.TestCase):
     def test_response_is_withheld_when_a_tool_changes_during_the_action(self):
+        make_command = shlex.join(discover_make_toolchain().command)
         for changed in (False, True):
             with self.subTest(changed=changed), tempfile.TemporaryDirectory() as raw:
                 root = Path(raw)
                 make = root / "make"
-                make.write_text(f'#!/bin/sh\nexec {shutil.which("make")} "$@"\n')
+                make.write_text(f'#!/bin/sh\nexec {make_command} "$@"\n')
                 make.chmod(0o755)
                 config = root / "receiver.json"
                 config.write_text(

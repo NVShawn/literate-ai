@@ -41,6 +41,9 @@ from tests.support.host_platform import host_os_family
 from tests.support.loader_environment import without_empty_loader_entries
 
 FAKE_CLAUDE = Path(__file__).resolve().parents[1] / "support" / "fake_claude.py"
+# Native FreeBSD tool/dependency observations exceed the original ten-minute
+# fixture lease even in an independent checkout. Keep a finite integration bound.
+WORKER_ACTION_DURATION_SECONDS = 1800 if host_os_family() == "freebsd" else 600
 
 
 def install_fake_claude(directory: Path) -> Path:
@@ -329,8 +332,8 @@ class ModelFreeRebuildTests(unittest.TestCase):
                     "schema": "literate-ai/private-action-execution@1",
                     "source_cas_root": str(cas),
                     "source_handoff": "filesystem-cas",
-                    "duration_seconds": 600,
-                    "maximum_hardware_age_seconds": 600,
+                    "duration_seconds": WORKER_ACTION_DURATION_SECONDS,
+                    "maximum_hardware_age_seconds": WORKER_ACTION_DURATION_SECONDS,
                     "health_configurations": {"cli-worker": str(health.config_file)},
                     "result_sources": {"cli-worker": {"kind": "shared-cas"}},
                     **({} if finalize is None else {"finalize": finalize}),
@@ -508,12 +511,14 @@ class ModelFreeRebuildTests(unittest.TestCase):
             },
         )
         issued = []
+        finished = threading.Event()
 
         def operator():
             # Review happens out of band; here the operator grants what was asked.
-            stop = time.monotonic() + 540
+            stop = time.monotonic() + WORKER_ACTION_DURATION_SECONDS
             while not request.exists() and time.monotonic() < stop:
-                time.sleep(0.5)
+                if finished.wait(0.5):
+                    return
             if request.exists():
                 issued.append(
                     receiver(
@@ -530,9 +535,14 @@ class ModelFreeRebuildTests(unittest.TestCase):
 
         thread = threading.Thread(target=operator, daemon=True)
         thread.start()
-        with self.without_local_component_phases():
-            status, envelope = self.rebuild()
-        thread.join(timeout=60)
+        try:
+            with self.without_local_component_phases():
+                status, envelope = self.rebuild()
+        finally:
+            finished.set()
+            # A grant issuance already in flight has the receiver's 120s bound.
+            thread.join(timeout=125)
+        self.assertFalse(thread.is_alive(), "operator grant receiver did not finish")
         # The rebuild's own result explains why no request was described.
         self.assertTrue(
             issued, f"FINALIZE never described a grant request: {status} {envelope}"

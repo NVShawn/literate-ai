@@ -521,8 +521,23 @@ services.
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / "failing-project"
             target.mkdir()
+
+            def exiting_command(status: int) -> str:
+                command = [
+                    Path(sys.executable).as_posix(),
+                    "-c",
+                    f"raise SystemExit({status})",
+                ]
+                return (
+                    subprocess.list2cmdline(command)
+                    if os.name == "nt"
+                    else shlex.join(command)
+                )
+
             original = {
-                "Makefile": "all:\n\t@exit 7\ntest:\n\t@exit 0\n",
+                "Makefile": (
+                    f"all:\n\t@{exiting_command(7)}\ntest:\n\t@{exiting_command(0)}\n"
+                ),
                 "src/app.py": "print('legacy')\n",
                 "docs/guide.md": "# Legacy guide\n",
             }
@@ -530,6 +545,20 @@ services.
                 path = target / relative
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(content, encoding="utf-8")
+
+            # GNU and BSD Make report a failed recipe with different statuses
+            # and diagnostic spelling. Observe this host's real legacy gate.
+            baseline = subprocess.run(
+                ["make", "-f", "Makefile"],
+                cwd=target,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+            self.assertNotEqual(baseline.returncode, 0)
+            recipe_failure = r"\bError(?: code)? 7\b"
+            self.assertRegex(baseline.stdout + baseline.stderr, recipe_failure)
 
             with self.assertRaises(ProjectInitializationError) as raised:
                 _adapter().initialize(
@@ -543,8 +572,8 @@ services.
             )
             self.assertIn("rolled back", raised.exception.message)
             self.assertIn("make -f Makefile", raised.exception.message)
-            self.assertIn("status 2", raised.exception.message)
-            self.assertIn("Error 7", raised.exception.message)
+            self.assertIn(f"status {baseline.returncode}", raised.exception.message)
+            self.assertRegex(raised.exception.message, recipe_failure)
             self.assertFalse((target / "literate.project.json").exists())
             self.assertFalse((target / ".literate").exists())
             self.assertFalse((target / "_legacy").exists())

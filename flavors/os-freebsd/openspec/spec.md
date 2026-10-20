@@ -42,12 +42,23 @@ configured CPU architecture before executing harness commands. Optional packaged
 runtime tools SHALL bind OS and architecture; a missing native provider SHALL
 refuse before transfer, and a foreign tool archive SHALL refuse at the receiver.
 Source-only harnesses SHALL NOT require an unused optional runtime provider.
+Repository child lifecycle declarations SHALL admit `freebsd-x86_64` and
+`freebsd-aarch64` native targets. Execution SHALL require the declared target to
+match the actual host OS and architecture before creating execution outputs or
+reservations. Unknown target identities SHALL remain unsupported.
 
 #### Scenario: FreeBSD retained harness without optional runtime tools
 
 - **WHEN** an authorized retained harness selects an explicit FreeBSD SSH worker
 - **THEN** its source-only command graph can execute with native platform evidence
 - **AND** Linux tool binaries cannot substitute for a missing FreeBSD provider
+
+#### Scenario: Native repository child lifecycle target
+
+- **WHEN** a pinned child lifecycle declaration selects a canonical FreeBSD target
+- **THEN** read-only planning preserves that target and reports the actual host
+- **AND** a foreign host or architecture refuses execution before any writes
+- **AND** child ordering, current pins, retained logs and cancellation remain bound
 
 ### Requirement: Truthful native capability evidence
 

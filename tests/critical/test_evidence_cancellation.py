@@ -12,6 +12,8 @@ import time
 import unittest
 from pathlib import Path
 
+from tests.support.process_state import stopped_process_state
+
 _CHILD = """import json, os, subprocess, sys, time
 from pathlib import Path
 from literate_ai.evidence_ledger import attach_run
@@ -102,12 +104,7 @@ class EvidenceCancellationTests(unittest.TestCase):
                             owner.wait(timeout=30), 130 if reason == "signal" else 124
                         )
                         for name, pid in pids.items():
-                            observed = subprocess.run(
-                                ["ps", "-o", "stat=", "-p", str(pid)],
-                                capture_output=True,
-                                text=True,
-                                check=False,
-                            ).stdout.strip()
+                            observed = stopped_process_state(pid)
                             self.assertTrue(
                                 not observed or observed.startswith("Z"),
                                 (name, observed),

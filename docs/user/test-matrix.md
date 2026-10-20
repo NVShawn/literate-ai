@@ -108,6 +108,14 @@ sample-worker readiness.
 
 ## Run the supported matrix
 
+`make python-check` bounds each parallel test module to 3,600 seconds by default.
+Set `PYTHON_TEST_WORKER_TIMEOUT` to configure that module deadline. Native FreeBSD
+qualification sets `PYTHON_TEST_WORKERS=4 PYTHON_TEST_WORKER_TIMEOUT=10800` when
+running `gmake python-check`: the snapshot proof runs four clean generations and their probes,
+with a separate 1,800-second deadline for each candidate process. These module
+and process deadlines remain finite; increasing the module bound does not remove
+the individual process limits.
+
 The framework's sample suite defaults unpinned samples to exactly
 `flavor://literate-ai/lang-python`, `flavor://literate-ai/build-make`, and the current
 host OS. Explicit sample pins remain authoritative. Opt into the full supported matrix
