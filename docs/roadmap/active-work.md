@@ -28667,6 +28667,12 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   Supported require-current and verify pass (two passes, three configured skips).
   The complete native regression at `eb8de8cb` remains in progress; its pending
   results and pending exact-head hosted CI are not qualification claims.
+  Native regression then passes 1,072 cases and all four actual native package
+  cases before receiver-custody setup pins BSD Make through its wrapper and
+  fails GNU Make validation. Select the wrapper target through the existing GNU
+  Make discovery owner instead of the first executable named `make`; preserve
+  unchanged-tool success and changed-tool response withholding. This is a test
+  fixture repair; production discovery and authority closures remain unchanged.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
