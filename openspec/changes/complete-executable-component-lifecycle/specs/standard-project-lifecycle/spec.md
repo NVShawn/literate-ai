@@ -6,6 +6,121 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Retained SBOM roots preserve original-source provenance
+A retained managed CycloneDX graph SHALL bind its distinct retained-project root
+to the reviewed plan and complete current Component-lock inventory. Its root SHALL
+NOT claim a Component revision. Shared dependencies SHALL retain identities, edge
+authority and merged scopes. Conflicts, omitted locks and forged managed claims
+SHALL refuse. Graph construction SHALL NOT establish observed native closure or
+lifecycle acceptance.
+
+#### Scenario: An ordinary Component receipt attempts to consume retained provenance
+- **WHEN** a retained-project BOM is verified against an ordinary Component graph
+- **THEN** verification refuses the different managed root and binding authority
+
+#### Scenario: A retained graph traverses the source and resolved BOM transition
+- **WHEN** the existing verifier admits the exact source and resolved BOM pair
+- **THEN** the retained root binding and locked dependency authority remain unchanged
+
+#### Scenario: The operator reviews retained project planning
+- **WHEN** the read-only public retained planner validates current filesystem authority
+- **THEN** its response includes the managed graph derived from the same verified Component locks and reviewed plan
+- **AND** absent catalog locks remain unselected, stale persisted locks refuse, and planning issues no lifecycle receipt
+
+### Requirement: Retained commands bind observed native dependencies
+The retained workspace SHALL observe captured native tools and inputs through
+the existing host observer using its sanitized command environment. The graph
+SHALL be immutable, revalidated around every command and identity-bound to the
+command record. Missing, malformed or changed observations SHALL refuse.
+
+#### Scenario: A library changes while retained commands execute
+- **WHEN** the native dependency observation differs before or after a command
+- **THEN** the workspace refuses the changed closure and cannot resume as green
+
+#### Scenario: The coordinator has ambient loader injection
+- **WHEN** inherited loader controls are absent from the sanitized command environment
+- **THEN** native observation also excludes those controls
+
+### Requirement: Native observations retain admission boundaries
+Native drift custody SHALL NOT substitute for SDK admission, source/resolved
+BOM verification, independent acceptance or retained-origin receipt issuance.
+
+#### Scenario: Native observation succeeds without independent acceptance
+- **WHEN** native command observations pass but lifecycle admission remains incomplete
+- **THEN** no lifecycle receipt or package/release authority is issued
+
+### Requirement: Retained planning binds actual release authority
+The retained release-policy input SHALL be the canonical configured policy used
+by the existing release owner. Planning SHALL parse its exact reviewed bytes,
+retain the profile's byte identity and validate current repository policy.
+An unrelated hashed policy, duplicate-key document, changed policy or conflicting
+release branch SHALL refuse. Planning SHALL NOT authorize publication.
+
+#### Scenario: An alternate retained policy would bypass the configured release gate
+- **WHEN** a retained manifest declares a different file as its release policy
+- **THEN** planning refuses before executing commands or issuing evidence
+
+### Requirement: Retained project tests cover the original reviewed inventory
+Retained-project planning SHALL bind the configured project receipt policy,
+complete declared test cases, permitted skips, action owners and sealed report
+paths. Runtime SHALL derive outcomes from those exact reports. Missing, extra,
+duplicate or failed cases and unauthorized skips SHALL prevent acceptance.
+
+#### Scenario: A successful command omits an original test
+- **WHEN** a retained test action exits zero but its report omits a reviewed case
+- **THEN** the lifecycle rejects the report before independent acceptance
+
+#### Scenario: Original tests report only skips
+- **WHEN** permitted skips leave fewer actual passes than the configured minimum
+- **THEN** the lifecycle refuses rather than counting skips as passes
+
+### Requirement: Python discovery supports versioned native commands
+Without an explicit command pin, Python discovery SHALL inspect each PATH
+directory in order, preferring `python3`, then `python`, then numerically descending
+`python3.MINOR` commands within that directory. Actual runtime version and identity
+checks SHALL remain mandatory. An explicit command SHALL never fall back.
+
+#### Scenario: Native worker has only a versioned Python command
+- **WHEN** an aligned worker provides `python3.12` without unversioned aliases
+- **THEN** Python discovery probes and admits that actual runtime if it qualifies
+- **AND** unrelated command names and invalid explicit pins cannot supply fallback
+
+### Requirement: Retained source has no generation provider
+Exact retained-source execution SHALL bind the reviewed input as a distinct,
+non-executable source selection. It SHALL NOT discover, authenticate or invoke a
+coding agent, select a model, or represent retained bytes as a model response or
+previously accepted cache entry. Ordinary generation SHALL retain its provider
+requirements.
+
+#### Scenario: Native build worker has no coding agent
+- **WHEN** a worker receives exact retained source and its current authorization
+- **THEN** provider discovery is unnecessary and the normal post-source gates run
+- **AND** stale input, failed tests or missing acceptance prevent a passing receipt
+
+#### Scenario: Retained input attempts to select a model
+- **WHEN** retained-source execution supplies a pipeline model override
+- **THEN** the incompatible selection is rejected rather than invoking a provider
+
+### Requirement: Retained admission preserves post-source gates
+Source classification, immutable custody, native dependency/SBOM checks,
+compilation, complete current tests, execution and independent acceptance SHALL
+remain mandatory after retained-source admission.
+
+#### Scenario: Retained behavior violates its specification
+- **WHEN** retained code passes input review but fails a current test or acceptance
+- **THEN** it cannot produce a passing receipt or replace a previous passing receipt
+
+### Requirement: Retained rejection never regenerates unchanged input
+Retained-origin rejection SHALL be terminal for that exact input. Automatic
+candidate replacement SHALL NOT regenerate or recopy unchanged retained bytes.
+Changed retained input requires a new review and authorization. The original
+failure evidence SHALL remain the reported rejection.
+
+#### Scenario: Native tests reject exact retained bytes
+- **WHEN** a retained candidate fails native behavior tests
+- **THEN** the lifecycle reports that test rejection without a replacement attempt
+- **AND** the existing source-custody checks remain enforced
+
 ### Requirement: Python wheel libraries retain import authority and runtime custody
 
 An explicit Python wheel command profile SHALL admit a library without inventing an
@@ -33,6 +148,21 @@ SBOMs SHALL fail before harness execution.
 - **WHEN** the original source, artifact and wheelhouse are removed after packaging
 - **THEN** the relocated package still passes the library's independent verifier
 - **AND** deleting retained package files causes refusal before execution
+
+### Requirement: FreeBSD SDK admission preserves native target identity
+
+Native SDK layouts and acquisition SHALL support an explicit FreeBSD target,
+normalize versioned native host names, and refuse foreign host/architecture
+execution. Runtime observation SHALL use FreeBSD ELF loader closure and retain
+the FreeBSD OS identity in dependency evidence. ELF format alone SHALL NOT
+establish ABI compatibility, consumer acceptance or execution permission.
+
+#### Scenario: A native FreeBSD SDK is relocated
+
+- **WHEN** an authorized SDK is built, captured and relocated on its selected FreeBSD host
+- **THEN** runtime observation binds exact native ELF bytes and dependency closure
+- **AND** altered bytes, incompatible architecture or a different OS host are refused
+- **AND** independent consumer execution remains required for acceptance
 
 ### Requirement: Worker routing preserves one exact Component graph
 Worker assignments SHALL bind every and only planned Component revision to an exact

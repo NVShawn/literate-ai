@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -65,13 +66,16 @@ class NativeSdkRuntimeTests(unittest.TestCase):
         )
 
     def observation(self, operating_system="linux"):
-        path_name = {"linux": "elf", "macos": "macho", "windows": "pe"}[
-            operating_system
-        ]
+        path_name = {
+            "freebsd": "elf",
+            "linux": "elf",
+            "macos": "macho",
+            "windows": "pe",
+        }[operating_system]
         components = []
         for ref, path in (("sdk", self.library), ("system", self.system)):
             properties = [{"name": f"literate-ai:{path_name}-path", "value": str(path)}]
-            if operating_system == "linux":
+            if operating_system in {"freebsd", "linux"}:
                 properties.append(
                     {
                         "name": "literate-ai:elf-architecture",
@@ -96,7 +100,13 @@ class NativeSdkRuntimeTests(unittest.TestCase):
             tuple(components), ((self.snapshot.identity.uri, "sdk"), ("sdk", "system"))
         )
 
-    def observe(self, observation=None, operating_system="linux", **overrides):
+    def observe(
+        self,
+        observation=None,
+        operating_system="linux",
+        host_platform=None,
+        **overrides,
+    ):
         arguments = dict(
             expected_identity=self.snapshot.identity,
             target_identity=self.snapshot.target_identity,
@@ -106,9 +116,15 @@ class NativeSdkRuntimeTests(unittest.TestCase):
             store=self.store,
         )
         arguments.update(overrides)
-        host = {"linux": "linux", "macos": "darwin", "windows": "win32"}[
-            operating_system
-        ]
+        host = (
+            host_platform
+            or {
+                "freebsd": "freebsd16",
+                "linux": "linux",
+                "macos": "darwin",
+                "windows": "win32",
+            }[operating_system]
+        )
         with (
             mock.patch("literate_ai.adapters.native_sdk_runtime.sys.platform", host),
             mock.patch(
@@ -127,6 +143,32 @@ class NativeSdkRuntimeTests(unittest.TestCase):
         self.library.write_bytes(b"changed")
         with self.assertRaisesRegex(ValueError, "SDK bytes changed"):
             self.observe(observed)
+
+    def test_freebsd_observation_retains_native_os_and_elf_closure(self):
+        result = self.observe(operating_system="freebsd")
+        wire = json.loads(self.store.get_bytes(result))
+        self.assertEqual(wire["operating_system"], "freebsd")
+        self.assertEqual(wire["architecture"], "x86_64")
+        self.assertEqual(
+            wire["edges"], [[self.snapshot.identity.uri, "sdk"], ["sdk", "system"]]
+        )
+
+    def test_freebsd_sdk_refuses_foreign_host_and_architecture(self):
+        with self.assertRaisesRegex(ValueError, "selected target host"):
+            self.observe(operating_system="freebsd", host_platform="linux")
+        observed = self.observation("freebsd")
+        for component in observed.components:
+            for item in component["properties"]:
+                if item["name"] == "literate-ai:elf-architecture":
+                    item["value"] = "ELF64/AArch64"
+        with self.assertRaisesRegex(ValueError, "architecture differs"):
+            self.observe(observed, operating_system="freebsd")
+
+    def test_freebsd_runtime_dependency_mutation_refuses(self):
+        observed = self.observation("freebsd")
+        self.system.write_bytes(b"changed native dependency")
+        with self.assertRaisesRegex(ValueError, "runtime library bytes changed"):
+            self.observe(observed, operating_system="freebsd")
 
     def test_changed_runtime_dependency_bytes_are_rejected(self):
         observed = self.observation()

@@ -32,6 +32,24 @@ loader imports and recursive dependency edges without executing the inspected im
 Reuse the equivalent platform observers when their target is selected. Preserve
 their rejection of missing imports, changed inspectors and unsafe paths.
 
+FreeBSD is an explicit SDK layout and runtime target. Versioned host identifiers
+such as `freebsd16` normalize to `freebsd`; acquisition still requires the exact
+selected host and architecture. The FreeBSD ELF observer supplies the actual
+loader closure, including its native loader inputs. Reusing ELF architecture and
+SBOM path properties does not make a Linux image a FreeBSD SDK or establish ABI
+compatibility. Current native consumer tests and independent acceptance remain
+required, including after relocation. The full retained-project release path
+remains separately unqualified.
+
+FreeBSD potential filter/auxiliary facts belong to loader contexts, with explicit
+image, program and target references. Identical shared ELF files retain one file
+identity even when different programs observe different potential filters. SDK
+projection verifies the observed context hash and filter inventory, rebinds SDK
+paths and image references, and derives a portable context identity. Its graph
+edges follow the rebound identity. A stale context or changed file still refuses;
+older cached observer records require a current observation rather than relaxed
+merging. The static `potential` label does not claim that a filtee was executed.
+
 Standard already binds Component provider exports at build intent, packaging and
 execution. External SDK products must join those lifecycle boundaries explicitly;
 they must not impersonate generated Component products or inherit an unrelated

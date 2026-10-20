@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -42,6 +43,7 @@ class WorkerAlignmentTests(unittest.TestCase):
             root = Path(raw)
             home = root / "home"
             (home / "bin").mkdir(parents=True)
+            python = Path(sys.executable)
             template = root / "template.json"
             template.write_text(
                 json.dumps(
@@ -50,7 +52,10 @@ class WorkerAlignmentTests(unittest.TestCase):
                         "platforms": {
                             "linux": {
                                 "commands": ["git", "litai-missing-tool"],
-                                "python": {"commands": ["python3"], "minimum": "3.11"},
+                                "python": {
+                                    "commands": [python.name],
+                                    "minimum": "3.11",
+                                },
                             }
                         },
                     }
@@ -107,7 +112,9 @@ class WorkerAlignmentTests(unittest.TestCase):
             )
             environment = {
                 "HOME": str(home),
-                "PATH": f"{home / 'bin'}{os.pathsep}{os.environ['PATH']}",
+                "PATH": os.pathsep.join(
+                    (str(home / "bin"), str(python.parent), os.environ["PATH"])
+                ),
             }
             with (
                 patch.dict(os.environ, environment),
@@ -119,7 +126,7 @@ class WorkerAlignmentTests(unittest.TestCase):
                 patch.object(
                     worker_alignment,
                     "scp_arguments",
-                    lambda source, _endpoint, destination, _timeout: (
+                    lambda source, _endpoint, destination, _timeout, **_kwargs: (
                         "cp",
                         str(source),
                         str(home / destination),
@@ -365,3 +372,61 @@ class WindowsDefenderExclusionTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FreeBSDAlignmentTests(unittest.TestCase):
+    def test_native_template_inspection_rejects_wrong_or_missing_os(self):
+        from literate_ai.contracts import (
+            ExecutionRequirements,
+            ExecutionWorker,
+            ExecutionWorkerKind,
+        )
+
+        root = Path(__file__).resolve().parents[2]
+        worker = ExecutionWorker(
+            "bsd",
+            ExecutionWorkerKind.SSH,
+            requirements=ExecutionRequirements(os_family="freebsd"),
+            endpoint="user@bsd.invalid",
+            workspace="~/litai",
+        )
+        template = WorkerTemplate.load(root / "literate.worker-template.json")
+        self.assertIn(
+            "gmake", [item.name for item in template.platforms["freebsd"].commands]
+        )
+        self.assertNotIn(
+            "make", [item.name for item in template.platforms["freebsd"].commands]
+        )
+        for os_line, expected in (
+            ("os FreeBSD amd64", True),
+            ("os Linux x86_64", False),
+            ("", False),
+        ):
+            with self.subTest(os_line=os_line):
+                output = "\n".join(
+                    [
+                        "cmd git /usr/local/bin/git",
+                        "cmd git-lfs /usr/local/bin/git-lfs",
+                        "cmd gmake /usr/local/bin/gmake",
+                        "cmd readelf /usr/bin/readelf",
+                        "cmd ldconfig /sbin/ldconfig",
+                        "cmd cc /usr/bin/cc",
+                        "cmd node /usr/local/bin/node",
+                        "cmd npm /usr/local/bin/npm",
+                        "python python3 3.11.14",
+                        "free 100000000",
+                        os_line,
+                    ]
+                )
+                aligner = WorkerAligner(
+                    template, UserAlignment(), coding_cli=None, model=None, cwd=root
+                )
+                with patch.object(
+                    aligner,
+                    "_run",
+                    return_value=SimpleNamespace(
+                        returncode=0, stdout=output.encode(), stderr=b""
+                    ),
+                ):
+                    report = aligner.align((worker,), apply=False, check_model=False)
+                self.assertEqual(report["aligned"], expected, report)

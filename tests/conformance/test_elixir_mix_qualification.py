@@ -57,6 +57,7 @@ from literate_ai.security import (
     SecurityPolicy,
 )
 from tests.support.hex_pins import exact_hex_component
+from tests.support.host_platform import host_os_family
 
 
 class _NoHostPackages:
@@ -350,7 +351,6 @@ class ElixirMixQualificationTests(unittest.TestCase):
                 verify_mix_artifact(artifact, toolchain=tool)
 
     def test_locked_profile_projects_native_standard_runtime(self):
-        import sys
         from types import SimpleNamespace
 
         from literate_ai.adapters.lifecycle import LocalSourceTreeRegistry
@@ -371,9 +371,7 @@ class ElixirMixQualificationTests(unittest.TestCase):
         self.assertTrue(plugin, "native Mix qualification requires LITAI_HEX_EBIN")
         with tempfile.TemporaryDirectory(prefix="mix-profile-qual-") as directory:
             root = Path(directory).resolve()
-            platform = {"darwin": "macos", "win32": "windows"}.get(
-                sys.platform, "linux"
-            )
+            platform = host_os_family()
             # Use reviewed generation contracts rather than the projection-only
             # fixture's inert placeholder skill.
             _, snapshot, execution = _mix_snapshot(

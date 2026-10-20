@@ -171,7 +171,7 @@ def investigate_worker_cleanup(
             remote_command,
             timeout,
             transport=bindings.worker.transport,
-            login_shell=not windows,
+            login_shell=bindings.os_family not in {"freebsd", "windows"},
         )
         if "SSH_AUTH_SOCK" in os.environ:
             environment["SSH_AUTH_SOCK"] = os.environ["SSH_AUTH_SOCK"]

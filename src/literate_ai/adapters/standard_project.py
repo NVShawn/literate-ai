@@ -1011,6 +1011,8 @@ def _host_platform_target() -> str:
         return "macos"
     if sys.platform.startswith("linux"):
         return "linux"
+    if sys.platform.startswith("freebsd"):
+        return "freebsd"
     if sys.platform in {"win32", "cygwin"}:
         return "windows"
     raise StandardCommandProjectionError(
@@ -3929,6 +3931,7 @@ class FilesystemStandardSourceGenerationAdapter:
         accepted_source_provider_identity: ContentIdentity | None = None,
         project_authority_identity: ContentIdentity | None = None,
         native_sdk_inputs=None,
+        retained_source=None,
     ) -> FilesystemStandardSourceGenerationAdapter:
         """Select and guard the host coding CLI behind the filesystem boundary."""
 
@@ -3944,23 +3947,33 @@ class FilesystemStandardSourceGenerationAdapter:
             raise TypeError(
                 "accepted_source_provider_identity must be a ContentIdentity or null"
             )
-        generator = (
-            CodingCliSourceGenerator.for_accepted_source_lookup(
-                accepted_source_provider_id,
-                accepted_source_provider_identity,
+        if retained_source is not None and (
+            accepted_source_provider_identity is not None or pipeline_model is not None
+        ):
+            raise ValueError(
+                "retained source cannot select a model or accepted-cache provider"
             )
-            if accepted_source_provider_identity is not None
+        generator = (
+            CodingCliSourceGenerator.for_retained_source(retained_source)
+            if retained_source is not None
             else (
-                InheritedSessionSourceGenerator.from_environment()
-                if selected_coding_provider() == "inherited-session"
-                else CodingCliSourceGenerator(
-                    timeout_seconds=_coding_cli_generation_timeout_seconds(),
-                    maximum_cli_stderr_bytes=(
-                        _coding_cli_generation_stderr_limit_bytes()
-                    ),
-                    source_intelligence_provider=None,
-                    source_intelligence_mode="off",
-                    use_default_source_intelligence_provider=False,
+                CodingCliSourceGenerator.for_accepted_source_lookup(
+                    accepted_source_provider_id,
+                    accepted_source_provider_identity,
+                )
+                if accepted_source_provider_identity is not None
+                else (
+                    InheritedSessionSourceGenerator.from_environment()
+                    if selected_coding_provider() == "inherited-session"
+                    else CodingCliSourceGenerator(
+                        timeout_seconds=_coding_cli_generation_timeout_seconds(),
+                        maximum_cli_stderr_bytes=(
+                            _coding_cli_generation_stderr_limit_bytes()
+                        ),
+                        source_intelligence_provider=None,
+                        source_intelligence_mode="off",
+                        use_default_source_intelligence_provider=False,
+                    )
                 )
             )
         )

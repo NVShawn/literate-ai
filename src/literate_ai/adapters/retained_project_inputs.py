@@ -9,6 +9,7 @@ import stat
 import sys
 import tempfile
 from collections.abc import Mapping
+from contextlib import contextmanager
 from pathlib import Path
 from typing import BinaryIO
 
@@ -84,6 +85,21 @@ def _safe(root: Path, relative: str) -> Path:
     return path
 
 
+@contextmanager
+def _parent_descriptor(path: Path):
+    parent = os.open(path.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        for part in path.parts[1:-1]:
+            child = os.open(
+                part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent
+            )
+            os.close(parent)
+            parent = child
+        yield parent
+    finally:
+        os.close(parent)
+
+
 def _open_file(path: Path) -> int:
     flags = (
         os.O_RDONLY
@@ -94,22 +110,46 @@ def _open_file(path: Path) -> int:
     if os.name == "nt":
         # Windows has no portable openat; reparse/ancestor checks bracket the read.
         return os.open(path, flags)
-    parent = os.open(path.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
-    try:
-        for part in path.parts[1:-1]:
-            child = os.open(
-                part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent
-            )
-            os.close(parent)
-            parent = child
+    with _parent_descriptor(path) as parent:
         return os.open(path.name, flags, dir_fd=parent)
-    finally:
-        os.close(parent)
+
+
+def _link_bytes(root: Path, name: str, limit: int) -> bytes:
+    if os.name == "nt":
+        raise RetainedProjectInputError("POSIX symlink custody requires a POSIX worker")
+    path = root / name
+    require_safe_directory(path.parent)
+    before = path.lstat()
+    if not stat.S_ISLNK(before.st_mode) or before.st_size > limit:
+        raise RetainedProjectInputError("Retained symlink type or size is inadmissible")
+    with _parent_descriptor(path) as parent:
+        if _stamp(os.stat(path.name, dir_fd=parent, follow_symlinks=False)) != _stamp(
+            before
+        ):
+            raise RetainedProjectInputError("Retained symlink changed before read")
+        data = os.readlink(path.name, dir_fd=parent).encode("utf-8")
+        if _stamp(os.stat(path.name, dir_fd=parent, follow_symlinks=False)) != _stamp(
+            before
+        ):
+            raise RetainedProjectInputError("Retained symlink changed during read")
+    require_safe_directory(path.parent)
+    if len(data) > min(limit, 4096) or _stamp(path.lstat()) != _stamp(before):
+        raise RetainedProjectInputError(
+            "Retained symlink changed or exceeds byte bound"
+        )
+    return data
 
 
 def _stream(
     root: Path, name: str, limit: int, output: BinaryIO | None = None
 ) -> tuple[int, int, str]:
+    path = root / name
+    require_safe_directory(path.parent)
+    if stat.S_ISLNK(path.lstat().st_mode):
+        data = _link_bytes(root, name, limit)
+        if output is not None:
+            output.write(data)
+        return len(data), 0o120000, hashlib.sha256(data).hexdigest()
     path = _safe(root, name)
     before = path.lstat()
     if not stat.S_ISREG(before.st_mode) or before.st_size > limit:
@@ -140,7 +180,11 @@ def _stream(
 
 
 def _inventory(
-    root: Path, roots: tuple[str, ...], limit: int
+    root: Path,
+    roots: tuple[str, ...],
+    limit: int,
+    *,
+    allow_internal_symlinks: bool = False,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     names: list[str] = []
     directories: list[str] = []
@@ -152,8 +196,13 @@ def _inventory(
         if count > limit:
             raise RetainedProjectInputError("Retained inputs exceed entry bound")
         canonical_relative_posix_paths((name,), label="retained entry")
-        path = _safe(root, name)
+        path = root / name
+        require_safe_directory(path.parent)
         metadata = path.lstat()
+        if stat.S_ISLNK(metadata.st_mode) and allow_internal_symlinks:
+            names.append(name)
+            return  # The link is an input; never traverse its target.
+        path = _safe(root, name)
         if stat.S_ISDIR(metadata.st_mode):
             directories.append(name)
             # Do not materialize an unbounded scandir listing before checking bounds.
@@ -188,13 +237,26 @@ def _inventory(
 
 
 def discover_retained_project_inputs(
-    root: Path, roots: Mapping[str, str], limits: RetainedProjectLimits
+    root: Path,
+    roots: Mapping[str, str],
+    limits: RetainedProjectLimits,
+    *,
+    allow_internal_symlinks: bool = False,
 ) -> RetainedProjectManifest:
     """Read a complete declared closure; the caller must review the result."""
     root = _root(root)
+    if type(allow_internal_symlinks) is not bool:
+        raise TypeError(
+            "Retained symlink admission requires explicit boolean selection"
+        )
     selected = tuple(sorted(roots))
     canonical_relative_posix_paths(selected, label="retained roots")
-    names, directories = _inventory(root, selected, limits.max_entries)
+    names, directories = _inventory(
+        root,
+        selected,
+        limits.max_entries,
+        allow_internal_symlinks=allow_internal_symlinks,
+    )
     members = []
     total = 0
     for name in names:
@@ -207,7 +269,10 @@ def discover_retained_project_inputs(
             for prefix, role in roots.items()
             if name == prefix or name.startswith(prefix + "/")
         )
-        members.append(RetainedProjectMember(name, size, mode, digest, role))
+        target = None
+        if mode == 0o120000:
+            target = _link_bytes(root, name, size).decode("utf-8")
+        members.append(RetainedProjectMember(name, size, mode, digest, role, target))
     manifest = RetainedProjectManifest(selected, tuple(members), limits, directories)
     verify_retained_project_inputs(root, manifest)
     return manifest
@@ -218,7 +283,13 @@ def verify_retained_project_inputs(
 ) -> None:
     """Reject any extra, missing, redirected or changed input, including empty dirs."""
     root = _root(root)
-    names, directories = _inventory(root, manifest.roots, manifest.limits.max_entries)
+    allow_links = any(m.symlink_target is not None for m in manifest.members)
+    names, directories = _inventory(
+        root,
+        manifest.roots,
+        manifest.limits.max_entries,
+        allow_internal_symlinks=allow_links,
+    )
     if (
         names != tuple(m.path for m in manifest.members)
         or directories != manifest.directories
@@ -233,7 +304,12 @@ def verify_retained_project_inputs(
             raise RetainedProjectInputError(
                 "Retained input bytes or executable mode changed"
             )
-    if _inventory(root, manifest.roots, manifest.limits.max_entries) != (
+    if _inventory(
+        root,
+        manifest.roots,
+        manifest.limits.max_entries,
+        allow_internal_symlinks=allow_links,
+    ) != (
         names,
         directories,
     ):
@@ -285,9 +361,32 @@ def capture_retained_project_inputs(
                     blob.chmod(0o444)
             target = tree / member.path
             target.parent.mkdir(parents=True, exist_ok=True)
+            if member.symlink_target is not None:
+                continue  # Materialize links after every ordinary input is copied.
             with blob.open("rb") as source, target.open("xb") as output:
                 shutil.copyfileobj(source, output, _CHUNK)
             target.chmod(0o555 if member.mode == 0o755 else 0o444)
+        by_path = {member.path: member for member in manifest.members}
+        destinations: dict[str, str] = {}
+        for member in manifest.members:
+            current = member.path
+            chain = []
+            while (
+                current in by_path
+                and by_path[current].symlink_target is not None
+                and current not in destinations
+            ):
+                chain.append(current)
+                current = by_path[current].symlink_destination
+            terminal = destinations.get(current, current)
+            destinations.update((name, terminal) for name in chain)
+        for member in manifest.members:
+            if member.symlink_target is not None:
+                (tree / member.path).symlink_to(
+                    member.symlink_target,
+                    target_is_directory=destinations[member.path]
+                    in manifest.directories,
+                )
         verify_retained_project_inputs(root, manifest)
         verify_retained_project_inputs(tree, manifest)
         for digest, size in {m.sha256: m.size for m in manifest.members}.items():

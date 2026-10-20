@@ -138,7 +138,11 @@ class NativeSdkBuildTests(unittest.TestCase):
             "LICENSE",
             "LICENSE",
             ContentIdentity.parse_uri(license_blob.identity),
-            {"darwin": "macos", "win32": "windows"}.get(sys.platform, sys.platform),
+            "freebsd"
+            if sys.platform.startswith("freebsd")
+            else {"darwin": "macos", "win32": "windows"}.get(
+                sys.platform, sys.platform
+            ),
             {"aarch64": "arm64", "amd64": "x86_64"}.get(
                 platform.machine().lower(), platform.machine().lower()
             ),

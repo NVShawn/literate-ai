@@ -374,10 +374,10 @@ class WorkerCapacityObservation:
         string_value(
             self.os_family, "WorkerCapacityObservation.os_family", max_length=16
         )
-        if self.os_family not in {"linux", "macos", "windows"}:
+        if self.os_family not in {"freebsd", "linux", "macos", "windows"}:
             fail(
                 "WorkerCapacityObservation.os_family",
-                "must be linux, macos, or windows",
+                "must be freebsd, linux, macos, or windows",
             )
         for name in ("started_at_ms", "completed_at_ms", "expires_at_ms"):
             int_value(getattr(self, name), f"WorkerCapacityObservation.{name}")

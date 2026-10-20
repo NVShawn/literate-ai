@@ -69,6 +69,10 @@ or upgrading host compilers, package managers, and other toolchains. Completing
 | `sandbox-exec` or `bwrap` | Separately authorized dynamic source observation | Required only for the corresponding macOS or Linux source-to-specification operation; it fails closed when absent. |
 | Other host/accelerator/build tools | Flavor-selected targets | Resolve exact pins first, then bounded compatible `PATH` discovery; never replace a missing selected target with another Flavor. |
 
+FreeBSD native ELF inspection uses `readelf`, `/sbin/ldconfig` hints, and exact library
+mapping configuration and dependency bytes. It does not execute the target binary.
+Unqualified loader controls or ambiguous mappings stop dependency admission.
+
 The tiers are deliberately conditional: installing Literate AI does not silently pull
 in every possible language or build ecosystem.
 
@@ -95,6 +99,16 @@ Automation must opt in explicitly:
 ```console
 LITAI_INSTALL_DEPENDENCIES=yes make install
 ```
+
+The FreeBSD x86-64 tuple uses native `pkg` packages, with Codex as its currently
+declared coding-agent alternative. Other coding agents remain unavailable in this
+tuple; an explicit unsupported `CODING_CLI` selection fails before installation.
+GNU Make is provided and probed as `gmake`. Installed package provenance and the
+required runtime version must both pass; an older repository package is not ready
+merely because installation succeeded. Native worker alignment and offline wheel
+bootstrap have separate declared requirements and do not by themselves qualify
+agent authentication, native sandboxing, or an application lifecycle.
+
 
 For a managed coding agent, the tuple SBOM identifies the complete official package,
 its digest, executable directory, and required runtime companions. Installation keeps

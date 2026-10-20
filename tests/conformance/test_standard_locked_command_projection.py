@@ -94,6 +94,8 @@ def _host_platform() -> str:
         return "macos"
     if sys.platform.startswith("linux"):
         return "linux"
+    if sys.platform.startswith("freebsd"):
+        return "freebsd"
     if sys.platform in {"win32", "cygwin"}:
         return "windows"
     raise unittest.SkipTest(f"unsupported conformance host: {sys.platform}")

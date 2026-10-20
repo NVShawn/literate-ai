@@ -72,6 +72,54 @@ development (2026-09-10):
 
 ## Current work
 
+RETAINED-CATALOG-001 (issue #74) extends Goals 1, 4 and 6 with complete
+retained-input ownership by exact canonical Components. Coverage must use the
+real authored catalog, preserve target-specific lock and source authority
+boundaries, and scale to complete native trees. Explicit POSIX symlink custody
+must retain bounded relative target text, complete internal target coverage and
+immutable snapshots; it must not dereference source links or weaken default
+refusal and legacy identities. Native action, package and
+independent acceptance qualification remain required beyond ownership planning.
+
+RETAINED-FS-001 extends Goals 1 and 4 with independent observation of retained
+products' filesystem effects. Development cases bind private fixtures, exact
+file state and bounded observation without changing legacy case identities or
+sealed exports. Focused local file-effect and SDK-scope checks pass. Full current,
+native/installed and original-source composition qualification remain open;
+these observations do not confer per-unit source/package or release admission.
+
+RETAINED-LOADER-001 binds explicit captured SDK/toolchain/dependency runtime
+directories to native command execution and dependency observation under Goals
+1 and 4. Default environments and legacy profile identities remain unchanged.
+The local private-library tool fixture passes all retained command stages;
+native/installed renewal, complete compiler/sysroot closure and SDK admission
+remain separate requirements.
+
+FREEBSD-001 adds a fourth first-class OS platform and native worker/target
+support under Goals 1, 4 and 5. This includes truthful FreeBSD identity,
+registration, host/toolchain realization, bounded native observations, isolated
+execution and current artifact/acceptance evidence. It is open; registering a
+POSIX endpoint or passing mocked dispatch tests alone does not establish support.
+See framework issue #67 and the active queue. Existing three-platform behavior
+and retained-source authority must remain intact.
+A native pkg provider is being implemented under the same issue, with explicit
+ABI/dependency/payload projection, bound static pkg tooling and independent
+manifest/file/checksum inspection. Portable format checks do not establish native
+construction. Public provider dispatch, retained integration, native execution
+qualification and whole-system package coverage remain open.
+The initial public pkg plan/build/verify route now composes the same provider
+through the accepted Standard lifecycle on local native host targets. Actual
+native format construction, independent ELF library metadata inspection and
+reopened compiled executable/shared-library payload cases now pass on FreeBSD.
+Public batch/provider plumbing also passes with an injected lifecycle. Complete
+installed public-path and retained-provider qualification remain required.
+Development retained pkg composition now joins live local admission to that
+native provider, preserving accepted payload and receipt/BOM/run custody and
+binding the native projection and tool metadata. Its initial portable checks
+pass; actual native construction, installed/public retained execution and
+per-unit source/ports package qualification remain open. Existing ZIP plan/result
+wire identities are preserved.
+
 The current development release is **1.3.0**. [RELEASE-INTEGRATION-004](docs/roadmap/1.3-integration.md)
 owns the current public issue and review scope. The first implementation batch
 landed through PR #66 at `5d92797a`, including eleven issue repairs and dependency
@@ -95,7 +143,32 @@ from this slice; see [the queue](docs/roadmap/active-work.md).
 retained-project Standard lifecycle admission route under Goals 1, 4 and 6.
 The directing human accepted this design on 2026-10-02. Implementation and full
 qualification remain open under RETAINED-PROJECT-001; conversion and release-authority
-gates remain unchanged.
+gates remain unchanged. An opt-in verifier policy now binds selected locks and
+executes exact cases against sealed retained build exports, checking output and
+native dependency drift. This internal gate does not qualify public execution,
+SDK producer admission, retained receipts or package/release consumption.
+An additional internal bridge now binds exact input/build-export manifests and
+frozen native observations to source/resolved CycloneDX documents before tests;
+it preserves retained origin without issuing lifecycle acceptance.
+A completed-run boundary now checks the full ordered command graph, exact original
+test and verifier results, both BOMs and final exports together, then revalidates
+current custody. Its record is not SDK admission or a lifecycle receipt.
+An explicit retained SDK policy now joins captured files to existing live SDK
+producer/consumer owners, carries source resolutions into the BOM and delegates
+command/verifier authorization and revocation checks to their existing owner.
+SDK inputs require their exact selected lock/product/file closure; public retained
+execution and receipt/package qualification remain open.
+A distinct local retained receipt now retains exact source, sealed exports, BOMs
+and actual run evidence in CAS. Its in-process admission can reconstruct package
+inputs after scratch retirement and storage relocation, while rechecking original
+authority. Decoded receipts do not grant remote or regenerative admission; native
+package/public CLI and installed qualification remain open.
+A distinct retained package plan/result now projects a locally admitted run
+through the existing ZIP provider, with an actually selected packaging Flavor,
+authored specifications, both BOMs and receipt/manifests. Planning is read-only;
+construction retains plan/result/archive in CAS and independently verifies the
+archive. Native pkg, complete-system scale, installed CLI and release integration
+remain open; this does not transfer original source authority.
 
 PACKAGE-ZIP-001 ([issue #17](https://github.com/jordanhubbard/literate-ai/issues/17))
 extends Goals 1, 4 and 6 with selectable deterministic ZIP packaging through the

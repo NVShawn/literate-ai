@@ -538,7 +538,7 @@ root-integration acceptance still remain.
 | `project documentation-review [PATH] [--record]` | Calculate the exact marker for the current reviewed authority and documentation graph; `--record` atomically replaces the one existing marker and verifies it became current. |
 | `project parent-readme [PATH] [--apply] [--browser-url REPOSITORY=URL]` | Plan or reconcile root README links to validated direct parents using the installed framework runtime; preserve authored content and require explicit browser identity for local-only parents. |
 | `spec scxml-review CHART [--trace SIDECAR ...]` | Read-only bounded structural validation and supported-subset trace replay for one exact SCXML 1.0 chart and its explicit JSON sidecars. |
-| `project test-receipt run-retained CANDIDATE [--project PATH] [--evidence PATH] [--worker-id ID] [--worker-config PATH] [--timeout-seconds N] [--known-failure-report PATH] [--harness-workspace-link DESTINATION=SOURCE ...]` | Execute a qualified converted project's exact admitted harness in a disposable authored-source copy and emit one outer-finalized candidate plus external run evidence. `local` remains controller-local; every other ID must select an exact configured POSIX SSH worker. Admitted `uv` stages and Ninja declarations in their evidence scripts receive the framework's pinned, digest-verified Linux x86-64 runtime tools without changing the worker installation. External sibling projections remain local-only in this first remote slice. |
+| `project test-receipt run-retained CANDIDATE [--project PATH] [--evidence PATH] [--worker-id ID] [--worker-config PATH] [--timeout-seconds N] [--known-failure-report PATH] [--harness-workspace-link DESTINATION=SOURCE ...]` | Execute a qualified converted project's exact admitted harness in a disposable authored-source copy and emit one outer-finalized candidate plus external run evidence. `local` remains controller-local; every other ID must select an exact configured POSIX SSH worker. Explicit Linux, macOS and FreeBSD SSH workers preserve their native OS identity; the receiver checks that OS and any configured CPU architecture before executing commands. Admitted `uv` stages and Ninja declarations in their evidence scripts require a native optional tool provider. The current provider requires Linux with an explicit `x86_64` or `amd64` CPU architecture and supplies pinned, digest-verified binaries without changing the worker installation. Unsupported OS/architecture combinations refuse before transfer, and receivers independently reject foreign tool archives. Source-only harnesses require no optional provider. External sibling projections remain local-only in this first remote slice. |
 | `project test-receipt update CANDIDATE [--project PATH]` | Atomically replace the configured receipt with an exact passing candidate. |
 | `project test-receipt check CANDIDATE [--project PATH]` | Require the configured receipt to equal an exact tested candidate. |
 | `project test-receipt require-current [--project PATH]` | Require a canonical committed receipt bound to the complete current authority revision. |
@@ -653,6 +653,9 @@ opt into its capability probe with
 `"action_protocol": "literate-ai/lifecycle-action-wire@1"`; omitting this field retains
 the existing worker document and identity. SSH workers additionally declare
 `action_command`, a literal argv array naming their worker-owned action receiver.
+Explicit FreeBSD action workers invoke that argv through the native SSH command
+shell without interactive Bash. Use executable paths available in that native
+environment; absolute paths avoid reliance on login-dotfile tool discovery.
 This is separate from `lifecycle_executable`; legacy SSH workers remain ineligible.
 The receiver's private environment owns its identity and credentials. SSH requests
 travel over stdin, and controller environment bindings are not forwarded to that
@@ -2290,6 +2293,32 @@ make release-check
 
 See [Installation](installation.md) for Python and contributor-tool requirements.
 
+### Native dependency wheel sources
+
+`litai worker wheelhouse export --wheel-directory /absolute/native-wheels` resolves
+an offline closure from reviewed wheels built for the selected worker. The source
+must be a non-redirected directory containing only wheel files. Export snapshots
+and validates their content, refuses direct-URL dependencies and uses pip with
+`--no-index`; it does not compile sources or weaken bootstrap verification.
+Use explicit `--platform`, `--python-version`, `--implementation` and `--abi`
+for a foreign target, then transfer the resulting manifest and exact wheels for
+normal identity-bound worker bootstrap. Building those native wheels is a separate
+reviewed build action; a controller's Linux/macOS binary cannot satisfy a FreeBSD
+wheel requirement. FreeBSD receiver compatibility requires its exact native
+platform tag, such as `freebsd_16_0_current_amd64`. Foreign FreeBSD dependencies
+that condition on kernel release/version require native target observations;
+export refuses to infer those values from the wheel tag or the controller.
+
+### Worker file-transfer routing
+
+A worker's `transport` selects its private SSH-compatible program for commands
+and for SCP source/evidence transfers. SCP remains the transfer executable; for
+a nondefault program, the framework passes it with `scp -S`. This also applies to
+release checkout synchronization and alignment file copies. The program must
+accept OpenSSH flags and support the endpoint's SCP/SFTP session. Routing data,
+SSH configuration and credentials stay private. The default `ssh` selection keeps
+normal OpenSSH arguments and verification behavior.
+
 ### Private worker registration and connectivity
 
 Video walkthrough:
@@ -2299,6 +2328,16 @@ Video walkthrough:
 Static workers are a complete supported mode: register machines the user or an
 administrator has already provisioned. An empty catalog is also valid. These
 operations do not require provisioning rights.
+
+Worker registration accepts `--os freebsd` for a physical FreeBSD machine or a
+FreeBSD guest reached over SSH. Its hardware probe uses `freebsd-version -u`,
+`uname` and named CPU/memory sysctls; `amd64` is reported as `x86_64`.
+The program rejects a non-FreeBSD kernel before collecting hardware. GPU probing
+on FreeBSD is currently unqualified and reports `not-applicable` with a diagnostic;
+it does not establish GPU availability. Registration and hardware inventory alone
+are not native build/test or release qualification. FreeBSD toolchain realization
+and lifecycle qualification are tracked in framework issue #67.
+
 
 Optional dynamic provisioning uses an organization-owned local command. It is disabled
 by default and must be explicitly enabled in the user's `worker-provisioner.json`

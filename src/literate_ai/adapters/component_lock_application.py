@@ -5,7 +5,11 @@ from __future__ import annotations
 from pathlib import Path
 
 from literate_ai.application.component_lock_resolution import ComponentLockResolver
-from literate_ai.contracts import ContentIdentity, rebuild_project_authority_identity
+from literate_ai.contracts import (
+    ComponentLock,
+    ContentIdentity,
+    rebuild_project_authority_identity,
+)
 from literate_ai.projects import LoadedProject, PinnedInputClosureError
 
 from .component_lock_planning import (
@@ -14,7 +18,10 @@ from .component_lock_planning import (
 )
 from .component_locks import ComponentLockStore, ComponentLockStoreError
 from .component_resolution_audits import ComponentResolutionAuditStore
-from .locked_generation_authority import FilesystemLockedGenerationAuthorityReader
+from .locked_generation_authority import (
+    FilesystemLockedGenerationAuthorityReader,
+    LockedGenerationAuthorityReaderError,
+)
 
 
 class ProjectComponentLockSetError(RuntimeError):
@@ -52,6 +59,13 @@ def project_component_roots(project: LoadedProject) -> tuple[Path, ...]:
 def current_project_component_lock_identities(
     project: LoadedProject,
 ) -> tuple[ContentIdentity, ...]:
+    """Return the canonical identities of the same verified persisted lock set."""
+    return tuple(lock.identity for lock in current_project_component_locks(project))
+
+
+def current_project_component_locks(
+    project: LoadedProject,
+) -> tuple[ComponentLock, ...]:
     """Read every persisted current lock without treating the catalog as selection.
 
     Component roots are a catalog of available authoring authority.  A lock file is
@@ -60,7 +74,7 @@ def current_project_component_lock_identities(
     evidence, so an absent lock is not itself an invalid catalog entry.
     """
 
-    identities: list[ContentIdentity] = []
+    locks: list[ComponentLock] = []
     try:
         for component in project_component_roots(project):
             lock_path = component / "component.lock.json"
@@ -73,7 +87,7 @@ def current_project_component_lock_identities(
                     "component_lock.project_lock_set_unavailable",
                     "project Component lock set could not be inspected",
                 ) from exc
-            identities.append(current_component_lock_identity(component))
+            locks.append(current_component_lock(component))
     except ProjectComponentLockSetError:
         raise
     except (
@@ -85,13 +99,13 @@ def current_project_component_lock_identities(
             getattr(exc, "code", "component_lock.project_lock_set_invalid"),
             getattr(exc, "message", str(exc)),
         ) from exc
-    result = tuple(sorted(identities, key=lambda item: item.uri))
+    result = tuple(sorted(locks, key=lambda item: item.identity.uri))
     if not result:
         raise ProjectComponentLockSetError(
             "component_lock.missing",
             "project has no persisted Component locks",
         )
-    if len({item.uri for item in result}) != len(result):
+    if len({item.identity.uri for item in result}) != len(result):
         raise ProjectComponentLockSetError(
             "component_lock.project_lock_set_ambiguous",
             "project Component lock identities must be unique",
@@ -100,6 +114,11 @@ def current_project_component_lock_identities(
 
 
 def current_component_lock_identity(component_root: Path) -> ContentIdentity:
+    """Return one verified current lock's identity without weakening input checks."""
+    return current_component_lock(component_root).identity
+
+
+def current_component_lock(component_root: Path) -> ComponentLock:
     """Read one exact current lock and its complete pinned input closure."""
 
     reader = FilesystemLockedGenerationAuthorityReader()
@@ -116,7 +135,7 @@ def current_component_lock_identity(component_root: Path) -> ContentIdentity:
         catalog.require_unchanged()
         lock_store.require_current(lock)
         closure.require_unchanged()
-        return lock.identity
+        return lock
     except ProjectComponentLockSetError:
         raise
     except (
@@ -124,6 +143,7 @@ def current_component_lock_identity(component_root: Path) -> ContentIdentity:
         ComponentLockStoreError,
         PinnedInputClosureError,
         OSError,
+        LockedGenerationAuthorityReaderError,
     ) as exc:
         raise ProjectComponentLockSetError(
             getattr(exc, "code", "component_lock.project_lock_set_invalid"),

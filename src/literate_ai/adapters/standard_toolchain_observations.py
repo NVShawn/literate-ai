@@ -112,7 +112,7 @@ class StandardToolObservations:
     tools: tuple[StandardToolObservation, ...]
 
     def __post_init__(self):
-        if self.platform not in ("linux", "macos", "windows"):
+        if self.platform not in ("freebsd", "linux", "macos", "windows"):
             raise ValueError("invalid observed target platform")
         if (
             not isinstance(self.tools, tuple)

@@ -29,6 +29,7 @@ from literate_ai.contracts import (
     canonical_identity,
 )
 from tests.support.fixtures_test_worker_capacity import ROLES, policy
+from tests.support.host_platform import host_os_family
 
 
 class Terminal(io.StringIO):
@@ -41,9 +42,7 @@ class WorkerHealthCliTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(prefix="wh-")
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name).resolve()
-        self.family = {"linux": "linux", "darwin": "macos", "win32": "windows"}[
-            sys.platform
-        ]
+        self.family = host_os_family()
         self.worker = ExecutionWorker(
             "fixture",
             ExecutionWorkerKind.LOCAL,

@@ -196,7 +196,7 @@ def resolve_application_config_root(
     name = _application_directory(application)
     configured = dict(os.environ if environment is None else environment)
     family = platform_family or _host_platform_family()
-    if family not in {"linux", "macos", "windows"}:
+    if family not in {"freebsd", "linux", "macos", "windows"}:
         raise ApplicationSettingsError(
             "application_settings.platform_unsupported",
             f"unsupported application-settings platform family: {family!r}",

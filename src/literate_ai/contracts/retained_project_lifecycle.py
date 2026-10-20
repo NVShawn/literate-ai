@@ -124,11 +124,30 @@ class RetainedProjectProfile:
     tools: tuple[tuple[str, str, ContentIdentity], ...]
     actions: tuple[RetainedProjectAction, ...]
     package_inventory: tuple[str, ...]
+    acceptance_policy_identity: ContentIdentity | None = None
+    runtime_library_paths: tuple[str, ...] = ()
 
     SCHEMA: ClassVar[str] = "literate-ai/retained-project-profile@1"
 
     def __post_init__(self) -> None:
         _name(self.target)
+        if (
+            type(self.runtime_library_paths) is not tuple
+            or len(self.runtime_library_paths) > 32
+        ):
+            raise ValueError("Retained runtime library paths require a bounded tuple")
+        aliases = set()
+        for path in self.runtime_library_paths:
+            canonical_relative_posix_path(
+                path, label="retained runtime library directory"
+            )
+            if path.casefold() in aliases:
+                raise ValueError("Retained runtime library directories alias")
+            aliases.add(path.casefold())
+        if self.acceptance_policy_identity is not None and not isinstance(
+            self.acceptance_policy_identity, ContentIdentity
+        ):
+            raise TypeError("Retained acceptance policy requires a typed identity")
         for identity in (
             self.worker_identity,
             self.toolchain_identity,
@@ -180,6 +199,10 @@ class RetainedProjectProfile:
             raise ValueError(
                 "Build, tests, docs and independent acceptance are required"
             )
+        canonical_relative_posix_paths(
+            (output for action in self.actions for output in action.outputs),
+            label="retained sealed output ownership",
+        )
         ancestors: dict[str, set[str]] = {}
         build_ids = {
             action.action_id for action in self.actions if action.stage == "build"
@@ -207,9 +230,18 @@ class RetainedProjectProfile:
         canonical_relative_posix_paths(
             self.package_inventory, label="retained package inventory"
         )
+        outputs = tuple(output for action in self.actions for output in action.outputs)
+        for member in self.package_inventory:
+            if not any(
+                member == output
+                or member.startswith(output + "/")
+                or output.startswith(member + "/")
+                for output in outputs
+            ):
+                raise ValueError("Package inventory has no declared output producer")
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        value = {
             "schema": self.SCHEMA,
             "authority_mode": "retained-project",
             "target": self.target,
@@ -225,6 +257,11 @@ class RetainedProjectProfile:
             "actions": [action.to_dict() for action in self.actions],
             "package_inventory": list(self.package_inventory),
         }
+        if self.acceptance_policy_identity is not None:
+            value["acceptance_policy_identity"] = self.acceptance_policy_identity.uri
+        if self.runtime_library_paths:
+            value["runtime_library_paths"] = list(self.runtime_library_paths)
+        return value
 
     @property
     def identity(self) -> ContentIdentity:
@@ -232,6 +269,11 @@ class RetainedProjectProfile:
 
     @classmethod
     def from_dict(cls, value: object) -> RetainedProjectProfile:
+        optional = {
+            key
+            for key in ("acceptance_policy_identity", "runtime_library_paths")
+            if isinstance(value, dict) and key in value
+        }
         value = _fields(
             value,
             {
@@ -246,7 +288,8 @@ class RetainedProjectProfile:
                 "tools",
                 "actions",
                 "package_inventory",
-            },
+            }
+            | optional,
         )
         if (
             value["schema"] != cls.SCHEMA
@@ -258,6 +301,13 @@ class RetainedProjectProfile:
         for key in ("tools", "actions", "package_inventory"):
             if not isinstance(value[key], list):
                 raise ValueError("Profile collections must be JSON arrays")
+        if "runtime_library_paths" in value and (
+            not isinstance(value["runtime_library_paths"], list)
+            or not value["runtime_library_paths"]
+        ):
+            raise ValueError(
+                "Explicit runtime library paths require a nonempty JSON array"
+            )
         tools = []
         for tool in value["tools"]:
             tool = _fields(tool, {"name", "path", "identity"})
@@ -285,6 +335,10 @@ class RetainedProjectProfile:
                 RetainedProjectAction.from_dict(action) for action in value["actions"]
             ),
             tuple(value["package_inventory"]),
+            ContentIdentity.parse_uri(value["acceptance_policy_identity"])
+            if "acceptance_policy_identity" in optional
+            else None,
+            tuple(value.get("runtime_library_paths", ())),
         )
 
 

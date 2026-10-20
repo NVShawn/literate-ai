@@ -33,6 +33,10 @@ from literate_ai.contracts.executable_components.packages import (
     PackageResult,
 )
 from literate_ai.contracts.identity import canonical_identity
+from literate_ai.contracts.retained_project_package import (
+    RetainedProjectPackagePlan,
+    RetainedProjectPackageResult,
+)
 from literate_ai.contracts.versioning import SemanticVersion
 
 _WHEEL_COMPONENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
@@ -257,6 +261,8 @@ def package_result_for(
     files: tuple[PackagedFile, ...],
     artifacts: tuple[PackagedFile, ...],
 ) -> PackageResult:
+    if isinstance(plan, RetainedProjectPackagePlan):
+        return RetainedProjectPackageResult(plan, files, artifacts)
     return PackageResult(
         package_plan_identity=plan.identity,
         root_component_revision=plan.root_component_revision,

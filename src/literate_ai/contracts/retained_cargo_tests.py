@@ -9,24 +9,7 @@ from ._validation import contract_fields, fail, fields, list_value, string_value
 from .cargo_workspace import CargoWorkspaceExpectation
 from .identity import ContentIdentity, canonical_identity
 from .paths import canonical_relative_posix_paths
-
-
-def validate_retained_test_cases(values, maximum_cases=100000):
-    if (
-        type(maximum_cases) is not int
-        or maximum_cases < 1
-        or not isinstance(values, tuple)
-        or len(values) > maximum_cases
-        or any(
-            not isinstance(v, str)
-            or not v
-            or len(v) > 1024
-            or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in v)
-            for v in values
-        )
-        or values != tuple(sorted(set(values)))
-    ):
-        fail("retained.tests.cases", "requires bounded, sorted, unique case names")
+from .retained_test_cases import validate_retained_test_cases
 
 
 def retained_cargo_test_targets(graph: CargoWorkspaceExpectation):

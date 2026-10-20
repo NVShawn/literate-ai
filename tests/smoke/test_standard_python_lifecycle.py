@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 import shutil
-import sys
 import tempfile
 import unittest
 from dataclasses import replace
@@ -32,6 +31,7 @@ from tests.support import fixtures_test_python_install as wheel_fixtures
 from tests.support import (
     fixtures_test_standard_command_projection as projection_fixtures,
 )
+from tests.support.host_platform import host_os_family
 from tests.support.standard_source_evidence_fixture import register_strict_source
 
 
@@ -64,13 +64,7 @@ class StandardPythonLifecycleTests(unittest.TestCase):
                 python_source_projection=self.source_projection,
                 no_entrypoint=self.library,
                 generation_ready=True,
-                platform=(
-                    "windows"
-                    if os.name == "nt"
-                    else "macos"
-                    if sys.platform == "darwin"
-                    else "linux"
-                ),
+                platform=host_os_family(),
             )
         )
         self.generation_plan = self.execution.generation_plans[0]
@@ -102,13 +96,7 @@ class StandardPythonLifecycleTests(unittest.TestCase):
         self.closure = project_locked_standard_toolchain_closure(
             self.snapshot,
             self.execution,
-            host_platform=(
-                "windows"
-                if os.name == "nt"
-                else "macos"
-                if sys.platform == "darwin"
-                else "linux"
-            ),
+            host_platform=host_os_family(),
             toolchain_discoverer=lambda *_: self.wheels.toolchain,
             dependency_observer=observe,
         )

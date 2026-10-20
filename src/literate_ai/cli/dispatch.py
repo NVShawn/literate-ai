@@ -1026,6 +1026,10 @@ def _parser() -> JsonArgumentParser:
     worker_wheelhouse_export.add_argument("--python-version")
     worker_wheelhouse_export.add_argument("--implementation")
     worker_wheelhouse_export.add_argument("--abi")
+    worker_wheelhouse_export.add_argument(
+        "--wheel-directory",
+        help="resolve offline from a reviewed directory of native dependency wheels",
+    )
     worker_bootstrap = worker_commands.add_parser(
         "bootstrap",
         help="install one exact verified Standard worker dependency closure",
@@ -1166,7 +1170,8 @@ def _parser() -> JsonArgumentParser:
             "Flavor selector to install and use as a project default "
             "(e.g. python, macos, javascript); repeat for multiple. "
             "Known selectors: bazel, cmake, make, repo.sh (build system); cpp, "
-            "elixir, javascript, python, rust (language); linux, macos, windows (OS); "
+            "elixir, javascript, python, rust (language); "
+            "freebsd, linux, macos, windows (OS); "
             "google-workspace, microsoft-365 (service)."
         ),
     )

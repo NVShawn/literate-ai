@@ -21,6 +21,8 @@ from .generation_cache import (
 from .identity import ContentIdentity, contract_identity
 
 MODEL_SCOPE_BINDING_SCHEMA = "urn:literate-ai:schema:v2:model-scope-binding"
+RETAINED_SOURCE_PROVIDER = "operator-retained-source"
+RETAINED_SOURCE_NO_MODEL_SELECTOR = "retained-source-no-model"
 _GENERATION_PROVIDERS = frozenset(
     {"codex", "claude", "cursor-agent", "opencode", "inherited-session"}
 )
@@ -182,7 +184,7 @@ class ModelScopeBinding:
                 "must be a ContentIdentity or null",
             )
         string_value(self.provider_id, "ModelScopeBinding.provider_id")
-        if self.provider_id not in _GENERATION_PROVIDERS:
+        if self.provider_id not in _GENERATION_PROVIDERS | {RETAINED_SOURCE_PROVIDER}:
             fail(
                 "ModelScopeBinding.provider_id",
                 "must identify a supported generation provider",
@@ -199,6 +201,18 @@ class ModelScopeBinding:
                 "must contain only ModelScopeResolutionStep values",
             )
         final = self.resolution_trace[-1]
+        if self.provider_id == RETAINED_SOURCE_PROVIDER and (
+            self.scope_kind is not ModelScopeKind.COMPONENT
+            or self.parent_binding_identity is not None
+            or self.model_selector != RETAINED_SOURCE_NO_MODEL_SELECTOR
+            or len(self.resolution_trace) != 1
+            or final.decision is not ModelScopeDecision.DEFAULT
+            or final.configured_selectors
+            or final.candidate_owner_identities
+        ):
+            fail(
+                "ModelScopeBinding", "retained source cannot select or inherit a model"
+            )
         if (
             final.scope_kind is not self.scope_kind
             or final.owner_identity != self.owner_identity
@@ -218,7 +232,29 @@ class ModelScopeBinding:
         return (
             None
             if self.model_selector == CLI_CONFIGURED_DEFAULT_MODEL_SELECTOR
+            or self.provider_id == RETAINED_SOURCE_PROVIDER
             else self.model_selector
+        )
+
+    @classmethod
+    def for_retained_source(cls, owner_identity: ContentIdentity) -> ModelScopeBinding:
+        """Bind the absence of a model; never an override or inherited provider."""
+        return cls(
+            ModelScopeKind.COMPONENT,
+            owner_identity,
+            None,
+            RETAINED_SOURCE_PROVIDER,
+            RETAINED_SOURCE_NO_MODEL_SELECTOR,
+            (
+                ModelScopeResolutionStep(
+                    ModelScopeKind.COMPONENT,
+                    owner_identity,
+                    (),
+                    (),
+                    RETAINED_SOURCE_NO_MODEL_SELECTOR,
+                    ModelScopeDecision.DEFAULT,
+                ),
+            ),
         )
 
     def to_dict(self) -> dict[str, object]:

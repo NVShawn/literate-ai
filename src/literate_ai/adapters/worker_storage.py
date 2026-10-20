@@ -99,7 +99,7 @@ class WorkerStorageBindings:
     def __post_init__(self) -> None:
         if not isinstance(self.worker, ExecutionWorker):
             raise WorkerStorageProbeError("worker.storage_worker_invalid")
-        if self.os_family not in ("linux", "macos", "windows"):
+        if self.os_family not in ("freebsd", "linux", "macos", "windows"):
             raise WorkerStorageProbeError("worker.storage_platform_invalid")
         if self.worker.requirements.os_family not in (None, self.os_family):
             raise WorkerStorageProbeError("worker.storage_platform_mismatch")
@@ -192,9 +192,12 @@ def _run_probe(command, *, environment, timeout_seconds, input_bytes=None):
 
 
 def _probe_command(*, executable=None, timeout_ms=None, os_family=None):
-    family = os_family or {"linux": "linux", "darwin": "macos", "win32": "windows"}.get(
-        sys.platform
-    )
+    family = os_family or {
+        "linux": "linux",
+        "darwin": "macos",
+        "win32": "windows",
+        "freebsd": "freebsd",
+    }.get("freebsd" if sys.platform.startswith("freebsd") else sys.platform)
     paths = [Path(worker_storage_probe.__file__)]
     if family != "windows":
         paths.append(paths[0].with_name("worker_quota_probe.py"))
@@ -366,7 +369,7 @@ def observe_worker_storage(
                     remote_command,
                     policy.probe_timeout_ms / 1000,
                     transport=bindings.worker.transport,
-                    login_shell=not windows,
+                    login_shell=bindings.os_family not in {"freebsd", "windows"},
                 )
             else:
                 command = _probe_command()

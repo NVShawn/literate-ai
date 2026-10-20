@@ -37,7 +37,8 @@ class WorkerCleanupAdapterTests(unittest.TestCase):
             "linux": "linux",
             "darwin": "macos",
             "win32": "windows",
-        }[sys.platform]
+            "freebsd": "freebsd",
+        }["freebsd" if sys.platform.startswith("freebsd") else sys.platform]
         self.bindings = SimpleNamespace(
             worker=ExecutionWorker(
                 "remote",

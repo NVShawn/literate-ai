@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from literate_ai.adapters.dependencies.types import HostDependencyObservation
+from literate_ai.adapters.native_sdk_freebsd import project_freebsd_loader_context
 from literate_ai.contracts.identity import (
     ContentIdentity,
     canonical_identity,
@@ -174,6 +175,7 @@ def project_native_sdk_dependencies(
     root_prefix = exact_root.as_posix() + "/"
     native_prefix = str(exact_root) + ("\\" if "\\" in str(exact_root) else "/")
     path_property = {
+        "freebsd": "literate-ai:elf-path",
         "linux": "literate-ai:elf-path",
         "macos": "literate-ai:macho-path",
         "windows": "literate-ai:pe-path",
@@ -243,6 +245,29 @@ def project_native_sdk_dependencies(
         if component["bom-ref"] in components:
             raise ValueError("SDK dependency image references collide after projection")
         components[component["bom-ref"]] = component
+    if layout.operating_system == "freebsd":
+        native_refs = frozenset(
+            raw["bom-ref"]
+            for raw in raw_components
+            if any(p["name"] == path_property for p in raw.get("properties", []))
+        )
+        for raw in raw_components:
+            if not any(
+                p["name"] == "literate-ai:freebsd-loader-state"
+                for p in raw.get("properties", [])
+            ):
+                continue
+            projected = project_freebsd_loader_context(
+                raw, refs=refs, native_refs=native_refs, root_prefix=root_prefix
+            )
+            old_ref = refs[raw["bom-ref"]]
+            if projected["bom-ref"] in components:
+                raise ValueError(
+                    "SDK loader context references collide after projection"
+                )
+            del components[old_ref]
+            refs[raw["bom-ref"]] = projected["bom-ref"]
+            components[projected["bom-ref"]] = projected
     declared = {}
     for library in libraries:
         if not isinstance(library, dict) or set(library) != {"path", "component"}:

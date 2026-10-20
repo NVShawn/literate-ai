@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -45,6 +46,7 @@ class ProjectGuidanceTests(unittest.TestCase):
                 check=True,
             )
             environment = {
+                "PATH": os.environ["PATH"],
                 "GIT_AUTHOR_NAME": "guidance-test",
                 "GIT_AUTHOR_EMAIL": "guidance-test@example.com",
                 "GIT_COMMITTER_NAME": "guidance-test",

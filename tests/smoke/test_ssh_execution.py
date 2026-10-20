@@ -178,8 +178,13 @@ class RetryingCustodyRunner(RecordingRunner):
 
 class SshExecutionTests(unittest.TestCase):
     def test_handler_stages_four_files_and_returns_one_typed_result(self) -> None:
-        selected = worker()
-        dispatch_request = request()
+        for transport in ("ssh", "private-route"):
+            with self.subTest(transport=transport):
+                self._assert_staged_custody_transport(transport)
+
+    def _assert_staged_custody_transport(self, transport: str) -> None:
+        selected = replace(worker(), transport=transport)
+        dispatch_request = replace(request(), worker_identity=selected.identity)
         reference = ContentReference(
             "artifact-export", "litai-worker-cas:sha256:" + "8" * 64, identity("8")
         )
@@ -230,11 +235,15 @@ class SshExecutionTests(unittest.TestCase):
         self.assertEqual(actual.request_identity, result.request_identity)
         self.assertIsNotNone(actual.custody_receipt)
         self.assertEqual(len(runner.calls), 8)
-        self.assertEqual(runner.calls[0][0], "ssh")
+        self.assertEqual(runner.calls[0][0], transport)
         self.assertTrue(all(call[0] == "scp" for call in runner.calls[1:5]))
-        self.assertEqual(runner.calls[5][0], "ssh")
+        self.assertEqual(runner.calls[5][0], transport)
         self.assertEqual(runner.calls[6][0], "scp")
-        self.assertEqual(runner.calls[7][0], "ssh")
+        for call in (*runner.calls[1:5], runner.calls[6]):
+            self.assertEqual("-S" in call, transport != "ssh")
+            if transport != "ssh":
+                self.assertEqual(call[1:3], ("-S", transport))
+        self.assertEqual(runner.calls[7][0], transport)
         self.assertTrue(
             all(
                 any("user@host" in argument for argument in call)

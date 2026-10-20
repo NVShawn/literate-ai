@@ -29,7 +29,7 @@ WORKER_HARDWARE_CATALOG_SCHEMA = (
 )
 
 _IDENTIFIER = re.compile(r"^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$")
-_OS_FAMILIES = frozenset({"linux", "macos", "windows"})
+_OS_FAMILIES = frozenset({"freebsd", "linux", "macos", "windows"})
 
 
 def _identifier(value: Any, path: str) -> str:
@@ -170,7 +170,7 @@ class WorkerHardwareObservation:
         if self.os_family not in _OS_FAMILIES:
             fail(
                 "WorkerHardwareObservation.os_family",
-                "must be linux, macos, or windows",
+                "must be freebsd, linux, macos, or windows",
             )
         for value, path in (
             (self.os_name, "WorkerHardwareObservation.os_name"),

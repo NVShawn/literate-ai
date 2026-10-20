@@ -242,6 +242,11 @@ def observe_retained_cargo_tests(
                 if sys.platform.startswith("linux")
                 else None
             ),
+            freebsd_environment=(
+                {**environment, **tool_environment}
+                if sys.platform.startswith("freebsd")
+                else None
+            ),
         )
 
         def target_guard(native=native):

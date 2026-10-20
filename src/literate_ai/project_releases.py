@@ -2879,7 +2879,13 @@ def _sync_worker_checkout(
                 )
                 try:
                     uploaded = runner.run(
-                        scp_arguments(bundle, worker.endpoint, destination, timeout),
+                        scp_arguments(
+                            bundle,
+                            worker.endpoint,
+                            destination,
+                            timeout,
+                            transport=worker.transport,
+                        ),
                         cwd=root,
                         timeout_seconds=timeout,
                     )

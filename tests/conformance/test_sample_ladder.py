@@ -38,6 +38,7 @@ from literate_ai.generated_tests import (
 )
 from tests.conformance.support.sample_runner import (
     REPORT_SCHEMA,
+    SampleFailure,
     _execution_contract,
     _execution_variants,
     _ExecutionVariant,
@@ -51,6 +52,9 @@ from tests.conformance.support.sample_runner import (
     run_all,
     sample_harness_manifest,
     sample_harness_oracle,
+)
+from tests.conformance.support.sample_runner import (
+    main as sample_main,
 )
 from tests.conformance.support.standard_service_stack import (
     execute_standard_service_stack,
@@ -92,6 +96,8 @@ def expected_variants(sample_name: str) -> tuple[str, ...]:
 
 
 def host_os() -> str:
+    if sys.platform.startswith("freebsd"):
+        return "freebsd"
     if sys.platform.startswith("linux"):
         return "linux"
     if sys.platform == "darwin":
@@ -103,7 +109,7 @@ def host_os() -> str:
 
 def platform_contracts() -> dict[str, tuple[str, str]]:
     contracts = {}
-    for os_name in ("linux", "macos", "windows"):
+    for os_name in ("freebsd", "linux", "macos", "windows"):
         root = REPO_ROOT / "flavors" / f"os-{os_name}"
         definition = _flavor_definition(root)
         loaded = OpenSpecProvider().load(
@@ -159,6 +165,41 @@ def _contains(value, target) -> bool:
 
 
 class NeutralSampleLadderTests(unittest.TestCase):
+    def test_freebsd_receiver_selection_refuses_other_host_before_execution(self):
+        with (
+            mock.patch("sys.platform", "linux"),
+            self.assertRaisesRegex(
+                SampleFailure, "remote target expected freebsd but resolved linux"
+            ),
+        ):
+            sample_main(["--expected-platform", "freebsd"])
+        with (
+            mock.patch("sys.platform", "freebsd16"),
+            self.assertRaisesRegex(
+                SampleFailure, "remote target expected linux but resolved freebsd"
+            ),
+        ):
+            sample_main(["--expected-platform", "linux"])
+
+    def test_freebsd_recipes_keep_native_flavor_and_exclude_foreign_samples(self):
+        with mock.patch("sys.platform", "freebsd16"):
+            plans = plan_recipes(SAMPLES)
+            selected = discover(SAMPLES, platform="freebsd")
+        self.assertTrue(plans)
+        self.assertEqual(
+            {item["sample_id"] for item in plans}, {sample.name for sample in selected}
+        )
+        self.assertNotIn("macos-launch-agent", {sample.name for sample in selected})
+        for item in plans:
+            with self.subTest(sample=item["sample_id"], variant=item["variant"]):
+                operating_systems = [
+                    flavor
+                    for flavor in item["recipe"].flavors
+                    if flavor.axis == FlavorAxis.PLATFORM_OS.value
+                ]
+                self.assertEqual(len(operating_systems), 1)
+                self.assertEqual(operating_systems[0].value, "freebsd")
+
     def setUp(self) -> None:
         evidence_environment = mock.patch.dict(
             os.environ,

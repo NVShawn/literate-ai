@@ -26,6 +26,12 @@ from literate_ai.adapters.execution_dispatch import (
     ExecutionDispatchAdapterError,
     SshExecutionDispatcher,
 )
+from literate_ai.adapters.freebsd_packaging import (
+    FreeBsdPackageAdapter,
+    FreeBsdPackageProjection,
+    FreeBsdPkgToolBinding,
+    project_freebsd_package,
+)
 from literate_ai.adapters.lifecycle.standard_local import local_tree_identity
 from literate_ai.adapters.packaging import (
     NativeMetadataArchiveAdapter,
@@ -58,6 +64,7 @@ PACKAGE_BATCH_EVIDENCE_SCHEMA = "literate-ai/native-package-batch@1"
 _SAFE_PATH = re.compile(r"[^A-Za-z0-9._-]+")
 _PROVIDER_OS = {
     "apt": "linux",
+    "pkg": "freebsd",
     "brew": "macos",
     "winget": "windows",
     "chocolatey": "windows",
@@ -163,6 +170,7 @@ def _provider_name(provider: dict[str, Any]) -> str:
         "/package-conan": "conan",
         "/package-npm": "npm",
         "/package-apt": "apt",
+        "/package-pkg": "pkg",
         "/package-brew": "brew",
         "/package-winget": "winget",
         "/package-chocolatey": "chocolatey",
@@ -314,6 +322,20 @@ def _build_packages(
             "Debian artifact construction requires serializable remote package "
             "dispatch; the selected worker only supports lifecycle dispatch",
         )
+    pkg_tool = None
+    if any(name == "pkg" for name, _provider in providers):
+        if selected_worker.worker.kind is not ExecutionWorkerKind.LOCAL:
+            _fail(
+                "package.remote_freebsd_dispatch_unavailable",
+                "native pkg construction requires a local FreeBSD worker; "
+                "remote package dispatch is not yet qualified",
+            )
+        if args.target != "host":
+            _fail(
+                "package.freebsd_target_unqualified",
+                "native pkg construction currently requires the native host target",
+            )
+        pkg_tool = FreeBsdPkgToolBinding.discover()
     component_record = declaration["component"]
     coordinate = str(component_record["coordinate"])
     version = str(component_record["version"])
@@ -430,6 +452,41 @@ def _build_packages(
                         ),
                     )
                     extra = {"sbom/source.cdx.json": source_sbom}
+                elif name == "pkg":
+                    if pkg_tool is None:
+                        _fail(
+                            "package.native_tool_unavailable",
+                            "native pkg preflight did not retain its tool binding",
+                        )
+                    source_plan = lifecycle_archive_package_plan(
+                        integration.package_plan,
+                        packager_identity=integration.package_plan.packager_identity,
+                        specification=component_specification.read_bytes(),
+                        source_sbom=source_sbom,
+                        source_sbom_identity=root_result.build_evidence.source_sbom.bom_identity,
+                        resolved_sbom=resolved_sbom,
+                        resolved_sbom_source_identity=root_result.build_evidence.identity,
+                    )
+                    projection = project_freebsd_package(
+                        source_plan,
+                        package=_safe_name(distribution, lowercase=True).replace(
+                            "_", "-"
+                        ),
+                        version=version,
+                        origin="literate-ai/"
+                        + _safe_name(distribution, lowercase=True).replace("_", "-"),
+                        target_abi=pkg_tool.abi,
+                        worker_abi=pkg_tool.abi,
+                        worker_architecture=pkg_tool.architecture,
+                        resolved_sbom=resolved_sbom,
+                        tool_identity=pkg_tool.identity,
+                    )
+                    native_adapter = FreeBsdPackageAdapter(projection, pkg_tool)
+                    plan = replace(
+                        source_plan, packager_identity=native_adapter.packager_identity
+                    )
+                    extra = {"sbom/source.cdx.json": source_sbom}
+                    adapter_authority = {"freebsd_projection": projection.to_dict()}
                 elif name == "apt":
                     tool = DpkgDebToolBinding.discover()
                     source_plan = native_archive_package_plan(
@@ -500,7 +557,7 @@ def _build_packages(
                         destination = materialized.joinpath(*Path(relative).parts)
                         destination.parent.mkdir(parents=True, exist_ok=True)
                         destination.write_bytes(body)
-                if name in {"apt", "conan"}:
+                if name in {"apt", "pkg", "conan"}:
                     result = native_adapter.package(
                         plan,
                         materialized_root=materialized,
@@ -640,7 +697,7 @@ def _verify_packages(
         _fail(
             "package.declaration_changed", "package selection changed; rebuild packages"
         )
-    verified: list[dict[str, str]] = []
+    verified: list[dict[str, object]] = []
     for record in evidence["providers"]:
         input_root = batch / str(record.get("input_root", evidence["input_root"]))
         plan = PackagePlan.from_dict(record["plan"])
@@ -686,6 +743,13 @@ def _verify_packages(
                 _safe_name(distribution, lowercase=True).replace("_", "-"),
                 version,
             ).verify_bytes(result, content)
+        elif provider == "pkg":
+            projection = FreeBsdPackageProjection.from_dict(
+                record.get("freebsd_projection")
+            )
+            FreeBsdPackageAdapter(
+                projection, FreeBsdPkgToolBinding.discover()
+            ).verify_bytes(plan, result, content)
         elif provider == "apt":
             projection = DebianPackageProjection.from_dict(
                 record.get("debian_projection"),
@@ -700,7 +764,16 @@ def _verify_packages(
             )
         else:
             _fail("package.provider_not_implemented", f"unknown provider {provider}")
-        verified.append({"provider": provider, "artifact": str(artifact_path)})
+        verified_record: dict[str, object] = {
+            "provider": provider,
+            "artifact": str(artifact_path),
+        }
+        if provider == "pkg":
+            verified_record.update(
+                verification_scope="native-format-and-declared-plan",
+                lifecycle_admitted=False,
+            )
+        verified.append(verified_record)
         del root
     return {
         "schema": "literate-ai/native-package-verification@1",

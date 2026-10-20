@@ -79,6 +79,23 @@ def workers() -> ExecutionWorkerCatalog:
 
 
 class ExecutionDispatchContractTests(unittest.TestCase):
+    def test_freebsd_worker_catalog_satisfies_schema_and_roundtrips(self):
+        catalog = ExecutionWorkerCatalog(
+            (
+                ExecutionWorker(
+                    "bsd",
+                    ExecutionWorkerKind.SSH,
+                    requirements=ExecutionRequirements(
+                        os_family="freebsd", cpu_architecture="x86_64"
+                    ),
+                    endpoint="user@bsd.invalid",
+                    workspace="~/litai",
+                ),
+            )
+        )
+        SchemaCatalog().validate(catalog.SCHEMA, catalog.to_dict())
+        self.assertEqual(ExecutionWorkerCatalog.from_dict(catalog.to_dict()), catalog)
+
     def test_source_materialization_rejects_ambiguous_or_credentialed_authority(
         self,
     ) -> None:
