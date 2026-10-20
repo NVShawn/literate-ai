@@ -5,8 +5,10 @@
 - Scope named-user search through private FreeBSD retained allocation directories
   to eligible test actions. Protect unrelated siblings, refuse inaccessible
   outside ancestors, verify effective access after dropping identity, and restore
-  exact permissions before accepting cleanup. Native source-level coverage passes;
-  installed original-suite qualification remains pending.
+  exact permissions before accepting cleanup. The installed FreeBSD retained run
+  passes all 24 original tests and 11 independent checks, restores private access
+  and admits its local-runtime receipt. Canonical SDK, pkg and release
+  qualification remain separate.
 
 - Reuse bounded, current-name-checked directory handles during retained input
   discovery, snapshot copying and private CAS validation. Preserve hashing,
