@@ -29249,7 +29249,12 @@ comparison and actual CLI refusal, but explicitly bind that test's disposable
 exists there, then rerun the full adoption module and remaining native preflight.
 Do not exclude arbitrary new source files or disable production telemetry.
 The revised host adoption module passes all ten cases with no skips; the combined
-Windows fixture modules pass all 37 host cases. Native rerun remains pending.
+Windows fixture modules pass all 37 host cases. The native rerun passes all ten
+adoption cases, then exposes the same diagnostic-output assumption in the
+non-host lock status test. Give that actual status invocation its own sibling
+`OBJ_DIR` as well; retain the complete project snapshot, target/lock identity
+checks and real telemetry. Rerun the affected host and native lock module before
+continuing native qualification.
 The combined full host regression passes 1,810 tests with 42 declared skips
 (1,852 selected), zero failures and zero known failures. Static/export/layout,
 strict OpenSpec and all 121 documentation diagrams pass. An initial lifecycle

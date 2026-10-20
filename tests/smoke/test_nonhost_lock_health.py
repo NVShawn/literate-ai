@@ -1,7 +1,9 @@
 """Verify real committed non-host locks without rewriting target or policy."""
 
 import json
+import os
 import unittest
+from unittest.mock import patch
 
 from literate_ai.adapters.component_lock_application import current_component_lock
 from literate_ai.adapters.project_lock_health import observe_project_locks
@@ -27,13 +29,17 @@ class NonhostLockHealthTests(unittest.TestCase):
         observed = observe_project_locks(self.root)
         self.assertEqual(observed.gate.state, "pass")
         self.assertEqual(observed.components[0]["state"], "current")
-        status, report = invoke("status", "--project", str(self.root))
+        # Status telemetry is disposable output, outside the unchanged project.
+        diagnostics = self.root.parent / "diagnostics"
+        with patch.dict(os.environ, {"OBJ_DIR": str(diagnostics)}):
+            status, report = invoke("status", "--project", str(self.root))
         self.assertEqual(status, 0, report)
         self.assertEqual(report["result"]["project"]["locks"]["state"], "current")
         self.assertEqual(
             current_component_lock(self.component).identity, current.identity
         )
         self.assertEqual(tree_snapshot(self.root), before)
+        self.assertTrue(tuple((diagnostics / ".litai" / "perf").glob("*.jsonl")))
 
     def test_changed_project_flavor_policy_remains_stale(self):
         self.lock()
