@@ -523,7 +523,11 @@ services.
             target.mkdir()
 
             def exiting_command(status: int) -> str:
-                command = [sys.executable, "-c", f"raise SystemExit({status})"]
+                command = [
+                    Path(sys.executable).as_posix(),
+                    "-c",
+                    f"raise SystemExit({status})",
+                ]
                 return (
                     subprocess.list2cmdline(command)
                     if os.name == "nt"

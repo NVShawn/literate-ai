@@ -28703,6 +28703,17 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   focused host/native cases and the complete frozen native suite before landing.
   All eight harness-inventory cases pass on the host; lint/format, driver/runner
   reviews and the current 228-case receipt pass. Native renewal remains pending.
+  The repaired eight-case rollback group then passes on actual FreeBSD. The
+  four-worker early E2E sweep reaches the next unqualified monorepo fixture and
+  finds its retained test command assumes a versionless `python3` alias. Bind
+  that command to the running interpreter with native shell quoting, and keep
+  actual per-root execution, shared-input isolation and receipt/rollback checks.
+  Preserve non-executed shebang and transcript fixtures found by the alias audit;
+  normalize the Make failure fixture's interpreter path for Windows shells.
+  Renew both affected host groups and the native monorepo group before a fresh
+  complete native run; no worker alias or ambient interpreter is hand-repaired.
+  The five monorepo and eight harness cases pass on the host without skips;
+  lint/format, both closure reviews and the current receipt remain green.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
