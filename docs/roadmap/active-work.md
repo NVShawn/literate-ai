@@ -25841,6 +25841,15 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
 - **Conclusion:** Preserve original source and release authority while adding typed bounded retained admission and complete Standard execution; no conversion bypass.
 - **Depends on:** Accepted ADR 0048; package providers retain their own qualification
+- **Windows qualification follow-up:** Merged-main CI run `39442421907`, Windows
+  shard 3, rejects the simulated dependency/BOM fixtures before their intended
+  assertions: Windows reports their extensionless dummy tools as non-executable
+  despite `chmod(0755)`. Give these explicitly simulated tools executable filenames
+  recognized by Windows while retaining genuine manifest discovery, byte hashes,
+  executable-mode validation and all negative custody/observer assertions. Change
+  only the two fixtures, qualify both modules on Windows and the host, and preserve
+  the separate native-inspection group. Do not relax production tool closure or
+  add skips to conceal this portability defect.
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners

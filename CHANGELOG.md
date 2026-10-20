@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Fix Windows retained dependency and BOM contract fixtures so their simulated
+  tools retain executable-mode validation before exercising custody assertions.
+
 - Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
   declarations. Preserve read-only planning, exact host-target execution matching
   and refusal of unsupported targets. Native and installed renewal is in progress.
