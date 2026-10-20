@@ -58,6 +58,15 @@ missing artifacts or changed post-execution inputs prevent acceptance. Retained-
 receipts must bind original test identity/skip policy and packaged-payload provenance
 when the project's contract requires them. A baseline exception is not a test pass.
 
+Input verification may reuse a bounded set of POSIX directory handles within a
+single verification transaction. Every lookup still checks current ancestor
+names and identities without following directory links; cached lineages are
+revalidated before completion and all handles close on success or failure.
+Complete before/after inventories, byte hashes, executable modes, link text and
+file/path identity checks remain mandatory. No cached trust crosses verification
+boundaries, and unsupported or low-descriptor environments retain the preceding
+traversal. This changes neither manifest identities nor execution authority.
+
 Packaging consumes only the accepted closure through the selected existing package
 provider. A separately authorized release can publish that retained-origin artifact
 only after its current receipt and original release-authority policy pass. Such a

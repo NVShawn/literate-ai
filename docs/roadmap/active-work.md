@@ -29282,3 +29282,19 @@ rather than treating resumed partial coverage as release qualification.
   - [ ] Design and implement explicit secondary test identity and exact traversal/read/execute/fixture-write scope through existing workspace owners; refuse mutable identity and permission drift without broad chmod or silent account creation.
 - **Evidence:**
   - [ ] Portable identity/scope/currentness refusal fixtures plus real privileged and unprivileged original cases in a disposable native guest; preserve legacy identities and private defaults.
+
+### [ ] INPUT-WALK-001 — Bound retained input ancestor traversal cost
+
+- **Priority:** P1
+- **Owner:** Retained input filesystem adapter
+- **Direction:** Reduce elapsed build orchestration without omitting source, hashing or currentness checks.
+- **Conclusion:** A real 5266-member plan issued 716820 open calls; input verification consumed 9.023 of 12.040 profiled seconds. Reuse bounded anchored directory handles only within each verification, while checking current lineage on every access and preserving all file, inventory, symlink and replacement guards. GitHub issue: https://github.com/jordanhubbard/literate-ai/issues/86
+- **Depends on:** Retained input custody and SBOM-SCALE-001
+- **Implementation:**
+  - [x] Add transaction-local bounded POSIX directory traversal with current-name checks, deterministic cleanup and unchanged unsupported-platform fallback.
+- **Evidence:**
+  - [x] Focused checks cover actual directory/root replacement, link substitution, permission revocation, added entries and changed bytes, descriptor bounds and cleanup, real low-descriptor fallback, and unchanged manifests. Twenty-four checks pass with one optional source-corpus skip on both the controller and a native source-level probe.
+  - [x] The same 5,310-member manifest verifies in 1.938397 seconds versus 7.281015 seconds in one warm comparison; profiled open calls fall from 711,962 to 7,108. Manifest identity stays `sha256:a5e6bb4c5a876022b73759193af759d375f69b1c7d802280a78eb2cffc98606a`. These measure input verification, not complete build performance.
+  - [x] Native profiling exposed Python 3.12 `Path.relative_to` and repeated lexical parsing as dominant remaining costs. A checked immutable path-prefix comparison retains per-access filesystem lineage checks; three warm source-level verifications of the same 5,270-member native manifest have a median of 7.926676 seconds versus 19.794351 seconds with the installed baseline. The adapter bytes have SHA-256 `6811499e92de9342cd8e316ae65dc2f4316acb5610b9072392ada6e7b5245e02`; the native focused log has SHA-256 `1e05b07e13f823a7a44b884e96cfa5dde0ef6560fef6a5b120b334f4eb518b47`. This probe does not qualify an installed wheel or a complete build.
+  - [x] Fresh full regression of the frozen reviewed implementation: 1,865 passed, 42 skipped, no failures across 1,907 selected checks in 1,043.891 seconds. Report SHA-256 `aeba051ec5d0a178f3a5451c75b4220e360efa9c7a4ba1de4483e6945f9a0277`; log SHA-256 `81aae3d3b81d09691cf5cf879a76d207bda549b0d399a0344f62c976d4851c83`.
+  - [ ] Canonical installed-wheel and native renewal. An earlier broad run selected 1,216 checks and stopped with a self-host snapshot-currentness error after the final lexical change modified its live inputs (36 skipped). That failed gate remains preserved; the fresh complete run above passed the unchanged-snapshot proof.

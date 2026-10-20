@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Reuse bounded POSIX directory handles within retained input verification,
+  preserving current-name and ancestor checks, complete inventories, bytes and
+  modes. Fresh verifications share no cached trust; low-descriptor environments
+  and Windows retain the preceding traversal path.
+
 - Bound strict CycloneDX object uniqueness validation with structural JSON keys,
   preserving the official schema, reference registry, complete provenance and
   canonical BOM identities for large retained inventories.

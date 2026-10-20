@@ -72,6 +72,13 @@ development (2026-09-10):
 
 ## Current work
 
+INPUT-WALK-001 (issue #86) extends Goal 4 with bounded directory traversal for
+large retained input selections. Each verification may reuse a limited set of
+POSIX directory handles while checking current names and ancestor identities
+on every access. Hashes, modes, complete inventories, symlink rules, currentness
+and cleanup remain mandatory; Windows and low-descriptor fallback behavior
+stay unchanged. Full regression and installed/native renewal remain required.
+
 RETAINED-USER-001 (issue #85) extends Goals 1, 4 and 5 with explicit secondary
 test identities and scoped access to private retained workspaces. Original
 privileged and unprivileged test requirements must both pass on an allocated

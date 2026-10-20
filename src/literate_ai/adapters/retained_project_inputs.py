@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import errno
 import hashlib
 import os
 import shutil
 import stat
 import sys
 import tempfile
+from collections import OrderedDict
 from collections.abc import Mapping
 from contextlib import contextmanager
 from pathlib import Path
@@ -26,6 +28,166 @@ _CHUNK = 1024 * 1024
 
 class RetainedProjectInputError(ValueError):
     """An input could not be captured under its reviewed identity."""
+
+
+class _DirectoryAccess:
+    """Bounded, transaction-local handles; current names are checked on every use.
+
+    Handles are never evidence by themselves: root and relative directory
+    identities must still match the no-follow lookup through their current parent.
+    Cached lineages are checked again before successful transaction completion.
+    """
+
+    def __init__(self, root: Path, budget: int):
+        self.root = root
+        self._root_parts = root.parts
+        self._last_path_parts = None
+        self._last_relative_parts = None
+        self._absolute = []
+        self._cached = OrderedDict()
+        self._flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+        self._flags |= getattr(os, "O_CLOEXEC", 0)
+        try:
+            descriptor = os.open(root.anchor, self._flags)
+            try:
+                identity = self._identity(os.fstat(descriptor))
+            except BaseException:
+                os.close(descriptor)
+                raise
+            self._absolute.append((root.anchor, descriptor, identity))
+            for name in root.parts[1:]:
+                parent = self._absolute[-1][1]
+                current = self._identity(
+                    os.stat(name, dir_fd=parent, follow_symlinks=False)
+                )
+                child = self._open_directory(parent, name, current)
+                self._absolute.append((name, child, current))
+            self._capacity = budget - len(self._absolute)
+            self._root_current()
+        except BaseException:
+            self.close()
+            raise
+
+    @staticmethod
+    def _identity(metadata):
+        if not stat.S_ISDIR(metadata.st_mode):
+            raise RetainedProjectInputError("Retained ancestor is redirected")
+        return (
+            metadata.st_dev,
+            metadata.st_ino,
+            metadata.st_mode,
+            metadata.st_uid,
+            metadata.st_gid,
+        )
+
+    def _open_directory(self, parent, name, expected):
+        descriptor = os.open(name, self._flags, dir_fd=parent)
+        try:
+            if self._identity(os.fstat(descriptor)) != expected:
+                raise RetainedProjectInputError("Retained ancestor changed during open")
+            return descriptor
+        except BaseException:
+            os.close(descriptor)
+            raise
+
+    def _root_current(self):
+        first = self._absolute[0]
+        if self._identity(os.stat(first[0], follow_symlinks=False)) != first[2]:
+            raise RetainedProjectInputError("Retained root ancestor changed")
+        for parent, child in zip(self._absolute, self._absolute[1:], strict=False):
+            current = os.stat(child[0], dir_fd=parent[1], follow_symlinks=False)
+            if self._identity(current) != child[2]:
+                raise RetainedProjectInputError("Retained root ancestor changed")
+
+    def directory(self, parts):
+        self._root_current()
+        descriptor = self._absolute[-1][1]
+        lineage = []
+        for index, name in enumerate(parts):
+            key = parts[: index + 1]
+            current = self._identity(
+                os.stat(name, dir_fd=descriptor, follow_symlinks=False)
+            )
+            lineage.append(current)
+            expected = tuple(lineage)
+            cached = self._cached.pop(key, None)
+            if cached is not None:
+                if cached[1] != expected:
+                    os.close(cached[0])
+                    raise RetainedProjectInputError(
+                        "Retained directory lineage changed"
+                    )
+                self._cached[key] = cached
+            else:
+                while len(self._cached) >= self._capacity:
+                    oldest = next(
+                        k for k, v in self._cached.items() if v[0] != descriptor
+                    )
+                    os.close(self._cached.pop(oldest)[0])
+                child = self._open_directory(descriptor, name, current)
+                self._cached[key] = (child, expected)
+            descriptor = self._cached[key][0]
+        return descriptor, tuple(lineage)
+
+    def parent(self, path):
+        # This cache contains only immutable lexical parsing, never filesystem
+        # observations. Python 3.12 relative_to walks parents; avoid repeating
+        # that walk and portable-path parsing around each read of the same file.
+        path_parts = path.parts
+        if path_parts != self._last_path_parts:
+            if path_parts[: len(self._root_parts)] != self._root_parts:
+                raise RetainedProjectInputError("Retained entry is outside its root")
+            parts = path_parts[len(self._root_parts) :]
+            canonical_relative_posix_paths(("/".join(parts),), label="retained entry")
+            self._last_path_parts = path_parts
+            self._last_relative_parts = parts
+        parts = self._last_relative_parts
+        descriptor, _ = self.directory(parts[:-1])
+        return descriptor
+
+    def metadata(self, path):
+        return os.stat(path.name, dir_fd=self.parent(path), follow_symlinks=False)
+
+    def require_current(self):
+        previous = tuple((parts, value[1]) for parts, value in self._cached.items())
+        for parts, expected in previous:
+            if self.directory(parts)[1] != expected:
+                raise RetainedProjectInputError("Retained directory lineage changed")
+        self._root_current()
+
+    def close(self):
+        for descriptor, _ in self._cached.values():
+            os.close(descriptor)
+        self._cached.clear()
+        for _, descriptor, _ in reversed(self._absolute):
+            os.close(descriptor)
+        self._absolute.clear()
+
+
+@contextmanager
+def _directory_access(root):
+    if os.name == "nt":
+        yield None
+        return
+    import resource
+
+    soft, _ = resource.getrlimit(resource.RLIMIT_NOFILE)
+    budget = 32 if soft == resource.RLIM_INFINITY else min(32, max(0, (soft - 32) // 4))
+    if len(root.parts) + 2 > budget:
+        yield None
+        return
+    try:
+        access = _DirectoryAccess(root, budget)
+    except OSError as error:
+        if error.errno not in (errno.EMFILE, errno.ENFILE):
+            raise
+        yield None
+        return
+    try:
+        yield access
+        access.require_current()
+    finally:
+        access.close()
 
 
 def _remove_tree(path: Path) -> None:
@@ -86,7 +248,10 @@ def _safe(root: Path, relative: str) -> Path:
 
 
 @contextmanager
-def _parent_descriptor(path: Path):
+def _parent_descriptor(path: Path, access=None):
+    if access is not None:
+        yield access.parent(path)
+        return
     parent = os.open(path.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
     try:
         for part in path.parts[1:-1]:
@@ -100,7 +265,7 @@ def _parent_descriptor(path: Path):
         os.close(parent)
 
 
-def _open_file(path: Path) -> int:
+def _open_file(path: Path, access=None) -> int:
     flags = (
         os.O_RDONLY
         | getattr(os, "O_NOFOLLOW", 0)
@@ -110,19 +275,22 @@ def _open_file(path: Path) -> int:
     if os.name == "nt":
         # Windows has no portable openat; reparse/ancestor checks bracket the read.
         return os.open(path, flags)
-    with _parent_descriptor(path) as parent:
+    with _parent_descriptor(path, access) as parent:
         return os.open(path.name, flags, dir_fd=parent)
 
 
-def _link_bytes(root: Path, name: str, limit: int) -> bytes:
+def _link_bytes(root: Path, name: str, limit: int, access=None) -> bytes:
     if os.name == "nt":
         raise RetainedProjectInputError("POSIX symlink custody requires a POSIX worker")
     path = root / name
-    require_safe_directory(path.parent)
-    before = path.lstat()
+    if access is None:
+        require_safe_directory(path.parent)
+        before = path.lstat()
+    else:
+        before = access.metadata(path)
     if not stat.S_ISLNK(before.st_mode) or before.st_size > limit:
         raise RetainedProjectInputError("Retained symlink type or size is inadmissible")
-    with _parent_descriptor(path) as parent:
+    with _parent_descriptor(path, access) as parent:
         if _stamp(os.stat(path.name, dir_fd=parent, follow_symlinks=False)) != _stamp(
             before
         ):
@@ -132,8 +300,12 @@ def _link_bytes(root: Path, name: str, limit: int) -> bytes:
             before
         ):
             raise RetainedProjectInputError("Retained symlink changed during read")
-    require_safe_directory(path.parent)
-    if len(data) > min(limit, 4096) or _stamp(path.lstat()) != _stamp(before):
+    if access is None:
+        require_safe_directory(path.parent)
+        current = path.lstat()
+    else:
+        current = access.metadata(path)
+    if len(data) > min(limit, 4096) or _stamp(current) != _stamp(before):
         raise RetainedProjectInputError(
             "Retained symlink changed or exceeds byte bound"
         )
@@ -141,26 +313,35 @@ def _link_bytes(root: Path, name: str, limit: int) -> bytes:
 
 
 def _stream(
-    root: Path, name: str, limit: int, output: BinaryIO | None = None
+    root: Path, name: str, limit: int, output: BinaryIO | None = None, *, access=None
 ) -> tuple[int, int, str]:
     path = root / name
-    require_safe_directory(path.parent)
-    if stat.S_ISLNK(path.lstat().st_mode):
-        data = _link_bytes(root, name, limit)
+    if access is None:
+        require_safe_directory(path.parent)
+        metadata = path.lstat()
+    else:
+        metadata = access.metadata(path)
+    if stat.S_ISLNK(metadata.st_mode):
+        data = _link_bytes(root, name, limit, access)
         if output is not None:
             output.write(data)
         return len(data), 0o120000, hashlib.sha256(data).hexdigest()
-    path = _safe(root, name)
-    before = path.lstat()
+    if access is None:
+        path = _safe(root, name)
+        before = path.lstat()
+    else:
+        before = metadata
     if not stat.S_ISREG(before.st_mode) or before.st_size > limit:
         raise RetainedProjectInputError("Retained input type or size is inadmissible")
-    descriptor = _open_file(path)
+    descriptor = _open_file(path, access)
     digest = hashlib.sha256()
     count = 0
     with os.fdopen(descriptor, "rb") as stream:
         if not _same_open_file(before, os.fstat(stream.fileno())) or _stamp(
             before
-        ) != _stamp(_safe(root, name).lstat()):
+        ) != _stamp(
+            _safe(root, name).lstat() if access is None else access.metadata(path)
+        ):
             raise RetainedProjectInputError("Retained input changed before read")
         while data := stream.read(min(_CHUNK, limit - count + 1)):
             count += len(data)
@@ -172,7 +353,10 @@ def _stream(
         after = os.fstat(stream.fileno())
     if (
         not _same_open_file(before, after)
-        or _stamp(before) != _stamp(_safe(root, name).lstat())
+        or _stamp(before)
+        != _stamp(
+            _safe(root, name).lstat() if access is None else access.metadata(path)
+        )
         or count != before.st_size
     ):
         raise RetainedProjectInputError("Retained input changed during read")
@@ -185,6 +369,7 @@ def _inventory(
     limit: int,
     *,
     allow_internal_symlinks: bool = False,
+    access=None,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     names: list[str] = []
     directories: list[str] = []
@@ -197,17 +382,23 @@ def _inventory(
             raise RetainedProjectInputError("Retained inputs exceed entry bound")
         canonical_relative_posix_paths((name,), label="retained entry")
         path = root / name
-        require_safe_directory(path.parent)
-        metadata = path.lstat()
+        if access is None:
+            require_safe_directory(path.parent)
+            metadata = path.lstat()
+        else:
+            metadata = access.metadata(path)
         if stat.S_ISLNK(metadata.st_mode) and allow_internal_symlinks:
             names.append(name)
             return  # The link is an input; never traverse its target.
-        path = _safe(root, name)
+        if access is None:
+            path = _safe(root, name)
+        elif stat.S_ISLNK(metadata.st_mode):
+            raise RetainedProjectInputError("Retained input is redirected")
         if stat.S_ISDIR(metadata.st_mode):
             directories.append(name)
             # Do not materialize an unbounded scandir listing before checking bounds.
             if os.name != "nt":
-                descriptor = _open_file(path)
+                descriptor = _open_file(path, access)
                 try:
                     if _stamp(os.fstat(descriptor)) != _stamp(metadata):
                         raise RetainedProjectInputError(
@@ -222,7 +413,10 @@ def _inventory(
                 with os.scandir(path) as children:
                     for child in children:
                         visit(name + "/" + child.name)
-            if _stamp(metadata) != _stamp(_safe(root, name).lstat()):
+            current = (
+                _safe(root, name).lstat() if access is None else access.metadata(path)
+            )
+            if _stamp(metadata) != _stamp(current):
                 raise RetainedProjectInputError(
                     "Retained directory changed during inventory"
                 )
@@ -283,12 +477,18 @@ def verify_retained_project_inputs(
 ) -> None:
     """Reject any extra, missing, redirected or changed input, including empty dirs."""
     root = _root(root)
+    with _directory_access(root) as access:
+        _verify_inputs(root, manifest, access)
+
+
+def _verify_inputs(root, manifest, access):
     allow_links = any(m.symlink_target is not None for m in manifest.members)
     names, directories = _inventory(
         root,
         manifest.roots,
         manifest.limits.max_entries,
         allow_internal_symlinks=allow_links,
+        access=access,
     )
     if (
         names != tuple(m.path for m in manifest.members)
@@ -296,7 +496,7 @@ def verify_retained_project_inputs(
     ):
         raise RetainedProjectInputError("Retained input inventory changed")
     for member in manifest.members:
-        if _stream(root, member.path, member.size) != (
+        if _stream(root, member.path, member.size, access=access) != (
             member.size,
             member.mode,
             member.sha256,
@@ -309,6 +509,7 @@ def verify_retained_project_inputs(
         manifest.roots,
         manifest.limits.max_entries,
         allow_internal_symlinks=allow_links,
+        access=access,
     ) != (
         names,
         directories,

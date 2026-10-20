@@ -69,9 +69,9 @@ class RetainedProjectInputTests(unittest.TestCase):
         original = inputs._stream
         changed = False
 
-        def mutate(root, name, limit, output=None):
+        def mutate(root, name, limit, output=None, *, access=None):
             nonlocal changed
-            result = original(root, name, limit, output)
+            result = original(root, name, limit, output, access=access)
             if output is not None and not changed:
                 changed = True
                 (self.root / "src" / "main.py").write_bytes(b"changed")
