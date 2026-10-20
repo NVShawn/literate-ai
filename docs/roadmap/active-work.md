@@ -25841,6 +25841,30 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
 - **Conclusion:** Preserve original source and release authority while adding typed bounded retained admission and complete Standard execution; no conversion bypass.
 - **Depends on:** Accepted ADR 0048; package providers retain their own qualification
+- **Windows qualification follow-up:** Merged-main CI run `39442421907` exposes
+  simulated dependency/BOM tools whose extensionless filenames lose executable
+  mode on Windows, relocated Python executables without their runtime home, and
+  POSIX loader-path assertions masked by the Windows unsupported-loader guard.
+  Use executable filenames for simulated tools, real venv redirectors for isolated
+  interpreter discovery, and native path comparison for PATHEXT casing. Exercise
+  POSIX path validation explicitly while preserving Windows loader refusal.
+  Retain genuine manifests, byte hashes, custody guards and version/order/pin
+  assertions; qualify the four affected modules without changing production rules
+  or adding skips. All 33 affected host cases pass across completed module runs,
+  including a fresh seven-case interpreter rerun. Static reviews, current receipt
+  and verification pass. Initial native Windows evidence passes all 16 custody
+  cases with five existing POSIX skips, plus three loader cases with two existing
+  POSIX skips. The collected custody archive SHA-256 is
+  `de6a76346b9c0b5705de044768f0f0f3f70cea3c7f3f83ddb1f5ca814a7bb14a`.
+  Final exact-source native qualification and CI remain open.
+- **Separate Windows receiver blocker:** [Issue #90](https://github.com/jordanhubbard/literate-ai/issues/90)
+  owns the actual PE dependency-observation timeout. A native rerun passes nine
+  toolchain cases before this receiver fails its separate 300-second production
+  observation limit. Preparing the catalog before admission does not fix that
+  bound; withdraw that unproven test change and preserve the actual receiver
+  test. Trace and qualify the native observer independently, retaining cold-start
+  custody, current image/inspector hashes and live-profile invalidation. Do not
+  increase deadlines or claim the fixture repair makes main release-qualified.
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
@@ -29217,6 +29241,15 @@ Windows cases (26 passed, seven existing POSIX skips). The independent FreeBSD
 preflight remains bound to its sealed `08211e5e` checkout; advancing this host
 integration does not modify that checkout. Receiver timeout issue #90 remains a
 separate production blocker and is not fixed by these fixtures.
+The first independent FreeBSD preflight at `08211e5e` stops after four adoption
+passes when the ordinary-rebuild refusal test includes a legitimate diagnostic
+performance span in its unchanged-tree snapshot. Keep the complete original-tree
+comparison and actual CLI refusal, but explicitly bind that test's disposable
+`OBJ_DIR` to a sibling outside the original source. Verify that telemetry still
+exists there, then rerun the full adoption module and remaining native preflight.
+Do not exclude arbitrary new source files or disable production telemetry.
+The revised host adoption module passes all ten cases with no skips; the combined
+Windows fixture modules pass all 37 host cases. Native rerun remains pending.
 The combined full host regression passes 1,810 tests with 42 declared skips
 (1,852 selected), zero failures and zero known failures. Static/export/layout,
 strict OpenSpec and all 121 documentation diagrams pass. An initial lifecycle

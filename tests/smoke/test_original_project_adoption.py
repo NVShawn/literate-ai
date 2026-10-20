@@ -224,17 +224,22 @@ class OriginalProjectAdoptionTests(unittest.TestCase):
     def test_ordinary_rebuild_cannot_regenerate_original_source(self):
         self.apply(plan_original_project_adoption(self.root))
         before = self.snapshot()
-        code, document = invoke(
-            "--json",
-            "rebuild",
-            ".",
-            "--project",
-            str(self.root),
-            "--allow-host-execution",
-        )
+        # Refused commands still emit diagnostics; keep disposable output outside
+        # the original source whose complete byte snapshot must stay unchanged.
+        diagnostics = self.root.parent / "diagnostics"
+        with mock.patch.dict(os.environ, {"OBJ_DIR": str(diagnostics)}):
+            code, document = invoke(
+                "--json",
+                "rebuild",
+                ".",
+                "--project",
+                str(self.root),
+                "--allow-host-execution",
+            )
         self.assertEqual(code, 2, document)
         self.assertEqual(
             document["error"]["code"], "rebuild.conversion_authority_not_qualified"
         )
         self.assertIn("--retained-project-plan", document["error"]["message"])
         self.assertEqual(before, self.snapshot())
+        self.assertTrue(tuple((diagnostics / ".litai" / "perf").glob("*.jsonl")))

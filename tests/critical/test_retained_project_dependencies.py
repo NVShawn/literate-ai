@@ -31,9 +31,10 @@ class RetainedProjectDependencyTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name).resolve()
         (self.root / "sdk").mkdir()
-        tool = self.root / "sdk/tool"
+        tool = self.root / "sdk/tool.exe"
         # The observer is explicitly simulated in this contract fixture.
         # Native inspection is exercised by the real compiled command group.
+        # Windows derives executable mode from the filename, not chmod(0755).
         tool.write_bytes(b"captured tool")
         tool.chmod(0o755)
         self.manifest = discover_retained_project_inputs(
@@ -48,7 +49,7 @@ class RetainedProjectDependencyTests(unittest.TestCase):
         self.plan = replace(
             plan,
             manifest_identity=self.manifest.identity,
-            profile=replace(plan.profile, tools=(("tool", "sdk/tool", identity),)),
+            profile=replace(plan.profile, tools=(("tool", "sdk/tool.exe", identity),)),
         )
         self.binding = LocalComponentToolBinding(str(tool), authority_identity=identity)
         self.environment = {

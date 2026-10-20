@@ -16,6 +16,12 @@
   current project Flavor-policy and resolution-audit checks. Valid non-host locks
   no longer become stale merely because project verification assumed `host`.
 
+- Fix Windows retained dependency and BOM contract fixtures so their simulated
+  tools retain executable-mode validation before exercising custody assertions.
+  Use real Windows venv launchers for isolated interpreter discovery, exercise
+  POSIX loader-path guards explicitly so native conformance checks exercise their
+  intended contracts.
+
 - Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
   declarations. Preserve read-only planning, exact host-target execution matching
   and refusal of unsupported targets. Native and installed renewal is in progress.
