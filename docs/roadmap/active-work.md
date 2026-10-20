@@ -28683,6 +28683,15 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   cancellation remains unchanged. Expose the runner's existing start-directory
   selector through Make so the unqualified E2E suite can run early alongside a
   fresh complete regression; every selected native case still requires renewal.
+  The early native E2E sweep catches a separate stale expected host Flavor after
+  16 passes: signed derivation correctly returns FreeBSD, while its test expects
+  Linux. Audit the remaining host-dependent fallback expressions and use the
+  existing truthful host-family fixture in source promotion, native Bazel consumer
+  qualification and Python lifecycle projections. Keep cross-platform negative
+  fixtures and correct POSIX shared-library suffix selection intact. All five
+  native dispatch repetitions pass (25 cases, no skips), and the native signal/
+  timeout ledger case passes before the superseded full runner is stopped with
+  its exact owner and checkout verified.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
