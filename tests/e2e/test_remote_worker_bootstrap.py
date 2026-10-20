@@ -114,6 +114,55 @@ def _manifest(
 
 
 class RemoteWorkerBootstrapTests(unittest.TestCase):
+    def test_staged_stdlib_only_bootstrap_creates_a_working_private_runtime(self):
+        from literate_ai import remote_worker_bootstrap
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            staged = root / "bootstrap.py"
+            staged.write_bytes(Path(remote_worker_bootstrap.__file__).read_bytes())
+            environment = root / "runtime"
+            subprocess.run(
+                (
+                    sys.executable,
+                    "-I",
+                    "-S",
+                    "-c",
+                    "import runpy, sys; from pathlib import Path; "
+                    "bootstrap=runpy.run_path(sys.argv[1], "
+                    "run_name='staged_bootstrap'); "
+                    "bootstrap['_create_python_environment'](Path(sys.argv[2]))",
+                    str(staged),
+                    str(environment),
+                ),
+                cwd=root,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            python = environment / (
+                "Scripts/python.exe" if os.name == "nt" else "bin/python"
+            )
+            self.assertFalse(python.is_symlink())
+            probe = subprocess.run(
+                (
+                    str(python),
+                    "-I",
+                    "-c",
+                    "import json, sys, pip; "
+                    "print(json.dumps([sys.prefix, pip.__version__]))",
+                ),
+                cwd=root,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            prefix, pip_version = json.loads(probe.stdout)
+            self.assertEqual(Path(prefix).resolve(), environment)
+            self.assertTrue(pip_version)
+
     def test_worker_bootstrap_verb_returns_verified_launcher(self) -> None:
         args = Namespace(
             worker_command="bootstrap",

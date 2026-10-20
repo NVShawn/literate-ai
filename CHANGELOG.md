@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Retain the shared library required by copied standalone macOS Python executables
+  when creating the private source-install runtime, allowing Python and pip to
+  start while preserving self-update executable custody. Windows keeps its native
+  creation mode. Share this standard-library-only environment owner across source
+  installation, offline worker bootstrap, wheelhouse export and wheel verification.
+
 - Register both retained allocation-inspection resources in the v2 schema index,
   restoring complete catalog validation. The frozen v1 catalog is unchanged.
 
@@ -30,6 +36,9 @@
 - Declare FreeBSD Python SQLite support through the existing Flavor host-bootstrap
   contracts and native `py312-sqlite3` realization. Require package registration
   and an in-memory query through the current interpreter before reporting it ready.
+  Model the native Python version explicitly in controller fixtures so Python
+  3.11 CI can verify the FreeBSD 3.12 contract, including rejection of an older
+  interpreter despite a successful package/module probe.
 
 - Reuse bounded POSIX directory handles within retained input verification,
   preserving current-name and ancestor checks, complete inventories, bytes and

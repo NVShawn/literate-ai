@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from literate_ai.adapters import host_install
 from literate_ai.bootstrap.host_install_requirements import (
@@ -158,7 +159,12 @@ class FreeBSDHostInstallTests(unittest.TestCase):
         self.assertEqual(requirement.manager_package, "py312-sqlite3")
         self.assertEqual(requirement.probe_kind, "python-module")
         self.assertIn("select 1", requirement.probe_arguments[-1])
-        for registered, usable in ((True, True), (True, False), (False, True)):
+        for registered, usable, python_version in (
+            (True, True, "3.12.15"),
+            (True, False, "3.12.15"),
+            (False, True, "3.12.15"),
+            (True, True, "3.11.14"),
+        ):
             calls = []
 
             def runner(
@@ -177,17 +183,28 @@ class FreeBSDHostInstallTests(unittest.TestCase):
                     argv, 0 if usable else 1, "", "missing extension"
                 )
 
-            observed = host_install._observe_native_package(
-                requirement,
-                sbom=self.sbom,
-                query_path="pkg",
-                environment={},
-                runner=runner,
-                locator=lambda *a: self.fail(
-                    "Python module probe must use current interpreter"
+            with (
+                self.subTest(
+                    registered=registered, usable=usable, python_version=python_version
                 ),
-            )
-            self.assertEqual(observed.ready, registered and usable)
+                mock.patch.object(
+                    host_install.platform, "python_version", return_value=python_version
+                ),
+            ):
+                observed = host_install._observe_native_package(
+                    requirement,
+                    sbom=self.sbom,
+                    query_path="pkg",
+                    environment={},
+                    runner=runner,
+                    locator=lambda *a: self.fail(
+                        "Python module probe must use current interpreter"
+                    ),
+                )
+                self.assertEqual(
+                    observed.ready,
+                    registered and usable and python_version == "3.12.15",
+                )
             self.assertEqual(len(calls), 2)
 
     def test_declining_install_does_not_run_pkg_install_or_download(self):
@@ -265,7 +282,14 @@ class FreeBSDHostInstallTests(unittest.TestCase):
                     "",
                 )
 
-            with tempfile.TemporaryDirectory() as temporary:
+            # This fixture models a FreeBSD Python 3.12 host independently of
+            # the interpreter that runs the cross-platform controller suite.
+            with (
+                tempfile.TemporaryDirectory() as temporary,
+                mock.patch.object(
+                    host_install.platform, "python_version", return_value="3.12.15"
+                ),
+            ):
 
                 def execute():
                     return host_install.ensure_host_install_dependencies(
