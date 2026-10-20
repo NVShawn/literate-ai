@@ -5,8 +5,8 @@
 - Fix Windows retained dependency and BOM contract fixtures so their simulated
   tools retain executable-mode validation before exercising custody assertions.
   Use real Windows venv launchers for isolated interpreter discovery, exercise
-  POSIX loader-path guards explicitly, and begin receiver deadlines after catalog
-  setup so native conformance checks exercise their intended contracts.
+  POSIX loader-path guards explicitly so native conformance checks exercise their
+  intended contracts.
 
 - Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
   declarations. Preserve read-only planning, exact host-target execution matching

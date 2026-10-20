@@ -25841,33 +25841,30 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
 - **Conclusion:** Preserve original source and release authority while adding typed bounded retained admission and complete Standard execution; no conversion bypass.
 - **Depends on:** Accepted ADR 0048; package providers retain their own qualification
-- **Windows qualification follow-up:** Merged-main CI run `39442421907`, Windows
-  shard 3, rejects the simulated dependency/BOM fixtures before their intended
-  assertions: Windows reports their extensionless dummy tools as non-executable
-  despite `chmod(0755)`. Give these explicitly simulated tools executable filenames
-  recognized by Windows while retaining genuine manifest discovery, byte hashes,
-  executable-mode validation and all negative custody/observer assertions. Change
-  the contract fixtures and preserve the separate native-inspection group. Shard 2
-  also exposes relocated Windows Python executables without their runtime home,
-  POSIX loader-path assertions masked by the Windows unsupported-loader guard,
-  and receiver admission whose deadline includes unrelated catalog preparation.
-  Use real venv launchers with a configured base runtime, exercise POSIX path
-  validation explicitly while retaining Windows refusal, and prepare the catalog
-  before starting bounded receiver admission. Qualify all affected modules on the
-  host and Windows. Keep production discovery, custody, deadlines and acceptance
-  unchanged; add no skips to conceal these portability defects.
-  Host qualification passes all 37 affected cases across the retained BOM and
-  dependency modules (21), loader environment (5), and toolchain smoke modules
-  (11), including a fresh seven-case interpreter rerun after native Windows
-  exposed PATHEXT filename casing. Compare paths with native case semantics while
-  retaining the exact one-command assertion. Lint, format, driver/runner/document
-  reviews, current lifecycle receipt and project verification pass. The initial
-  native Windows contract proof passes all 16 custody cases with five existing
-  POSIX-only skips; its collected archive digest is
+- **Windows qualification follow-up:** Merged-main CI run `39442421907` exposes
+  simulated dependency/BOM tools whose extensionless filenames lose executable
+  mode on Windows, relocated Python executables without their runtime home, and
+  POSIX loader-path assertions masked by the Windows unsupported-loader guard.
+  Use executable filenames for simulated tools, real venv redirectors for isolated
+  interpreter discovery, and native path comparison for PATHEXT casing. Exercise
+  POSIX path validation explicitly while preserving Windows loader refusal.
+  Retain genuine manifests, byte hashes, custody guards and version/order/pin
+  assertions; qualify the four affected modules without changing production rules
+  or adding skips. All 33 affected host cases pass across completed module runs,
+  including a fresh seven-case interpreter rerun. Static reviews, current receipt
+  and verification pass. Initial native Windows evidence passes all 16 custody
+  cases with five existing POSIX skips, plus three loader cases with two existing
+  POSIX skips. The collected custody archive SHA-256 is
   `de6a76346b9c0b5705de044768f0f0f3f70cea3c7f3f83ddb1f5ca814a7bb14a`.
-  Windows loader-path checks pass three cases with two existing POSIX-only skips.
-  Expanded Windows discovery/receiver qualification and exact-head CI remain in
-  progress; these partial results are not release qualification.
+  Final exact-source native qualification and CI remain open.
+- **Separate Windows receiver blocker:** [Issue #90](https://github.com/jordanhubbard/literate-ai/issues/90)
+  owns the actual PE dependency-observation timeout. A native rerun passes nine
+  toolchain cases before this receiver fails its separate 300-second production
+  observation limit. Preparing the catalog before admission does not fix that
+  bound; withdraw that unproven test change and preserve the actual receiver
+  test. Trace and qualify the native observer independently, retaining cold-start
+  custody, current image/inspector hashes and live-profile invalidation. Do not
+  increase deadlines or claim the fixture repair makes main release-qualified.
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
