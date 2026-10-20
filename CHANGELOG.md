@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Windows dependency observation discards partial inspector facts after a failed capture, so subsequent captures cannot reuse an incomplete DLL closure.
+
 - Let development retained profiles explicitly select build-output command
   directories before captured tools, so original tests can invoke newly built
   products by name. Preserve default identities and refuse undeclared or

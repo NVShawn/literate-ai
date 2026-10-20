@@ -451,7 +451,8 @@ class DependencyFactCacheTests(unittest.TestCase):
         )
         self.assertNotIn(key, observation._INSPECTION_FACTS)
 
-    def test_pe_parallel_observer_refuses_changed_inspector(self):
+    def public_pe_inputs(self):
+        self.root = self.root.resolve()
         inspector, paths = self.pe_graph_inputs()
         # The public observer includes its inspector and API-set image as seeds.
         header = paths["a.dll"].read_bytes()
@@ -473,14 +474,24 @@ class DependencyFactCacheTests(unittest.TestCase):
             (),
             canonical_identity("schema fixture").uri,
         )
+        return inspector, paths, header, schema
+
+    def test_pe_parallel_observer_refuses_changed_inspector(self):
+        inspector, paths, header, schema = self.public_pe_inputs()
         barrier = threading.Barrier(2)
+        closure = observation._pe_closure
 
         def imports(_inspector, path):
             if path.name in {"a.dll", "b.dll"}:
                 barrier.wait(timeout=10)
-                if path.name == "a.dll":
-                    inspector.path.write_bytes(header + b"substitution")
             return ()
+
+        def changed_inspector(*args, **kwargs):
+            result = closure(*args, **kwargs)
+            # Mutate after parallel capture so this targets the closing guard,
+            # rather than a race between writing and reading the inspector seed.
+            inspector.path.write_bytes(header + b"substitution")
+            return result
 
         with (
             patch.object(observation.sys, "platform", "win32"),
@@ -492,22 +503,73 @@ class DependencyFactCacheTests(unittest.TestCase):
                 observation, "_load_windows_api_set_schema", return_value=schema
             ),
             patch.object(observation, "_inspect_pe_imports", imports),
+            patch.object(observation, "_pe_closure", changed_inspector),
             self.assertRaises(observation.DependencyObservationError) as raised,
         ):
             observation.WindowsPeDependencyObserver(
-                environment={"SystemRoot": str(self.root.resolve())}
+                environment={"SystemRoot": str(self.root)}
             ).observe({"artifact_path": str(self.root)}, root_ref="test-root")
-        self.assertIn(
-            raised.exception.code,
-            {
-                # Concurrent seed hashing can refuse the mutation before the
-                # image-specific or final inspector identity guard observes it.
-                "dependencies.file-changed",
-                "dependencies.pe-image-changed",
-                "dependencies.windows-inspector-changed",
-            },
+        self.assertEqual(
+            raised.exception.code, "dependencies.windows-inspector-changed"
         )
         self.assertEqual(inspector.path.read_bytes(), header + b"substitution")
+
+    def test_failed_pe_capture_cannot_poison_reloaded_dependency_facts(self):
+        inspector, paths, header, schema = self.public_pe_inputs()
+        for workers in (1, 2):
+            with (
+                self.subTest(workers=workers),
+                patch.object(observation.sys, "platform", "win32"),
+                patch.object(observation, "_INSPECTION_WORKERS", workers),
+                patch.object(
+                    observation, "_find_windows_pe_inspector", return_value=inspector
+                ),
+                patch.object(
+                    observation, "_load_windows_api_set_schema", return_value=schema
+                ),
+            ):
+                observation._INSPECTION_FACTS.clear()
+                self.cache.unlink(missing_ok=True)
+                observation.use_persistent_dependency_facts(self.cache)
+
+                def observe(selected, imports):
+                    with patch.object(observation, "_inspect_pe_imports", imports):
+                        return observation.WindowsPeDependencyObserver(
+                            environment={"SystemRoot": str(self.root)},
+                            artifact_files=tuple(paths[name] for name in selected),
+                        ).observe(
+                            {"artifact_path": str(self.root)}, root_ref="test-root"
+                        )
+
+                def failed_imports(_inspector, path):
+                    if path.name == "a.dll":
+                        inspector.path.write_bytes(header + b"substitution")
+                    if path.name == "b.dll":
+                        return (("missing.dll", False),)
+                    return ()
+
+                with self.assertRaises(
+                    observation.DependencyObservationError
+                ) as raised:
+                    observe(("a.dll", "b.dll"), failed_imports)
+                self.assertEqual(
+                    raised.exception.code, "dependencies.pe-import-unresolved"
+                )
+                inspector.path.write_bytes(header)
+                # Exercise the next process's view, not just the in-memory memo.
+                self.reload()
+                calls = []
+
+                def restored_imports(_inspector, path, *, calls=calls):
+                    calls.append(path.name)
+                    return (("shared.dll", False),) if path.name == "a.dll" else ()
+
+                recovered = observe(("a.dll",), restored_imports)
+                self.assertIn("a.dll", calls)
+                self.assertIn("shared.dll", {c["name"] for c in recovered.components})
+                observation._INSPECTION_FACTS.clear()
+                cold = observe(("a.dll",), restored_imports)
+                self.assertEqual(recovered, cold)
 
 
 if __name__ == "__main__":

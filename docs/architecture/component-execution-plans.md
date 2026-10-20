@@ -1751,7 +1751,9 @@ closure. Facts are keyed exactly as in the in-process memo: the inspector's
 digest, the image path, and the image's content digest (with its symlink chain on
 macOS, or the boot session for dyld shared-cache images). ELF and PE images are
 keyed at their resolved path. Facts recorded while an inspector changed are
-dropped, and a file written on another platform is ignored. Because cached facts
+dropped. A failed PE capture also drops facts for its bound inspector before
+propagating the failure, including failures during closure resolution or closing
+inspector/API-set checks. A file written on another platform is ignored. Because cached facts
 decide what a closure contains, the path must lie outside the workspace and CAS
 that actions write. A missing or malformed file is ignored and rewritten.
 

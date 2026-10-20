@@ -29389,3 +29389,40 @@ Upstream: [issue #90](https://github.com/jordanhubbard/literate-ai/issues/90).
     candidate evidence remains bound to its original revision.
   - [ ] Complete combined-source native regression, installed-wheel qualification
     and exact required CI before landing.
+
+**Failed-capture cache follow-up:** A controlled public-observer fixture at
+`a5f95173` changes the bound inspector and then encounters an unresolved import.
+Two partial facts remain under the earlier inspector digest. Restoring the
+inspector and selecting the first image reuses one of those facts and omits a
+required shared DLL; clearing the memo yields the complete graph. This diagnostic
+uses a simulated inspector and establishes no native acceptance or containment.
+The issue #90 follow-up records the existing cache-custody contract violation.
+
+**Conclusion:** On any PE closure or closing inspector/API-set check failure,
+discard facts for that bound inspector before propagating the original failure.
+Preserve successful-path fact keys, graph rules and every existing deadline.
+The prior driver `5f6f5acc` and receipt `62ec04fa` remain source-bound baseline
+evidence; this repair requires a fresh driver review, lifecycle and receipt.
+
+- [x] Add a deterministic failed-capture/reloaded-cache recovery regression.
+  It fails against the earlier implementation because `a.dll` is reused without
+  inspection, then passes with the repair for one and two inspection workers.
+- [x] Discard affected inspector facts on closure and closing-check failures.
+  All 11 custody checks pass locally. The inspector closing-guard fixture now
+  mutates after real parallel capture, avoiding transient partial-file races.
+- [ ] Renew the current finalized host receipt, full host regression, native
+  Windows receiver and installed/native evidence, then require exact-head CI.
+
+
+### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
+
+- **GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
+- **Priority:** P1, PR #81 qualification blocker
+- **Owning authority:** native process-group termination fixture.
+- **Direction:** Finish native qualification without confusing interpreter startup with failed signal delivery.
+- **Conclusion:** The FreeBSD full run at `6f933e54` stopped after 1,278 passes and 36 skips because the child shutdown marker was absent. The fixture starts its one-second deadline before child readiness. Wait for an explicit handler-ready marker at the real process-spawn boundary, with bounded setup and cleanup on failure; retain real group termination, timeout status and shutdown assertion. Production supervision is unchanged.
+- **Implementation:**
+  - [x] Establish bounded child readiness before starting supervision's existing timeout.
+  All six remote-fanout checks pass locally; native renewal remains pending.
+- **Evidence:**
+  - [ ] Native FreeBSD focused process-group checks and the renewed full regression pass with no new skips.

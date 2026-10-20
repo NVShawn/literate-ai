@@ -1993,23 +1993,31 @@ class WindowsPeDependencyObserver:
             *self.library_roots,
             *(Path(item) for item in search_paths if item),
         ]
-        images, image_edges, api_set_bindings, unavailable_delay_imports = _pe_closure(
-            inspector,
-            seeds,
-            roots,
-            api_set_schema=api_set_schema,
-        )
-        if _file_digest(inspector.path) != inspector.digest:
+        try:
+            images, image_edges, api_set_bindings, unavailable_delay_imports = (
+                _pe_closure(
+                    inspector,
+                    seeds,
+                    roots,
+                    api_set_schema=api_set_schema,
+                )
+            )
+            if _file_digest(inspector.path) != inspector.digest:
+                raise DependencyObservationError(
+                    "dependencies.windows-inspector-changed",
+                    "the PE dependency inspector changed during observation",
+                )
+            if _file_digest(Path(api_set_schema.path)) != api_set_schema.digest:
+                raise DependencyObservationError(
+                    "dependencies.pe-api-set-changed",
+                    "the Windows API-set schema changed during dependency observation",
+                )
+        except BaseException:
+            # Failed captures may already have published facts before discovering
+            # a changed inspector or an unresolved import. None may outlive the
+            # failed capture under the originally bound inspector identity.
             _forget_inspection_facts(inspector.digest)
-            raise DependencyObservationError(
-                "dependencies.windows-inspector-changed",
-                "the PE dependency inspector changed during observation",
-            )
-        if _file_digest(Path(api_set_schema.path)) != api_set_schema.digest:
-            raise DependencyObservationError(
-                "dependencies.pe-api-set-changed",
-                "the Windows API-set schema changed during dependency observation",
-            )
+            raise
         refs = {image.path: _pe_ref(image) for image in images}
         unavailable_by_importer: dict[str, list[str]] = {}
         for item in unavailable_delay_imports:
