@@ -13,6 +13,10 @@ from types import SimpleNamespace
 from unittest import mock
 
 from literate_ai.adapters.models import CodingCliError, CodingCliSourceGenerator
+from literate_ai.adapters.models.generated_source_validation import (
+    GeneratedSourceValidationError,
+    validate_javascript_generation_handoff,
+)
 from tests.support.fixtures_test_coding_cli_generation import (
     flavor,
     recipe,
@@ -113,6 +117,41 @@ def _passing_application() -> dict[str, str]:
 
 
 class JavaScriptGenerationHandoffTests(unittest.TestCase):
+    def test_valid_bundle_ignores_inert_writer_and_leading_registry_text(self):
+        validate_javascript_generation_handoff(_passing_application())
+        inert = (
+            "const prologue = 'const __litaiModules = {};';\n",
+            'const prologue = "const __litaiModules = {};";\n',
+            "const prologue = `const __litaiModules = {};`;\n",
+            "// __litaiModules = {};\n",
+            "/* __litaiModules = {}; */\n",
+            "const registryPattern = /__litaiModules/;\n",
+        )
+        for content in inert:
+            for writer in ("source/tools/bundle.js", "source/lib/writer.js"):
+                with self.subTest(content=content, writer=writer):
+                    files = _passing_application()
+                    files[writer] = content
+                    head, body = files["source/build/run.js"].split("\n", 1)
+                    files["source/build/run.js"] = head + "\n" + content + body
+                    validate_javascript_generation_handoff(files)
+
+    def test_inert_writer_cannot_hide_missing_real_bundle_modules(self):
+        files = _passing_application()
+        files["source/tools/bundle.js"] += "const prologue = '__litaiModules';\n"
+        files["source/build/run.js"] = _naive_bundle(
+            modules={"./main.js": files["source/main.js"].split("\n", 1)[1]},
+            entry="./main.js",
+            footer="__litaiRequire('./main.js').dispatch(process.argv);\n",
+        )
+        with self.assertRaises(GeneratedSourceValidationError) as raised:
+            validate_javascript_generation_handoff(files)
+        self.assertEqual(
+            raised.exception.code,
+            "coding_cli.generated_javascript_bundle_module_missing",
+        )
+        self.assertIn("source/build/run.js", raised.exception.message)
+
     def test_generation_rejects_extensionless_bundle_before_index_or_cache(
         self,
     ) -> None:
@@ -189,6 +228,9 @@ class JavaScriptBundleExecutionTests(unittest.TestCase):
         if node is None:
             self.skipTest("node is required to execute the bundled self-check fixture")
         files = _passing_application()
+        files["source/build/run.js"] = files["source/build/run.js"].replace(
+            "\n", "\n// __litaiModules = {};\n", 1
+        )
         with tempfile.TemporaryDirectory() as directory:
             artifact = Path(directory) / "run.js"
             artifact.write_text(files["source/build/run.js"], encoding="utf-8")

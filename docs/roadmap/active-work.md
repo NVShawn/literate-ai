@@ -29607,7 +29607,58 @@ evidence; this repair requires a fresh driver review, lifecycle and receipt.
 - **Evidence:**
   - [ ] Native FreeBSD focused process-group checks and the renewed full regression pass with no new skips.
 
+
+**WINDOWS-PE-OBSERVE-001 upgrade follow-up:** The completed `b782cdb5` host
+regression passes 1,814 cases with 42 skips, but a controlled legacy-file fixture
+still loads an incomplete old `pe-imports` fact and omits a required DLL. Failure
+cleanup prevents new poison, not reuse of pre-repair data. Version only the PE
+capture kind, reject obsolete PE entries through the existing decoder, and let
+successful capture rewrite the cache. ELF/Mach-O keys and formats stay unchanged.
+The issue #90 comment records this gap before implementation. Keep the completed
+host and ongoing FreeBSD full results bound to `b782cdb5`; renew the full host
+suite, lifecycle/receipt and exact CI for the revised source. Renew actual Windows
+receiver/custody checks and current FreeBSD custody/installed-wheel checks; retain
+the full FreeBSD baseline explicitly as earlier-source evidence.
+
+- [x] Add an upgrade regression that refuses legacy incomplete PE facts.
+  Before the repair, the public observer reuses the old fact without inspecting
+  `a.dll`; the test fails at its fresh-inspection assertion.
+- [x] Version the PE capture kind without invalidating other platform fact kinds.
+  The existing decoder rejects obsolete PE entries; successful capture rewrites
+  current facts, whose repeated observation reuses the complete closure.
+- [ ] Renew affected qualification and current receipt before landing.
+
+
+### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
+
+- **GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
+- **Priority:** P1, PR #81 lifecycle qualification blocker
+- **Owning authority:** inert JavaScript lexical observation and generated-source handoff validation.
+- **Direction:** Complete lifecycle qualification without rejecting a valid bundle writer as its emitted executable.
+- **Conclusion:** The earlier generated lifecycle rejected `source/tools/bundle.js` as missing a registry module. Its unaccepted candidate was discarded. A controlled existing valid-application fixture independently proves the validator rejects a harmless bundle-writer string, without any change to the actual executable bundle. Recognize registry identifiers and their offsets through the existing inert lexer, ignoring strings/comments/templates/regex text. Preserve actual-bundle missing-module, explicit-extension, shebang and entry-dispatch refusals and independent execution/acceptance.
+- **Implementation:**
+  - [x] Reuse the JavaScript lexical owner for bundle classification and registry location.
+- **Evidence:**
+  - [x] Valid writer/leading-inert-text and broken-real-bundle regressions pass alongside actual Node bundle execution and existing generation refusals.
+  All four JavaScript handoff/bundle checks and three bounded-retry checks pass.
+  The actual Node fixture executes test/smoke modes with a leading inert registry
+  comment. The regression fails against the earlier text-based classifier.
+  - [ ] Renew combined trusted-driver/document review, full regression, lifecycle/receipt, installed/native and exact CI gates.
+
+
+**Combined renewal:** Complete the PE legacy-kind repair and JavaScript lexical
+repair before starting the next frozen qualification. Preserve `b782cdb5`'s
+passing 1,856-case host report and failed generated lifecycle under their actual
+identities. Stop its superseded native full run only after matching runner UID,
+checkout, Git revision and checkpoint; retain its partial report as interrupted,
+not as acceptance. Run fresh complete host and FreeBSD suites for the revised
+source, plus current actual Windows receiver/custody and JavaScript checks, then
+renew generated lifecycle/independent acceptance, receipt, installed wheel and
+exact required CI. No earlier-source result is relabeled as the revised full run.
+
 ### [ ] RETAINED-PR82-INTEGRATE-001 — Reconcile retained public execution with PR #81
+
+**GitHub review:** [#82](https://github.com/jordanhubbard/literate-ai/pull/82)
 
 - **Priority:** P1
 - **Owner:** Retained public build/test and acquisition/input verification
@@ -29618,3 +29669,5 @@ evidence; this repair requires a fresh driver review, lifecycle and receipt.
   - [ ] Resolve metadata conflicts and bind combined authority without dropping source behavior.
 - **Evidence:**
   - [ ] Renew combined local and native/installed qualification, current receipt and exact CI before landing.
+
+**Integration baseline:** `b63d0d51` passes all 1,870 executed cases with 42 existing skips across 1,912 selected. Report SHA-256 `b18fa5f4f789ada05451731dfdf690768cf409f55e45b659a6773e09447c673f`. The next integration includes both PE legacy-kind and JavaScript lexical fixes from #81; those renewed checks remain separate from this completed baseline.

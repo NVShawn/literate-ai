@@ -608,6 +608,8 @@ def _python_distribution_component(
 # and bound by that path and their content digest.
 _INSPECTION_FACTS: dict[tuple[object, ...], object] = {}
 _INSPECTION_FACTS_LIMIT = 65536
+# Legacy PE captures could persist facts after a failed mutable-inspector capture.
+_PE_IMPORT_FACT_KIND = "pe-imports-v2"
 # Concurrent independent native inspections within one closure frontier.
 _INSPECTION_WORKERS = min(8, os.cpu_count() or 1)
 _BOOT_SESSION: list[str | None] = []
@@ -695,7 +697,7 @@ def _decoded_inspection_entry(entry):
     fact = entry["fact"]
     if not isinstance(digest, str) or not isinstance(path, str):
         raise ValueError("invalid dependency fact key")
-    if kind in {"elf-image", "elf-header", "pe-imports"}:
+    if kind in {"elf-image", "elf-header", _PE_IMPORT_FACT_KIND}:
         if identity[0] != "content" or len(identity) != 2:
             raise ValueError("invalid image identity")
         if not isinstance(identity[1], str):
@@ -2988,7 +2990,9 @@ def _pe_closure(
                 "dependencies.pe-image-invalid", f"PE image {path} is unsafe or invalid"
             )
         image_digest = _file_digest(path)
-        key = _content_fact_key("pe-imports", inspector.digest, path, image_digest)
+        key = _content_fact_key(
+            _PE_IMPORT_FACT_KIND, inspector.digest, path, image_digest
+        )
         imports = _INSPECTION_FACTS.get(key)
         if imports is None:
             imports = _inspect_pe_imports(inspector, path)
