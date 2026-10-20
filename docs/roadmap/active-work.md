@@ -28737,6 +28737,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   frozen complete native run. The isolated installed-wheel check retains its exact
   runtime source while this test-only repair proceeds; partial regressions do not
   qualify a complete suite.
+  The focused late-worker sweep then passes nine cases and exposes a second
+  transport fixture that always unwraps `bash -lic`. FreeBSD intentionally sends
+  the literal receiver command to its native shell. Execute that generated command
+  through `/bin/sh -c` in the disposable local transport, verify the isolated Python
+  prefix, and retain request binding, measured-volume, path privacy and no-write
+  assertions. Leave explicit Linux Bash custody cases and the existing native
+  FreeBSD action-transport cases intact. Require the full late-worker sweep to pass
+  before restarting the broad native jobs, so late fixtures fail promptly.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
