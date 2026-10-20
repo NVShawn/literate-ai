@@ -28692,6 +28692,17 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   native dispatch repetitions pass (25 cases, no skips), and the native signal/
   timeout ledger case passes before the superseded full runner is stopped with
   its exact owner and checkout verified.
+  With the exact locked pip fixture supplied through worker alignment, all eight
+  native Python lifecycle cases pass without skips. The fresh full regression
+  passes all four native package and seven custody cases; the early E2E sweep
+  then finds a legacy rollback fixture that assumes GNU Make exit/diagnostic
+  spelling and tries to execute the shell builtin `exit` directly under BSD Make.
+  Use a real Python child with exit code seven and an independent direct native
+  Make failure as the diagnostic/status oracle. Preserve exact restored bytes,
+  typed conversion failure and the absence of partially installed authority. Renew
+  focused host/native cases and the complete frozen native suite before landing.
+  All eight harness-inventory cases pass on the host; lint/format, driver/runner
+  reviews and the current 228-case receipt pass. Native renewal remains pending.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
