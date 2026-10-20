@@ -19,6 +19,12 @@
   owner with fresh challenges, instance/prefix/lifetime currentness and permanent
   revocation. Real child-process fixtures cover protocol refusals; actual native
   allocation and workspace integration remain open.
+- [x] Integrate lower-level workspace command scoping: typed allocation and
+  allocated-parent checks before capture, explicit reviewed argument bindings,
+  sealed post-build exports, eligible command activation/revocation and failed-run
+  retention. Completion and local CLI still refuse selected policy pending receipt
+  integration. The source-level native command case passes; installed
+  qualification is tracked separately.
 - [ ] Bind source launcher view paths and actual root/unprivileged dependency observations.
 - [ ] Integrate command/completion/receipt evidence without changing legacy defaults.
 
@@ -45,4 +51,16 @@
 - [x] Complete view-owner retained regression: 290 passed, 19 skipped, no failures
   across 309 selected checks in 301.541 seconds. This checks the source backend;
   actual provisioning and installed execution remain open.
+- [x] Complete command-workspace retained regression: 297 passed, 20 skipped,
+  no failures across 317 selected checks in 263.107 seconds. This includes unknown
+  paths, allocation mismatch, command exceptions, constructor failure retention and
+  revocation failure after a successful command. It does not qualify installed
+  allocation, original native suites or receipts.
+- [x] Run the real native command-workspace case: one pass, no skips,
+  224.210 seconds. Actual UID/GID 2001 reads the views, writes/removes its fixture
+  and cannot read private inputs; root writes to the view fail. Final audit finds
+  zero nullfs mounts and unchanged account IDs. The inspector is a protocol fixture.
+  Preserve the earlier 11-case run with ten passes and one command error; the native
+  fixture had created its delegated export directory as private mode 0700. The
+  corrected fixture explicitly creates that export directory with mode 0755.
 - [ ] Complete integrated feature regression, installed qualification and review gates.

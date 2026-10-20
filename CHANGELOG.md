@@ -8,12 +8,18 @@
 - Bind optional secondary test views and fresh fixtures into retained profile
   identities. Add a separate private provisioning inspector with fresh challenges
   and permanent revocation on allocation or configuration drift. These are
-  development contracts: selected-policy execution refuses until actual native
-  allocation, view ownership and lifecycle integration are qualified.
+  development contracts; installed allocation and lifecycle integration remain
+  unqualified.
 - Add a development FreeBSD read-only view owner with effective kernel flag and
   vnode identity checks, scoped test activation, source/path currentness and
   private-root restoration before unmounting. Busy mounts and incomplete fixture
   cleanup cannot support acceptance. Installed execution remains unqualified.
+
+- Integrate typed allocation custody and named secondary view/fixture arguments
+  into the retained command workspace. Reserve views before build, seal export
+  bindings after build and grant access only around eligible test commands.
+  Exceptions revoke access; constructor failures retain private backing trees.
+  Completion and the local CLI remain closed until receipt integration is ready.
 
 - Reuse bounded POSIX directory handles within retained input verification,
   preserving current-name and ancestor checks, complete inventories, bytes and

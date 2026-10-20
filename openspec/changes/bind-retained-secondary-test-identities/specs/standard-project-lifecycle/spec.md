@@ -102,3 +102,33 @@ backend SHALL NOT substitute for path/ancestor or allocation authority.
 #### Scenario: Another inode replaces the descriptor number before restoration
 - **WHEN** descriptor identity differs from the retained resource
 - **THEN** cleanup refuses and neither changes nor closes the other inode
+
+### Requirement: Workspace secondary paths require allocated custody
+A workspace with selected secondary policy SHALL require a typed current allocation
+owner before creating a run under its allocated prefix. It SHALL reserve named
+views and fixtures before build and bind export views after all build actions seal
+their exports. Supplying an allocation without selected policy SHALL refuse.
+
+#### Scenario: An operator selects a run parent outside the allocated prefix
+- **WHEN** the requested parent lies outside the current allocation
+- **THEN** the workspace refuses before capturing inputs or creating the run
+
+### Requirement: Workspace secondary arguments name only reviewed resources
+Workspace command substitution SHALL accept only declared `{secondary_view:NAME}`,
+`{secondary_fixture:NAME}` and `{secondary_account}` arguments. Unknown secondary
+bindings SHALL refuse before executing a command.
+
+#### Scenario: An action requests an undeclared writable fixture
+- **WHEN** its command names an undeclared secondary fixture
+- **THEN** execution refuses and closes any reserved views
+
+### Requirement: Workspace secondary grants end with their eligible test commands
+The workspace SHALL grant secondary access only around eligible test commands and
+revoke it on normal and exceptional exit. Until completion and receipt evidence
+bind successful cleanup, selected-policy execution SHALL NOT mint a completed
+run or passing receipt.
+
+#### Scenario: A test command times out after access is granted
+- **WHEN** the bounded command fails or raises after activation
+- **THEN** workspace cleanup revokes delegated traversal and unmounts its views
+- **AND** the failed workspace cannot resume execution or yield a passing receipt

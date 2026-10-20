@@ -130,3 +130,31 @@ identity plus kernel read-only/nosuid flags. All six failed-run mounts were
 recovered with unchanged source bytes and private roots; the failed log remains
 retained. Native filesystem tests use an explicit allocation protocol peer and
 do not qualify the actual provisioner or installed workspace integration.
+
+## Workspace command integration
+
+The execution workspace accepts a typed live allocation only with selected policy,
+checks the actual plan and allocated parent before capture, and reserves views
+before tool/dependency observation. The newly captured input root is created as a
+private run resource; no original source permissions change. Reviewed command
+arguments bind named views, fixtures and the exact account explicitly. Export
+mounts bind after the final build seals exports, before export dependency
+observation. Only eligible test commands activate delegation, including SDK-scope
+entry and bounded execution; normal exit revokes access, while any exception closes
+the views and makes the workspace non-resumable.
+
+This command-level integration deliberately retains a completion refusal until
+receipt retention binds the closed owner's cleanup evidence. The local CLI still
+refuses selected policy before effects until operator-private provisioning
+selection and admission lifetime are integrated. Unit scope doubles are not
+native mount or provisioning evidence. The native workspace test uses actual
+mounts, a compiled command that sets the reviewed fixture UID/GID and sole group, and private input denial; its inspector remains an
+explicit protocol fixture rather than a qualified provisioner.
+
+The corrected native command case passes in 224.210 seconds without skips. Its
+post-test audit finds no nullfs mounts and unchanged test-account IDs. A preceding
+run passed the ten view-owner checks but failed the command because the fixture
+created its delegated export directory as private mode 0700. The fixture now
+explicitly creates that directory as 0755; the framework does not widen source or
+export child permissions. Failed native fixtures now retain their private run and
+command streams. Earlier logs and the mount/account audit remain retained.
