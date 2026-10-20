@@ -113,6 +113,18 @@ class FreeBsdLoaderSystemPaths:
     interpreter: PurePath
 
 
+@dataclass(frozen=True, slots=True)
+class FreeBsdViewSystemPaths:
+    mount: PurePath
+    unmount: PurePath
+
+
+def resolve_freebsd_view_system_paths() -> FreeBsdViewSystemPaths:
+    return FreeBsdViewSystemPaths(
+        PurePosixPath("/sbin/mount"), PurePosixPath("/sbin/umount")
+    )
+
+
 def resolve_freebsd_loader_system_paths() -> FreeBsdLoaderSystemPaths:
     """Native FreeBSD runtime-loader policy, independent of user configuration."""
     return FreeBsdLoaderSystemPaths(

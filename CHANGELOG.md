@@ -10,6 +10,10 @@
   and permanent revocation on allocation or configuration drift. These are
   development contracts: selected-policy execution refuses until actual native
   allocation, view ownership and lifecycle integration are qualified.
+- Add a development FreeBSD read-only view owner with effective kernel flag and
+  vnode identity checks, scoped test activation, source/path currentness and
+  private-root restoration before unmounting. Busy mounts and incomplete fixture
+  cleanup cannot support acceptance. Installed execution remains unqualified.
 
 - Reuse bounded POSIX directory handles within retained input verification,
   preserving current-name and ancestor checks, complete inventories, bytes and

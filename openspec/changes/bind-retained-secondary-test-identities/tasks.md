@@ -8,6 +8,12 @@
 - [x] Add the descriptor ACL backend, mask-safe projection and exact restoration;
   13 focused native checks pass with one unsupported-platform skip.
 - [ ] Bind declared readonly input/export views, internal aliases and fresh fixtures through the workspace owner.
+- [x] Implement the separate FreeBSD view owner: private reservation, bounded
+  no-follow path custody, effective mount flags, eligible test grants, fresh
+  fixtures and private-root restoration before unmounting. Ten source-level
+  native checks pass with no skips, including real busy mounts, writable-view
+  refusal, source/root replacement and exact normal/exception cleanup. Actual
+  provisioning and installed workspace integration remain open.
 - [ ] Integrate actual private provisioning authority and current instance checks; reject configuration-only claims.
 - [x] Add a separate optional private inspection command and a non-deserializable
   owner with fresh challenges, instance/prefix/lifetime currentness and permanent
@@ -36,4 +42,7 @@
   no failures across 299 selected checks in 228.360 seconds. Three existing
   provisioning smoke checks also pass. Actual allocation and view execution are
   still unqualified.
+- [x] Complete view-owner retained regression: 290 passed, 19 skipped, no failures
+  across 309 selected checks in 301.541 seconds. This checks the source backend;
+  actual provisioning and installed execution remain open.
 - [ ] Complete integrated feature regression, installed qualification and review gates.

@@ -102,3 +102,31 @@ The configured inspector is trusted provisioning code and must inspect the
 actual instance, rather than echoing configuration. Real child-process protocol
 fixtures are not proof of a native allocation. Wiring this owner to actual
 provisioning, view lifetime, workspace execution and receipts remains open.
+
+## Native read-only view owner
+
+`FreeBsdRetainedViewOwner` reserves a fresh private namespace under the allocated
+prefix. Original input/output roots must be canonical, disjoint private
+descendants. Bounded no-follow directory handles retain path/ancestor identities;
+declared input aliases must close inside their selected directory. Input views
+mount before launcher preparation, while export views wait for their manifest.
+The namespace requires a POSIX-ACL filesystem; unsupported backends refuse.
+
+Only a reviewed test action with every view bound can activate named-account
+traversal and fresh fixture writes. Account/allocation currentness, actual mount
+flags, source lineage, held ACLs and fixture identities are rechecked. The
+workspace must still verify complete contents/inventories around commands.
+The backend does not sandbox privileged test code or issue lifecycle receipts.
+
+Cleanup restores the held private view-root inode before attempting unmounts.
+It then restores fixture ACLs and closes anchored handles. Busy mounts, nonempty
+fixtures or replaced paths prevent cleanup acceptance; failures remain failures
+on subsequent close calls. Diagnostic directories remain private. Observations
+bind plan, policy and the live allocation observation used for that event.
+
+The first native run exposed that FreeBSD `statvfs().f_fsid` is zero for both the
+backing filesystem and nullfs. The corrected owner uses actual vnode device/inode
+identity plus kernel read-only/nosuid flags. All six failed-run mounts were
+recovered with unchanged source bytes and private roots; the failed log remains
+retained. Native filesystem tests use an explicit allocation protocol peer and
+do not qualify the actual provisioner or installed workspace integration.

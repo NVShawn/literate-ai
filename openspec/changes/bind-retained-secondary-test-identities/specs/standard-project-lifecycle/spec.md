@@ -72,6 +72,22 @@ NOT issue this non-deserializable live owner.
 - **WHEN** secondary access requests live allocation custody
 - **THEN** inspection refuses without invoking the allocation command
 
+### Requirement: Read-only views own effective mounts and delegated lifetime
+The view owner SHALL reserve declared paths under the allocated prefix, preserve
+private backing roots and bind complete manifest alias closure. It SHALL verify
+actual read-only/nosuid mount flags before delegation. Only reviewed test actions
+with all views bound SHALL activate traversal and fresh fixture writes. Account,
+allocation, path or permission drift SHALL revoke access. Cleanup SHALL restore
+the private view root before unmounting; incomplete cleanup SHALL refuse acceptance.
+
+#### Scenario: Mount exits successfully but the resulting view is writable
+- **WHEN** the kernel reports a writable view after successful mount invocation
+- **THEN** the owner refuses before granting secondary traversal and cleans up
+
+#### Scenario: An open descriptor prevents unmounting
+- **WHEN** cleanup encounters a busy view
+- **THEN** the view root is private and cleanup cannot support acceptance
+
 ### Requirement: ACL projection preserves other principals and held inode custody
 Granting a named secondary UID SHALL NOT unmask permissions for another user or
 group. The backend SHALL retain exact previous access/default ACLs and restore
