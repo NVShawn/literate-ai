@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
+  declarations. Preserve read-only planning, exact host-target execution matching
+  and refusal of unsupported targets. Native and installed renewal is in progress.
+
 - Invoke explicitly configured FreeBSD SSH action receivers through the native
   command shell, preserving literal arguments without requiring interactive Bash.
   Native capability/index receiver renewal remains in progress.

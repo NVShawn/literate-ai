@@ -28714,6 +28714,17 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   complete native run; no worker alias or ambient interpreter is hand-repaired.
   The five monorepo and eight harness cases pass on the host without skips;
   lint/format, both closure reviews and the current receipt remain green.
+  The combined native E2E sweep passes all thirteen repaired cases and reaches
+  180 passes before repository child lifecycle planning reveals an actual target
+  contract omission: discovery preserves FreeBSD, but the closed declaration
+  allowlist excludes it. Admit canonical FreeBSD x86-64/aarch64 targets while
+  retaining unknown-target refusal and exact native-host matching before writes.
+  Add read-only foreign-target planning/execution refusal coverage; preserve the
+  existing real dependency, resume, blocked-consumer and cancellation checks.
+  This changes reviewed runtime authority: renew closure and documentation
+  reviews, the finalized host lifecycle receipt, native/installed wheel gates and
+  the complete frozen native regression before landing. Prior partial runs remain
+  evidence for their actual source revisions, not current complete qualification.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
