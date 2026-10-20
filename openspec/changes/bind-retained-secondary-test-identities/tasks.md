@@ -82,5 +82,6 @@
 - [x] Recheck account identity after private content/dependency verification,
   including after cleanup. A late account change refuses admission. The final
   retained regression passes 312 checks with 21 skips across 333 selected in
-  275.180 seconds. Native renewal now exercises local orchestration and is pending.
+  275.180 seconds. Native renewal exercises local orchestration: eleven passes,
+  no skips in 797.989 seconds. It still uses a protocol-peer allocation inspector.
 - [ ] Complete integrated feature regression, installed qualification and review gates.

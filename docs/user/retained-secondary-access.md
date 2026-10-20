@@ -1,9 +1,9 @@
 # Retained tests with a secondary account
 
 Development status: command scoping, cleanup-bound receipt retention and the local
-orchestration bridge are implemented. A source-level FreeBSD fixture exercises
-real secondary-user access, independent acceptance, cleanup, retained admission
-and payload use after run retirement. Installed CLI qualification, a real
+orchestration bridge are implemented. Eleven source-level FreeBSD checks pass
+without skips, including real local orchestration, secondary-user access,
+independent acceptance, cleanup-bound admission and payload use after run retirement. Installed CLI qualification, a real
 provisioning inspector and the complete original-source suite remain open.
 
 ## Select reviewed resources

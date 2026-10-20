@@ -195,4 +195,8 @@ admission. The final retained regression passes 312 checks with 21 skips across
 333 selected in 275.180 seconds. The preceding 760.742-second native pass predates
 this last identity check and exercised the lower execution/admission owners. Its
 renewal now uses actual local orchestration, private inspector resolution,
-allocated sessions and worker-platform evidence; that native result is pending.
+allocated sessions and worker-platform evidence. That renewal and the ten
+view-owner checks pass together without skips in 797.989 seconds. Its final audit
+finds no nullfs mounts and unchanged account IDs. It remains a source-level
+fixture with a protocol-peer inspector; installed CLI, actual provisioning and
+the original source suite remain open.
