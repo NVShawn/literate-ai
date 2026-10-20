@@ -28725,6 +28725,18 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   reviews, the finalized host lifecycle receipt, native/installed wheel gates and
   the complete frozen native regression before landing. Prior partial runs remain
   evidence for their actual source revisions, not current complete qualification.
+  On the renewed runtime source, all four native package cases, all seven custody
+  cases and the combined six repository-lifecycle, eight harness and five monorepo
+  cases pass. The early E2E sweep then reaches worker alignment and finds another
+  local-transport fixture declaring an ambient `python3` alias. Declare the running
+  interpreter's actual command name and expose its directory only within that
+  fixture's PATH; keep the production name-only template contract, real probe,
+  declared-only installation, secret permissions and backup assertions intact.
+  Audit other live alignment templates separately from synthetic probe transcripts.
+  Renew the whole alignment module on the host and native worker before another
+  frozen complete native run. The isolated installed-wheel check retains its exact
+  runtime source while this test-only repair proceeds; partial regressions do not
+  qualify a complete suite.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 

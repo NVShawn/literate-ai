@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -42,6 +43,7 @@ class WorkerAlignmentTests(unittest.TestCase):
             root = Path(raw)
             home = root / "home"
             (home / "bin").mkdir(parents=True)
+            python = Path(sys.executable)
             template = root / "template.json"
             template.write_text(
                 json.dumps(
@@ -50,7 +52,10 @@ class WorkerAlignmentTests(unittest.TestCase):
                         "platforms": {
                             "linux": {
                                 "commands": ["git", "litai-missing-tool"],
-                                "python": {"commands": ["python3"], "minimum": "3.11"},
+                                "python": {
+                                    "commands": [python.name],
+                                    "minimum": "3.11",
+                                },
                             }
                         },
                     }
@@ -107,7 +112,9 @@ class WorkerAlignmentTests(unittest.TestCase):
             )
             environment = {
                 "HOME": str(home),
-                "PATH": f"{home / 'bin'}{os.pathsep}{os.environ['PATH']}",
+                "PATH": os.pathsep.join(
+                    (str(home / "bin"), str(python.parent), os.environ["PATH"])
+                ),
             }
             with (
                 patch.dict(os.environ, environment),
