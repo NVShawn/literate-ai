@@ -500,10 +500,14 @@ class DependencyFactCacheTests(unittest.TestCase):
         self.assertIn(
             raised.exception.code,
             {
+                # Concurrent seed hashing can refuse the mutation before the
+                # image-specific or final inspector identity guard observes it.
+                "dependencies.file-changed",
                 "dependencies.pe-image-changed",
                 "dependencies.windows-inspector-changed",
             },
         )
+        self.assertEqual(inspector.path.read_bytes(), header + b"substitution")
 
 
 if __name__ == "__main__":
