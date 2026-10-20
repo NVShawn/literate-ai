@@ -28753,6 +28753,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   The Git-identity environment audit finds this as the sole literal dictionary
   omitting both inherited variables and PATH. Renew guidance plus the remaining
   late smoke modules before another broad run; production guidance stays unchanged.
+  The late native smoke subset then passes 138 cases before its executable-drift
+  fixture inherits the installed Python binary's read-only mode through `copy2`.
+  Grant owner-write permission only to the disposable copy before creating the
+  tool binding, preserve its execution bits, append actual drift bytes and require
+  the unchanged production binding to reject that mutation. Do not modify the
+  installed interpreter or move permission changes after binding. Audit other
+  copied-tool mutation fixtures, then renew this six-case module and the remaining
+  late-smoke cases before broad native qualification.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
