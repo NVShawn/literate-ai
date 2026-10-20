@@ -29241,6 +29241,15 @@ Windows cases (26 passed, seven existing POSIX skips). The independent FreeBSD
 preflight remains bound to its sealed `08211e5e` checkout; advancing this host
 integration does not modify that checkout. Receiver timeout issue #90 remains a
 separate production blocker and is not fixed by these fixtures.
+**Combined qualification decision:** Integrate reviewed parallel PE observation
+candidate `1fbc7e7f` from issue #90 before finalizing this review. Its unchanged
+native Windows receiver/live-profile tests pass both cases in 571.256 seconds
+under the existing per-observation limit; seven native custody cases pass with
+three existing POSIX-only skips. Preserve this candidate's actual source identity
+and old `b9e3615e` host/native evidence. Review the combined driver/document
+identity and obtain a new real finalized host receipt, then qualify the frozen
+combined host, native and installed paths. Superseded partial runs must not be
+relabeled as combined-source passes.
 The first independent FreeBSD preflight at `08211e5e` stops after four adoption
 passes when the ordinary-rebuild refusal test includes a legitimate diagnostic
 performance span in its unchanged-tree snapshot. Keep the complete original-tree
