@@ -79,11 +79,27 @@ class ProjectGuidanceTests(unittest.TestCase):
         for url, expected in (
             (
                 "https://github.com/example/project.git",
-                ["gh", "pr", "create", "--base", "trunk"],
+                [
+                    "gh",
+                    "pr",
+                    "create",
+                    "--repo",
+                    "github.com/example/project",
+                    "--base",
+                    "trunk",
+                ],
             ),
             (
                 "https://gitlab.com/example/project.git",
-                ["glab", "mr", "create", "--target-branch", "trunk"],
+                [
+                    "glab",
+                    "mr",
+                    "create",
+                    "--repo",
+                    "https://gitlab.com/example/project",
+                    "--target-branch",
+                    "trunk",
+                ],
             ),
         ):
             with self.subTest(url=url), tempfile.TemporaryDirectory() as directory:

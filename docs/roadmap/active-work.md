@@ -29341,12 +29341,16 @@ regression remains bound to that source. Rerun the affected fixture after repair
 - **Priority:** P1
 - **Owner:** Tracker command generation
 - **Direction:** Preserve the chosen fork/origin identity in generated issue and review CLI commands.
-- **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; use explicit repository arguments as the current operator mitigation.
+- **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; derive a credential-free, host-qualified selector from that same selected remote. GitLab keeps nested groups and HTTP(S) API ports, while an SSH transport port does not become an API port. Refuse malformed repository paths without emitting ambient commands. Remote-selection policy is unchanged.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
+  - [x] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
 - **Evidence:**
-  - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+  - [x] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+
+**Qualification:** All 15 tracker, guidance, peer-work and release-contribution cases pass with zero skips, including hostile ambient host/repository defaults and credential-free enterprise/nested-group selectors. Lint/format, supported driver/document review and layout/export checks pass.
+
+- [ ] Renew the framework lifecycle/current receipt and exact required review CI before landing the trusted-driver change.
 
 ### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
 
