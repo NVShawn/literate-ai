@@ -29055,8 +29055,15 @@ All six current-lock/planning checks pass, including original-stage retained
 planning with a distinct authority-bound identity and no execution admission.
 Repository lint, format, layout and public-export checks pass. Ordinary rebuild
 refuses the original stage and directs the operator to retained planning.
-**Next action in progress:** full regression qualification before native
-deployment; complete source-project coverage and native admission remain unfinished.
+**Current integration decision (PR #81):** Integrate the merged FreeBSD foundation
+from PR #68 (`f05f1858`) without discarding either branch's recorded scope or
+evidence. Resolve the changelog, design traceability and roadmap together, then
+review and record the combined lifecycle-driver identity through its supported
+review command. Renew the finalized host receipt and qualify the combined host,
+native and installed-wheel paths before treating this integration as ready.
+Earlier branch and FreeBSD results retain their actual source identities.
+**Next action in progress:** integrate current main and renew combined
+qualification; complete source-project coverage and native admission remain unfinished.
 
 An actual original native source tree now has three validated, current locked
 unit contracts and the explicit original authority projection. Applying its
