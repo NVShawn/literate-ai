@@ -34,6 +34,7 @@
   Original authority is preserved; canonical installed CLI, native and public
   package/release qualification remain open.
 
+- Give the complete native packaging proof fixture enough test dispatch headroom to reach its format checks on slower workers; production execution limits stay unchanged.
 
 - JavaScript generation distinguishes executable bundle registries from inert bundle-writer text, preserving rejection of missing executable modules.
 
