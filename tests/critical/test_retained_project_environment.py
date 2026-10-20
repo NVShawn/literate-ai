@@ -11,8 +11,8 @@ from dataclasses import replace
 from unittest.mock import patch
 
 from literate_ai._filesystem import UnsafeFilesystemPathError
-from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
 from literate_ai.adapters import retained_project_environment as environment
+from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
