@@ -9,7 +9,6 @@ The same-user workspace detects input mutation; it is not an OS sandbox.
 from __future__ import annotations
 
 import hashlib
-import os
 import tempfile
 from collections.abc import Callable
 from contextlib import nullcontext
@@ -37,6 +36,7 @@ from literate_ai.adapters.retained_project_dependencies import (
 )
 from literate_ai.adapters.retained_project_environment import (
     captured_runtime_environment,
+    retained_command_path,
 )
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
@@ -456,10 +456,8 @@ class RetainedProjectExecutionWorkspace:
             **captured_runtime_environment(
                 self.inputs, self.manifest, self.plan.profile
             ),
-            "PATH": os.pathsep.join(
-                sorted(
-                    {str(Path(tool.executable).parent) for tool in self._tools.values()}
-                )
+            "PATH": retained_command_path(
+                self.outputs, self.plan.profile, self._tools.values()
             ),
             "HOME": str(self.home),
             "TMPDIR": str(self.temporary),

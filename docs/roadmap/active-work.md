@@ -25844,6 +25844,10 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
+    - [x] Bind opt-in command-search directories to declared build exports so
+      original tests can invoke newly built products by name without inheriting
+      host PATH. Preserve default profile identities; reject undeclared,
+      redirected or non-directory selections and qualify actual subprocess lookup.
   - [ ] Bind package and release custody to retained origin without conversion advancement
 - **Evidence:**
   - [ ] Public installed CLI mixed source and binary fixture passes complete build, test, docs and deterministic package lifecycle with repeat, invalidation and relocation checks
@@ -25861,6 +25865,20 @@ authorization and then unconditionally raise
 `retained_project.execution_not_qualified` in `cli/retained_project.py`. Issue #22
 was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
 does not close this runtime requirement or transfer retained release authority.
+
+Built-product lookup checkpoint: nine local environment checks pass, including
+an actual subprocess that finds a newly exported executable by name and fails
+without the explicit selection. Four new checks cover identity/producer/path
+refusals and lookup behavior. Caller PATH stays outside the target environment;
+host native inspectors retain their separate discovery context. Native,
+installed/public execution and original-source test qualification remain open.
+The full local regression passes 1,809 tests with 42 skips (1,851 selected) in
+682.902 seconds, including the new lookup checks. Its log SHA-256 is
+`4f02307799e89cd624473fc4ac51f0441803faec4e7639b1f0c67204ddbce909`;
+the report SHA-256 is
+`7e9295bab9ad4c46078567af2cfb49380006df3161d4c31d438c9c9707c44b44`.
+Lint, formatting, layout/export, TCB pins and strict OpenSpec checks also pass.
+This renews the local lookup checkpoint, not native or installed qualification.
 
 **Next action in progress:** connect local retained admission to the existing
 native FreeBSD pkg provider without changing existing ZIP wire identities. Bind a

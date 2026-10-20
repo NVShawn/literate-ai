@@ -126,6 +126,7 @@ class RetainedProjectProfile:
     package_inventory: tuple[str, ...]
     acceptance_policy_identity: ContentIdentity | None = None
     runtime_library_paths: tuple[str, ...] = ()
+    output_command_paths: tuple[str, ...] = ()
 
     SCHEMA: ClassVar[str] = "literate-ai/retained-project-profile@1"
 
@@ -199,6 +200,32 @@ class RetainedProjectProfile:
             raise ValueError(
                 "Build, tests, docs and independent acceptance are required"
             )
+        if (
+            type(self.output_command_paths) is not tuple
+            or len(self.output_command_paths) > 32
+        ):
+            raise ValueError("Retained output command paths require a bounded tuple")
+        aliases = set()
+        build_outputs = tuple(
+            output
+            for action in self.actions
+            if action.stage == "build"
+            for output in action.outputs
+        )
+        for path in self.output_command_paths:
+            canonical_relative_posix_path(
+                path, label="retained output command directory"
+            )
+            if path.casefold() in aliases:
+                raise ValueError("Retained output command directories alias")
+            aliases.add(path.casefold())
+            if not any(
+                path == output or path.startswith(output + "/")
+                for output in build_outputs
+            ):
+                raise ValueError(
+                    "Retained output command directory requires a build producer"
+                )
         canonical_relative_posix_paths(
             (output for action in self.actions for output in action.outputs),
             label="retained sealed output ownership",
@@ -261,6 +288,8 @@ class RetainedProjectProfile:
             value["acceptance_policy_identity"] = self.acceptance_policy_identity.uri
         if self.runtime_library_paths:
             value["runtime_library_paths"] = list(self.runtime_library_paths)
+        if self.output_command_paths:
+            value["output_command_paths"] = list(self.output_command_paths)
         return value
 
     @property
@@ -271,7 +300,11 @@ class RetainedProjectProfile:
     def from_dict(cls, value: object) -> RetainedProjectProfile:
         optional = {
             key
-            for key in ("acceptance_policy_identity", "runtime_library_paths")
+            for key in (
+                "acceptance_policy_identity",
+                "runtime_library_paths",
+                "output_command_paths",
+            )
             if isinstance(value, dict) and key in value
         }
         value = _fields(
@@ -308,6 +341,13 @@ class RetainedProjectProfile:
             raise ValueError(
                 "Explicit runtime library paths require a nonempty JSON array"
             )
+        if "output_command_paths" in value and (
+            not isinstance(value["output_command_paths"], list)
+            or not value["output_command_paths"]
+        ):
+            raise ValueError(
+                "Explicit output command paths require a nonempty JSON array"
+            )
         tools = []
         for tool in value["tools"]:
             tool = _fields(tool, {"name", "path", "identity"})
@@ -339,6 +379,7 @@ class RetainedProjectProfile:
             if "acceptance_policy_identity" in optional
             else None,
             tuple(value.get("runtime_library_paths", ())),
+            tuple(value.get("output_command_paths", ())),
         )
 
 

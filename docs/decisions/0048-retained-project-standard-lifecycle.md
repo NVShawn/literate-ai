@@ -149,6 +149,22 @@ tool source-build provenance, or qualify public retained execution. Compiler
 resource directories, sysroots, startup/link inputs and relocated execution
 remain separate explicit requirements.
 
+## Built-product command lookup
+
+Profiles may separately opt into an ordered `output_command_paths` tuple of at
+most 32 canonical output-relative directory names. Every selection must be at
+or below a declared build output; test/documentation-only products, ambient paths,
+aliases and redirected or non-directory existing ancestors refuse. A directory
+may be absent before its build producer runs. Its eventual bytes remain subject
+to the normal sealed export and dependency checks.
+
+These paths precede captured tool directories in the credential-free command
+search path, allowing original tests to invoke newly built programs by name.
+The selection is bound into profile/plan identity and the stable execution
+environment. Caller PATH is never inherited. Omission preserves previous profile
+wire identities and the existing captured-tools-only command path. This does not
+grant execution, qualify a compiled product or replace independent acceptance.
+
 ## Canonical per-Component input ownership
 
 An optional retained manifest ownership map binds normalized input prefixes to

@@ -61,10 +61,14 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         source.write_text(
             "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n"
             "#include <sys/stat.h>\n"
+            "#include <unistd.h>\n"
             "#include <dlfcn.h>\n"
             "int main(int n, char **v) {\n"
             ' if (getenv("LITAI_FIXTURE_SECRET")) return 99;\n'
             " if (n < 2) return 2;\n"
+            ' if (!strcmp(v[1], "via-path") && n > 2) {\n'
+            "  execvp(v[2], v+2); return 96;\n"
+            " }\n"
             ' if (!strcmp(v[1], "echo")) {\n'
             "  int c; while ((c = getchar()) != EOF) if (putchar(c) == EOF) return 7;\n"
             "  return ferror(stdin) ? 8 : 0;\n"
