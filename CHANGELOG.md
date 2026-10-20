@@ -7,6 +7,11 @@
   Original authority is preserved; canonical installed CLI, native and public
   package/release qualification remain open.
 
+- Let development retained profiles explicitly select build-output command
+  directories before captured tools, so original tests can invoke newly built
+  products by name. Preserve default identities and refuse undeclared or
+  redirected selections; public execution qualification remains pending.
+
 - Add development original-source adoption with a reviewed Git/project-bound
   plan and metadata-only apply. Preserve the existing source hierarchy and
   original release authority; reject legacy conversion transitions. Execution

@@ -191,6 +191,16 @@ default environments. This selects captured runtime libraries for native tools;
 it does not suppress system fallback or establish complete compiler/sysroot
 provenance. Native/installed qualification remains open under RETAINED-LOADER-001.
 
+Development profiles can also select `output_command_paths`: up to 32 ordered
+output-relative directories at or below declared build products. These precede
+captured tool directories so original tests can find the newly built programs.
+Missing future directories are permitted before their producer runs; existing
+redirected or non-directory ancestors refuse. Export custody still guards the
+produced bytes. The profile and environment bind the selection, and caller PATH
+is never inherited. Omission preserves the captured-tools-only default and legacy
+profile identities. This prepares original-suite execution; it grants no public
+execution or acceptance on its own.
+
 Development retained independent acceptance can opt in to a `filesystem` case.
 It binds private input bytes, expected file lengths and SHA-256 values, optional
 permission checks, directory/absence expectations and explicit resource limits.
