@@ -72,6 +72,19 @@ development (2026-09-10):
 
 ## Current work
 
+RETAINED-USER-001 (issue #85) extends Goals 1, 4 and 5 with explicit secondary
+test identities and scoped access to private retained workspaces. Original
+privileged and unprivileged test requirements must both pass on an allocated
+disposable native guest. Account selection alone cannot traverse private run
+directories; reviewed identity/resource grants and permission currentness are
+required without changing existing private defaults or acceptance boundaries.
+
+SBOM-SCALE-001 (issue #84) extends Goal 4 to complete retained inventories without
+quadratic strict-schema uniqueness checks. Structural JSON equality must preserve
+the official schema, reference registry, format checks, full file provenance and
+canonical BOM identities. Portable differential and scale qualification precede
+full regression and native installed renewal.
+
 CATALOG-FETCH-001 (issue #83) bounds acquisition of immutable Git catalog
 snapshots without transferring unrelated repository history or file contents.
 Selected submodule contents and canonical provenance must match the requested commit. Real Git

@@ -301,6 +301,15 @@ and random serial numbers so equal observations produce equal bytes. Validation 
 the official strict CycloneDX 1.7 JSON validator with the framework's deterministic,
 complete-graph, lifecycle, and managed-subgraph checks.
 
+Large retained inventories preserve every file component. Strict schema validation
+uses structural JSON keys for `uniqueItems`, avoiding pairwise comparisons of
+objects while retaining JSON Schema equality (including numeric equivalence,
+boolean distinction, unordered object members and ordered arrays). The adapter
+retains the official schema, offline reference registry, format checker and every
+other keyword. It changes no global validator and falls back to the original
+keyword for values outside ordinary finite JSON. Canonical BOM bytes, identities
+and source/resolved transition checks remain unchanged.
+
 Completeness is also a transition invariant, not two unrelated snapshots. The
 post-build document binds the exact pre-build BOM identity and revalidates the complete
 managed graph. It retains every pre-build `bom-ref`, standard dependency edge, and

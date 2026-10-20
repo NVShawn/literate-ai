@@ -29008,6 +29008,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Bind typed ownership rules to exact canonical Component authoring identities and all retained file/directory inputs
   - [x] Revalidate ownership against the actual canonical catalog through retained planning without changing legacy identities or execution refusal
   - [ ] Integrate selected native actions, variants, per-unit packages and independent acceptance with bounded full-catalog scale
+  - [ ] Bind exact per-unit output/source/build package ownership and typed dependencies to the admitted multi-Component closure; reject ambiguous, overlapping or uncovered package members and preserve complete receipt/BOM custody.
 - **Evidence:**
   - [ ] Canonical catalog fixtures reject unknown/stale owners, uncovered or ambiguous inputs and changed shared ownership; existing retained planning remains compatible
   - [ ] Public installed CLI and native multi-component execution, package custody and complete-tree scale qualification pass before closing issue #74
@@ -29023,6 +29024,16 @@ conversion and project validation; it is not installed/native qualification.
 Native selected actions, shared consumer/variant binding, per-unit package
 products, installed CLI and complete native-tree admission remain open. No
 retained execution or package acceptance is inferred from coverage.
+
+The current retained package owner projects all admitted payload members into
+one archive selected through a packaging-provider lock. That aggregate custody
+is not a separate package for every Component. Per-unit qualification requires
+an explicit current ownership partition, version/target/options binding and
+typed source/build/runtime relationships. Inspect every constructed native pkg
+and its reopened payload, including source/build units linked into larger
+products. Preserve complete evidence and refuse gaps, overlap, stale ownership
+or dependence on retired build paths; do not infer package partitioning from
+the presence of several Component locks in one project receipt.
 
 
 Source-link admission checkpoint for RETAINED-CATALOG-001: the pinned FreeBSD
@@ -29223,3 +29234,51 @@ package or release admission is claimed by lock-health verification.
 - **Evidence:**
   - [x] Real Git fixtures prove old pinned contents and shallow ancestry, SHA-256 repositories, selected submodule data without private Git metadata, omitted unrelated blobs/submodules, rejected traversal, and no destination mutation on failure. Eleven catalog checks pass; an actual pinned upstream-derived source import succeeds with canonical resolved-commit provenance.
   - [x] Existing catalog and full framework regression checks pass: 1,850 passed, 42 skipped and no failures (1,892 selected) in 1,063.469 seconds. Report SHA-256 `d4885099d94eba41785a4b7795af11a10f20869fe0eca69aa6e8730799e1d5d6`; log SHA-256 `7fc7ae0393d46d09ca5561950edcf298438682e9aa6ef55fc9dd8d00de7bb255`. Lint/format, layout/public-export, strict OpenSpec and reviewed TCB checks pass.
+
+### [ ] SBOM-SCALE-001 — Bound strict validation cost for large retained inventories
+
+**GitHub issue:** [#84](https://github.com/jordanhubbard/literate-ai/issues/84).
+
+- **Priority:** P1
+- **Owner:** Dependency CycloneDX adapter
+- **Direction:** Reduce elapsed native build time without dropping full per-file provenance or validation.
+- **Conclusion:** A real 5266-member source BOM took 88.3 seconds in portable profiling, with 84.3 seconds in quadratic uniqueItems checks. Preserve the official strict schema, registry, formats and semantic joins; use a local equivalent structural uniqueness implementation, without global mutation. GitHub issue: https://github.com/jordanhubbard/literate-ai/issues/84
+- **Depends on:** Existing strict CycloneDX and retained BOM owners
+- **Implementation:**
+  - [x] Use bounded structural JSON equality for strict validator uniqueness while preserving all other keywords and canonical BOM bytes.
+- **Evidence:**
+  - [x] Differential equality fixtures, strict schema/refusal regression, deterministic large-inventory scaling and unchanged actual BOM identity.
+  - [x] Complete full framework regression: 1,855 passed, 42 skipped and no failures across 1,897 selected tests in 1,044.628 seconds. Report SHA-256 `95b14ef1ed69a5c656e39d55e77627ca586a34e047f53fd57d7c939e0c1ea97f`; log SHA-256 `90ff8bbc8b73c400188fbf90799094d8bd728907508dac0c95b52cddcfde68e8`.
+  - [ ] Complete native installed renewal.
+
+**Partial evidence:** Seven focused checks pass. Structural equality agrees with
+the original validator across nested JSON, numeric/boolean distinctions, object
+ordering and Unicode; non-JSON fallback, offline SPDX references, unknown-field
+refusal and global-validator preservation also pass. The 6,000-object fixture
+visits exactly 36,000 JSON values, with a duplicate at the end still refused.
+The actual 5,266-member source inventory produces the same 4,661,185-byte BOM,
+identity `sha256:04db30dfa7c9e1e1e368562ba3c31d66770463eca16c20f73421c5330cdf4885`.
+An unprofiled comparison in the same Python 3.14.7 environment takes 20.251011
+seconds with the prior validator and 1.417537 seconds with this adapter.
+Baseline log SHA-256 `e491cb95763ae80209daa61ecffdc06113a9d2d583c3f5ad77d18f084fc4b691`;
+optimized log SHA-256 `964c238285967f933ff752546255c74d1be71d8c7dc84ed7dfdc32ca4c1bb77b`.
+These are source-BOM timings, not whole-build or native qualification claims.
+**Next action in progress:** installed/native renewal after the passing full local regression.
+
+The first full attempt retained 1,427 completed checks and no recorded failure,
+then was deliberately interrupted for host overload: twelve outer test workers
+plus nested builds saturated the twelve-core host. Its logs/checkpoint remain;
+it is not a passing full gate. A fresh complete run now uses four outer workers,
+rather than treating resumed partial coverage as release qualification.
+
+### [ ] RETAINED-USER-001 — Bind secondary test identities to scoped workspace access
+
+- **Priority:** P1
+- **Owner:** Retained execution profile and workspace custody
+- **Direction:** Execute complete original test suites with their privileged and explicitly unprivileged user requirements.
+- **Conclusion:** Native run and output directories are private mode 0700; selecting a secondary account alone cannot execute captured test programs through them. Preserve private defaults and add reviewed worker/profile-bound resource grants, current UID/GID observations and permission custody. GitHub issue: https://github.com/jordanhubbard/literate-ai/issues/85
+- **Depends on:** RETAINED-PROJECT-001 and FREEBSD-001
+- **Implementation:**
+  - [ ] Design and implement explicit secondary test identity and exact traversal/read/execute/fixture-write scope through existing workspace owners; refuse mutable identity and permission drift without broad chmod or silent account creation.
+- **Evidence:**
+  - [ ] Portable identity/scope/currentness refusal fixtures plus real privileged and unprivileged original cases in a disposable native guest; preserve legacy identities and private defaults.

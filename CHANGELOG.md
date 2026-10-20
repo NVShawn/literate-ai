@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Bound strict CycloneDX object uniqueness validation with structural JSON keys,
+  preserving the official schema, reference registry, complete provenance and
+  canonical BOM identities for large retained inventories.
+
 - Expose original-source retained planning and full lifecycle execution on
   `build` and `test` through the existing retained owner. Preserve explicit
   plan/host authorization, locked configuration and distinct receipt/custody;
