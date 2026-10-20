@@ -147,6 +147,28 @@ every original case and owning test action, any exact permitted skip reason, and
 the report path sealed by each test action. Action inventories name the actual
 cases; a suite label or successful command exit does not establish coverage.
 
+The same original-source protocol is available on `build`, `test` and `rebuild`.
+For example, review the exact locked selection with:
+
+```sh
+litai build --project path/to/project \
+  --retained-project manifest.json --retained-project-profile profile.json \
+  --retained-project-plan
+```
+
+Execution uses the same manifest/profile, the returned
+`--authorize-retained-project sha256:REVIEWED_PLAN_ID` and explicit
+`--allow-host-execution`. `test` runs the same complete retained lifecycle,
+including build, original tests, documentation and independent acceptance.
+Both verbs return retained admission/custody evidence, not an ordinary generated
+artifact or a `litai run` export. Package and release qualification remain
+separate. `--build-dir` and `--obj-dir` select the retained custody/object roots.
+Target configuration, Flavors, toolchain and command capacity come from the
+locked profile; generation/model/source-cache and `--jobs` overrides are refused
+instead of being silently ignored. A partial Component selector cannot narrow a
+whole-project retained plan. Planning output says read-only and grants no build
+or publication authority.
+
 The sole `release-policy` input must be the configured `literate.release.json`,
 with the profile binding its exact bytes. Planning reuses the existing release
 policy parser and repository-branch checks. An alternative hashed file cannot

@@ -1418,16 +1418,11 @@ def _rebuild_from_args_body(
 ) -> dict[str, object]:
     """Run one project-authorized full lifecycle and validate its external receipt."""
 
+    from .retained_project import retained_project_requested
+
     retained_project = getattr(args, "retained_project", None)
     retained_project_plan = getattr(args, "retained_project_plan", False)
-    if not retained_project and any(
-        getattr(args, key, None)
-        for key in (
-            "retained_project_profile",
-            "retained_project_plan",
-            "authorize_retained_project",
-        )
-    ):
+    if not retained_project and retained_project_requested(args):
         raise CliFailure(
             "retained_project.manifest_required",
             "Retained-project options require an explicit manifest",
@@ -1448,7 +1443,7 @@ def _rebuild_from_args_body(
     ):
         raise CliFailure(
             "rebuild.host_execution_not_acknowledged",
-            "a full rebuild compiles and executes generated host code; rerun with "
+            "a full lifecycle compiles and executes host code; rerun with "
             "--allow-host-execution after reviewing the selected specification, "
             "Flavors, skills, and lifecycle driver",
         )

@@ -21,6 +21,33 @@ from .execution_workers import (
 )
 
 
+def retained_project_requested(args: Any) -> bool:
+    """Keep explicit, even empty, retained selectors out of generated execution."""
+    return bool(getattr(args, "retained_project_plan", False)) or any(
+        getattr(args, key, None) is not None
+        for key in (
+            "retained_project",
+            "retained_project_profile",
+            "authorize_retained_project",
+        )
+    )
+
+
+def human_retained_project_text(result: dict[str, Any], *, command: str) -> str:
+    """Distinguish a read-only plan from live retained admission and publication."""
+    admitted = result.get("admitted") is True
+    status = "admitted" if admitted else "planned (read-only)"
+    identity = result.get("plan_identity") or result.get("authorization_identity")
+    lines = [f"Literate AI {command}: retained project {status}", f"Plan: {identity}"]
+    if admitted:
+        lines.append(f"Retained receipt: {result.get('retained_receipt_identity')}")
+        lines.append(f"Custody: {result.get('custody_root')}")
+        lines.append("Package and release qualification remain separate.")
+    else:
+        lines.append("Review and authorize this exact plan before execution.")
+    return "\n".join(lines) + "\n"
+
+
 def _unique_object(items: list[tuple[str, object]]) -> dict[str, object]:
     result = {}
     for key, value in items:
@@ -57,6 +84,17 @@ def retained_project_from_args(
             raise ValueError(
                 "Retained authority cannot replace existing source/receipt modes"
             )
+        overrides = [
+            "--" + key.replace("_", "-")
+            for key in ("flavor", "model", "jobs", "source_cache_entry")
+            if getattr(args, key, None) is not None
+            and (key in {"model", "jobs"} or getattr(args, key))
+        ]
+        if overrides:
+            raise ValueError(
+                "Retained-project execution uses its locked profile; unsupported "
+                "overrides: " + ", ".join(overrides)
+            )
         if args.specification != ".":
             raise ValueError("Retained-project admission requires the complete project")
         profile_path = project.root / args.retained_project_profile
@@ -86,7 +124,7 @@ def retained_project_from_args(
         manifest, worker, planning = current_authority()
         plan = planning.plan
         if args.retained_project_plan:
-            return planning.to_dict()
+            return {"authority_mode": "retained-project", **planning.to_dict()}
         plan.require_authorization(args.authorize_retained_project)
         from literate_ai.adapters.component_lock_application import (
             current_project_component_locks,

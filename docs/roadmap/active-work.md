@@ -25869,6 +25869,20 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
       The HP's isolated installed CLI validates `/usr/src`; authority and all
       three locks pass, while the absent retained test receipt fails as expected.
       Native worker execution and full installed qualification remain open.
+    - [x] Expose the same retained-project plan and execution protocol through
+      `litai build` and `litai test`, delegating to the existing retained owner.
+      Preserve exact plan/host authorization, original source authority, all
+      configured gates and distinct retained receipts. Reject orphaned retained
+      options before generated execution and keep read-only plans distinct from
+      successful builds in operator output. Installed native project execution
+      and package consumers remain separate qualification requirements.
+      The combined public-frontend/catalog regression passes 1,850 tests with
+      42 skips (1,892 selected) in 1,063.469 seconds. Report SHA-256:
+      `d4885099d94eba41785a4b7795af11a10f20869fe0eca69aa6e8730799e1d5d6`;
+      log SHA-256:
+      `7fc7ae0393d46d09ca5561950edcf298438682e9aa6ef55fc9dd8d00de7bb255`.
+      Handler fixtures exercise actual local command/custody owners; they do
+      not qualify canonical installed native compilation or package consumers.
     - [x] Connect explicit local retained execution to live workspace admission,
       preserving original authority, exact re-planning and retained CAS custody.
       Reject unsupported remote/SDK execution rather than falling back to local
@@ -29193,3 +29207,19 @@ package or release admission is claimed by lock-health verification.
   - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
 - **Evidence:**
   - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+
+### [x] CATALOG-FETCH-001 — Fetch immutable catalog snapshots without full history
+
+**GitHub issue:** [#83](https://github.com/jordanhubbard/literate-ai/issues/83).
+
+- **Priority:** P1
+- **Owner:** Catalog Git source acquisition
+- **Direction:** Import small catalogs from large upstream-derived repositories efficiently while preserving exact provenance.
+- **Conclusion:** Use bounded shallow and filtered sparse acquisition for explicit immutable commits, then initialize only relevant selected submodules; preserve other selector behavior and fail closed on missing input. Shallow history alone still transfers the entire selected tree and is insufficient for large source repositories.
+- **Depends on:** Git source identity and catalog DAG validation
+- **Implementation:**
+  - [x] Fetch exact commit pins without transferring default-branch history; request blob filtering and sparse selected directories, then initialize only relevant submodules at the requested revision.
+  - [x] Retain canonical provenance, bounded process behavior and destination preservation on acquisition failure.
+- **Evidence:**
+  - [x] Real Git fixtures prove old pinned contents and shallow ancestry, SHA-256 repositories, selected submodule data without private Git metadata, omitted unrelated blobs/submodules, rejected traversal, and no destination mutation on failure. Eleven catalog checks pass; an actual pinned upstream-derived source import succeeds with canonical resolved-commit provenance.
+  - [x] Existing catalog and full framework regression checks pass: 1,850 passed, 42 skipped and no failures (1,892 selected) in 1,063.469 seconds. Report SHA-256 `d4885099d94eba41785a4b7795af11a10f20869fe0eca69aa6e8730799e1d5d6`; log SHA-256 `7fc7ae0393d46d09ca5561950edcf298438682e9aa6ef55fc9dd8d00de7bb255`. Lint/format, layout/public-export, strict OpenSpec and reviewed TCB checks pass.

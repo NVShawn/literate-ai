@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Expose original-source retained planning and full lifecycle execution on
+  `build` and `test` through the existing retained owner. Preserve explicit
+  plan/host authorization, locked configuration and distinct receipt/custody;
+  read-only plans no longer render as failed builds or generated run exports.
+- Acquire exact Git catalog commit snapshots with shallow ancestry and matching
+  selected catalog submodule revisions. Fetch selected catalog directories without
+  unrelated file contents when the Git server supports filtering. Preserve
+  canonical provenance and destination state on failed acquisition.
+
 - Let adopted projects establish their first Standard lifecycle binding through
   the reviewed installed-wheel plan/apply command, preserving the complete policy
   and rejecting missing receipt paths, partial configuration or stale authority.

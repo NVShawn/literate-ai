@@ -72,6 +72,18 @@ development (2026-09-10):
 
 ## Current work
 
+CATALOG-FETCH-001 (issue #83) bounds acquisition of immutable Git catalog
+snapshots without transferring unrelated repository history or file contents.
+Selected submodule contents and canonical provenance must match the requested commit. Real Git
+fixtures and actual large-source imports qualify this path; source import is
+not build or release admission.
+
+RETAINED-PROJECT-001 (issue #22) also makes ordinary `build` and `test` delegate
+explicit original-source selections to the same retained lifecycle as
+`rebuild`, preserving reviewed plan/host authorization and distinct receipts.
+Installed original-source compilation, package consumption and full native
+qualification remain separate open requirements.
+
 RETAINED-CATALOG-001 (issue #74) extends Goals 1, 4 and 6 with complete
 retained-input ownership by exact canonical Components. Coverage must use the
 real authored catalog, preserve target-specific lock and source authority

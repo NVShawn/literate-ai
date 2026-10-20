@@ -20,6 +20,7 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorker,
     ExecutionWorkerKind,
 )
+from literate_ai.contracts.projects import StandardProjectLifecycleDriver
 from literate_ai.contracts.retained_project_sbom import (
     project_retained_project_managed_graph,
 )
@@ -264,7 +265,7 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
             obj_dir=str(self.directories.obj_dir),
         )
 
-    def call_handler(self, args, *, changed_after_first_read=False):
+    def call_handler(self, args, *, changed_after_first_read=False, command=None):
         """Only authority discovery is a fixture; target execution/admission is real.
 
         These handler-wiring checks do not qualify installed canonical-project
@@ -273,7 +274,12 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         f = self.fixture.fixture
         project = SimpleNamespace(
             root=f.source,
-            definition=SimpleNamespace(test_receipt_policy=f.configured_test_policy),
+            definition=SimpleNamespace(
+                test_receipt_policy=f.configured_test_policy,
+                lifecycle_driver=StandardProjectLifecycleDriver(
+                    f.plan.profile.toolchain_identity, f.configured_test_policy.identity
+                ),
+            ),
         )
         planning = RetainedProjectPlanningResult(
             f.plan,
@@ -307,8 +313,119 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
                 "literate_ai.adapters.component_lock_application.current_project_component_locks",
                 return_value=self.fixture.locks,
             ),
+            patch("literate_ai.cli.rebuild._project", return_value=project),
+            patch(
+                "literate_ai.cli.rebuild._resolve_standard_binding",
+                return_value=object(),
+            ),
         ):
+            if command is not None:
+                from literate_ai.cli.build_run import build_from_args, test_from_args
+
+                handler = build_from_args if command == "build" else test_from_args
+                return handler(args), calls
             return retained_project_from_args(project, object(), args), calls
+
+    def public_arguments(self, command, *, plan=False, authorize=True, component=None):
+        from literate_ai.cli.dispatch import _parser
+
+        selected = self.handler_arguments()
+        arguments = [
+            command,
+            "--project",
+            str(self.fixture.fixture.source),
+            "--retained-project",
+            selected.retained_project,
+            "--retained-project-profile",
+            selected.retained_project_profile,
+            "--build-dir",
+            selected.build_dir,
+            "--obj-dir",
+            selected.obj_dir,
+        ]
+        if plan:
+            arguments.append("--retained-project-plan")
+        else:
+            arguments.append("--allow-host-execution")
+            if authorize:
+                arguments.extend(
+                    [
+                        "--authorize-retained-project",
+                        selected.authorize_retained_project,
+                    ]
+                )
+        if component is not None:
+            arguments.append(component)
+        return _parser().parse_args(arguments)
+
+    def test_public_build_and_test_plan_without_commands_or_custody(self):
+        for command in ("build", "test"):
+            with self.subTest(command=command):
+                result, calls = self.call_handler(
+                    self.public_arguments(command, plan=True), command=command
+                )
+                self.assertEqual(result["authority_mode"], "retained-project")
+                self.assertFalse(result["admitted"])
+                self.assertEqual(
+                    result["authorization_identity"],
+                    self.fixture.fixture.plan.identity.uri,
+                )
+                self.assertEqual(len(calls), 1)
+                self.assertFalse(self.directories.obj_dir.exists())
+                self.assertFalse(self.directories.build_dir.exists())
+
+    def test_public_build_and_test_keep_live_retained_origin_and_exact_custody(self):
+        for command in ("build", "test"):
+            with self.subTest(command=command):
+                result, calls = self.call_handler(
+                    self.public_arguments(command), command=command
+                )
+                self.assertTrue(result["admitted"])
+                self.assertGreater(len(calls), 4)
+                self.assertFalse(result["conversion_advanced"])
+                self.assertFalse(result["package_qualified"])
+                self.assertFalse(result["release_authorized"])
+                self.assertNotIn("run", result)
+                self.assertNotIn("artifact", result)
+                self.assertEqual(
+                    result["custody_root"],
+                    str(self.directories.build_dir / "retained-project-cas"),
+                )
+
+    def test_public_build_and_test_do_not_invent_authorization_or_partial_scope(self):
+        for command in ("build", "test"):
+            for component, authorize in ((None, False), ("components/partial", True)):
+                with (
+                    self.subTest(command=command, component=component),
+                    self.assertRaises(CliFailure),
+                ):
+                    self.call_handler(
+                        self.public_arguments(
+                            command, component=component, authorize=authorize
+                        ),
+                        command=command,
+                    )
+                self.assertFalse(self.directories.obj_dir.exists())
+                self.assertFalse(self.directories.build_dir.exists())
+
+    def test_public_retained_profiles_refuse_ignored_generation_or_capacity_overrides(
+        self,
+    ):
+        for command in ("build", "test"):
+            for name, value in (
+                ("flavor", ["+unlocked"]),
+                ("model", "unselected-model"),
+                ("jobs", 2),
+                ("jobs", 0),
+                ("source_cache_entry", ["sha256:" + "a" * 64]),
+            ):
+                with self.subTest(command=command, option=name):
+                    args = self.public_arguments(command, plan=True)
+                    setattr(args, name, value)
+                    with self.assertRaises(CliFailure) as failure:
+                        self.call_handler(args, command=command)
+                    self.assertIn("locked profile", str(failure.exception))
+                    self.assertFalse(self.directories.obj_dir.exists())
 
     def test_handler_planning_is_read_only(self):
         args = self.handler_arguments()
