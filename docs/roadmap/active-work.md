@@ -28654,6 +28654,19 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   Qualify the four-generation proof with a finite 10,800-second module deadline;
   retain every replay, probe, source/isolation assertion and descendant limit.
   Other platforms and the default 3,600-second module deadline remain unchanged.
+  The frozen host regression at `45d5ce24` passes 1,831 selected cases:
+  1,789 passed, 42 skipped, zero failures in 1,222.277 seconds. The actual
+  FreeBSD installed-wheel gate passes the same host-qualified wheel identity
+  `sha256:857a60dd082b002118314cdfb6ea7cd4453b1c6669a10573b6c834188091717c`;
+  retained log SHA-256 is
+  `42d67d0f8b8ca21b0eb72f98c8d1339c41767ec89252805143e06910771bfe9f`.
+  Documenting the module option changes bound documentation authority despite
+  unchanged driver/runner closures. Renew the host lifecycle rather than reuse
+  its predecessor receipt: the fresh finalized candidate passes and its promoted
+  receipt is `sha256:32cc1dfd7ec03dccc588b5468e36f55bf5844837469ae0ebb9665c69008578a7`.
+  Supported require-current and verify pass (two passes, three configured skips).
+  The complete native regression at `eb8de8cb` remains in progress; its pending
+  results and pending exact-head hosted CI are not qualification claims.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
