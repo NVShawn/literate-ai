@@ -29352,6 +29352,8 @@ regression remains bound to that source. Rerun the affected fixture after repair
 
 - [ ] Renew the framework lifecycle/current receipt and exact required review CI before landing the trusted-driver change.
 
+**Live and lifecycle results:** At `e6d72f0a`, all nine command groups explicitly bind the actual fork; real read-only surveys return selected-repository issues/reviews despite hostile GH_REPO/GH_HOST defaults. Fresh force-generation, native builds, generated tests, execution and independent acceptance pass all 13 lifecycle phases. Supported update/check/current/verify promote receipt `sha256:a6dc1391dd1967a558a898196c2cae89ab2f80ec4368ef352419e2ae198d76bb` with driver `34aa39fc5667343a0ac3f158dad4287c43d58e9f665765c3683e9c4b73f0e059`. Installed-wheel and exact review CI remain pending.
+
 ### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
 
 Upstream: [issue #90](https://github.com/jordanhubbard/literate-ai/issues/90).
