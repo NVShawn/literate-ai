@@ -445,31 +445,40 @@ def discover_retained_project_inputs(
         )
     selected = tuple(sorted(roots))
     canonical_relative_posix_paths(selected, label="retained roots")
-    names, directories = _inventory(
-        root,
-        selected,
-        limits.max_entries,
-        allow_internal_symlinks=allow_internal_symlinks,
-    )
-    members = []
-    total = 0
-    for name in names:
-        size, mode, digest = _stream(
-            root, name, min(limits.max_file_bytes, limits.max_total_bytes - total)
+    with _directory_access(root) as access:
+        names, directories = _inventory(
+            root,
+            selected,
+            limits.max_entries,
+            allow_internal_symlinks=allow_internal_symlinks,
+            access=access,
         )
-        total += size
-        role = next(
-            role
-            for prefix, role in roots.items()
-            if name == prefix or name.startswith(prefix + "/")
+        members = []
+        total = 0
+        for name in names:
+            size, mode, digest = _stream(
+                root,
+                name,
+                min(limits.max_file_bytes, limits.max_total_bytes - total),
+                access=access,
+            )
+            total += size
+            role = next(
+                role
+                for prefix, role in roots.items()
+                if name == prefix or name.startswith(prefix + "/")
+            )
+            target = None
+            if mode == 0o120000:
+                target = _link_bytes(root, name, size, access).decode("utf-8")
+            members.append(
+                RetainedProjectMember(name, size, mode, digest, role, target)
+            )
+        manifest = RetainedProjectManifest(
+            selected, tuple(members), limits, directories
         )
-        target = None
-        if mode == 0o120000:
-            target = _link_bytes(root, name, size).decode("utf-8")
-        members.append(RetainedProjectMember(name, size, mode, digest, role, target))
-    manifest = RetainedProjectManifest(selected, tuple(members), limits, directories)
-    verify_retained_project_inputs(root, manifest)
-    return manifest
+        _verify_inputs(root, manifest, access)
+        return manifest
 
 
 def verify_retained_project_inputs(
@@ -544,29 +553,32 @@ def capture_retained_project_inputs(
         tree.mkdir()
         for directory in manifest.directories:
             (tree / directory).mkdir(parents=True, exist_ok=True)
-        for member in manifest.members:
-            blob = blobs / member.sha256
-            with tempfile.TemporaryFile(dir=temporary) as stream:
-                if _stream(root, member.path, member.size, stream) != (
-                    member.size,
-                    member.mode,
-                    member.sha256,
-                ):
-                    raise RetainedProjectInputError(
-                        "Retained input changed while capturing"
-                    )
-                stream.seek(0)
-                if not blob.exists():
-                    with blob.open("xb") as target:
-                        shutil.copyfileobj(stream, target, _CHUNK)
-                    blob.chmod(0o444)
-            target = tree / member.path
-            target.parent.mkdir(parents=True, exist_ok=True)
-            if member.symlink_target is not None:
-                continue  # Materialize links after every ordinary input is copied.
-            with blob.open("rb") as source, target.open("xb") as output:
-                shutil.copyfileobj(source, output, _CHUNK)
-            target.chmod(0o555 if member.mode == 0o755 else 0o444)
+        with _directory_access(root) as access:
+            for member in manifest.members:
+                blob = blobs / member.sha256
+                with tempfile.TemporaryFile(dir=temporary) as stream:
+                    if _stream(
+                        root, member.path, member.size, stream, access=access
+                    ) != (
+                        member.size,
+                        member.mode,
+                        member.sha256,
+                    ):
+                        raise RetainedProjectInputError(
+                            "Retained input changed while capturing"
+                        )
+                    stream.seek(0)
+                    if not blob.exists():
+                        with blob.open("xb") as target:
+                            shutil.copyfileobj(stream, target, _CHUNK)
+                        blob.chmod(0o444)
+                target = tree / member.path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                if member.symlink_target is not None:
+                    continue  # Materialize links after every ordinary input is copied.
+                with blob.open("rb") as source, target.open("xb") as output:
+                    shutil.copyfileobj(source, output, _CHUNK)
+                target.chmod(0o555 if member.mode == 0o755 else 0o444)
         by_path = {member.path: member for member in manifest.members}
         destinations: dict[str, str] = {}
         for member in manifest.members:
@@ -590,11 +602,16 @@ def capture_retained_project_inputs(
                 )
         verify_retained_project_inputs(root, manifest)
         verify_retained_project_inputs(tree, manifest)
-        for digest, size in {m.sha256: m.size for m in manifest.members}.items():
-            if _stream(temporary, "blobs/" + digest, size) != (size, 0o644, digest):
-                raise RetainedProjectInputError(
-                    "Retained CAS blob changed during capture"
-                )
+        with _directory_access(temporary) as access:
+            for digest, size in {m.sha256: m.size for m in manifest.members}.items():
+                if _stream(temporary, "blobs/" + digest, size, access=access) != (
+                    size,
+                    0o644,
+                    digest,
+                ):
+                    raise RetainedProjectInputError(
+                        "Retained CAS blob changed during capture"
+                    )
         # Atomic no-replacement reservation; no rename-over-existing-directory race.
         destination.mkdir(mode=0o700)
         try:

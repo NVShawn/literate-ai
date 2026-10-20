@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Reuse bounded, current-name-checked directory handles during retained input
+  discovery, snapshot copying and private CAS validation. Preserve hashing,
+  complete inventories, alias closure and cleanup; refuse a replaced parent
+  before publishing even when the copied file bytes remain identical.
+
 - Retain the shared library required by copied standalone macOS Python executables
   when creating the private source-install runtime, allowing Python and pip to
   start while preserving self-update executable custody. Windows keeps its native

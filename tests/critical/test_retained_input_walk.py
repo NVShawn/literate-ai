@@ -9,7 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from unittest.mock import patch
 
@@ -71,6 +71,61 @@ class RetainedInputWalkTests(unittest.TestCase):
             with self.assertRaises((ValueError, OSError)):
                 inputs.verify_retained_project_inputs(self.root, self.manifest)
         self.assertTrue(changed)
+
+    def test_discovery_and_capture_reuse_prefixes_without_changing_inputs(self):
+        @contextmanager
+        def legacy(_root):
+            yield None
+
+        original = os.open
+        for operation in ("discover", "capture"):
+            counts = []
+            for baseline in (False, True):
+                destination = self.base / f"{operation}-{baseline}"
+                with patch.object(inputs.os, "open", wraps=original) as observed:
+                    with (
+                        patch.object(inputs, "_directory_access", legacy)
+                        if baseline
+                        else nullcontext()
+                    ):
+                        if operation == "discover":
+                            manifest = inputs.discover_retained_project_inputs(
+                                self.root, {"shared": "source"}, self.limits
+                            )
+                            self.assertEqual(manifest, self.manifest)
+                        else:
+                            tree = inputs.capture_retained_project_inputs(
+                                self.root, self.manifest, destination
+                            )
+                    counts.append(observed.call_count)
+                if operation == "capture":
+                    inputs.verify_retained_project_inputs(tree, self.manifest)
+            with self.subTest(operation=operation):
+                self.assertLess(counts[0] * 4, counts[1])
+
+    def test_capture_refuses_replaced_cached_parent_before_publication(self):
+        original = inputs._stream
+        changed = False
+        destination = self.base / "snapshot"
+
+        def stream(root, name, limit, output=None, *, access=None):
+            nonlocal changed
+            result = original(root, name, limit, output, access=access)
+            if output is not None and name.endswith("file-099.h") and not changed:
+                changed = True
+                saved = self.base / "saved-copy-input"
+                self.directory.rename(saved)
+                shutil.copytree(saved, self.directory)
+            return result
+
+        with patch.object(inputs, "_stream", side_effect=stream):
+            with self.assertRaises((ValueError, OSError)):
+                inputs.capture_retained_project_inputs(
+                    self.root, self.manifest, destination
+                )
+        self.assertTrue(changed)
+        self.assertFalse(destination.exists())
+        self.assertEqual(list(self.base.glob(".retained-*")), [])
 
     def test_cached_parent_replaced_by_link_cannot_hide_behind_its_old_handle(self):
         def replace():
@@ -186,18 +241,17 @@ class RetainedInputWalkTests(unittest.TestCase):
             access.metadata(self.directory / "file-000.h")
 
     def test_low_real_descriptor_limit_preserves_the_legacy_path(self):
-        program = """import resource,sys
+        program = """import importlib.util,resource,sys
 from pathlib import Path
-from literate_ai.adapters.retained_project_inputs import (
-    discover_retained_project_inputs as discover,
-)
 from literate_ai.contracts.retained_project import RetainedProjectLimits
+spec=importlib.util.spec_from_file_location('retained_input_under_test',sys.argv[2])
+inputs=importlib.util.module_from_spec(spec);spec.loader.exec_module(inputs)
 resource.setrlimit(resource.RLIMIT_NOFILE,(24,24))
-manifest=discover(Path(sys.argv[1]),{'shared':'source'},RetainedProjectLimits(500,1024,16384))
+manifest=inputs.discover_retained_project_inputs(Path(sys.argv[1]),{'shared':'source'},RetainedProjectLimits(500,1024,16384))
 assert len(manifest.members)==100
 """
         result = subprocess.run(
-            [sys.executable, "-c", program, str(self.root)],
+            [sys.executable, "-c", program, str(self.root), inputs.__file__],
             capture_output=True,
             text=True,
             timeout=30,
