@@ -25848,6 +25848,10 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
       preserving original authority, exact re-planning and retained CAS custody.
       Reject unsupported remote/SDK execution rather than falling back to local
       execution or ambient tools; preserve failed run evidence.
+    - [ ] Verify selected OS/architecture and authored worker requirements against
+      fresh actual local platform observations, retaining the binding in admitted
+      evidence. Add wrong-platform refusal checks before operator deployment;
+      matching target names and worker metadata alone do not prove this gate.
 
     - [x] Bind opt-in command-search directories to declared build exports so
       original tests can invoke newly built products by name without inheriting
@@ -25875,6 +25879,17 @@ project discovery; canonical installed CLI qualification remains open, as do SDK
 producer binding, remote retained dispatch and public package/release composition.
 Issue #22 remains open. FreeBSD receiver/bootstrap qualification does not close
 these runtime requirements or transfer retained release authority.
+
+Combined local checkpoint at `3d2650134909d55ffc36f9147a652bd62faecce5`:
+the full Python regression passes 1,820 tests with 42 skips (1,862 selected) in
+796.437 seconds. Log SHA-256:
+`9b67dbf8a5dd01593dde83ff4f6007dbb6765f671d5c1787fae7f1b9dcf0d5a4`;
+report SHA-256:
+`99c29ae5e393ff72e0eb0680b87a0ace704514a1e8a800217ed03d9a055fae8b`.
+The combined lookup/runtime tree passes lint, formatting, layout/export, both
+TCB reviews and project authority validation. Actual canonical installed CLI
+execution, local platform-binding audit, native and SDK/package composition
+remain open; the fixture handler tests do not prove those boundaries.
 
 Built-product lookup checkpoint: nine local environment checks pass, including
 an actual subprocess that finds a newly exported executable by name and fails

@@ -203,9 +203,10 @@ fields preserve legacy wire identities. Ownership rules cover links as ordinary
 input nodes, and a changed link target invalidates the manifest even when the old
 and new destination files have identical contents.
 
-This input custody extension does not admit native actions, executable tool
-aliases, per-unit packages or retained lifecycle acceptance. The public execution
-refusal and independent source/SDK/variant/receipt gates remain unchanged.
+This input custody extension does not itself admit native actions, executable
+tool aliases, per-unit packages or retained lifecycle acceptance. Local execution
+still requires the independent source/SDK/variant/receipt gates; complete public
+and native qualification remain open.
 
 
 ## Explicit independent acceptance of retained exports
