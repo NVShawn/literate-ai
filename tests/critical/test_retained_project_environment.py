@@ -31,6 +31,21 @@ class RetainedOutputCommandPathTests(unittest.TestCase):
         self.fixture.setUp()
         self.addCleanup(self.fixture.doCleanups)
         f = self.fixture
+        if os.name == "nt":
+            (f.source / "tools/runner").rename(f.source / "tools/runner.exe")
+            f.manifest = discover_retained_project_inputs(
+                f.source,
+                {
+                    "src": "source",
+                    "tools": "toolchain",
+                    "test-policy.json": "test-policy",
+                },
+                f.manifest.limits,
+            )
+            f.profile = replace(
+                f.profile,
+                tools=(("shell", "tools/runner.exe", f.profile.tools[0][2]),),
+            )
         actions = list(f.actions)
         actions[0] = replace(
             actions[0],
@@ -62,7 +77,9 @@ class RetainedOutputCommandPathTests(unittest.TestCase):
             package_inventory=("bin", "docs.txt"),
             output_command_paths=("bin",),
         )
-        f.plan = replace(f.plan, profile=f.profile)
+        f.plan = replace(
+            f.plan, profile=f.profile, manifest_identity=f.manifest.identity
+        )
         f.current = f.plan
 
     def test_opt_in_round_trip_preserves_default_wire(self):

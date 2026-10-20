@@ -29325,6 +29325,15 @@ HTML lock-state fixture. Three project-verification checks also pass. Lint,
 format, repository layout and public-export checks pass. No native build,
 package or release admission is claimed by lock-health verification.
 
+**Windows fixture renewal:** Combined-source native preflight passes all ten
+original-adoption cases and all six non-host lock cases, then finds the new
+output-command PATH fixture using an extensionless copied executable. Windows
+correctly refuses its non-executable manifest mode. Give this fixture a real
+`.exe` name and rediscover its manifest, preserving the strict production tool
+check, output ordering and unchanged default-wire assertions. The full host
+regression and installed-wheel smoke already pass at `6f933e54`; native full
+regression remains bound to that source. Rerun the affected fixture after repair.
+
 ### [ ] TRACKER-REPO-001 — Bind forge commands to the selected repository
 
 - **GitHub issue:** [#80](https://github.com/jordanhubbard/literate-ai/issues/80)
