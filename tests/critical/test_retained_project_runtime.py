@@ -24,6 +24,11 @@ from literate_ai.contracts.projects import StandardProjectLifecycleDriver
 from literate_ai.contracts.retained_project_sbom import (
     project_retained_project_managed_graph,
 )
+from literate_ai.contracts.retained_secondary_access import (
+    RetainedReadOnlyView,
+    RetainedSecondaryAccessPolicy,
+)
+from literate_ai.contracts.retained_test_identity import RetainedSecondaryTestIdentity
 from literate_ai.storage.cas import FileSystemCAS
 from tests.critical import test_retained_project_completion as completed
 from tests.critical import test_retained_project_execution as commands
@@ -88,6 +93,7 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         )
         self.assertFalse(diagnostics["admission"])
         self.assertEqual(len(diagnostics["command_observations"]), 4)
+
         for row in diagnostics["command_observations"]:
             for reference in row.values():
                 admission.store.verify(BlobRef.from_dict(reference))
@@ -110,6 +116,32 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         )
         self.assertEqual(len(records[0]["observations"]), 2)
         self.assertFalse(records[0]["grants_admission"])
+
+    def test_secondary_policy_without_owner_refuses_before_platform_or_cache(self):
+        f = self.fixture.fixture
+        policy = RetainedSecondaryAccessPolicy(
+            self.worker.identity,
+            RetainedSecondaryTestIdentity("litaitest", 2001, 2001, (2001,)),
+            (next(a.action_id for a in f.plan.profile.actions if a.stage == "test"),),
+            (RetainedReadOnlyView("runtime", "inputs", "sdk"),),
+            ("work",),
+        )
+        f.plan = replace(
+            f.plan, profile=replace(f.plan.profile, secondary_access=policy)
+        )
+        f.current = f.plan
+        with (
+            patch(
+                "literate_ai.adapters.retained_project_runtime.RetainedLocalPlatform"
+            ) as platform,
+            patch(
+                "literate_ai.adapters.retained_project_runtime.bind_cache_directories"
+            ) as cache,
+            self.assertRaisesRegex(ValueError, "provisioning-owner-required"),
+        ):
+            self.run_project()
+        platform.assert_not_called()
+        cache.assert_not_called()
 
     def test_wrong_actual_os_refuses_before_cache_creation(self):
         from tests.critical.test_retained_project_platform import observation

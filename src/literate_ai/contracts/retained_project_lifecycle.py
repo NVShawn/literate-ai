@@ -7,10 +7,13 @@ constitute lifecycle acceptance, regenerative source authority, or release permi
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from .identity import ContentIdentity, canonical_identity
 from .paths import canonical_relative_posix_path, canonical_relative_posix_paths
+
+if TYPE_CHECKING:
+    from .retained_secondary_access import RetainedSecondaryAccessPolicy
 
 
 def _fields(value: object, fields: set[str]) -> dict:
@@ -127,6 +130,7 @@ class RetainedProjectProfile:
     acceptance_policy_identity: ContentIdentity | None = None
     runtime_library_paths: tuple[str, ...] = ()
     output_command_paths: tuple[str, ...] = ()
+    secondary_access: RetainedSecondaryAccessPolicy | None = None
 
     SCHEMA: ClassVar[str] = "literate-ai/retained-project-profile@1"
 
@@ -266,6 +270,23 @@ class RetainedProjectProfile:
                 for output in outputs
             ):
                 raise ValueError("Package inventory has no declared output producer")
+        if self.secondary_access is not None:
+            from .retained_secondary_access import RetainedSecondaryAccessPolicy
+
+            policy = self.secondary_access
+            if not isinstance(policy, RetainedSecondaryAccessPolicy):
+                raise TypeError("retained.secondary.typed-policy-required")
+            if policy.worker_identity != self.worker_identity:
+                raise ValueError("retained.secondary.worker-mismatch")
+            tests = {a.action_id for a in self.actions if a.stage == "test"}
+            if not set(policy.action_ids) <= tests:
+                raise ValueError("retained.secondary.test-actions-required")
+            for view in policy.views:
+                if view.origin == "exports" and not any(
+                    view.prefix == output or view.prefix.startswith(output + "/")
+                    for output in build_outputs
+                ):
+                    raise ValueError("retained.secondary.build-producer-required")
 
     def to_dict(self) -> dict[str, object]:
         value = {
@@ -290,6 +311,8 @@ class RetainedProjectProfile:
             value["runtime_library_paths"] = list(self.runtime_library_paths)
         if self.output_command_paths:
             value["output_command_paths"] = list(self.output_command_paths)
+        if self.secondary_access is not None:
+            value["secondary_access"] = self.secondary_access.to_dict()
         return value
 
     @property
@@ -304,6 +327,7 @@ class RetainedProjectProfile:
                 "acceptance_policy_identity",
                 "runtime_library_paths",
                 "output_command_paths",
+                "secondary_access",
             )
             if isinstance(value, dict) and key in value
         }
@@ -358,6 +382,13 @@ class RetainedProjectProfile:
                     ContentIdentity.parse_uri(tool["identity"]),
                 )
             )
+        secondary_access = None
+        if "secondary_access" in optional:
+            from .retained_secondary_access import RetainedSecondaryAccessPolicy
+
+            secondary_access = RetainedSecondaryAccessPolicy.from_dict(
+                value["secondary_access"]
+            )
         return cls(
             value["target"],
             *(
@@ -380,6 +411,7 @@ class RetainedProjectProfile:
             else None,
             tuple(value.get("runtime_library_paths", ())),
             tuple(value.get("output_command_paths", ())),
+            secondary_access,
         )
 
 

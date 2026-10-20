@@ -164,6 +164,10 @@ class RetainedProjectExecutionWorkspace:
                 "retained.execution.authorization-required"
             )
         plan.require_authorization(authorization)
+        if plan.profile.secondary_access is not None:
+            raise RetainedProjectExecutionError(
+                "retained.secondary.provisioning-owner-required"
+            )
         if (managed_graph is None) != (component_locks is None):
             raise RetainedProjectExecutionError(
                 "retained.bom.graph-and-locks-required-together"

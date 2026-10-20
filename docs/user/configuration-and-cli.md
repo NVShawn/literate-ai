@@ -2432,6 +2432,33 @@ provisioner configuration does not delete allocation records or remote machines.
 This hook is explicit on-demand provisioning; automatic scheduling and provider
 resource deletion remain separate work under `WORKER-001`.
 
+For retained secondary-identity execution, the development contract also accepts
+an optional `inspection_command` argument array. Omit it to preserve existing
+configuration serialization. This is a **separate read-only command**: the
+framework never sends an inspection request to `command`. Its implementation
+must inspect the actual allocated instance and its remaining lifetime; returning
+cached state or echoing configured `disposable` claims is insufficient.
+
+The inspection owner requires owner-only configuration and its containing
+directory on POSIX. It sends one bounded JSON request on stdin with schema
+`urn:literate-ai:schema:v1:retained-allocation-inspection-request`, a fresh `nonce`,
+`worker_identity`, `plan_identity`, `policy_identity` and
+`minimum_remaining_seconds`. The response schema is
+`urn:literate-ai:schema:v1:retained-allocation-inspection-response`, with exactly
+`request_identity` (the canonical request hash), `allocation_identity` (the
+provider's content identity for this actual instance), `workspace_prefix`
+(canonical absolute allocated directory), `remaining_seconds` (positive integer)
+and `disposable: true`. Streams are bounded to 64 KiB and inspection to at most
+30 seconds. Remaining lifetime must cover the requested duration plus inspection
+elapsed time. Instance, prefix, configuration or plan drift permanently revokes
+the owner. Observations grant no lifecycle acceptance.
+
+This inspection owner has protocol tests; actual provisioner qualification,
+read-only view ownership and installed retained execution remain in development
+under `RETAINED-USER-001`. Selecting a policy still refuses execution until the
+enforcing owner is integrated. Configuring an inspector does not complete that
+integration or admit a compiler SDK.
+
 `litai worker list` and `show WORKER_ID` inspect the private catalog selected by
 `--worker-config`, `LITAI_WORKER_CONFIG`, or `litai config paths`.
 `add WORKER_ID --endpoint user@host --os linux --workspace '~/litai'` registers an

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Add development retained secondary-account identity checks and FreeBSD POSIX
+  descriptor ACL custody, preserving masked permissions for other principals and
+  restoring exact original access/default ACLs after failures or drift.
+- Bind optional secondary test views and fresh fixtures into retained profile
+  identities. Add a separate private provisioning inspector with fresh challenges
+  and permanent revocation on allocation or configuration drift. These are
+  development contracts: selected-policy execution refuses until actual native
+  allocation, view ownership and lifecycle integration are qualified.
+
 - Reuse bounded POSIX directory handles within retained input verification,
   preserving current-name and ancestor checks, complete inventories, bytes and
   modes. Fresh verifications share no cached trust; low-descriptor environments

@@ -87,6 +87,10 @@ def execute_local_retained_project(
         )
     if current_plan() != plan:
         raise RetainedProjectExecutionError("retained.execution.plan-changed")
+    if plan.profile.secondary_access is not None:
+        raise RetainedProjectExecutionError(
+            "retained.secondary.provisioning-owner-required"
+        )
     platform = RetainedLocalPlatform(worker, component_locks, plan)
     platform.require_current()
 

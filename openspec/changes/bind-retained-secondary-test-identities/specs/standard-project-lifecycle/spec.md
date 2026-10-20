@@ -31,6 +31,47 @@ every exit. Drift or incomplete cleanup SHALL prevent lifecycle acceptance.
 - **WHEN** the original reviewed inventory requires both identities
 - **THEN** the lifecycle refuses incomplete coverage and issues no passing receipt
 
+### Requirement: Reviewed views are part of the exact profile identity
+An optional secondary access policy SHALL bind the exact worker and account,
+eligible test actions, disjoint named read-only input/export prefixes and fresh
+writable fixture names. Export prefixes SHALL have declared build producers.
+The policy SHALL participate in the profile and plan identities. Absent policy
+SHALL preserve the existing profile serialization.
+
+#### Scenario: A view prefix or secondary group changes
+- **WHEN** reviewed view scope or numeric group membership changes
+- **THEN** the profile identity and required plan authorization change
+
+#### Scenario: A profile selects a fixture name that aliases a read-only view
+- **WHEN** the delegated namespace contains a duplicate view or fixture name
+- **THEN** profile construction refuses before creating or granting resources
+
+### Requirement: View declarations cannot supply execution authority
+Secondary access policy SHALL NOT contain provisioning authority or select an
+observer endpoint. Explicit malformed policy and execution without an enforcing
+provisioning owner SHALL refuse. Manifest binding SHALL require a declared
+directory and reject aliases that leave the selected view at any path step.
+
+#### Scenario: A relative alias escapes and returns to the selected directory
+- **WHEN** normalization ends inside the view after traversal above its root
+- **THEN** manifest binding refuses rather than treating the alias as internal
+
+### Requirement: Provisioning inspection is fresh and separate from allocation
+An optional private operator inspection command SHALL inspect the actual live
+allocation using a fresh challenge bound to worker, plan and policy. Cached
+responses, changed instances or workspace prefixes, insufficient lifetime and
+configuration drift SHALL revoke the owner. The framework SHALL NOT send
+inspection requests to a legacy allocation command. Parsed policy alone SHALL
+NOT issue this non-deserializable live owner.
+
+#### Scenario: A successful response is replayed for another check
+- **WHEN** the inspector returns the previous request identity
+- **THEN** the live owner refuses the response and remains revoked
+
+#### Scenario: An existing provisioner has no inspection command
+- **WHEN** secondary access requests live allocation custody
+- **THEN** inspection refuses without invoking the allocation command
+
 ### Requirement: ACL projection preserves other principals and held inode custody
 Granting a named secondary UID SHALL NOT unmask permissions for another user or
 group. The backend SHALL retain exact previous access/default ACLs and restore

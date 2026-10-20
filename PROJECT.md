@@ -87,8 +87,14 @@ directories; reviewed identity/resource grants and permission currentness are
 required without changing existing private defaults or acceptance boundaries.
 The numeric identity/currentness prerequisite passes full controller regression.
 The descriptor ACL backend has native source-level checks, including safe mask
-widening and exact restoration; reviewed resource scope, provisioning authority
-and installed lifecycle integration remain open.
+widening and exact restoration. The optional reviewed policy binds worker,
+account, test actions, read-only views and fresh fixtures into the exact profile;
+manifest binding rejects aliases escaping a selected view. Provisioning
+inspection now has a separate operator-local command and a live owner that
+refuses replay, instance/prefix changes, expiry and configuration drift. Actual
+native allocation qualification, enforced runtime scope and installed lifecycle
+integration remain open; selected-policy execution refuses until that owner is
+integrated.
 
 SBOM-SCALE-001 (issue #84) extends Goal 4 to complete retained inventories without
 quadratic strict-schema uniqueness checks. Structural JSON equality must preserve
