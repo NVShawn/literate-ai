@@ -25852,6 +25852,11 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
       fresh actual local platform observations, retaining the binding in admitted
       evidence. Add wrong-platform refusal checks before operator deployment;
       matching target names and worker metadata alone do not prove this gate.
+    - [ ] Audit configured Standard evidence requirements against retained-origin
+      admission and public consumers. Preserve the initialized policy in the real
+      installed fixture; do not narrow required evidence to manufacture success.
+      Distinct retained receipts must neither substitute for generated receipts
+      nor silently discard applicable declared gates.
 
     - [x] Bind opt-in command-search directories to declared build exports so
       original tests can invoke newly built products by name without inheriting
