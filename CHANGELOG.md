@@ -19,7 +19,14 @@
   into the retained command workspace. Reserve views before build, seal export
   bindings after build and grant access only around eligible test commands.
   Exceptions revoke access; constructor failures retain private backing trees.
-  Completion and the local CLI remain closed until receipt integration is ready.
+  Bind successful cleanup and allocation observations into retained completed-run
+  identities. The local CLI resolves operator-private inspection authority and
+  places selected runs under its allocated prefix. Installed qualification,
+  actual provisioner validation and complete original-suite coverage remain open.
+
+- Declare FreeBSD Python SQLite support through the existing Flavor host-bootstrap
+  contracts and native `py312-sqlite3` realization. Require package registration
+  and an in-memory query through the current interpreter before reporting it ready.
 
 - Reuse bounded POSIX directory handles within retained input verification,
   preserving current-name and ancestor checks, complete inventories, bytes and

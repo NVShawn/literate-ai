@@ -329,6 +329,59 @@ class RetainedProjectExecutionWorkspace:
     def secondary_access_evidence(self):
         return self._secondary_views.evidence() if self._secondary_views else ()
 
+    def finalize_secondary_access(self, run):
+        """Close after retained custody, bind historical facts, and refuse failure."""
+        if self._secondary_views is None:
+            return None
+        from literate_ai.adapters.retained_project_completion import (
+            RetainedProjectCompletedRun,
+        )
+        from literate_ai.contracts.retained_secondary_evidence import (
+            RetainedSecondaryAccessEvidence,
+        )
+
+        owner = self._secondary_views
+        try:
+            if (
+                self._failed
+                or not isinstance(run, RetainedProjectCompletedRun)
+                or run.source_bom != self.source_bom
+                or run.observations != self.observations
+                or run.output_manifest != self._output_manifest
+                or run.secondary_access_identity is not None
+            ):
+                raise ValueError("retained.secondary.current-completed-run-required")
+            self._require_current()
+            owner.require_current(
+                minimum_remaining_seconds=30 + 20 * len(owner.policy.views)
+            )
+            self.close_secondary_access()
+            owner.allocation.require_plan(self.plan, minimum_remaining_seconds=30)
+            evidence = RetainedSecondaryAccessEvidence.from_dict(
+                {
+                    "schema": RetainedSecondaryAccessEvidence.SCHEMA,
+                    "plan_identity": self.plan.identity.uri,
+                    "policy_identity": owner.policy.identity.uri,
+                    "worker_identity": owner.policy.worker_identity.uri,
+                    "account_identity": owner.policy.account.identity.uri,
+                    "command_observations": [v.identity.uri for v in run.observations],
+                    "allocation_observations": list(owner.allocation.evidence()),
+                    "view_observations": list(owner.evidence()),
+                    "cleanup_ok": True,
+                }
+            )
+            evidence.require_context(
+                self.plan,
+                export_manifest_identity=run.resolved_bom.output_manifest.identity,
+                command_observations=tuple(v.identity for v in run.observations),
+            )
+            self._require_private_current()
+            return evidence
+        except BaseException:
+            self._failed = True
+            self.close_secondary_access()
+            raise
+
     @contextmanager
     def _secondary_command_scope(self, action):
         owner = self._secondary_views
@@ -416,11 +469,6 @@ class RetainedProjectExecutionWorkspace:
             RetainedProjectCompletedRun,
         )
 
-        if self._secondary_views is not None:
-            raise RetainedProjectExecutionError(
-                "retained.secondary.completion-evidence-required"
-            )
-
         if self._failed or len(self.observations) != len(self.plan.profile.actions):
             raise RetainedProjectExecutionError("retained.completion.run-incomplete")
         if (
@@ -462,6 +510,9 @@ class RetainedProjectExecutionWorkspace:
     def _require_current(self) -> None:
         if self._secondary_views is not None:
             self._secondary_views.require_current()
+        self._require_private_current()
+
+    def _require_private_current(self) -> None:
         for directory in (
             self.root,
             self.objects,
@@ -490,6 +541,8 @@ class RetainedProjectExecutionWorkspace:
             self._native_sdks.require_unchanged()
         if self._output_manifest is not None:
             verify_retained_project_inputs(self.outputs, self._output_manifest)
+        if self._secondary_views is not None:
+            self._secondary_views.require_identity_current()
 
     def _capture_outputs(self, action: RetainedProjectAction):
         roots = tuple(

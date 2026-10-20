@@ -415,6 +415,10 @@ class FreeBsdRetainedViewOwner:
     def evidence(self):
         return tuple(dict(event) for event in self._events)
 
+    def require_identity_current(self):
+        """Recheck the reviewed account even after delegation has been closed."""
+        return require_current_secondary_test_identity(self.policy.account)
+
     def __enter__(self):
         self.require_current()
         return self

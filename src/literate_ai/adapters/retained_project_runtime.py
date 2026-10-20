@@ -6,14 +6,18 @@ It preserves the private run on success and failure for operator inspection.
 
 from __future__ import annotations
 
+import tempfile
 from pathlib import Path
 
+from literate_ai._filesystem import require_safe_directory
+from literate_ai.adapters.retained_allocation import RetainedAllocationOwner
 from literate_ai.adapters.retained_project_execution import (
     RetainedProjectExecutionError,
     RetainedProjectExecutionWorkspace,
 )
 from literate_ai.adapters.retained_project_platform import RetainedLocalPlatform
 from literate_ai.adapters.retained_project_receipt import admit_retained_project
+from literate_ai.adapters.user_paths import resolve_user_paths
 from literate_ai.cache_directories import (
     bind_cache_directories,
     ensure_cache_directory,
@@ -42,6 +46,18 @@ def _retain_observations(workspace, store):
         "command_observations": observations,
         "admission": False,
         "release_authorized": False,
+        **(
+            {
+                "secondary_access": {
+                    "view_observations": list(workspace.secondary_access_evidence()),
+                    "allocation_observations": list(
+                        workspace._secondary_views.allocation.evidence()
+                    ),
+                }
+            }
+            if workspace.plan.profile.secondary_access is not None
+            else {}
+        ),
     }
     # A diagnostic index is deliberately separate from the retained receipt.
     # Exclusive publication never overwrites an earlier record in a run.
@@ -61,6 +77,7 @@ def execute_local_retained_project(
     cache_directories,
     authorization,
     allow_host_execution,
+    operator_environment=None,
 ):
     """Run one reviewed local plan and return its live retained admission.
 
@@ -87,10 +104,29 @@ def execute_local_retained_project(
         )
     if current_plan() != plan:
         raise RetainedProjectExecutionError("retained.execution.plan-changed")
+    allocation = None
     if plan.profile.secondary_access is not None:
-        raise RetainedProjectExecutionError(
-            "retained.secondary.provisioning-owner-required"
+        if operator_environment is None:
+            raise RetainedProjectExecutionError(
+                "retained.secondary.provisioning-owner-required"
+            )
+        operator_environment = dict(operator_environment)
+        private = resolve_user_paths(environment=operator_environment)
+        allocation = RetainedAllocationOwner(
+            Path(private.worker_provisioner),
+            plan=plan,
+            environment=operator_environment,
+            minimum_remaining_seconds=60,
         )
+        prefix = allocation.workspace_prefix
+        if prefix.resolve(strict=True) != prefix or any(
+            prefix == source / name or prefix.is_relative_to(source / name)
+            for name in manifest.roots
+        ):
+            raise RetainedProjectExecutionError(
+                "retained.secondary.allocated-parent-overlaps-or-redirects"
+            )
+        require_safe_directory(prefix)
     platform = RetainedLocalPlatform(worker, component_locks, plan)
     platform.require_current()
 
@@ -111,15 +147,23 @@ def execute_local_retained_project(
             raise RetainedProjectExecutionError(
                 "retained.execution.cache-overlaps-inputs"
             )
-    runs = (
-        ensure_cache_directory(
-            directories.obj_dir,
-            kind="object",
-            project_root=source,
-            required_subdirectories=(Path("retained-project-runs"),),
+    if allocation is None:
+        runs = (
+            ensure_cache_directory(
+                directories.obj_dir,
+                kind="object",
+                project_root=source,
+                required_subdirectories=(Path("retained-project-runs"),),
+            )
+            / "retained-project-runs"
         )
-        / "retained-project-runs"
-    )
+    else:
+        allocation.require_plan(plan, minimum_remaining_seconds=60)
+        runs = Path(
+            tempfile.mkdtemp(
+                prefix="retained-session-", dir=allocation.workspace_prefix
+            )
+        )
     custody = (
         ensure_cache_directory(
             directories.build_dir,
@@ -141,6 +185,7 @@ def execute_local_retained_project(
         test_receipt_policy=test_receipt_policy,
         managed_graph=planning.managed_sbom_graph,
         component_locks=component_locks,
+        allocation_owner=allocation,
     )
     try:
         for _ in plan.profile.actions:
@@ -155,4 +200,7 @@ def execute_local_retained_project(
             f"{exc}; retained run: {workspace.root}", workspace.observations
         ) from exc
     finally:
-        _retain_observations(workspace, store)
+        try:
+            workspace.close_secondary_access()
+        finally:
+            _retain_observations(workspace, store)

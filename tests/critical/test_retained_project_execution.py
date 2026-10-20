@@ -362,7 +362,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         allocation.require_plan.assert_called_with(
             self.plan, minimum_remaining_seconds=60
         )
-        with self.assertRaisesRegex(ValueError, "completion-evidence-required"):
+        with self.assertRaisesRegex(ValueError, "run-incomplete"):
             workspace.completed_run()
 
     @unittest.skipIf(os.name == "nt", "native fixture executable requires POSIX")

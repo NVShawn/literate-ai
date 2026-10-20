@@ -151,9 +151,52 @@ class FreeBSDHostInstallTests(unittest.TestCase):
                 commands, [(pkg, "query", "%n-%v", "gmake"), (gmake, "--version")]
             )
 
+    def test_split_sqlite_requires_native_package_and_working_current_interpreter(self):
+        requirement = next(
+            p for p in self.sbom.packages if p.capability == "python-sqlite3"
+        )
+        self.assertEqual(requirement.manager_package, "py312-sqlite3")
+        self.assertEqual(requirement.probe_kind, "python-module")
+        self.assertIn("select 1", requirement.probe_arguments[-1])
+        for registered, usable in ((True, True), (True, False), (False, True)):
+            calls = []
+
+            def runner(
+                argv, *, calls=calls, registered=registered, usable=usable, **kwargs
+            ):
+                calls.append(argv)
+                if argv[0] == "pkg":
+                    return subprocess.CompletedProcess(
+                        argv,
+                        0 if registered else 1,
+                        "py312-sqlite3-3.12.15" if registered else "",
+                        "",
+                    )
+                self.assertEqual(argv, (sys.executable, *requirement.probe_arguments))
+                return subprocess.CompletedProcess(
+                    argv, 0 if usable else 1, "", "missing extension"
+                )
+
+            observed = host_install._observe_native_package(
+                requirement,
+                sbom=self.sbom,
+                query_path="pkg",
+                environment={},
+                runner=runner,
+                locator=lambda *a: self.fail(
+                    "Python module probe must use current interpreter"
+                ),
+            )
+            self.assertEqual(observed.ready, registered and usable)
+            self.assertEqual(len(calls), 2)
+
     def test_declining_install_does_not_run_pkg_install_or_download(self):
         def runner(argv, **kwargs):
-            self.assertEqual(argv, (sys.executable, "-c", "import ensurepip,venv"))
+            self.assertEqual(argv[0], sys.executable)
+            self.assertTrue(
+                argv[1:] == ("-c", "import ensurepip,venv")
+                or argv[1:] == ("-m", "sqlite3", ":memory:", "select 1")
+            )
             return subprocess.CompletedProcess(argv, 0, "", "")
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -259,6 +302,7 @@ class FreeBSDHostInstallTests(unittest.TestCase):
                         "install",
                         "-y",
                         "python312",
+                        "py312-sqlite3",
                         "git",
                         "git-lfs",
                         "codex",

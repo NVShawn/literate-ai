@@ -143,13 +143,23 @@ observation. Only eligible test commands activate delegation, including SDK-scop
 entry and bounded execution; normal exit revokes access, while any exception closes
 the views and makes the workspace non-resumable.
 
-This command-level integration deliberately retains a completion refusal until
-receipt retention binds the closed owner's cleanup evidence. The local CLI still
-refuses selected policy before effects until operator-private provisioning
-selection and admission lifetime are integrated. Unit scope doubles are not
-native mount or provisioning evidence. The native workspace test uses actual
-mounts, a compiled command that sets the reviewed fixture UID/GID and sole group, and private input denial; its inspector remains an
-explicit protocol fixture rather than a qualified provisioner.
+Observation-only completion can now precede cleanup. Admission retains bytes and
+observations while views are current, closes the views on every exit, and binds a
+canonical cleanup record into the completed-run identity before issuing a receipt.
+The record validates exact plan/worker/account, command observations, manifest
+mounts, activation/revocation order, fresh allocation history and final cleanup.
+Private source, captured inputs and exports are checked after cleanup. Parsing
+these historical facts never creates an admission capability.
+
+The local CLI supplies operator context separately from command environments. Local
+orchestration resolves the private provisioning inspector before platform/cache
+creation, checks the allocated prefix against retained input roots, and creates
+private sessions inside that prefix. Failed runs retain command and allocation
+observations. Absent policy preserves the preceding profile/completion/receipt
+serialization. Unit scope doubles are not native mount or provisioning evidence.
+The native workspace test uses actual mounts and a compiled command that sets the
+reviewed fixture UID/GID and sole group, including private-input denial. Its
+inspector remains an explicit protocol fixture rather than a qualified provisioner.
 
 The corrected native command case passes in 224.210 seconds without skips. Its
 post-test audit finds no nullfs mounts and unchanged test-account IDs. A preceding
@@ -158,3 +168,31 @@ created its delegated export directory as private mode 0700. The fixture now
 explicitly creates that directory as 0755; the framework does not widen source or
 export child permissions. Failed native fixtures now retain their private run and
 command streams. Earlier logs and the mount/account audit remain retained.
+
+## Native receipt and orchestration evidence
+
+The native source-level receipt fixture passes without skips in 760.742 seconds.
+It executes privileged and secondary operations, independent acceptance, closes
+actual views, admits retained custody, retires the run and executes materialized
+payload bytes. Final audit finds no nullfs mounts and unchanged account IDs. This
+fixture exercises the execution/admission owners; it does not run the installed
+CLI or the original source suite and uses a protocol-peer inspector. The local
+orchestration bridge separately passes 21 controller checks. The combined retained
+regression passes 311 checks with 21 skips across 332 selected in 271.326 seconds.
+
+The first native receipt attempt failed during import because the guest's Python
+lacked `_sqlite3`; no fixture commands ran. The existing Flavor host-bootstrap
+module-probe mechanism now declares FreeBSD Python SQLite and maps it to native
+`py312-sqlite3`. The declared package installer repaired only that capability and
+its dependencies; package registration and an in-memory query both pass. Twelve
+host-install checks pass. The earlier import failure and catalog validation
+failures remain retained. Actual allocation inspection, installed qualification,
+SDK provenance and original-suite execution remain open.
+
+Finalization also rechecks the exact account after private content/dependency
+verification, including after cleanup. A late identity change cannot produce
+admission. The final retained regression passes 312 checks with 21 skips across
+333 selected in 275.180 seconds. The preceding 760.742-second native pass predates
+this last identity check and exercised the lower execution/admission owners. Its
+renewal now uses actual local orchestration, private inspector resolution,
+allocated sessions and worker-platform evidence; that native result is pending.

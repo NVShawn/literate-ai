@@ -163,6 +163,10 @@ including build, original tests, documentation and independent acceptance.
 Both verbs return retained admission/custody evidence, not an ordinary generated
 artifact or a `litai run` export. Package and release qualification remain
 separate. `--build-dir` and `--obj-dir` select the retained custody/object roots.
+Selected [secondary-account tests](retained-secondary-access.md) additionally
+require an operator-private live allocation inspector. Their private execution
+sessions live under the inspected allocation prefix, and admission requires
+successful delegated-access cleanup retained with the run.
 Target configuration, Flavors, toolchain and command capacity come from the
 locked profile; generation/model/source-cache and `--jobs` overrides are refused
 instead of being silently ignored. A partial Component selector cannot narrow a

@@ -80,3 +80,16 @@ identity conflicts SHALL still refuse.
 - **WHEN** different programs produce distinct potential filter observations
 - **THEN** both contexts remain represented alongside the shared exact file
 - **AND** relocation preserves every image, program and target relationship
+
+### Requirement: Split Python SQLite runtime
+
+FreeBSD host installation SHALL compose a Python SQLite capability from the OS
+Flavor and map it to the native `py312-sqlite3` package. Package registration and
+a successful in-memory SQLite query through the current interpreter SHALL both
+be required. An installed Python command alone SHALL NOT prove this capability.
+
+#### Scenario: Python runs without its SQLite extension
+
+- **WHEN** Python is available but importing or using `sqlite3` fails
+- **THEN** host bootstrap reports the SQLite capability missing
+- **AND** an authorized repair installs the declared native package and re-probes

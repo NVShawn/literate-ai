@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -160,6 +161,7 @@ def retained_project_from_args(
                     cache_directories=directories,
                     authorization=args.authorize_retained_project,
                     allow_host_execution=args.allow_host_execution,
+                    operator_environment=dict(os.environ),
                 ),
             )
         except (

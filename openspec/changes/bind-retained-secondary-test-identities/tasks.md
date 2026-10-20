@@ -22,11 +22,14 @@
 - [x] Integrate lower-level workspace command scoping: typed allocation and
   allocated-parent checks before capture, explicit reviewed argument bindings,
   sealed post-build exports, eligible command activation/revocation and failed-run
-  retention. Completion and local CLI still refuse selected policy pending receipt
-  integration. The source-level native command case passes; installed
+  retention. Completion/receipt integration and operator-private orchestration
+  are now implemented. The source-level native command case passes; installed
   qualification is tracked separately.
 - [ ] Bind source launcher view paths and actual root/unprivileged dependency observations.
-- [ ] Integrate command/completion/receipt evidence without changing legacy defaults.
+- [x] Integrate cleanup-bound completion/receipt evidence and operator-private
+  local orchestration without changing absent-policy defaults. Installed
+  qualification, actual provisioner inspection and original-suite coverage remain
+  separate open gates.
 
 ## Verification
 
@@ -63,4 +66,21 @@
   Preserve the earlier 11-case run with ten passes and one command error; the native
   fixture had created its delegated export directory as private mode 0700. The
   corrected fixture explicitly creates that export directory with mode 0755.
+- [x] Pass 15 receipt checks, six evidence-contract checks and 21 local
+  orchestration checks. Cover failed retention/cleanup, changed plans, corrupt
+  evidence, exact event history, private inspector selection and input overlap.
+- [x] Pass combined retained regression: 311 passed, 21 skipped, no failures
+  across 332 selected in 271.326 seconds. This is not the complete framework suite.
+- [x] Pass the real native receipt fixture without skips in 760.742 seconds:
+  secondary operations, independent acceptance, cleanup, retained admission and
+  materialized payload after run retirement. Audit confirms zero nullfs mounts
+  and unchanged account IDs. Inspector is a protocol fixture; installed CLI and
+  original source-suite qualification remain open.
+- [x] Declare and repair the missing FreeBSD SQLite capability through existing
+  Flavor host-bootstrap/package owners; twelve host-install checks pass. Retain
+  the original native import failure and failed catalog validations.
+- [x] Recheck account identity after private content/dependency verification,
+  including after cleanup. A late account change refuses admission. The final
+  retained regression passes 312 checks with 21 skips across 333 selected in
+  275.180 seconds. Native renewal now exercises local orchestration and is pending.
 - [ ] Complete integrated feature regression, installed qualification and review gates.

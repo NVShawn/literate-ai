@@ -3,14 +3,16 @@
 import json
 import os
 import shutil
+import sys
 import unittest
 from argparse import Namespace
 from dataclasses import replace
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from literate_ai.adapters.retained_project_planning import RetainedProjectPlanningResult
 from literate_ai.adapters.retained_project_runtime import execute_local_retained_project
+from literate_ai.adapters.worker_provisioning import configure
 from literate_ai.cache_directories import CacheDirectories
 from literate_ai.cli.errors import CliFailure
 from literate_ai.cli.retained_project import retained_project_from_args
@@ -29,6 +31,7 @@ from literate_ai.contracts.retained_secondary_access import (
     RetainedSecondaryAccessPolicy,
 )
 from literate_ai.contracts.retained_test_identity import RetainedSecondaryTestIdentity
+from literate_ai.contracts.worker_provisioning import WorkerProvisioner
 from literate_ai.storage.cas import FileSystemCAS
 from tests.critical import test_retained_project_completion as completed
 from tests.critical import test_retained_project_execution as commands
@@ -142,6 +145,129 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
             self.run_project()
         platform.assert_not_called()
         cache.assert_not_called()
+
+    def secondary_operator_context(self, *, overlap=False, enabled=True):
+        """A real private inspector protocol fixture, not native allocation proof."""
+        from literate_ai.adapters.retained_allocation import RESPONSE_SCHEMA
+        from literate_ai.contracts import canonical_identity
+
+        f = self.fixture.fixture
+        policy = RetainedSecondaryAccessPolicy(
+            self.worker.identity,
+            RetainedSecondaryTestIdentity("litaitest", 2001, 2001, (2001,)),
+            ("tests",),
+            (RetainedReadOnlyView("runtime", "inputs", "tools"),),
+            ("work",),
+        )
+        f.plan = replace(
+            f.plan, profile=replace(f.plan.profile, secondary_access=policy)
+        )
+        f.current = f.plan
+        private = f.base / "operator"
+        private.mkdir(mode=0o700)
+        prefix = f.source / "tools" if overlap else f.base / "allocated"
+        if not overlap:
+            prefix.mkdir(mode=0o700)
+        inspector = private / "inspect.py"
+        instance = canonical_identity("runtime inspector protocol fixture").uri
+        inspector.write_text(
+            "import json,sys,hashlib\nr=json.load(sys.stdin)\n"
+            "d='sha256:'+hashlib.sha256(json.dumps(r,sort_keys=True,separators=(',',':'),ensure_ascii=False).encode()).hexdigest()\n"
+            f"print(json.dumps({{'schema':{RESPONSE_SCHEMA!r},'request_identity':d,"
+            f"'allocation_identity':{instance!r},'workspace_prefix':{str(prefix)!r},"
+            "'remaining_seconds':3600,'disposable':True}))\n"
+        )
+        configure(
+            private / "worker-provisioner.json",
+            WorkerProvisioner(
+                ("never-allocate",),
+                enabled=enabled,
+                inspection_command=(sys.executable, str(inspector)),
+            ),
+        )
+        return {
+            **os.environ,
+            "HOME": str(f.base),
+            "LITAI_CONFIG_DIR": str(private),
+        }, prefix
+
+    def test_private_inspector_routes_runs_into_allocation_and_keeps_diagnostics(self):
+        environment, prefix = self.secondary_operator_context()
+        f = self.fixture.fixture
+        workspace = Mock()
+        workspace.plan = f.plan
+        workspace.observations = ()
+        workspace.secondary_access_evidence.return_value = ()
+
+        def reserve(*args, **kwargs):
+            allocation = kwargs["allocation_owner"]
+            self.assertEqual(allocation.workspace_prefix, prefix)
+            self.assertTrue(kwargs["parent"].is_relative_to(prefix))
+            self.assertEqual(kwargs["parent"].stat().st_mode & 0o777, 0o700)
+            self.assertNotIn("operator_environment", kwargs)
+            workspace.root = kwargs["parent"] / "fixture-run"
+            workspace.root.mkdir(mode=0o700)
+            workspace._secondary_views.allocation = allocation
+            return workspace
+
+        admission = Mock()
+        with (
+            patch(
+                "literate_ai.adapters.retained_project_runtime.RetainedProjectExecutionWorkspace",
+                side_effect=reserve,
+            ),
+            patch(
+                "literate_ai.adapters.retained_project_runtime.admit_retained_project",
+                return_value=admission,
+            ),
+        ):
+            returned, actual = self.run_project(operator_environment=environment)
+        self.assertIs(returned, admission)
+        self.assertIs(actual, workspace)
+        self.assertEqual(workspace.execute_next.call_count, len(f.plan.profile.actions))
+        workspace.close_secondary_access.assert_called_once()
+        document = json.loads(
+            (workspace.root / "command-diagnostics.json").read_bytes()
+        )
+        self.assertFalse(document["admission"])
+        self.assertTrue(document["secondary_access"]["allocation_observations"])
+        self.assertFalse((self.directories.obj_dir / "retained-project-runs").exists())
+
+    def test_private_inspector_refusals_precede_platform_cache_and_session_creation(
+        self,
+    ):
+        environment, prefix = self.secondary_operator_context(overlap=True)
+        with (
+            patch(
+                "literate_ai.adapters.retained_project_runtime.RetainedLocalPlatform"
+            ) as platform,
+            patch(
+                "literate_ai.adapters.retained_project_runtime.bind_cache_directories"
+            ) as cache,
+            self.assertRaisesRegex(
+                ValueError, "allocated-parent-overlaps-or-redirects"
+            ),
+        ):
+            self.run_project(operator_environment=environment)
+        platform.assert_not_called()
+        cache.assert_not_called()
+        self.assertEqual(list(prefix.glob("retained-session-*")), [])
+
+    def test_disabled_private_inspector_refuses_without_cache_effects(self):
+        environment, prefix = self.secondary_operator_context(enabled=False)
+        with (
+            patch(
+                "literate_ai.adapters.retained_project_runtime.RetainedLocalPlatform"
+            ) as platform,
+            patch(
+                "literate_ai.adapters.retained_project_runtime.bind_cache_directories"
+            ) as cache,
+            self.assertRaises(ValueError),
+        ):
+            self.run_project(operator_environment=environment)
+        platform.assert_not_called()
+        cache.assert_not_called()
+        self.assertEqual(list(prefix.iterdir()), [])
 
     def test_wrong_actual_os_refuses_before_cache_creation(self):
         from tests.critical.test_retained_project_platform import observation

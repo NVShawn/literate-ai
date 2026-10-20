@@ -124,11 +124,45 @@ bindings SHALL refuse before executing a command.
 
 ### Requirement: Workspace secondary grants end with their eligible test commands
 The workspace SHALL grant secondary access only around eligible test commands and
-revoke it on normal and exceptional exit. Until completion and receipt evidence
-bind successful cleanup, selected-policy execution SHALL NOT mint a completed
-run or passing receipt.
+revoke it on normal and exceptional exit. Observation-only completion MAY precede
+cleanup; selected-policy admission SHALL require successful cleanup bound into
+the retained completed-run identity.
 
 #### Scenario: A test command times out after access is granted
 - **WHEN** the bounded command fails or raises after activation
 - **THEN** workspace cleanup revokes delegated traversal and unmounts its views
 - **AND** the failed workspace cannot resume execution or yield a passing receipt
+
+### Requirement: Secondary admission retains exact successful cleanup evidence
+Before admission, the framework SHALL retain all inputs, exports and observations
+while views remain current, then close the owned views. A canonical record SHALL
+bind plan, worker, account, allocation inspections, mounted manifest views, exact
+command observations and eligible activation/revocation pairs. Cleanup failure or
+changed content SHALL prevent admission. Absent policy SHALL preserve legacy wire
+identities and receipt roots.
+
+#### Scenario: Cleanup fails after all commands and independent acceptance pass
+- **WHEN** an owned mount cannot be released or a fixture remains populated
+- **THEN** no receipt or admission capability is issued
+- **AND** the private failed run and available diagnostics remain retained
+
+#### Scenario: Retention fails before cleanup
+- **WHEN** an input, export or observation cannot enter retained custody
+- **THEN** the framework still attempts to close all owned views
+- **AND** the failed attempt issues no admission
+
+### Requirement: Local orchestration selects operator-private allocation authority
+The CLI SHALL supply operator context separately from project command environments.
+For selected secondary policy, local orchestration SHALL resolve the configured
+private provisioning inspector, validate its live plan and allocated prefix before
+cache creation, and place private runs inside that prefix. Every exit SHALL attempt
+view cleanup and retain available command/allocation diagnostics. Project policy
+SHALL NOT select inspector paths or inherit operator credentials.
+
+#### Scenario: A project selects policy without operator provisioning configuration
+- **WHEN** no current private allocation inspector is available
+- **THEN** orchestration refuses before platform execution or cache creation
+
+#### Scenario: Source inputs contain the allocation prefix
+- **WHEN** the proposed run parent overlaps a retained source root
+- **THEN** orchestration refuses before creating its private session directory

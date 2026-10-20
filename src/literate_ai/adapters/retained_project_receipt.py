@@ -136,6 +136,27 @@ class AdmittedRetainedProject:
             raise ValueError("retained.receipt.receipt-changed")
         for item in self.receipt.records:
             self.store.verify(item)
+        if self.receipt.root("completed-run").identity != self.run.identity.uri:
+            raise ValueError("retained.receipt.completed-run-changed")
+        secondary = self.run.secondary_access_identity
+        if plan.profile.secondary_access is not None:
+            from literate_ai.contracts.retained_secondary_evidence import (
+                RetainedSecondaryAccessEvidence,
+            )
+
+            if secondary is None:
+                raise ValueError("retained.receipt.secondary-cleanup-required")
+            reference = _metadata_reference(self.store, secondary)
+            if reference not in self.receipt.records:
+                raise ValueError("retained.receipt.secondary-evidence-not-retained")
+            evidence = RetainedSecondaryAccessEvidence.from_dict(
+                self.store.get_manifest(reference)
+            )
+            evidence.require_context(
+                plan,
+                export_manifest_identity=self.run.resolved_bom.output_manifest.identity,
+                command_observations=tuple(v.identity for v in self.run.observations),
+            )
         for manifest in (self.run.source_bom.manifest, self.run.output_manifest):
             for member in manifest.members:
                 self.store.verify(_file_reference(member))
@@ -205,6 +226,18 @@ class AdmittedRetainedProject:
 
 
 def admit_retained_project(workspace, store, *, worker_evidence=None):
+    """Retain and admit, closing delegated resources even when retention fails."""
+    if not isinstance(workspace, RetainedProjectExecutionWorkspace):
+        raise TypeError("retained.receipt.live-workspace-and-store-required")
+    try:
+        return _admit_retained_project(
+            workspace, store, worker_evidence=worker_evidence
+        )
+    finally:
+        workspace.close_secondary_access()
+
+
+def _admit_retained_project(workspace, store, *, worker_evidence=None):
     """Mint only after all live gates, retaining bytes before returning admission."""
     if not isinstance(workspace, RetainedProjectExecutionWorkspace) or not isinstance(
         store, FileSystemCAS
@@ -305,10 +338,6 @@ def admit_retained_project(workspace, store, *, worker_evidence=None):
     ):
         raise ValueError("retained.receipt.run-changed-during-retention")
     run = current
-    previous_run = roots["completed-run"]
-    roots["completed-run"] = document(run.to_dict(), run.identity)
-    if previous_run != roots["completed-run"]:
-        records.pop(previous_run.identity)
     sdk_ids = {
         identity
         for observation in (*run.observations, *run.acceptance_observations)
@@ -319,6 +348,15 @@ def admit_retained_project(workspace, store, *, worker_evidence=None):
     for identity in sorted(sdk_ids, key=lambda v: v.uri):
         reference = _metadata_reference(store, identity)
         remember(store.get_bytes(reference), expected=identity)
+    workspace._require_current()
+    secondary = workspace.finalize_secondary_access(run)
+    if secondary is not None:
+        document(secondary.to_dict(), secondary.identity)
+        run = replace(run, secondary_access_identity=secondary.identity)
+    previous_run = roots["completed-run"]
+    roots["completed-run"] = document(run.to_dict(), run.identity)
+    if previous_run != roots["completed-run"]:
+        records.pop(previous_run.identity)
     receipt = RetainedProjectReceipt(
         plan.project_id,
         tuple(sorted(roots.items())),
@@ -326,7 +364,10 @@ def admit_retained_project(workspace, store, *, worker_evidence=None):
         sum(report.report.passed for report in run.test_reports),
         sum(report.report.skipped for report in run.test_reports),
     )
-    workspace._require_current()
+    if plan.profile.secondary_access is None:
+        workspace._require_current()
+    else:
+        workspace._require_private_current()
     document(receipt.to_dict(), receipt.identity)
     admission = AdmittedRetainedProject(
         receipt,
