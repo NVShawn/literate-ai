@@ -29414,20 +29414,6 @@ evidence; this repair requires a fresh driver review, lifecycle and receipt.
   Windows receiver and installed/native evidence, then require exact-head CI.
 
 
-### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
-
-- **GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
-- **Priority:** P1, PR #81 qualification blocker
-- **Owning authority:** native process-group termination fixture.
-- **Direction:** Finish native qualification without confusing interpreter startup with failed signal delivery.
-- **Conclusion:** The FreeBSD full run at `6f933e54` stopped after 1,278 passes and 36 skips because the child shutdown marker was absent. The fixture starts its one-second deadline before child readiness. Wait for an explicit handler-ready marker at the real process-spawn boundary, with bounded setup and cleanup on failure; retain real group termination, timeout status and shutdown assertion. Production supervision is unchanged.
-- **Implementation:**
-  - [x] Establish bounded child readiness before starting supervision's existing timeout.
-  All six remote-fanout checks pass locally; native renewal remains pending.
-- **Evidence:**
-  - [ ] Native FreeBSD focused process-group checks and the renewed full regression pass with no new skips.
-
-
 **WINDOWS-PE-OBSERVE-001 upgrade follow-up:** The completed `b782cdb5` host
 regression passes 1,814 cases with 42 skips, but a controlled legacy-file fixture
 still loads an incomplete old `pe-imports` fact and omits a required DLL. Failure
@@ -29449,23 +29435,6 @@ the full FreeBSD baseline explicitly as earlier-source evidence.
 - [ ] Renew affected qualification and current receipt before landing.
 
 
-### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
-
-- **GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
-- **Priority:** P1, PR #81 lifecycle qualification blocker
-- **Owning authority:** inert JavaScript lexical observation and generated-source handoff validation.
-- **Direction:** Complete lifecycle qualification without rejecting a valid bundle writer as its emitted executable.
-- **Conclusion:** The earlier generated lifecycle rejected `source/tools/bundle.js` as missing a registry module. Its unaccepted candidate was discarded. A controlled existing valid-application fixture independently proves the validator rejects a harmless bundle-writer string, without any change to the actual executable bundle. Recognize registry identifiers and their offsets through the existing inert lexer, ignoring strings/comments/templates/regex text. Preserve actual-bundle missing-module, explicit-extension, shebang and entry-dispatch refusals and independent execution/acceptance.
-- **Implementation:**
-  - [x] Reuse the JavaScript lexical owner for bundle classification and registry location.
-- **Evidence:**
-  - [x] Valid writer/leading-inert-text and broken-real-bundle regressions pass alongside actual Node bundle execution and existing generation refusals.
-  All four JavaScript handoff/bundle checks and three bounded-retry checks pass.
-  The actual Node fixture executes test/smoke modes with a leading inert registry
-  comment. The regression fails against the earlier text-based classifier.
-  - [ ] Renew combined trusted-driver/document review, full regression, lifecycle/receipt, installed/native and exact CI gates.
-
-
 **Combined renewal:** Complete the PE legacy-kind repair and JavaScript lexical
 repair before starting the next frozen qualification. Preserve `b782cdb5`'s
 passing 1,856-case host report and failed generated lifecycle under their actual
@@ -29475,3 +29444,63 @@ not as acceptance. Run fresh complete host and FreeBSD suites for the revised
 source, plus current actual Windows receiver/custody and JavaScript checks, then
 renew generated lifecycle/independent acceptance, receipt, installed wheel and
 exact required CI. No earlier-source result is relabeled as the revised full run.
+
+
+**Current combined qualification:** Frozen source `7625cc05` passes the complete
+host regression: 1,817 passed, 42 existing skips, no failures across 1,859 selected
+cases in 1,670.611 seconds. Report SHA-256
+`9fa5d6e1066c59f8d257ddb7558b4b985e1de9df52270ca8e83cbbe516616d59`.
+The fresh generated lifecycle, native builds, generated tests and independent
+acceptance pass. Supported receipt promotion/check/current and project verification
+pass with receipt `e68395dc91d3bcb4016b82cf8865c84ec80cbe105734ba1c629011bcfd618ffb`
+and finalized candidate `6223b74b738dae98a5093775ef9ddcca8b3915cad3b70cb6db146acaee44be05`.
+The reviewed driver is `4a09f2422252a72de0b84adf3fad09a3a3b13dd8d8121095106ffdc57c1d5e15`.
+
+Actual Windows qualification at that source completes 21 selected cases:
+18 passed and three existing POSIX-only skips, including the new cache upgrade
+and lexical checks and both real receiver cases in 549.979 seconds. The production
+300-second observation bound is unchanged. Independent archive SHA-256:
+`156deac00e92cebb89c5003fffc102824462df059bf5a3ce9062fb4917df2f62`.
+Linux completes 133 passing executions of 25 unique cases with no skips, including
+ten custody repetitions, fanout, JavaScript and retry checks. Independent archive:
+`7ee1b685c74bab790744beef34f64a48f875e1843cf6828997c674bde9ad1781`.
+All 121 documentation diagrams render; static/export/layout, strict OpenSpec and
+supported driver/document reviews pass. The framework repository ignores its
+reserved operational lifecycle-lock directory; the driver and receipt stay current.
+
+The superseded `b782cdb5` native run was deliberately interrupted after verifying
+runner UID, checkout, revision and checkpoint. Its checkpoint retains 1,043 passes,
+34 skips and zero failures; this is partial evidence, not acceptance. Its archive
+is `4d7d8e3175c8774d2f8739a1f1da9c25b924b0b4045a8c45460eb86293cc9ca3`.
+The fresh complete FreeBSD run at `7625cc05`, matching installed-wheel pair and
+exact required CI remain landing gates.
+
+### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
+
+**GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
+
+- **Priority:** P1
+- **Owner:** Native process-group termination fixture
+- **Direction:** Finish native qualification without confusing interpreter startup with failed signal delivery.
+- **Conclusion:** The earlier FreeBSD full run at 6f933e54 stopped after 1278 passes and 36 skips because the child shutdown marker was absent. Establish explicit handler readiness at the real spawn boundary with bounded setup and failure cleanup, then retain the existing one-second timeout, real process-group signals and shutdown assertion. Production supervision is unchanged.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Wait for actual child handler readiness before starting the existing supervision deadline.
+- **Evidence:**
+  - [ ] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI.
+
+### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
+
+**GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
+
+- **Priority:** P1
+- **Owner:** Inert JavaScript lexical observation and generated-source handoff validation
+- **Direction:** Complete lifecycle qualification without rejecting a valid bundle writer as its emitted executable.
+- **Conclusion:** A controlled valid application and bundle are rejected when a writer string or leading inert registry text is added. Use the existing lexer for actual registry identifiers and source offsets, while preserving real-bundle module, local-extension, shebang and CLI-dispatch guards and independent execution/acceptance.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Reuse the existing inert lexical owner for bundle classification and registry location.
+- **Evidence:**
+  - [ ] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
+
+**Focused results:** All six fanout checks pass on the host and Linux and in the actual FreeBSD preflight. All four JavaScript handoff/bundle cases and all three retry cases pass on the host, Windows, Linux and FreeBSD preflight. Complete native/installed and exact CI gates remain pending above.
