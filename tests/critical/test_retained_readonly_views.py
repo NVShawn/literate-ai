@@ -99,7 +99,7 @@ class NativeReadOnlyViewTests(unittest.TestCase):
             tuple(sorted(set(os.getgrouplist(name, account.pw_gid)))),
         )
         self.prefix = Path(tempfile.mkdtemp(prefix="litai-native-views-")).resolve()
-        self.prefix.chmod(0o755)
+        self.prefix.chmod(0o700)
         config_directory = tempfile.TemporaryDirectory()
         self.addCleanup(config_directory.cleanup)
         config_root = Path(config_directory.name).resolve()
@@ -293,6 +293,106 @@ class NativeReadOnlyViewTests(unittest.TestCase):
         self.assertEqual(len(os.listdir("/dev/fd")), before)
         self.assertTrue(owner.evidence()[-1]["cleanup_ok"])
 
+    def test_private_prefix_keeps_siblings_private_and_restores_exact_acls(self):
+        note = self.prefix / "operator-note"
+        note.write_bytes(b"private operator evidence")
+        note.chmod(0o644)
+        unrelated = self.prefix / "operator-data"
+        unrelated.mkdir(mode=0o755)
+        (unrelated / "secret").write_bytes(b"private")
+        backend = views.FreeBsdPosixAcl()
+
+        def acl(path):
+            descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+            try:
+                kinds = (2, 3) if path.is_dir() else (2,)
+                return {kind: backend.read(descriptor, kind) for kind in kinds}
+            finally:
+                os.close(descriptor)
+
+        original = {path: acl(path) for path in (self.prefix, note, unrelated)}
+        owner = self.create()
+        owner.bind_outputs(self.output_manifest)
+        owner.activate("test")
+        self.assertEqual(self.actor(lambda: note.read_bytes()), errno.EACCES)
+        self.assertEqual(
+            self.actor(lambda: (unrelated / "secret").read_bytes()), errno.EACCES
+        )
+        self.assertEqual(
+            self.actor(lambda: (owner.paths["runtime"] / "alias").read_bytes()), 0
+        )
+        transient = self.prefix / "framework-private-step"
+        transient.mkdir(mode=0o700)
+        owner.require_current()
+        self.assertEqual(self.actor(lambda: os.listdir(transient)), errno.EACCES)
+        transient.rmdir()
+        owner.require_current()
+        owner.deactivate()
+        owner.close()
+        self.assertEqual(stat.S_IMODE(self.prefix.stat().st_mode), 0o700)
+        self.assertEqual({path: acl(path) for path in original}, original)
+        self.assertEqual(note.read_bytes(), b"private operator evidence")
+
+    def test_existing_searchable_allocation_prefix_remains_unchanged(self):
+        self.prefix.chmod(0o755)
+        owner = self.create()
+        owner.bind_outputs(self.output_manifest)
+        owner.activate("test")
+        self.assertEqual(
+            self.actor(lambda: (owner.paths["products"] / "program").read_bytes()), 0
+        )
+        owner.deactivate()
+        owner.close()
+        self.assertEqual(stat.S_IMODE(self.prefix.stat().st_mode), 0o755)
+
+    def test_unrelated_prefix_link_refuses_before_delegation(self):
+        target = self.prefix / "unrelated-link"
+        target.symlink_to(self.inputs / "sdk")
+        owner = self.create()
+        paths = owner.paths
+        owner.bind_outputs(self.output_manifest)
+        with self.assertRaisesRegex(ValueError, "unsupported-prefix-child"):
+            owner.activate("test")
+        self.assertEqual(stat.S_IMODE(self.prefix.stat().st_mode), 0o700)
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(
+            self.actor(lambda: (paths["runtime"] / "alias").read_bytes()),
+            errno.EACCES,
+        )
+        self.assertTrue(owner.evidence()[-1]["cleanup_ok"])
+
+    def test_external_private_parent_is_refused_without_changing_permissions(self):
+        parent = self.prefix / "external-private-parent"
+        parent.mkdir(mode=0o700)
+        prefix = parent / "allocation"
+        prefix.mkdir(mode=0o700)
+        namespace = prefix / "views"
+        namespace.mkdir(mode=0o700)
+        anchor = views._anchor(prefix, prefix, private=False)
+        try:
+            with self.assertRaisesRegex(ValueError, "external-ancestor-not-searchable"):
+                views.PrivatePrefixSearch(
+                    prefix, namespace, (anchor,), views.FreeBsdPosixAcl(), self.account
+                )
+        finally:
+            anchor.close()
+        for path in (self.prefix, parent, prefix, namespace):
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o700)
+
+    def test_prefix_permission_drift_is_restored_without_cleanup_acceptance(self):
+        owner = self.create()
+        paths = owner.paths
+        owner.bind_outputs(self.output_manifest)
+        owner.activate("test")
+        self.prefix.chmod(0o750)
+        with self.assertRaises(ValueError):
+            owner.require_current()
+        self.assertEqual(stat.S_IMODE(self.prefix.stat().st_mode), 0o700)
+        self.assertEqual(
+            self.actor(lambda: (paths["runtime"] / "alias").read_bytes()), errno.EACCES
+        )
+        self.assertFalse(owner.evidence()[-1]["cleanup_ok"])
+
     def test_bad_effective_flags_refuse_even_when_mount_command_succeeds(self):
         command = views._command
 
@@ -371,9 +471,10 @@ class NativeReadOnlyViewTests(unittest.TestCase):
         moved = root.with_name(root.name + "-moved")
         root.rename(moved)
         root.mkdir(mode=0o755)
+        foreign_mode = stat.S_IMODE(root.stat().st_mode)
         with self.assertRaisesRegex(ValueError, "cleanup-incomplete"):
             owner.require_current()
-        self.assertEqual(stat.S_IMODE(root.stat().st_mode), 0o755)
+        self.assertEqual(stat.S_IMODE(root.stat().st_mode), foreign_mode)
         self.assertEqual(stat.S_IMODE(moved.stat().st_mode), 0o700)
         self.assertEqual(
             self.actor(lambda: (moved / "runtime/alias").read_bytes()), errno.EACCES

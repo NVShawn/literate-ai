@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Scope named-user search through private FreeBSD retained allocation directories
+  to eligible test actions. Protect unrelated siblings, refuse inaccessible
+  outside ancestors, verify effective access after dropping identity, and restore
+  exact permissions before accepting cleanup. Native source-level coverage passes;
+  installed original-suite qualification remains pending.
+
 - Reuse bounded, current-name-checked directory handles during retained input
   discovery, snapshot copying and private CAS validation. Preserve hashing,
   complete inventories, alias closure and cleanup; refuse a replaced parent

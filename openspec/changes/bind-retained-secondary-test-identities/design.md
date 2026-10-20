@@ -131,6 +131,34 @@ recovered with unchanged source bytes and private roots; the failed log remains
 retained. Native filesystem tests use an explicit allocation protocol peer and
 do not qualify the actual provisioner or installed workspace integration.
 
+## Private allocation-prefix ingress
+
+An inspected allocation prefix can itself be private mode 0700. Granting the
+view namespace alone is then insufficient: the kernel cannot reach it. The
+installed original-suite run exposed this as two unprivileged ATF launcher
+failures while all root cases passed. Preserve that failed run under issue #94.
+
+A selected eligible action may delegate only search on that owned prefix. Before
+opening ingress, protect unrelated root-owned first-level children which would
+otherwise become reachable; private siblings remain private. Bound enumeration
+and descriptor custody, refuse unsupported link/ownership shapes, and deny new
+unrelated children by the temporary default ACL. No outside ancestor is changed;
+an inaccessible external parent is an explicit refusal. Existing searchable
+prefixes keep their preceding behavior.
+
+All owned ACL transitions retain inode/ACL custody. Revalidate current names and
+held descriptors before accepting only those exact permission changes into the
+existing directory anchors. Replacement or unrelated metadata drift still
+refuses. Verify actual secondary-account access to the selected roots before
+execution, while original backing trees and unrelated evidence remain denied.
+
+Revoke view ingress first, then prefix ingress, before restoring sibling ACLs.
+Restore exact prefix/sibling ACLs and modes on normal deactivation and every
+failure, before cleanup acceptance. No permission change or copied assertion
+can authenticate the allocation or issue a receipt. Native tests must include
+0700 prefixes, searchable-prefix compatibility, sibling privacy, outside-parent
+refusal, owned-transition replacement/drift and exact success/failure cleanup.
+
 ## Workspace command integration
 
 The execution workspace accepts a typed live allocation only with selected policy,

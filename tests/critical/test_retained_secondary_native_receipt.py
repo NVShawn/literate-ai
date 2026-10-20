@@ -89,7 +89,7 @@ class NativeSecondaryReceiptTests(unittest.TestCase):
         completion = self.fixture.fixture
         f = completion.fixture
         f._retain_native_fixture = True
-        f.base.chmod(0o755)
+        f.base.chmod(0o700)
         worker = ExecutionWorker("native-secondary-fixture", ExecutionWorkerKind.LOCAL)
         f.plan = replace(
             f.plan, profile=replace(f.plan.profile, worker_identity=worker.identity)

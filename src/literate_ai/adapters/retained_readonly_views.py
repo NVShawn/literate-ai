@@ -24,6 +24,7 @@ from .retained_posix_acl import (
     FreeBsdPosixAcl,
     project_secondary_acl,
 )
+from .retained_prefix_search import PrivatePrefixSearch, secondary_path_access
 from .retained_project_inputs import _DirectoryAccess
 from .retained_test_identity import require_current_secondary_test_identity
 from .user_paths import resolve_freebsd_view_system_paths
@@ -116,6 +117,7 @@ class FreeBsdRetainedViewOwner:
         self.policy = plan.profile.secondary_access
         self._anchors, self._fixtures, self._mounts = [], {}, {}
         self._root_acl = None
+        self._prefix_search = None
         self._closed = self._failed = False
         self._cleanup_ok = None
         self._active = None
@@ -148,6 +150,13 @@ class FreeBsdRetainedViewOwner:
                 path.mkdir(mode=0o700)
                 self._paths[name] = path
                 self._fixtures[name] = self._custody(path, self._root_acl.fd)
+            self._prefix_search = PrivatePrefixSearch(
+                prefix,
+                self._root,
+                tuple(self._anchors),
+                self._backend,
+                self.policy.account,
+            )
             for view in self.policy.views:
                 if view.origin == "inputs":
                     self._mount(view, input_manifest, self._inputs)
@@ -267,6 +276,7 @@ class FreeBsdRetainedViewOwner:
             )
             require_current_secondary_test_identity(self.policy.account)
             self._root_current()
+            self._prefix_search.require_current()
             self._root_acl.require_current()
             for name, resource in self._fixtures.items():
                 if _node(self._paths[name].lstat()) != _node(os.fstat(resource.fd)):
@@ -297,6 +307,7 @@ class FreeBsdRetainedViewOwner:
         self.require_current(minimum_remaining_seconds=action.timeout_seconds + 30)
         try:
             self._fixtures_empty()
+            self._prefix_search.activate()
             uid = self.policy.account.uid
             for resource in self._fixtures.values():
                 resource.replace(
@@ -309,6 +320,17 @@ class FreeBsdRetainedViewOwner:
             )
             self._active = action_id
             self.require_current(minimum_remaining_seconds=action.timeout_seconds + 30)
+            selected = tuple(
+                (self._paths[view.name], os.R_OK | os.X_OK)
+                for view in self.policy.views
+            ) + tuple(
+                (self._paths[name], os.R_OK | os.W_OK | os.X_OK)
+                for name in self.policy.fixtures
+            )
+            private = ((self._inputs.root, os.X_OK), (self._outputs.root, os.X_OK))
+            observed = secondary_path_access(self.policy.account, selected + private)
+            if not all(observed[: len(selected)]) or any(observed[len(selected) :]):
+                raise ValueError("retained.views.secondary-path-scope-refused")
             self._record(
                 {
                     "event": "activated",
@@ -338,6 +360,7 @@ class FreeBsdRetainedViewOwner:
                     project_secondary_acl(_DEFAULT, uid, "---"),
                 )
             self._fixtures_empty()
+            self._prefix_search.revoke()
             self._record({"event": "deactivated", "action_id": self._active})
             self._active = None
         except BaseException:
@@ -354,6 +377,11 @@ class FreeBsdRetainedViewOwner:
         if self._root_acl is not None:
             try:
                 self._root_acl.restore()
+            except BaseException as exc:
+                errors.append(exc)
+        if self._prefix_search is not None:
+            try:
+                self._prefix_search.close()
             except BaseException as exc:
                 errors.append(exc)
         try:
