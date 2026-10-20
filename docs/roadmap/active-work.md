@@ -29528,22 +29528,6 @@ rather than treating resumed partial coverage as release qualification.
   - [ ] Canonical installed-wheel and native renewal. An earlier broad run selected 1,216 checks and stopped with a self-host snapshot-currentness error after the final lexical change modified its live inputs (36 skipped). That failed gate remains preserved; the fresh complete run above passed the unchanged-snapshot proof.
 
 
-### [ ] RETAINED-PR82-INTEGRATE-001 — Reconcile retained public execution with PR #81
-
-- **GitHub review:** [#82](https://github.com/jordanhubbard/literate-ai/pull/82)
-- **Priority:** P1, 1.3 integration
-- **Owning authority:** retained public build/test and acquisition/input verification owners.
-- **Direction:** Finish the queued retained-project review after original-source adoption.
-- **Conclusion:** Exact `d6070ba5` CI passes, but PR #82 conflicts with the advancing #81 base in changelog, roadmap and authority metadata. Merge the reviewed base without dropping either branch's behavior; regenerate combined driver/document review through supported commands. Retain each earlier receipt and native result under its actual source identity. Current original-suite native acceptance still depends on scoped secondary-account support from #85/#87; a correct privileged-skip refusal grants no admission.
-- **Implementation:**
-  - [x] Resolve the four metadata conflicts and bind combined authority.
-  Both branches' changelog and roadmap entries are preserved. Supported combined
-  driver/document reviews, static/export/layout and strict OpenSpec gates pass.
-  Nine focused modules pass all 76 cases, including cache recovery, retained
-  input/runtime/platform, public frontend, rebind, catalog and strict uniqueness.
-- **Evidence:**
-  - [ ] Renew combined local and native/installed qualification, current receipt and exact CI before landing.
-
 ### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
 
 Upstream: [issue #90](https://github.com/jordanhubbard/literate-ai/issues/90).
@@ -29622,3 +29606,15 @@ evidence; this repair requires a fresh driver review, lifecycle and receipt.
   All six remote-fanout checks pass locally; native renewal remains pending.
 - **Evidence:**
   - [ ] Native FreeBSD focused process-group checks and the renewed full regression pass with no new skips.
+
+### [ ] RETAINED-PR82-INTEGRATE-001 — Reconcile retained public execution with PR #81
+
+- **Priority:** P1
+- **Owner:** Retained public build/test and acquisition/input verification
+- **Direction:** Finish the queued retained-project review after original-source adoption.
+- **Conclusion:** Exact d6070ba5 CI and the b63d0d51 combined full regression pass. Merge the advancing PR #81 fixes without dropping either branch, then regenerate combined authority through supported review commands. Keep earlier receipts and native results tied to their source. Complete original-suite native acceptance still depends on scoped secondary-account support from #85/#87; a privileged-skip refusal grants no admission.
+- **Depends on:** ORIGINAL-ADOPT-001 and RETAINED-USER-001
+- **Implementation:**
+  - [ ] Resolve metadata conflicts and bind combined authority without dropping source behavior.
+- **Evidence:**
+  - [ ] Renew combined local and native/installed qualification, current receipt and exact CI before landing.
