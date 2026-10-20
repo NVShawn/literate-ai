@@ -29338,3 +29338,45 @@ package or release admission is claimed by lock-health verification.
   - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
 - **Evidence:**
   - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+
+### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
+
+Upstream: [issue #90](https://github.com/jordanhubbard/literate-ai/issues/90).
+
+- **Priority:** P0, release blocker
+- **Direction:** Keep complete native receiver observation within its existing
+  300-second production limit, including cold PE import inspection.
+- **Conclusion:** Inspect independent images in bounded concurrent frontiers,
+  then merge results in deterministic queue order through the existing loader
+  resolution and graph owners. Preserve fresh image hashes before/after inspection,
+  exact inspector identity, content-bound fact reuse, API-set/delay-import rules,
+  failure cleanup and live-profile invalidation. Do not increase timeouts or skip
+  the actual receiver case.
+- **Diagnostic evidence:** On source `0d683978`, 208 serial native inspections
+  consume 251.876 of 270.172 measured seconds; path resolution consumes 8.319.
+  These are wrapper timings around actual operations, not acceptance. The
+  diagnostic stopped at its own bound; the original SSH session later timed out,
+  and its final diagnostic file was read through a separate bounded probe.
+- **Implementation:**
+  - [x] Reuse bounded native-inspection concurrency for PE closure frontiers.
+  - [x] Retain deterministic graph facts and reject image/inspector substitution.
+- **Evidence:**
+  - [x] Deterministic thread overlap, serial/parallel graph equivalence and
+    mutation refusal pass alongside existing dependency/custody regressions.
+    All ten custody checks pass, including three new parallel PE cases; focused
+    host tool-dependency, actual receiver and PE input checks also pass. Static,
+    export/layout, strict OpenSpec and supported driver/document reviews pass.
+    Candidate `1fbc7e7f` passes seven native Windows custody cases with three
+    existing POSIX-only skips, including all three new parallel PE checks.
+  - [x] The unchanged native Windows receiver/live-profile module passes both
+    cases in 571.256 seconds with the production 300-second per-observation
+    limit unchanged. Its candidate source, report hashes and guard blobs are
+    retained separately; combined-source final qualification remains open.
+  - [x] Renew combined driver/document review and the finalized host receipt.
+    Receipt `62ec04fa29ff237491a81f69fa480e9680b784cce623dd94e3a91bf47570eeb3`
+    is current after a fresh generated lifecycle and independent acceptance.
+    The complete combined host regression passes 1,813 cases with 42 existing
+    skips out of 1,855 selected; documentation checks also pass. Earlier native
+    candidate evidence remains bound to its original revision.
+  - [ ] Complete combined-source native regression, installed-wheel qualification
+    and exact required CI before landing.

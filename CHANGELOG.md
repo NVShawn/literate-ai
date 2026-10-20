@@ -16,6 +16,11 @@
   current project Flavor-policy and resolution-audit checks. Valid non-host locks
   no longer become stale merely because project verification assumed `host`.
 
+- Inspect independent Windows PE images concurrently within the existing
+  receiver dependency-observation deadline. Preserve exact image/inspector
+  bindings, loader resolution and fail-closed revalidation; qualification is
+  in progress.
+
 - Fix Windows retained dependency and BOM contract fixtures so their simulated
   tools retain executable-mode validation before exercising custody assertions.
   Use real Windows venv launchers for isolated interpreter discovery, exercise
