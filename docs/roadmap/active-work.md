@@ -29298,3 +29298,16 @@ rather than treating resumed partial coverage as release qualification.
   - [x] Native profiling exposed Python 3.12 `Path.relative_to` and repeated lexical parsing as dominant remaining costs. A checked immutable path-prefix comparison retains per-access filesystem lineage checks; three warm source-level verifications of the same 5,270-member native manifest have a median of 7.926676 seconds versus 19.794351 seconds with the installed baseline. The adapter bytes have SHA-256 `6811499e92de9342cd8e316ae65dc2f4316acb5610b9072392ada6e7b5245e02`; the native focused log has SHA-256 `1e05b07e13f823a7a44b884e96cfa5dde0ef6560fef6a5b120b334f4eb518b47`. This probe does not qualify an installed wheel or a complete build.
   - [x] Fresh full regression of the frozen reviewed implementation: 1,865 passed, 42 skipped, no failures across 1,907 selected checks in 1,043.891 seconds. Report SHA-256 `aeba051ec5d0a178f3a5451c75b4220e360efa9c7a4ba1de4483e6945f9a0277`; log SHA-256 `81aae3d3b81d09691cf5cf879a76d207bda549b0d399a0344f62c976d4851c83`.
   - [ ] Canonical installed-wheel and native renewal. An earlier broad run selected 1,216 checks and stopped with a self-host snapshot-currentness error after the final lexical change modified its live inputs (36 skipped). That failed gate remains preserved; the fresh complete run above passed the unchanged-snapshot proof.
+
+
+### [ ] RETAINED-PR82-INTEGRATE-001 — Reconcile retained public execution with PR #81
+
+- **GitHub review:** [#82](https://github.com/jordanhubbard/literate-ai/pull/82)
+- **Priority:** P1, 1.3 integration
+- **Owning authority:** retained public build/test and acquisition/input verification owners.
+- **Direction:** Finish the queued retained-project review after original-source adoption.
+- **Conclusion:** Exact `d6070ba5` CI passes, but PR #82 conflicts with the advancing #81 base in changelog, roadmap and authority metadata. Merge the reviewed base without dropping either branch's behavior; regenerate combined driver/document review through supported commands. Retain each earlier receipt and native result under its actual source identity. Current original-suite native acceptance still depends on scoped secondary-account support from #85/#87; a correct privileged-skip refusal grants no admission.
+- **Implementation:**
+  - [ ] Resolve the four metadata conflicts and bind combined authority.
+- **Evidence:**
+  - [ ] Renew combined local and native/installed qualification, current receipt and exact CI before landing.
