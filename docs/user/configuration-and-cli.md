@@ -2453,11 +2453,14 @@ and `disposable: true`. Streams are bounded to 64 KiB and inspection to at most
 elapsed time. Instance, prefix, configuration or plan drift permanently revokes
 the owner. Observations grant no lifecycle acceptance.
 
-This inspection owner has protocol tests; actual provisioner qualification,
-read-only view ownership and installed retained execution remain in development
-under `RETAINED-USER-001`. Selecting a policy still refuses execution until the
-enforcing owner is integrated. Configuring an inspector does not complete that
-integration or admit a compiler SDK.
+The source-level view owner and local orchestration bridge now enforce the policy
+through cleanup-bound admission. Eleven FreeBSD source checks pass without skips,
+including a complete fixture lifecycle with a protocol-peer inspector. A separate
+allocation-owner probe checks the actual supervised QEMU guest through fresh
+process and QMP observations. Installed distribution qualification, a reusable
+real provisioning inspector and the complete original-source lifecycle remain
+open under `RETAINED-USER-001`. Configuring an inspector alone grants no execution
+or compiler SDK admission. See [secondary-account retained tests](retained-secondary-access.md).
 
 `litai worker list` and `show WORKER_ID` inspect the private catalog selected by
 `--worker-config`, `LITAI_WORKER_CONFIG`, or `litai config paths`.
