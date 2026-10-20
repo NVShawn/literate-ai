@@ -1753,7 +1753,9 @@ macOS, or the boot session for dyld shared-cache images). ELF and PE images are
 keyed at their resolved path. Facts recorded while an inspector changed are
 dropped. A failed PE capture also drops facts for its bound inspector before
 propagating the failure, including failures during closure resolution or closing
-inspector/API-set checks. A file written on another platform is ignored. Because cached facts
+inspector/API-set checks. PE capture kinds are versioned so legacy facts from
+before that cleanup guarantee are rejected and re-inspected; other platforms
+retain their existing fact kinds. A file written on another platform is ignored. Because cached facts
 decide what a closure contains, the path must lie outside the workspace and CAS
 that actions write. A missing or malformed file is ignored and rewritten.
 

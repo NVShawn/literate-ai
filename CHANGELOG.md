@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Windows dependency observation discards partial inspector facts after a failed capture, so subsequent captures cannot reuse an incomplete DLL closure.
+- Windows dependency observation discards partial inspector facts after a failed capture, so subsequent captures cannot reuse an incomplete DLL closure. Legacy PE cache entries are re-inspected after upgrade.
 
 - Let development retained profiles explicitly select build-output command
   directories before captured tools, so original tests can invoke newly built

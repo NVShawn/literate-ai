@@ -29426,3 +29426,24 @@ evidence; this repair requires a fresh driver review, lifecycle and receipt.
   All six remote-fanout checks pass locally; native renewal remains pending.
 - **Evidence:**
   - [ ] Native FreeBSD focused process-group checks and the renewed full regression pass with no new skips.
+
+
+**WINDOWS-PE-OBSERVE-001 upgrade follow-up:** The completed `b782cdb5` host
+regression passes 1,814 cases with 42 skips, but a controlled legacy-file fixture
+still loads an incomplete old `pe-imports` fact and omits a required DLL. Failure
+cleanup prevents new poison, not reuse of pre-repair data. Version only the PE
+capture kind, reject obsolete PE entries through the existing decoder, and let
+successful capture rewrite the cache. ELF/Mach-O keys and formats stay unchanged.
+The issue #90 comment records this gap before implementation. Keep the completed
+host and ongoing FreeBSD full results bound to `b782cdb5`; renew the full host
+suite, lifecycle/receipt and exact CI for the revised source. Renew actual Windows
+receiver/custody checks and current FreeBSD custody/installed-wheel checks; retain
+the full FreeBSD baseline explicitly as earlier-source evidence.
+
+- [x] Add an upgrade regression that refuses legacy incomplete PE facts.
+  Before the repair, the public observer reuses the old fact without inspecting
+  `a.dll`; the test fails at its fresh-inspection assertion.
+- [x] Version the PE capture kind without invalidating other platform fact kinds.
+  The existing decoder rejects obsolete PE entries; successful capture rewrites
+  current facts, whose repeated observation reuses the complete closure.
+- [ ] Renew affected qualification and current receipt before landing.

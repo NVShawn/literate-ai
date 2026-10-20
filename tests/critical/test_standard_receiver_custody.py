@@ -447,7 +447,10 @@ class DependencyFactCacheTests(unittest.TestCase):
             )
         self.assertEqual(raised.exception.code, "dependencies.pe-image-changed")
         key = observation._content_fact_key(
-            "pe-imports", inspector.digest, image.resolve(), old_digest
+            observation._PE_IMPORT_FACT_KIND,
+            inspector.digest,
+            image.resolve(),
+            old_digest,
         )
         self.assertNotIn(key, observation._INSPECTION_FACTS)
 
@@ -513,6 +516,59 @@ class DependencyFactCacheTests(unittest.TestCase):
             raised.exception.code, "dependencies.windows-inspector-changed"
         )
         self.assertEqual(inspector.path.read_bytes(), header + b"substitution")
+
+    def test_legacy_pe_facts_are_reinspected_after_cache_upgrade(self):
+        inspector, paths, _header, schema = self.public_pe_inputs()
+        self.cache.write_text(
+            json.dumps(
+                {
+                    "schema": observation.DEPENDENCY_FACTS_SCHEMA,
+                    "platform": "win32",
+                    "entries": [
+                        {
+                            "key": [
+                                "pe-imports",
+                                inspector.digest,
+                                str(paths["a.dll"]),
+                                ["content", observation._file_digest(paths["a.dll"])],
+                            ],
+                            "fact": [],
+                        }
+                    ],
+                }
+            )
+        )
+        calls = []
+
+        def imports(_inspector, path):
+            calls.append(path.name)
+            return (("shared.dll", False),) if path.name == "a.dll" else ()
+
+        with (
+            patch.object(observation.sys, "platform", "win32"),
+            patch.object(
+                observation, "_find_windows_pe_inspector", return_value=inspector
+            ),
+            patch.object(
+                observation, "_load_windows_api_set_schema", return_value=schema
+            ),
+            patch.object(observation, "_inspect_pe_imports", imports),
+        ):
+            observation.use_persistent_dependency_facts(self.cache)
+            result = observation.WindowsPeDependencyObserver(
+                environment={"SystemRoot": str(self.root)},
+                artifact_files=(paths["a.dll"],),
+            ).observe({"artifact_path": str(self.root)}, root_ref="test-root")
+            self.assertIn("a.dll", calls)
+            self.assertIn("shared.dll", {c["name"] for c in result.components})
+            self.reload()
+            calls.clear()
+            repeated = observation.WindowsPeDependencyObserver(
+                environment={"SystemRoot": str(self.root)},
+                artifact_files=(paths["a.dll"],),
+            ).observe({"artifact_path": str(self.root)}, root_ref="test-root")
+            self.assertEqual(repeated, result)
+            self.assertEqual(calls, [])
 
     def test_failed_pe_capture_cannot_poison_reloaded_dependency_facts(self):
         inspector, paths, header, schema = self.public_pe_inputs()
