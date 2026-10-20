@@ -25844,6 +25844,15 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
+    - [x] Admit the first reviewed installed-wheel Standard binding for an adopted
+      project whose driver and receipt policy are both absent. Reject partial
+      configuration and policy downgrade; preserve original source authority.
+      Focused CLI and rollback checks pass. The full local Python regression passes
+      1,835 tests with 42 skips (1,877 selected) in 702.401 seconds. Log SHA-256:
+      `2f1555e13548a267a931cb1ed810888c8bcb95aef23446681f7e2c6b3874a7f1`;
+      report SHA-256:
+      `acb392e8ea9679c65793244a5e44166c2dc8059eca03e0c4582c1ad95a056739`.
+      Installed source-fork use remains open.
     - [x] Connect explicit local retained execution to live workspace admission,
       preserving original authority, exact re-planning and retained CAS custody.
       Reject unsupported remote/SDK execution rather than falling back to local

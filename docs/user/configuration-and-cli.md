@@ -518,7 +518,7 @@ root-integration acceptance still remain.
 | `lock COMPONENT --large-review start\|status\|acknowledge\|apply\|cleanup [--transaction-id ID] [--page-identity ID]` | Review a genuine lock transition larger than 512 semantic differences in bounded identity-chained pages, then perform one final revalidated atomic replacement. |
 | `project validate [PATH]` | Non-mutating validation of the discovered project, catalogs, pins, skills, and generation inputs. |
 | `project tracker inspect [PATH]` | Read Git remotes and name `gh` or `glab` plus issue/review/CI/land argv. Unknown hosts skip tracker work fail closed. |
-| `project lifecycle rebind-standard [PLAN] [--project PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard binding update without mutation, or compare-and-swap an explicitly reviewed plan while changing only lifecycle and derived receipt-policy authority. |
+| `project lifecycle rebind-standard [PLAN] [--project PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard binding update or first binding for a project with neither driver nor receipt policy, then compare-and-swap an explicitly reviewed plan while changing only those two fields. |
 | `project adopt-original [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review a validated canonical project's clean Git commit/tree and explicitly select original source authority with metadata-only writes. Preserve source layout; refuse stale plans, dirty or unsafe roots, existing evidence/authority and legacy conversion transitions. This grants no execution or release admission. |
 | `project convert-stage show [--project PATH]` | Read the canonical evidence-bound conversion authority state for an adopted project. |
 | `project convert-stage advance --to retained\|drafted\|qualified [--project PATH]` | Advance exactly one adjacent stage after independently verifying the current receipt or Component-promotion evidence. No command silently promotes a tree. |
@@ -1467,6 +1467,13 @@ uses compare-and-swap. It atomically updates only `lifecycle_driver` and the der
 `test_receipt_policy`, re-observes the installed authority, and rolls the project back
 if that authority moves during the write. Editable, ambiguous, origin-less, tampered,
 or changed installs fail closed.
+
+An adopted project with neither a lifecycle driver nor a test receipt policy can use
+the same plan/apply operation to establish its first Standard binding. The reviewed
+plan records both configured fields as `null`, then derives both new fields from the
+observed installed distribution and its complete Standard policy. A partly configured
+project is refused. First binding preserves existing source, conversion and release
+authority and produces no build or test receipt.
 
 For a custom (non-Standard) receipt suite, rebind preserves its suite ID/version,
 required evidence kinds, and minimum test count. An independent harness runner stays
