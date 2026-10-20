@@ -11,6 +11,7 @@ from dataclasses import replace
 from unittest.mock import patch
 
 from literate_ai._filesystem import UnsafeFilesystemPathError
+from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
 from literate_ai.adapters import retained_project_environment as environment
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
@@ -106,13 +107,21 @@ class RetainedOutputCommandPathTests(unittest.TestCase):
 
     def test_missing_future_directory_and_captured_tools_have_fixed_order(self):
         f = self.fixture
-        workspace = f.workspace()
-        selected = workspace._environment()["PATH"].split(os.pathsep)
-        self.assertEqual(
-            selected, [str(workspace.outputs / "bin"), str(workspace.inputs / "tools")]
+        outputs = f.base / "outputs"
+        outputs.mkdir()
+        tools = tuple(
+            LocalComponentToolBinding(str(f.source / path), authority_identity=identity)
+            for _name, path, identity in f.profile.tools
         )
-        self.assertFalse((workspace.outputs / "bin").exists())
-        self.assertEqual(workspace.observations, ())
+        # Path selection precedes native dependency observation. Exercise its
+        # real owner on every host; the compiled integration below covers the
+        # workspace and child process with its supported native fixture.
+        with patch.dict(os.environ, {"PATH": "/unreviewed/ambient"}):
+            selected = environment.retained_command_path(
+                outputs, f.profile, tools
+            ).split(os.pathsep)
+        self.assertEqual(selected, [str(outputs / "bin"), str(f.source / "tools")])
+        self.assertFalse((outputs / "bin").exists())
 
     @unittest.skipUnless(
         os.name != "nt" and shutil.which("cc"), "requires native POSIX fixture"
