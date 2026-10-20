@@ -25862,8 +25862,13 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
       report SHA-256:
       `a42bb14e781ba2308c3ad5d3b5c885d765c5c11f67d272e0b549b159794b7125`.
       The source fork's first binding succeeded using the prior installed
-      `4613eda2` wheel, and the HP's isolated CLI validated it on FreeBSD.
-      Final wheel and native worker qualification remain open.
+      `4613eda2` wheel. A reviewed rebind now pins the final `cffef323` wheel:
+      SHA-256 `e7d82a5035ce991f56ea45e2085bc9f91d81e71e25da9f7023897c6442e8391e`,
+      installed distribution identity
+      `sha256:ed899116420edda0c803acf424067f102b6face4870e180104add4da431cb534`.
+      The HP's isolated installed CLI validates `/usr/src`; authority and all
+      three locks pass, while the absent retained test receipt fails as expected.
+      Native worker execution and full installed qualification remain open.
     - [x] Connect explicit local retained execution to live workspace admission,
       preserving original authority, exact re-planning and retained CAS custody.
       Reject unsupported remote/SDK execution rather than falling back to local
