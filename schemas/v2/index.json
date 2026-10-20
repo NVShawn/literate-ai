@@ -952,7 +952,9 @@
       "public_ids": [
         "urn:literate-ai:schema:v1:worker-provisioner",
         "urn:literate-ai:schema:v1:worker-provision-request",
-        "urn:literate-ai:schema:v1:worker-provision-response"
+        "urn:literate-ai:schema:v1:worker-provision-response",
+        "urn:literate-ai:schema:v1:retained-allocation-inspection-request",
+        "urn:literate-ai:schema:v1:retained-allocation-inspection-response"
       ]
     },
     {

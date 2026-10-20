@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Register both retained allocation-inspection resources in the v2 schema index,
+  restoring complete catalog validation. The frozen v1 catalog is unchanged.
+
 - Add development retained secondary-account identity checks and FreeBSD POSIX
   descriptor ACL custody, preserving masked permissions for other principals and
   restoring exact original access/default ACLs after failures or drift.
