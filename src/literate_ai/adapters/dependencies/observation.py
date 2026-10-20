@@ -608,7 +608,7 @@ def _python_distribution_component(
 # and bound by that path and their content digest.
 _INSPECTION_FACTS: dict[tuple[object, ...], object] = {}
 _INSPECTION_FACTS_LIMIT = 65536
-# Concurrent dyld_info inspections within one closure level.
+# Concurrent independent native inspections within one closure frontier.
 _INSPECTION_WORKERS = min(8, os.cpu_count() or 1)
 _BOOT_SESSION: list[str | None] = []
 
@@ -1993,23 +1993,31 @@ class WindowsPeDependencyObserver:
             *self.library_roots,
             *(Path(item) for item in search_paths if item),
         ]
-        images, image_edges, api_set_bindings, unavailable_delay_imports = _pe_closure(
-            inspector,
-            seeds,
-            roots,
-            api_set_schema=api_set_schema,
-        )
-        if _file_digest(inspector.path) != inspector.digest:
+        try:
+            images, image_edges, api_set_bindings, unavailable_delay_imports = (
+                _pe_closure(
+                    inspector,
+                    seeds,
+                    roots,
+                    api_set_schema=api_set_schema,
+                )
+            )
+            if _file_digest(inspector.path) != inspector.digest:
+                raise DependencyObservationError(
+                    "dependencies.windows-inspector-changed",
+                    "the PE dependency inspector changed during observation",
+                )
+            if _file_digest(Path(api_set_schema.path)) != api_set_schema.digest:
+                raise DependencyObservationError(
+                    "dependencies.pe-api-set-changed",
+                    "the Windows API-set schema changed during dependency observation",
+                )
+        except BaseException:
+            # Failed captures may already have published facts before discovering
+            # a changed inspector or an unresolved import. None may outlive the
+            # failed capture under the originally bound inspector identity.
             _forget_inspection_facts(inspector.digest)
-            raise DependencyObservationError(
-                "dependencies.windows-inspector-changed",
-                "the PE dependency inspector changed during observation",
-            )
-        if _file_digest(Path(api_set_schema.path)) != api_set_schema.digest:
-            raise DependencyObservationError(
-                "dependencies.pe-api-set-changed",
-                "the Windows API-set schema changed during dependency observation",
-            )
+            raise
         refs = {image.path: _pe_ref(image) for image in images}
         unavailable_by_importer: dict[str, list[str]] = {}
         for item in unavailable_delay_imports:
@@ -2964,8 +2972,8 @@ def _pe_closure(
     directory_entries: dict[Path, dict[str, Path]] = {}
     pe_validity: dict[Path, bool] = {}
     pending = deque(sorted(seeds))
-    while pending:
-        raw_path = pending.popleft()
+
+    def inspect(raw_path):
         try:
             path = Path(raw_path).resolve(strict=True)
         except OSError as exc:
@@ -2974,7 +2982,7 @@ def _pe_closure(
             ) from exc
         path_string = str(path)
         if path_string in images:
-            continue
+            return None
         if path.is_symlink() or not path.is_file() or not _is_pe(path):
             raise DependencyObservationError(
                 "dependencies.pe-image-invalid", f"PE image {path} is unsafe or invalid"
@@ -2989,80 +2997,101 @@ def _pe_closure(
                     "dependencies.pe-image-changed",
                     f"PE image changed during inspection: {path}",
                 )
-            _remember_inspection_fact(key, imports)
-        image = _PeImage(path_string, image_digest, imports)
-        images[path_string] = image
-        for name, delayed in imports:
-            contract = name.casefold()
-            virtual_contract = False
-            schema_contract: str | None = None
-            if _is_windows_api_set_contract(contract):
-                try:
-                    api_set_resolution = api_set_schema.resolve(
-                        contract, importer=path_string
-                    )
-                except DependencyObservationError as exc:
-                    if exc.code != "dependencies.pe-api-set-unresolved":
-                        raise
-                    # Older contracts can be represented by exact forwarder images
-                    # in System32/downlevel instead of the current namespace map.
-                else:
-                    name = api_set_resolution.host
-                    schema_contract = api_set_resolution.schema_contract
-                    virtual_contract = True
-            try:
-                target = _resolve_pe_import(
-                    name,
-                    (path.parent, *roots),
-                    directory_entries=directory_entries,
-                    pe_validity=pe_validity,
-                )
-            except DependencyObservationError as exc:
-                if (
-                    delayed
-                    and _is_windows_api_set_contract(contract)
-                    and exc.code == "dependencies.pe-import-unresolved"
-                ):
-                    api_set_bindings.add(
-                        _PeApiSetBinding(
-                            path_string,
-                            contract,
-                            schema_contract,
+        return _PeImage(path_string, image_digest, imports), key
+
+    pool = ThreadPoolExecutor(max_workers=_INSPECTION_WORKERS)
+    try:
+        while pending:
+            # Inspect independent images together; resolve their loader edges in
+            # queue order. The existing hash-bound memo never admits path-only facts.
+            frontier = tuple(dict.fromkeys(pending))
+            pending.clear()
+            for entry in pool.map(inspect, frontier):
+                if entry is None:
+                    continue
+                image, key = entry
+                if image.path in images:
+                    continue
+                if key not in _INSPECTION_FACTS:
+                    _remember_inspection_fact(key, image.imports)
+                path = Path(image.path)
+                path_string = image.path
+                images[path_string] = image
+                for name, delayed in image.imports:
+                    contract = name.casefold()
+                    virtual_contract = False
+                    schema_contract: str | None = None
+                    if _is_windows_api_set_contract(contract):
+                        try:
+                            api_set_resolution = api_set_schema.resolve(
+                                contract, importer=path_string
+                            )
+                        except DependencyObservationError as exc:
+                            if exc.code != "dependencies.pe-api-set-unresolved":
+                                raise
+                            # Older contracts may use exact System32/downlevel
+                            # forwarder images instead of the current namespace map.
+                        else:
+                            name = api_set_resolution.host
+                            schema_contract = api_set_resolution.schema_contract
+                            virtual_contract = True
+                    try:
+                        target = _resolve_pe_import(
                             name,
-                            None,
-                            True,
+                            (path.parent, *roots),
+                            directory_entries=directory_entries,
+                            pe_validity=pe_validity,
                         )
-                    )
-                    continue
-                if (
-                    delayed
-                    and not virtual_contract
-                    and not _is_windows_api_set_contract(contract)
-                    and exc.code == "dependencies.pe-import-unresolved"
-                ):
-                    unavailable_delay_imports.add(
-                        _PeUnavailableDelayImport(path_string, name)
-                    )
-                    continue
-                raise DependencyObservationError(
-                    exc.code,
-                    f"PE image {path_string} has unresolved import {name!r}",
-                ) from exc
-            if virtual_contract:
-                api_set_bindings.add(
-                    _PeApiSetBinding(
-                        path_string,
-                        contract,
-                        schema_contract,
-                        name,
-                        target,
-                        delayed,
-                    )
-                )
-            else:
-                edges.add((path_string, target))
-            if target not in images:
-                pending.append(target)
+                    except DependencyObservationError as exc:
+                        if (
+                            delayed
+                            and _is_windows_api_set_contract(contract)
+                            and exc.code == "dependencies.pe-import-unresolved"
+                        ):
+                            api_set_bindings.add(
+                                _PeApiSetBinding(
+                                    path_string,
+                                    contract,
+                                    schema_contract,
+                                    name,
+                                    None,
+                                    True,
+                                )
+                            )
+                            continue
+                        if (
+                            delayed
+                            and not virtual_contract
+                            and not _is_windows_api_set_contract(contract)
+                            and exc.code == "dependencies.pe-import-unresolved"
+                        ):
+                            unavailable_delay_imports.add(
+                                _PeUnavailableDelayImport(path_string, name)
+                            )
+                            continue
+                        raise DependencyObservationError(
+                            exc.code,
+                            f"PE image {path_string} has unresolved import {name!r}",
+                        ) from exc
+                    if virtual_contract:
+                        api_set_bindings.add(
+                            _PeApiSetBinding(
+                                path_string,
+                                contract,
+                                schema_contract,
+                                name,
+                                target,
+                                delayed,
+                            )
+                        )
+                    else:
+                        edges.add((path_string, target))
+                    if target not in images:
+                        pending.append(target)
+    finally:
+        # A loader/inspection refusal cancels queued work and joins the bounded
+        # operations already running before returning the failure to the receiver.
+        pool.shutdown(wait=True, cancel_futures=True)
     return (
         tuple(images[path] for path in sorted(images)),
         tuple(sorted(edges)),

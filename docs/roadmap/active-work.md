@@ -25841,6 +25841,30 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
 - **Conclusion:** Preserve original source and release authority while adding typed bounded retained admission and complete Standard execution; no conversion bypass.
 - **Depends on:** Accepted ADR 0048; package providers retain their own qualification
+- **Windows qualification follow-up:** Merged-main CI run `39442421907` exposes
+  simulated dependency/BOM tools whose extensionless filenames lose executable
+  mode on Windows, relocated Python executables without their runtime home, and
+  POSIX loader-path assertions masked by the Windows unsupported-loader guard.
+  Use executable filenames for simulated tools, real venv redirectors for isolated
+  interpreter discovery, and native path comparison for PATHEXT casing. Exercise
+  POSIX path validation explicitly while preserving Windows loader refusal.
+  Retain genuine manifests, byte hashes, custody guards and version/order/pin
+  assertions; qualify the four affected modules without changing production rules
+  or adding skips. All 33 affected host cases pass across completed module runs,
+  including a fresh seven-case interpreter rerun. Static reviews, current receipt
+  and verification pass. Initial native Windows evidence passes all 16 custody
+  cases with five existing POSIX skips, plus three loader cases with two existing
+  POSIX skips. The collected custody archive SHA-256 is
+  `de6a76346b9c0b5705de044768f0f0f3f70cea3c7f3f83ddb1f5ca814a7bb14a`.
+  Final exact-source native qualification and CI remain open.
+- **Separate Windows receiver blocker:** [Issue #90](https://github.com/jordanhubbard/literate-ai/issues/90)
+  owns the actual PE dependency-observation timeout. A native rerun passes nine
+  toolchain cases before this receiver fails its separate 300-second production
+  observation limit. Preparing the catalog before admission does not fix that
+  bound; withdraw that unproven test change and preserve the actual receiver
+  test. Trace and qualify the native observer independently, retaining cold-start
+  custody, current image/inspector hashes and live-profile invalidation. Do not
+  increase deadlines or claim the fixture repair makes main release-qualified.
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
@@ -28727,8 +28751,157 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   configured finalize, model-free rebuild and projected-command cases on the
   actual guest, and preserve unsupported-host refusal rather than aliasing another
   POSIX OS. Optional Elixir fixtures must also retain the real host identity.
+  The fixture audit at `f05a8390` passes the complete host suite: 1,831
+  selected, 1,789 passed, 42 skipped and zero failures in 1,375.551 seconds;
+  log SHA-256 `a1f10e27fde77b9c149528e5d5e632db2e54e35275ee7b282ef0c77c82fb13c6`. Actual FreeBSD passes the
+  four worker-health cases and both configured-finalize cases without skips.
+  Its worker-toolchain/operator-grant case then exhausts the fixture's health
+  admission budget before reaching FINALIZE. Both job clones pass Git connectivity
+  checks but inherit four borrowed object stores; transient pack-index warnings
+  were retained. Compare the unchanged fixture budget on a fully independent
+  `--dissociate` checkout before attributing the refusal to runtime behavior or
+  changing timing. Native full-suite and isolated installed-wheel qualification
+  remain open.
+  The independent replay also exhausts the unchanged 600-second action deadline
+  during BUILD (745.833 seconds including fixture setup). Give this actual
+  FreeBSD integration fixture a finite 1,800-second action/observation budget;
+  other hosts retain 600 seconds. Its operator watcher must remain available for
+  that same budget and stop when rebuild ends, including exceptional exits.
+  Keep production deadlines, health admission, exact grant requests and the
+  prohibition on controller-local phases intact. Renew focused host/native
+  qualification and the complete regression before counting this repair green.
+  The independent native full run then passes 764 cases, including all three
+  actual `pkg` construction/inspection cases, before the isolated self-hosting
+  replay expires at 300 seconds. The proof already grants Linux and Windows a
+  finite 900-second candidate bound; include FreeBSD in that same policy.
+  Keep both clean replay attempts, frozen-source and import-isolation checks,
+  output limits and descendant termination intact. The supported driver and
+  sample-runner review checks remain current: this separately classified offline
+  replay helper is outside those live lifecycle closures. Recheck the existing
+  finalized receipt and qualify the actual repaired native replay before landing.
+  Prior incomplete native results remain predecessor evidence.
+  Measured native generation-one completions take 1,139, 1,143 and 1,173 seconds,
+  exceeding the initial 900-second policy. Allow each FreeBSD candidate 1,800
+  seconds and expose the existing parallel runner module deadline through Make.
+  Qualify the four-generation proof with a finite 10,800-second module deadline;
+  retain every replay, probe, source/isolation assertion and descendant limit.
+  Other platforms and the default 3,600-second module deadline remain unchanged.
+  The frozen host regression at `45d5ce24` passes 1,831 selected cases:
+  1,789 passed, 42 skipped, zero failures in 1,222.277 seconds. The actual
+  FreeBSD installed-wheel gate passes the same host-qualified wheel identity
+  `sha256:857a60dd082b002118314cdfb6ea7cd4453b1c6669a10573b6c834188091717c`;
+  retained log SHA-256 is
+  `42d67d0f8b8ca21b0eb72f98c8d1339c41767ec89252805143e06910771bfe9f`.
+  Documenting the module option changes bound documentation authority despite
+  unchanged driver/runner closures. Renew the host lifecycle rather than reuse
+  its predecessor receipt: the fresh finalized candidate passes and its promoted
+  receipt is `sha256:32cc1dfd7ec03dccc588b5468e36f55bf5844837469ae0ebb9665c69008578a7`.
+  Supported require-current and verify pass (two passes, three configured skips).
+  The complete native regression at `eb8de8cb` remains in progress; its pending
+  results and pending exact-head hosted CI are not qualification claims.
+  Native regression then passes 1,072 cases and all four actual native package
+  cases before receiver-custody setup pins BSD Make through its wrapper and
+  fails GNU Make validation. Select the wrapper target through the existing GNU
+  Make discovery owner instead of the first executable named `make`; preserve
+  unchanged-tool success and changed-tool response withholding. This is a test
+  fixture repair; production discovery and authority closures remain unchanged.
+  The repaired fresh native run then passes 1,121 cases, all seven receiver
+  custody cases and all four native package cases, before an immediate descendant
+  state observation races asynchronous SIGKILL delivery. An unchanged isolated
+  three-run probe observes one child as running at return and absent 10 ms later;
+  the other two runs pass. Use a shared finite five-second observation bound in
+  both cancellation fixtures, retain no-result, parent-exit, descendant absence/
+  zombie and ledger assertions, and report the last state on failure. Production
+  cancellation remains unchanged. Expose the runner's existing start-directory
+  selector through Make so the unqualified E2E suite can run early alongside a
+  fresh complete regression; every selected native case still requires renewal.
+  The early native E2E sweep catches a separate stale expected host Flavor after
+  16 passes: signed derivation correctly returns FreeBSD, while its test expects
+  Linux. Audit the remaining host-dependent fallback expressions and use the
+  existing truthful host-family fixture in source promotion, native Bazel consumer
+  qualification and Python lifecycle projections. Keep cross-platform negative
+  fixtures and correct POSIX shared-library suffix selection intact. All five
+  native dispatch repetitions pass (25 cases, no skips), and the native signal/
+  timeout ledger case passes before the superseded full runner is stopped with
+  its exact owner and checkout verified.
+  With the exact locked pip fixture supplied through worker alignment, all eight
+  native Python lifecycle cases pass without skips. The fresh full regression
+  passes all four native package and seven custody cases; the early E2E sweep
+  then finds a legacy rollback fixture that assumes GNU Make exit/diagnostic
+  spelling and tries to execute the shell builtin `exit` directly under BSD Make.
+  Use a real Python child with exit code seven and an independent direct native
+  Make failure as the diagnostic/status oracle. Preserve exact restored bytes,
+  typed conversion failure and the absence of partially installed authority. Renew
+  focused host/native cases and the complete frozen native suite before landing.
+  All eight harness-inventory cases pass on the host; lint/format, driver/runner
+  reviews and the current 228-case receipt pass. Native renewal remains pending.
+  The repaired eight-case rollback group then passes on actual FreeBSD. The
+  four-worker early E2E sweep reaches the next unqualified monorepo fixture and
+  finds its retained test command assumes a versionless `python3` alias. Bind
+  that command to the running interpreter with native shell quoting, and keep
+  actual per-root execution, shared-input isolation and receipt/rollback checks.
+  Preserve non-executed shebang and transcript fixtures found by the alias audit;
+  normalize the Make failure fixture's interpreter path for Windows shells.
+  Renew both affected host groups and the native monorepo group before a fresh
+  complete native run; no worker alias or ambient interpreter is hand-repaired.
+  The five monorepo and eight harness cases pass on the host without skips;
+  lint/format, both closure reviews and the current receipt remain green.
+  The combined native E2E sweep passes all thirteen repaired cases and reaches
+  180 passes before repository child lifecycle planning reveals an actual target
+  contract omission: discovery preserves FreeBSD, but the closed declaration
+  allowlist excludes it. Admit canonical FreeBSD x86-64/aarch64 targets while
+  retaining unknown-target refusal and exact native-host matching before writes.
+  Add read-only foreign-target planning/execution refusal coverage; preserve the
+  existing real dependency, resume, blocked-consumer and cancellation checks.
+  This changes reviewed runtime authority: renew closure and documentation
+  reviews, the finalized host lifecycle receipt, native/installed wheel gates and
+  the complete frozen native regression before landing. Prior partial runs remain
+  evidence for their actual source revisions, not current complete qualification.
+  On the renewed runtime source, all four native package cases, all seven custody
+  cases and the combined six repository-lifecycle, eight harness and five monorepo
+  cases pass. The early E2E sweep then reaches worker alignment and finds another
+  local-transport fixture declaring an ambient `python3` alias. Declare the running
+  interpreter's actual command name and expose its directory only within that
+  fixture's PATH; keep the production name-only template contract, real probe,
+  declared-only installation, secret permissions and backup assertions intact.
+  Audit other live alignment templates separately from synthetic probe transcripts.
+  Renew the whole alignment module on the host and native worker before another
+  frozen complete native run. The isolated installed-wheel check retains its exact
+  runtime source while this test-only repair proceeds; partial regressions do not
+  qualify a complete suite.
+  The focused late-worker sweep then passes nine cases and exposes a second
+  transport fixture that always unwraps `bash -lic`. FreeBSD intentionally sends
+  the literal receiver command to its native shell. Execute that generated command
+  through `/bin/sh -c` in the disposable local transport, verify the isolated Python
+  prefix, and retain request binding, measured-volume, path privacy and no-write
+  assertions. Leave explicit Linux Bash custody cases and the existing native
+  FreeBSD action-transport cases intact. Require the full late-worker sweep to pass
+  before restarting the broad native jobs, so late fixtures fail promptly.
+  The early native smoke sweep passes 218 cases before project-guidance setup
+  constructs a commit environment without PATH, so executable lookup falls back to
+  system directories and misses native Git in its declared installation directory.
+  Retain the calling PATH alongside the fixture's explicit Git author/committer
+  identities; keep its isolated environment and exact checkout-commit CI assertions.
+  The Git-identity environment audit finds this as the sole literal dictionary
+  omitting both inherited variables and PATH. Renew guidance plus the remaining
+  late smoke modules before another broad run; production guidance stays unchanged.
+  The late native smoke subset then passes 138 cases before its executable-drift
+  fixture inherits the installed Python binary's read-only mode through `copy2`.
+  Grant owner-write permission only to the disposable copy before creating the
+  tool binding, preserve its execution bits, append actual drift bytes and require
+  the unchanged production binding to reject that mutation. Do not modify the
+  installed interpreter or move permission changes after binding. Audit other
+  copied-tool mutation fixtures, then renew this six-case module and the remaining
+  late-smoke cases before broad native qualification.
+  PR #68 subsequently merged as `f05f1858` after exact-head CI passed at
+  `e3a6b778`. Its complete actual FreeBSD regression recorded 1,774 passes and
+  58 skips across 1,832 selected cases with no failures. Separate E2E and smoke
+  sweeps and the actual installed-wheel gate also passed. The retained native
+  bundle identity is
+  `sha256:5cc15e8565776d35e7b6bd87d5ec0aeeaef2c56c1cd090bef277337a73a0dbd7`.
   These predecessor results do not qualify the later original-adoption or
-  committed-target verification changes recorded below.
+  committed-target verification changes recorded below; the combined tree must
+  renew its own lifecycle and native evidence.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
@@ -29154,8 +29327,54 @@ All six current-lock/planning checks pass, including original-stage retained
 planning with a distinct authority-bound identity and no execution admission.
 Repository lint, format, layout and public-export checks pass. Ordinary rebuild
 refuses the original stage and directs the operator to retained planning.
-**Next action in progress:** full regression qualification before native
-deployment; complete source-project coverage and native admission remain unfinished.
+**Current integration decision (PR #81):** Integrate the merged FreeBSD foundation
+from PR #68 (`f05f1858`) without discarding either branch's recorded scope or
+evidence. Resolve the changelog, design traceability and roadmap together, then
+review and record the combined lifecycle-driver identity through its supported
+review command. Renew the finalized host receipt and qualify the combined host,
+native and installed-wheel paths before treating this integration as ready.
+Earlier branch and FreeBSD results retain their actual source identities.
+Include the confirmed Windows fixture repair from PR #89 before final combined
+native and installed qualification. Its exact source passed all 33 affected
+Windows cases (26 passed, seven existing POSIX skips). The independent FreeBSD
+preflight remains bound to its sealed `08211e5e` checkout; advancing this host
+integration does not modify that checkout. Receiver timeout issue #90 remains a
+separate production blocker and is not fixed by these fixtures.
+**Combined qualification decision:** Integrate reviewed parallel PE observation
+candidate `1fbc7e7f` from issue #90 before finalizing this review. Its unchanged
+native Windows receiver/live-profile tests pass both cases in 571.256 seconds
+under the existing per-observation limit; seven native custody cases pass with
+three existing POSIX-only skips. Preserve this candidate's actual source identity
+and old `b9e3615e` host/native evidence. Review the combined driver/document
+identity and obtain a new real finalized host receipt, then qualify the frozen
+combined host, native and installed paths. Superseded partial runs must not be
+relabeled as combined-source passes.
+The first independent FreeBSD preflight at `08211e5e` stops after four adoption
+passes when the ordinary-rebuild refusal test includes a legitimate diagnostic
+performance span in its unchanged-tree snapshot. Keep the complete original-tree
+comparison and actual CLI refusal, but explicitly bind that test's disposable
+`OBJ_DIR` to a sibling outside the original source. Verify that telemetry still
+exists there, then rerun the full adoption module and remaining native preflight.
+Do not exclude arbitrary new source files or disable production telemetry.
+The revised host adoption module passes all ten cases with no skips; the combined
+Windows fixture modules pass all 37 host cases. The native rerun passes all ten
+adoption cases, then exposes the same diagnostic-output assumption in the
+non-host lock status test. Give that actual status invocation its own sibling
+`OBJ_DIR` as well; retain the complete project snapshot, target/lock identity
+checks and real telemetry. Rerun the affected host and native lock module before
+continuing native qualification.
+The combined full host regression passes 1,810 tests with 42 declared skips
+(1,852 selected), zero failures and zero known failures. Static/export/layout,
+strict OpenSpec and all 121 documentation diagrams pass. An initial lifecycle
+attempt exhausted three Swift candidates at compilation; its failed evidence is
+preserved. A fresh same-authority lifecycle passes actual generation, native
+build, generated tests and independent acceptance. Supported receipt promotion,
+candidate comparison, require-current and project verification pass with receipt
+`sha256:4cc33e9be4762acbac30fd06624a524059f0c9b5a47291d5816f99b8d0336b67`.
+Native FreeBSD, installed-wheel and exact review CI qualification of this combined
+runtime remain open; these host results do not substitute for them.
+**Next action in progress:** integrate current main and renew combined
+qualification; complete source-project coverage and native admission remain unfinished.
 
 An actual original native source tree now has three validated, current locked
 unit contracts and the explicit original authority projection. Applying its
@@ -29204,6 +29423,15 @@ six real non-host target/current-policy/refusal checks and the existing installe
 HTML lock-state fixture. Three project-verification checks also pass. Lint,
 format, repository layout and public-export checks pass. No native build,
 package or release admission is claimed by lock-health verification.
+
+**Windows fixture renewal:** Combined-source native preflight passes all ten
+original-adoption cases and all six non-host lock cases, then finds the new
+output-command PATH fixture using an extensionless copied executable. Windows
+correctly refuses its non-executable manifest mode. Give this fixture a real
+`.exe` name and rediscover its manifest, preserving the strict production tool
+check, output ordering and unchanged default-wire assertions. The full host
+regression and installed-wheel smoke already pass at `6f933e54`; native full
+regression remains bound to that source. Rerun the affected fixture after repair.
 
 ### [ ] TRACKER-REPO-001 — Bind forge commands to the selected repository
 
@@ -29308,6 +29536,89 @@ rather than treating resumed partial coverage as release qualification.
 - **Direction:** Finish the queued retained-project review after original-source adoption.
 - **Conclusion:** Exact `d6070ba5` CI passes, but PR #82 conflicts with the advancing #81 base in changelog, roadmap and authority metadata. Merge the reviewed base without dropping either branch's behavior; regenerate combined driver/document review through supported commands. Retain each earlier receipt and native result under its actual source identity. Current original-suite native acceptance still depends on scoped secondary-account support from #85/#87; a correct privileged-skip refusal grants no admission.
 - **Implementation:**
-  - [ ] Resolve the four metadata conflicts and bind combined authority.
+  - [x] Resolve the four metadata conflicts and bind combined authority.
+  Both branches' changelog and roadmap entries are preserved. Supported combined
+  driver/document reviews, static/export/layout and strict OpenSpec gates pass.
+  Nine focused modules pass all 76 cases, including cache recovery, retained
+  input/runtime/platform, public frontend, rebind, catalog and strict uniqueness.
 - **Evidence:**
   - [ ] Renew combined local and native/installed qualification, current receipt and exact CI before landing.
+
+### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
+
+Upstream: [issue #90](https://github.com/jordanhubbard/literate-ai/issues/90).
+
+- **Priority:** P0, release blocker
+- **Direction:** Keep complete native receiver observation within its existing
+  300-second production limit, including cold PE import inspection.
+- **Conclusion:** Inspect independent images in bounded concurrent frontiers,
+  then merge results in deterministic queue order through the existing loader
+  resolution and graph owners. Preserve fresh image hashes before/after inspection,
+  exact inspector identity, content-bound fact reuse, API-set/delay-import rules,
+  failure cleanup and live-profile invalidation. Do not increase timeouts or skip
+  the actual receiver case.
+- **Diagnostic evidence:** On source `0d683978`, 208 serial native inspections
+  consume 251.876 of 270.172 measured seconds; path resolution consumes 8.319.
+  These are wrapper timings around actual operations, not acceptance. The
+  diagnostic stopped at its own bound; the original SSH session later timed out,
+  and its final diagnostic file was read through a separate bounded probe.
+- **Implementation:**
+  - [x] Reuse bounded native-inspection concurrency for PE closure frontiers.
+  - [x] Retain deterministic graph facts and reject image/inspector substitution.
+- **Evidence:**
+  - [x] Deterministic thread overlap, serial/parallel graph equivalence and
+    mutation refusal pass alongside existing dependency/custody regressions.
+    All ten custody checks pass, including three new parallel PE cases; focused
+    host tool-dependency, actual receiver and PE input checks also pass. Static,
+    export/layout, strict OpenSpec and supported driver/document reviews pass.
+    Candidate `1fbc7e7f` passes seven native Windows custody cases with three
+    existing POSIX-only skips, including all three new parallel PE checks.
+  - [x] The unchanged native Windows receiver/live-profile module passes both
+    cases in 571.256 seconds with the production 300-second per-observation
+    limit unchanged. Its candidate source, report hashes and guard blobs are
+    retained separately; combined-source final qualification remains open.
+  - [x] Renew combined driver/document review and the finalized host receipt.
+    Receipt `62ec04fa29ff237491a81f69fa480e9680b784cce623dd94e3a91bf47570eeb3`
+    is current after a fresh generated lifecycle and independent acceptance.
+    The complete combined host regression passes 1,813 cases with 42 existing
+    skips out of 1,855 selected; documentation checks also pass. Earlier native
+    candidate evidence remains bound to its original revision.
+  - [ ] Complete combined-source native regression, installed-wheel qualification
+    and exact required CI before landing.
+
+**Failed-capture cache follow-up:** A controlled public-observer fixture at
+`a5f95173` changes the bound inspector and then encounters an unresolved import.
+Two partial facts remain under the earlier inspector digest. Restoring the
+inspector and selecting the first image reuses one of those facts and omits a
+required shared DLL; clearing the memo yields the complete graph. This diagnostic
+uses a simulated inspector and establishes no native acceptance or containment.
+The issue #90 follow-up records the existing cache-custody contract violation.
+
+**Conclusion:** On any PE closure or closing inspector/API-set check failure,
+discard facts for that bound inspector before propagating the original failure.
+Preserve successful-path fact keys, graph rules and every existing deadline.
+The prior driver `5f6f5acc` and receipt `62ec04fa` remain source-bound baseline
+evidence; this repair requires a fresh driver review, lifecycle and receipt.
+
+- [x] Add a deterministic failed-capture/reloaded-cache recovery regression.
+  It fails against the earlier implementation because `a.dll` is reused without
+  inspection, then passes with the repair for one and two inspection workers.
+- [x] Discard affected inspector facts on closure and closing-check failures.
+  All 11 custody checks pass locally. The inspector closing-guard fixture now
+  mutates after real parallel capture, avoiding transient partial-file races.
+- [ ] Renew the current finalized host receipt, full host regression, native
+  Windows receiver and installed/native evidence, then require exact-head CI.
+
+
+### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
+
+- **GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
+- **Priority:** P1, PR #81 qualification blocker
+- **Owning authority:** native process-group termination fixture.
+- **Direction:** Finish native qualification without confusing interpreter startup with failed signal delivery.
+- **Conclusion:** The FreeBSD full run at `6f933e54` stopped after 1,278 passes and 36 skips because the child shutdown marker was absent. The fixture starts its one-second deadline before child readiness. Wait for an explicit handler-ready marker at the real process-spawn boundary, with bounded setup and cleanup on failure; retain real group termination, timeout status and shutdown assertion. Production supervision is unchanged.
+- **Implementation:**
+  - [x] Establish bounded child readiness before starting supervision's existing timeout.
+  All six remote-fanout checks pass locally; native renewal remains pending.
+- **Evidence:**
+  - [ ] Native FreeBSD focused process-group checks and the renewed full regression pass with no new skips.

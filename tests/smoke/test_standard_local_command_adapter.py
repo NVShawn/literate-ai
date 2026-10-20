@@ -1608,7 +1608,7 @@ class StandardLocalCommandAdapterTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             launcher = Path(temporary) / "python-copy"
             shutil.copy2(sys.executable, launcher)
-            launcher.chmod(launcher.stat().st_mode | stat.S_IXUSR)
+            launcher.chmod(launcher.stat().st_mode | stat.S_IXUSR | stat.S_IWUSR)
             binding = LocalComponentToolBinding(str(launcher))
             with launcher.open("ab") as stream:
                 stream.write(b"drift")

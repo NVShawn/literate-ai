@@ -39,8 +39,9 @@ class RetainedProjectBomTests(unittest.TestCase):
         for name in ("src", "sdk", "dependencies", "exports"):
             (self.root / name).mkdir()
         (self.root / "src/main.txt").write_bytes(b"retained\x00asset")
-        (self.root / "sdk/tool").write_bytes(b"declared-tool-fixture")
-        (self.root / "sdk/tool").chmod(0o755)
+        # Windows derives executable mode from the filename, not chmod(0755).
+        (self.root / "sdk/tool.exe").write_bytes(b"declared-tool-fixture")
+        (self.root / "sdk/tool.exe").chmod(0o755)
         (self.root / "dependencies/input.dat").write_bytes(b"declared dependency")
         (self.root / "exports/app").write_bytes(b"build output")
         limits = RetainedProjectLimits(100, 1024**2, 10 * 1024**2)
@@ -56,7 +57,7 @@ class RetainedProjectBomTests(unittest.TestCase):
         )
         plan, self.locks = retained_project_sbom_fixture()
         tool = next(
-            member for member in self.manifest.members if member.path == "sdk/tool"
+            member for member in self.manifest.members if member.path == "sdk/tool.exe"
         )
         self.plan = replace(
             plan,
@@ -66,7 +67,7 @@ class RetainedProjectBomTests(unittest.TestCase):
                 tools=(
                     (
                         "tool",
-                        "sdk/tool",
+                        "sdk/tool.exe",
                         ContentIdentity.parse_uri("sha256:" + tool.sha256),
                     ),
                 ),
@@ -155,7 +156,7 @@ class RetainedProjectBomTests(unittest.TestCase):
             {
                 "profile": replace(
                     self.plan.profile,
-                    tools=(("tool", "sdk/tool", canonical_identity("other tool")),),
+                    tools=(("tool", "sdk/tool.exe", canonical_identity("other tool")),),
                 )
             },
         ):

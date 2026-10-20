@@ -4,7 +4,6 @@ import hashlib
 import io
 import json
 import shutil
-import sys
 import tempfile
 import unittest
 from dataclasses import replace
@@ -24,6 +23,7 @@ from literate_ai.contracts import canonical_identity
 from literate_ai.contracts.operator_adoption import ConversionAuthorityStage
 from literate_ai.source_to_specification import canonical_value
 from literate_ai.source_to_specification.synthesis import capability_contract_path
+from tests.support.host_platform import host_os_family
 from tests.support.root_parent_adapter import root_parent_for_fixture_project
 
 KEY = b"local-bootstrap-key-material-32-bytes-minimum"
@@ -713,13 +713,7 @@ class ArbitrarySourceCliTests(unittest.TestCase):
             )
             self.assertTrue(accepted_result["qualification_required"])
             promoted = accepted_result["promoted_project"]
-            platform_flavor = (
-                "windows"
-                if sys.platform == "win32"
-                else "macos"
-                if sys.platform == "darwin"
-                else "linux"
-            )
+            platform_flavor = host_os_family()
             platform_coordinate = f"flavor://literate-ai/os-{platform_flavor}"
             self.assertEqual(promoted["component"], "components/source/component.md")
             self.assertTrue((project_target / promoted["component"]).is_file())

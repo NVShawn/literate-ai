@@ -5,7 +5,10 @@ from __future__ import annotations
 import copy
 import json
 import os
+import shlex
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -60,6 +63,17 @@ class MonorepoComponentTests(unittest.TestCase):
         }
         (self.source / "shared").mkdir()
         (self.source / "shared" / "api.py").write_text("API = 1\n", encoding="utf-8")
+        # A versionless alias may be absent or select another installation.
+        command = [
+            Path(sys.executable).as_posix(),
+            "-m",
+            "unittest",
+            "discover",
+            "-v",
+        ]
+        test_command = (
+            subprocess.list2cmdline(command) if os.name == "nt" else shlex.join(command)
+        )
         for name in ("kit", "runtime"):
             root = self.source / name
             root.mkdir()
@@ -76,7 +90,6 @@ class MonorepoComponentTests(unittest.TestCase):
                 + "/value.py').exists())\n",
                 encoding="utf-8",
             )
-            interpreter = "python" if os.name == "nt" else "python3"
             self.selection["components"].append(
                 {
                     "name": name,
@@ -84,7 +97,7 @@ class MonorepoComponentTests(unittest.TestCase):
                     "commands": [
                         {
                             "id": "test",
-                            "command": f"{interpreter} -m unittest discover -v",
+                            "command": test_command,
                             "cwd": name,
                             "evidence": f"{name}/test_value.py",
                         }

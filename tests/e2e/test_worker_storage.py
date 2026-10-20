@@ -120,6 +120,12 @@ class WorkerStorageTests(unittest.TestCase):
                     receiver = _probe_command(
                         executable=sys.executable, timeout_ms=5000
                     )
+                elif FAMILY == "freebsd":
+                    self.assertEqual(
+                        shlex.split(command[-1])[:5],
+                        [sys.executable, "-I", "-S", "-B", "-c"],
+                    )
+                    receiver = ("/bin/sh", "-c", command[-1])
                 else:
                     shell = shlex.split(command[-1])
                     self.assertEqual(shell[:2], ["bash", "-lic"])

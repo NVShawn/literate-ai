@@ -34,6 +34,8 @@
   Original authority is preserved; canonical installed CLI, native and public
   package/release qualification remain open.
 
+- Windows dependency observation discards partial inspector facts after a failed capture, so subsequent captures cannot reuse an incomplete DLL closure.
+
 - Let development retained profiles explicitly select build-output command
   directories before captured tools, so original tests can invoke newly built
   products by name. Preserve default identities and refuse undeclared or
@@ -47,6 +49,21 @@
 - Verify committed Component locks against their declared target while retaining
   current project Flavor-policy and resolution-audit checks. Valid non-host locks
   no longer become stale merely because project verification assumed `host`.
+
+- Inspect independent Windows PE images concurrently within the existing
+  receiver dependency-observation deadline. Preserve exact image/inspector
+  bindings, loader resolution and fail-closed revalidation; qualification is
+  in progress.
+
+- Fix Windows retained dependency and BOM contract fixtures so their simulated
+  tools retain executable-mode validation before exercising custody assertions.
+  Use real Windows venv launchers for isolated interpreter discovery, exercise
+  POSIX loader-path guards explicitly so native conformance checks exercise their
+  intended contracts.
+
+- Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
+  declarations. Preserve read-only planning, exact host-target execution matching
+  and refusal of unsupported targets. Native and installed renewal is in progress.
 
 - Invoke explicitly configured FreeBSD SSH action receivers through the native
   command shell, preserving literal arguments without requiring interactive Bash.
