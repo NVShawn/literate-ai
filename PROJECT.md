@@ -85,8 +85,10 @@ privileged and unprivileged test requirements must both pass on an allocated
 disposable native guest. Account selection alone cannot traverse private run
 directories; reviewed identity/resource grants and permission currentness are
 required without changing existing private defaults or acceptance boundaries.
-The numeric identity/currentness prerequisite has focused controller coverage;
-provisioning authority, permission grants and lifecycle integration remain open.
+The numeric identity/currentness prerequisite passes full controller regression.
+The descriptor ACL backend has native source-level checks, including safe mask
+widening and exact restoration; reviewed resource scope, provisioning authority
+and installed lifecycle integration remain open.
 
 SBOM-SCALE-001 (issue #84) extends Goal 4 to complete retained inventories without
 quadratic strict-schema uniqueness checks. Structural JSON equality must preserve

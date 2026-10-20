@@ -30,3 +30,18 @@ every exit. Drift or incomplete cleanup SHALL prevent lifecycle acceptance.
 #### Scenario: A privileged test passes while a required unprivileged test skips
 - **WHEN** the original reviewed inventory requires both identities
 - **THEN** the lifecycle refuses incomplete coverage and issues no passing receipt
+
+### Requirement: ACL projection preserves other principals and held inode custody
+Granting a named secondary UID SHALL NOT unmask permissions for another user or
+group. The backend SHALL retain exact previous access/default ACLs and restore
+them after commands, exceptions and entry-time permission drift. A reused
+descriptor number SHALL NOT cause mutation or closure of another inode. This
+backend SHALL NOT substitute for path/ancestor or allocation authority.
+
+#### Scenario: A secondary execute grant widens the POSIX ACL mask
+- **WHEN** another named user's execute bit was masked before the grant
+- **THEN** that user's effective execute permission remains denied
+
+#### Scenario: Another inode replaces the descriptor number before restoration
+- **WHEN** descriptor identity differs from the retained resource
+- **THEN** cleanup refuses and neither changes nor closes the other inode

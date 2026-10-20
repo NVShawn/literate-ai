@@ -29280,9 +29280,11 @@ rather than treating resumed partial coverage as release qualification.
 - **Depends on:** RETAINED-PROJECT-001 and FREEBSD-001
 - **Implementation:**
   - [x] Add a strict numeric secondary identity and read-only POSIX currentness adapter. Nine focused controller checks pass, covering forward/reverse aliases, group and observation drift, unsupported platforms and actual local lookup. A source-level disposable FreeBSD probe also passes the exact UID/GID 2001 lookup, eight checks and one root-account skip, preserving both accounts. This prerequisite does not grant workspace access.
+  - [x] Add the FreeBSD POSIX ACL descriptor backend: preserve exact original access/default ACLs, reject permission drift, hardlinks and foreign owners, and never restore through a reused descriptor onto another inode. Shared-mask widening clamps existing entries to their previous effective permissions. Fourteen focused checks select 13 passes and one unsupported-platform skip on the enabled disposable guest; five portable checks pass on the controller, with nine native skips. A separate 27-check native probe passes.
   - [ ] Bind exact traversal/read/execute/fixture-write scope through existing workspace and provisioning owners; refuse mutable identity and permission drift without broad chmod or silent account creation.
 - **Evidence:**
   - [x] Identity prerequisite regression: 1,874 passed, 42 skipped, no failures across 1,916 selected checks in 1,039.060 seconds. Report SHA-256 `329a5fec37f5a6d95313b2093a2f5df771c0d405f9081abf46489199e0224ac9`. This does not implement scoped grants or qualify the complete feature.
+  - [x] Descriptor-backend full regression: 1,879 passed, 51 skipped, no failures across 1,930 selected checks in 1,015.463 seconds. Report SHA-256 `62f6a447e2018599605fce03c90bb3e4a4478811e86b63d7ff0cc18dab514da0`; log SHA-256 `70945fe918b96527b1eb0a83239d6570f8e32636abbc499da4a5e7c8715fbb1d`. Native focused checks and the 24-case original-suite backend probe remain source-level evidence.
   - [ ] Complete scope/currentness refusal fixtures plus real privileged and unprivileged original cases through the installed framework in a disposable native guest; preserve legacy identities and private defaults.
 
 ### [ ] INPUT-WALK-001 — Bound retained input ancestor traversal cost

@@ -19,3 +19,26 @@ Admission must retain grant/currentness/cleanup observations with command and
 completion evidence. Incomplete cleanup or required root/unprivileged cases
 must prevent acceptance. Existing profiles without this explicit policy retain
 their previous serialization and private workspace behavior.
+
+## Native descriptor backend
+
+The FreeBSD adapter uses libc's descriptor ACL APIs on duplicated, non-inheritable
+handles. Custody requires existing root-owned regular files with one link or
+root-owned directories. POSIX access/default ACLs are captured and restored
+exactly; NFSv4 or unsupported filesystems refuse. Permission drift, command
+exceptions and failed context entry still trigger restoration. If a descriptor
+number was reused for another inode, cleanup refuses without changing or closing
+that other inode. The caller must separately own current path/ancestor checks,
+resource budgets, reviewed identity and live allocation authority.
+
+A POSIX ACL mask applies to every named user and group entry. Before widening it
+for the selected UID, projection clamps all existing affected entries to their
+previous effective permissions. Other principals therefore gain no access from
+the wider mask. Native execution fixtures verify a previously masked executable
+stays denied to the existing user while the selected UID can execute it.
+
+The actual backend also runs all 24 original parser/utility cases in the
+source-level disposable guest probe, with no skips, exact pre-existing ACL
+restoration, no remaining fixture children, unchanged accounts/payload and all
+owned descriptors closed. This is not installed lifecycle integration, SDK
+admission, independent acceptance or per-unit package qualification.
