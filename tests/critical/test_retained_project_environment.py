@@ -106,6 +106,7 @@ class RetainedRuntimePathTests(unittest.TestCase):
                 {},
             )
 
+    @patch.object(environment.sys, "platform", "linux")
     def test_source_empty_missing_and_file_directories_refuse(self):
         f = self.fixture
         for name in ("src", "missing", "tools/runner"):

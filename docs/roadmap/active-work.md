@@ -25847,9 +25847,27 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
   despite `chmod(0755)`. Give these explicitly simulated tools executable filenames
   recognized by Windows while retaining genuine manifest discovery, byte hashes,
   executable-mode validation and all negative custody/observer assertions. Change
-  only the two fixtures, qualify both modules on Windows and the host, and preserve
-  the separate native-inspection group. Do not relax production tool closure or
-  add skips to conceal this portability defect.
+  the contract fixtures and preserve the separate native-inspection group. Shard 2
+  also exposes relocated Windows Python executables without their runtime home,
+  POSIX loader-path assertions masked by the Windows unsupported-loader guard,
+  and receiver admission whose deadline includes unrelated catalog preparation.
+  Use real venv launchers with a configured base runtime, exercise POSIX path
+  validation explicitly while retaining Windows refusal, and prepare the catalog
+  before starting bounded receiver admission. Qualify all affected modules on the
+  host and Windows. Keep production discovery, custody, deadlines and acceptance
+  unchanged; add no skips to conceal these portability defects.
+  Host qualification passes all 37 affected cases across the retained BOM and
+  dependency modules (21), loader environment (5), and toolchain smoke modules
+  (11), including a fresh seven-case interpreter rerun after native Windows
+  exposed PATHEXT filename casing. Compare paths with native case semantics while
+  retaining the exact one-command assertion. Lint, format, driver/runner/document
+  reviews, current lifecycle receipt and project verification pass. The initial
+  native Windows contract proof passes all 16 custody cases with five existing
+  POSIX-only skips; its collected archive digest is
+  `de6a76346b9c0b5705de044768f0f0f3f70cea3c7f3f83ddb1f5ca814a7bb14a`.
+  Windows loader-path checks pass three cases with two existing POSIX-only skips.
+  Expanded Windows discovery/receiver qualification and exact-head CI remain in
+  progress; these partial results are not release qualification.
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners

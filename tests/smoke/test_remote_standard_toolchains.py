@@ -1,7 +1,10 @@
 """Received tools satisfy exact Flavor constraints without controller discovery."""
 
+import sys
+import tempfile
 import unittest
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import patch
 
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
@@ -89,6 +92,15 @@ class RemoteStandardToolchainTests(unittest.TestCase):
                 consumer.discover("missing", None, {})
 
     def test_actual_admitted_receiver_supplies_discovery_and_live_profile_guard(self):
+        # Catalog copying/locking is setup, outside the bounded receiver actions.
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        platform = {"darwin": "macos", "win32": "windows", "cygwin": "windows"}.get(
+            sys.platform, "freebsd" if sys.platform.startswith("freebsd") else "linux"
+        )
+        _, locked, execution = projection_fixture._locked_snapshot(
+            Path(temporary.name) / "project", platform=platform
+        )
         fixture = transport_fixture.ActionToolObservationTests()
         self.addCleanup(fixture.doCleanups)
         fixture.setUp()
@@ -115,9 +127,7 @@ class RemoteStandardToolchainTests(unittest.TestCase):
             environment=fixture.environment,
         )
         consumer = RemoteStandardToolchains.from_admission(pool, pool.workers[0])
-        _, locked, execution = projection_fixture._locked_snapshot(
-            fixture.root / "project", platform=consumer.platform
-        )
+        self.assertEqual(consumer.platform, platform)
         with patch.object(
             LocalComponentToolBinding,
             "from_observed_toolchain",
