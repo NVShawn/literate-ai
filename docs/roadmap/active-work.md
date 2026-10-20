@@ -28648,6 +28648,12 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   replay helper is outside those live lifecycle closures. Recheck the existing
   finalized receipt and qualify the actual repaired native replay before landing.
   Prior incomplete native results remain predecessor evidence.
+  Measured native generation-one completions take 1,139, 1,143 and 1,173 seconds,
+  exceeding the initial 900-second policy. Allow each FreeBSD candidate 1,800
+  seconds and expose the existing parallel runner module deadline through Make.
+  Qualify the four-generation proof with a finite 10,800-second module deadline;
+  retain every replay, probe, source/isolation assertion and descendant limit.
+  Other platforms and the default 3,600-second module deadline remain unchanged.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 

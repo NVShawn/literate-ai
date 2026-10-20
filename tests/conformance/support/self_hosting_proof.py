@@ -951,11 +951,14 @@ def _environment(candidate_root: Path, dependency_projection: Path) -> dict[str,
 
 # A clean replay indexes and qualifies the complete generated framework.
 # Hosted Windows filesystems are materially slower than macOS runners, a Linux
-# worker measured about 480 seconds per candidate, and native FreeBSD exceeds
-# 300 seconds. Keep the same finite extended bound on those platforms.
-_CANDIDATE_PROCESS_TIMEOUT_SECONDS = (
-    900 if os.name == "nt" or sys.platform.startswith(("linux", "freebsd")) else 300
-)
+# worker measured about 480 seconds per candidate, and native FreeBSD measured
+# about 1,140 seconds. Keep finite bounds above those observed candidate times.
+if sys.platform.startswith("freebsd"):
+    _CANDIDATE_PROCESS_TIMEOUT_SECONDS = 1800
+elif os.name == "nt" or sys.platform.startswith("linux"):
+    _CANDIDATE_PROCESS_TIMEOUT_SECONDS = 900
+else:
+    _CANDIDATE_PROCESS_TIMEOUT_SECONDS = 300
 _MAX_CANDIDATE_STDOUT_BYTES = 8 * 1024 * 1024
 _MAX_CANDIDATE_STDERR_BYTES = 1024 * 1024
 _CANDIDATE_FAILURE_DIAGNOSTIC_BYTES = 64 * 1024
