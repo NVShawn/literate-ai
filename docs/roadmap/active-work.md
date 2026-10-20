@@ -29211,6 +29211,12 @@ review and record the combined lifecycle-driver identity through its supported
 review command. Renew the finalized host receipt and qualify the combined host,
 native and installed-wheel paths before treating this integration as ready.
 Earlier branch and FreeBSD results retain their actual source identities.
+Include the confirmed Windows fixture repair from PR #89 before final combined
+native and installed qualification. Its exact source passed all 33 affected
+Windows cases (26 passed, seven existing POSIX skips). The independent FreeBSD
+preflight remains bound to its sealed `08211e5e` checkout; advancing this host
+integration does not modify that checkout. Receiver timeout issue #90 remains a
+separate production blocker and is not fixed by these fixtures.
 The combined full host regression passes 1,810 tests with 42 declared skips
 (1,852 selected), zero failures and zero known failures. Static/export/layout,
 strict OpenSpec and all 121 documentation diagrams pass. An initial lifecycle
