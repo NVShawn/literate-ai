@@ -165,6 +165,21 @@ environment. Caller PATH is never inherited. Omission preserves previous profile
 wire identities and the existing captured-tools-only command path. This does not
 grant execution, qualify a compiled product or replace independent acceptance.
 
+## Observed local execution context
+
+The development local entry obtains actual bounded worker observations through
+the existing probe owner. Authored OS requirements do not select the local probe
+implementation. The resulting observations must satisfy the original worker
+requirements and every selected OS/architecture Flavor; architecture aliases use
+the shared host normalizer. Target labels alone do not establish eligibility.
+
+Current-plan guards repeat the observation, refusing OS-family, OS-version or
+architecture drift. The initial and final observations bind the exact plan and
+authored worker in a typed data-only record. Live receipt admission revalidates
+that record against the run's actual lock closure and retains it in immutable CAS
+records. Existing receipt wire shape and identities are unchanged when this
+optional context is absent. Decoding context never creates an admission capability.
+
 ## Canonical per-Component input ownership
 
 An optional retained manifest ownership map binds normalized input prefixes to

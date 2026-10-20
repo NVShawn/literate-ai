@@ -25848,7 +25848,7 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
       preserving original authority, exact re-planning and retained CAS custody.
       Reject unsupported remote/SDK execution rather than falling back to local
       execution or ambient tools; preserve failed run evidence.
-    - [ ] Verify selected OS/architecture and authored worker requirements against
+    - [x] Implement local verification of selected OS/architecture and authored worker requirements against
       fresh actual local platform observations, retaining the binding in admitted
       evidence. Add wrong-platform refusal checks before operator deployment;
       matching target names and worker metadata alone do not prove this gate.
@@ -25884,6 +25884,24 @@ project discovery; canonical installed CLI qualification remains open, as do SDK
 producer binding, remote retained dispatch and public package/release composition.
 Issue #22 remains open. FreeBSD receiver/bootstrap qualification does not close
 these runtime requirements or transfer retained release authority.
+
+Local worker-context checkpoint: selected OS/architecture and authored capacity
+requirements now bind fresh actual observations before commands and through
+current-plan revalidation. Receipt admission retains typed initial/final context
+and rejects inconsistent evidence. Nine policy checks and thirteen runtime checks
+cover mismatches, architecture aliases, probe failures, platform drift, actual
+local probing and CAS retention. The retained group passes 163 tests with one
+native-only skip (164 selected) in 207.106 seconds; a final runtime follow-up
+passes all thirteen in 57.239 seconds. Their log SHA-256 values are
+`f4b8d9f03c4bcec51af4c727bf047ba1a9640454983ab8f12885e8058830f1aa`
+and `ff08d3fee1b080af85cbb7a6787dd486964b1ab78e1640e09fe3169f598a63be`.
+The full local regression for this context change passes 1,831 tests with 42
+skips (1,873 selected) in 651.219 seconds. Log SHA-256:
+`c0d47628ce909be9a51ff2f16bac620fbe75add5e8ab774d808c494931a55af2`;
+report SHA-256:
+`754025dfd4bb44340f988db7f48bc2993083090380fc81957bd99d2d5dfeedec`.
+Installed and native qualification remain open. Configured evidence-policy
+consumption remains a separate gate.
 
 Combined local checkpoint at `3d2650134909d55ffc36f9147a652bd62faecce5`:
 the full Python regression passes 1,820 tests with 42 skips (1,862 selected) in

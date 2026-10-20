@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Bind development local retained runs to fresh actual worker observations and
+  selected OS/architecture policies, rejecting mismatches before commands.
+  Retain plan-bound worker context through live receipt custody without changing
+  existing receipt wire identities when that context is omitted.
+
 - Connect development local retained execution to the existing live workspace
   and receipt owners, with fresh authority checks and retained command streams.
   Original authority is preserved; canonical installed CLI, native and public

@@ -12,6 +12,7 @@ from literate_ai.adapters.retained_project_execution import (
     RetainedProjectExecutionError,
     RetainedProjectExecutionWorkspace,
 )
+from literate_ai.adapters.retained_project_platform import RetainedLocalPlatform
 from literate_ai.adapters.retained_project_receipt import admit_retained_project
 from literate_ai.cache_directories import (
     bind_cache_directories,
@@ -75,7 +76,10 @@ def execute_local_retained_project(
         raise RetainedProjectExecutionError(
             "retained.execution.worker-runtime-unavailable"
         )
-    if worker.identity != plan.profile.worker_identity:
+    if (
+        worker.identity != plan.profile.worker_identity
+        or worker.target_profile != plan.profile.target
+    ):
         raise RetainedProjectExecutionError("retained.execution.worker-changed")
     if plan.profile.acceptance_policy_identity is None:
         raise RetainedProjectExecutionError(
@@ -83,6 +87,13 @@ def execute_local_retained_project(
         )
     if current_plan() != plan:
         raise RetainedProjectExecutionError("retained.execution.plan-changed")
+    platform = RetainedLocalPlatform(worker, component_locks, plan)
+    platform.require_current()
+
+    def current_local_plan():
+        platform.require_current()
+        return current_plan()
+
     directories = bind_cache_directories(
         source,
         build_dir=cache_directories.build_dir,
@@ -120,7 +131,7 @@ def execute_local_retained_project(
         manifest,
         plan,
         parent=runs,
-        current_plan=current_plan,
+        current_plan=current_local_plan,
         authorization=authorization,
         allow_host_execution=allow_host_execution,
         test_receipt_policy=test_receipt_policy,
@@ -130,7 +141,9 @@ def execute_local_retained_project(
     try:
         for _ in plan.profile.actions:
             workspace.execute_next()
-        admission = admit_retained_project(workspace, store)
+        admission = admit_retained_project(
+            workspace, store, worker_evidence=platform.evidence()
+        )
         admission.require_current()
         return admission, workspace
     except Exception as exc:

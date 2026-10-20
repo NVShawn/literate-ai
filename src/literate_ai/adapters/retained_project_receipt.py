@@ -204,7 +204,7 @@ class AdmittedRetainedProject:
         verify_retained_project_inputs(root, manifest)
 
 
-def admit_retained_project(workspace, store):
+def admit_retained_project(workspace, store, *, worker_evidence=None):
     """Mint only after all live gates, retaining bytes before returning admission."""
     if not isinstance(workspace, RetainedProjectExecutionWorkspace) or not isinstance(
         store, FileSystemCAS
@@ -231,6 +231,21 @@ def admit_retained_project(workspace, store):
 
     def document(value, expected=None):
         return remember(canonical_json_bytes(value), expected=expected)
+
+    if worker_evidence is not None:
+        from literate_ai.adapters.retained_project_platform import (
+            require_retained_worker_evidence,
+        )
+        from literate_ai.contracts.retained_project_worker import (
+            RetainedLocalWorkerEvidence,
+        )
+
+        if not isinstance(worker_evidence, RetainedLocalWorkerEvidence):
+            raise TypeError("retained.receipt.typed-worker-evidence-required")
+        require_retained_worker_evidence(
+            worker_evidence, plan, run.source_bom.component_locks
+        )
+        document(worker_evidence.to_dict(), worker_evidence.identity)
 
     roots = {
         "plan": document(plan.to_dict(), plan.identity),

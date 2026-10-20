@@ -16,6 +16,7 @@ from literate_ai.cli.errors import CliFailure
 from literate_ai.cli.retained_project import retained_project_from_args
 from literate_ai.contracts import BlobRef, canonical_json_bytes
 from literate_ai.contracts.execution_dispatch import (
+    ExecutionRequirements,
     ExecutionWorker,
     ExecutionWorkerKind,
 )
@@ -92,6 +93,62 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         destination = self.fixture.fixture.base / "reopened-products"
         admission.materialize_payload(destination)
         self.assertTrue((destination / "app.bin").is_file())
+        evidence = [
+            admission.store.get_manifest(ref)
+            for ref in admission.receipt.records
+            if ref.media_type == "application/json"
+        ]
+        records = [
+            record
+            for record in evidence
+            if record.get("schema") == "literate-ai/retained-local-worker-evidence@1"
+        ]
+        self.assertEqual(len(records), 1)
+        self.assertEqual(
+            records[0]["plan_identity"], self.fixture.fixture.plan.identity.uri
+        )
+        self.assertEqual(len(records[0]["observations"]), 2)
+        self.assertFalse(records[0]["grants_admission"])
+
+    def test_wrong_actual_os_refuses_before_cache_creation(self):
+        from tests.critical.test_retained_project_platform import observation
+
+        worker = replace(
+            self.worker, requirements=ExecutionRequirements(os_family="freebsd")
+        )
+        f = self.fixture.fixture
+        f.plan = replace(
+            f.plan, profile=replace(f.plan.profile, worker_identity=worker.identity)
+        )
+        f.current = f.plan
+        with patch(
+            "literate_ai.adapters.retained_project_platform.probe_worker_capabilities",
+            return_value=observation("linux"),
+        ):
+            with self.assertRaisesRegex(ValueError, "requirements-not-satisfied"):
+                self.run_project(worker=worker)
+        self.assertFalse(self.directories.obj_dir.exists())
+
+    def test_selected_os_rejects_matching_worker_labels_on_wrong_host(self):
+        from literate_ai.contracts.flavors import FlavorAxis
+        from tests.critical.test_retained_project_platform import (
+            observation,
+            platform_lock,
+        )
+
+        f = self.fixture.fixture
+        self.fixture.locks = (platform_lock(FlavorAxis.PLATFORM_OS, "freebsd"),)
+        f.plan = replace(
+            f.plan, component_locks=tuple(lock.identity for lock in self.fixture.locks)
+        )
+        f.current = f.plan
+        with patch(
+            "literate_ai.adapters.retained_project_platform.probe_worker_capabilities",
+            return_value=observation("linux"),
+        ):
+            with self.assertRaisesRegex(ValueError, "selected-os-mismatch"):
+                self.run_project()
+        self.assertFalse(self.directories.obj_dir.exists())
 
     def test_authorization_and_worker_drift_refuse_before_creating_caches(self):
         for changes in (

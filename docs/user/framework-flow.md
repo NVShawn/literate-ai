@@ -226,6 +226,14 @@ Local execution keeps its run under `OBJ_DIR/retained-project-runs` and immutabl
 receipt/payload custody under `BUILD_DIR/retained-project-cas`. The run's separate
 `command-diagnostics.json` index points to actual stdout/stderr and command
 observations, including failed commands; that diagnostic index grants no admission.
+Fresh local worker observations enforce authored capacity requirements and the
+selected OS/architecture Flavors across all current Component locks. The local
+probe follows the actual host OS; architecture aliases use the shared host
+normalizer. OS family, OS version or architecture drift refuses continued execution.
+The current-plan guards recheck that context, and live admission retains the
+plan-bound initial/final observations in receipt records. Those records are data;
+decoding them grants no execution or admission. Existing receipt wire identities
+are preserved for callers that omit this optional context.
 The returned retained receipt preserves original authority and cannot replace an
 ordinary generated receipt. Package construction and publication remain separate.
 
