@@ -28638,6 +28638,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   Keep production deadlines, health admission, exact grant requests and the
   prohibition on controller-local phases intact. Renew focused host/native
   qualification and the complete regression before counting this repair green.
+  The independent native full run then passes 764 cases, including all three
+  actual `pkg` construction/inspection cases, before the isolated self-hosting
+  replay expires at 300 seconds. The proof already grants Linux and Windows a
+  finite 900-second candidate bound; include FreeBSD in that same policy.
+  Keep both clean replay attempts, frozen-source and import-isolation checks,
+  output limits and descendant termination intact. The supported driver and
+  sample-runner review checks remain current: this separately classified offline
+  replay helper is outside those live lifecycle closures. Recheck the existing
+  finalized receipt and qualify the actual repaired native replay before landing.
+  Prior incomplete native results remain predecessor evidence.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
