@@ -28745,6 +28745,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   assertions. Leave explicit Linux Bash custody cases and the existing native
   FreeBSD action-transport cases intact. Require the full late-worker sweep to pass
   before restarting the broad native jobs, so late fixtures fail promptly.
+  The early native smoke sweep passes 218 cases before project-guidance setup
+  constructs a commit environment without PATH, so executable lookup falls back to
+  system directories and misses native Git in its declared installation directory.
+  Retain the calling PATH alongside the fixture's explicit Git author/committer
+  identities; keep its isolated environment and exact checkout-commit CI assertions.
+  The Git-identity environment audit finds this as the sole literal dictionary
+  omitting both inherited variables and PATH. Renew guidance plus the remaining
+  late smoke modules before another broad run; production guidance stays unchanged.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
