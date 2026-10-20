@@ -56,8 +56,12 @@ class CommandLinkDependencyTests(unittest.TestCase):
             root = Path(temporary).resolve()
             snapshot, execution = _fixture(dependency_kind=DependencyKind.PACKAGING)
             source_cas = FileSystemCAS(root / "source-cas")
-            # One deadline spans generation through FINALIZE in real receivers.
-            deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
+            # One grant spans the complete multi-node chain and both package
+            # formats. Allow two ordinary fixture budgets on slow native workers;
+            # production observation/subprocess bounds and expiry tests are unchanged.
+            deadline = ActionDispatchDeadline(
+                datetime.now(UTC) + 2 * ACTION_TEST_DEADLINE
+            )
             accepted, handoffs, blobs, proof_refs = {}, {}, {}, {}
             local_ports = {}
             for number, generation in enumerate(execution.generation_plans):

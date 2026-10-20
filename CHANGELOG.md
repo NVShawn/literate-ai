@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Give the complete native packaging proof fixture enough test dispatch headroom to reach its format checks on slower workers; production execution limits stay unchanged.
+
 - JavaScript generation distinguishes executable bundle registries from inert bundle-writer text, preserving rejection of missing executable modules.
 
 - Windows dependency observation discards partial inspector facts after a failed capture, so subsequent captures cannot reuse an incomplete DLL closure. Legacy PE cache entries are re-inspected after upgrade.

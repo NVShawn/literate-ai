@@ -29504,3 +29504,19 @@ exact required CI remain landing gates.
   - [ ] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
 
 **Focused results:** All six fanout checks pass on the host and Linux and in the actual FreeBSD preflight. All four JavaScript handoff/bundle cases and all three retry cases pass on the host, Windows, Linux and FreeBSD preflight. Complete native/installed and exact CI gates remain pending above.
+
+### [ ] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
+
+**GitHub issue:** [#98](https://github.com/jordanhubbard/literate-ai/issues/98)
+
+- **Priority:** P1
+- **Owner:** Complete command LINK/PACKAGE integration fixture
+- **Direction:** Make native qualification reach its intended archive-format and custody assertions under a fresh valid test grant.
+- **Conclusion:** The FreeBSD run at 7625cc05 reaches malformed-archive validation after its shared 30-minute test grant expires, correctly refusing with action_wire.expired. Give only this complete multi-component, multi-format fixture two standard budgets while retaining one grant across all phases. Preserve production deadlines, individual subprocess limits, dedicated expiry coverage and all proof-format assertions.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
+- **Evidence:**
+  - [ ] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged.
+
+**Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
