@@ -28991,6 +28991,25 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 **Current integration renewal:** Conflicts with PR #81 and the rebuild/profile follow-up are resolved together at `d45f05e7d0ed5d3830a6c71cb39f00e73a1ee188`, preserving both implementations and specification requirements. The complete current host suite passes 1,851 cases with 42 declared skips across 1,893 selected cases; all 12 focused rebuild/profile checks pass. Fresh force-generation completes the real framework lifecycle and independent acceptance. Supported receipt update/check/current and `verify` pass with 227 passing receipt tests, receipt `sha256:f57d98c1e4a607839e73bb26d7b1aba40399c60e4a6af7ee92136923126b0a05` and finalized candidate `sha256:fc4619c14067222dc81ab90b899b47beaffa20f7b93bdd006462bc6db6763f17`. Driver `sha256:2c578198b9e00d3e0bc3846d3aba5314bd4f33e87ee1ba69fe0b282d95eac028` and documentation reviews pass. Earlier two-wheel native acceptance remains bound to its original source; renewed installed/native acceptance and exact review CI remain required before landing.
 
+**Renewed installed qualification:** Noneditable implementation
+`1ceb6799504c64b39b0a4ae0bcf3148d9c2bf3e1`, wheel
+`sha256:b2a4ef37cc14f1d0e643551a73e8a204d8357f2b049361dfd952c639be85e236`,
+passes all 131 installed-wheel spans and a fresh upgrade from the real
+`90d5b6e9` wheel. Coordinated registered parent/child rebind, reviewed
+`tiny.app` to `tiny.api` replacement, exact prior-tree recovery and parent
+validation pass. The actual native child rebuild passes in 104.216 seconds;
+its current receipt has three passing tests. A separate exact copied-library
+`component.md` rebuild passes in 127.512 seconds with three passing receipt
+tests, and an exact copied unsupported-profile recovery refuses before generation.
+Both successful journeys retain unchanged verifier bytes
+`sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`,
+including isolated/no-site startup, exported-module origin and expected value 7.
+The child remains `DERIVED_SOURCE_RETAINED` after one successful native rebuild;
+no SDK/program or regenerative qualification is inferred. Private source,
+receipt and verifier evidence archive:
+`sha256:413d6cd38598f2d2bbfb9d6a56a2b22118646dcf98b2ae973f7db207356e5ed2`.
+Exact final integration CI and landing remain open.
+
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
 - **GitHub issue:** [#47](https://github.com/jordanhubbard/literate-ai/issues/47)
