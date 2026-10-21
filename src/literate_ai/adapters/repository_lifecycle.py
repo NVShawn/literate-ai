@@ -55,9 +55,12 @@ def _inside(base: Path, path: Path) -> Path:
 
 
 def _target() -> str:
-    system = {"Darwin": "macos", "Windows": "windows", "Linux": "linux"}.get(
-        platform.system(), "unsupported"
-    )
+    system = {
+        "Darwin": "macos",
+        "Windows": "windows",
+        "Linux": "linux",
+        "FreeBSD": "freebsd",
+    }.get(platform.system(), "unsupported")
     machine = platform.machine().lower()
     machine = {"arm64": "aarch64", "amd64": "x86_64"}.get(machine, machine)
     return f"{system}-{machine}"

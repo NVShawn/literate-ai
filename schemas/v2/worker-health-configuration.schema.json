@@ -23,6 +23,7 @@
     },
     "os_family": {
       "enum": [
+        "freebsd",
         "linux",
         "macos",
         "windows"

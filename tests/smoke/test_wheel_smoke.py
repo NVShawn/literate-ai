@@ -7,10 +7,37 @@ import tomllib
 import unittest
 from pathlib import Path, PurePosixPath
 
+from scripts.installed_html_smoke import _command_timeout
+from scripts.wheel_smoke import _host_flavor
 from tools.build_backend.literate_ai_build_backend import distribution_origin_bytes
 
 
 class CleanWheelSourceProjectionTests(unittest.TestCase):
+    def test_installed_html_budget_remains_finite_on_every_supported_host(self) -> None:
+        for platform_name, seconds in (
+            ("win32", 900),
+            ("freebsd", 900),
+            ("freebsd14", 900),
+            ("freebsd16", 900),
+            ("darwin", 300),
+            ("linux", 300),
+        ):
+            with self.subTest(platform_name=platform_name):
+                self.assertEqual(_command_timeout(platform_name), seconds)
+
+    def test_installed_wheel_expectations_keep_freebsd_explicit(self) -> None:
+        for platform_name, expected in (
+            ("win32", "windows"),
+            ("darwin", "macos"),
+            ("linux", "linux"),
+            ("linux2", "linux"),
+            ("freebsd", "freebsd"),
+            ("freebsd14", "freebsd"),
+            ("freebsd16", "freebsd"),
+        ):
+            with self.subTest(platform_name=platform_name):
+                self.assertEqual(_host_flavor(platform_name), expected)
+
     def test_every_template_data_file_is_admitted_by_wheel_package_data(self) -> None:
         repository = Path(__file__).resolve().parents[2]
         definition = tomllib.loads(

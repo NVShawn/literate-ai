@@ -157,6 +157,21 @@ implicit health-state write. File debug output and MCP discovery flags refuse. W
 each time. Pressure sampling, automatic investigation and dispatch/polling
 use the same application classifier.
 
+### FreeBSD observations
+
+FreeBSD storage receivers use descriptor-bound `fstatvfs` and preserve the same
+request identity, deadline and path privacy checks as other POSIX receivers.
+Native quota inspection remains explicitly unsupported; requiring quota evidence
+must not proceed on filesystem free bytes alone.
+
+Pressure uses named sysctls only. CPU busy percentage comes from two bounded
+`kern.cp_time` observations, not load average. Available memory is a conservative
+sum of free and inactive pages multiplied by the native page size; it excludes
+wired memory and reclaimable ZFS ARC. Interpret a low result alongside paging
+and progress rather than treating all cached RAM as unavailable. Paging measures
+swap pages in/out over the observation interval. Missing or malformed counters
+remain unavailable or unsupported. GPU probing remains unqualified.
+
 ## Explicit alert history
 
 Add `--alert-state /private/state/worker-alerts.json` to retain a bounded local

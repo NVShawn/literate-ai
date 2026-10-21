@@ -160,6 +160,13 @@ def _next_verb(
         )
     if standard_binding_distribution_mismatch:
         return "litai project lifecycle rebind-standard --project . --output OUTPUT"
+    if stage == "original":
+        if locks.get("state") != "current":
+            return "litai lock"
+        return (
+            "litai rebuild . --retained-project MANIFEST "
+            "--retained-project-profile PROFILE --retained-project-plan"
+        )
     if stage == "qualified":
         return "litai rebuild --allow-host-execution"
     if locks.get("state") != "current":

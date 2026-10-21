@@ -23,8 +23,8 @@ from literate_ai.contracts import canonical_identity
 
 QUALIFICATION_RECORD_SCHEMA = "literate-ai/release-qualification@1"
 TIERS = ("local", "worker", "ci")
-_OS_FAMILIES = ("linux", "macos", "windows")
-_PLATFORM = re.compile(r"^(linux|macos|windows)(?:-([a-z0-9_]{1,32}))?$")
+_OS_FAMILIES = ("freebsd", "linux", "macos", "windows")
+_PLATFORM = re.compile(r"^(freebsd|linux|macos|windows)(?:-([a-z0-9_]{1,32}))?$")
 _ACTION = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
 
 
@@ -53,7 +53,7 @@ def _platforms(value: object, path: str, *, minimum: int) -> tuple[str, ...]:
         _fail(
             path,
             "platforms must be unique os_family or os_family-cpu_architecture "
-            "values (linux, macos, windows)",
+            "values (freebsd, linux, macos, windows)",
         )
     return tuple(value)
 
@@ -73,7 +73,7 @@ class QualificationAction:
     def argv_for(self, os_family: str | None) -> tuple[str, ...] | None:
         if os_family == "windows":
             return self.windows_argv
-        return self.argv if os_family in {"linux", "macos"} else None
+        return self.argv if os_family in {"freebsd", "linux", "macos"} else None
 
     def to_dict(self) -> dict[str, object]:
         return {

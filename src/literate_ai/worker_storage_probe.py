@@ -179,11 +179,16 @@ def _windows_sample(role, path, *, kernel=None):
 
 
 def collect(paths):
-    family = {"darwin": "macos", "linux": "linux", "win32": "windows"}.get(sys.platform)
+    family = {
+        "darwin": "macos",
+        "linux": "linux",
+        "win32": "windows",
+        "freebsd": "freebsd",
+    }.get("freebsd" if sys.platform.startswith("freebsd") else sys.platform)
     samples = []
     for role, path in paths:
         try:
-            if family in {"macos", "linux"}:
+            if family in {"freebsd", "macos", "linux"}:
                 sample = _unix_sample(role, path)
             elif family == "windows":
                 sample = _windows_sample(role, path)
@@ -236,9 +241,12 @@ def receive(timeout_ms):
 
     def bind_timeout(raw, request):
         nonlocal watchdog
-        family = {"darwin": "macos", "linux": "linux", "win32": "windows"}.get(
-            sys.platform
-        )
+        family = {
+            "darwin": "macos",
+            "linux": "linux",
+            "win32": "windows",
+            "freebsd": "freebsd",
+        }.get("freebsd" if sys.platform.startswith("freebsd") else sys.platform)
         timeout_response[0] = _response(
             raw,
             family,
@@ -308,11 +316,14 @@ def main(*, raw=None, on_request=None):
                     or not _IDENTITY.fullmatch(request["job_identity"])
                 )
             )
-            or request["os_family"] not in {"linux", "macos", "windows"}
+            or request["os_family"] not in {"freebsd", "linux", "macos", "windows"}
             or request["os_family"]
-            != {"linux": "linux", "darwin": "macos", "win32": "windows"}.get(
-                sys.platform
-            )
+            != {
+                "linux": "linux",
+                "darwin": "macos",
+                "win32": "windows",
+                "freebsd": "freebsd",
+            }.get("freebsd" if sys.platform.startswith("freebsd") else sys.platform)
             or type(request["timeout_ms"]) is not int
             or not 1 <= request["timeout_ms"] <= 60_000
         ):

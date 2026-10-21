@@ -9,6 +9,10 @@ from typing import Any
 
 from literate_ai.projects import ProjectError, discover_project
 
+from .component_lock_application import (
+    ProjectComponentLockSetError,
+    current_component_lock,
+)
 from .lock_command_errors import LockCommandError
 
 PASS = "pass"
@@ -112,17 +116,21 @@ def observe_project_locks(root: Path) -> LockHealthObservation:
     stale: list[str] = []
     for component in locked:
         try:
+            # Read the target through the existing catalog-bound typed owner.
+            # Current project selectors still determine the expected resolution;
+            # replaying selected Flavors blindly would conceal policy drift.
+            committed = current_component_lock(component)
             report, status = component_lock_from_args(
                 Namespace(
                     component=str(component),
-                    target="host",
+                    target=committed.target_name,
                     flavor=[],
                     flavor_root=[],
                     check=True,
                     diff=False,
                 )
             )
-        except LockCommandError as exc:
+        except (LockCommandError, ProjectComponentLockSetError) as exc:
             components.append(
                 {
                     "component": component.relative_to(project.root).as_posix(),

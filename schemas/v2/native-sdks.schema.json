@@ -139,6 +139,7 @@
         },
         "operating_system": {
           "enum": [
+            "freebsd",
             "linux",
             "macos",
             "windows"

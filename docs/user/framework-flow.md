@@ -122,6 +122,104 @@ retained review identity rather than a regenerative source key. A passing run
 does not establish regenerative equivalence. `--update-receipt` still requires
 the complete Standard lifecycle to pass; the read-only plan grants no admission.
 
+### Retained whole projects (qualification in progress)
+
+For an existing source tree whose hierarchy must remain in place, first author
+and validate its canonical project metadata, then commit the source and metadata.
+`litai project adopt-original --project PATH` produces a read-only plan binding
+the validated project authority and clean Git commit/tree. Review its identity,
+then repeat with `--apply --acknowledge --expected-plan-identity sha256:...`.
+Apply writes only original-adoption evidence and conversion-authority metadata;
+it does not move source, build, contact a model, or qualify execution. Dirty
+trees, stale plans, unsafe roots and existing authority refuse. Preserve failed
+evidence for diagnosis rather than overwriting it.
+
+The independent initial `original` stage keeps release authority with original
+source. It has no successor in the legacy wrapped/retained/drafted/qualified
+conversion chain. After current locks exist, use explicit retained-project
+manifest/profile planning. Regenerative rebuild and unqualified retained
+execution remain blocked; this adoption record is not a build or test receipt.
+
+Whole-project retained planning uses a streaming binary-capable manifest and an
+explicit command profile, separately from the small UTF-8 source mode above. Its
+`test-policy` input must bind the configured project receipt policy's identity,
+every original case and owning test action, any exact permitted skip reason, and
+the report path sealed by each test action. Action inventories name the actual
+cases; a suite label or successful command exit does not establish coverage.
+
+The sole `release-policy` input must be the configured `literate.release.json`,
+with the profile binding its exact bytes. Planning reuses the existing release
+policy parser and repository-branch checks. An alternative hashed file cannot
+replace the project's release gates or grant publication permission.
+
+Retained managed SBOM graphs use the `retained-project` root kind and
+`literate-ai:retained-project` binding instead of a Component-revision claim. The
+root identifies the reviewed plan, including the original manifest and complete
+Component-lock inventory. Shared locked dependencies keep their identities and
+edge authority. The existing CycloneDX source/resolved transition checks preserve
+this distinction. A managed graph describes authority; it does not establish the
+observed native SDK/toolchain closure or issue an acceptance receipt.
+
+The read-only retained planning response includes `managed_sbom_graph` alongside
+the plan and authorization identity. It derives that graph from the same verified
+persisted Component locks, not supplied graph metadata or unlocked catalog entries.
+Current project definitions and lock inputs must remain unchanged. This response
+does not authorize execution or attest a resolved runtime dependency closure.
+
+The internal command workspace freezes host-native dependency observations for
+captured tools and inputs using its sanitized command environment. It rechecks
+that graph and the command context before and after each process, and binds the
+observation identity to the command record. Dependency drift refuses even after
+a zero exit. Returned observation dictionaries cannot mutate the frozen record.
+This does not qualify SDK products or establish the native closure of built exports.
+
+The internal command workspace reads bounded, identity-checked reports using
+`literate-ai/retained-project-test-report@1`. Each report names its action and
+the complete case outcomes (`passed`, `failed`, or explicitly permitted `skipped`).
+Missing, extra or duplicate cases, unknown outcomes, failed cases and unauthorized
+skips stop later work. Only actual passes satisfy the project's minimum; baseline
+exceptions cannot be relabeled as passing tests.
+
+Development profiles can explicitly select `runtime_library_paths`, an ordered
+list of up to 32 captured input directories. Every directory must contain only
+SDK, toolchain or dependency members. The command owner projects these paths to
+the POSIX loader variable and passes the same context to native dependency
+inspection, SDK scopes and acceptance. It never inherits loader variables from
+the caller. Missing, redirected, source/output or empty directories refuse;
+unsupported hosts refuse the opt-in. Omission preserves legacy identities and
+default environments. This selects captured runtime libraries for native tools;
+it does not suppress system fallback or establish complete compiler/sysroot
+provenance. Native/installed qualification remains open under RETAINED-LOADER-001.
+
+Development profiles can also select `output_command_paths`: up to 32 ordered
+output-relative directories at or below declared build products. These precede
+captured tool directories so original tests can find the newly built programs.
+Missing future directories are permitted before their producer runs; existing
+redirected or non-directory ancestors refuse. Export custody still guards the
+produced bytes. The profile and environment bind the selection, and caller PATH
+is never inherited. Omission preserves the captured-tools-only default and legacy
+profile identities. This prepares original-suite execution; it grants no public
+execution or acceptance on its own.
+
+Development retained independent acceptance can opt in to a `filesystem` case.
+It binds private input bytes, expected file lengths and SHA-256 values, optional
+permission checks, directory/absence expectations and explicit resource limits.
+The sealed product runs in a fresh case directory; `{case_root}` is substituted
+only for opted-in cases. Fixtures are rechecked after SDK authorization and before
+launch. Actual bounded file states are observed without following links and kept
+with the process evidence. Wrong contents or size fail even after a zero exit;
+extra output, unsafe nodes, changed fixtures and resource overruns also refuse.
+The ordinary run and private case environments retain separate native dependency
+bindings, so private HOME/temporary paths do not weaken final source/export checks.
+Legacy cases keep their wire identities. Native/installed filesystem qualification
+remains open under RETAINED-FS-001; this is cooperative custody, not a hostile-code
+filesystem sandbox or permission to execute with greater privileges.
+
+This test gate is not a lifecycle receipt. Public whole-project execution still
+refuses with `retained_project.execution_not_qualified` until native SDK/SBOM,
+independent acceptance, retained-origin receipt, package and release consumers
+are qualified. Original source and conversion authority remain unchanged.
+
 ### Target and worker selection
 
 `litai build`, `litai test`, and `litai run` keep two independent choices explicit.

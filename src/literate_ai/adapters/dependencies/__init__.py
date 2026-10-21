@@ -7,6 +7,7 @@ from .cyclonedx import (
     validate_cyclonedx_bom,
     validate_resolved_cyclonedx_bom,
 )
+from .freebsd import FreeBsdElfDependencyObserver
 from .observation import (
     LinuxElfDependencyObserver,
     MacOsMachODependencyObserver,
@@ -36,6 +37,7 @@ __all__ = [
     "CycloneDxLifecycleResolver",
     "DependencyObservationError",
     "HostDependencyObservation",
+    "FreeBsdElfDependencyObserver",
     "LinuxElfDependencyObserver",
     "MacOsMachODependencyObserver",
     "NpmDependencyResolver",

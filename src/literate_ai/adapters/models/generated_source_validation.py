@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import PurePosixPath
 
 from literate_ai.adapters.dependencies.javascript_imports import (
+    javascript_code_identifier_offsets,
     javascript_import_specifiers,
 )
 
@@ -72,7 +73,7 @@ def validate_javascript_generation_handoff(files: Mapping[str, str]) -> None:
     bundles = {
         path: content
         for path, content in sources.items()
-        if _LITAI_MODULE_MAP in content
+        if javascript_code_identifier_offsets(content, _LITAI_MODULE_MAP)
     }
     application = {
         path: content for path, content in sources.items() if path not in bundles
@@ -299,9 +300,10 @@ def _javascript_resolved_source_path(
 
 
 def _javascript_bundle_module_keys(content: str) -> set[str]:
-    start = content.find(_LITAI_MODULE_MAP)
-    if start < 0:
+    offsets = javascript_code_identifier_offsets(content, _LITAI_MODULE_MAP)
+    if not offsets:
         return set()
+    start = offsets[0]
     opening = content.find("{", start)
     if opening < 0:
         return set()

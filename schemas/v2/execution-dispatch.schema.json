@@ -132,7 +132,7 @@
       "required": ["schema", "os_family", "os_version", "cpu_architecture", "minimum_cpu_cores", "minimum_memory_mib", "gpu"],
       "properties": {
         "schema": {"const": "urn:literate-ai:schema:v1:execution-requirements"},
-        "os_family": {"type": ["string", "null"], "enum": ["linux", "macos", "windows", null]},
+        "os_family": {"type": ["string", "null"], "enum": ["freebsd", "linux", "macos", "windows", null]},
         "os_version": {"oneOf": [{"type": "null"}, {"$ref": "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/portable_value"}]},
         "cpu_architecture": {"oneOf": [{"type": "null"}, {"$ref": "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/portable_value"}]},
         "minimum_cpu_cores": {"type": ["integer", "null"], "minimum": 1, "maximum": 65536},
@@ -253,7 +253,7 @@
         "schema": {"const": "urn:literate-ai:schema:v1:worker-hardware-observation"},
         "worker_id": {"$ref": "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/portable_id"},
         "observed_at": {"type": "string", "format": "date-time"},
-        "os_family": {"enum": ["linux", "macos", "windows"]},
+        "os_family": {"enum": ["freebsd", "linux", "macos", "windows"]},
         "os_name": {"type": "string", "minLength": 1, "maxLength": 256},
         "os_version": {"type": "string", "minLength": 1, "maxLength": 256},
         "cpu_architecture": {"type": "string", "minLength": 1, "maxLength": 256},
@@ -380,7 +380,7 @@
       "required": ["schema", "os_family", "os_version", "cpu_architecture", "cpu_cores", "memory_mib", "gpu_vendor", "gpu_model", "gpu_count", "gpu_memory_mib", "gpu_capabilities", "toolchain_identities"],
       "properties": {
         "schema": {"const": "urn:literate-ai:schema:v2:observed-execution-environment"},
-        "os_family": {"enum": ["linux", "macos", "windows"]},
+        "os_family": {"enum": ["freebsd", "linux", "macos", "windows"]},
         "os_version": {"$ref": "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/portable_value"},
         "cpu_architecture": {"$ref": "urn:literate-ai:schema:v2:execution-dispatch-contracts#/$defs/portable_value"},
         "cpu_cores": {"type": "integer", "minimum": 1, "maximum": 65536},

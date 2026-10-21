@@ -16,6 +16,7 @@ from literate_ai.self_hosting import (
     SelfHostError,
     run_snapshot_replication,
 )
+from tests.conformance.support.self_hosting_proof import platform_flavor as host_flavor
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PACKAGE_ROOT = REPO_ROOT / "src" / "literate_ai"
@@ -30,17 +31,7 @@ SKILLS_MANIFEST = HARNESS_ROOT / "skills" / "self-hosting.json"
 
 
 def platform_flavor() -> Path:
-    import sys
-
-    if sys.platform.startswith("linux"):
-        host_os = "linux"
-    elif sys.platform == "darwin":
-        host_os = "macos"
-    elif sys.platform in {"win32", "cygwin"}:
-        host_os = "windows"
-    else:
-        raise AssertionError(f"unsupported test platform: {sys.platform}")
-    return REPO_ROOT / "flavors" / f"os-{host_os}" / "flavor.md"
+    return host_flavor(REPO_ROOT)
 
 
 def sample_digest() -> str:

@@ -2962,7 +2962,10 @@ class StandardProjectLifecycleService:
             failure = result.failure_evidence
             diagnostic = None
             if failure is not None:
-                if self.candidate_repair_port is None:
+                if (
+                    self.candidate_repair_port is None
+                    or output.provenance.retained_source_identity is not None
+                ):
                     diagnostic = CandidateRepairDiagnostic(
                         result.component_revision,
                         failure.phase,

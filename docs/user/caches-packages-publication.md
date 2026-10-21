@@ -446,15 +446,16 @@ into the same meaning.
 `litai package plan COMPONENT` resolves every selected `package.*` Flavor into one
 read-only declaration. Repeating compatible package Flavors is additive: pip and Conan,
 for example, produce two plans over the same eventual accepted closure. Platform
-constraints reject apt outside Linux, Homebrew outside macOS, and WinGet or Chocolatey
+constraints reject apt outside Linux, pkg outside FreeBSD, Homebrew outside macOS, and WinGet or Chocolatey
 outside Windows before generation.
 
 `litai package build COMPONENT --allow-host-execution` first runs the complete Standard
 lifecycle. Only after generated tests, application execution, independent acceptance,
 and resolved CycloneDX evidence pass does it construct native bytes. The
-current executable providers are deterministic pip wheels and portable Conan cache
-archives. Each contains the accepted product closure, the human-authored Component
-specification, and the resolved CycloneDX SBOM. The content-addressed batch is retained
+provider implementations include pip wheels, Conan and npm archives, portable ZIPs
+and Linux Debian packages; each provider's current qualification is recorded in
+the active queue. Packages bind the accepted product closure, authored Component
+specification and CycloneDX evidence. The content-addressed batch is retained
 under `OBJ_DIR/packages/`; construction grants no install or registry authority.
 
 `litai package verify COMPONENT` reopens the declaration, exact plans, materialized
@@ -462,8 +463,9 @@ inputs, package results, and package bytes from disk. Wheel metadata and `RECORD
 are checked without trusting the builder instance. Conan verification restores the
 archive into a fresh isolated cache and requires the exact exported package reference.
 Changing the Component, target, Flavor selection, accepted product, or SBOM invalidates
-the batch. Native apt, Homebrew, WinGet, and Chocolatey construction remains provider
-work; their planning and OS-compatibility authority is already live.
+the batch. Homebrew, WinGet and Chocolatey still use native metadata archives;
+their final native installer qualification remains provider work. Cached package
+inspection and current build-lifecycle admission are separate evidence boundaries.
 
 ```mermaid
 flowchart LR
@@ -492,6 +494,53 @@ Verification reads the exact plan, result, custody and archive bytes again. Chan
 inputs, target or tool identities, duplicate or undeclared members, altered modes,
 and content digest mismatches fail before release preparation. Outputs remain in
 `OBJ_DIR/packages/`; the release lifecycle owns any separately authorized upload.
+
+## FreeBSD pkg development integration
+
+Select `--flavor=+package-pkg` for native pkg plans. The development implementation
+constructs on a local FreeBSD worker with the native `host` target and an existing
+`pkg-static`; tool discovery runs before the accepted build lifecycle. Remote
+package dispatch and named/cross targets currently refuse. Initial native format
+construction and reopened payload checks pass; installed public-CLI lifecycle
+qualification remains open in FREEBSD-001.
+
+```console
+litai package plan COMPONENT --target host --flavor=+package-pkg
+litai package build COMPONENT --target host --flavor=+package-pkg --allow-host-execution
+litai package verify COMPONENT --target host --flavor=+package-pkg
+```
+
+The selected ABI, dependencies, installed-file mapping and native tool are bound
+to the package projection. External runtime dependencies need exact accepted
+FreeBSD names, origins and versions in the resolved BOM. Construction stages
+regular files with planned executable modes and root ownership, retains both
+BOMs and authored specification, and writes a native `.pkg` beneath `OBJ_DIR`.
+The initial provider uses finite archive limits and refuses links or hooks.
+
+Verification compares the retained plan and package result, then inspects the
+native manifests, complete file inventory, ownership/modes/timestamps, accepted
+digests and native checksums without installing the package. It also checks
+native required/provided library names against bounded independent
+ELF inspection, without extracting or executing target code. The current reader
+supports native FreeBSD ELF64 little-endian amd64/aarch64 payloads; unsupported
+variants and malformed dynamic tables refuse. Internal providers are excluded
+from external requirements. This metadata check does not resolve libraries or
+replace the accepted dependency BOM.
+The reported verification scope
+is native format and declared-plan bindings; build-lifecycle admission and release
+approval remain separate. The [FreeBSD qualification work](../roadmap/active-work.md#freebsd-001-add-first-class-freebsd-native-workers-and-targets)
+records the remaining evidence.
+
+The development retained-package backend can also construct the native format
+from a live locally admitted run with an exact selected `pkg` Flavor lock.
+It preserves the distinct retained receipt origin, accepted payload,
+specifications, both BOMs and run records, and retains the native projection
+and tool metadata in the same CAS. Construction and reinspection refuse stale
+source, plans, input blobs or native tooling. Parsed receipt JSON grants no
+admission. This backend connection is under native qualification; it does not
+enable the public retained-project execution path, infer per-unit runtime
+package coordinates, install packages or authorize publication. Existing ZIP
+wire identities and its selected-provider checks are unchanged.
 
 ## Publication
 

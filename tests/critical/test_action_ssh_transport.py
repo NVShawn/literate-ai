@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shlex
 import shutil
+import sys
 import unittest
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -44,7 +45,9 @@ class SshActionTransportTests(unittest.TestCase):
             "index",
             ExecutionWorkerKind.SSH,
             requirements=ExecutionRequirements(
-                os_family="windows" if os.name == "nt" else "linux"
+                os_family="windows"
+                if os.name == "nt"
+                else ("freebsd" if sys.platform.startswith("freebsd") else "linux")
             ),
             endpoint="runner@example.invalid",
             workspace="~/work",
@@ -78,10 +81,31 @@ class SshActionTransportTests(unittest.TestCase):
             **os.environ,
             "LITAI_ACTION_WORKER_IDENTITY": self.worker.identity.uri,
         }
+        if self.worker.requirements.os_family == "freebsd":
+            return run_bounded_process(("/bin/sh", "-c", argv[-1]), **kwargs)
         return run_bounded_process(tuple(shlex.split(argv[-1])), **kwargs)
 
+    def test_freebsd_uses_literal_native_shell_without_interactive_bash(self):
+        values = ("receiver", "path with spaces", "$(touch escaped)", "it's literal")
+        worker = replace(
+            self.worker,
+            action_command=values,
+            requirements=ExecutionRequirements(os_family="freebsd"),
+        )
+        argv = action_receiver_command(worker, self.deadline, mode="--describe")
+        self.assertEqual(shlex.split(argv[-1]), ["exec", *values, "--describe"])
+        self.assertEqual(argv[-2], worker.endpoint)
+
+    @unittest.skipIf(os.name == "nt", "requires a native POSIX command shell")
+    def test_freebsd_native_shell_runs_actual_receiver_with_exact_request_bytes(self):
+        self.worker = replace(
+            self.worker, requirements=ExecutionRequirements(os_family="freebsd")
+        )
+        self.test_real_capability_and_index_receivers_preserve_request_custody()
+
     @unittest.skipUnless(
-        os.name == "nt" or shutil.which("bash"), "native receiver shell required"
+        os.name == "nt" or sys.platform.startswith("freebsd") or shutil.which("bash"),
+        "native receiver shell required",
     )
     def test_real_capability_and_index_receivers_preserve_request_custody(self):
         fixture = self.fixture

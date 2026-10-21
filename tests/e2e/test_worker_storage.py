@@ -33,7 +33,12 @@ from tests.support.fixtures_test_worker_capacity import (
     policy,
 )
 
-FAMILY = {"darwin": "macos", "linux": "linux", "win32": "windows"}[sys.platform]
+FAMILY = {
+    "darwin": "macos",
+    "linux": "linux",
+    "win32": "windows",
+    "freebsd": "freebsd",
+}["freebsd" if sys.platform.startswith("freebsd") else sys.platform]
 
 
 def bindings(root):
@@ -75,7 +80,7 @@ class WorkerStorageTests(unittest.TestCase):
                 before, sorted(str(item.relative_to(root)) for item in root.rglob("*"))
             )
             self.assertEqual((root / "workspace" / "keep.txt").read_text(), "preserve")
-            if FAMILY == "macos":
+            if FAMILY in {"freebsd", "macos"}:
                 self.assertEqual(
                     {
                         quota.available_bytes.status
@@ -115,6 +120,12 @@ class WorkerStorageTests(unittest.TestCase):
                     receiver = _probe_command(
                         executable=sys.executable, timeout_ms=5000
                     )
+                elif FAMILY == "freebsd":
+                    self.assertEqual(
+                        shlex.split(command[-1])[:5],
+                        [sys.executable, "-I", "-S", "-B", "-c"],
+                    )
+                    receiver = ("/bin/sh", "-c", command[-1])
                 else:
                     shell = shlex.split(command[-1])
                     self.assertEqual(shell[:2], ["bash", "-lic"])

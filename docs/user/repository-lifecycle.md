@@ -150,6 +150,9 @@ A declaration uses schema `literate-ai/repository-lifecycle@1`, a native target
 such as `linux-x86_64`, an `inputs` list of root-owned recipe files, and a `children`
 list accounting for every indexed Gitlink. Declare root Dockerfiles, resource locks
 and helper scripts in `inputs`; their hashes are bound to the execution plan.
+FreeBSD target names are `freebsd-x86_64` and `freebsd-aarch64`. Planning records
+the actual host target; execution requires an exact OS/architecture match before
+creating output directories or execution reservations.
 Each child declares its exact `path`, `role` (`source`, `sdk`, or `application`),
 `dependencies` (provider child paths), and all three `operations`. An unimplemented
 operation is explicitly `null`; selecting it fails before any child is started.

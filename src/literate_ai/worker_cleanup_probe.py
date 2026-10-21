@@ -193,7 +193,12 @@ def _valid_request(request):
         "nonce",
     }:
         return False
-    family = {"linux": "linux", "darwin": "macos", "win32": "windows"}.get(sys.platform)
+    family = {
+        "linux": "linux",
+        "darwin": "macos",
+        "win32": "windows",
+        "freebsd": "freebsd",
+    }.get("freebsd" if sys.platform.startswith("freebsd") else sys.platform)
     if (
         request["schema"] != REQUEST_PROTOCOL
         or request["os_family"] != family

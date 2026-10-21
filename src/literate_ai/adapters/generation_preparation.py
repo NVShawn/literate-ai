@@ -93,6 +93,7 @@ from literate_ai.contracts.executable_components import (
     LibraryImportSurface,
 )
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
+from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
 from literate_ai.contracts.native_sdks import (
     NATIVE_SDK_BUILD_RECIPE_CONTENT_KIND,
     NativeSdkBuildRecipe,
@@ -708,6 +709,16 @@ class LockedComponentModelSelectionAdapter:
         *,
         coding_cli: str,
     ) -> dict[str, ModelScopeBinding]:
+        if coding_cli == RETAINED_SOURCE_PROVIDER:
+            if self.pipeline_model is not None:
+                raise ValueError("retained source cannot select a pipeline model")
+            snapshot.require_unchanged()
+            return {
+                node.revision.identity.uri: ModelScopeBinding.for_retained_source(
+                    node.revision.identity
+                )
+                for node in snapshot.authority.lock.nodes
+            }
         if coding_cli not in (*CODING_CLIS, INHERITED_SESSION_PROVIDER):
             raise ValueError("coding_cli must identify a supported generation provider")
         snapshot.require_unchanged()
@@ -2005,13 +2016,22 @@ class GenerationExecutionPlanningAdapter:
             "cli://validation"
             if selection is None
             else (
+                "cli://retained-source/review?binding="
+                + quote(selection.tool_binding_identity, safe="")
+            )
+            if selection.name == RETAINED_SOURCE_PROVIDER
+            else (
                 f"cli://{selection.name}/tool"
                 f"?binding={quote(selection.tool_binding_identity, safe='')}"
             )
         )
         endpoint = ModelEndpoint(
-            f"coding-cli-{endpoint_name}",
-            f"coding-cli/{endpoint_name}",
+            f"source-input-{endpoint_name}"
+            if endpoint_name == RETAINED_SOURCE_PROVIDER
+            else f"coding-cli-{endpoint_name}",
+            "retained-source/input"
+            if endpoint_name == RETAINED_SOURCE_PROVIDER
+            else f"coding-cli/{endpoint_name}",
             source_cache_model_selector(model, path="GenerationExecutionPlan.model"),
             endpoint_url,
             Locality.UNKNOWN,

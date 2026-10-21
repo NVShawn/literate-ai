@@ -26,6 +26,7 @@ from literate_ai.contracts import (
     WorkerCapacityObservation,
 )
 from tests.support.fixtures_test_worker_capacity import ROLES, policy
+from tests.support.host_platform import host_os_family
 
 
 class Terminal(io.StringIO):
@@ -38,9 +39,7 @@ class WorkerHealthCliTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(prefix="wh-")
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name).resolve()
-        self.family = {"linux": "linux", "darwin": "macos", "win32": "windows"}[
-            sys.platform
-        ]
+        self.family = host_os_family()
         self.worker = ExecutionWorker(
             "fixture",
             ExecutionWorkerKind.LOCAL,
@@ -66,6 +65,25 @@ class WorkerHealthCliTests(unittest.TestCase):
         }
         self.config_file = self.root / "health.json"
         self.write_config()
+
+    def test_versioned_freebsd_fixture_preserves_native_worker_and_policy_identity(
+        self,
+    ):
+        for platform_name in ("freebsd15", "freebsd16"):
+            with (
+                self.subTest(platform=platform_name),
+                patch("sys.platform", platform_name),
+            ):
+                fixture = type(self)()
+                self.addCleanup(fixture.doCleanups)
+                fixture.setUp()
+                self.assertEqual(fixture.worker.requirements.os_family, "freebsd")
+                self.assertEqual(fixture.config["os_family"], "freebsd")
+        with patch("sys.platform", "unsupported-native-os"):
+            with self.assertRaisesRegex(
+                ValueError, "unsupported native fixture platform"
+            ):
+                host_os_family()
 
     def write_config(self):
         self.config_file.write_text(json.dumps(self.config))

@@ -92,6 +92,8 @@ class NativeSdkProjectAcquisition:
         host_os = {"darwin": "macos", "linux": "linux", "win32": "windows"}.get(
             sys.platform
         )
+        if sys.platform.startswith("freebsd"):
+            host_os = "freebsd"
         machine = platform.machine().lower()
         architecture = {"amd64": "x86_64", "aarch64": "arm64"}.get(machine, machine)
         if any(
