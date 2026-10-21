@@ -9,6 +9,8 @@
   exact completed producer and rejects ownership loss during packaging. A real
   compiled-library API works after producer retirement, extraction and relocation
   on macOS and FreeBSD. Native pkg/runtime/qualification integration remains open.
+  The exact clean-commit wheel passes qualification; its offline FreeBSD install
+  passes all 14 focused tree/TAR/API checks without skips, using installed modules.
 
 - Define explicit artifact/resource package tree inputs carrying complete directory,
   alias, naming and provenance authority. Reject overlapping package namespaces;

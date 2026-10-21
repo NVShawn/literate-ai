@@ -978,3 +978,11 @@ its completed-product registration prevents a successful return. Once a package
 is constructed, independent archive/stage verification needs only its exact plan
 and retained package CAS, not the producer's store. This does not replace fresh
 runtime dependency observation or qualify the Standard packaged execution driver.
+
+At clean revision `9411185a`, the wheel gate passes and retains exact distribution
+`sha256:c1706b8fd78a6a4d197103ae5734c6ddb7085ec9836bd7d070412092280c1139`.
+The same wheel installs offline on FreeBSD with 37 reviewed distributions. Fourteen
+focused TAR, tree-input and real compiled-library API checks pass without skips,
+with all framework modules imported from the installed prefix. This closes focused
+installed-provider qualification; native tree pkg, Standard packaged execution,
+qualification codecs and full source-built compiler SDK admission remain open.

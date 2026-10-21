@@ -29538,8 +29538,8 @@ lifecycle or full compiler SDK admission. The FreeBSD source group passes all 14
 selected TAR/input/API checks in 14.417 seconds (supervised 18.095 seconds), with
 no skips. Its verified 1,856-file source export has archive SHA-256
 `d096592262f95bb24994e5aa2768219f5a7586d04d29aa10a01b42a5f8f8df67`.
-Native pkg, default packaged runtime, qualification codecs and installed/full
-compiler SDK acceptance remain open; the legacy unsupported-tree guards stay active.
+Native pkg, default packaged runtime, qualification codecs and full compiler SDK
+acceptance remain open; the legacy unsupported-tree guards stay active.
 
 
 The fresh complete Python 3.11 controller regression exits zero with four workers.
@@ -29563,3 +29563,16 @@ The worker's normal package database is unchanged. Archive SHA-256
 `f8173765adce11c47019cd1b97713b30e92b989b6026954ef8112a6237da2ba2`.
 These are native-format/installation discovery results; the framework's tree-aware
 pkg projection and verifier still require implementation.
+
+Clean revision `9411185a9b94ed256184ffc7925e707fb5c04184` passes the installed-wheel
+gate. Retained wheel SHA-256
+`70745868e7a65b956aeae91d8664435b0b11dfc2bf9b0d350f3e73153b7ff8cd`
+binds distribution `sha256:c1706b8fd78a6a4d197103ae5734c6ddb7085ec9836bd7d070412092280c1139`
+(1,227 members). That exact wheel installs offline with the reviewed 37-distribution
+FreeBSD dependency closure in a separate disposable-worker prefix. All 14 focused
+tree TAR/input/API checks pass without skips in 21.383 supervised seconds; every
+framework import resolves within the installed prefix. The real library API still
+works after producer retirement and relocation. These checks qualify the installed
+tree/TAR mechanism, not the complete native lifecycle, compiler SDK, pkg provider,
+default CLI or release. Draft PR #87 carries the code; exact-current hosted CI
+remains a separate gate.

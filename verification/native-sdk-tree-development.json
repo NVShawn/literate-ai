@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/native-sdk-tree-development@1",
-  "scope": "Source-level tree recipe, completed producer, live/retained consumer, topology custody and CycloneDX evidence; not complete retained lifecycle, packaging, installed wheel or compiler SDK admission",
+  "scope": "Tree recipe, completed producer, live/retained consumer, topology custody, CycloneDX and explicit TAR packaging; focused exact installed-wheel checks, not complete retained lifecycle, native tree pkg or compiler SDK admission",
   "source_files_sha256": {
     "src/literate_ai/contracts/native_sdk_trees.py": "61b3348bd60687626640ac84a6caaad95235cd8c978da3214ec9f224d2d75cf9",
     "src/literate_ai/adapters/native_sdk_tree_custody.py": "eb8e3e6381fb2f6bcf532c56e20f9b7bcd33401cf3f1e47a6103f4fbb8f4c51a",
@@ -89,7 +89,7 @@
     "default_refusal": "SDK tree has ambiguous member ownership",
     "sdk_admitted": false
   },
-  "installed_wheel_qualified": false,
+  "installed_wheel_qualified": true,
   "canonical_snapshot_layout_integration": false,
   "retained_input_naming_integration": false,
   "producer_admitted": false,
@@ -264,7 +264,7 @@
     "native_pkg_provider": false,
     "standard_packaged_runtime": false,
     "qualification_decoder_integration": false,
-    "installed_wheel_qualified": false
+    "installed_wheel_qualified": true
   },
   "full_controller_regression": {
     "python": "3.11.14",
@@ -322,5 +322,39 @@
       "algorithm": "sha256",
       "digest": "5d6b714ed753d31558c11cdb5fd0c8bfd10b626bb50d14244dba70908e04896a"
     }
+  },
+  "exact_wheel_qualification": {
+    "revision": "9411185a9b94ed256184ffc7925e707fb5c04184",
+    "wheel_sha256": "70745868e7a65b956aeae91d8664435b0b11dfc2bf9b0d350f3e73153b7ff8cd",
+    "wheel_bytes": 3751471,
+    "distribution_identity": "sha256:c1706b8fd78a6a4d197103ae5734c6ddb7085ec9836bd7d070412092280c1139",
+    "distribution_members": 1227,
+    "report_sha256": "fc89c4b1fb2292b0823f196f84516dfe874df1c9489cb659dd9f678950619baa",
+    "clean_exact_revision": true,
+    "passed": true,
+    "release_acceptance": false
+  },
+  "native_installed_tree_tar_checks": {
+    "schema": "daemonarchy/installed-sdk-tree-development-qualification@1",
+    "framework_revision": "9411185a9b94ed256184ffc7925e707fb5c04184",
+    "distribution_identity": "sha256:c1706b8fd78a6a4d197103ae5734c6ddb7085ec9836bd7d070412092280c1139",
+    "tests_run": 14,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "all_framework_imports_installed": true,
+    "source_sdk_admitted": false,
+    "canonical_lifecycle_accepted": false,
+    "default_cli_changed": false,
+    "release_acceptance": false,
+    "scope": "Exact wheel installed offline with 37 verified distributions; focused tree TAR/input/live source-built library API checks, not full native lifecycle or compiler SDK acceptance",
+    "os": "FreeBSD 16.0-CURRENT amd64",
+    "python": "3.12",
+    "dependency_distributions": 37,
+    "bootstrap_seconds": 9.947,
+    "supervised_test_seconds": 21.383,
+    "observation_sha256": "21097bfe8e09b6ac573a6a33ca94df26f5716e2b468fab229afe3c4211572748",
+    "bootstrap_observation_sha256": "73e19711447c73e82ba90bd391467eb45ffa288697ba45b60dc6058484dcedc7",
+    "test_bundle_archive_sha256": "d096592262f95bb24994e5aa2768219f5a7586d04d29aa10a01b42a5f8f8df67"
   }
 }
