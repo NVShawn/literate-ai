@@ -58,6 +58,15 @@ missing artifacts or changed post-execution inputs prevent acceptance. Retained-
 receipts must bind original test identity/skip policy and packaged-payload provenance
 when the project's contract requires them. A baseline exception is not a test pass.
 
+Input verification may reuse a bounded set of POSIX directory handles within a
+single verification transaction. Every lookup still checks current ancestor
+names and identities without following directory links; cached lineages are
+revalidated before completion and all handles close on success or failure.
+Complete before/after inventories, byte hashes, executable modes, link text and
+file/path identity checks remain mandatory. No cached trust crosses verification
+boundaries, and unsupported or low-descriptor environments retain the preceding
+traversal. This changes neither manifest identities nor execution authority.
+
 Packaging consumes only the accepted closure through the selected existing package
 provider. A separately authorized release can publish that retained-origin artifact
 only after its current receipt and original release-authority policy pass. Such a
@@ -96,6 +105,30 @@ Acceptance permits implementation and its tests under ADR 0006. It does not itse
 authorize a release, claim qualification, or merge a PR. Implementation and full
 qualification remain open under RETAINED-PROJECT-001.
 
+## In-place original-source authority
+
+An already-authored canonical project may explicitly select initial `original`
+authority through a reviewed `project adopt-original` plan/apply operation. This
+mode preserves the original hierarchy and build definitions rather than invoking
+the legacy quarantine/wrapper conversion. The plan binds validated project
+authority and the clean Git root's current commit/tree. Applying requires that
+exact plan identity and acknowledgment, revalidates those facts, and creates only
+the original-adoption evidence and authority projection under `.literate`.
+
+`original` is a separate initial authority choice, not a conversion milestone or
+baseline/acceptance claim. It has no prior state and no transition into the legacy
+wrapped/retained/drafted/qualified chain. Existing stages and their identities
+remain unchanged. A project in original mode continues to reject ordinary
+regenerative rebuilds; retained planning/execution still need their complete
+input, lock, SDK/toolchain, original-test, independent acceptance, receipt,
+package and release gates. This adoption never runs the existing build, chooses
+language/packaging Flavors, changes source bytes or claims full catalog coverage.
+
+The Git snapshot records the initial adoption boundary, not future build
+acceptance. Subsequent edits remain original-authoritative and must earn current
+retained plans/receipts with their actual bytes. Existing conversion/adoption
+authority cannot be silently replaced by this operation.
+
 ## Captured native runtime search paths
 
 Profiles may opt into an ordered `runtime_library_paths` tuple of at most 32
@@ -124,6 +157,37 @@ compiler closure, suppress system loader fallback, admit SDK products, establish
 tool source-build provenance, or qualify public retained execution. Compiler
 resource directories, sysroots, startup/link inputs and relocated execution
 remain separate explicit requirements.
+
+## Built-product command lookup
+
+Profiles may separately opt into an ordered `output_command_paths` tuple of at
+most 32 canonical output-relative directory names. Every selection must be at
+or below a declared build output; test/documentation-only products, ambient paths,
+aliases and redirected or non-directory existing ancestors refuse. A directory
+may be absent before its build producer runs. Its eventual bytes remain subject
+to the normal sealed export and dependency checks.
+
+These paths precede captured tool directories in the credential-free command
+search path, allowing original tests to invoke newly built programs by name.
+The selection is bound into profile/plan identity and the stable execution
+environment. Caller PATH is never inherited. Omission preserves previous profile
+wire identities and the existing captured-tools-only command path. This does not
+grant execution, qualify a compiled product or replace independent acceptance.
+
+## Observed local execution context
+
+The development local entry obtains actual bounded worker observations through
+the existing probe owner. Authored OS requirements do not select the local probe
+implementation. The resulting observations must satisfy the original worker
+requirements and every selected OS/architecture Flavor; architecture aliases use
+the shared host normalizer. Target labels alone do not establish eligibility.
+
+Current-plan guards repeat the observation, refusing OS-family, OS-version or
+architecture drift. The initial and final observations bind the exact plan and
+authored worker in a typed data-only record. Live receipt admission revalidates
+that record against the run's actual lock closure and retains it in immutable CAS
+records. Existing receipt wire shape and identities are unchanged when this
+optional context is absent. Decoding context never creates an admission capability.
 
 ## Canonical per-Component input ownership
 
@@ -163,9 +227,10 @@ fields preserve legacy wire identities. Ownership rules cover links as ordinary
 input nodes, and a changed link target invalidates the manifest even when the old
 and new destination files have identical contents.
 
-This input custody extension does not admit native actions, executable tool
-aliases, per-unit packages or retained lifecycle acceptance. The public execution
-refusal and independent source/SDK/variant/receipt gates remain unchanged.
+This input custody extension does not itself admit native actions, executable
+tool aliases, per-unit packages or retained lifecycle acceptance. Local execution
+still requires the independent source/SDK/variant/receipt gates; complete public
+and native qualification remain open.
 
 
 ## Explicit independent acceptance of retained exports
@@ -191,7 +256,7 @@ identities; failed-case observations cannot become successful lifecycle evidence
 These observations are independent executable-case evidence, not retained
 lifecycle receipts, complete source/resolved BOM admission, qualified SDK products
 or packaged-artifact acceptance. They never advance conversion or release
-authority. The public retained execution refusal remains while these later
+authority. Full public retained execution qualification remains open while these later
 consumers are integrated and qualified. Legacy profiles produce no new independent
 acceptance observation merely by labeling a zero-exit command as acceptance.
 

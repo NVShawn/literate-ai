@@ -94,6 +94,10 @@ from literate_ai.contracts.executable_components import (
 )
 from literate_ai.contracts.identity import canonical_identity, canonical_json_bytes
 from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
+from literate_ai.contracts.native_sdk_tree_products import (
+    NATIVE_SDK_TREE_BUILD_RECIPE_CONTENT_KIND,
+    NativeSdkTreeBuildRecipe,
+)
 from literate_ai.contracts.native_sdks import (
     NATIVE_SDK_BUILD_RECIPE_CONTENT_KIND,
     NativeSdkBuildRecipe,
@@ -364,9 +368,18 @@ def load_flavor_contributions(
             f"Flavor {definition.coordinate.uri} contribution "
             f"{contribution.contribution_id}"
         )
-        if contribution.content.kind == NATIVE_SDK_BUILD_RECIPE_CONTENT_KIND:
+        if contribution.content.kind in {
+            NATIVE_SDK_BUILD_RECIPE_CONTENT_KIND,
+            NATIVE_SDK_TREE_BUILD_RECIPE_CONTENT_KIND,
+        }:
             try:
-                recipe = NativeSdkBuildRecipe.from_dict(
+                decoder = (
+                    NativeSdkTreeBuildRecipe
+                    if contribution.content.kind
+                    == NATIVE_SDK_TREE_BUILD_RECIPE_CONTENT_KIND
+                    else NativeSdkBuildRecipe
+                )
+                recipe = decoder.from_dict(
                     json.loads(
                         _read_reference(
                             root,

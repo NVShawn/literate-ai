@@ -9,10 +9,9 @@ The same-user workspace detects input mutation; it is not an OS sandbox.
 from __future__ import annotations
 
 import hashlib
-import os
 import tempfile
 from collections.abc import Callable
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -22,6 +21,7 @@ from literate_ai.adapters.builders import run_bounded_process
 from literate_ai.adapters.builders._process import BoundedProcessResult
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
+from literate_ai.adapters.retained_allocation import RetainedAllocationOwner
 from literate_ai.adapters.retained_project_acceptance import (
     read_retained_acceptance_policy,
     verify_retained_acceptance_action,
@@ -37,6 +37,7 @@ from literate_ai.adapters.retained_project_dependencies import (
 )
 from literate_ai.adapters.retained_project_environment import (
     captured_runtime_environment,
+    retained_command_path,
 )
 from literate_ai.adapters.retained_project_inputs import (
     _remove_tree,
@@ -50,6 +51,8 @@ from literate_ai.adapters.retained_project_testing import (
     read_retained_project_test_policy,
     read_retained_project_test_report,
 )
+from literate_ai.adapters.retained_readonly_views import FreeBsdRetainedViewOwner
+from literate_ai.adapters.retained_windows_context import retained_system_context
 from literate_ai.contracts import (
     ComponentLock,
     ContentIdentity,
@@ -158,12 +161,32 @@ class RetainedProjectExecutionWorkspace:
         native_sdk_owners: tuple[NativeSdkConsumerInputs, ...] | None = None,
         native_sdk_authorize=None,
         native_sdk_record=None,
+        allocation_owner: RetainedAllocationOwner | None = None,
     ) -> None:
         if allow_host_execution is not True:
             raise RetainedProjectExecutionError(
                 "retained.execution.authorization-required"
             )
         plan.require_authorization(authorization)
+        if plan.profile.secondary_access is not None and not isinstance(
+            allocation_owner, RetainedAllocationOwner
+        ):
+            raise RetainedProjectExecutionError(
+                "retained.secondary.provisioning-owner-required"
+            )
+        if plan.profile.secondary_access is None and allocation_owner is not None:
+            raise RetainedProjectExecutionError("retained.secondary.policy-required")
+        if allocation_owner is not None:
+            allocation_owner.require_plan(plan, minimum_remaining_seconds=60)
+            prefix = allocation_owner.workspace_prefix
+            if (
+                not isinstance(parent, Path)
+                or parent.resolve(strict=True) != parent
+                or not parent.is_relative_to(prefix)
+            ):
+                raise RetainedProjectExecutionError(
+                    "retained.secondary.allocated-parent-required"
+                )
         if (managed_graph is None) != (component_locks is None):
             raise RetainedProjectExecutionError(
                 "retained.bom.graph-and-locks-required-together"
@@ -216,6 +239,8 @@ class RetainedProjectExecutionWorkspace:
         self._native_sdks = None
         self._native_sdk_authorize = native_sdk_authorize
         self._native_sdk_record = native_sdk_record
+        self._secondary_views = None
+        self._secondary_outputs_bound = False
         self._require_current_plan()
         self._test_policy = read_retained_project_test_policy(
             source, manifest, plan.profile, test_receipt_policy
@@ -229,6 +254,7 @@ class RetainedProjectExecutionWorkspace:
             else None
         )
         self._resolved_bom = None
+        self._system_context = retained_system_context()
         require_safe_directory(parent)
         self.root = Path(tempfile.mkdtemp(prefix="retained-run-", dir=parent))
         try:
@@ -241,6 +267,17 @@ class RetainedProjectExecutionWorkspace:
             self.temporary = self.root / "tmp"
             for directory in (self.objects, self.outputs, self.home, self.temporary):
                 directory.mkdir(mode=0o700)
+            if allocation_owner is not None:
+                # This newly captured root belongs to this run. Keep it private;
+                # original source and captured child permissions stay untouched.
+                self.inputs.chmod(0o700)
+                self._secondary_views = FreeBsdRetainedViewOwner(
+                    plan,
+                    allocation_owner,
+                    input_root=self.inputs,
+                    output_root=self.outputs,
+                    input_manifest=manifest,
+                )
             self._tools = {}
             members = {member.path: member for member in manifest.members}
             for name, path, identity in plan.profile.tools:
@@ -275,8 +312,108 @@ class RetainedProjectExecutionWorkspace:
                 )
             self._require_current()
         except BaseException:
-            _remove_tree(self.root)
+            self.close_secondary_access()
+            # A view constructor can fail after mounting but before returning
+            # its owner. Preserve selected-policy backing trees for recovery.
+            if allocation_owner is None:
+                _remove_tree(self.root)
             raise
+
+    def close_secondary_access(self):
+        """Revoke and release owned views; cleanup failure remains a failure."""
+        if self._secondary_views is not None:
+            try:
+                self._secondary_views.close()
+            except BaseException:
+                self._failed = True
+                raise
+
+    def secondary_access_evidence(self):
+        return self._secondary_views.evidence() if self._secondary_views else ()
+
+    def finalize_secondary_access(self, run):
+        """Close after retained custody, bind historical facts, and refuse failure."""
+        if self._secondary_views is None:
+            return None
+        from literate_ai.adapters.retained_project_completion import (
+            RetainedProjectCompletedRun,
+        )
+        from literate_ai.contracts.retained_secondary_evidence import (
+            RetainedSecondaryAccessEvidence,
+        )
+
+        owner = self._secondary_views
+        try:
+            if (
+                self._failed
+                or not isinstance(run, RetainedProjectCompletedRun)
+                or run.source_bom != self.source_bom
+                or run.observations != self.observations
+                or run.output_manifest != self._output_manifest
+                or run.secondary_access_identity is not None
+            ):
+                raise ValueError("retained.secondary.current-completed-run-required")
+            self._require_current()
+            owner.require_current(
+                minimum_remaining_seconds=30 + 20 * len(owner.policy.views)
+            )
+            self.close_secondary_access()
+            owner.allocation.require_plan(self.plan, minimum_remaining_seconds=30)
+            evidence = RetainedSecondaryAccessEvidence.from_dict(
+                {
+                    "schema": RetainedSecondaryAccessEvidence.SCHEMA,
+                    "plan_identity": self.plan.identity.uri,
+                    "policy_identity": owner.policy.identity.uri,
+                    "worker_identity": owner.policy.worker_identity.uri,
+                    "account_identity": owner.policy.account.identity.uri,
+                    "command_observations": [v.identity.uri for v in run.observations],
+                    "allocation_observations": list(owner.allocation.evidence()),
+                    "view_observations": list(owner.evidence()),
+                    "cleanup_ok": True,
+                }
+            )
+            evidence.require_context(
+                self.plan,
+                export_manifest_identity=run.resolved_bom.output_manifest.identity,
+                command_observations=tuple(v.identity for v in run.observations),
+            )
+            self._require_private_current()
+            return evidence
+        except BaseException:
+            self._failed = True
+            self.close_secondary_access()
+            raise
+
+    @contextmanager
+    def _secondary_command_scope(self, action):
+        owner = self._secondary_views
+        selected = (
+            owner is not None
+            and action.action_id in self.plan.profile.secondary_access.action_ids
+        )
+        if selected:
+            owner.activate(action.action_id)
+        try:
+            yield
+        finally:
+            if selected:
+                owner.deactivate()
+
+    def _command_replacements(self):
+        result = {
+            "{input_root}": str(self.inputs),
+            "{object_root}": str(self.objects),
+            "{output_root}": str(self.outputs),
+        }
+        if self._secondary_views is not None:
+            policy = self.plan.profile.secondary_access
+            paths = self._secondary_views.paths
+            result["{secondary_account}"] = policy.account.name
+            for view in policy.views:
+                result["{secondary_view:" + view.name + "}"] = str(paths[view.name])
+            for name in policy.fixtures:
+                result["{secondary_fixture:" + name + "}"] = str(paths[name])
+        return result
 
     def _require_current_plan(self) -> None:
         current = self.current_plan()
@@ -373,6 +510,11 @@ class RetainedProjectExecutionWorkspace:
         return result
 
     def _require_current(self) -> None:
+        if self._secondary_views is not None:
+            self._secondary_views.require_current()
+        self._require_private_current()
+
+    def _require_private_current(self) -> None:
         for directory in (
             self.root,
             self.objects,
@@ -401,6 +543,8 @@ class RetainedProjectExecutionWorkspace:
             self._native_sdks.require_unchanged()
         if self._output_manifest is not None:
             verify_retained_project_inputs(self.outputs, self._output_manifest)
+        if self._secondary_views is not None:
+            self._secondary_views.require_identity_current()
 
     def _capture_outputs(self, action: RetainedProjectAction):
         roots = tuple(
@@ -453,13 +597,16 @@ class RetainedProjectExecutionWorkspace:
         # Do not inherit credentials, compiler/loader injection, user dotfiles,
         # Python paths or the caller's command search path.
         return {
+            **(
+                self._system_context.environment()
+                if self._system_context is not None
+                else {}
+            ),
             **captured_runtime_environment(
                 self.inputs, self.manifest, self.plan.profile
             ),
-            "PATH": os.pathsep.join(
-                sorted(
-                    {str(Path(tool.executable).parent) for tool in self._tools.values()}
-                )
+            "PATH": retained_command_path(
+                self.outputs, self.plan.profile, self._tools.values()
             ),
             "HOME": str(self.home),
             "TMPDIR": str(self.temporary),
@@ -492,28 +639,31 @@ class RetainedProjectExecutionWorkspace:
                     self._configured_test_policy,
                 )
             binding = self._tools[action.tool]
-            replacements = {
-                "{input_root}": str(self.inputs),
-                "{object_root}": str(self.objects),
-                "{output_root}": str(self.outputs),
-            }
+            replacements = self._command_replacements()
             argv = []
             for argument in action.argv:
                 for token, value in replacements.items():
                     argument = argument.replace(token, value)
+                if "{secondary_" in argument:
+                    raise RetainedProjectExecutionError(
+                        "retained.secondary.unknown-command-binding"
+                    )
                 argv.append(argument)
             environment = self._environment()
             remaining = _TOTAL_OUTPUT_BYTES - self._output_bytes
             if remaining < 2:
                 raise RetainedProjectExecutionError("retained.execution.output-budget")
-            with self._sdk_command_scope(
-                (*binding.command, *argv),
-                tool=binding,
-                cwd=self.objects,
-                environment=environment,
-                action_identity=canonical_identity(action.to_dict()),
-                phase=action.stage,
-            ) as sdk_scope:
+            with (
+                self._secondary_command_scope(action),
+                self._sdk_command_scope(
+                    (*binding.command, *argv),
+                    tool=binding,
+                    cwd=self.objects,
+                    environment=environment,
+                    action_identity=canonical_identity(action.to_dict()),
+                    phase=action.stage,
+                ) as sdk_scope,
+            ):
                 result = run_bounded_process(
                     (*binding.command, *argv),
                     cwd=self.objects,
@@ -559,6 +709,27 @@ class RetainedProjectExecutionWorkspace:
                 if produced
                 else None
             )
+            completed_builds = {
+                item.action.action_id
+                for item in self.observations
+                if item.action.stage == "build"
+            }
+            if (
+                self._secondary_views is not None
+                and not self._secondary_outputs_bound
+                and action.stage == "build"
+                and all(
+                    item.action_id in completed_builds
+                    for item in self.plan.profile.actions
+                    if item.stage == "build"
+                )
+            ):
+                if self._output_manifest is None:
+                    raise RetainedProjectExecutionError(
+                        "retained.secondary.build-exports-required"
+                    )
+                self._secondary_views.bind_outputs(self._output_manifest)
+                self._secondary_outputs_bound = True
             if action.stage == "build" and self.source_bom is not None:
                 completed = {item.action.action_id for item in self.observations}
                 builds = {
@@ -634,4 +805,5 @@ class RetainedProjectExecutionWorkspace:
             return observation
         except BaseException:
             self._failed = True
+            self.close_secondary_access()
             raise

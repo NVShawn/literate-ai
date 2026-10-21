@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from literate_ai.adapters import host_install
 from literate_ai.bootstrap.host_install_requirements import (
@@ -151,9 +152,68 @@ class FreeBSDHostInstallTests(unittest.TestCase):
                 commands, [(pkg, "query", "%n-%v", "gmake"), (gmake, "--version")]
             )
 
+    def test_split_sqlite_requires_native_package_and_working_current_interpreter(self):
+        requirement = next(
+            p for p in self.sbom.packages if p.capability == "python-sqlite3"
+        )
+        self.assertEqual(requirement.manager_package, "py312-sqlite3")
+        self.assertEqual(requirement.probe_kind, "python-module")
+        self.assertIn("select 1", requirement.probe_arguments[-1])
+        for registered, usable, python_version in (
+            (True, True, "3.12.15"),
+            (True, False, "3.12.15"),
+            (False, True, "3.12.15"),
+            (True, True, "3.11.14"),
+        ):
+            calls = []
+
+            def runner(
+                argv, *, calls=calls, registered=registered, usable=usable, **kwargs
+            ):
+                calls.append(argv)
+                if argv[0] == "pkg":
+                    return subprocess.CompletedProcess(
+                        argv,
+                        0 if registered else 1,
+                        "py312-sqlite3-3.12.15" if registered else "",
+                        "",
+                    )
+                self.assertEqual(argv, (sys.executable, *requirement.probe_arguments))
+                return subprocess.CompletedProcess(
+                    argv, 0 if usable else 1, "", "missing extension"
+                )
+
+            with (
+                self.subTest(
+                    registered=registered, usable=usable, python_version=python_version
+                ),
+                mock.patch.object(
+                    host_install.platform, "python_version", return_value=python_version
+                ),
+            ):
+                observed = host_install._observe_native_package(
+                    requirement,
+                    sbom=self.sbom,
+                    query_path="pkg",
+                    environment={},
+                    runner=runner,
+                    locator=lambda *a: self.fail(
+                        "Python module probe must use current interpreter"
+                    ),
+                )
+                self.assertEqual(
+                    observed.ready,
+                    registered and usable and python_version == "3.12.15",
+                )
+            self.assertEqual(len(calls), 2)
+
     def test_declining_install_does_not_run_pkg_install_or_download(self):
         def runner(argv, **kwargs):
-            self.assertEqual(argv, (sys.executable, "-c", "import ensurepip,venv"))
+            self.assertEqual(argv[0], sys.executable)
+            self.assertTrue(
+                argv[1:] == ("-c", "import ensurepip,venv")
+                or argv[1:] == ("-m", "sqlite3", ":memory:", "select 1")
+            )
             return subprocess.CompletedProcess(argv, 0, "", "")
 
         with tempfile.TemporaryDirectory() as temporary:
@@ -222,7 +282,14 @@ class FreeBSDHostInstallTests(unittest.TestCase):
                     "",
                 )
 
-            with tempfile.TemporaryDirectory() as temporary:
+            # This fixture models a FreeBSD Python 3.12 host independently of
+            # the interpreter that runs the cross-platform controller suite.
+            with (
+                tempfile.TemporaryDirectory() as temporary,
+                mock.patch.object(
+                    host_install.platform, "python_version", return_value="3.12.15"
+                ),
+            ):
 
                 def execute():
                     return host_install.ensure_host_install_dependencies(
@@ -259,6 +326,7 @@ class FreeBSDHostInstallTests(unittest.TestCase):
                         "install",
                         "-y",
                         "python312",
+                        "py312-sqlite3",
                         "git",
                         "git-lfs",
                         "codex",

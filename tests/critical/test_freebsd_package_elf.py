@@ -39,6 +39,15 @@ class FreeBsdPackageElfTests(unittest.TestCase):
             self.inspect(aarch64, abi="FreeBSD:16:aarch64"), (("libc.so.7",), ())
         )
 
+    def test_private_library_names_follow_native_summary(self):
+        content = freebsd_package_elf(
+            needed=("vendor_factor.so", "libc.so.7"), soname="vendor_math.so"
+        )
+        self.assertEqual(self.inspect(content), (("libc.so.7",), ()))
+        for name in ("vendor/bad.so", "vendor\n.so"):
+            with self.subTest(name=name), self.assertRaises(PackagingError):
+                self.inspect(freebsd_package_elf(needed=(name,)))
+
     def test_truncation_offsets_counts_and_string_links_are_bounded(self):
         original = freebsd_package_elf()
         for offset, encoding, value in (

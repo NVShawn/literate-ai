@@ -15,6 +15,7 @@ class WorkerProvisioner:
     environment: tuple[ExecutionWorkerEnvironment, ...] = ()
     help_argument: str = "--help"
     timeout_seconds: int = 300
+    inspection_command: tuple[str, ...] = ()
 
     SCHEMA = "urn:literate-ai:schema:v1:worker-provisioner"
 
@@ -22,6 +23,16 @@ class WorkerProvisioner:
         command = string_tuple(self.command, "WorkerProvisioner.command")
         if not command or len(command) > 64 or any("\0" in arg for arg in command):
             fail("WorkerProvisioner.command", "requires 1..64 non-NUL arguments")
+        if type(self.inspection_command) is not tuple:
+            fail("WorkerProvisioner.inspection_command", "requires an immutable tuple")
+        inspection = string_tuple(
+            self.inspection_command, "WorkerProvisioner.inspection_command"
+        )
+        if len(inspection) > 64 or any("\0" in arg for arg in inspection):
+            fail(
+                "WorkerProvisioner.inspection_command",
+                "requires at most 64 non-NUL arguments",
+            )
         bool_value(self.enabled, "WorkerProvisioner.enabled")
         int_value(
             self.timeout_seconds,
@@ -36,7 +47,7 @@ class WorkerProvisioner:
             fail("WorkerProvisioner.environment", "requires at most 64 unique bindings")
 
     def to_dict(self):
-        return {
+        value = {
             "schema": self.SCHEMA,
             "command": list(self.command),
             "enabled": self.enabled,
@@ -44,6 +55,9 @@ class WorkerProvisioner:
             "help_argument": self.help_argument,
             "timeout_seconds": self.timeout_seconds,
         }
+        if self.inspection_command:
+            value["inspection_command"] = list(self.inspection_command)
+        return value
 
     @classmethod
     def from_dict(cls, value):
@@ -62,7 +76,16 @@ class WorkerProvisioner:
                     "timeout_seconds",
                 }
             ),
+            optional=frozenset({"inspection_command"}),
         )
+        if "inspection_command" in data and (
+            not isinstance(data["inspection_command"], list)
+            or not data["inspection_command"]
+        ):
+            fail(
+                "WorkerProvisioner.inspection_command",
+                "explicit inspection command must be nonempty",
+            )
         return cls(
             string_tuple(data["command"], "WorkerProvisioner.command"),
             data["enabled"],
@@ -74,4 +97,8 @@ class WorkerProvisioner:
             ),
             data["help_argument"],
             data["timeout_seconds"],
+            string_tuple(
+                data.get("inspection_command", ()),
+                "WorkerProvisioner.inspection_command",
+            ),
         )

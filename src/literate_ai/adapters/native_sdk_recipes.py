@@ -16,6 +16,10 @@ from literate_ai.contracts.identity import (
     ContentReference,
     canonical_identity,
 )
+from literate_ai.contracts.native_sdk_tree_products import (
+    NATIVE_SDK_TREE_BUILD_RECIPE_CONTENT_KIND,
+    NativeSdkTreeBuildRecipe,
+)
 from literate_ai.contracts.native_sdks import (
     NATIVE_SDK_BUILD_RECIPE_CONTENT_KIND,
     NativeSdkBuildRecipe,
@@ -31,7 +35,7 @@ class NativeSdkRecipeSelection:
     flavor_revision: ContentIdentity
     content: ContentReference
     source_lock: RepositorySourceLock
-    recipe: NativeSdkBuildRecipe
+    recipe: NativeSdkBuildRecipe | NativeSdkTreeBuildRecipe
 
     @property
     def identity(self) -> ContentIdentity:
@@ -83,7 +87,10 @@ def select_native_sdk_recipes(
     recipes: dict[str, NativeSdkRecipeSelection] = {}
     for flavor in flavors:
         for contribution in flavor.definition.contributions:
-            if contribution.content.kind != NATIVE_SDK_BUILD_RECIPE_CONTENT_KIND:
+            if contribution.content.kind not in {
+                NATIVE_SDK_BUILD_RECIPE_CONTENT_KIND,
+                NATIVE_SDK_TREE_BUILD_RECIPE_CONTENT_KIND,
+            }:
                 continue
             if (
                 contribution.kind is not ContributionKind.BUILDER
@@ -92,7 +99,13 @@ def select_native_sdk_recipes(
                 raise ValueError(
                     "SDK recipes require exact-singleton builder contributions"
                 )
-            recipe = NativeSdkBuildRecipe.from_dict(
+            decoder = (
+                NativeSdkTreeBuildRecipe
+                if contribution.content.kind
+                == NATIVE_SDK_TREE_BUILD_RECIPE_CONTENT_KIND
+                else NativeSdkBuildRecipe
+            )
+            recipe = decoder.from_dict(
                 json.loads(
                     snapshot.flavor_content(flavor.identity, contribution.content)
                 )

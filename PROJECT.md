@@ -72,6 +72,48 @@ development (2026-09-10):
 
 ## Current work
 
+INPUT-WALK-001 (issue #86) extends Goal 4 with bounded directory traversal for
+large retained input selections. Each verification may reuse a limited set of
+POSIX directory handles while checking current names and ancestor identities
+on every access. Hashes, modes, complete inventories, symlink rules, currentness
+and cleanup remain mandatory; Windows and low-descriptor fallback behavior
+stay unchanged. Full regression and installed/native renewal remain required.
+
+RETAINED-USER-001 (issue #85) extends Goals 1, 4 and 5 with explicit secondary
+test identities and scoped access to private retained workspaces. Original
+privileged and unprivileged test requirements must both pass on an allocated
+disposable native guest. Account selection alone cannot traverse private run
+directories; reviewed identity/resource grants and permission currentness are
+required without changing existing private defaults or acceptance boundaries.
+The numeric identity/currentness prerequisite passes full controller regression.
+The descriptor ACL backend has native source-level checks, including safe mask
+widening and exact restoration. The optional reviewed policy binds worker,
+account, test actions, read-only views and fresh fixtures into the exact profile;
+manifest binding rejects aliases escaping a selected view. Provisioning
+inspection now has a separate operator-local command and a live owner that
+refuses replay, instance/prefix changes, expiry and configuration drift. Actual
+native allocation qualification, enforced runtime scope and installed lifecycle
+integration remain open; selected-policy execution refuses until that owner is
+integrated.
+
+SBOM-SCALE-001 (issue #84) extends Goal 4 to complete retained inventories without
+quadratic strict-schema uniqueness checks. Structural JSON equality must preserve
+the official schema, reference registry, format checks, full file provenance and
+canonical BOM identities. Portable differential and scale qualification precede
+full regression and native installed renewal.
+
+CATALOG-FETCH-001 (issue #83) bounds acquisition of immutable Git catalog
+snapshots without transferring unrelated repository history or file contents.
+Selected submodule contents and canonical provenance must match the requested commit. Real Git
+fixtures and actual large-source imports qualify this path; source import is
+not build or release admission.
+
+RETAINED-PROJECT-001 (issue #22) also makes ordinary `build` and `test` delegate
+explicit original-source selections to the same retained lifecycle as
+`rebuild`, preserving reviewed plan/host authorization and distinct receipts.
+Installed original-source compilation, package consumption and full native
+qualification remain separate open requirements.
+
 RETAINED-CATALOG-001 (issue #74) extends Goals 1, 4 and 6 with complete
 retained-input ownership by exact canonical Components. Coverage must use the
 real authored catalog, preserve target-specific lock and source authority

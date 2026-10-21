@@ -90,9 +90,27 @@ _REPOSITORY_RESOLUTION_PROPERTIES = (
 @cache
 def _strict_validator():
     # jsonschema compiles format grammars on import; load it only to validate.
-    from cyclonedx.validation.json import JsonStrictValidator
+    from functools import cached_property
 
-    return JsonStrictValidator(SchemaVersion.V1_7)
+    from cyclonedx.validation.json import JsonStrictValidator
+    from jsonschema.validators import extend
+
+    from .json_uniqueness import unique_json_items
+
+    class ScalableStrictValidator(JsonStrictValidator):
+        @cached_property
+        def _validator(self):
+            official = super()._validator
+            validator_type = extend(type(official), {"uniqueItems": unique_json_items})
+            # Retain the official strict schema and its offline SPDX/crypto/JSF
+            # registry. CycloneDX exposes that registry only on its validator.
+            return validator_type(
+                official.schema,
+                registry=official._registry,
+                format_checker=official.format_checker,
+            )
+
+    return ScalableStrictValidator(SchemaVersion.V1_7)
 
 
 class CycloneDxBomError(RuntimeError):

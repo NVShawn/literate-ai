@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "literate-ai/native-sdk-tree-package-inputs@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "component_lock_identity",
+    "root_revision",
+    "target_identity",
+    "consumers"
+  ],
+  "properties": {
+    "schema": {
+      "const": "literate-ai/native-sdk-tree-package-inputs@1"
+    },
+    "component_lock_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "root_revision": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "target_identity": {
+      "$ref": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "consumers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1024,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consumer_revision",
+          "input_identity",
+          "tree_input_identity",
+          "import_root",
+          "snapshot",
+          "binding"
+        ],
+        "properties": {
+          "consumer_revision": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          },
+          "input_identity": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          },
+          "tree_input_identity": {
+            "$ref": "urn:literate-ai:schema:v1:content-identity"
+          },
+          "import_root": {
+            "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/path"
+          },
+          "snapshot": {
+            "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/path"
+          },
+          "binding": {
+            "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/path"
+          }
+        }
+      }
+    }
+  }
+}

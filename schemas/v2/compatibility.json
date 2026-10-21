@@ -225,7 +225,18 @@
     "literate-ai/retained-cargo-workspace-plan@1",
     "urn:literate-ai:schema:v2:native-sdk-snapshot",
     "urn:literate-ai:schema:v2:native-sdk-build-layout",
-    "urn:literate-ai:schema:v2:native-sdk-build-recipe"
+    "urn:literate-ai:schema:v2:native-sdk-build-recipe",
+    "urn:literate-ai:schema:v2:native-sdk-tree-build-layout@1",
+    "urn:literate-ai:schema:v2:native-sdk-tree-build-recipe@1",
+    "urn:literate-ai:schema:v2:native-sdk-tree-snapshot@1",
+    "urn:literate-ai:schema:v2:native-sdk-tree@1",
+    "literate-ai/retained-project-tree-policy@1",
+    "urn:literate-ai:schema:v2:package-tree-input@1",
+    "urn:literate-ai:schema:v2:tree-package-plan@1",
+    "urn:literate-ai:schema:v2:tree-package-result@1",
+    "literate-ai/native-sdk-tree-package-inputs@1",
+    "literate-ai/freebsd-tree-pkg-projection@1",
+    "literate-ai/freebsd-tree-pkg-result@1"
   ],
   "read_paths": [
     {

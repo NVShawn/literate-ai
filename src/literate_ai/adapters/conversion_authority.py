@@ -298,6 +298,18 @@ class FilesystemConversionAuthorityStore:
         self._replace(replacement, expected=current.identity)
         return replacement
 
+    def initialize_original(
+        self, *, project_id: str, evidence_identity: ContentIdentity
+    ) -> ConversionAuthorityState:
+        """Record explicit original authority without asserting legacy conversion."""
+        state = ConversionAuthorityState(
+            project_id=project_id,
+            stage=ConversionAuthorityStage.ORIGINAL,
+            evidence_identities=(evidence_identity,),
+        )
+        self._replace(state, expected=None)
+        return state
+
     def _read(self) -> ConversionAuthorityState:
         descriptor: int | None = None
         try:

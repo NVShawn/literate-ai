@@ -6,7 +6,6 @@ import os
 import subprocess
 import tempfile
 import unittest
-import venv
 import zipfile
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -19,6 +18,7 @@ from literate_ai.adapters.user_paths import (
     HOST_INSTALL_MANIFEST_SCHEMA,
     HostInstallLayout,
 )
+from scripts.install_litai import _create_private_environment
 from tests.support.fixtures_test_host_self_update import _write_manifest
 
 
@@ -79,7 +79,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
             root = Path(temporary).resolve()
             layout = HostInstallLayout.for_prefix(root / "prefix")
             environment = Path(layout.environment)
-            venv.EnvBuilder(with_pip=True).create(environment)
+            _create_private_environment(environment)
             python = updater._venv_python(environment)
             _write_manifest(layout, schema=HOST_INSTALL_MANIFEST_SCHEMA)
 

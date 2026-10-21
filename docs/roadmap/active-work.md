@@ -25844,6 +25844,63 @@ Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), r
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
+    - [x] Admit the first reviewed installed-wheel Standard binding for an adopted
+      project whose driver and receipt policy are both absent. Reject partial
+      configuration and policy downgrade; preserve original source authority.
+      Focused CLI and rollback checks pass. At `4613eda2447eca5ad02b1abee2130375b83b29de`,
+      the full local Python regression passes
+      1,835 tests with 42 skips (1,877 selected) in 702.401 seconds. Log SHA-256:
+      `2f1555e13548a267a931cb1ed810888c8bcb95aef23446681f7e2c6b3874a7f1`;
+      report SHA-256:
+      `acb392e8ea9679c65793244a5e44166c2dc8059eca03e0c4582c1ad95a056739`.
+      Actual installed source-fork use then found a missing project-owned
+      `test_receipt` path. The source fork now declares that path; the framework
+      planner also refuses its absence before apply. Seven focused binding checks
+      pass. The full local regression for the added preflight passes 1,836 tests
+      with 42 skips (1,878 selected) in 788.241 seconds. Log SHA-256:
+      `927c0e587dfba70adfc8b138e0051a0e994bc0b7176ecfc368ba799f75674160`;
+      report SHA-256:
+      `a42bb14e781ba2308c3ad5d3b5c885d765c5c11f67d272e0b549b159794b7125`.
+      The source fork's first binding succeeded using the prior installed
+      `4613eda2` wheel. A reviewed rebind now pins the final `cffef323` wheel:
+      SHA-256 `e7d82a5035ce991f56ea45e2085bc9f91d81e71e25da9f7023897c6442e8391e`,
+      installed distribution identity
+      `sha256:ed899116420edda0c803acf424067f102b6face4870e180104add4da431cb534`.
+      The HP's isolated installed CLI validates `/usr/src`; authority and all
+      three locks pass, while the absent retained test receipt fails as expected.
+      Native worker execution and full installed qualification remain open.
+    - [x] Expose the same retained-project plan and execution protocol through
+      `litai build` and `litai test`, delegating to the existing retained owner.
+      Preserve exact plan/host authorization, original source authority, all
+      configured gates and distinct retained receipts. Reject orphaned retained
+      options before generated execution and keep read-only plans distinct from
+      successful builds in operator output. Installed native project execution
+      and package consumers remain separate qualification requirements.
+      The combined public-frontend/catalog regression passes 1,850 tests with
+      42 skips (1,892 selected) in 1,063.469 seconds. Report SHA-256:
+      `d4885099d94eba41785a4b7795af11a10f20869fe0eca69aa6e8730799e1d5d6`;
+      log SHA-256:
+      `7fc7ae0393d46d09ca5561950edcf298438682e9aa6ef55fc9dd8d00de7bb255`.
+      Handler fixtures exercise actual local command/custody owners; they do
+      not qualify canonical installed native compilation or package consumers.
+    - [x] Connect explicit local retained execution to live workspace admission,
+      preserving original authority, exact re-planning and retained CAS custody.
+      Reject unsupported remote/SDK execution rather than falling back to local
+      execution or ambient tools; preserve failed run evidence.
+    - [x] Implement local verification of selected OS/architecture and authored worker requirements against
+      fresh actual local platform observations, retaining the binding in admitted
+      evidence. Add wrong-platform refusal checks before operator deployment;
+      matching target names and worker metadata alone do not prove this gate.
+    - [ ] Audit configured Standard evidence requirements against retained-origin
+      admission and public consumers. Preserve the initialized policy in the real
+      installed fixture; do not narrow required evidence to manufacture success.
+      Distinct retained receipts must neither substitute for generated receipts
+      nor silently discard applicable declared gates.
+
+    - [x] Bind opt-in command-search directories to declared build exports so
+      original tests can invoke newly built products by name without inheriting
+      host PATH. Preserve default profile identities; reject undeclared,
+      redirected or non-directory selections and qualify actual subprocess lookup.
   - [ ] Bind package and release custody to retained origin without conversion advancement
 - **Evidence:**
   - [ ] Public installed CLI mixed source and binary fixture passes complete build, test, docs and deterministic package lifecycle with repeat, invalidation and relocation checks
@@ -25856,14 +25913,63 @@ record, worker/target, SDK/toolchain/dependency closure and original policy inpu
 `make python-check` passes 23 retained input/planning tests and 33 existing rebuild
 CLI regressions. Execution still fails closed: typed retained runtime/receipt, SBOM,
 package and release consumers and full installed-CLI qualification remain open.
-Current execution audit: both current main and this branch still validate plan
-authorization and then unconditionally raise
-`retained_project.execution_not_qualified` in `cli/retained_project.py`. Issue #22
-was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
-does not close this runtime requirement or transfer retained release authority.
+The baseline audit at `7c5cbd29` verified unconditional public execution refusal.
+This branch connects the development local route to existing live execution and
+receipt admission, with exact plan/host authorization, fresh authority reads and
+captured command diagnostics. Eight owner checks and three handler-wiring checks
+pass locally in 30.151 seconds with actual command/admission owners, including
+pre-execution refusal when independent acceptance is absent. The handler tests fixture
+project discovery; canonical installed CLI qualification remains open, as do SDK
+producer binding, remote retained dispatch and public package/release composition.
+Issue #22 remains open. FreeBSD receiver/bootstrap qualification does not close
+these runtime requirements or transfer retained release authority.
 
-**Next action in progress:** connect local retained admission to the existing
-native FreeBSD pkg provider without changing existing ZIP wire identities. Bind a
+Local worker-context checkpoint: selected OS/architecture and authored capacity
+requirements now bind fresh actual observations before commands and through
+current-plan revalidation. Receipt admission retains typed initial/final context
+and rejects inconsistent evidence. Nine policy checks and thirteen runtime checks
+cover mismatches, architecture aliases, probe failures, platform drift, actual
+local probing and CAS retention. The retained group passes 163 tests with one
+native-only skip (164 selected) in 207.106 seconds; a final runtime follow-up
+passes all thirteen in 57.239 seconds. Their log SHA-256 values are
+`f4b8d9f03c4bcec51af4c727bf047ba1a9640454983ab8f12885e8058830f1aa`
+and `ff08d3fee1b080af85cbb7a6787dd486964b1ab78e1640e09fe3169f598a63be`.
+The full local regression for this context change passes 1,831 tests with 42
+skips (1,873 selected) in 651.219 seconds. Log SHA-256:
+`c0d47628ce909be9a51ff2f16bac620fbe75add5e8ab774d808c494931a55af2`;
+report SHA-256:
+`754025dfd4bb44340f988db7f48bc2993083090380fc81957bd99d2d5dfeedec`.
+Installed and native qualification remain open. Configured evidence-policy
+consumption remains a separate gate.
+
+Combined local checkpoint at `3d2650134909d55ffc36f9147a652bd62faecce5`:
+the full Python regression passes 1,820 tests with 42 skips (1,862 selected) in
+796.437 seconds. Log SHA-256:
+`9b67dbf8a5dd01593dde83ff4f6007dbb6765f671d5c1787fae7f1b9dcf0d5a4`;
+report SHA-256:
+`99c29ae5e393ff72e0eb0680b87a0ace704514a1e8a800217ed03d9a055fae8b`.
+The combined lookup/runtime tree passes lint, formatting, layout/export, both
+TCB reviews and project authority validation. Actual canonical installed CLI
+execution, local platform-binding audit, native and SDK/package composition
+remain open; the fixture handler tests do not prove those boundaries.
+
+Built-product lookup checkpoint: nine local environment checks pass, including
+an actual subprocess that finds a newly exported executable by name and fails
+without the explicit selection. Four new checks cover identity/producer/path
+refusals and lookup behavior. Caller PATH stays outside the target environment;
+host native inspectors retain their separate discovery context. Native,
+installed/public execution and original-source test qualification remain open.
+The full local regression passes 1,809 tests with 42 skips (1,851 selected) in
+682.902 seconds, including the new lookup checks. Its log SHA-256 is
+`4f02307799e89cd624473fc4ac51f0441803faec4e7639b1f0c67204ddbce909`;
+the report SHA-256 is
+`7e9295bab9ad4c46078567af2cfb49380006df3161d4c31d438c9c9707c44b44`.
+Lint, formatting, layout/export, TCB pins and strict OpenSpec checks also pass.
+This renews the local lookup checkpoint, not native or installed qualification.
+
+**Next action in progress:** qualify the canonical installed local retained route,
+then join its selected SDK and package authority through the existing owners.
+The native FreeBSD pkg provider keeps existing ZIP wire identities. Bind a
 packaging Flavor actually selected by a current Component lock, exact accepted
 payload, authored specifications, both BOMs and retained receipt evidence. Reuse
 the provider's construction and independent native inspection; never place a
@@ -27971,6 +28077,15 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 ### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
 
+Native receipt qualification exposed a missing `_sqlite3` extension despite a
+working Python command. Declare Python SQLite in the FreeBSD OS Flavor, map it to
+`py312-sqlite3`, and require both native package registration and an in-memory
+query through the current interpreter. Twelve host-install checks pass. The
+existing declared native-package installer repairs the disposable guest with
+`py312-sqlite3` and its two dependencies; the probe and existing installed CLI now
+start successfully. This is a capability repair, not full worker/distribution
+qualification. Preserve the original import failure and invalid catalog attempts.
+
 Current native renewal at `d833ebd0` stopped after 232 tests (one error, 26
 skips) because the real SSH-receiver fixture exhausted its capability deadline.
 An isolated rerun reproduced the same 60-second failure. Receiver import and
@@ -28583,6 +28698,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   separate, unfinished gates. Hosted checks on the pushed revision remain required
   evidence to inspect before any eventual landing.
 
+
 - **PR #68 final qualification (in progress):** Finish the review against the
   current retained/native package and SSH receiver corrections through `ab15e04e`.
   Renew the complete local and actual FreeBSD regression, canonical-origin
@@ -28600,6 +28716,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   timeout/SIGINT, descendant cleanup and nested-evidence assertions. Production
   command deadlines and cancellation behavior remain unchanged. Renew the focused
   native fixture and complete native regression before landing.
+
   Host qualification at `ab15e04e` passes all 1,830 selected cases: 1,788
   passed and 42 skipped in 1,056.253 seconds (log SHA-256
   `59a10aef8739236f15175dccf83acb5bd84eec99fff7a9b2073f3e3bc1608446`).
@@ -28761,6 +28878,8 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   installed interpreter or move permission changes after binding. Audit other
   copied-tool mutation fixtures, then renew this six-case module and the remaining
   late-smoke cases before broad native qualification.
+  These predecessor results do not qualify the later original-adoption or
+  committed-target verification changes recorded below.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
@@ -29040,6 +29159,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Bind typed ownership rules to exact canonical Component authoring identities and all retained file/directory inputs
   - [x] Revalidate ownership against the actual canonical catalog through retained planning without changing legacy identities or execution refusal
   - [ ] Integrate selected native actions, variants, per-unit packages and independent acceptance with bounded full-catalog scale
+  - [ ] Bind exact per-unit output/source/build package ownership and typed dependencies to the admitted multi-Component closure; reject ambiguous, overlapping or uncovered package members and preserve complete receipt/BOM custody.
 - **Evidence:**
   - [ ] Canonical catalog fixtures reject unknown/stale owners, uncovered or ambiguous inputs and changed shared ownership; existing retained planning remains compatible
   - [ ] Public installed CLI and native multi-component execution, package custody and complete-tree scale qualification pass before closing issue #74
@@ -29055,6 +29175,16 @@ conversion and project validation; it is not installed/native qualification.
 Native selected actions, shared consumer/variant binding, per-unit package
 products, installed CLI and complete native-tree admission remain open. No
 retained execution or package acceptance is inferred from coverage.
+
+The current retained package owner projects all admitted payload members into
+one archive selected through a packaging-provider lock. That aggregate custody
+is not a separate package for every Component. Per-unit qualification requires
+an explicit current ownership partition, version/target/options binding and
+typed source/build/runtime relationships. Inspect every constructed native pkg
+and its reopened payload, including source/build units linked into larger
+products. Preserve complete evidence and refuse gaps, overlap, stale ownership
+or dependence on retired build paths; do not infer package partitioning from
+the presence of several Component locks in one project receipt.
 
 
 Source-link admission checkpoint for RETAINED-CATALOG-001: the pinned FreeBSD
@@ -29175,7 +29305,7 @@ suite and native execution before exposing it to the operator workstation.
   explicit null previous binding. Preserve the entire existing receipt policy;
   without an old Standard driver there is no derived runner identity to advance.
   Existing bound-project plans keep their schema and projection semantics. A
-  project with neither receipt policy nor driver still uses initialization, and
+  project with neither receipt policy nor driver uses the separate native initial-binding route, and
   an existing custom executable driver cannot migrate through this operation.
 - **Depends on:** STANDARD-REBIND-001
 - **Implementation:**
@@ -29196,6 +29326,24 @@ Evidence: [exact wheel and native migration checkpoint](../../verification/stand
 - **Owner:** framework native retained lifecycle and binding integration
 - **Direction:** Combine the reviewed first-binding repair and native original-source admission in one qualified installed distribution for retained products.
 - **Conclusion:** Preserve both review branches and source authority. A merged source tree is a candidate until its exact full regression, installed wheel, native first binding and original-source planning pass; it does not confer downstream lifecycle or release acceptance.
+- **Integration contract:** Preserve the native initial-binding plan for projects
+  with neither driver nor policy and a configured receipt path; preserve the
+  distinct receipt-only first-binding plan and complete existing policy; retain
+  ordinary Standard rebind and reject a configured driver without policy. Never
+  reinterpret one plan schema as another authority state. Resolve GNU Make fixture
+  selection through the shared toolchain observer. Predecessor qualification stays
+  scoped to its own revision until the combined candidate passes.
+- **Focused integration:** The 18 combined binding cases pass. The original-source
+  refusal fixture exposed diagnostic telemetry under its complete source snapshot;
+  route that declared output to a separate owned `OBJ_DIR`, preserve the unchanged
+  full source-byte assertion and check that the failed rebuild span is recorded.
+  No source or execution guard is relaxed. All 38 focused checks now pass:
+  18 binding, 10 original-source adoption and 10 receiver-custody cases, with no
+  skips. Lint, formatting, repository layout, public exports, documentation
+  rendering, OpenSpec and driver review pass. The reviewed combined driver
+  identity is `sha256:27208ae96d0c7d49e1d2581358b7e105874a03addf0bdc4c07aedb95dfb62ccc`.
+  Next: freeze the exact merge revision and run a new full controller regression
+  and clean-commit wheel qualification before installed/native use.
 - **Depends on:** STANDARD-FIRST-BIND-001, FREEBSD-001
 - **Implementation:**
   - [ ] Integrate exact PR87 and PR108 revisions without losing source, tree package, access or binding contracts.
@@ -29203,3 +29351,721 @@ Evidence: [exact wheel and native migration checkpoint](../../verification/stand
 - **Evidence:**
   - [ ] Combined full controller regression, static/documentation/driver checks and exact clean-commit installed wheel pass.
   - [ ] Aligned native installation verifies the complete dependency closure and real public CLI first-bind/original-source planning, with historical policy preserved and no fabricated receipt.
+
+### [ ] ORIGINAL-ADOPT-001 — Bind original project authority without relocating source
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+
+- **Priority:** P0
+- **Owner:** Original-source adoption contracts, project command and conversion authority store
+- **Direction:** Preserve conventional native source trees while adopting explicit retained project authority through the framework.
+- **Conclusion:** Add an independent original initial authority stage and read-only Git/project-bound plan with acknowledged apply. Preserve original files and hierarchy, forbid transitions into legacy conversion stages, and leave retained execution, SDK, receipt and release gates unchanged.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [x] Define original initial authority semantics without changing existing wrapped/retained/drafted/qualified wire identities.
+  - [x] Expose a reviewed in-place original-source plan/apply command over an already-authored canonical project; bind project authority and clean Git commit/tree without executing its build.
+- **Evidence:**
+  - [x] Prove preserved source files, exact metadata-only writes, stale-plan refusal, collision/dirty/unsafe-root refusal and permanent refusal of regenerative conversion transitions.
+  - [x] Run existing adoption and retained planning regression gates.
+  - [ ] Run full regression and native/installed renewal gates.
+  - [x] Initialize an actual native source project only after authoring and validation.
+
+**Partial evidence:** The managed Python gate passes all 22 adoption checks,
+including nine real Git/worktree and public-command original-adoption checks.
+All six current-lock/planning checks pass, including original-stage retained
+planning with a distinct authority-bound identity and no execution admission.
+Repository lint, format, layout and public-export checks pass. Ordinary rebuild
+refuses the original stage and directs the operator to retained planning.
+**Next action in progress:** full regression qualification before native
+deployment; complete source-project coverage and native admission remain unfinished.
+
+An actual original native source tree now has three validated, current locked
+unit contracts and the explicit original authority projection. Applying its
+reviewed Git/project-bound plan created only authority/evidence metadata and
+preserved tracked source bytes. This demonstrates initial authoring/adoption;
+complete tree ownership, native execution and per-unit pkg qualification remain
+unfinished and are not inferred from those three locks.
+
+The initial full regression stopped after 1,287 tests because the repository's
+documentation authority marker had not been refreshed after these documentation
+changes. Its managed review marker is now refreshed and project authority
+validation passes. This failed run is retained separately; full renewal remains
+required before native deployment.
+
+The combined renewal then reached 1,470 tests and found the new public verb
+missing from the CLI reference inventory. Both its inventory entry and usage
+table are now documented; both CLI-help checks pass. The failed full log is
+retained separately, and exact combined full renewal remains required.
+
+The next full run reached 1,634 tests before fixture cleanup found a recreated
+Git `objects/info/packs` file after its assertions passed. The original-adoption
+fixture now uses the existing shared Git helper with automatic maintenance and
+GC disabled. A real Git trace check enables repository auto-maintenance policy
+and proves the fixture still starts no maintenance/GC child. All ten original
+adoption checks pass; ordinary cleanup and source-integrity assertions remain
+strict. This test-only repair changes no production execution policy. Full
+renewal is still required; none of the interrupted runs is counted as passing.
+
+### [ ] LOCK-TARGET-001 — Verify the committed Component target
+
+- **GitHub issue:** [#79](https://github.com/jordanhubbard/literate-ai/issues/79)
+
+- **Priority:** P0
+- **Owner:** Project lock-health observation
+- **Direction:** Report current non-host locks accurately without rewriting their target or weakening verification.
+- **Conclusion:** Read the committed target through the typed catalog-bound lock owner, then reuse current project selector and lock/audit checks. Preserve stale project configuration and input refusal.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Use the catalog-validated committed target in read-only project lock health.
+- **Evidence:**
+  - [x] A real non-host project lock passes verify/status and exact lock checks; dependency, target/audit and project selector drift still refuse.
+  - [ ] Complete full-regression and installed/native renewal before deployment.
+
+**Partial evidence:** All seven lock-health regression checks pass, including
+six real non-host target/current-policy/refusal checks and the existing installed
+HTML lock-state fixture. Three project-verification checks also pass. Lint,
+format, repository layout and public-export checks pass. No native build,
+package or release admission is claimed by lock-health verification.
+
+### [ ] TRACKER-REPO-001 — Bind forge commands to the selected repository
+
+- **GitHub issue:** [#80](https://github.com/jordanhubbard/literate-ai/issues/80)
+
+- **Priority:** P1
+- **Owner:** Tracker command generation
+- **Direction:** Preserve the chosen fork/origin identity in generated issue and review CLI commands.
+- **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; use explicit repository arguments as the current operator mitigation.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
+- **Evidence:**
+  - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+
+### [x] CATALOG-FETCH-001 — Fetch immutable catalog snapshots without full history
+
+**GitHub issue:** [#83](https://github.com/jordanhubbard/literate-ai/issues/83).
+
+- **Priority:** P1
+- **Owner:** Catalog Git source acquisition
+- **Direction:** Import small catalogs from large upstream-derived repositories efficiently while preserving exact provenance.
+- **Conclusion:** Use bounded shallow and filtered sparse acquisition for explicit immutable commits, then initialize only relevant selected submodules; preserve other selector behavior and fail closed on missing input. Shallow history alone still transfers the entire selected tree and is insufficient for large source repositories.
+- **Depends on:** Git source identity and catalog DAG validation
+- **Implementation:**
+  - [x] Fetch exact commit pins without transferring default-branch history; request blob filtering and sparse selected directories, then initialize only relevant submodules at the requested revision.
+  - [x] Retain canonical provenance, bounded process behavior and destination preservation on acquisition failure.
+- **Evidence:**
+  - [x] Real Git fixtures prove old pinned contents and shallow ancestry, SHA-256 repositories, selected submodule data without private Git metadata, omitted unrelated blobs/submodules, rejected traversal, and no destination mutation on failure. Eleven catalog checks pass; an actual pinned upstream-derived source import succeeds with canonical resolved-commit provenance.
+  - [x] Existing catalog and full framework regression checks pass: 1,850 passed, 42 skipped and no failures (1,892 selected) in 1,063.469 seconds. Report SHA-256 `d4885099d94eba41785a4b7795af11a10f20869fe0eca69aa6e8730799e1d5d6`; log SHA-256 `7fc7ae0393d46d09ca5561950edcf298438682e9aa6ef55fc9dd8d00de7bb255`. Lint/format, layout/public-export, strict OpenSpec and reviewed TCB checks pass.
+
+### [ ] SBOM-SCALE-001 — Bound strict validation cost for large retained inventories
+
+**GitHub issue:** [#84](https://github.com/jordanhubbard/literate-ai/issues/84).
+
+- **Priority:** P1
+- **Owner:** Dependency CycloneDX adapter
+- **Direction:** Reduce elapsed native build time without dropping full per-file provenance or validation.
+- **Conclusion:** A real 5266-member source BOM took 88.3 seconds in portable profiling, with 84.3 seconds in quadratic uniqueItems checks. Preserve the official strict schema, registry, formats and semantic joins; use a local equivalent structural uniqueness implementation, without global mutation. GitHub issue: https://github.com/jordanhubbard/literate-ai/issues/84
+- **Depends on:** Existing strict CycloneDX and retained BOM owners
+- **Implementation:**
+  - [x] Use bounded structural JSON equality for strict validator uniqueness while preserving all other keywords and canonical BOM bytes.
+- **Evidence:**
+  - [x] Differential equality fixtures, strict schema/refusal regression, deterministic large-inventory scaling and unchanged actual BOM identity.
+  - [x] Complete full framework regression: 1,855 passed, 42 skipped and no failures across 1,897 selected tests in 1,044.628 seconds. Report SHA-256 `95b14ef1ed69a5c656e39d55e77627ca586a34e047f53fd57d7c939e0c1ea97f`; log SHA-256 `90ff8bbc8b73c400188fbf90799094d8bd728907508dac0c95b52cddcfde68e8`.
+  - [ ] Complete native installed renewal.
+
+**Partial evidence:** Seven focused checks pass. Structural equality agrees with
+the original validator across nested JSON, numeric/boolean distinctions, object
+ordering and Unicode; non-JSON fallback, offline SPDX references, unknown-field
+refusal and global-validator preservation also pass. The 6,000-object fixture
+visits exactly 36,000 JSON values, with a duplicate at the end still refused.
+The actual 5,266-member source inventory produces the same 4,661,185-byte BOM,
+identity `sha256:04db30dfa7c9e1e1e368562ba3c31d66770463eca16c20f73421c5330cdf4885`.
+An unprofiled comparison in the same Python 3.14.7 environment takes 20.251011
+seconds with the prior validator and 1.417537 seconds with this adapter.
+Baseline log SHA-256 `e491cb95763ae80209daa61ecffdc06113a9d2d583c3f5ad77d18f084fc4b691`;
+optimized log SHA-256 `964c238285967f933ff752546255c74d1be71d8c7dc84ed7dfdc32ca4c1bb77b`.
+These are source-BOM timings, not whole-build or native qualification claims.
+**Next action in progress:** installed/native renewal after the passing full local regression.
+
+The first full attempt retained 1,427 completed checks and no recorded failure,
+then was deliberately interrupted for host overload: twelve outer test workers
+plus nested builds saturated the twelve-core host. Its logs/checkpoint remain;
+it is not a passing full gate. A fresh complete run now uses four outer workers,
+rather than treating resumed partial coverage as release qualification.
+
+### [ ] RETAINED-USER-001 — Bind secondary test identities to scoped workspace access
+
+- **Priority:** P1
+- **Owner:** Retained execution profile and workspace custody
+- **Direction:** Execute complete original test suites with their privileged and explicitly unprivileged user requirements.
+- **Conclusion:** Native run and output directories are private mode 0700; selecting a secondary account alone cannot execute captured test programs through them. Preserve private defaults and add reviewed worker/profile-bound resource grants, current UID/GID observations and permission custody. GitHub issue: https://github.com/jordanhubbard/literate-ai/issues/85
+- **Depends on:** RETAINED-PROJECT-001 and FREEBSD-001
+- **Implementation:**
+  - [x] Add a strict numeric secondary identity and read-only POSIX currentness adapter. Nine focused controller checks pass, covering forward/reverse aliases, group and observation drift, unsupported platforms and actual local lookup. A source-level disposable FreeBSD probe also passes the exact UID/GID 2001 lookup, eight checks and one root-account skip, preserving both accounts. This prerequisite does not grant workspace access.
+  - [x] Add the FreeBSD POSIX ACL descriptor backend: preserve exact original access/default ACLs, reject permission drift, hardlinks and foreign owners, and never restore through a reused descriptor onto another inode. Shared-mask widening clamps existing entries to their previous effective permissions. Fourteen focused checks select 13 passes and one unsupported-platform skip on the enabled disposable guest; five portable checks pass on the controller, with nine native skips. A separate 27-check native probe passes.
+  - [x] Bind exact traversal/read/execute/fixture-write scope through existing workspace and provisioning owners; refuse mutable identity and permission drift without broad chmod or silent account creation.
+  - [x] Close the private allocation-prefix ingress gap from installed original execution (#94). Preserve the preceding 22/24 failure, Kyua database, CAS output and successful mount cleanup. Scoped named-user search protects unrelated siblings, refuses inaccessible outside ancestors and restores exact permissions. Installed `6e370033` now passes all 24 original cases without skips, including both previously denied launchers, and admits the retained local-runtime result after independent acceptance and cleanup. Canonical SDK, pkg and release qualification remain separate.
+    Native source-level renewal also passes all 16 read-only-view and secondary-receipt checks with no skips, including real identity-drop access, private sibling refusal, inaccessible external ancestors, permission drift and exact ACL restoration. This protocol-peer fixture is distinct from the installed run on an actually supervised allocation.
+  - [x] Implement the separate FreeBSD read-only view owner with canonical disjoint backing paths, manifest alias binding, actual mount flags, vnode identity, fresh fixtures and private-root restoration before unmounting. Ten native source-level checks pass with no skips, covering writable mounts, busy cleanup, account/source/root drift, unrelated new children, actual secondary-user operations and exact normal/exception cleanup. Inspector qualification and installed workspace/receipt integration remain open.
+  - [x] Integrate lower-level workspace command scoping: verify allocation/parent before capture, reserve named view/fixture arguments, mount sealed exports after build and activate/revoke only eligible test commands. Failed constructors retain private backing trees. Cleanup-bound completion/receipt retention and operator-private local orchestration are now implemented; this does not qualify the installed feature.
+  - [x] Bind optional exact worker/account/test actions, read-only input/export view prefixes and fresh fixture names into profile/plan identity. Preserve absent-field serialization; reject overlapping prefixes, namespace collisions, unproduced exports and aliases escaping the selected manifest view. Twelve focused policy checks pass. The workspace requires a typed live allocation and enforcing view owner. Local orchestration resolves operator-private authority before platform/cache effects and creates sessions under its inspected prefix.
+  - [x] Add a separate optional operator-local provisioning inspector and live allocation owner. Fresh nonce-bound process calls retain exact worker/plan/policy observations; instance, prefix, lifetime, configuration or process failures permanently revoke the owner. Eleven focused protocol/schema checks pass, alongside three existing provisioning smoke checks. These fixtures are not actual native allocation qualification; workspace/view/receipt integration remains open.
+- **Evidence:**
+  - [x] Identity prerequisite regression: 1,874 passed, 42 skipped, no failures across 1,916 selected checks in 1,039.060 seconds. Report SHA-256 `329a5fec37f5a6d95313b2093a2f5df771c0d405f9081abf46489199e0224ac9`. This does not implement scoped grants or qualify the complete feature.
+  - [x] Descriptor-backend full regression: 1,879 passed, 51 skipped, no failures across 1,930 selected checks in 1,015.463 seconds. Report SHA-256 `62f6a447e2018599605fce03c90bb3e4a4478811e86b63d7ff0cc18dab514da0`; log SHA-256 `70945fe918b96527b1eb0a83239d6570f8e32636abbc499da4a5e7c8715fbb1d`. Native focused checks and the 24-case original-suite backend probe remain source-level evidence.
+  - [x] Policy-stage retained regression: 277 passed, 11 skipped, no failures across 288 selected checks in 219.171 seconds. This precedes the inspection owner and does not qualify installed scope or lifecycle integration.
+  - [x] Policy/inspection retained regression: 288 passed, 11 skipped, no failures across 299 selected checks in 228.360 seconds. Report SHA-256 `83b19103b7a36d1452cdd31a953889c3217cdfdae9500a67ae0415196ca3ad95`. The 11 focused protocol/schema checks and three existing provisioning smoke checks also pass. Actual allocation, views and installed lifecycle remain unqualified; this is not the complete framework regression or a current lifecycle receipt.
+  - [x] Native view-owner source tests pass all ten checks in 39.395 seconds. Module SHA-256 `7bd56c8b67c2a580b8303626962fc6afe5c13cea7f55128adba5f6156d375cc6`; test SHA-256 `3d0dfbfc6b7bc71769ee3c65387ad766dcab290a570175b0580e7b4fb4a0cc8f`. Post-test audit confirms no remaining nullfs mounts and unchanged test-account IDs. The allocation inspector is an explicit protocol fixture. An earlier seven-check run failed because `statvfs().f_fsid` returned zero for both filesystems; its six mounts were recovered with private roots and unchanged source bytes. Failed logs are retained.
+  - [x] View-owner retained regression: 290 passed, 19 skipped, no failures across 309 selected checks in 301.541 seconds. Report SHA-256 `1b3681f467be09aacab04ca534b5c7f1238bb34511c68e20e9d9e0328ab5e895`; log SHA-256 `c7f18f7f811291e76bedfe2e177c4bcb7a30504450244dcdcae90c2d2f70679e`. This is source-backend evidence; installed execution and actual provisioning remain open.
+  - [x] Command-workspace retained regression: 297 passed, 20 skipped, no failures across 317 selected checks in 263.107 seconds. Report SHA-256 `6c68fa603b23d1eb13bd8f61f0c1f51842307426bc3b0aa9deb0932943ed21fe`. Constructor failure retention and revocation failure after a successful command are covered. Installed execution, actual provisioner qualification and receipts remain open.
+  - [x] Native command-workspace source test: one pass, no skips in 224.210 seconds, including real secondary reads, private-input denial, fixture writes/removal and root read-only refusal. Execution module SHA-256 `180648f4190b657eec794f69001e1a8294fded43a71b222f51ccbd833c526ebf`; test SHA-256 `acf64e40eb712a0bbf85e9150907fa540e89c0e9c0941e9009c0ec5acc361338`; log SHA-256 `9530e5680a64d76c4867cb516a076a1680f4bf187991fbf73bddcf1e51d46c64`. Final audit confirms zero nullfs mounts and unchanged account IDs. The inspector remains a protocol fixture. The prior 11-case native run retained ten passes and one command error; its fixture used mode 0700 for the delegated export directory, corrected to explicit 0755. This does not run the original source suite or qualify an installed lifecycle.
+  - [x] Bind canonical secondary cleanup facts into completed-run identity after retaining live inputs/exports/observations. Exact plan/account/worker/commands, manifest mounts, activation/revocation history and fresh inspections are checked; failed retention and cleanup close resources and issue no admission. Add operator-private inspector selection, allocated-session routing and available failure diagnostics to local orchestration. Fifteen receipt, six evidence and 21 orchestration checks pass.
+  - [x] Combined retained regression: 311 passed, 21 skipped, no failures across 332 selected in 271.326 seconds. Report SHA-256 `1d0821dbc8f22d61026d6f71b99058fcce8f0ea12b3e31e3ab40b943c20608c4`. This includes the CLI bridge but is not the full framework suite or installed qualification.
+  - [x] Native source-level receipt fixture: one pass, no skips in 760.742 seconds, including secondary operations, independent acceptance, cleanup-bound admission and materialized payload use after run retirement. Final audit confirms no nullfs mounts and unchanged account IDs. This exercises execution/admission owners with a protocol-peer inspector; installed CLI, actual provisioning and the original suite remain open. The initial attempt failed during import because the native Python lacked `_sqlite3`; no lifecycle commands ran. That log remains retained.
+  - [x] Final retained regression after late-account currentness checks: 312 passed, 21 skipped, no failures across 333 selected in 275.180 seconds. Report SHA-256 `22d1aa2c05a193ae2f3862004410a374b4a7ee199c8b56039557e98ad11b8b93`. The exact account is checked after private content/dependency verification and cleanup; late drift prevents admission. The earlier 760.742-second native pass predates this last check. The renewed local-orchestration fixture and ten view-owner checks all pass without skips in 797.989 seconds; final audit finds no nullfs mounts and unchanged account IDs. Native log SHA-256 `6ce8039d4aa231c08cede6950531c618255b2ab4882141ba52ed46775bb00ddf`. This uses an explicit inspector protocol fixture; installed/public CLI, actual provisioning and the original suite remain open.
+  - [x] Connect the source-level allocation owner to the actual supervised QEMU guest through a private SSH-forwarded socket. Two fresh inspections bind the reviewed fixture context to the same live process chain and attached overlay/seed; an insufficient lifetime refuses and permanently revokes the owner. Probe record SHA-256 `f6f6b104cd7ab7641972d350e3dbe41a0e924a50aa5e0e9207c6cd1ef36d9f78`. This bounded operator probe does not execute a retained lifecycle, qualify a reusable provisioner or admit an SDK. Its socket and guest configuration are removed after completion.
+  - [x] Repair the v2 catalog index to register both allocation-inspection schema resources. The first full regression stopped at this mismatch after 549 tests; preserve that failure. Five evidence-record and frozen-v1-schema checks pass after the repair. Full regression remains open until its checkpointed runner completes.
+  - [x] Review the changed authority and user documentation, correct the earlier inspection-only development description and record the current documentation authority marker. The next full-check attempt reused 546 passes and ran 866 tests before its stale documentation marker stopped project self-description validation. Retain that failure; the documentation repair left the trusted-driver pin unchanged at that checkpoint.
+  - [x] Complete an explicit author review of all fifteen changed trusted-driver files, including optional wire compatibility, operator credentials/configuration, allocation freshness, mounts/ACLs, command scope, cleanup-bound admission and SQLite realization. Author-review report SHA-256 `c415083f88581049452164df5dedf4b86c34fbf84c708b99ac082ec8fb0ffb34`; no blocking finding is recorded. This is not an independent review or production-security attestation. Renew the reviewed implementation pin separately from runtime qualification.
+  - [x] Complete the repaired full-suite coverage: 1,928 passed, 61 skipped, no failures across 1,989 selected. The final repair attempt ran 581 cases in 323.282 seconds and reused 1,408 earlier passes. The runner correctly exits 2 for repaired coverage and resets progress; a fresh complete run remains required for a passing full gate.
+  - [x] Complete a fresh full framework run after the authority repairs: 1,928 passed, 61 skipped, no failures across 1,989 selected in 1,149.784 seconds. Report SHA-256 `ad7792ac49072c67f1429f4020cbb37133eddbe9e07446df3cd1de2001444b86`. Wheel packaging and the local fast gates pass. This does not qualify the installed native lifecycle.
+  - [x] Reproduce the hosted Python 3.11 FreeBSD host-install fixture failure locally, then model Python 3.12 explicitly in the simulated native host. Nine focused checks pass on both Python 3.11 and 3.14, including rejection of Python 3.11 even when package registration and the SQLite query succeed. Production probing and the declared version requirement remain unchanged; renewed full-suite and hosted CI confirmation remain open.
+  - [x] Complete scope/currentness refusal fixtures plus real privileged and unprivileged original cases through the installed framework in a disposable native guest; preserve legacy identities and private defaults. Installed `6e370033` completes in 1,717.496 seconds with 24 original passes, no skips, and 11 independent observations matching declared exits and stream hashes. One invalid-input case correctly expects exit 1. All 34 retained records reverify; cleanup is bound into completion, the prefix ACL is root-only and no nullfs mounts remain. Fifty-one fresh observations bind the same actual allocation. Receipt identity `sha256:924264d401159e317059b69c80087ec3a9cd047ca4652a53ca7903fa6c29f559` is admitted for local runtime use; canonical Standard lifecycle, SDK, pkg and release flags remain false.
+  - [ ] Complete exact-current required CI and land the reviewed integration. Native retained execution is qualified; this does not mark the broader FreeBSD program complete.
+
+### [ ] INPUT-WALK-001 — Bound retained input ancestor traversal cost
+
+- **Priority:** P1
+- **Owner:** Retained input filesystem adapter
+- **Direction:** Reduce elapsed build orchestration without omitting source, hashing or currentness checks.
+- **Conclusion:** A real 5266-member plan issued 716820 open calls; input verification consumed 9.023 of 12.040 profiled seconds. Reuse bounded anchored directory handles only within each verification, while checking current lineage on every access and preserving all file, inventory, symlink and replacement guards. GitHub issue: https://github.com/jordanhubbard/literate-ai/issues/86
+- **Depends on:** Retained input custody and SBOM-SCALE-001
+- **Implementation:**
+  - [x] Add transaction-local bounded POSIX directory traversal with current-name checks, deterministic cleanup and unchanged unsupported-platform fallback.
+  - [x] Extend the same bounded transaction-local traversal to discovery, snapshot input copying and private CAS validation. Preserve complete inventories, byte hashing, alias checks, current lineage before publication, cleanup and the unsupported/low-descriptor fallback. The installed source run exposed these remaining repeated ancestor walks; its installed implementation remains unchanged while this repair is developed.
+- **Evidence:**
+  - [x] Focused checks cover actual directory/root replacement, link substitution, permission revocation, added entries and changed bytes, descriptor bounds and cleanup, real low-descriptor fallback, and unchanged manifests. Twenty-four checks pass with one optional source-corpus skip on both the controller and a native source-level probe.
+  - [x] Discovery/capture focused checks pass on Python 3.14 and 3.11: 26 passed, one optional source-corpus skip in 2.468 and 2.339 seconds. Real last-file parent replacement refuses before publication and removes temporary output. On a 5,141-member / 306,736,551-byte SDK corpus, a first controller comparison preserves manifest `sha256:90768a489e8cad42df4be7fcd4c7ef61ac11befbe4bccf7bcc6d2494eedcb8e2`: discovery 7.131112 versus 2.312534 seconds; capture 12.908503 versus 6.979871 seconds. This is an initial operation measurement, not whole-build performance. Native comparison, full regression and installed renewal remain required.
+  - [x] The native source-level candidate passes all 27 input checks with no skips in 126.751 seconds, including every tracked member of source revision `d98e6c2da7571295bb3c70236afe637a987370e0`: 114,710 files, 9,887 directories and 138 symlinks. Source manifest identity `sha256:6bcececf720ac6a21c12e5ebf3f04eedbc2c22438bf04c28be1ae38ce770a406`; raw corpus report SHA-256 `ad4bd6c37cbfaf03805c27fd2ec226a9095ee4dd9359c37a471fd94cd8dcf223`. A balanced four-sample FreeBSD SDK comparison preserves the 5,141-member manifest; median discovery is 4.776245 versus 4.471518 seconds and capture 12.602876 versus 10.549773 seconds. Another world build was running. These are source-level operation observations, not installed-wheel or whole-build qualification. The initial native harness omitted a shared test fixture; its failed import is retained separately.
+  - [x] Fresh full Python 3.11 regression exits zero in 956.811 seconds with four workers. Its report records 1912 passed, 81 explicit skips and zero failures across 1993 selected cases. Report SHA-256 `9f987f35edcbb91d7abd079e67c5853c518cde22bbce8dccc8991bbe9ee1adc4`; log SHA-256 `ecee9b70e0af25d4455721b8698d445f560d5faab82647ef3aa4fcf8e4f48c2d`. Installed-wheel renewal and hosted/native product lifecycle qualification remain open.
+  - [x] Review the discovery/capture TCB change explicitly before renewal. Author-review report SHA-256 `e6cd02de84849762bfd005884b8214932b8809ff7a56233fa7ba8d73727a15eb`; no blocking finding is recorded, and no independent review is claimed.
+  - [x] The same 5,310-member manifest verifies in 1.938397 seconds versus 7.281015 seconds in one warm comparison; profiled open calls fall from 711,962 to 7,108. Manifest identity stays `sha256:a5e6bb4c5a876022b73759193af759d375f69b1c7d802280a78eb2cffc98606a`. These measure input verification, not complete build performance.
+  - [x] Native profiling exposed Python 3.12 `Path.relative_to` and repeated lexical parsing as dominant remaining costs. A checked immutable path-prefix comparison retains per-access filesystem lineage checks; three warm source-level verifications of the same 5,270-member native manifest have a median of 7.926676 seconds versus 19.794351 seconds with the installed baseline. The adapter bytes have SHA-256 `6811499e92de9342cd8e316ae65dc2f4316acb5610b9072392ada6e7b5245e02`; the native focused log has SHA-256 `1e05b07e13f823a7a44b884e96cfa5dde0ef6560fef6a5b120b334f4eb518b47`. This probe does not qualify an installed wheel or a complete build.
+  - [x] Fresh full regression of the frozen reviewed implementation: 1,865 passed, 42 skipped, no failures across 1,907 selected checks in 1,043.891 seconds. Report SHA-256 `aeba051ec5d0a178f3a5451c75b4220e360efa9c7a4ba1de4483e6945f9a0277`; log SHA-256 `81aae3d3b81d09691cf5cf879a76d207bda549b0d399a0344f62c976d4851c83`.
+  - [x] Canonical wheel `d6070ba5` qualifies through the installed-wheel gate (wheel SHA-256 `c36be2bb76cfd41ca0e5e185eeb95e3f73e6c4f2fd327e28e9c53241e59d7d7a`). A verified native 37-distribution wheelhouse bootstraps the build worker and disposable guest. Native installed checks report 29 passes, one optional source-corpus skip and zero failures; real Ed25519 signing also passes. Three installed native input verifications have median 9.227105 seconds versus baseline 19.794351 seconds for the same manifest. This is focused runtime/input qualification, not full FreeBSD platform acceptance or whole-build performance.
+  - **Preserved renderer failure:** The final gate’s managed Chromium timed out on the unchanged authority-learning-loop diagram. The supported `PUPPETEER_EXECUTABLE_PATH` system Chrome selection renders all 121 diagrams from 621 Markdown files and passes the current driver review. Sandbox defaults and validation coverage are unchanged.
+  - **Preserved failed gate:** An earlier broad run selected 1,216 checks and stopped with a self-host snapshot-currentness error after the final lexical change modified its live inputs (36 skipped). That failed gate remains preserved; the fresh complete run above passed the unchanged-snapshot proof.
+
+### [ ] HOST-RUNTIME-001 — Preserve executable private runtimes with standalone POSIX Python
+
+- **GitHub issue:** [#91](https://github.com/jordanhubbard/literate-ai/issues/91)
+- **Priority:** P1
+- **Owner:** Standalone worker bootstrap, stage-zero source installer and installed CLI fixtures
+- **Direction:** Keep the installed build entrypoint usable on supported Python distributions.
+- **Conclusion:** Copied standalone macOS Python 3.11 executables abort at launch because their relative libpython linkage is lost. Retain the base library in the private runtime before pip bootstrap. Keep the executable inside installation custody, preserving self-update containment, Windows environment behavior and orphaned-base detection. A symlink-only candidate starts Python but fails the existing self-update custody check; preserve that failure and retain the copied-executable contract.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Share copied-runtime creation with the standalone bootstrap owner, source installer, wheelhouse downloader, offline worker installation and wheel smoke. Preserve the bootstrap file's standard-library-only staging contract. Eleven bootstrap checks pass on the affected Python 3.11 runtime in 6.841 seconds, including staging the single file outside the checkout and creating a working private Python/pip under isolated `-I -S` startup. The second full run preserved a further downloader failure after 1,442 executed tests (61 skipped); it exposed the remaining direct creation paths, now consolidated.
+  - [x] Centralize private-runtime creation and use the production owner in the real-prefix update fixture. Standalone non-framework shared macOS Python retains its base `libpython` beside the copied executable before pip bootstrap. Other platforms keep their preceding creation behavior; self-update containment is unchanged.
+- **Evidence:**
+  - [x] Pass offline wheelhouse export/tamper refusal and standalone offline bootstrap under the affected interpreter, in addition to source installation and self-update. All eleven bootstrap checks pass again in the complete Python 3.11 regression.
+  - [x] The shared owner passes eleven bootstrap checks on Python 3.14 in 5.480 seconds and three source-installer checks on Python 3.11 in 2.645 seconds. Real-wheel self-update and original-command reexecution pass all three checks on Python 3.11 and 3.14 in 3.931 and 3.575 seconds. These are focused checks; the renewed full framework and installed-wheel gates remain required.
+  - [x] Review the shared bootstrap change explicitly and renew its trusted-driver pin. Author-review report SHA-256 `de394586676a8d7267c93466a2a59c43a72e47d14766d35b3d740a074c635629`; no blocking finding is recorded. This is an author review, not an independent security attestation. Exact wheel/dependency verification, pip arguments, process deadlines, cleanup, wire identities and admission rules are unchanged. New driver identity: `ecd6f7320cd8f6da0056406dea80165e4e31d753085bfba00c79a1d884f260c0`.
+  - [x] The managed Python 3.11 suite reproduces the original native loader abort after 1,291 tests (57 skips); the macOS crash report identifies missing executable-relative `libpython3.11.dylib`. After the repair, three installer checks pass in 3.789 seconds and three build-identity/real-wheel self-update checks pass in 5.599 seconds. The same groups pass on Python 3.14 in 2.899 and 4.227 seconds. These checks use real private environments, Python, pip, wheels and launcher reexecution. The earlier symlink-only experiment passed startup but failed the unchanged enrollment containment check and was replaced.
+  - [x] Run Python and pip from an actual new private runtime under the affected Python 3.11 distribution and pass real-wheel self-update. The fresh full Python 3.11 gate exits zero in 1,021.195 seconds with four workers; its report records 1,910 passed, 81 skipped and zero failures across 1,991 selected cases. Report SHA-256 `d770be5e04081dfe8fa59374a3e3b6a9b988b2390347f6dbe459ab3cd466d24d`; log SHA-256 `13969000d45edfbf9443089b50f1f25ee7e119032c62c85527b409d175989617`. This is a complete unit regression with explicit platform/dependency skips, not release or native FreeBSD acceptance.
+  - [ ] Qualify the exact committed wheel and pass the hosted platform matrix before closing this item.
+
+### [ ] NATIVE-SDK-ALIAS-001 — Preserve internal aliases through native SDK admission
+
+**GitHub issue:** [#93](https://github.com/jordanhubbard/literate-ai/issues/93)
+
+- **Priority:** P1
+- **Owner:** Framework native SDK contracts, custody, runtime and lifecycle owners
+- **Direction:** Admit faithful source-built SDK trees with internal file and directory aliases, retaining full provenance and dependency authority.
+- **Conclusion:** Extend canonical SDK authority through an explicitly selected versioned tree capability while preserving regular-file-only wire identities and refusals. Snapshot custody alone cannot issue producer admission; every consumer boundary must join the actual completed producer.
+- **Depends on:** Existing native SDK source resolver, build authorization, runtime observation and retained SDK owners
+- **Implementation:**
+  - [x] Specify bounded internal alias target and ancestor closure, exact target text, explicit capability selection and legacy identity preservation. See [the SDK contract](native-sdk-admission.md#faithful-internal-sdk-aliases).
+  - [x] Preserve hard-link equivalence with canonical regular-file ownership and explicit target case sensitivity through source-level SDK and retained input custody; verify destination filesystem support and preserve default collision refusals. Installed/compiler SDK qualification remains separate.
+  - [x] Implement canonical tree contracts/schema and bounded no-follow byte capture/relocation, including closed hard-link groups, escape/cycle/dangling/drift refusals, destination case-sensitivity verification and owned cleanup. Development evidence is scoped to the byte-custody layer.
+  - [x] Bind the tree capability into canonical SDK snapshot/build-layout authority and actual completed builders. Source-level live consumers and source/resolved BOM evidence pass; retained/package admission remains open.
+  - [ ] Integrate live producer admission, retained placement, command/runtime observations, BOM and package provenance without self-authenticating transport claims.
+- **Evidence:**
+  - [ ] Existing regular-file SDK identities and refusal behavior remain unchanged; alias graph, filesystem drift and cleanup negative fixtures pass.
+  - [ ] A real source-built compiler, headers, resources, sysroot and libraries remain usable after relocation and producer retirement; alias and target changes invalidate consumers.
+  - [ ] Full required regression, installed-wheel and native consumer qualification pass before completion.
+
+The `native-sdk-tree@1` contract and registered schema now inventory physical
+members separately from aliases and resolve exclusively against that inventory.
+Ten focused tree checks include finite repeated-alias traversal, cycles, root
+escape, non-directory traversal, exact target-text identity and a shared aggregate
+work limit. The SDK/custody/runtime/source-build/schema regression passes all 32
+checks without skips on Python 3.14. This is contract-level development evidence;
+no-follow filesystem capture, immutable relocation and live producer/consumer
+integration remain unchecked. Next: connect this explicit tree capability to
+canonical SDK snapshot/build-layout custody while preserving legacy wire behavior.
+
+The initial complete Python 3.11 gate stopped after 1,417 tests in 996.069
+seconds because project validation found a stale documentation-review marker
+following the driver-pin change. Its report records 1,351 passes, one failure
+and 66 skips across 2,008 selected cases; it does not establish full regression.
+The failure report and checkpoint remain retained before the next source change.
+
+The extended tree contract now includes typed hard-link aliases with canonical
+regular-file ownership and explicit case-sensitive selection. Fourteen focused
+tree checks cover the new topology and preserve default case-collision refusals.
+An external source-built archive topology also constructs and round-trips through
+the contract with 247 directories, 4,396 files and 1,868 aliases (29 symbolic and
+1,839 hard links); portable selection refuses its case-variant names as required.
+This is representation evidence, not filesystem capture or producer admission.
+The upcoming retained-input integration must carry the same naming policy through
+its inventory, comparison and placement owners; SDK-only acceptance is insufficient.
+
+The [tree development record](../../verification/native-sdk-tree-development.json)
+binds the current source bytes, 46 passing controller checks (42.505 seconds),
+27 passing FreeBSD source-level checks (1.462 seconds), and a real native
+case-sensitive `CC`/`cc` hard-link relocation after producer retirement. No checks
+skip in these focused groups. Capture reuses transaction-local descriptor custody,
+closes every hard-link inode group, refuses a store inside the input root, rechecks
+names/bytes/link text, and verifies output topology before handing it to its owner.
+Relocation refuses resource bounds before copying payloads and removes owned
+staging after failures. These are source-level checks, not an installed-wheel or
+admitted compiler SDK result. Next remains canonical snapshot/layout and retained
+input naming integration followed by live producer and consumer qualification.
+
+The explicit `native-sdk-tree-snapshot@1` and `native-sdk-tree-build-layout@1`
+resources now bind complete topology to input/import/license metadata, capture
+bounds and naming semantics. Layout-bound capture verifies the selected output
+license; snapshot relocation verifies the complete product identity. Import roots
+must resolve to nonempty directories and native library declarations to physical
+regular files. Batch resolution shares a local index and bounded work budget.
+Legacy snapshot/layout decoders and recipe selection refuse the new capability;
+there is no plain-file fallback or live producer admission from decoding.
+The renewed focused group passes all 57 controller checks in 49.192 seconds and
+all 38 FreeBSD source checks in 0.763 seconds without skips. Native exported source
+hashes match the development record. Next: add explicit tree recipe selection and
+carry the capability through the actual builder/runtime owners, then retained
+input naming/hard-link custody and downstream command/BOM/package consumers.
+
+An earlier builder refused tree layouts before accepting execution resources.
+The current builder now explicitly supports typed tree layouts, as described below;
+untyped layouts and unsupported mixed wire formats continue to refuse.
+
+Tree recipes now have an explicit contribution kind and wire resource. Flavor
+preparation and locked selection preserve dependency slots, interface/target
+matching and complete source coverage. The repository builder supports the typed
+tree layout explicitly and retains the actual completed product. Runtime checking
+recaptures its full topology before/after inspection, supplies only verified
+physical native images to the existing observer, and retains logical-to-physical
+library bindings in `native-sdk-tree-runtime-observation@1`. Generic symlink
+refusal and legacy runtime wire identities remain unchanged.
+
+The source-level producer fixture compiles two linked native libraries, retains
+hard/symbolic aliases, deletes its source checkout, relocates the SDK and calls
+its public API successfully. Replacing a hard link with independent identical
+bytes refuses runtime rechecking. Locked tree recipe selection and invalid-slot
+refusal also pass. The focused controller group passes 61 checks in 55.929 seconds;
+the FreeBSD source group passes all 41 in 15.189 seconds without skips. The native
+bundle's first attempt omitted an existing fixture skill; that harness failure is
+retained separately from the repaired successful source export. CMake bootstrap
+uses the declared FreeBSD `cmake-core` realization and verifies version/provenance.
+These are source-level fixture results, not an installed wheel, full Standard
+consumer/receipt, source-built compiler SDK, per-unit pkg or release admission.
+The live SDK consumer now uses the completed source-build owner, selected layout
+limits and tree-aware materialization/rechecking. Both source and resolved
+CycloneDX BOMs retain tree identity, case selection and canonical alias properties.
+Forged legacy runtime schemas, substituted physical bindings and same-byte
+hard-link replacement refuse; cleanup preserves unrelated siblings. The focused
+consumer/legacy regression passes 50 tests in 94.432 seconds. The native source
+group passes 45 tests in 69.564 seconds, with no skips (supervised 72.270 seconds).
+The exported 1,574-file source bundle is hash-verified against the tested files.
+Packaging explicitly refuses tree products until its input custody preserves
+links. These remain source-level results, not installed-wheel or compiler SDK
+qualification. Next: retained input naming/hard-link custody and placement, then
+link-aware package inputs, runtime and qualification owners.
+
+
+Retained tree input custody now explicitly selects `retained-project-tree-policy@1`.
+Member hard-link targets bind canonical representatives, byte/mode equality and
+closed observed inode groups. Default naming checks and omitted legacy wire
+identities remain unchanged. Capture copies representatives separately from CAS,
+recreates hard links and symbolic aliases, verifies actual case-sensitive placement
+and rejects same-byte independent replacements. Verification and discovery read
+each physical inode group once while charging every declared name to existing
+aggregate bounds. Receipt and completion manifest projections carry the policy.
+
+The retained SDK owner compares captured files, both alias kinds and every directory
+to the actual completed tree product, requires the explicit naming capability and
+rechecks its placed runtime through the live producer owner. A controller fixture
+retires both source checkouts, calls the relocated C API successfully and rejects
+later hard-link topology drift. The five tree-consumer tests pass in 41.461 seconds;
+the custody/schema group passes 28 tests in 0.154 seconds. These are source-level
+results; full retained command lifecycle, package inputs/runtime/qualification,
+installed-wheel and source-built compiler SDK acceptance remain separate gates.
+
+The final native source export verifies 1,846 files and passes all 28 selected
+checks in 81.553 seconds (supervised 83.753 seconds), including actual case-distinct
+names, retained SDK relocation/API and rejection of linked payload flattening in
+both package resource construction and receipt materialization. Archive SHA-256
+`7f1f2e13d3fdcc32c42142dfe367e9fadd152825a13cc332c22bc9dfb262e396`.
+The preceding 59-test native source group passes in 79.868 seconds, with its exact
+archive retained separately. Full regression and installed/compiler/package
+qualification remain open.
+
+An explicit `package-tree-input@1` resource now binds artifact/resource kind,
+owned prefix, role, source, target and the complete tree. Namespace checks refuse
+regular-file/tree overlap, aliased ownership, target substitution and missing
+case-sensitive selection. Staging and rechecking reuse the existing no-follow tree
+custody owner. Thirty-three controller custody/schema checks pass in 0.198 seconds;
+five FreeBSD package-input checks pass in 0.039 seconds (supervised 0.667 seconds).
+The 1,850-file native source export has archive SHA-256
+`e6bd7c7194f60139f40e3200edcd16764b5ea58478b69387ea0285924b3420e9`.
+These are structural and byte-custody results. The new input is deliberately
+separate from legacy PackageInput and does not yet enter package plans/providers,
+SDK package runtime or qualification. Those owners are the next integration step;
+the existing unsupported-tree guards remain required until that work is verified.
+
+The final controller retained integration group completes all 67 selected tests
+in 423.113 seconds, with no failures or skips. It covers legacy completion,
+receipt and SDK owners, explicit tree custody, live/retained tree consumers,
+linked-payload refusal and schema catalog validation. This is focused source-level
+regression, not the full framework suite or installed/compiler/package acceptance.
+
+
+The explicit tree package plan/result now has a deterministic PAX TAR provider.
+It stages the complete bounded namespace through existing no-follow custody and
+independently verifies member order/type/mode/ownership/epoch, bytes, exact link
+targets, empty directories and the zero-only end trailer. Extended metadata is
+bounded before allocation, including on Python versions with different tarfile
+read strategies. Namespace checks now also reject differently spelled implicit
+ancestors. Fifteen controller contract/custody/schema tests pass on Python 3.14
+and 3.11 (0.303 and 0.288 seconds).
+
+The live SDK tree-package owner binds the exact lock, root, target and completed
+products; changed projections and actual builder ownership loss prevent successful
+completion. Its separate package index binds complete tree input identities and
+original snapshot/binding records. A structural consumer-plan fixture packages two
+real source-built linked libraries, retires source and producer CAS, extracts and
+relocates the archive, and calls the C API successfully. This is not Standard
+lifecycle or full compiler SDK admission. The FreeBSD source group passes all 14
+selected TAR/input/API checks in 14.417 seconds (supervised 18.095 seconds), with
+no skips. Its verified 1,856-file source export has archive SHA-256
+`d096592262f95bb24994e5aa2768219f5a7586d04d29aa10a01b42a5f8f8df67`.
+Native pkg, default packaged runtime, qualification codecs and full compiler SDK
+acceptance remain open; the legacy unsupported-tree guards stay active.
+
+
+The fresh complete Python 3.11 controller regression exits zero with four workers.
+Its dispatcher report records 1,981 passed, 86 skipped and no failures across
+2,067 selected tests. The raw unittest runner separately reports 2,047 tests,
+73 skips and 967.835 seconds; these layers' counts are retained without merging.
+Report SHA-256 `0a9f3bfdbb8a264d09fa4a121b8c9bcc014af6431be9dd4f64608b31d655af6f`.
+The run uses a new checkpoint without known-failure annotations. This is a full
+controller unit gate, not installed, native project or release acceptance.
+
+While source was fixed for that run, an independent native `pkg` 2.8.4 probe
+preserved real hard links, exact symbolic target text, case-distinct names and an
+empty directory. Native manifests hash symbolic target bytes, record hard-link
+aliases with the representative checksum and count physical bytes plus symbolic
+target bytes in flatsize. Archive payload numeric IDs are reproducible 65534,
+with root/wheel names; native installation resolves them to root ownership.
+A script-free 896-byte fixture installs and removes correctly in a fresh private
+root/database inside the disposable worker: link inodes, targets, bytes, empty
+directory, ownership, removal and an empty final private database all verify.
+The worker's normal package database is unchanged. Archive SHA-256
+`f8173765adce11c47019cd1b97713b30e92b989b6026954ef8112a6237da2ba2`.
+These are native-format/installation discovery results; the framework's tree-aware
+pkg projection and verifier still require implementation.
+
+Clean revision `9411185a9b94ed256184ffc7925e707fb5c04184` passes the installed-wheel
+gate. Retained wheel SHA-256
+`70745868e7a65b956aeae91d8664435b0b11dfc2bf9b0d350f3e73153b7ff8cd`
+binds distribution `sha256:c1706b8fd78a6a4d197103ae5734c6ddb7085ec9836bd7d070412092280c1139`
+(1,227 members). That exact wheel installs offline with the reviewed 37-distribution
+FreeBSD dependency closure in a separate disposable-worker prefix. All 14 focused
+tree TAR/input/API checks pass without skips in 21.383 supervised seconds; every
+framework import resolves within the installed prefix. The real library API still
+works after producer retirement and relocation. These checks qualify the installed
+tree/TAR mechanism, not the complete native lifecycle, compiler SDK, pkg provider,
+default CLI or release. Draft PR #87 carries the code; exact-current hosted CI
+remains a separate gate.
+
+Native tree pkg source integration now constructs packages through the real pinned
+tool and the live SDK tree resource owner. A distinct projection/result binds the
+whole tree plan, native tool/ABI, package coordinates and installation prefix.
+Owned staging moves by rename so hard-link groups survive. Independent verification
+checks bounded XZ/TAR decoding, exact files/links/directories, symbolic target text,
+hard-link owners, modes, ownership, epoch, native checksums, physical flatsize and
+ELF summaries. Rehashed topology changes, hooks, changed manifests, extra frames
+and unplanned extended attributes refuse. Environment/device requirements remain
+in the original plan without fabricated native package coordinates.
+
+The first live-library probe exposed a private SONAME summary mismatch and remains
+retained as a failed 21-case run. Native pkg only summarizes names starting with
+`lib`; the corrected projection preserves all imports in the actual SDK dependency
+observation and source/resolved BOMs. The final 1,858-file source export has SHA-256
+`8bd66e993c3ad78a46be424b643b9030a09b7ad8f61c756642f5a8f8168623d6`.
+All 28 native source checks pass with no skips in 39.680 test seconds (43.252
+supervised). This includes repeat construction with identical bytes, live producer
+ownership-loss refusal and a real compiled-library API after extraction, producer
+retirement and relocation. Python 3.11 focused checks pass 25 cases with one native
+construction skip. Full controller regression and exact installed-wheel renewal
+for this new native provider remain pending. Flavor/default lifecycle dispatch,
+qualification codecs, artifact-root joins/directory expansion and full compiler
+SDK admission remain open; the preceding installed TAR wheel does not qualify this
+new native source batch.
+
+The frozen pre-Unicode batch completes the full controller regression: 1,988
+passed, 88 skipped and zero failures across 2,076 selected cases. The raw runner
+separately reports 2,056 tests, 75 skips and 1,161.072 seconds. Report SHA-256
+`b58d6b6fd67ebf64bfd1d23d805a50a5af751c664cecd08206c8ae09c66e2573`.
+That pass is retained separately from the subsequent naming corrections.
+
+Actual native naming probes expose libarchive's `hdrcharset=BINARY` marker and
+PAX directory trailing slash. The verifier now admits those exact forms while
+retaining exact decoded paths/targets and refusing other charsets or extended
+attributes. The renewed 1,858-file source export has SHA-256
+`be385a2d54b67be35fb9599786cfc7039c0ec6b4d54fa45af241ca37492037a6`.
+All 29 native source cases pass without skips in 35.469 test seconds (39.746
+supervised), including case-distinct hard links, long NFC file/target names and
+Unicode empty directories through actual native construction and system tar.
+The failed preceding naming probe and archive remain retained.
+
+Exact pushed `79bae2df` hosted CI also exposes Windows fixture failures already
+addressed by [PR #89](https://github.com/jordanhubbard/literate-ai/pull/89).
+Its reviewed executable-filename, isolated interpreter and explicit loader-platform
+fixture repairs are integrated here. A further output-PATH fixture now gives its
+captured Windows placeholder an executable filename and refreshes the exact manifest
+and tool binding. All 37 affected controller cases pass in 33.103 seconds. Native
+Windows validation of the additional fixture remains pending; production receiver
+timeout [#90](https://github.com/jordanhubbard/literate-ai/issues/90) remains a separate
+failure. Full regression renewal, exact wheel/native installation and current CI
+must pass before this source batch is pushed or treated as qualified.
+
+The actual isolated Python 3.12.10 Windows check now runs all 37 affected cases:
+27 pass, nine existing platform skips remain and one fails in workspace PE
+observation because the retained command environment lacks `SystemRoot`. Its
+source archive is `sha256:4942ade26758b57aa9fe189e7f3134c90c950c34accc52ab1b6a3cb201b0fb76`.
+The repaired executable filename reaches the real dependency guard; no command
+executes and no receipt is admitted. Preserve this failure under
+[issue #102](https://github.com/jordanhubbard/literate-ai/issues/102). Do not relax
+the guard or replace this failure with an empty dependency observation.
+
+### [ ] RETAINED-WIN-CONTEXT-001 — Bind native Windows retained system context
+
+- **GitHub issue:** [#102](https://github.com/jordanhubbard/literate-ai/issues/102)
+- **Owner:** Retained execution environment, dependency observation and native runtime custody
+- **Direction:** Supply explicitly bound native Windows system context and complete
+  captured tool runtime while preserving caller-injection refusal and POSIX identities.
+- **Evidence:** The real native source check fails at the `SystemRoot` requirement
+  after the fixture's executable naming repair. Subsequent runtime closure remains
+  unproven. This is separate from receiver observation deadline issue #90.
+- **Acceptance:** Native workspace/command checks pass with actual PE closure;
+  source/context/runtime drift refuses; existing loader-policy assertions and
+  finite observation deadlines remain intact. Renew full, installed and exact CI gates.
+
+### [ ] WINDOWS-PE-OBSERVE-001 — Bound native Windows PE dependency observation
+
+- **GitHub issue:** [#90](https://github.com/jordanhubbard/literate-ai/issues/90)
+- **Priority:** P0
+- **Owner:** Framework PE dependency observation and receiver custody
+- **Direction:** Complete native Windows dependency closure within existing finite receiver and retained-command limits; issue #90.
+- **Conclusion:** Integrate the reviewed independent-image frontier implementation from peer commit 1fbc7e7f, retaining deterministic resolution, image and inspector hashes, complete graph semantics and owned failure cleanup; qualify it on actual Windows before acceptance.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Inspect independent images in bounded concurrent frontiers; merge through the existing loader resolver in canonical queue order.
+  - [x] Preserve content-bound fact caching and cancel/join outstanding bounded inspections on refusal.
+- **Evidence:**
+  - [x] Serial/parallel graph equivalence, real overlap, image substitution and inspector mutation refusals pass.
+  - [ ] Actual native Windows retained workspace and admitted receiver complete inside unchanged deadlines; full regression, exact installed wheel and CI pass.
+
+Native Windows source qualification of the context and concurrent PE observer
+passes 53 cases: 39 pass, 14 existing skips, no failures in 167.082 test seconds
+(176.172 supervised), inside the unchanged 300-second limit. The source archive
+is `sha256:7ec3355dc0480542ec71040361cafc65f4d14e9727c93eada9275591b7f28874`.
+The preceding serial run exceeded its 300-second bound and remains retained.
+A separate actual captured-command/drift probe initially refuses its malformed
+test profile because acceptance lacks the new stage dependency. Correct the
+fixture DAG before retrying; this is not evidence of command execution or
+installed/runtime admission. The admitted receiver and full renewal gates remain
+open.
+
+The corrected-DAG captured-command probe reaches actual Windows execution: both
+commands return zero, but relocated `whoami /?` produces no help text and the
+new test's duplicate raw `rmtree` cleanup fails on read-only snapshot blobs.
+The probe fails in 288.374 test seconds (295.969 supervised); drift assertions
+were not reached. Preserve that failure. The next source probe uses actual
+`whoami` identity output and the fixture's existing `TemporaryDirectory` cleanup
+instead of duplicate raw deletion. No production guard or deadline is changed.
+
+Native FreeBSD context/package regression runs 55 cases with two existing
+Windows-only skips, but receiver custody subtests fail because the fixture wraps
+BSD `/usr/bin/make` while receiver discovery correctly requires GNU Make.
+Track this fixture repair under existing [FreeBSD support issue #67](https://github.com/jordanhubbard/literate-ai/issues/67):
+select available `gmake` before `make`, quote its executable path, retain actual
+before/after receiver measurements and all tool-substitution assertions. Do not
+relax the production GNU Make requirement or add a FreeBSD skip. Renew the native
+group after the fixture repair; retain the failed 101.916-second supervisor result.
+
+The renewed actual Windows captured-command probe passes both context/source
+subtests with no skips: `whoami` executes successfully in each retained workspace,
+then the next execution refuses a changed native system context or changed original
+source without recording another command observation. Test time is 279.381 seconds
+(286.500 supervised), inside the unchanged 300-second limit. Source archive:
+`sha256:3f8702850abf911950dfeab1ebb3d80c8c16c401c9709f9a1e86cd44a6edffde`.
+The admitted receiver is being qualified independently; current full regression,
+exact installed wheel and hosted CI remain required before landing this batch.
+
+The current implementation completes its frozen full controller regression:
+1,997 passes, 90 skips and zero failures across 2,087 selected cases. The raw
+runner reports 2,067 tests, 77 skips and 911.576 seconds. Report SHA-256:
+`88bcdb5128cfe8822c760c57389671267cc64c3fbd367a1cb4109d0a537b1328`.
+The frozen source inventory remains unchanged through terminal completion.
+Lint, format, layout, public-export audit, skills, runner review, OpenSpec and
+rendered documentation gates pass.
+
+Native FreeBSD source renewal passes 55 cases (53 passes, two existing
+Windows-only skips), including POSIX execution, repaired GNU Make receiver
+custody, actual tree pkg construction and both relocated C APIs. Time:
+100.241 test / 103.775 supervised seconds. Source archive:
+`sha256:3c8ba342527e417e51d14eafe3d3f42253b0044fa1d87f940842769dc906e9c8`.
+
+The actual native Windows admitted-receiver discovery/profile-guard test also
+passes without skips: 463.266 test / 472.344 supervised seconds. Each receiver
+observation retains the production 300-second cap, and the test retains its
+existing 1,800-second dispatch budget. The first operator probe incorrectly
+capped this entire multi-observation test at 300 seconds and is preserved as a
+harness timeout; the corrected harness reads both existing policies from verified
+source. No repository deadline changes. Native archive remains
+`sha256:3f8702850abf911950dfeab1ebb3d80c8c16c401c9709f9a1e86cd44a6edffde`.
+
+These are source-development gates. Next: commit the reviewed batch, build and
+qualify its exact wheel, repeat the 55-case FreeBSD group from installed modules,
+then push the draft and obtain fresh exact-revision hosted CI. Current installed
+renewal, compiler SDK admission, package transport/default lifecycle integration
+and source/ports full-catalog and release-matrix goals remain open.
+
+Exact wheel qualification for code commit `42f1caa1` passes, and offline FreeBSD
+installation succeeds. Its first installed 55-case run exposes a nondeterministic
+mutation fixture: concurrent inspection can read the deliberately truncated
+inspector header and correctly refuse `dependencies.pe-image-invalid`, whereas
+the test only names later hash-change refusals. Preserve that failed installed
+run (79.310 test seconds); current installed qualification remains open.
+Under WINDOWS-PE-OBSERVE-001 / issue #90, make the fixture's inspector the first
+sorted seed and require its inspection before the two-image mutation barrier.
+Then assert the specific final inspector-change refusal and empty inspector cache.
+Do not broaden accepted error codes or change production behavior. Renew focused
+mutation checks, complete controller regression and exact installed-module tests.
+
+The deterministic inspector fixture now orders the canonical first seed ahead of
+the a/b barrier, asserts that inspection happened, and requires exactly
+`dependencies.windows-inspector-changed` plus an empty inspector cache. Fifty
+controller repetitions and fifty actual Windows repetitions pass without skips;
+Windows time is 3.930 test / 9.703 supervised seconds. The accepted error set is
+narrower; production code and all deadlines remain unchanged.
+
+Code commit `42f1caa1` passes exact clean-wheel qualification:
+wheel `sha256:e76ea9b48bb128ef75bbbf486fbb71939cd8ca054103baeafc35a25c56f347cb`,
+distribution `sha256:9b5627b6ed08eb4f1663a6725923ef7d9cd353e9ff574b1726b691b7e70baefd`.
+Its offline FreeBSD installation succeeds; the corrected verified test bundle
+passes 55 cases (53 passes, the two named Windows-only skips) in 81.360 test /
+83.600 supervised seconds. Every framework module remains under the installed
+prefix. Native package construction/topology, receiver custody, POSIX execution
+and relocated C APIs pass. This qualifies the focused installed provider, not
+compiler SDK, canonical lifecycle or release admission.
+
+The refreshed full controller run passes 1,997 cases with 90 skips and zero
+failures across 2,087 selected cases. The raw runner separately reports 2,067
+tests, 77 skips and 938.046 seconds. Report SHA-256:
+`297c8e89a665c0566347719cabc9d27d20dee962d323c877a228c3e6dd17ea35`.
+The entire frozen source inventory stays unchanged through terminal completion.
+Next: commit the fixture/evidence update, push the draft PR and require fresh
+exact-revision hosted CI. All larger SDK, runtime, source/ports catalogue and
+release-matrix gates remain open.
+
+### [ ] NATIVE-TREE-WIRE-001 — Transport complete native package tree contracts without flattening
+
+- **GitHub issue:** [#93](https://github.com/jordanhubbard/literate-ai/issues/93)
+
+- **Priority:** P0
+- **Owner:** Native SDK packaging contracts and PACKAGE worker admission
+- **Direction:** Carry complete source-built SDK package trees through selected native providers and worker records while preserving provenance and live admission.
+- **Conclusion:** Refine NATIVE-SDK-ALIAS-001 and existing issue93. Begin with exact bounded projection/result codecs and published schemas, preserving current wire identities. Descriptor decoding grants no SDK producer, runtime, worker or release admission. Then bind source/final provider plans and actual LINK proof transport.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add exact bounded native tree projection/result decoders and schema contracts; preserve field identities and reject mixed or malformed documents.
+  - [ ] Integrate selected source/final native provider plans and tree-aware worker transport without weakening legacy guards or LINK proof.
+- **Evidence:**
+  - [x] Round-trip real tree plans/results through Python and schema validation; refuse schema drift, extra fields, invalid dependencies, epoch/media mismatch and over-budget arrays.
+  - [ ] Require provider verification and live runtime/producer scope plus full and native qualification before claiming canonical PACKAGE admission.
+
+NATIVE-TREE-WIRE-001 descriptor codecs now pass 26 controller cases (25 passes,
+one native-only skip), all five portable codec cases on actual Windows Python
+3.12 with no skips, and a 60-case native FreeBSD source group (58 passes, the two
+existing Windows-only skips). The v2 catalog verifies 102 schema files and 514
+resources. Native source time is 79.552 test / 82.644 supervised seconds; archive
+`sha256:ef0b58ae876233f7495b1790500bc7a4b3fb6c47594783f2a7b140b136192d84`.
+Decoding retains complete tree authority and still feeds the independent archive
+verifier; cross-provider records and rehashed archive corruption refuse.
+Selected source/final native provider binding now passes the qualification below.
+Next integration: real LINK proof in tree-aware PACKAGE worker records, after
+the current batch renews its exact-wheel, installed and hosted CI qualification.
+
+NATIVE-TREE-WIRE-001 source/selected binding decision: retain the original plan in
+its projection, derive the native selection by replacing only the base packager
+identity, and verify that the full original plan can be reconstructed exactly.
+Keep explicit source-plan calls compatible; selected worker admission will require
+the selected form plus real LINK/live-owner proof. Exercise altered limits,
+provenance and provider identities, and require source/selected native construction
+to produce the same physical archive with distinct exact result-plan bindings.
+
+### [ ] RETAINED-WIN-FIXTURE-001 — Capture complete Windows retained fixture executable inputs
+
+- **GitHub issue:** [#103](https://github.com/jordanhubbard/literate-ai/issues/103)
+
+- **Priority:** P0
+- **Owner:** Shared retained execution test fixture and platform coverage
+- **Direction:** Repair actual hosted Windows failures without bypassing executable checks or PE runtime dependency observation.
+- **Conclusion:** Issue103: shared fixture needs a Windows executable filename and actual adjacent Python native DLL inputs. Venv-only source probes missed the base-interpreter layout used by hostedCI. Centralize platform paths in the shared fixture, preserve all drift checks and validate base plusvenv native runs.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Bind the shared runner filename, hash and profile once and capture base interpreter Python/VC runtime DLL inputs on Windows.
+  - [x] Use the same fixture in PATH/runtime-role tests and exercise both base Python and private venv layouts without new skips or production guard changes.
+- **Evidence:**
+  - [ ] Hosted failing workspace/PATH/source-drift cases pass on actual base and venv Windows interpreters; missing sidecars still refuse.
+  - [ ] Renew focused, native, full regression and exact CI gates; preserve failed cbcd337d shard3 logs.
+
+Native selected-plan source qualification passes 61 FreeBSD cases (59 passes,
+two existing Windows-only skips) in 74.547 test / 77.883 supervised seconds.
+Source and selected plans produce identical actual native archives; result IDs
+bind the exact submitted plan, and altered limits, ownership, provider IDs and
+stripped environment/device obligations refuse. Canonical worker LINK admission
+remains open.
+
+RETAINED-WIN-FIXTURE-001 centralizes `runner.exe` naming and captured adjacent
+Python/VC native DLLs in the shared Windows fixture; removes the subclass-only
+rename; retains the same positive and negative runtime guards. Three controller
+groups pass 56 cases (54 passes, two existing Windows-only skips) in 133.220
+seconds. All six actual Windows cases pass across base Python and a private venv in
+992.391 supervised seconds, each under the unchanged 300-second case bound.
+The exact source archive is `sha256:d233a824da3bded5ac4924184e40a603757d3ccd3ab4cc02969d04ff8f5a146f`;
+all 2,030 production/test/schema file hashes still match. Current installed
+qualification and fresh hosted CI remain required.
+
+Combined native tree wire/selection and Windows shared-fixture regression passes
+2,093 selected cases: 2,003 passes, 90 explicit skips and zero failures. The raw
+runner reports 2,073 tests, 77 skips and 921.262 seconds; dispatcher accounting
+is retained separately. Frozen source matches through terminal completion. Lint,
+format, lifecycle/documentation review, layout, public export and strict OpenSpec
+checks pass. Next in progress: clean exact-commit wheel and installed native
+renewal, then fresh exact-head CI. The preceding hosted receiver timeout remains
+open under issue90; the fixture103 repair does not claim to fix it.
+
+The combined code batch is committed at `fb791575583b8549dc0e8d82e79f4b7adf7db2dd`.
+Its exact clean wheel `sha256:55a6b70590497671c8d09fdd28af38254b28bbb1331d83d1cf34b7220517e0f9`
+qualifies a 1,230-member Standard distribution, installs offline, and passes 61
+FreeBSD checks: 59 passes, exactly two existing Windows-only skips, no failures
+or errors. Test time is 85.267 seconds; supervised time is 87.913 seconds.
+All framework imports resolve inside the installed prefix. The current code
+now has full controller and scoped installed qualification; fresh exact-head
+hosted CI and canonical tree worker/live SDK integration remain open.

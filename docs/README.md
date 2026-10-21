@@ -35,7 +35,8 @@ and [documentation authority review](user/configuration-and-cli.md#documentation
 For dependency and environment reconstruction, read the
 [CycloneDX SBOM and dependency graph](architecture/sbom-and-dependency-graph.md) together
 with [cache/publication boundaries](user/caches-packages-publication.md) and
-[retained Cargo package provisioning](user/retained-cargo.md).
+[retained Cargo package provisioning](user/retained-cargo.md) and
+[secondary-account retained tests](user/retained-secondary-access.md).
 
 For the current per-Component implementation boundary, read
 [Per-Component execution plans](architecture/component-execution-plans.md). It separates

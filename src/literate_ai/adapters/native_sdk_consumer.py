@@ -26,7 +26,12 @@ from literate_ai.adapters.native_sdk_source_build import (
     NativeSdkSourceBuild,
     NativeSdkSourceBuildService,
 )
+from literate_ai.adapters.native_sdk_tree_custody import (
+    capture_native_sdk_tree_snapshot,
+    materialize_native_sdk_tree_snapshot,
+)
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
+from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
 from literate_ai.contracts.sbom import (
     ManagedComponentKind,
     project_component_lock_managed_graph,
@@ -190,14 +195,23 @@ class NativeSdkConsumerInputs:
             for binding in selected:
                 service = services[binding.identity]
                 sdk = binding.build.product.snapshot
-                root = materialize_native_sdk(
-                    sdk,
-                    expected_identity=sdk.identity,
-                    store=service.store,
-                    parent=parent,
-                )
-                roots.append(root)
                 layout = binding.build.selection.recipe.layout
+                if isinstance(sdk, NativeSdkTreeSnapshot):
+                    root = materialize_native_sdk_tree_snapshot(
+                        sdk,
+                        expected_identity=sdk.identity,
+                        store=service.store,
+                        limits=layout.limits,
+                        parent=parent,
+                    )
+                else:
+                    root = materialize_native_sdk(
+                        sdk,
+                        expected_identity=sdk.identity,
+                        store=service.store,
+                        parent=parent,
+                    )
+                roots.append(root)
                 observation = observe_native_sdk_runtime(
                     sdk,
                     expected_identity=sdk.identity,
@@ -220,17 +234,27 @@ class NativeSdkConsumerInputs:
             for value in materialized:
                 sdk = value.binding.build.product.snapshot
                 service = services[value.binding.identity]
-                captured = capture_native_sdk(
-                    value.root,
-                    store=service.store,
-                    source_lock_identity=sdk.source_lock_identity,
-                    recipe_identity=sdk.recipe_identity,
-                    target_identity=sdk.target_identity,
-                    license_identity=sdk.license_identity,
-                    import_surface=sdk.import_surface,
-                    import_root=sdk.import_root,
-                    native_libraries=sdk.native_libraries,
-                )
+                if isinstance(sdk, NativeSdkTreeSnapshot):
+                    captured = capture_native_sdk_tree_snapshot(
+                        value.root,
+                        layout=value.binding.build.selection.recipe.layout,
+                        store=service.store,
+                        source_lock_identity=sdk.source_lock_identity,
+                        recipe_identity=sdk.recipe_identity,
+                        target_identity=sdk.target_identity,
+                    )
+                else:
+                    captured = capture_native_sdk(
+                        value.root,
+                        store=service.store,
+                        source_lock_identity=sdk.source_lock_identity,
+                        recipe_identity=sdk.recipe_identity,
+                        target_identity=sdk.target_identity,
+                        license_identity=sdk.license_identity,
+                        import_surface=sdk.import_surface,
+                        import_root=sdk.import_root,
+                        native_libraries=sdk.native_libraries,
+                    )
                 if captured != sdk:
                     raise ValueError("SDK consumer input changed during use")
         finally:

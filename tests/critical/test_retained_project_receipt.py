@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import unittest
 from dataclasses import replace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from literate_ai.adapters.retained_project_acceptance import ACCEPTANCE_POLICY_PATH
 from literate_ai.adapters.retained_project_inputs import (
@@ -16,15 +16,24 @@ from literate_ai.adapters.retained_project_receipt import (
     AdmittedRetainedProject,
     admit_retained_project,
 )
-from literate_ai.contracts import BlobRef, ProjectTestReceipt
+from literate_ai.contracts import BlobRef, ProjectTestReceipt, canonical_identity
 from literate_ai.contracts.retained_project_receipt import RetainedProjectReceipt
 from literate_ai.contracts.retained_project_sbom import (
     project_retained_project_managed_graph,
 )
+from literate_ai.contracts.retained_secondary_access import (
+    RetainedReadOnlyView,
+    RetainedSecondaryAccessPolicy,
+)
+from literate_ai.contracts.retained_secondary_evidence import (
+    RetainedSecondaryAccessEvidence,
+)
+from literate_ai.contracts.retained_test_identity import RetainedSecondaryTestIdentity
 from literate_ai.storage.cas import BlobIntegrityError, FileSystemCAS
 from tests.critical import test_retained_project_completion as completed
 from tests.critical import test_retained_project_execution as commands
 from tests.critical import test_retained_project_sdks as sdk_fixtures
+from tests.critical.test_retained_secondary_evidence import evidence_fixture
 
 
 @unittest.skipUnless(
@@ -45,6 +54,159 @@ class RetainedProjectReceiptTests(unittest.TestCase):
     def finish(self):
         workspace, _ = self.fixture.finish()
         return workspace, admit_retained_project(workspace, self.store)
+
+    def secondary_workspace(self):
+        """Real commands/CAS with an explicit view/allocation protocol double."""
+        f = self.fixture.fixture
+        policy = RetainedSecondaryAccessPolicy(
+            f.plan.profile.worker_identity,
+            RetainedSecondaryTestIdentity("litaitest", 2001, 2001, (2001,)),
+            ("tests",),
+            (RetainedReadOnlyView("runtime", "inputs", "tools"),),
+            ("work",),
+        )
+        f.plan = replace(
+            f.plan, profile=replace(f.plan.profile, secondary_access=policy)
+        )
+        f.current = f.plan
+        self.fixture.graph = project_retained_project_managed_graph(
+            f.plan, self.fixture.locks, version="1.0.0"
+        )
+        allocation = Mock(spec=commands.execution.RetainedAllocationOwner)
+        allocation.workspace_prefix = f.base
+        value = evidence_fixture(
+            f.plan,
+            exports=canonical_identity("unused exports"),
+            commands=tuple(
+                canonical_identity(a.to_dict()) for a in f.plan.profile.actions
+            ),
+        )
+        allocation.evidence.return_value = tuple(value["allocation_observations"])
+        owner = Mock()
+        owner.policy, owner.allocation = policy, allocation
+        owner.paths = {"runtime": f.base / "runtime", "work": f.base / "work"}
+        events = [value["view_observations"][0]]
+        owner.evidence.side_effect = lambda: tuple(dict(v) for v in events)
+        closed = False
+
+        def current(**kwargs):
+            if closed:
+                raise ValueError("view already closed")
+
+        def close():
+            nonlocal closed
+            if not closed:
+                events.append(value["view_observations"][-1])
+                closed = True
+
+        owner.require_current.side_effect = current
+        owner.close.side_effect = close
+        owner.activate.side_effect = lambda action_id: events.append(
+            value["view_observations"][1]
+        )
+        owner.deactivate.side_effect = lambda: events.append(
+            value["view_observations"][2]
+        )
+        with patch.object(
+            commands.execution, "FreeBsdRetainedViewOwner", return_value=owner
+        ):
+            workspace = self.fixture.workspace(allocation_owner=allocation)
+        self.addCleanup(workspace.close_secondary_access)
+        self.fixture.finish(workspace)
+        return workspace, owner
+
+    def test_secondary_admission_binds_cleanup_then_survives_run_retirement(self):
+        workspace, owner = self.secondary_workspace()
+        provisional = workspace.completed_run()
+        self.assertNotIn("secondary_access_identity", provisional.to_dict())
+        admission = admit_retained_project(workspace, self.store)
+        owner.close.assert_called()
+        identity = admission.run.secondary_access_identity
+        self.assertIsNotNone(identity)
+        ref = next(v for v in admission.receipt.records if v.identity == identity.uri)
+        evidence = RetainedSecondaryAccessEvidence.from_dict(
+            self.store.get_manifest(ref)
+        )
+        evidence.require_context(
+            workspace.plan,
+            export_manifest_identity=admission.run.resolved_bom.output_manifest.identity,
+            command_observations=tuple(v.identity for v in admission.run.observations),
+        )
+        self.assertEqual(
+            admission.receipt.root("completed-run").identity, admission.run.identity.uri
+        )
+        self.assertNotEqual(provisional.identity, admission.run.identity)
+        _remove_tree(workspace.root)
+        admission.require_current()
+        admission.materialize_payload(self.fixture.fixture.base / "secondary-payload")
+
+    def test_secondary_cleanup_failure_cannot_publish_a_receipt(self):
+        workspace, owner = self.secondary_workspace()
+        owner.close.side_effect = ValueError("busy mount")
+        with patch.object(self.store, "put_bytes", wraps=self.store.put_bytes) as put:
+            with self.assertRaisesRegex(ValueError, "busy mount"):
+                admit_retained_project(workspace, self.store)
+        self.assertFalse(
+            any(
+                b'"schema":"literate-ai/retained-project-receipt@1"' in c.args[0]
+                for c in put.call_args_list
+            )
+        )
+        self.assertTrue(workspace.root.exists())
+        owner.close.side_effect = None  # No native resources exist in this double.
+
+    def test_secondary_retention_failure_still_closes_views(self):
+        workspace, owner = self.secondary_workspace()
+        with patch.object(
+            self.store, "put_file", side_effect=OSError("retention disk failure")
+        ):
+            with self.assertRaisesRegex(OSError, "retention disk failure"):
+                admit_retained_project(workspace, self.store)
+        owner.close.assert_called_once()
+        self.assertEqual(workspace.secondary_access_evidence()[-1]["event"], "closed")
+        self.assertTrue(workspace.root.exists())
+
+    def test_secondary_plan_change_during_cleanup_refuses_admission(self):
+        workspace, owner = self.secondary_workspace()
+        close = owner.close.side_effect
+
+        def change():
+            close()
+            self.fixture.fixture.current = replace(workspace.plan, project_id="changed")
+
+        owner.close.side_effect = change
+        with self.assertRaisesRegex(ValueError, "plan-changed"):
+            admit_retained_project(workspace, self.store)
+
+    def test_secondary_cleanup_evidence_corruption_refuses_current_admission(self):
+        workspace, _ = self.secondary_workspace()
+        admission = admit_retained_project(workspace, self.store)
+        identity = admission.run.secondary_access_identity
+        ref = next(v for v in admission.receipt.records if v.identity == identity.uri)
+        path = self.store.path_for(ref)
+        path.chmod(0o600)
+        path.write_bytes(b"changed cleanup facts")
+        with self.assertRaises(BlobIntegrityError):
+            admission.require_current()
+
+    def test_secondary_account_change_after_cleanup_prevents_admission(self):
+        workspace, owner = self.secondary_workspace()
+
+        def identity():
+            if workspace.secondary_access_evidence()[-1]["event"] == "closed":
+                raise ValueError("late account drift")
+
+        owner.require_identity_current.side_effect = identity
+        with patch.object(self.store, "put_bytes", wraps=self.store.put_bytes) as put:
+            with self.assertRaisesRegex(ValueError, "late account drift"):
+                admit_retained_project(workspace, self.store)
+        self.assertFalse(
+            any(
+                b'"schema":"literate-ai/retained-project-receipt@1"' in c.args[0]
+                for c in put.call_args_list
+            )
+        )
+        self.assertTrue(workspace.root.exists())
 
     def refresh_inputs(self, roles):
         f = self.fixture.fixture

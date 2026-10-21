@@ -86,6 +86,18 @@ class StandardLifecycleRebindTests(unittest.TestCase):
         self.original = ProjectDefinition.from_dict(value)
         ProjectConfigurationStore(self.root).create(self.original)
 
+    def unbind(self) -> None:
+        store = ProjectConfigurationStore(self.root)
+        snapshot = store.discover(self.root)
+        store.update(
+            snapshot,
+            replace(
+                snapshot.definition,
+                lifecycle_driver=None,
+                test_receipt_policy=None,
+            ),
+        )
+
     def plan(self, observed=None, selected_policy=None) -> dict[str, object]:
         chosen = self.new_distribution if observed is None else observed
         policy = self.policy if selected_policy is None else selected_policy
@@ -184,6 +196,121 @@ class StandardLifecycleRebindTests(unittest.TestCase):
             ).definition.test_receipt_policy,
             receipt,
         )
+
+    def test_public_cli_initial_binding_uses_complete_installed_policy(self) -> None:
+        self.unbind()
+        before = (self.root / "literate.project.json").read_bytes()
+        plan_path = self.root / "bind.json"
+        arguments = ["project", "lifecycle", "rebind-standard"]
+        with (
+            patch(
+                "literate_ai.cli.project.observe_installed_framework_distribution",
+                return_value=self.new_distribution,
+            ),
+            patch(
+                "literate_ai.cli.project.observe_installed_framework_origin",
+                side_effect=origin,
+            ),
+        ):
+            output, errors = io.StringIO(), io.StringIO()
+            status = main(
+                [*arguments, "--project", str(self.root), "--output", str(plan_path)],
+                stdout=output,
+                stderr=errors,
+            )
+            self.assertEqual(status, 0, errors.getvalue())
+            self.assertEqual((self.root / "literate.project.json").read_bytes(), before)
+            plan = json.loads(plan_path.read_bytes())
+            self.assertIsNone(plan["configured_binding"])
+            self.assertIsNone(plan["configured_receipt_policy"])
+            self.assertEqual(
+                plan["changed_fields"], ["lifecycle_driver", "test_receipt_policy"]
+            )
+            output, errors = io.StringIO(), io.StringIO()
+            status = main(
+                [
+                    *arguments,
+                    str(plan_path),
+                    "--project",
+                    str(self.root),
+                    "--apply",
+                    "--authorize-rebind",
+                ],
+                stdout=output,
+                stderr=errors,
+            )
+            self.assertEqual(status, 0, errors.getvalue())
+        snapshot = ProjectConfigurationStore.discover(self.root)
+        driver = snapshot.definition.lifecycle_driver
+        receipt = snapshot.definition.test_receipt_policy
+        self.assertEqual(
+            driver.framework_distribution_identity, self.new_distribution.identity
+        )
+        self.assertEqual(driver.policy_identity, self.policy.identity)
+        self.assertEqual(receipt.runner_identity, driver.identity)
+        self.assertEqual(
+            receipt.required_evidence_kinds, self.policy.required_evidence_kinds
+        )
+        self.assertEqual(receipt.minimum_test_count, self.policy.minimum_test_count)
+
+    def test_initial_binding_rejects_receipt_policy_downgrade(self) -> None:
+        self.unbind()
+        plan = self.plan()
+        before = (self.root / "literate.project.json").read_bytes()
+        receipt = ProjectTestReceiptPolicy.from_dict(
+            plan["proposed_receipt_policy"], path="test.proposed_receipt_policy"
+        )
+        plan["proposed_receipt_policy"] = replace(
+            receipt, required_evidence_kinds=(PROJECT_TEST_RUNNER_EVIDENCE_KIND,)
+        ).to_dict()
+        plan.pop("identity")
+        plan["identity"] = canonical_identity(plan).uri
+        with self.assertRaises(StandardLifecycleRebindError) as rejected:
+            self.apply(plan)
+        self.assertEqual(rejected.exception.code, "standard_rebind.plan_invalid")
+        self.assertEqual((self.root / "literate.project.json").read_bytes(), before)
+
+    def test_bound_driver_without_receipt_policy_refuses(self) -> None:
+        self.unbind()
+        store = ProjectConfigurationStore(self.root)
+        snapshot = store.discover(self.root)
+        store.update(
+            snapshot,
+            replace(
+                snapshot.definition,
+                lifecycle_driver=self.original.lifecycle_driver,
+            ),
+        )
+        with self.assertRaises(StandardLifecycleRebindError) as rejected:
+            self.plan()
+        self.assertEqual(
+            rejected.exception.code, "standard_rebind.receipt_policy_required"
+        )
+
+    def test_initial_binding_requires_receipt_path_during_read_only_plan(self) -> None:
+        self.unbind()
+        store = ProjectConfigurationStore(self.root)
+        snapshot = store.discover(self.root)
+        store.update(snapshot, replace(snapshot.definition, test_receipt=None))
+        before = (self.root / "literate.project.json").read_bytes()
+        with self.assertRaises(StandardLifecycleRebindError) as rejected:
+            self.plan()
+        self.assertEqual(
+            rejected.exception.code, "standard_rebind.test_receipt_path_required"
+        )
+        self.assertEqual((self.root / "literate.project.json").read_bytes(), before)
+
+    def test_initial_binding_rolls_back_on_installed_authority_drift(self) -> None:
+        self.unbind()
+        plan = self.plan()
+        before = (self.root / "literate.project.json").read_bytes()
+        observations = iter((self.new_distribution, distribution("drift")))
+        with self.assertRaises(StandardLifecycleRebindError) as changed:
+            self.apply(plan, observer=lambda: next(observations))
+        self.assertEqual(
+            changed.exception.code, "standard_rebind.installed_authority_changed"
+        )
+        self.assertEqual((self.root / "literate.project.json").read_bytes(), before)
 
     def test_post_write_distribution_drift_rolls_back_original_bytes(self) -> None:
         plan = self.plan()
@@ -393,16 +520,23 @@ class StandardLifecycleRebindTests(unittest.TestCase):
             self.apply(self.rehash(plan))
         self.assertEqual(denied.exception.code, "standard_rebind.plan_invalid")
 
-    def test_first_binding_does_not_initialize_receiptless_project(self) -> None:
+    def test_receipt_only_plan_schema_cannot_initialize_receiptless_project(
+        self,
+    ) -> None:
         self.receipt_only()
         store = ProjectConfigurationStore(self.root)
         snapshot = store.discover(self.root)
         store.update(snapshot, replace(snapshot.definition, test_receipt_policy=None))
+        plan = self.plan()
+        self.assertEqual(plan["schema"], STANDARD_REBIND_PLAN_SCHEMA)
+        self.assertIsNone(plan["configured_binding"])
+        self.assertIsNone(plan["configured_receipt_policy"])
+        plan["schema"] = STANDARD_FIRST_BIND_PLAN_SCHEMA
+        before = (self.root / "literate.project.json").read_bytes()
         with self.assertRaises(StandardLifecycleRebindError) as denied:
-            self.plan()
-        self.assertEqual(
-            denied.exception.code, "standard_rebind.receipt_policy_required"
-        )
+            self.apply(self.rehash(plan))
+        self.assertEqual(denied.exception.code, "standard_rebind.plan_invalid")
+        self.assertEqual((self.root / "literate.project.json").read_bytes(), before)
 
     def test_first_binding_refuses_changed_installed_policy(self) -> None:
         self.receipt_only()

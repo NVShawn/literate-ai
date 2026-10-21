@@ -18,6 +18,7 @@ import shlex
 import shutil
 import sys
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -361,6 +362,157 @@ class DependencyFactCacheTests(unittest.TestCase):
             image.write_bytes(image.read_bytes() + b"changed")
             closure()
             self.assertEqual(len(runs), 2)
+
+    def pe_graph_inputs(self):
+        tool = self.root / "inspector.exe"
+        tool.write_bytes(b"fixture inspector")
+        header = b"MZ" + bytes(0x3A) + (0x40).to_bytes(4, "little") + b"PE\0\0"
+        paths = {name: self.root / name for name in ("a.dll", "b.dll", "shared.dll")}
+        for path in paths.values():
+            path.write_bytes(header)
+        inspector = observation._PeInspector(
+            tool, "llvm-readobj", "1", "sha256:0", observation._file_digest(tool)
+        )
+        return inspector, paths
+
+    def test_pe_frontiers_overlap_and_keep_serial_graph_with_shared_cycle(self):
+        inspector, paths = self.pe_graph_inputs()
+        results = []
+        for workers in (1, 2):
+            observation._INSPECTION_FACTS.clear()
+            barrier = threading.Barrier(2)
+            calls = []
+
+            def imports(
+                _inspector, path, *, calls=calls, workers=workers, barrier=barrier
+            ):
+                calls.append(path.name)
+                if workers == 2 and path.name in {"a.dll", "b.dll"}:
+                    barrier.wait(timeout=10)
+                if path.name == "shared.dll":
+                    return (("a.dll", False),)
+                return (("shared.dll", False),)
+
+            with (
+                patch.object(observation, "_INSPECTION_WORKERS", workers),
+                patch.object(observation, "_inspect_pe_imports", imports),
+            ):
+                results.append(
+                    observation._pe_closure(
+                        inspector,
+                        {str(paths[name]): {"runtime"} for name in ("a.dll", "b.dll")},
+                        (self.root,),
+                        api_set_schema=None,
+                    )
+                )
+            self.assertCountEqual(calls, paths)
+        self.assertEqual(results[0], results[1])
+        images, edges, bindings, unavailable = results[1]
+        self.assertEqual(
+            {image.path for image in images}, {str(p.resolve()) for p in paths.values()}
+        )
+        expected = (
+            ("a.dll", "shared.dll"),
+            ("b.dll", "shared.dll"),
+            ("shared.dll", "a.dll"),
+        )
+        self.assertEqual(
+            set(edges),
+            {(str(paths[a].resolve()), str(paths[b].resolve())) for a, b in expected},
+        )
+        self.assertEqual((bindings, unavailable), ((), ()))
+
+    def test_pe_parallel_frontier_refuses_changed_image_without_caching_it(self):
+        inspector, paths = self.pe_graph_inputs()
+        image = paths["a.dll"]
+        old_digest = observation._file_digest(image)
+        barrier = threading.Barrier(2)
+
+        def imports(_inspector, path):
+            barrier.wait(timeout=10)
+            if path.name == "a.dll":
+                path.write_bytes(path.read_bytes() + b"substitution")
+            return ()
+
+        with (
+            patch.object(observation, "_INSPECTION_WORKERS", 2),
+            patch.object(observation, "_inspect_pe_imports", imports),
+            self.assertRaises(observation.DependencyObservationError) as raised,
+        ):
+            observation._pe_closure(
+                inspector,
+                {str(paths[name]): {"runtime"} for name in ("a.dll", "b.dll")},
+                (),
+                api_set_schema=None,
+            )
+        self.assertEqual(raised.exception.code, "dependencies.pe-image-changed")
+        key = observation._content_fact_key(
+            "pe-imports", inspector.digest, image.resolve(), old_digest
+        )
+        self.assertNotIn(key, observation._INSPECTION_FACTS)
+
+    def test_pe_parallel_observer_refuses_changed_inspector(self):
+        inspector, paths = self.pe_graph_inputs()
+        # The public observer includes its inspector and API-set image as seeds.
+        # Inspect the tool before the a/b frontier can mutate it. Otherwise an
+        # in-place write can legitimately fail its concurrent PE-header check
+        # before the final inspector-identity guard this test exercises.
+        inspector_path = inspector.path.with_name("0-inspector.exe").resolve()
+        inspector.path.rename(inspector_path)
+        header = paths["a.dll"].read_bytes()
+        inspector_path.write_bytes(header)
+        inspector = observation._PeInspector(
+            inspector_path,
+            "llvm-readobj",
+            "1",
+            "sha256:0",
+            observation._file_digest(inspector_path),
+        )
+        schema_path = self.root / "schema.dll"
+        schema_path.write_bytes(header)
+        schema = observation._WindowsApiSetSchema(
+            str(schema_path),
+            observation._file_digest(schema_path),
+            6,
+            (),
+            (),
+            canonical_identity("schema fixture").uri,
+        )
+        barrier = threading.Barrier(2)
+        inspected = threading.Event()
+
+        def imports(_inspector, path):
+            if path == inspector.path:
+                inspected.set()
+            if path.name in {"a.dll", "b.dll"}:
+                barrier.wait(timeout=10)
+                if path.name == "a.dll":
+                    self.assertTrue(inspected.is_set())
+                    inspector.path.write_bytes(header + b"substitution")
+            return ()
+
+        with (
+            patch.object(observation.sys, "platform", "win32"),
+            patch.object(observation, "_INSPECTION_WORKERS", 2),
+            patch.object(
+                observation, "_find_windows_pe_inspector", return_value=inspector
+            ),
+            patch.object(
+                observation, "_load_windows_api_set_schema", return_value=schema
+            ),
+            patch.object(observation, "_inspect_pe_imports", imports),
+            self.assertRaises(observation.DependencyObservationError) as raised,
+        ):
+            observation.WindowsPeDependencyObserver(
+                environment={"SystemRoot": str(self.root.resolve())}
+            ).observe({"artifact_path": str(self.root)}, root_ref="test-root")
+        self.assertEqual(
+            raised.exception.code,
+            "dependencies.windows-inspector-changed",
+        )
+        self.assertFalse(
+            any(key[1] == inspector.digest for key in observation._INSPECTION_FACTS)
+        )
 
 
 if __name__ == "__main__":

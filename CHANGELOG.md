@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Integrate native original-source admission with reviewed receipt-preserving
+  first binding. Keep the native completely-unbound route and the receipt-only
+  route distinct; combined qualification remains in progress.
+
 - Plan and explicitly apply a retained project's first Standard lifecycle binding
   without discarding its existing receipt policy or historical evidence. Preserve
   ordinary rebind plans and reject policy weakening, authority drift and custom
@@ -10,6 +14,187 @@
 - Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
   declarations. Preserve read-only planning, exact host-target execution matching
   and refusal of unsupported targets. Native and installed renewal is in progress.
+- Bind native source and selected package plans exactly, preserving environment
+  and device obligations and rejecting cross-plan results. Capture Windows
+  retained fixture executable names and adjacent native Python DLL inputs in the
+  shared fixture; keep production executable and dependency guards unchanged.
+
+- Add strict native tree package projection/result codecs and published schemas.
+  Preserve complete tree provenance and provider identities; reject mixed formats,
+  altered policy and oversized raw inventories before nested decoding. Decoding
+  does not grant producer or package execution admission.
+
+- Make the concurrent inspector-mutation fixture deterministic: inspect its tool
+  before mutation, then require the exact inspector-change refusal and cache
+  invalidation. Native Windows repetitions, full controller regression and
+  focused installed FreeBSD package/execution checks pass.
+
+- Select installed `gmake` before base `make` in the POSIX receiver custody
+  fixture, retaining actual GNU Make discovery and tool-substitution refusals.
+
+- Bind retained Windows command system context to the native OS directory and
+  live directory identities, refusing caller injection and later drift. Inspect
+  independent PE dependencies concurrently with deterministic graph assembly,
+  unchanged deadlines and cache invalidation on inspection failure. Installed
+  qualification and full compiler SDK integration remain pending.
+
+- Add an explicit native FreeBSD tree pkg provider and live SDK resource-owner
+  dispatch. Preserve hard links, symbolic targets, empty directories and native
+  metadata; verify bounded archives independently and refuse altered topology,
+  hooks, checksums and trailers. Retain environment/device obligations without
+  inventing package coordinates. Match native shared-library summaries for private
+  library names while retaining complete imports in SDK dependency evidence.
+  Full compiler SDK and default lifecycle qualification remain open.
+  Preserve native Unicode PAX charset and directory-path forms while rejecting
+  changed names/targets; native tests include case-distinct links and long NFC names.
+
+- Integrate the reviewed Windows retained/interpreter fixture repairs from PR #89
+  and bind an executable Windows placeholder for the retained output-PATH case.
+  Keep production custody, discovery and receiver deadlines unchanged.
+
+- Add a distinct tree package plan/result and deterministic PAX TAR provider.
+  Preserve file modes, empty directories, symbolic targets and hard-link groups;
+  independently reject rehashed topology/byte/mode changes and unbound trailers.
+  Bound extended metadata before allocation. A live SDK resource owner binds the
+  exact completed producer and rejects ownership loss during packaging. A real
+  compiled-library API works after producer retirement, extraction and relocation
+  on macOS and FreeBSD. Native pkg/runtime/qualification integration remains open.
+  The exact clean-commit wheel passes qualification; its offline FreeBSD install
+  passes all 14 focused tree/TAR/API checks without skips, using installed modules.
+
+- Define explicit artifact/resource package tree inputs carrying complete directory,
+  alias, naming and provenance authority. Reject overlapping package namespaces;
+  reuse existing bounded tree custody for byte relocation and verification.
+  Package plan, provider, runtime and qualification integration remains open.
+
+- Add explicit retained input topology policy, preserving canonical hard-link
+  groups and case-sensitive target names through capture and verification.
+  Keep legacy manifest and role identities unchanged. Reuse physical file reads
+  without sharing CAS inodes, reject external links and identical-byte link
+  replacement, and clean up failed placement. Join retained SDK files, aliases
+  and directories to the completed live source-build owner.
+
+- Carry completed tree SDK products through live consumers and source/resolved
+  CycloneDX evidence, retaining alias and logical/physical library relationships.
+  Refuse forged runtime bindings and identical-byte topology drift. Tree packaging
+  explicitly refuses until link-aware package input custody is implemented.
+
+- Select explicit tree SDK recipes through locked Flavor authority and retain
+  completed source-built tree products. Verify alias topology around native
+  inspection, retain logical/physical library bindings, and preserve the generic
+  observer's symlink refusal. A relocated source-built C API fixture passes on
+  macOS and FreeBSD; retained and package integration remain open.
+
+- Bind tree-aware SDK snapshots and layouts to exact input/import/license claims,
+  capture limits and naming semantics. Verify selected output-license bytes and
+  complete snapshot identity during byte capture/relocation. Legacy decoders and
+  legacy recipes refuse mixed formats; complete consumer admission remains open.
+
+- Add a versioned SDK tree contract preserving symbolic alias text, canonical
+  hard-link ownership and resolved targets. Bind explicit case-sensitive target
+  names while preserving portable collision refusals. Refuse escapes, dangling
+  targets, cycles, ambiguous ancestors and excessive resolution work. Legacy SDK
+  snapshot identities and alias refusals remain unchanged. Source-level capture
+  and relocation reuse no-follow input custody, preserve closed hard-link groups,
+  verify destination case sensitivity and clean up failed placement. Canonical
+  retained-input, consumer and package integration remain pending.
+
+- Scope named-user search through private FreeBSD retained allocation directories
+  to eligible test actions. Protect unrelated siblings, refuse inaccessible
+  outside ancestors, verify effective access after dropping identity, and restore
+  exact permissions before accepting cleanup. The installed FreeBSD retained run
+  passes all 24 original tests and 11 independent checks, restores private access
+  and admits its local-runtime receipt. Canonical SDK, pkg and release
+  qualification remain separate.
+
+- Reuse bounded, current-name-checked directory handles during retained input
+  discovery, snapshot copying and private CAS validation. Preserve hashing,
+  complete inventories, alias closure and cleanup; refuse a replaced parent
+  before publishing even when the copied file bytes remain identical.
+
+- Retain the shared library required by copied standalone macOS Python executables
+  when creating the private source-install runtime, allowing Python and pip to
+  start while preserving self-update executable custody. Windows keeps its native
+  creation mode. Share this standard-library-only environment owner across source
+  installation, offline worker bootstrap, wheelhouse export and wheel verification.
+
+- Register both retained allocation-inspection resources in the v2 schema index,
+  restoring complete catalog validation. The frozen v1 catalog is unchanged.
+
+- Add development retained secondary-account identity checks and FreeBSD POSIX
+  descriptor ACL custody, preserving masked permissions for other principals and
+  restoring exact original access/default ACLs after failures or drift.
+- Bind optional secondary test views and fresh fixtures into retained profile
+  identities. Add a separate private provisioning inspector with fresh challenges
+  and permanent revocation on allocation or configuration drift. These are
+  development contracts; installed allocation and lifecycle integration remain
+  unqualified.
+- Add a development FreeBSD read-only view owner with effective kernel flag and
+  vnode identity checks, scoped test activation, source/path currentness and
+  private-root restoration before unmounting. Busy mounts and incomplete fixture
+  cleanup cannot support acceptance. Installed execution remains unqualified.
+
+- Integrate typed allocation custody and named secondary view/fixture arguments
+  into the retained command workspace. Reserve views before build, seal export
+  bindings after build and grant access only around eligible test commands.
+  Exceptions revoke access; constructor failures retain private backing trees.
+  Bind successful cleanup and allocation observations into retained completed-run
+  identities. The local CLI resolves operator-private inspection authority and
+  places selected runs under its allocated prefix. Installed qualification,
+  actual provisioner validation and complete original-suite coverage remain open.
+
+- Declare FreeBSD Python SQLite support through the existing Flavor host-bootstrap
+  contracts and native `py312-sqlite3` realization. Require package registration
+  and an in-memory query through the current interpreter before reporting it ready.
+  Model the native Python version explicitly in controller fixtures so Python
+  3.11 CI can verify the FreeBSD 3.12 contract, including rejection of an older
+  interpreter despite a successful package/module probe.
+
+- Reuse bounded POSIX directory handles within retained input verification,
+  preserving current-name and ancestor checks, complete inventories, bytes and
+  modes. Fresh verifications share no cached trust; low-descriptor environments
+  and Windows retain the preceding traversal path.
+
+- Bound strict CycloneDX object uniqueness validation with structural JSON keys,
+  preserving the official schema, reference registry, complete provenance and
+  canonical BOM identities for large retained inventories.
+
+- Expose original-source retained planning and full lifecycle execution on
+  `build` and `test` through the existing retained owner. Preserve explicit
+  plan/host authorization, locked configuration and distinct receipt/custody;
+  read-only plans no longer render as failed builds or generated run exports.
+- Acquire exact Git catalog commit snapshots with shallow ancestry and matching
+  selected catalog submodule revisions. Fetch selected catalog directories without
+  unrelated file contents when the Git server supports filtering. Preserve
+  canonical provenance and destination state on failed acquisition.
+
+- Let adopted projects establish their first Standard lifecycle binding through
+  the reviewed installed-wheel plan/apply command, preserving the complete policy
+  and rejecting missing receipt paths, partial configuration or stale authority.
+
+- Bind development local retained runs to fresh actual worker observations and
+  selected OS/architecture policies, rejecting mismatches before commands.
+  Retain plan-bound worker context through live receipt custody without changing
+  existing receipt wire identities when that context is omitted.
+
+- Connect development local retained execution to the existing live workspace
+  and receipt owners, with fresh authority checks and retained command streams.
+  Original authority is preserved; canonical installed CLI, native and public
+  package/release qualification remain open.
+
+- Let development retained profiles explicitly select build-output command
+  directories before captured tools, so original tests can invoke newly built
+  products by name. Preserve default identities and refuse undeclared or
+  redirected selections; public execution qualification remains pending.
+
+- Add development original-source adoption with a reviewed Git/project-bound
+  plan and metadata-only apply. Preserve the existing source hierarchy and
+  original release authority; reject legacy conversion transitions. Execution
+  and native qualification gates remain unchanged.
+
+- Verify committed Component locks against their declared target while retaining
+  current project Flavor-policy and resolution-audit checks. Valid non-host locks
+  no longer become stale merely because project verification assumed `host`.
 
 - Invoke explicitly configured FreeBSD SSH action receivers through the native
   command shell, preserving literal arguments without requiring interactive Bash.

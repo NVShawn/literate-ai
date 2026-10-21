@@ -1,0 +1,168 @@
+## ADDED Requirements
+
+### Requirement: Retained secondary identities bind exact current accounts
+An explicitly reviewed secondary test identity SHALL bind its account name,
+nonroot numeric UID, nonzero primary GID and complete nonzero numeric group set.
+The execution owner SHALL require current forward and reverse account mappings
+and group membership. Unknown, unsupported or changing observations SHALL refuse.
+The observation SHALL NOT create accounts or grant workspace access.
+
+#### Scenario: The account name is reassigned between reviewed and actual execution
+- **WHEN** a reviewed secondary identity resolves to a different UID or reverse name
+- **THEN** execution refuses before granting permissions
+
+#### Scenario: Membership changes while resolving the identity
+- **WHEN** repeated group or account observations differ
+- **THEN** currentness refuses rather than accepting the earlier mapping
+
+### Requirement: Secondary access requires live scoped provisioning authority
+Secondary retained workspace access SHALL require worker/profile/action-bound
+reviewed scopes and a live disposable allocation capability issued by its trusted
+provisioning owner. Parsed configuration alone SHALL NOT grant that capability.
+Permissions SHALL preserve private defaults, deny unrelated and newly created
+resources, retain no-follow custody and restore exact previous permissions on
+every exit. Drift or incomplete cleanup SHALL prevent lifecycle acceptance.
+
+#### Scenario: A configured worker claims to be disposable without an allocation
+- **WHEN** a secondary access policy has no current provisioner-owned allocation
+- **THEN** the workspace refuses access without changing its private permissions
+
+#### Scenario: A privileged test passes while a required unprivileged test skips
+- **WHEN** the original reviewed inventory requires both identities
+- **THEN** the lifecycle refuses incomplete coverage and issues no passing receipt
+
+### Requirement: Reviewed views are part of the exact profile identity
+An optional secondary access policy SHALL bind the exact worker and account,
+eligible test actions, disjoint named read-only input/export prefixes and fresh
+writable fixture names. Export prefixes SHALL have declared build producers.
+The policy SHALL participate in the profile and plan identities. Absent policy
+SHALL preserve the existing profile serialization.
+
+#### Scenario: A view prefix or secondary group changes
+- **WHEN** reviewed view scope or numeric group membership changes
+- **THEN** the profile identity and required plan authorization change
+
+#### Scenario: A profile selects a fixture name that aliases a read-only view
+- **WHEN** the delegated namespace contains a duplicate view or fixture name
+- **THEN** profile construction refuses before creating or granting resources
+
+### Requirement: View declarations cannot supply execution authority
+Secondary access policy SHALL NOT contain provisioning authority or select an
+observer endpoint. Explicit malformed policy and execution without an enforcing
+provisioning owner SHALL refuse. Manifest binding SHALL require a declared
+directory and reject aliases that leave the selected view at any path step.
+
+#### Scenario: A relative alias escapes and returns to the selected directory
+- **WHEN** normalization ends inside the view after traversal above its root
+- **THEN** manifest binding refuses rather than treating the alias as internal
+
+### Requirement: Provisioning inspection is fresh and separate from allocation
+An optional private operator inspection command SHALL inspect the actual live
+allocation using a fresh challenge bound to worker, plan and policy. Cached
+responses, changed instances or workspace prefixes, insufficient lifetime and
+configuration drift SHALL revoke the owner. The framework SHALL NOT send
+inspection requests to a legacy allocation command. Parsed policy alone SHALL
+NOT issue this non-deserializable live owner.
+
+#### Scenario: A successful response is replayed for another check
+- **WHEN** the inspector returns the previous request identity
+- **THEN** the live owner refuses the response and remains revoked
+
+#### Scenario: An existing provisioner has no inspection command
+- **WHEN** secondary access requests live allocation custody
+- **THEN** inspection refuses without invoking the allocation command
+
+### Requirement: Read-only views own effective mounts and delegated lifetime
+The view owner SHALL reserve declared paths under the allocated prefix, preserve
+private backing roots and bind complete manifest alias closure. It SHALL verify
+actual read-only/nosuid mount flags before delegation. Only reviewed test actions
+with all views bound SHALL activate traversal and fresh fixture writes. Account,
+allocation, path or permission drift SHALL revoke access. Cleanup SHALL restore
+the private view root before unmounting; incomplete cleanup SHALL refuse acceptance.
+
+#### Scenario: Mount exits successfully but the resulting view is writable
+- **WHEN** the kernel reports a writable view after successful mount invocation
+- **THEN** the owner refuses before granting secondary traversal and cleans up
+
+#### Scenario: An open descriptor prevents unmounting
+- **WHEN** cleanup encounters a busy view
+- **THEN** the view root is private and cleanup cannot support acceptance
+
+### Requirement: ACL projection preserves other principals and held inode custody
+Granting a named secondary UID SHALL NOT unmask permissions for another user or
+group. The backend SHALL retain exact previous access/default ACLs and restore
+them after commands, exceptions and entry-time permission drift. A reused
+descriptor number SHALL NOT cause mutation or closure of another inode. This
+backend SHALL NOT substitute for path/ancestor or allocation authority.
+
+#### Scenario: A secondary execute grant widens the POSIX ACL mask
+- **WHEN** another named user's execute bit was masked before the grant
+- **THEN** that user's effective execute permission remains denied
+
+#### Scenario: Another inode replaces the descriptor number before restoration
+- **WHEN** descriptor identity differs from the retained resource
+- **THEN** cleanup refuses and neither changes nor closes the other inode
+
+### Requirement: Workspace secondary paths require allocated custody
+A workspace with selected secondary policy SHALL require a typed current allocation
+owner before creating a run under its allocated prefix. It SHALL reserve named
+views and fixtures before build and bind export views after all build actions seal
+their exports. Supplying an allocation without selected policy SHALL refuse.
+
+#### Scenario: An operator selects a run parent outside the allocated prefix
+- **WHEN** the requested parent lies outside the current allocation
+- **THEN** the workspace refuses before capturing inputs or creating the run
+
+### Requirement: Workspace secondary arguments name only reviewed resources
+Workspace command substitution SHALL accept only declared `{secondary_view:NAME}`,
+`{secondary_fixture:NAME}` and `{secondary_account}` arguments. Unknown secondary
+bindings SHALL refuse before executing a command.
+
+#### Scenario: An action requests an undeclared writable fixture
+- **WHEN** its command names an undeclared secondary fixture
+- **THEN** execution refuses and closes any reserved views
+
+### Requirement: Workspace secondary grants end with their eligible test commands
+The workspace SHALL grant secondary access only around eligible test commands and
+revoke it on normal and exceptional exit. Observation-only completion MAY precede
+cleanup; selected-policy admission SHALL require successful cleanup bound into
+the retained completed-run identity.
+
+#### Scenario: A test command times out after access is granted
+- **WHEN** the bounded command fails or raises after activation
+- **THEN** workspace cleanup revokes delegated traversal and unmounts its views
+- **AND** the failed workspace cannot resume execution or yield a passing receipt
+
+### Requirement: Secondary admission retains exact successful cleanup evidence
+Before admission, the framework SHALL retain all inputs, exports and observations
+while views remain current, then close the owned views. A canonical record SHALL
+bind plan, worker, account, allocation inspections, mounted manifest views, exact
+command observations and eligible activation/revocation pairs. Cleanup failure or
+changed content SHALL prevent admission. Absent policy SHALL preserve legacy wire
+identities and receipt roots.
+
+#### Scenario: Cleanup fails after all commands and independent acceptance pass
+- **WHEN** an owned mount cannot be released or a fixture remains populated
+- **THEN** no receipt or admission capability is issued
+- **AND** the private failed run and available diagnostics remain retained
+
+#### Scenario: Retention fails before cleanup
+- **WHEN** an input, export or observation cannot enter retained custody
+- **THEN** the framework still attempts to close all owned views
+- **AND** the failed attempt issues no admission
+
+### Requirement: Local orchestration selects operator-private allocation authority
+The CLI SHALL supply operator context separately from project command environments.
+For selected secondary policy, local orchestration SHALL resolve the configured
+private provisioning inspector, validate its live plan and allocated prefix before
+cache creation, and place private runs inside that prefix. Every exit SHALL attempt
+view cleanup and retain available command/allocation diagnostics. Project policy
+SHALL NOT select inspector paths or inherit operator credentials.
+
+#### Scenario: A project selects policy without operator provisioning configuration
+- **WHEN** no current private allocation inspector is available
+- **THEN** orchestration refuses before platform execution or cache creation
+
+#### Scenario: Source inputs contain the allocation prefix
+- **WHEN** the proposed run parent overlaps a retained source root
+- **THEN** orchestration refuses before creating its private session directory

@@ -14,6 +14,7 @@ from literate_ai.contracts.identity import (
     canonical_identity,
     canonical_json_bytes,
 )
+from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
 from literate_ai.contracts.sbom import (
     CycloneDxRepositorySourceResolution,
     component_bom_ref,
@@ -151,7 +152,12 @@ def project_native_sdk_dependencies(
     sdk = built.product.snapshot
     layout = built.selection.recipe.layout
     if (
-        runtime.get("schema") != "literate-ai/native-sdk-runtime-observation@1"
+        runtime.get("schema")
+        != (
+            "literate-ai/native-sdk-tree-runtime-observation@1"
+            if isinstance(sdk, NativeSdkTreeSnapshot)
+            else "literate-ai/native-sdk-runtime-observation@1"
+        )
         or runtime.get("snapshot_identity") != sdk.identity.to_dict()
         or runtime.get("target_identity") != sdk.target_identity.to_dict()
         or runtime.get("operating_system") != layout.operating_system
@@ -269,13 +275,41 @@ def project_native_sdk_dependencies(
             refs[raw["bom-ref"]] = projected["bom-ref"]
             components[projected["bom-ref"]] = projected
     declared = {}
+    physical_libraries = (
+        dict(
+            zip(
+                sdk.native_libraries,
+                sdk.tree.resolve_all(sdk.native_libraries),
+                strict=True,
+            )
+        )
+        if isinstance(sdk, NativeSdkTreeSnapshot)
+        else {}
+    )
     for library in libraries:
-        if not isinstance(library, dict) or set(library) != {"path", "component"}:
+        expected_fields = (
+            {"path", "physical_path", "component"}
+            if isinstance(sdk, NativeSdkTreeSnapshot)
+            else {"path", "component"}
+        )
+        if not isinstance(library, dict) or set(library) != expected_fields:
             raise ValueError("SDK dependency native library binding is invalid")
         path, ref = library["path"], library["component"]
         if not isinstance(path, str) or not isinstance(ref, str) or path in declared:
             raise ValueError("SDK dependency native library binding is ambiguous")
-        if relative_by_ref.get(ref) != path:
+        physical = (
+            physical_libraries.get(path)
+            if isinstance(sdk, NativeSdkTreeSnapshot)
+            else path
+        )
+        if physical is None:
+            raise ValueError("SDK dependency binding names an undeclared library")
+        if (
+            isinstance(sdk, NativeSdkTreeSnapshot)
+            and library["physical_path"] != physical
+        ):
+            raise ValueError("SDK logical library binding differs from its tree target")
+        if relative_by_ref.get(ref) != physical:
             raise ValueError(
                 "SDK dependency native library is absent from its snapshot"
             )
@@ -343,6 +377,31 @@ def project_native_sdk_dependencies(
             ),
         ],
     }
+    if isinstance(sdk, NativeSdkTreeSnapshot):
+        components[package_ref]["properties"].extend(
+            (
+                {"name": "literate-ai:native-sdk-tree", "value": sdk.tree.identity.uri},
+                {
+                    "name": "literate-ai:native-sdk-case-sensitive",
+                    "value": str(sdk.tree.case_sensitive).lower(),
+                },
+                *(
+                    {
+                        "name": "literate-ai:native-sdk-alias",
+                        "value": canonical_json_bytes(
+                            {**alias.to_dict(), "resolved_path": resolved}
+                        ).decode("utf-8"),
+                    }
+                    for alias, resolved in zip(
+                        sdk.tree.aliases,
+                        sdk.tree.resolve_all(
+                            tuple(alias.path for alias in sdk.tree.aliases)
+                        ),
+                        strict=True,
+                    )
+                ),
+            )
+        )
     edges.add((component_bom_ref(built.selection.component_revision), package_ref))
     edges.add(
         (

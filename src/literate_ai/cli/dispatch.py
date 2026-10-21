@@ -406,6 +406,10 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             from .operator import conversion_authority_from_args
 
             return conversion_authority_from_args(args), 0
+        if args.project_command == "adopt-original":
+            from .original_adoption import original_adoption_from_args
+
+            return original_adoption_from_args(args), 0
         if args.project_command == "retained-scope":
             from .operator import retained_scope_from_args
 
@@ -464,6 +468,34 @@ def _add_repository_fetch_deadline_arguments(parser) -> None:
         metavar="SECONDS",
         help="bounded SSH connection attempt (5..120; default: 30)",
     )
+
+
+def _add_retained_project_arguments(parser, *, execution_options=False) -> None:
+    parser.add_argument(
+        "--retained-project",
+        help="complete retained input manifest; explicit original-source authority",
+    )
+    parser.add_argument(
+        "--retained-project-profile",
+        help="manifest-owned locked build/test/docs action profile",
+    )
+    parser.add_argument(
+        "--retained-project-plan",
+        action="store_true",
+        help="validate retained project and inputs read-only; grants no admission",
+    )
+    parser.add_argument(
+        "--authorize-retained-project",
+        help="exact reviewed retained-project plan identity",
+    )
+    if execution_options:
+        parser.add_argument(
+            "--allow-host-execution",
+            action="store_true",
+            help="authorize host execution of the reviewed retained lifecycle",
+        )
+        parser.add_argument("--build-dir", help="retained product/custody cache root")
+        parser.add_argument("--obj-dir", help="retained object and diagnostic root")
 
 
 def _parser() -> JsonArgumentParser:
@@ -1532,7 +1564,7 @@ def _parser() -> JsonArgumentParser:
         "build",
         help=(
             "build a Component from its current specifications and keep the runnable "
-            "artifact; then use `litai run` to execute it"
+            "artifact, or execute an explicitly selected original-source project"
         ),
     )
     build.add_argument("component", nargs="?", default=None)
@@ -1576,11 +1608,12 @@ def _parser() -> JsonArgumentParser:
             "membership for every Component and never invoke a coding CLI"
         ),
     )
+    _add_retained_project_arguments(build, execution_options=True)
     test_command = commands.add_parser(
         "test",
         help=(
             "build a Component from current specifications and require its current "
-            "generated tests and acceptance gates to pass"
+            "tests and acceptance gates to pass, including selected retained projects"
         ),
     )
     test_command.add_argument("component", nargs="?", default=None)
@@ -1624,6 +1657,7 @@ def _parser() -> JsonArgumentParser:
             "membership for every Component and never invoke a coding CLI"
         ),
     )
+    _add_retained_project_arguments(test_command, execution_options=True)
     run_command = commands.add_parser(
         "run",
         help="run a Component built by `litai build`, passing through any arguments",
@@ -2089,6 +2123,13 @@ def _parser() -> JsonArgumentParser:
     )
     project_parent_checkout.add_argument("--project", default=".")
     _add_repository_fetch_deadline_arguments(project_parent_checkout)
+    project_original = project_commands.add_parser(
+        "adopt-original", help="bind original-source authority without moving the tree"
+    )
+    project_original.add_argument("--project", default=".")
+    project_original.add_argument("--apply", action="store_true")
+    project_original.add_argument("--acknowledge", action="store_true")
+    project_original.add_argument("--expected-plan-identity")
     project_convert_stage = project_commands.add_parser(
         "convert-stage", help="show or explicitly advance adopted-project authority"
     )
@@ -2460,23 +2501,7 @@ def _parser() -> JsonArgumentParser:
         action="store_true",
         help="retain an automatically allocated successful Standard runtime",
     )
-    rebuild.add_argument(
-        "--retained-project",
-        help="complete retained input manifest; explicit original-source authority",
-    )
-    rebuild.add_argument(
-        "--retained-project-profile",
-        help="manifest-owned locked build/test/docs action profile",
-    )
-    rebuild.add_argument(
-        "--retained-project-plan",
-        action="store_true",
-        help="validate retained project and inputs read-only; grants no admission",
-    )
-    rebuild.add_argument(
-        "--authorize-retained-project",
-        help="exact reviewed retained-project plan identity",
-    )
+    _add_retained_project_arguments(rebuild)
     rebuild.add_argument(
         "--retained-source",
         help="exact local UTF-8 source tree to qualify, never regenerate",
@@ -2957,6 +2982,10 @@ def _human_verify_text(result: dict[str, Any]) -> str:
 def _human_build_text(result: dict[str, Any]) -> str:
     """Say whether it passed and how to run it; that is the whole first-run need."""
 
+    if result.get("authority_mode") == "retained-project":
+        from .retained_project import human_retained_project_text
+
+        return human_retained_project_text(result, command="build")
     summary = result.get("test_summary") or {}
     lines = [
         "Literate AI build: " + ("passed" if result.get("passed") else "FAILED"),
@@ -3015,6 +3044,10 @@ def _human_conversion_authority_text(result: dict[str, Any]) -> str:
 
 
 def _human_test_text(result: dict[str, Any]) -> str:
+    if result.get("authority_mode") == "retained-project":
+        from .retained_project import human_retained_project_text
+
+        return human_retained_project_text(result, command="test")
     summary = result.get("test_summary")
     lines = [
         f"Literate AI test: {result.get('component')} "
@@ -3066,6 +3099,10 @@ def _display_command(argv: Sequence[object]) -> str:
 def _human_rebuild_text(result: dict[str, Any]) -> str:
     """Render the successful Standard path without discarding JSON evidence."""
 
+    if result.get("authority_mode") == "retained-project":
+        from .retained_project import human_retained_project_text
+
+        return human_retained_project_text(result, command="rebuild")
     if result.get("schema") != "literate-ai/project-rebuild@1":
         return "Literate AI rebuild completed. Use --json for complete evidence.\n"
     lines = [f"Literate AI rebuild: {'passed' if result.get('passed') else 'failed'}"]
