@@ -75,6 +75,7 @@ from literate_ai.generated_tests import (
     validate_generated_test_suite,
 )
 from tests.support.fixtures_test_standard_command_projection import _locked_snapshot
+from tests.support.host_platform import host_os_family
 
 
 def target(layout, test="tests/run"):
@@ -709,13 +710,7 @@ class CppBazelOutputTests(unittest.TestCase):
             0,
             preflight.stdout + preflight.stderr,
         )
-        platform = (
-            "windows"
-            if os.name == "nt"
-            else "macos"
-            if sys.platform == "darwin"
-            else "linux"
-        )
+        platform = host_os_family()
         # One kind keeps the full runtime and Conan consumer path covered; the
         # static product is linked by the producer-source-free test below.
         for kind in ("shared",):

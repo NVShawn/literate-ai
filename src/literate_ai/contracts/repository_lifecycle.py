@@ -131,6 +131,8 @@ class RepositoryLifecycle:
             "macos-aarch64",
             "macos-x86_64",
             "windows-x86_64",
+            "freebsd-x86_64",
+            "freebsd-aarch64",
         }:
             raise ValueError("unsupported lifecycle target")
         if (

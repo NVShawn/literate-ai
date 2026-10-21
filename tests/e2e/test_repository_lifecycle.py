@@ -166,6 +166,34 @@ class RepositoryLifecycleTests(unittest.TestCase):
             self.run_plan(plan)
         self.assertEqual((self.root / "lib/source.txt").read_text(), "local work")
 
+    def test_freebsd_targets_plan_without_foreign_execution(self):
+        native = _target()
+        for target in ("freebsd-x86_64", "freebsd-aarch64"):
+            with self.subTest(target=target):
+                self.contract["target"] = target
+                self.declare()
+                plan = self.plan()
+                self.assertEqual(plan["target"], target)
+                self.assertEqual(plan["host_target"], native)
+                self.assertEqual(plan["acceptance"], "not-qualified")
+                if target != native:
+                    with self.assertRaisesRegex(
+                        OrchestrationInventoryError,
+                        f"run on {target}; this host is {native}",
+                    ):
+                        self.run_plan(plan)
+                self.assertFalse((self.root / "_build").exists())
+                for child in ("lib", "app"):
+                    self.assertFalse((self.root / child / "_build").exists())
+
+        for target in ("freebsd-i386", "freebsd-riscv64", "unknown-x86_64"):
+            with self.subTest(unsupported=target):
+                self.contract["target"] = target
+                self.declare()
+                with self.assertRaisesRegex(ValueError, "unsupported lifecycle target"):
+                    self.plan()
+                self.assertFalse((self.root / "_build").exists())
+
     def test_planning_refuses_local_filters_before_status_can_execute_them(self):
         child = self.root / "lib"
         git(child, "config", "filter.fixture.clean", "must-not-run")

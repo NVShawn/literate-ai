@@ -55,7 +55,9 @@ def add_registry_arguments(commands):
             parser.add_argument("--kind", choices=("local", "ssh", "command"))
             parser.add_argument("--endpoint")
             parser.add_argument("--workspace")
-            parser.add_argument("--os", choices=("linux", "windows", "macos"))
+            parser.add_argument(
+                "--os", choices=("freebsd", "linux", "windows", "macos")
+            )
             parser.add_argument("--os-version")
             parser.add_argument(
                 "--cpu-architecture", choices=("x86_64", "aarch64", "arm64")

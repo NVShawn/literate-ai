@@ -46,6 +46,7 @@ CYCLONEDX_REPOSITORY_SOURCE_RESOLUTION_SCHEMA = (
 )
 
 LITERATE_COMPONENT_REVISION_PROPERTY = "literate-ai:component-revision"
+LITERATE_RETAINED_PROJECT_PROPERTY = "literate-ai:retained-project"
 LITERATE_RESOLVED_GRAPH_IDENTITY_PROPERTY = "literate-ai:resolved-graph-identity"
 LEGACY_LITERATE_COMPONENT_COMPOSITION_IDENTITY_PROPERTY = (
     "literate-ai:component-composition-identity"
@@ -101,8 +102,22 @@ class CycloneDxLifecycle(StrEnum):
 
 class ManagedComponentKind(StrEnum):
     ROOT = "root-component"
+    RETAINED_PROJECT = "retained-project"
     COMPONENT = "component"
     REPOSITORY_SOURCE = "repository-source"
+
+    @property
+    def is_root(self) -> bool:
+        return self in {
+            ManagedComponentKind.ROOT,
+            ManagedComponentKind.RETAINED_PROJECT,
+        }
+
+
+def retained_project_bom_ref(identity: ContentIdentity) -> str:
+    if not isinstance(identity, ContentIdentity):
+        raise TypeError("retained project BOM reference requires a ContentIdentity")
+    return f"urn:literate-ai:retained-project:{identity.digest}"
 
 
 def component_bom_ref(revision: ContentIdentity) -> str:
@@ -203,9 +218,9 @@ class CycloneDxManagedComponent:
                 "CycloneDxManagedComponent.scopes",
                 "contains unsupported dependency scopes",
             )
-        if self.kind is ManagedComponentKind.ROOT and self.scopes:
+        if self.kind.is_root and self.scopes:
             fail("CycloneDxManagedComponent.scopes", "root scopes must be empty")
-        if self.kind is not ManagedComponentKind.ROOT and not self.scopes:
+        if not self.kind.is_root and not self.scopes:
             fail(
                 "CycloneDxManagedComponent.scopes",
                 "a dependency must declare at least one scope",
@@ -213,6 +228,8 @@ class CycloneDxManagedComponent:
         expected_ref = (
             repository_dependency_bom_ref(self.identity)
             if self.kind is ManagedComponentKind.REPOSITORY_SOURCE
+            else retained_project_bom_ref(self.identity)
+            if self.kind is ManagedComponentKind.RETAINED_PROJECT
             else component_bom_ref(self.identity)
         )
         if self.bom_ref != expected_ref:
@@ -223,6 +240,8 @@ class CycloneDxManagedComponent:
 
     @property
     def binding_property(self) -> str:
+        if self.kind is ManagedComponentKind.RETAINED_PROJECT:
+            return LITERATE_RETAINED_PROJECT_PROPERTY
         if self.kind is ManagedComponentKind.REPOSITORY_SOURCE:
             return LITERATE_REPOSITORY_DEPENDENCY_PROPERTY
         return LITERATE_COMPONENT_REVISION_PROPERTY
@@ -475,7 +494,7 @@ class CycloneDxRepositorySourceResolution:
 
 @dataclass(frozen=True, slots=True)
 class CycloneDxManagedGraph:
-    """Exact resolved Component and repository-source dependency subgraph."""
+    """Exact managed project, Component and repository-source dependency graph."""
 
     root_ref: str
     components: tuple[CycloneDxManagedComponent, ...]
@@ -499,9 +518,9 @@ class CycloneDxManagedGraph:
             fail("CycloneDxManagedGraph.components", "must be sorted by BOM reference")
         by_ref = {item.bom_ref: item for item in self.components}
         root = by_ref.get(self.root_ref)
-        if root is None or root.kind is not ManagedComponentKind.ROOT:
-            fail("CycloneDxManagedGraph.root_ref", "must identify the root Component")
-        if sum(item.kind is ManagedComponentKind.ROOT for item in self.components) != 1:
+        if root is None or not root.kind.is_root:
+            fail("CycloneDxManagedGraph.root_ref", "must identify the managed root")
+        if sum(item.kind.is_root for item in self.components) != 1:
             fail("CycloneDxManagedGraph.components", "must contain exactly one root")
         if self.edges != tuple(sorted(self.edges)):
             fail("CycloneDxManagedGraph.edges", "must be sorted")

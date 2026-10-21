@@ -32,7 +32,51 @@ def _unique_object(pairs):
     return result
 
 
+def _freebsd_sysctls(*names):
+    output = subprocess.run(
+        ("/sbin/sysctl", "-n", *names),
+        capture_output=True,
+        text=True,
+        timeout=2,
+        check=True,
+    ).stdout
+    values = tuple(int(value) for value in output.split())
+    if len(values) != len(names) or any(value < 0 for value in values):
+        raise ValueError("malformed FreeBSD memory or paging counters")
+    return values
+
+
+def _freebsd_cpu_ticks():
+    output = subprocess.run(
+        ("/sbin/sysctl", "-n", "kern.cp_time"),
+        capture_output=True,
+        text=True,
+        timeout=2,
+        check=True,
+    ).stdout
+    ticks = tuple(int(value) for value in output.split())
+    if len(ticks) != 5 or any(value < 0 for value in ticks):
+        raise ValueError("malformed FreeBSD CPU ticks")
+    return ticks
+
+
+def _freebsd_cpu():
+    try:
+        before = _freebsd_cpu_ticks()
+        time.sleep(0.1)
+        after = _freebsd_cpu_ticks()
+        delta = tuple(end - start for start, end in zip(before, after, strict=True))
+        total = sum(delta)
+        if min(delta) < 0 or total <= 0:
+            return _metric("unavailable")
+        return _metric("measured", round((total - delta[4]) * 10000 / total))
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return _metric("unavailable")
+
+
 def _cpu():
+    if sys.platform.startswith("freebsd"):
+        return _freebsd_cpu()
     try:
         return _metric(
             "measured",
@@ -46,6 +90,16 @@ def _cpu():
 
 def _memory():
     try:
+        if sys.platform.startswith("freebsd"):
+            size, free, inactive = _freebsd_sysctls(
+                "hw.pagesize",
+                "vm.stats.vm.v_free_count",
+                "vm.stats.vm.v_inactive_count",
+            )
+            if size <= 0:
+                return _metric("unavailable")
+            # Conservative reclaimable memory; do not count wired/kernel or ARC.
+            return _metric("measured", (free + inactive) * size)
         if sys.platform.startswith("linux"):
             values = {}
             with open("/proc/meminfo", encoding="utf-8") as stream:
@@ -109,6 +163,16 @@ def _memory():
 
 
 def _paging():
+    if sys.platform.startswith("freebsd"):
+        try:
+            size, pages_in, pages_out = _freebsd_sysctls(
+                "hw.pagesize", "vm.stats.vm.v_swappgsin", "vm.stats.vm.v_swappgsout"
+            )
+            if size <= 0:
+                return None
+            return (pages_in + pages_out) * size, time.monotonic_ns()
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return None
     if not sys.platform.startswith("linux"):
         return None
     try:
@@ -216,9 +280,12 @@ def receive():
             }
             or request["schema"] != REQUEST_PROTOCOL
             or request["os_family"]
-            != {"linux": "linux", "darwin": "macos", "win32": "windows"}.get(
-                sys.platform
-            )
+            != {
+                "linux": "linux",
+                "darwin": "macos",
+                "win32": "windows",
+                "freebsd": "freebsd",
+            }.get("freebsd" if sys.platform.startswith("freebsd") else sys.platform)
             or isinstance(request["sustained_samples"], bool)
             or not isinstance(request["sustained_samples"], int)
             or not 2 <= request["sustained_samples"] <= 32

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import platform
+import shutil
 import tempfile
 import unittest
 from argparse import Namespace
@@ -10,11 +12,13 @@ from types import SimpleNamespace
 from unittest import mock
 
 from literate_ai.adapters.packaging import DirectoryPackageAdapter
+from literate_ai.application.packaging import PackagingError
 from literate_ai.cli.errors import CliFailure
 from literate_ai.cli.package import (
     package_from_args,
 )
 from literate_ai.contracts.executable_components.packages import PackageKind
+from literate_ai.contracts.execution_dispatch import ExecutionWorkerKind
 from tests.support import fixtures_test_package_release_contracts as release_fixtures
 from tests.support.fixtures_test_package_release_contracts import _identity
 
@@ -103,6 +107,116 @@ class PackageCliTests(unittest.TestCase):
     def test_zip_public_plan_build_verify_and_stale_input_refusal(self) -> None:
         self._public_archive_lifecycle("zip")
 
+    @unittest.skipUnless(
+        platform.system().casefold() == "freebsd" and shutil.which("pkg-static"),
+        "requires native FreeBSD pkg-static",
+    )
+    def test_native_pkg_public_batch_plumbing_with_injected_lifecycle(self):
+        self._public_archive_lifecycle("pkg")
+
+    def test_pkg_read_only_plan_does_not_discover_or_execute_native_tools(self):
+        args = self._args()
+        generation = _generation_plan(providers=("pkg",))
+        with (
+            mock.patch(
+                "literate_ai.cli.package.discover_project",
+                return_value=SimpleNamespace(root=Path("/project")),
+            ),
+            mock.patch(
+                "literate_ai.cli.generation.plan_from_args", return_value=generation
+            ),
+            mock.patch(
+                "literate_ai.cli.package.FreeBsdPkgToolBinding.discover"
+            ) as discover,
+        ):
+            result, status = package_from_args(args)
+        self.assertEqual(status, 0)
+        self.assertEqual(result["providers"][0]["value"], "pkg")
+        self.assertFalse(result["execution_authorized"])
+        discover.assert_not_called()
+
+    def test_pkg_rejects_foreign_os_remote_and_unqualified_target_before_native_tools(
+        self,
+    ):
+        for operating_system, kind, target, code in (
+            ("linux", ExecutionWorkerKind.LOCAL, "host", "package.worker_os_mismatch"),
+            (
+                "freebsd",
+                ExecutionWorkerKind.SSH,
+                "host",
+                "package.remote_freebsd_dispatch_unavailable",
+            ),
+            (
+                "freebsd",
+                ExecutionWorkerKind.LOCAL,
+                "cross",
+                "package.freebsd_target_unqualified",
+            ),
+        ):
+            args = self._build_args()
+            args.target = target
+            worker = SimpleNamespace(
+                worker=SimpleNamespace(
+                    kind=kind,
+                    worker_id="fixture-worker",
+                    requirements=SimpleNamespace(os_family=operating_system),
+                )
+            )
+            with (
+                self.subTest(os=operating_system, kind=kind, target=target),
+                mock.patch(
+                    "literate_ai.cli.package.discover_project",
+                    return_value=SimpleNamespace(root=Path("/project")),
+                ),
+                mock.patch(
+                    "literate_ai.cli.generation.plan_from_args",
+                    return_value=_generation_plan(providers=("pkg",)),
+                ),
+                mock.patch(
+                    "literate_ai.cli.execution_workers.select_execution_worker",
+                    return_value=worker,
+                ),
+                mock.patch(
+                    "literate_ai.cli.package.FreeBsdPkgToolBinding.discover"
+                ) as discover,
+                self.assertRaises(CliFailure) as raised,
+            ):
+                package_from_args(args)
+            self.assertEqual(raised.exception.code, code)
+            discover.assert_not_called()
+
+    def test_pkg_missing_native_tool_refuses_before_the_accepted_lifecycle_runs(self):
+        worker = SimpleNamespace(
+            worker=SimpleNamespace(
+                kind=ExecutionWorkerKind.LOCAL,
+                worker_id="fixture-worker",
+                requirements=SimpleNamespace(os_family="freebsd"),
+            )
+        )
+        with (
+            mock.patch(
+                "literate_ai.cli.package.discover_project",
+                return_value=SimpleNamespace(root=Path("/project")),
+            ),
+            mock.patch(
+                "literate_ai.cli.generation.plan_from_args",
+                return_value=_generation_plan(providers=("pkg",)),
+            ),
+            mock.patch(
+                "literate_ai.cli.execution_workers.select_execution_worker",
+                return_value=worker,
+            ),
+            mock.patch(
+                "literate_ai.cli.package.FreeBsdPkgToolBinding.discover",
+                side_effect=PackagingError("missing native tool"),
+            ),
+            mock.patch("literate_ai.cli.rebuild.rebuild_from_args") as rebuild,
+            self.assertRaises(CliFailure) as raised,
+        ):
+            package_from_args(self._build_args())
+        self.assertEqual(raised.exception.code, "package.execution_failed")
+        rebuild.assert_not_called()
+
     def _public_archive_lifecycle(self, provider: str) -> None:
         generation = _generation_plan(providers=(provider,))
         release = release_fixtures.PackageReleaseContractTests()
@@ -128,8 +242,12 @@ class PackageCliTests(unittest.TestCase):
                 path.write_bytes(contents[item.blob.identity])
             object_root = root / "obj"
             object_root.mkdir()
-            source_sbom = b'{"bomFormat":"CycloneDX","lifecycle":"source"}'
-            resolved_sbom = b'{"bomFormat":"CycloneDX","lifecycle":"resolved"}'
+            source_sbom = (
+                b'{"bomFormat":"CycloneDX","lifecycle":"source","components":[]}'
+            )
+            resolved_sbom = (
+                b'{"bomFormat":"CycloneDX","lifecycle":"resolved","components":[]}'
+            )
             build_evidence = SimpleNamespace(
                 identity=_identity("npm-build-evidence"),
                 source_sbom=SimpleNamespace(bom_identity=_identity("npm-source-sbom")),
@@ -218,6 +336,8 @@ class PackageCliTests(unittest.TestCase):
             self.assertEqual(status, 0)
             self.assertEqual(verified["verified"][0]["provider"], provider)
             self.assertFalse(verified["publication_authorized"])
+            if provider == "pkg":
+                self.assertFalse(verified["verified"][0]["lifecycle_admitted"])
 
             stale = {**generation, "input_closure": {"identity": "sha256:" + "f" * 64}}
             with (

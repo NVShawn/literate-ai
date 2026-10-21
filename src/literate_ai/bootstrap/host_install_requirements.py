@@ -531,8 +531,11 @@ def parse_host_install_sbom(
     capability_catalog = catalog or base
     base_names = {item.capability for item in capability_catalog.capabilities}
     unknown = sorted(set(realized) - base_names)
-    required = {item.capability for item in base.capabilities}
+    required = {item.capability for item in base.capabilities if item.group is None}
     missing = sorted(required - set(realized))
+    agents = {item.capability for item in base.coding_agents}
+    if not agents.intersection(realized):
+        missing.append("coding-agent alternative")
     if unknown or missing:
         detail = []
         if unknown:

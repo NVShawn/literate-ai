@@ -801,6 +801,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         accepted_source_provider_identity=accepted_source_provider_identity,
         project_authority_identity=project_authority_identity,
         native_sdk_inputs=prepared.native_sdk_inputs,
+        **({"retained_source": retained_source} if retained_source is not None else {}),
     )
     planning = FilesystemStandardProjectPlanningAdapter(
         coding_cli_selector=lambda: source_generation.generator.selection,

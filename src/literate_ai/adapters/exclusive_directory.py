@@ -31,6 +31,8 @@ def _native_rename(parent: int, source: bytes, destination: bytes) -> None:
         symbol, flag = "renameatx_np", 4  # RENAME_EXCL, Darwin sys/stdio.h
     elif sys.platform.startswith("linux"):
         symbol, flag = "renameat2", 1  # RENAME_NOREPLACE, Linux stdio.h
+    elif sys.platform.startswith("freebsd"):
+        symbol, flag = "renameat2", 1  # AT_RENAME_NOREPLACE, FreeBSD sys/fcntl.h
     else:
         raise OSError(errno.ENOTSUP, "exclusive directory rename unavailable")
     function = getattr(ctypes.CDLL(None, use_errno=True), symbol, None)

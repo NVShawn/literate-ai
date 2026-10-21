@@ -175,7 +175,8 @@ def _invoke(
                     remote_command,
                     timeout,
                     transport=worker.transport,
-                    login_shell=not windows,
+                    login_shell=worker.requirements.os_family
+                    not in {"freebsd", "windows"},
                 ),
                 timeout,
             )
@@ -257,6 +258,12 @@ if command -v nvidia-smi >/dev/null 2>&1; then
   else diagnostic='"nvidia-smi is installed but its device query failed"'; fi
 fi
 printf '{"os_name":"%s","os_version":"%s","architecture":"%s","physical_cores":%s,"logical_cores":%s,"memory_mib":%s,"nvidia_status":"%s","gpus":%s,"diagnostic":%s}\n' "$name" "$version" "$(uname -m)" "$physical" "$(getconf _NPROCESSORS_ONLN)" "$(awk '/^MemTotal:/ {print int($2/1024)}' /proc/meminfo)" "$gpu_status" "$gpu_json" "$diagnostic"'''  # noqa: E501
+
+_FREEBSD_SCRIPT = r'''set -eu
+[ "$(uname -s)" = FreeBSD ] || { echo 'expected FreeBSD worker' >&2; exit 1; }
+architecture=$(uname -m)
+case "$architecture" in amd64) architecture=x86_64;; arm64) architecture=aarch64;; esac
+printf '{"os_name":"FreeBSD","os_version":"%s","architecture":"%s","physical_cores":%s,"logical_cores":%s,"memory_mib":%s,"nvidia_status":"not-applicable","gpus":[],"diagnostic":"FreeBSD GPU probing is not qualified"}\n' "$(freebsd-version -u)" "$architecture" "$(sysctl -n kern.smp.cores)" "$(sysctl -n hw.ncpu)" "$(( $(sysctl -n hw.physmem) / 1048576 ))"'''  # noqa: E501
 
 _MACOS_SCRIPT = r'''set -eu
 gpu=$(system_profiler SPDisplaysDataType -json)
@@ -350,21 +357,27 @@ def _probe_worker_capabilities(
     family = worker.requirements.os_family
     if family is None:
         family = (
-            {"Darwin": "macos", "Linux": "linux", "Windows": "windows"}.get(
-                platform.system()
-            )
+            {
+                "Darwin": "macos",
+                "FreeBSD": "freebsd",
+                "Linux": "linux",
+                "Windows": "windows",
+            }.get(platform.system())
             if worker.kind is ExecutionWorkerKind.LOCAL
             else None
         )
-    if family not in {"linux", "macos", "windows"}:
+    if family not in {"freebsd", "linux", "macos", "windows"}:
         raise WorkerCapabilityProbeError(
             "worker.probe_os_required", "worker probing requires a declared OS family"
         )
     value = _json_probe(
         worker,
-        {"linux": _LINUX_SCRIPT, "macos": _MACOS_SCRIPT, "windows": _WINDOWS_SCRIPT}[
-            family
-        ],
+        {
+            "freebsd": _FREEBSD_SCRIPT,
+            "linux": _LINUX_SCRIPT,
+            "macos": _MACOS_SCRIPT,
+            "windows": _WINDOWS_SCRIPT,
+        }[family],
         runner,
         timeout_seconds,
         family,

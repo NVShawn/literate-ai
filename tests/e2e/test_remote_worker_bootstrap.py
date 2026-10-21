@@ -283,3 +283,164 @@ class RunWithTreeKillTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FreeBSDWheelhouseTests(unittest.TestCase):
+    def test_offline_native_wheels_export_and_tampering_is_rejected(self):
+        from literate_ai.remote_worker_bootstrap import export_worker_wheelhouse
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            source = root / "native"
+            source.mkdir()
+            dependency = source / "native_dep-0.3.0-py3-none-any.whl"
+            _wheel(dependency, name="native-dep")
+            framework = root / "literate_ai-0.3.0-py3-none-any.whl"
+            _wheel(framework, requires_dist=("native-dep==0.3.0",))
+            original = dependency.read_bytes()
+            manifest, identity = export_worker_wheelhouse(
+                framework,
+                root / "export",
+                framework_distribution_identity="sha256:" + "4" * 64,
+                platform="freebsd_16_0_current_amd64",
+                python_version="3.12",
+                implementation="cp",
+                abi="cp312",
+                wheel_directory=source,
+            )
+            value, _identity, _framework = verify_worker_wheelhouse(
+                manifest.parent,
+                manifest,
+                identity,
+                require_host_compatible=False,
+            )
+            self.assertEqual(
+                {w["distribution_name"] for w in value["wheels"]},
+                {"literate-ai", "native-dep"},
+            )
+            self.assertEqual(dependency.read_bytes(), original)
+            self.assertNotIn(str(source), manifest.read_text())
+            copied = manifest.parent / dependency.name
+            copied.write_bytes(copied.read_bytes() + b"changed")
+            with self.assertRaises(WorkerBootstrapError):
+                verify_worker_wheelhouse(
+                    manifest.parent, manifest, identity, require_host_compatible=False
+                )
+
+    def test_offline_source_refuses_urls_before_invoking_pip(self):
+        from literate_ai.remote_worker_bootstrap import export_worker_wheelhouse
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            source = root / "native"
+            source.mkdir()
+            framework = root / "literate_ai-0.3.0-py3-none-any.whl"
+            _wheel(framework)
+            dependency = source / "native_dep-0.3.0-py3-none-any.whl"
+            _wheel(
+                dependency,
+                name="native-dep",
+                requires_dist=("other @ https://example.invalid/other.whl",),
+            )
+            with patch(
+                "literate_ai.remote_worker_bootstrap._wheelhouse_downloader"
+            ) as downloader:
+                with self.assertRaises(WorkerBootstrapError) as caught:
+                    export_worker_wheelhouse(
+                        framework,
+                        root / "export",
+                        framework_distribution_identity="sha256:" + "4" * 64,
+                        wheel_directory=source,
+                    )
+            downloader.assert_not_called()
+            self.assertEqual(
+                caught.exception.code, "worker.wheelhouse_requirement_invalid"
+            )
+            self.assertFalse((root / "export").exists())
+
+    def test_foreign_kernel_markers_cannot_silently_omit_a_dependency(self):
+        from literate_ai.remote_worker_bootstrap import _close_target_requirements
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            framework = root / "literate_ai-0.3.0-py3-none-any.whl"
+            _wheel(framework, requires_dist=('native-dep; platform_release == "16.0"',))
+            with (
+                patch("sys.platform", "darwin"),
+                patch(
+                    "literate_ai.remote_worker_bootstrap._download_wheels"
+                ) as download,
+            ):
+                with self.assertRaises(WorkerBootstrapError) as caught:
+                    _close_target_requirements(
+                        root,
+                        downloader=("unused",),
+                        framework_name=framework.name,
+                        platform="freebsd_16_0_current_amd64",
+                        python_version="3.12",
+                        implementation="cp",
+                        abi="cp312",
+                    )
+            self.assertEqual(caught.exception.code, "worker.wheelhouse_marker_unproven")
+            download.assert_not_called()
+
+    def test_freebsd_host_tags_and_dependency_markers_do_not_become_linux(self):
+        from literate_ai.remote_worker_bootstrap import (
+            _host_target_compatible,
+            _target_marker_environment,
+        )
+
+        target = {
+            "python_version": None,
+            "implementation": None,
+            "abi": None,
+            "platform": "freebsd_16_0_current_amd64",
+        }
+        with (
+            patch("os.name", "posix"),
+            patch("sys.platform", "freebsd16"),
+            patch("sysconfig.get_platform", return_value="freebsd-16.0-CURRENT-amd64"),
+        ):
+            self.assertTrue(_host_target_compatible(target))
+            self.assertFalse(
+                _host_target_compatible({**target, "platform": "manylinux_2_17_x86_64"})
+            )
+            self.assertFalse(
+                _host_target_compatible({**target, "platform": "freebsd_15_0_amd64"})
+            )
+        environment = _target_marker_environment(
+            platform=target["platform"], python_version="3.12", implementation="cp"
+        )
+        self.assertEqual(environment["sys_platform"], "freebsd16")
+        self.assertEqual(environment["platform_system"], "FreeBSD")
+        self.assertEqual(environment["platform_machine"], "amd64")
+        with self.assertRaises(WorkerBootstrapError):
+            _target_marker_environment(
+                platform="unknown_amd64", python_version=None, implementation=None
+            )
+
+
+@unittest.skipIf(os.name == "nt", "POSIX symlink source refusal")
+class OfflineWheelLinkTests(unittest.TestCase):
+    def test_redirected_native_wheel_is_rejected_before_resolver(self):
+        from literate_ai.remote_worker_bootstrap import export_worker_wheelhouse
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            source = root / "native"
+            source.mkdir()
+            framework = root / "literate_ai-0.3.0-py3-none-any.whl"
+            _wheel(framework)
+            (source / framework.name).symlink_to(framework)
+            with patch(
+                "literate_ai.remote_worker_bootstrap._wheelhouse_downloader"
+            ) as downloader:
+                with self.assertRaises(WorkerBootstrapError):
+                    export_worker_wheelhouse(
+                        framework,
+                        root / "export",
+                        framework_distribution_identity="sha256:" + "4" * 64,
+                        wheel_directory=source,
+                    )
+            downloader.assert_not_called()
+            self.assertFalse((root / "export").exists())

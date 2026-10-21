@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Any
 
 from literate_ai._filesystem import path_is_link_or_reparse
-from literate_ai.adapters.retained_project_planning import plan_retained_project
+from literate_ai.adapters.retained_project_planning import (
+    plan_retained_project_with_graph,
+)
 from literate_ai.contracts.retained_project import RetainedProjectManifest
 from literate_ai.contracts.retained_project_lifecycle import RetainedProjectProfile
 
@@ -61,7 +63,7 @@ def retained_project_from_args(
         worker = select_execution_worker(
             args, project_root=project.root, target_profile=args.target
         )
-        plan = plan_retained_project(
+        planning = plan_retained_project_with_graph(
             project,
             binding,
             manifest,
@@ -71,13 +73,9 @@ def retained_project_from_args(
             profile_path=profile_path,
             profile_bytes=profile_bytes,
         )
+        plan = planning.plan
         if args.retained_project_plan:
-            return {
-                "plan": plan.to_dict(),
-                "authorization_identity": plan.identity.uri,
-                "admitted": False,
-                "release_authority": "original-source",
-            }
+            return planning.to_dict()
         plan.require_authorization(args.authorize_retained_project)
         # The planning slice grants no execution/acceptance shortcut while the
         # typed Standard runtime and receipt consumer are being qualified.

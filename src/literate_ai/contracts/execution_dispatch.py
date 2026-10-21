@@ -74,7 +74,7 @@ _SSH_ENDPOINT = re.compile(
 _WORKSPACE = re.compile(r"^(?:~/|/)[A-Za-z0-9._/-]+$")
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 _GIT_REVISION = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
-_OS_FAMILIES = frozenset({"linux", "macos", "windows"})
+_OS_FAMILIES = frozenset({"freebsd", "linux", "macos", "windows"})
 _REQUEST_FILE_PLACEHOLDER = "{request_file}"
 
 
@@ -495,7 +495,10 @@ class ExecutionRequirements:
 
     def __post_init__(self) -> None:
         if self.os_family is not None and self.os_family not in _OS_FAMILIES:
-            fail("ExecutionRequirements.os_family", "must be linux, macos, or windows")
+            fail(
+                "ExecutionRequirements.os_family",
+                "must be freebsd, linux, macos, or windows",
+            )
         for value, path in (
             (self.os_version, "ExecutionRequirements.os_version"),
             (self.cpu_architecture, "ExecutionRequirements.cpu_architecture"),
@@ -1578,7 +1581,7 @@ class ObservedExecutionEnvironment:
         if self.os_family not in _OS_FAMILIES:
             fail(
                 "ObservedExecutionEnvironment.os_family",
-                "must be linux, macos, or windows",
+                "must be freebsd, linux, macos, or windows",
             )
         _value(self.os_version, "ObservedExecutionEnvironment.os_version")
         _value(self.cpu_architecture, "ObservedExecutionEnvironment.cpu_architecture")

@@ -11,7 +11,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from dataclasses import fields, replace
@@ -62,8 +61,9 @@ from tests.support.fixtures_test_standard_command_projection import (
     _locked_snapshot,
     _observation,
 )
+from tests.support.host_platform import host_os_family
 
-HOST = {"darwin": "macos", "win32": "windows"}.get(sys.platform, "linux")
+HOST = host_os_family()
 _HARNESS = b"""[artifact, surface_json, cases_json] = System.argv()
 artifact = Path.expand(artifact)
 surface = JSON.decode!(surface_json)

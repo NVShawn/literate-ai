@@ -25834,14 +25834,44 @@ repository-owned default branch. Full 1.2 qualification and release remain open.
 
 ### [ ] RETAINED-PROJECT-001 — Admit retained projects through explicit Standard lifecycle authority
 
+Upstream: [issue #22](https://github.com/jordanhubbard/literate-ai/issues/22), reopened after checking the public handler on current main.
+
 - **Priority:** P0
 - **Owner:** framework lifecycle, retained custody, package and release verification
 - **Direction:** Implement accepted ADR 0048 after explicit directing-human acceptance on 2026-10-02.
 - **Conclusion:** Preserve original source and release authority while adding typed bounded retained admission and complete Standard execution; no conversion bypass.
 - **Depends on:** Accepted ADR 0048; package providers retain their own qualification
+- **Windows qualification follow-up:** Merged-main CI run `39442421907` exposes
+  simulated dependency/BOM tools whose extensionless filenames lose executable
+  mode on Windows, relocated Python executables without their runtime home, and
+  POSIX loader-path assertions masked by the Windows unsupported-loader guard.
+  Use executable filenames for simulated tools, real venv redirectors for isolated
+  interpreter discovery, and native path comparison for PATHEXT casing. Exercise
+  POSIX path validation explicitly while preserving Windows loader refusal.
+  Retain genuine manifests, byte hashes, custody guards and version/order/pin
+  assertions; qualify the four affected modules without changing production rules
+  or adding skips. All 33 affected host cases pass across completed module runs,
+  including a fresh seven-case interpreter rerun. Static reviews, current receipt
+  and verification pass. Initial native Windows evidence passes all 16 custody
+  cases with five existing POSIX skips, plus three loader cases with two existing
+  POSIX skips. The collected custody archive SHA-256 is
+  `de6a76346b9c0b5705de044768f0f0f3f70cea3c7f3f83ddb1f5ca814a7bb14a`.
+  Final exact-source native qualification and CI remain open.
+- **Separate Windows receiver blocker:** [Issue #90](https://github.com/jordanhubbard/literate-ai/issues/90)
+  owns the actual PE dependency-observation timeout. A native rerun passes nine
+  toolchain cases before this receiver fails its separate 300-second production
+  observation limit. Preparing the catalog before admission does not fix that
+  bound; withdraw that unproven test change and preserve the actual receiver
+  test. Trace and qualify the native observer independently, retaining cold-start
+  custody, current image/inspector hashes and live-profile invalidation. Do not
+  increase deadlines or claim the fixture repair makes main release-qualified.
 - **Implementation:**
   - [ ] Define streaming manifest, locked plan, authority mode and retained receipt contracts
   - [ ] Integrate read-only planning and authorized Standard build, complete tests and docs through existing execution owners
+    - [x] Bind opt-in command-search directories to declared build exports so
+      original tests can invoke newly built products by name without inheriting
+      host PATH. Preserve default profile identities; reject undeclared,
+      redirected or non-directory selections and qualify actual subprocess lookup.
   - [ ] Bind package and release custody to retained origin without conversion advancement
 - **Evidence:**
   - [ ] Public installed CLI mixed source and binary fixture passes complete build, test, docs and deterministic package lifecycle with repeat, invalidation and relocation checks
@@ -25854,9 +25884,296 @@ record, worker/target, SDK/toolchain/dependency closure and original policy inpu
 `make python-check` passes 23 retained input/planning tests and 33 existing rebuild
 CLI regressions. Execution still fails closed: typed retained runtime/receipt, SBOM,
 package and release consumers and full installed-CLI qualification remain open.
-**Next action:** integrate a distinct retained-origin entry into the existing Standard
-lifecycle owners and share common post-admission gates; do not fabricate generated
-source, generated tests, cache membership or an ordinary regenerative receipt.
+Current execution audit: both current main and this branch still validate plan
+authorization and then unconditionally raise
+`retained_project.execution_not_qualified` in `cli/retained_project.py`. Issue #22
+was reopened to match that verified state. FreeBSD receiver/bootstrap qualification
+does not close this runtime requirement or transfer retained release authority.
+
+Built-product lookup checkpoint: nine local environment checks pass, including
+an actual subprocess that finds a newly exported executable by name and fails
+without the explicit selection. Four new checks cover identity/producer/path
+refusals and lookup behavior. Caller PATH stays outside the target environment;
+host native inspectors retain their separate discovery context. Native,
+installed/public execution and original-source test qualification remain open.
+The full local regression passes 1,809 tests with 42 skips (1,851 selected) in
+682.902 seconds, including the new lookup checks. Its log SHA-256 is
+`4f02307799e89cd624473fc4ac51f0441803faec4e7639b1f0c67204ddbce909`;
+the report SHA-256 is
+`7e9295bab9ad4c46078567af2cfb49380006df3161d4c31d438c9c9707c44b44`.
+Lint, formatting, layout/export, TCB pins and strict OpenSpec checks also pass.
+This renews the local lookup checkpoint, not native or installed qualification.
+
+**Next action in progress:** connect local retained admission to the existing
+native FreeBSD pkg provider without changing existing ZIP wire identities. Bind a
+packaging Flavor actually selected by a current Component lock, exact accepted
+payload, authored specifications, both BOMs and retained receipt evidence. Reuse
+the provider's construction and independent native inspection; never place a
+retained project identity in a generated Component revision field. Qualify repeat,
+relocation, stale authority, resource collision and rehashed archive tampering.
+The ZIP backend slice below is complete at its recorded scope. Native pkg
+composition, bounded whole-system scale, installed CLI and release integration
+remain open; no publication grant is added. A native-format result or decoded
+receipt must never replace live retained admission or per-unit package evidence.
+
+Retained pkg backend checkpoint: live custody now delegates native construction
+and inspection to the existing provider, with an exact selected pkg Flavor lock,
+accepted payload/specifications, both BOMs and complete receipt/run records.
+The native projection and tool metadata are retained in CAS and required during
+reinspection. Existing ZIP wire identities are preserved. Four portable retained
+pkg checks pass (five selected, one actual-native case skipped); all eight ZIP
+package checks pass, and 21 portable native format/ELF checks pass (24 selected,
+three native construction cases skipped). Actual native retained construction,
+the full current regression, installed/public lifecycle and per-unit source/ports
+execution remain unqualified. The native retained test must prove repeatable
+construction, reopened payload execution and missing-projection refusal without
+mocking native tools before this backend can receive native qualification.
+
+Archive checkpoint: all 117 retained-project checks pass locally in 464.220
+seconds, including eight actual archive cases. They prove read-only planning,
+byte-identical repeat construction, executable payload preservation, complete
+retained run records/specifications/BOMs, scratch retirement/CAS relocation,
+stale authority and rehashed archive tamper rejection. Empty selected payload
+directories refuse rather than being silently dropped by the file-only ZIP
+provider. The existing package-provider group also passes 47 checks before the
+final run-record/empty-directory additions. Lint/format, authority validation,
+driver/documentation review, OpenSpec and documentation checks pass. Native,
+installed/public CLI, release and whole-system scale qualification remain open.
+At exact archive/receipt revision
+`f2f3c3ba0a764d72d87542f886a639f6db7c5447`, all 117 retained-project tests
+also pass on actual FreeBSD without skips in 3,887.772 seconds. The native log
+SHA-256 is
+`d30ee2356f4cf5dc89dedb2b1ac08c15837e7f0b4b69b66f64a9b09d4247356a`.
+This renews native receipt, payload materialization, ZIP archive and SDK custody
+coverage at that revision. It does not qualify later native pkg/public CLI
+changes, the installed wheel or complete source/ports unit execution.
+At exact receipt-integration revision `cdd7379225496c2fb4d311e4eab72598e262e623`,
+the full Python suite passes 1,752 tests with 37 declared skips in 3,734.087
+seconds. Its log SHA-256 is
+`972479448ccad40736528806d1c6352620954703c844d567a54f943e59a8d425`.
+This baseline excludes the later archive/native-pkg and incoming main-line changes.
+The reconciled revision `bd5d77764ab094d549fb729cb8d72b3a4c0617d7` passes
+the complete Python suite: 1,795 tests with 40 declared skips in 1,027.566 seconds,
+using four isolated module workers. Its log SHA-256 is
+`b76f369c354a95495857f561ea0480de605f95165413163e7315585c6032faae`.
+This includes the native pkg/public-dispatch foundation and incoming main-line
+changes; it excludes the subsequent extended-tar-metadata correction and does
+not substitute for native construction or installed-wheel qualification.
+At `ace6e5402683dba4120c5da8e6fb3fbc621516aa`, the full Python suite passes
+1,797 tests with 40 declared skips in 1,054.891 seconds, including the extended
+tar-metadata correction. Its log SHA-256 is
+`51c611509b6432db64566d06fcd177d9234435b251087d6978eed007adc8b9a6`.
+This baseline precedes the native owner/timestamp correction and independent ELF
+library metadata reader; those retain their own native/full/installed gates.
+Local receipt checkpoint: all 109 retained-project tests pass in 373.215 seconds,
+including ten receipt cases and the source-link execution regression. Actual
+compiled exports survive scratch retirement and CAS relocation; stale authority,
+corrupt payloads, missing SDK records and existing destination collisions refuse.
+Lint/format, project authority, driver/documentation review, OpenSpec and the full
+documentation gate pass. This establishes local admission and exact payload
+materialization only. Full-suite, native and installed qualification, native
+package construction and public package/release consumers remain open.
+The source-link receipt fixture exposed a runtime gap: the native observer still
+walks and rejects approved source symlinks. Project the complete verified manifest
+onto its regular native files through the existing explicit selection interface;
+retain link text/target validation and default unselected-tree refusal. Explicit
+data-only native selections must remain empty rather than traversing links.
+
+The SDK join now binds the complete selected lock/product/file/mode closure to
+captured inputs, reuses existing producer materialization and native inspection,
+and delegates per-command and verifier grants plus live revocation checks to
+the existing SDK execution owner. Source resolutions flow into the resolved BOM;
+completion retains fresh checks of the most recent verifier grants. SDK-bound
+BOM execution rejects missing producer owners before target commands run.
+All 98 local retained-project checks pass (243.802 seconds), including seven new
+SDK policy/execution cases with a real compiled SDK and its transitive library.
+At exact revision `015582a0740550d73fcf4577f6ca54b741c6e68d`, all 98 also pass
+on actual FreeBSD without skips in 1,907.301 seconds. The native log SHA-256 is
+`ca4260601e3d6c4628d7449adb9188ad994fd6513601cb3dbe97ec7a3900194f`.
+This qualifies the SDK checkpoint, not later receipt/package changes.
+Both existing SDK execution regressions pass (38.770 seconds). The initial focused
+run also passed seven existing producer checks. Lint/format, authority/driver
+review, both OpenSpec changes, all 121 diagrams and 21 documentation-tool tests
+pass. The configured lifecycle receipt remains stale. Native/installed/full-suite
+qualification and distinct retained receipt/package consumers remain open.
+
+The completed-run boundary now joins the full ordered command transcript, original
+test policy and reports, independent cases, both BOMs and sealed final exports.
+It revalidates live custody and final native dependency observations; partial or
+failed runs, mixed observations and missing package members refuse. Nested exports
+retain canonical producer roots while package selection may name their parent
+directory. All 91 local retained-project checks pass (116.818 seconds), including
+nine completed-run cases with real compiled exports. Lint/format, authority/driver
+review, both OpenSpec changes, all 121 diagrams and 21 documentation-tool checks
+pass. Native and full-suite qualification remain open. The joined record is not
+SDK admission, a lifecycle receipt, package acceptance or public execution authority.
+
+Source/resolved BOM integration in progress: project exact retained input and
+SDK/dependency-file declarations through the existing retained managed graph and
+CycloneDX owners before execution, then bind actual frozen tool and export-native
+observations after the complete build and before tests. Preserve original origin,
+input/output manifests and policy identities; reject forged graphs, stale or
+substituted documents and native observation conflicts. This gate does not itself
+admit SDK producers, qualify a retained receipt or enable public execution.
+Thirteen focused BOM checks pass locally, including actual compiled-fixture
+build exports and data-only exports resolved before tests. The complete retained
+regression group now passes 82 checks (62.963 seconds).
+Native and installed qualification of this new bridge remain open.
+
+
+Independent acceptance implementation: add an explicit opt-in verifier policy
+whose exact bytes and selected Component locks are bound to the retained plan.
+Keep it outside the materialized retained inputs. Run bounded cases against sealed
+build exports, checking exact exit/stdout/stderr and current input/output/native
+dependency custody. Reject stale policies, missing cases and substituted outputs.
+Legacy profile identities and the public execution refusal remain unchanged;
+SDK/BOM admission, retained receipts, package and release consumers remain open.
+The local canonical retained-project group passes 68 checks. Fourteen current
+focused acceptance checks pass, including a retained build/test/docs command
+sequence followed by execution of its compiled native fixture export, exact
+binary stdin/stdout, expected nonzero exits, bounded output and failed-result
+custody. This is internal gate coverage; full-suite, installed-wheel and native
+qualification remain required.
+
+
+
+Execution work in progress: add an isolated retained command workspace using the
+existing streaming snapshot, Standard tool binding and bounded process owners.
+Every action must use the reviewed graph and captured tool, recheck current plan
+and original/snapshot inputs, and retain exact command/output observations. These
+observations are not acceptance receipts: SBOM, independent acceptance, package,
+public CLI and release consumers must still be integrated before execution can
+qualify. No conversion record or ordinary generated-source membership may change.
+The canonical local retained-project group passes 16 tests. A compiled fixture
+actually runs the complete declared command graph; failed tests, stale plans,
+source/snapshot mutations, substituted tools, undeclared/missing/redirected
+exports, sealed-export mutation, output overflow and incomplete profiles refuse.
+This is command-owner evidence only, not an installed public lifecycle receipt.
+At revision `92b56bf5`, the same 16-test group also passes on actual FreeBSD,
+including compilation and execution of the captured native fixture. The native
+log SHA-256 is `59a98595401b8de649db3b1ec785951cd99bb1b4dd2bc55b5d9ad70d54a05bc7`.
+The five current CLI rebuild regressions pass locally. Public retained execution
+remains closed pending the existing SBOM/acceptance/receipt consumers.
+
+Current integration audit: action labels and zero exit codes do not prove a
+complete original test inventory. The next required runtime gate binds a typed
+reviewed case/skip policy to the project's configured receipt policy, exact test
+actions and sealed report outputs. Planning must reject an unrelated policy or
+an incomplete action inventory; execution must reject missing/extra/duplicate
+cases, failed outcomes, unauthorized skips and insufficient actual passes before
+independent acceptance. Reuse streaming input/output custody and the existing
+retained-case validator. A baseline exception cannot become a passing result.
+Qualify real compiled command execution and failed-report refusal, then continue
+the separate native SDK/SBOM, independent acceptance, retained receipt, package
+and release consumers before removing the public execution guard.
+
+The integrated case gate passes 28 local retained-project checks, including actual
+compiled command execution, zero-exit invalid reports and an all-permitted-skips
+report that cannot satisfy the configured minimum. Existing retained Cargo test
+execution (2) and CLI rebuild (5) checks pass. The retained-project log SHA-256 is
+`4fc8ca009b891766183b60916302860a7148f55629c6f2817b75a7d970e71663`.
+Policies and reports use bounded streaming custody and duplicate-key rejection;
+verified case observations bind their actual command and report bytes. These
+checks qualify this internal gate locally, not the complete public lifecycle.
+
+Release-authority audit: retained planning currently accepts any single hashed
+`release-policy` member, even when it is unrelated to the policy consumed by
+`litai release`. The next implementation action in progress binds that role to
+the canonical configured release-policy path and its current typed policy,
+including repository-branch consistency. Reuse bounded streamed metadata custody;
+reject duplicate JSON keys, stale bytes, alternate paths and policy substitutions.
+This is a prerequisite to retained-origin receipt/publication integration, not
+permission to publish or advance conversion authority.
+
+The release-policy correction and shared metadata reader pass all 36 local
+retained-project checks without skips, including compiled commands and the
+existing test report/skip refusal cases. The log SHA-256 is
+`a6ee25e110d2ae4253e979057e6ab7afb7ffa40639d389aefa3abffbe59a0afa`.
+Native qualification of this revision and full retained lifecycle integration
+remain required.
+
+SBOM integration is the next implementation action in progress. Existing managed
+CycloneDX graphs require a Component root; inserting a project/manifest digest as
+a Component revision would misstate provenance. Add a distinct retained-project
+root kind and binding property, derive its identity from the reviewed retained
+plan, and merge every current Component-lock graph without changing dependency
+identities. Reuse the existing CycloneDX builder/verifier and its source-to-resolved
+transition checks. Qualify retained-origin/ordinary-origin separation, exact lock
+coverage, overlapping-graph consistency and forged managed claims. This graph
+foundation does not prove native tool/SDK closure, independent acceptance or a
+release receipt; those runtime integrations remain mandatory.
+
+The distinct-root graph passes seven focused checks, including exact lock closure,
+overlap merging/conflict refusal, schema roundtrip, source/resolved transition and
+ordinary-origin/forged-claim refusal. Its log SHA-256 is
+`0b7ac5c4d203eb985ba7a4dea1a23f4808d4a3ea4918683b8b5d81ea1cd1cc1b`.
+Existing CycloneDX checks (2), dependency lifecycle checks (4) and schema catalog
+checks (2) pass. Full runtime SBOM observation/custody remains open.
+
+The next integration action in progress connects this graph to actual filesystem
+planning. Extend the existing current-lock owner to expose its verified immutable
+lock objects while preserving the identity-only API and catalog-selection rules.
+Derive the retained planning result's managed graph from exactly those locks and
+the reviewed plan, and expose it through the read-only public planning response.
+Keep current-authority revalidation and the unqualified execution refusal. Test
+real lock loading/staleness and graph/result origin consistency; a graph response
+does not issue source/resolved runtime evidence or a receipt.
+The bridge passes six current-lock/planning checks, all 46 retained-project checks
+and five CLI rebuild regressions. Actual catalog/lock reads reject stale persisted
+inputs and retain unselected catalog behavior; the positive planning fixture uses
+explicit unit-test validation/conversion/distribution authority and issues no
+receipt. Current-lock and retained-group log SHA-256 values are
+`036806237ddfa2a12ae7f7225f3e003cb008224f5fa18c4414db9d68579abf02`
+and `99a97e57211a7cf809aa346daee87f5504516316c7f371b7a25998f34d023783`.
+Installed public whole-project and runtime SBOM qualification remain required.
+
+Next runtime integration: bind the retained workspace's captured tools to the
+existing native SDK/toolchain and recursive dependency-observation owners before
+source/resolved BOM admission. Current role-closure hashes and executable byte
+guards identify reviewed inputs; they do not yet qualify a native SDK or prove a
+complete compiler/runtime closure. Observe the actual effective command
+environment, preserve original binary inputs and distinct retained origin, and
+share existing SBOM/independent acceptance/receipt/package gates without inventing
+a regenerative execution plan or generated-source wrapper. The public execution
+refusal must remain until those integrations and installed mixed-project evidence
+pass.
+
+Native dependency observation is the implementation action in progress. The
+internal workspace currently guards captured executable bytes but never observes
+the libraries those commands actually load. Reuse PortableHostDependencyObserver
+over exact captured SDK/toolchain/dependency members and tool commands, with
+loader controls derived from the sanitized command environment, not the caller.
+Freeze the observation as canonical bytes, reobserve around each command, reject
+drift before retaining success, and bind its identity to every command record.
+Qualify actual compiled command execution and simulated dependency mutation,
+malformed graphs, ambient loader injection and mutable-observation refusal.
+This runtime drift gate does not itself admit SDK products, original-language
+dependency declarations, independent acceptance or a release receipt; those
+remain required before opening public retained execution.
+
+The implemented gate passes seven focused observation/refusal checks and all
+55 local retained-project checks, including compiled commands and dependency
+mutation before execution and after a real zero exit. All five CLI rebuild
+regressions pass. The final retained-group log SHA-256 is
+`e99ca19a687467bef93103217337ab551bce7a93ebff8762921f44afeb743eb6`;
+the CLI regression log SHA-256 is
+`0c419a01d33d77f0b76711b8b2dd826ed65d63f3139ad8dda618b3acb8193a29`.
+Original SDK admission and public retained execution remain open. A local snapshot replay attempt correctly rejected source drift
+after a command-observation identity edit during that test. Repeat it from a
+frozen checkout; this rejected attempt supplies no replay qualification.
+
+The frozen `01285c9b` correction passes all three local snapshot checks in
+531.896 seconds, including repeated clean replay. Its log SHA-256 is
+`efc0354f5cb151ab2b4baa08f083d02c14706824cce9fca28e67e6460f3221e3`.
+Installed-wheel qualification passes from that same unchanged checkout; wheel
+identity is `sha256:22d78d4992a9e7112679d17f0d28f1169aa84581db88b55e36d392034a88bdd7`
+and qualified manifest identity is
+`sha256:3d9e2343fe36961baf9138052ed368d551a4cccad8942958a3c34e545ced13d1`.
+Native renewal and a separate frozen full local suite remain in progress.
+Next admission work must bind producer-backed SDK inputs from the current locks,
+observe sealed build exports and integrate source/resolved BOM custody before
+independent acceptance and retained-origin receipts. Input observation alone
+does not establish those boundaries; public retained execution remains closed.
 
 ### [ ] PACKAGE-ZIP-001 — Expose deterministic ZIP packaging through the standard lifecycle
 
@@ -27694,6 +28011,583 @@ alone. Measured on real workers: first full sync 30 s (windows-11); re-sync of a
 unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 2.4 s and 11.3 s.
 
+### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
+
+Current native renewal at `d833ebd0` stopped after 232 tests (one error, 26
+skips) because the real SSH-receiver fixture exhausted its capability deadline.
+An isolated rerun reproduced the same 60-second failure. Receiver import and
+code hashing complete independently; even `bash -lic true` hangs on this native
+host. Select direct literal SSH invocation for explicit FreeBSD action workers
+and make the real receiver fixture declare its actual host. Preserve existing
+Linux/macOS login-path behavior, request bytes and deadline/cleanup gates; renew
+the actual native fixture and complete suite before claiming qualification.
+Four local SSH checks now pass in 3.350 seconds, including real receiver
+capability, dispatch and indexing through the FreeBSD native-shell seam, literal
+special-character arguments and workspace cleanup. This is controller-host
+transport evidence; actual FreeBSD renewal remains pending.
+
+Installed-wheel qualification correction: production initialization explicitly
+selects the FreeBSD OS Flavor, but the wheel smoke comparator still defaults to
+Linux outside macOS/Windows. Correct the comparator, cover FreeBSD versioned
+platform names and preserve existing platform expectations, then execute the
+actual native installed-wheel gate. This does not qualify retained lifecycle
+receipts or release publication.
+
+Native installed HTML verification at `8f572841` exceeded the 300-second
+per-command harness deadline after two full gate passes. Captured passes took
+about 123 seconds each, with authority and lock checks making steady progress;
+the worker retained ample resources. Give FreeBSD the same finite 900-second
+installed-command budget already used on Windows, retain diagnostic tails and
+qualify the new exact wheel. The failed run remains failure evidence.
+
+
+- **GitHub issue:** [#67](https://github.com/jordanhubbard/literate-ai/issues/67)
+- **Priority:** P1
+- **Owner:** OS Flavor, worker contracts, host tooling and native lifecycle
+- **Direction:** Support FreeBSD as an explicit native execution platform, including remote or virtualized workers, without mislabeling it as Linux.
+- **Conclusion:** Implement platform identity end to end, including registration, realization, probes, health, execution, package and acceptance custody. Existing platform regressions and real native proof are required.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Add FreeBSD OS and target contracts and Flavor; implement CLI registration, probing, paths, toolchains and alignment; support native storage and pressure checks; qualify isolated build/test/artifact and retained lifecycle execution.
+  - [ ] Add a real FreeBSD pkg provider with exact selected target ABI, explicit dependency coordinates, payload/ownership/mode projection, bound native tool and independent metadata/content/checksum inspection. Prove actual construction and package-tool inspection on FreeBSD before public qualification.
+- **Evidence:**
+  - [ ] Real FreeBSD SSH registration and alignment pass; native build/test and failed-input/test rejection are retained; cleanup is bounded; existing Linux/macOS/Windows suites pass; exact installed wheel and CI qualify the change.
+
+Native package implementation in progress: project accepted files and both BOMs
+through a FreeBSD-specific provider, bind the static native pkg executable and
+ABI, construct only in isolated staging without installing, and independently
+inspect the resulting native archive. Retain original source/Component authority;
+reject missing dependency coordinates, hooks, extra files, ownership/mode drift
+and rehashed manifest/payload substitutions. Native pkg format inspection follows
+the selected tool version's upstream contracts, including its actual file-checksum
+encoding. Retained-provider/public CLI composition and per-unit source/ports
+qualification remain separate required integrations.
+Format references are the selected pkg 2.8.4
+[file-checksum implementation](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_checksum.c),
+[native manifest emitter](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_manifest.c)
+and [package construction owner](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_create.c).
+Ten portable checks pass, including bound-plan/result substitution, rehashed
+payload/metadata/native-checksum changes, owner/mode drift, hooks, duplicate/extra
+members and trailing tar/XZ data. Both actual native construction cases remain
+unexecuted on this macOS host; the dedicated FreeBSD slot is still qualifying the
+earlier retained receipt/archive revision. No native pkg pass is inferred.
+The package-provider regression group passes 58 checks (two explicit native-only
+skips) before the final executable-mode/tool-drift additions. Native construction,
+full-current-revision regression, installed and public-dispatch qualification
+remain open. Keep this development provider out of qualification claims until
+the actual FreeBSD construction/query/payload cases execute successfully.
+All 14 initialization checks also pass with the new provider authority and bundled
+template. Public/provider composition must reopen current accepted lifecycle
+custody; parsed batch/plan/result assertions alone must not supply admission.
+Next public integration in progress: select pkg through its actual Flavor,
+preflight the native tool before rebuilding, and delegate construction to the
+existing accepted-lifecycle observer with both BOMs. Scope initial construction
+to a local native host target; refuse remote package dispatch and named/cross
+targets until separately qualified. Verification inspects the bound plan and
+native bytes without granting publication or reconstructing lifecycle admission
+from batch JSON. Native and installed public-path evidence remain mandatory.
+The public CLI group passes seven checks (one explicit native-only skip), and
+the package-provider group passes 64 checks (three native-only skips). A further
+optional-codec regression proves ordinary CLI import works without lzma while
+native inspection refuses without it. The final native-format group passes 13
+checks with its two explicit native-only skips. Native/public installed execution
+remains unqualified until those cases run on FreeBSD.
+
+Native package inspection follow-up: reject unplanned extended tar
+attributes, including ACLs, file flags and extended attributes. Python's tar
+reader exposes these separately from normal ownership/mode fields, so checking
+only those fields can admit metadata outside the accepted projection. Preserve
+bounded standard PAX encodings only when they reproduce the exact accepted
+member fields. The regression first reproduced acceptance of an unplanned file
+flag after rewriting the outer package digest. After correction, thirteen
+portable format checks pass (15 selected tests with two native-only skips),
+including ACL/file-flag/xattr refusal and accepted standard PAX encodings. Actual
+native format compatibility remains part of the pending FreeBSD construction
+gate.
+
+Native construction at `2152af97` fails its first actual package inspection;
+the dependent public CLI group therefore did not run. A separately retained
+diagnostic archive (SHA-256
+`bacd265e033efe95df4559b05dd6a3fff428e517a834ab11a754dc5bf88a2ff1`)
+matches pkg 2.8.4's source: metadata entries have zero timestamps and numeric
+root ownership, while payload entries use fixed numeric IDs 65534 with mandatory
+root/wheel names. Installation resolves those names. Correct that precise
+encoding rather than accepting arbitrary numeric IDs or absent names. The tool
+also emits `shlibs_required` from the real dynamic binary; preserve refusal until
+independent accepted-payload inspection binds the exact native library metadata.
+No positive native package qualification is claimed.
+The native failure log SHA-256 is
+`00627918c6120c0caa9f08e4e0f45f3ba9768de3a097077d515a6ad46d02c355`.
+Fourteen portable format checks now pass (16 selected tests, two native-only
+skips), including mandatory root/wheel names and exact fixed-ID/timestamp
+refusal. Driver/documentation review, lint/format, layout/export, OpenSpec and
+the full documentation gate pass. Renew actual native construction after
+binding the shared-library metadata; do not claim this encoding correction
+alone qualifies the provider.
+The relevant native
+[packing](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/packing.c),
+[installation](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_add.c)
+and [ELF analysis](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_elf.c)
+owners define those semantics.
+
+Shared-library metadata binding is now in progress: inspect bounded accepted
+ELF64 payload sections without execution or extraction, validate the selected
+FreeBSD architecture, and derive exact DT_NEEDED/DT_SONAME inventories. Compare
+both native manifests against those inventories, excluding libraries supplied
+inside the same package. Reject malformed or unsupported ELF authority and
+extra/missing/rehashed library metadata. Native executable and shared-library
+construction must qualify this independent reader; this is format/dependency
+metadata verification, not a substitute for retained lifecycle admission.
+Twenty-one portable checks pass (24 selected tests with three native-only
+skips), including hostile ELF offsets/counts, truncation, target drift,
+termination/SONAME ambiguity and rehashed native library substitutions. The
+reader also independently matches all seven checksums and the exact libc
+requirement in the retained actual native diagnostic archive; that read does
+not replace actual construction. Native coverage now includes a real linked
+shared library, internal-provider filtering and execution of the reopened
+package payload. Those three native construction cases and the public CLI
+group remain the next execution gate. OpenSpec, documentation, lint/format,
+layout/export and reviewed driver/documentation authority checks pass locally.
+At exact revision `e0ca3ba04dd57c9fce7d92e8891a909ae3c1e85f`, all 24 native
+format/ELF checks pass on actual FreeBSD without skips in 10.190 seconds. This
+includes repeat construction, native pkg query, reopened compiled payloads and
+a real linked shared library whose internal provision removes its external
+requirement. All seven public CLI checks also pass without skips in 3.927
+seconds. The native CLI construction case deliberately injects lifecycle
+evidence, so it qualifies batch/provider plumbing rather than full installed
+Standard admission. The combined native log SHA-256 is
+`e3d3801876e73ea5e8b6d2cd536c94ca5bcc102c7a87f2045584073e4704d4e5`.
+The next qualification action is the current full regression and actual native
+installed-wheel gate; retained pkg composition, complete per-unit source/ports
+packages, public installed lifecycle and release consumers remain open.
+
+The full native Python run at `c75fac59` stopped in sample recipe planning:
+the conformance runner rejects `freebsd16` before selecting the existing FreeBSD
+Flavor. Extend host discovery, OS catalog and explicit receiver selection together;
+exercise real recipe composition with FreeBSD identity and preserve foreign-OS
+sample filtering. Local canonical sample checks pass (10 tests, six explicitly
+opt-in execution skips), including actual FreeBSD recipe composition and receiver
+OS mismatch refusal. The stable run log SHA-256 is
+`09478ca743d0b335c6e93fd04958356119e886fea10601d8e62d274cca1f8f92`.
+Native sample rerun passes all 10 checks (six explicit opt-in execution skips),
+with log SHA-256
+`c94310bd9e4f5e9af0459991efca3976864911a4043569e0198c3877e6006d1e`.
+Native SDK target support reaches the following owners: native SDK
+layout, acquisition, runtime architecture inspection and SBOM path properties
+still omit FreeBSD. Extend the shared layout/schema, host matching, ELF architecture
+inspection and dependency projection, then run real native build/relocation and
+consumer tests with wrong-target and changed-byte refusals. Qualify those owners
+before claiming native mixed-project dependency closure. Local canonical SDK
+regressions pass all 26 tests without skips, covering real native builds,
+relocation, dependency graphs and consumer/package acceptance. The run log SHA-256
+is `e97160621cc467d9c74f6fe881958c2825d22e6256422ff7a15188de087588d0`.
+These are macOS regressions, not FreeBSD SDK qualification. The exact native run
+at `02c1abb8` passes eight SDK checks, then the public consumer lifecycle fails
+because SDK and host dependency observations conflict. Diagnose the differing
+identity/loader-context fields and preserve both exact file and context custody;
+do not ignore conflicting records. This is the next FreeBSD action in progress.
+Read-only native reproduction identifies only `freebsd-filtee` property differences
+on identical libc/libthr file records. Program-specific filter facts belong to a
+context-bound loader record, with explicit image/program/target references. Move
+them without discarding facts; SDK relocation must remap embedded image references
+and portable paths, then rebind the projected context identity and graph edges.
+Retain strict conflict rejection for actual file differences. The private native
+diagnostic's canonical identity is
+`sha256:bb15c3747c640fd416fe65174bd3fac347e3a528532d6d115e40b59fe5c9d89a`.
+The correction passes all 31 local SDK tests without skips, including relocation
+and original-source consumer/package execution. The FreeBSD loader group passes
+17 checks with one native-only skip on macOS; two-program context merging preserves
+both inventories and actual differing file hashes still refuse. The SDK and loader
+log SHA-256 values are
+`60f740e6ecf6625cd90b858cc99fa813eebdc0d396b5ee044ff0b1da87916f40`
+and `682354c938909f8da72f082d2cff60d53db108c251bcecc225490c6ebad93b37`.
+Exact native two-context observation, SDK and complete suite reruns remain required.
+The native retained-project group separately passes all 36 tests; its log SHA-256
+is `9c817b88c1bdd7f9f0a6678f85662133a76a8803d574f37f5076733b0494075d`.
+The frozen installed-wheel check for `02c1abb8` also passes; native SDK and full
+suite qualification remain required.
+The installed `88fc4bb6` retained-source run passed actual
+native tests and independently refused both stale authorization and failing
+behavior while preserving its previous receipt. The retained 11-file native proof
+archive has SHA-256
+`232ffc7e1a5fb98d9f3bfb0b4bfa85a5ec70efe79d91c911d719b8f0e87f4fbb`.
+That small-component proof does
+not close full-project or release qualification.
+
+Additional execution audit: the existing retained legacy-harness SSH connector
+still allows only Linux and macOS, and its optional Ninja/uv runtime artifacts
+are Linux x86_64 binaries. First-class FreeBSD support must reach both coordinator
+and receiver validation and preserve the actual remote platform identity. Bind
+optional runtime tool acquisition to the selected worker's OS and architecture;
+never send Linux executables to a FreeBSD guest. Qualify the public installed
+connector with native retained commands, failure and changed-input rejection,
+artifact custody and bounded cleanup. Supporting a source-only harness does not
+qualify unimplemented native runtime-tool providers or replace the stronger
+mixed-project lifecycle required by RETAINED-PROJECT-001.
+
+The connector repair is in progress: admit explicit FreeBSD SSH workers and check
+the observed receiver OS and any configured CPU architecture before harness
+execution, as well as when admitting its result. Bind optional tool archives to
+their selected OS/architecture; unsupported providers must refuse before network
+transfer, and the receiver must independently reject a foreign tool archive.
+Source-only harnesses need no optional binary provider. Qualify native command
+execution, changed input/failure refusal and cleanup separately; this connector
+does not substitute for retained-project Standard lifecycle admission.
+
+The repair passes seven local platform/receiver checks, including actual unittest
+execution, failed behavior, source mutation, pre-transfer provider refusal and
+cleanup, plus all 13 existing retained-harness checks. Platform-selection tests
+explicitly simulate FreeBSD on the local host; they are not native acceptance.
+The respective log SHA-256 values are
+`8edd27e07caf124129b239cd6e81c91693b3d3becf3ff1ec1cd74a92b664595a`
+and `e97073c9dfaf6e83c11fafacf743c6b747f3a20bb8ded5cf4936bf68ae94fbae`.
+Native and installed public connector qualification remain required.
+
+The preceding loader-context correction at `f30cbe96` passes all 31 SDK checks
+on actual FreeBSD in 1972.523 seconds, including the formerly failing consumer
+lifecycle and relocation. Its log SHA-256 is
+`f91bf793f17d6d01c5f52d1729174c729b05f603b1354d87fae0a3660de1e0d4`.
+The same native revision passes all 43 retained-project checks in 14.079 seconds
+(log SHA-256 `944001f7988f898f0fa57e1fc71cd435c9a8fe319bc42686b3990174f0154c30`).
+Its complete native Python ladder remains running; this evidence does not cover
+the later current-lock bridge or connector repair. The separately frozen wheel
+qualification at `9000d9b2` passes with qualified wheel identity
+`sha256:9264357d0ac3eb0e3eb09c4735ab428ec44c7f4bd726755adcb56a7998a49afd`.
+
+The full native ladder at `f30cbe96` then stops after 43 checks (30 normal skips):
+the self-hosting snapshot conformance helper rejects `freebsd16` before its
+negative lifecycle test. Both that helper and the separate replication proof
+duplicate an OS selector without FreeBSD. Repair their shared platform selection
+in progress, preserving explicit unsupported-host refusal and the native Flavor;
+qualify the real snapshot replay and failure group before resuming the full
+ladder. The previously successful SDK/retained groups do not establish full-suite
+success. Keep the native slot free until the repaired exact revision is ready.
+
+The snapshot selector passes its focused platform check and all three actual
+local snapshot conformance tests in 563.317 seconds, including repeated clean
+replays and negative custody checks (log SHA-256
+`e21bd8157394065082a4840cff031a15eff797b7c7f8412ffc75f5b15e748c38`).
+The native `9fc8596f` retained-group run stops at its first Cargo publication
+rollback test, before the connector checks: `exclusive_directory._native_rename`
+supports only Darwin/Linux. The worker exposes FreeBSD `renameat2` and header
+`AT_RENAME_NOREPLACE=0x0001`. Add that native publication path in progress and
+qualify real success, a destination appearing after prechecks, unsupported API
+refusal and original Cargo rollback. Preserve descriptor/source guards and refuse
+unsupported kernels/filesystems; no check-then-replacing-rename fallback.
+The failed native retained log SHA-256 is
+`476e4275a2fc838a199dc4a0ea9d46939d4287aa77020c10ed0def7f36da5be3`.
+The [FreeBSD rename contract](https://man.freebsd.org/cgi/man.cgi?manpath=FreeBSD+15.1-STABLE&query=renameat&sektion=2)
+documents no-replace behavior and unsupported-filesystem refusal. Five local
+publication checks pass, including a real destination-creation race and exact
+stage identity, plus the original Cargo rollback test. Their log SHA-256 values
+are `91ab2035360d7396068fc187cd304f1c7fcbbb3a1b987488bb15c37611ebc79b`
+and `5baef7cbc18942278d9315e39fcb8f415906dc39406c5f5413d93184a987db14`.
+Native exact-revision replay/publication/retained and full-suite renewal remain
+required. The earlier diagram renderer timeout passes an unchanged retry with
+all 121 diagrams; no timeout or check was relaxed.
+
+At exact revision `75fd75cc`, actual FreeBSD passes all five native exclusive
+publication checks in 0.242 seconds, including the post-precheck destination race
+and successful stage identity preservation. The log SHA-256 is
+`e5ade638d3400bce14dd48ffc25a5ebba4d71ee60652f2a3a6c0d50018cef603`.
+The sequential wider retained/current-lock/snapshot/full native ladder remains
+active at that frozen revision; later phases are not yet qualified. A separate
+frozen local full-suite/wheel ladder runs at `9fc8596f`, so its results cannot
+qualify the later snapshot/publication changes.
+
+Native `75fd75cc` renewal passes all 94 retained checks without skips in
+1878.469 seconds and all six current-lock checks in 25.696 seconds. Snapshot
+replay then reaches a second missing FreeBSD selector in the actual core
+`self_hosting._host_os`, after the proof/helper selection correction. The first
+two snapshot checks pass; repeated replay refuses `freebsd16` before its build.
+Repair this core selector in progress and test actual FreeBSD Flavor admission,
+wrong-OS Flavor refusal and unknown-host refusal before native replay renewal.
+The separate frozen `9fc8596f` local suite and wheel check pass: 1,651 tests,
+38 platform/tool skips, 3042.666 seconds; wheel identity
+`sha256:6ce5de959cbb171a77ff8bce2e1db7d90b7ce38b0a7b72cfe0f27742c8c46225`.
+These exact-revision results do not qualify later runtime changes.
+
+Installed-wheel execution at `d96f6b8b` no longer discovers a coding agent, but
+refuses before compilation because the shared Python builder searches only
+`python3` and `python`. The aligned native worker exposes the actual interpreter
+as `python3.12`, with neither unversioned alias. Extend ordered PATH discovery to
+versioned Python commands, preserving authoritative explicit pins, actual runtime
+version/digest checks and per-directory preference. Qualify real interpreter
+discovery with only versioned launchers, then repeat the exact installed native
+lifecycle and rejection checks; do not create a compatibility symlink or bypass
+toolchain admission.
+The same attempt exposed an uncaught builder exception at the public CLI boundary.
+Preserve its typed refusal as a JSON CLI failure instead of an unstructured
+traceback; no receipt may be issued when toolchain admission fails.
+The correction passes seven real-interpreter discovery checks and all seven
+public CLI rebuild regressions, including structured toolchain refusal without
+receipt issuance. Their log SHA-256 values are
+`2b741be11d25f19952bc4f44aa3ce11fff5aa753b4570350f008219697758de7`
+and `e088baa4de593e6ce69f7d6ae27055deb1fb6d619d8d08bde5fa5687367ecd30`.
+Lint, formatting, layout, strict OpenSpec, documentation and reviewed TCB checks
+pass. Native automatic-discovery qualification still requires a new exact wheel;
+a diagnostic run with an explicit native Python pin is separate evidence for
+agent-free retained execution and cannot close that discovery gate.
+
+FreeBSD implementation checkpoint: explicit OS identity now reaches worker CRUD,
+execution requirements, hardware observations, capacity records and corresponding
+JSON schemas. The hardware program checks `uname -s` before named FreeBSD sysctls,
+normalizes amd64, and leaves GPU probing explicitly unqualified. Local canonical
+`make python-check` runs pass the worker tests (29), worker CRUD (4) and dispatch
+contracts (3); shell-program tests cover named-query output and wrong-OS refusal.
+These are local regression evidence, not native lifecycle qualification. Alignment
+inspection found unrelated unavailable/low-space workers; no remediation or cleanup
+was applied. Next: OS Flavor, host/toolchain realization and alignment, storage and
+pressure observations, then native installed-wheel lifecycle and rejection proof.
+
+FreeBSD native checkpoint: the development CLI registered a real SSH FreeBSD worker;
+read-only alignment passed the full declared FreeBSD command/Python/disk template
+with no installs, file synchronization or coding-model call. The first attempt
+correctly timed out at 120 seconds in interactive Bash startup; a native `/bin/sh`
+transport correction made alignment pass. Hardware probing reports FreeBSD
+16.0-CURRENT, x86_64, 8 CPUs and 8145 MiB. The request-bound storage receiver measured
+all four roles and preserved unsupported native quota status; three pressure
+samples measured CPU ticks, conservative memory and zero swap throughput. These
+are live receiver observations from the development source, not installed-wheel
+lifecycle or release qualification. Private endpoint and raw observations stay
+outside repository authority.
+
+The next native gate is an exact non-editable framework wheel, native toolchain
+realization and isolated build/test plus failed-input rejection. Remaining work
+also includes retained lifecycle admission/custody, supported sandbox behavior,
+FreeBSD install SBOMs and quota qualification, and existing-platform CI. The OS
+Flavor explicitly refuses assumptions about Linux procfs/GNU utilities. Swift
+requires an explicit FreeBSD toolchain rather than an invented default.
+
+Native contributor execution exposed inherited GNU Make control variables leaking
+into pip's Rust source builds: the jemalloc build consumed the outer command-line
+test selector before Cargo's appended jobserver flags and treated `-j` as a target.
+Isolate pip dependency builds from the parent Make flags, preserve explicit compiler
+resource limits and package-source policy, and qualify the corrected canonical
+native `make python-check` path. Native onboarding also reports the missing
+FreeBSD host-install realization; this remains required host-toolchain work.
+Host-install implementation now in progress: declare the native `pkg` tuple and
+its supported coding-agent alternatives instead of borrowing Linux binaries.
+Require the complete non-alternative capability closure and at least one declared
+agent provider; an explicit unavailable provider must refuse before probing or
+installation. Honor tuple-specific command probes so FreeBSD's base `make` cannot
+satisfy the GNU Make capability. Qualify parsing, selection, package provenance,
+consent and native observation; unavailable packages remain missing rather than
+becoming a fabricated ready host.
+The canonical local host-install group passes 11 tests, including a full simulated
+consent/install/re-observation flow that rejects a successful package-manager exit
+when the installed coding-agent version remains too old. Lint, formatting,
+repository-layout, strict OpenSpec and reviewed driver/documentation authority
+checks pass. These are local contract tests; native package observation and the
+installed lifecycle remain separate qualification requirements.
+At `c8290fa5`, the seven new tests also pass on actual FreeBSD without skips;
+their log SHA-256 is
+`56f5466e02971defa689fc3415f3523d594f9e6aa0f273249dc96807720957b1`.
+Read-only native package observation proves Python/venv, Git and GNU Make but
+correctly reports overall host readiness false: Codex is absent and the aligned
+official Git LFS binary has no `pkg` provenance. It does not install an unused
+agent or relabel the separately verified Git LFS artifact as a package.
+The CMake realization uses the observed native `cmake-core` command package;
+the extra local tuple test verifies that mapping. Native application execution
+still needs the retained-provider correction tracked in RETAINED-ADMISSION-002.
+At `cb38faee`, all eight native host-install tests pass without skips, including
+that CMake mapping. The log SHA-256 is
+`e0a59929cf5e41c3574e9b87291b49744a05b5b12d0f27df01991864368b4330`.
+The pip wrapper regression passes through the canonical Make runner: a real child
+process receives the original pip arguments and package-source/compiler limits,
+excludes parent Make control variables, and preserves the child's failing status.
+Lint, format, repository-layout and reviewed driver-pin checks pass locally; the
+corrected native contributor build remains pending.
+
+Native Make correction checkpoint: revision `ba085be6` finishes its real FreeBSD
+contributor dependency installation, including native gRPC and Ruff builds, and
+passes `make python-check`'s eight FreeBSD tests. A qualified non-editable wheel at
+`d4d67a9f` also completes public native `onboard create` plan/apply with an exact
+reviewed plan and explicit candidate parent revision; it selects the FreeBSD OS
+Flavor and pins the actual installed Standard distribution. Neither result is a
+complete native application build/test/accept/package or release receipt.
+
+The initial dependency observation audit found `PortableHostDependencyObserver`
+refusing FreeBSD and native executable recognition omitting its ELF format. Qualifying the
+native dependency closure requires a FreeBSD loader/inspector owner and current
+native evidence; Linux loader-cache semantics cannot stand in for FreeBSD hints
+and library mappings. This remains part of FREEBSD-001 before native lifecycle
+qualification, alongside the missing host-install realization.
+
+Loader implementation checkpoint: bind the native readelf/ldconfig tools,
+FreeBSD hints search order, default library directories and recursively included
+global libmap rules; revalidate loader inputs and exact ELF closure after
+inspection. Preserve typed refusal for unmodeled loader controls, constrained or
+ambiguous mappings, unsafe paths, changed configuration and unresolved imports.
+Do not execute target binaries or reuse Linux cache parsing as FreeBSD evidence.
+The local FreeBSD group passes 22 tests with its one actual-FreeBSD case skipped
+on macOS. Three real inspector-process tests enforce cleared loader/Python
+environment, output overflow and deadline/tree ownership. Existing alignment (4),
+worker-tool dependencies (1), compiler-cache dependencies (2), retained native
+custody (2) and retained Cargo test execution (2) groups pass. Native inspection,
+installed-wheel lifecycle, supported sandbox/capacity policies and retained
+receipt/release qualification remain open.
+
+The installed `d4d67a9f` native CLI now also completes public sample `lock` and
+`plan`, selecting FreeBSD authority. This is native planning evidence, not a
+generated application or current lifecycle receipt.
+
+The first real loader run at `e1a6e254` correctly refused FreeBSD 16 libc's
+`AUXILIARY` record for libsys. The observer now resolves filter and auxiliary
+targets recursively, retains their kinds and potential-loading status, and
+refuses unresolved or malformed filtee records. The local dependency group passes
+16 cases with the actual-FreeBSD case skipped on macOS; the corrected native run
+must still pass. This does not convert potential loader edges into observed
+runtime execution or acceptance evidence.
+
+At `fbb31213`, the real FreeBSD run passes all 24 FreeBSD tests without skips,
+including compilation and static inspection of a native program's actual
+interpreter/libc/libsys closure. All three real inspector-process tests pass on
+FreeBSD as well. Native log SHA-256 identities are
+`2e58a611bfb3e9b490ff94b7330c248e108be3395f2564fd18578cb8d249a66b`
+and `540257cdfb43cd8a484acd885249e7f015732cb975c989cf5bac38db1bd6f4e2`.
+Separately, frozen `77e4dac8` completes the full canonical Python suite: 1500
+tests, 37 platform/tool skips, zero failures. That earlier full-suite result does
+not qualify the later retained-command or loader changes; the current exact
+candidate must receive its own full regression and installed-wheel qualification.
+The frozen `89278c96` candidate now completes its canonical full Python suite:
+1533 tests, 38 platform/tool skips and zero failures. Its log SHA-256 is
+`0cb708f5735bd66f54299721043e4e3e650fd13ff62a3ca4cfbc6c0e23fbd499`.
+That exact result covers the loader/workspace foundation at that revision,
+not later host-install or model-free retained-source changes.
+
+FreeBSD bootstrap checkpoint: the dedicated native build VM was registered through
+a private SSH-compatible transport. Read-only alignment identified GNU Make/npm,
+then declared installs added only gmake and the existing Node-24-compatible npm.
+Git LFS was added to the FreeBSD prerequisite inventory. The feed's old vulnerable
+Git LFS was not installed; declared alignment installed the official FreeBSD amd64
+3.8.0 archive only after matching its published SHA-256, then alignment passed.
+Private installation commands/endpoints remain outside authority. The native VM
+has 20 CPUs, about 80 GiB RAM and 277 GiB free; no old images/evidence were removed.
+
+Bootstrap now accepts a bounded verified offline native wheel source for export,
+while normal closure identity, no-index installation and installed RECORD checks
+remain in force. FreeBSD platform tags no longer inherit Linux dependency markers
+and native receiver tags must match exactly. Versioned Python discovery supports
+the FreeBSD package layout. Real offline pip resolution, tamper and direct-URL
+refusal tests pass in the local bootstrap group. This does not yet qualify the
+native installed-wheel lifecycle. The earlier wheel-smoke run refused because the
+checkout changed during execution; a new frozen revision must run that gate.
+
+Installed-wheel checkpoint: frozen revision `77e4dac8` passes isolated
+`make wheel-check`. Wheel SHA-256 is
+`2e06aa79f3f08d0a388a0c760593d3154b3d5bf6be69fc9d6019c3f561520860`;
+normalized framework distribution identity is
+`5936ed45cd3b17703e763cf717fbf35d073f74328b1201c10b95080f3fb8ad09`.
+Offline export from reviewed FreeBSD cp312 wheels produces closure
+`c5ba582637d19451cb4aa5a8e8913306fa97571a84a9144a880219bdd1f92bcc`.
+An actual FreeBSD bootstrap installs that closure into a separate non-editable
+runtime and verifies all installed RECORD content and the exact framework
+identity. This qualifies wheel installation only; native lifecycle, source and
+evidence custody, retained receipts and release enforcement remain open. The
+subsequent Make-environment correction is not part of that wheel's evidence.
+
+### [ ] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
+
+- **GitHub issue:** [#69](https://github.com/jordanhubbard/literate-ai/issues/69)
+
+- **Priority:** P1
+- **Owner:** worker SSH transport and artifact custody
+- **Direction:** Use the same private configured SSH-compatible route for commands, source staging and evidence retrieval.
+- **Conclusion:** SCP may remain the fixed transfer executable, but must carry the selected SSH program for nondefault worker transports; direct default routing cannot establish the registered worker identity.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
+- **Evidence:**
+  - [ ] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
+
+WORKER-SCP-001 implementation checkpoint: SCP helpers accept a validated optional
+SSH program and the selected worker transport now reaches source staging,
+evidence retrieval, retained-harness staging, release synchronization and alignment
+file copies. Default OpenSSH argv stays unchanged. Canonical local checks pass
+SSH/custody (5 tests), alignment (4) and release synchronization (17), including
+custom-route uploads/downloads and transport-injection refusal. A live FreeBSD
+SSH/SFTP round trip through the configured route uploaded a 63-byte gzip fixture,
+matched its remote SHA-256 and downloaded identical bytes. The result is explicitly
+transport-only, not a complete native lifecycle receipt. Full installed native
+source/build/test/evidence qualification and existing-platform CI remain open.
+
+### [ ] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
+
+- **GitHub issue:** [#70](https://github.com/jordanhubbard/literate-ai/issues/70)
+- **Priority:** P0
+- **Owner:** Standard source planning and retained admission
+- **Direction:** Exact authorized retained source must build, test and accept without discovering or invoking a model provider.
+- **Conclusion:** The installed native CLI eagerly selects a coding agent before attaching retained source. Preserve distinct original-input provenance and all post-admission gates; do not fabricate an agent or model-generated evidence.
+- **Depends on:** Issue #70; existing retained-source authority and Standard lifecycle owners
+- **Implementation:**
+  - [x] Add explicit model-free retained source planning and execution wiring while leaving ordinary generation discovery unchanged.
+- **Evidence:**
+  - [ ] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
+
+Installed native checkpoint: the exact qualified wheel at `89278c96` bootstraps
+37 verified distributions offline. Public Standard rebind and documentation review
+complete, and the retained-source review returns an exact authorization identity.
+Authorized execution then refuses with `coding_cli.unavailable` before compilation.
+Assembly constructs `FilesystemStandardSourceGenerationAdapter.from_environment`
+before attaching the reviewed retained input. The correction must give retained
+input its own non-executable source selection and avoid representing it as an
+accepted cache entry, inherited IDE response or model-generated payload. The
+generation model-scope, workflow invocation and cache-key owners currently assume
+a coding provider; integrate a typed retained origin through these shared owners
+without removing build/test/SBOM/acceptance checks or admitting regenerative cache
+membership. This remains distinct from full mixed retained-project work in #22.
+The stronger failed-behavior regression exposed automatic replacement retrying
+the same retained bytes after their native test failed, obscuring that failure
+with a competing-custody error. Retained-origin rejection must be terminal in the
+shared lifecycle owner; a changed source tree requires a new exact review.
+Preserve the original test failure, prior receipt and ordinary generated-candidate
+replacement behavior instead of weakening registry custody or accepting any
+generic failure as failed-test evidence.
+
+Local implementation checkpoint: a non-executable retained selection binds its
+exact review, fixed no-model scope and invocation identity. It never discovers an
+agent, inherits a model, invokes generation or claims accepted-cache authority.
+The common lifecycle makes retained-origin rejection terminal and preserves the
+original failure. Six focused guard tests, six public CLI rebuild tests, four
+existing repair tests, source-cache trust (1), model/workflow (3), planning (1)
+and locked-generation (3) checks pass through the canonical Make runner. The CLI
+test compiles real retained Python, executes current native cases and independent
+acceptance, verifies exact stale-authorization and generated-test failure codes,
+and preserves the prior receipt after both rejections. Its log SHA-256 is
+`3c92417a0366bbc1892f46e16a0e0c366f696e5454577a3ea9542adc8e6aa24a`.
+The editable-test distribution seam is not installed-wheel evidence: native
+offline bootstrap, reviewed rebind, complete positive/rejection execution and
+current matrix qualification remain open. Full mixed retained projects remain
+separately unqualified under #22.
+
+Integration checkpoint: incorporate exact main `5d92797a` after its CI run
+`39159031754` passed. Additive requirement, roadmap, changelog and worker-probe
+changes from both branches remain present; recompute the combined TCB and
+documentation review pins. The refreshed OpenSpec validator requires short
+individual behaviors, so retained-provider, post-source-gate and terminal-rejection
+requirements retain separate scenarios. On the integrated tree, all six public
+CLI rebuild cases, six retained-source guard cases and seven combined worker
+probe cases pass. Strict OpenSpec, lint, formatting and repository-layout checks
+pass. Exact installed-wheel/native and final release qualification remain open.
+
+Subsequent native evidence: qualified wheel `88fc4bb6` installs its 37 verified
+distributions offline. After reviewed public rebind and documentation review, its
+public retained-source rebuild compiles, passes three original behavior cases
+and independent acceptance with neither coding agents nor a Python override or
+unversioned Python alias. Its receipt identity is
+`sha256:584a9f38989bfa3ec4edd9cb2128762f6b995e4ceb459327deca314c447bd522`.
+The automatic-discovery rejection run remains in progress. The preceding exact
+`d96f6b8b` wheel, with an explicit native Python pin, passed both stale-review and
+freshly authorized failed-behavior checks while preserving the passing receipt;
+the retained evidence archive SHA-256 is
+`6fe64332a65d644fbe85114b2b2eb93ef3af51be6076316bbf0fca597c108d12`.
+Separately, the complete frozen `d96f6b8b` Python suite passed 1,578 tests with 38
+platform/tool skips; log SHA-256
+`3b7603d5171be3e9c5bd4641c240c7af4276a7250229c9408ff5d9a2bb995293`.
+That broad baseline does not qualify later changes or full mixed retained
+projects under #22, typed SSH custody under #69, or a downstream release.
+
 ### [ ] RELEASE-INTEGRATION-004 — Reconcile and execute the 1.3 release backlog
 
 - **Priority:** P0
@@ -27713,6 +28607,213 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **GitHub pull request:** [#66](https://github.com/jordanhubbard/literate-ai/pull/66), including the reviewed ancestry of #60–#62.
 - **Policy reconciliation:** Correct stale repository pre-release target 1.2 to 1.3 through the public release-state command; record native and installed qualification without claiming final release readiness.
+
+- **PR #68 reconciliation (conflicts resolved and locally qualified):** Merged
+  current main `90d5b6e9` into published FreeBSD head `545c4ae6` in an isolated
+  integration checkout; frozen source is `89f80bfb`. Both contributions' release
+  notes and work evidence remain intact, and driver, runner and documentation
+  authority were renewed. The automatically merged Python projection, worker
+  observations and test runner pass 36 focused tests and the full suite: 1,714
+  selected, 1,677 passed, 37 skipped, zero failed. Source/style/layout, strict
+  OpenSpec, both changed-skill admissions, 21 documentation tests and 121 rendered
+  Mermaid diagrams pass. Installed-wheel and offline installed-CLI checks pass;
+  the tested wheel identity is
+  `sha256:d360ac91896fbfc2a909f50172d1cf9c34f692a83a8c90476fff07dc5bd7d8e5`.
+  A fresh host lifecycle passes 229 tests and supplies the finalized current
+  receipt through the supported promotion command. This reconciles the published
+  review; active retained SDK/package work and native FreeBSD acceptance remain
+  separate, unfinished gates. Hosted checks on the pushed revision remain required
+  evidence to inspect before any eventual landing.
+
+
+- **PR #68 final qualification (in progress):** Finish the review against the
+  current retained/native package and SSH receiver corrections through `ab15e04e`.
+  Renew the complete local and actual FreeBSD regression, canonical-origin
+  installed-wheel evidence, current framework lifecycle receipt and exact-head
+  hosted checks before landing. Preserve the existing open acceptance contracts
+  for public full-project execution, complete native source/ports unit packaging
+  and downstream system installation/rollback; these are not established by
+  internal infrastructure tests. Final title, description and completion claims
+  must match the gates actually exercised. Active peer checkouts retain their
+  work and evidence.
+  Native full regression at `ab15e04e` exposed a cancellation fixture race:
+  its one-second process deadline could expire during cold interpreter/ledger
+  startup, before the fixture's existing fifteen-second readiness budget.
+  Give the process deadline a finite bound above readiness and preserve actual
+  timeout/SIGINT, descendant cleanup and nested-evidence assertions. Production
+  command deadlines and cancellation behavior remain unchanged. Renew the focused
+  native fixture and complete native regression before landing.
+
+  Host qualification at `ab15e04e` passes all 1,830 selected cases: 1,788
+  passed and 42 skipped in 1,056.253 seconds (log SHA-256
+  `59a10aef8739236f15175dccf83acb5bd84eec99fff7a9b2073f3e3bc1608446`).
+  The repaired cancellation fixture at `d030edee` passes locally, retaining both
+  real interruption modes. Source/style/layout, strict OpenSpec, documentation
+  and authority reviews pass; the offline installed CLI gate is current.
+  The canonical-origin wheel passes installed qualification on the host, with
+  identity `sha256:857a60dd082b002118314cdfb6ea7cd4453b1c6669a10573b6c834188091717c`.
+  A newly finalized 228-test host lifecycle supplies current receipt
+  `sha256:1e55274f9b726a089fdf93e5a3a68e5a2cee4f4414cda836fab8d4c0f6a822db`;
+  supported promotion and candidate recheck pass after the test-only repair.
+  Final native regression and isolated installed-wheel renewal remain in progress;
+  no pending native or hosted result is counted as passing.
+  The repaired native full run passes cancellation and then finds a shared
+  worker-health fixture rejecting versioned `freebsd16`. Audit fixture selectors
+  together, centralize truthful test host-family selection, renew worker-health,
+  configured finalize, model-free rebuild and projected-command cases on the
+  actual guest, and preserve unsupported-host refusal rather than aliasing another
+  POSIX OS. Optional Elixir fixtures must also retain the real host identity.
+  The fixture audit at `f05a8390` passes the complete host suite: 1,831
+  selected, 1,789 passed, 42 skipped and zero failures in 1,375.551 seconds;
+  log SHA-256 `a1f10e27fde77b9c149528e5d5e632db2e54e35275ee7b282ef0c77c82fb13c6`. Actual FreeBSD passes the
+  four worker-health cases and both configured-finalize cases without skips.
+  Its worker-toolchain/operator-grant case then exhausts the fixture's health
+  admission budget before reaching FINALIZE. Both job clones pass Git connectivity
+  checks but inherit four borrowed object stores; transient pack-index warnings
+  were retained. Compare the unchanged fixture budget on a fully independent
+  `--dissociate` checkout before attributing the refusal to runtime behavior or
+  changing timing. Native full-suite and isolated installed-wheel qualification
+  remain open.
+  The independent replay also exhausts the unchanged 600-second action deadline
+  during BUILD (745.833 seconds including fixture setup). Give this actual
+  FreeBSD integration fixture a finite 1,800-second action/observation budget;
+  other hosts retain 600 seconds. Its operator watcher must remain available for
+  that same budget and stop when rebuild ends, including exceptional exits.
+  Keep production deadlines, health admission, exact grant requests and the
+  prohibition on controller-local phases intact. Renew focused host/native
+  qualification and the complete regression before counting this repair green.
+  The independent native full run then passes 764 cases, including all three
+  actual `pkg` construction/inspection cases, before the isolated self-hosting
+  replay expires at 300 seconds. The proof already grants Linux and Windows a
+  finite 900-second candidate bound; include FreeBSD in that same policy.
+  Keep both clean replay attempts, frozen-source and import-isolation checks,
+  output limits and descendant termination intact. The supported driver and
+  sample-runner review checks remain current: this separately classified offline
+  replay helper is outside those live lifecycle closures. Recheck the existing
+  finalized receipt and qualify the actual repaired native replay before landing.
+  Prior incomplete native results remain predecessor evidence.
+  Measured native generation-one completions take 1,139, 1,143 and 1,173 seconds,
+  exceeding the initial 900-second policy. Allow each FreeBSD candidate 1,800
+  seconds and expose the existing parallel runner module deadline through Make.
+  Qualify the four-generation proof with a finite 10,800-second module deadline;
+  retain every replay, probe, source/isolation assertion and descendant limit.
+  Other platforms and the default 3,600-second module deadline remain unchanged.
+  The frozen host regression at `45d5ce24` passes 1,831 selected cases:
+  1,789 passed, 42 skipped, zero failures in 1,222.277 seconds. The actual
+  FreeBSD installed-wheel gate passes the same host-qualified wheel identity
+  `sha256:857a60dd082b002118314cdfb6ea7cd4453b1c6669a10573b6c834188091717c`;
+  retained log SHA-256 is
+  `42d67d0f8b8ca21b0eb72f98c8d1339c41767ec89252805143e06910771bfe9f`.
+  Documenting the module option changes bound documentation authority despite
+  unchanged driver/runner closures. Renew the host lifecycle rather than reuse
+  its predecessor receipt: the fresh finalized candidate passes and its promoted
+  receipt is `sha256:32cc1dfd7ec03dccc588b5468e36f55bf5844837469ae0ebb9665c69008578a7`.
+  Supported require-current and verify pass (two passes, three configured skips).
+  The complete native regression at `eb8de8cb` remains in progress; its pending
+  results and pending exact-head hosted CI are not qualification claims.
+  Native regression then passes 1,072 cases and all four actual native package
+  cases before receiver-custody setup pins BSD Make through its wrapper and
+  fails GNU Make validation. Select the wrapper target through the existing GNU
+  Make discovery owner instead of the first executable named `make`; preserve
+  unchanged-tool success and changed-tool response withholding. This is a test
+  fixture repair; production discovery and authority closures remain unchanged.
+  The repaired fresh native run then passes 1,121 cases, all seven receiver
+  custody cases and all four native package cases, before an immediate descendant
+  state observation races asynchronous SIGKILL delivery. An unchanged isolated
+  three-run probe observes one child as running at return and absent 10 ms later;
+  the other two runs pass. Use a shared finite five-second observation bound in
+  both cancellation fixtures, retain no-result, parent-exit, descendant absence/
+  zombie and ledger assertions, and report the last state on failure. Production
+  cancellation remains unchanged. Expose the runner's existing start-directory
+  selector through Make so the unqualified E2E suite can run early alongside a
+  fresh complete regression; every selected native case still requires renewal.
+  The early native E2E sweep catches a separate stale expected host Flavor after
+  16 passes: signed derivation correctly returns FreeBSD, while its test expects
+  Linux. Audit the remaining host-dependent fallback expressions and use the
+  existing truthful host-family fixture in source promotion, native Bazel consumer
+  qualification and Python lifecycle projections. Keep cross-platform negative
+  fixtures and correct POSIX shared-library suffix selection intact. All five
+  native dispatch repetitions pass (25 cases, no skips), and the native signal/
+  timeout ledger case passes before the superseded full runner is stopped with
+  its exact owner and checkout verified.
+  With the exact locked pip fixture supplied through worker alignment, all eight
+  native Python lifecycle cases pass without skips. The fresh full regression
+  passes all four native package and seven custody cases; the early E2E sweep
+  then finds a legacy rollback fixture that assumes GNU Make exit/diagnostic
+  spelling and tries to execute the shell builtin `exit` directly under BSD Make.
+  Use a real Python child with exit code seven and an independent direct native
+  Make failure as the diagnostic/status oracle. Preserve exact restored bytes,
+  typed conversion failure and the absence of partially installed authority. Renew
+  focused host/native cases and the complete frozen native suite before landing.
+  All eight harness-inventory cases pass on the host; lint/format, driver/runner
+  reviews and the current 228-case receipt pass. Native renewal remains pending.
+  The repaired eight-case rollback group then passes on actual FreeBSD. The
+  four-worker early E2E sweep reaches the next unqualified monorepo fixture and
+  finds its retained test command assumes a versionless `python3` alias. Bind
+  that command to the running interpreter with native shell quoting, and keep
+  actual per-root execution, shared-input isolation and receipt/rollback checks.
+  Preserve non-executed shebang and transcript fixtures found by the alias audit;
+  normalize the Make failure fixture's interpreter path for Windows shells.
+  Renew both affected host groups and the native monorepo group before a fresh
+  complete native run; no worker alias or ambient interpreter is hand-repaired.
+  The five monorepo and eight harness cases pass on the host without skips;
+  lint/format, both closure reviews and the current receipt remain green.
+  The combined native E2E sweep passes all thirteen repaired cases and reaches
+  180 passes before repository child lifecycle planning reveals an actual target
+  contract omission: discovery preserves FreeBSD, but the closed declaration
+  allowlist excludes it. Admit canonical FreeBSD x86-64/aarch64 targets while
+  retaining unknown-target refusal and exact native-host matching before writes.
+  Add read-only foreign-target planning/execution refusal coverage; preserve the
+  existing real dependency, resume, blocked-consumer and cancellation checks.
+  This changes reviewed runtime authority: renew closure and documentation
+  reviews, the finalized host lifecycle receipt, native/installed wheel gates and
+  the complete frozen native regression before landing. Prior partial runs remain
+  evidence for their actual source revisions, not current complete qualification.
+  On the renewed runtime source, all four native package cases, all seven custody
+  cases and the combined six repository-lifecycle, eight harness and five monorepo
+  cases pass. The early E2E sweep then reaches worker alignment and finds another
+  local-transport fixture declaring an ambient `python3` alias. Declare the running
+  interpreter's actual command name and expose its directory only within that
+  fixture's PATH; keep the production name-only template contract, real probe,
+  declared-only installation, secret permissions and backup assertions intact.
+  Audit other live alignment templates separately from synthetic probe transcripts.
+  Renew the whole alignment module on the host and native worker before another
+  frozen complete native run. The isolated installed-wheel check retains its exact
+  runtime source while this test-only repair proceeds; partial regressions do not
+  qualify a complete suite.
+  The focused late-worker sweep then passes nine cases and exposes a second
+  transport fixture that always unwraps `bash -lic`. FreeBSD intentionally sends
+  the literal receiver command to its native shell. Execute that generated command
+  through `/bin/sh -c` in the disposable local transport, verify the isolated Python
+  prefix, and retain request binding, measured-volume, path privacy and no-write
+  assertions. Leave explicit Linux Bash custody cases and the existing native
+  FreeBSD action-transport cases intact. Require the full late-worker sweep to pass
+  before restarting the broad native jobs, so late fixtures fail promptly.
+  The early native smoke sweep passes 218 cases before project-guidance setup
+  constructs a commit environment without PATH, so executable lookup falls back to
+  system directories and misses native Git in its declared installation directory.
+  Retain the calling PATH alongside the fixture's explicit Git author/committer
+  identities; keep its isolated environment and exact checkout-commit CI assertions.
+  The Git-identity environment audit finds this as the sole literal dictionary
+  omitting both inherited variables and PATH. Renew guidance plus the remaining
+  late smoke modules before another broad run; production guidance stays unchanged.
+  The late native smoke subset then passes 138 cases before its executable-drift
+  fixture inherits the installed Python binary's read-only mode through `copy2`.
+  Grant owner-write permission only to the disposable copy before creating the
+  tool binding, preserve its execution bits, append actual drift bytes and require
+  the unchanged production binding to reject that mutation. Do not modify the
+  installed interpreter or move permission changes after binding. Audit other
+  copied-tool mutation fixtures, then renew this six-case module and the remaining
+  late-smoke cases before broad native qualification.
+  PR #68 subsequently merged as `f05f1858` after exact-head CI passed at
+  `e3a6b778`. Its complete actual FreeBSD regression recorded 1,774 passes and
+  58 skips across 1,832 selected cases with no failures. Separate E2E and smoke
+  sweeps and the actual installed-wheel gate also passed. The retained native
+  bundle identity is
+  `sha256:5cc15e8565776d35e7b6bd87d5ec0aeeaef2c56c1cd090bef277337a73a0dbd7`.
+  These predecessor results do not qualify the later original-adoption or
+  committed-target verification changes recorded below; the combined tree must
+  renew its own lifecycle and native evidence.
 
 ### [ ] PYTHON-TARGET-001 — Support target-specific Python backend imports during retained-source admission
 
@@ -27888,6 +28989,8 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Installed-wheel acceptance:** Implementation `e3a9da73a95ad976b3b423fcec9ea8b1a59f2d77` passed the real macOS tiny-library journey across two noneditable 1.3.0 distribution payloads. The registered child rebind preserved current parent validation. A signed `tiny.app` to `tiny.api` import-map revision replaced only the exact unqualified child and retained its complete prior tree. A separately reviewed native Python profile correction retained the failed-profile tree too. The native Standard rebuild passed in 134.536 seconds, including its verifier-owned isolated interpreter, module-origin assertion and expected result 7; the native child receipt is current with 3 passing tests and `verify` passes. This is one successful rebuild, not regenerative qualification: the child remains `DERIVED_SOURCE_RETAINED` and parent release authority remains with the retained source. Qualified-child refusal is covered by deterministic policy tests. The framework lifecycle receipt is current with 225 passing tests, and installed-wheel smoke passes (wheel `sha256:3ad725ea83cfe48ac652ca15ebd2449b3743c2242a5315e9e1b4a96973233a19`). Local proof custody: `sha256:fd6986f3bac434f0bc6a69b2979054cf9372376df0cb6e74fb0e4a14892a3100`. Native acceptance also exposed separately scoped 1.3 issues [#75](https://github.com/jordanhubbard/literate-ai/issues/75) and [#76](https://github.com/jordanhubbard/literate-ai/issues/76).
 
+**Current integration renewal:** Bring the registered-child implementation forward with PR #81 without dropping either source path. Earlier native two-wheel acceptance remains bound to its original source; the merged source requires current driver/document reviews, fresh complete host regression and lifecycle receipt, installed/native checks and exact review CI before landing.
+
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
 - **GitHub issue:** [#47](https://github.com/jordanhubbard/literate-ai/issues/47)
@@ -27994,6 +29097,50 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
+### [ ] RETAINED-CATALOG-001 — Bind complete retained input ownership to canonical Component catalogs
+
+- **GitHub issue:** [#74](https://github.com/jordanhubbard/literate-ai/issues/74)
+
+- **Priority:** P1
+- **Owner:** retained input contracts and canonical catalog planning
+- **Direction:** Represent complete native source trees through canonical Components while retaining original implementation authority and selected target locks.
+- **Conclusion:** Add exact canonical Component ownership to retained input manifests and revalidate it against the actual authored catalog during planning. This is input coverage only; selected native actions, packages, independent acceptance and scale qualification remain separate requirements under issue #74.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [x] Bind typed ownership rules to exact canonical Component authoring identities and all retained file/directory inputs
+  - [x] Revalidate ownership against the actual canonical catalog through retained planning without changing legacy identities or execution refusal
+  - [ ] Integrate selected native actions, variants, per-unit packages and independent acceptance with bounded full-catalog scale
+- **Evidence:**
+  - [ ] Canonical catalog fixtures reject unknown/stale owners, uncovered or ambiguous inputs and changed shared ownership; existing retained planning remains compatible
+  - [ ] Public installed CLI and native multi-component execution, package custody and complete-tree scale qualification pass before closing issue #74
+
+Current ownership checkpoint: ten portable contract tests include 40,000 files,
+8,001 directories and 8,001 ownership rules; 55 retained-project regressions and
+six actual-catalog lock/planning tests pass locally. At ownership revision `3badbdb7`,
+the full Python gate passes 1,684 tests with 36 skips in 3,095.295 seconds.
+Authority validation passes; the
+configured lifecycle receipt remains stale. The catalog planning fixture
+uses real authored files/locks with explicit test trust for distribution,
+conversion and project validation; it is not installed/native qualification.
+Native selected actions, shared consumer/variant binding, per-unit package
+products, installed CLI and complete native-tree admission remain open. No
+retained execution or package acceptance is inferred from coverage.
+
+
+Source-link admission checkpoint for RETAINED-CATALOG-001: the pinned FreeBSD
+source tree has 138 Git symlinks, all pointing to present internal inputs. Add
+explicit bounded POSIX target-text/kind custody, closure/cycle validation and
+snapshot preservation while leaving discovery opt-in, legacy identities and
+public execution refusal unchanged. All twelve new checks pass, including the real
+114,644-file, 9,856-directory source corpus and all 138 Git link targets in
+226.888 seconds. Its manifest identity is
+`sha256:ec88abe4c9ca60865255eaf39922385193c83829b688c809001e8a6332110a7a`.
+The 55 retained-project, ten ownership and six actual-catalog lock/planning
+regressions also pass. This is complete selected input discovery/validation and
+small-fixture snapshot custody; it is not a full source-tree snapshot, canonical
+native catalog registration or Component action/package/lifecycle acceptance.
+Full-suite, installed and native qualification remain separate gates.
+
 ### [x] RECEIPT-REFRESH-001 — Refresh the current project test receipt through the complete lifecycle
 
 - **Priority:** P1
@@ -28018,24 +29165,6 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
   tests with 37 skips; installing Elixir enables the nine class-setup omissions and
   all 19 explicitly gated Elixir cases, including native Make, Bazel and Mix proof.
 
-### [ ] RETAINED-CATALOG-001 — Model complete retained native trees as canonical Component catalogs
-
-- **GitHub issue:** [#74](https://github.com/jordanhubbard/literate-ai/issues/74)
-- **Current release target:** 1.3.0
-- **Next action:** Inspect the #22 typed retained-lock and managed-graph evidence before implementing whole-tree catalog integration.
-
-- **Priority:** P1
-- **Owner:** framework retained-project, Component catalog and typed native lock authorities
-- **Direction:** Account for every selected tracked source/support input and native build unit through canonical Components, preserving original source authority and explicit ownership.
-- **Conclusion:** Include GitHub issue #74 in the 1.3 retained-project program after #22 typed lock and managed-graph integration. Catalog coverage, source admission, selected execution, independent acceptance, packaging and release remain separate evidence boundaries.
-- **Depends on:** RETAINED-PROJECT-001 and GitHub #22 typed lock and managed native graph integration
-- **Implementation:**
-  - [ ] Define complete deterministic ownership and shared-input accounting without treating directory structure as the native dependency DAG.
-  - [ ] Resolve conditional dependencies, bootstrap relationships, target/configuration variants and selected dependency closures through existing canonical authorities.
-  - [ ] Prove bounded scale, invalidation and fail-closed ownership/dependency checks with a real native multi-Component fixture.
-- **Evidence:**
-  - [ ] Complete coverage and selected-closure native build plus independent acceptance; preserve the unqualified execution guard until its gates pass.
-
 ### [ ] REBUILD-ENTRY-001 — Normalize or safely reject Component file entry points in Standard rebuild
 
 - **Priority:** P1
@@ -28058,6 +29187,8 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 - **Acceptance evidence:** Combined implementation `8746155526cecb46de83202fc26cd4733b13dd62` passes the full 1,582-case suite (1,547 passed, 35 skipped, no failures; 648.937 seconds), all 19 focused cases, the installed wheel (`sha256:456a7bea81cf93d42892eab9cfd1926f86642281e2a6c133f73d44258584eb93`), strict source/specification/review gates and all 121 diagrams. The installed CLI refuses the exact retained incompatible Bazel library profile before generation. A separate supported native profile rebuilds through its `component.md` path with the unchanged isolated, module-origin-checking oracle and expected value 7. Its current native receipt has 4 passing tests and `verify` passes. Installed API regressions also pass all eight entry-point and four profile cases. The fresh framework lifecycle receipt is current with 231 passing tests; candidate comparison and `verify` pass. Native proof custody: `sha256:4007c044d3fd7ed8c18bc4a7e451a5ec2812c0feb71074af7bb379cfa16b2e28`. This is one successful rebuild per temporary fixture, not regenerative qualification. Full hosted CI and landing remain open.
 
+**Current integration renewal:** Merge the reviewed entry-point and library-profile implementations with current registered-child and retained-project qualification, preserving both sets of requirements and original native proofs. Earlier 1,582-case and installed two-wheel results remain historical. Run the combined current focused/full suite, native installed journey, fresh lifecycle receipt and exact review CI before landing this batch.
+
 ### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
 
 - **Priority:** P1
@@ -28079,3 +29210,392 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 - **Combined checkpoint:** All 19 focused entry-point/profile/qualification cases pass in 9.795 seconds. The combined source passes layout/export, strict lint/format, specifications and current driver/runner/documentation review. The source slices preserve both standalone implementations exactly. Combined local qualification is complete as recorded below; hosted CI and landing remain open.
 
 - **Acceptance evidence:** The full combined evidence is recorded under REBUILD-ENTRY-001 immediately above. The installed CLI rejects the exact retained default Bazel library profile before generation and accepts the supported native directory profile through real generated tests and unchanged independent acceptance. All four installed profile tests pass across the declared Linux, Windows and macOS projections, including existing wheel behavior. The 1,582-case combined suite, package check and fresh current framework receipt pass; full hosted CI and landing remain open.
+  - [ ] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
+### [ ] RETAINED-FS-001 — Observe retained product filesystem effects through private verifier cases
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+- **Priority:** P0
+- **Owner:** Retained acceptance contracts and bounded verifier owner
+- **Direction:** Qualify original filesystem utilities without replacing file effects with successful process exits; framework issue #22 owns retained lifecycle integration.
+- **Conclusion:** Add opt-in private case fixtures and bounded file-state expectations to independent retained acceptance. Preserve legacy identities and sealed exports; retain actual observations and reject mismatches, unsafe nodes and resource overruns. Public execution, source admission and release authority remain separate.
+- **Depends on:** Existing retained command, SDK and acceptance owners under RETAINED-PROJECT-001; this capability does not wait for the broader program to close.
+- **Implementation:**
+  - [x] Define typed optional filesystem fixtures, expectations and explicit limits with unchanged legacy case wire identities.
+  - [x] Run sealed products in fresh owned case workspaces through existing process and SDK owners; independently observe bounded no-follow file states and retain mismatch evidence.
+- **Evidence:**
+  - [x] Real programs demonstrate resize and content preservation; an always-zero wrong product, extra files, links, aliases, changed fixtures and exceeded budgets refuse.
+  - [ ] Legacy retained cases, SDK scope, receipt/package custody and native installed qualification remain correct; no per-unit source or release completion is inferred.
+
+Local development evidence: all 11 focused filesystem cases pass, including
+real compiled writes, repeated private fixtures, zero-exit wrong-output refusal,
+pre-execution fixture substitution, link/special-node and resource/mutation
+refusal, whole-run substitution and receipt retention. All eight SDK cases also
+pass, including a real selected producer and the new private case through live
+command scope. A first whole-run probe exposed that private HOME/temporary paths
+change dependency context; separate run/case bindings now preserve both checks.
+The complete retained regression passes 134 tests (133 passed, one actual-native
+pkg construction case skipped) in 231.322 seconds. Lint/format, layout/export,
+strict OpenSpec, 21 Node checks and all 121 documentation diagrams pass.
+**Next action in progress:** freeze and run the exact-head full suite, then
+qualify native and installed behavior without advancing public
+execution, conversion, release or source/ports unit admission.
+
+### [ ] RETAINED-LOADER-001 — Bind captured native runtime search paths in retained profiles
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+
+- **Priority:** P0
+- **Owner:** Retained lifecycle profile and execution environment
+- **Direction:** Run captured native compilers and tools against their selected shared-library closure without inheriting ambient loader injection.
+- **Conclusion:** Add opt-in ordered input-relative runtime directories to the reviewed profile; validate captured role ownership and bind their projected POSIX loader environment to existing dependency observations. Preserve legacy identities and refuse unsupported hosts. SDK admission and public execution remain separate.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [x] Define bounded canonical path selection and unchanged legacy wire identities.
+  - [x] Project only captured toolchain/SDK/dependency directories through the existing credential-free environment.
+- **Evidence:**
+  - [x] Run a real linked private tool in a retained workspace and reject undeclared, redirected, changed and unsupported search paths; preserve default behavior.
+  - [ ] Run retained regression, authority/style/documentation gates and native renewal before qualification.
+
+Five focused checks pass, including a compiled private-library tool that fails
+without its declared loader path and passes all four actual retained commands
+with captured paths. All 139 retained checks pass locally (138 passed, one
+native-only pkg construction skip) in 240.266 seconds. The original probe exposed
+that macOS/Linux observers assumed host loader paths for build tools; explicit
+tool runtime context now matches execution, while host inspectors retain their
+separate context. Lint/format, layout/export and strict specifications pass;
+all 121 documentation diagrams render. Native/installed renewal remains open.
+**Next action in progress:** qualify this exact implementation through the full
+suite and native execution before exposing it to the operator workstation.
+
+### [ ] ORIGINAL-ADOPT-001 — Bind original project authority without relocating source
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+
+- **Priority:** P0
+- **Owner:** Original-source adoption contracts, project command and conversion authority store
+- **Direction:** Preserve conventional native source trees while adopting explicit retained project authority through the framework.
+- **Conclusion:** Add an independent original initial authority stage and read-only Git/project-bound plan with acknowledged apply. Preserve original files and hierarchy, forbid transitions into legacy conversion stages, and leave retained execution, SDK, receipt and release gates unchanged.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [x] Define original initial authority semantics without changing existing wrapped/retained/drafted/qualified wire identities.
+  - [x] Expose a reviewed in-place original-source plan/apply command over an already-authored canonical project; bind project authority and clean Git commit/tree without executing its build.
+- **Evidence:**
+  - [x] Prove preserved source files, exact metadata-only writes, stale-plan refusal, collision/dirty/unsafe-root refusal and permanent refusal of regenerative conversion transitions.
+  - [x] Run existing adoption and retained planning regression gates.
+  - [ ] Run full regression and native/installed renewal gates.
+  - [x] Initialize an actual native source project only after authoring and validation.
+
+**Partial evidence:** The managed Python gate passes all 22 adoption checks,
+including nine real Git/worktree and public-command original-adoption checks.
+All six current-lock/planning checks pass, including original-stage retained
+planning with a distinct authority-bound identity and no execution admission.
+Repository lint, format, layout and public-export checks pass. Ordinary rebuild
+refuses the original stage and directs the operator to retained planning.
+**Current integration decision (PR #81):** Integrate the merged FreeBSD foundation
+from PR #68 (`f05f1858`) without discarding either branch's recorded scope or
+evidence. Resolve the changelog, design traceability and roadmap together, then
+review and record the combined lifecycle-driver identity through its supported
+review command. Renew the finalized host receipt and qualify the combined host,
+native and installed-wheel paths before treating this integration as ready.
+Earlier branch and FreeBSD results retain their actual source identities.
+Include the confirmed Windows fixture repair from PR #89 before final combined
+native and installed qualification. Its exact source passed all 33 affected
+Windows cases (26 passed, seven existing POSIX skips). The independent FreeBSD
+preflight remains bound to its sealed `08211e5e` checkout; advancing this host
+integration does not modify that checkout. Receiver timeout issue #90 remains a
+separate production blocker and is not fixed by these fixtures.
+**Combined qualification decision:** Integrate reviewed parallel PE observation
+candidate `1fbc7e7f` from issue #90 before finalizing this review. Its unchanged
+native Windows receiver/live-profile tests pass both cases in 571.256 seconds
+under the existing per-observation limit; seven native custody cases pass with
+three existing POSIX-only skips. Preserve this candidate's actual source identity
+and old `b9e3615e` host/native evidence. Review the combined driver/document
+identity and obtain a new real finalized host receipt, then qualify the frozen
+combined host, native and installed paths. Superseded partial runs must not be
+relabeled as combined-source passes.
+The first independent FreeBSD preflight at `08211e5e` stops after four adoption
+passes when the ordinary-rebuild refusal test includes a legitimate diagnostic
+performance span in its unchanged-tree snapshot. Keep the complete original-tree
+comparison and actual CLI refusal, but explicitly bind that test's disposable
+`OBJ_DIR` to a sibling outside the original source. Verify that telemetry still
+exists there, then rerun the full adoption module and remaining native preflight.
+Do not exclude arbitrary new source files or disable production telemetry.
+The revised host adoption module passes all ten cases with no skips; the combined
+Windows fixture modules pass all 37 host cases. The native rerun passes all ten
+adoption cases, then exposes the same diagnostic-output assumption in the
+non-host lock status test. Give that actual status invocation its own sibling
+`OBJ_DIR` as well; retain the complete project snapshot, target/lock identity
+checks and real telemetry. Rerun the affected host and native lock module before
+continuing native qualification.
+The combined full host regression passes 1,810 tests with 42 declared skips
+(1,852 selected), zero failures and zero known failures. Static/export/layout,
+strict OpenSpec and all 121 documentation diagrams pass. An initial lifecycle
+attempt exhausted three Swift candidates at compilation; its failed evidence is
+preserved. A fresh same-authority lifecycle passes actual generation, native
+build, generated tests and independent acceptance. Supported receipt promotion,
+candidate comparison, require-current and project verification pass with receipt
+`sha256:4cc33e9be4762acbac30fd06624a524059f0c9b5a47291d5816f99b8d0336b67`.
+Native FreeBSD, installed-wheel and exact review CI qualification of this combined
+runtime remain open; these host results do not substitute for them.
+**Next action in progress:** integrate current main and renew combined
+qualification; complete source-project coverage and native admission remain unfinished.
+
+An actual original native source tree now has three validated, current locked
+unit contracts and the explicit original authority projection. Applying its
+reviewed Git/project-bound plan created only authority/evidence metadata and
+preserved tracked source bytes. This demonstrates initial authoring/adoption;
+complete tree ownership, native execution and per-unit pkg qualification remain
+unfinished and are not inferred from those three locks.
+
+The initial full regression stopped after 1,287 tests because the repository's
+documentation authority marker had not been refreshed after these documentation
+changes. Its managed review marker is now refreshed and project authority
+validation passes. This failed run is retained separately; full renewal remains
+required before native deployment.
+
+The combined renewal then reached 1,470 tests and found the new public verb
+missing from the CLI reference inventory. Both its inventory entry and usage
+table are now documented; both CLI-help checks pass. The failed full log is
+retained separately, and exact combined full renewal remains required.
+
+The next full run reached 1,634 tests before fixture cleanup found a recreated
+Git `objects/info/packs` file after its assertions passed. The original-adoption
+fixture now uses the existing shared Git helper with automatic maintenance and
+GC disabled. A real Git trace check enables repository auto-maintenance policy
+and proves the fixture still starts no maintenance/GC child. All ten original
+adoption checks pass; ordinary cleanup and source-integrity assertions remain
+strict. This test-only repair changes no production execution policy. Full
+renewal is still required; none of the interrupted runs is counted as passing.
+
+### [ ] LOCK-TARGET-001 — Verify the committed Component target
+
+- **GitHub issue:** [#79](https://github.com/jordanhubbard/literate-ai/issues/79)
+
+- **Priority:** P0
+- **Owner:** Project lock-health observation
+- **Direction:** Report current non-host locks accurately without rewriting their target or weakening verification.
+- **Conclusion:** Read the committed target through the typed catalog-bound lock owner, then reuse current project selector and lock/audit checks. Preserve stale project configuration and input refusal.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Use the catalog-validated committed target in read-only project lock health.
+- **Evidence:**
+  - [x] A real non-host project lock passes verify/status and exact lock checks; dependency, target/audit and project selector drift still refuse.
+  - [ ] Complete full-regression and installed/native renewal before deployment.
+
+**Partial evidence:** All seven lock-health regression checks pass, including
+six real non-host target/current-policy/refusal checks and the existing installed
+HTML lock-state fixture. Three project-verification checks also pass. Lint,
+format, repository layout and public-export checks pass. No native build,
+package or release admission is claimed by lock-health verification.
+
+**Windows fixture renewal:** Combined-source native preflight passes all ten
+original-adoption cases and all six non-host lock cases, then finds the new
+output-command PATH fixture using an extensionless copied executable. Windows
+correctly refuses its non-executable manifest mode. Give this fixture a real
+`.exe` name and rediscover its manifest, preserving the strict production tool
+check, output ordering and unchanged default-wire assertions. The full host
+regression and installed-wheel smoke already pass at `6f933e54`; native full
+regression remains bound to that source. Rerun the affected fixture after repair.
+
+### [ ] TRACKER-REPO-001 — Bind forge commands to the selected repository
+
+- **GitHub issue:** [#80](https://github.com/jordanhubbard/literate-ai/issues/80)
+
+- **Priority:** P1
+- **Owner:** Tracker command generation
+- **Direction:** Preserve the chosen fork/origin identity in generated issue and review CLI commands.
+- **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; use explicit repository arguments as the current operator mitigation.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
+- **Evidence:**
+  - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+
+### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
+
+Upstream: [issue #90](https://github.com/jordanhubbard/literate-ai/issues/90).
+
+- **Priority:** P0, release blocker
+- **Direction:** Keep complete native receiver observation within its existing
+  300-second production limit, including cold PE import inspection.
+- **Conclusion:** Inspect independent images in bounded concurrent frontiers,
+  then merge results in deterministic queue order through the existing loader
+  resolution and graph owners. Preserve fresh image hashes before/after inspection,
+  exact inspector identity, content-bound fact reuse, API-set/delay-import rules,
+  failure cleanup and live-profile invalidation. Do not increase timeouts or skip
+  the actual receiver case.
+- **Diagnostic evidence:** On source `0d683978`, 208 serial native inspections
+  consume 251.876 of 270.172 measured seconds; path resolution consumes 8.319.
+  These are wrapper timings around actual operations, not acceptance. The
+  diagnostic stopped at its own bound; the original SSH session later timed out,
+  and its final diagnostic file was read through a separate bounded probe.
+- **Implementation:**
+  - [x] Reuse bounded native-inspection concurrency for PE closure frontiers.
+  - [x] Retain deterministic graph facts and reject image/inspector substitution.
+- **Evidence:**
+  - [x] Deterministic thread overlap, serial/parallel graph equivalence and
+    mutation refusal pass alongside existing dependency/custody regressions.
+    All ten custody checks pass, including three new parallel PE cases; focused
+    host tool-dependency, actual receiver and PE input checks also pass. Static,
+    export/layout, strict OpenSpec and supported driver/document reviews pass.
+    Candidate `1fbc7e7f` passes seven native Windows custody cases with three
+    existing POSIX-only skips, including all three new parallel PE checks.
+  - [x] The unchanged native Windows receiver/live-profile module passes both
+    cases in 571.256 seconds with the production 300-second per-observation
+    limit unchanged. Its candidate source, report hashes and guard blobs are
+    retained separately; combined-source final qualification remains open.
+  - [x] Renew combined driver/document review and the finalized host receipt.
+    Receipt `62ec04fa29ff237491a81f69fa480e9680b784cce623dd94e3a91bf47570eeb3`
+    is current after a fresh generated lifecycle and independent acceptance.
+    The complete combined host regression passes 1,813 cases with 42 existing
+    skips out of 1,855 selected; documentation checks also pass. Earlier native
+    candidate evidence remains bound to its original revision.
+  - [ ] Complete combined-source native regression, installed-wheel qualification
+    and exact required CI before landing.
+
+**Failed-capture cache follow-up:** A controlled public-observer fixture at
+`a5f95173` changes the bound inspector and then encounters an unresolved import.
+Two partial facts remain under the earlier inspector digest. Restoring the
+inspector and selecting the first image reuses one of those facts and omits a
+required shared DLL; clearing the memo yields the complete graph. This diagnostic
+uses a simulated inspector and establishes no native acceptance or containment.
+The issue #90 follow-up records the existing cache-custody contract violation.
+
+**Conclusion:** On any PE closure or closing inspector/API-set check failure,
+discard facts for that bound inspector before propagating the original failure.
+Preserve successful-path fact keys, graph rules and every existing deadline.
+The prior driver `5f6f5acc` and receipt `62ec04fa` remain source-bound baseline
+evidence; this repair requires a fresh driver review, lifecycle and receipt.
+
+- [x] Add a deterministic failed-capture/reloaded-cache recovery regression.
+  It fails against the earlier implementation because `a.dll` is reused without
+  inspection, then passes with the repair for one and two inspection workers.
+- [x] Discard affected inspector facts on closure and closing-check failures.
+  All 11 custody checks pass locally. The inspector closing-guard fixture now
+  mutates after real parallel capture, avoiding transient partial-file races.
+- [ ] Renew the current finalized host receipt, full host regression, native
+  Windows receiver and installed/native evidence, then require exact-head CI.
+
+
+**WINDOWS-PE-OBSERVE-001 upgrade follow-up:** The completed `b782cdb5` host
+regression passes 1,814 cases with 42 skips, but a controlled legacy-file fixture
+still loads an incomplete old `pe-imports` fact and omits a required DLL. Failure
+cleanup prevents new poison, not reuse of pre-repair data. Version only the PE
+capture kind, reject obsolete PE entries through the existing decoder, and let
+successful capture rewrite the cache. ELF/Mach-O keys and formats stay unchanged.
+The issue #90 comment records this gap before implementation. Keep the completed
+host and ongoing FreeBSD full results bound to `b782cdb5`; renew the full host
+suite, lifecycle/receipt and exact CI for the revised source. Renew actual Windows
+receiver/custody checks and current FreeBSD custody/installed-wheel checks; retain
+the full FreeBSD baseline explicitly as earlier-source evidence.
+
+- [x] Add an upgrade regression that refuses legacy incomplete PE facts.
+  Before the repair, the public observer reuses the old fact without inspecting
+  `a.dll`; the test fails at its fresh-inspection assertion.
+- [x] Version the PE capture kind without invalidating other platform fact kinds.
+  The existing decoder rejects obsolete PE entries; successful capture rewrites
+  current facts, whose repeated observation reuses the complete closure.
+- [ ] Renew affected qualification and current receipt before landing.
+
+
+**Combined renewal:** Complete the PE legacy-kind repair and JavaScript lexical
+repair before starting the next frozen qualification. Preserve `b782cdb5`'s
+passing 1,856-case host report and failed generated lifecycle under their actual
+identities. Stop its superseded native full run only after matching runner UID,
+checkout, Git revision and checkpoint; retain its partial report as interrupted,
+not as acceptance. Run fresh complete host and FreeBSD suites for the revised
+source, plus current actual Windows receiver/custody and JavaScript checks, then
+renew generated lifecycle/independent acceptance, receipt, installed wheel and
+exact required CI. No earlier-source result is relabeled as the revised full run.
+
+
+**Current combined qualification:** Frozen source `7625cc05` passes the complete
+host regression: 1,817 passed, 42 existing skips, no failures across 1,859 selected
+cases in 1,670.611 seconds. Report SHA-256
+`9fa5d6e1066c59f8d257ddb7558b4b985e1de9df52270ca8e83cbbe516616d59`.
+The fresh generated lifecycle, native builds, generated tests and independent
+acceptance pass. Supported receipt promotion/check/current and project verification
+pass with receipt `e68395dc91d3bcb4016b82cf8865c84ec80cbe105734ba1c629011bcfd618ffb`
+and finalized candidate `6223b74b738dae98a5093775ef9ddcca8b3915cad3b70cb6db146acaee44be05`.
+The reviewed driver is `4a09f2422252a72de0b84adf3fad09a3a3b13dd8d8121095106ffdc57c1d5e15`.
+
+Actual Windows qualification at that source completes 21 selected cases:
+18 passed and three existing POSIX-only skips, including the new cache upgrade
+and lexical checks and both real receiver cases in 549.979 seconds. The production
+300-second observation bound is unchanged. Independent archive SHA-256:
+`156deac00e92cebb89c5003fffc102824462df059bf5a3ce9062fb4917df2f62`.
+Linux completes 133 passing executions of 25 unique cases with no skips, including
+ten custody repetitions, fanout, JavaScript and retry checks. Independent archive:
+`7ee1b685c74bab790744beef34f64a48f875e1843cf6828997c674bde9ad1781`.
+All 121 documentation diagrams render; static/export/layout, strict OpenSpec and
+supported driver/document reviews pass. The framework repository ignores its
+reserved operational lifecycle-lock directory; the driver and receipt stay current.
+
+The superseded `b782cdb5` native run was deliberately interrupted after verifying
+runner UID, checkout, revision and checkpoint. Its checkpoint retains 1,043 passes,
+34 skips and zero failures; this is partial evidence, not acceptance. Its archive
+is `4d7d8e3175c8774d2f8739a1f1da9c25b924b0b4045a8c45460eb86293cc9ca3`.
+The fresh complete FreeBSD run at `7625cc05`, matching installed-wheel pair and
+exact required CI remain landing gates.
+
+### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
+
+**GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
+
+- **Priority:** P1
+- **Owner:** Native process-group termination fixture
+- **Direction:** Finish native qualification without confusing interpreter startup with failed signal delivery.
+- **Conclusion:** The earlier FreeBSD full run at 6f933e54 stopped after 1278 passes and 36 skips because the child shutdown marker was absent. Establish explicit handler readiness at the real spawn boundary with bounded setup and failure cleanup, then retain the existing one-second timeout, real process-group signals and shutdown assertion. Production supervision is unchanged.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Wait for actual child handler readiness before starting the existing supervision deadline.
+- **Evidence:**
+  - [ ] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI.
+
+### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
+
+**GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
+
+- **Priority:** P1
+- **Owner:** Inert JavaScript lexical observation and generated-source handoff validation
+- **Direction:** Complete lifecycle qualification without rejecting a valid bundle writer as its emitted executable.
+- **Conclusion:** A controlled valid application and bundle are rejected when a writer string or leading inert registry text is added. Use the existing lexer for actual registry identifiers and source offsets, while preserving real-bundle module, local-extension, shebang and CLI-dispatch guards and independent execution/acceptance.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Reuse the existing inert lexical owner for bundle classification and registry location.
+- **Evidence:**
+  - [ ] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
+
+**Focused results:** All six fanout checks pass on the host and Linux and in the actual FreeBSD preflight. All four JavaScript handoff/bundle cases and all three retry cases pass on the host, Windows, Linux and FreeBSD preflight. Complete native/installed and exact CI gates remain pending above.
+
+### [ ] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
+
+**GitHub issue:** [#98](https://github.com/jordanhubbard/literate-ai/issues/98)
+
+- **Priority:** P1
+- **Owner:** Complete command LINK/PACKAGE integration fixture
+- **Direction:** Make native qualification reach its intended archive-format and custody assertions under a fresh valid test grant.
+- **Conclusion:** The FreeBSD run at 7625cc05 reaches malformed-archive validation after its shared 30-minute test grant expires, correctly refusing with action_wire.expired. Give only this complete multi-component, multi-format fixture two standard budgets while retaining one grant across all phases. Preserve production deadlines, individual subprocess limits, dedicated expiry coverage and all proof-format assertions.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
+- **Evidence:**
+  - [ ] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged.
+
+**Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
+
+**Second native refusal:** The `425ac341` rerun retains 1,149 passes, 34 skips and one `action_build.input_invalid` at package proof reopening after 2,105.044 seconds. Standard build grants have their own 30-minute lifetime; dispatch headroom alone does not extend them. Use a test-only authorization-input/port subclass to issue one-hour grants for this complete chain, preserving production defaults, grant validation, the single dispatch grant, all format/custody oracles and dedicated expiry controls. Run the focused actual native chain before the next fresh full run.
+
+### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
+
+**GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
+
+- **Priority:** P1
+- **Owner:** Accepted-source provider reconstruction
+- **Direction:** Make accepted-source-only build consume a qualified retained source entry and export its artifact.
+- **Conclusion:** Issue #97 reproduces an admitted retained origin being rejected by the coding-CLI provider allowlist. Preserve RetainedSourceSelection semantics with no executable or model claim; merely adding a provider spelling is insufficient. Keep independent acceptance, origin/tree/tool bindings and unknown-provider refusal intact. This remains separate from the original-adoption work in PR #81.
+- **Depends on:** RETAINED-PROJECT-001
+- **Implementation:**
+  - [ ] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
+- **Evidence:**
+  - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.

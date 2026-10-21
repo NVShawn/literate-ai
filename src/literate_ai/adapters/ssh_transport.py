@@ -234,7 +234,12 @@ def ssh_arguments(
 
 
 def scp_arguments(
-    source: Path, endpoint: str, destination: str, timeout_seconds: float
+    source: Path,
+    endpoint: str,
+    destination: str,
+    timeout_seconds: float,
+    *,
+    transport: str = "ssh",
 ) -> tuple[str, ...]:
     """Build one noninteractive SCP argv for an exact local regular file."""
 
@@ -250,8 +255,10 @@ def scp_arguments(
             "SCP destination must be nonempty and NUL-free",
         )
     connect_timeout = _timeout(timeout_seconds)
+    selected_transport = _transport_binary(transport)
     return (
         "scp",
+        *(("-S", selected_transport) if selected_transport != "ssh" else ()),
         "-o",
         "BatchMode=yes",
         "-o",
@@ -264,7 +271,12 @@ def scp_arguments(
 
 
 def scp_download_arguments(
-    endpoint: str, source: str, destination: Path, timeout_seconds: float
+    endpoint: str,
+    source: str,
+    destination: Path,
+    timeout_seconds: float,
+    *,
+    transport: str = "ssh",
 ) -> tuple[str, ...]:
     """Build one noninteractive SCP argv for one transport-defined remote file."""
 
@@ -286,8 +298,10 @@ def scp_download_arguments(
             "SCP evidence destination must be a new file below an existing directory",
         )
     connect_timeout = _timeout(timeout_seconds)
+    selected_transport = _transport_binary(transport)
     return (
         "scp",
+        *(("-S", selected_transport) if selected_transport != "ssh" else ()),
         "-o",
         "BatchMode=yes",
         "-o",

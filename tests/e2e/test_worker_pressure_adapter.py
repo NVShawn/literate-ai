@@ -20,7 +20,12 @@ class WorkerPressureAdapterTests(unittest.TestCase):
         self.policy = PressurePolicy(3, 8000, 1024, 100, 512, 0)
 
     def test_ssh_receiver_round_trip_binds_request_and_collects_native_memory(self):
-        family = {"linux": "linux", "darwin": "macos", "win32": "windows"}[sys.platform]
+        family = {
+            "darwin": "macos",
+            "linux": "linux",
+            "win32": "windows",
+            "freebsd": "freebsd",
+        }["freebsd" if sys.platform.startswith("freebsd") else sys.platform]
         bindings = SimpleNamespace(
             worker=ExecutionWorker(
                 "ssh-worker",

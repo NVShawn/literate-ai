@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tarfile
@@ -345,11 +346,13 @@ class RemoteSampleFanoutTests(unittest.TestCase):
             root = Path(temporary)
             status = root / "status.json"
             child_stopped = root / "child-stopped"
+            child_ready = root / "child-ready"
             child = (
                 "import os,pathlib,signal,time; "
                 f"marker=pathlib.Path({str(child_stopped)!r}); "
                 "signal.signal(signal.SIGTERM, "
                 "lambda *_: (marker.write_text('stopped'), os._exit(0))); "
+                f"pathlib.Path({str(child_ready)!r}).write_text('ready'); "
                 "time.sleep(30)"
             )
             parent = (
@@ -358,7 +361,32 @@ class RemoteSampleFanoutTests(unittest.TestCase):
                 "env={**__import__('os').environ,'PYTHONUNBUFFERED':'1'}); "
                 "time.sleep(30)"
             )
-            returncode = supervise(1, status, [sys.executable, "-c", parent])
+            spawn = subprocess.Popen
+
+            def spawn_ready(*args, **kwargs):
+                process = spawn(*args, **kwargs)
+                try:
+                    deadline = time.monotonic() + 10
+                    while not child_ready.is_file() and time.monotonic() < deadline:
+                        if process.poll() is not None:
+                            break
+                        time.sleep(0.01)
+                    self.assertTrue(
+                        child_ready.is_file(), "child handler was not ready"
+                    )
+                except BaseException:
+                    try:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    process.wait(timeout=5)
+                    raise
+                return process
+
+            with mock.patch(
+                "literate_ai.remote_source_guard.subprocess.Popen", spawn_ready
+            ):
+                returncode = supervise(1, status, [sys.executable, "-c", parent])
             # The parent can exit before its child's signal handler writes the
             # marker. Keep the fixture alive for that bounded shutdown interval.
             deadline = time.monotonic() + 5

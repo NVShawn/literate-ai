@@ -4,12 +4,52 @@ Private test matrices map the repository's sample and lifecycle gates onto opera
 workers without making hostnames, credentials, or private routing part of project
 authority.
 
+## FreeBSD workers
+
+FreeBSD workers may be physical machines or virtual guests. Their OS Flavor is
+`flavor://literate-ai/os-freebsd`; their execution requirement is `freebsd`,
+regardless of the hypervisor host. Use a dedicated build worker for packages and
+images, disposable guests for installation/upgrade/rollback, and physical targets
+for hardware acceptance. QEMU guests can be registered through private SSH worker
+configuration; the optional provisioner command owns guest creation and cleanup.
+Registration never implicitly creates a VM.
+
+The FreeBSD repository template requires native Git and Git LFS, GNU Make (`gmake`), the base
+C compiler, native `readelf`/`ldconfig`, Node/npm and Python 3.11+. FreeBSD inventory and resource collection use
+noninteractive native commands, not interactive Bash startup. `--skip-model`
+alignment proves only declared tool/file readiness; it does not qualify a coding
+CLI or provider. Generation needs its separately configured and qualified runner.
+
+Native Python build discovery also accepts versioned commands such as
+`python3.12`; an unversioned alias is unnecessary. Within each PATH directory,
+`python3` and `python` precede numerically descending versioned commands. Explicit
+pins remain authoritative, and every selected executable must pass actual runtime
+version and identity checks.
+
+Native ELF observation reads the FreeBSD hints directory order and recursively
+included global library maps, binds the inspector/configuration/library bytes,
+and rechecks library search candidates. It supports RPATH/RUNPATH, `$ORIGIN` and
+explicit `LD_LIBRARY_PATH`. It never runs a target image to discover dependencies.
+Filter and auxiliary library targets are retained as potential imports, including
+their recursive closure; that label does not assert that lazy loading occurred.
+Constrained, conflicting or chained library maps, other loader environment
+controls, other ABI interpreters, unmodeled dynamic tokens, unresolved filtees and
+`NODEFLIB` remain explicit refusals. These restrictions follow the observed
+[FreeBSD loader contract](https://github.com/freebsd/freebsd-src/blob/main/libexec/rtld-elf/rtld.1);
+they do not qualify an arbitrary loader configuration or a complete lifecycle.
+
+FreeBSD initialization, registration, alignment and resource observations are under
+active qualification in issue #67. End-to-end installed-wheel build/test, retained
+source custody and release qualification remain required; a hardware probe is not
+a substitute for those gates. Native quota observation is explicitly unsupported
+and requiring capacity policies continue to hold rather than infer no quotas.
+
 ## Configure workers and selections
 
 Copy `literate.workers.example.json` to user `workers.json` and replace its SSH
 placeholders with user-owned endpoints and workspaces. Copy
 `literate.test.example.json` to project-scoped user `test.json` and select those exact
-worker IDs with their matching `linux`, `macos`, or `windows` platform Flavors. The
+worker IDs with their matching `freebsd`, `linux`, `macos`, or `windows` platform Flavors. The
 resolved paths are reported by `litai init`: Linux/macOS default to
 `${XDG_CONFIG_HOME:-$HOME/.config}/literate-ai`, while Windows uses the user's Roaming
 AppData Known Folder. `LITAI_CONFIG_DIR` is an absolute override.
@@ -67,6 +107,14 @@ attempt is logged in `host-bootstrap.json` under `clock_sync` and does not fail
 sample-worker readiness.
 
 ## Run the supported matrix
+
+`make python-check` bounds each parallel test module to 3,600 seconds by default.
+Set `PYTHON_TEST_WORKER_TIMEOUT` to configure that module deadline. Native FreeBSD
+qualification sets `PYTHON_TEST_WORKERS=4 PYTHON_TEST_WORKER_TIMEOUT=10800` when
+running `gmake python-check`: the snapshot proof runs four clean generations and their probes,
+with a separate 1,800-second deadline for each candidate process. These module
+and process deadlines remain finite; increasing the module bound does not remove
+the individual process limits.
 
 The framework's sample suite defaults unpinned samples to exactly
 `flavor://literate-ai/lang-python`, `flavor://literate-ai/build-make`, and the current

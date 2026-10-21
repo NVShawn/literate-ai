@@ -63,6 +63,10 @@ from literate_ai.contracts.executable_components.context_journal import (
     ComponentContextBenchmarkRecord,
     ForwardGenerationContextCacheReport,
 )
+from literate_ai.contracts.model_scopes import (
+    RETAINED_SOURCE_NO_MODEL_SELECTOR,
+    RETAINED_SOURCE_PROVIDER,
+)
 from literate_ai.generated_tests import (
     GENERATED_TEST_SUITE_PATH,
     validate_generated_test_suite,
@@ -340,7 +344,9 @@ class CachedCodingCliSourceGenerator:
             ),
             model_binding=SourceCacheModelBinding(
                 self.selection.name,
-                source_cache_model_selector(recipe.model_for(self.selection.name)),
+                RETAINED_SOURCE_NO_MODEL_SELECTOR
+                if self.selection.name == RETAINED_SOURCE_PROVIDER
+                else source_cache_model_selector(recipe.model_for(self.selection.name)),
             ),
             request_identity=request_identity,
             source_semantics_identity=_accepted_source_semantics_identity(

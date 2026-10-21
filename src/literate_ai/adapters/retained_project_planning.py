@@ -4,43 +4,127 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 from literate_ai.adapters.component_lock_application import (
     current_project_component_lock_identities,
+    current_project_component_locks,
+    project_component_roots,
 )
 from literate_ai.adapters.conversion_authority import FilesystemConversionAuthorityStore
+from literate_ai.adapters.locked_generation_authority import (
+    FilesystemLockedGenerationAuthorityReader,
+)
 from literate_ai.adapters.project_validation import validated_project_authority_identity
+from literate_ai.adapters.retained_project_acceptance import (
+    read_retained_acceptance_policy,
+)
 from literate_ai.adapters.retained_project_inputs import verify_retained_project_inputs
+from literate_ai.adapters.retained_project_release import (
+    read_retained_project_release_policy,
+)
+from literate_ai.adapters.retained_project_sdks import read_retained_sdk_policy
+from literate_ai.adapters.retained_project_testing import (
+    read_retained_project_test_policy,
+)
 from literate_ai.adapters.standard_lifecycle_binding import (
     ResolvedStandardProjectLifecycleDriver,
 )
 from literate_ai.contracts import ContentIdentity, canonical_identity
 from literate_ai.contracts.operator_adoption import ConversionAuthorityStage
+from literate_ai.contracts.retained_component_ownership import (
+    require_registered_retained_owners,
+)
 from literate_ai.contracts.retained_project import RetainedProjectManifest
 from literate_ai.contracts.retained_project_lifecycle import (
     RetainedProjectPlan,
     RetainedProjectProfile,
 )
-from literate_ai.projects import LoadedProject
+from literate_ai.contracts.retained_project_sbom import (
+    project_retained_project_managed_graph,
+)
+from literate_ai.contracts.sbom import CycloneDxManagedGraph, ManagedComponentKind
+from literate_ai.projects import LoadedProject, ProjectConfigurationStore
 
 
 def retained_role_identity(
     manifest: RetainedProjectManifest, roles: set[str]
 ) -> ContentIdentity:
     """Bind the complete declared byte closure for a set of input ownership roles."""
-    return canonical_identity(
-        {
-            "schema": "literate-ai/retained-role-closure@1",
-            "roles": sorted(roles),
-            "members": [
-                member.to_dict() for member in manifest.members if member.role in roles
-            ],
+    return manifest.role_identity(roles)
+
+
+@dataclass(frozen=True, slots=True)
+class RetainedProjectPlanningResult:
+    plan: RetainedProjectPlan
+    managed_sbom_graph: CycloneDxManagedGraph
+    owned_components: tuple[ContentIdentity, ...] = ()
+    owned_inputs: int = 0
+    ownership_catalog_identity: ContentIdentity | None = None
+
+    def __post_init__(self):
+        if not isinstance(self.plan, RetainedProjectPlan) or not isinstance(
+            self.managed_sbom_graph, CycloneDxManagedGraph
+        ):
+            raise TypeError("retained planning requires a typed plan and managed graph")
+        root = next(c for c in self.managed_sbom_graph.components if c.kind.is_root)
+        if (
+            self.managed_sbom_graph.resolved_graph_identity != self.plan.identity
+            or root.kind is not ManagedComponentKind.RETAINED_PROJECT
+            or root.identity != self.plan.identity
+        ):
+            raise ValueError("retained.planning.managed-graph-mismatch")
+        if (
+            type(self.owned_components) is not tuple
+            or any(
+                not isinstance(item, ContentIdentity) for item in self.owned_components
+            )
+            or self.owned_components
+            != tuple(sorted(set(self.owned_components), key=lambda i: i.uri))
+        ):
+            raise ValueError("retained.planning.invalid-ownership-summary")
+        if type(self.owned_inputs) is not int or (
+            (
+                self.owned_components
+                and (
+                    self.owned_inputs <= 0
+                    or not isinstance(self.ownership_catalog_identity, ContentIdentity)
+                )
+            )
+            or (
+                not self.owned_components
+                and (
+                    self.owned_inputs != 0
+                    or self.ownership_catalog_identity is not None
+                )
+            )
+        ):
+            raise ValueError("retained.planning.invalid-ownership-summary")
+
+    def to_dict(self):
+        value = {
+            "plan": self.plan.to_dict(),
+            "managed_sbom_graph": self.managed_sbom_graph.to_dict(),
+            "authorization_identity": self.plan.identity.uri,
+            "admitted": False,
+            "release_authority": "original-source",
         }
-    )
+        if self.owned_components:
+            value["component_ownership"] = {
+                "state": "ownership-validated",
+                "catalog_identity": self.ownership_catalog_identity.uri,
+                "registered_component_authorings": [
+                    identity.uri for identity in self.owned_components
+                ],
+                "input_nodes": self.owned_inputs,
+                "native_action_admission": False,
+                "acceptance": "not-qualified",
+            }
+        return value
 
 
-def plan_retained_project(
+def plan_retained_project_with_graph(
     project: LoadedProject,
     binding: ResolvedStandardProjectLifecycleDriver,
     manifest: RetainedProjectManifest,
@@ -50,7 +134,7 @@ def plan_retained_project(
     target: str,
     profile_path: Path,
     profile_bytes: bytes,
-) -> RetainedProjectPlan:
+) -> RetainedProjectPlanningResult:
     """Validate current authority and complete retained inputs without acquisition.
 
     No native SDK builder, model provider, process runner, or cache writer is called.
@@ -58,11 +142,23 @@ def plan_retained_project(
     """
     if profile.target != target or profile.worker_identity != worker_identity:
         raise ValueError("Retained profile names another target or worker")
+    if ProjectConfigurationStore(project.root).read().definition != project.definition:
+        raise ValueError("retained.planning.project-definition-changed")
     binding.require_unchanged()
     project_identity = validated_project_authority_identity(
         project.root, synchronize_source_intelligence=False
     )
-    locks = current_project_component_lock_identities(project)
+    current_locks = current_project_component_locks(project)
+    locks = tuple(lock.identity for lock in current_locks)
+    ownership_catalog = None
+    owned_components = ()
+    if manifest.component_ownership:
+        ownership_catalog = FilesystemLockedGenerationAuthorityReader().load_catalog(
+            project_component_roots(project)[0]
+        )
+        owned_components = require_registered_retained_owners(
+            manifest.component_ownership, ownership_catalog.authorings
+        )
     conversion = FilesystemConversionAuthorityStore(project.root).load_optional()
     if conversion is None or conversion.project_id != project.definition.project_id:
         raise ValueError(
@@ -103,18 +199,15 @@ def plan_retained_project(
         raise ValueError("Retained SDK/toolchain closure is incomplete or changed")
     if profile.dependency_identity != retained_role_identity(manifest, {"dependency"}):
         raise ValueError("Retained dependency closure is incomplete or changed")
-    for role, identity in (
-        ("test-policy", profile.test_policy_identity),
-        ("release-policy", profile.release_policy_identity),
-    ):
-        policy = [member for member in manifest.members if member.role == role]
-        if (
-            len(policy) != 1
-            or ContentIdentity.parse_uri("sha256:" + policy[0].sha256) != identity
-        ):
-            raise ValueError(
-                "Retained policy requires exactly one current original policy input"
-            )
+    read_retained_project_test_policy(
+        project.root, manifest, profile, project.definition.test_receipt_policy
+    )
+    read_retained_acceptance_policy(project.root, profile, locks, manifest)
+    read_retained_project_release_policy(
+        project.root, manifest, profile.release_policy_identity
+    )
+    if any(member.role == "sdk-policy" for member in manifest.members):
+        read_retained_sdk_policy(project.root, manifest, locks)
     required_roles = {
         "source",
         "build-definition",
@@ -127,7 +220,8 @@ def plan_retained_project(
         )
     # Re-open all authority after streaming input capture, including conversion state.
     if (
-        validated_project_authority_identity(
+        ProjectConfigurationStore(project.root).read().definition != project.definition
+        or validated_project_authority_identity(
             project.root, synchronize_source_intelligence=False
         )
         != project_identity
@@ -137,7 +231,9 @@ def plan_retained_project(
     ):
         raise ValueError("Project authority changed during retained planning")
     binding.require_unchanged()
-    return RetainedProjectPlan(
+    if ownership_catalog is not None:
+        ownership_catalog.require_unchanged()
+    plan = RetainedProjectPlan(
         project.definition.project_id,
         project_identity,
         locks,
@@ -146,3 +242,38 @@ def plan_retained_project(
         manifest.identity,
         profile,
     )
+    return RetainedProjectPlanningResult(
+        plan,
+        project_retained_project_managed_graph(
+            plan, current_locks, version=project.definition.version
+        ),
+        owned_components,
+        len(manifest.members) + len(manifest.directories) if owned_components else 0,
+        ownership_catalog.catalog_audit_identity
+        if ownership_catalog is not None
+        else None,
+    )
+
+
+def plan_retained_project(
+    project: LoadedProject,
+    binding: ResolvedStandardProjectLifecycleDriver,
+    manifest: RetainedProjectManifest,
+    profile: RetainedProjectProfile,
+    *,
+    worker_identity: ContentIdentity,
+    target: str,
+    profile_path: Path,
+    profile_bytes: bytes,
+) -> RetainedProjectPlan:
+    """Preserve the identity-only planning API with the same complete graph checks."""
+    return plan_retained_project_with_graph(
+        project,
+        binding,
+        manifest,
+        profile,
+        worker_identity=worker_identity,
+        target=target,
+        profile_path=profile_path,
+        profile_bytes=profile_bytes,
+    ).plan

@@ -70,9 +70,11 @@ RELEASE_GATES := repository-layout-check public-export-check python-check lint f
 RELEASE_CHECKPOINT := $(OBJ_DIR)/release-checkpoint.json
 PYTHON_TEST_CHECKPOINT := $(OBJ_DIR)/python-test-checkpoint.json
 PYTHON_TEST_REPORT ?= $(OBJ_DIR)/python-test-report.json
+PYTHON_TEST_START_DIRECTORY ?= tests
 PYTHON_TEST_PATTERN ?= test*.py
 PYTHON_TEST_VERBOSITY ?= 1
 PYTHON_TEST_WORKERS ?= auto
+PYTHON_TEST_WORKER_TIMEOUT ?= 3600
 RELEASE_PLAN ?=
 RELEASE_PREPARED ?= $(OBJ_DIR)/release/prepared.json
 
@@ -92,11 +94,11 @@ really-clean: python-version ## Remove OBJ_DIR and generated sources from BUILD_
 
 $(RUNTIME_STAMP): pyproject.toml
 	$(PYTHON_COMMAND) -m venv "$(PYTHON_ENV)"
-	$(RUN_PYTHON_COMMAND) -m pip install -e .
+	$(RUN_PYTHON_COMMAND) scripts/run_pip.py install -e .
 	@touch "$@"
 
 $(DEV_STAMP): $(RUNTIME_STAMP) pyproject.toml
-	$(RUN_PYTHON_COMMAND) -m pip install -e ".[dev]"
+	$(RUN_PYTHON_COMMAND) scripts/run_pip.py install -e ".[dev]"
 	@touch "$@"
 
 bootstrap: install dev-install tools-install skill-evaluator-install validate ## First-time setup: install all runtime and contributor tools, then validate.
@@ -114,7 +116,7 @@ ifneq ($(strip $(RUNTIME_PREREQUISITE)),)
 dev-install: $(DEV_PREREQUISITE) ## Install pinned Python contributor tools.
 else
 dev-install: ## Install pinned Python contributor tools.
-	$(RUN_PYTHON_COMMAND) -m pip install -e ".[dev]"
+	$(RUN_PYTHON_COMMAND) scripts/run_pip.py install -e ".[dev]"
 endif
 
 install-check: python-version $(RUNTIME_PREREQUISITE) ## Install to a temporary PREFIX and verify init/validate/lock/plan.
@@ -155,7 +157,7 @@ python-check: python-version $(DEV_PREREQUISITE) ## Validate the Python framewor
 	$(RUN_PYTHON_COMMAND) -X pycache_prefix="$(OBJ_DIR)/pycache" -m compileall -q src tests
 	$(RUN_PYTHON_COMMAND) -m py_compile $(SAMPLE_PYTHON)
 	$(RUN_PYTHON_COMMAND) scripts/check_host_path_policy.py .
-	LITAI_REQUIRE_PINNED_PIP_WHEEL=1 PYTHONPATH=src $(STEP) python-check -- $(RUN_PYTHON_COMMAND) scripts/run_checkpointed_unittests.py --state "$(PYTHON_TEST_CHECKPOINT)" --start-directory tests --pattern "$(PYTHON_TEST_PATTERN)" --verbosity "$(PYTHON_TEST_VERBOSITY)" --workers "$(PYTHON_TEST_WORKERS)" --report "$(PYTHON_TEST_REPORT)"
+	LITAI_REQUIRE_PINNED_PIP_WHEEL=1 PYTHONPATH=src $(STEP) python-check -- $(RUN_PYTHON_COMMAND) scripts/run_checkpointed_unittests.py --state "$(PYTHON_TEST_CHECKPOINT)" --start-directory "$(PYTHON_TEST_START_DIRECTORY)" --pattern "$(PYTHON_TEST_PATTERN)" --verbosity "$(PYTHON_TEST_VERBOSITY)" --workers "$(PYTHON_TEST_WORKERS)" --worker-timeout "$(PYTHON_TEST_WORKER_TIMEOUT)" --report "$(PYTHON_TEST_REPORT)"
 
 .PHONY: finite-acceptance-check
 finite-acceptance-check: python-version $(RUNTIME_PREREQUISITE) ## Verify fractional application/library acceptance and identity compatibility.

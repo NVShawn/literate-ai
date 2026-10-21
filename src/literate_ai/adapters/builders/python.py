@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shlex
 import shutil
 import tempfile
@@ -439,7 +440,25 @@ def _python_candidates(
     seen: set[str] = set()
     for directory in path_value.split(os.pathsep):
         search_directory = directory or os.curdir
-        for name in ("python3", "python"):
+        pattern = r"python3\.([0-9]+)" + (r"(?:\.exe)?" if os.name == "nt" else "")
+        try:
+            versioned = sorted(
+                (
+                    (int(match.group(1)), entry.name)
+                    for entry in Path(search_directory).iterdir()
+                    if (
+                        match := re.fullmatch(
+                            pattern,
+                            entry.name,
+                            re.IGNORECASE if os.name == "nt" else 0,
+                        )
+                    )
+                ),
+                reverse=True,
+            )
+        except OSError:
+            versioned = []
+        for name in ("python3", "python", *(name for _, name in versioned)):
             found = shutil.which(name, path=search_directory)
             if found is None:
                 continue
@@ -492,8 +511,9 @@ def discover_python_toolchain(
     has resolved those constraints from a Component or Flavor; this adapter does not
     parse specification prose. That command is authoritative. Otherwise a non-empty
     operator-provided ``PYTHON`` command is authoritative. With neither, each ``PATH``
-    directory is considered in order and ``python3`` then ``python`` are probed within
-    that directory. Invalid unpinned candidates are skipped; invalid explicit commands
+    directory is considered in order: ``python3``, ``python``, then numerically
+    descending ``python3.MINOR`` commands are probed within that directory.
+    Invalid unpinned candidates are skipped; invalid explicit commands
     fail without fallback. The default minimum matches the framework and portable-
     Python Flavor requirement; callers may tighten it or provide an exact version
     prefix from a resolved pin.

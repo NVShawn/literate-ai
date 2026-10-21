@@ -134,8 +134,8 @@ def _selected_platforms(selectors: tuple[str, ...]) -> frozenset[str]:
             "flavor://samples/os-*",
             "flavor://literate-ai/os-*",
         }:
-            return frozenset({"linux", "macos", "windows"})
-        for name in ("linux", "macos", "windows"):
+            return frozenset({"freebsd", "linux", "macos", "windows"})
+        for name in ("freebsd", "linux", "macos", "windows"):
             if selector in {
                 f"os-{name}",
                 f"flavor://samples/os-{name}",
@@ -144,9 +144,12 @@ def _selected_platforms(selectors: tuple[str, ...]) -> frozenset[str]:
                 selected.add(name)
     if selected:
         return frozenset(selected)
-    host = {"darwin": "macos", "linux": "linux", "windows": "windows"}.get(
-        platform.system().lower()
-    )
+    host = {
+        "darwin": "macos",
+        "linux": "linux",
+        "windows": "windows",
+        "freebsd": "freebsd",
+    }.get(platform.system().lower())
     if host is None:
         raise ValueError("sample fanout controller host OS is unsupported")
     return frozenset({host})

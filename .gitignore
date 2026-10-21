@@ -20,6 +20,7 @@ dist/
 # Derived cache by default. Projects may explicitly unignore or force-add BUILD_DIR.
 /generated/
 /.litai-cache-locks/
+/.litai-locks/
 .component.*.write.lock
 .literate.project.json.write.lock
 .literate.project.json.write.lock

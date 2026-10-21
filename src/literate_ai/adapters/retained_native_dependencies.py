@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from literate_ai.adapters.dependencies.observation import PortableHostDependencyObserver
+from literate_ai.adapters.freebsd_loader_paths import FreeBsdLoaderPaths
 from literate_ai.adapters.linux_loader_paths import LinuxLoaderPaths
 from literate_ai.adapters.macos_loader_paths import MacOsLoaderPaths
 from literate_ai.adapters.retained_native_files import (
@@ -53,6 +54,11 @@ class RetainedNativeDependencies:
                 if "linux_environment" in selected
                 else None
             ),
+            freebsd_loader_paths=(
+                FreeBsdLoaderPaths.from_environment(selected["freebsd_environment"])
+                if "freebsd_environment" in selected
+                else None
+            ),
         ).observe(
             {"artifact_path": selected["artifact_root"]}, root_ref=selected["root_ref"]
         )
@@ -76,6 +82,7 @@ def observe_retained_native_dependencies(
     windows_environment=None,
     macos_environment=None,
     linux_environment=None,
+    freebsd_environment=None,
 ):
     if (
         not isinstance(artifact_root, Path)
@@ -98,12 +105,18 @@ def observe_retained_native_dependencies(
         if linux_environment is not None
         else None
     )
+    freebsd_paths = (
+        FreeBsdLoaderPaths.from_environment(freebsd_environment)
+        if freebsd_environment is not None
+        else None
+    )
     observer = PortableHostDependencyObserver(
         artifact_files=artifact_files,
         library_roots=library_roots,
         windows_environment=windows_environment,
         macos_loader_paths=macos_paths,
         linux_loader_paths=linux_paths,
+        freebsd_loader_paths=freebsd_paths,
     )
     selected = {
         "platform": sys.platform,
@@ -117,6 +130,8 @@ def observe_retained_native_dependencies(
         selected["macos_environment"] = macos_paths.to_environment()
     if linux_paths is not None:
         selected["linux_environment"] = linux_paths.to_environment()
+    if freebsd_paths is not None:
+        selected["freebsd_environment"] = freebsd_paths.to_environment()
     selection = canonical_json_bytes(selected)
     observation = observer.observe(
         {"artifact_path": str(artifact_root)}, root_ref=root_ref

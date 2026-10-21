@@ -16,7 +16,7 @@ import urllib.error
 import urllib.request
 import zipfile
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path, PurePosixPath
 
 from literate_ai.adapters.user_paths import resolve_host_paths
@@ -557,7 +557,16 @@ def _select_coding_agent(
     locator: CommandLocator,
 ) -> str:
     requested = environment.get(CODING_CLI_ENVIRONMENT, "").strip()
-    supported = tuple(item.capability for item in sbom.base.coding_agents)
+    realized = {item.capability for item in sbom.packages} | {
+        capability
+        for artifact in sbom.artifacts
+        for capability in artifact.capabilities
+    }
+    supported = tuple(
+        item.capability
+        for item in sbom.base.coding_agents
+        if item.capability in realized
+    )
     if requested:
         if requested not in supported:
             raise HostInstallError(
@@ -567,6 +576,8 @@ def _select_coding_agent(
             )
         return requested
     for requirement in sbom.base.coding_agents:
+        if requirement.capability not in supported:
+            continue
         observation = _observe_capability(
             requirement,
             source_kind="coding-agent",
@@ -577,10 +588,11 @@ def _select_coding_agent(
         if observation.ready:
             return requirement.capability
     default = sbom.base.default_coding_agent
-    if default is None:
+    if default is None or default not in supported:
         raise HostInstallError(
             "host-install.coding-agent-default-missing",
-            "os-base does not declare a default coding agent",
+            "the declared default coding agent has no realization for this tuple; "
+            f"select {CODING_CLI_ENVIRONMENT} from: {', '.join(supported)}",
         )
     return default
 
@@ -614,7 +626,11 @@ def _observe_native_package(
             and requirement.manager_package.casefold()
             in (query.stdout + query.stderr).casefold()
         )
-    base = sbom.base.capability(requirement.capability)
+    base = replace(
+        sbom.base.capability(requirement.capability),
+        probe_candidates=requirement.probe_candidates,
+        probe_arguments=requirement.probe_arguments,
+    )
     probe = _probe_capability(
         base, environment=environment, runner=runner, locator=locator
     )
@@ -1152,6 +1168,8 @@ def _managed_tool_root(
         if target.operating_system == "windows"
         else "macos"
         if target.operating_system == "macos"
+        else "freebsd"
+        if target.operating_system == "freebsd"
         else "linux"
     )
     return Path(

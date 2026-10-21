@@ -1080,6 +1080,8 @@ def _create_promoted_project(
             if sys.platform == "win32"
             else "macos"
             if sys.platform == "darwin"
+            else "freebsd"
+            if sys.platform.startswith("freebsd")
             else "linux"
         )
         bootstrap_flavors = {
@@ -1587,6 +1589,7 @@ def _create_promoted_project(
             and "platform.os" not in selected_axes
             and not selected_aliases.intersection(
                 {
+                    "flavor://literate-ai/os-freebsd",
                     "flavor://literate-ai/os-linux",
                     "flavor://literate-ai/os-macos",
                     "flavor://literate-ai/os-windows",
@@ -1598,6 +1601,8 @@ def _create_promoted_project(
                 if sys.platform == "win32"
                 else "macos"
                 if sys.platform == "darwin"
+                else "freebsd"
+                if sys.platform.startswith("freebsd")
                 else "linux"
             )
             selected_qualification_flavors = (

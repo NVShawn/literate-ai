@@ -40,6 +40,9 @@ def _metric(value: int | None, status=CapacityProbeStatus.MEASURED) -> CapacityM
 
 
 def _cpu_basis_points() -> CapacityMetric:
+    if sys.platform.startswith("freebsd"):
+        measured = worker_pressure_probe._cpu()
+        return _metric(measured["value"], CapacityProbeStatus(measured["status"]))
     try:
         load = os.getloadavg()[0]
         cores = os.cpu_count() or 1
@@ -49,6 +52,9 @@ def _cpu_basis_points() -> CapacityMetric:
 
 
 def _available_memory() -> CapacityMetric:
+    if sys.platform.startswith("freebsd"):
+        measured = worker_pressure_probe._memory()
+        return _metric(measured["value"], CapacityProbeStatus(measured["status"]))
     try:
         if sys.platform.startswith("linux"):
             values = {}
@@ -112,6 +118,8 @@ def _available_memory() -> CapacityMetric:
 
 
 def _paging_counter() -> tuple[int, int] | None:
+    if sys.platform.startswith("freebsd"):
+        return worker_pressure_probe._paging()
     if not sys.platform.startswith("linux"):
         return None
     try:
@@ -236,7 +244,7 @@ def _remote_samples(bindings, policy, runner):
             remote_command,
             timeout,
             transport=bindings.worker.transport,
-            login_shell=not windows,
+            login_shell=bindings.os_family not in {"freebsd", "windows"},
         )
         if "SSH_AUTH_SOCK" in os.environ:
             environment["SSH_AUTH_SOCK"] = os.environ["SSH_AUTH_SOCK"]

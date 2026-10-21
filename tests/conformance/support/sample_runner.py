@@ -753,6 +753,7 @@ _BUILD_FLAVOR_COORDINATES = {
     "cmake": "flavor://literate-ai/build-cmake",
 }
 _OS_FLAVOR_COORDINATES = {
+    "freebsd": "flavor://literate-ai/os-freebsd",
     "linux": "flavor://literate-ai/os-linux",
     "macos": "flavor://literate-ai/os-macos",
     "windows": "flavor://literate-ai/os-windows",
@@ -2016,6 +2017,8 @@ def _sample_oracle_reference(metadata: Mapping[str, object]) -> ContentReference
 
 
 def _host_os() -> str:
+    if sys.platform.startswith("freebsd"):
+        return "freebsd"
     if sys.platform.startswith("linux"):
         return "linux"
     if sys.platform == "darwin":
@@ -2500,6 +2503,7 @@ def _shared_flavors(samples_root: Path) -> tuple[_SharedFlavor, ...]:
             )
         )
     required = {
+        (FlavorAxis.PLATFORM_OS, "freebsd"),
         (FlavorAxis.PLATFORM_OS, "linux"),
         (FlavorAxis.PLATFORM_OS, "macos"),
         (FlavorAxis.PLATFORM_OS, "windows"),
@@ -9490,7 +9494,7 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--expected-platform",
-        choices=("linux", "macos", "windows"),
+        choices=tuple(_OS_FLAVOR_COORDINATES),
         help="fail unless host Flavor discovery resolves this exact platform",
     )
     parser.add_argument(

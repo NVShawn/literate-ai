@@ -13,6 +13,7 @@ from literate_ai.adapters.dependencies import (
     PortableHostDependencyObserver,
 )
 from literate_ai.adapters.dependencies.observation import _normalized_observation
+from literate_ai.adapters.freebsd_loader_paths import FreeBsdLoaderPaths
 from literate_ai.adapters.linux_loader_paths import LinuxLoaderPaths
 from literate_ai.adapters.macos_loader_paths import MacOsLoaderPaths
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
@@ -41,6 +42,11 @@ class CompilerCacheDependencies:
             linux_loader_paths=(
                 LinuxLoaderPaths.from_environment(environment)
                 if sys.platform.startswith("linux")
+                else None
+            ),
+            freebsd_loader_paths=(
+                FreeBsdLoaderPaths.from_environment(environment)
+                if sys.platform.startswith("freebsd")
                 else None
             ),
         ).observe({"artifact_path": str(executable.parent)}, root_ref=_ROOT)

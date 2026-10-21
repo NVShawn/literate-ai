@@ -10,6 +10,7 @@ from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
+from literate_ai.adapters.builders import BuildError
 from literate_ai.adapters.component_lock_application import (
     ProjectComponentLockSetError,
     current_project_component_lock_identities,
@@ -1019,6 +1020,8 @@ def _standard_rebuild_one_component(
                 ) from exc
             except (CodingCliError, RetainedSourceError) as exc:
                 raise CliFailure(exc.code, exc.message) from exc
+            except BuildError as exc:
+                raise CliFailure(exc.code, str(exc)) from exc
             except LocalStandardLifecycleError as exc:
                 raise CliFailure(
                     getattr(
@@ -1500,6 +1503,14 @@ def _rebuild_from_args_body(
         conversion_authority is not None
         and conversion_authority.stage is not ConversionAuthorityStage.QUALIFIED
     ):
+        if conversion_authority.stage is ConversionAuthorityStage.ORIGINAL:
+            raise CliFailure(
+                "rebuild.conversion_authority_not_qualified",
+                "This project retains original-source authority; review an explicit "
+                "--retained-project manifest and --retained-project-profile with "
+                "--retained-project-plan. Original adoption does not "
+                "qualify execution.",
+            )
         raise CliFailure(
             "rebuild.conversion_authority_not_qualified",
             "adopted project remains original-source authoritative at conversion stage "

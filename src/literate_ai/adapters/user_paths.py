@@ -105,6 +105,26 @@ class HostSystemPaths:
 
 
 @dataclass(frozen=True, slots=True)
+class FreeBsdLoaderSystemPaths:
+    ldconfig: PurePath
+    hints: PurePath
+    libmap: PurePath
+    defaults: tuple[PurePath, ...]
+    interpreter: PurePath
+
+
+def resolve_freebsd_loader_system_paths() -> FreeBsdLoaderSystemPaths:
+    """Native FreeBSD runtime-loader policy, independent of user configuration."""
+    return FreeBsdLoaderSystemPaths(
+        PurePosixPath("/sbin/ldconfig"),
+        PurePosixPath("/var/run/ld-elf.so.hints"),
+        PurePosixPath("/etc/libmap.conf"),
+        (PurePosixPath("/lib"), PurePosixPath("/usr/lib")),
+        PurePosixPath("/libexec/ld-elf.so.1"),
+    )
+
+
+@dataclass(frozen=True, slots=True)
 class HostPaths(UserPaths):
     """All per-user host-native roots owned by the platform policy surface."""
 
@@ -150,7 +170,7 @@ class HostInstallLayout:
         cls, prefix: PurePath, *, platform_family: str | None = None
     ) -> HostInstallLayout:
         family = platform_family or _host_platform_family()
-        if family not in {"linux", "macos", "windows"}:
+        if family not in {"freebsd", "linux", "macos", "windows"}:
             raise UserPathError(
                 "user_paths.platform_unsupported",
                 f"unsupported install-layout platform family: {family!r}",
@@ -191,6 +211,23 @@ def resolve_host_system_paths(*, platform_family: str | None = None) -> HostSyst
                 PurePosixPath("/System"),
                 PurePosixPath("/usr"),
                 PurePosixPath("/bin"),
+                PurePosixPath("/dev"),
+            ),
+            None,
+            None,
+            None,
+        )
+    if family == "freebsd":
+        return HostSystemPaths(
+            None,
+            None,
+            None,
+            (),
+            (
+                PurePosixPath("/usr"),
+                PurePosixPath("/bin"),
+                PurePosixPath("/lib"),
+                PurePosixPath("/libexec"),
                 PurePosixPath("/dev"),
             ),
             None,
@@ -248,7 +285,7 @@ def resolve_user_home(
 
     configured = dict(os.environ if environment is None else environment)
     family = platform_family or _host_platform_family()
-    if family not in {"linux", "macos", "windows"}:
+    if family not in {"freebsd", "linux", "macos", "windows"}:
         raise UserPathError(
             "user_paths.platform_unsupported",
             f"unsupported user-path platform family: {family!r}",
@@ -281,7 +318,7 @@ def resolve_host_paths(
 
     configured = dict(os.environ if environment is None else environment)
     family = platform_family or _host_platform_family()
-    if family not in {"linux", "macos", "windows"}:
+    if family not in {"freebsd", "linux", "macos", "windows"}:
         raise UserPathError(
             "user_paths.platform_unsupported",
             f"unsupported user-path platform family: {family!r}",
@@ -539,6 +576,8 @@ def _host_platform_family() -> str:
         return "macos"
     if sys.platform.startswith("linux"):
         return "linux"
+    if sys.platform.startswith("freebsd"):
+        return "freebsd"
     raise UserPathError(
         "user_paths.platform_unsupported",
         f"unsupported host platform: {sys.platform!r}",
@@ -600,6 +639,7 @@ def _windows_known_folder(kind: str) -> Path:
 
 
 __all__ = [
+    "FreeBsdLoaderSystemPaths",
     "APPLICATION_DIRECTORY",
     "CONFIG_DIRECTORY_ENVIRONMENT",
     "HOST_INSTALL_MANIFEST_SCHEMA",
@@ -613,6 +653,7 @@ __all__ = [
     "prepare_user_directory",
     "resolve_host_paths",
     "resolve_host_system_paths",
+    "resolve_freebsd_loader_system_paths",
     "resolve_user_home",
     "resolve_user_paths",
 ]

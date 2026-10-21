@@ -985,6 +985,8 @@ def host_platform_selector() -> str:
         return "+flavor://literate-ai/os-macos"
     if sys.platform.startswith("linux"):
         return "+flavor://literate-ai/os-linux"
+    if sys.platform.startswith("freebsd"):
+        return "+flavor://literate-ai/os-freebsd"
     return "+flavor://literate-ai/os-windows"
 
 
@@ -1024,6 +1026,11 @@ def apply_init_flavor_defaults(raw: list[str] | tuple[str, ...]) -> tuple[str, .
     selected = {item.removeprefix("+") for item in normalized}
     if "flavor://literate-ai/lang-swift" in selected and "toolchain" not in covered:
         platform = next(item for item in selected if "/os-" in item)
+        if platform == "flavor://literate-ai/os-freebsd":
+            raise ProjectInitializationError(
+                "project.initialization_unsupported_toolchain",
+                "Swift on FreeBSD requires an explicitly selected toolchain Flavor",
+            )
         realization = {
             "flavor://literate-ai/os-macos": (
                 "flavor://literate-ai/toolchain-swift-apple"
@@ -1224,6 +1231,11 @@ _TEMPLATE_FILES = {
         "flavors/os-macos/standard-command-profile.json"
     ),
     "flavors/os-macos/openspec/spec.md": "flavors/os-macos/openspec/spec.md",
+    "flavors/os-freebsd/flavor.md": "flavors/os-freebsd/flavor.md",
+    "flavors/os-freebsd/standard-command-profile.json": (
+        "flavors/os-freebsd/standard-command-profile.json"
+    ),
+    "flavors/os-freebsd/openspec/spec.md": "flavors/os-freebsd/openspec/spec.md",
     "flavors/os-linux/flavor.md": "flavors/os-linux/flavor.md",
     "flavors/os-linux/standard-command-profile.json": (
         "flavors/os-linux/standard-command-profile.json"

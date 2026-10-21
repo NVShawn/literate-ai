@@ -43,7 +43,9 @@ def _worker() -> ExecutionWorker:
         ExecutionWorkerKind.SSH,
         endpoint="runner@linux.example",
         workspace="~/literate-ai",
-        requirements=ExecutionRequirements(os_family="linux"),
+        requirements=ExecutionRequirements(
+            os_family="linux", cpu_architecture="x86_64"
+        ),
         lifecycle_executable="~/.local/bin/litai",
     )
 
@@ -263,6 +265,14 @@ class RetainedHarnessRemoteTests(unittest.TestCase):
         )
         self.assertIn("rm -rf", runner.calls[-1][-1])
 
+    @patch(
+        "literate_ai.adapters.retained_harness_remote.platform.system",
+        new=lambda: "Linux",
+    )
+    @patch(
+        "literate_ai.adapters.retained_harness_remote.platform.machine",
+        new=lambda: "x86_64",
+    )
     def test_internal_receiver_validates_runtime_and_rejects_tampering(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -296,6 +306,8 @@ class RetainedHarnessRemoteTests(unittest.TestCase):
                     runtime_package,
                     runtime_path,
                     inventory=inventory,
+                    os_family="linux",
+                    cpu_architecture="x86_64",
                 )
             worker = _worker()
             request = RetainedHarnessRemoteRequest(

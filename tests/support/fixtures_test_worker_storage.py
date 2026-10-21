@@ -18,7 +18,12 @@ from literate_ai.contracts import (
 )
 from tests.support.fixtures_test_worker_capacity import ROLES, observation, policy
 
-FAMILY = {"darwin": "macos", "linux": "linux", "win32": "windows"}[sys.platform]
+FAMILY = {
+    "darwin": "macos",
+    "linux": "linux",
+    "win32": "windows",
+    "freebsd": "freebsd",
+}["freebsd" if sys.platform.startswith("freebsd") else sys.platform]
 
 
 def bindings(root):
