@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Select installed `gmake` before base `make` in the POSIX receiver custody
+  fixture, retaining actual GNU Make discovery and tool-substitution refusals.
+
+- Bind retained Windows command system context to the native OS directory and
+  live directory identities, refusing caller injection and later drift. Inspect
+  independent PE dependencies concurrently with deterministic graph assembly,
+  unchanged deadlines and cache invalidation on inspection failure. Installed
+  qualification and full compiler SDK integration remain pending.
+
+- Add an explicit native FreeBSD tree pkg provider and live SDK resource-owner
+  dispatch. Preserve hard links, symbolic targets, empty directories and native
+  metadata; verify bounded archives independently and refuse altered topology,
+  hooks, checksums and trailers. Retain environment/device obligations without
+  inventing package coordinates. Match native shared-library summaries for private
+  library names while retaining complete imports in SDK dependency evidence.
+  Full compiler SDK and default lifecycle qualification remain open.
+  Preserve native Unicode PAX charset and directory-path forms while rejecting
+  changed names/targets; native tests include case-distinct links and long NFC names.
+
+- Integrate the reviewed Windows retained/interpreter fixture repairs from PR #89
+  and bind an executable Windows placeholder for the retained output-PATH case.
+  Keep production custody, discovery and receiver deadlines unchanged.
+
 - Add a distinct tree package plan/result and deterministic PAX TAR provider.
   Preserve file modes, empty directories, symbolic targets and hard-link groups;
   independently reject rehashed topology/byte/mode changes and unbound trailers.

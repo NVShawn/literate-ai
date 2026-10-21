@@ -199,10 +199,13 @@ class NativeSdkTreePackageResources:
     def package(
         self, base, *, adapter, store, object_root, limits, case_sensitive=False
     ):
+        from literate_ai.adapters.freebsd_tree_packaging import (
+            FreeBsdTreePackageAdapter,
+        )
         from literate_ai.adapters.tree_packaging import TreeTarPackageAdapter
 
-        if not isinstance(adapter, TreeTarPackageAdapter):
-            raise TypeError("SDK tree package requires its explicit TAR provider")
+        if not isinstance(adapter, (TreeTarPackageAdapter, FreeBsdTreePackageAdapter)):
+            raise TypeError("SDK tree package requires an explicit tree provider")
         self.populate_store(store)
         plan = self.make_plan(base, limits=limits, case_sensitive=case_sensitive)
         result = adapter.package(plan, store=store, object_root=object_root)

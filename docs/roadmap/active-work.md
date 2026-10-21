@@ -29576,3 +29576,158 @@ works after producer retirement and relocation. These checks qualify the install
 tree/TAR mechanism, not the complete native lifecycle, compiler SDK, pkg provider,
 default CLI or release. Draft PR #87 carries the code; exact-current hosted CI
 remains a separate gate.
+
+Native tree pkg source integration now constructs packages through the real pinned
+tool and the live SDK tree resource owner. A distinct projection/result binds the
+whole tree plan, native tool/ABI, package coordinates and installation prefix.
+Owned staging moves by rename so hard-link groups survive. Independent verification
+checks bounded XZ/TAR decoding, exact files/links/directories, symbolic target text,
+hard-link owners, modes, ownership, epoch, native checksums, physical flatsize and
+ELF summaries. Rehashed topology changes, hooks, changed manifests, extra frames
+and unplanned extended attributes refuse. Environment/device requirements remain
+in the original plan without fabricated native package coordinates.
+
+The first live-library probe exposed a private SONAME summary mismatch and remains
+retained as a failed 21-case run. Native pkg only summarizes names starting with
+`lib`; the corrected projection preserves all imports in the actual SDK dependency
+observation and source/resolved BOMs. The final 1,858-file source export has SHA-256
+`8bd66e993c3ad78a46be424b643b9030a09b7ad8f61c756642f5a8f8168623d6`.
+All 28 native source checks pass with no skips in 39.680 test seconds (43.252
+supervised). This includes repeat construction with identical bytes, live producer
+ownership-loss refusal and a real compiled-library API after extraction, producer
+retirement and relocation. Python 3.11 focused checks pass 25 cases with one native
+construction skip. Full controller regression and exact installed-wheel renewal
+for this new native provider remain pending. Flavor/default lifecycle dispatch,
+qualification codecs, artifact-root joins/directory expansion and full compiler
+SDK admission remain open; the preceding installed TAR wheel does not qualify this
+new native source batch.
+
+The frozen pre-Unicode batch completes the full controller regression: 1,988
+passed, 88 skipped and zero failures across 2,076 selected cases. The raw runner
+separately reports 2,056 tests, 75 skips and 1,161.072 seconds. Report SHA-256
+`b58d6b6fd67ebf64bfd1d23d805a50a5af751c664cecd08206c8ae09c66e2573`.
+That pass is retained separately from the subsequent naming corrections.
+
+Actual native naming probes expose libarchive's `hdrcharset=BINARY` marker and
+PAX directory trailing slash. The verifier now admits those exact forms while
+retaining exact decoded paths/targets and refusing other charsets or extended
+attributes. The renewed 1,858-file source export has SHA-256
+`be385a2d54b67be35fb9599786cfc7039c0ec6b4d54fa45af241ca37492037a6`.
+All 29 native source cases pass without skips in 35.469 test seconds (39.746
+supervised), including case-distinct hard links, long NFC file/target names and
+Unicode empty directories through actual native construction and system tar.
+The failed preceding naming probe and archive remain retained.
+
+Exact pushed `79bae2df` hosted CI also exposes Windows fixture failures already
+addressed by [PR #89](https://github.com/jordanhubbard/literate-ai/pull/89).
+Its reviewed executable-filename, isolated interpreter and explicit loader-platform
+fixture repairs are integrated here. A further output-PATH fixture now gives its
+captured Windows placeholder an executable filename and refreshes the exact manifest
+and tool binding. All 37 affected controller cases pass in 33.103 seconds. Native
+Windows validation of the additional fixture remains pending; production receiver
+timeout [#90](https://github.com/jordanhubbard/literate-ai/issues/90) remains a separate
+failure. Full regression renewal, exact wheel/native installation and current CI
+must pass before this source batch is pushed or treated as qualified.
+
+The actual isolated Python 3.12.10 Windows check now runs all 37 affected cases:
+27 pass, nine existing platform skips remain and one fails in workspace PE
+observation because the retained command environment lacks `SystemRoot`. Its
+source archive is `sha256:4942ade26758b57aa9fe189e7f3134c90c950c34accc52ab1b6a3cb201b0fb76`.
+The repaired executable filename reaches the real dependency guard; no command
+executes and no receipt is admitted. Preserve this failure under
+[issue #102](https://github.com/jordanhubbard/literate-ai/issues/102). Do not relax
+the guard or replace this failure with an empty dependency observation.
+
+### [ ] RETAINED-WIN-CONTEXT-001 — Bind native Windows retained system context
+
+- **GitHub issue:** [#102](https://github.com/jordanhubbard/literate-ai/issues/102)
+- **Owner:** Retained execution environment, dependency observation and native runtime custody
+- **Direction:** Supply explicitly bound native Windows system context and complete
+  captured tool runtime while preserving caller-injection refusal and POSIX identities.
+- **Evidence:** The real native source check fails at the `SystemRoot` requirement
+  after the fixture's executable naming repair. Subsequent runtime closure remains
+  unproven. This is separate from receiver observation deadline issue #90.
+- **Acceptance:** Native workspace/command checks pass with actual PE closure;
+  source/context/runtime drift refuses; existing loader-policy assertions and
+  finite observation deadlines remain intact. Renew full, installed and exact CI gates.
+
+### [ ] WINDOWS-PE-OBSERVE-001 — Bound native Windows PE dependency observation
+
+- **GitHub issue:** [#90](https://github.com/jordanhubbard/literate-ai/issues/90)
+- **Priority:** P0
+- **Owner:** Framework PE dependency observation and receiver custody
+- **Direction:** Complete native Windows dependency closure within existing finite receiver and retained-command limits; issue #90.
+- **Conclusion:** Integrate the reviewed independent-image frontier implementation from peer commit 1fbc7e7f, retaining deterministic resolution, image and inspector hashes, complete graph semantics and owned failure cleanup; qualify it on actual Windows before acceptance.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Inspect independent images in bounded concurrent frontiers; merge through the existing loader resolver in canonical queue order.
+  - [x] Preserve content-bound fact caching and cancel/join outstanding bounded inspections on refusal.
+- **Evidence:**
+  - [x] Serial/parallel graph equivalence, real overlap, image substitution and inspector mutation refusals pass.
+  - [ ] Actual native Windows retained workspace and admitted receiver complete inside unchanged deadlines; full regression, exact installed wheel and CI pass.
+
+Native Windows source qualification of the context and concurrent PE observer
+passes 53 cases: 39 pass, 14 existing skips, no failures in 167.082 test seconds
+(176.172 supervised), inside the unchanged 300-second limit. The source archive
+is `sha256:7ec3355dc0480542ec71040361cafc65f4d14e9727c93eada9275591b7f28874`.
+The preceding serial run exceeded its 300-second bound and remains retained.
+A separate actual captured-command/drift probe initially refuses its malformed
+test profile because acceptance lacks the new stage dependency. Correct the
+fixture DAG before retrying; this is not evidence of command execution or
+installed/runtime admission. The admitted receiver and full renewal gates remain
+open.
+
+The corrected-DAG captured-command probe reaches actual Windows execution: both
+commands return zero, but relocated `whoami /?` produces no help text and the
+new test's duplicate raw `rmtree` cleanup fails on read-only snapshot blobs.
+The probe fails in 288.374 test seconds (295.969 supervised); drift assertions
+were not reached. Preserve that failure. The next source probe uses actual
+`whoami` identity output and the fixture's existing `TemporaryDirectory` cleanup
+instead of duplicate raw deletion. No production guard or deadline is changed.
+
+Native FreeBSD context/package regression runs 55 cases with two existing
+Windows-only skips, but receiver custody subtests fail because the fixture wraps
+BSD `/usr/bin/make` while receiver discovery correctly requires GNU Make.
+Track this fixture repair under existing [FreeBSD support issue #67](https://github.com/jordanhubbard/literate-ai/issues/67):
+select available `gmake` before `make`, quote its executable path, retain actual
+before/after receiver measurements and all tool-substitution assertions. Do not
+relax the production GNU Make requirement or add a FreeBSD skip. Renew the native
+group after the fixture repair; retain the failed 101.916-second supervisor result.
+
+The renewed actual Windows captured-command probe passes both context/source
+subtests with no skips: `whoami` executes successfully in each retained workspace,
+then the next execution refuses a changed native system context or changed original
+source without recording another command observation. Test time is 279.381 seconds
+(286.500 supervised), inside the unchanged 300-second limit. Source archive:
+`sha256:3f8702850abf911950dfeab1ebb3d80c8c16c401c9709f9a1e86cd44a6edffde`.
+The admitted receiver is being qualified independently; current full regression,
+exact installed wheel and hosted CI remain required before landing this batch.
+
+The current implementation completes its frozen full controller regression:
+1,997 passes, 90 skips and zero failures across 2,087 selected cases. The raw
+runner reports 2,067 tests, 77 skips and 911.576 seconds. Report SHA-256:
+`88bcdb5128cfe8822c760c57389671267cc64c3fbd367a1cb4109d0a537b1328`.
+The frozen source inventory remains unchanged through terminal completion.
+Lint, format, layout, public-export audit, skills, runner review, OpenSpec and
+rendered documentation gates pass.
+
+Native FreeBSD source renewal passes 55 cases (53 passes, two existing
+Windows-only skips), including POSIX execution, repaired GNU Make receiver
+custody, actual tree pkg construction and both relocated C APIs. Time:
+100.241 test / 103.775 supervised seconds. Source archive:
+`sha256:3c8ba342527e417e51d14eafe3d3f42253b0044fa1d87f940842769dc906e9c8`.
+
+The actual native Windows admitted-receiver discovery/profile-guard test also
+passes without skips: 463.266 test / 472.344 supervised seconds. Each receiver
+observation retains the production 300-second cap, and the test retains its
+existing 1,800-second dispatch budget. The first operator probe incorrectly
+capped this entire multi-observation test at 300 seconds and is preserved as a
+harness timeout; the corrected harness reads both existing policies from verified
+source. No repository deadline changes. Native archive remains
+`sha256:3f8702850abf911950dfeab1ebb3d80c8c16c401c9709f9a1e86cd44a6edffde`.
+
+These are source-development gates. Next: commit the reviewed batch, build and
+qualify its exact wheel, repeat the 55-case FreeBSD group from installed modules,
+then push the draft and obtain fresh exact-revision hosted CI. Current installed
+renewal, compiler SDK admission, package transport/default lifecycle integration
+and source/ports full-catalog and release-matrix goals remain open.

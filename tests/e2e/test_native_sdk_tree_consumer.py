@@ -328,6 +328,15 @@ class NativeSdkTreeConsumerTests(unittest.TestCase):
         self.assertEqual(sentinel.read_bytes(), b"unrelated")
 
     def test_explicit_tree_tar_retains_real_sdk_after_producer_retirement(self):
+        self._exercise_explicit_tree_package(native_pkg=False)
+
+    @unittest.skipUnless(
+        sys.platform.startswith("freebsd"), "Native pkg requires FreeBSD"
+    )
+    def test_explicit_native_pkg_retains_real_sdk_after_producer_retirement(self):
+        self._exercise_explicit_tree_package(native_pkg=True)
+
+    def _exercise_explicit_tree_package(self, *, native_pkg):
         lock = self.fixture.snapshot.authority.lock
         revision = self.built.selection.component_revision
         target = self.built.selection.target_identity
@@ -370,12 +379,75 @@ class NativeSdkTreeConsumerTests(unittest.TestCase):
             (PackageEntrypoint("consumer", "application", "consumer.py", artifact),),
             (),
         )
+        limits = RetainedProjectLimits(200, 1048576, 4194304)
+        if native_pkg:
+            from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
+            from literate_ai.adapters.freebsd_tree_packaging import (
+                FreeBsdTreePackageAdapter,
+                project_freebsd_tree_package,
+            )
+
+            with self.materialize() as values:
+                value = values[0]
+                observation = value.dependencies.observation
+                managed = project_component_lock_managed_graph(lock, revision)
+                source, _ = build_cyclonedx_bom(
+                    lifecycle=CycloneDxLifecycle.SOURCE,
+                    managed_graph=managed,
+                    additional_components=observation.components,
+                    additional_edges=observation.edges,
+                )
+                resolved, _ = build_cyclonedx_bom(
+                    lifecycle=CycloneDxLifecycle.RESOLVED,
+                    managed_graph=managed,
+                    additional_components=observation.components,
+                    additional_edges=observation.edges,
+                    source_bom=source,
+                    source_managed_graph=managed,
+                    repository_resolutions=(value.dependencies.repository_resolution,),
+                )
+            inputs = list(base.inputs)
+            for path, role, content in (
+                (
+                    "specification.md",
+                    "component-specification",
+                    b"# Structural consumer fixture\n",
+                ),
+                ("source.cdx.json", "cyclonedx-source-sbom", source),
+                ("resolved.cdx.json", "cyclonedx-resolved-sbom", resolved),
+            ):
+                inputs.append(
+                    PackageInput(
+                        path,
+                        role,
+                        PackageFileKind.RESOURCE,
+                        lock.identity,
+                        target,
+                        store.put_bytes(content),
+                    )
+                )
+            base = dataclasses.replace(
+                base, inputs=tuple(sorted(inputs, key=lambda item: item.path))
+            )
+            native_plan = resources.make_plan(base, limits=limits)
+            tool = FreeBsdPkgToolBinding.discover()
+            projection = project_freebsd_tree_package(
+                native_plan,
+                package="litai-sdk-tree-fixture",
+                version="0.0.0",
+                origin="devel/litai-sdk-tree-fixture",
+                tool=tool,
+                target_abi=tool.abi,
+                resolved_sbom=resolved,
+                prefix="/usr/local/lib/litai-sdk-tree-fixture",
+            )
+            adapter = FreeBsdTreePackageAdapter(projection, tool)
         plan, result = resources.package(
             base,
             adapter=adapter,
             store=store,
             object_root=work,
-            limits=RetainedProjectLimits(200, 1048576, 4194304),
+            limits=limits,
         )
         resources.require_current()
         with self.assertRaisesRegex(ValueError, "locked scope"):
@@ -423,7 +495,10 @@ class NativeSdkTreeConsumerTests(unittest.TestCase):
         )
         self.assertEqual(extracted.returncode, 0, extracted.stderr)
         relocated = self.parent / "relocated tree package"
-        root.rename(relocated)
+        if native_pkg:
+            (root / adapter.projection.prefix[1:]).rename(relocated)
+        else:
+            root.rename(relocated)
         adapter.verify(plan, result, store=store, object_root=work)
         verify_tree_package_stage(plan, relocated)
         index = json.loads((relocated / "native-sdks/tree-inputs.json").read_bytes())

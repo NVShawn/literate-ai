@@ -986,3 +986,65 @@ focused TAR, tree-input and real compiled-library API checks pass without skips,
 with all framework modules imported from the installed prefix. This closes focused
 installed-provider qualification; native tree pkg, Standard packaged execution,
 qualification codecs and full source-built compiler SDK admission remain open.
+
+### Native tree package provider boundary
+
+Native pkg must consume the same explicit tree plan without flattening aliases.
+A distinct projection binds the entire plan, native tool/ABI, package coordinates,
+installation prefix and accepted runtime package dependencies. Every relative
+payload path moves under one prefix, preserving exact symbolic target text and
+hard-link groups. Environment/device requirements stay constraints in the original
+plan; they cannot become invented native package coordinates. Specification and
+both source/resolved BOM inputs remain mandatory.
+
+Construction relocates an owned complete staging tree by rename, retaining its
+inodes, and uses the verified native tool with empty configuration and plugins
+disabled. The independent verifier must bind exact native result/provider bytes,
+bound compressed expansion and extended metadata, inspect every file/link/directory
+type and target, verify physical bytes and native checksums, and check exact native
+manifest inventories, ownership, modes, epoch, physical flatsize and ELF library
+metadata. Hooks, undeclared payload, alternate hard-link topology and trailing
+archive frames refuse even when an attacker recomputes the outer archive digest.
+Verification grants no installation, producer, runtime or release admission.
+
+Native shared-library summaries follow pkg 2.8's `analyse_elf`: canonical private
+library names without the `lib` prefix do not appear in its native summary.
+The SDK dependency observer and source/resolved BOMs still retain those imports;
+omission from this provider-specific summary cannot satisfy a runtime obligation.
+See [the native metadata implementation](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_elf.c).
+
+The source implementation is a separate explicit capability. The live SDK
+resource owner dispatches both TAR and native pkg providers and rechecks actual
+completed-producer ownership after construction. Native tests construct repeatable
+packages with the real tool, preserve links through system-tar extraction, retire
+the producer, relocate the package and call the compiled C API. Same-byte hardlink
+replacement and producer ownership loss refuse. Flavor/default lifecycle selection,
+transport codecs, directory-artifact expansion, exact installed-wheel renewal and
+compiler SDK qualification remain required.
+
+Native Unicode coverage retains libarchive's exact `hdrcharset=BINARY` marker
+and the single trailing slash in a PAX directory path. Decoded member names and
+symbolic targets still match the typed tree exactly. Unknown charset values,
+changed targets and unplanned extended attributes refuse. Native construction
+also covers case-distinct hard links, long NFC file/target names, Unicode
+directories and empty directories through a real system-tar round trip.
+
+
+### Native Windows command system context
+
+Retained commands on Windows obtain `SystemRoot` from the native
+`GetSystemWindowsDirectoryW` API, using a system-directory-only lookup of
+`kernel32.dll`. Caller `SystemRoot`, `WINDIR` and `PATH` do not select this root.
+The workspace binds the observed root and `System32` directory nodes and
+revalidates both, together with the native API result, before constructing each
+command environment. Missing or redirected directories and later context changes
+refuse. This supplies the existing PE dependency guard with native OS context;
+it does not bypass captured tool hashes, runtime observation or source currentness.
+POSIX environments and legacy profile wire identities remain unchanged.
+
+PE dependency observation inspects independent images in bounded concurrent
+frontiers, then merges results in canonical queue order through the existing
+loader resolver. Image and inspector hashes still guard each inspection.
+Failures cancel and join owned work and invalidate facts for the inspector;
+parallelism does not extend receiver or command deadlines. Actual native source
+tests and installed-wheel qualification remain separate evidence gates.
