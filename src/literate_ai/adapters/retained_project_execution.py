@@ -50,6 +50,7 @@ from literate_ai.adapters.retained_project_testing import (
     read_retained_project_test_policy,
     read_retained_project_test_report,
 )
+from literate_ai.adapters.retained_windows_context import retained_system_context
 from literate_ai.contracts import (
     ComponentLock,
     ContentIdentity,
@@ -229,6 +230,7 @@ class RetainedProjectExecutionWorkspace:
             else None
         )
         self._resolved_bom = None
+        self._system_context = retained_system_context()
         require_safe_directory(parent)
         self.root = Path(tempfile.mkdtemp(prefix="retained-run-", dir=parent))
         try:
@@ -453,6 +455,11 @@ class RetainedProjectExecutionWorkspace:
         # Do not inherit credentials, compiler/loader injection, user dotfiles,
         # Python paths or the caller's command search path.
         return {
+            **(
+                self._system_context.environment()
+                if self._system_context is not None
+                else {}
+            ),
             **captured_runtime_environment(
                 self.inputs, self.manifest, self.plan.profile
             ),

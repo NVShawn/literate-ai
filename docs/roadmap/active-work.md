@@ -29709,3 +29709,58 @@ oracle was relaxed to obtain the fresh successful lifecycle.
   - [ ] Implement deterministic CLI-supported creation, reading, update and resume behavior after the design is reviewed; preserve authority boundaries and avoid competing cross-session writes.
 - **Evidence:**
   - [ ] Prove no writes when disabled, isolated simultaneous sessions, safe atomic updates, stale-evidence revalidation, secret exclusion, bounded retention and portability across supported CLI providers and hosts before shipping in a later point release.
+
+### [ ] HOST-RUNTIME-001 — Preserve executable private runtimes with standalone POSIX Python
+
+- **GitHub issue:** [#91](https://github.com/jordanhubbard/literate-ai/issues/91)
+- **Current release target:** 1.3.0
+
+- **Priority:** P1
+- **Owner:** Private source-install and worker bootstrap runtime
+- **Direction:** Reconcile and fix release 1.3 issue #91.
+- **Conclusion:** Backport the reviewed private-runtime library preservation from commit 587ad3f1. Retain executable copies for self-update and the required standalone macOS libpython before pip bootstrap; preserve Windows behavior and orphaned-base refusal.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Use the shared private environment builder from install and wheel qualification.
+- **Evidence:**
+  - [ ] Exercise the affected standalone macOS Python 3.11 runtime, pip, real-wheel self-update and unchanged orphan refusal.
+
+### [ ] RETAINED-WIN-CONTEXT-001 — Bind native Windows retained system context
+
+- **GitHub issue:** [#102](https://github.com/jordanhubbard/literate-ai/issues/102)
+- **Current release target:** 1.3.0
+
+- **Priority:** P1
+- **Owner:** Retained command workspace environment and native context custody
+- **Direction:** Reconcile and fix release 1.3 issue #102.
+- **Conclusion:** Backport the published native system-directory binding from PR87 without its unfinished SDK features. Capture from the native API, retain root/System32 directory identities and revalidate before command observation. Preserve POSIX identities and prohibit caller environment injection.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Add the existing bounded Windows context owner and join it through retained workspace capture and environment validation.
+- **Evidence:**
+  - [ ] Pass native Windows source/context drift and actual command probes with full PE provenance; keep the production deadline and guard unchanged.
+
+### [ ] RETAINED-WIN-FIXTURE-001 — Capture complete Windows retained fixture executable inputs
+
+- **GitHub issue:** [#103](https://github.com/jordanhubbard/literate-ai/issues/103)
+- **Current release target:** 1.3.0
+
+- **Priority:** P1
+- **Owner:** Shared retained execution fixtures
+- **Direction:** Reconcile and fix release 1.3 issue #103.
+- **Conclusion:** Reuse the published shared fixture repair from fb791575. Bind the executable suffix and actual adjacent Python/vcruntime DLLs once in the shared owner, then rebuild dependent manifests and bindings without subclass renames or ambient PATH injection.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Update the shared executable fixture and dependent runtime/path assertions using its declared runner path.
+- **Evidence:**
+  - [ ] Run actual Windows base and private-venv fixture probes with no new skips, plus affected POSIX regressions and final current-driver/receipt/CI checks.
+
+**Narrow CI repair development evidence:** Reused the published private-runtime
+owner from `587ad3f1`, native Windows context from `42f1caa1` and shared fixture
+repair from `fb791575`, excluding their unrelated SDK/package changes. On actual
+standalone macOS Python 3.11.14, install (3), real-prefix self-update/reexecution
+(3) and worker bootstrap (11) pass without skips. Retained execution (17),
+dependency custody (8), environment (9 passes/one Windows-only skip) and context
+(5 passes/one Windows-only skip) pass. Lint and formatting pass. Native Windows
+base/venv renewal and final combined driver/receipt/CI remain required; no
+compiler SDK, original-suite completion or release readiness is inferred.

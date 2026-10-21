@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import tempfile
@@ -10,12 +11,35 @@ from pathlib import Path
 from unittest import mock
 
 from scripts.install_litai import (
+    _create_private_environment,
     _require_clean_git_checkout,
     main,
 )
 
 
 class InstallLitaiCleanCheckoutTests(unittest.TestCase):
+    def test_private_environment_runs_its_python_and_pip(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            environment = Path(temporary).resolve() / "private-runtime"
+            _create_private_environment(environment)
+            python = environment / (
+                "Scripts/python.exe" if sys.platform == "win32" else "bin/python"
+            )
+            probe = subprocess.run(
+                (
+                    str(python),
+                    "-c",
+                    "import json, sys, pip; "
+                    "print(json.dumps([sys.prefix, pip.__version__]))",
+                ),
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            prefix, pip_version = json.loads(probe.stdout)
+            self.assertEqual(Path(prefix).resolve(), environment)
+            self.assertTrue(pip_version)
+
     def _git(self, root: Path, *arguments: str) -> None:
         subprocess.run(
             ("git", "-C", str(root), *arguments),
