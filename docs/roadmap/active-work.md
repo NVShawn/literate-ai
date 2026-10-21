@@ -29163,3 +29163,27 @@ suite and native execution before exposing it to the operator workstation.
   - [ ] Implement deterministic CLI-supported creation, reading, update and resume behavior after the design is reviewed; preserve authority boundaries and avoid competing cross-session writes.
 - **Evidence:**
   - [ ] Prove no writes when disabled, isolated simultaneous sessions, safe atomic updates, stale-evidence revalidation, secret exclusion, bounded retention and portability across supported CLI providers and hosts before shipping in a later point release.
+
+### [ ] STANDARD-FIRST-BIND-001 — Migrate retained receipt-only projects to reviewed Standard binding
+
+- **Priority:** P1
+- **GitHub issue:** [#107](https://github.com/jordanhubbard/literate-ai/issues/107)
+- **Owner:** framework lifecycle binding and receipt authority
+- **Direction:** Enable explicit reviewed Standard first binding while retaining project-owned receipt requirements and historical evidence.
+- **Conclusion:** Plan against exact installed authority and current project identity, preserve custom receipt policy, reject executable driver replacement and tampered or stale plans, and retain compare-and-swap rollback. This is configuration migration only.
+- **Contract:** Receipt-only first binding uses a distinct versioned plan with an
+  explicit null previous binding. Preserve the entire existing receipt policy;
+  without an old Standard driver there is no derived runner identity to advance.
+  Existing bound-project plans keep their schema and projection semantics. A
+  project with neither receipt policy nor driver still uses initialization, and
+  an existing custom executable driver cannot migrate through this operation.
+- **Depends on:** STANDARD-REBIND-001
+- **Implementation:**
+  - [x] Add a versioned first-binding plan/apply route through the existing reviewed command, preserving bound-project plan compatibility.
+  - [x] Document receipt-only migration and keep the original acceptance contract intact.
+- **Evidence:**
+  - [x] Positive public CLI planning/apply, unchanged historical receipt, custom-policy preservation, denied authorization, rehashed weakening, project/installed drift and post-write rollback pass.
+  - [x] Thirteen focused rebind/first-binding tests, lint, formatting, repository layout, public export, documentation, OpenSpec and reviewed driver closure checks pass on the controller.
+  - [ ] Complete full controller regression and exact clean-commit installed-wheel qualification.
+  - [ ] Qualify the actual installed CLI on a native receipt-only project copy; preserve original evidence and retain missing lifecycle admission.
+  - [ ] Pass exact-head required hosted CI before landing.

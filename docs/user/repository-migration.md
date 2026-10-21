@@ -50,6 +50,13 @@ litai project lifecycle rebind-standard --project . --output rebind.json
 litai project lifecycle rebind-standard rebind.json --project . --apply --authorize-rebind
 ```
 
+The same reviewed path supports a retained project that already has a receipt
+policy but has no lifecycle driver. A distinct first-binding plan explicitly shows
+the absent previous binding and preserves all existing receipt requirements and
+the runner identity. Do not delete that policy to force initialization. First
+binding changes configuration only; native harness integration and fresh accepted
+execution remain required. Existing custom executable drivers refuse this route.
+
 See [Configuration and CLI reference](configuration-and-cli.md) for rebind details.
 
 ## Clones of the literate-ai repository

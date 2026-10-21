@@ -148,7 +148,7 @@ PROJECT_INITIALIZATION_SCHEMA = "literate-ai/project-initialization@6"
 
 
 def project_lifecycle_from_args(args) -> dict[str, Any]:
-    """Plan or apply a reviewed Standard lifecycle distribution rebind."""
+    """Plan or apply a reviewed Standard first binding or distribution rebind."""
 
     from literate_ai.application.standard_lifecycle_rebind import (
         StandardLifecycleRebindError,

@@ -517,7 +517,7 @@ root-integration acceptance still remain.
 | `lock COMPONENT --large-review start\|status\|acknowledge\|apply\|cleanup [--transaction-id ID] [--page-identity ID]` | Review a genuine lock transition larger than 512 semantic differences in bounded identity-chained pages, then perform one final revalidated atomic replacement. |
 | `project validate [PATH]` | Non-mutating validation of the discovered project, catalogs, pins, skills, and generation inputs. |
 | `project tracker inspect [PATH]` | Read Git remotes and name `gh` or `glab` plus issue/review/CI/land argv. Unknown hosts skip tracker work fail closed. |
-| `project lifecycle rebind-standard [PLAN] [--project PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard binding update without mutation, or compare-and-swap an explicitly reviewed plan while changing only lifecycle and derived receipt-policy authority. |
+| `project lifecycle rebind-standard [PLAN] [--project PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard first binding or update without mutation, or compare-and-swap an explicitly reviewed plan while preserving project-owned receipt authority. |
 | `project convert-stage show [--project PATH]` | Read the canonical evidence-bound conversion authority state for an adopted project. |
 | `project convert-stage advance --to retained\|drafted\|qualified [--project PATH]` | Advance exactly one adjacent stage after independently verifying the current receipt or Component-promotion evidence. No command silently promotes a tree. |
 | `project retained-scope refresh [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review exact added/removed retained-source paths and input identities, then revalidate and rebind scope and receipt policy without changing source or historical conversion evidence. |
@@ -1472,6 +1472,19 @@ unchanged; a runner exactly bound to the old Standard driver advances to the new
 driver identity. Only the Standard suite adopts the installed Standard receipt policy.
 The plan lists only fields that actually change. Re-plan an older proposal that would
 replace custom receipt authority; apply rejects it even if its identity is consistent.
+
+A retained project with an existing receipt policy and no lifecycle driver can use
+the same reviewed command for its first Standard binding. Its distinct
+`literate-ai/standard-lifecycle-first-bind-plan@1` plan shows
+`configured_binding: null` and preserves the entire receipt policy, including
+the independent runner identity. With no old Standard driver, the planner cannot
+infer a derived runner or replace even a Standard-named suite. Planning remains
+read-only; apply requires `--authorize-rebind`, rechecks project and installed
+authority, and retains rollback on post-write drift. A custom executable driver
+is refused, and a project without a receipt policy still needs initialization.
+Already-bound projects retain the original versioned rebind plan and semantics.
+First binding does not qualify the existing harness, its native target, or its
+historical receipts; those require separate lifecycle integration and acceptance.
 
 The operation does not build, execute generated code, delete a prior receipt, or rewrite
 accepted source. Changing the binding makes those earlier identities stale by contract;

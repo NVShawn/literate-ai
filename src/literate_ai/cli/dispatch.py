@@ -1924,7 +1924,7 @@ def _parser() -> JsonArgumentParser:
     )
     project_standard_rebind = project_lifecycle_commands.add_parser(
         "rebind-standard",
-        help="plan or apply an exact installed-wheel Standard binding update",
+        help="plan or apply an exact installed-wheel Standard first binding or update",
     )
     project_standard_rebind.add_argument(
         "plan",

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Plan and explicitly apply a retained project's first Standard lifecycle binding
+  without discarding its existing receipt policy or historical evidence. Preserve
+  ordinary rebind plans and reject policy weakening, authority drift and custom
+  executable-driver replacement. Native execution still requires qualification.
+
 - Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
   declarations. Preserve read-only planning, exact host-target execution matching
   and refusal of unsupported targets. Native and installed renewal is in progress.
