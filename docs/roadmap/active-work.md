@@ -29184,6 +29184,8 @@ suite and native execution before exposing it to the operator workstation.
 - **Evidence:**
   - [x] Positive public CLI planning/apply, unchanged historical receipt, custom-policy preservation, denied authorization, rehashed weakening, project/installed drift and post-write rollback pass.
   - [x] Thirteen focused rebind/first-binding tests, lint, formatting, repository layout, public export, documentation, OpenSpec and reviewed driver closure checks pass on the controller.
-  - [ ] Complete full controller regression and exact clean-commit installed-wheel qualification.
-  - [ ] Qualify the actual installed CLI on a native receipt-only project copy; preserve original evidence and retain missing lifecycle admission.
+  - [x] Complete full controller regression and exact clean-commit installed-wheel qualification. At `73311c69`, Python 3.14.7 passes 1,801 cases with 42 explicit skips and no failures; the exact wheel and all installed smoke checks pass.
+  - [x] Qualify the actual installed CLI on a native receipt-only project copy; preserve original evidence and retain missing lifecycle admission. FreeBSD 16 / Python 3.12.14 verifies all 37 offline distributions, passes all five real CLI operations and preserves all 42 historical evidence files. All 13 exact committed contract cases also pass with installed imports and no skips. Two preceding harness failures remain retained; neither changed production authority.
   - [ ] Pass exact-head required hosted CI before landing.
+
+Evidence: [exact wheel and native migration checkpoint](../../verification/standard-first-binding-development.json). [Draft PR #108](https://github.com/jordanhubbard/literate-ai/pull/108) remains open pending exact-head hosted CI. First binding does not execute or admit a retained source lifecycle, SDK, package, ISO or release.
