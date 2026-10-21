@@ -29521,6 +29521,8 @@ exact required CI remain landing gates.
 
 **Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
 
+**Second native refusal:** The `425ac341` rerun retains 1,149 passes, 34 skips and one `action_build.input_invalid` at package proof reopening after 2,105.044 seconds. Standard build grants have their own 30-minute lifetime; dispatch headroom alone does not extend them. Use a test-only authorization-input/port subclass to issue one-hour grants for this complete chain, preserving production defaults, grant validation, the single dispatch grant, all format/custody oracles and dedicated expiry controls. Run the focused actual native chain before the next fresh full run.
+
 ### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
 
 **GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
