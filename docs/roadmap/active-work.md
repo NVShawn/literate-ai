@@ -29189,3 +29189,17 @@ suite and native execution before exposing it to the operator workstation.
   - [ ] Pass exact-head required hosted CI before landing.
 
 Evidence: [exact wheel and native migration checkpoint](../../verification/standard-first-binding-development.json). [Draft PR #108](https://github.com/jordanhubbard/literate-ai/pull/108) remains open pending exact-head hosted CI. First binding does not execute or admit a retained source lifecycle, SDK, package, ISO or release.
+
+### [ ] NATIVE-FIRST-BIND-INTEGRATION-001 — Qualify native original-source admission with reviewed first binding
+
+- **Priority:** P1
+- **Owner:** framework native retained lifecycle and binding integration
+- **Direction:** Combine the reviewed first-binding repair and native original-source admission in one qualified installed distribution for retained products.
+- **Conclusion:** Preserve both review branches and source authority. A merged source tree is a candidate until its exact full regression, installed wheel, native first binding and original-source planning pass; it does not confer downstream lifecycle or release acceptance.
+- **Depends on:** STANDARD-FIRST-BIND-001, FREEBSD-001
+- **Implementation:**
+  - [ ] Integrate exact PR87 and PR108 revisions without losing source, tree package, access or binding contracts.
+  - [ ] Resolve shared driver/documentation authority through reviewed tools and retain the exact combined revision.
+- **Evidence:**
+  - [ ] Combined full controller regression, static/documentation/driver checks and exact clean-commit installed wheel pass.
+  - [ ] Aligned native installation verifies the complete dependency closure and real public CLI first-bind/original-source planning, with historical policy preserved and no fabricated receipt.
