@@ -29011,7 +29011,8 @@ receipt and verifier evidence archive:
 Exact final integration CI and landing remain open.
 
 **Staging consolidation:** Integrate the independently qualified tracker repository
-binding fix from PR #99 with the native-child and rebuild/profile batch from
+binding fix from PR #99 and verifier-admitted retained export/cache retirement
+from issues #97/#100 with the native-child and rebuild/profile batch from
 PRs #77/#78. Preserve both source paths and every recorded failed/current proof.
 The tracker change scopes forge commands only; it does not change native
 execution or qualification policy. Recalculate the combined trusted driver and
@@ -29647,12 +29648,54 @@ original-source SDK and accepted-retained export programs remain separate.
 - **Priority:** P1
 - **Owner:** Accepted-source provider reconstruction
 - **Direction:** Make accepted-source-only build consume a qualified retained source entry and export its artifact.
-- **Conclusion:** Issue #97 reproduces an admitted retained origin being rejected by the coding-CLI provider allowlist. Preserve RetainedSourceSelection semantics with no executable or model claim; merely adding a provider spelling is insufficient. Keep independent acceptance, origin/tree/tool bindings and unknown-provider refusal intact. This remains separate from the original-adoption work in PR #81.
-- **Depends on:** RETAINED-PROJECT-001
+- **Conclusion:** Issue #97 reproduces an admitted retained origin being rejected by the coding-CLI provider allowlist. Preserve RetainedSourceSelection semantics with no executable or model claim; merely adding a provider spelling is insufficient. Recover the review only from verified Standard accepted-cache membership at the existing portable cache root. Reconstruct the same no-model/no-executable retained selection and require its canonical identity to equal the dispatched tool binding; carry the recovered review into the existing retained request/semantics namespace. Keep independent acceptance, origin/tree/tool bindings and unknown-provider refusal intact. This remains separate from the original-adoption work in PR #81.
+- **Depends on:** RETAINED-PROJECT-001 and CACHE-RETIREMENT-001
 - **Implementation:**
-  - [ ] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
+  - [x] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
 - **Evidence:**
   - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+
+**Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
+
+### [ ] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
+
+**GitHub issue:** [#100](https://github.com/jordanhubbard/literate-ai/issues/100)
+
+- **Priority:** P1
+- **Owner:** Accepted source-cache membership
+- **Direction:** Keep supported cache refresh usable without discarding immutable history.
+- **Conclusion:** Issue #100 shows that deliberate retirement removes a key pointer while verified enumeration still demands it for the preserved immutable manifest. Record an exact key/entry retirement before pointer removal; recognize only that record as intentional history. Preserve refusal of unexplained missing pointers, corruption, unsafe paths and ambiguous active entries.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Persist exact retirement records and distinguish them from active membership during lookup and verified enumeration.
+- **Evidence:**
+  - [x] Prove current lookup and read-only enumeration after retirement, unchanged immutable history, missing/corrupt-record refusal, safe reactivation and portable archive restoration.
+  - [ ] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
+
+**Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.
+
+**Combined-suite repair:** The first complete host run at `bb40b136` stopped after 310 passes, 29 existing skips and one error in the existing real command-generator regression. Ordinary cached generators may implement the supported adapter seam without a coding-provider selection object. Restrict retained lookup key reconstruction to an explicitly present typed retained selection; preserve ordinary planned keys. Retain that failed report and the deliberately interrupted prior lifecycle separately, merge the latest native fixture grant repair, and start fresh complete and lifecycle qualification after the focused real command receiver cases pass.
+
+**Current-source qualification:** At `9941a6c4c1c4fe0e0e05c474135d204346041f79`,
+the fresh complete host suite passes 1,827 cases with 42 declared skips across
+1,869 selected cases. A new force-generated framework lifecycle completes
+build, generated tests, execution and independent acceptance; supported receipt
+update/check/current and `verify` pass with receipt
+`sha256:31b15788308e9ed7cd762d0a5e230598f102465cedfe44cba00a2dbf8fc9fcad`
+and finalized candidate
+`sha256:48f264fb8f428cd814a0b7f876aaa1edca0ce135fc26138b0e053712431d5b08`.
+Actual Windows qualification passes all 21 selected retained/admission/retirement,
+ordinary command and public export cases without skips; independently collected
+archive `sha256:65291999d77cad4917d0d05a1d2925a1271891914a21fcd7db23cc7b7248b1a4`.
+The preceding `bb40b136` native FreeBSD 19-case proof remains separately bound
+to its actual source, archive
+`sha256:51c642d0e49cbd13ff929810b063e7f560c4dea2a47cf062b3b23f707caf0fef`.
+The current-source native renewal has passed all 44 focused cases, including
+ordinary command receivers and all four actual native package cases; its final
+public export case remains in progress. Installed-wheel and exact final review
+CI qualification remain required. The earlier invalid generated candidates and
+interrupted launchers are retained as unsuccessful attempts; no acceptance
+oracle was relaxed to obtain the fresh successful lifecycle.
 
 ### [ ] PROJECT-SESSION-MEMORY-001 — Opt-in project and individual CLI session memory
 

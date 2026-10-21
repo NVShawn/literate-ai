@@ -47,6 +47,9 @@
         "$ref": "urn:literate-ai:schema:v1:cyclonedx-repository-source-resolution"
       }
     },
+    "source_admission_evidence": {
+      "$ref": "urn:literate-ai:schema:v2:standard-source-admission-evidence"
+    },
     "standard_source_membership": {
       "$ref": "urn:literate-ai:schema:v2:standard-source-cache-membership"
     }

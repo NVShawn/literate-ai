@@ -76,6 +76,24 @@ worker's ambient coding provider cannot silently replace that binding. Downstrea
 lifecycle results retain the source-admission identity; any later failure prevents
 project admission and receipt finalization.
 
+A live, explicitly reviewed retained-source qualification can also prepare canonical
+source admission after its real build, tests, execution and independent acceptance
+pass. That admission binds the reviewed tree and locked assets, the no-model retained
+tool selection, the current framework, target and passing verifier facts. It carries
+the retained review identity instead of a coding-CLI transcript. Its evidence is
+published atomically alongside the complete accepted membership in the same cache
+entry. Historical complete acceptance without this admission is insufficient: run a
+fresh reviewed retained qualification to upgrade it. Accepted-only build never invokes
+a coding agent and still runs fresh build, tests, execution and independent acceptance
+before exporting an artifact.
+
+Explicit cache refresh preserves immutable old entries and records each exact retired
+key/entry membership before removing its active pointer. Verified enumeration omits
+that deliberately retired history while retaining all its bytes for recovery and
+portable transfer. A missing active pointer without a matching retirement record,
+corrupt record or substituted key remains an error. Deliberate reactivation restores
+an active pointer; retirement never grants current acceptance authority.
+
 `OBJ_DIR` entries additionally bind the generated tree, exact semantic build request,
 the content identity of the builder implementation closure, selected build-system
 Flavor, host toolchain byte identities, and a canonical

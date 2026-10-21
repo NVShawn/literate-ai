@@ -12,6 +12,12 @@
 
 - Bind generated GitHub and GitLab issue, review and CI commands to the selected repository and host, including forks and nested GitLab groups, so ambient CLI defaults cannot redirect them.
 
+- Build and export verifier-admitted retained source without a coding agent. A live
+  reviewed qualification records source admission alongside complete acceptance;
+  accepted-only builds still require fresh tests and independent acceptance.
+- Preserve explicit cache retirement records so verified lookup and portable cache
+  transfer retain immutable history while refusing unexplained missing memberships.
+
 - Give the complete native packaging proof fixture enough dispatch and build-grant headroom to reach its format checks on slower workers; production execution limits and authorization defaults stay unchanged.
 
 - JavaScript generation distinguishes executable bundle registries from inert bundle-writer text, preserving rejection of missing executable modules.

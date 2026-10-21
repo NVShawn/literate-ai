@@ -5,7 +5,10 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
+
+if TYPE_CHECKING:
+    from .standard_source_admission import StandardSourceAdmissionEvidence
 
 from ._validation import (
     bool_value,
@@ -1182,6 +1185,7 @@ class StandardAcceptedSourceCacheEntry(AcceptedSourceCacheEntry):
     """Accepted source whose complete Standard resume evidence survives storage."""
 
     standard_source_membership: StandardSourceCacheMembershipDocument
+    source_admission_evidence: StandardSourceAdmissionEvidence | None = None
 
     SCHEMA: ClassVar[str] = STANDARD_ACCEPTED_SOURCE_CACHE_ENTRY_SCHEMA
 
@@ -1240,12 +1244,38 @@ class StandardAcceptedSourceCacheEntry(AcceptedSourceCacheEntry):
                     "StandardAcceptedSourceCacheEntry.standard_source_membership",
                     f"must bind the accepted derivation's exact {label}",
                 )
+        if self.source_admission_evidence is not None:
+            from .standard_source_admission import (
+                StandardSourceAdmissionEvidence,
+                StandardSourceAdmissionMembership,
+            )
+
+            evidence = self.source_admission_evidence
+            if not isinstance(evidence, StandardSourceAdmissionEvidence):
+                fail(
+                    "StandardAcceptedSourceCacheEntry.source_admission_evidence",
+                    "must be typed verifier admission",
+                )
+            StandardSourceAdmissionMembership(membership.generation, evidence)
+            if (
+                evidence.coding_cli_tool_binding_identity
+                != key.coding_cli_tool_binding_identity
+                or evidence.planned_coding_cli_request_identity != key.request_identity
+            ):
+                fail(
+                    "StandardAcceptedSourceCacheEntry.source_admission_evidence",
+                    "must bind the exact source key",
+                )
 
     def to_dict(self) -> dict[str, object]:
         document = AcceptedSourceCacheEntry.to_dict(self)
         document["standard_source_membership"] = (
             self.standard_source_membership.to_dict()
         )
+        if self.source_admission_evidence is not None:
+            document["source_admission_evidence"] = (
+                self.source_admission_evidence.to_dict()
+            )
         return document
 
     @classmethod
@@ -1259,8 +1289,16 @@ class StandardAcceptedSourceCacheEntry(AcceptedSourceCacheEntry):
             fail(path, f"schema must be exactly {cls.SCHEMA!r}")
         legacy = dict(value)
         membership = legacy.pop("standard_source_membership", None)
+        has_admission = "source_admission_evidence" in legacy
+        admission = legacy.pop("source_admission_evidence", None)
         legacy["schema"] = ACCEPTED_SOURCE_CACHE_ENTRY_SCHEMA
         base = AcceptedSourceCacheEntry.from_dict(legacy, path=path)
+        if has_admission:
+            from .standard_source_admission import StandardSourceAdmissionEvidence
+
+            admission = StandardSourceAdmissionEvidence.from_dict(
+                admission, path=f"{path}.source_admission_evidence"
+            )
         return cls(
             derivation=base.derivation,
             source_files=base.source_files,
@@ -1278,6 +1316,7 @@ class StandardAcceptedSourceCacheEntry(AcceptedSourceCacheEntry):
                     membership, path=f"{path}.standard_source_membership"
                 )
             ),
+            source_admission_evidence=admission,
         )
 
 

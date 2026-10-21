@@ -263,7 +263,7 @@ class StandardSourceAdmissionEvidence:
     source_bom_identity: ContentIdentity
     generated_test_suite_identity: ContentIdentity
     coding_cli_tool_binding_identity: ContentIdentity
-    coding_cli_transcript_identity: ContentIdentity
+    coding_cli_transcript_identity: ContentIdentity | None
     generation_provenance_identity: ContentIdentity
     test_plan_identity: ContentIdentity
     test_results: tuple[StandardSourceTestResult, ...]
@@ -271,6 +271,7 @@ class StandardSourceAdmissionEvidence:
     framework_distribution_identity: ContentIdentity
     verifier_identity: ContentIdentity
     admitted_at: str
+    retained_source_review_identity: ContentIdentity | None = None
 
     SCHEMA: ClassVar[str] = STANDARD_SOURCE_ADMISSION_EVIDENCE_SCHEMA
     IDENTITY_FIELDS: ClassVar[tuple[str, ...]] = (
@@ -289,7 +290,6 @@ class StandardSourceAdmissionEvidence:
         "source_bom_identity",
         "generated_test_suite_identity",
         "coding_cli_tool_binding_identity",
-        "coding_cli_transcript_identity",
         "generation_provenance_identity",
         "test_plan_identity",
         "framework_distribution_identity",
@@ -299,6 +299,20 @@ class StandardSourceAdmissionEvidence:
     def __post_init__(self) -> None:
         for name in self.IDENTITY_FIELDS:
             _identity(getattr(self, name), f"StandardSourceAdmissionEvidence.{name}")
+        if (self.coding_cli_transcript_identity is None) == (
+            self.retained_source_review_identity is None
+        ):
+            fail(
+                "StandardSourceAdmissionEvidence",
+                "requires exactly one model transcript or retained-source review",
+            )
+        for name in (
+            "coding_cli_transcript_identity",
+            "retained_source_review_identity",
+        ):
+            value = getattr(self, name)
+            if value is not None:
+                _identity(value, f"StandardSourceAdmissionEvidence.{name}")
         if not self.test_results or any(
             not isinstance(item, StandardSourceTestResult) for item in self.test_results
         ):
@@ -333,6 +347,19 @@ class StandardSourceAdmissionEvidence:
         return {
             "schema": self.SCHEMA,
             **{name: getattr(self, name).to_dict() for name in self.IDENTITY_FIELDS},
+            **(
+                {
+                    "coding_cli_transcript_identity": (
+                        self.coding_cli_transcript_identity.to_dict()
+                    )
+                }
+                if self.coding_cli_transcript_identity is not None
+                else {
+                    "retained_source_review_identity": (
+                        self.retained_source_review_identity.to_dict()
+                    )
+                }
+            ),
             "test_results": [item.to_dict() for item in self.test_results],
             "source_selectors": self.source_selectors.to_dict(),
         }
@@ -362,9 +389,28 @@ class StandardSourceAdmissionEvidence:
                     "evidence_identity",
                 }
             ),
+            optional=frozenset(
+                {"coding_cli_transcript_identity", "retained_source_review_identity"}
+            ),
         )
         evidence = cls(
             **_identity_fields(data, identity_names, path),
+            coding_cli_transcript_identity=(
+                ContentIdentity.from_dict(
+                    data["coding_cli_transcript_identity"],
+                    path=f"{path}.coding_cli_transcript_identity",
+                )
+                if "coding_cli_transcript_identity" in data
+                else None
+            ),
+            retained_source_review_identity=(
+                ContentIdentity.from_dict(
+                    data["retained_source_review_identity"],
+                    path=f"{path}.retained_source_review_identity",
+                )
+                if "retained_source_review_identity" in data
+                else None
+            ),
             test_results=parse_tuple(
                 data["test_results"],
                 f"{path}.test_results",
@@ -403,6 +449,14 @@ class StandardSourceAdmissionMembership:
             )
         candidate = self.generation.output.candidate
         provenance = self.generation.output.provenance
+        if (
+            self.evidence.retained_source_review_identity
+            != provenance.retained_source_identity
+        ):
+            fail(
+                "StandardSourceAdmissionMembership.evidence.retained_source_review_identity",
+                "must bind the exact retained origin without model evidence",
+            )
         bindings = {
             "component_revision_identity": candidate.component_revision,
             "component_lock_identity": provenance.component_lock_identity,
