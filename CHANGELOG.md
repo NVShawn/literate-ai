@@ -4,7 +4,10 @@
 
 - Integrate native original-source admission with reviewed receipt-preserving
   first binding. Keep the native completely-unbound route and the receipt-only
-  route distinct; combined qualification remains in progress.
+  route distinct. The exact combined candidate passes controller regression,
+  installed wheel qualification, and isolated FreeBSD/controller binding and
+  metadata-only original-adoption probes. Retained execution, compiler SDK and
+  release admission remain separate gates.
 
 - Plan and explicitly apply a retained project's first Standard lifecycle binding
   without discarding its existing receipt policy or historical evidence. Preserve

@@ -29342,15 +29342,29 @@ Evidence: [exact wheel and native migration checkpoint](../../verification/stand
   skips. Lint, formatting, repository layout, public exports, documentation
   rendering, OpenSpec and driver review pass. The reviewed combined driver
   identity is `sha256:27208ae96d0c7d49e1d2581358b7e105874a03addf0bdc4c07aedb95dfb62ccc`.
-  Next: freeze the exact merge revision and run a new full controller regression
-  and clean-commit wheel qualification before installed/native use.
+  Exact combined code `e90cbadb` passes the full controller run: 2,105 selected,
+  2,035 passes and 70 skips, no failures, in 1,081.363 seconds. Its clean-commit
+  wheel passes qualification. Offline isolated installs verify 36 controller and
+  37 FreeBSD distributions. Both installed CLIs preserve the receipt-only policy,
+  initialize a fully unbound contract, explicitly refresh documentation review,
+  and select original authority through metadata-only writes while preserving
+  270 source entries. Dirty source, missing acknowledgment and regenerative
+  execution refuse. All 18 installed FreeBSD binding cases pass without skips.
+  The first controller probe omitted documentation review and correctly refused;
+  its failure remains retained, followed by a fresh corrected probe. No production
+  guard changed. [Qualification checkpoint](../../verification/native-first-binding-integration-development.json).
+  Next: submit the combined review branch and require exact-head hosted CI before
+  landing. Other branches and 26 attached worktrees remain retained; this task
+  does not collect unrelated peer work.
 - **Depends on:** STANDARD-FIRST-BIND-001, FREEBSD-001
 - **Implementation:**
-  - [ ] Integrate exact PR87 and PR108 revisions without losing source, tree package, access or binding contracts.
-  - [ ] Resolve shared driver/documentation authority through reviewed tools and retain the exact combined revision.
+  - [x] Integrate exact PR87 and PR108 revisions without losing source, tree package, access or binding contracts.
+  - [x] Resolve shared driver/documentation authority through reviewed tools and retain the exact combined revision.
 - **Evidence:**
-  - [ ] Combined full controller regression, static/documentation/driver checks and exact clean-commit installed wheel pass.
-  - [ ] Aligned native installation verifies the complete dependency closure and real public CLI first-bind/original-source planning, with historical policy preserved and no fabricated receipt.
+  - [x] Combined full controller regression, static/documentation/driver checks and exact clean-commit installed wheel pass.
+  - [x] Aligned native installation verifies the complete dependency closure and real public CLI first-bind/original-source planning, with historical policy preserved and no fabricated receipt.
+
+  - [ ] Exact-head hosted matrix and review disposition pass before main landing; preserve parent reviews until coordinated.
 
 ### [ ] ORIGINAL-ADOPT-001 — Bind original project authority without relocating source
 
