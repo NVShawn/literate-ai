@@ -29021,6 +29021,25 @@ framework receipt, installed/native renewal and exact review CI. Earlier
 receipts and package proofs retain their actual source identities while this
 combined source is being qualified.
 
+**Combined baseline qualified on the host:** Source
+`bb3a8727c42d51d99ac1c96876c80d564736ea7b` combines PRs #77/#78/#99 and
+issues #97/#100. The complete host regression passes 1,864 cases with 42 declared
+skips across 1,906 selected cases, zero failures. A fresh force-generated
+framework lifecycle passes all stages and independent acceptance. Supported
+receipt update/check/current and `verify` pass with 224 receipt tests,
+receipt `sha256:744b777f8971c5d8a35715a73b6cf716901ab0d27b313b1907df28abcbdbe833`
+and finalized candidate
+`sha256:3ca5cae1342689fdec025b55c74b5be7d40b2fe38199a94eea5ac61401ec6142`.
+Current driver: `sha256:c36c189114b025fe98d24b7e78df099ca4ad94c38c278edb0b789f1150ca01aa`.
+The retained-export native renewal at `9941a6c4` passes all 45 cases without skips,
+independently collected archive
+`sha256:779a6b87ac3af93718c4e12af186f698f79ecf7e1b4c36a763be8e4665d5c43e`.
+A fresh complete native run at the combined baseline remains in progress.
+Separate narrow fixes for newly classified supported-runtime and Windows issues
+#91/#102/#103 are being prepared from published work; integrating production
+changes requires a renewed driver and current receipt. This baseline is not
+final release or compiler-SDK admission.
+
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
 - **GitHub issue:** [#47](https://github.com/jordanhubbard/literate-ai/issues/47)
