@@ -143,8 +143,17 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         for directory in ("src", "tools"):
             (self.source / directory).mkdir(parents=True)
         (self.source / "src/main.txt").write_bytes(b"original\x00asset")
-        shutil.copyfile(self.fixture_binary, self.source / "tools/runner")
-        (self.source / "tools/runner").chmod(0o755)
+        self.runner_path = "tools/runner.exe" if os.name == "nt" else "tools/runner"
+        shutil.copyfile(self.fixture_binary, self.source / self.runner_path)
+        (self.source / self.runner_path).chmod(0o755)
+        if os.name == "nt":
+            # Windows guards use a native PE stand-in; C action execution is
+            # POSIX-only. Base Python needs adjacent native DLLs, unlike a venv
+            # redirector. Keep those imports captured rather than adding the
+            # ambient Python installation to the command's search path.
+            for pattern in ("python*.dll", "vcruntime*.dll"):
+                for library in Path(sys.base_prefix).glob(pattern):
+                    shutil.copyfile(library, self.source / "tools" / library.name)
         self.configured_test_policy = ProjectTestReceiptPolicy(
             "retained-fixture",
             "1.0.0",
@@ -216,13 +225,13 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             (
                 (
                     "shell",
-                    "tools/runner",
+                    self.runner_path,
                     ContentIdentity.parse_uri(
                         "sha256:"
                         + next(
                             m.sha256
                             for m in self.manifest.members
-                            if m.path == "tools/runner"
+                            if m.path == self.runner_path
                         )
                     ),
                 ),
@@ -292,7 +301,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             self.plan,
             profile=replace(
                 self.profile,
-                tools=(("shell", "tools/runner", canonical_identity("wrong")),),
+                tools=(("shell", self.runner_path, canonical_identity("wrong")),),
             ),
         )
         self.current = self.plan

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Source installation retains the standalone macOS Python shared library before bootstrapping pip in copied private runtimes, preserving self-update custody.
+- Retained Windows commands bind native system-directory context and revalidate its directory identities without inheriting caller injection.
+- Shared Windows retained fixtures capture executable suffixes and actual Python runtime DLLs before rebuilding their input bindings.
+
 - Python libraries: reject single-file build profiles before generation and identify supported directory or wheel profiles, avoiding futile rebuild retries.
 
 - Rebuild CLI: accept a Component's `component.md` path for Standard rebuild and report invalid locked authority without an uncaught exception. Reject symlink entry points before resolving them.

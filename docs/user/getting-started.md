@@ -94,6 +94,11 @@ your regular PowerShell session with access to your installed tool directories;
 an inaccessible declared search directory produces a host-install diagnostic.
 Contributor validation still requires the documented GNU Make toolchain.
 
+The source installer creates a private runtime with working Python and pip.
+Standalone macOS Python builds also retain the shared library needed by the copied
+interpreter. Keep the base Python installation available; reinstall Literate AI if
+that base interpreter is removed or replaced.
+
 Source builds embed the exact Git revision and repository origin. Recognized GitHub
 HTTPS, SCP-style SSH and `ssh://git@` aliases use one HTTPS origin spelling in newly
 built wheels, independent of a trailing `.git` or default transport port. Other

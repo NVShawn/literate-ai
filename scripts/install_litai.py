@@ -8,7 +8,6 @@ import os
 import shutil
 import subprocess
 import sys
-import venv
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -27,6 +26,9 @@ from literate_ai.adapters.user_paths import (  # noqa: E402
 )
 from literate_ai.bootstrap.host_install_requirements import (  # noqa: E402
     HOST_INSTALL_SBOM_RELATIVE_PATH,
+)
+from literate_ai.remote_worker_bootstrap import (  # noqa: E402
+    _create_python_environment as _create_private_environment,
 )
 
 
@@ -143,7 +145,7 @@ def install(*, prefix: Path, source: Path) -> dict[str, str]:
         shutil.rmtree(environment)
     if not python.is_file():
         environment.parent.mkdir(parents=True, exist_ok=True)
-        venv.EnvBuilder(with_pip=True).create(environment)
+        _create_private_environment(environment)
     _run(
         str(python),
         "-m",
