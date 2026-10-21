@@ -29010,6 +29010,16 @@ receipt and verifier evidence archive:
 `sha256:413d6cd38598f2d2bbfb9d6a56a2b22118646dcf98b2ae973f7db207356e5ed2`.
 Exact final integration CI and landing remain open.
 
+**Staging consolidation:** Integrate the independently qualified tracker repository
+binding fix from PR #99 with the native-child and rebuild/profile batch from
+PRs #77/#78. Preserve both source paths and every recorded failed/current proof.
+The tracker change scopes forge commands only; it does not change native
+execution or qualification policy. Recalculate the combined trusted driver and
+document review, then require a fresh complete regression, force-generated
+framework receipt, installed/native renewal and exact review CI. Earlier
+receipts and package proofs retain their actual source identities while this
+combined source is being qualified.
+
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
 - **GitHub issue:** [#47](https://github.com/jordanhubbard/literate-ai/issues/47)
@@ -29423,12 +29433,18 @@ regression remains bound to that source. Rerun the affected fixture after repair
 - **Priority:** P1
 - **Owner:** Tracker command generation
 - **Direction:** Preserve the chosen fork/origin identity in generated issue and review CLI commands.
-- **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; use explicit repository arguments as the current operator mitigation.
+- **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; derive a credential-free, host-qualified selector from that same selected remote. GitLab keeps nested groups and HTTP(S) API ports, while an SSH transport port does not become an API port. Refuse malformed repository paths without emitting ambient commands. Remote-selection policy is unchanged.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
+  - [x] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
 - **Evidence:**
-  - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+  - [x] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+
+**Qualification:** All 15 tracker, guidance, peer-work and release-contribution cases pass with zero skips, including hostile ambient host/repository defaults and credential-free enterprise/nested-group selectors. Lint/format, supported driver/document review and layout/export checks pass.
+
+- [ ] Renew the framework lifecycle/current receipt and exact required review CI before landing the trusted-driver change.
+
+**Live and lifecycle results:** At `e6d72f0a`, all nine command groups explicitly bind the actual fork; real read-only surveys return selected-repository issues/reviews despite hostile GH_REPO/GH_HOST defaults. Fresh force-generation, native builds, generated tests, execution and independent acceptance pass all 13 lifecycle phases. Supported update/check/current/verify promote receipt `sha256:a6dc1391dd1967a558a898196c2cae89ab2f80ec4368ef352419e2ae198d76bb` with driver `34aa39fc5667343a0ac3f158dad4287c43d58e9f665765c3683e9c4b73f0e059`. Installed-wheel and exact review CI remain pending.
 
 ### [ ] WINDOWS-PE-OBSERVE-001 — Bound cold Windows receiver dependency observation
 
@@ -29597,13 +29613,32 @@ exact required CI remain landing gates.
 - **Conclusion:** The FreeBSD run at 7625cc05 reaches malformed-archive validation after its shared 30-minute test grant expires, correctly refusing with action_wire.expired. Give only this complete multi-component, multi-format fixture two standard budgets while retaining one grant across all phases. Preserve production deadlines, individual subprocess limits, dedicated expiry coverage and all proof-format assertions.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
+  - [x] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
 - **Evidence:**
   - [ ] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged.
 
 **Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
 
 **Second native refusal:** The `425ac341` rerun retains 1,149 passes, 34 skips and one `action_build.input_invalid` at package proof reopening after 2,105.044 seconds. Standard build grants have their own 30-minute lifetime; dispatch headroom alone does not extend them. Use a test-only authorization-input/port subclass to issue one-hour grants for this complete chain, preserving production defaults, grant validation, the single dispatch grant, all format/custody oracles and dedicated expiry controls. Run the focused actual native chain before the next fresh full run.
+
+**Completed native renewal for PR #81:** The fresh complete FreeBSD run at
+`7db3a7dcbf289142bce20191e05ea4e41f2e085c` passes 1,801 cases with 58
+platform/tool-dependent skips and no failures across 1,859 selected cases.
+The four actual native package cases, complete multi-format packaging chain and
+process-group termination case all pass. Independent hash-verified archive:
+`sha256:6ebba986ea614ea262d6a707a31cb2dad76fc13a4ed7825976fb12be61cad537`.
+The identical host-built wheel `sha256:44327bdd7a76121c16449ed5a2c6014a8992faac03ac49193325f4b24b6cc259`
+passes native installation with its harness pinned to its actual source
+`58c9d8a058b9c9c2adc6d69ae86152140fb48bef`: 73 preflight cases pass without
+skips and all 127 installed-wheel spans succeed. Independent wheel archive:
+`sha256:bd5cd91d89c92b4813fb14dd6220e418157ddc9c7804d551601f72135db305b2`.
+Later fixture/roadmap-only commits leave production source and the reviewed driver
+unchanged. The supported finalized receipt remains current at
+`sha256:e68395dc91d3bcb4016b82cf8865c84ec80cbe105734ba1c629011bcfd618ffb`.
+Exact `7db3a7dc` CI run `39519805647` passes. Landing also requires exact CI on
+the final review head. Failed and interrupted native attempts above retain their
+original source identities and are not successful qualification. The broader
+original-source SDK and accepted-retained export programs remain separate.
 
 ### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
 
@@ -29618,3 +29653,16 @@ exact required CI remain landing gates.
   - [ ] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
 - **Evidence:**
   - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+
+### [ ] PROJECT-SESSION-MEMORY-001 — Opt-in project and individual CLI session memory
+
+- **Priority:** P2
+- **Owner:** Project configuration and provider-neutral agent onboarding
+- **Direction:** Offer project-local MEMORY.md support for individual CLI sessions in a later point release, targeted at 1.3.1 rather than 1.3.0.
+- **Conclusion:** Provide an optional small project memory index linked to separate bounded session notes for decisions, failed approaches, evidence locations and resumable next actions. Specifications, issues and the roadmap remain authoritative. Keep notes local and ignored by default, exclude credentials and sensitive transcripts, and require revalidation of stale facts before action. This entry authorizes planning only; it adds no memory files, automatic persistence or changes to user-level agent memory.
+- **Depends on:** 1.3.0 release completion
+- **Implementation:**
+  - [ ] Design an opt-in project memory attribute and provider-neutral discovery through existing onboarding; define per-session ownership, naming, bounded index and notes, timestamps and exact revision or evidence references, privacy defaults, retention and explicit sharing policy.
+  - [ ] Implement deterministic CLI-supported creation, reading, update and resume behavior after the design is reviewed; preserve authority boundaries and avoid competing cross-session writes.
+- **Evidence:**
+  - [ ] Prove no writes when disabled, isolated simultaneous sessions, safe atomic updates, stale-evidence revalidation, secret exclusion, bounded retention and portability across supported CLI providers and hosts before shipping in a later point release.
