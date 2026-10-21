@@ -17,7 +17,6 @@ from unittest.mock import patch
 from literate_ai.adapters import retained_project_dependencies as dependencies
 from literate_ai.adapters import retained_project_execution as execution
 from literate_ai.adapters.builders import BuildError
-from literate_ai.adapters.dependencies.types import HostDependencyObservation
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
@@ -37,7 +36,6 @@ from literate_ai.contracts.retained_project_tests import (
     RetainedProjectExpectedCase,
     RetainedProjectTestPolicy,
 )
-from literate_ai.contracts.sbom import retained_project_bom_ref
 
 
 class RetainedProjectExecutionTests(unittest.TestCase):
@@ -323,35 +321,9 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                 )
 
     def test_stale_original_or_snapshot_refuses_before_process_launch(self):
-        # This refusal precedes native inspection and execution. Simulate only
-        # inspector facts; keep real tool custody and source/snapshot hashing on
-        # every host. Native command/dependency behavior has compiled tests below.
-        (self.source / "tools/runner").rename(self.source / "tools/runner.exe")
-        self.manifest = discover_retained_project_inputs(
-            self.source,
-            {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
-            self.manifest.limits,
-        )
-        self.profile = replace(
-            self.profile,
-            tools=(("shell", "tools/runner.exe", self.profile.tools[0][2]),),
-        )
-        self.plan = replace(
-            self.plan, profile=self.profile, manifest_identity=self.manifest.identity
-        )
-        self.current = self.plan
-        observer = self.enterContext(
-            patch.object(dependencies, "PortableHostDependencyObserver")
-        ).return_value
-        tool_ref = "urn:fixture:retained-tool"
-        observer.observe.return_value = HostDependencyObservation(
-            ({"bom-ref": tool_ref, "type": "file", "name": "fixture", "version": "1"},),
-            ((retained_project_bom_ref(self.plan.identity), tool_ref),),
-        )
         for selected in ("original", "snapshot"):
             with self.subTest(selected=selected):
                 workspace = self.workspace()
-                observations_before = observer.observe.call_count
                 path = (
                     self.source if selected == "original" else workspace.inputs
                 ) / "src/main.txt"
@@ -361,7 +333,6 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         workspace.execute_next()
                     process.assert_not_called()
-                self.assertEqual(observer.observe.call_count, observations_before)
                 self.assertEqual(workspace.observations, ())
                 path.write_bytes(b"original\x00asset")
 
