@@ -15,11 +15,15 @@ from literate_ai.adapters.dependencies.observation import (
     PortableHostDependencyObserver,
     _file_digest,
     _stable_file_bytes,
+    is_host_native_executable,
 )
 from literate_ai.adapters.native_sdk_custody import capture_native_sdk
+from literate_ai.adapters.native_sdk_tree_custody import capture_native_sdk_tree
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.identity import ContentIdentity
+from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
 from literate_ai.contracts.native_sdks import NativeSdkSnapshot
+from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.storage.cas import FileSystemCAS
 
 _ARCHITECTURES = {"x86_64", "arm64"}
@@ -81,7 +85,7 @@ def _architectures(properties: list[dict[str, str]], operating_system: str) -> s
 
 
 def observe_native_sdk_runtime(
-    snapshot: NativeSdkSnapshot,
+    snapshot: NativeSdkSnapshot | NativeSdkTreeSnapshot,
     *,
     expected_identity: ContentIdentity,
     target_identity: ContentIdentity,
@@ -111,6 +115,31 @@ def observe_native_sdk_runtime(
         raise ValueError("SDK runtime observation requires the selected target host")
 
     def require_bytes() -> None:
+        if isinstance(snapshot, NativeSdkTreeSnapshot):
+            tree = snapshot.tree
+            actual_tree = capture_native_sdk_tree(
+                root,
+                store=store,
+                case_sensitive=tree.case_sensitive,
+                limits=RetainedProjectLimits(
+                    len(tree.files) + len(tree.directories) + len(tree.aliases),
+                    max(1, max(item.blob.size for item in tree.files)),
+                    max(
+                        1,
+                        sum(item.blob.size for item in tree.files)
+                        + sum(
+                            len(alias.target.encode("utf-8"))
+                            for alias in tree.aliases
+                            if alias.kind == "symlink"
+                        ),
+                    ),
+                ),
+            )
+            if actual_tree != tree:
+                raise ValueError(
+                    "SDK tree changed before or during runtime observation"
+                )
+            return
         actual = capture_native_sdk(
             root,
             store=store,
@@ -127,7 +156,19 @@ def observe_native_sdk_runtime(
 
     require_bytes()
     root_ref = expected_identity.uri
-    observed = PortableHostDependencyObserver().observe(
+    # Tree custody already verified the entire namespace. Inspect its physical
+    # files explicitly; retain aliases in the snapshot and logical bindings,
+    # without weakening the generic observer's symlink refusal.
+    artifact_files = (
+        tuple(
+            root / item.path
+            for item in snapshot.files
+            if is_host_native_executable(root / item.path)
+        )
+        if isinstance(snapshot, NativeSdkTreeSnapshot)
+        else None
+    )
+    observed = PortableHostDependencyObserver(artifact_files=artifact_files).observe(
         {"artifact_path": str(root)}, root_ref=root_ref
     )
     components = {item["bom-ref"]: item for item in observed.components}
@@ -163,18 +204,38 @@ def observe_native_sdk_runtime(
                 native_by_path.setdefault(item["value"], []).append(ref)
     files = {item.path: item.blob for item in snapshot.files}
     bindings = []
+    physical_libraries = (
+        dict(
+            zip(
+                snapshot.native_libraries,
+                snapshot.tree.resolve_all(snapshot.native_libraries),
+                strict=True,
+            )
+        )
+        if isinstance(snapshot, NativeSdkTreeSnapshot)
+        else {}
+    )
     for relative in snapshot.native_libraries:
-        refs = native_by_path.get(str((root / relative).resolve(strict=True)), [])
+        physical = (
+            physical_libraries[relative]
+            if isinstance(snapshot, NativeSdkTreeSnapshot)
+            else relative
+        )
+        refs = native_by_path.get(str((root / physical).resolve(strict=True)), [])
         if len(refs) != 1:
             raise ValueError(
                 "SDK native library is absent or ambiguous in the observed closure"
             )
         ref = refs[0]
-        if {"alg": "SHA-256", "content": files[relative].digest} not in components[
-            ref
-        ].get("hashes", ()):
+        file = files[physical]
+        if {"alg": "SHA-256", "content": file.digest} not in components[ref].get(
+            "hashes", ()
+        ):
             raise ValueError("SDK native library hash differs from the observed image")
-        bindings.append({"path": relative, "component": ref})
+        binding = {"path": relative, "component": ref}
+        if isinstance(snapshot, NativeSdkTreeSnapshot):
+            binding["physical_path"] = physical
+        bindings.append(binding)
     runtime_refs = closure({binding["component"] for binding in bindings})
     verified_native_refs: set[str] = set()
     sdk_native_refs = {
@@ -216,7 +277,11 @@ def observe_native_sdk_runtime(
     require_bytes()
     return store.put_manifest(
         {
-            "schema": "literate-ai/native-sdk-runtime-observation@1",
+            "schema": (
+                "literate-ai/native-sdk-tree-runtime-observation@1"
+                if isinstance(snapshot, NativeSdkTreeSnapshot)
+                else "literate-ai/native-sdk-runtime-observation@1"
+            ),
             "snapshot_identity": snapshot.identity.to_dict(),
             "target_identity": target_identity.to_dict(),
             "operating_system": operating_system,

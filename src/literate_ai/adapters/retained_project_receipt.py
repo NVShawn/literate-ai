@@ -62,7 +62,11 @@ def _payload_manifest(run):
         sorted({p.split("/", 1)[0] for p in (*[m.path for m in members], *directories)})
     )
     return RetainedProjectManifest(
-        roots, members, run.output_manifest.limits, tuple(sorted(directories))
+        roots,
+        members,
+        run.output_manifest.limits,
+        tuple(sorted(directories)),
+        tree_policy=run.output_manifest.tree_policy,
     )
 
 
@@ -199,7 +203,10 @@ class AdmittedRetainedProject:
             for directory in manifest.directories:
                 (stage / directory).mkdir(parents=True, exist_ok=True)
             for member in manifest.members:
-                if member.symlink_target is not None:
+                if (
+                    member.symlink_target is not None
+                    or member.hardlink_target is not None
+                ):
                     raise ValueError("retained.receipt.payload-links-not-qualified")
                 target = stage / member.path
                 target.parent.mkdir(parents=True, exist_ok=True)

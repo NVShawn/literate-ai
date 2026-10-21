@@ -29361,3 +29361,205 @@ rather than treating resumed partial coverage as release qualification.
   - [x] The managed Python 3.11 suite reproduces the original native loader abort after 1,291 tests (57 skips); the macOS crash report identifies missing executable-relative `libpython3.11.dylib`. After the repair, three installer checks pass in 3.789 seconds and three build-identity/real-wheel self-update checks pass in 5.599 seconds. The same groups pass on Python 3.14 in 2.899 and 4.227 seconds. These checks use real private environments, Python, pip, wheels and launcher reexecution. The earlier symlink-only experiment passed startup but failed the unchanged enrollment containment check and was replaced.
   - [x] Run Python and pip from an actual new private runtime under the affected Python 3.11 distribution and pass real-wheel self-update. The fresh full Python 3.11 gate exits zero in 1,021.195 seconds with four workers; its report records 1,910 passed, 81 skipped and zero failures across 1,991 selected cases. Report SHA-256 `d770be5e04081dfe8fa59374a3e3b6a9b988b2390347f6dbe459ab3cd466d24d`; log SHA-256 `13969000d45edfbf9443089b50f1f25ee7e119032c62c85527b409d175989617`. This is a complete unit regression with explicit platform/dependency skips, not release or native FreeBSD acceptance.
   - [ ] Qualify the exact committed wheel and pass the hosted platform matrix before closing this item.
+
+### [ ] NATIVE-SDK-ALIAS-001 — Preserve internal aliases through native SDK admission
+
+**GitHub issue:** [#93](https://github.com/jordanhubbard/literate-ai/issues/93)
+
+- **Priority:** P1
+- **Owner:** Framework native SDK contracts, custody, runtime and lifecycle owners
+- **Direction:** Admit faithful source-built SDK trees with internal file and directory aliases, retaining full provenance and dependency authority.
+- **Conclusion:** Extend canonical SDK authority through an explicitly selected versioned tree capability while preserving regular-file-only wire identities and refusals. Snapshot custody alone cannot issue producer admission; every consumer boundary must join the actual completed producer.
+- **Depends on:** Existing native SDK source resolver, build authorization, runtime observation and retained SDK owners
+- **Implementation:**
+  - [x] Specify bounded internal alias target and ancestor closure, exact target text, explicit capability selection and legacy identity preservation. See [the SDK contract](native-sdk-admission.md#faithful-internal-sdk-aliases).
+  - [x] Preserve hard-link equivalence with canonical regular-file ownership and explicit target case sensitivity through source-level SDK and retained input custody; verify destination filesystem support and preserve default collision refusals. Installed/compiler SDK qualification remains separate.
+  - [x] Implement canonical tree contracts/schema and bounded no-follow byte capture/relocation, including closed hard-link groups, escape/cycle/dangling/drift refusals, destination case-sensitivity verification and owned cleanup. Development evidence is scoped to the byte-custody layer.
+  - [x] Bind the tree capability into canonical SDK snapshot/build-layout authority and actual completed builders. Source-level live consumers and source/resolved BOM evidence pass; retained/package admission remains open.
+  - [ ] Integrate live producer admission, retained placement, command/runtime observations, BOM and package provenance without self-authenticating transport claims.
+- **Evidence:**
+  - [ ] Existing regular-file SDK identities and refusal behavior remain unchanged; alias graph, filesystem drift and cleanup negative fixtures pass.
+  - [ ] A real source-built compiler, headers, resources, sysroot and libraries remain usable after relocation and producer retirement; alias and target changes invalidate consumers.
+  - [ ] Full required regression, installed-wheel and native consumer qualification pass before completion.
+
+The `native-sdk-tree@1` contract and registered schema now inventory physical
+members separately from aliases and resolve exclusively against that inventory.
+Ten focused tree checks include finite repeated-alias traversal, cycles, root
+escape, non-directory traversal, exact target-text identity and a shared aggregate
+work limit. The SDK/custody/runtime/source-build/schema regression passes all 32
+checks without skips on Python 3.14. This is contract-level development evidence;
+no-follow filesystem capture, immutable relocation and live producer/consumer
+integration remain unchecked. Next: connect this explicit tree capability to
+canonical SDK snapshot/build-layout custody while preserving legacy wire behavior.
+
+The initial complete Python 3.11 gate stopped after 1,417 tests in 996.069
+seconds because project validation found a stale documentation-review marker
+following the driver-pin change. Its report records 1,351 passes, one failure
+and 66 skips across 2,008 selected cases; it does not establish full regression.
+The failure report and checkpoint remain retained before the next source change.
+
+The extended tree contract now includes typed hard-link aliases with canonical
+regular-file ownership and explicit case-sensitive selection. Fourteen focused
+tree checks cover the new topology and preserve default case-collision refusals.
+An external source-built archive topology also constructs and round-trips through
+the contract with 247 directories, 4,396 files and 1,868 aliases (29 symbolic and
+1,839 hard links); portable selection refuses its case-variant names as required.
+This is representation evidence, not filesystem capture or producer admission.
+The upcoming retained-input integration must carry the same naming policy through
+its inventory, comparison and placement owners; SDK-only acceptance is insufficient.
+
+The [tree development record](../../verification/native-sdk-tree-development.json)
+binds the current source bytes, 46 passing controller checks (42.505 seconds),
+27 passing FreeBSD source-level checks (1.462 seconds), and a real native
+case-sensitive `CC`/`cc` hard-link relocation after producer retirement. No checks
+skip in these focused groups. Capture reuses transaction-local descriptor custody,
+closes every hard-link inode group, refuses a store inside the input root, rechecks
+names/bytes/link text, and verifies output topology before handing it to its owner.
+Relocation refuses resource bounds before copying payloads and removes owned
+staging after failures. These are source-level checks, not an installed-wheel or
+admitted compiler SDK result. Next remains canonical snapshot/layout and retained
+input naming integration followed by live producer and consumer qualification.
+
+The explicit `native-sdk-tree-snapshot@1` and `native-sdk-tree-build-layout@1`
+resources now bind complete topology to input/import/license metadata, capture
+bounds and naming semantics. Layout-bound capture verifies the selected output
+license; snapshot relocation verifies the complete product identity. Import roots
+must resolve to nonempty directories and native library declarations to physical
+regular files. Batch resolution shares a local index and bounded work budget.
+Legacy snapshot/layout decoders and recipe selection refuse the new capability;
+there is no plain-file fallback or live producer admission from decoding.
+The renewed focused group passes all 57 controller checks in 49.192 seconds and
+all 38 FreeBSD source checks in 0.763 seconds without skips. Native exported source
+hashes match the development record. Next: add explicit tree recipe selection and
+carry the capability through the actual builder/runtime owners, then retained
+input naming/hard-link custody and downstream command/BOM/package consumers.
+
+An earlier builder refused tree layouts before accepting execution resources.
+The current builder now explicitly supports typed tree layouts, as described below;
+untyped layouts and unsupported mixed wire formats continue to refuse.
+
+Tree recipes now have an explicit contribution kind and wire resource. Flavor
+preparation and locked selection preserve dependency slots, interface/target
+matching and complete source coverage. The repository builder supports the typed
+tree layout explicitly and retains the actual completed product. Runtime checking
+recaptures its full topology before/after inspection, supplies only verified
+physical native images to the existing observer, and retains logical-to-physical
+library bindings in `native-sdk-tree-runtime-observation@1`. Generic symlink
+refusal and legacy runtime wire identities remain unchanged.
+
+The source-level producer fixture compiles two linked native libraries, retains
+hard/symbolic aliases, deletes its source checkout, relocates the SDK and calls
+its public API successfully. Replacing a hard link with independent identical
+bytes refuses runtime rechecking. Locked tree recipe selection and invalid-slot
+refusal also pass. The focused controller group passes 61 checks in 55.929 seconds;
+the FreeBSD source group passes all 41 in 15.189 seconds without skips. The native
+bundle's first attempt omitted an existing fixture skill; that harness failure is
+retained separately from the repaired successful source export. CMake bootstrap
+uses the declared FreeBSD `cmake-core` realization and verifies version/provenance.
+These are source-level fixture results, not an installed wheel, full Standard
+consumer/receipt, source-built compiler SDK, per-unit pkg or release admission.
+The live SDK consumer now uses the completed source-build owner, selected layout
+limits and tree-aware materialization/rechecking. Both source and resolved
+CycloneDX BOMs retain tree identity, case selection and canonical alias properties.
+Forged legacy runtime schemas, substituted physical bindings and same-byte
+hard-link replacement refuse; cleanup preserves unrelated siblings. The focused
+consumer/legacy regression passes 50 tests in 94.432 seconds. The native source
+group passes 45 tests in 69.564 seconds, with no skips (supervised 72.270 seconds).
+The exported 1,574-file source bundle is hash-verified against the tested files.
+Packaging explicitly refuses tree products until its input custody preserves
+links. These remain source-level results, not installed-wheel or compiler SDK
+qualification. Next: retained input naming/hard-link custody and placement, then
+link-aware package inputs, runtime and qualification owners.
+
+
+Retained tree input custody now explicitly selects `retained-project-tree-policy@1`.
+Member hard-link targets bind canonical representatives, byte/mode equality and
+closed observed inode groups. Default naming checks and omitted legacy wire
+identities remain unchanged. Capture copies representatives separately from CAS,
+recreates hard links and symbolic aliases, verifies actual case-sensitive placement
+and rejects same-byte independent replacements. Verification and discovery read
+each physical inode group once while charging every declared name to existing
+aggregate bounds. Receipt and completion manifest projections carry the policy.
+
+The retained SDK owner compares captured files, both alias kinds and every directory
+to the actual completed tree product, requires the explicit naming capability and
+rechecks its placed runtime through the live producer owner. A controller fixture
+retires both source checkouts, calls the relocated C API successfully and rejects
+later hard-link topology drift. The five tree-consumer tests pass in 41.461 seconds;
+the custody/schema group passes 28 tests in 0.154 seconds. These are source-level
+results; full retained command lifecycle, package inputs/runtime/qualification,
+installed-wheel and source-built compiler SDK acceptance remain separate gates.
+
+The final native source export verifies 1,846 files and passes all 28 selected
+checks in 81.553 seconds (supervised 83.753 seconds), including actual case-distinct
+names, retained SDK relocation/API and rejection of linked payload flattening in
+both package resource construction and receipt materialization. Archive SHA-256
+`7f1f2e13d3fdcc32c42142dfe367e9fadd152825a13cc332c22bc9dfb262e396`.
+The preceding 59-test native source group passes in 79.868 seconds, with its exact
+archive retained separately. Full regression and installed/compiler/package
+qualification remain open.
+
+An explicit `package-tree-input@1` resource now binds artifact/resource kind,
+owned prefix, role, source, target and the complete tree. Namespace checks refuse
+regular-file/tree overlap, aliased ownership, target substitution and missing
+case-sensitive selection. Staging and rechecking reuse the existing no-follow tree
+custody owner. Thirty-three controller custody/schema checks pass in 0.198 seconds;
+five FreeBSD package-input checks pass in 0.039 seconds (supervised 0.667 seconds).
+The 1,850-file native source export has archive SHA-256
+`e6bd7c7194f60139f40e3200edcd16764b5ea58478b69387ea0285924b3420e9`.
+These are structural and byte-custody results. The new input is deliberately
+separate from legacy PackageInput and does not yet enter package plans/providers,
+SDK package runtime or qualification. Those owners are the next integration step;
+the existing unsupported-tree guards remain required until that work is verified.
+
+The final controller retained integration group completes all 67 selected tests
+in 423.113 seconds, with no failures or skips. It covers legacy completion,
+receipt and SDK owners, explicit tree custody, live/retained tree consumers,
+linked-payload refusal and schema catalog validation. This is focused source-level
+regression, not the full framework suite or installed/compiler/package acceptance.
+
+
+The explicit tree package plan/result now has a deterministic PAX TAR provider.
+It stages the complete bounded namespace through existing no-follow custody and
+independently verifies member order/type/mode/ownership/epoch, bytes, exact link
+targets, empty directories and the zero-only end trailer. Extended metadata is
+bounded before allocation, including on Python versions with different tarfile
+read strategies. Namespace checks now also reject differently spelled implicit
+ancestors. Fifteen controller contract/custody/schema tests pass on Python 3.14
+and 3.11 (0.303 and 0.288 seconds).
+
+The live SDK tree-package owner binds the exact lock, root, target and completed
+products; changed projections and actual builder ownership loss prevent successful
+completion. Its separate package index binds complete tree input identities and
+original snapshot/binding records. A structural consumer-plan fixture packages two
+real source-built linked libraries, retires source and producer CAS, extracts and
+relocates the archive, and calls the C API successfully. This is not Standard
+lifecycle or full compiler SDK admission. The FreeBSD source group passes all 14
+selected TAR/input/API checks in 14.417 seconds (supervised 18.095 seconds), with
+no skips. Its verified 1,856-file source export has archive SHA-256
+`d096592262f95bb24994e5aa2768219f5a7586d04d29aa10a01b42a5f8f8df67`.
+Native pkg, default packaged runtime, qualification codecs and installed/full
+compiler SDK acceptance remain open; the legacy unsupported-tree guards stay active.
+
+
+The fresh complete Python 3.11 controller regression exits zero with four workers.
+Its dispatcher report records 1,981 passed, 86 skipped and no failures across
+2,067 selected tests. The raw unittest runner separately reports 2,047 tests,
+73 skips and 967.835 seconds; these layers' counts are retained without merging.
+Report SHA-256 `0a9f3bfdbb8a264d09fa4a121b8c9bcc014af6431be9dd4f64608b31d655af6f`.
+The run uses a new checkpoint without known-failure annotations. This is a full
+controller unit gate, not installed, native project or release acceptance.
+
+While source was fixed for that run, an independent native `pkg` 2.8.4 probe
+preserved real hard links, exact symbolic target text, case-distinct names and an
+empty directory. Native manifests hash symbolic target bytes, record hard-link
+aliases with the representative checksum and count physical bytes plus symbolic
+target bytes in flatsize. Archive payload numeric IDs are reproducible 65534,
+with root/wheel names; native installation resolves them to root ownership.
+A script-free 896-byte fixture installs and removes correctly in a fresh private
+root/database inside the disposable worker: link inodes, targets, bytes, empty
+directory, ownership, removal and an empty final private database all verify.
+The worker's normal package database is unchanged. Archive SHA-256
+`f8173765adce11c47019cd1b97713b30e92b989b6026954ef8112a6237da2ba2`.
+These are native-format/installation discovery results; the framework's tree-aware
+pkg projection and verifier still require implementation.

@@ -16,6 +16,7 @@ from literate_ai.contracts.executable_components.packages import (
     RuntimeRequirementKind,
 )
 from literate_ai.contracts.identity import ContentIdentity, canonical_json_bytes
+from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
 from literate_ai.storage import BlobRef
 
 
@@ -42,6 +43,13 @@ class NativeSdkPackageResources:
             raise ValueError("SDK package lock differs from consumer inputs")
         self._owner = owner
         self.bindings = owner.for_scope(root_revision)
+        if any(
+            isinstance(binding.build.product.snapshot, NativeSdkTreeSnapshot)
+            for binding in self.bindings
+        ):
+            raise ValueError(
+                "SDK tree packaging requires link-aware package input custody"
+            )
         if consumer_revisions is not None:
             known = {
                 node.revision.identity for node in owner.snapshot.authority.lock.nodes

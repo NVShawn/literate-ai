@@ -21,6 +21,7 @@ from literate_ai.contracts.retained_project import (
     RetainedProjectLimits,
     RetainedProjectManifest,
     RetainedProjectMember,
+    RetainedProjectTreePolicy,
 )
 
 _CHUNK = 1024 * 1024
@@ -430,21 +431,74 @@ def _inventory(
     return tuple(sorted(names)), tuple(sorted(directories))
 
 
+def _hardlink_topology(root, names, access):
+    """Observe complete physical groups without following symbolic inputs."""
+    if os.name == "nt":
+        raise RetainedProjectInputError(
+            "Faithful retained topology requires a POSIX worker"
+        )
+    groups = {}
+    stamps = {}
+    for name in names:
+        value = (
+            access.metadata(root / name)
+            if access is not None
+            else _safe(root, name).lstat()
+        )
+        if stat.S_ISREG(value.st_mode):
+            groups.setdefault((value.st_dev, value.st_ino), []).append(name)
+            stamps[name] = (*_stamp(value), value.st_nlink)
+    aliases = {}
+    for group in groups.values():
+        first = min(group)
+        if any(stamps[name][-1] != len(group) for name in group):
+            raise RetainedProjectInputError("Retained hard link group is incomplete")
+        aliases.update((name, first) for name in group if name != first)
+    return aliases, stamps
+
+
+def _require_case_sensitive(root: Path) -> None:
+    probe = root / ".case-probe"
+    probe.mkdir()
+    try:
+        (probe / "Aa").write_bytes(b"")
+        try:
+            with (probe / "aa").open("xb"):
+                pass
+        except FileExistsError as error:
+            raise ValueError(
+                "Input requires a case-sensitive destination filesystem"
+            ) from error
+        if (probe / "Aa").stat().st_ino == (probe / "aa").stat().st_ino:
+            raise ValueError("Input requires distinct case-sensitive directory entries")
+    finally:
+        _remove_tree(probe)
+
+
 def discover_retained_project_inputs(
     root: Path,
     roots: Mapping[str, str],
     limits: RetainedProjectLimits,
     *,
     allow_internal_symlinks: bool = False,
+    tree_policy: RetainedProjectTreePolicy | None = None,
 ) -> RetainedProjectManifest:
     """Read a complete declared closure; the caller must review the result."""
     root = _root(root)
+    if tree_policy is not None and not isinstance(
+        tree_policy, RetainedProjectTreePolicy
+    ):
+        raise TypeError("Typed retained tree policy required")
     if type(allow_internal_symlinks) is not bool:
         raise TypeError(
             "Retained symlink admission requires explicit boolean selection"
         )
     selected = tuple(sorted(roots))
-    canonical_relative_posix_paths(selected, label="retained roots")
+    if tree_policy is None or not tree_policy.case_sensitive:
+        canonical_relative_posix_paths(selected, label="retained roots")
+    else:
+        for name in selected:
+            canonical_relative_posix_paths((name,), label="retained roots")
     with _directory_access(root) as access:
         names, directories = _inventory(
             root,
@@ -453,15 +507,28 @@ def discover_retained_project_inputs(
             allow_internal_symlinks=allow_internal_symlinks,
             access=access,
         )
+        topology = (
+            _hardlink_topology(root, names, access) if tree_policy is not None else None
+        )
         members = []
         total = 0
+        physical = {}
         for name in names:
-            size, mode, digest = _stream(
-                root,
-                name,
-                min(limits.max_file_bytes, limits.max_total_bytes - total),
-                access=access,
+            representative = (
+                topology[0].get(name, name) if topology is not None else name
             )
+            if representative in physical:
+                size, mode, digest = physical[representative]
+                if size > min(limits.max_file_bytes, limits.max_total_bytes - total):
+                    raise RetainedProjectInputError("Retained inputs exceed byte bound")
+            else:
+                size, mode, digest = _stream(
+                    root,
+                    name,
+                    min(limits.max_file_bytes, limits.max_total_bytes - total),
+                    access=access,
+                )
+                physical[name] = (size, mode, digest)
             total += size
             role = next(
                 role
@@ -472,10 +539,22 @@ def discover_retained_project_inputs(
             if mode == 0o120000:
                 target = _link_bytes(root, name, size, access).decode("utf-8")
             members.append(
-                RetainedProjectMember(name, size, mode, digest, role, target)
+                RetainedProjectMember(
+                    name,
+                    size,
+                    mode,
+                    digest,
+                    role,
+                    target,
+                    topology[0].get(name) if topology is not None else None,
+                )
+            )
+        if topology is not None and _hardlink_topology(root, names, access) != topology:
+            raise RetainedProjectInputError(
+                "Retained hard link topology changed during discovery"
             )
         manifest = RetainedProjectManifest(
-            selected, tuple(members), limits, directories
+            selected, tuple(members), limits, directories, tree_policy=tree_policy
         )
         _verify_inputs(root, manifest, access)
         return manifest
@@ -504,7 +583,20 @@ def _verify_inputs(root, manifest, access):
         or directories != manifest.directories
     ):
         raise RetainedProjectInputError("Retained input inventory changed")
+    topology = None
+    if manifest.tree_policy is not None:
+        topology = _hardlink_topology(root, names, access)
+        expected = {
+            m.path: m.hardlink_target
+            for m in manifest.members
+            if m.hardlink_target is not None
+        }
+        if topology[0] != expected:
+            raise RetainedProjectInputError("Retained hard link topology changed")
     for member in manifest.members:
+        if member.hardlink_target is not None:
+            # The complete inode group shares its verified representative bytes.
+            continue
         if _stream(root, member.path, member.size, access=access) != (
             member.size,
             member.mode,
@@ -525,6 +617,11 @@ def _verify_inputs(root, manifest, access):
     ):
         raise RetainedProjectInputError(
             "Retained inventory changed during verification"
+        )
+
+    if topology is not None and _hardlink_topology(root, names, access) != topology:
+        raise RetainedProjectInputError(
+            "Retained hard link topology changed during verification"
         )
 
 
@@ -551,10 +648,14 @@ def capture_retained_project_inputs(
         tree = temporary / "tree"
         blobs.mkdir()
         tree.mkdir()
+        if manifest.tree_policy is not None and manifest.tree_policy.case_sensitive:
+            _require_case_sensitive(tree)
         for directory in manifest.directories:
             (tree / directory).mkdir(parents=True, exist_ok=True)
         with _directory_access(root) as access:
             for member in manifest.members:
+                if member.hardlink_target is not None:
+                    continue  # A canonical representative supplies the CAS bytes.
                 blob = blobs / member.sha256
                 with tempfile.TemporaryFile(dir=temporary) as stream:
                     if _stream(
@@ -574,11 +675,17 @@ def capture_retained_project_inputs(
                         blob.chmod(0o444)
                 target = tree / member.path
                 target.parent.mkdir(parents=True, exist_ok=True)
-                if member.symlink_target is not None:
+                if (
+                    member.symlink_target is not None
+                    or member.hardlink_target is not None
+                ):
                     continue  # Materialize links after every ordinary input is copied.
                 with blob.open("rb") as source, target.open("xb") as output:
                     shutil.copyfileobj(source, output, _CHUNK)
                 target.chmod(0o555 if member.mode == 0o755 else 0o444)
+        for member in manifest.members:
+            if member.hardlink_target is not None:
+                os.link(tree / member.hardlink_target, tree / member.path)
         by_path = {member.path: member for member in manifest.members}
         destinations: dict[str, str] = {}
         for member in manifest.members:

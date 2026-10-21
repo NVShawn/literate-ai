@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -21,7 +22,11 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from literate_ai.contracts.retained_project import RetainedProjectManifest
+from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
+from literate_ai.contracts.retained_project import (
+    RetainedProjectManifest,
+    RetainedProjectMember,
+)
 from literate_ai.contracts.retained_project_lifecycle import RetainedProjectPlan
 from literate_ai.contracts.retained_project_sdks import RetainedProjectSdkPolicy
 
@@ -93,26 +98,58 @@ class RetainedProjectNativeSdkInputs:
         expected_directories = set()
         for key, binding in selected.items():
             prefix = self._prefixes[key]
+            sdk = binding.build.product.snapshot
             expected_directories.add(prefix)
-            for item in binding.build.product.snapshot.files:
+            if isinstance(sdk, NativeSdkTreeSnapshot):
+                if manifest.tree_policy is None or (
+                    sdk.tree.case_sensitive and not manifest.tree_policy.case_sensitive
+                ):
+                    raise ValueError("retained.sdk.selected-tree-policy-required")
+                expected_directories.update(
+                    prefix + "/" + path for path in sdk.tree.directories
+                )
+            for item in sdk.files:
                 path = prefix + "/" + item.path
-                expected[path] = item
+                expected[path] = RetainedProjectMember(
+                    path,
+                    item.blob.size,
+                    0o755 if item.executable else 0o644,
+                    item.blob.digest,
+                    "sdk",
+                )
                 directory = path.rpartition("/")[0]
                 while directory != prefix:
                     expected_directories.add(directory)
                     directory = directory.rpartition("/")[0]
+            if isinstance(sdk, NativeSdkTreeSnapshot):
+                physical = {item.path: item for item in sdk.files}
+                for alias in sdk.tree.aliases:
+                    path = prefix + "/" + alias.path
+                    if alias.kind == "hardlink":
+                        item = physical[alias.target]
+                        expected[path] = RetainedProjectMember(
+                            path,
+                            item.blob.size,
+                            0o755 if item.executable else 0o644,
+                            item.blob.digest,
+                            "sdk",
+                            hardlink_target=prefix + "/" + alias.target,
+                        )
+                    else:
+                        content = alias.target.encode("utf-8")
+                        expected[path] = RetainedProjectMember(
+                            path,
+                            len(content),
+                            0o120000,
+                            hashlib.sha256(content).hexdigest(),
+                            "sdk",
+                            symlink_target=alias.target,
+                        )
         sdk_members = {m.path: m for m in manifest.members if m.role == "sdk"}
         if set(sdk_members) != set(expected):
             raise ValueError("retained.sdk.complete-sdk-file-closure-required")
-        for path, item in expected.items():
-            member = sdk_members[path]
-            if (
-                member.symlink_target is not None
-                or member.sha256 != item.blob.digest
-                or member.size != item.blob.size
-                or member.mode != (0o755 if item.executable else 0o644)
-            ):
-                raise ValueError("retained.sdk.product-file-mismatch")
+        if sdk_members != expected:
+            raise ValueError("retained.sdk.product-file-mismatch")
         prefixes = set(self._prefixes.values())
         if (
             any(

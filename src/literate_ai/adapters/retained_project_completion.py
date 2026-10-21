@@ -44,6 +44,7 @@ def _stage_manifest(manifest, roots):
         tuple(member for member in manifest.members if _under(member.path, roots)),
         manifest.limits,
         tuple(path for path in manifest.directories if _under(path, roots)),
+        tree_policy=manifest.tree_policy,
     )
 
 

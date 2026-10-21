@@ -906,6 +906,20 @@
       ]
     },
     {
+      "file": "native-sdk-tree.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:native-sdk-tree@1",
+      "public_ids": []
+    },
+    {
+      "file": "native-sdk-tree-products.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:native-sdk-tree-products@1",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:native-sdk-tree-snapshot@1",
+        "urn:literate-ai:schema:v2:native-sdk-tree-build-layout@1",
+        "urn:literate-ai:schema:v2:native-sdk-tree-build-recipe@1"
+      ]
+    },
+    {
       "file": "worker-capacity.schema.json",
       "root_id": "urn:literate-ai:schema:v1:worker-capacity-contracts",
       "public_ids": [
@@ -977,6 +991,29 @@
       "public_ids": [
         "urn:literate-ai:schema:v2:standard-authorization-action-inputs"
       ]
+    },
+    {
+      "file": "retained-project-tree.schema.json",
+      "root_id": "literate-ai/retained-project-tree-policy@1",
+      "public_ids": []
+    },
+    {
+      "file": "package-tree-input.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:package-tree-input@1",
+      "public_ids": []
+    },
+    {
+      "file": "tree-packages.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:tree-package-contracts@1",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:tree-package-plan@1",
+        "urn:literate-ai:schema:v2:tree-package-result@1"
+      ]
+    },
+    {
+      "file": "native-sdk-tree-package-inputs.schema.json",
+      "root_id": "literate-ai/native-sdk-tree-package-inputs@1",
+      "public_ids": []
     }
   ]
 }

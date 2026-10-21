@@ -9,6 +9,7 @@ import subprocess
 import unittest
 import zipfile
 from dataclasses import replace
+from unittest.mock import PropertyMock, patch
 
 from literate_ai.adapters.retained_project_acceptance import ACCEPTANCE_POLICY_PATH
 from literate_ai.adapters.retained_project_inputs import (
@@ -292,6 +293,33 @@ class RetainedProjectPackageTests(unittest.TestCase):
                 media_type="application/json",
             )
             self.assertEqual(self.store.get_manifest(reference), value.to_dict())
+
+    def test_linked_payload_cannot_be_silently_flattened(self):
+        self.finish()
+        manifest = self.admission.payload_manifest
+        original = manifest.members[0]
+        alias = replace(original, path="zz-hardlink", hardlink_target=original.path)
+        from literate_ai.contracts.retained_project import RetainedProjectTreePolicy
+
+        linked = replace(
+            manifest,
+            roots=tuple(sorted((*manifest.roots, alias.path))),
+            members=tuple(sorted((*manifest.members, alias), key=lambda m: m.path)),
+            tree_policy=RetainedProjectTreePolicy(),
+        )
+        with patch.object(
+            type(self.admission),
+            "payload_manifest",
+            new_callable=PropertyMock,
+            return_value=linked,
+        ):
+            with self.assertRaisesRegex(ValueError, "payload-links-not-qualified"):
+                self.provider()
+            with self.assertRaisesRegex(ValueError, "payload-links-not-qualified"):
+                self.admission.materialize_payload(
+                    self.fixture.fixture.base / "linked-payload"
+                )
+        self.assertFalse((self.fixture.fixture.base / "linked-payload").exists())
 
     def test_wrong_provider_or_lock_and_decoded_receipt_do_not_grant_packaging(self):
         self.finish()

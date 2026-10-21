@@ -2,6 +2,51 @@
 
 ## Unreleased
 
+- Add a distinct tree package plan/result and deterministic PAX TAR provider.
+  Preserve file modes, empty directories, symbolic targets and hard-link groups;
+  independently reject rehashed topology/byte/mode changes and unbound trailers.
+  Bound extended metadata before allocation. A live SDK resource owner binds the
+  exact completed producer and rejects ownership loss during packaging. A real
+  compiled-library API works after producer retirement, extraction and relocation
+  on macOS and FreeBSD. Native pkg/runtime/qualification integration remains open.
+
+- Define explicit artifact/resource package tree inputs carrying complete directory,
+  alias, naming and provenance authority. Reject overlapping package namespaces;
+  reuse existing bounded tree custody for byte relocation and verification.
+  Package plan, provider, runtime and qualification integration remains open.
+
+- Add explicit retained input topology policy, preserving canonical hard-link
+  groups and case-sensitive target names through capture and verification.
+  Keep legacy manifest and role identities unchanged. Reuse physical file reads
+  without sharing CAS inodes, reject external links and identical-byte link
+  replacement, and clean up failed placement. Join retained SDK files, aliases
+  and directories to the completed live source-build owner.
+
+- Carry completed tree SDK products through live consumers and source/resolved
+  CycloneDX evidence, retaining alias and logical/physical library relationships.
+  Refuse forged runtime bindings and identical-byte topology drift. Tree packaging
+  explicitly refuses until link-aware package input custody is implemented.
+
+- Select explicit tree SDK recipes through locked Flavor authority and retain
+  completed source-built tree products. Verify alias topology around native
+  inspection, retain logical/physical library bindings, and preserve the generic
+  observer's symlink refusal. A relocated source-built C API fixture passes on
+  macOS and FreeBSD; retained and package integration remain open.
+
+- Bind tree-aware SDK snapshots and layouts to exact input/import/license claims,
+  capture limits and naming semantics. Verify selected output-license bytes and
+  complete snapshot identity during byte capture/relocation. Legacy decoders and
+  legacy recipes refuse mixed formats; complete consumer admission remains open.
+
+- Add a versioned SDK tree contract preserving symbolic alias text, canonical
+  hard-link ownership and resolved targets. Bind explicit case-sensitive target
+  names while preserving portable collision refusals. Refuse escapes, dangling
+  targets, cycles, ambiguous ancestors and excessive resolution work. Legacy SDK
+  snapshot identities and alias refusals remain unchanged. Source-level capture
+  and relocation reuse no-follow input custody, preserve closed hard-link groups,
+  verify destination case sensitivity and clean up failed placement. Canonical
+  retained-input, consumer and package integration remain pending.
+
 - Scope named-user search through private FreeBSD retained allocation directories
   to eligible test actions. Protect unrelated siblings, refuse inaccessible
   outside ancestors, verify effective access after dropping identity, and restore

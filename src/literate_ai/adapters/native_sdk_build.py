@@ -22,6 +22,9 @@ from literate_ai.adapters.native_sdk_custody import capture_native_sdk
 from literate_ai.adapters.native_sdk_runtime import (
     observe_native_sdk_runtime,
 )
+from literate_ai.adapters.native_sdk_tree_custody import (
+    capture_native_sdk_tree_snapshot,
+)
 from literate_ai.adapters.source.git import GitSourceAdapter
 from literate_ai.application.repository_sources import (
     RepositoryBuildApproval,
@@ -30,6 +33,10 @@ from literate_ai.application.repository_sources import (
 )
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
+from literate_ai.contracts.native_sdk_tree_products import (
+    NativeSdkTreeBuildLayout,
+    NativeSdkTreeSnapshot,
+)
 from literate_ai.contracts.native_sdks import NativeSdkBuildLayout, NativeSdkSnapshot
 from literate_ai.contracts.repositories import (
     RepositoryBuildOutput,
@@ -52,7 +59,7 @@ class NativeSdkBuiltProduct:
     """Live builder output; this handle does not grant consumer execution."""
 
     verification: RepositoryBuildVerification
-    snapshot: NativeSdkSnapshot
+    snapshot: NativeSdkSnapshot | NativeSdkTreeSnapshot
     snapshot_blob: BlobRef
     runtime_observation: BlobRef
     result_blob: BlobRef
@@ -64,7 +71,7 @@ class NativeSdkRepositoryBuilder:
     def __init__(
         self,
         *,
-        layout: NativeSdkBuildLayout,
+        layout: NativeSdkBuildLayout | NativeSdkTreeBuildLayout,
         tools: Mapping[str, LocalComponentToolBinding],
         store: FileSystemCAS,
         grant_lookup: Callable[[ContentIdentity], BuildAuthorization],
@@ -72,6 +79,8 @@ class NativeSdkRepositoryBuilder:
         authorization_verifier: BuildAuthorizationVerifier | None = None,
         timeout_seconds: float = 300,
     ) -> None:
+        if not isinstance(layout, (NativeSdkBuildLayout, NativeSdkTreeBuildLayout)):
+            raise TypeError("SDK repository builder requires a supported SDK layout")
         if not tools or any(
             not isinstance(name, str)
             or not name
@@ -246,19 +255,34 @@ class NativeSdkRepositoryBuilder:
         require_source()
         for tool in self.tools.values():
             tool.require_unchanged()
-        snapshot = capture_native_sdk(
-            sdk,
-            store=self.store,
-            source_lock_identity=lock.identity,
-            recipe_identity=plan.identity,
-            target_identity=plan.flavor_set,
-            license_identity=self.layout.license_identity,
-            import_surface=self.layout.import_surface,
-            import_root=self.layout.import_root,
-            native_libraries=self.layout.native_libraries,
-        )
+        if isinstance(self.layout, NativeSdkTreeBuildLayout):
+            snapshot = capture_native_sdk_tree_snapshot(
+                sdk,
+                layout=self.layout,
+                store=self.store,
+                source_lock_identity=lock.identity,
+                recipe_identity=plan.identity,
+                target_identity=plan.flavor_set,
+            )
+        else:
+            snapshot = capture_native_sdk(
+                sdk,
+                store=self.store,
+                source_lock_identity=lock.identity,
+                recipe_identity=plan.identity,
+                target_identity=plan.flavor_set,
+                license_identity=self.layout.license_identity,
+                import_surface=self.layout.import_surface,
+                import_root=self.layout.import_root,
+                native_libraries=self.layout.native_libraries,
+            )
         outputs = {item.path: item.blob for item in snapshot.files}
-        if outputs.get(self.layout.output_license) != license_blob:
+        retained_license = (
+            snapshot.file_at(self.layout.output_license).blob
+            if isinstance(snapshot, NativeSdkTreeSnapshot)
+            else outputs.get(self.layout.output_license)
+        )
+        if retained_license != license_blob:
             raise ValueError("SDK output does not retain the exact source license")
         runtime_observation = observe_native_sdk_runtime(
             snapshot,
