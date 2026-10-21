@@ -29353,9 +29353,10 @@ Evidence: [exact wheel and native migration checkpoint](../../verification/stand
   The first controller probe omitted documentation review and correctly refused;
   its failure remains retained, followed by a fresh corrected probe. No production
   guard changed. [Qualification checkpoint](../../verification/native-first-binding-integration-development.json).
-  Next: submit the combined review branch and require exact-head hosted CI before
-  landing. Other branches and 26 attached worktrees remain retained; this task
-  does not collect unrelated peer work.
+  [Draft PR #109](https://github.com/jordanhubbard/literate-ai/pull/109) carries the
+  combined review branch. Next require its exact-head hosted matrix and review
+  disposition before landing. Other branches and 26 attached worktrees remain
+  retained; this task does not collect unrelated peer work.
 - **Depends on:** STANDARD-FIRST-BIND-001, FREEBSD-001
 - **Implementation:**
   - [x] Integrate exact PR87 and PR108 revisions without losing source, tree package, access or binding contracts.

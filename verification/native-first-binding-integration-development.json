@@ -95,10 +95,11 @@
     "correction": "Retained failed attempt; used a fresh source copy and public documentation-review command before planning original authority.",
     "production_guard_changed": false
   },
-  "hosted_ci": "pending review branch submission",
+  "hosted_ci": "Exact-head matrix pending; local and installed probes do not waive it",
   "retained_lifecycle_admitted": false,
   "compiler_sdk_admitted": false,
   "current_product_receipt": false,
   "iso_created": false,
-  "release_acceptance": false
+  "release_acceptance": false,
+  "review": "https://github.com/jordanhubbard/literate-ai/pull/109"
 }
