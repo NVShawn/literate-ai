@@ -29515,13 +29515,32 @@ exact required CI remain landing gates.
 - **Conclusion:** The FreeBSD run at 7625cc05 reaches malformed-archive validation after its shared 30-minute test grant expires, correctly refusing with action_wire.expired. Give only this complete multi-component, multi-format fixture two standard budgets while retaining one grant across all phases. Preserve production deadlines, individual subprocess limits, dedicated expiry coverage and all proof-format assertions.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
+  - [x] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
 - **Evidence:**
   - [ ] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged.
 
 **Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
 
 **Second native refusal:** The `425ac341` rerun retains 1,149 passes, 34 skips and one `action_build.input_invalid` at package proof reopening after 2,105.044 seconds. Standard build grants have their own 30-minute lifetime; dispatch headroom alone does not extend them. Use a test-only authorization-input/port subclass to issue one-hour grants for this complete chain, preserving production defaults, grant validation, the single dispatch grant, all format/custody oracles and dedicated expiry controls. Run the focused actual native chain before the next fresh full run.
+
+**Completed native renewal for PR #81:** The fresh complete FreeBSD run at
+`7db3a7dcbf289142bce20191e05ea4e41f2e085c` passes 1,801 cases with 58
+platform/tool-dependent skips and no failures across 1,859 selected cases.
+The four actual native package cases, complete multi-format packaging chain and
+process-group termination case all pass. Independent hash-verified archive:
+`sha256:6ebba986ea614ea262d6a707a31cb2dad76fc13a4ed7825976fb12be61cad537`.
+The identical host-built wheel `sha256:44327bdd7a76121c16449ed5a2c6014a8992faac03ac49193325f4b24b6cc259`
+passes native installation with its harness pinned to its actual source
+`58c9d8a058b9c9c2adc6d69ae86152140fb48bef`: 73 preflight cases pass without
+skips and all 127 installed-wheel spans succeed. Independent wheel archive:
+`sha256:bd5cd91d89c92b4813fb14dd6220e418157ddc9c7804d551601f72135db305b2`.
+Later fixture/roadmap-only commits leave production source and the reviewed driver
+unchanged. The supported finalized receipt remains current at
+`sha256:e68395dc91d3bcb4016b82cf8865c84ec80cbe105734ba1c629011bcfd618ffb`.
+Exact `7db3a7dc` CI run `39519805647` passes. Landing also requires exact CI on
+the final review head. Failed and interrupted native attempts above retain their
+original source identities and are not successful qualification. The broader
+original-source SDK and accepted-retained export programs remain separate.
 
 ### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
 
