@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Swift generation uses one top-level entrypoint and validates every Swift source file together, preventing auxiliary tools from breaking the native build after generation.
+
 - Source installation retains the standalone macOS Python shared library before bootstrapping pip in copied private runtimes, preserving self-update custody.
 - Retained Windows commands bind native system-directory context and revalidate its directory identities without inheriting caller injection.
 - Shared Windows retained fixtures capture executable suffixes and actual Python runtime DLLs before rebuilding their input bindings.

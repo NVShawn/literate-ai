@@ -28837,7 +28837,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 - **Current evidence:** Thirteen focused projection tests pass locally, including raw-CRLF exclusion custody, all three supported manifest forms, active-import refusal, target/tag drift, strict JSON bounds, application cache reuse and relocated library independent acceptance after source/wheelhouse retirement. Twelve existing Python resolver/lifecycle/projection tests and four broader dependency lifecycle tests pass. Lint/format, repository layout/export, 21 Node tests, 121 Mermaid renders and strict OpenSpec pass; the lifecycle driver and documentation authority reviews are current. Complete local, native Linux, installed and exact-head CI qualification are the next action; no terminal release or retained-project claim is made.
 
-### [ ] TEST-PARALLEL-001 — Run release-gate tests in parallel (checkpointed, fail-fast)
+### [x] TEST-PARALLEL-001 — Run release-gate tests in parallel (checkpointed, fail-fast)
 
 - **GitHub issue:** [#56](https://github.com/jordanhubbard/literate-ai/issues/56)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -28847,7 +28847,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Direction:** Run release-gate tests in parallel (checkpointed, fail-fast)
 - **Conclusion:** The current installed checkpoint runner executes the entire suite in one process. Add bounded process-level module scheduling while preserving one controller-owned marker ledger and source/context binding. Keep the existing serial API for in-memory suites; make CLI/Make worker count explicit, defaulting to the available CPU count. The Windows gate retains pytest/JUnit and uses isolated file-group workers with fail-fast.
 - **Depends on:** existing pin dispatch, known-failure contracts and owned-process-tree cleanup
-- **Next action (in progress):** Finish native Windows parity and the eight-core Windows performance acceptance. PR #73 is merged after its full exact-head matrix passed; post-merge main CI remains queued and the sixteen-core worker remains held for disk capacity.
+- **Next action:** Complete. PR #73 is merged, its exact post-merge CI passed, and the missing eight-worker Windows serial/parity comparison is independently verified below.
 - **Implementation:**
   - [x] Execute importable module groups in private process/temp/object environments with explicit serial barriers and configurable worker count.
   - [x] Record validated per-case outcomes only in the parent; retain exact failure/skip/subtest/fixture counts and bounded diagnostics.
@@ -28856,9 +28856,9 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Integrate Make and Windows pytest worker configuration, audit fixed shared state, and document limits and wheel-check timing findings.
 - **Evidence:**
   - [x] Real processes prove overlap, isolation, serial barriers, deterministic failure order, fail-fast child cleanup, crash/protocol refusal and out-of-order resume.
-  - [ ] Serial and parallel runs produce identical ordered case outcomes and receipt summaries, including duplicates, class/module fixtures and subtests.
-  - [ ] Measure the complete framework suite and native Linux/Windows gates on aligned workers; demonstrate the requested speedup without dropped or doubled cases.
-  - [ ] Pass complete local, installed-wheel, exact-head CI and a newly current lifecycle receipt before landing.
+  - [x] Serial and parallel runs produce identical ordered case outcomes and receipt summaries, including duplicates, class/module fixtures and subtests.
+  - [x] Measure the complete framework suite and native Linux/Windows gates on aligned workers; demonstrate the requested speedup without dropped or doubled cases.
+  - [x] Pass complete local, installed-wheel, exact-head CI and a newly current lifecycle receipt before landing.
 
 - **Development evidence:** Seventeen focused checkpoint tests pass, covering real process overlap, private scratch/configuration, serial barriers, per-case out-of-order repair (including retained skips), owned descendant termination, crash/protocol refusal, duplicate object occurrences, fixture/subtest parity, known-failure contexts, release-evidence bypass and Windows entry-point configuration. The initial full-suite attempt exposed project-authority inheritance from scratch directories beneath the checkout; scratch now lives outside it. A later exploratory run stopped at 730 tests because source was edited while its immutable self-hosting proof ran. This is not a complete-suite pass or a performance claim. Freeze source before final qualification. Review also covered multiple cleanup failures and skipped teardown after a failing body: failure precedence is retained, other workers stop immediately, and the failing module has a bounded cleanup-report window. Make retains an ordered sidecar report even after successful repair markers reset.
 
@@ -28871,6 +28871,9 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Native Windows follow-up:** The four-worker gate stopped after 575 passes, 45 skips and 579 passing subtests when the real Cargo accounting fixture exceeded its 60-second compiler deadline. An isolated unchanged probe passes: cold compile 32.594 seconds, cached compile 0.469 seconds. The fixture now allows 180 seconds on Windows (60 elsewhere) and uses existing owned-process-tree cleanup on timeout. This is a test-fixture timing correction, not native performance acceptance; the final gate must be rerun. The failed job evidence is retained and its finite on-demand task is confirmed removed.
 
 - **Landed and native comparison checkpoint:** [PR #73](https://github.com/jordanhubbard/literate-ai/pull/73) merged as `90d5b6e9dcf155af28301b3e4d4b67863bf70d25` after all 26 jobs passed in [exact-head CI](https://github.com/jordanhubbard/literate-ai/actions/runs/39207384350). The final macOS comparison at `77b06857` is 879.384 seconds parallel versus 3,136.970 serial (3.567x). The eight-worker Linux comparison at `7652c2ed` is 629.442 versus 2,649.103 seconds (4.209x). Both preserve all selected ordered outcomes and summary counts. These implementations match the landed runner source; the later Windows Cargo fixture deadline correction is recorded separately above. The current four-core Windows parallel pass is awaiting its serial comparison and does not satisfy the required eight-core Windows performance target. Issue #56 remains open.
+
+
+- **Completed Windows acceptance (2026-10-21):** At exact source `056f76185eeccb8dfecfc6a6a154634af7b63ebc` on an aligned sixteen-core worker, the serial run completes in 23,033.812 seconds and the retained eight-worker run in 3,082.2 seconds (7.473x). Independently collected XML contains the same 1,548 ordered case identities/outcomes, 1,446 passes, 102 skips and 1,461 passing subtests; both native JUnit summaries report 3,009 tests, zero failures/errors and 102 skips. This closes the missing Windows comparison alongside the macOS/Linux comparisons above. Archive SHA-256: `8b32bf027dcbc374341027de9e985aac264701a65def55c7b869084290eeffc9`. Exact PR #73 post-merge CI [39225375339](https://github.com/jordanhubbard/literate-ai/actions/runs/39225375339) passed at `90d5b6e9`. These timings qualify the historical runner implementation and do not substitute for the current release suite, wheel or receipt.
 
 ### [x] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
 
@@ -29781,5 +29784,27 @@ standalone macOS Python 3.11.14, install (3), real-prefix self-update/reexecutio
 (3) and worker bootstrap (11) pass without skips. Retained execution (17),
 dependency custody (8), environment (9 passes/one Windows-only skip) and context
 (5 passes/one Windows-only skip) pass. Lint and formatting pass. Native Windows
-base/venv renewal and final combined driver/receipt/CI remain required; no
+base/venv renewal now passes all six real PE/context probes at `b3c52b36`,
+with no skips and unchanged 300-second per-test bounds; all 1,925 tracked source,
+test and script hashes match Git. Independent archive: `592a9a3d6fa732f831d92339248914f360b6e5eeb4d01e1e0e1ce1b522bff6d2`.
+Additional native Windows Make modules pass 23 cases with five existing platform
+skips (archive `760fa3153cca0763e2239be3a39d2a4cacc21e3d6efa7ad2b610b89eae7931a3`).
+Final combined driver/receipt/CI remain required; no
 compiler SDK, original-suite completion or release readiness is inferred.
+
+### [ ] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
+
+- **GitHub issue:** [#104](https://github.com/jordanhubbard/literate-ai/issues/104)
+- **Current release target:** 1.3.0
+
+- **Priority:** P1
+- **Owner:** Swift generation skill and native build contract
+- **Direction:** Repair the Swift lifecycle failure blocking 1.3 qualification.
+- **Conclusion:** Require one top-level main.swift dispatcher, declaration-only Swift support files and compilation of the same complete source set as the native builder. Keep native build refusal and all acceptance requirements.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Update the owning generation guidance and shipped template, preserve exact versioned skill references and record issue104.
+- **Evidence:**
+  - [ ] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
+
+**Swift repair development evidence:** Skill version 1.0.7 and both authored/shipped Flavor contracts require the native builder's complete single-executable source set. Two actual Swift compiler tests pass, including three conflicting-entrypoint refusal variants and successful support/test linkage and execution. Ten skill/template tests, SkillEvaluator, lint/format, strict OpenSpec and supported authority reviews pass. A fresh live macOS LaunchAgent sample succeeds on the first generation attempt (one source-cache miss): 3 generated tests, 3 independent verifier tests and 2 assertions, with 6 invocations. The earlier exhausted three-candidate attempt remains retained. A current complete project lifecycle receipt, installed wheel and exact-head CI remain required before landing.
