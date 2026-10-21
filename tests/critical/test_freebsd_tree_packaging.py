@@ -1,5 +1,6 @@
 """Native tree pkg topology and independently rehashed archive refusals."""
 
+import copy
 import hashlib
 import io
 import json
@@ -18,14 +19,170 @@ from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
 from literate_ai.adapters.native_sdk_tree_custody import capture_native_sdk_tree
 from literate_ai.adapters.tree_packaging import verify_tree_package_stage
 from literate_ai.application.packaging import PackagingError
+from literate_ai.contracts import BlobRef, canonical_identity
 from literate_ai.contracts.executable_components.packages import (
     PackageFileKind,
     PackageInput,
+    PackageKind,
     RuntimeRequirement,
     RuntimeRequirementKind,
 )
+from literate_ai.contracts.native_sdk_trees import NativeSdkAlias, NativeSdkTree
+from literate_ai.contracts.native_sdks import NativeSdkFile
 from literate_ai.contracts.package_tree_inputs import PackageTreeInput
+from literate_ai.contracts.retained_project import RetainedProjectLimits
+from literate_ai.contracts.tree_packages import TreePackagePlan, TreePackageResult
 from tests.critical import test_tree_packages as tree_fixture
+from tests.support import fixtures_test_package_adapters as package_fixture
+from tests.support.fixtures_test_executable_component_v2_schemas import (
+    _official_validator,
+)
+
+
+class FreeBsdTreePackageCodecTests(unittest.TestCase):
+    """Wire decoding is portable and grants no filesystem or producer authority."""
+
+    def setUp(self):
+        fixture = package_fixture.PackageAdapterTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        base = fixture.fixture.plan(PackageKind.ARCHIVE, ())
+        inputs = list(base.inputs)
+        for name, role in (
+            ("component.md", "component-specification"),
+            ("source.json", "cyclonedx-source-sbom"),
+            ("resolved.json", "cyclonedx-resolved-sbom"),
+        ):
+            inputs.append(
+                PackageInput(
+                    "provenance/" + name,
+                    role,
+                    PackageFileKind.RESOURCE,
+                    base.component_lock_identity,
+                    base.target_identity,
+                    BlobRef("1" * 64, 8),
+                )
+            )
+        base = replace(base, inputs=tuple(sorted(inputs, key=lambda v: v.path)))
+        tree = NativeSdkTree(
+            ("bin", "empty"),
+            (NativeSdkFile("bin/CC", BlobRef("2" * 64, 8), True),),
+            (
+                NativeSdkAlias("bin/cc", "bin/CC", "hardlink"),
+                NativeSdkAlias("public", "bin"),
+            ),
+            case_sensitive=True,
+        )
+        self.plan = TreePackagePlan(
+            base,
+            (
+                PackageTreeInput(
+                    "sdk",
+                    "native-sdk-tree",
+                    canonical_identity("source"),
+                    base.target_identity,
+                    tree,
+                ),
+            ),
+            RetainedProjectLimits(100, 65536, 1048576),
+            True,
+        )
+        self.projection = tree_pkg.FreeBsdTreePackageProjection(
+            self.plan,
+            "codec-fixture",
+            "1.0.0",
+            "devel/codec-fixture",
+            "FreeBSD:16:amd64",
+            "freebsd:16:x86:64",
+            "/usr/local/lib/codec",
+            (("dependency", "devel/dependency", "1.0.0"),),
+            canonical_identity("tool"),
+        )
+        self.result = tree_pkg.FreeBsdTreePackageResult(
+            self.plan.identity,
+            canonical_identity("packager"),
+            BlobRef("3" * 64, 128, media_type="application/vnd.freebsd.pkg"),
+        )
+
+    def test_native_contracts_roundtrip_with_schema_and_exact_identity(self):
+        for value in (self.projection, self.result):
+            with self.subTest(schema=value.SCHEMA):
+                wire = json.loads(json.dumps(value.to_dict()))
+                _official_validator(value.SCHEMA).validate(wire)
+                restored = type(value).from_dict(wire)
+                self.assertEqual(restored, value)
+                self.assertEqual(restored.identity, value.identity)
+        self.assertEqual(self.projection.plan.trees[0].tree.aliases[0].kind, "hardlink")
+        self.assertTrue(self.projection.plan.case_sensitive)
+
+    def test_projection_refuses_mixed_fields_epoch_and_dependency_records(self):
+        original = self.projection.to_dict()
+        variants = [
+            {**original, "unexpected": True},
+            {**original, "schema": self.result.SCHEMA},
+            {**original, "source_date_epoch": 946684801},
+            {**original, "source_date_epoch": "946684800"},
+            {**original, "maximum_archive_bytes": True},
+            {**original, "dependencies": [["dependency", "devel/dependency"]]},
+            {**original, "dependencies": [original["dependencies"][0]] * 2},
+            {**original, "dependencies": [["dependency", "../escape", "1.0.0"]]},
+            {**original, "prefix": "/usr/../escape"},
+        ]
+        for index, wire in enumerate(variants):
+            with (
+                self.subTest(index=index),
+                self.assertRaises((ValueError, TypeError, PackagingError)),
+            ):
+                tree_pkg.FreeBsdTreePackageProjection.from_dict(wire)
+        for wire in variants[:6]:
+            self.assertFalse(_official_validator(self.projection.SCHEMA).is_valid(wire))
+
+    def test_tar_and_native_result_codecs_do_not_accept_each_other(self):
+        legacy = TreePackageResult(
+            self.result.package_plan_identity,
+            self.result.packager_identity,
+            replace(self.result.archive, media_type="application/x-tar"),
+        )
+        with self.assertRaises(ValueError):
+            TreePackageResult.from_dict(self.result.to_dict())
+        with self.assertRaises(ValueError):
+            tree_pkg.FreeBsdTreePackageResult.from_dict(legacy.to_dict())
+
+    def test_raw_inventory_and_dependency_bounds_precede_nested_contract_decode(self):
+        for which in ("dependencies", "members"):
+            wire = copy.deepcopy(self.projection.to_dict())
+            if which == "dependencies":
+                wire["dependencies"] *= 1025
+            else:
+                files = wire["tree_package_plan"]["trees"][0]["tree"]["files"]
+                files *= 100001
+            with (
+                self.subTest(which=which),
+                mock.patch.object(
+                    tree_pkg.TreePackagePlan,
+                    "from_dict",
+                    side_effect=AssertionError("nested allocation"),
+                ),
+                self.assertRaises(PackagingError),
+            ):
+                tree_pkg.FreeBsdTreePackageProjection.from_dict(wire)
+
+    def test_result_refuses_other_provider_media_and_extra_fields(self):
+        wire = self.result.to_dict()
+        variants = [
+            {**wire, "schema": self.projection.SCHEMA},
+            {**wire, "extra": True},
+            {**wire, "archive": {**wire["archive"], "media_type": "application/x-tar"}},
+            {**wire, "archive": {**wire["archive"], "size": True}},
+            {**wire, "package_plan_identity": "sha256:" + "4" * 64},
+        ]
+        for index, document in enumerate(variants):
+            with (
+                self.subTest(index=index),
+                self.assertRaises((ValueError, TypeError, PackagingError)),
+            ):
+                tree_pkg.FreeBsdTreePackageResult.from_dict(document)
+            self.assertFalse(_official_validator(self.result.SCHEMA).is_valid(document))
 
 
 @unittest.skipIf(os.name == "nt", "Native tree pkg custody requires POSIX")
@@ -173,7 +330,12 @@ class FreeBsdTreePackageTests(unittest.TestCase):
             self.adapter.identity,
             self.store.put_bytes(content, media_type="application/vnd.freebsd.pkg"),
         )
-        self.adapter.verify(self.plan, result, store=self.store, object_root=self.work)
+        projection = tree_pkg.FreeBsdTreePackageProjection.from_dict(
+            self.projection.to_dict()
+        )
+        adapter = tree_pkg.FreeBsdTreePackageAdapter(projection, self.tool)
+        result = tree_pkg.FreeBsdTreePackageResult.from_dict(result.to_dict())
+        adapter.verify(self.plan, result, store=self.store, object_root=self.work)
 
     def test_exact_native_tree_and_empty_directory_verify_without_native_tool(self):
         self.verify(self.archive())
@@ -184,6 +346,67 @@ class FreeBsdTreePackageTests(unittest.TestCase):
         self.assertEqual(
             self.projection.to_dict()["tree_package_plan"], self.plan.to_dict()
         )
+
+    def test_native_selection_binds_every_source_plan_field_and_result(self):
+        selected = self.adapter.selected_plan()
+        self.assertEqual(selected.base.packager_identity, self.adapter.identity)
+        self.assertNotEqual(selected.identity, self.plan.identity)
+        self.assertEqual(
+            replace(
+                selected,
+                base=replace(
+                    selected.base, packager_identity=self.plan.base.packager_identity
+                ),
+            ),
+            self.plan,
+        )
+        self.adapter._require_plan(selected, self.store)
+        result = tree_pkg.FreeBsdTreePackageResult(
+            selected.identity,
+            self.adapter.identity,
+            self.store.put_bytes(
+                self.archive(), media_type="application/vnd.freebsd.pkg"
+            ),
+        )
+        self.adapter.verify(
+            selected,
+            tree_pkg.FreeBsdTreePackageResult.from_dict(result.to_dict()),
+            store=self.store,
+            object_root=self.work,
+        )
+        for plan, value in (
+            (self.plan, result),
+            (selected, replace(result, package_plan_identity=self.plan.identity)),
+        ):
+            with (
+                self.subTest(plan=plan.identity.uri),
+                self.assertRaises(PackagingError),
+            ):
+                self.adapter.verify(
+                    plan, value, store=self.store, object_root=self.work
+                )
+        for changed in (
+            replace(selected, limits=replace(selected.limits, max_total_bytes=2097152)),
+            replace(
+                selected,
+                base=replace(
+                    selected.base, packager_identity=canonical_identity("other")
+                ),
+            ),
+            replace(
+                selected,
+                trees=(
+                    replace(
+                        selected.trees[0], source_identity=canonical_identity("forged")
+                    ),
+                ),
+            ),
+        ):
+            with (
+                self.subTest(changed=changed.identity.uri),
+                self.assertRaises(PackagingError),
+            ):
+                self.adapter._require_plan(changed, self.store)
 
     def test_rehashed_hardlink_copy_and_changed_symbolic_text_refuse(self):
         for kind in ("hardlink", "symlink"):
@@ -349,6 +572,18 @@ class FreeBsdTreePackageTests(unittest.TestCase):
             prefix=self.projection.prefix,
         )
         self.assertEqual(device_projection.dependencies, ())
+        for value in (projection, device_projection):
+            adapter = tree_pkg.FreeBsdTreePackageAdapter(value, self.tool)
+            selected = adapter.selected_plan()
+            self.assertEqual(
+                selected.base.runtime_requirements, value.plan.base.runtime_requirements
+            )
+            adapter._require_plan(selected, self.store)
+            stripped = replace(
+                selected, base=replace(selected.base, runtime_requirements=())
+            )
+            with self.assertRaises(PackagingError):
+                adapter._require_plan(stripped, self.store)
         self.assertEqual(device_projection.plan.base.runtime_requirements, (device,))
         native_requirement = replace(
             requirement, kind=RuntimeRequirementKind.SHARED_LIBRARY
@@ -406,11 +641,20 @@ class FreeBsdTreePackageTests(unittest.TestCase):
             abi=tool.abi,
             architecture=tool.architecture,
         )
+        projection = tree_pkg.FreeBsdTreePackageProjection.from_dict(
+            projection.to_dict()
+        )
         adapter = tree_pkg.FreeBsdTreePackageAdapter(projection, tool)
-        first = adapter.package(plan, store=self.store, object_root=self.work)
-        second = adapter.package(plan, store=self.store, object_root=self.work)
+        original = adapter.package(plan, store=self.store, object_root=self.work)
+        selected = adapter.selected_plan()
+        first = adapter.package(selected, store=self.store, object_root=self.work)
+        first = tree_pkg.FreeBsdTreePackageResult.from_dict(first.to_dict())
+        second = adapter.package(selected, store=self.store, object_root=self.work)
         self.assertEqual(first, second)
-        adapter.verify(plan, first, store=self.store, object_root=self.work)
+        self.assertEqual(first.archive, original.archive)
+        self.assertEqual(first.package_plan_identity, selected.identity)
+        self.assertEqual(original.package_plan_identity, plan.identity)
+        adapter.verify(selected, first, store=self.store, object_root=self.work)
         archive = self.work / "native.pkg"
         self.store.copy_to(first.archive, archive)
         target = self.work / "unpacked"

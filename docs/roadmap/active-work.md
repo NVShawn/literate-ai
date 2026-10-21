@@ -29769,3 +29769,81 @@ The entire frozen source inventory stays unchanged through terminal completion.
 Next: commit the fixture/evidence update, push the draft PR and require fresh
 exact-revision hosted CI. All larger SDK, runtime, source/ports catalogue and
 release-matrix gates remain open.
+
+### [ ] NATIVE-TREE-WIRE-001 — Transport complete native package tree contracts without flattening
+
+- **GitHub issue:** [#93](https://github.com/jordanhubbard/literate-ai/issues/93)
+
+- **Priority:** P0
+- **Owner:** Native SDK packaging contracts and PACKAGE worker admission
+- **Direction:** Carry complete source-built SDK package trees through selected native providers and worker records while preserving provenance and live admission.
+- **Conclusion:** Refine NATIVE-SDK-ALIAS-001 and existing issue93. Begin with exact bounded projection/result codecs and published schemas, preserving current wire identities. Descriptor decoding grants no SDK producer, runtime, worker or release admission. Then bind source/final provider plans and actual LINK proof transport.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add exact bounded native tree projection/result decoders and schema contracts; preserve field identities and reject mixed or malformed documents.
+  - [ ] Integrate selected source/final native provider plans and tree-aware worker transport without weakening legacy guards or LINK proof.
+- **Evidence:**
+  - [x] Round-trip real tree plans/results through Python and schema validation; refuse schema drift, extra fields, invalid dependencies, epoch/media mismatch and over-budget arrays.
+  - [ ] Require provider verification and live runtime/producer scope plus full and native qualification before claiming canonical PACKAGE admission.
+
+NATIVE-TREE-WIRE-001 descriptor codecs now pass 26 controller cases (25 passes,
+one native-only skip), all five portable codec cases on actual Windows Python
+3.12 with no skips, and a 60-case native FreeBSD source group (58 passes, the two
+existing Windows-only skips). The v2 catalog verifies 102 schema files and 514
+resources. Native source time is 79.552 test / 82.644 supervised seconds; archive
+`sha256:ef0b58ae876233f7495b1790500bc7a4b3fb6c47594783f2a7b140b136192d84`.
+Decoding retains complete tree authority and still feeds the independent archive
+verifier; cross-provider records and rehashed archive corruption refuse.
+Selected source/final native provider binding now passes the qualification below.
+Next integration: real LINK proof in tree-aware PACKAGE worker records, after
+the current batch renews its exact-wheel, installed and hosted CI qualification.
+
+NATIVE-TREE-WIRE-001 source/selected binding decision: retain the original plan in
+its projection, derive the native selection by replacing only the base packager
+identity, and verify that the full original plan can be reconstructed exactly.
+Keep explicit source-plan calls compatible; selected worker admission will require
+the selected form plus real LINK/live-owner proof. Exercise altered limits,
+provenance and provider identities, and require source/selected native construction
+to produce the same physical archive with distinct exact result-plan bindings.
+
+### [ ] RETAINED-WIN-FIXTURE-001 — Capture complete Windows retained fixture executable inputs
+
+- **GitHub issue:** [#103](https://github.com/jordanhubbard/literate-ai/issues/103)
+
+- **Priority:** P0
+- **Owner:** Shared retained execution test fixture and platform coverage
+- **Direction:** Repair actual hosted Windows failures without bypassing executable checks or PE runtime dependency observation.
+- **Conclusion:** Issue103: shared fixture needs a Windows executable filename and actual adjacent Python native DLL inputs. Venv-only source probes missed the base-interpreter layout used by hostedCI. Centralize platform paths in the shared fixture, preserve all drift checks and validate base plusvenv native runs.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Bind the shared runner filename, hash and profile once and capture base interpreter Python/VC runtime DLL inputs on Windows.
+  - [x] Use the same fixture in PATH/runtime-role tests and exercise both base Python and private venv layouts without new skips or production guard changes.
+- **Evidence:**
+  - [ ] Hosted failing workspace/PATH/source-drift cases pass on actual base and venv Windows interpreters; missing sidecars still refuse.
+  - [ ] Renew focused, native, full regression and exact CI gates; preserve failed cbcd337d shard3 logs.
+
+Native selected-plan source qualification passes 61 FreeBSD cases (59 passes,
+two existing Windows-only skips) in 74.547 test / 77.883 supervised seconds.
+Source and selected plans produce identical actual native archives; result IDs
+bind the exact submitted plan, and altered limits, ownership, provider IDs and
+stripped environment/device obligations refuse. Canonical worker LINK admission
+remains open.
+
+RETAINED-WIN-FIXTURE-001 centralizes `runner.exe` naming and captured adjacent
+Python/VC native DLLs in the shared Windows fixture; removes the subclass-only
+rename; retains the same positive and negative runtime guards. Three controller
+groups pass 56 cases (54 passes, two existing Windows-only skips) in 133.220
+seconds. All six actual Windows cases pass across base Python and a private venv in
+992.391 supervised seconds, each under the unchanged 300-second case bound.
+The exact source archive is `sha256:d233a824da3bded5ac4924184e40a603757d3ccd3ab4cc02969d04ff8f5a146f`;
+all 2,030 production/test/schema file hashes still match. Current installed
+qualification and fresh hosted CI remain required.
+
+Combined native tree wire/selection and Windows shared-fixture regression passes
+2,093 selected cases: 2,003 passes, 90 explicit skips and zero failures. The raw
+runner reports 2,073 tests, 77 skips and 921.262 seconds; dispatcher accounting
+is retained separately. Frozen source matches through terminal completion. Lint,
+format, lifecycle/documentation review, layout, public export and strict OpenSpec
+checks pass. Next in progress: clean exact-commit wheel and installed native
+renewal, then fresh exact-head CI. The preceding hosted receiver timeout remains
+open under issue90; the fixture103 repair does not claim to fix it.

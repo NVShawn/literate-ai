@@ -1048,3 +1048,39 @@ loader resolver. Image and inspector hashes still guard each inspection.
 Failures cancel and join owned work and invalidate facts for the inspector;
 parallelism does not extend receiver or command deadlines. Actual native source
 tests and installed-wheel qualification remain separate evidence gates.
+
+
+### Native tree package descriptor transport
+
+Native tree projections and results have exact, versioned descriptor codecs and
+published v2 schema resources. Decoding preserves the complete tree plan,
+case-sensitive names, link targets, dependencies, native tool/ABI and epoch.
+Unknown fields, other-provider schemas, changed epochs, malformed dependency
+records and non-native result media types refuse. Raw inventory and dependency
+counts are checked before constructing nested tree contracts. The regular-file
+and TAR formats retain their existing identities and do not accept native tree
+result records.
+
+A decoded descriptor grants no completed-producer ownership, package execution
+or installation authority. Existing provider verification still checks the actual
+archive, including rehashed topology and metadata corruption. Selected native
+source/final plan binding is qualified separately below.
+PACKAGE worker LINK proof, live SDK runtime joins and canonical qualification
+remain required integration work.
+
+
+### Native source and selected plan binding
+
+A native projection retains its exact original tree plan. The adapter can describe
+a selected plan by replacing only the base packager identity with its own native
+provider identity. That identity hashes the original projection, avoiding a cycle
+between selected-plan and projection identities. Source-plan archive annotations
+remain bound to the original projection; result records bind the exact submitted
+source or selected plan.
+
+For selected-plan verification, the native identity must match and restoring only
+the original base packager identity must reproduce the complete original plan.
+Changes to limits, provenance, runtime obligations, tree ownership or any other
+field refuse. Existing explicit source-plan construction remains supported;
+canonical worker composition must require the selected plan and independently
+reopen LINK proof and live SDK ownership. Rebinding alone grants no admission.

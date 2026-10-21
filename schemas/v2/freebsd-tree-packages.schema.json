@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:freebsd-tree-pkg-contracts@1",
+  "oneOf": [
+    {
+      "$ref": "literate-ai/freebsd-tree-pkg-projection@1"
+    },
+    {
+      "$ref": "literate-ai/freebsd-tree-pkg-result@1"
+    }
+  ],
+  "$defs": {
+    "projection": {
+      "$id": "literate-ai/freebsd-tree-pkg-projection@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "tree_package_plan",
+        "package",
+        "version",
+        "origin",
+        "abi",
+        "architecture",
+        "prefix",
+        "dependencies",
+        "tool_identity",
+        "maximum_archive_bytes",
+        "source_date_epoch"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/freebsd-tree-pkg-projection@1"
+        },
+        "tree_package_plan": {
+          "$ref": "urn:literate-ai:schema:v2:tree-package-plan@1"
+        },
+        "package": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9+_.-]{0,127}$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9][0-9A-Za-z.+,_-]{0,127}$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "origin": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9+_.-]{0,127}/[A-Za-z0-9][A-Za-z0-9+_.-]{0,127}$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "abi": {
+          "type": "string",
+          "pattern": "^FreeBSD:[1-9][0-9]*:(amd64|aarch64)$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "architecture": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9:._-]{1,96}$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "prefix": {
+          "type": "string",
+          "minLength": 2,
+          "pattern": "^/[^\\u0000-\\u001f\\u007f]+$"
+        },
+        "dependencies": {
+          "type": "array",
+          "maxItems": 1024,
+          "uniqueItems": true,
+          "items": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "prefixItems": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9+_.-]{0,127}$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "string",
+                "pattern": "^[0-9][0-9A-Za-z.+,_-]{0,127}$",
+                "not": {
+                  "pattern": "[\\r\\n]"
+                }
+              }
+            ],
+            "items": false
+          }
+        },
+        "tool_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "not": {
+            "pattern": "[\\r\\n]"
+          }
+        },
+        "maximum_archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        },
+        "source_date_epoch": {
+          "const": 946684800
+        }
+      }
+    },
+    "result": {
+      "$id": "literate-ai/freebsd-tree-pkg-result@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "package_plan_identity",
+        "packager_identity",
+        "archive"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/freebsd-tree-pkg-result@1"
+        },
+        "package_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "packager_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "archive": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "media_type": {
+                  "const": "application/vnd.freebsd.pkg"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

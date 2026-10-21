@@ -352,7 +352,7 @@ class RetainedProjectRuntimeTests(unittest.TestCase):
         f.manifest = replace(
             f.manifest,
             members=tuple(
-                replace(m, role="sdk") if m.path == "tools/runner" else m
+                replace(m, role="sdk") if m.path == f.runner_path else m
                 for m in f.manifest.members
             ),
         )

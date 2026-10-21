@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Bind native source and selected package plans exactly, preserving environment
+  and device obligations and rejecting cross-plan results. Capture Windows
+  retained fixture executable names and adjacent native Python DLL inputs in the
+  shared fixture; keep production executable and dependency guards unchanged.
+
+- Add strict native tree package projection/result codecs and published schemas.
+  Preserve complete tree provenance and provider identities; reject mixed formats,
+  altered policy and oversized raw inventories before nested decoding. Decoding
+  does not grant producer or package execution admission.
+
 - Make the concurrent inspector-mutation fixture deterministic: inspect its tool
   before mutation, then require the exact inspector-change refusal and cache
   invalidation. Native Windows repetitions, full controller regression and

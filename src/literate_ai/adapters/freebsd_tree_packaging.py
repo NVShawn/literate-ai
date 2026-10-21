@@ -15,6 +15,7 @@ import tarfile
 import tempfile
 from dataclasses import dataclass, replace
 from pathlib import Path
+from typing import ClassVar
 
 from literate_ai.adapters import freebsd_packaging as native
 from literate_ai.adapters.builders import run_bounded_process
@@ -34,6 +35,7 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
+from literate_ai.contracts._validation import contract_fields
 from literate_ai.contracts.executable_components.packages import RuntimeRequirementKind
 from literate_ai.contracts.tree_packages import (
     TreePackageMember,
@@ -69,6 +71,34 @@ def _dependencies(plan, content):
     return native.freebsd_runtime_dependencies(selected, content)
 
 
+def _bounded_plan_document(value):
+    """Reject oversized raw inventories before constructing nested contracts."""
+    if not isinstance(value, dict) or not isinstance(value.get("base"), dict):
+        raise PackagingError("Native tree pkg requires a plan document")
+    inputs = value["base"].get("inputs")
+    trees = value.get("trees")
+    if (
+        not isinstance(inputs, list)
+        or not isinstance(trees, list)
+        or not 1 <= len(trees) <= 1024
+    ):
+        raise PackagingError("Native tree pkg plan inventories are invalid")
+    count = 1 + len(inputs) + len(trees)
+    if count > native._MAX_MEMBERS:
+        raise PackagingError("Native tree pkg inventory exceeds provider bound")
+    for item in trees:
+        if not isinstance(item, dict) or not isinstance(item.get("tree"), dict):
+            raise PackagingError("Native tree pkg requires a tree document")
+        for name in ("directories", "files", "aliases"):
+            members = item["tree"].get(name)
+            if not isinstance(members, list):
+                raise PackagingError("Native tree pkg tree inventories are invalid")
+            count += len(members)
+            if count > native._MAX_MEMBERS:
+                raise PackagingError("Native tree pkg inventory exceeds provider bound")
+    return TreePackagePlan.from_dict(value)
+
+
 @dataclass(frozen=True, slots=True)
 class FreeBsdTreePackageProjection:
     plan: TreePackagePlan
@@ -81,6 +111,8 @@ class FreeBsdTreePackageProjection:
     dependencies: tuple[tuple[str, str, str], ...]
     tool_identity: ContentIdentity
     maximum_archive_bytes: int = 256 * 1024 * 1024
+
+    SCHEMA: ClassVar[str] = "literate-ai/freebsd-tree-pkg-projection@1"
 
     def __post_init__(self):
         if not isinstance(self.plan, TreePackagePlan) or not isinstance(
@@ -150,7 +182,7 @@ class FreeBsdTreePackageProjection:
 
     def to_dict(self):
         return {
-            "schema": "literate-ai/freebsd-tree-pkg-projection@1",
+            "schema": self.SCHEMA,
             "tree_package_plan": self.plan.to_dict(),
             "package": self.package,
             "version": self.version,
@@ -167,6 +199,64 @@ class FreeBsdTreePackageProjection:
     @property
     def identity(self):
         return canonical_identity(self.to_dict())
+
+    @classmethod
+    def from_dict(cls, value):
+        """Decode descriptors; provider and live producer checks remain required."""
+        data = contract_fields(
+            value,
+            path=cls.__name__,
+            schema_uri=cls.SCHEMA,
+            required=frozenset(
+                {
+                    "tree_package_plan",
+                    "package",
+                    "version",
+                    "origin",
+                    "abi",
+                    "architecture",
+                    "prefix",
+                    "dependencies",
+                    "tool_identity",
+                    "maximum_archive_bytes",
+                    "source_date_epoch",
+                }
+            ),
+        )
+        if (
+            type(data["source_date_epoch"]) is not int
+            or data["source_date_epoch"] != native._EPOCH
+        ):
+            raise PackagingError("Native tree pkg epoch differs from provider policy")
+        dependencies = data["dependencies"]
+        if (
+            not isinstance(dependencies, list)
+            or len(dependencies) > 1024
+            or any(
+                not isinstance(row, list)
+                or len(row) != 3
+                or any(not isinstance(part, str) for part in row)
+                for row in dependencies
+            )
+        ):
+            raise PackagingError("Native tree pkg dependency document is invalid")
+        return cls(
+            _bounded_plan_document(data["tree_package_plan"]),
+            *(
+                data[name]
+                for name in (
+                    "package",
+                    "version",
+                    "origin",
+                    "abi",
+                    "architecture",
+                    "prefix",
+                )
+            ),
+            tuple(tuple(row) for row in dependencies),
+            ContentIdentity.parse_uri(data["tool_identity"]),
+            data["maximum_archive_bytes"],
+        )
 
     @property
     def manifest(self):
@@ -234,6 +324,8 @@ class FreeBsdTreePackageResult:
     packager_identity: ContentIdentity
     archive: BlobRef
 
+    SCHEMA: ClassVar[str] = "literate-ai/freebsd-tree-pkg-result@1"
+
     def __post_init__(self):
         if (
             not isinstance(self.package_plan_identity, ContentIdentity)
@@ -247,7 +339,7 @@ class FreeBsdTreePackageResult:
 
     def to_dict(self):
         return {
-            "schema": "literate-ai/freebsd-tree-pkg-result@1",
+            "schema": self.SCHEMA,
             "package_plan_identity": self.package_plan_identity.to_dict(),
             "packager_identity": self.packager_identity.to_dict(),
             "archive": self.archive.to_dict(),
@@ -256,6 +348,22 @@ class FreeBsdTreePackageResult:
     @property
     def identity(self):
         return canonical_identity(self.to_dict())
+
+    @classmethod
+    def from_dict(cls, value):
+        data = contract_fields(
+            value,
+            path=cls.__name__,
+            schema_uri=cls.SCHEMA,
+            required=frozenset(
+                {"package_plan_identity", "packager_identity", "archive"}
+            ),
+        )
+        return cls(
+            ContentIdentity.from_dict(data["package_plan_identity"]),
+            ContentIdentity.from_dict(data["packager_identity"]),
+            BlobRef.from_dict(data["archive"]),
+        )
 
 
 class FreeBsdTreePackageAdapter:
@@ -284,9 +392,31 @@ class FreeBsdTreePackageAdapter:
             }
         )
 
+    def selected_plan(self):
+        """Describe native selection without granting producer or runtime admission."""
+        source = self.projection.plan
+        return replace(
+            source, base=replace(source.base, packager_identity=self.identity)
+        )
+
     def _require_plan(self, plan, store):
-        if not isinstance(plan, TreePackagePlan) or plan != self.projection.plan:
-            raise PackagingError("Native tree pkg differs from exact selected plan")
+        if not isinstance(plan, TreePackagePlan):
+            raise PackagingError("Native tree pkg requires an exact tree plan")
+        source = self.projection.plan
+        if plan != source:
+            if (
+                plan.base.packager_identity != self.identity
+                or replace(
+                    plan,
+                    base=replace(
+                        plan.base, packager_identity=source.base.packager_identity
+                    ),
+                )
+                != source
+            ):
+                raise PackagingError(
+                    "Native tree pkg differs from source/native selection"
+                )
         bom = [
             item for item in plan.base.inputs if item.role == "cyclonedx-resolved-sbom"
         ]

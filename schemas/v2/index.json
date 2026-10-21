@@ -1014,6 +1014,14 @@
       "file": "native-sdk-tree-package-inputs.schema.json",
       "root_id": "literate-ai/native-sdk-tree-package-inputs@1",
       "public_ids": []
+    },
+    {
+      "file": "freebsd-tree-packages.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:freebsd-tree-pkg-contracts@1",
+      "public_ids": [
+        "literate-ai/freebsd-tree-pkg-projection@1",
+        "literate-ai/freebsd-tree-pkg-result@1"
+      ]
     }
   ]
 }

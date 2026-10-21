@@ -34,28 +34,6 @@ class RetainedOutputCommandPathTests(unittest.TestCase):
         self.fixture.setUp()
         self.addCleanup(self.fixture.doCleanups)
         f = self.fixture
-        if os.name == "nt":
-            # This test observes workspace PATH without launching the POSIX C
-            # fixture. Its captured placeholder must still be executable on the
-            # actual filesystem, where filename extensions determine that mode.
-            (f.source / "tools/runner").rename(f.source / "tools/runner.exe")
-            f.manifest = discover_retained_project_inputs(
-                f.source,
-                {
-                    "src": "source",
-                    "tools": "toolchain",
-                    "test-policy.json": "test-policy",
-                },
-                f.manifest.limits,
-            )
-            f.profile = replace(
-                f.profile,
-                tools=tuple(
-                    (name, "tools/runner.exe", identity)
-                    for name, _path, identity in f.profile.tools
-                ),
-            )
-            f.plan = replace(f.plan, manifest_identity=f.manifest.identity)
         actions = list(f.actions)
         actions[0] = replace(
             actions[0],
@@ -327,7 +305,7 @@ class RetainedRuntimePathTests(unittest.TestCase):
     @patch.object(environment.sys, "platform", "linux")
     def test_source_empty_missing_and_file_directories_refuse(self):
         f = self.fixture
-        for name in ("src", "missing", "tools/runner"):
+        for name in ("src", "missing", f.runner_path):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 environment.captured_runtime_environment(
                     f.source,
