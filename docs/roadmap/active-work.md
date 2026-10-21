@@ -29555,3 +29555,16 @@ original-source SDK and accepted-retained export programs remain separate.
   - [ ] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
 - **Evidence:**
   - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+
+### [ ] PROJECT-SESSION-MEMORY-001 — Opt-in project and individual CLI session memory
+
+- **Priority:** P2
+- **Owner:** Project configuration and provider-neutral agent onboarding
+- **Direction:** Offer project-local MEMORY.md support for individual CLI sessions in a later point release, targeted at 1.3.1 rather than 1.3.0.
+- **Conclusion:** Provide an optional small project memory index linked to separate bounded session notes for decisions, failed approaches, evidence locations and resumable next actions. Specifications, issues and the roadmap remain authoritative. Keep notes local and ignored by default, exclude credentials and sensitive transcripts, and require revalidation of stale facts before action. This entry authorizes planning only; it adds no memory files, automatic persistence or changes to user-level agent memory.
+- **Depends on:** 1.3.0 release completion
+- **Implementation:**
+  - [ ] Design an opt-in project memory attribute and provider-neutral discovery through existing onboarding; define per-session ownership, naming, bounded index and notes, timestamps and exact revision or evidence references, privacy defaults, retention and explicit sharing policy.
+  - [ ] Implement deterministic CLI-supported creation, reading, update and resume behavior after the design is reviewed; preserve authority boundaries and avoid competing cross-session writes.
+- **Evidence:**
+  - [ ] Prove no writes when disabled, isolated simultaneous sessions, safe atomic updates, stale-evidence revalidation, secret exclusion, bounded retention and portability across supported CLI providers and hosts before shipping in a later point release.
