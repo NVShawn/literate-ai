@@ -29847,3 +29847,12 @@ format, lifecycle/documentation review, layout, public export and strict OpenSpe
 checks pass. Next in progress: clean exact-commit wheel and installed native
 renewal, then fresh exact-head CI. The preceding hosted receiver timeout remains
 open under issue90; the fixture103 repair does not claim to fix it.
+
+The combined code batch is committed at `fb791575583b8549dc0e8d82e79f4b7adf7db2dd`.
+Its exact clean wheel `sha256:55a6b70590497671c8d09fdd28af38254b28bbb1331d83d1cf34b7220517e0f9`
+qualifies a 1,230-member Standard distribution, installs offline, and passes 61
+FreeBSD checks: 59 passes, exactly two existing Windows-only skips, no failures
+or errors. Test time is 85.267 seconds; supervised time is 87.913 seconds.
+All framework imports resolve inside the installed prefix. The current code
+now has full controller and scoped installed qualification; fresh exact-head
+hosted CI and canonical tree worker/live SDK integration remain open.
