@@ -329,7 +329,7 @@ class CachedCodingCliSourceGenerationRunner:
         else:
             from .models.coding_cli import AcceptedRetainedSourceSelection
 
-            selection = self.generator.selection
+            selection = getattr(self.generator, "selection", None)
             if isinstance(selection, AcceptedRetainedSourceSelection):
                 key = replace(
                     key,

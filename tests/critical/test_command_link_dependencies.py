@@ -26,6 +26,7 @@ from literate_ai.application.action_dag_scheduler import (
     LifecycleActionKind,
     LifecycleActionWorker,
 )
+from literate_ai.application.standard_authorization import StandardAuthorizationInputs
 from literate_ai.application.standard_execution_inputs import (
     plan_standard_execution_receipts,
 )
@@ -48,6 +49,28 @@ from tests.support.fixtures_test_component_node_generation_preparation import _f
 from tests.support.fixtures_test_standard_local_command_adapter import (
     _python_copy_lifecycle,
 )
+
+
+class _PackagingChainAuthorizationInputs(StandardAuthorizationInputs):
+    """One-hour fixture grants; the production authorizer keeps its default."""
+
+    def authorize(self):
+        authorization = super().authorize()
+        return replace(
+            authorization,
+            grant=replace(
+                authorization.grant,
+                expires_at=authorization.grant.issued_at + 2 * ACTION_TEST_DEADLINE,
+            ),
+        )
+
+
+class _PackagingChainPorts(LocalStandardLifecyclePorts):
+    def authorization_inputs(self, intent, index):
+        inputs = super().authorization_inputs(intent, index)
+        return _PackagingChainAuthorizationInputs(
+            inputs.intent, inputs.index, inputs.issued_at
+        )
 
 
 class CommandLinkDependencyTests(unittest.TestCase):
@@ -103,7 +126,7 @@ class CommandLinkDependencyTests(unittest.TestCase):
                         for command in contract.commands
                     ),
                 )
-                ports = LocalStandardLifecyclePorts(
+                ports = _PackagingChainPorts(
                     source_trees=base.source_trees,
                     object_root=workspace / "verified",
                     contracts=(contract,),

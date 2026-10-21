@@ -29521,6 +29521,8 @@ exact required CI remain landing gates.
 
 **Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
 
+**Second native refusal:** The `425ac341` rerun retains 1,149 passes, 34 skips and one `action_build.input_invalid` at package proof reopening after 2,105.044 seconds. Standard build grants have their own 30-minute lifetime; dispatch headroom alone does not extend them. Use a test-only authorization-input/port subclass to issue one-hour grants for this complete chain, preserving production defaults, grant validation, the single dispatch grant, all format/custody oracles and dedicated expiry controls. Run the focused actual native chain before the next fresh full run.
+
 ### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
 
 **GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
@@ -29553,3 +29555,5 @@ exact required CI remain landing gates.
   - [ ] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
 
 **Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.
+
+**Combined-suite repair:** The first complete host run at `bb40b136` stopped after 310 passes, 29 existing skips and one error in the existing real command-generator regression. Ordinary cached generators may implement the supported adapter seam without a coding-provider selection object. Restrict retained lookup key reconstruction to an explicitly present typed retained selection; preserve ordinary planned keys. Retain that failed report and the deliberately interrupted prior lifecycle separately, merge the latest native fixture grant repair, and start fresh complete and lifecycle qualification after the focused real command receiver cases pass.
