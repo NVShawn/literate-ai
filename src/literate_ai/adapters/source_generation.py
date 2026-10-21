@@ -326,6 +326,16 @@ class CachedCodingCliSourceGenerationRunner:
                 request_identity=self.retained_source.identity,
                 source_semantics_identity=self.retained_source.identity,
             )
+        else:
+            from .models.coding_cli import AcceptedRetainedSourceSelection
+
+            selection = self.generator.selection
+            if isinstance(selection, AcceptedRetainedSourceSelection):
+                key = replace(
+                    key,
+                    request_identity=selection.review_identity,
+                    source_semantics_identity=selection.review_identity,
+                )
         return key
 
     def cache_key_for_candidate(

@@ -428,6 +428,49 @@ def create_execution_dispatch_request(
     effective_flavors = project.flavor_selectors_for(
         component_root, tuple(getattr(args, "flavor", ()) or ())
     )
+    accepted_source_only = bool(getattr(args, "from_accepted_source", False))
+    accepted_source_provider_binding = None
+    accepted_selection = None
+    if accepted_source_only:
+        from literate_ai.adapters.cache.standard import (
+            StandardSourceCacheRestorationError,
+            accepted_retained_source_review,
+        )
+        from literate_ai.adapters.models.coding_cli import (
+            CodingCliError,
+            CodingCliSourceGenerator,
+        )
+        from literate_ai.cache_directories import resolve_cache_directories
+        from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
+
+        try:
+            accepted_source_provider_binding = (
+                discover_accepted_source_provider_binding(project.root)
+            )
+            if accepted_source_provider_binding is None:
+                raise CliFailure(
+                    "execution.accepted_source_cache_missing",
+                    "accepted-source build requires valid cache membership",
+                )
+            provider, tool_binding = accepted_source_provider_binding
+            review = (
+                accepted_retained_source_review(
+                    resolve_cache_directories(project.root).build_dir
+                    / "accepted-source-cache",
+                    tool_binding,
+                )
+                if provider == RETAINED_SOURCE_PROVIDER
+                else None
+            )
+            accepted_selection = CodingCliSourceGenerator.for_accepted_source_lookup(
+                provider, tool_binding, retained_review_identity=review
+            ).selection
+        except (SourceMaterializationError, CodingCliError) as exc:
+            raise CliFailure(exc.code, exc.message) from exc
+        except StandardSourceCacheRestorationError as exc:
+            raise CliFailure(
+                "execution.accepted_source_cache_invalid", str(exc)
+            ) from exc
     plan = plan_from_args(
         Namespace(
             specification=str(component_root),
@@ -436,6 +479,7 @@ def create_execution_dispatch_request(
             flavor=list(getattr(args, "flavor", ()) or ()),
             flavor_root=[],
             model=getattr(args, "model", None),
+            accepted_source_selection=accepted_selection,
         )
     )
     try:
@@ -493,12 +537,6 @@ def create_execution_dispatch_request(
                 if isinstance(item, dict)
             ),
             project_root=project_root,
-        )
-        accepted_source_only = bool(getattr(args, "from_accepted_source", False))
-        accepted_source_provider_binding = (
-            discover_accepted_source_provider_binding(project.root)
-            if accepted_source_only
-            else None
         )
         return ExecutionDispatchRequest(
             action=action,

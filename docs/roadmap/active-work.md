@@ -29528,9 +29528,28 @@ exact required CI remain landing gates.
 - **Priority:** P1
 - **Owner:** Accepted-source provider reconstruction
 - **Direction:** Make accepted-source-only build consume a qualified retained source entry and export its artifact.
-- **Conclusion:** Issue #97 reproduces an admitted retained origin being rejected by the coding-CLI provider allowlist. Preserve RetainedSourceSelection semantics with no executable or model claim; merely adding a provider spelling is insufficient. Keep independent acceptance, origin/tree/tool bindings and unknown-provider refusal intact. This remains separate from the original-adoption work in PR #81.
-- **Depends on:** RETAINED-PROJECT-001
+- **Conclusion:** Issue #97 reproduces an admitted retained origin being rejected by the coding-CLI provider allowlist. Preserve RetainedSourceSelection semantics with no executable or model claim; merely adding a provider spelling is insufficient. Recover the review only from verified Standard accepted-cache membership at the existing portable cache root. Reconstruct the same no-model/no-executable retained selection and require its canonical identity to equal the dispatched tool binding; carry the recovered review into the existing retained request/semantics namespace. Keep independent acceptance, origin/tree/tool bindings and unknown-provider refusal intact. This remains separate from the original-adoption work in PR #81.
+- **Depends on:** RETAINED-PROJECT-001 and CACHE-RETIREMENT-001
 - **Implementation:**
-  - [ ] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
+  - [x] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
 - **Evidence:**
   - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+
+**Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
+
+### [ ] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
+
+**GitHub issue:** [#100](https://github.com/jordanhubbard/literate-ai/issues/100)
+
+- **Priority:** P1
+- **Owner:** Accepted source-cache membership
+- **Direction:** Keep supported cache refresh usable without discarding immutable history.
+- **Conclusion:** Issue #100 shows that deliberate retirement removes a key pointer while verified enumeration still demands it for the preserved immutable manifest. Record an exact key/entry retirement before pointer removal; recognize only that record as intentional history. Preserve refusal of unexplained missing pointers, corruption, unsafe paths and ambiguous active entries.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Persist exact retirement records and distinguish them from active membership during lookup and verified enumeration.
+- **Evidence:**
+  - [x] Prove current lookup and read-only enumeration after retirement, unchanged immutable history, missing/corrupt-record refusal, safe reactivation and portable archive restoration.
+  - [ ] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
+
+**Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.

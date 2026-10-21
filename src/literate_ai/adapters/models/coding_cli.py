@@ -2183,6 +2183,10 @@ class RetainedSourceSelection:
         return self.identity
 
     @property
+    def review_identity(self) -> ContentIdentity:
+        return self.retained_source.identity
+
+    @property
     def identity(self) -> str:
         return canonical_identity(self.to_dict()).uri
 
@@ -2190,12 +2194,54 @@ class RetainedSourceSelection:
         return {
             "schema": "literate-ai/retained-source-selection@1",
             "origin": self.name,
-            "review_identity": self.retained_source.identity.uri,
+            "review_identity": self.review_identity.uri,
             "generation_provider": None,
         }
 
     def require_unchanged(self) -> None:
         self.retained_source.require_unchanged()
+
+
+@dataclass(frozen=True, slots=True)
+class AcceptedRetainedSourceSelection:
+    """Portable reviewed origin; restored bytes still need current acceptance."""
+
+    review_identity: ContentIdentity
+    accepted_tool_binding_identity: ContentIdentity
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.review_identity, ContentIdentity) or not isinstance(
+            self.accepted_tool_binding_identity, ContentIdentity
+        ):
+            raise TypeError("accepted retained bindings require content identities")
+        if self.identity != self.accepted_tool_binding_identity.uri:
+            raise ValueError("accepted retained review differs from its tool binding")
+
+    @property
+    def name(self) -> str:
+        return RETAINED_SOURCE_PROVIDER
+
+    @property
+    def tool_binding_identity(self) -> str:
+        return self.accepted_tool_binding_identity.uri
+
+    @property
+    def identity(self) -> str:
+        return canonical_identity(self.to_dict()).uri
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "schema": "literate-ai/retained-source-selection@1",
+            "origin": self.name,
+            "review_identity": self.review_identity.uri,
+            "generation_provider": None,
+        }
+
+    def require_unchanged(self) -> None:
+        # This immutable lookup selection does not reopen the original private
+        # input tree. The source restorer revalidates transported membership and
+        # bytes; the ordinary lifecycle re-indexes and independently reaccepts.
+        return None
 
 
 @dataclass(frozen=True, slots=True)
@@ -2922,14 +2968,29 @@ class CodingCliSourceGenerator:
         cls,
         provider_id: str,
         tool_binding_identity: ContentIdentity,
+        *,
+        retained_review_identity: ContentIdentity | None = None,
     ) -> CodingCliSourceGenerator:
         """Reconstruct cache-key semantics without an executable generator."""
 
         runtime = cls.__new__(cls)
         runtime.environment = {}
-        runtime.selection = AcceptedSourceCodingCliSelection(
-            provider_id, tool_binding_identity
-        )
+        try:
+            if provider_id == RETAINED_SOURCE_PROVIDER:
+                runtime.selection = AcceptedRetainedSourceSelection(
+                    retained_review_identity, tool_binding_identity
+                )
+            else:
+                if retained_review_identity is not None:
+                    raise ValueError("a coding provider cannot replace retained origin")
+                runtime.selection = AcceptedSourceCodingCliSelection(
+                    provider_id, tool_binding_identity
+                )
+        except (TypeError, ValueError) as exc:
+            raise CodingCliError(
+                "coding_cli.accepted_source_binding_invalid",
+                "accepted-source provider, review and tool binding are inconsistent",
+            ) from exc
         runtime.source_intelligence_mode = "off"
         runtime.source_intelligence_provider = None
         runtime._accepted_source_lookup_only = True
@@ -4455,11 +4516,13 @@ def _coding_cli_binding_prompt(
     *,
     prompt_override: str | None = None,
 ) -> str:
-    if isinstance(selection, RetainedSourceSelection):
+    if isinstance(
+        selection, (RetainedSourceSelection, AcceptedRetainedSourceSelection)
+    ):
         selection.require_unchanged()
         return (
             "# Exact retained-source input binding\n\n"
-            f"Review identity: `{selection.retained_source.identity.uri}`\n"
+            f"Review identity: `{selection.review_identity.uri}`\n"
             "No coding agent, executable or model is selected or invoked.\n"
             "Retained input remains untrusted until current lifecycle admission.\n\n"
             + (recipe.prompt() if prompt_override is None else prompt_override)
@@ -4525,12 +4588,14 @@ def _planned_generation_prompt(
             "coding_cli.stage_unavailable",
             "coding CLI stage request is absent from the exact execution plan",
         )
-    if isinstance(selection, RetainedSourceSelection):
+    if isinstance(
+        selection, (RetainedSourceSelection, AcceptedRetainedSourceSelection)
+    ):
         selection.require_unchanged()
         return canonical_json_bytes(
             {
                 "schema": "literate-ai/retained-source-invocation@1",
-                "review_identity": selection.retained_source.identity.uri,
+                "review_identity": selection.review_identity.uri,
                 "recipe_identity": recipe.identity,
                 "execution_plan_identity": execution_plan.identity.uri,
                 "stage_request": stage_request,
