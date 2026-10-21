@@ -29557,3 +29557,24 @@ exact required CI remain landing gates.
 **Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.
 
 **Combined-suite repair:** The first complete host run at `bb40b136` stopped after 310 passes, 29 existing skips and one error in the existing real command-generator regression. Ordinary cached generators may implement the supported adapter seam without a coding-provider selection object. Restrict retained lookup key reconstruction to an explicitly present typed retained selection; preserve ordinary planned keys. Retain that failed report and the deliberately interrupted prior lifecycle separately, merge the latest native fixture grant repair, and start fresh complete and lifecycle qualification after the focused real command receiver cases pass.
+
+**Current-source qualification:** At `9941a6c4c1c4fe0e0e05c474135d204346041f79`,
+the fresh complete host suite passes 1,827 cases with 42 declared skips across
+1,869 selected cases. A new force-generated framework lifecycle completes
+build, generated tests, execution and independent acceptance; supported receipt
+update/check/current and `verify` pass with receipt
+`sha256:31b15788308e9ed7cd762d0a5e230598f102465cedfe44cba00a2dbf8fc9fcad`
+and finalized candidate
+`sha256:48f264fb8f428cd814a0b7f876aaa1edca0ce135fc26138b0e053712431d5b08`.
+Actual Windows qualification passes all 21 selected retained/admission/retirement,
+ordinary command and public export cases without skips; independently collected
+archive `sha256:65291999d77cad4917d0d05a1d2925a1271891914a21fcd7db23cc7b7248b1a4`.
+The preceding `bb40b136` native FreeBSD 19-case proof remains separately bound
+to its actual source, archive
+`sha256:51c642d0e49cbd13ff929810b063e7f560c4dea2a47cf062b3b23f707caf0fef`.
+The current-source native renewal has passed all 44 focused cases, including
+ordinary command receivers and all four actual native package cases; its final
+public export case remains in progress. Installed-wheel and exact final review
+CI qualification remain required. The earlier invalid generated candidates and
+interrupted launchers are retained as unsuccessful attempts; no acceptance
+oracle was relaxed to obtain the fresh successful lifecycle.
