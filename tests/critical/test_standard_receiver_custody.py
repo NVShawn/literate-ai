@@ -455,14 +455,19 @@ class DependencyFactCacheTests(unittest.TestCase):
     def test_pe_parallel_observer_refuses_changed_inspector(self):
         inspector, paths = self.pe_graph_inputs()
         # The public observer includes its inspector and API-set image as seeds.
+        # Inspect the tool before the a/b frontier can mutate it. Otherwise an
+        # in-place write can legitimately fail its concurrent PE-header check
+        # before the final inspector-identity guard this test exercises.
+        inspector_path = inspector.path.with_name("0-inspector.exe").resolve()
+        inspector.path.rename(inspector_path)
         header = paths["a.dll"].read_bytes()
-        inspector.path.write_bytes(header)
+        inspector_path.write_bytes(header)
         inspector = observation._PeInspector(
-            inspector.path,
+            inspector_path,
             "llvm-readobj",
             "1",
             "sha256:0",
-            observation._file_digest(inspector.path),
+            observation._file_digest(inspector_path),
         )
         schema_path = self.root / "schema.dll"
         schema_path.write_bytes(header)
@@ -475,11 +480,15 @@ class DependencyFactCacheTests(unittest.TestCase):
             canonical_identity("schema fixture").uri,
         )
         barrier = threading.Barrier(2)
+        inspected = threading.Event()
 
         def imports(_inspector, path):
+            if path == inspector.path:
+                inspected.set()
             if path.name in {"a.dll", "b.dll"}:
                 barrier.wait(timeout=10)
                 if path.name == "a.dll":
+                    self.assertTrue(inspected.is_set())
                     inspector.path.write_bytes(header + b"substitution")
             return ()
 
@@ -498,13 +507,9 @@ class DependencyFactCacheTests(unittest.TestCase):
             observation.WindowsPeDependencyObserver(
                 environment={"SystemRoot": str(self.root.resolve())}
             ).observe({"artifact_path": str(self.root)}, root_ref="test-root")
-        self.assertIn(
+        self.assertEqual(
             raised.exception.code,
-            {
-                "dependencies.pe-image-changed",
-                "dependencies.windows-inspector-changed",
-                "dependencies.file-changed",
-            },
+            "dependencies.windows-inspector-changed",
         )
         self.assertFalse(
             any(key[1] == inspector.digest for key in observation._INSPECTION_FACTS)

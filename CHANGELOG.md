@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Make the concurrent inspector-mutation fixture deterministic: inspect its tool
+  before mutation, then require the exact inspector-change refusal and cache
+  invalidation. Native Windows repetitions, full controller regression and
+  focused installed FreeBSD package/execution checks pass.
+
 - Select installed `gmake` before base `make` in the POSIX receiver custody
   fixture, retaining actual GNU Make discovery and tool-substitution refusals.
 

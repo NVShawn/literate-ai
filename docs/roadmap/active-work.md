@@ -29731,3 +29731,41 @@ qualify its exact wheel, repeat the 55-case FreeBSD group from installed modules
 then push the draft and obtain fresh exact-revision hosted CI. Current installed
 renewal, compiler SDK admission, package transport/default lifecycle integration
 and source/ports full-catalog and release-matrix goals remain open.
+
+Exact wheel qualification for code commit `42f1caa1` passes, and offline FreeBSD
+installation succeeds. Its first installed 55-case run exposes a nondeterministic
+mutation fixture: concurrent inspection can read the deliberately truncated
+inspector header and correctly refuse `dependencies.pe-image-invalid`, whereas
+the test only names later hash-change refusals. Preserve that failed installed
+run (79.310 test seconds); current installed qualification remains open.
+Under WINDOWS-PE-OBSERVE-001 / issue #90, make the fixture's inspector the first
+sorted seed and require its inspection before the two-image mutation barrier.
+Then assert the specific final inspector-change refusal and empty inspector cache.
+Do not broaden accepted error codes or change production behavior. Renew focused
+mutation checks, complete controller regression and exact installed-module tests.
+
+The deterministic inspector fixture now orders the canonical first seed ahead of
+the a/b barrier, asserts that inspection happened, and requires exactly
+`dependencies.windows-inspector-changed` plus an empty inspector cache. Fifty
+controller repetitions and fifty actual Windows repetitions pass without skips;
+Windows time is 3.930 test / 9.703 supervised seconds. The accepted error set is
+narrower; production code and all deadlines remain unchanged.
+
+Code commit `42f1caa1` passes exact clean-wheel qualification:
+wheel `sha256:e76ea9b48bb128ef75bbbf486fbb71939cd8ca054103baeafc35a25c56f347cb`,
+distribution `sha256:9b5627b6ed08eb4f1663a6725923ef7d9cd353e9ff574b1726b691b7e70baefd`.
+Its offline FreeBSD installation succeeds; the corrected verified test bundle
+passes 55 cases (53 passes, the two named Windows-only skips) in 81.360 test /
+83.600 supervised seconds. Every framework module remains under the installed
+prefix. Native package construction/topology, receiver custody, POSIX execution
+and relocated C APIs pass. This qualifies the focused installed provider, not
+compiler SDK, canonical lifecycle or release admission.
+
+The refreshed full controller run passes 1,997 cases with 90 skips and zero
+failures across 2,087 selected cases. The raw runner separately reports 2,067
+tests, 77 skips and 938.046 seconds. Report SHA-256:
+`297c8e89a665c0566347719cabc9d27d20dee962d323c877a228c3e6dd17ea35`.
+The entire frozen source inventory stays unchanged through terminal completion.
+Next: commit the fixture/evidence update, push the draft PR and require fresh
+exact-revision hosted CI. All larger SDK, runtime, source/ports catalogue and
+release-matrix gates remain open.

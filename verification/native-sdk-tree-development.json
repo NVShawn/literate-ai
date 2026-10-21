@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/native-sdk-tree-development@1",
-  "scope": "Explicit SDK tree custody, consumers, CycloneDX and TAR/native pkg providers, native Windows retained execution context and bounded PE observation. Current source regression and focused FreeBSD/Windows checks pass; current exact installed-wheel renewal, canonical compiler SDK and lifecycle admission remain pending.",
+  "scope": "Explicit SDK tree custody, consumers and TAR/native pkg providers, Windows system context and bounded PE observation. Code42f1caa1 passes exact-wheel and focused installed FreeBSD qualification; the corrected test fixture passes fresh full controller regression and native Windows repetitions. Canonical compiler SDK, default lifecycle, full source/ports and release admission remain pending.",
   "source_files_sha256": {
     "src/literate_ai/contracts/native_sdk_trees.py": "61b3348bd60687626640ac84a6caaad95235cd8c978da3214ec9f224d2d75cf9",
     "src/literate_ai/adapters/native_sdk_tree_custody.py": "eb8e3e6381fb2f6bcf532c56e20f9b7bcd33401cf3f1e47a6103f4fbb8f4c51a",
@@ -40,7 +40,7 @@
     "src/literate_ai/adapters/freebsd_package_elf.py": "7a29d164228a49cbb029f877d85881a474610fda3b2ece37940e76e002ac2ae4",
     "tests/critical/test_freebsd_tree_packaging.py": "90236ba19ff0623f28f206d9520dc95998463679744bc519172b7fececec7209",
     "tests/critical/test_freebsd_package_elf.py": "0b0c65a4a65cd8534177c98529c7c380a75e029d38a1befd35fffe46c3855561",
-    "tests/critical/test_standard_receiver_custody.py": "4822d75b659c91a76e9b3d9d1866194fddd5fc1998da9dcc00f1e960fcc596fd",
+    "tests/critical/test_standard_receiver_custody.py": "e450aeaa73acd4a4a88f450d36d1168573df909a2b70fd4cb6ec36c2927a0591",
     "tests/critical/test_retained_windows_context.py": "02b60cc841ef729941ab5e340af2b801fa8981bf4092a685cc5fb2d2d4c65d86",
     "src/literate_ai/adapters/retained_project_execution.py": "5719dde1178b5528ec9360629f6e1b9ce9c1a222c5194bf88c424c6f14122a0e",
     "tests/critical/test_retained_project_environment.py": "a01007a247008725f42dca38731e6ff2868cd92662153e61c7363dc3770d2f88",
@@ -99,7 +99,7 @@
     "default_refusal": "SDK tree has ambiguous member ownership",
     "sdk_admitted": false
   },
-  "installed_wheel_qualified": false,
+  "installed_wheel_qualified": true,
   "canonical_snapshot_layout_integration": false,
   "retained_input_naming_integration": false,
   "producer_admitted": false,
@@ -574,30 +574,6 @@
     "installed_framework_qualified": false,
     "release_acceptance": false
   },
-  "current_full_regression": {
-    "scope": "Frozen current implementation and test source; local development regression, not release acceptance",
-    "summary": {
-      "executed": 1997,
-      "failed": 0,
-      "known_failed": 0,
-      "passed": 1997,
-      "selected": 2087,
-      "skipped": 90
-    },
-    "raw_runner_tests": 2067,
-    "raw_runner_skipped": 77,
-    "seconds": 911.576,
-    "report_sha256": "88bcdb5128cfe8822c760c57389671267cc64c3fbd367a1cb4109d0a537b1328",
-    "log_sha256": "2fbecf2778a89f7f42f25bcfbf89fcd7230df3f8f901bc8c36c9615bc8f204d0",
-    "pin_identity": {
-      "algorithm": "sha256",
-      "digest": "712adcd0c19f64d78ae2c0992f5b4bc5a15c429a928740c470e52d987bd52b70",
-      "schema": "urn:literate-ai:schema:v1:content-identity"
-    },
-    "source_freeze_sha256": "3468f0965b3bb346256f7814e7c7ef815221015a9d823148b965dc66b3144680",
-    "source_freeze_preserved_to_terminal": true,
-    "release_evidence": false
-  },
   "freebsd_context_package_current_source_development": {
     "scope": "Native FreeBSD source-level POSIX execution, receiver custody, tree pkg/TAR verification and relocated C APIs",
     "selected": 55,
@@ -631,6 +607,130 @@
     "preceding_whole_test_outer_300_second_harness_timeout_preserved": true,
     "outer_harness_budget_corrected_to_existing_fixture_policy": true,
     "installed_framework_qualified": false,
+    "release_acceptance": false
+  },
+  "preceding_full_regression_before_inspector_fixture_ordering": {
+    "scope": "Frozen current implementation and test source; local development regression, not release acceptance",
+    "summary": {
+      "executed": 1997,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 1997,
+      "selected": 2087,
+      "skipped": 90
+    },
+    "raw_runner_tests": 2067,
+    "raw_runner_skipped": 77,
+    "seconds": 911.576,
+    "report_sha256": "88bcdb5128cfe8822c760c57389671267cc64c3fbd367a1cb4109d0a537b1328",
+    "log_sha256": "2fbecf2778a89f7f42f25bcfbf89fcd7230df3f8f901bc8c36c9615bc8f204d0",
+    "pin_identity": {
+      "algorithm": "sha256",
+      "digest": "712adcd0c19f64d78ae2c0992f5b4bc5a15c429a928740c470e52d987bd52b70",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "source_freeze_sha256": "3468f0965b3bb346256f7814e7c7ef815221015a9d823148b965dc66b3144680",
+    "source_freeze_preserved_to_terminal": true,
+    "release_evidence": false
+  },
+  "preceding_current_installed_wheel_probe": {
+    "scope": "Exact42f1caa1 wheel installed successfully; all imported framework modules are installed, but concurrent mutation fixture expects the wrong refusal timing. Qualification remains open.",
+    "framework_revision": "42f1caa1979965fbc1c0e458be4acf8c3f4651be",
+    "wheel_identity": "sha256:e76ea9b48bb128ef75bbbf486fbb71939cd8ca054103baeafc35a25c56f347cb",
+    "distribution_identity": "sha256:9b5627b6ed08eb4f1663a6725923ef7d9cd353e9ff574b1726b691b7e70baefd",
+    "selected": 55,
+    "passed": 52,
+    "failed": 1,
+    "skipped": 2,
+    "test_seconds": 79.31,
+    "supervised_seconds": 81.641,
+    "observation_sha256": "1d3aea3fca1f480e46f04bc847231164b85a399c69dce373ea9bcc4588fef3ff",
+    "failure": "Inspector mutation races PE header read; production safely refuses dependencies.pe-image-invalid, but fixture expected only hash-change errors",
+    "installed_framework_qualified": false,
+    "release_acceptance": false
+  },
+  "hosted_ci_qualified": false,
+  "current_full_regression": {
+    "scope": "Frozen implementation, corrected mutation fixture and test source; local development regression, not release acceptance",
+    "summary": {
+      "executed": 1997,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 1997,
+      "selected": 2087,
+      "skipped": 90
+    },
+    "raw_runner_tests": 2067,
+    "raw_runner_skipped": 77,
+    "seconds": 938.046,
+    "report_sha256": "297c8e89a665c0566347719cabc9d27d20dee962d323c877a228c3e6dd17ea35",
+    "log_sha256": "2f8ed58e42b6b69f74fde09b78c1e817263ddd040bce349274a328f0f7497810",
+    "pin_identity": {
+      "algorithm": "sha256",
+      "digest": "2788bb79c869e5aa81a53c6be5e46f1c38a4224a5d8bf46ee179743e59c638ee",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "source_freeze_sha256": "c58b0c2e5da9e02780e987c8da991a4ca32d4c593e6254eac2e68795491fc6ce",
+    "source_freeze_preserved_to_terminal": true,
+    "release_evidence": false
+  },
+  "current_exact_wheel": {
+    "qualified_code_revision": "42f1caa1979965fbc1c0e458be4acf8c3f4651be",
+    "ok": true,
+    "wheel_identity": "sha256:e76ea9b48bb128ef75bbbf486fbb71939cd8ca054103baeafc35a25c56f347cb",
+    "distribution_identity": "sha256:9b5627b6ed08eb4f1663a6725923ef7d9cd353e9ff574b1726b691b7e70baefd",
+    "distribution_members": 1229,
+    "policy_identity": "sha256:a5ca0d6d13daff0199f218c5e4af723a2cec87b927e75dd3a731c511b5d85ac7",
+    "report_sha256": "2c05ef8d7930c9448302318e04a372d134a600d231cf3c0f67bfb40a1ccb3d9f",
+    "implementation_unchanged_by_fixture_repair": true,
+    "release_acceptance": false
+  },
+  "current_installed_freebsd_wheel": {
+    "schema": "daemonarchy/installed-sdk-tree-development-qualification@1",
+    "framework_revision": "42f1caa1979965fbc1c0e458be4acf8c3f4651be",
+    "distribution_identity": "sha256:9b5627b6ed08eb4f1663a6725923ef7d9cd353e9ff574b1726b691b7e70baefd",
+    "tests_run": 55,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 2,
+    "skipped_cases": [
+      "tests.critical.test_retained_project_environment.RetainedOutputCommandPathTests.test_actual_windows_command_and_late_source_or_context_drift",
+      "tests.critical.test_retained_windows_context.RetainedWindowsContextTests.test_actual_windows_api_ignores_caller_root_and_search_path"
+    ],
+    "all_framework_imports_installed": true,
+    "source_sdk_admitted": false,
+    "canonical_lifecycle_accepted": false,
+    "default_cli_changed": false,
+    "release_acceptance": false,
+    "scope": "Exact42f1caa1 installed wheel, corrected verified test bundle; development qualification only",
+    "passed": 53,
+    "test_seconds": 81.36,
+    "supervised_seconds": 83.6,
+    "test_source_archive_sha256": "3929c47778c812659cef34a6d4456ae485d9906984905bf4a5152ed4b6831834",
+    "test_manifest_sha256": "7582ceff0e0f7585b3ec20d791addbdd54b9d8dcc2c2205a5d01d6531ed9182d",
+    "observation_sha256": "180358f17acf7fdfd7cb373631cbba4ac3641e920dcf54c474b7cc1b44851f90",
+    "result_sha256": "f2724dcb9d0b5cdaecbdb562dc50771e40d20010d063988f27dcadb47326194d",
+    "dependency_closure_identity": "sha256:3909f5a1756c31f336115f0c007ebb6c6d994375c5d43c0ac5752d3018e11406",
+    "reviewed_seed_closure_identity": "sha256:1af3f6e635c71f638e77bd7339c8cd3d53152b41dbea0dd45c09398117499b53",
+    "bootstrap_seconds": 5.925
+  },
+  "deterministic_inspector_mutation_native_check": {
+    "scope": "Inspector seed completes before concurrent a/b mutation; exact inspector-change refusal and cache invalidation asserted",
+    "source_archive_sha256": "db0996a22a657041a1ba58ec67ddcc078c7b3cdd1cc17674745ee66f040bac5f",
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "selected": 50,
+    "passed": 50,
+    "skipped": 0,
+    "failed": 0,
+    "test_seconds": 3.93,
+    "supervised_seconds": 9.703,
+    "test_log_sha256": "02195f1bdd5746207e8794a578107d45ff971d4f501311fec0edd1dbb9f8b07c",
+    "result_sha256": "d38c98a9e47df6386bc28d42afbe2a69dc49e61e5b46a0c1523da67e2b7f23e7",
+    "controller_repetitions": 50,
+    "controller_seconds": 0.109,
+    "production_code_changed": false,
+    "accepted_error_set_broadened": false,
+    "installed_windows_framework_qualified": false,
     "release_acceptance": false
   }
 }
