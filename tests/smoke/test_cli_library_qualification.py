@@ -9,19 +9,35 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import stat
 import unittest
 from contextlib import ExitStack
+from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.component_acceptance import LIBRARY_SCHEMA, LibraryAcceptance
+from literate_ai.adapters.qualification import (
+    FilesystemQualificationError,
+    FilesystemQualificationParityVerifier,
+)
+from literate_ai.adapters.qualification_capture import (
+    QualificationEvidenceReader,
+    QualificationEvidenceRecorder,
+)
 from literate_ai.authority import ComponentAuthorityState
+from literate_ai.cli import source_to_specification as source_cli
+from literate_ai.cli.errors import CliFailure
 from literate_ai.contracts import ComponentCoordinate, ContentIdentity
 from literate_ai.source_to_specification.host_qualification import (
     LocalQualificationCase,
     LocalQualificationProfile,
 )
-from literate_ai.source_to_specification.inventory import inventory_source
+from literate_ai.source_to_specification.inventory import (
+    inventory_source,
+    source_inventory_from_dict,
+)
 from tests.support.fixtures_test_cli_rebuild import invoke
 from tests.support.fixtures_test_standard_rebuild_adapter import (
     _identity as identity,
@@ -113,7 +129,9 @@ class PublicLibraryQualificationTests(unittest.TestCase):
             inverse_evidence_custody=None,
             inverse_evidence_custody_identity=None,
             promotion_input_audits=(),
+            standard_rebind_migration=None,
         )
+        self.verified = verified
         self.plan = {
             "component": {"revision_identity": revision.identity.uri},
             "resolution": {
@@ -267,6 +285,345 @@ class PublicLibraryQualificationTests(unittest.TestCase):
         self.assertTrue(self.output.is_file())
         self.qualify.assert_called_once()
         self.authority_store.append_qualified.assert_called_once()
+
+    def test_recertify_current_qualified_publishes_archive_and_new_projection(self):
+        self.qualify.side_effect = self.retained_runs
+        qualified = SimpleNamespace(
+            recorded_state=(ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE),
+            blockers=(
+                "target-lock-not-evaluated",
+                "generation-closure-not-evaluated",
+                "verifier-not-evaluated",
+                "policy-not-evaluated",
+            ),
+        )
+        self.authority_store.recertify_qualified.return_value = self.projection
+        with patch(
+            "literate_ai.authority.ComponentAuthorityLifecycle.status",
+            return_value=qualified,
+        ):
+            status, document = self.invoke(
+                "--recertify-current-qualified",
+                "--retained-evidence-store",
+                str(self.fixture.root / "evidence"),
+            )
+        self.assertEqual(status, 0, document)
+        self.assertEqual(
+            document["result"]["authority_projection_identity"],
+            self.projection.identity.uri,
+        )
+        self.assertIn("retained_evidence", document["result"])
+        self.authority_store.append_qualified.assert_not_called()
+        self.authority_store.recertify_qualified.assert_called_once()
+
+    def test_recertify_current_qualified_requires_retained_store(self):
+        status, document = self.invoke("--recertify-current-qualified")
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(
+            document["error"]["code"], "qualification.retained_store_required"
+        )
+        self.qualify.assert_not_called()
+        self.authority_store.append_qualified.assert_not_called()
+
+    def test_prior_project_configuration_requires_recertification(self):
+        status, document = self.invoke(
+            "--prior-project-configuration", str(self.profile_path)
+        )
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(
+            document["error"]["code"],
+            "qualification.rebind_migration_unexpected",
+        )
+        self.qualify.assert_not_called()
+
+    def test_prior_project_configuration_rejects_symlink(self):
+        prior = self.fixture.root / "prior-project.json"
+        prior.symlink_to(self.project.root / "literate.project.json")
+        status, document = self.invoke(
+            "--recertify-current-qualified",
+            "--retained-evidence-store",
+            str(self.fixture.root / "evidence"),
+            "--prior-project-configuration",
+            str(prior),
+        )
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(
+            document["error"]["code"],
+            "qualification.rebind_migration_unavailable",
+        )
+        self.qualify.assert_not_called()
+
+    def test_prior_project_configuration_rejects_oversized_file(self):
+        prior = self.fixture.root / "prior-project.json"
+        prior.write_bytes(b"x" * (1024 * 1024 + 1))
+        status, document = self.invoke(
+            "--recertify-current-qualified",
+            "--retained-evidence-store",
+            str(self.fixture.root / "evidence"),
+            "--prior-project-configuration",
+            str(prior),
+        )
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(
+            document["error"]["code"],
+            "qualification.rebind_migration_unavailable",
+        )
+        self.qualify.assert_not_called()
+
+    def test_prior_project_configuration_uses_windows_handle_identity(self):
+        prior = self.fixture.root / "prior-project.json"
+        content = b'{"fixture":true}\n'
+        prior.write_bytes(content)
+        path_metadata = list(prior.lstat())
+        path_metadata[stat.ST_INO] = 0
+        windows_path_metadata = os.stat_result(path_metadata)
+
+        with (
+            patch.object(
+                source_cli.Path,
+                "lstat",
+                return_value=windows_path_metadata,
+            ),
+            patch.object(source_cli, "_is_windows", return_value=True),
+            patch.object(
+                source_cli,
+                "_windows_identity_matches",
+                return_value=True,
+            ) as identity_matches,
+        ):
+            self.assertEqual(
+                source_cli._read_stable_bounded_regular_file(prior, maximum_bytes=1024),
+                content,
+            )
+        self.assertEqual(identity_matches.call_count, 2)
+
+        with (
+            patch.object(
+                source_cli.Path,
+                "lstat",
+                return_value=windows_path_metadata,
+            ),
+            patch.object(source_cli, "_is_windows", return_value=True),
+            patch.object(
+                source_cli,
+                "_windows_identity_matches",
+                return_value=False,
+            ),
+            self.assertRaises(CliFailure) as raised,
+        ):
+            source_cli._read_stable_bounded_regular_file(prior, maximum_bytes=1024)
+        self.assertEqual(
+            raised.exception.code,
+            "qualification.rebind_migration_unavailable",
+        )
+
+    def configure_legacy_inventory_rebind(self):
+        inventory = inventory_source(self.source)
+        legacy_identity = replace(
+            inventory,
+            inventory_policy_id="static-checkout-inventory@1",
+        ).identity
+        self.projection.source_snapshot_identity = ContentIdentity.parse_uri(
+            legacy_identity
+        )
+        self.verified.standard_rebind_migration = SimpleNamespace(
+            identity=identity("standard-rebind-migration"),
+            to_dict=lambda: {
+                "schema": "literate-ai/qualification-standard-rebind-migration@1",
+                "fixture": True,
+            },
+        )
+        prior = self.fixture.root / "prior-project.json"
+        prior.write_bytes(b'{"fixture":true}\n')
+        return prior
+
+    def test_verified_rebind_accepts_entry_compatible_legacy_inventory(self):
+        prior = self.configure_legacy_inventory_rebind()
+        self.qualify.side_effect = self.retained_runs
+        self.authority_store.recertify_qualified.return_value = self.projection
+        qualified = SimpleNamespace(
+            recorded_state=(ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE),
+            blockers=(),
+        )
+        with patch(
+            "literate_ai.authority.ComponentAuthorityLifecycle.status",
+            return_value=qualified,
+        ):
+            status, document = self.invoke(
+                "--recertify-current-qualified",
+                "--retained-evidence-store",
+                str(self.fixture.root / "evidence"),
+                "--prior-project-configuration",
+                str(prior),
+            )
+
+        self.assertEqual(status, 0, document)
+        self.qualify.assert_called_once()
+        adapter = self.qualify.call_args.args[0]
+        self.assertEqual(
+            adapter.parity.source_inventory_identity,
+            inventory_source(self.source).identity,
+        )
+        self.assertNotEqual(
+            adapter.parity.source_inventory_identity,
+            self.projection.source_snapshot_identity.uri,
+        )
+        self.authority_store.recertify_qualified.assert_called_once()
+
+    def legacy_parity_verifier(self):
+        self.configure_legacy_inventory_rebind()
+        generated = self.fixture.root / "generated-parity"
+        generated.joinpath("source").mkdir(parents=True)
+        run_root = self.fixture.root / "parity-run"
+        run_root.mkdir()
+        run_identity = identity("legacy-parity-run")
+        tree_identity = identity("legacy-parity-tree")
+        recorder = QualificationEvidenceRecorder(max_bytes=1_000_000, max_records=100)
+        lifecycle = SimpleNamespace(
+            generated_roots={run_identity.uri: ((tree_identity, generated),)},
+            root_generated_roots={run_identity.uri: generated},
+            run_roots={run_identity.uri: run_root},
+            evidence_recorder=recorder,
+        )
+        verifier = FilesystemQualificationParityVerifier(
+            source_root=self.source,
+            source_snapshot_identity=self.projection.source_snapshot_identity,
+            profile=self.profile,
+            lifecycle=lifecycle,
+            allow_legacy_inventory_policy=True,
+        )
+        return verifier, recorder, run_identity, tree_identity
+
+    def test_legacy_parity_executes_and_reopens_accepted_inventory(self):
+        verifier, recorder, run_identity, tree_identity = self.legacy_parity_verifier()
+        with patch(
+            "literate_ai.adapters.qualification._observe",
+            return_value=({"value": True}, identity("observation"), True),
+        ) as observe:
+            evidence = verifier.verify(
+                run_identity=run_identity,
+                source_snapshot_identity=self.projection.source_snapshot_identity,
+                generated_tree_identities=(tree_identity,),
+                case_map=verifier.case_map,
+            )
+
+        self.assertTrue(evidence.cases[0].passed)
+        self.assertEqual(observe.call_count, 2)
+        reader = QualificationEvidenceReader(
+            recorder.entries, max_bytes=1_000_000, max_records=100
+        )
+        accepted = source_inventory_from_dict(
+            reader.read_json(self.projection.source_snapshot_identity)
+        )
+        self.assertEqual(accepted.inventory_policy_id, "static-checkout-inventory@1")
+        self.assertEqual(
+            accepted.identity, self.projection.source_snapshot_identity.uri
+        )
+
+    def test_legacy_parity_rejects_source_drift_after_execution(self):
+        verifier, _recorder, run_identity, tree_identity = self.legacy_parity_verifier()
+        calls = 0
+
+        def observe(*_args, **_kwargs):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                (self.source / "library.py").write_bytes(b"def value(): return False\n")
+            return {"value": True}, identity(["observation", calls]), True
+
+        with (
+            patch("literate_ai.adapters.qualification._observe", side_effect=observe),
+            self.assertRaises(FilesystemQualificationError) as raised,
+        ):
+            verifier.verify(
+                run_identity=run_identity,
+                source_snapshot_identity=self.projection.source_snapshot_identity,
+                generated_tree_identities=(tree_identity,),
+                case_map=verifier.case_map,
+            )
+        self.assertEqual(raised.exception.code, "qualification.source_drift")
+
+    def test_legacy_inventory_requires_verified_rebind_migration(self):
+        prior = self.configure_legacy_inventory_rebind()
+        self.verified.standard_rebind_migration = None
+        qualified = SimpleNamespace(
+            recorded_state=(ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE),
+            blockers=(),
+        )
+        with patch(
+            "literate_ai.authority.ComponentAuthorityLifecycle.status",
+            return_value=qualified,
+        ):
+            status, document = self.invoke(
+                "--recertify-current-qualified",
+                "--retained-evidence-store",
+                str(self.fixture.root / "evidence"),
+                "--prior-project-configuration",
+                str(prior),
+            )
+
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(document["error"]["code"], "qualification.source_mismatch")
+        self.qualify.assert_not_called()
+        self.authority_store.recertify_qualified.assert_not_called()
+
+    def test_verified_rebind_rejects_source_change_during_qualification(self):
+        prior = self.configure_legacy_inventory_rebind()
+
+        def mutate_source(adapter, plan):
+            result = self.retained_runs(adapter, plan)
+            (self.source / "library.py").write_bytes(b"def value(): return False\n")
+            return result
+
+        self.qualify.side_effect = mutate_source
+        qualified = SimpleNamespace(
+            recorded_state=(ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE),
+            blockers=(),
+        )
+        with patch(
+            "literate_ai.authority.ComponentAuthorityLifecycle.status",
+            return_value=qualified,
+        ):
+            status, document = self.invoke(
+                "--recertify-current-qualified",
+                "--retained-evidence-store",
+                str(self.fixture.root / "evidence"),
+                "--prior-project-configuration",
+                str(prior),
+            )
+
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(document["error"]["code"], "qualification.source_changed")
+        self.qualify.assert_called_once()
+        self.authority_store.recertify_qualified.assert_not_called()
+
+    def test_recertification_rejects_profile_drift_before_archive_publication(self):
+        def drift_profile(adapter, plan):
+            result = self.retained_runs(adapter, plan)
+            self.write_profile(
+                replace(self.profile, timeout_seconds=self.profile.timeout_seconds + 1)
+            )
+            return result
+
+        self.qualify.side_effect = drift_profile
+        qualified = SimpleNamespace(
+            recorded_state=(ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE),
+            blockers=(),
+        )
+        evidence_store = self.fixture.root / "evidence"
+        with patch(
+            "literate_ai.authority.ComponentAuthorityLifecycle.status",
+            return_value=qualified,
+        ):
+            status, document = self.invoke(
+                "--recertify-current-qualified",
+                "--retained-evidence-store",
+                str(evidence_store),
+            )
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(document["error"]["code"], "inputs.closure_changed")
+        self.assertFalse(evidence_store.exists())
+        self.authority_store.recertify_qualified.assert_not_called()
 
     def test_public_qualification_still_rejects_a_changed_verifier_harness(self):
         (self.project.root / "verification" / "acceptance" / "harness.py").write_bytes(

@@ -669,6 +669,7 @@ class QualificationCaptureTests(unittest.TestCase):
         foreign_candidate_recipe=False,
         promotion_audit=None,
         artifact_payloads=None,
+        allocation_salt="",
     ):
         producer, surface, oracle = self.library_authority_fixture(
             bind_current_target=promotion_audit is not None
@@ -908,12 +909,15 @@ class QualificationCaptureTests(unittest.TestCase):
                 tuple(parity_cases),
             )
             recorder.remember_json(parity.to_dict())
+            allocation = (
+                ["allocation", ordinal]
+                if not allocation_salt
+                else ["allocation", allocation_salt, ordinal]
+            )
             run = replace(
                 run,
                 run_identity=run_id,
-                workspace_allocation_identity=canonical_identity(
-                    ["allocation", ordinal]
-                ),
+                workspace_allocation_identity=canonical_identity(allocation),
                 covered_surface_ids=qualification.case_map.surface_ids,
                 parity_evidence_identity=parity.identity,
             )

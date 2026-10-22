@@ -787,6 +787,120 @@ class DependencyLifecycleTests(unittest.TestCase):
             )
         self.assertEqual(caught.exception.code, "dependencies.source-range-unresolved")
 
+    def test_cargo_lock_resolves_cyclonedx_semver_source_range(self) -> None:
+        graph = _managed_graph()
+        serde_ref = "pkg:cargo/serde"
+        source_content, _ = build_cyclonedx_bom(
+            lifecycle=CycloneDxLifecycle.SOURCE,
+            managed_graph=graph,
+            additional_components=(
+                {
+                    "type": "library",
+                    "bom-ref": serde_ref,
+                    "name": "serde",
+                    "purl": serde_ref,
+                    "isExternal": True,
+                    "versionRange": "vers:semver/>=1.0.0|<2.0.0",
+                    "properties": [
+                        {
+                            "name": "literate-ai:dependency-kind",
+                            "value": "runtime",
+                        },
+                        {
+                            "name": "literate-ai:dependency-scope",
+                            "value": "runtime",
+                        },
+                    ],
+                },
+            ),
+            additional_edges=((graph.root_ref, serde_ref),),
+        )
+        cargo_manifest = (
+            '[package]\nname = "fixture-app"\nversion = "1.0.0"\n'
+            '[dependencies]\nserde = "1"\n'
+        )
+        cargo_lock = (
+            "version = 4\n\n"
+            '[[package]]\nname = "fixture-app"\nversion = "1.0.0"\n'
+            'dependencies = ["serde"]\n\n'
+            '[[package]]\nname = "serde"\nversion = "1.0.229"\n'
+            'source = "registry+https://github.com/rust-lang/crates.io-index"\n'
+            f'checksum = "{"a" * 64}"\n'
+        )
+        source_digest = canonical_identity({"fixture": "cargo-source"}).uri
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            artifact_path = root / "artifact"
+            artifact_path.mkdir()
+            evidence_path = root / "resolved.cdx.json"
+            CycloneDxLifecycleResolver(
+                managed_graph=graph,
+                observer=_EmptyObserver(),
+                evidence_path=evidence_path,
+            ).resolve(
+                {
+                    "effective_revision_digest": canonical_identity(
+                        {"fixture": "cargo-revision"}
+                    ).uri,
+                    "source_bundle_digest": source_digest,
+                    "files": {
+                        CYCLONEDX_SOURCE_SBOM_PATH: source_content.decode(),
+                        "source/Cargo.toml": cargo_manifest,
+                        "source/Cargo.lock": cargo_lock,
+                        "source/src/lib.rs": "pub const VALUE: u8 = 1;\n",
+                    },
+                },
+                {
+                    "source_bundle_digest": source_digest,
+                    "artifact_digest": canonical_identity(
+                        {"fixture": "cargo-artifact"}
+                    ).uri,
+                    "artifact_path": str(artifact_path),
+                },
+            )
+
+            inventory = {
+                item["name"]: item
+                for item in json.loads(evidence_path.read_bytes())["components"]
+            }
+            self.assertEqual(inventory["serde"]["version"], "1.0.229")
+            self.assertEqual(inventory["serde"]["hashes"][0]["alg"], "SHA-256")
+
+            rejected_evidence = root / "rejected.cdx.json"
+            with self.assertRaises(DependencyObservationError) as caught:
+                CycloneDxLifecycleResolver(
+                    managed_graph=graph,
+                    observer=_EmptyObserver(),
+                    evidence_path=rejected_evidence,
+                ).resolve(
+                    {
+                        "effective_revision_digest": canonical_identity(
+                            {"fixture": "cargo-revision-outside-range"}
+                        ).uri,
+                        "source_bundle_digest": source_digest,
+                        "files": {
+                            CYCLONEDX_SOURCE_SBOM_PATH: source_content.decode(),
+                            "source/Cargo.toml": cargo_manifest,
+                            "source/Cargo.lock": cargo_lock.replace(
+                                'version = "1.0.229"', 'version = "2.0.0"'
+                            ),
+                            "source/src/lib.rs": "pub const VALUE: u8 = 1;\n",
+                        },
+                    },
+                    {
+                        "source_bundle_digest": source_digest,
+                        "artifact_digest": canonical_identity(
+                            {"fixture": "cargo-artifact-outside-range"}
+                        ).uri,
+                        "artifact_path": str(artifact_path),
+                    },
+                )
+            self.assertEqual(
+                caught.exception.code,
+                "dependencies.source-range-unresolved",
+            )
+            self.assertFalse(rejected_evidence.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

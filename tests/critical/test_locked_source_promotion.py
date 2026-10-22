@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
+import json
 import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from unittest import mock
 
 from literate_ai.adapters.authority import (
     AuthorityProjectionStoreError,
@@ -21,15 +24,26 @@ from literate_ai.application.source_promotion import (
 )
 from literate_ai.authority import ComponentAuthorityLifecycle
 from literate_ai.contracts import (
+    ComponentAuthorityState,
     ComponentGenerationClosure,
     ContentIdentity,
+    StandardProjectLifecycleDriver,
     canonical_identity,
 )
 from literate_ai.source_to_specification import (
     PromotionInputKind,
+    QualificationStandardRebindMigration,
+    SourcePromotionError,
     SourcePromotionInput,
     SourcePromotionMaterializer,
     VerifiedSourcePromotionEvidence,
+)
+from literate_ai.source_to_specification.promotion_materialization import (
+    SOURCE_PROMOTION_PROVENANCE_SCHEMA,
+    verify_source_promotion_evidence,
+)
+from literate_ai.source_to_specification.qualification_lifecycle import (
+    QualificationLifecycleResult,
 )
 
 # Import the module, not the TestCase class, so unittest does not collect and
@@ -136,6 +150,226 @@ class LockedSourcePromotionTests(unittest.TestCase):
             qualification_lifecycle_result=self.qualification,
         )
 
+    def fresh_evidence(self, qualified):
+        fresh_runs = tuple(
+            replace(
+                run,
+                workspace_allocation_identity=_identity(
+                    f"recertification-workspace-{index}"
+                ),
+            )
+            for index, run in enumerate(self.qualification.runs)
+        )
+        fresh_qualification = QualificationLifecycleResult(
+            fresh_runs,
+            self.qualification.case_map,
+            self.qualification.parity_evidence,
+        )
+        self.assertNotEqual(fresh_qualification.identity, self.qualification.identity)
+        return replace(
+            self.evidence,
+            authority_projection=qualified,
+            generation_closure=replace(
+                self.closure,
+                qualification_evidence_identity=fresh_qualification.identity,
+            ),
+            qualification_lifecycle_result=fresh_qualification,
+        )
+
+    def test_standard_rebind_migration_reopens_and_binds_old_and_new_runs(self):
+        root = Path(self.temporary.name) / "rebound"
+        root.mkdir()
+        component_content = (self.component / "component.md").read_bytes()
+        (root / "component.md").write_bytes(component_content)
+
+        prior_driver = StandardProjectLifecycleDriver(
+            _identity("prior-framework"), _identity("standard-policy")
+        )
+        current_driver = StandardProjectLifecycleDriver(
+            _identity("current-framework"), prior_driver.policy_identity
+        )
+
+        def manifest(driver: StandardProjectLifecycleDriver) -> bytes:
+            return json.dumps(
+                {
+                    "schema": "fixture-project",
+                    "lifecycle_driver": driver.to_dict(),
+                    "test_receipt_policy": {
+                        "schema": "fixture-receipt",
+                        "runner_identity": driver.identity.to_dict(),
+                    },
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode()
+
+        prior_manifest = manifest(prior_driver)
+        current_manifest = manifest(current_driver)
+        configuration = root / "literate.project.json"
+        configuration.write_bytes(prior_manifest)
+        audit = SourcePromotionMaterializer().audit(
+            (
+                SourcePromotionInput(
+                    PromotionInputKind.COMPONENT_INTENT,
+                    root,
+                    "promoted",
+                    "component.md",
+                    "component.md",
+                    "sha256:" + hashlib.sha256(component_content).hexdigest(),
+                ),
+                SourcePromotionInput(
+                    PromotionInputKind.PROJECT_CONFIGURATION,
+                    root,
+                    "promoted",
+                    "literate.project.json",
+                    "literate.project.json",
+                    "sha256:" + hashlib.sha256(prior_manifest).hexdigest(),
+                ),
+            )
+        )
+
+        def qualification_for(driver: StandardProjectLifecycleDriver, label: str):
+            runs = tuple(
+                replace(
+                    run,
+                    framework_distribution_identity=(
+                        driver.framework_distribution_identity
+                    ),
+                    lifecycle_policy_identity=driver.policy_identity,
+                    driver_identity=driver.identity,
+                    generation_input_audit_identity=ContentIdentity.parse_uri(
+                        audit.identity
+                    ),
+                    promotion_tree_identity=ContentIdentity.parse_uri(
+                        audit.materialized_tree_identity
+                    ),
+                    workspace_allocation_identity=_identity(label + str(index)),
+                )
+                for index, run in enumerate(self.qualification.runs)
+            )
+            return QualificationLifecycleResult(
+                runs,
+                self.qualification.case_map,
+                self.qualification.parity_evidence,
+            )
+
+        prior_qualification = qualification_for(prior_driver, "prior-workspace")
+        prior_closure = replace(
+            self.closure,
+            promotion_input_audit_identity=ContentIdentity.parse_uri(audit.identity),
+            promotion_tree_identity=ContentIdentity.parse_uri(
+                audit.materialized_tree_identity
+            ),
+            qualification_evidence_identity=prior_qualification.identity,
+        )
+        prior_evidence = replace(
+            self.evidence,
+            promotion_input_audits=(audit,),
+            generation_closure=prior_closure,
+            policy_identity=prior_driver.policy_identity,
+            qualification_lifecycle_result=prior_qualification,
+        )
+        prior_qualified = qualify_locked_source_promotion(
+            self.authority, prior_evidence
+        )
+
+        record = {
+            "schema": SOURCE_PROMOTION_PROVENANCE_SCHEMA,
+            "source_snapshot_identity": self.retained.source_snapshot_identity.uri,
+            "specification_set_identity": self.retained.specification_set_identity.uri,
+            "review_identity": _identity("review").uri,
+            "component_graph_identity": _identity("graph").uri,
+            "translation_identity": None,
+            "inverse_evidence_reference": None,
+            "generation_input_audit_references": [
+                {
+                    "kind": "generation-input-audit",
+                    "identity": audit.identity,
+                    "path": (
+                        "generation-input-audits/"
+                        + audit.identity.split(":", 1)[1]
+                        + ".json"
+                    ),
+                }
+            ],
+        }
+        record_identity = canonical_identity(record)
+        provenance = root / "provenance" / "source-promotion" / record_identity.digest
+        audit_path = provenance / record["generation_input_audit_references"][0]["path"]
+        audit_path.parent.mkdir(parents=True)
+        (provenance / "reference.json").write_text(json.dumps(record))
+        audit_path.write_text(json.dumps(audit.to_dict()))
+        prior_qualified = replace(
+            prior_qualified, provenance_reference_identity=record_identity
+        )
+        qualification_directory = root / "provenance" / "qualification"
+        qualification_directory.mkdir()
+        (
+            qualification_directory / f"{prior_qualification.identity.digest}.json"
+        ).write_text(json.dumps(prior_qualification.to_dict()))
+
+        configuration.write_bytes(current_manifest)
+        migration = QualificationStandardRebindMigration(
+            component_coordinate=prior_qualified.component_coordinate,
+            prior_qualified_projection_identity=prior_qualified.identity.uri,
+            generation_input_audit_identity=audit.identity,
+            prior_project_configuration_base64=base64.b64encode(prior_manifest).decode(
+                "ascii"
+            ),
+            current_project_configuration_identity=(
+                "sha256:" + hashlib.sha256(current_manifest).hexdigest()
+            ),
+        )
+        migration_directory = root / "provenance" / "qualification-rebind"
+        migration_directory.mkdir()
+        (migration_directory / f"{migration.identity.digest}.json").write_text(
+            json.dumps(migration.to_dict())
+        )
+
+        reopened_prior = verify_source_promotion_evidence(
+            root,
+            prior_qualified,
+            prior_project_configuration=prior_manifest,
+        )
+        self.assertEqual(reopened_prior.standard_rebind_migration, migration)
+
+        current_qualification = qualification_for(current_driver, "current-workspace")
+        current_closure = replace(
+            prior_closure,
+            qualification_evidence_identity=current_qualification.identity,
+        )
+        current_qualified = replace(
+            prior_qualified,
+            generation_closure=current_closure,
+            evidence_identities=(
+                *prior_qualified.evidence_identities,
+                migration.identity,
+            ),
+        )
+        (
+            qualification_directory / f"{current_qualification.identity.digest}.json"
+        ).write_text(json.dumps(current_qualification.to_dict()))
+        reopened_current = verify_source_promotion_evidence(root, current_qualified)
+        self.assertEqual(reopened_current.standard_rebind_migration, migration)
+
+        stale_qualification = qualification_for(prior_driver, "stale-workspace")
+        stale_projection = replace(
+            current_qualified,
+            generation_closure=replace(
+                current_closure,
+                qualification_evidence_identity=stale_qualification.identity,
+            ),
+        )
+        (
+            qualification_directory / f"{stale_qualification.identity.digest}.json"
+        ).write_text(json.dumps(stale_qualification.to_dict()))
+        with self.assertRaises(SourcePromotionError) as raised:
+            verify_source_promotion_evidence(root, stale_projection)
+        self.assertEqual(
+            raised.exception.code,
+            "promotion.rebind_migration_binding_mismatch",
+        )
+
     def test_missing_and_stale_lock_evidence_fail_closed(self) -> None:
         with self.assertRaises(LockedSourcePromotionError) as missing:
             qualify_locked_source_promotion(
@@ -172,6 +406,73 @@ class LockedSourcePromotionTests(unittest.TestCase):
             store.current(self.retained.component_coordinate),
             qualified,
         )
+
+    def test_store_atomically_recertifies_an_existing_qualified_head(self) -> None:
+        store = FileAuthorityProjectionStore(Path(self.temporary.name))
+        for projection in (self.inventory, self.assisted, self.retained):
+            store.append(projection)
+        store.append_qualified(self.authority, self.evidence)
+        previous = store.current(self.retained.component_coordinate)
+
+        recertified = store.recertify_qualified(
+            self.authority,
+            self.fresh_evidence(previous),
+        )
+
+        self.assertEqual(store.current(previous.component_coordinate), recertified)
+        history = store.history(previous.component_coordinate)
+        self.assertEqual(history[-3], previous)
+        self.assertEqual(
+            history[-2].state, ComponentAuthorityState.DERIVED_SOURCE_RETAINED
+        )
+        self.assertEqual(
+            history[-1].state,
+            ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE,
+        )
+        self.assertEqual(history[-2].prior_projection_identity, previous.identity)
+        self.assertEqual(
+            history[-1].prior_projection_identity,
+            history[-2].identity,
+        )
+
+        with self.assertRaisesRegex(
+            AuthorityProjectionStoreError, "current immutable history"
+        ):
+            store.recertify_qualified(
+                self.authority,
+                self.fresh_evidence(previous),
+            )
+        self.assertEqual(store.current(previous.component_coordinate), recertified)
+        self.assertEqual(store.history(previous.component_coordinate), history)
+
+    def test_recertification_write_failure_keeps_old_qualified_head(self) -> None:
+        store = FileAuthorityProjectionStore(Path(self.temporary.name))
+        for projection in (self.inventory, self.assisted, self.retained):
+            store.append(projection)
+        store.append_qualified(self.authority, self.evidence)
+        previous = store.current(self.retained.component_coordinate)
+        original_write = store._atomic_write
+        projection_writes = 0
+
+        def fail_second_projection(path, content, *, exclusive=False):
+            nonlocal projection_writes
+            if path.parent.name == "projections":
+                projection_writes += 1
+                if projection_writes == 2:
+                    raise OSError("injected projection write failure")
+            return original_write(path, content, exclusive=exclusive)
+
+        with (
+            mock.patch.object(
+                store, "_atomic_write", side_effect=fail_second_projection
+            ),
+            self.assertRaisesRegex(AuthorityProjectionStoreError, "append lock failed"),
+        ):
+            store.recertify_qualified(
+                self.authority,
+                self.fresh_evidence(previous),
+            )
+        self.assertEqual(store.current(previous.component_coordinate), previous)
 
 
 if __name__ == "__main__":

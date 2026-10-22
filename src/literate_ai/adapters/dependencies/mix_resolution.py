@@ -417,7 +417,11 @@ def project_mix_evidence(
             if component["version"] != package.version:
                 _fail("Source BOM exact Hex version differs from the native lock")
         else:
-            _require_version_in_range(component.get("versionRange"), package.version)
+            _require_version_in_range(
+                component.get("versionRange"),
+                package.version,
+                package_url=component.get("purl"),
+            )
         if "hashes" in component and component["hashes"] != observed[name]["hashes"]:
             _fail("Source BOM Hex checksum differs from acquired bytes")
         for key in (

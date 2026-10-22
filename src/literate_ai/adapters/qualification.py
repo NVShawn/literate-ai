@@ -69,7 +69,10 @@ from literate_ai.source_to_specification.contracts import (
 from literate_ai.source_to_specification.host_qualification import (
     LocalQualificationProfile,
 )
-from literate_ai.source_to_specification.inventory import inventory_source
+from literate_ai.source_to_specification.inventory import (
+    accepted_inventory_projection,
+    inventory_source,
+)
 from literate_ai.source_to_specification.qualification_lifecycle import (
     QualificationLifecycleExecution,
     QualificationLifecyclePlan,
@@ -521,12 +524,26 @@ class FilesystemQualificationParityVerifier:
         profile: LocalQualificationProfile,
         lifecycle: FilesystemStandardQualificationLifecyclePort,
         environment: Mapping[str, str] | None = None,
+        allow_legacy_inventory_policy: bool = False,
     ) -> None:
         self.source_root = source_root.resolve(strict=True)
         self.source_snapshot_identity = source_snapshot_identity
         self.profile = profile
         self.lifecycle = lifecycle
         self.environment = dict(os.environ if environment is None else environment)
+        inventory = inventory_source(self.source_root)
+        accepted_inventory = accepted_inventory_projection(
+            inventory,
+            source_snapshot_identity.uri,
+            allow_legacy_policy=allow_legacy_inventory_policy,
+        )
+        if accepted_inventory is None:
+            raise FilesystemQualificationError(
+                "qualification.parity_authority_mismatch",
+                "parity source differs from the pinned accepted snapshot",
+            )
+        self.source_inventory_identity = inventory.identity
+        self.accepted_source_inventory = accepted_inventory
         self.case_map = qualification_verifier_case_map(
             profile, source_snapshot_identity
         )
@@ -549,8 +566,8 @@ class FilesystemQualificationParityVerifier:
     ) -> QualificationParityEvidence:
         if (
             source_snapshot_identity != self.source_snapshot_identity
-            or (source_inventory := inventory_source(self.source_root)).identity
-            != source_snapshot_identity.uri
+            or inventory_source(self.source_root).identity
+            != self.source_inventory_identity
             or case_map != self.case_map
         ):
             raise FilesystemQualificationError(
@@ -584,7 +601,7 @@ class FilesystemQualificationParityVerifier:
         recorder = getattr(self.lifecycle, "evidence_recorder", None)
         if recorder is not None:
             if (
-                recorder.remember_json(canonical_value(source_inventory))
+                recorder.remember_json(canonical_value(self.accepted_source_inventory))
                 != source_snapshot_identity
             ):
                 raise QualificationCaptureError(
@@ -640,7 +657,10 @@ class FilesystemQualificationParityVerifier:
                     == canonical_digest(generated_value),
                 )
             )
-        if inventory_source(self.source_root).identity != source_snapshot_identity.uri:
+        if (
+            inventory_source(self.source_root).identity
+            != self.source_inventory_identity
+        ):
             raise FilesystemQualificationError(
                 "qualification.source_drift",
                 "source baseline changed during independent parity execution",
@@ -676,6 +696,7 @@ class FilesystemStandardQualificationAdapter:
         retain_library_products: bool = False,
         max_capture_bytes: int = 256 * 1024 * 1024,
         pipeline_model: str | None = None,
+        allow_legacy_inventory_policy: bool = False,
     ) -> None:
         if type(retain_library_products) is not bool or (
             type(max_capture_bytes) is not int or max_capture_bytes <= 0
@@ -714,6 +735,7 @@ class FilesystemStandardQualificationAdapter:
             source_snapshot_identity=source_snapshot_identity,
             profile=profile,
             lifecycle=lifecycle,
+            allow_legacy_inventory_policy=allow_legacy_inventory_policy,
         )
         self.runner = QualificationLifecycleRunner(
             workspaces=workspaces,

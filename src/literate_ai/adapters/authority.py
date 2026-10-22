@@ -11,6 +11,7 @@ import tempfile
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import replace
 from errno import EEXIST
 from pathlib import Path
 
@@ -21,6 +22,7 @@ from literate_ai.application.locked_generation_authority import (
 from literate_ai.application.source_promotion import (
     qualify_locked_source_promotion,
 )
+from literate_ai.authority import ComponentAuthorityLifecycle
 from literate_ai.contracts.authority import (
     ComponentAuthorityProjection,
     ComponentAuthorityState,
@@ -127,6 +129,66 @@ class FileAuthorityProjectionStore:
         projection = qualify_locked_source_promotion(authority, evidence)
         return self._append(projection, qualification_authorized=True)
 
+    def recertify_qualified(
+        self,
+        authority: LockedGenerationAuthority,
+        evidence: VerifiedSourcePromotionEvidence,
+    ) -> ComponentAuthorityProjection:
+        """Atomically replace one qualified head with fresh qualified evidence.
+
+        Immutable history records the required invalidation and qualification
+        transitions. The current pointer moves only once, from the exact qualified
+        head supplied by ``evidence`` to the fresh qualified successor.
+        """
+
+        current = evidence.authority_projection
+        if (
+            not isinstance(current, ComponentAuthorityProjection)
+            or current.state
+            is not ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE
+        ):
+            raise AuthorityProjectionStoreError(
+                "recertification requires a qualified authority projection"
+            )
+        invalidated = ComponentAuthorityLifecycle.invalidate(
+            current,
+            evidence_identities=evidence.qualification_evidence_identities,
+        )
+        qualified = qualify_locked_source_promotion(
+            authority,
+            replace(evidence, authority_projection=invalidated),
+        )
+        root = self._component_root(current.component_coordinate, create=True)
+        with self._append_lock(root):
+            observed = self._read_current(root, required=True)
+            if observed != current:
+                raise AuthorityProjectionStoreError(
+                    "recertification does not extend the current immutable history"
+                )
+            try:
+                invalidated.require_successor_of(observed)
+                qualified.require_successor_of(invalidated)
+            except ValueError as exc:
+                raise AuthorityProjectionStoreError(
+                    "recertification is not a legal authority transition"
+                ) from exc
+            self._write_projection(root, invalidated)
+            path = self._write_projection(root, qualified)
+
+            # Detect a writer that ignored the cooperative lock before publishing
+            # the sole pointer update. The retained-source intermediate is never a
+            # current projection.
+            if self._read_current(root, required=True) != current:
+                raise AuthorityProjectionStoreError(
+                    "current authority projection changed during recertification"
+                )
+            self._write_current(root, qualified)
+            if not path.is_file():
+                raise AuthorityProjectionStoreError(
+                    "qualified recertification projection is unavailable"
+                )
+        return qualified
+
     def _append(
         self,
         projection: ComponentAuthorityProjection,
@@ -163,20 +225,7 @@ class FileAuthorityProjectionStore:
                     "locked lifecycle admission"
                 )
 
-            projections = self._direct_directory(root, "projections", create=False)
-            path = projections / f"{projection.identity.digest}.json"
-            content = canonical_json_bytes(projection.to_dict()) + b"\n"
-            if path.exists() or path.is_symlink():
-                if (
-                    path.is_symlink()
-                    or not path.is_file()
-                    or path.read_bytes() != content
-                ):
-                    raise AuthorityProjectionStoreError(
-                        "projection identity is already occupied by different bytes"
-                    )
-            else:
-                self._atomic_write(path, content, exclusive=True)
+            path = self._write_projection(root, projection)
 
             # Keep the pointer update a compare-and-swap even while holding the
             # cooperative process lock.  This detects a writer that ignored the lock
@@ -187,15 +236,33 @@ class FileAuthorityProjectionStore:
                 raise AuthorityProjectionStoreError(
                     "current authority projection changed during append"
                 )
-            pointer = {
-                "schema": self.CURRENT_SCHEMA,
-                "component_coordinate": projection.component_coordinate,
-                "projection_identity": projection.identity.uri,
-            }
-            self._atomic_write(
-                root / "current.json", canonical_json_bytes(pointer) + b"\n"
-            )
+            self._write_current(root, projection)
             return path
+
+    def _write_projection(
+        self, root: Path, projection: ComponentAuthorityProjection
+    ) -> Path:
+        projections = self._direct_directory(root, "projections", create=False)
+        path = projections / f"{projection.identity.digest}.json"
+        content = canonical_json_bytes(projection.to_dict()) + b"\n"
+        if path.exists() or path.is_symlink():
+            if path.is_symlink() or not path.is_file() or path.read_bytes() != content:
+                raise AuthorityProjectionStoreError(
+                    "projection identity is already occupied by different bytes"
+                )
+        else:
+            self._atomic_write(path, content, exclusive=True)
+        return path
+
+    def _write_current(
+        self, root: Path, projection: ComponentAuthorityProjection
+    ) -> None:
+        pointer = {
+            "schema": self.CURRENT_SCHEMA,
+            "component_coordinate": projection.component_coordinate,
+            "projection_identity": projection.identity.uri,
+        }
+        self._atomic_write(root / "current.json", canonical_json_bytes(pointer) + b"\n")
 
     def current(self, component_coordinate: str) -> ComponentAuthorityProjection:
         result = self._read_current(

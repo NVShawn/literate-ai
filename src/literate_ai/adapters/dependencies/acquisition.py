@@ -112,7 +112,11 @@ def _matching_locked_package(
         try:
             from .resolution import _require_version_in_range
 
-            _require_version_in_range(source.get("versionRange"), package.version)
+            _require_version_in_range(
+                source.get("versionRange"),
+                package.version,
+                package_url=source.get("purl"),
+            )
         except DependencyObservationError as exc:
             if exc.code == "dependencies.source-range-mismatch":
                 continue
