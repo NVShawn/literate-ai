@@ -1,0 +1,22 @@
+{
+  "schema": "literate-ai/retained-observation-performance-development@1",
+  "observed_utc": "2026-10-22T12:06:41.511839+00:00",
+  "work_item": "RETAINED-OBSERVATION-PERF-001",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/117",
+  "scope": "Direct wheel RECORD enumeration preserves current member byte verification; focused controller evidence only at this checkpoint",
+  "source_sha256": {
+    "src/literate_ai/adapters/standard_lifecycle_binding.py": "c52fa742ef21d465293b65afab9df7cc8c5a1b89a0bcf70e764148aca7ece39d",
+    "tests/critical/test_standard_lifecycle_binding_adapter.py": "c1139128918d8eee24545cf54d322211a0da36b9d0b14367276be645c13cb0c2"
+  },
+  "focused_controller_cases": 5,
+  "record_bytes_bound": 16777216,
+  "record_entries_bound": 100000,
+  "non_record_fallback_preserved": true,
+  "current_bytes_always_hashed": true,
+  "canonical_identity_preserved_on_real_metadata_fixture": true,
+  "full_regression": "pending",
+  "native_comparison": "pending",
+  "installed_wheel_qualified": false,
+  "canonical_native_cli_qualified": false,
+  "release_authorized": false
+}

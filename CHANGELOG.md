@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Read installed wheel RECORD inventories directly while verifying every selected
+  member from current bytes. Avoid redundant metadata existence scans and refuse
+  missing recorded payloads; preserve canonical distribution identities.
+
 - Bind reviewed captured runtime directories to retained native SDK commands,
   preserving complete native dependency observations and SDK-owned placements.
   Reject ambient injection, shadowing, drift and revocation; retain captured

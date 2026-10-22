@@ -30150,10 +30150,12 @@ hosted CI and canonical tree worker/live SDK integration remain open.
   independent acceptance. Supported receipt promotion and current verification
   pass. This result keeps its own test count, distinct from the predecessor's
   227-test lifecycle. Exact-wheel offline FreeBSD installation verifies all 37
-  distributions. Ten installed context cases and the fresh canonical native CLI
-  replay are running; neither has a completed qualification claim. The latter
-  retains the default receipt policy, removes the consumer RPATH, requires the
-  captured loader path and checks missing host/plan authorization separately.
+  distributions. All ten installed native context cases pass with 469 production
+  modules verified from the installed prefix. The fresh canonical native CLI
+  passes SDK production, original adoption, planning and separate missing host/plan
+  refusals, then exceeds its unchanged 3,600-second execution bound. Partial
+  products and original test output earn no receipt or independent admission.
+  The default receipt policy and captured loader requirements remain intact.
   Compiler SDK admission and release authorization remain open. See
   [the scoped record](../../verification/retained-sdk-runtime-context-development.json).
 - **Depends on:** RETAINED-PROJECT-001,NATIVE-SDK-001
@@ -30532,3 +30534,40 @@ remain open in their owning items; this controller/sample proof does not close t
   - [ ] Qualify and compose the fix without losing current native SDK or PE observation guards.
 - **Evidence:**
   - [ ] Complete clean local regression, real Windows input/output/admission/package proof and green exact-head hosted CI before landing.
+
+### [ ] RETAINED-OBSERVATION-PERF-001 — Bound retained authority and native observation cost
+
+- **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117)
+
+- **Priority:** P1
+- **Owner:** Standard installed-distribution, retained runtime and native dependency observers
+- **Direction:** Make the installed public retained SDK lifecycle complete within reviewed native bounds while preserving exact authority, loader and revocation checks.
+- **Conclusion:** Issue117 owns the measured bottleneck. Profile the public planning path and native dependency guard separately, then reduce redundant work at its owning boundary with current byte and topology validation. Never cache stale success, omit freshness checks or raise the one-hour deadline to label the current attempt passing.
+- **Depends on:** RETAINED-SDK-PUBLIC-001
+- **Implementation:**
+  - [x] Record exact installed public-plan and native observation call counts and costs before selecting the optimization.
+  - [ ] Implement operation-scoped observation reuse or lower-cost equivalent verification with current member bytes, native graph, authorization and revocation intact.
+- **Evidence:**
+  - [ ] Changed, replaced, redirected, missing or unreadable members and changes during actual SDK commands fail closed; all existing tamper and revocation cases remain covered.
+  - [ ] Compare equivalent instrumented counts and uninstrumented native timings, then pass full regression, exact wheel and canonical installed public CLI build/tests/docs/independent acceptance.
+
+The exact installed native dependency observer now has a successful read-only
+profile: 14.613 instrumented seconds, 34 components, 97 edges, 217 inspector
+processes and 10,520 stat calls. The public retained-plan profile passes in 105.045 instrumented seconds:
+four installed-distribution observations consume 75.589 cumulative seconds,
+including 32.782 seconds in the metadata library inventory existence prefilter. These are scoped preparation
+measurements, not an uninstrumented release benchmark or accepted lifecycle.
+The first dependency-profile attempt refused retired inputs; its replacement
+captures a fresh verified diagnostic snapshot without repairing the retired run.
+
+Next in progress: read the wheel RECORD inventory directly in each fresh
+distribution observation, avoiding the metadata library existence prefilter.
+Every selected member still undergoes current byte verification; missing recorded
+members must refuse rather than disappear from the inventory. Keep the existing
+non-RECORD distribution fallback and canonical identity format. Measure the exact
+installed path before deciding whether additional observation work is required.
+
+The initial direct-RECORD implementation passes five focused installed-distribution
+cases, including a real wheel metadata fixture, unchanged canonical identity,
+missing nonmandatory members, mutation across observations and malformed/oversized
+inventories. Full regression and native comparison remain required.

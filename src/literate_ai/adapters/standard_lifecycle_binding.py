@@ -7,9 +7,11 @@ ambient import location or the package version alone.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import importlib.metadata
 import importlib.resources
+import io
 import json
 import re
 from collections.abc import Callable, Iterable
@@ -38,6 +40,7 @@ EMBEDDED_DISTRIBUTION_ORIGIN_SCHEMA = "literate-ai/distribution-origin@1"
 _FRAMEWORK_DISTRIBUTION_NAME = "literate-ai"
 _MAXIMUM_PAYLOAD_FILES = 100_000
 _MAXIMUM_PAYLOAD_BYTES = 256 * 1024 * 1024
+_MAXIMUM_RECORD_BYTES = 16 * 1024 * 1024
 # Keep aligned with the stdlib-only, independently staged worker bootstrap. Importing
 # policy from that file would make the trusted in-process observer depend on a
 # transport program, while the bootstrap cannot import this package before trust is
@@ -312,6 +315,35 @@ def _read_stable_member(path: Path) -> tuple[int, str]:
     return observed_size, "sha256:" + digest.hexdigest()
 
 
+def _recorded_distribution_paths(distribution: _DistributionLike) -> tuple[Any, ...]:
+    """Read wheel names without the metadata library's existence prefilter.
+
+    Every selected name is subsequently read and hashed. Missing recorded members
+    must refuse, rather than disappear during enumeration. No inventory or byte
+    observation is reused across calls.
+    """
+    try:
+        record = distribution.read_text("RECORD")
+        if record is None:
+            return tuple(distribution.files or ())
+        if (
+            not isinstance(record, str)
+            or len(record.encode("utf-8")) > _MAXIMUM_RECORD_BYTES
+        ):
+            raise ValueError("invalid wheel inventory size")
+        paths = []
+        for row in csv.reader(io.StringIO(record, newline=""), strict=True):
+            if len(row) != 3 or not row[0] or len(paths) >= _MAXIMUM_PAYLOAD_FILES:
+                raise ValueError("invalid wheel inventory row")
+            paths.append(row[0])
+        return tuple(paths)
+    except (AttributeError, OSError, TypeError, ValueError, csv.Error) as exc:
+        raise StandardLifecycleBindingError(
+            "standard_binding.distribution_payload_invalid",
+            "installed framework distribution lacks a bounded file inventory",
+        ) from exc
+
+
 def observe_installed_framework_distribution(
     *, distribution_finder: DistributionFinder = _default_distribution_finder
 ) -> InstalledFrameworkDistribution:
@@ -362,13 +394,7 @@ def observe_installed_framework_distribution(
             "standard_binding.distribution_metadata_invalid",
             "installed framework distribution has an invalid package version",
         ) from exc
-    try:
-        recorded = tuple(distribution.files or ())
-    except (AttributeError, TypeError) as exc:
-        raise StandardLifecycleBindingError(
-            "standard_binding.distribution_payload_invalid",
-            "installed framework distribution lacks a bounded file inventory",
-        ) from exc
+    recorded = _recorded_distribution_paths(distribution)
     if not recorded or len(recorded) > _MAXIMUM_PAYLOAD_FILES:
         raise StandardLifecycleBindingError(
             "standard_binding.distribution_payload_invalid",

@@ -70,3 +70,28 @@ confer no authority.
 - **WHEN** authorization mutates a caller-owned argv or environment mapping
 - **THEN** the process SHALL use the SDK scope's immutable approved values or refuse
 - **AND** a changed outer command context SHALL prevent retained admission
+
+### Requirement: Fresh bounded installed-distribution inventory
+
+Installed wheel observation SHALL read a bounded current RECORD inventory and
+verify each selected member from its actual bytes. Inventory enumeration SHALL
+NOT silently omit a missing recorded member. Avoiding preliminary existence
+scans SHALL preserve canonical member identities, non-editable selection, current
+source and revocation checks, and existing non-RECORD distribution support.
+
+#### Scenario: Recorded member disappears
+
+- **WHEN** an installed wheel records a selected member that is missing or unavailable
+- **THEN** distribution observation SHALL refuse
+- **AND** the member SHALL NOT silently disappear from the observed inventory
+
+#### Scenario: Inventory contains malformed or excessive rows
+
+- **WHEN** the current RECORD is malformed or exceeds inventory bounds
+- **THEN** observation SHALL refuse before returning a trusted distribution
+
+#### Scenario: Repeated observation after member mutation
+
+- **WHEN** selected member bytes change between observations
+- **THEN** the next observation SHALL reflect the changed bytes or refuse
+- **AND** an earlier successful observation SHALL confer no cached authority
