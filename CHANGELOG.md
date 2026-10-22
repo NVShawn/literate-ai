@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Native Swift compiler discovery preserves compiler mode after resolving executable
+  aliases, and Swift builds replay the pinned SDK environment.
+
 - Repository maintenance consolidates superseded reviews and inactive worktrees
   while preserving unique commits, ignored qualification evidence and open gates.
 

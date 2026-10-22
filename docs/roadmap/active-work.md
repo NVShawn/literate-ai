@@ -4689,17 +4689,22 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ### Current consolidation inventory
 
-The WORKTREE-CONSOLIDATION-001 pass retains these five reviews. Older inventory
-below is historical and does not supersede this disposition.
+After the requested merge pass, three reviews remain. The earlier
+WORKTREE-CONSOLIDATION-001 inventory and older records below are historical.
 
 | Review | Retained scope | Landing state |
 | --- | --- | --- |
-| [#105](https://github.com/jordanhubbard/literate-ai/pull/105) | Includes #77, #78, #81, #89 and #99 by ancestry | Draft; prior Linux Swift test failure |
+| [#105](https://github.com/jordanhubbard/literate-ai/pull/105) | Includes #77, #78, #81, #89 and #99 by ancestry | Swift compiler-mode repair prepared; exact-head CI required |
 | [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #87, #108 and #109 by ancestry | Draft; pending macOS CI and remaining qualification |
 | [#82](https://github.com/jordanhubbard/literate-ai/pull/82) | Additional public-execution merge/evidence history | Retained draft; reconcile unique history before disposition |
-| [#112](https://github.com/jordanhubbard/literate-ai/pull/112) | Qualified-library recertification | Pending macOS CI; promotion migration boundary remains open |
-| [#106](https://github.com/jordanhubbard/literate-ai/pull/106) | setup-bazel 0.19.1 action pin | Green; retain existing sequencing after #105 |
 
+
+PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
+exact-head matrix; the pinned upstream commit is the 0.19.1 release. PR #112
+was merged concurrently by another actor at
+`7a1ccfe38f102c3c275710a87d8037c8a5d0e10d`. Local main was fast-forwarded
+to both merges. Postmerge CI and broader release qualification remain separate
+open gates.
 
 ### Retained 1.2 review inventory — repository migrated
 
@@ -29833,10 +29838,10 @@ compiler SDK, original-suite completion or release readiness is inferred.
 - **Priority:** P2
 - **Owner:** GitHub Actions C++ native qualification workflow
 - **Direction:** Reconcile the newly opened Dependabot PR #106 during the release contribution sweep.
-- **Conclusion:** Include the pinned 0.19.1 CI-action patch as a separate follow-up after PR #105. It fixes warning reporting, adds a restore timeout option and updates action dependencies; it changes one workflow action pin and no runtime or native package code.
-- **Depends on:** PR #105 consolidated runtime integration, followed by refreshed PR #106 merge-base and exact-head CI
+- **Conclusion:** Include the independent pinned 0.19.1 CI-action patch. The subsequent explicit maintainer merge request prioritizes this already-green review while PR #105 is repaired. It fixes warning reporting, adds a restore timeout option and updates action dependencies; it changes one workflow action pin and no runtime or native package code.
+- **Depends on:** none; the action pin has no runtime dependency on PR #105
 - **Implementation:**
-  - [ ] Review and land PR #106 through normal merge semantics after current integration; preserve the upstream action SHA pin.
+  - [x] Review and land PR #106 through normal merge semantics after the explicit maintainer merge request; preserve the upstream action SHA pin. Merge `ccd4c030` retains the exact upstream 0.19.1 commit `104e3eea9447cdaa4b00d0fb46191a3985d26ab3`; all non-placeholder checks on review head `d95e3aaa` passed. Exact postmerge CI remains pending.
 - **Evidence:**
   - [ ] Inspect the one-line workflow diff and upstream release; require green exact PR #106 CI and exact postmerge main CI before release mutation.
 
@@ -29890,3 +29895,33 @@ maintenance pass. Worker alignment refused the configured template with
 `worker_alignment.invalid`; no user-worker qualification jobs were dispatched
 or worker configuration repaired. This operational audit does not close WORKTREE-002's
 reusable migration-contract or platform-qualification obligations.
+
+### [ ] SWIFT-DRIVER-MODE-001 — Preserve Swift compiler mode after executable resolution
+
+- **Priority:** P0
+- **Owner:** Native compiler discovery and Swift qualification
+- **Direction:** Merge the remaining reviews after repairing their required CI gates.
+- **Conclusion:** The exact PR105 Linux failure resolves the swiftc symlink to swift-driver and loses its compiler-mode invocation. Bind an explicit Swift compiler mode into the resolved command while retaining executable-byte verification and source/artifact custody.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Preserve swiftc compiler mode when the resolved executable is swift-driver; leave ordinary compilers unchanged.
+  - [x] Replay the pinned SDK environment for direct Swift compiler invocations; native testing exposed that the Swift builder omitted the selected SDK environment.
+  - [x] Add portable symlink-driver regression coverage and requalify the affected native builder path.
+- **Evidence:**
+  - [x] Focused compiler discovery and native Swift tests, format/lint, and reviewed driver/documentation authority checks pass.
+  - [ ] Require green exact review-head CI before merging PR105; retain pending qualification honestly.
+
+**Current local repair evidence:** All three native Swift builder cases pass on
+macOS, including direct resolved-compiler compilation, both executable modes,
+explicit-mode identity parity and competing-entrypoint refusal. The first direct
+compiler probe correctly failed on missing SDK state; replaying the pinned SDK
+environment repaired it without changing source/output authorization. Lint and
+format pass across 1,647 files, driver/documentation reviews are current, strict
+OpenSpec checks pass and all 121 diagrams render across 616 Markdown files.
+The full local regression and exact updated-head CI remain required before land.
+The installed ambient CLI could not parse the current worker template; the
+source-tree managed CLI performed alignment and found five aligned workers,
+one unreachable endpoint and one worker with 735 MiB free. No jobs were sent to
+the unavailable workers and no data was deleted.
+
+The first full local regression was deliberately interrupted after 850 completed cases when concurrent PR #112 changed main. Its checkpoint is retained as partial evidence; the merged candidate requires a fresh full run.

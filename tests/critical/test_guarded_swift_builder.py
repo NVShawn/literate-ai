@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -109,6 +110,28 @@ class GuardedSwiftBuilderTests(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 0, result.stderr.decode())
                 self.assertEqual(result.stdout, expected)
+
+    def test_direct_swiftc_alias_preserves_compiler_mode_and_native_execution(self):
+        compiler = (
+            subprocess.check_output(
+                ["xcrun", "--find", "swiftc"], text=True, timeout=10
+            ).strip()
+            if sys.platform == "darwin"
+            else shutil.which("swiftc")
+        )
+        self.assertIsNotNone(compiler)
+        environment = dict(os.environ, CXX=f'"{compiler}"')
+        self.toolchain = discover_cpp_toolchain(environment)
+        if Path(compiler).resolve().stem.casefold() != "swiftc":
+            self.assertEqual(self.toolchain.command[1], "--driver-mode=swiftc")
+        explicit = discover_cpp_toolchain(
+            dict(environment, CXX=f'"{compiler}" --driver-mode=swiftc')
+        )
+        self.assertEqual(explicit.command.count("--driver-mode=swiftc"), 1)
+        if Path(compiler).resolve().stem.casefold() != "swiftc":
+            self.assertEqual(explicit.identity, self.toolchain.identity)
+        self.toolchain.require_unchanged()
+        self.test_support_and_generated_tests_link_into_one_runnable_executable()
 
     def test_competing_helper_or_main_entrypoints_refuse_without_publication(self):
         for path, content in (
