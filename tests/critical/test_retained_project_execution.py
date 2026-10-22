@@ -142,8 +142,9 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         for directory in ("src", "tools"):
             (self.source / directory).mkdir(parents=True)
         (self.source / "src/main.txt").write_bytes(b"original\x00asset")
-        shutil.copyfile(self.fixture_binary, self.source / "tools/runner")
-        (self.source / "tools/runner").chmod(0o755)
+        self.runner_member = "tools/runner.exe" if os.name == "nt" else "tools/runner"
+        shutil.copyfile(self.fixture_binary, self.source / self.runner_member)
+        (self.source / self.runner_member).chmod(0o755)
         self.configured_test_policy = ProjectTestReceiptPolicy(
             "retained-fixture",
             "1.0.0",
@@ -162,7 +163,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             self.source,
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             RetainedProjectLimits(100, 64 * 1024 * 1024, 128 * 1024 * 1024),
-            executable_paths=("tools/runner",),
+            executable_paths=(self.runner_member,),
         )
         self.actions = (
             RetainedProjectAction(
@@ -216,13 +217,13 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             (
                 (
                     "shell",
-                    "tools/runner",
+                    self.runner_member,
                     ContentIdentity.parse_uri(
                         "sha256:"
                         + next(
                             m.sha256
                             for m in self.manifest.members
-                            if m.path == "tools/runner"
+                            if m.path == self.runner_member
                         )
                     ),
                 ),
@@ -314,7 +315,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             self.plan,
             profile=replace(
                 self.profile,
-                tools=(("shell", "tools/runner", canonical_identity("wrong")),),
+                tools=(("shell", self.runner_member, canonical_identity("wrong")),),
             ),
         )
         self.current = self.plan
