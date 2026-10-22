@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/retained-observation-performance-development@1",
-  "observed_utc": "2026-10-22T13:25:52.455488+00:00",
+  "observed_utc": "2026-10-22T14:06:54.400368+00:00",
   "work_item": "RETAINED-OBSERVATION-PERF-001",
   "issue": "https://github.com/jordanhubbard/literate-ai/issues/117",
   "scope": "Fresh direct RECORD enumeration with full controller regression, clean Linux wheel and complete configured host lifecycle; canonical FreeBSD CLI qualification remains pending",
@@ -91,7 +91,16 @@
     "passed": true,
     "seconds": 114.637
   },
-  "canonical_native_cli_status": "fresh attempt started with unchanged 3600-second execution budget and corrected output lookup; no completed qualification claim",
+  "canonical_native_cli_status": {
+    "status": "failed",
+    "reason": "Authorized public build timed out after 3600 seconds",
+    "authorized_execution_budget_seconds": 3600,
+    "supervised_total_seconds": 4162.132,
+    "exit_code": 1,
+    "owned_source_server_terminal": 0,
+    "admission_earned": false,
+    "bootstrap_compiler_source_admitted": false
+  },
   "framework_current_lifecycle_receipt": {
     "passed": true,
     "tests": 233,
@@ -102,5 +111,6 @@
     "verify_current": true,
     "report_sha256": "75354df5b482dd15d98bbde2e06a2505e2cd32d95855a44a8127f436f2f3f4f3",
     "driver_implementation_identity": "sha256:ae7e2958c721d85df08cd527a3e24e954e369221ba26cb0feb7547012f0809a9"
-  }
+  },
+  "next_action": "Profile actual authorized execution; the direct RECORD optimization alone does not satisfy the installed native lifecycle deadline"
 }

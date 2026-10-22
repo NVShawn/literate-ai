@@ -30576,8 +30576,10 @@ The direct-RECORD candidate `760bfa09` now passes all 2,201 controller cases:
 2,131 passes, 70 declared skips, no failures (2,336.332 seconds). Exact clean
 Linux wheel qualification passes in 524.198 seconds with 1,235 framework members.
 Offline FreeBSD installation verifies the reviewed dependency closure, and fresh
-project initialization passes. The canonical installed public SDK replay is
-running under the unchanged execution deadline; admission is not yet earned.
+project initialization passes. The canonical installed public SDK replay reached authorized execution but
+timed out at the unchanged 3,600-second budget (4,162.132 seconds supervised
+total). Its owned source server exited successfully. No admission was earned;
+profile the actual execution path before selecting further observation changes.
 The complete configured framework host lifecycle now passes 233 cases in
 1,385.562 seconds, including execution and independent acceptance. Its finalized
 candidate is promoted through `litai project test-receipt update`; `litai verify`
