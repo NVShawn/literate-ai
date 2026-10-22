@@ -3,7 +3,7 @@
   "observed_utc": "2026-10-22T15:04:02.012818+00:00",
   "work_item": "RETAINED-OBSERVATION-PERF-001",
   "issue": "https://github.com/jordanhubbard/literate-ai/issues/117",
-  "scope": "Historical 760bfa09 direct-RECORD qualification and subsequent descriptor-read development; current candidate qualification remains pending",
+  "scope": "Historical 760bfa09 direct-RECORD qualification and descriptor-read candidate with uninterrupted regression, clean Linux wheel, configured host lifecycle and installed FreeBSD binding controls; canonical native SDK qualification remains pending",
   "source_sha256": {
     "src/literate_ai/adapters/standard_lifecycle_binding.py": "c52fa742ef21d465293b65afab9df7cc8c5a1b89a0bcf70e764148aca7ece39d",
     "tests/critical/test_standard_lifecycle_binding_adapter.py": "c1139128918d8eee24545cf54d322211a0da36b9d0b14367276be645c13cb0c2"
@@ -101,7 +101,7 @@
     "admission_earned": false,
     "bootstrap_compiler_source_admitted": false
   },
-  "next_action": "Qualify the descriptor-read candidate with full regression, clean installed wheel, configured host lifecycle and canonical native CLI renewal; no installed FreeBSD success yet",
+  "next_action": "Finish the unchanged-budget installed FreeBSD public SDK replay and ten installed context controls; compose with the reviewed Windows integration before landing",
   "authorized_execution_profile": {
     "diagnostic_only": true,
     "seconds": 300.429,
@@ -157,9 +157,26 @@
     },
     "native_diagnostic_source_scope": "Separately imported pre-format source against the previously installed wheel; no installed-candidate qualification",
     "fresh_byte_reads_preserved": true,
-    "full_regression": "pending",
-    "clean_wheel": "pending",
-    "current_host_receipt": "stale after the driver change",
+    "full_regression": {
+      "selected": 2202,
+      "passed": 2132,
+      "skipped": 70,
+      "failed": 0,
+      "seconds": 908.832,
+      "workers": 12,
+      "uninterrupted": true,
+      "report_sha256": "a480e613d38a2edea6e47db4068c30096f2b71eaafa7e46a66124fec1c587da3"
+    },
+    "clean_wheel": {
+      "passed": true,
+      "seconds": 569.152,
+      "target": "Linux x86_64 / Python 3.14",
+      "wheel_identity": "sha256:359cbf0f25a9b22f1dc5e276c42030b8a539ae17878c1db374f3b23dd73a81db",
+      "distribution_identity": "sha256:196504b9d858d877009293736ddcfef0bd28c68fdcb1dcc3c6ffbd9784fb02e7",
+      "members": 1235,
+      "tamper_refusal": "standard_binding.changed"
+    },
+    "current_host_receipt": "current after supported receipt promotion",
     "canonical_native_cli_qualified": false,
     "directory_relative_metadata_probe": {
       "members": 1235,
@@ -169,7 +186,21 @@
       "absolute_seconds": 4.945896414981689,
       "directory_relative_seconds": 5.959457288961858,
       "decision": "Not adopted; measured path was slower"
-    }
+    },
+    "source_revision": "4ed7e5a1024b513a497f3608e053d759f7bce952",
+    "installed_freebsd_controls": {
+      "selected": 6,
+      "passed": 6,
+      "skipped": 0,
+      "failed": 0,
+      "seconds": 1.459,
+      "module_sha256": "118eaf712600436acccd83ac2b69b68cce71c486405ea473330cbe5d50d744ac",
+      "module_from_installed_prefix": true,
+      "canonical_native_cli_qualified": false
+    },
+    "offline_freebsd_bootstrap_seconds": 113.05,
+    "native_project_initialization_seconds": 97.78,
+    "canonical_native_cli_status": "running; actual authorized execution; unchanged 3600-second public command budget"
   },
   "framework_preceding_lifecycle_receipt": {
     "passed": true,
@@ -184,7 +215,14 @@
     "verify_current_at_preceding_checkpoint": true
   },
   "framework_current_lifecycle_receipt": {
-    "state": "stale after descriptor-read implementation and driver change",
-    "promotion_pending": true
+    "state": "current",
+    "passed": true,
+    "tests": 228,
+    "seconds": 1823.13,
+    "receipt_identity": "sha256:b6d7329d67710bfbab7c4658333a26c98ee4216d97e2f40bcd4da0ee98098bbd",
+    "finalized_candidate_identity": "sha256:84024d79d87c08197d4ae3638af01a241d3c8ffa9b19cf4c803a8affbb705ce0",
+    "driver_implementation_identity": "sha256:be82990eed48623266e27522a5240cc771ed0ec6a66de4cffa7b52aef21f37b4",
+    "promotion": "litai project test-receipt update",
+    "verify_current": true
   }
 }

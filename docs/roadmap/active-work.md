@@ -30593,8 +30593,12 @@ member is fast. Descriptor-first no-follow reads now hash every member and compa
 descriptor/path identities. A new open-boundary symlink control reproduces the
 prior acceptance of a link to the original inode; the candidate refuses with
 and without a platform no-follow flag. Six focused controller and six native
-source-import cases pass. The full controller regression is running; clean
-installed-wheel, configured host receipt and canonical FreeBSD renewal remain
-pending. The prior 233-case receipt is stale after the driver change. A separate
+source-import cases pass. The uninterrupted controller regression passes 2,132 cases with 70 declared
+skips. The exact clean Linux wheel passes, and six binding controls pass from
+the installed FreeBSD prefix. A fresh complete configured host lifecycle passes
+228 tests and independent acceptance in 1,823.130 seconds. Its candidate is
+promoted through the supported command and verifies current; the preceding
+233-test receipt retains its original scope. Canonical installed FreeBSD SDK
+execution is running at the unchanged 3,600-second command budget. A separate
 directory-relative metadata probe was slower and was not adopted.
 No cached distribution success or expanded execution deadline is authorized.
