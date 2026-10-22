@@ -4696,6 +4696,7 @@ The earlier inventories below are historical.
 | Review | Retained scope | Landing state |
 | --- | --- | --- |
 | [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
+| [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Late arrival at `594fedf6`; full local/native and hosted qualification pending |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
@@ -30499,3 +30500,19 @@ which retains their exact public heads and their full histories. The combined
 branch still requires its own exact hosted CI before landing. Canonical installed
 public SDK execution, actual compiler SDK, native packaging and release admission
 remain open in their owning items; this controller/sample proof does not close them.
+
+### [ ] RETAINED-WIN-EXEC-001 — Qualify reviewed Windows retained executable intent
+
+- **GitHub issue:** [#114](https://github.com/jordanhubbard/literate-ai/issues/114)
+- **GitHub PR:** [#115](https://github.com/jordanhubbard/literate-ai/pull/115)
+
+- **Priority:** P0
+- **Owner:** Retained input, output admission and packaging executable intent
+- **Direction:** Reconcile late PR115 and issue114 during the requested merge pass.
+- **Conclusion:** The peer review reports a reproduced current-main Windows shard3 failure and 51 focused passes, one skip and 60 passing subtests. Full local and hosted matrices remain pending. Review sealed executable intent independently of native POSIX mode bits and compose the qualified fix with current SDK/PE custody before Windows admission.
+- **Depends on:** MERGE-STACK-001
+- **Implementation:**
+  - [ ] Review PR115 at its exact current head; retain its author-owned qualification boundary.
+  - [ ] Qualify and compose the fix without losing current native SDK or PE observation guards.
+- **Evidence:**
+  - [ ] Complete clean local regression, real Windows input/output/admission/package proof and green exact-head hosted CI before landing.
