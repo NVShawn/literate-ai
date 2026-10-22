@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Preserve reviewed executable intent when capturing and verifying retained inputs
+  on Windows. Carry verifier-owned output executable intent into sealed manifests
+  and packaging, while POSIX continues to require native execute permission.
+
 - Bind reviewed captured runtime directories to retained native SDK commands,
   preserving complete native dependency observations and SDK-owned placements.
   Reject ambient injection, shadowing, drift and revocation; retain captured

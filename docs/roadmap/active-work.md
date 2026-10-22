@@ -29168,6 +29168,8 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
+**Current audit:** The exception list is already empty in current main (ancestor `4ceedbe9`). Fresh staged OpenSpec installation reports five low findings and no high/critical findings; strict validation and documentation checks pass. Review #24 for closure against its original contract after confirming the landed dependency change; no exception restoration or dependency downgrade is proposed.
+
 ### [ ] RETAINED-CATALOG-001 — Bind complete retained input ownership to canonical Component catalogs
 
 - **GitHub issue:** [#74](https://github.com/jordanhubbard/literate-ai/issues/74)
@@ -30188,6 +30190,8 @@ hosted CI and canonical tree worker/live SDK integration remain open.
   - [x] Focused runtime, PE observer and adoption checks and the full local combined regression pass.
   - [ ] Current driver/documentation reviews and exact-head CI pass before landing; retain uncompleted native/package gates.
 
+**Windows integration renewal:** Composed code `49a7d52e` preserves #115 head `5faea3b9` by merge ancestry. A fresh uninterrupted six-worker full suite exits zero: 2,202 selected, 2,131 passed, 71 declared skips and no failures in 1,042.865 seconds. Focused retained checks pass 203 with four skips; all 12 descriptor-walk checks pass and the new executable-intent/hardlink/descriptor composition regression passes. Lint/format, layout/export, four strict OpenSpec changes, current driver/documentation reviews, documentation tooling and all 121 diagrams pass. The complete configured host lifecycle passes 226 tests; supported receipt promotion and `verify` pass. Current receipt: `sha256:5f0551e4738d04b9bc2dd17ba3f07bb9f02115e285b83be32394dddaf25364ff`; finalized candidate: `sha256:e7ea4dfdf355c07cf836393db20c12048d32a0edec8fcc62d723a2494ea64836`; reviewed driver: `sha256:eca0dd79ccc80f0cd33eb90c15d6989473049c2f45d6df9c9c5b853d9685c12e`. Earlier source-only and native checkpoints retain their scopes; exact combined hosted CI and landing remain required.
+
 ### [ ] REBUILD-ENTRY-001 — Normalize or safely reject Component file entry points in Standard rebuild
 
 - **Priority:** P1
@@ -30612,3 +30616,5 @@ remain open in their owning items; this controller/sample proof does not close t
   - [ ] Review and land PR #119 separately after #115; diagnose its current Linux CI failure before qualification.
 - **Evidence:**
   - [ ] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.
+
+**Review finding:** Exact-head Linux job `119840524271` in run `39783402916` fails the lifecycle driver review: `retained_project_execution.py` changed while the pin still names `c27617cb`. The contribution also projects ambient `SYSTEMROOT`, overlapping #110's already-bound system-context owner. Reconcile the production delta against the integrated custody path before re-reviewing and repinning; do not treat the failure as only an infrastructure retry.
