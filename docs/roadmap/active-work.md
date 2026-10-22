@@ -29925,3 +29925,18 @@ one unreachable endpoint and one worker with 735 MiB free. No jobs were sent to
 the unavailable workers and no data was deleted.
 
 The first full local regression was deliberately interrupted after 850 completed cases when concurrent PR #112 changed main. Its checkpoint is retained as partial evidence; the merged candidate requires a fresh full run.
+
+**SWIFT-DRIVER-MODE-001 combined-main local qualification:** Exact code
+`b6e36582` passes all 1,936 selected Python cases: 1,892 passes, 44 declared
+skips and zero failures in 765.817 seconds. The complete fresh host lifecycle
+passes 230 tests and independent acceptance, and supported receipt promotion
+succeeds. Current receipt:
+`sha256:93ea919ab6091e4b0bef38d2e54a02b8caf607c4cf8c5f7de301b97f1571403b`;
+finalized candidate:
+`sha256:e8a465c22569065501f73d056a235ce58ef4bdc16c0d5560e5d15430488e23f9`;
+reviewed driver:
+`sha256:64d7cb48a685fbba3c1c0d4d7c97edce79c718612c7cdde2b2f90590be114747`.
+`litai verify` passes authority and current receipt; three unconfigured gates
+skip. This proof remains scoped to PR105 plus merged main. MERGE-STACK-001
+separately composes PR110 and PR82 and requires its own current evidence and
+hosted matrix; none of this evidence is relabeled for that larger code closure.
