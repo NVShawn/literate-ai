@@ -8,6 +8,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import sys
 import tempfile
 from argparse import Namespace
@@ -16,6 +17,7 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
+from literate_ai._cache_lock import _is_windows, _windows_identity_matches
 from literate_ai.adapters.component_markdown import (
     parse_component_markdown,
     render_component_markdown,
@@ -105,6 +107,9 @@ from literate_ai.source_to_specification import (
     verify_review_attestation,
     verify_source_attestation,
 )
+from literate_ai.source_to_specification.inventory import (
+    inventory_matches_accepted_snapshot,
+)
 from literate_ai.source_to_specification.synthesis import (
     capability_contract_path,
     promoted_component_specification_projection,
@@ -161,6 +166,70 @@ def _read_json(path: str | Path) -> dict[str, Any]:
         raise CliFailure(
             "cli.invalid_json", f"could not read JSON input: {path}"
         ) from exc
+
+
+def _read_stable_bounded_regular_file(path: str | Path, *, maximum_bytes: int) -> bytes:
+    """Read one direct regular file without following or racing its pathname."""
+
+    candidate = Path(os.path.abspath(path))
+
+    def descriptor_signature(metadata: os.stat_result) -> tuple[int, ...]:
+        return (
+            metadata.st_dev,
+            metadata.st_ino,
+            metadata.st_mode,
+            metadata.st_size,
+            metadata.st_mtime_ns,
+            metadata.st_ctime_ns,
+        )
+
+    def named_file_matches(descriptor: int, opened: os.stat_result) -> bool:
+        named = candidate.lstat()
+        if not stat.S_ISREG(named.st_mode):
+            return False
+        if _is_windows() and (named.st_ino == 0 or opened.st_ino == 0):
+            return _windows_identity_matches(candidate, descriptor)
+        return (named.st_dev, named.st_ino) == (opened.st_dev, opened.st_ino)
+
+    descriptor: int | None = None
+    try:
+        flags = os.O_RDONLY
+        for name in ("O_BINARY", "O_CLOEXEC", "O_NOFOLLOW", "O_NONBLOCK"):
+            flags |= getattr(os, name, 0)
+        descriptor = os.open(candidate, flags)
+        opened = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(opened.st_mode)
+            or opened.st_size > maximum_bytes
+            or not named_file_matches(descriptor, opened)
+        ):
+            raise OSError
+        content = bytearray()
+        while len(content) <= maximum_bytes:
+            chunk = os.read(
+                descriptor,
+                min(64 * 1024, maximum_bytes + 1 - len(content)),
+            )
+            if not chunk:
+                break
+            content.extend(chunk)
+        final = os.fstat(descriptor)
+        if (
+            len(content) > maximum_bytes
+            or len(content) != opened.st_size
+            or descriptor_signature(final) != descriptor_signature(opened)
+            or not named_file_matches(descriptor, final)
+        ):
+            raise OSError
+    except OSError as exc:
+        raise CliFailure(
+            "qualification.rebind_migration_unavailable",
+            "prior project configuration must be one stable bounded regular file",
+        ) from exc
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+    return bytes(content)
 
 
 def _write_new_json(path: Path, value: object) -> None:
@@ -2209,6 +2278,7 @@ def _complete_standard_lifecycle_qualification(
     component_root: Path,
     source: Path,
     profile: LocalQualificationProfile,
+    qualification_authority: Any,
     authority_store: Any,
     authority_projection: Any,
     locked_snapshot: Any,
@@ -2221,9 +2291,13 @@ def _complete_standard_lifecycle_qualification(
     workflow_identity: ContentIdentity,
     routing_identity: ContentIdentity,
     output_path: Path,
+    recertify_current_qualified: bool = False,
+    prior_project_configuration: bytes | None = None,
+    allow_legacy_inventory_policy: bool = False,
 ) -> tuple[dict[str, Any], int]:
     """Run and admit only the filesystem Standard lifecycle qualification contract."""
 
+    from literate_ai.adapters.authority import AuthorityProjectionStoreError
     from literate_ai.adapters.generation_preparation import (
         FilesystemLockedGenerationApplicationAdapter,
         GenerationPreparationError,
@@ -2248,6 +2322,7 @@ def _complete_standard_lifecycle_qualification(
         ComponentChangeSurface,
         StandardProjectLifecycleDriver,
     )
+    from literate_ai.projects import PinnedInputClosureError
     from literate_ai.source_to_specification import (
         QualificationLifecyclePlan,
         VerifiedSourcePromotionEvidence,
@@ -2326,6 +2401,7 @@ def _complete_standard_lifecycle_qualification(
             scratch_root=scratch_root,
             retain_library_products=retained_store is not None,
             pipeline_model=getattr(args, "model", None),
+            allow_legacy_inventory_policy=allow_legacy_inventory_policy,
         )
         run_identities = tuple(
             sorted(
@@ -2369,6 +2445,7 @@ def _complete_standard_lifecycle_qualification(
                 "qualification result differs from the resolved Standard binding",
             )
         if retained_store is not None:
+            qualification_authority.require_unchanged()
             from literate_ai.adapters.evidence_storage import FileSystemEvidenceStore
             from literate_ai.adapters.qualification_archive import (
                 encode_qualification_archive,
@@ -2419,6 +2496,8 @@ def _complete_standard_lifecycle_qualification(
             getattr(exc, "code", "qualification.lifecycle_failed"),
             getattr(exc, "message", str(exc)),
         ) from exc
+    except PinnedInputClosureError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
     except CliFailure:
         raise
     except (OSError, ValueError) as exc:
@@ -2437,7 +2516,15 @@ def _complete_standard_lifecycle_qualification(
     except FilesystemQualificationError as exc:
         raise CliFailure(exc.code, exc.message) from exc
     locked_snapshot.require_unchanged()
-    if inventory_source(source).identity != source_snapshot_identity.uri:
+    try:
+        qualification_authority.require_unchanged()
+    except PinnedInputClosureError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+    if not inventory_matches_accepted_snapshot(
+        inventory_source(source),
+        source_snapshot_identity.uri,
+        allow_legacy_policy=allow_legacy_inventory_policy,
+    ):
         raise CliFailure(
             "qualification.source_changed",
             "source baseline changed during lifecycle qualification",
@@ -2456,7 +2543,9 @@ def _complete_standard_lifecycle_qualification(
         )
     try:
         verified_promotion = SourcePromotionService().verify_evidence(
-            project.root, current_projection
+            project.root,
+            current_projection,
+            prior_project_configuration=prior_project_configuration,
         )
     except (SourceToSpecificationError, ValueError) as exc:
         raise CliFailure(
@@ -2473,6 +2562,7 @@ def _complete_standard_lifecycle_qualification(
         ContentIdentity.parse_uri(component_audit.materialized_tree_identity),
         qualification_identity,
     )
+    migration = getattr(verified_promotion, "standard_rebind_migration", None)
     verified = VerifiedSourcePromotionEvidence(
         verified_promotion.promotion_input_audits,
         authority_projection=current_projection,
@@ -2487,7 +2577,30 @@ def _complete_standard_lifecycle_qualification(
         inverse_evidence_custody_identity=(
             verified_promotion.inverse_evidence_custody_identity
         ),
+        standard_rebind_migration=migration,
     )
+    if migration is not None:
+        migration_root = project.root / "provenance" / "qualification-rebind"
+        migration_root.mkdir(parents=True, exist_ok=True)
+        if migration_root.is_symlink() or not migration_root.is_dir():
+            raise CliFailure(
+                "qualification.rebind_migration_path_unsafe",
+                "qualification rebind migration root must be a direct directory",
+            )
+        migration_path = migration_root / f"{migration.identity.digest}.json"
+        migration_bytes = _json_text(migration.to_dict()).encode()
+        if migration_path.exists():
+            if (
+                migration_path.is_symlink()
+                or migration_path.read_bytes() != migration_bytes
+            ):
+                raise CliFailure(
+                    "qualification.rebind_migration_conflict",
+                    "qualification rebind migration identity is occupied by "
+                    "different bytes",
+                )
+        else:
+            _write_new_json(migration_path, migration.to_dict())
     qualification_root = project.root / "provenance" / "qualification"
     qualification_root.mkdir(parents=True, exist_ok=True)
     if qualification_root.is_symlink() or not qualification_root.is_dir():
@@ -2509,10 +2622,20 @@ def _complete_standard_lifecycle_qualification(
     else:
         _write_new_json(qualification_path, qualification.to_dict())
     try:
-        authority_store.append_qualified(locked_snapshot.authority, verified)
-        qualified_projection = authority_store.current(component_coordinate)
+        if recertify_current_qualified:
+            qualified_projection = authority_store.recertify_qualified(
+                locked_snapshot.authority, verified
+            )
+        else:
+            authority_store.append_qualified(locked_snapshot.authority, verified)
+            qualified_projection = authority_store.current(component_coordinate)
     except LockedSourcePromotionError as exc:
         raise CliFailure(exc.code, exc.message) from exc
+    except AuthorityProjectionStoreError as exc:
+        raise CliFailure(
+            "qualification.authority_changed",
+            "Component authority changed or could not record recertification",
+        ) from exc
     record = {
         "schema": "literate-ai/local-regenerative-qualification@2",
         "component_coordinate": component_coordinate,
@@ -3218,7 +3341,6 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 "qualification.profile_untrusted",
                 "qualification profile must be a regular file inside the project",
             )
-        profile = LocalQualificationProfile.from_dict(_read_json(profile_path))
         from literate_ai.adapters.authority import (
             AuthorityProjectionStoreError,
             FileAuthorityProjectionStore,
@@ -3229,6 +3351,9 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         )
         from literate_ai.adapters.project_initialization import (
             flavor_selector_directory,
+        )
+        from literate_ai.adapters.qualification_authority import (
+            read_current_qualification_authority,
         )
         from literate_ai.application import SourcePromotionService
         from literate_ai.authority import ComponentAuthorityLifecycle
@@ -3262,6 +3387,34 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 "qualification.authority_projection_required",
                 "qualification requires a valid Component authority projection",
             ) from exc
+        recertify_current_qualified = bool(args.recertify_current_qualified)
+        prior_project_configuration = None
+        prior_configuration_path = getattr(args, "prior_project_configuration", None)
+        if prior_configuration_path is not None:
+            if not recertify_current_qualified:
+                raise CliFailure(
+                    "qualification.rebind_migration_unexpected",
+                    "--prior-project-configuration requires current-qualified "
+                    "recertification",
+                )
+            prior_project_configuration = _read_stable_bounded_regular_file(
+                prior_configuration_path,
+                maximum_bytes=1024 * 1024,
+            )
+            if (
+                not prior_project_configuration
+                or len(prior_project_configuration) > 1024 * 1024
+            ):
+                raise CliFailure(
+                    "qualification.rebind_migration_invalid",
+                    "prior project configuration has an invalid size",
+                )
+        if recertify_current_qualified and args.retained_evidence_store is None:
+            raise CliFailure(
+                "qualification.retained_store_required",
+                "recertifying current qualified evidence requires "
+                "--retained-evidence-store",
+            )
         authority_status = ComponentAuthorityLifecycle.status(
             authority_projection,
             component_revision_identity=component_revision_identity,
@@ -3271,22 +3424,46 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             for blocker in authority_status.blockers
             if blocker != "regenerative-qualification-required"
         )
+        required_state = (
+            ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE
+            if recertify_current_qualified
+            else ComponentAuthorityState.DERIVED_SOURCE_RETAINED
+        )
+        state_invalid = authority_status.recorded_state is not required_state
+        if not recertify_current_qualified:
+            state_invalid = state_invalid or bool(stale_blockers)
         if (
-            authority_status.recorded_state
-            is not ComponentAuthorityState.DERIVED_SOURCE_RETAINED
-            or stale_blockers
+            state_invalid
             or authority_projection.specification_set_identity
             != root_node.revision.specification_set_identity
         ):
+            expected = (
+                "current regeneratively qualified authority"
+                if recertify_current_qualified
+                else "current retained-source authority after human acceptance"
+            )
             raise CliFailure(
                 "qualification.authority_state_invalid",
-                "qualification requires current retained-source authority after "
-                "human acceptance",
+                f"qualification requires {expected}",
             )
+        try:
+            qualification_authority = read_current_qualification_authority(
+                project.root,
+                profile_path.relative_to(project.root).as_posix(),
+                source_snapshot_identity=authority_projection.source_snapshot_identity,
+            )
+        except (OSError, TypeError, ValueError) as exc:
+            raise CliFailure(
+                "qualification.profile_untrusted",
+                "qualification profile is invalid or unavailable",
+            ) from exc
+        profile = qualification_authority.profile
         promotion_service = SourcePromotionService()
         try:
             verified_promotion = promotion_service.verify_evidence(
-                project.root, authority_projection
+                project.root,
+                authority_projection,
+                prior_project_configuration=prior_project_configuration,
             )
             component_audit = verified_promotion.audit_containing(
                 (component_root.relative_to(project.root) / "component.md").as_posix()
@@ -3339,12 +3516,19 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             )
         inventory = inventory_source(source)
         source_snapshot_id = authority_projection.source_snapshot_identity.uri
+        rebind_migration = getattr(
+            verified_promotion, "standard_rebind_migration", None
+        )
         specification_set_id = (
             None
             if authority_projection.specification_set_identity is None
             else authority_projection.specification_set_identity.uri
         )
-        if inventory.identity != source_snapshot_id:
+        if not inventory_matches_accepted_snapshot(
+            inventory,
+            source_snapshot_id,
+            allow_legacy_policy=rebind_migration is not None,
+        ):
             raise CliFailure(
                 "qualification.source_mismatch",
                 "source baseline does not match the accepted source snapshot",
@@ -3459,6 +3643,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             component_root=component_root,
             source=source,
             profile=profile,
+            qualification_authority=qualification_authority,
             authority_store=authority_store,
             authority_projection=authority_projection,
             locked_snapshot=locked_snapshot,
@@ -3471,6 +3656,9 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             workflow_identity=workflow_identity,
             routing_identity=routing_identity,
             output_path=output_path,
+            recertify_current_qualified=recertify_current_qualified,
+            prior_project_configuration=prior_project_configuration,
+            allow_legacy_inventory_policy=rebind_migration is not None,
         )
 
     if command == "refresh":
@@ -3725,6 +3913,21 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
         help=(
             "explicit local immutable evidence store for captured library packages "
             "and qualification records; does not authorize importer admission"
+        ),
+    )
+    qualify.add_argument(
+        "--recertify-current-qualified",
+        action="store_true",
+        help=(
+            "rerun and retain evidence for a qualified Component, atomically "
+            "appending invalidation and fresh qualification history"
+        ),
+    )
+    qualify.add_argument(
+        "--prior-project-configuration",
+        help=(
+            "exact pre-rebind literate.project.json whose bytes match the historical "
+            "promotion audit; accepted only for current-qualified recertification"
         ),
     )
     qualify.add_argument("--allow-host-execution", action="store_true")

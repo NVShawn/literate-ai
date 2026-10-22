@@ -58,9 +58,17 @@ class SourcePromotionService:
         return assess_source_exclusion(audit, source_inventory)
 
     def verify_evidence(
-        self, project_root: Path, projection: ComponentAuthorityProjection
+        self,
+        project_root: Path,
+        projection: ComponentAuthorityProjection,
+        *,
+        prior_project_configuration: bytes | None = None,
     ) -> VerifiedSourcePromotionEvidence:
-        return verify_source_promotion_evidence(project_root, projection)
+        return verify_source_promotion_evidence(
+            project_root,
+            projection,
+            prior_project_configuration=prior_project_configuration,
+        )
 
     def qualify_locked(
         self,
