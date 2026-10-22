@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Load MAC contract schema validation only when its project command is selected,
+  avoiding optional URI parser initialization in ordinary project command startup.
+
 - Update the documentation tool lock to patched DOMPurify 3.4.17 while keeping
   critical/high dependency audit gates enforced.
 

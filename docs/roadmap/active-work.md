@@ -30654,3 +30654,26 @@ URL and integrity, from 3.4.16 to 3.4.17. A clean installation and dependency ga
 pass without exceptions; all 21 documentation-tool tests and all 121 diagrams
 across 625 Markdown files pass on the controller. Native Windows gate renewal
 remains required after composition. No Python production code changes.
+
+
+### [ ] CLI-IMPORT-001 — Defer optional MAC schema parser initialization
+
+- **Owner:** framework CLI project command dispatch and MAC contract projection
+- **GitHub issue:** [#121](https://github.com/jordanhubbard/literate-ai/issues/121)
+- **Direction:** Ordinary project commands must not initialize optional MAC schema parsers.
+- **Conclusion:** The native installed-wheel profile attributes 235.62 seconds to
+  importing the MAC projector, including 228.89 seconds and 39 parser constructors
+  in RFC3987 grammar initialization. Load that adapter only for `project mac-contract`.
+  Keep strict BOM validation unchanged. Profiling overhead is included; these timings
+  do not establish an unprofiled speedup or explain the entire full-gate timeout.
+- **Implementation and evidence:**
+  - [x] Move the optional import into the MAC command handler.
+  - [x] Prove ordinary project CLI import avoids the adapter and grammar in a fresh process.
+  - [x] Prove MAC command dispatch and strict malformed-BOM rejection remain intact.
+  - [x] Measure native import startup: one baseline/deferred pair took 7.48/2.91 seconds;
+        installed bytes stayed unchanged. See [the diagnostic record](../../verification/optional-project-import-development.json).
+  - [ ] Renew exact-candidate native wheel/full qualification.
+- **Next action:** qualify a wheel built from the exact candidate in a fresh native
+  checkout, preserving the previous gate's temporary evidence. Two focused tests and
+  seven CycloneDX tests pass through `make python-check`; the fresh-process regression
+  fails against the original eager import. Catalog costs and full-gate renewal remain open.
