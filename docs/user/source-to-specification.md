@@ -327,6 +327,15 @@ qualified projection; retained-source authority is never exposed as current. Use
 returned archive reference for the reviewed retained-library binding. Archive
 publication alone does not authorize importer admission.
 
+If the capture command was introduced by a newer Standard wheel, preserve the exact
+pre-rebind `literate.project.json` before applying the reviewed Standard rebind. Pass
+that file with `--prior-project-configuration PATH`. Literate AI requires its bytes to
+match the historical promotion audit, requires the current manifest to differ only in
+the Standard lifecycle binding and its derived test-receipt runner, and records the
+bridge as immutable authority evidence. Any Component, Flavor, skill, workflow,
+routing, policy, receipt contract, or other project-configuration change refuses the
+migration. The prior file is evidence input; it is not restored or made current.
+
 `qualify` independently resolves the exact forward recipe, creates at least two empty
 workspaces, forces real `litai generate` calls, runs the profile's build and current-test
 commands, executes baseline and generated applications on the profile's JSON probes,

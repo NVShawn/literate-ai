@@ -200,6 +200,23 @@ promotion audit, profile, verifier, or policy refuses recertification. As with i
 qualification, a later authority failure may leave an unreferenced immutable archive
 or qualification record; neither authorizes importer admission.
 
+When a newer Standard distribution supplies the recertification command, the operator
+must retain the exact pre-rebind project manifest and supply it through
+`--prior-project-configuration`. The migration evidence binds those historical bytes,
+the old qualified projection, the promotion audit, and the current manifest. Only the
+framework distribution identity and the mechanically derived Standard receipt runner
+may differ; the Standard policy and every other project field must remain identical.
+If the accepted source snapshot used `static-checkout-inventory@1`, the current reader
+supports snapshots whose current inventory entries are unchanged and differ only in
+the policy identifier: it derives the candidate legacy identity by substituting the
+`@1` identifier. The candidate must equal the accepted snapshot. A source tree whose
+classification or entries differ under current inventory semantics fails closed, as
+does any changed source, rather than claiming general reproduction of historical
+`@1` behavior.
+The migration record is immutable evidence on the recertified projections, so later
+retained-library verification can reopen the historical audit without treating the
+execution-authority change as unreviewed generation-input drift.
+
 Before exposing retained captures, the producer rechecks its prepared authority
 snapshot, installed Standard distribution/policy and verifier-owned acceptance
 oracle. Final qualification admission repeats those checks and reopens the current
