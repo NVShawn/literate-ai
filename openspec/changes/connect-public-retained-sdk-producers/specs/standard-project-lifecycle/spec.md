@@ -79,6 +79,7 @@ NOT silently omit a missing recorded member. Avoiding preliminary existence
 scans SHALL preserve canonical member identities, non-editable selection, current
 source and revocation checks, and existing non-RECORD distribution support.
 
+
 #### Scenario: Recorded member disappears
 
 - **WHEN** an installed wheel records a selected member that is missing or unavailable
@@ -95,3 +96,15 @@ source and revocation checks, and existing non-RECORD distribution support.
 - **WHEN** selected member bytes change between observations
 - **THEN** the next observation SHALL reflect the changed bytes or refuse
 - **AND** an earlier successful observation SHALL confer no cached authority
+
+### Requirement: Stable descriptor-bound member reads
+
+Selected members SHALL remain regular files bound to their opened descriptors
+through observation. Member reads SHALL verify descriptor and named-path
+stability and SHALL NOT reuse member observations across calls.
+
+#### Scenario: Payload path redirects during open
+
+- **WHEN** a recorded member becomes a symlink at the open boundary
+- **THEN** observation SHALL refuse, even if its target preserves the earlier inode
+- **AND** refusal SHALL also hold on platforms without a no-follow open flag

@@ -30585,3 +30585,16 @@ The complete configured framework host lifecycle now passes 233 cases in
 candidate is promoted through `litai project test-receipt update`; `litai verify`
 confirms the receipt is current. Canonical installed FreeBSD SDK qualification
 and exact-head hosted CI remain required before landing the performance repair.
+
+A 300-second diagnostic of actual authorized execution records 202,949 stat
+calls and 19 full distribution observations. Broad alternating metadata probes
+find equivalent pathname APIs similarly costly; repeated access to one warm
+member is fast. Descriptor-first no-follow reads now hash every member and compare current
+descriptor/path identities. A new open-boundary symlink control reproduces the
+prior acceptance of a link to the original inode; the candidate refuses with
+and without a platform no-follow flag. Six focused controller and six native
+source-import cases pass. The full controller regression is running; clean
+installed-wheel, configured host receipt and canonical FreeBSD renewal remain
+pending. The prior 233-case receipt is stale after the driver change. A separate
+directory-relative metadata probe was slower and was not adopted.
+No cached distribution success or expanded execution deadline is authorized.

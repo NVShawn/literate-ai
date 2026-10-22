@@ -5,8 +5,10 @@ from __future__ import annotations
 import csv
 import io
 import json
+import os
 import tempfile
 import unittest
+from functools import partial
 from importlib.metadata import PathDistribution
 from pathlib import Path, PurePosixPath
 from unittest import mock
@@ -236,6 +238,50 @@ class StandardLifecycleBindingAdapterTests(unittest.TestCase):
         self.assertEqual(
             caught.exception.code, "standard_binding.distribution_payload_incomplete"
         )
+
+    def test_member_redirected_to_its_original_inode_at_open_refuses(self) -> None:
+        for nofollow in sorted({0, getattr(os, "O_NOFOLLOW", 0)}):
+            with self.subTest(nofollow=nofollow):
+                distribution = FakeDistribution(self.root / f"open-race-{nofollow}")
+                member = distribution.locations["literate_ai/__init__.py"]
+                backing = member.with_name("saved-member.py")
+                original_io_open = io.open
+                original_os_open = os.open
+
+                def redirected(
+                    open_function, file, *args, member=member, backing=backing, **kwargs
+                ):
+                    if (
+                        isinstance(file, (str, os.PathLike))
+                        and Path(file) == member
+                        and not backing.exists()
+                    ):
+                        member.rename(backing)
+                        member.symlink_to(backing.name)
+                    return open_function(file, *args, **kwargs)
+
+                with (
+                    mock.patch.object(os, "O_NOFOLLOW", nofollow, create=True),
+                    mock.patch.object(
+                        io,
+                        "open",
+                        side_effect=partial(redirected, original_io_open),
+                    ),
+                    mock.patch.object(
+                        os,
+                        "open",
+                        side_effect=partial(redirected, original_os_open),
+                    ),
+                ):
+                    with self.assertRaises(StandardLifecycleBindingError) as caught:
+                        observe(distribution)
+                self.assertIn(
+                    caught.exception.code,
+                    {
+                        "standard_binding.distribution_payload_unsafe",
+                        "standard_binding.distribution_changed",
+                    },
+                )
 
 
 if __name__ == "__main__":

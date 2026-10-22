@@ -8,12 +8,15 @@ ambient import location or the package version alone.
 from __future__ import annotations
 
 import csv
+import errno
 import hashlib
 import importlib.metadata
 import importlib.resources
 import io
 import json
+import os
 import re
+import stat
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from pathlib import Path, PurePosixPath
@@ -283,30 +286,59 @@ def _logical_payload_path(entry: PurePosixPath) -> str | None:
 
 
 def _read_stable_member(path: Path) -> tuple[int, str]:
-    if path.is_symlink():
-        raise StandardLifecycleBindingError(
-            "standard_binding.distribution_payload_unsafe",
-            "installed framework payload contains a symbolic link",
-        )
+    nofollow = getattr(os, "O_NOFOLLOW", 0)
+    nonblock = getattr(os, "O_NONBLOCK", 0)
+    flags = os.O_RDONLY | nofollow | nonblock | getattr(os, "O_BINARY", 0)
+    prior = None
     try:
-        before = path.stat()
-        if not path.is_file():
-            raise OSError
-        digest = hashlib.sha256()
-        observed_size = 0
-        with path.open("rb") as stream:
-            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
-                observed_size += len(chunk)
-                digest.update(chunk)
-        after = path.stat()
+        if not nofollow:
+            prior = os.lstat(path)
+            if stat.S_ISLNK(prior.st_mode):
+                raise StandardLifecycleBindingError(
+                    "standard_binding.distribution_payload_unsafe",
+                    "installed framework payload contains a symbolic link",
+                )
+            if not stat.S_ISREG(prior.st_mode):
+                raise OSError
+        descriptor = os.open(path, flags)
+        try:
+            before = os.fstat(descriptor)
+            if not stat.S_ISREG(before.st_mode):
+                raise OSError
+            if nonblock:
+                os.set_blocking(descriptor, True)
+            digest = hashlib.sha256()
+            observed_size = 0
+            with os.fdopen(descriptor, "rb", closefd=False) as stream:
+                for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                    observed_size += len(chunk)
+                    digest.update(chunk)
+            after = os.fstat(descriptor)
+            named_after = os.lstat(path)
+        finally:
+            os.close(descriptor)
     except OSError as exc:
+        if nofollow and exc.errno in (errno.ELOOP, errno.EMLINK):
+            raise StandardLifecycleBindingError(
+                "standard_binding.distribution_payload_unsafe",
+                "installed framework payload contains a symbolic link",
+            ) from exc
         raise StandardLifecycleBindingError(
             "standard_binding.distribution_payload_unavailable",
             "installed framework payload member is unavailable",
         ) from exc
     stable_fields = ("st_dev", "st_ino", "st_size", "st_mtime_ns")
-    if observed_size != before.st_size or any(
-        getattr(before, field) != getattr(after, field) for field in stable_fields
+    observations = (
+        (after, named_after) if prior is None else (prior, after, named_after)
+    )
+    if (
+        observed_size != before.st_size
+        or not stat.S_ISREG(named_after.st_mode)
+        or any(
+            getattr(before, field) != getattr(observed, field)
+            for observed in observations
+            for field in stable_fields
+        )
     ):
         raise StandardLifecycleBindingError(
             "standard_binding.distribution_changed",
