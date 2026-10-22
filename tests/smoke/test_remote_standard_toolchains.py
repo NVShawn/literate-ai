@@ -2,8 +2,6 @@
 
 import unittest
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
-from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
@@ -38,15 +36,13 @@ from tests.support.fixtures_test_standard_toolchain_observations import observat
 REMOTE_TOOLCHAIN_TEST_DEADLINE = timedelta(hours=24) - timedelta(seconds=1)
 
 
-def _retry_once_after_clock_correction(root: Path, exercise) -> None:
-    attempt = 1
+def _retry_once_after_clock_correction(exercise) -> None:
     try:
-        exercise(root / f"project-{attempt}")
+        exercise()
     except ActionWireError as exc:
         if exc.code != "action_wire.expired":
             raise
-        attempt += 1
-        exercise(root / f"project-{attempt}")
+        exercise()
 
 
 def _require_observation_changed(operation) -> None:
@@ -97,29 +93,11 @@ class RemoteStandardToolchainTests(unittest.TestCase):
                 effects=[error.code if error else None for error in effects]
             ):
                 if raised is None:
-                    _retry_once_after_clock_correction(Path("root"), exercise)
+                    _retry_once_after_clock_correction(exercise)
                 else:
                     with self.assertRaisesRegex(ActionWireError, str(raised)):
-                        _retry_once_after_clock_correction(Path("root"), exercise)
+                        _retry_once_after_clock_correction(exercise)
                 self.assertEqual(exercise.call_count, calls)
-                self.assertEqual(
-                    [call.args[0] for call in exercise.call_args_list],
-                    [Path("root/project-1"), Path("root/project-2")][:calls],
-                )
-
-    def test_clock_correction_retry_rebuilds_snapshot_in_fresh_root(self):
-        with TemporaryDirectory() as temporary:
-            roots = []
-
-            def exercise(project_root: Path) -> None:
-                projection_fixture._locked_snapshot(project_root)
-                roots.append(project_root)
-                if len(roots) == 1:
-                    raise ActionWireError("action_wire.expired", "expired")
-
-            _retry_once_after_clock_correction(Path(temporary), exercise)
-
-        self.assertEqual([root.name for root in roots], ["project-1", "project-2"])
 
     def test_observation_change_boundary_does_not_swallow_expiry(self):
         _require_observation_changed(
@@ -179,8 +157,20 @@ class RemoteStandardToolchainTests(unittest.TestCase):
         fixture.environment["LITAI_ACTION_WORKER_IDENTITY"] = (
             fixture.worker.identity.uri
         )
+        # Snapshot preparation is controller-local work and can take minutes under
+        # a saturated hosted runner. Complete it before starting the bounded action
+        # authority so the deadline covers only worker admission and observation.
+        bootstrap_hardware = probe_command_hardware(
+            fixture.worker,
+            timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
+            cwd=fixture.root,
+            environment=fixture.environment,
+        )
+        _, locked, execution = projection_fixture._locked_snapshot(
+            fixture.root / "project", platform=bootstrap_hardware.os_family
+        )
 
-        def exercise(project_root: Path) -> None:
+        def exercise() -> None:
             environment = dict(fixture.environment)
             hardware = probe_command_hardware(
                 fixture.worker,
@@ -205,9 +195,7 @@ class RemoteStandardToolchainTests(unittest.TestCase):
                 environment=environment,
             )
             consumer = RemoteStandardToolchains.from_admission(pool, pool.workers[0])
-            _, locked, execution = projection_fixture._locked_snapshot(
-                project_root, platform=consumer.platform
-            )
+            self.assertEqual(consumer.platform, bootstrap_hardware.os_family)
             with patch.object(
                 LocalComponentToolBinding,
                 "from_observed_toolchain",
@@ -240,4 +228,4 @@ class RemoteStandardToolchainTests(unittest.TestCase):
         # worker starts. Production must reject that expired authority. A single
         # fresh in-contract attempt then proves the integration path against the
         # corrected clock; any second expiry or other error fails.
-        _retry_once_after_clock_correction(fixture.root, exercise)
+        _retry_once_after_clock_correction(exercise)
