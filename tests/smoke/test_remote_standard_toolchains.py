@@ -2,7 +2,9 @@
 
 import unittest
 from datetime import UTC, datetime, timedelta
-from unittest.mock import patch
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import Mock, patch
 
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
 from literate_ai.adapters.action_capabilities import ActionWorkerCapabilities
@@ -36,6 +38,27 @@ from tests.support.fixtures_test_standard_toolchain_observations import observat
 REMOTE_TOOLCHAIN_TEST_DEADLINE = timedelta(hours=24) - timedelta(seconds=1)
 
 
+def _retry_once_after_clock_correction(root: Path, exercise) -> None:
+    attempt = 1
+    try:
+        exercise(root / f"project-{attempt}")
+    except ActionWireError as exc:
+        if exc.code != "action_wire.expired":
+            raise
+        attempt += 1
+        exercise(root / f"project-{attempt}")
+
+
+def _require_observation_changed(operation) -> None:
+    try:
+        operation()
+    except ActionWireError as exc:
+        if exc.code != "action_tools.observation_changed":
+            raise
+    else:
+        raise AssertionError("live worker observation unexpectedly remained current")
+
+
 def snapshot(*tools):
     inventory = StandardToolObservations(
         "linux", tuple(sorted(tools, key=lambda item: item.role))
@@ -61,6 +84,63 @@ def snapshot(*tools):
 
 
 class RemoteStandardToolchainTests(unittest.TestCase):
+    def test_clock_correction_retry_is_exactly_once_and_expiry_only(self):
+        expired = ActionWireError("action_wire.expired", "expired")
+        other = ActionWireError("action_wire.invalid", "invalid")
+        for effects, calls, raised in (
+            ([expired, None], 2, None),
+            ([other], 1, other),
+            ([expired, expired], 2, expired),
+        ):
+            exercise = Mock(side_effect=effects)
+            with self.subTest(
+                effects=[error.code if error else None for error in effects]
+            ):
+                if raised is None:
+                    _retry_once_after_clock_correction(Path("root"), exercise)
+                else:
+                    with self.assertRaisesRegex(ActionWireError, str(raised)):
+                        _retry_once_after_clock_correction(Path("root"), exercise)
+                self.assertEqual(exercise.call_count, calls)
+                self.assertEqual(
+                    [call.args[0] for call in exercise.call_args_list],
+                    [Path("root/project-1"), Path("root/project-2")][:calls],
+                )
+
+    def test_clock_correction_retry_rebuilds_snapshot_in_fresh_root(self):
+        with TemporaryDirectory() as temporary:
+            roots = []
+
+            def exercise(project_root: Path) -> None:
+                projection_fixture._locked_snapshot(project_root)
+                roots.append(project_root)
+                if len(roots) == 1:
+                    raise ActionWireError("action_wire.expired", "expired")
+
+            _retry_once_after_clock_correction(Path(temporary), exercise)
+
+        self.assertEqual([root.name for root in roots], ["project-1", "project-2"])
+
+    def test_observation_change_boundary_does_not_swallow_expiry(self):
+        _require_observation_changed(
+            Mock(
+                side_effect=ActionWireError(
+                    "action_tools.observation_changed", "changed"
+                )
+            )
+        )
+        for error in (
+            ActionWireError("action_wire.expired", "expired"),
+            ActionWireError("action_tools.constraint_mismatch", "wrong failure"),
+        ):
+            with (
+                self.subTest(code=error.code),
+                self.assertRaisesRegex(ActionWireError, str(error)),
+            ):
+                _require_observation_changed(Mock(side_effect=error))
+        with self.assertRaisesRegex(AssertionError, "unexpectedly remained current"):
+            _require_observation_changed(Mock())
+
     def test_commands_are_exact_data_and_never_resolved_against_controller_path(self):
         consumer = RemoteStandardToolchains(
             snapshot(observation()), require_current=lambda: None
@@ -99,60 +179,65 @@ class RemoteStandardToolchainTests(unittest.TestCase):
         fixture.environment["LITAI_ACTION_WORKER_IDENTITY"] = (
             fixture.worker.identity.uri
         )
-        hardware = probe_command_hardware(
-            fixture.worker,
-            timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
-            cwd=fixture.root,
-            environment=fixture.environment,
-        )
-        # This real integration path performs repeated capability and dependency
-        # observations. GitHub's hosted Windows clock can synchronize forward by
-        # almost 23 hours after Python starts, so use the contract's bounded maximum
-        # while remaining strictly below its one-day ceiling. Explicit expiry
-        # coverage uses separate already-expired deadlines.
-        deadline = ActionDispatchDeadline(
-            datetime.now(UTC) + REMOTE_TOOLCHAIN_TEST_DEADLINE
-        )
-        catalog = ExecutionWorkerCatalog((fixture.worker,))
-        pool = CommandActionWorkerPool(
-            lambda: catalog,
-            lambda: WorkerHardwareObservationCatalog((hardware,)),
-            lambda worker: canonical_identity({"healthy": worker.identity.uri}),
-            deadline,
-            phase=LifecycleActionKind.INDEX,
-            source_handoff="filesystem-cas",
-            target_profile="host",
-            maximum_hardware_age=REMOTE_TOOLCHAIN_TEST_DEADLINE,
-            cwd=fixture.root,
-            environment=fixture.environment,
-        )
-        consumer = RemoteStandardToolchains.from_admission(pool, pool.workers[0])
-        _, locked, execution = projection_fixture._locked_snapshot(
-            fixture.root / "project", platform=consumer.platform
-        )
-        with patch.object(
-            LocalComponentToolBinding,
-            "from_observed_toolchain",
-            side_effect=AssertionError("controller launcher"),
-        ):
-            closure = project_remote_standard_toolchain_closure(
-                locked, execution, pool, pool.workers[0]
+
+        def exercise(project_root: Path) -> None:
+            environment = dict(fixture.environment)
+            hardware = probe_command_hardware(
+                fixture.worker,
+                timeout_seconds=HARDWARE_PROBE_TIMEOUT_SECONDS,
+                cwd=fixture.root,
+                environment=environment,
             )
-            self.assertEqual(closure.tool_bindings, ())
-            self.assertTrue(closure.dependency_observation.components)
-            closure.require_unchanged()
-        with patch.object(
-            LocalComponentToolBinding,
-            "require_unchanged",
-            side_effect=AssertionError("controller tool access"),
-        ):
-            tool = consumer.discover(
-                "python", ToolchainConstraint("python", minimum_version=(3, 11)), {}
+            deadline = ActionDispatchDeadline(
+                datetime.now(UTC) + REMOTE_TOOLCHAIN_TEST_DEADLINE
             )
+            catalog = ExecutionWorkerCatalog((fixture.worker,))
+            pool = CommandActionWorkerPool(
+                lambda: catalog,
+                lambda: WorkerHardwareObservationCatalog((hardware,)),
+                lambda worker: canonical_identity({"healthy": worker.identity.uri}),
+                deadline,
+                phase=LifecycleActionKind.INDEX,
+                source_handoff="filesystem-cas",
+                target_profile="host",
+                maximum_hardware_age=REMOTE_TOOLCHAIN_TEST_DEADLINE,
+                cwd=fixture.root,
+                environment=environment,
+            )
+            consumer = RemoteStandardToolchains.from_admission(pool, pool.workers[0])
+            _, locked, execution = projection_fixture._locked_snapshot(
+                project_root, platform=consumer.platform
+            )
+            with patch.object(
+                LocalComponentToolBinding,
+                "from_observed_toolchain",
+                side_effect=AssertionError("controller launcher"),
+            ):
+                closure = project_remote_standard_toolchain_closure(
+                    locked, execution, pool, pool.workers[0]
+                )
+                self.assertEqual(closure.tool_bindings, ())
+                self.assertTrue(closure.dependency_observation.components)
+                closure.require_unchanged()
+            with patch.object(
+                LocalComponentToolBinding,
+                "require_unchanged",
+                side_effect=AssertionError("controller tool access"),
+            ):
+                tool = consumer.discover(
+                    "python",
+                    ToolchainConstraint("python", minimum_version=(3, 11)),
+                    {},
+                )
+                tool.require_unchanged()
+            pool.environment["BUILD_SETTING"] = "changed"
+            # Discovery reads keep the cheap admission check; the closure guard
+            # probes the worker's live profile before trusting its dependencies.
             tool.require_unchanged()
-        pool.environment["BUILD_SETTING"] = "changed"
-        # Discovery reads keep the cheap admission check; the closure guard
-        # probes the worker's live profile before trusting its dependencies.
-        tool.require_unchanged()
-        with self.assertRaises(ActionWireError):
-            closure.require_unchanged()
+            _require_observation_changed(closure.require_unchanged)
+
+        # Hosted Windows can correct its wall clock forward by a full day after the
+        # worker starts. Production must reject that expired authority. A single
+        # fresh in-contract attempt then proves the integration path against the
+        # corrected clock; any second expiry or other error fails.
+        _retry_once_after_clock_correction(fixture.root, exercise)

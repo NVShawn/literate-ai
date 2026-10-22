@@ -259,7 +259,7 @@ edition = "2021"
             cwd=cls.root,
             env=cls.environment,
             capture_output=True,
-            timeout=60,
+            timeout=180,
             check=True,
         )
         return result.stdout

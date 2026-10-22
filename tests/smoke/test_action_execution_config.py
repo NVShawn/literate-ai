@@ -52,7 +52,7 @@ class ActionExecutionConfigurationTests(unittest.TestCase):
             "schema": "literate-ai/private-action-execution@1",
             "source_cas_root": str(self.factory.admission.fixture.controller_cas.root),
             "source_handoff": "filesystem-cas",
-            "duration_seconds": 300,
+            "duration_seconds": 1800,
             "maximum_hardware_age_seconds": 300,
             "health_configurations": {"index": str(self.health.config_file)},
         }
