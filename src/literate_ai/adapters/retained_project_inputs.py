@@ -314,7 +314,13 @@ def _link_bytes(root: Path, name: str, limit: int, access=None) -> bytes:
 
 
 def _stream(
-    root: Path, name: str, limit: int, output: BinaryIO | None = None, *, access=None
+    root: Path,
+    name: str,
+    limit: int,
+    output: BinaryIO | None = None,
+    *,
+    access=None,
+    windows_executable: bool = False,
 ) -> tuple[int, int, str]:
     path = root / name
     if access is None:
@@ -361,7 +367,12 @@ def _stream(
         or count != before.st_size
     ):
         raise RetainedProjectInputError("Retained input changed during read")
-    return count, 0o755 if before.st_mode & 0o111 else 0o644, digest.hexdigest()
+    executable = bool(before.st_mode & 0o111)
+    if os.name == "nt":
+        # NTFS has no POSIX execute bit. Discovery supplies reviewed intent;
+        # verification reuses only the sealed manifest selection.
+        executable = windows_executable
+    return count, 0o755 if executable else 0o644, digest.hexdigest()
 
 
 def _inventory(
@@ -482,6 +493,7 @@ def discover_retained_project_inputs(
     *,
     allow_internal_symlinks: bool = False,
     tree_policy: RetainedProjectTreePolicy | None = None,
+    executable_paths: tuple[str, ...] = (),
 ) -> RetainedProjectManifest:
     """Read a complete declared closure; the caller must review the result."""
     root = _root(root)
@@ -492,6 +504,13 @@ def discover_retained_project_inputs(
     if type(allow_internal_symlinks) is not bool:
         raise TypeError(
             "Retained symlink admission requires explicit boolean selection"
+        )
+    if type(executable_paths) is not tuple:
+        raise TypeError("Retained executable paths require an explicit tuple")
+    canonical_relative_posix_paths(executable_paths, label="retained executables")
+    if executable_paths != tuple(sorted(set(executable_paths))):
+        raise RetainedProjectInputError(
+            "Retained executable paths must be sorted and unique"
         )
     selected = tuple(sorted(roots))
     if tree_policy is None or not tree_policy.case_sensitive:
@@ -507,6 +526,11 @@ def discover_retained_project_inputs(
             allow_internal_symlinks=allow_internal_symlinks,
             access=access,
         )
+        executable_set = set(executable_paths)
+        if not executable_set <= set(names):
+            raise RetainedProjectInputError(
+                "Retained executable path is absent from the selected inputs"
+            )
         topology = (
             _hardlink_topology(root, names, access) if tree_policy is not None else None
         )
@@ -527,6 +551,7 @@ def discover_retained_project_inputs(
                     name,
                     min(limits.max_file_bytes, limits.max_total_bytes - total),
                     access=access,
+                    windows_executable=name in executable_set,
                 )
                 physical[name] = (size, mode, digest)
             total += size
@@ -537,7 +562,15 @@ def discover_retained_project_inputs(
             )
             target = None
             if mode == 0o120000:
+                if name in executable_set:
+                    raise RetainedProjectInputError(
+                        "Retained executable path must name an ordinary file"
+                    )
                 target = _link_bytes(root, name, size, access).decode("utf-8")
+            elif name in executable_set and mode != 0o755:
+                raise RetainedProjectInputError(
+                    "Retained executable path lacks native execute permission"
+                )
             members.append(
                 RetainedProjectMember(
                     name,
@@ -597,7 +630,13 @@ def _verify_inputs(root, manifest, access):
         if member.hardlink_target is not None:
             # The complete inode group shares its verified representative bytes.
             continue
-        if _stream(root, member.path, member.size, access=access) != (
+        if _stream(
+            root,
+            member.path,
+            member.size,
+            access=access,
+            windows_executable=member.mode == 0o755,
+        ) != (
             member.size,
             member.mode,
             member.sha256,
@@ -659,7 +698,12 @@ def capture_retained_project_inputs(
                 blob = blobs / member.sha256
                 with tempfile.TemporaryFile(dir=temporary) as stream:
                     if _stream(
-                        root, member.path, member.size, stream, access=access
+                        root,
+                        member.path,
+                        member.size,
+                        stream,
+                        access=access,
+                        windows_executable=member.mode == 0o755,
                     ) != (
                         member.size,
                         member.mode,

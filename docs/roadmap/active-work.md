@@ -4689,6 +4689,8 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ### Current consolidation inventory
 
+**Open-issue review (2026-10-22):** All 52 currently open issues have explicit current-forge roadmap links after adding #88, #92, #113, #116 and #117 and attaching #94 to the existing retained-user owner. Historical NVIDIA-dev issue numbers are a different namespace. #83 has a completed local owner and merits a landed-evidence closure review; no issue is closed merely by this inventory. #114 is owned by #115. #116 / #119 remains separate, with a failing Linux job. #118 has controller implementation in #110 but still requires its installed native positive/negative acceptance. #117 remains measured performance work. Broad native packaging, retained SDK, Windows ARM64 and release claims remain open under their existing owners.
+
 The remaining retained stack is composed in PR #110. PR #105 and PR #82
 are superseded by exact merge ancestry; their branches and histories are retained.
 The earlier inventories below are historical.
@@ -4696,7 +4698,8 @@ The earlier inventories below are historical.
 | Review | Retained scope | Landing state |
 | --- | --- | --- |
 | [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
-| [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Late arrival at `594fedf6`; full local/native and hosted qualification pending |
+| [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Compose exact head `5faea3b9` into #110; renewed combined qualification pending |
+| [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | WINDOWS-TEST-CONTRACT-001 / issue #116; stacked on #115 | Separate contribution; Linux failure requires diagnosis before landing |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
@@ -29529,6 +29532,10 @@ rather than treating resumed partial coverage as release qualification.
 
 ### [ ] RETAINED-USER-001 — Bind secondary test identities to scoped workspace access
 
+**GitHub issue:** [#85](https://github.com/jordanhubbard/literate-ai/issues/85).
+
+**Additional GitHub issue:** [#94](https://github.com/jordanhubbard/literate-ai/issues/94), private allocation-prefix search delegation. Existing #85 remains the scoped identity/custody owner.
+
 - **Priority:** P1
 - **Owner:** Retained execution profile and workspace custody
 - **Direction:** Execute complete original test suites with their privileged and explicitly unprivileged user requirements.
@@ -29568,6 +29575,8 @@ rather than treating resumed partial coverage as release qualification.
   - [ ] Complete exact-current required CI and land the reviewed integration. Native retained execution is qualified; this does not mark the broader FreeBSD program complete.
 
 ### [ ] INPUT-WALK-001 — Bound retained input ancestor traversal cost
+
+**GitHub issue:** [#86](https://github.com/jordanhubbard/literate-ai/issues/86).
 
 - **Priority:** P1
 - **Owner:** Retained input filesystem adapter
@@ -30171,6 +30180,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Direction:** Merge the remaining reviews after the maintainer consolidation request.
 - **Conclusion:** Compose the current main and PR105 repair into PR110 with both histories preserved. Resolve overlapping retained runtime and PE observation changes deliberately, retain PR82 unique history, and require exact combined CI before default-branch landing.
 - **Depends on:** none
+- **Current direction (2026-10-22):** Merge #110 and #115, then reconcile open issues. Compose the exact Windows executable-intent head `5faea3b93f4706157883ad23bb2c6dbefcf808e2` into the retained SDK branch before landing. Preserve descriptor-authorized access, hardlink/tree-policy custody and both executable-intent selection and verification. Refresh the reviewed driver and require a fresh combined suite, current lifecycle receipt and exact-head hosted CI. Earlier receipts and source-only results retain their original scope. Issue #116 / PR #119 remain a separate test-contract contribution.
 - **Implementation:**
   - [x] Merge current PR105 repair and main into the retained SDK integration; preserve its FreeBSD and native SDK additions.
   - [x] Reconcile PR82 unique history with the combined implementation and retain its evidence without claiming new qualification.
@@ -30532,3 +30542,73 @@ remain open in their owning items; this controller/sample proof does not close t
   - [ ] Qualify and compose the fix without losing current native SDK or PE observation guards.
 - **Evidence:**
   - [ ] Complete clean local regression, real Windows input/output/admission/package proof and green exact-head hosted CI before landing.
+
+### [ ] ENTRYPOINT-AUDIT-001 — Audit original-source agent entry points
+
+**GitHub issue:** [#113](https://github.com/jordanhubbard/literate-ai/issues/113).
+
+- **Priority:** P1
+- **Owner:** Agent onboarding and original-source adoption
+- **Direction:** Reconcile open GitHub issue #113: report missing or stale agent delegates on authored projects.
+- **Conclusion:** Preserve metadata-only adoption and custom instructions; add read-only audit and an explicitly reviewed repair path using the declared agent skill.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Add supported entry-point auditing and safe reviewed repair without modifying pinned parents or retained evidence.
+- **Evidence:**
+  - [ ] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
+
+### [ ] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
+
+**GitHub issue:** [#92](https://github.com/jordanhubbard/literate-ai/issues/92).
+
+- **Priority:** P1
+- **Owner:** Retained workspace grant admission
+- **Direction:** Reconcile open GitHub issue #92: detect unsupported execution filesystem ACLs before expensive capture.
+- **Conclusion:** Probe the actual selected ACL backend and workspace with reversible named-user/default grants; keep worker mount policy and account custody unchanged.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Run bounded capability preflight before capture and emit an actionable unsupported-filesystem diagnostic.
+- **Evidence:**
+  - [ ] Real disabled/enabled UFS probes establish early refusal, exact cleanup and unchanged unsupported-brand refusals.
+
+### [ ] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
+
+**GitHub issue:** [#88](https://github.com/jordanhubbard/literate-ai/issues/88).
+
+- **Priority:** P1
+- **Owner:** Project update planning
+- **Direction:** Reconcile open GitHub issue #88: newer installed scaffold additions must not mix incompatible pins into older parent catalogs.
+- **Conclusion:** Compare the complete prospective closure before apply, retain explicit parent selection and overlays, and offer a safe compatible subset.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Align plan/apply compatibility diagnostics and preserve atomic rollback for incompatible additions.
+- **Evidence:**
+  - [ ] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
+
+### [ ] SDK-OBSERVATION-COST-001 — Bound repeated installed distribution observation
+
+**GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117).
+
+- **Priority:** P1
+- **Owner:** Installed retained SDK authorization
+- **Direction:** Reconcile open GitHub issue #117: repeated full distribution observation dominates installed FreeBSD preparation.
+- **Conclusion:** Investigate operation-scoped reuse and bounded revalidation while preserving exact member identity, live revocation, source and command custody; do not use process-global success caching.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Measure the installed public SDK route and reduce redundant observation without weakening drift detection.
+- **Evidence:**
+  - [ ] Compare equivalent profiles and uninstrumented native timings; prove changed, redirected, missing or altered members fail closed during commands and qualify independent consumer acceptance.
+
+### [ ] WINDOWS-TEST-CONTRACT-001 — Repair Windows test contracts
+
+**GitHub issue:** [#116](https://github.com/jordanhubbard/literate-ai/issues/116).
+
+- **Priority:** P1
+- **Owner:** Portable runtime and retained loader test fixtures
+- **Direction:** Reconcile open GitHub issue #116 and stacked PR #119.
+- **Conclusion:** Keep copied Python aliases bound to their native base runtime and exercise structural loader checks on a supported platform while preserving explicit Windows refusal.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Review and land PR #119 separately after #115; diagnose its current Linux CI failure before qualification.
+- **Evidence:**
+  - [ ] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.

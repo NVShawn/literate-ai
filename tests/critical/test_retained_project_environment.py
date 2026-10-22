@@ -236,6 +236,7 @@ class RetainedRuntimePathTests(unittest.TestCase):
             f.source,
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             f.manifest.limits,
+            executable_paths=(f.runner_path,),
         )
         f.profile = replace(f.profile, runtime_library_paths=paths)
         f.plan = replace(

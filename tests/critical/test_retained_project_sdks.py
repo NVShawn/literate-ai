@@ -210,6 +210,7 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
                 "vendor": "sdk",
             },
             self.fixture.manifest.limits,
+            executable_paths=(self.fixture.runner_path,),
         )
         path = self.fixture.source / ACCEPTANCE_POLICY_PATH
         policy = RetainedProjectAcceptancePolicy.from_dict(

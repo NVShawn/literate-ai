@@ -108,9 +108,9 @@ class RetainedInputWalkTests(unittest.TestCase):
         changed = False
         destination = self.base / "snapshot"
 
-        def stream(root, name, limit, output=None, *, access=None):
+        def stream(root, name, limit, output=None, **kwargs):
             nonlocal changed
-            result = original(root, name, limit, output, access=access)
+            result = original(root, name, limit, output, **kwargs)
             if output is not None and name.endswith("file-099.h") and not changed:
                 changed = True
                 saved = self.base / "saved-copy-input"
@@ -147,9 +147,9 @@ class RetainedInputWalkTests(unittest.TestCase):
         original = inputs._stream
         changed = False
 
-        def stream(root, name, limit, output=None, *, access=None):
+        def stream(root, name, limit, output=None, **kwargs):
             nonlocal changed
-            result = original(root, name, limit, output, access=access)
+            result = original(root, name, limit, output, **kwargs)
             if not changed:
                 changed = True
                 (self.directory / "extra.h").write_bytes(b"new")

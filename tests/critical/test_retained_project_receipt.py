@@ -211,7 +211,11 @@ class RetainedProjectReceiptTests(unittest.TestCase):
     def refresh_inputs(self, roles):
         f = self.fixture.fixture
         f.manifest = discover_retained_project_inputs(
-            f.source, roles, f.manifest.limits, allow_internal_symlinks=True
+            f.source,
+            roles,
+            f.manifest.limits,
+            allow_internal_symlinks=True,
+            executable_paths=(f.runner_path,),
         )
         f.plan = replace(f.plan, manifest_identity=f.manifest.identity)
         f.current = f.plan

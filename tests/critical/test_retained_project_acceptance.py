@@ -11,6 +11,7 @@ from unittest.mock import patch
 from literate_ai.adapters import retained_project_acceptance as acceptance
 from literate_ai.adapters.builders import BuildError
 from literate_ai.adapters.retained_project_inputs import (
+    RetainedProjectInputError,
     discover_retained_project_inputs,
     verify_retained_project_inputs,
 )
@@ -268,17 +269,17 @@ class RetainedProjectAcceptanceTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             Case.from_dict(wire)
 
-    def test_workspace_cannot_promote_zero_exit_without_a_real_exported_program(self):
+    def test_workspace_rejects_nonexecutable_declared_export_during_capture(self):
         self.fixture.plan = self.plan
         self.fixture.current = self.plan
         workspace = self.fixture.workspace()
-        for _ in range(3):
+        with self.assertRaisesRegex(
+            RetainedProjectInputError, "lacks native execute permission"
+        ):
             workspace.execute_next()
         self.assertFalse(
             (workspace.inputs / acceptance.ACCEPTANCE_POLICY_PATH).exists()
         )
-        with self.assertRaisesRegex(ValueError, "sealed-executable"):
-            workspace.execute_next()
         self.assertEqual(workspace.acceptance_observations, ())
 
     def test_workspace_runs_independent_cases_after_build_tests_and_docs(self):
