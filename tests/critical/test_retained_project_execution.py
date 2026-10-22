@@ -48,7 +48,15 @@ class RetainedProjectExecutionTests(unittest.TestCase):
     def setUpClass(cls):
         cls.compiler = shutil.which("cc")
         cls.fixture_binary = Path(sys.executable).resolve()
-        if cls.compiler is None or os.name == "nt":
+        if os.name == "nt":
+            system_root = os.environ.get("SYSTEMROOT")
+            if not system_root:
+                raise RuntimeError("Windows retained fixture requires SystemRoot")
+            cls.fixture_binary = Path(system_root, "System32", "where.exe").resolve(
+                strict=True
+            )
+            return
+        if cls.compiler is None:
             return
         temporary = tempfile.TemporaryDirectory()
         cls.addClassCleanup(temporary.cleanup)
