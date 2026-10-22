@@ -337,7 +337,7 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
                     self.workspace()
 
     def public_runtime_arguments(self, **selection_changes):
-        """Supply project discovery; acquire and execute SDKs through real owners."""
+        """Supply discovery and local Git routing; use real SDK production owners."""
         self.select_snapshot_policy(**selection_changes)
         f = self.fixture
         worker = ExecutionWorker("local", ExecutionWorkerKind.LOCAL)

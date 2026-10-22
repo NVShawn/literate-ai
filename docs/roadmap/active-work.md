@@ -30104,8 +30104,8 @@ hosted CI and canonical tree worker/live SDK integration remain open.
   regression passed eight cases. Twelve legacy/selected-policy custody checks
   pass without skips (190.396 seconds). A real public-runtime adapter run now
   acquires fresh SDK owners and retains six SDK command records through
-  independent acceptance; its three-case group passes in 96.096 seconds. Only
-  project discovery is fixture-supplied in that group; this is not installed
+  independent acceptance; its three-case group passes in 96.096 seconds. Project discovery
+  and local Git routing are fixture-supplied in that group; this is not installed
   canonical-project or native compiler SDK qualification. The first wrapper
   omitted shared class fixture setup and failed before execution; it is retained.
   The final seven-case source group passes without skips in 166.185 seconds,
@@ -30114,9 +30114,13 @@ hosted CI and canonical tree worker/live SDK integration remain open.
   in 91.158 seconds after restoring the original missing-producer refusal code;
   the first changed-code failure is preserved. Lint, formatting, layout, exports,
   documentation, OpenSpec and reviewed driver/documentation authority pass.
-  Next freeze the exact candidate for full regression and wheel qualification,
-  then exercise genuine installed canonical-project and native execution before
-  claiming public CLI or compiler SDK qualification.
+  Exact code candidate `f65e0c62` now passes full controller regression: 2,046
+  passes, 70 skips and no failures across 2,116 selected tests (1,172.745 seconds).
+  Clean wheel qualification passes with 1,231 members; its exact offline FreeBSD
+  installation verifies 37 distributions. Installed native fixture checks are
+  running, with no terminal result claimed. Next exercise a genuine installed
+  canonical project and native execution before claiming public CLI or compiler
+  SDK qualification. See [the scoped record](../../verification/retained-sdk-public-development.json).
 - **Depends on:** RETAINED-PROJECT-001,NATIVE-SDK-001
 - **Implementation:**
   - [x] Bind complete current per-lock SDK owner closure in the local public runtime after plan and host authorization, preserving owners through admission and cleanup.

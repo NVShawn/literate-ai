@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/retained-sdk-public-development@1",
-  "scope": "Controller source-level runtime qualification with real source-built CMake SDKs; project discovery is fixture-supplied",
+  "scope": "Controller source-level runtime qualification with real source-built CMake SDKs; project discovery and local Git routing are fixture-supplied",
   "policy_schema": "literate-ai/retained-project-sdk-selection-policy@1",
   "legacy_policy_unchanged": true,
   "two_build_identity_observation": {
@@ -34,7 +34,26 @@
   "canonical_installed_cli_qualified": false,
   "native_installed_qualified": false,
   "compiler_sdk_admitted": false,
-  "full_regression": "pending",
-  "wheel_qualified": false,
-  "release_authorized": false
+  "full_regression": {
+    "exit_code": 0,
+    "selected": 2116,
+    "passed": 2046,
+    "skipped": 70,
+    "failed": 0,
+    "seconds": 1172.745,
+    "report_sha256": "ad0a00d4c7fd199cbf0cceec6abf76e138d9eb3e034b381ac1a88f4cd7280b1a"
+  },
+  "wheel_qualified": true,
+  "release_authorized": false,
+  "qualified_code_revision": "f65e0c622aaaa7bb6102d864b61404de524b9645",
+  "wheel_identity": "sha256:7e2ca6c78987136723c6efc8ae2f46c7617a2e72a829d4576381db2aab67d841",
+  "distribution_identity": "sha256:7175249318bdfef817eeacbffaeb33e9b64c96350ad3e924e2f1ae2bdf31e2a4",
+  "wheel_members": 1231,
+  "native_offline_bootstrap": {
+    "target": "FreeBSD 16 amd64 / Python 3.12.14",
+    "exit_code": 0,
+    "distributions_verified": 37,
+    "seconds": 88.753
+  },
+  "native_installed_fixture_checks": "running; no result claimed"
 }
