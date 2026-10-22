@@ -30571,3 +30571,12 @@ The initial direct-RECORD implementation passes five focused installed-distribut
 cases, including a real wheel metadata fixture, unchanged canonical identity,
 missing nonmandatory members, mutation across observations and malformed/oversized
 inventories. Full regression and native comparison remain required.
+
+The direct-RECORD candidate `760bfa09` now passes all 2,201 controller cases:
+2,131 passes, 70 declared skips, no failures (2,336.332 seconds). Exact clean
+Linux wheel qualification passes in 524.198 seconds with 1,235 framework members.
+Offline FreeBSD installation verifies the reviewed dependency closure, and fresh
+project initialization passes. The canonical installed public SDK replay is
+running under the unchanged execution deadline; admission is not yet earned.
+Renew the complete configured framework host lifecycle and its current receipt
+before landing the performance repair.
