@@ -6,7 +6,10 @@ from unittest.mock import patch
 
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
 from literate_ai.adapters.action_capabilities import ActionWorkerCapabilities
-from literate_ai.adapters.action_dispatch_wire import ActionWireError
+from literate_ai.adapters.action_dispatch_wire import (
+    ActionDispatchDeadline,
+    ActionWireError,
+)
 from literate_ai.adapters.action_hardware import (
     HARDWARE_PROBE_TIMEOUT_SECONDS,
     probe_command_hardware,
@@ -101,12 +104,17 @@ class RemoteStandardToolchainTests(unittest.TestCase):
             cwd=fixture.root,
             environment=fixture.environment,
         )
+        # This test exercises projection and its live guard, not whether a deadline
+        # allocated before the real hardware probe survives a loaded hosted shard.
+        # Start the shared subprocess budget at the operation under test; explicit
+        # expiry coverage uses its own already-expired deadlines.
+        deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
         catalog = ExecutionWorkerCatalog((fixture.worker,))
         pool = CommandActionWorkerPool(
             lambda: catalog,
             lambda: WorkerHardwareObservationCatalog((hardware,)),
             lambda worker: canonical_identity({"healthy": worker.identity.uri}),
-            fixture.deadline,
+            deadline,
             phase=LifecycleActionKind.INDEX,
             source_handoff="filesystem-cas",
             target_profile="host",

@@ -85,11 +85,12 @@ class PythonToolchainDiscoveryTests(unittest.TestCase):
                 (str(newer),),
             )
             alias = _install_python_alias(root, "python")
+            selected = discover_python_toolchain(
+                {"PATH": str(root)}, minimum_version=(3, 0)
+            )
+            self.assertEqual(selected.command[1:], ())
             self.assertEqual(
-                discover_python_toolchain(
-                    {"PATH": str(root)}, minimum_version=(3, 0)
-                ).command,
-                (str(alias),),
+                os.path.normcase(selected.command[0]), os.path.normcase(str(alias))
             )
 
     def test_versioned_discovery_does_not_admit_config_tools(self) -> None:
