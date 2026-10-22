@@ -33,7 +33,7 @@ from tests.support import (
 )
 from tests.support.fixtures_test_standard_toolchain_observations import observation
 
-REMOTE_TOOLCHAIN_TEST_DEADLINE = timedelta(hours=23)
+REMOTE_TOOLCHAIN_TEST_DEADLINE = timedelta(hours=24) - timedelta(seconds=1)
 
 
 def snapshot(*tools):
@@ -106,9 +106,10 @@ class RemoteStandardToolchainTests(unittest.TestCase):
             environment=fixture.environment,
         )
         # This real integration path performs repeated capability and dependency
-        # observations. Give it a bounded window that also tolerates hosted Windows
-        # wall-clock synchronization; explicit expiry coverage uses separate
-        # already-expired deadlines.
+        # observations. GitHub's hosted Windows clock can synchronize forward by
+        # almost 23 hours after Python starts, so use the contract's bounded maximum
+        # while remaining strictly below its one-day ceiling. Explicit expiry
+        # coverage uses separate already-expired deadlines.
         deadline = ActionDispatchDeadline(
             datetime.now(UTC) + REMOTE_TOOLCHAIN_TEST_DEADLINE
         )

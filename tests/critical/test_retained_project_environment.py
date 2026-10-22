@@ -40,7 +40,7 @@ class RetainedRuntimePathTests(unittest.TestCase):
             f.source,
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             f.manifest.limits,
-            executable_paths=("tools/runner",),
+            executable_paths=(f.runner_member,),
         )
         f.profile = replace(f.profile, runtime_library_paths=paths)
         f.plan = replace(
@@ -112,7 +112,7 @@ class RetainedRuntimePathTests(unittest.TestCase):
         # Structural refusal is platform-independent, but Windows deliberately
         # rejects this loader projection before inspecting individual paths.
         with patch.object(environment.sys, "platform", "linux"):
-            for name in ("src", "missing", "tools/runner"):
+            for name in ("src", "missing", f.runner_member):
                 with self.subTest(name=name), self.assertRaises(ValueError):
                     environment.captured_runtime_environment(
                         f.source,
