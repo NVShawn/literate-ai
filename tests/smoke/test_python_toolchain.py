@@ -23,7 +23,20 @@ def _install_python_alias(directory: Path, name: str) -> Path:
         if os.name == "nt"
         else sys.executable
     )
-    if symlinks_followable(directory):
+    if os.name == "nt":
+        # A relocated CPython launcher needs its versioned runtime DLL before it
+        # can read pyvenv.cfg and find the installed standard library.  Windows
+        # symlink resolution does not make the original launch directory the DLL
+        # search root, so build a minimal disposable venv-shaped fixture instead.
+        shutil.copy2(runtime, alias)
+        runtime_dll = runtime.with_name(
+            f"python{sys.version_info.major}{sys.version_info.minor}.dll"
+        )
+        shutil.copy2(runtime_dll, directory / runtime_dll.name)
+        (directory / "pyvenv.cfg").write_text(
+            f"home = {runtime.parent}\n", encoding="utf-8"
+        )
+    elif symlinks_followable(directory):
         alias.symlink_to(runtime)
     else:
         # Copy where links cannot be created or followed (WinError 1463 over

@@ -109,26 +109,31 @@ class RetainedRuntimePathTests(unittest.TestCase):
 
     def test_source_empty_missing_and_file_directories_refuse(self):
         f = self.fixture
-        for name in ("src", "missing", "tools/runner"):
-            with self.subTest(name=name), self.assertRaises(ValueError):
+        # Structural refusal is platform-independent, but Windows deliberately
+        # rejects this loader projection before inspecting individual paths.
+        with patch.object(environment.sys, "platform", "linux"):
+            for name in ("src", "missing", "tools/runner"):
+                with self.subTest(name=name), self.assertRaises(ValueError):
+                    environment.captured_runtime_environment(
+                        f.source,
+                        f.manifest,
+                        replace(f.profile, runtime_library_paths=(name,)),
+                    )
+            mixed = replace(
+                f.manifest,
+                members=tuple(
+                    replace(m, role="source") if m.path == "tools/lib/member" else m
+                    for m in f.manifest.members
+                ),
+            )
+            with self.assertRaisesRegex(ValueError, "role"):
+                environment.captured_runtime_environment(f.source, mixed, f.profile)
+            (self.directory / "member").unlink()
+            self.refresh()
+            with self.assertRaisesRegex(ValueError, "role"):
                 environment.captured_runtime_environment(
-                    f.source,
-                    f.manifest,
-                    replace(f.profile, runtime_library_paths=(name,)),
+                    f.source, f.manifest, f.profile
                 )
-        mixed = replace(
-            f.manifest,
-            members=tuple(
-                replace(m, role="source") if m.path == "tools/lib/member" else m
-                for m in f.manifest.members
-            ),
-        )
-        with self.assertRaisesRegex(ValueError, "role"):
-            environment.captured_runtime_environment(f.source, mixed, f.profile)
-        (self.directory / "member").unlink()
-        self.refresh()
-        with self.assertRaisesRegex(ValueError, "role"):
-            environment.captured_runtime_environment(f.source, f.manifest, f.profile)
 
     @unittest.skipIf(os.name == "nt", "requires native directory symlink")
     def test_redirected_runtime_directory_refuses(self):
