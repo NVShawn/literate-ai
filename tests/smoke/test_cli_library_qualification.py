@@ -11,6 +11,7 @@ import hashlib
 import json
 import unittest
 from contextlib import ExitStack
+from dataclasses import replace
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -267,6 +268,73 @@ class PublicLibraryQualificationTests(unittest.TestCase):
         self.assertTrue(self.output.is_file())
         self.qualify.assert_called_once()
         self.authority_store.append_qualified.assert_called_once()
+
+    def test_recertify_current_qualified_publishes_archive_and_new_projection(self):
+        self.qualify.side_effect = self.retained_runs
+        qualified = SimpleNamespace(
+            recorded_state=(ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE),
+            blockers=(
+                "target-lock-not-evaluated",
+                "generation-closure-not-evaluated",
+                "verifier-not-evaluated",
+                "policy-not-evaluated",
+            ),
+        )
+        self.authority_store.recertify_qualified.return_value = self.projection
+        with patch(
+            "literate_ai.authority.ComponentAuthorityLifecycle.status",
+            return_value=qualified,
+        ):
+            status, document = self.invoke(
+                "--recertify-current-qualified",
+                "--retained-evidence-store",
+                str(self.fixture.root / "evidence"),
+            )
+        self.assertEqual(status, 0, document)
+        self.assertEqual(
+            document["result"]["authority_projection_identity"],
+            self.projection.identity.uri,
+        )
+        self.assertIn("retained_evidence", document["result"])
+        self.authority_store.append_qualified.assert_not_called()
+        self.authority_store.recertify_qualified.assert_called_once()
+
+    def test_recertify_current_qualified_requires_retained_store(self):
+        status, document = self.invoke("--recertify-current-qualified")
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(
+            document["error"]["code"], "qualification.retained_store_required"
+        )
+        self.qualify.assert_not_called()
+        self.authority_store.append_qualified.assert_not_called()
+
+    def test_recertification_rejects_profile_drift_before_archive_publication(self):
+        def drift_profile(adapter, plan):
+            result = self.retained_runs(adapter, plan)
+            self.write_profile(
+                replace(self.profile, timeout_seconds=self.profile.timeout_seconds + 1)
+            )
+            return result
+
+        self.qualify.side_effect = drift_profile
+        qualified = SimpleNamespace(
+            recorded_state=(ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE),
+            blockers=(),
+        )
+        evidence_store = self.fixture.root / "evidence"
+        with patch(
+            "literate_ai.authority.ComponentAuthorityLifecycle.status",
+            return_value=qualified,
+        ):
+            status, document = self.invoke(
+                "--recertify-current-qualified",
+                "--retained-evidence-store",
+                str(evidence_store),
+            )
+        self.assertNotEqual(status, 0, document)
+        self.assertEqual(document["error"]["code"], "inputs.closure_changed")
+        self.assertFalse(evidence_store.exists())
+        self.authority_store.recertify_qualified.assert_not_called()
 
     def test_public_qualification_still_rejects_a_changed_verifier_harness(self):
         (self.project.root / "verification" / "acceptance" / "harness.py").write_bytes(

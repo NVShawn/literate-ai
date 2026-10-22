@@ -189,6 +189,17 @@ unreferenced immutable CAS object, which is not removed because another transact
 could reference it. Persisted transport bytes do not authorize consumer admission;
 the importing maintainer's binding and current evidence checks remain required.
 
+Projects whose library reached qualified authority before retained capture existed
+use `spec qualify --recertify-current-qualified --retained-evidence-store PATH`. The
+command reruns the complete clean qualification against the exact retained source,
+lock, profile, generation closure, verifier, and installed policy. Immutable history
+records a qualification invalidation followed by the new qualified projection, while
+the current pointer moves atomically from the old qualified head to the fresh one and
+never exposes retained-source authority. A stale source, lock, Component revision,
+promotion audit, profile, verifier, or policy refuses recertification. As with initial
+qualification, a later authority failure may leave an unreferenced immutable archive
+or qualification record; neither authorizes importer admission.
+
 Before exposing retained captures, the producer rechecks its prepared authority
 snapshot, installed Standard distribution/policy and verifier-owned acceptance
 oracle. Final qualification admission repeats those checks and reopens the current

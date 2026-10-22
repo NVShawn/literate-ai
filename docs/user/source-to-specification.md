@@ -305,6 +305,28 @@ Component and lexical model-scope rules still applied. Select the configured cod
 CLI through `CODING_CLI`. Omitting `--model` keeps the CLI-configured default;
 `LITAI_LIVE_MODEL` by itself does not replace this command's pipeline selector.
 
+For an already-qualified library whose original run predates retained archive
+capture, repeat the same command with an immutable evidence store and explicit
+current-authority mode:
+
+```console
+litai spec qualify path/to/new-project/components/LIBRARY \
+  --source path/to/exact-source-baseline \
+  --profile path/to/new-project/components/LIBRARY/qualification/profile.json \
+  --target host \
+  --output /tmp/literate-ai-qualification-capture.json \
+  --retained-evidence-store path/to/evidence-store \
+  --recertify-current-qualified \
+  --allow-host-execution
+```
+
+This performs fresh generation, build, test, and independent parity runs. It records
+the required invalidation and new qualification as immutable successors, then moves
+the current pointer atomically from the old qualified projection to the fresh
+qualified projection; retained-source authority is never exposed as current. Use the
+returned archive reference for the reviewed retained-library binding. Archive
+publication alone does not authorize importer admission.
+
 `qualify` independently resolves the exact forward recipe, creates at least two empty
 workspaces, forces real `litai generate` calls, runs the profile's build and current-test
 commands, executes baseline and generated applications on the profile's JSON probes,

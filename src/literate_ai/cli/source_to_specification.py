@@ -2209,6 +2209,7 @@ def _complete_standard_lifecycle_qualification(
     component_root: Path,
     source: Path,
     profile: LocalQualificationProfile,
+    qualification_authority: Any,
     authority_store: Any,
     authority_projection: Any,
     locked_snapshot: Any,
@@ -2221,9 +2222,11 @@ def _complete_standard_lifecycle_qualification(
     workflow_identity: ContentIdentity,
     routing_identity: ContentIdentity,
     output_path: Path,
+    recertify_current_qualified: bool = False,
 ) -> tuple[dict[str, Any], int]:
     """Run and admit only the filesystem Standard lifecycle qualification contract."""
 
+    from literate_ai.adapters.authority import AuthorityProjectionStoreError
     from literate_ai.adapters.generation_preparation import (
         FilesystemLockedGenerationApplicationAdapter,
         GenerationPreparationError,
@@ -2248,6 +2251,7 @@ def _complete_standard_lifecycle_qualification(
         ComponentChangeSurface,
         StandardProjectLifecycleDriver,
     )
+    from literate_ai.projects import PinnedInputClosureError
     from literate_ai.source_to_specification import (
         QualificationLifecyclePlan,
         VerifiedSourcePromotionEvidence,
@@ -2369,6 +2373,7 @@ def _complete_standard_lifecycle_qualification(
                 "qualification result differs from the resolved Standard binding",
             )
         if retained_store is not None:
+            qualification_authority.require_unchanged()
             from literate_ai.adapters.evidence_storage import FileSystemEvidenceStore
             from literate_ai.adapters.qualification_archive import (
                 encode_qualification_archive,
@@ -2419,6 +2424,8 @@ def _complete_standard_lifecycle_qualification(
             getattr(exc, "code", "qualification.lifecycle_failed"),
             getattr(exc, "message", str(exc)),
         ) from exc
+    except PinnedInputClosureError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
     except CliFailure:
         raise
     except (OSError, ValueError) as exc:
@@ -2437,6 +2444,10 @@ def _complete_standard_lifecycle_qualification(
     except FilesystemQualificationError as exc:
         raise CliFailure(exc.code, exc.message) from exc
     locked_snapshot.require_unchanged()
+    try:
+        qualification_authority.require_unchanged()
+    except PinnedInputClosureError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
     if inventory_source(source).identity != source_snapshot_identity.uri:
         raise CliFailure(
             "qualification.source_changed",
@@ -2509,10 +2520,20 @@ def _complete_standard_lifecycle_qualification(
     else:
         _write_new_json(qualification_path, qualification.to_dict())
     try:
-        authority_store.append_qualified(locked_snapshot.authority, verified)
-        qualified_projection = authority_store.current(component_coordinate)
+        if recertify_current_qualified:
+            qualified_projection = authority_store.recertify_qualified(
+                locked_snapshot.authority, verified
+            )
+        else:
+            authority_store.append_qualified(locked_snapshot.authority, verified)
+            qualified_projection = authority_store.current(component_coordinate)
     except LockedSourcePromotionError as exc:
         raise CliFailure(exc.code, exc.message) from exc
+    except AuthorityProjectionStoreError as exc:
+        raise CliFailure(
+            "qualification.authority_changed",
+            "Component authority changed or could not record recertification",
+        ) from exc
     record = {
         "schema": "literate-ai/local-regenerative-qualification@2",
         "component_coordinate": component_coordinate,
@@ -3218,7 +3239,6 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 "qualification.profile_untrusted",
                 "qualification profile must be a regular file inside the project",
             )
-        profile = LocalQualificationProfile.from_dict(_read_json(profile_path))
         from literate_ai.adapters.authority import (
             AuthorityProjectionStoreError,
             FileAuthorityProjectionStore,
@@ -3229,6 +3249,9 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         )
         from literate_ai.adapters.project_initialization import (
             flavor_selector_directory,
+        )
+        from literate_ai.adapters.qualification_authority import (
+            read_current_qualification_authority,
         )
         from literate_ai.application import SourcePromotionService
         from literate_ai.authority import ComponentAuthorityLifecycle
@@ -3262,6 +3285,13 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                 "qualification.authority_projection_required",
                 "qualification requires a valid Component authority projection",
             ) from exc
+        recertify_current_qualified = bool(args.recertify_current_qualified)
+        if recertify_current_qualified and args.retained_evidence_store is None:
+            raise CliFailure(
+                "qualification.retained_store_required",
+                "recertifying current qualified evidence requires "
+                "--retained-evidence-store",
+            )
         authority_status = ComponentAuthorityLifecycle.status(
             authority_projection,
             component_revision_identity=component_revision_identity,
@@ -3271,18 +3301,40 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             for blocker in authority_status.blockers
             if blocker != "regenerative-qualification-required"
         )
+        required_state = (
+            ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE
+            if recertify_current_qualified
+            else ComponentAuthorityState.DERIVED_SOURCE_RETAINED
+        )
+        state_invalid = authority_status.recorded_state is not required_state
+        if not recertify_current_qualified:
+            state_invalid = state_invalid or bool(stale_blockers)
         if (
-            authority_status.recorded_state
-            is not ComponentAuthorityState.DERIVED_SOURCE_RETAINED
-            or stale_blockers
+            state_invalid
             or authority_projection.specification_set_identity
             != root_node.revision.specification_set_identity
         ):
+            expected = (
+                "current regeneratively qualified authority"
+                if recertify_current_qualified
+                else "current retained-source authority after human acceptance"
+            )
             raise CliFailure(
                 "qualification.authority_state_invalid",
-                "qualification requires current retained-source authority after "
-                "human acceptance",
+                f"qualification requires {expected}",
             )
+        try:
+            qualification_authority = read_current_qualification_authority(
+                project.root,
+                profile_path.relative_to(project.root).as_posix(),
+                source_snapshot_identity=authority_projection.source_snapshot_identity,
+            )
+        except (OSError, TypeError, ValueError) as exc:
+            raise CliFailure(
+                "qualification.profile_untrusted",
+                "qualification profile is invalid or unavailable",
+            ) from exc
+        profile = qualification_authority.profile
         promotion_service = SourcePromotionService()
         try:
             verified_promotion = promotion_service.verify_evidence(
@@ -3459,6 +3511,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             component_root=component_root,
             source=source,
             profile=profile,
+            qualification_authority=qualification_authority,
             authority_store=authority_store,
             authority_projection=authority_projection,
             locked_snapshot=locked_snapshot,
@@ -3471,6 +3524,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
             workflow_identity=workflow_identity,
             routing_identity=routing_identity,
             output_path=output_path,
+            recertify_current_qualified=recertify_current_qualified,
         )
 
     if command == "refresh":
@@ -3725,6 +3779,14 @@ def add_spec_parser(commands: argparse._SubParsersAction) -> None:
         help=(
             "explicit local immutable evidence store for captured library packages "
             "and qualification records; does not authorize importer admission"
+        ),
+    )
+    qualify.add_argument(
+        "--recertify-current-qualified",
+        action="store_true",
+        help=(
+            "rerun and retain evidence for a qualified Component, atomically "
+            "appending invalidation and fresh qualification history"
         ),
     )
     qualify.add_argument("--allow-host-execution", action="store_true")

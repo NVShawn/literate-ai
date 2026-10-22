@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from unittest import mock
 
 from literate_ai.adapters.authority import (
     AuthorityProjectionStoreError,
@@ -21,6 +22,7 @@ from literate_ai.application.source_promotion import (
 )
 from literate_ai.authority import ComponentAuthorityLifecycle
 from literate_ai.contracts import (
+    ComponentAuthorityState,
     ComponentGenerationClosure,
     ContentIdentity,
     canonical_identity,
@@ -30,6 +32,9 @@ from literate_ai.source_to_specification import (
     SourcePromotionInput,
     SourcePromotionMaterializer,
     VerifiedSourcePromotionEvidence,
+)
+from literate_ai.source_to_specification.qualification_lifecycle import (
+    QualificationLifecycleResult,
 )
 
 # Import the module, not the TestCase class, so unittest does not collect and
@@ -136,6 +141,32 @@ class LockedSourcePromotionTests(unittest.TestCase):
             qualification_lifecycle_result=self.qualification,
         )
 
+    def fresh_evidence(self, qualified):
+        fresh_runs = tuple(
+            replace(
+                run,
+                workspace_allocation_identity=_identity(
+                    f"recertification-workspace-{index}"
+                ),
+            )
+            for index, run in enumerate(self.qualification.runs)
+        )
+        fresh_qualification = QualificationLifecycleResult(
+            fresh_runs,
+            self.qualification.case_map,
+            self.qualification.parity_evidence,
+        )
+        self.assertNotEqual(fresh_qualification.identity, self.qualification.identity)
+        return replace(
+            self.evidence,
+            authority_projection=qualified,
+            generation_closure=replace(
+                self.closure,
+                qualification_evidence_identity=fresh_qualification.identity,
+            ),
+            qualification_lifecycle_result=fresh_qualification,
+        )
+
     def test_missing_and_stale_lock_evidence_fail_closed(self) -> None:
         with self.assertRaises(LockedSourcePromotionError) as missing:
             qualify_locked_source_promotion(
@@ -172,6 +203,73 @@ class LockedSourcePromotionTests(unittest.TestCase):
             store.current(self.retained.component_coordinate),
             qualified,
         )
+
+    def test_store_atomically_recertifies_an_existing_qualified_head(self) -> None:
+        store = FileAuthorityProjectionStore(Path(self.temporary.name))
+        for projection in (self.inventory, self.assisted, self.retained):
+            store.append(projection)
+        store.append_qualified(self.authority, self.evidence)
+        previous = store.current(self.retained.component_coordinate)
+
+        recertified = store.recertify_qualified(
+            self.authority,
+            self.fresh_evidence(previous),
+        )
+
+        self.assertEqual(store.current(previous.component_coordinate), recertified)
+        history = store.history(previous.component_coordinate)
+        self.assertEqual(history[-3], previous)
+        self.assertEqual(
+            history[-2].state, ComponentAuthorityState.DERIVED_SOURCE_RETAINED
+        )
+        self.assertEqual(
+            history[-1].state,
+            ComponentAuthorityState.REGENERATIVELY_QUALIFIED_FUNGIBLE,
+        )
+        self.assertEqual(history[-2].prior_projection_identity, previous.identity)
+        self.assertEqual(
+            history[-1].prior_projection_identity,
+            history[-2].identity,
+        )
+
+        with self.assertRaisesRegex(
+            AuthorityProjectionStoreError, "current immutable history"
+        ):
+            store.recertify_qualified(
+                self.authority,
+                self.fresh_evidence(previous),
+            )
+        self.assertEqual(store.current(previous.component_coordinate), recertified)
+        self.assertEqual(store.history(previous.component_coordinate), history)
+
+    def test_recertification_write_failure_keeps_old_qualified_head(self) -> None:
+        store = FileAuthorityProjectionStore(Path(self.temporary.name))
+        for projection in (self.inventory, self.assisted, self.retained):
+            store.append(projection)
+        store.append_qualified(self.authority, self.evidence)
+        previous = store.current(self.retained.component_coordinate)
+        original_write = store._atomic_write
+        projection_writes = 0
+
+        def fail_second_projection(path, content, *, exclusive=False):
+            nonlocal projection_writes
+            if path.parent.name == "projections":
+                projection_writes += 1
+                if projection_writes == 2:
+                    raise OSError("injected projection write failure")
+            return original_write(path, content, exclusive=exclusive)
+
+        with (
+            mock.patch.object(
+                store, "_atomic_write", side_effect=fail_second_projection
+            ),
+            self.assertRaisesRegex(AuthorityProjectionStoreError, "append lock failed"),
+        ):
+            store.recertify_qualified(
+                self.authority,
+                self.fresh_evidence(previous),
+            )
+        self.assertEqual(store.current(previous.component_coordinate), previous)
 
 
 if __name__ == "__main__":
