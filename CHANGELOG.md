@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Bind reviewed captured runtime directories to retained native SDK commands,
+  preserving complete native dependency observations and SDK-owned placements.
+  Reject ambient injection, shadowing, drift and revocation; retain captured
+  context in versioned command evidence. Installed native qualification remains
+  required before release acceptance.
+
 - Connect public local retained execution to fresh source-built SDK producers
   under an explicit recipe/snapshot selection policy. Preserve the earlier
   run-bound policy, authorization, complete custody and revocation checks.

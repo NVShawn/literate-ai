@@ -453,6 +453,10 @@ class RetainedProjectExecutionWorkspace:
     ):
         if self._native_sdks is None:
             return nullcontext(None)
+        from literate_ai.adapters.retained_sdk_runtime_context import (
+            RetainedSdkRuntimeContext,
+        )
+
         return self._native_sdks.command_scope(
             tuple(argv),
             tool=tool,
@@ -463,6 +467,11 @@ class RetainedProjectExecutionWorkspace:
             authorize=self._native_sdk_authorize,
             clock=lambda: datetime.now(UTC),
             record=self._native_sdk_record,
+            captured_runtime_context=(
+                RetainedSdkRuntimeContext(self._dependencies, environment)
+                if self.plan.profile.runtime_library_paths
+                else None
+            ),
         )
 
     def completed_run(self):
@@ -664,8 +673,12 @@ class RetainedProjectExecutionWorkspace:
                     phase=action.stage,
                 ) as sdk_scope,
             ):
+                command = (*binding.command, *argv)
+                if sdk_scope is not None and sdk_scope.environment is not None:
+                    command = sdk_scope.argv
+                    environment = dict(sdk_scope.environment)
                 result = run_bounded_process(
-                    (*binding.command, *argv),
+                    command,
                     cwd=self.objects,
                     environment=environment,
                     timeout_seconds=action.timeout_seconds,

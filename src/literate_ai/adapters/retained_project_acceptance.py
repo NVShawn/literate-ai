@@ -256,6 +256,12 @@ def verify_retained_acceptance_action(
                 )
             )
             with context as sdk_scope:
+                if (
+                    sdk_scope is not None
+                    and getattr(sdk_scope, "environment", None) is not None
+                ):
+                    command = sdk_scope.argv
+                    case_environment = dict(sdk_scope.environment)
                 if filesystem is not None:
                     filesystem.require_initial()
                 result = run_bounded_process(

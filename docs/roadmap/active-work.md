@@ -30112,6 +30112,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Owner:** Retained public runtime and native SDK acquisition
 - **Direction:** Execute original-source projects with their complete selected source-built SDK closure through the public retained CLI.
 - **Conclusion:** Issue22 already owns this gap. Reuse current locked-authority snapshots and production SDK acquisition, live revocation, authorization and command evidence; never accept transported producer claims or relabel SDK inputs. Planning stays read-only and exact reviewed authorization precedes SDK builds.
+- **Captured loader composition (issue [#118](https://github.com/jordanhubbard/literate-ai/issues/118)):** An installed native probe reaches the first retained SDK command and refuses the reviewed captured loader variable. Reuse the existing complete retained dependency guard as a typed, plan-bound runtime context; compare the SDK native dependency subgraph under that environment before authorizing each command. Record the context with the command grant and keep ambient overrides, shadowing, drift and revocation fail-closed. Native installed positive/negative renewal remains required.
 - **Identity evidence:** A real CMake SDK is built twice under fresh producer
   grants: locked selection and complete SDK snapshot identities are equal, while
   live consumer-input identities differ. The legacy input-bound policy therefore

@@ -216,6 +216,11 @@ unsupported hosts refuse the opt-in. Omission preserves legacy identities and
 default environments. This selects captured runtime libraries for native tools;
 it does not suppress system fallback or establish complete compiler/sysroot
 provenance. Native/installed qualification remains open under RETAINED-LOADER-001.
+When selected SDKs are present, each SDK command also binds the complete captured
+runtime context and preserves SDK-owned placements and the native code/dependency
+graph. Reviewed external byte copies may relocate with equivalent native edges;
+ambient import/preload injection and SDK shadowing remain refusals. Captured
+context records do not establish compiler SDK or product release admission.
 
 Development profiles can also select `output_command_paths`: up to 32 ordered
 output-relative directories at or below declared build products. These precede

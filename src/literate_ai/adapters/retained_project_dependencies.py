@@ -137,6 +137,7 @@ class RetainedProjectDependencyGuard:
         self._inputs = Path(inputs)
         self._manifest = manifest
         self._plan_identity = plan.identity
+        self._profile = plan.profile
         self._root_ref = retained_project_bom_ref(plan.identity)
         expected = sorted(plan.profile.tools)
         members = {member.path: member for member in manifest.members}
@@ -162,14 +163,14 @@ class RetainedProjectDependencyGuard:
         self._environment = dict(environment)
         self._canonical = self._observe()
 
-    def _observe(self) -> bytes:
+    def _observe(self, *, environment=None) -> bytes:
         try:
             verify_retained_project_inputs(self._inputs, self._manifest)
             for binding in self._tools:
                 binding.require_unchanged()
             observer = _observer(
                 tuple(binding.command for binding in self._tools),
-                self._environment,
+                self._environment if environment is None else environment,
                 artifact_files=(
                     tuple(
                         self._inputs / member.path
@@ -222,6 +223,48 @@ class RetainedProjectDependencyGuard:
             tuple(value["components"]),
             tuple(tuple(edge) for edge in value["edges"]),
         )
+
+    def observe_sdk_runtime_context(self, environment):
+        """Admit only the reviewed loader projection, with its actual native graph.
+
+        Acceptance may use a private HOME/TMP. Observe that exact environment;
+        never silently replace it with the ordinary command environment.
+        """
+        from literate_ai.adapters.native_sdk_execution import isolated_sdk_environment
+        from literate_ai.adapters.retained_project_environment import (
+            captured_runtime_environment,
+        )
+
+        environment = dict(environment)
+        clean = isolated_sdk_environment(environment)
+        overrides = {
+            key: value for key, value in environment.items() if key not in clean
+        }
+        captured = captured_runtime_environment(
+            self._inputs, self._manifest, self._profile
+        )
+        if not captured or overrides != captured:
+            raise RetainedProjectDependencyError(
+                "retained.sdk.uncaptured-loader-environment"
+            )
+        if self._observe(environment=environment) != self._canonical:
+            raise RetainedProjectDependencyError(
+                "retained.sdk.runtime-dependency-context-changed"
+            )
+        return {
+            "schema": "literate-ai/retained-sdk-runtime-context@1",
+            "plan_identity": self._plan_identity.to_dict(),
+            "manifest_identity": self._manifest.identity.to_dict(),
+            "environment_identity": canonical_identity(environment).to_dict(),
+            "captured_loader_environment": captured,
+            "input_root": str(self._inputs),
+            "captured_runtime_members": [
+                member.to_dict()
+                for member in self._manifest.members
+                if member.path.rpartition("/")[0] in self._profile.runtime_library_paths
+            ],
+            "observation": json.loads(self._canonical),
+        }
 
     def require_unchanged(
         self,

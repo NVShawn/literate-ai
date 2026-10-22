@@ -161,6 +161,7 @@ class NativeSdkExecutionInputs:
         authorize: Callable[[BuildRequest, ContentIdentity], BuildAuthorization],
         clock: Callable[[], datetime],
         record: Callable[[object], ContentIdentity],
+        captured_runtime_context=None,
     ) -> Iterator[NativeSdkCommandScope]:
         """Authorize one complete process lifetime, including caller-owned teardown."""
         from literate_ai.adapters.lifecycle.standard_local import (
@@ -173,14 +174,34 @@ class NativeSdkExecutionInputs:
         if not argv or argv[: len(tool.command)] != tool.command:
             raise ValueError("SDK execution command differs from its bound tool")
         selected_environment = dict(environment)
-        # These affect Python or native loader resolution outside the observed SDK
-        # graph. Refuse them; silently altering a command's environment changes it.
-        if any(_loader_override(key) for key in selected_environment):
+        # Caller loader overrides remain forbidden. Only a live reviewed retained
+        # dependency context can bind the complete captured loader projection.
+        if captured_runtime_context is not None:
+            from literate_ai.adapters.retained_sdk_runtime_context import (
+                RetainedSdkRuntimeContext,
+            )
+
+            if not isinstance(captured_runtime_context, RetainedSdkRuntimeContext):
+                raise TypeError(
+                    "SDK captured runtime requires a live retained dependency context"
+                )
+            if isinstance(self.owner, LinkedNativeSdkExecutionInputs):
+                raise ValueError(
+                    "Retained runtime context requires direct SDK ownership"
+                )
+        elif any(_loader_override(key) for key in selected_environment):
             raise ValueError(
                 "SDK execution environment has an ambient import or loader override"
             )
         self.require_unchanged()
         tool.require_unchanged()
+        if captured_runtime_context is not None:
+            captured_runtime_context.require_binding(
+                self,
+                environment=selected_environment,
+                source_identity=source_identity,
+                command_contract_identity=command_contract_identity,
+            )
         command_binding = {
             "phase": phase,
             "command_identity": command_identity.to_dict(),
@@ -194,6 +215,10 @@ class NativeSdkExecutionInputs:
             "manifest": self.manifest_identity.to_dict(),
             "runtime": self.runtime_identity.to_dict(),
         }
+        if captured_runtime_context is not None:
+            command_binding["captured_runtime_identity"] = (
+                captured_runtime_context.identity.to_dict()
+            )
         linked_scope = (
             self.owner.execution_scope
             if isinstance(self.owner, LinkedNativeSdkExecutionInputs)
@@ -221,6 +246,13 @@ class NativeSdkExecutionInputs:
         def require_authority() -> dict[str, object]:
             self.require_unchanged()
             tool.require_unchanged()
+            if captured_runtime_context is not None:
+                captured_runtime_context.require_current(
+                    self,
+                    environment=selected_environment,
+                    source_identity=source_identity,
+                    command_contract_identity=command_contract_identity,
+                )
             if grant.classification_digest != self.runtime_identity.uri:
                 raise ValueError(
                     "SDK execution grant differs from the fresh runtime graph"
@@ -263,9 +295,18 @@ class NativeSdkExecutionInputs:
             record(value.binding.build.resolution.build_plan.to_dict())
         evidence = record(
             {
-                "schema": "literate-ai/native-sdk-command-execution@2"
-                if linked_scope is None
-                else "literate-ai/native-sdk-command-execution@3",
+                "schema": (
+                    "literate-ai/native-sdk-command-execution@4"
+                    if captured_runtime_context is not None
+                    else "literate-ai/native-sdk-command-execution@2"
+                    if linked_scope is None
+                    else "literate-ai/native-sdk-command-execution@3"
+                ),
+                **(
+                    {"captured_runtime_context": captured_runtime_context.document}
+                    if captured_runtime_context is not None
+                    else {}
+                ),
                 **(
                     {}
                     if linked_scope is None

@@ -4,6 +4,7 @@
 - [x] Connect public local execution to complete live SDK owners and retained evidence.
 - [x] Qualify source-level fresh-producer execution and pre/post execution refusals.
 - [ ] Exercise canonical installed public CLI discovery and execution.
+- [ ] Qualify captured loader/SDK context composition, native dependency shadow refusal, input drift and revocation through private acceptance cleanup.
 
 ## Qualification
 

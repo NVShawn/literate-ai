@@ -37,3 +37,36 @@ remain mandatory.
 - **WHEN** project authority or a producer's current authorization changes
 - **THEN** command or receipt admission SHALL refuse
 - **AND** prior source and failure evidence SHALL remain available
+
+### Requirement: Captured retained SDK runtime environments
+
+A retained SDK command MAY use reviewed captured runtime directories. The framework
+SHALL bind the exact retained manifest, plan, complete native dependency graph and
+command environment. It SHALL preserve SDK-owned image placements, native code
+identities and equivalent dependency edges. Caller-supplied loader variables SHALL
+confer no authority.
+
+#### Scenario: Reviewed captured runtime dependency is needed
+
+- **WHEN** a retained consumer requires a captured runtime directory and a selected source-built SDK
+- **THEN** build, test and independent acceptance SHALL retain the complete captured dependency context in each SDK command grant/evidence
+- **AND** current input, native dependency, SDK producer and revocation checks SHALL remain live through cleanup
+
+#### Scenario: Loader context differs from reviewed native inputs
+
+- **WHEN** an ambient override, changed environment, redirected/missing directory, input drift or SDK dependency shadowing is observed
+- **THEN** the command or its evidence SHALL refuse
+- **AND** no profile contribution SHALL be silently removed to obtain acceptance
+
+#### Scenario: Captured external runtime copy
+
+- **WHEN** an external runtime image is copied to a reviewed captured directory
+- **THEN** its native code identity and complete dependency graph SHALL remain equivalent
+- **AND** SDK-owned images SHALL retain their reviewed placements
+- **AND** the actual captured paths and ownership SHALL remain in command evidence
+
+#### Scenario: Caller mapping changes during authorization
+
+- **WHEN** authorization mutates a caller-owned argv or environment mapping
+- **THEN** the process SHALL use the SDK scope's immutable approved values or refuse
+- **AND** a changed outer command context SHALL prevent retained admission

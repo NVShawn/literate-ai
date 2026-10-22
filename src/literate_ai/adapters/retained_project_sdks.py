@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Mapping
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, replace
 from pathlib import Path
+from types import MappingProxyType
 
 from literate_ai._filesystem import require_safe_directory
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
@@ -53,9 +55,11 @@ def read_retained_sdk_policy(root, manifest, locks):
     return policy
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class RetainedSdkCommandScope:
     evidence_identities: tuple = ()
+    argv: tuple[str, ...] | None = None
+    environment: Mapping[str, str] | None = None
 
 
 class RetainedProjectNativeSdkInputs:
@@ -287,7 +291,8 @@ class RetainedProjectNativeSdkInputs:
     @contextmanager
     def command_scope(self, argv, *, action_identity, **arguments):
         self.require_unchanged()
-        result = RetainedSdkCommandScope()
+        expected_argv = tuple(argv)
+        expected_environment = dict(arguments["environment"])
         with ExitStack() as stack:
             scopes = tuple(
                 stack.enter_context(
@@ -301,7 +306,22 @@ class RetainedProjectNativeSdkInputs:
                 )
                 for execution in self.executions
             )
+            if scopes:
+                if any(
+                    scope.argv != expected_argv
+                    or dict(scope.environment) != expected_environment
+                    for scope in scopes
+                ):
+                    raise ValueError("retained.sdk.command-projection-mismatch")
+            result = RetainedSdkCommandScope(
+                argv=expected_argv if scopes else None,
+                environment=MappingProxyType(expected_environment) if scopes else None,
+            )
             yield result
         self.require_unchanged()
-        result.evidence_identities = tuple(scope.evidence_identity for scope in scopes)
+        object.__setattr__(
+            result,
+            "evidence_identities",
+            tuple(scope.evidence_identity for scope in scopes),
+        )
         self._last_scopes = scopes
