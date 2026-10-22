@@ -32,10 +32,32 @@ class RetainedProjectInputTests(unittest.TestCase):
         self.limits = RetainedProjectLimits(100, 3_000_000, 4_000_000)
         self.roots = {"src": "source", "assets": "asset"}
 
-    def discover(self):
+    def discover(self, **kwargs):
         return inputs.discover_retained_project_inputs(
-            self.root, self.roots, self.limits
+            self.root, self.roots, self.limits, **kwargs
         )
+
+    def test_explicit_executable_paths_are_sealed_and_bounded(self):
+        executable = "src/main.py"
+        (self.root / executable).chmod(0o755)
+        manifest = self.discover(executable_paths=(executable,))
+        member = next(item for item in manifest.members if item.path == executable)
+        self.assertEqual(member.mode, 0o755)
+        inputs.verify_retained_project_inputs(self.root, manifest)
+        for declared in (("missing",), (executable, executable), [executable]):
+            with (
+                self.subTest(declared=declared),
+                self.assertRaises((TypeError, ValueError)),
+            ):
+                self.discover(executable_paths=declared)
+
+    @unittest.skipUnless(os.name == "nt", "Windows portable mode contract")
+    def test_windows_executable_selection_does_not_depend_on_posix_mode_bits(self):
+        executable = "src/main.py"
+        manifest = self.discover(executable_paths=(executable,))
+        member = next(item for item in manifest.members if item.path == executable)
+        self.assertEqual(member.mode, 0o755)
+        inputs.verify_retained_project_inputs(self.root, manifest)
 
     def test_alias_and_unsafe_paths_rejected(self):
         for path in ("../secret", "C:secret", "src/CON", "src/a.", "src\\a"):
@@ -69,9 +91,9 @@ class RetainedProjectInputTests(unittest.TestCase):
         original = inputs._stream
         changed = False
 
-        def mutate(root, name, limit, output=None):
+        def mutate(root, name, limit, output=None, **kwargs):
             nonlocal changed
-            result = original(root, name, limit, output)
+            result = original(root, name, limit, output, **kwargs)
             if output is not None and not changed:
                 changed = True
                 (self.root / "src" / "main.py").write_bytes(b"changed")

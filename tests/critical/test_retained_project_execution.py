@@ -17,6 +17,7 @@ from unittest.mock import patch
 from literate_ai.adapters import retained_project_dependencies as dependencies
 from literate_ai.adapters import retained_project_execution as execution
 from literate_ai.adapters.builders import BuildError
+from literate_ai.adapters.retained_project_acceptance import ACCEPTANCE_POLICY_PATH
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
@@ -27,6 +28,10 @@ from literate_ai.contracts import (
     canonical_json_bytes,
 )
 from literate_ai.contracts.retained_project import RetainedProjectLimits
+from literate_ai.contracts.retained_project_acceptance import (
+    RetainedProjectAcceptanceCase,
+    RetainedProjectAcceptancePolicy,
+)
 from literate_ai.contracts.retained_project_lifecycle import (
     RetainedProjectAction,
     RetainedProjectPlan,
@@ -157,6 +162,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             self.source,
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             RetainedProjectLimits(100, 64 * 1024 * 1024, 128 * 1024 * 1024),
+            executable_paths=("tools/runner",),
         )
         self.actions = (
             RetainedProjectAction(
@@ -306,6 +312,48 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                         self.actions[3],
                     ),
                 )
+
+    def test_output_capture_projects_reviewed_executable_intent(self):
+        policy = RetainedProjectAcceptancePolicy(
+            self.plan.component_locks,
+            (
+                RetainedProjectAcceptanceCase(
+                    "oracle-command",
+                    "accept",
+                    "app.bin",
+                    (),
+                    b"",
+                    0,
+                    b"",
+                    b"",
+                    10,
+                ),
+            ),
+        )
+        content = canonical_json_bytes(policy.to_dict())
+        policy_path = self.source / ACCEPTANCE_POLICY_PATH
+        policy_path.parent.mkdir()
+        policy_path.write_bytes(content)
+        self.profile = replace(
+            self.profile,
+            acceptance_policy_identity=ContentIdentity.parse_uri(
+                "sha256:" + hashlib.sha256(content).hexdigest()
+            ),
+        )
+        self.plan = replace(self.plan, profile=self.profile)
+        self.current = self.plan
+        workspace = self.workspace()
+        output = workspace.outputs / "app.bin"
+        output.write_bytes(b"portable executable fixture")
+        output.chmod(0o755)
+        with patch.object(
+            execution,
+            "discover_retained_project_inputs",
+            wraps=execution.discover_retained_project_inputs,
+        ) as discover:
+            manifest = workspace._capture_outputs(self.actions[0])
+        self.assertEqual(discover.call_args.kwargs["executable_paths"], ("app.bin",))
+        self.assertEqual(manifest.members[0].mode, 0o755)
 
     def test_stale_original_or_snapshot_refuses_before_process_launch(self):
         for selected in ("original", "snapshot"):

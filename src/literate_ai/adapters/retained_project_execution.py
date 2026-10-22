@@ -421,10 +421,8 @@ class RetainedProjectExecutionWorkspace:
             return None
         if not roots:
             raise RetainedProjectExecutionError("retained.execution.undeclared-output")
-        actual = discover_retained_project_inputs(
-            self.outputs,
-            {path: "retained-output" for path in sorted(top)},
-            self.manifest.limits,
+        actual = self._discover_output_manifest(
+            roots, {path: "retained-output" for path in sorted(top)}
         )
         for member in actual.members:
             if not any(
@@ -448,6 +446,34 @@ class RetainedProjectExecutionWorkspace:
         if not set(roots) <= nodes:
             raise RetainedProjectExecutionError("retained.execution.missing-output")
         return actual
+
+    def _output_executable_paths(self, roots: tuple[str, ...]) -> tuple[str, ...]:
+        """Project verifier-reviewed portable executable intent into outputs."""
+        if self._acceptance_policy is None:
+            return ()
+        return tuple(
+            sorted(
+                {
+                    case.executable
+                    for case in self._acceptance_policy.cases
+                    if any(
+                        case.executable == root
+                        or case.executable.startswith(root + "/")
+                        for root in roots
+                    )
+                }
+            )
+        )
+
+    def _discover_output_manifest(
+        self, roots: tuple[str, ...], roles: dict[str, str]
+    ) -> RetainedProjectManifest:
+        return discover_retained_project_inputs(
+            self.outputs,
+            roles,
+            self.manifest.limits,
+            executable_paths=self._output_executable_paths(roots),
+        )
 
     def _environment(self) -> dict[str, str]:
         # Do not inherit credentials, compiler/loader injection, user dotfiles,
@@ -553,8 +579,9 @@ class RetainedProjectExecutionWorkspace:
                 for path in prior.outputs
             }
             self._output_manifest = (
-                discover_retained_project_inputs(
-                    self.outputs, produced, self.manifest.limits
+                self._discover_output_manifest(
+                    tuple(produced),
+                    produced,
                 )
                 if produced
                 else None

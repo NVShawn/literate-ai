@@ -48,6 +48,7 @@ class RetainedProjectBomTests(unittest.TestCase):
             self.root,
             {"src": "source", "sdk": "sdk", "dependencies": "dependency"},
             limits,
+            executable_paths=("sdk/tool",),
         )
         self.outputs = discover_retained_project_inputs(
             self.root / "exports",

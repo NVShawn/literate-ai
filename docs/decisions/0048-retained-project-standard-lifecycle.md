@@ -96,6 +96,24 @@ Acceptance permits implementation and its tests under ADR 0006. It does not itse
 authorize a release, claim qualification, or merge a PR. Implementation and full
 qualification remain open under RETAINED-PROJECT-001.
 
+## Portable retained executable intent
+
+Input discovery accepts a sorted, unique tuple of reviewed executable paths. On
+POSIX, every declaration must also have a native execute bit; an explicit name
+cannot promote inert bytes. Windows has no corresponding POSIX mode bit, so the
+declaration supplies the portable `0755` intent that is sealed into the retained
+manifest. Later Windows verification reuses only that sealed selection while still
+rechecking the complete path, byte, size and role closure. Missing paths, aliases,
+duplicates and symlinks refuse. Changing executable intent therefore changes the
+manifest identity and cannot silently widen an accepted plan.
+
+Produced executable intent is not inferred from a Windows filesystem either. The
+withheld acceptance policy is the independent reviewed owner of executable output
+paths; output capture projects only cases that fall under the action's declared
+output roots. The sealed output manifest then carries that intent through verifier
+execution, admission and package projection. An absent declared executable fails
+capture instead of being silently packaged as inert data.
+
 ## Captured native runtime search paths
 
 Profiles may opt into an ordered `runtime_library_paths` tuple of at most 32

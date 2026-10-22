@@ -141,7 +141,12 @@ def _link_bytes(root: Path, name: str, limit: int) -> bytes:
 
 
 def _stream(
-    root: Path, name: str, limit: int, output: BinaryIO | None = None
+    root: Path,
+    name: str,
+    limit: int,
+    output: BinaryIO | None = None,
+    *,
+    windows_executable: bool = False,
 ) -> tuple[int, int, str]:
     path = root / name
     require_safe_directory(path.parent)
@@ -176,7 +181,13 @@ def _stream(
         or count != before.st_size
     ):
         raise RetainedProjectInputError("Retained input changed during read")
-    return count, 0o755 if before.st_mode & 0o111 else 0o644, digest.hexdigest()
+    executable = bool(before.st_mode & 0o111)
+    if os.name == "nt":
+        # NTFS does not carry the POSIX execute bits represented by this portable
+        # manifest.  The reviewed discovery caller must name Windows executables;
+        # subsequent verification reuses the sealed manifest's selection.
+        executable = windows_executable
+    return count, 0o755 if executable else 0o644, digest.hexdigest()
 
 
 def _inventory(
@@ -242,12 +253,20 @@ def discover_retained_project_inputs(
     limits: RetainedProjectLimits,
     *,
     allow_internal_symlinks: bool = False,
+    executable_paths: tuple[str, ...] = (),
 ) -> RetainedProjectManifest:
     """Read a complete declared closure; the caller must review the result."""
     root = _root(root)
     if type(allow_internal_symlinks) is not bool:
         raise TypeError(
             "Retained symlink admission requires explicit boolean selection"
+        )
+    if type(executable_paths) is not tuple:
+        raise TypeError("Retained executable paths require an explicit tuple")
+    canonical_relative_posix_paths(executable_paths, label="retained executables")
+    if executable_paths != tuple(sorted(set(executable_paths))):
+        raise RetainedProjectInputError(
+            "Retained executable paths must be sorted and unique"
         )
     selected = tuple(sorted(roots))
     canonical_relative_posix_paths(selected, label="retained roots")
@@ -257,11 +276,19 @@ def discover_retained_project_inputs(
         limits.max_entries,
         allow_internal_symlinks=allow_internal_symlinks,
     )
+    executable_set = set(executable_paths)
+    if not executable_set <= set(names):
+        raise RetainedProjectInputError(
+            "Retained executable path is absent from the selected inputs"
+        )
     members = []
     total = 0
     for name in names:
         size, mode, digest = _stream(
-            root, name, min(limits.max_file_bytes, limits.max_total_bytes - total)
+            root,
+            name,
+            min(limits.max_file_bytes, limits.max_total_bytes - total),
+            windows_executable=name in executable_set,
         )
         total += size
         role = next(
@@ -271,7 +298,15 @@ def discover_retained_project_inputs(
         )
         target = None
         if mode == 0o120000:
+            if name in executable_set:
+                raise RetainedProjectInputError(
+                    "Retained executable path must name an ordinary file"
+                )
             target = _link_bytes(root, name, size).decode("utf-8")
+        elif name in executable_set and mode != 0o755:
+            raise RetainedProjectInputError(
+                "Retained executable path lacks native execute permission"
+            )
         members.append(RetainedProjectMember(name, size, mode, digest, role, target))
     manifest = RetainedProjectManifest(selected, tuple(members), limits, directories)
     verify_retained_project_inputs(root, manifest)
@@ -296,7 +331,12 @@ def verify_retained_project_inputs(
     ):
         raise RetainedProjectInputError("Retained input inventory changed")
     for member in manifest.members:
-        if _stream(root, member.path, member.size) != (
+        if _stream(
+            root,
+            member.path,
+            member.size,
+            windows_executable=member.mode == 0o755,
+        ) != (
             member.size,
             member.mode,
             member.sha256,
@@ -346,7 +386,13 @@ def capture_retained_project_inputs(
         for member in manifest.members:
             blob = blobs / member.sha256
             with tempfile.TemporaryFile(dir=temporary) as stream:
-                if _stream(root, member.path, member.size, stream) != (
+                if _stream(
+                    root,
+                    member.path,
+                    member.size,
+                    stream,
+                    windows_executable=member.mode == 0o755,
+                ) != (
                     member.size,
                     member.mode,
                     member.sha256,
@@ -390,7 +436,12 @@ def capture_retained_project_inputs(
         verify_retained_project_inputs(root, manifest)
         verify_retained_project_inputs(tree, manifest)
         for digest, size in {m.sha256: m.size for m in manifest.members}.items():
-            if _stream(temporary, "blobs/" + digest, size) != (size, 0o644, digest):
+            if _stream(
+                temporary,
+                "blobs/" + digest,
+                size,
+                windows_executable=False,
+            ) != (size, 0o644, digest):
                 raise RetainedProjectInputError(
                     "Retained CAS blob changed during capture"
                 )

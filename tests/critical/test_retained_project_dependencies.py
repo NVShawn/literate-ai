@@ -40,6 +40,7 @@ class RetainedProjectDependencyTests(unittest.TestCase):
             self.root,
             {"sdk": "sdk"},
             RetainedProjectLimits(10, 4096, 8192),
+            executable_paths=("sdk/tool",),
         )
         plan, _locks = retained_project_sbom_fixture()
         identity = ContentIdentity.parse_uri(
@@ -199,6 +200,7 @@ class RetainedDependencyLinkTests(unittest.TestCase):
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             fixture.manifest.limits,
             allow_internal_symlinks=True,
+            executable_paths=("tools/runner",),
         )
         fixture.plan = replace(
             fixture.plan, manifest_identity=fixture.manifest.identity
