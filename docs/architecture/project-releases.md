@@ -241,6 +241,14 @@ the full test suite. It never installs system tools; a missing MSVC, Rust, LLVM,
 Node or Git is a preflight failure. With a reachable Windows worker at the exact
 revision, the repository's release needs no CI.
 
+The Windows gate retains wheel-operation timings in a unique
+`_build/wg-*/wheel-timings.json` file for each attempt; its wheel command prints
+the selected path. Completed spans are replaced atomically, so a failed or
+interrupted later write preserves the previous report. The current interrupted
+operation may have no completed span. Labels exclude command arguments and
+workspace paths. These timings diagnose slow stages; they are not qualification
+receipts, and a timing report does not establish that the wheel or full gate passed.
+
 ## Versioned release lines
 
 Every release belongs on `release/<major>.<minor>.x`, including releases using

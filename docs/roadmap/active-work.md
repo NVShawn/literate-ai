@@ -30677,3 +30677,19 @@ remains required after composition. No Python production code changes.
   checkout, preserving the previous gate's temporary evidence. Two focused tests and
   seven CycloneDX tests pass through `make python-check`; the fresh-process regression
   fails against the original eager import. Catalog costs and full-gate renewal remain open.
+
+### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
+
+- **GitHub issue:** [#123](https://github.com/jordanhubbard/literate-ai/issues/123)
+
+- **Priority:** P1
+- **Owner:** Native Windows release gate
+- **Direction:** Retain existing wheel-smoke per-operation timing spans through the full native gate without dropping checks or widening execution bounds.
+- **Conclusion:** Issue #123 tracks a 5400.328-second wheel timeout with no stage timing artifact despite an existing timing-report option; isolated successful validation takes 9.187 seconds and does not identify the aggregate bottleneck.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Pass a unique per-attempt timing report to wheel smoke and document its diagnostic scope.
+- **Evidence:**
+  - [x] Completed spans survive partial-write failure on macOS and native Windows; the original writer fails the same check. Eight focused tests, lint, format and driver review pass. Two controlled gate attempts keep distinct reports after deliberate stage failure.
+  - [ ] Renew the configured host lifecycle/receipt and exact native wheel/full qualification.
+- **Evidence:** [Timing development record](../../verification/windows-wheel-timing-development.json). The documentation authority review is recorded; the old receipt is stale until complete renewal. Timing artifacts remain diagnostic and never imply a passing wheel or gate.
