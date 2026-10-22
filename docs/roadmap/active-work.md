@@ -4689,14 +4689,13 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ### Current consolidation inventory
 
-After the requested merge pass, three reviews remain. The earlier
-WORKTREE-CONSOLIDATION-001 inventory and older records below are historical.
+The remaining retained stack is composed in PR #110. PR #105 and PR #82
+are superseded by exact merge ancestry; their branches and histories are retained.
+The earlier inventories below are historical.
 
 | Review | Retained scope | Landing state |
 | --- | --- | --- |
-| [#105](https://github.com/jordanhubbard/literate-ai/pull/105) | Includes #77, #78, #81, #89 and #99 by ancestry | Swift compiler-mode repair prepared; exact-head CI required |
-| [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #87, #108 and #109 by ancestry | Draft; pending macOS CI and remaining qualification |
-| [#82](https://github.com/jordanhubbard/literate-ai/pull/82) | Additional public-execution merge/evidence history | Retained draft; reconcile unique history before disposition |
+| [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
@@ -30156,10 +30155,10 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Conclusion:** Compose the current main and PR105 repair into PR110 with both histories preserved. Resolve overlapping retained runtime and PE observation changes deliberately, retain PR82 unique history, and require exact combined CI before default-branch landing.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Merge current PR105 repair and main into the retained SDK integration; preserve its FreeBSD and native SDK additions.
-  - [ ] Reconcile PR82 unique history with the combined implementation and retain its evidence without claiming new qualification.
+  - [x] Merge current PR105 repair and main into the retained SDK integration; preserve its FreeBSD and native SDK additions.
+  - [x] Reconcile PR82 unique history with the combined implementation and retain its evidence without claiming new qualification.
 - **Evidence:**
-  - [ ] Focused runtime, PE observer and adoption checks and the full local combined regression pass.
+  - [x] Focused runtime, PE observer and adoption checks and the full local combined regression pass.
   - [ ] Current driver/documentation reviews and exact-head CI pass before landing; retain uncompleted native/package gates.
 
 ### [ ] REBUILD-ENTRY-001 — Normalize or safely reject Component file entry points in Standard rebuild
@@ -30406,7 +30405,7 @@ outside the combined #105/#110 ancestry and therefore remains open. Unique local
 heads `bf4ee21e`, `fb35e56d`, `51291de9` and `491bc807` remain unchanged on their
 original branches; retirement of their checkouts is not a completion claim.
 
-Remaining review scopes are #105 (retained lifecycle/runtime integration), #110
+At that pass, remaining review scopes were #105 (retained lifecycle/runtime integration), #110
 (native SDK public execution, including #109/#108/#87), #82 (public execution
 merge/evidence history), #112 (qualified-library recertification) and #106
 (setup-bazel action update). #105's prior exact-head Linux run fails in the
@@ -30430,7 +30429,7 @@ reusable migration-contract or platform-qualification obligations.
   - [x] Add portable symlink-driver regression coverage and requalify the affected native builder path.
 - **Evidence:**
   - [x] Focused compiler discovery and native Swift tests, format/lint, and reviewed driver/documentation authority checks pass.
-  - [ ] Require green exact review-head CI before merging PR105; retain pending qualification honestly.
+  - [ ] Require green exact review-head CI before merging the composed PR110; PR105 is retained by ancestry and superseded. Keep remaining qualification honest.
 
 **Current local repair evidence:** All three native Swift builder cases pass on
 macOS, including direct resolved-compiler compilation, both executable modes,
@@ -30465,3 +30464,38 @@ reviewed driver:
 skip. This proof remains scoped to PR105 plus merged main. MERGE-STACK-001
 separately composes PR110 and PR82 and requires its own current evidence and
 hosted matrix; none of this evidence is relabeled for that larger code closure.
+
+**MERGE-STACK-001 local qualification and publication:** Composed code `7ef6a3e9`
+and metadata ancestry `91347211` have identical source and test trees. The clean,
+uninterrupted `make python-check` passes all 2,188 selected cases: 2,118 passes,
+70 explicit skips, zero failures and zero known failures, in 735.513 seconds,
+with command exit 0. A preceding resumed run accounted for the same cases but
+returned exit 2 because checkpoint repair is not final qualification; that run
+is retained separately and was not substituted for this fresh pass.
+All 12 PE-custody cases pass. Lint, format, repository layout, public export,
+four strict OpenSpec changes and all 121 diagrams across 625 Markdown files pass.
+
+The configured host lifecycle passes all 227 tests and independent acceptance.
+Supported receipt promotion succeeds, and `litai verify` passes authority and
+current receipt with three unconfigured gates skipped. Current receipt:
+`sha256:bdd4db5b31326e915ec70833127df7c8e74cd93778e93aa533fa423e94194b39`; finalized candidate:
+`sha256:b43100845924856b28eb4cd74fa3cb3d33f90d52aa0391a064ee7becf22cabe3`;
+reviewed driver:
+`sha256:3dc534c54d4a2e8e279b76437fca185959d63a1130fb7d504347e9703f9fbb3e`.
+This 227-test result belongs to the composed candidate and does not relabel the
+predecessor PR105's 230-test result. The source tree is
+`f307198c84cb72ec97a2516ffaa939a8e67910bb`, and the test tree is
+`db4292a5392923d36a372f1349d341678244bf50`.
+
+The remaining PR105/PR82 checkouts were clean and inactive, and every head was
+already an ancestor of this combined branch. Ignored state was preserved by
+same-volume rename and revalidated device/inode identity. Only main and the
+combined review checkout remain; all branch refs and unique earlier work are
+retained. The second migration journal SHA-256 is `cccdceec7e771fcde80a7642931aec205778c51a7fec2ad26bdec1334dc32a55`.
+Queued runs `39687824995` and `39693800706` were canceled only after verifying
+closed PR108/PR109 heads are ancestors of the active review; histories remain.
+No main qualification run was canceled. PR105 and PR82 are superseded by PR110,
+which retains their exact public heads and their full histories. The combined
+branch still requires its own exact hosted CI before landing. Canonical installed
+public SDK execution, actual compiler SDK, native packaging and release admission
+remain open in their owning items; this controller/sample proof does not close them.
