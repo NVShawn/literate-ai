@@ -264,6 +264,28 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         )
         self.current = self.plan
 
+    def test_windows_system_root_is_explicit_and_required(self):
+        with (
+            patch.object(execution.os, "name", "nt"),
+            patch.dict(
+                execution.os.environ,
+                {"SYSTEMROOT": "C:\\Windows", "LITAI_FIXTURE_SECRET": "secret"},
+                clear=True,
+            ),
+        ):
+            self.assertEqual(
+                execution._host_system_environment(), {"SYSTEMROOT": "C:\\Windows"}
+            )
+        with (
+            patch.object(execution.os, "name", "nt"),
+            patch.dict(execution.os.environ, {}, clear=True),
+            self.assertRaisesRegex(
+                execution.RetainedProjectExecutionError,
+                "windows-system-root-required",
+            ),
+        ):
+            execution._host_system_environment()
+
     def test_authorization_and_current_plan_precede_workspace_creation(self):
         for changes in ({"allow_host_execution": False}, {"authorization": None}):
             with self.subTest(changes=changes), self.assertRaises(ValueError):

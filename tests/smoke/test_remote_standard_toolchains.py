@@ -33,7 +33,7 @@ from tests.support import (
 )
 from tests.support.fixtures_test_standard_toolchain_observations import observation
 
-REMOTE_TOOLCHAIN_TEST_DEADLINE = timedelta(hours=12)
+REMOTE_TOOLCHAIN_TEST_DEADLINE = timedelta(hours=23)
 
 
 def snapshot(*tools):

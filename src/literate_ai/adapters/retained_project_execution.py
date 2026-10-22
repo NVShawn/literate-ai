@@ -69,6 +69,19 @@ _PROCESS_OUTPUT_BYTES = 4 * 1024 * 1024
 _TOTAL_OUTPUT_BYTES = 64 * 1024 * 1024
 
 
+def _host_system_environment() -> dict[str, str]:
+    """Capture the Windows system root required by native dependency custody."""
+
+    if os.name != "nt":
+        return {}
+    system_root = os.environ.get("SYSTEMROOT")
+    if not system_root:
+        raise RetainedProjectExecutionError(
+            "retained.execution.windows-system-root-required"
+        )
+    return {"SYSTEMROOT": system_root}
+
+
 @dataclass(frozen=True, slots=True)
 class RetainedProjectCommandObservation:
     plan_identity: ContentIdentity
@@ -479,6 +492,7 @@ class RetainedProjectExecutionWorkspace:
         # Do not inherit credentials, compiler/loader injection, user dotfiles,
         # Python paths or the caller's command search path.
         return {
+            **_host_system_environment(),
             **captured_runtime_environment(
                 self.inputs, self.manifest, self.plan.profile
             ),
