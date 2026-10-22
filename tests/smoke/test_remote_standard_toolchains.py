@@ -1,7 +1,7 @@
 """Received tools satisfy exact Flavor constraints without controller discovery."""
 
 import unittest
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 from literate_ai.adapters.action_admission import CommandActionWorkerPool
@@ -31,8 +31,9 @@ from tests.support import fixtures_test_action_tool_observation as transport_fix
 from tests.support import (
     fixtures_test_standard_command_projection as projection_fixture,
 )
-from tests.support.action_deadline import ACTION_TEST_DEADLINE
 from tests.support.fixtures_test_standard_toolchain_observations import observation
+
+REMOTE_TOOLCHAIN_TEST_DEADLINE = timedelta(minutes=60)
 
 
 def snapshot(*tools):
@@ -104,11 +105,12 @@ class RemoteStandardToolchainTests(unittest.TestCase):
             cwd=fixture.root,
             environment=fixture.environment,
         )
-        # This test exercises projection and its live guard, not whether a deadline
-        # allocated before the real hardware probe survives a loaded hosted shard.
-        # Start the shared subprocess budget at the operation under test; explicit
-        # expiry coverage uses its own already-expired deadlines.
-        deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
+        # This real integration path performs repeated capability and dependency
+        # observations. Give it its own bounded budget for loaded Windows shards;
+        # explicit expiry coverage uses separate already-expired deadlines.
+        deadline = ActionDispatchDeadline(
+            datetime.now(UTC) + REMOTE_TOOLCHAIN_TEST_DEADLINE
+        )
         catalog = ExecutionWorkerCatalog((fixture.worker,))
         pool = CommandActionWorkerPool(
             lambda: catalog,
@@ -118,7 +120,7 @@ class RemoteStandardToolchainTests(unittest.TestCase):
             phase=LifecycleActionKind.INDEX,
             source_handoff="filesystem-cas",
             target_profile="host",
-            maximum_hardware_age=ACTION_TEST_DEADLINE,
+            maximum_hardware_age=REMOTE_TOOLCHAIN_TEST_DEADLINE,
             cwd=fixture.root,
             environment=fixture.environment,
         )
