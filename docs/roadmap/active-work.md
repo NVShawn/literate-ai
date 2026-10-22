@@ -30618,7 +30618,7 @@ Six binding controls pass from this new installed prefix. The primary worker's
 timeouts remain retained. Its bounded diagnostic identifies vnode processing
 latency alongside a root-owned periodic scan; the scan and kernel settings are
 unchanged. The isolated comparison also changes kernel/filesystem/load, so it is
-not a single-variable performance attribution. Compiler SDK, package, product
-receipt and release admission remain unearned. Finish the ten installed context
-controls, then renew exact composed Windows/descriptor regression, wheel and
-lifecycle qualification before landing.
+not a single-variable performance attribution. All ten installed context controls
+now pass with zero skips; 469 production modules resolve from the installed prefix. Compiler SDK, package, product
+receipt and release admission remain unearned. Renew exact composed
+Windows/descriptor regression, wheel and lifecycle qualification before landing.
