@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Repository maintenance consolidates superseded reviews and inactive worktrees
+  while preserving unique commits, ignored qualification evidence and open gates.
+
 - Swift generation uses one top-level entrypoint and validates every Swift source file together, preventing auxiliary tools from breaking the native build after generation.
 
 - Source installation retains the standalone macOS Python shared library before bootstrapping pip in copied private runtimes, preserving self-update custody.

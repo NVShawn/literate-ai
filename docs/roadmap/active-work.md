@@ -4687,6 +4687,20 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ## Open pull-request landing queue
 
+### Current consolidation inventory
+
+The WORKTREE-CONSOLIDATION-001 pass retains these five reviews. Older inventory
+below is historical and does not supersede this disposition.
+
+| Review | Retained scope | Landing state |
+| --- | --- | --- |
+| [#105](https://github.com/jordanhubbard/literate-ai/pull/105) | Includes #77, #78, #81, #89 and #99 by ancestry | Draft; prior Linux Swift test failure |
+| [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #87, #108 and #109 by ancestry | Draft; pending macOS CI and remaining qualification |
+| [#82](https://github.com/jordanhubbard/literate-ai/pull/82) | Additional public-execution merge/evidence history | Retained draft; reconcile unique history before disposition |
+| [#112](https://github.com/jordanhubbard/literate-ai/pull/112) | Qualified-library recertification | Pending macOS CI; promotion migration boundary remains open |
+| [#106](https://github.com/jordanhubbard/literate-ai/pull/106) | setup-bazel 0.19.1 action pin | Green; retain existing sequencing after #105 |
+
+
 ### Retained 1.2 review inventory — repository migrated
 
 NVIDIA-dev/literate-ai is archived. Its integration PR #513 is closed and its
@@ -29833,3 +29847,46 @@ Fresh installed old-wheel `90d5b6e9` to current-wheel journeys pass coordinated 
 At baseline composed source `bb3a8727`, the native FreeBSD full run passes 1,828 cases with 78 skips across 1,906 cases, including the four actual package cases, complete chain, process supervision and 45 retained-source/export/package cases (archive `b15c89eb7d73cfd843c7161aaaca231b46f873e074fabc61e79722f9035bdb39`). Its invocation omitted the explicit pinned-pip input, causing 20 Python cases to skip. A separate six-module run with the staged, digest-verified installer passes all 21 cases without skips, covering every previously skipped ID plus one previously passing case (independently collected archive `3a90e6ad331398b260096b3ba763eb74f518c1daf75031c661be3bd8d5f19eb0`). The original full report is retained unchanged.
 
 Local native Elixir 1.20.4/OTP 29 with source-built pinned Hex 2.5.1 passes all three library and both graph qualification cases with no skips, including the four Hex-fetch failures observed in the superseded PR #99 run. PR #81 final-head CI 39545486434 passes at `5543f5cc`. PR #105 still requires exact current-head CI and the active provided-wheel FreeBSD run pairing the `c3d15a2c` harness with those identical wheel bytes. Later qualification-note edits change metadata only; they do not relabel these evidence origins. Broader native catalog/compiler SDK and actual Windows ARM64 acceptance remain open.
+
+### [x] WORKTREE-CONSOLIDATION-001 — Consolidate reviewed worktrees and superseded pull requests
+
+- **Priority:** P1
+- **Owner:** Repository worktree and review inventory
+- **Direction:** Consolidate existing worktrees and PRs while retaining unfinished work and qualification evidence.
+- **Conclusion:** Retain independent review scopes and their full Git histories. Close only reviews whose exact heads are ancestors of retained integration reviews; archive ignored state before retiring clean inactive checkouts. Do not merge failing or pending candidates or bypass branch garbage-collection policy.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Inventory exact review heads, local commits, active checkouts and ignored state.
+  - [x] Retire redundant clean inactive worktrees after preserving ignored state and proving every head remains reachable.
+  - [x] Close superseded reviews with explicit links to retained integration reviews; preserve unique review and branch scope.
+- **Evidence:**
+  - [x] Revalidate worktree status and ref reachability immediately before removal; retain a local migration journal.
+  - [x] Verify final worktree inventory, open review inventory and untouched unique branch heads.
+
+**Consolidation evidence:** The operator-authorized pass reduced 27 registered
+worktrees to four: the main checkout and the integration checkouts for #105,
+#110 and #82. All 23 retired worktrees were clean and inactive; their exact
+heads remain reachable through unchanged local branches. All 893 ignored paths
+were preserved by same-volume rename, with device/inode identity rechecked after
+retirement. The local migration journal SHA-256 is `f1c221b37977b11cc01e931c8ad6849b91597f0e7f7bfbf5c0dfa0f2f4eacb9e`;
+its ignored archive remains under the repository build output. No branch was
+deleted, and the policy-driven garbage-collection plan admitted no candidates.
+
+Closed #77, #78, #81, #89 and #99 into #105, and #87, #108 and #109 into #110.
+Each closed review's exact remote head was verified as a Git ancestor of its
+retained integration review immediately before closure. Branches and review
+history remain available. #82 retains five additional merge/evidence commits
+outside the combined #105/#110 ancestry and therefore remains open. Unique local
+heads `bf4ee21e`, `fb35e56d`, `51291de9` and `491bc807` remain unchanged on their
+original branches; retirement of their checkouts is not a completion claim.
+
+Remaining review scopes are #105 (retained lifecycle/runtime integration), #110
+(native SDK public execution, including #109/#108/#87), #82 (public execution
+merge/evidence history), #112 (qualified-library recertification) and #106
+(setup-bazel action update). #105's prior exact-head Linux run fails in the
+Swift builder integration test. #110/#112 still have queued macOS CI. #106 is
+green but retains its existing sequencing after #105. None was merged by this
+maintenance pass. Worker alignment refused the configured template with
+`worker_alignment.invalid`; no user-worker qualification jobs were dispatched
+or worker configuration repaired. This operational audit does not close WORKTREE-002's
+reusable migration-contract or platform-qualification obligations.
