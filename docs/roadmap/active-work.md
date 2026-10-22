@@ -30128,3 +30128,17 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Evidence:**
   - [ ] A real locked source-built SDK fixture passes the canonical installed public CLI retained build/test/docs/independent acceptance; missing authorization, producer drift, policy mismatch and revocation refuse before accepted evidence.
   - [ ] Full regression, static/driver/documentation checks, installed wheel and native renewal pass at the exact resulting candidate.
+
+### [ ] MERGE-STACK-001 — Resolve and qualify the remaining retained integration stack
+
+- **Priority:** P0
+- **Owner:** Retained lifecycle integration and review landing
+- **Direction:** Merge the remaining reviews after the maintainer consolidation request.
+- **Conclusion:** Compose the current main and PR105 repair into PR110 with both histories preserved. Resolve overlapping retained runtime and PE observation changes deliberately, retain PR82 unique history, and require exact combined CI before default-branch landing.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Merge current PR105 repair and main into the retained SDK integration; preserve its FreeBSD and native SDK additions.
+  - [ ] Reconcile PR82 unique history with the combined implementation and retain its evidence without claiming new qualification.
+- **Evidence:**
+  - [ ] Focused runtime, PE observer and adoption checks and the full local combined regression pass.
+  - [ ] Current driver/documentation reviews and exact-head CI pass before landing; retain uncompleted native/package gates.
