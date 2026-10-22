@@ -77,10 +77,11 @@ class StandardSourceAdmissionRequest:
     flavor_set_identity: ContentIdentity
     skill_closure_identity: ContentIdentity
     coding_cli_tool_binding_identity: ContentIdentity
-    coding_cli_transcript_identity: ContentIdentity
+    coding_cli_transcript_identity: ContentIdentity | None
     source_selectors: StandardSourceSelectorSet
     framework_distribution_identity: ContentIdentity
     inherited_session_handoff: InheritedSessionHandoffEvidence | None = None
+    retained_source_review_identity: ContentIdentity | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.generation, SourceGenerationResumeCandidate):
@@ -91,11 +92,22 @@ class StandardSourceAdmissionRequest:
             "flavor_set_identity",
             "skill_closure_identity",
             "coding_cli_tool_binding_identity",
-            "coding_cli_transcript_identity",
             "framework_distribution_identity",
         ):
             if not isinstance(getattr(self, name), ContentIdentity):
                 raise TypeError(f"{name} must be a ContentIdentity")
+        if (self.coding_cli_transcript_identity is None) == (
+            self.retained_source_review_identity is None
+        ):
+            raise TypeError(
+                "source admission requires one transcript or retained review"
+            )
+        for value in (
+            self.coding_cli_transcript_identity,
+            self.retained_source_review_identity,
+        ):
+            if value is not None and not isinstance(value, ContentIdentity):
+                raise TypeError("source origin bindings must be content identities")
         if not isinstance(self.source_selectors, StandardSourceSelectorSet):
             raise TypeError("source_selectors must be a StandardSourceSelectorSet")
         if self.inherited_session_handoff is not None and not isinstance(
@@ -110,13 +122,13 @@ class StandardSourceAdmissionService:
     def __init__(
         self,
         verifier: StandardGeneratedSourceVerifier,
-        publisher: StandardSourceAdmissionPublisher,
+        publisher: StandardSourceAdmissionPublisher | None = None,
         *,
         clock: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
         if not callable(getattr(verifier, "verify", None)):
             raise TypeError("verifier must provide verify")
-        if not callable(getattr(publisher, "publish", None)):
+        if publisher is not None and not callable(getattr(publisher, "publish", None)):
             raise TypeError("publisher must provide publish")
         if not callable(clock):
             raise TypeError("clock must be callable")
@@ -124,9 +136,10 @@ class StandardSourceAdmissionService:
         self.publisher = publisher
         self.clock = clock
 
-    def admit(
+    def prepare(
         self, request: StandardSourceAdmissionRequest
     ) -> StandardSourceAdmissionMembership:
+        """Verify exact source for an enclosing atomic cache publication."""
         if not isinstance(request, StandardSourceAdmissionRequest):
             raise TypeError("request must be a StandardSourceAdmissionRequest")
         generation = request.generation
@@ -163,7 +176,42 @@ class StandardSourceAdmissionService:
                 "source_admission.generation_authority_mismatch",
                 "candidate and generation provenance bind different authority",
             )
-        if not provenance.model_stage_output_identities:
+        retained_review = provenance.retained_source_identity
+        if retained_review is not None:
+            from literate_ai.contracts import canonical_identity
+            from literate_ai.contracts.model_scopes import (
+                RETAINED_SOURCE_NO_MODEL_SELECTOR,
+                RETAINED_SOURCE_PROVIDER,
+            )
+
+            binding = canonical_identity(
+                {
+                    "schema": "literate-ai/retained-source-selection@1",
+                    "origin": RETAINED_SOURCE_PROVIDER,
+                    "review_identity": retained_review.uri,
+                    "generation_provider": None,
+                }
+            )
+            if (
+                request.retained_source_review_identity != retained_review
+                or request.coding_cli_transcript_identity is not None
+                or request.inherited_session_handoff is not None
+                or cache_key.model_binding.provider_id != RETAINED_SOURCE_PROVIDER
+                or cache_key.model_binding.model_selector
+                != RETAINED_SOURCE_NO_MODEL_SELECTOR
+                or cache_key.model_binding.exact_revision_identity is not None
+                or cache_key.coding_cli_tool_binding_identity != binding
+                or cache_key.request_identity != retained_review
+                or cache_key.source_semantics_identity != retained_review
+            ):
+                raise StandardSourceAdmissionError(
+                    "source_admission.retained_origin_mismatch",
+                    "retained admission requires its exact reviewed no-model origin",
+                )
+        elif (
+            request.retained_source_review_identity is not None
+            or not provenance.model_stage_output_identities
+        ):
             raise StandardSourceAdmissionError(
                 "source_admission.coding_cli_provenance_missing",
                 "admission requires retained coding-CLI model output evidence",
@@ -214,9 +262,13 @@ class StandardSourceAdmissionService:
                 "admission request does not bind the exact generation recipe, "
                 "planned coding-CLI request, and coding CLI",
             )
-        if handoff is None and (
-            request.coding_cli_transcript_identity
-            not in provenance.model_stage_output_identities
+        if (
+            retained_review is None
+            and handoff is None
+            and (
+                request.coding_cli_transcript_identity
+                not in provenance.model_stage_output_identities
+            )
         ):
             raise StandardSourceAdmissionError(
                 "source_admission.coding_cli_transcript_mismatch",
@@ -254,6 +306,7 @@ class StandardSourceAdmissionService:
             generated_test_suite_identity=candidate.generated_test_suite_identity,
             coding_cli_tool_binding_identity=request.coding_cli_tool_binding_identity,
             coding_cli_transcript_identity=request.coding_cli_transcript_identity,
+            retained_source_review_identity=request.retained_source_review_identity,
             generation_provenance_identity=output.provenance_identity,
             test_plan_identity=verification.test_plan_identity,
             test_results=verification.test_results,
@@ -263,6 +316,17 @@ class StandardSourceAdmissionService:
             admitted_at=self.clock().astimezone(UTC).isoformat().replace("+00:00", "Z"),
         )
         membership = StandardSourceAdmissionMembership(generation, evidence)
+        return membership
+
+    def admit(
+        self, request: StandardSourceAdmissionRequest
+    ) -> StandardSourceAdmissionMembership:
+        if self.publisher is None:
+            raise StandardSourceAdmissionError(
+                "source_admission.publisher_missing",
+                "admission requires an explicit publication port",
+            )
+        membership = self.prepare(request)
         published = self.publisher.publish(membership)
         if published != membership.identity:
             raise StandardSourceAdmissionError(

@@ -209,6 +209,33 @@ that owns its promotion evidence. The adopted root can therefore advance to `dra
 without copying generated authority files across project boundaries or rewriting the
 retained project configuration.
 
+To revise a still-unqualified registered child, derive and sign a new current review,
+then plan its replacement using the same acceptance arguments:
+
+```console
+litai spec accept SOURCE BUNDLE --review REVIEW --trust-key KEY \
+  --target accepted-next --integrate-project ADOPTED_ROOT \
+  --plan-native-child-replacement > replacement-plan.json
+# Review the old registration, complete child-tree identities, and new review binding.
+litai spec accept SOURCE BUNDLE --review REVIEW --trust-key KEY \
+  --target accepted-next --integrate-project ADOPTED_ROOT \
+  --replace-native-child replacement-plan.json
+```
+
+Repeat any qualification-profile, target and Flavor options in both commands. Planning
+changes neither the child nor the accepted specification set. Apply rechecks the signed
+source, review, parent registration and complete prior child tree. It preserves the
+project identifier, retains the old promotion and registration beneath the parent's
+`.literate/native-updates/` directory, and restores both on failure. Concurrent edits
+are preserved and reported as a rollback conflict. Retention is bounded to 4,096 nodes,
+64 MiB per file and 256 MiB total; unsafe or oversized trees refuse before replacement.
+
+Replacement accepts parents at `retained` or `drafted`, and refuses qualified children,
+qualified parents, stale inputs, symlinks and reparse points. A prior coordinated
+Standard rebind can supply exact historical manifest custody for checking the original
+promotion audit. That history never makes the live audit or test receipt current. The
+revised child still needs its own verifier-owned oracle and qualification.
+
 When a reviewed `local-regenerative-qualification-profile` is supplied, acceptance
 content-pins it as
 the Component's independent acceptance contract. Every case has a stable ID, a
@@ -304,6 +331,37 @@ The public plan and every clean runtime receive the same selector, with normal
 Component and lexical model-scope rules still applied. Select the configured coding
 CLI through `CODING_CLI`. Omitting `--model` keeps the CLI-configured default;
 `LITAI_LIVE_MODEL` by itself does not replace this command's pipeline selector.
+
+For an already-qualified library whose original run predates retained archive
+capture, repeat the same command with an immutable evidence store and explicit
+current-authority mode:
+
+```console
+litai spec qualify path/to/new-project/components/LIBRARY \
+  --source path/to/exact-source-baseline \
+  --profile path/to/new-project/components/LIBRARY/qualification/profile.json \
+  --target host \
+  --output /tmp/literate-ai-qualification-capture.json \
+  --retained-evidence-store path/to/evidence-store \
+  --recertify-current-qualified \
+  --allow-host-execution
+```
+
+This performs fresh generation, build, test, and independent parity runs. It records
+the required invalidation and new qualification as immutable successors, then moves
+the current pointer atomically from the old qualified projection to the fresh
+qualified projection; retained-source authority is never exposed as current. Use the
+returned archive reference for the reviewed retained-library binding. Archive
+publication alone does not authorize importer admission.
+
+If the capture command was introduced by a newer Standard wheel, preserve the exact
+pre-rebind `literate.project.json` before applying the reviewed Standard rebind. Pass
+that file with `--prior-project-configuration PATH`. Literate AI requires its bytes to
+match the historical promotion audit, requires the current manifest to differ only in
+the Standard lifecycle binding and its derived test-receipt runner, and records the
+bridge as immutable authority evidence. Any Component, Flavor, skill, workflow,
+routing, policy, receipt contract, or other project-configuration change refuses the
+migration. The prior file is evidence input; it is not restored or made current.
 
 `qualify` independently resolves the exact forward recipe, creates at least two empty
 workspaces, forces real `litai generate` calls, runs the profile's build and current-test

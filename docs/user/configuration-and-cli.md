@@ -518,7 +518,7 @@ root-integration acceptance still remain.
 | `lock COMPONENT --large-review start\|status\|acknowledge\|apply\|cleanup [--transaction-id ID] [--page-identity ID]` | Review a genuine lock transition larger than 512 semantic differences in bounded identity-chained pages, then perform one final revalidated atomic replacement. |
 | `project validate [PATH]` | Non-mutating validation of the discovered project, catalogs, pins, skills, and generation inputs. |
 | `project tracker inspect [PATH]` | Read Git remotes and name `gh` or `glab` plus issue/review/CI/land argv. Unknown hosts skip tracker work fail closed. |
-| `project lifecycle rebind-standard [PLAN] [--project PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard first binding or update without mutation, or compare-and-swap an explicitly reviewed plan while preserving project-owned receipt authority. |
+| `project lifecycle rebind-standard [PLAN] [--project PATH] [--registered-parent PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard first binding or update without mutation, or compare-and-swap an explicitly reviewed plan while preserving project-owned receipt authority and coordinating a registered parent. |
 | `project adopt-original [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review a validated canonical project's clean Git commit/tree and explicitly select original source authority with metadata-only writes. Preserve source layout; refuse stale plans, dirty or unsafe roots, existing evidence/authority and legacy conversion transitions. This grants no execution or release admission. |
 | `project convert-stage show [--project PATH]` | Read the canonical evidence-bound conversion authority state for an adopted project. |
 | `project convert-stage advance --to retained\|drafted\|qualified [--project PATH]` | Advance exactly one adjacent stage after independently verifying the current receipt or Component-promotion evidence. No command silently promotes a tree. |
@@ -609,7 +609,7 @@ selection policy to obtain fresh producers.
 | `derive CASE_OR_SOURCE [--translator static\|coding-cli]` | Produce a reviewable draft bundle; semantic model translation requires explicit egress consent. |
 | `audit CASE_OR_SOURCE --baseline FILE [--translator static\|coding-cli]` | Compare derived behavior with a baseline. |
 | `review BUNDLE [--component-graph FILE]` | Record resolutions and optionally sign the review. A standalone static project promotion requires one explicit source-bound Component graph whose identity is covered by the review signature. |
-| `accept CASE_OR_SOURCE BUNDLE --review FILE --target DIR [--project-target DIR\|--integrate-project ADOPTED_ROOT] [--qualification-target NAME] [--flavor=+NAME ...]` | Verify and promote reviewed artifacts to intent authority; optionally create a standalone source-free Component project or register one beneath an existing retained adopted root, pin a qualification profile, and resolve the exact target/Flavor Component lock without generating source. |
+| `accept CASE_OR_SOURCE BUNDLE --review FILE --target DIR [--project-target DIR\|--integrate-project ADOPTED_ROOT] [--plan-native-child-replacement\|--replace-native-child PLAN] [--qualification-target NAME] [--flavor=+NAME ...]` | Verify and promote reviewed artifacts to intent authority; optionally create a standalone source-free Component project or register one beneath an existing retained adopted root, explicitly plan/apply replacement of an unqualified child, pin a qualification profile, and resolve the exact target/Flavor Component lock without generating source. |
 | `qualify COMPONENT --source DIR --profile FILE --output FILE --key FILE --signer ID --target NAME [--flavor=+NAME ...] --allow-host-execution` | Require the current exact Component lock, then run the historical clean generation/build/test/parity path. Version-1 evidence remains non-authorizing; only complete typed evidence from a trusted lifecycle adapter can enter locked v2 admission. |
 | `refresh CASE_OR_SOURCE --previous FILE` | Incrementally rederive, optionally naming changed paths. |
 | `conformance CASE` | Run one deterministic descriptor-based conformance case. |
@@ -1490,6 +1490,13 @@ native adoption route's original versioned plan. The project must already declar
 planning refuses a missing path before it offers a plan that cannot be applied.
 First binding preserves existing source, conversion and release authority and
 produces no build or test receipt.
+
+For a registered native child, add `--registered-parent ADOPTED_ROOT` to both the
+planning and apply commands. The plan binds the parent manifest, exact registry and
+child definition. Apply coordinates both files under the registry lock, retains exact
+before/after metadata as history, and rolls back both if validation or retention fails.
+An uncoordinated registered-child rebind refuses. Concurrent metadata changes are never
+silently registered or overwritten during rollback.
 
 For a custom (non-Standard) receipt suite, rebind preserves its suite ID/version,
 required evidence kinds, and minimum test count. An independent harness runner stays

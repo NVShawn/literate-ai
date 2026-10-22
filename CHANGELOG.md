@@ -190,6 +190,40 @@
   Original authority is preserved; canonical installed CLI, native and public
   package/release qualification remain open.
 
+- Native Swift compiler discovery preserves compiler mode after resolving executable
+  aliases, and Swift builds replay the pinned SDK environment.
+
+- Repository maintenance consolidates superseded reviews and inactive worktrees
+  while preserving unique commits, ignored qualification evidence and open gates.
+
+- Swift generation uses one top-level entrypoint and validates every Swift source file together, preventing auxiliary tools from breaking the native build after generation.
+
+- Source installation retains the standalone macOS Python shared library before bootstrapping pip in copied private runtimes, preserving self-update custody.
+- Retained Windows commands bind native system-directory context and revalidate its directory identities without inheriting caller injection.
+- Shared Windows retained fixtures capture executable suffixes and actual Python runtime DLLs before rebuilding their input bindings.
+
+- Python libraries: reject single-file build profiles before generation and identify supported directory or wheel profiles, avoiding futile rebuild retries.
+
+- Rebuild CLI: accept a Component's `component.md` path for Standard rebuild and report invalid locked authority without an uncaught exception. Reject symlink entry points before resolving them.
+
+- Registered native children support reviewed Standard rebinds that coordinate the
+  parent registry. Signed promotion replacements retain the previous unqualified
+  child as recovery evidence and refuse stale inputs or qualified destinations.
+
+- Bind generated GitHub and GitLab issue, review and CI commands to the selected repository and host, including forks and nested GitLab groups, so ambient CLI defaults cannot redirect them.
+
+- Build and export verifier-admitted retained source without a coding agent. A live
+  reviewed qualification records source admission alongside complete acceptance;
+  accepted-only builds still require fresh tests and independent acceptance.
+- Preserve explicit cache retirement records so verified lookup and portable cache
+  transfer retain immutable history while refusing unexplained missing memberships.
+
+- Give the complete native packaging proof fixture enough dispatch and build-grant headroom to reach its format checks on slower workers; production execution limits and authorization defaults stay unchanged.
+
+- JavaScript generation distinguishes executable bundle registries from inert bundle-writer text, preserving rejection of missing executable modules.
+
+- Windows dependency observation discards partial inspector facts after a failed capture, so subsequent captures cannot reuse an incomplete DLL closure. Legacy PE cache entries are re-inspected after upgrade.
+
 - Let development retained profiles explicitly select build-output command
   directories before captured tools, so original tests can invoke newly built
   products by name. Preserve default identities and refuse undeclared or
@@ -203,6 +237,23 @@
 - Verify committed Component locks against their declared target while retaining
   current project Flavor-policy and resolution-audit checks. Valid non-host locks
   no longer become stale merely because project verification assumed `host`.
+
+
+
+- Inspect independent Windows PE images concurrently within the existing
+  receiver dependency-observation deadline. Preserve exact image/inspector
+  bindings, loader resolution and fail-closed revalidation; qualification is
+  in progress.
+
+- Fix Windows retained dependency and BOM contract fixtures so their simulated
+  tools retain executable-mode validation before exercising custody assertions.
+  Use real Windows venv launchers for isolated interpreter discovery, exercise
+  POSIX loader-path guards explicitly so native conformance checks exercise their
+  intended contracts.
+
+- Admit native FreeBSD x86-64/aarch64 targets in pinned repository child lifecycle
+  declarations. Preserve read-only planning, exact host-target execution matching
+  and refusal of unsupported targets. Native and installed renewal is in progress.
 
 - Invoke explicitly configured FreeBSD SSH action receivers through the native
   command shell, preserving literal arguments without requiring interactive Bash.

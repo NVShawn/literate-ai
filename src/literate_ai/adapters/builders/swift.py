@@ -115,6 +115,8 @@ class GuardedSwiftBuilder:
         relative_sources = [
             path.relative_to(resolved_source).as_posix() for path in sources
         ]
+        environment = dict(os.environ)
+        environment.update(self.toolchain.environment)
         try:
             try:
                 completed = run_bounded_process(
@@ -126,7 +128,7 @@ class GuardedSwiftBuilder:
                         str(executable),
                     ],
                     cwd=resolved_source,
-                    environment=dict(os.environ),
+                    environment=environment,
                     timeout_seconds=self.timeout_seconds,
                     stdout_limit_bytes=self.stdout_limit_bytes,
                     stderr_limit_bytes=self.stderr_limit_bytes,

@@ -7,7 +7,7 @@ import hashlib
 import os
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import StrEnum
 from pathlib import Path, PurePosixPath
 
@@ -550,10 +550,52 @@ def inventory_source(source: str | Path) -> SourceInventory:
     )
 
 
+def accepted_inventory_projection(
+    inventory: SourceInventory,
+    accepted_identity: str,
+    *,
+    allow_legacy_policy: bool,
+) -> SourceInventory | None:
+    """Project exact accepted inventory bytes across the bounded @1 bridge."""
+
+    if inventory.identity == accepted_identity:
+        return inventory
+    if (
+        not allow_legacy_policy
+        or inventory.inventory_policy_id != "static-checkout-inventory@2"
+    ):
+        return None
+    legacy_inventory = replace(
+        inventory,
+        inventory_policy_id="static-checkout-inventory@1",
+    )
+    return legacy_inventory if legacy_inventory.identity == accepted_identity else None
+
+
+def inventory_matches_accepted_snapshot(
+    inventory: SourceInventory,
+    accepted_identity: str,
+    *,
+    allow_legacy_policy: bool,
+) -> bool:
+    """Match exact inventory bytes, including the bounded @1 policy bridge."""
+
+    return (
+        accepted_inventory_projection(
+            inventory,
+            accepted_identity,
+            allow_legacy_policy=allow_legacy_policy,
+        )
+        is not None
+    )
+
+
 __all__ = [
     "FlavorSignal",
     "SourceFileClassification",
     "SourceInventory",
     "SourceInventoryEntry",
+    "accepted_inventory_projection",
+    "inventory_matches_accepted_snapshot",
     "inventory_source",
 ]

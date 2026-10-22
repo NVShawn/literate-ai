@@ -638,6 +638,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         workspace.execute_next()
                     process.assert_not_called()
+                self.assertEqual(workspace.observations, ())
                 path.write_bytes(b"original\x00asset")
 
     @unittest.skipUnless(os.name != "nt" and shutil.which("cc"), "C process fixture")

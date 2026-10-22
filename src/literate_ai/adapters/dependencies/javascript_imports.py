@@ -83,6 +83,16 @@ _REGEX_PREFIX_IDENTIFIERS = frozenset(
 )
 
 
+def javascript_code_identifier_offsets(
+    content: str, identifier: str
+) -> tuple[int, ...]:
+    """Locate an identifier through the existing inert-source lexical projection."""
+
+    offsets: list[int] = []
+    _project_code(content, observed_identifier=identifier, identifier_offsets=offsets)
+    return tuple(offsets)
+
+
 def javascript_import_specifiers(content: str) -> set[str]:
     """Return literal import specifiers without interpreting inert source text."""
 
@@ -157,7 +167,12 @@ def javascript_dynamic_import_specifiers(content: str) -> set[str]:
     }
 
 
-def _project_code(content: str) -> tuple[str, dict[str, str]]:
+def _project_code(
+    content: str,
+    *,
+    observed_identifier: str | None = None,
+    identifier_offsets: list[int] | None = None,
+) -> tuple[str, dict[str, str]]:
     """Replace quoted strings with keys and mask all other inert lexical forms."""
 
     projected: list[str] = []
@@ -204,6 +219,8 @@ def _project_code(content: str) -> tuple[str, dict[str, str]]:
             ):
                 end += 1
             identifier = content[index:end]
+            if identifier == observed_identifier and identifier_offsets is not None:
+                identifier_offsets.append(index)
             projected.append(identifier)
             can_start_regex = identifier in _REGEX_PREFIX_IDENTIFIERS
             index = end

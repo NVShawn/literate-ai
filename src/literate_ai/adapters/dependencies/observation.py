@@ -608,6 +608,8 @@ def _python_distribution_component(
 # and bound by that path and their content digest.
 _INSPECTION_FACTS: dict[tuple[object, ...], object] = {}
 _INSPECTION_FACTS_LIMIT = 65536
+# Legacy PE captures could persist facts after a failed mutable-inspector capture.
+_PE_IMPORT_FACT_KIND = "pe-imports-v2"
 # Concurrent independent native inspections within one closure frontier.
 _INSPECTION_WORKERS = min(8, os.cpu_count() or 1)
 _BOOT_SESSION: list[str | None] = []
@@ -695,7 +697,7 @@ def _decoded_inspection_entry(entry):
     fact = entry["fact"]
     if not isinstance(digest, str) or not isinstance(path, str):
         raise ValueError("invalid dependency fact key")
-    if kind in {"elf-image", "elf-header", "pe-imports"}:
+    if kind in {"elf-image", "elf-header", _PE_IMPORT_FACT_KIND}:
         if identity[0] != "content" or len(identity) != 2:
             raise ValueError("invalid image identity")
         if not isinstance(identity[1], str):
@@ -1993,28 +1995,31 @@ class WindowsPeDependencyObserver:
             *self.library_roots,
             *(Path(item) for item in search_paths if item),
         ]
-        images, image_edges, api_set_bindings, unavailable_delay_imports = _pe_closure(
-            inspector,
-            seeds,
-            roots,
-            api_set_schema=api_set_schema,
-        )
         try:
-            current_inspector = _file_digest(inspector.path)
-        except DependencyObservationError:
+            images, image_edges, api_set_bindings, unavailable_delay_imports = (
+                _pe_closure(
+                    inspector,
+                    seeds,
+                    roots,
+                    api_set_schema=api_set_schema,
+                )
+            )
+            if _file_digest(inspector.path) != inspector.digest:
+                raise DependencyObservationError(
+                    "dependencies.windows-inspector-changed",
+                    "the PE dependency inspector changed during observation",
+                )
+            if _file_digest(Path(api_set_schema.path)) != api_set_schema.digest:
+                raise DependencyObservationError(
+                    "dependencies.pe-api-set-changed",
+                    "the Windows API-set schema changed during dependency observation",
+                )
+        except BaseException:
+            # Failed captures may already have published facts before discovering
+            # a changed inspector or an unresolved import. None may outlive the
+            # failed capture under the originally bound inspector identity.
             _forget_inspection_facts(inspector.digest)
             raise
-        if current_inspector != inspector.digest:
-            _forget_inspection_facts(inspector.digest)
-            raise DependencyObservationError(
-                "dependencies.windows-inspector-changed",
-                "the PE dependency inspector changed during observation",
-            )
-        if _file_digest(Path(api_set_schema.path)) != api_set_schema.digest:
-            raise DependencyObservationError(
-                "dependencies.pe-api-set-changed",
-                "the Windows API-set schema changed during dependency observation",
-            )
         refs = {image.path: _pe_ref(image) for image in images}
         unavailable_by_importer: dict[str, list[str]] = {}
         for item in unavailable_delay_imports:
@@ -2985,7 +2990,9 @@ def _pe_closure(
                 "dependencies.pe-image-invalid", f"PE image {path} is unsafe or invalid"
             )
         image_digest = _file_digest(path)
-        key = _content_fact_key("pe-imports", inspector.digest, path, image_digest)
+        key = _content_fact_key(
+            _PE_IMPORT_FACT_KIND, inspector.digest, path, image_digest
+        )
         imports = _INSPECTION_FACTS.get(key)
         if imports is None:
             imports = _inspect_pe_imports(inspector, path)
@@ -2997,7 +3004,6 @@ def _pe_closure(
         return _PeImage(path_string, image_digest, imports), key
 
     pool = ThreadPoolExecutor(max_workers=_INSPECTION_WORKERS)
-    complete = False
     try:
         while pending:
             # Inspect independent images together; resolve their loader edges in
@@ -3086,13 +3092,10 @@ def _pe_closure(
                         edges.add((path_string, target))
                     if target not in images:
                         pending.append(target)
-        complete = True
     finally:
         # A loader/inspection refusal cancels queued work and joins the bounded
         # operations already running before returning the failure to the receiver.
         pool.shutdown(wait=True, cancel_futures=True)
-        if not complete:
-            _forget_inspection_facts(inspector.digest)
     return (
         tuple(images[path] for path in sorted(images)),
         tuple(sorted(edges)),

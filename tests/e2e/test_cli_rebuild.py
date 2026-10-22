@@ -430,6 +430,117 @@ class RebuildCliTests(unittest.TestCase):
         }
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
+    def test_standard_component_file_and_directory_select_the_same_component(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = self._project(Path(directory))
+            self._configure_standard_driver(project)
+            component = project / "samples" / "hello-component"
+            with (
+                patch(
+                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
+                    return_value=Mock(),
+                ),
+                patch(
+                    "literate_ai.cli.rebuild._standard_rebuild_one_component",
+                    return_value={"accepted": True},
+                ) as rebuild_one,
+            ):
+                for entry in (component, component / "component.md"):
+                    with self.subTest(entry=entry.name):
+                        status, envelope = invoke(
+                            "rebuild",
+                            str(entry),
+                            "--project",
+                            str(project),
+                            "--allow-host-execution",
+                        )
+                        self.assertEqual(status, 0, envelope)
+                        self.assertEqual(
+                            rebuild_one.call_args.args[3], component.resolve()
+                        )
+                        self.assertEqual(
+                            rebuild_one.call_args.args[4], "samples/hello-component"
+                        )
+
+    def test_standard_invalid_file_and_symlink_entries_refuse_before_generation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = self._project(Path(directory))
+            self._configure_standard_driver(project)
+            component = project / "samples" / "hello-component"
+            other = component / "notes.txt"
+            other.write_text("not Component authority", encoding="utf-8")
+            link = component.parent / "indirect-component"
+            try:
+                link.symlink_to(component, target_is_directory=True)
+                link_cases = (
+                    (link, "rebuild.path_unsafe"),
+                    (link / "component.md", "rebuild.path_unsafe"),
+                    (
+                        Path("samples/indirect-component/component.md"),
+                        "rebuild.path_unsafe",
+                    ),
+                )
+            except OSError:
+                link_cases = ()
+            outside = Path(directory) / "component.md"
+            outside.write_text("outside project", encoding="utf-8")
+            cases = (
+                (other, "rebuild.specification_invalid"),
+                (component / "missing.md", "rebuild.specification_unavailable"),
+                (outside, "rebuild.specification_outside_project"),
+                *link_cases,
+            )
+            with (
+                patch(
+                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
+                    return_value=Mock(),
+                ),
+                patch(
+                    "literate_ai.cli.rebuild._standard_rebuild_one_component"
+                ) as rebuild_one,
+            ):
+                for entry, code in cases:
+                    with self.subTest(entry=entry):
+                        status, envelope = invoke(
+                            "rebuild",
+                            str(entry),
+                            "--project",
+                            str(project),
+                            "--allow-host-execution",
+                        )
+                        self.assertEqual(status, 2, envelope)
+                        self.assertEqual(envelope["error"]["code"], code)
+                rebuild_one.assert_not_called()
+
+    def test_standard_invalid_locked_authority_is_a_bounded_cli_error(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = self._project(Path(directory))
+            self._configure_standard_driver(project)
+            component = project / "samples" / "empty-component"
+            component.mkdir()
+            with (
+                patch(
+                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
+                    return_value=Mock(policy=load_current_standard_lifecycle_policy()),
+                ),
+                patch(
+                    "literate_ai.cli.rebuild.assemble_filesystem_standard_rebuild_adapter"
+                ) as assemble,
+            ):
+                status, envelope = invoke(
+                    "rebuild",
+                    str(component),
+                    "--project",
+                    str(project),
+                    "--allow-host-execution",
+                )
+                self.assertEqual(status, 2, envelope)
+                self.assertEqual(
+                    envelope["error"]["code"], "component_lock.component_missing"
+                )
+                self.assertNotIn("Traceback", json.dumps(envelope))
+                assemble.assert_not_called()
+
     def _clear_component_locks(self, project: Path) -> None:
         for lock in project.rglob("component.lock.json"):
             lock.unlink()

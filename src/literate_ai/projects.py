@@ -188,11 +188,15 @@ class ProjectConfigurationStore:
 
     def _read_manifest(self, path: Path) -> bytes:
         flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
-        flags |= getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_BINARY", 0)
+        flags |= (
+            getattr(os, "O_NOFOLLOW", 0)
+            | getattr(os, "O_BINARY", 0)
+            | getattr(os, "O_NONBLOCK", 0)
+        )
         try:
             before = path.lstat()
-            if stat.S_ISLNK(before.st_mode):
-                raise OSError("manifest is a symbolic link")
+            if not stat.S_ISREG(before.st_mode):
+                raise OSError("manifest is not a regular file")
             descriptor = os.open(path, flags)
         except OSError as exc:
             raise ProjectError(

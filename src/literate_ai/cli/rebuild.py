@@ -418,6 +418,15 @@ def _standard_rebuild_from_args(
             "--from-accepted-source instead",
         )
     specification, specification_label = _specification(project, args.specification)
+    if specification.is_file():
+        if specification.name != "component.md":
+            raise CliFailure(
+                "rebuild.specification_invalid",
+                "the Standard rebuild entry point must be a Component directory "
+                "or its component.md file",
+            )
+        specification = specification.parent
+        specification_label = specification.relative_to(project.root).as_posix()
     if specification != project.root:
         return _standard_rebuild_one_component(
             project,
@@ -676,6 +685,7 @@ def _standard_rebuild_one_component(
         )
     except (
         GenerationPreparationError,
+        LockedGenerationAuthorityReaderError,
         CacheDirectoryError,
         ProjectLifecycleLockError,
     ) as exc:
@@ -1056,8 +1066,19 @@ def _specification(project: LoadedProject, configured: str) -> tuple[Path, str]:
     source = Path(configured)
     candidate = source if source.is_absolute() else project.root / source
     try:
+        # Preserve lexical links before resolve() erases them, while allowing
+        # platform aliases above the project (for example macOS /var).
+        for entry in (*reversed(candidate.parents), candidate):
+            if entry.is_symlink() and (
+                entry.parent.resolve(strict=True).is_relative_to(project.root)
+                or entry.resolve(strict=True).is_relative_to(project.root)
+            ):
+                raise CliFailure(
+                    "rebuild.path_unsafe",
+                    "specification entry point cannot traverse a symbolic link",
+                )
         target = candidate.resolve(strict=True)
-    except OSError as exc:
+    except (OSError, RuntimeError) as exc:
         raise CliFailure(
             "rebuild.specification_unavailable",
             "rebuild specification entry point is unavailable",

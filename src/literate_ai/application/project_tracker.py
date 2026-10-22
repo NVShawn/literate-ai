@@ -228,6 +228,41 @@ def _github_ci_status(revision: str | None) -> tuple[str, ...]:
     )
 
 
+def _repository_selector(url: str, forge: Forge) -> str | None:
+    """Resolve the selected remote without inheriting CLI host/repo defaults."""
+
+    host = remote_host(url)
+    if host is None:
+        return None
+    parsed = urlparse(url) if "://" in url else None
+    path = parsed.path if parsed is not None else url.partition(":")[2]
+    path = unquote(path).strip("/").removesuffix(".git")
+    parts = path.split("/")
+    if (
+        len(parts) < 2
+        or (forge == "github" and len(parts) != 2)
+        or any(
+            part in {".", ".."} or re.fullmatch(r"[A-Za-z0-9_.-]+", part) is None
+            for part in parts
+        )
+    ):
+        return None
+    if forge == "github":
+        return f"{host}/{path}"
+    # glab accepts a full URL, including nested groups and an HTTP(S) API port.
+    # A custom SSH transport port is not an API port.
+    scheme = "https"
+    if parsed is not None and parsed.scheme in {"http", "https"}:
+        scheme = parsed.scheme
+        if parsed.port:
+            host = f"{host}:{parsed.port}"
+    return f"{scheme}://{host}/{path}"
+
+
+def _in_repository(command: tuple[str, ...], repository: str) -> tuple[str, ...]:
+    return (*command, "--repo", repository) if command else ()
+
+
 def inspect_remotes(
     remotes: tuple[GitRemote, ...], *, revision: str | None = None
 ) -> TrackerInspect:
@@ -268,37 +303,42 @@ def inspect_remotes(
             return empty
     forge = classify_git_remote_url(selected.url)
     sanitized = sanitize_git_url(selected.url)
-    if forge == "github":
+    repository = (
+        _repository_selector(selected.url, forge)
+        if forge in {"github", "gitlab"}
+        else None
+    )
+    if forge == "github" and repository is not None:
         return TrackerInspect(
             forge="github",
             cli="gh",
             remote=selected.name,
             url=sanitized,
             review_noun="pull-request",
-            issue_list=_GITHUB_LIST_ISSUES,
-            review_list=_GITHUB_LIST_PRS,
-            ci_status=_github_ci_status(revision),
-            land_create=_GITHUB_LAND_CREATE,
-            land_merge=_GITHUB_LAND_MERGE,
-            review_status=_GITHUB_REVIEW_STATUS,
-            issue_status=_GITHUB_ISSUE_STATUS,
-            issue_search=_GITHUB_SEARCH_ISSUES,
-            issue_create=_GITHUB_CREATE_ISSUE,
+            issue_list=_in_repository(_GITHUB_LIST_ISSUES, repository),
+            review_list=_in_repository(_GITHUB_LIST_PRS, repository),
+            ci_status=_in_repository(_github_ci_status(revision), repository),
+            land_create=_in_repository(_GITHUB_LAND_CREATE, repository),
+            land_merge=_in_repository(_GITHUB_LAND_MERGE, repository),
+            review_status=_in_repository(_GITHUB_REVIEW_STATUS, repository),
+            issue_status=_in_repository(_GITHUB_ISSUE_STATUS, repository),
+            issue_search=_in_repository(_GITHUB_SEARCH_ISSUES, repository),
+            issue_create=_in_repository(_GITHUB_CREATE_ISSUE, repository),
         )
-    if forge == "gitlab":
+    if forge == "gitlab" and repository is not None:
         return TrackerInspect(
             forge="gitlab",
             cli="glab",
             remote=selected.name,
             url=sanitized,
             review_noun="merge-request",
-            issue_list=_GITLAB_LIST_ISSUES,
-            review_list=_GITLAB_LIST_MRS,
-            ci_status=_GITLAB_CI_STATUS,
-            land_create=_GITLAB_LAND_CREATE,
-            land_merge=_GITLAB_LAND_MERGE,
-            issue_search=_GITLAB_SEARCH_ISSUES,
-            issue_create=_GITLAB_CREATE_ISSUE,
+            issue_list=_in_repository(_GITLAB_LIST_ISSUES, repository),
+            review_list=_in_repository(_GITLAB_LIST_MRS, repository),
+            ci_status=_in_repository(_GITLAB_CI_STATUS, repository),
+            land_create=_in_repository(_GITLAB_LAND_CREATE, repository),
+            land_merge=_in_repository(_GITLAB_LAND_MERGE, repository),
+            issue_search=_in_repository(_GITLAB_SEARCH_ISSUES, repository),
+            issue_create=_in_repository(_GITLAB_CREATE_ISSUE, repository),
         )
     return TrackerInspect(
         forge=forge,

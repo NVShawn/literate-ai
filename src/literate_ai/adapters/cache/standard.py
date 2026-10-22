@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +16,9 @@ from literate_ai.application.standard_project_lifecycle import (
     rebind_standard_source_admission_generation,
     rebind_standard_source_cache_generation,
 )
+from literate_ai.application.standard_source_admission import (
+    StandardSourceAdmissionError,
+)
 from literate_ai.contracts import (
     CYCLONEDX_SOURCE_SBOM_PATH,
     AcceptedSourceDerivation,
@@ -24,17 +27,20 @@ from literate_ai.contracts import (
     ContentIdentity,
     SourceDerivationCacheKey,
     StandardSourceAdmissionCacheEntry,
+    StandardSourceAdmissionEvidence,
     StandardSourceAdmissionMembership,
 )
 from literate_ai.contracts.generation_cache import (
     AcceptedSourceCacheEntry,
     StandardAcceptedSourceCacheEntry,
 )
+from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
 from literate_ai.generated_tests import GENERATED_TEST_SUITE_PATH
 from literate_ai.storage import FileSystemCAS
 
 from .filesystem import (
     FileSystemSourceCache,
+    SourceCacheError,
     SourceCacheMaterializer,
     SourceCacheResolver,
 )
@@ -58,6 +64,50 @@ def _require_retained_cache_namespace(
         raise StandardSourceCachePublicationError(
             "retained source cannot be published under a model-generation cache key"
         )
+
+
+def accepted_retained_source_review(
+    cache_root: Path, tool_binding: ContentIdentity
+) -> ContentIdentity:
+    """Recover a retained review from verified, portable Standard membership."""
+
+    try:
+        cache = FileSystemSourceCache(
+            "accepted-retained-review", cache_root, writable=False
+        )
+        reviews = set()
+        for entry in cache.verified_published_entries():
+            key = (
+                entry.derivation.cache_key
+                if isinstance(entry, AcceptedSourceCacheEntry)
+                else entry.cache_key
+            )
+            if (
+                key.model_binding.provider_id != RETAINED_SOURCE_PROVIDER
+                or key.coding_cli_tool_binding_identity != tool_binding
+            ):
+                continue
+            membership = restore_standard_source_cache_membership(entry)
+            if not isinstance(membership, StandardSourceAdmissionMembership):
+                raise ValueError("retained cache entry lacks Standard admission")
+            provenance = membership.generation.output.provenance
+            review = provenance.retained_source_identity
+            if review is None:
+                raise ValueError("retained cache entry lacks its review")
+            _require_retained_cache_namespace(provenance, key)
+            reviews.add(review)
+        if len(reviews) != 1:
+            raise ValueError("retained lookup needs one exact admitted review")
+    except (
+        OSError,
+        SourceCacheError,
+        ValueError,
+        StandardSourceCachePublicationError,
+    ) as exc:
+        raise StandardSourceCacheRestorationError(
+            "accepted retained lookup requires verified Standard review membership"
+        ) from exc
+    return next(iter(reviews))
 
 
 @dataclass(frozen=True, slots=True)
@@ -219,6 +269,7 @@ class FilesystemStandardAcceptedSourcePublisher:
         cache_key: Callable[
             [StandardAcceptedSourcePublication], SourceDerivationCacheKey
         ],
+        source_admission: Callable | None = None,
     ) -> None:
         if not isinstance(cache, (FileSystemSourceCache, SourceCacheResolver)):
             raise TypeError("cache must be a filesystem source cache or resolver")
@@ -232,12 +283,20 @@ class FilesystemStandardAcceptedSourcePublisher:
         if not callable(cache_key):
             raise TypeError("cache_key must be callable")
         self.cache_key = cache_key
+        if source_admission is not None and not callable(source_admission):
+            raise TypeError("source admission must be callable")
+        self.source_admission = source_admission
+        self._prepared_admissions = {}
 
     def publish_accepted(
         self, publication: StandardAcceptedSourcePublication
     ) -> ContentIdentity:
         _key, entry = self._build_entry(publication)
         self.cache.publish(entry, caller_cas=self.caller_cas)
+        if self.source_admission is not None:
+            # An explicitly reviewed live retained qualification supersedes its
+            # prior exact-key membership. Immutable older evidence is retained.
+            self.cache.retire_other_memberships(_key, keep=entry.identity)
         return publication.membership.identity
 
     def _build_entry(
@@ -332,7 +391,7 @@ class FilesystemStandardAcceptedSourcePublisher:
             publication.acceptance_evidence.identity,
             publication.source_output.provenance.identity,
         )
-        return key, StandardAcceptedSourceCacheEntry(
+        entry = StandardAcceptedSourceCacheEntry(
             derivation=derivation,
             source_files=tuple(source_files),
             managed_sbom_graph=managed_graph,
@@ -346,6 +405,25 @@ class FilesystemStandardAcceptedSourcePublisher:
             repository_resolutions=(),
             standard_source_membership=publication.membership.to_document(),
         )
+        if self.source_admission is not None:
+            # One live publication may be revisited by forced-membership retirement.
+            # Retain the already verified evidence, including its admission time.
+            identity = publication.identity
+            if identity not in self._prepared_admissions:
+                try:
+                    evidence = self.source_admission(publication, key, entry)
+                except StandardSourceAdmissionError as exc:
+                    raise StandardSourceCachePublicationError(str(exc)) from exc
+                if not isinstance(evidence, StandardSourceAdmissionEvidence):
+                    raise StandardSourceCachePublicationError(
+                        "source admission did not return verified evidence"
+                    )
+                self._prepared_admissions[identity] = evidence
+            entry = replace(
+                entry,
+                source_admission_evidence=self._prepared_admissions[identity],
+            )
+        return key, entry
 
     def retire_prior_membership(
         self, publication: StandardAcceptedSourcePublication
@@ -496,6 +574,11 @@ def restore_standard_source_cache_membership(
         return entry.membership
     if type(entry) is not StandardAcceptedSourceCacheEntry:
         return None
+    if entry.source_admission_evidence is not None:
+        return StandardSourceAdmissionMembership(
+            entry.standard_source_membership.generation,
+            entry.source_admission_evidence,
+        )
     return StandardSourceCacheMembership.from_dict(
         entry.standard_source_membership.to_dict()
     )

@@ -26,6 +26,7 @@ from literate_ai.application.action_dag_scheduler import (
     LifecycleActionKind,
     LifecycleActionWorker,
 )
+from literate_ai.application.standard_authorization import StandardAuthorizationInputs
 from literate_ai.application.standard_execution_inputs import (
     plan_standard_execution_receipts,
 )
@@ -50,14 +51,40 @@ from tests.support.fixtures_test_standard_local_command_adapter import (
 )
 
 
+class _PackagingChainAuthorizationInputs(StandardAuthorizationInputs):
+    """One-hour fixture grants; the production authorizer keeps its default."""
+
+    def authorize(self):
+        authorization = super().authorize()
+        return replace(
+            authorization,
+            grant=replace(
+                authorization.grant,
+                expires_at=authorization.grant.issued_at + 2 * ACTION_TEST_DEADLINE,
+            ),
+        )
+
+
+class _PackagingChainPorts(LocalStandardLifecyclePorts):
+    def authorization_inputs(self, intent, index):
+        inputs = super().authorization_inputs(intent, index)
+        return _PackagingChainAuthorizationInputs(
+            inputs.intent, inputs.index, inputs.issued_at
+        )
+
+
 class CommandLinkDependencyTests(unittest.TestCase):
     def test_packaging_chain_reopens_all_provider_proofs_in_real_receiver(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
             snapshot, execution = _fixture(dependency_kind=DependencyKind.PACKAGING)
             source_cas = FileSystemCAS(root / "source-cas")
-            # One deadline spans generation through FINALIZE in real receivers.
-            deadline = ActionDispatchDeadline(datetime.now(UTC) + ACTION_TEST_DEADLINE)
+            # One grant spans the complete multi-node chain and both package
+            # formats. Allow two ordinary fixture budgets on slow native workers;
+            # production observation/subprocess bounds and expiry tests are unchanged.
+            deadline = ActionDispatchDeadline(
+                datetime.now(UTC) + 2 * ACTION_TEST_DEADLINE
+            )
             accepted, handoffs, blobs, proof_refs = {}, {}, {}, {}
             local_ports = {}
             for number, generation in enumerate(execution.generation_plans):
@@ -99,7 +126,7 @@ class CommandLinkDependencyTests(unittest.TestCase):
                         for command in contract.commands
                     ),
                 )
-                ports = LocalStandardLifecyclePorts(
+                ports = _PackagingChainPorts(
                     source_trees=base.source_trees,
                     object_root=workspace / "verified",
                     contracts=(contract,),

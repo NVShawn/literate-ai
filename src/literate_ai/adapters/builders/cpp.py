@@ -558,6 +558,15 @@ def discover_cpp_toolchain(
         if executable is None:
             continue
         command = (str(Path(executable).resolve()), *candidate[1:])
+        # Swift dispatches by invocation name. Resolving swiftc can select the
+        # shared swift-driver or swift-frontend binary, so bind its original
+        # compiler mode into the command identity before probing or building.
+        if (
+            Path(executable).stem.casefold() == "swiftc"
+            and Path(command[0]).stem.casefold() != "swiftc"
+            and not (candidate[1:] and candidate[1].startswith("--driver-mode="))
+        ):
+            command = (command[0], "--driver-mode=swiftc", *command[1:])
         family = _compiler_family(command[0])
         toolchain_environment = (
             _windows_msvc_environment(

@@ -75,6 +75,7 @@ class RetainedCargoImportTests(unittest.TestCase):
                 )
             )
         fixture = captures.QualificationCaptureTests()
+        self.capture_fixture = fixture
         producer = lifecycle_fixtures.StandardProjectLifecycleTests()
         producer.setUp()
         self.native_manifests = {
@@ -97,6 +98,8 @@ class RetainedCargoImportTests(unittest.TestCase):
             )
             for name, manifest in self.native_manifests.items()
         }
+        self.artifact_payloads = payloads
+        self.promotion_audit = audit
         result, products, entries = fixture.typed_product_fixture(
             promotion_audit=audit, artifact_payloads=payloads
         )

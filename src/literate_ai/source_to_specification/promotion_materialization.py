@@ -8,6 +8,8 @@ inverse journals, and retained source have no representable input kind here.
 
 from __future__ import annotations
 
+import base64
+import copy
 import hashlib
 import json
 import os
@@ -27,6 +29,7 @@ from literate_ai.contracts import (
     ComponentAuthorityProjection,
     ComponentGenerationClosure,
     ContentIdentity,
+    StandardProjectLifecycleDriver,
     canonical_identity,
     canonical_relative_posix_path,
     canonical_relative_posix_paths,
@@ -50,6 +53,9 @@ PREVIOUS_SOURCE_PROMOTION_PROVENANCE_SCHEMA = (
 )
 SOURCE_PROMOTION_PROVENANCE_SCHEMA = (
     "urn:literate-ai:schema:v3:source-promotion-provenance"
+)
+QUALIFICATION_REBIND_MIGRATION_SCHEMA = (
+    "literate-ai/qualification-standard-rebind-migration@1"
 )
 
 _ROOT_LABEL = re.compile(r"^[a-z0-9](?:[a-z0-9._-]{0,126}[a-z0-9])?$")
@@ -244,20 +250,39 @@ class GenerationInputAudit:
             "materialized_tree_identity": self.materialized_tree_identity,
         }
 
-    def verify(self, project_root: Path) -> None:
+    def verify(
+        self,
+        project_root: Path,
+        *,
+        standard_rebind_migration: QualificationStandardRebindMigration | None = None,
+    ) -> None:
         """Resolve every audited target and require the exact recorded bytes."""
 
         root = _require_direct_directory(Path(project_root), label="promoted project")
         for entry in self.entries:
+            migration_target = (
+                entry.target_path == "literate.project.json"
+                and standard_rebind_migration is not None
+            )
             content = _read_regular_file(
                 root,
                 _portable_path(entry.target_path, label="audit target path"),
-                max_bytes=max(entry.byte_count, 1),
+                max_bytes=(
+                    1024 * 1024 if migration_target else max(entry.byte_count, 1)
+                ),
             )
+            if migration_target:
+                standard_rebind_migration.verify(
+                    audit=self,
+                    entry=entry,
+                    current_content=content,
+                )
             if (
                 len(content) != entry.byte_count
                 or _bytes_identity(content) != entry.content_identity
             ):
+                if migration_target:
+                    continue
                 raise SourcePromotionError(
                     "promotion.audit_target_changed",
                     f"audited forward input changed: {entry.target_path}",
@@ -289,6 +314,253 @@ class GenerationInputAudit:
                 data["materialized_tree_identity"],
                 path,
                 "materialized_tree_identity",
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class QualificationStandardRebindMigration:
+    """Exact evidence that only Standard execution authority changed.
+
+    Promotion audits deliberately bind the complete project manifest.  A feature
+    introduced by a newer Standard wheel cannot therefore be used by an older
+    qualified project until the project rebinds.  This record preserves the exact
+    audited manifest bytes and proves that the current manifest differs only in the
+    Standard lifecycle binding and its mechanically derived receipt runner.
+    """
+
+    component_coordinate: str
+    prior_qualified_projection_identity: str
+    generation_input_audit_identity: str
+    prior_project_configuration_base64: str
+    current_project_configuration_identity: str
+
+    SCHEMA: ClassVar[str] = QUALIFICATION_REBIND_MIGRATION_SCHEMA
+
+    def __post_init__(self) -> None:
+        if (
+            not isinstance(self.component_coordinate, str)
+            or not self.component_coordinate
+        ):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification rebind migration requires a Component coordinate",
+            )
+        for value, label in (
+            (
+                self.prior_qualified_projection_identity,
+                "prior qualified projection identity",
+            ),
+            (self.generation_input_audit_identity, "generation input audit identity"),
+            (
+                self.current_project_configuration_identity,
+                "current project configuration identity",
+            ),
+        ):
+            _content_identity(value, label)
+        self.prior_project_configuration_bytes()
+
+    @property
+    def identity(self) -> ContentIdentity:
+        return canonical_identity(self.to_dict())
+
+    def prior_project_configuration_bytes(self) -> bytes:
+        try:
+            content = base64.b64decode(
+                self.prior_project_configuration_base64.encode("ascii"),
+                validate=True,
+            )
+        except (UnicodeEncodeError, ValueError) as exc:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "prior project configuration is not canonical base64",
+            ) from exc
+        if not content or len(content) > 1024 * 1024:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "prior project configuration has an invalid size",
+            )
+        if (
+            base64.b64encode(content).decode("ascii")
+            != self.prior_project_configuration_base64
+        ):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "prior project configuration base64 is not canonical",
+            )
+        return content
+
+    def verify(
+        self,
+        *,
+        audit: GenerationInputAudit,
+        entry: GenerationInputAuditEntry,
+        current_content: bytes,
+    ) -> None:
+        if self.generation_input_audit_identity != audit.identity:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_mismatch",
+                "qualification rebind migration names a different promotion audit",
+            )
+        prior_content = self.prior_project_configuration_bytes()
+        if (
+            len(prior_content) != entry.byte_count
+            or _bytes_identity(prior_content) != entry.content_identity
+        ):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_mismatch",
+                "prior project configuration does not match the promotion audit",
+            )
+        if (
+            _bytes_identity(current_content)
+            != self.current_project_configuration_identity
+        ):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_mismatch",
+                "current project configuration changed after migration review",
+            )
+        try:
+            prior = json.loads(prior_content)
+            current = json.loads(current_content)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification rebind migration project configuration is invalid JSON",
+            ) from exc
+        if not isinstance(prior, dict) or not isinstance(current, dict):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification rebind migration requires project objects",
+            )
+        prior_driver = prior.get("lifecycle_driver")
+        current_driver = current.get("lifecycle_driver")
+        prior_receipt = prior.get("test_receipt_policy")
+        current_receipt = current.get("test_receipt_policy")
+        try:
+            prior_binding = StandardProjectLifecycleDriver.from_dict(
+                prior_driver, path="migration.prior.lifecycle_driver"
+            )
+            current_binding = StandardProjectLifecycleDriver.from_dict(
+                current_driver, path="migration.current.lifecycle_driver"
+            )
+        except (TypeError, ValueError) as exc:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification migration requires Standard lifecycle bindings",
+            ) from exc
+        if prior_binding.policy_identity != current_binding.policy_identity:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_policy_changed",
+                "qualification migration cannot change Standard policy authority",
+            )
+        if (
+            prior_binding.framework_distribution_identity
+            == current_binding.framework_distribution_identity
+        ):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_unnecessary",
+                "qualification migration requires a Standard distribution change",
+            )
+        if not isinstance(prior_receipt, dict) or not isinstance(current_receipt, dict):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification migration requires test receipt policies",
+            )
+        try:
+            prior_runner = ContentIdentity.from_dict(
+                prior_receipt.get("runner_identity"),
+                path="migration.prior.test_receipt_policy.runner_identity",
+            )
+            current_runner = ContentIdentity.from_dict(
+                current_receipt.get("runner_identity"),
+                path="migration.current.test_receipt_policy.runner_identity",
+            )
+        except (TypeError, ValueError) as exc:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification migration receipt runner is invalid",
+            ) from exc
+        if prior_runner != prior_binding.identity:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "prior receipt runner does not bind the prior Standard driver",
+            )
+        if current_runner != current_binding.identity:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "current receipt runner does not bind the current Standard driver",
+            )
+        normalized_prior = copy.deepcopy(prior)
+        normalized_current = copy.deepcopy(current)
+        normalized_prior["lifecycle_driver"] = normalized_current["lifecycle_driver"]
+        normalized_prior_receipt = normalized_prior["test_receipt_policy"]
+        normalized_prior_receipt["runner_identity"] = normalized_current[
+            "test_receipt_policy"
+        ]["runner_identity"]
+        if normalized_prior != normalized_current:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_scope_exceeded",
+                "project configuration changed beyond a Standard binding rebind",
+            )
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "schema": self.SCHEMA,
+            "component_coordinate": self.component_coordinate,
+            "prior_qualified_projection_identity": (
+                self.prior_qualified_projection_identity
+            ),
+            "generation_input_audit_identity": self.generation_input_audit_identity,
+            "prior_project_configuration_base64": (
+                self.prior_project_configuration_base64
+            ),
+            "current_project_configuration_identity": (
+                self.current_project_configuration_identity
+            ),
+        }
+
+    @classmethod
+    def from_dict(
+        cls, value: Mapping[str, Any]
+    ) -> QualificationStandardRebindMigration:
+        data = _exact_mapping(
+            value,
+            path="QualificationStandardRebindMigration",
+            fields={
+                "schema",
+                "component_coordinate",
+                "prior_qualified_projection_identity",
+                "generation_input_audit_identity",
+                "prior_project_configuration_base64",
+                "current_project_configuration_identity",
+            },
+            schema=cls.SCHEMA,
+        )
+        return cls(
+            component_coordinate=_string(
+                data["component_coordinate"],
+                "QualificationStandardRebindMigration",
+                "component_coordinate",
+            ),
+            prior_qualified_projection_identity=_string(
+                data["prior_qualified_projection_identity"],
+                "QualificationStandardRebindMigration",
+                "prior_qualified_projection_identity",
+            ),
+            generation_input_audit_identity=_string(
+                data["generation_input_audit_identity"],
+                "QualificationStandardRebindMigration",
+                "generation_input_audit_identity",
+            ),
+            prior_project_configuration_base64=_string(
+                data["prior_project_configuration_base64"],
+                "QualificationStandardRebindMigration",
+                "prior_project_configuration_base64",
+            ),
+            current_project_configuration_identity=_string(
+                data["current_project_configuration_identity"],
+                "QualificationStandardRebindMigration",
+                "current_project_configuration_identity",
             ),
         )
 
@@ -403,6 +675,7 @@ class VerifiedSourcePromotionEvidence:
     translation_identity: ContentIdentity | None = None
     inverse_evidence_custody: Mapping[str, Any] | None = None
     inverse_evidence_custody_identity: ContentIdentity | None = None
+    standard_rebind_migration: QualificationStandardRebindMigration | None = None
 
     def __post_init__(self) -> None:
         if not self.promotion_input_audits or any(
@@ -477,6 +750,34 @@ class VerifiedSourcePromotionEvidence:
                     "promotion.lifecycle_evidence_invalid",
                     "promotion generation closure must be typed",
                 )
+        if self.standard_rebind_migration is not None:
+            if not isinstance(
+                self.standard_rebind_migration,
+                QualificationStandardRebindMigration,
+            ):
+                raise SourcePromotionError(
+                    "promotion.rebind_migration_invalid",
+                    "qualification rebind migration must be typed evidence",
+                )
+            projection = self.authority_projection
+            if projection is None or (
+                self.standard_rebind_migration.component_coordinate
+                != projection.component_coordinate
+            ):
+                raise SourcePromotionError(
+                    "promotion.rebind_migration_mismatch",
+                    "qualification rebind migration names a different Component",
+                )
+            if (
+                projection.identity.uri
+                != self.standard_rebind_migration.prior_qualified_projection_identity
+                and self.standard_rebind_migration.identity
+                not in projection.evidence_identities
+            ):
+                raise SourcePromotionError(
+                    "promotion.rebind_migration_mismatch",
+                    "qualification rebind migration is not bound to current authority",
+                )
             matching_audits = tuple(
                 audit
                 for audit in self.promotion_input_audits
@@ -505,6 +806,9 @@ class VerifiedSourcePromotionEvidence:
         for identity in (
             self.translation_identity,
             self.inverse_evidence_custody_identity,
+            None
+            if self.standard_rebind_migration is None
+            else self.standard_rebind_migration.identity,
         ):
             if identity is not None:
                 identities[identity.uri] = identity
@@ -1170,7 +1474,10 @@ def _string(value: Any, path: str, field: str) -> str:
 
 
 def verify_source_promotion_evidence(
-    project_root: Path, projection: ComponentAuthorityProjection
+    project_root: Path,
+    projection: ComponentAuthorityProjection,
+    *,
+    prior_project_configuration: bytes | None = None,
 ) -> VerifiedSourcePromotionEvidence:
     """Resolve the typed promotion record and every audit bound by a projection."""
 
@@ -1315,6 +1622,43 @@ def verify_source_promotion_evidence(
             "promotion.evidence_invalid",
             "promotion record must resolve at least one audit",
         )
+    persisted_migrations: list[QualificationStandardRebindMigration] = []
+    for evidence_identity in projection.evidence_identities:
+        migration_path = (
+            PurePosixPath("provenance/qualification-rebind")
+            / f"{evidence_identity.digest}.json"
+        )
+        try:
+            migration_content = _read_regular_file(
+                Path(project_root), migration_path, max_bytes=2 * 1024 * 1024
+            )
+        except SourcePromotionError as exc:
+            if exc.code == "promotion.input_unavailable":
+                continue
+            raise
+        try:
+            migration = QualificationStandardRebindMigration.from_dict(
+                json.loads(migration_content)
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification rebind migration is invalid JSON",
+            ) from exc
+        if migration.identity != evidence_identity:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_mismatch",
+                "qualification rebind migration does not match its identity",
+            )
+        persisted_migrations.append(migration)
+    if len(persisted_migrations) > 1:
+        raise SourcePromotionError(
+            "promotion.rebind_migration_ambiguous",
+            "authority names more than one qualification rebind migration",
+        )
+    standard_rebind_migration = (
+        persisted_migrations[0] if persisted_migrations else None
+    )
     parsed_audits: dict[str, GenerationInputAudit] = {}
     canonical_references: list[dict[str, str]] = []
     for index, reference in enumerate(references):
@@ -1354,7 +1698,36 @@ def verify_source_promotion_evidence(
                 "promotion.evidence_mismatch",
                 "generation input audit does not match its content identity",
             )
-        audit.verify(Path(project_root))
+        audit_migration = standard_rebind_migration
+        if prior_project_configuration is not None and any(
+            entry.target_path == "literate.project.json" for entry in audit.entries
+        ):
+            if audit_migration is not None:
+                raise SourcePromotionError(
+                    "promotion.rebind_migration_ambiguous",
+                    "caller and authority both supplied rebind migration evidence",
+                )
+            current_configuration = _read_regular_file(
+                Path(project_root),
+                PurePosixPath("literate.project.json"),
+                max_bytes=1024 * 1024,
+            )
+            audit_migration = QualificationStandardRebindMigration(
+                component_coordinate=projection.component_coordinate,
+                prior_qualified_projection_identity=projection.identity.uri,
+                generation_input_audit_identity=audit.identity,
+                prior_project_configuration_base64=base64.b64encode(
+                    prior_project_configuration
+                ).decode("ascii"),
+                current_project_configuration_identity=_bytes_identity(
+                    current_configuration
+                ),
+            )
+            standard_rebind_migration = audit_migration
+        audit.verify(
+            Path(project_root),
+            standard_rebind_migration=audit_migration,
+        )
         parsed_audits[identity.uri] = audit
         canonical_references.append(reference)
     if canonical_references != sorted(
@@ -1374,6 +1747,7 @@ def verify_source_promotion_evidence(
             translation_identity=translation_identity,
             inverse_evidence_custody=inverse_evidence_custody,
             inverse_evidence_custody_identity=inverse_evidence_custody_identity,
+            standard_rebind_migration=standard_rebind_migration,
         )
     from .qualification_lifecycle import QualificationLifecycleResult
 
@@ -1417,6 +1791,54 @@ def verify_source_promotion_evidence(
             "promotion.qualification_evidence_mismatch",
             "lifecycle qualification evidence differs from retained authority",
         )
+    if standard_rebind_migration is not None:
+        try:
+            prior_manifest = json.loads(
+                standard_rebind_migration.prior_project_configuration_bytes()
+            )
+            current_manifest = json.loads(
+                _read_regular_file(
+                    Path(project_root),
+                    PurePosixPath("literate.project.json"),
+                    max_bytes=1024 * 1024,
+                )
+            )
+            prior_binding = StandardProjectLifecycleDriver.from_dict(
+                prior_manifest["lifecycle_driver"],
+                path="migration.prior.lifecycle_driver",
+            )
+            current_binding = StandardProjectLifecycleDriver.from_dict(
+                current_manifest["lifecycle_driver"],
+                path="migration.current.lifecycle_driver",
+            )
+        except (
+            KeyError,
+            TypeError,
+            ValueError,
+            UnicodeDecodeError,
+            json.JSONDecodeError,
+        ) as exc:
+            raise SourcePromotionError(
+                "promotion.rebind_migration_invalid",
+                "qualification rebind migration cannot resolve Standard bindings",
+            ) from exc
+        expected_binding = (
+            prior_binding
+            if projection.identity.uri
+            == standard_rebind_migration.prior_qualified_projection_identity
+            else current_binding
+        )
+        if any(
+            run.framework_distribution_identity
+            != expected_binding.framework_distribution_identity
+            or run.lifecycle_policy_identity != expected_binding.policy_identity
+            or run.driver_identity != expected_binding.identity
+            for run in qualification.runs
+        ):
+            raise SourcePromotionError(
+                "promotion.rebind_migration_binding_mismatch",
+                "qualification evidence does not match the bridged Standard binding",
+            )
     return VerifiedSourcePromotionEvidence(
         audits,
         authority_projection=projection,
@@ -1429,6 +1851,7 @@ def verify_source_promotion_evidence(
         translation_identity=translation_identity,
         inverse_evidence_custody=inverse_evidence_custody,
         inverse_evidence_custody_identity=inverse_evidence_custody_identity,
+        standard_rebind_migration=standard_rebind_migration,
     )
 
 

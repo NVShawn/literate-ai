@@ -4687,6 +4687,25 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ## Open pull-request landing queue
 
+### Current consolidation inventory
+
+After the requested merge pass, three reviews remain. The earlier
+WORKTREE-CONSOLIDATION-001 inventory and older records below are historical.
+
+| Review | Retained scope | Landing state |
+| --- | --- | --- |
+| [#105](https://github.com/jordanhubbard/literate-ai/pull/105) | Includes #77, #78, #81, #89 and #99 by ancestry | Swift compiler-mode repair prepared; exact-head CI required |
+| [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #87, #108 and #109 by ancestry | Draft; pending macOS CI and remaining qualification |
+| [#82](https://github.com/jordanhubbard/literate-ai/pull/82) | Additional public-execution merge/evidence history | Retained draft; reconcile unique history before disposition |
+
+
+PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
+exact-head matrix; the pinned upstream commit is the 0.19.1 release. PR #112
+was merged concurrently by another actor at
+`7a1ccfe38f102c3c275710a87d8037c8a5d0e10d`. Local main was fast-forwarded
+to both merges. Postmerge CI and broader release qualification remain separate
+open gates.
+
 ### Retained 1.2 review inventory — repository migrated
 
 NVIDIA-dev/literate-ai is archived. Its integration PR #513 is closed and its
@@ -30142,3 +30161,290 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Evidence:**
   - [ ] Focused runtime, PE observer and adoption checks and the full local combined regression pass.
   - [ ] Current driver/documentation reviews and exact-head CI pass before landing; retain uncompleted native/package gates.
+
+### [ ] REBUILD-ENTRY-001 — Normalize or safely reject Component file entry points in Standard rebuild
+
+- **Priority:** P1
+- **Owner:** framework rebuild CLI
+- **GitHub issue:** [#75](https://github.com/jordanhubbard/literate-ai/issues/75)
+- **Current release target:** 1.3.0
+- **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
+- **Conclusion:** An installed-wheel native journey exposed an uncaught authority-reader exception for a Component file argument. Normalize supported file entry points or report a bounded CLI error before provider invocation; preserve project and symlink boundaries.
+- **Depends on:** none
+- **Next action (in progress):** Land the qualified combined change after #77 and its full exact-head hosted CI.
+- **Implementation:**
+  - [x] Resolve the documented Component entry point before locked authority loading and normalize invalid-input diagnostics.
+- **Evidence:**
+  - [ ] Pass full exact-head hosted CI and land the reviewed combined change.
+  - [x] Installed-wheel file and directory cases, unsafe paths and no provider invocation on invalid input.
+
+- **Local evidence:** The full unchanged production-source suite passes: 1,580 selected, 1,545 passed, 35 skips and no failures in 779.102 seconds. Eight focused CLI tests cover file/directory equivalence, lexical symlink refusals (including relative paths), unavailable/outside/unrelated inputs and a real missing-Component authority error before lifecycle assembly. The missing-authority assertion is strengthened after the full run and rerun in the focused group. Static/export/style checks, strict specifications, current driver/runner/documentation reviews, 21 Node tests and all 121 Mermaid diagrams pass. The subsequent combined acceptance is recorded below; hosted CI and landing remain open.
+
+- **Installed native file-input evidence:** Noneditable implementation `a46e5e3b8780f21184da6cd4fdb807351b61622a` passes the copied tiny-library `component.md` rebuild in 72.058 seconds after reviewed Standard rebind and documentation renewal. Its existing verifier-owned harness remains unchanged (`sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`), including isolated startup, module origin and expected value 7. Generated tests, independent acceptance, current three-test receipt and `verify` pass. This is a standalone copied-library check, separate from #48 registered-parent evidence, and it does not execute the #76 refusal case. Retained proof identity: `sha256:e2230e775cbf47ad5a70442ac6def65a3917b0336296d627d9feb3fb1d508e1d`. The combined installed qualification is recorded below.
+
+- **Acceptance evidence:** Combined implementation `8746155526cecb46de83202fc26cd4733b13dd62` passes the full 1,582-case suite (1,547 passed, 35 skipped, no failures; 648.937 seconds), all 19 focused cases, the installed wheel (`sha256:456a7bea81cf93d42892eab9cfd1926f86642281e2a6c133f73d44258584eb93`), strict source/specification/review gates and all 121 diagrams. The installed CLI refuses the exact retained incompatible Bazel library profile before generation. A separate supported native profile rebuilds through its `component.md` path with the unchanged isolated, module-origin-checking oracle and expected value 7. Its current native receipt has 4 passing tests and `verify` passes. Installed API regressions also pass all eight entry-point and four profile cases. The fresh framework lifecycle receipt is current with 231 passing tests; candidate comparison and `verify` pass. Native proof custody: `sha256:4007c044d3fd7ed8c18bc4a7e451a5ec2812c0feb71074af7bb379cfa16b2e28`. This is one successful rebuild per temporary fixture, not regenerative qualification. Full hosted CI and landing remain open.
+
+**Current integration renewal:** Merge the reviewed entry-point and library-profile implementations with current registered-child and retained-project qualification, preserving both sets of requirements and original native proofs. Earlier 1,582-case and installed two-wheel results remain historical. Run the combined current focused/full suite, native installed journey, fresh lifecycle receipt and exact review CI before landing this batch.
+
+### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
+
+- **Priority:** P1
+- **Owner:** framework library profiles and generation preparation
+- **GitHub issue:** [#76](https://github.com/jordanhubbard/literate-ai/issues/76)
+- **Current release target:** 1.3.0
+- **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
+- **Conclusion:** The default promoted Bazel profile exports a file while library test preparation requires a directory, wasting generation retries. Reject unsupported profile combinations before generation or provide a supported directory export without weakening acceptance.
+- **Depends on:** none
+- **Next action (in progress):** Land the qualified combined change after #77 and its full exact-head hosted CI.
+- **Implementation:**
+  - [x] Validate library artifact shape against the selected build profile before generation and provide actionable profile selection.
+- **Evidence:**
+  - [ ] Pass full exact-head hosted CI and land the reviewed combined change.
+  - [x] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
+
+- **Local evidence:** The standalone profile implementation passes all 11 focused projection/CLI tests, including pre-discovery refusal of Bazel and Make file profiles on Linux, Windows and macOS, unchanged native directory exports and existing wheel-library acceptance. The full standalone suite passes 1,579 selected cases: 1,544 passed, 35 skipped and no failures in 703.524 seconds. Static/export/style, strict specifications, driver/runner/documentation reviews, all 121 diagrams and the pinned root skill evaluation pass. Exact production/test source slices are consolidated with the #75 entry-point fix; subsequent combined acceptance is recorded below, with hosted CI and landing still open.
+
+- **Combined checkpoint:** All 19 focused entry-point/profile/qualification cases pass in 9.795 seconds. The combined source passes layout/export, strict lint/format, specifications and current driver/runner/documentation review. The source slices preserve both standalone implementations exactly. Combined local qualification is complete as recorded below; hosted CI and landing remain open.
+
+- **Acceptance evidence:** The full combined evidence is recorded under REBUILD-ENTRY-001 immediately above. The installed CLI rejects the exact retained default Bazel library profile before generation and accepts the supported native directory profile through real generated tests and unchanged independent acceptance. All four installed profile tests pass across the declared Linux, Windows and macOS projections, including existing wheel behavior. The 1,582-case combined suite, package check and fresh current framework receipt pass; full hosted CI and landing remain open.
+  - [ ] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
+
+### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
+
+**GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
+
+- **Priority:** P1
+- **Owner:** Native process-group termination fixture
+- **Direction:** Finish native qualification without confusing interpreter startup with failed signal delivery.
+- **Conclusion:** The earlier FreeBSD full run at 6f933e54 stopped after 1278 passes and 36 skips because the child shutdown marker was absent. Establish explicit handler readiness at the real spawn boundary with bounded setup and failure cleanup, then retain the existing one-second timeout, real process-group signals and shutdown assertion. Production supervision is unchanged.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Wait for actual child handler readiness before starting the existing supervision deadline.
+- **Evidence:**
+  - [ ] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI.
+
+### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
+
+**GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
+
+- **Priority:** P1
+- **Owner:** Inert JavaScript lexical observation and generated-source handoff validation
+- **Direction:** Complete lifecycle qualification without rejecting a valid bundle writer as its emitted executable.
+- **Conclusion:** A controlled valid application and bundle are rejected when a writer string or leading inert registry text is added. Use the existing lexer for actual registry identifiers and source offsets, while preserving real-bundle module, local-extension, shebang and CLI-dispatch guards and independent execution/acceptance.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Reuse the existing inert lexical owner for bundle classification and registry location.
+- **Evidence:**
+  - [ ] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
+
+**Focused results:** All six fanout checks pass on the host and Linux and in the actual FreeBSD preflight. All four JavaScript handoff/bundle cases and all three retry cases pass on the host, Windows, Linux and FreeBSD preflight. Complete native/installed and exact CI gates remain pending above.
+
+### [ ] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
+
+**GitHub issue:** [#98](https://github.com/jordanhubbard/literate-ai/issues/98)
+
+- **Priority:** P1
+- **Owner:** Complete command LINK/PACKAGE integration fixture
+- **Direction:** Make native qualification reach its intended archive-format and custody assertions under a fresh valid test grant.
+- **Conclusion:** The FreeBSD run at 7625cc05 reaches malformed-archive validation after its shared 30-minute test grant expires, correctly refusing with action_wire.expired. Give only this complete multi-component, multi-format fixture two standard budgets while retaining one grant across all phases. Preserve production deadlines, individual subprocess limits, dedicated expiry coverage and all proof-format assertions.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
+- **Evidence:**
+  - [ ] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged.
+
+**Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
+
+**Second native refusal:** The `425ac341` rerun retains 1,149 passes, 34 skips and one `action_build.input_invalid` at package proof reopening after 2,105.044 seconds. Standard build grants have their own 30-minute lifetime; dispatch headroom alone does not extend them. Use a test-only authorization-input/port subclass to issue one-hour grants for this complete chain, preserving production defaults, grant validation, the single dispatch grant, all format/custody oracles and dedicated expiry controls. Run the focused actual native chain before the next fresh full run.
+
+**Completed native renewal for PR #81:** The fresh complete FreeBSD run at
+`7db3a7dcbf289142bce20191e05ea4e41f2e085c` passes 1,801 cases with 58
+platform/tool-dependent skips and no failures across 1,859 selected cases.
+The four actual native package cases, complete multi-format packaging chain and
+process-group termination case all pass. Independent hash-verified archive:
+`sha256:6ebba986ea614ea262d6a707a31cb2dad76fc13a4ed7825976fb12be61cad537`.
+The identical host-built wheel `sha256:44327bdd7a76121c16449ed5a2c6014a8992faac03ac49193325f4b24b6cc259`
+passes native installation with its harness pinned to its actual source
+`58c9d8a058b9c9c2adc6d69ae86152140fb48bef`: 73 preflight cases pass without
+skips and all 127 installed-wheel spans succeed. Independent wheel archive:
+`sha256:bd5cd91d89c92b4813fb14dd6220e418157ddc9c7804d551601f72135db305b2`.
+Later fixture/roadmap-only commits leave production source and the reviewed driver
+unchanged. The supported finalized receipt remains current at
+`sha256:e68395dc91d3bcb4016b82cf8865c84ec80cbe105734ba1c629011bcfd618ffb`.
+Exact `7db3a7dc` CI run `39519805647` passes. Landing also requires exact CI on
+the final review head. Failed and interrupted native attempts above retain their
+original source identities and are not successful qualification. The broader
+original-source SDK and accepted-retained export programs remain separate.
+
+### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
+
+**GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
+
+- **Priority:** P1
+- **Owner:** Accepted-source provider reconstruction
+- **Direction:** Make accepted-source-only build consume a qualified retained source entry and export its artifact.
+- **Conclusion:** Issue #97 reproduces an admitted retained origin being rejected by the coding-CLI provider allowlist. Preserve RetainedSourceSelection semantics with no executable or model claim; merely adding a provider spelling is insufficient. Recover the review only from verified Standard accepted-cache membership at the existing portable cache root. Reconstruct the same no-model/no-executable retained selection and require its canonical identity to equal the dispatched tool binding; carry the recovered review into the existing retained request/semantics namespace. Keep independent acceptance, origin/tree/tool bindings and unknown-provider refusal intact. This remains separate from the original-adoption work in PR #81.
+- **Depends on:** RETAINED-PROJECT-001 and CACHE-RETIREMENT-001
+- **Implementation:**
+  - [x] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
+- **Evidence:**
+  - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+
+**Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
+
+### [ ] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
+
+**GitHub issue:** [#100](https://github.com/jordanhubbard/literate-ai/issues/100)
+
+- **Priority:** P1
+- **Owner:** Accepted source-cache membership
+- **Direction:** Keep supported cache refresh usable without discarding immutable history.
+- **Conclusion:** Issue #100 shows that deliberate retirement removes a key pointer while verified enumeration still demands it for the preserved immutable manifest. Record an exact key/entry retirement before pointer removal; recognize only that record as intentional history. Preserve refusal of unexplained missing pointers, corruption, unsafe paths and ambiguous active entries.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Persist exact retirement records and distinguish them from active membership during lookup and verified enumeration.
+- **Evidence:**
+  - [x] Prove current lookup and read-only enumeration after retirement, unchanged immutable history, missing/corrupt-record refusal, safe reactivation and portable archive restoration.
+  - [ ] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
+
+**Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.
+
+**Combined-suite repair:** The first complete host run at `bb40b136` stopped after 310 passes, 29 existing skips and one error in the existing real command-generator regression. Ordinary cached generators may implement the supported adapter seam without a coding-provider selection object. Restrict retained lookup key reconstruction to an explicitly present typed retained selection; preserve ordinary planned keys. Retain that failed report and the deliberately interrupted prior lifecycle separately, merge the latest native fixture grant repair, and start fresh complete and lifecycle qualification after the focused real command receiver cases pass.
+
+**Current-source qualification:** At `9941a6c4c1c4fe0e0e05c474135d204346041f79`,
+the fresh complete host suite passes 1,827 cases with 42 declared skips across
+1,869 selected cases. A new force-generated framework lifecycle completes
+build, generated tests, execution and independent acceptance; supported receipt
+update/check/current and `verify` pass with receipt
+`sha256:31b15788308e9ed7cd762d0a5e230598f102465cedfe44cba00a2dbf8fc9fcad`
+and finalized candidate
+`sha256:48f264fb8f428cd814a0b7f876aaa1edca0ce135fc26138b0e053712431d5b08`.
+Actual Windows qualification passes all 21 selected retained/admission/retirement,
+ordinary command and public export cases without skips; independently collected
+archive `sha256:65291999d77cad4917d0d05a1d2925a1271891914a21fcd7db23cc7b7248b1a4`.
+The preceding `bb40b136` native FreeBSD 19-case proof remains separately bound
+to its actual source, archive
+`sha256:51c642d0e49cbd13ff929810b063e7f560c4dea2a47cf062b3b23f707caf0fef`.
+The current-source native renewal has passed all 44 focused cases, including
+ordinary command receivers and all four actual native package cases; its final
+public export case remains in progress. Installed-wheel and exact final review
+CI qualification remain required. The earlier invalid generated candidates and
+interrupted launchers are retained as unsuccessful attempts; no acceptance
+oracle was relaxed to obtain the fresh successful lifecycle.
+
+### [ ] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
+
+- **GitHub issue:** [#104](https://github.com/jordanhubbard/literate-ai/issues/104)
+- **Current release target:** 1.3.0
+
+- **Priority:** P1
+- **Owner:** Swift generation skill and native build contract
+- **Direction:** Repair the Swift lifecycle failure blocking 1.3 qualification.
+- **Conclusion:** Require one top-level main.swift dispatcher, declaration-only Swift support files and compilation of the same complete source set as the native builder. Keep native build refusal and all acceptance requirements.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Update the owning generation guidance and shipped template, preserve exact versioned skill references and record issue104.
+- **Evidence:**
+  - [ ] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
+
+**Swift repair development evidence:** Skill version 1.0.7 and both authored/shipped Flavor contracts require the native builder's complete single-executable source set. Two actual Swift compiler tests pass, including three conflicting-entrypoint refusal variants and successful support/test linkage and execution. Ten skill/template tests, SkillEvaluator, lint/format, strict OpenSpec and supported authority reviews pass. A fresh live macOS LaunchAgent sample succeeds on the first generation attempt (one source-cache miss): 3 generated tests, 3 independent verifier tests and 2 assertions, with 6 invocations. The earlier exhausted three-candidate attempt remains retained. A current complete project lifecycle receipt, installed wheel and exact-head CI remain required before landing.
+
+**Current Swift-repaired integration lifecycle:** At implementation `595da5b25931eaf5bfa94977512596b7eccd7570`, the complete project lifecycle passes. Supported receipt update/check/require-current and `litai verify` pass with 230 tests, no failures or skips. Current receipt: `sha256:40585141e6ec627f44b1573bf8ca10868ffd945f0938dc59455feeb4f241d5b0`; finalized candidate: `sha256:37c2663be538e67fadd94d5ce8f760c66209608e2c04e05c8b2bd142b40bb759`; driver: `sha256:5d1b8a0f8f67ac284a33b72af22ab8cff9de19b7ddbacf42c0978a7f4be905b6`. This run revalidates eligible admitted source through the complete current lifecycle; the separately recorded Swift sample was freshly generated. Final package/native renewal and exact-head CI remain open.
+
+### [ ] CI-BAZEL-ACTION-001 — Review the Bazel setup action patch for release 1.3
+
+- **GitHub PR:** [#106](https://github.com/jordanhubbard/literate-ai/pull/106)
+- **Current release target:** 1.3.0
+
+- **Priority:** P2
+- **Owner:** GitHub Actions C++ native qualification workflow
+- **Direction:** Reconcile the newly opened Dependabot PR #106 during the release contribution sweep.
+- **Conclusion:** Include the independent pinned 0.19.1 CI-action patch. The subsequent explicit maintainer merge request prioritizes this already-green review while PR #105 is repaired. It fixes warning reporting, adds a restore timeout option and updates action dependencies; it changes one workflow action pin and no runtime or native package code.
+- **Depends on:** none; the action pin has no runtime dependency on PR #105
+- **Implementation:**
+  - [x] Review and land PR #106 through normal merge semantics after the explicit maintainer merge request; preserve the upstream action SHA pin. Merge `ccd4c030` retains the exact upstream 0.19.1 commit `104e3eea9447cdaa4b00d0fb46191a3985d26ab3`; all non-placeholder checks on review head `d95e3aaa` passed. Exact postmerge CI remains pending.
+- **Evidence:**
+  - [ ] Inspect the one-line workflow diff and upstream release; require green exact PR #106 CI and exact postmerge main CI before release mutation.
+
+**Consolidated integration qualification at `c3d15a2c44c0ff025905fa7f51d0683d09c76f33`:** [PR #105](https://github.com/jordanhubbard/literate-ai/pull/105) contains the current public heads of #77, #78, #81, #89 and #99 by Git ancestry. The complete host suite passes 1,873 cases with 44 declared skips across 1,917 selected cases. The exact installed host wheel `sha256:0b0d7cd302c0103566060a38df2d92b478674cb83dc4f0397febe82994b31c2e` passes all 131 spans. Current receipt `sha256:40585141e6ec627f44b1573bf8ca10868ffd945f0938dc59455feeb4f241d5b0` remains valid with 230 passing lifecycle tests.
+
+Fresh installed old-wheel `90d5b6e9` to current-wheel journeys pass coordinated parent/child rebind, signed replacement, exact recovery retention, native rebuild, standalone component-file rebuild and incompatible-profile refusal before generation. Both native receipts are current with three passing cases and the unchanged isolated/module-origin/result-seven oracle `sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`; parent validation passes. Private archive: `aa6a7011d7325ac08e721b77ff67bb73fcb95f9a594eee0efec71c9c1ea896ec`. A separate real installed retained-source admission and accepted-only export uses the actual framework distribution with no mocked framework observers or model selector, preserves exact checked-hash bytecode, and checks every framework import is installed. Private archive: `a3406f643f4bf00a34aa46571fa078b47c956b4ea2303cf6a47403e07000dd33`. These are bounded individual flows, not regenerative qualification or transfer of parent release authority.
+
+At baseline composed source `bb3a8727`, the native FreeBSD full run passes 1,828 cases with 78 skips across 1,906 cases, including the four actual package cases, complete chain, process supervision and 45 retained-source/export/package cases (archive `b15c89eb7d73cfd843c7161aaaca231b46f873e074fabc61e79722f9035bdb39`). Its invocation omitted the explicit pinned-pip input, causing 20 Python cases to skip. A separate six-module run with the staged, digest-verified installer passes all 21 cases without skips, covering every previously skipped ID plus one previously passing case (independently collected archive `3a90e6ad331398b260096b3ba763eb74f518c1daf75031c661be3bd8d5f19eb0`). The original full report is retained unchanged.
+
+Local native Elixir 1.20.4/OTP 29 with source-built pinned Hex 2.5.1 passes all three library and both graph qualification cases with no skips, including the four Hex-fetch failures observed in the superseded PR #99 run. PR #81 final-head CI 39545486434 passes at `5543f5cc`. PR #105 still requires exact current-head CI and the active provided-wheel FreeBSD run pairing the `c3d15a2c` harness with those identical wheel bytes. Later qualification-note edits change metadata only; they do not relabel these evidence origins. Broader native catalog/compiler SDK and actual Windows ARM64 acceptance remain open.
+
+### [x] WORKTREE-CONSOLIDATION-001 — Consolidate reviewed worktrees and superseded pull requests
+
+- **Priority:** P1
+- **Owner:** Repository worktree and review inventory
+- **Direction:** Consolidate existing worktrees and PRs while retaining unfinished work and qualification evidence.
+- **Conclusion:** Retain independent review scopes and their full Git histories. Close only reviews whose exact heads are ancestors of retained integration reviews; archive ignored state before retiring clean inactive checkouts. Do not merge failing or pending candidates or bypass branch garbage-collection policy.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Inventory exact review heads, local commits, active checkouts and ignored state.
+  - [x] Retire redundant clean inactive worktrees after preserving ignored state and proving every head remains reachable.
+  - [x] Close superseded reviews with explicit links to retained integration reviews; preserve unique review and branch scope.
+- **Evidence:**
+  - [x] Revalidate worktree status and ref reachability immediately before removal; retain a local migration journal.
+  - [x] Verify final worktree inventory, open review inventory and untouched unique branch heads.
+
+**Consolidation evidence:** The operator-authorized pass reduced 27 registered
+worktrees to four: the main checkout and the integration checkouts for #105,
+#110 and #82. All 23 retired worktrees were clean and inactive; their exact
+heads remain reachable through unchanged local branches. All 893 ignored paths
+were preserved by same-volume rename, with device/inode identity rechecked after
+retirement. The local migration journal SHA-256 is `f1c221b37977b11cc01e931c8ad6849b91597f0e7f7bfbf5c0dfa0f2f4eacb9e`;
+its ignored archive remains under the repository build output. No branch was
+deleted, and the policy-driven garbage-collection plan admitted no candidates.
+
+Closed #77, #78, #81, #89 and #99 into #105, and #87, #108 and #109 into #110.
+Each closed review's exact remote head was verified as a Git ancestor of its
+retained integration review immediately before closure. Branches and review
+history remain available. #82 retains five additional merge/evidence commits
+outside the combined #105/#110 ancestry and therefore remains open. Unique local
+heads `bf4ee21e`, `fb35e56d`, `51291de9` and `491bc807` remain unchanged on their
+original branches; retirement of their checkouts is not a completion claim.
+
+Remaining review scopes are #105 (retained lifecycle/runtime integration), #110
+(native SDK public execution, including #109/#108/#87), #82 (public execution
+merge/evidence history), #112 (qualified-library recertification) and #106
+(setup-bazel action update). #105's prior exact-head Linux run fails in the
+Swift builder integration test. #110/#112 still have queued macOS CI. #106 is
+green but retains its existing sequencing after #105. None was merged by this
+maintenance pass. Worker alignment refused the configured template with
+`worker_alignment.invalid`; no user-worker qualification jobs were dispatched
+or worker configuration repaired. This operational audit does not close WORKTREE-002's
+reusable migration-contract or platform-qualification obligations.
+
+### [ ] SWIFT-DRIVER-MODE-001 — Preserve Swift compiler mode after executable resolution
+
+- **Priority:** P0
+- **Owner:** Native compiler discovery and Swift qualification
+- **Direction:** Merge the remaining reviews after repairing their required CI gates.
+- **Conclusion:** The exact PR105 Linux failure resolves the swiftc symlink to swift-driver and loses its compiler-mode invocation. Bind an explicit Swift compiler mode into the resolved command while retaining executable-byte verification and source/artifact custody.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Preserve swiftc compiler mode when the resolved executable is swift-driver; leave ordinary compilers unchanged.
+  - [x] Replay the pinned SDK environment for direct Swift compiler invocations; native testing exposed that the Swift builder omitted the selected SDK environment.
+  - [x] Add portable symlink-driver regression coverage and requalify the affected native builder path.
+- **Evidence:**
+  - [x] Focused compiler discovery and native Swift tests, format/lint, and reviewed driver/documentation authority checks pass.
+  - [ ] Require green exact review-head CI before merging PR105; retain pending qualification honestly.
+
+**Current local repair evidence:** All three native Swift builder cases pass on
+macOS, including direct resolved-compiler compilation, both executable modes,
+explicit-mode identity parity and competing-entrypoint refusal. The first direct
+compiler probe correctly failed on missing SDK state; replaying the pinned SDK
+environment repaired it without changing source/output authorization. Lint and
+format pass across 1,647 files, driver/documentation reviews are current, strict
+OpenSpec checks pass and all 121 diagrams render across 616 Markdown files.
+The full local regression and exact updated-head CI remain required before land.
+The installed ambient CLI could not parse the current worker template; the
+source-tree managed CLI performed alignment and found five aligned workers,
+one unreachable endpoint and one worker with 735 MiB free. No jobs were sent to
+the unavailable workers and no data was deleted.
+
+The first full local regression was deliberately interrupted after 850 completed cases when concurrent PR #112 changed main. Its checkpoint is retained as partial evidence; the merged candidate requires a fresh full run.
+
+MERGE-STACK-001 reconciliation retains the SDK branch's later native and installed evidence for shared owners and imports the integration branch's additional owners. Earlier qualification details remain reachable in PR105 commit `b6e36582`. PE observation uses the newer versioned cache facts, whole-capture invalidation and deterministic mutation controls; FreeBSD read-only views and typed performance-span assertions remain composed. This does not advance unfinished native SDK or package gates.

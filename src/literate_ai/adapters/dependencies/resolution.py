@@ -2077,17 +2077,33 @@ def _source_component_exact_version(
                 "authoritative raw Bzlmod selection does not match its source intent",
             )
         return exact
-    _require_version_in_range(source.get("versionRange"), exact)
+    _require_version_in_range(
+        source.get("versionRange"),
+        exact,
+        package_url=source.get("purl"),
+    )
     return exact
 
 
-def _require_version_in_range(raw_range: object, version: str) -> None:
+def _require_version_in_range(
+    raw_range: object,
+    version: str,
+    *,
+    package_url: object,
+) -> None:
     if not isinstance(raw_range, str) or not raw_range:
         raise DependencyObservationError(
             "dependencies.source-range-invalid",
             "source dependency versionRange is invalid",
         )
     scheme = raw_range.partition("/")[0].removeprefix("vers:")
+    if (
+        scheme == "semver"
+        and isinstance(package_url, str)
+        and package_url.startswith("pkg:cargo/")
+    ):
+        raw_range = "vers:cargo/" + raw_range.partition("/")[2]
+        scheme = "cargo"
     if scheme == "cargo" and "|" not in raw_range and "," in raw_range:
         raw_range = raw_range.replace(",", "|")
     if scheme not in {"cargo", "generic", "hex", "npm", "pypi"}:
