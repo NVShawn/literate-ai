@@ -1,0 +1,40 @@
+{
+  "schema": "literate-ai/retained-sdk-public-development@1",
+  "scope": "Controller source-level runtime qualification with real source-built CMake SDKs; project discovery is fixture-supplied",
+  "policy_schema": "literate-ai/retained-project-sdk-selection-policy@1",
+  "legacy_policy_unchanged": true,
+  "two_build_identity_observation": {
+    "same_selection_and_sdk_snapshot": true,
+    "different_fresh_run_input": true
+  },
+  "checks": {
+    "legacy_and_selected_policy": 12,
+    "public_runtime_and_refusals": 7,
+    "existing_runtime_compatibility": 21,
+    "skipped": 0
+  },
+  "public_runtime_seconds": 166.185,
+  "existing_runtime_seconds": 91.158,
+  "runtime_report_sha256": "caea69a79b8eb784b25d2678f114c727c784530b7c83400efaaa173cc5c52c8e",
+  "refusals": [
+    "missing exact plan authorization",
+    "missing host execution acknowledgment",
+    "wrong recipe before SDK build",
+    "wrong SDK snapshot before consumer execution",
+    "project authority change after SDK build",
+    "revocation after real SDK command"
+  ],
+  "real_sdk_command_records_retained": 6,
+  "producer_records_share_retained_cas": true,
+  "source_fixture_failures_retained": [
+    "first public wrapper omitted compiled shared class setup; failed before execution",
+    "existing no-context refusal code changed; original producer-bindings-required code restored"
+  ],
+  "source_static_and_documentation_checks": "passed",
+  "canonical_installed_cli_qualified": false,
+  "native_installed_qualified": false,
+  "compiler_sdk_admitted": false,
+  "full_regression": "pending",
+  "wheel_qualified": false,
+  "release_authorized": false
+}

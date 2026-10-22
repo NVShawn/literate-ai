@@ -591,6 +591,19 @@ root-integration acceptance still remain.
 | `skills [--skills-root DIR]` | List an explicit inverse-skill catalog, or packaged reviewed skills by default. |
 | `format CORPUS --id-prefix ID [--check\|--write]` | Preview canonical layered-spec formatting by default, check without mutation, or explicitly write canonical Markdown frontmatter and line endings. Supporting JSON remains byte-exact. |
 
+
+For source-built SDK inputs, the explicit
+`literate-ai/retained-project-sdk-selection-policy@1` policy binds each
+`component_lock_identity`, `selection_identity`, `snapshot_identity` and `prefix`.
+These are exact expected contents and placement, not producer admission. Planning
+is read-only. Execution first requires the exact plan and host acknowledgment,
+then builds the selected SDKs through the existing source/policy owners and checks
+the complete snapshot closure. It retains fresh SDK command grants, currentness,
+revocation and independent acceptance evidence. The preceding run-bound SDK policy
+keeps its exact identity and refusal semantics; a public invocation requires the
+selection policy to obtain fresh producers.
+
+
 | `validate CORPUS --id-prefix ID` | Non-mutating validation of derived IDs, parents, references, and effective context. |
 | `explain CORPUS --id-prefix ID [--node ID]` | Explain the full derived corpus graph or one node's effective context without mutation. |
 | `derive CASE_OR_SOURCE [--translator static\|coding-cli]` | Produce a reviewable draft bundle; semantic model translation requires explicit egress consent. |

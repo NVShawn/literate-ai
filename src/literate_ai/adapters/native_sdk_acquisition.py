@@ -38,7 +38,10 @@ class NativeSdkProjectAcquisition:
         actor: str,
         reason: str,
         host_build_acknowledged: bool = False,
+        store: FileSystemCAS | None = None,
     ):
+        if store is not None and not isinstance(store, FileSystemCAS):
+            raise TypeError("SDK acquisition requires a live filesystem CAS")
         self.cache_root = cache_root
         self.source_intelligence_policy = source_intelligence_policy
         self.security_policy = security_policy
@@ -47,6 +50,7 @@ class NativeSdkProjectAcquisition:
         self.actor = actor
         self.reason = reason
         self.host_build_acknowledged = host_build_acknowledged
+        self.store = store
         self._started = False
 
     def __call__(self, snapshot) -> NativeSdkConsumerInputs | None:
@@ -117,7 +121,11 @@ class NativeSdkProjectAcquisition:
                 str(Path(executable).resolve(strict=True))
             )
         snapshot.require_unchanged()
-        store = FileSystemCAS(self.cache_root / "cas")
+        store = (
+            self.store
+            if self.store is not None
+            else FileSystemCAS(self.cache_root / "cas")
+        )
         quarantine = QuarantineStore(self.cache_root / "quarantine", store)
         references = ReferenceIndex(self.cache_root / "references", store)
         services = tuple(

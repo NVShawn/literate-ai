@@ -30084,3 +30084,43 @@ or errors. Test time is 85.267 seconds; supervised time is 87.913 seconds.
 All framework imports resolve inside the installed prefix. The current code
 now has full controller and scoped installed qualification; fresh exact-head
 hosted CI and canonical tree worker/live SDK integration remain open.
+
+### [ ] RETAINED-SDK-PUBLIC-001 — Connect public retained execution to live native SDK producers
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+
+- **Priority:** P1
+- **Owner:** Retained public runtime and native SDK acquisition
+- **Direction:** Execute original-source projects with their complete selected source-built SDK closure through the public retained CLI.
+- **Conclusion:** Issue22 already owns this gap. Reuse current locked-authority snapshots and production SDK acquisition, live revocation, authorization and command evidence; never accept transported producer claims or relabel SDK inputs. Planning stays read-only and exact reviewed authorization precedes SDK builds.
+- **Identity evidence:** A real CMake SDK is built twice under fresh producer
+  grants: locked selection and complete SDK snapshot identities are equal, while
+  live consumer-input identities differ. The legacy input-bound policy therefore
+  cannot be reinterpreted as a stable public review contract. Add a distinct
+  explicitly selected policy binding exact lock, recipe selection, snapshot and
+  placement; fresh production owners must still match that entire closure. Keep
+  the existing policy schema and byte identities unchanged.
+- **Focused results:** The initial two-build identity check and source-build
+  regression passed eight cases. Twelve legacy/selected-policy custody checks
+  pass without skips (190.396 seconds). A real public-runtime adapter run now
+  acquires fresh SDK owners and retains six SDK command records through
+  independent acceptance; its three-case group passes in 96.096 seconds. Only
+  project discovery is fixture-supplied in that group; this is not installed
+  canonical-project or native compiler SDK qualification. The first wrapper
+  omitted shared class fixture setup and failed before execution; it is retained.
+  The final seven-case source group passes without skips in 166.185 seconds,
+  including wrong selection/snapshot, post-build authority change and revocation
+  after an actual command. Existing runtime compatibility passes all 21 cases
+  in 91.158 seconds after restoring the original missing-producer refusal code;
+  the first changed-code failure is preserved. Lint, formatting, layout, exports,
+  documentation, OpenSpec and reviewed driver/documentation authority pass.
+  Next freeze the exact candidate for full regression and wheel qualification,
+  then exercise genuine installed canonical-project and native execution before
+  claiming public CLI or compiler SDK qualification.
+- **Depends on:** RETAINED-PROJECT-001,NATIVE-SDK-001
+- **Implementation:**
+  - [x] Bind complete current per-lock SDK owner closure in the local public runtime after plan and host authorization, preserving owners through admission and cleanup.
+  - [x] Wire production command grants and retained SDK evidence through existing custody and revocation owners without relaxing non-SDK behavior.
+- **Evidence:**
+  - [ ] A real locked source-built SDK fixture passes the canonical installed public CLI retained build/test/docs/independent acceptance; missing authorization, producer drift, policy mismatch and revocation refuse before accepted evidence.
+  - [ ] Full regression, static/driver/documentation checks, installed wheel and native renewal pass at the exact resulting candidate.

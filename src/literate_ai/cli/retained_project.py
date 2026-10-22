@@ -162,6 +162,8 @@ def retained_project_from_args(
                     authorization=args.authorize_retained_project,
                     allow_host_execution=args.allow_host_execution,
                     operator_environment=dict(os.environ),
+                    sdk_project=project,
+                    sdk_binding=binding,
                 ),
             )
         except (

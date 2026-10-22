@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Connect public local retained execution to fresh source-built SDK producers
+  under an explicit recipe/snapshot selection policy. Preserve the earlier
+  run-bound policy, authorization, complete custody and revocation checks.
+  Full installed/native qualification remains in progress.
+
 - Integrate native original-source admission with reviewed receipt-preserving
   first binding. Keep the native completely-unbound route and the receipt-only
   route distinct. The exact combined candidate passes controller regression,

@@ -28,7 +28,10 @@ from literate_ai.contracts.retained_project import (
     RetainedProjectMember,
 )
 from literate_ai.contracts.retained_project_lifecycle import RetainedProjectPlan
-from literate_ai.contracts.retained_project_sdks import RetainedProjectSdkPolicy
+from literate_ai.contracts.retained_project_sdks import (
+    RetainedProjectSdkSelectionPolicy,
+    read_retained_sdk_policy_document,
+)
 
 
 def _inside_prefix(path, prefixes):
@@ -43,7 +46,7 @@ def read_retained_sdk_policy(root, manifest, locks):
     members = [m for m in manifest.members if m.role == "sdk-policy"]
     if len(members) != 1:
         raise ValueError("retained.sdk.exact-policy-input-required")
-    policy = RetainedProjectSdkPolicy.from_dict(
+    policy = read_retained_sdk_policy_document(
         read_retained_project_document(root, members[0], error_prefix="retained.sdk")
     )
     policy.require_locks(locks)
@@ -83,15 +86,40 @@ class RetainedProjectNativeSdkInputs:
         self.plan = plan
         self.owners = owners
         self.policy = read_retained_sdk_policy(root, manifest, plan.component_locks)
-        self._prefixes = {
-            (v.component_lock_identity, v.input_identity): v.prefix
-            for v in self.policy.bindings
-        }
         selected = {}
         for lock, owner in zip(locks, owners, strict=True):
             owner.require_unchanged()
             for binding in owner.for_scope(lock.root_revision):
                 selected[lock.identity, binding.identity] = binding
+        if isinstance(self.policy, RetainedProjectSdkSelectionPolicy):
+            expected = {
+                (
+                    v.component_lock_identity,
+                    v.selection_identity,
+                    v.snapshot_identity,
+                ): v.prefix
+                for v in self.policy.bindings
+            }
+            actual = {
+                (
+                    lock_id,
+                    binding.build.selection.identity,
+                    binding.build.product.snapshot.identity,
+                ): input_id
+                for (lock_id, input_id), binding in selected.items()
+            }
+            if len(actual) != len(selected) or set(actual) != set(expected):
+                raise ValueError(
+                    "retained.sdk.complete-selected-snapshot-closure-required"
+                )
+            self._prefixes = {
+                (key[0], actual[key]): prefix for key, prefix in expected.items()
+            }
+        else:
+            self._prefixes = {
+                (v.component_lock_identity, v.input_identity): v.prefix
+                for v in self.policy.bindings
+            }
         if set(selected) != set(self._prefixes):
             raise ValueError("retained.sdk.complete-product-bindings-required")
         expected = {}

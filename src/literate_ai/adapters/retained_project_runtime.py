@@ -78,6 +78,8 @@ def execute_local_retained_project(
     authorization,
     allow_host_execution,
     operator_environment=None,
+    sdk_project=None,
+    sdk_binding=None,
 ):
     """Run one reviewed local plan and return its live retained admission.
 
@@ -174,6 +176,66 @@ def execute_local_retained_project(
         / "retained-project-cas"
     )
     store = FileSystemCAS(custody)
+    sdk_arguments = {}
+    if any(member.role in {"sdk", "sdk-policy"} for member in manifest.members) or any(
+        node.revision.repository_sources
+        for lock in component_locks
+        for node in lock.nodes
+    ):
+        from literate_ai.adapters.retained_project_sdk_runtime import (
+            RetainedProjectSdkRuntime,
+        )
+        from literate_ai.application.generation_preparation import (
+            GenerationPreparationError,
+        )
+        from literate_ai.security import AuthorizationError
+
+        if sdk_project is None or sdk_binding is None:
+            raise RetainedProjectExecutionError(
+                "retained.sdk.producer-bindings-required"
+            )
+        if sdk_project.root != source:
+            raise RetainedProjectExecutionError(
+                "retained.sdk.project-authority-required"
+            )
+        if operator_environment is None:
+            raise RetainedProjectExecutionError(
+                "retained.sdk.operator-environment-required"
+            )
+        try:
+            sdk_runtime = RetainedProjectSdkRuntime(
+                sdk_project,
+                sdk_binding,
+                manifest,
+                plan,
+                component_locks=component_locks,
+                current_plan=current_local_plan,
+                cache_root=directories.build_dir / "native-sdk-cache",
+                store=store,
+                environment=operator_environment,
+            )
+            sdk_arguments = {
+                "native_sdk_owners": sdk_runtime.acquire(),
+                "native_sdk_authorize": sdk_runtime.authorize,
+                "native_sdk_record": sdk_runtime.record,
+            }
+        except (
+            AuthorizationError,
+            GenerationPreparationError,
+            ValueError,
+            OSError,
+        ) as exc:
+            store.put_manifest(
+                {
+                    "schema": "literate-ai/retained-sdk-acquisition-diagnostic@1",
+                    "plan_identity": plan.identity.uri,
+                    "error_class": type(exc).__name__,
+                    "admitted": False,
+                }
+            )
+            raise RetainedProjectExecutionError(
+                f"{exc}; retained SDK custody: {store.root}"
+            ) from exc
     workspace = RetainedProjectExecutionWorkspace(
         source,
         manifest,
@@ -186,6 +248,7 @@ def execute_local_retained_project(
         managed_graph=planning.managed_sbom_graph,
         component_locks=component_locks,
         allocation_owner=allocation,
+        **sdk_arguments,
     )
     try:
         for _ in plan.profile.actions:

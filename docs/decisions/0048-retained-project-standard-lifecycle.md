@@ -447,3 +447,22 @@ a failed case. Retain immutable actual filesystem observations with ordinary
 process results, including mismatches, and recheck their policy binding during
 whole-run completion and receipt retention. Existing independent authority,
 original test coverage, source/SDK admission and release gates remain mandatory.
+
+## Public selected SDK execution
+
+An SDK placement bound to a particular producer run remains an exact run-bound
+contract. Its identity includes fresh producer authorization, so a later public
+invocation cannot reuse it as a live admission handle. The explicit
+`literate-ai/retained-project-sdk-selection-policy@1` instead pins each exact
+Component lock, recipe selection, complete SDK snapshot and placement. Selection
+includes source, target and recipe authority; snapshot includes complete output
+bytes and selected topology. The earlier schema is neither weakened nor reinterpreted.
+
+Read-only planning validates those expectations without acquiring or compiling
+SDKs. After exact-plan and host-execution authorization, public local execution
+uses the current locked-authority reader and existing native source-build service
+to obtain fresh producer owners for the complete lock closure. It compares actual
+selections and snapshots before consumer commands, retains producer/command evidence
+in its custody CAS and keeps live currentness and revocation through independent
+acceptance and receipt admission. Policy metadata cannot grant source, command,
+package or release authority. Remote execution remains separately qualified work.
