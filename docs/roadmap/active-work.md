@@ -30599,6 +30599,10 @@ the installed FreeBSD prefix. A fresh complete configured host lifecycle passes
 228 tests and independent acceptance in 1,823.130 seconds. Its candidate is
 promoted through the supported command and verifies current; the preceding
 233-test receipt retains its original scope. Canonical installed FreeBSD SDK
-execution is running at the unchanged 3,600-second command budget. A separate
-directory-relative metadata probe was slower and was not adopted.
+execution also timed out at the unchanged 3,600-second command budget
+(4,103.472 seconds supervised total); its owned source server exited zero.
+This newer failure preserves the preceding direct-RECORD failure as separate
+evidence. No native SDK admission was earned. Profile the installed descriptor
+candidate before another canonical replay. A separate directory-relative
+metadata probe was slower and was not adopted.
 No cached distribution success or expanded execution deadline is authorized.

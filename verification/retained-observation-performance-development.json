@@ -1,9 +1,9 @@
 {
   "schema": "literate-ai/retained-observation-performance-development@1",
-  "observed_utc": "2026-10-22T15:04:02.012818+00:00",
+  "observed_utc": "2026-10-22T17:00:05.224348+00:00",
   "work_item": "RETAINED-OBSERVATION-PERF-001",
   "issue": "https://github.com/jordanhubbard/literate-ai/issues/117",
-  "scope": "Historical 760bfa09 direct-RECORD qualification and descriptor-read candidate with uninterrupted regression, clean Linux wheel, configured host lifecycle and installed FreeBSD binding controls; canonical native SDK qualification remains pending",
+  "scope": "Historical 760bfa09 direct-RECORD qualification and descriptor-read candidate with uninterrupted regression, clean Linux wheel, configured host lifecycle and installed FreeBSD binding controls; canonical native SDK qualification failed its unchanged execution deadline",
   "source_sha256": {
     "src/literate_ai/adapters/standard_lifecycle_binding.py": "c52fa742ef21d465293b65afab9df7cc8c5a1b89a0bcf70e764148aca7ece39d",
     "tests/critical/test_standard_lifecycle_binding_adapter.py": "c1139128918d8eee24545cf54d322211a0da36b9d0b14367276be645c13cb0c2"
@@ -101,7 +101,7 @@
     "admission_earned": false,
     "bootstrap_compiler_source_admitted": false
   },
-  "next_action": "Finish the unchanged-budget installed FreeBSD public SDK replay and ten installed context controls; compose with the reviewed Windows integration before landing",
+  "next_action": "Profile the installed descriptor candidate without expanding the canonical deadline; finish ten installed context controls and compose with reviewed Windows integration before landing",
   "authorized_execution_profile": {
     "diagnostic_only": true,
     "seconds": 300.429,
@@ -200,7 +200,16 @@
     },
     "offline_freebsd_bootstrap_seconds": 113.05,
     "native_project_initialization_seconds": 97.78,
-    "canonical_native_cli_status": "running; actual authorized execution; unchanged 3600-second public command budget"
+    "canonical_native_cli_status": {
+      "status": "failed",
+      "reason": "Authorized public build timed out after 3600 seconds",
+      "authorized_execution_budget_seconds": 3600,
+      "supervised_total_seconds": 4103.472,
+      "exit_code": 1,
+      "owned_source_server_terminal": 0,
+      "admission_earned": false,
+      "bootstrap_compiler_source_admitted": false
+    }
   },
   "framework_preceding_lifecycle_receipt": {
     "passed": true,
