@@ -1,9 +1,9 @@
 {
   "schema": "literate-ai/retained-observation-performance-development@1",
-  "observed_utc": "2026-10-22T12:06:41.511839+00:00",
+  "observed_utc": "2026-10-22T13:25:52.455488+00:00",
   "work_item": "RETAINED-OBSERVATION-PERF-001",
   "issue": "https://github.com/jordanhubbard/literate-ai/issues/117",
-  "scope": "Direct wheel RECORD enumeration preserves current member byte verification; focused controller evidence only at this checkpoint",
+  "scope": "Fresh direct RECORD enumeration with full controller regression, clean Linux wheel and complete configured host lifecycle; canonical FreeBSD CLI qualification remains pending",
   "source_sha256": {
     "src/literate_ai/adapters/standard_lifecycle_binding.py": "c52fa742ef21d465293b65afab9df7cc8c5a1b89a0bcf70e764148aca7ece39d",
     "tests/critical/test_standard_lifecycle_binding_adapter.py": "c1139128918d8eee24545cf54d322211a0da36b9d0b14367276be645c13cb0c2"
@@ -92,5 +92,15 @@
     "seconds": 114.637
   },
   "canonical_native_cli_status": "fresh attempt started with unchanged 3600-second execution budget and corrected output lookup; no completed qualification claim",
-  "framework_current_lifecycle_receipt": "requires renewal after the source/driver change"
+  "framework_current_lifecycle_receipt": {
+    "passed": true,
+    "tests": 233,
+    "seconds": 1385.562,
+    "receipt_identity": "sha256:97da2a96e8e78be2474176c42430a23a7e8d10b38d0654e66ecd16a10e4171cd",
+    "finalized_candidate_identity": "sha256:b6691c9b4ae0714a643e6f9c6a7a517d58d2c0b8814505f971e2ad6f3f5e8a08",
+    "promotion": "litai project test-receipt update",
+    "verify_current": true,
+    "report_sha256": "75354df5b482dd15d98bbde2e06a2505e2cd32d95855a44a8127f436f2f3f4f3",
+    "driver_implementation_identity": "sha256:ae7e2958c721d85df08cd527a3e24e954e369221ba26cb0feb7547012f0809a9"
+  }
 }
