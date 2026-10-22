@@ -30448,3 +30448,5 @@ the unavailable workers and no data was deleted.
 The first full local regression was deliberately interrupted after 850 completed cases when concurrent PR #112 changed main. Its checkpoint is retained as partial evidence; the merged candidate requires a fresh full run.
 
 MERGE-STACK-001 reconciliation retains the SDK branch's later native and installed evidence for shared owners and imports the integration branch's additional owners. Earlier qualification details remain reachable in PR105 commit `b6e36582`. PE observation uses the newer versioned cache facts, whole-capture invalidation and deterministic mutation controls; FreeBSD read-only views and typed performance-span assertions remain composed. This does not advance unfinished native SDK or package gates.
+
+MERGE-STACK-001 also retains PR82 head `6e7b94c3` by merge ancestry. That merge changes no production or test source: its unique merge/evidence history is retained while the newer combined driver pins, roadmap and existing receipt remain selected. No historical receipt was promoted as current qualification.
