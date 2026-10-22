@@ -55,5 +55,14 @@
     "distributions_verified": 37,
     "seconds": 88.753
   },
-  "native_installed_fixture_checks": "running; no result claimed"
+  "native_installed_fixture_checks": {
+    "status": "timed-out",
+    "exit_code": -15,
+    "timeout": true,
+    "seconds": 1800.047,
+    "selected": 40,
+    "observed_passes": 9,
+    "batch_complete": false,
+    "qualification_claimed": false
+  }
 }

@@ -30137,10 +30137,25 @@ hosted CI and canonical tree worker/live SDK integration remain open.
   Exact code candidate `f65e0c62` now passes full controller regression: 2,046
   passes, 70 skips and no failures across 2,116 selected tests (1,172.745 seconds).
   Clean wheel qualification passes with 1,231 members; its exact offline FreeBSD
-  installation verifies 37 distributions. Installed native fixture checks are
-  running, with no terminal result claimed. Next exercise a genuine installed
-  canonical project and native execution before claiming public CLI or compiler
-  SDK qualification. See [the scoped record](../../verification/retained-sdk-public-development.json).
+  installation verifies 37 distributions. That 40-case installed native batch
+  timed out after 1,800.047 seconds with nine observed passes; it did not complete.
+  That batch does not establish canonical public CLI or compiler SDK
+  qualification. See [the scoped record](../../verification/retained-sdk-public-development.json).
+- **Captured-context controller renewal:** Exact code `4eab5e25` passes all
+  2,198 selected regression cases: 2,128 passes, 70 declared skips and no failures
+  (2,440.464 seconds, two workers). All seven real native-loading cases and three
+  graph-equivalence cases pass, including caller environment mutation. Static,
+  OpenSpec, documentation and driver reviews pass. Its clean 1,235-member wheel
+  qualifies, and the complete configured host lifecycle passes 223 tests and
+  independent acceptance. Supported receipt promotion and current verification
+  pass. This result keeps its own test count, distinct from the predecessor's
+  227-test lifecycle. Exact-wheel offline FreeBSD installation verifies all 37
+  distributions. Ten installed context cases and the fresh canonical native CLI
+  replay are running; neither has a completed qualification claim. The latter
+  retains the default receipt policy, removes the consumer RPATH, requires the
+  captured loader path and checks missing host/plan authorization separately.
+  Compiler SDK admission and release authorization remain open. See
+  [the scoped record](../../verification/retained-sdk-runtime-context-development.json).
 - **Depends on:** RETAINED-PROJECT-001,NATIVE-SDK-001
 - **Implementation:**
   - [x] Bind complete current per-lock SDK owner closure in the local public runtime after plan and host authorization, preserving owners through admission and cleanup.
