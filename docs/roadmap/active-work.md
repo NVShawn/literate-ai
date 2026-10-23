@@ -23216,7 +23216,7 @@ GitHub CI failure without relaxing identity checks.
   - [ ] Supported fixtures proceed through the declared lifecycle; unsupported and
         partial fixtures stop early with no model call, generated source, or receipt.
 
-### [ ] WORKER-PROBE-DIAGNOSTICS-001 — Preserve actionable SSH probe failures
+### [x] WORKER-PROBE-DIAGNOSTICS-001 — Preserve actionable SSH probe failures
 
 - **Release target:** 1.3.0
 - **Priority:** P0
@@ -23229,8 +23229,7 @@ GitHub CI failure without relaxing identity checks.
   worker identity, exit status, stable cause classification, and safe stderr while
   preserving BatchMode, host-key policy, output bounds, and credential redaction.
 - **Depends on:** WORKER-HEALTH-001
-- **Next action (in progress):** Complete consistency and installed/hosted qualification
-  before landing the diagnostic repair.
+- **Outcome:** Diagnostic repair is landed and its issue acceptance is verified.
 - **Implementation:**
   - [x] Carry worker ID, SSH exit status, bounded stderr, and redacted transport cause
         through individual and `--all` probe results.
@@ -23253,6 +23252,9 @@ GitHub CI failure without relaxing identity checks.
   substitute invented capacity in order to admit that worker.
 
 - **Current qualification:** Four capability tests cover every named SSH cause, bounds/redaction and mixed healthy/failed routing. Fresh strict empty-known-host refusal followed by normal registered-host success passes on the combined 1.3 source. Exact combined CI remains pending; the parent stays open until integration qualification.
+
+- **Closure qualification:** The implementation is landed through PR #110 on `75d73ac2`; exact-head CI run `39790990072` passed. Fresh managed `make python-check` selection `test_worker_capabilities.py` passed all seven cases, including six SSH exit-255 causes, failing-worker identity in a mixed catalog, redaction and diagnostic bounds. The previously checked first-contact/registered-host acceptance is preserved; host-key policy is unchanged.
+
 
 ### [ ] QUALIFICATION-ECONOMY-001 — Make exact qualification affordable and observable
 
@@ -28959,7 +28961,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 - **Native Windows follow-up:** The four-worker gate stopped after 575 passes, 45 skips and 579 passing subtests when the real Cargo accounting fixture exceeded its 60-second compiler deadline. An isolated unchanged probe passes: cold compile 32.594 seconds, cached compile 0.469 seconds. The fixture now allows 180 seconds on Windows (60 elsewhere) and uses existing owned-process-tree cleanup on timeout. This is a test-fixture timing correction, not native performance acceptance; the final gate must be rerun. The failed job evidence is retained and its finite on-demand task is confirmed removed.
 
-### [ ] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
+### [x] MERMAID-SCOPE-001 — Mermaid documentation check scans gitignored build output (generated/)
 
 - **GitHub issue:** [#53](https://github.com/jordanhubbard/literate-ai/issues/53)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -28972,11 +28974,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
-### [ ] SOURCE-CREDENTIAL-001 — Distinguish credential literals from Python assignment expressions
+- **Closure qualification:** Landed implementation on `75d73ac2`; all 21 documentation-tool tests passed and 121 tracked diagrams rendered successfully. The real temporary Git repository fixture proves invalid ignored generated/worktree Markdown and untracked files do not change candidates, while modified/deleted tracked files are respected. Exact-head CI run `39790990072` passed; this is the complete ignored-file acceptance scope.
+
+
+### [x] SOURCE-CREDENTIAL-001 — Distinguish credential literals from Python assignment expressions
 
 - **GitHub issue:** [#52](https://github.com/jordanhubbard/literate-ai/issues/52)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -28989,13 +28994,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Execution decision:** Use inert Python AST positions to distinguish assignments of credential-free expressions from literal credentials. Exempt only exact assignment matches with no string/bytes literal in their value; preserve uncertain-language, syntax-error, secret-literal and filename exclusions. An entirely excluded inventory must produce a typed classification diagnostic without matched content.
 
 - **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
 
 - **Adversarial review repair:** A literal-free assignment must not exempt a different credential literal elsewhere in the file. Add mixed assignment/dictionary/keyword/default and embedded-private-key controls, then renew qualification.
+
+- **Closure qualification:** Landed implementation on `75d73ac2`; fresh managed `test_source_inventory_credentials.py` passed all five tests, including both complete inert portable fixtures, nine mixed-secret controls, malformed/unknown-language and private-key exclusions, Unicode offsets and typed value-free diagnostics. The full landed source qualification passed 2131 tests with 71 platform skips and no failures; exact-head CI run `39790990072` passed.
+
 
 ### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
 
@@ -29106,7 +29114,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-### [ ] WORKER-GPU-MEMORY-001 — Preserve unavailable NVIDIA GPU memory in POSIX worker observations
+### [x] WORKER-GPU-MEMORY-001 — Preserve unavailable NVIDIA GPU memory in POSIX worker observations
 
 - **GitHub issue:** [#44](https://github.com/jordanhubbard/literate-ai/issues/44)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29119,9 +29127,12 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+- **Closure qualification:** Landed implementation on `75d73ac2`; fresh managed `test_worker_capabilities.py` selection passed seven tests. The portable NVIDIA fixture executes the POSIX serializer for unknown, positive and failed-query memory cases; the Windows serializer emits explicit JSON null for unavailable memory. This closes the observation/serialization contract and makes no physical GPU capacity claim.
+
 
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
@@ -29157,7 +29168,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-### [ ] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
+### [x] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
 
 - **GitHub issue:** [#24](https://github.com/jordanhubbard/literate-ai/issues/24)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29168,14 +29179,20 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Upgrade OpenSpec without weakening strict validation; split existing overlong requirements while preserving every normative sentence
+  - [x] Upgrade OpenSpec without weakening strict validation; split existing overlong requirements while preserving every normative sentence
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Complete the issue’s clean-audit requirement: remove the five remaining low KaTeX-chain findings through a normally resolved supported renderer release, then require zero total findings and renew all documentation/strict gates.
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
 **Current audit:** The exception list is already empty in current main (ancestor `4ceedbe9`). Fresh staged OpenSpec installation reports five low findings and no high/critical findings; strict validation and documentation checks pass. Review #24 for closure against its original contract after confirming the landed dependency change; no exception restoration or dependency downgrade is proposed.
+
+- **Earlier staged audit (not final closure):** Main contains OpenSpec 1.14.3 and no `braces` package in the lock; the exception list is empty. A fresh clean staged install and `npm audit --audit-level=high` exit zero: 0 high, 0 critical, 0 moderate, 5 low. The normal documentation gate passes all 21 tool tests and renders all 121 diagrams; all four strict OpenSpec specifications passed on this same tooling source. The remaining low findings are reported honestly and do not reinstate the removed high-severity exception.
+
+- **Final clean-audit qualification:** A fresh install and audit at every severity report zero vulnerabilities. A normally resolved KaTeX 0.18.2 override removes the five inherited low findings; every other lock package and the Mermaid CLI 11.16.0 pin remain unchanged. The new real-library inherited-trust regression fails on 0.16.47 and passes on the patch while preserving explicit trust. All 22 tool tests, 121 diagram renders and four strict specifications pass. The unchanged CLI also renders two actual mathematical expressions with the patched library. See `verification/documentation-audit-qualification.json`. No advisory exception, audit threshold change or forced dependency downgrade is used.
+
 
 ### [ ] RETAINED-CATALOG-001 — Bind complete retained input ownership to canonical Component catalogs
 
@@ -29476,7 +29493,7 @@ package or release admission is claimed by lock-health verification.
 - **Closure qualification:** Fresh native macOS public installed-wheel commands lock a real canonical Standard project for `native-test`; verify, status, the exact lock check and the typed current-lock reader agree on `sha256:5a34134ef5e43251a15db4f128d96ede0ef1c5d8eb32cd38f232fa044ee06205`. Project file bytes remain unchanged. Actual selected-Flavor, target-binding and missing-audit mutations refuse, and restoration returns current. The six portable regressions pass and the complete source suite passes 2139 cases with 71 explicit skips. All relevant lock-owner code matches landed `a6a22996` exactly; see `verification/installed-lock-entrypoint-acceptance.json`. This verifies read-only target selection, not construction for a foreign target.
 
 
-### [ ] TRACKER-REPO-001 — Bind forge commands to the selected repository
+### [x] TRACKER-REPO-001 — Bind forge commands to the selected repository
 
 - **GitHub issue:** [#80](https://github.com/jordanhubbard/literate-ai/issues/80)
 
@@ -29486,9 +29503,12 @@ package or release admission is claimed by lock-health verification.
 - **Conclusion:** GitHub CLI context can select an upstream parent even after tracker inspection chose the fork. Bind emitted commands explicitly to the parsed selected repository; use explicit repository arguments as the current operator mitigation.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
+  - [x] Extend the existing forge command owner with explicit repository identity without changing remote-selection policy or exposing credentials.
 - **Evidence:**
-  - [ ] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+  - [x] Portable fork, multiple-remote, enterprise-host and ambient-override fixtures preserve the selected repository across all emitted commands; external writes are not needed for qualification.
+
+- **Closure qualification:** Landed implementation on `75d73ac2`; fresh managed `test_project_tracker.py` passed five tests. Every emitted issue/review/create/merge/status argv carries the selected repository explicitly across fork-style SSH/HTTPS, multiple remotes, enterprise hosts/ports and ambient forge overrides; credentials and unsupported repository paths fail safely without external writes. Exact-head CI run `39790990072` passed.
+
 
 ### [x] CATALOG-FETCH-001 — Fetch immutable catalog snapshots without full history
 
