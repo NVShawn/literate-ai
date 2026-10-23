@@ -1,0 +1,17 @@
+{
+  "schema": "literate-ai/development-evidence@1",
+  "scope": "Windows RECORD fixture byte preservation; not full Windows qualification",
+  "ci_run": 39960983882,
+  "failed_job": 120438738913,
+  "cause": "csv.writer produced CRLF then Windows Path.write_text translated LF again; empty inventory rows correctly refused",
+  "correction": "write exact encoded UTF-8 bytes; production strict CSV validation unchanged",
+  "local": {
+    "owner": "tests/critical/test_standard_lifecycle_binding_adapter.py",
+    "tests": 6,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 0.024
+  },
+  "windows_confirmation": "pending isolated hosted execution",
+  "qualification": "development only"
+}

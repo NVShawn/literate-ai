@@ -30622,3 +30622,10 @@ not a single-variable performance attribution. All ten installed context control
 now pass with zero skips; 469 production modules resolve from the installed prefix. Compiler SDK, package, product
 receipt and release admission remain unearned. Renew exact composed
 Windows/descriptor regression, wheel and lifecycle qualification before landing.
+
+Windows fixture correction pending for #117: PR #130 full Windows shard 2
+found that CSV's CRLF rows were translated a second time by Path.write_text.
+The resulting CR-CR-LF creates empty RECORD rows, correctly refused by the
+production parser. Write the fixture's exact UTF-8 CSV bytes; retain strict
+production inventory validation. Re-run this owner through the managed runner
+and confirm the same cases on Windows before claiming cross-platform closure.

@@ -105,7 +105,7 @@ class StandardLifecycleBindingAdapterTests(unittest.TestCase):
         for name in (*payload, "literate_ai/missing.pyc"):
             writer.writerow((name, "", ""))
         record = metadata / "RECORD"
-        record.write_text(stream.getvalue())
+        record.write_bytes(stream.getvalue().encode("utf-8"))
         return root, record, PathDistribution(metadata)
 
     def test_record_inventory_skips_prefilter_but_reobserves_actual_bytes(self):
