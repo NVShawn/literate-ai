@@ -6,9 +6,14 @@ import hashlib
 import tempfile
 import unittest
 from argparse import Namespace
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
+
+from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
 
 from literate_ai.adapters import project_updates
 from literate_ai.adapters.project_initialization import (
@@ -29,6 +34,8 @@ from literate_ai.adapters.repository_catalogs import (
     InheritedCatalogPlan,
 )
 from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
+from literate_ai.adapters.repository_updates import FilesystemRepositoryUpdateAdapter
+from literate_ai.cli.errors import CliFailure
 from literate_ai.cli.project import update_project_from_args
 from literate_ai.contracts import (
     ProjectUpdateClassification,
@@ -39,6 +46,7 @@ from literate_ai.contracts import (
 from literate_ai.projects import load_project
 from tests.e2e.test_project_update_adapter import _origin
 from tests.support.fixtures_test_repository_lineage import fixture
+from tests.support.fixtures_test_schema_catalog import SchemaCatalog
 
 
 class ProjectUpdateCompatibilityTests(unittest.TestCase):
@@ -134,6 +142,13 @@ class ProjectUpdateCompatibilityTests(unittest.TestCase):
             blocked.compatibility[0], "project.skill_dependency_identity_mismatch"
         )
         self.assertEqual(ProjectUpdatePlan.from_dict(plan.to_dict()), plan)
+        catalog = SchemaCatalog()
+        schema, _ = catalog.resolve(plan.SCHEMA)
+        registry = Registry().with_resources(
+            (uri, Resource.from_contents(document, default_specification=DRAFT202012))
+            for uri, document in catalog.resources.items()
+        )
+        Draft202012Validator(schema, registry=registry).validate(plan.to_dict())
         with (
             mock.patch.object(
                 project_updates, "_upstream_template", side_effect=upstream
@@ -167,73 +182,96 @@ class ProjectUpdateCompatibilityTests(unittest.TestCase):
             "sha256:8878f7e688f090827fcfaaf4fca8e547839e0e6cc506c35435b6f3aff3844876",
         )
 
-    def test_public_update_plan_and_apply_keep_old_pin_and_report_same_incompatibility(
-        self,
+    def invoke_public_update(
+        self, additions, *, apply, repository_adapter=None, path=None
     ):
-        bad = self.skill("fixture-b", dependency=("fixture-a", "2.0.0", self.new))
-        good = self.skill("fixture-c")
         original_template = project_updates._upstream_template
 
         def upstream(paths):
-            return original_template(paths) | {self.b: bad, self.c: good}
+            return original_template(paths) | additions
 
         def adapter(**options):
             return FilesystemProjectUpdateAdapter(
                 origin_provider=lambda: self.installed_origin, **options
             )
 
-        def invoke(apply):
-            with (
-                mock.patch(
-                    "literate_ai.cli.project._repository_fetch_provider",
-                    return_value=SimpleNamespace(
-                        deadline_evidence={"fixture": True}, update_blobs=lambda *_: {}
-                    ),
+        with (
+            mock.patch(
+                "literate_ai.cli.project._repository_fetch_provider",
+                return_value=SimpleNamespace(
+                    deadline_evidence={"fixture": True}, update_blobs=lambda *_: {}
                 ),
-                mock.patch(
-                    "literate_ai.cli.project.resolve_repository_lineage",
-                    return_value=self.lineage,
-                ),
-                mock.patch(
-                    "literate_ai.cli.project.plan_inherited_catalogs",
-                    return_value=self.parent_catalog,
-                ),
-                mock.patch(
-                    "literate_ai.cli.project.FilesystemProjectUpdateAdapter",
-                    side_effect=adapter,
-                ),
-                mock.patch.object(
-                    project_updates, "_upstream_template", side_effect=upstream
-                ),
-                mock.patch(
-                    "literate_ai.adapters.project_update_apply._upstream_template",
-                    side_effect=upstream,
-                ),
-            ):
-                return update_project_from_args(
-                    Namespace(
-                        path=self.root,
-                        apply=apply,
-                        adopt_added=True,
-                        take_upstream=[],
-                        keep_local=[],
-                        record_work_items=False,
-                        unpin=False,
-                        follow_ref=None,
-                        allow_major=False,
-                        review_conflicts=False,
-                    )
+            ),
+            mock.patch(
+                "literate_ai.cli.project.resolve_repository_lineage",
+                return_value=self.lineage,
+            ),
+            mock.patch(
+                "literate_ai.cli.project.plan_inherited_catalogs",
+                return_value=self.parent_catalog,
+            ),
+            mock.patch(
+                "literate_ai.cli.project.FilesystemProjectUpdateAdapter",
+                side_effect=adapter,
+            ),
+            mock.patch(
+                "literate_ai.cli.project.FilesystemRepositoryUpdateAdapter",
+                side_effect=repository_adapter or FilesystemRepositoryUpdateAdapter,
+            ),
+            mock.patch.object(
+                project_updates, "_upstream_template", side_effect=upstream
+            ),
+            mock.patch(
+                "literate_ai.adapters.project_update_apply._upstream_template",
+                side_effect=upstream,
+            ),
+        ):
+            return update_project_from_args(
+                Namespace(
+                    path=path or self.root,
+                    apply=apply,
+                    adopt_added=True,
+                    take_upstream=[],
+                    keep_local=[],
+                    record_work_items=False,
+                    unpin=False,
+                    follow_ref=None,
+                    allow_major=False,
+                    review_conflicts=False,
                 )
+            )
 
+    def test_public_update_from_nested_path_preserves_parent_catalog(self):
+        nested = self.root / "components"
+        nested.mkdir(exist_ok=True)
+        item = self.parent_catalog.items[0]
+        self.parent_catalog = replace(
+            self.parent_catalog,
+            items=(
+                replace(item, files=(InheritedCatalogFile(self.a, self.new, False),)),
+            ),
+        )
+        good = self.skill("fixture-c")
+        planned = self.invoke_public_update({self.c: good}, apply=False, path=nested)
+        self.assertEqual(planned["mode"], "read-only-plan")
+        self.invoke_public_update({self.c: good}, apply=True, path=nested)
+        self.assertEqual((self.root / self.a).read_bytes(), self.new)
+        self.assertEqual((self.root / self.c).read_bytes(), good)
+
+    def test_public_update_plan_and_apply_keep_old_pin_and_report_same_incompatibility(
+        self,
+    ):
+        bad = self.skill("fixture-b", dependency=("fixture-a", "2.0.0", self.new))
+        good = self.skill("fixture-c")
         before = self.snapshot()
-        planned = invoke(False)
+        planned = self.invoke_public_update({self.b: bad, self.c: good}, apply=False)
         self.assertEqual(self.snapshot(), before)
         expected = next(
             x["compatibility"]
             for x in planned["framework"]["files"]
             if x["path"] == self.b
         )
-        applied = invoke(True)
+        applied = self.invoke_public_update({self.b: bad, self.c: good}, apply=True)
         self.assertEqual(
             next(
                 x["compatibility"]
@@ -249,6 +287,40 @@ class ProjectUpdateCompatibilityTests(unittest.TestCase):
             FilesystemRepositoryLineageStore(self.root).load(),
             (self.selection, self.lineage),
         )
+
+    def test_local_provider_drift_refuses_before_inherited_provenance_is_written(self):
+        local = self.prefix + "fixture-local/SKILL.md"
+        old = self.skill("fixture-local")
+        changed = self.skill("fixture-local", version="2.0.0")
+        path = self.root / local
+        path.parent.mkdir()
+        path.write_bytes(old)
+        addition = self.skill("fixture-b", dependency=("fixture-local", "1.1.0", old))
+        snapshots = []
+        owner = self
+
+        class ConcurrentEdit(FilesystemRepositoryUpdateAdapter):
+            def apply(self, *args, **kwargs):
+                path.write_bytes(changed)
+                snapshots.append(owner.snapshot())
+                return super().apply(*args, **kwargs)
+
+        with (
+            mock.patch.object(
+                FilesystemRepositoryLineageStore,
+                "replace",
+                side_effect=AssertionError("preflight reached lineage writer"),
+            ) as writer,
+            self.assertRaises(CliFailure) as raised,
+        ):
+            self.invoke_public_update(
+                {self.b: addition}, apply=True, repository_adapter=ConcurrentEdit
+            )
+        self.assertEqual(
+            raised.exception.code, "project.skill_dependency_identity_mismatch"
+        )
+        self.assertEqual(writer.call_count, 0)
+        self.assertEqual(self.snapshot(), snapshots[0])
 
     def test_selected_parent_addition_takes_precedence_over_installed_scaffold(self):
         parent = self.skill("fixture-b")

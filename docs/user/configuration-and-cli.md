@@ -1419,8 +1419,8 @@ those files unchanged and reports them under `dependency-incompatible`, while
 applying the compatible subset. Review an explicit parent update when a new skill
 requires a newer pinned dependency; the updater does not change parent selectors
 to satisfy it. Selected parent catalog bytes take precedence over same-path
-installed scaffolds. The actual selected subset is checked again before any
-framework file write, and complete-project validation retains atomic rollback.
+installed scaffolds. The selected dependency closure is rechecked before applying
+inherited or framework changes. Complete-project validation retains atomic rollback.
 
 `litai update --apply` writes upstream-only changes and clean three-way text merges
 in both plans. `upstream-only` files still equal the recorded baseline locally,

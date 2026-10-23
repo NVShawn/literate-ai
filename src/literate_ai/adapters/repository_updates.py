@@ -492,6 +492,7 @@ class FilesystemRepositoryUpdateAdapter:
         keep_local: frozenset[str] = frozenset(),
         finalizer: Callable[[Path], object] | None = None,
         resolutions: dict | None = None,
+        preflight: Callable[[Path], object] | None = None,
     ) -> AppliedRepositoryLineageUpdate:
         """Apply safe inherited deltas and one optional final transaction stage."""
 
@@ -654,6 +655,10 @@ class FilesystemRepositoryUpdateAdapter:
         lineage_replaced = False
         written: list[str] = []
         created_directories: set[Path] = set()
+        if preflight is not None:
+            # Check the complete composed update after local/provenance checks,
+            # before any inherited bytes, lineage or baseline are written.
+            preflight(project.root)
         try:
             for item in selected_files:
                 target = _project_path(project.root, item.path)

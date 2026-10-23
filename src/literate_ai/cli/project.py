@@ -780,27 +780,31 @@ def update_project_from_args(args) -> dict[str, Any]:
             for path, review in resolutions.items()
             if path in framework_paths
         }
-        catalog_overrides = prospective_catalog_update_contents(
-            Path(args.path).resolve(),
-            lineage_update,
-            adopt_added=getattr(args, "adopt_added", False),
-            take_upstream=take_upstream,
-            keep_local=keep_local,
-            resolutions={
-                path: review
-                for path, review in resolutions.items()
-                if path not in framework_paths
-            },
-        )
-        framework_plan = ProjectUpdateService(
-            FilesystemProjectUpdateAdapter(
-                protected_paths=protected_paths,
-                base_reader=provider.update_blobs,
-                catalog_overrides=catalog_overrides,
+
+        def complete_framework_plan(root: Path):
+            catalog_overrides = prospective_catalog_update_contents(
+                root,
+                lineage_update,
                 adopt_added=getattr(args, "adopt_added", False),
-                resolutions=framework_resolutions,
+                take_upstream=take_upstream,
+                keep_local=keep_local,
+                resolutions={
+                    path: review
+                    for path, review in resolutions.items()
+                    if path not in framework_paths
+                },
             )
-        ).plan(Path(args.path))
+            return ProjectUpdateService(
+                FilesystemProjectUpdateAdapter(
+                    protected_paths=protected_paths,
+                    base_reader=provider.update_blobs,
+                    catalog_overrides=catalog_overrides,
+                    adopt_added=getattr(args, "adopt_added", False),
+                    resolutions=framework_resolutions,
+                )
+            ).plan(root)
+
+        framework_plan = complete_framework_plan(project.root)
     except (ProjectUpdateError, RepositoryUpdateError, RepositoryReparentError) as exc:
         rollback_staged_reparent()
         raise CliFailure(exc.code, exc.message) from exc
@@ -843,6 +847,24 @@ def update_project_from_args(args) -> dict[str, Any]:
     if getattr(args, "apply", False):
         try:
             report_progress("Applying inherited catalog updates")
+
+            def preflight_complete_project(root: Path) -> None:
+                current = complete_framework_plan(root)
+                if current.identity == framework_plan.identity:
+                    return
+                previous = {
+                    item.path: item.compatibility for item in framework_plan.files
+                }
+                for item in current.files:
+                    if (
+                        item.compatibility is not None
+                        and item.compatibility != previous.get(item.path)
+                    ):
+                        raise ProjectUpdateError(*item.compatibility)
+                raise ProjectUpdateError(
+                    "project.update_local_changed",
+                    "framework or skill catalog inputs changed; re-plan",
+                )
 
             def finalize_complete_project(root: Path) -> None:
                 nonlocal framework_plan, applied, evidence_migration
@@ -887,6 +909,7 @@ def update_project_from_args(args) -> dict[str, Any]:
                 take_upstream=take_upstream,
                 keep_local=keep_local,
                 finalizer=finalize_complete_project,
+                preflight=preflight_complete_project,
                 resolutions={
                     item.path: resolutions[item.path]
                     for item in lineage_update.contract.files
