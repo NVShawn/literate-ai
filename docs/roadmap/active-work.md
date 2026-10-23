@@ -29639,6 +29639,8 @@ rather than treating resumed partial coverage as release qualification.
 - **Fresh combined lifecycle:** The force-generated complete framework lifecycle at authority commit `885352ad` passes all 233 cases with no failures/skips. Supported receipt update/check/require-current and verify pass. Receipt `sha256:35189b34504770136936cd41bbc7421a01a8681550ecde0eed5cb70a4ec8a5e5`; finalized candidate `sha256:e760890282ba6aaf3f9603909a06b314ea860549624c1b321d80025ba0ae5bab`; driver `sha256:ceb559c1eaa79ce4db8210a6acd34ccf7ecbf19ad0651092e8aacb105bcd7578`. This renews the integrated alias/Windows source under its actual authority and preserves the older Windows-only receipt separately.
 
 
+- **Installed-wheel renewal:** Exact source `1063ecd8` passes the complete official wheel smoke runner: 131 timing spans succeed, with evidence ledger state passed and wheel `sha256:3e6f9f8896d7cf66261d190302f899cedbc13cc6995bd115a88df7816165d6eb`. Current framework receipt remains 233 passes and verify has no failing gates. Source-full regression and Python 3.11 alias/runtime regressions are recorded in `verification/private-runtime-alias-development.json`; hosted CI and reviewed landing remain required.
+
 ### [ ] NATIVE-SDK-ALIAS-001 — Preserve internal aliases through native SDK admission
 
 **GitHub issue:** [#93](https://github.com/jordanhubbard/literate-ai/issues/93)
