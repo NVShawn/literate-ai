@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 import unittest
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from literate_ai import worker_storage_probe
+from literate_ai.adapters import action_hardware
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
 )
@@ -113,6 +115,24 @@ class ActionExecutionConfigurationTests(unittest.TestCase):
                     self.admit()
 
     def test_public_factory_automatically_uses_private_configuration(self):
+        timings = {}
+
+        def measured(label, function):
+            def observe(*args, **kwargs):
+                started = time.monotonic()
+                completed = False
+                try:
+                    result = function(*args, **kwargs)
+                    completed = True
+                    return result
+                finally:
+                    timings[label] = {
+                        "seconds": round(time.monotonic() - started, 3),
+                        "completed": completed,
+                    }
+
+            return observe
+
         with source_cas_server(self.factory.admission.fixture.blobs) as (url, requests):
             self.configure(url)
             self.configuration["source_handoff"] = "http-cas"
@@ -121,7 +141,34 @@ class ActionExecutionConfigurationTests(unittest.TestCase):
             }
             self.load()
             with patch.dict(os.environ, self.environment, clear=True):
-                adapter = self.factory.assemble()
+                # Measure the actual calls without changing responses, deadlines or
+                # native observations. A failed CI run needs to distinguish lease
+                # spent identifying controller code from time in the receiver.
+                try:
+                    with (
+                        patch.object(
+                            action_hardware,
+                            "receiver_code_identity",
+                            measured(
+                                "code_identity", action_hardware.receiver_code_identity
+                            ),
+                        ),
+                        patch.object(
+                            action_hardware,
+                            "run_command_observation",
+                            measured(
+                                "transport", action_hardware.run_command_observation
+                            ),
+                        ),
+                    ):
+                        adapter = self.factory.assemble()
+                except FilesystemStandardRebuildError as exc:
+                    import json
+
+                    exc.add_note(
+                        "Real hardware observation timings: " + json.dumps(timings)
+                    )
+                    raise
                 indexer = adapter.runtime.application.lifecycle.indexer
                 self.assertIsInstance(indexer, CommandGenerationIndexer)
                 self.assertIsNotNone(adapter.action_execution)
