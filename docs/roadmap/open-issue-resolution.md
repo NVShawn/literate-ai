@@ -1,7 +1,7 @@
 # Open issue resolution
 
 - **Status:** active
-- **Owning queue item:** [ISSUE-RESOLUTION-001](active-work.md#issue-resolution-001--resolve-all-open-issues-with-verified-closure)
+- **Owning queue item:** [ISSUE-RESOLUTION-001](active-work.md#issue-resolution-001-resolve-all-open-issues-with-verified-closure)
 - **Completion / archival evidence:** pending until every live open issue is resolved and verified
 
 The requested outcome is resolution of **all open issues**, not only the easiest fixes,
