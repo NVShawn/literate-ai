@@ -4699,8 +4699,8 @@ The earlier inventories below are historical.
 | --- | --- | --- |
 | [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
 | [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Compose exact head `5faea3b9` into #110; renewed combined qualification pending |
-| [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | WINDOWS-TEST-CONTRACT-001 / issue #116; stacked on #115 | Integrated by ancestry into the Windows review branch; exact #119 CI passed after retrying two pre-test OTP setup failures. Current integration host qualification passes; native and new exact-head CI remain pending. |
-| [#127](https://github.com/jordanhubbard/literate-ai/pull/127) | WINDOWS-TEST-CONTRACT-001 / CLI-IMPORT-001 / WIN-GATE-001; consolidates #119, #122 and #124 | Draft: 2138 complete-suite passes and 228 fresh lifecycle passes; current receipt and verify. Final native/package and exact-head CI pending. |
+| [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | Exact head `1a4d3e6e` retained by ancestry in #127 | Superseded review; its branch is retained and issue #116 remains open pending native qualification and landing |
+| [#127](https://github.com/jordanhubbard/literate-ai/pull/127) | Windows fixtures plus optional-import and wheel-timing source repairs | Consolidated draft at `62ce16a0`: exact hosted CI `39926518820` and fresh 228-pass host receipt pass; final native qualification and the newly found identity-fixture correction remain open |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
@@ -29096,7 +29096,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
-### [ ] README-PARENT-001 — Ensure project README links to its actual parent repository through a reusable skill
+### [x] README-PARENT-001 — Ensure project README links to its actual parent repository through a reusable skill
 
 - **GitHub issue:** [#46](https://github.com/jordanhubbard/literate-ai/issues/46)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29112,7 +29112,9 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Route initialized and maintainer agent workflows through the reusable parent-README skill and read-only plan / authorized apply helper
   - [x] Cover actual initialized/reparented projects, arbitrary and multiple parents, authored prose, idempotency, local URL evidence and unsafe inputs
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
+
+- **Closure qualification:** The actual non-editable installed public CLI plans without writes, creates a descriptive browser link for an arbitrary SSH parent, applies idempotently, reconciles multiple changed parents while preserving authored CRLF bytes, and invents no parent for a root project. All ten parent-README contract cases pass in the current full 2139-pass source suite. Generated and maintainer instructions route through the reusable skill. Relevant implementation matches already-landed a6a22996. See `verification/installed-maintenance-acceptance.json`.
 
 ### [x] WORKER-GPU-MEMORY-001 — Preserve unavailable NVIDIA GPU memory in POSIX worker observations
 
@@ -29342,7 +29344,7 @@ suite and native execution before exposing it to the operator workstation.
 - **Evidence:**
   - [ ] Prove no writes when disabled, isolated simultaneous sessions, safe atomic updates, stale-evidence revalidation, secret exclusion, bounded retention and portability across supported CLI providers and hosts before shipping in a later point release.
 
-### [ ] STANDARD-FIRST-BIND-001 — Migrate retained receipt-only projects to reviewed Standard binding
+### [x] STANDARD-FIRST-BIND-001 — Migrate retained receipt-only projects to reviewed Standard binding
 
 - **Priority:** P1
 - **GitHub issue:** [#107](https://github.com/jordanhubbard/literate-ai/issues/107)
@@ -29364,9 +29366,11 @@ suite and native execution before exposing it to the operator workstation.
   - [x] Thirteen focused rebind/first-binding tests, lint, formatting, repository layout, public export, documentation, OpenSpec and reviewed driver closure checks pass on the controller.
   - [x] Complete full controller regression and exact clean-commit installed-wheel qualification. At `73311c69`, Python 3.14.7 passes 1,801 cases with 42 explicit skips and no failures; the exact wheel and all installed smoke checks pass.
   - [x] Qualify the actual installed CLI on a native receipt-only project copy; preserve original evidence and retain missing lifecycle admission. FreeBSD 16 / Python 3.12.14 verifies all 37 offline distributions, passes all five real CLI operations and preserves all 42 historical evidence files. All 13 exact committed contract cases also pass with installed imports and no skips. Two preceding harness failures remain retained; neither changed production authority.
-  - [ ] Pass exact-head required hosted CI before landing.
+  - [x] Pass exact-head required hosted CI before landing.
 
 Evidence: [exact wheel and native migration checkpoint](../../verification/standard-first-binding-development.json). [Draft PR #108](https://github.com/jordanhubbard/literate-ai/pull/108) remains open pending exact-head hosted CI. First binding does not execute or admit a retained source lifecycle, SDK, package, ISO or release.
+
+- **Closure qualification:** Fresh non-editable installed CLI planning binds exact installed authority without writes; denied authorization, rehashed policy weakening and replay refuse. Exact authorized apply preserves the complete receipt policy and historical receipt bytes, and explicitly retains stale-until-rebuild rather than minting acceptance. All current rebind/first-binding contract cases pass in the full 2139-pass source suite; the earlier real FreeBSD custom-policy migration proof remains retained. The implementation already landed with reviewed integration #110 and exact CI 39790990072; earlier draft #108 is superseded. See `verification/installed-maintenance-acceptance.json`.
 
 ### [ ] NATIVE-FIRST-BIND-INTEGRATION-001 — Qualify native original-source admission with reviewed first binding
 
@@ -30498,6 +30502,8 @@ maintenance pass. Worker alignment refused the configured template with
 or worker configuration repaired. This operational audit does not close WORKTREE-002's
 reusable migration-contract or platform-qualification obligations.
 
+- **Windows review consolidation:** PR119 exact head `1a4d3e6e` is an ancestor of retained PR127 head `62ce16a0`; the latter has a complete green hosted matrix and fresh host qualification. Close PR119 as superseded while preserving its branch, histories and all issue116 native/landing gates. PR122 and PR124 remain retained: their optional-import and timing runtime/test slices match the accepted #127 source, but their exact receipt-bearing heads were deliberately not merged. Their final disposition follows complete qualification of the consolidated successor. No source contribution is represented as landed by this review closure.
+
 ### [ ] SWIFT-DRIVER-MODE-001 — Preserve Swift compiler mode after executable resolution
 
 - **Priority:** P0
@@ -30674,6 +30680,7 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
 
+- **Retained development failure:** The native Windows run at `dd8a9f35` passes preflight/environment/compile/lint/OpenSpec (21 tooling tests and 121 diagrams), then reaches its unchanged 5,400-second owned-tree deadline during wheel checks. It does not reach the unit gate. All 112 completed timing spans succeeded, but that is not a complete wheel pass. The evidence archive is downloaded through the configured nondefault transport and independently hash-verified (`sha256:d802e2da8e91835de502d692f1d280cccb748637d706e13a0726b34e95122e39`); no routing configuration is published. See `verification/windows-development-timeout.json`. Finalized-candidate qualification and the corrected Windows identity fixture remain open.
 
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
