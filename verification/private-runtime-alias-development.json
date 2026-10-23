@@ -59,5 +59,19 @@
       "pass": 2,
       "skipped": 3
     }
+  },
+  "installed_wheel": {
+    "source_commit": "1063ecd886e31cf90307b66e4b5675cbd2d90bcf",
+    "wheel_identity": "sha256:3e6f9f8896d7cf66261d190302f899cedbc13cc6995bd115a88df7816165d6eb",
+    "standard_binding": {
+      "distribution": "sha256:1318ba26d64d674c9690d8670adcaf47a9b9a7bd61d03a382db5748851eed0e5",
+      "members": 1235,
+      "policy": "sha256:a5ca0d6d13daff0199f218c5e4af723a2cec87b927e75dd3a731c511b5d85ac7"
+    },
+    "full_smoke_passed": true,
+    "successful_timing_spans": 131,
+    "evidence_ledger_sha256": "7029a6d23651f32ca2c9c3c40316e40676398340f393ae32c5512141315ebc30",
+    "stdout_sha256": "4f5bda6ae475b369d48bd13e3db1706ae405de4502d6ea96c52021999d9dbade",
+    "timings_sha256": "34c1407ef8646dbdf39352d85b3300fba0c86b891f403c01e087ea4dcaed0175"
   }
 }
