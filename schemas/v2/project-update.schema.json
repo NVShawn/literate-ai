@@ -13,6 +13,13 @@
         "path": {"type": "string", "minLength": 1},
         "base_text": {"type": "string"},
         "merged_text": {"type": "string"},
+        "compatibility": {
+          "type": "object", "additionalProperties": false, "required": ["code", "message"],
+          "properties": {
+            "code": {"type": "string", "pattern": "^(project\\.skill_|agent_skill\\.)"},
+            "message": {"type": "string", "minLength": 1}
+          }
+        },
         "classification": {
           "enum": ["unchanged", "already-current", "upstream-only", "local-only", "conflict", "mergeable", "upstream-added", "preserved-dynamic"]
         },

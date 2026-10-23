@@ -31,6 +31,19 @@ class ProjectUpdateClassification(StrEnum):
     PRESERVED_DYNAMIC = "preserved-dynamic"
 
 
+def update_adopts_additions(files, *, explicit: bool) -> bool:
+    """Use one selection rule in prospective planning and actual apply."""
+    return explicit or not any(
+        item.classification
+        in {
+            ProjectUpdateClassification.LOCAL_ONLY,
+            ProjectUpdateClassification.CONFLICT,
+            ProjectUpdateClassification.MERGEABLE,
+        }
+        for item in files
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class ProjectUpdateFile:
     path: str
@@ -40,6 +53,7 @@ class ProjectUpdateFile:
     upstream_identity: ContentIdentity | None
     base_text: str | None = None
     merged_text: str | None = None
+    compatibility: tuple[str, str] | None = None
 
     SCHEMA: ClassVar[str] = PROJECT_UPDATE_FILE_SCHEMA
 
@@ -78,6 +92,17 @@ class ProjectUpdateFile:
                 raise ValueError("mergeable file requires base and result text")
         elif self.merged_text is not None:
             raise ValueError("only mergeable files may carry merged text")
+        if self.compatibility is not None and (
+            not isinstance(self.compatibility, tuple)
+            or len(self.compatibility) != 2
+            or any(
+                not isinstance(value, str) or not value for value in self.compatibility
+            )
+            or not self.compatibility[0].startswith(("project.skill_", "agent_skill."))
+        ):
+            raise ValueError(
+                "update compatibility must bind a skill-catalog diagnostic"
+            )
 
     @property
     def identity(self) -> ContentIdentity:
@@ -85,6 +110,16 @@ class ProjectUpdateFile:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **(
+                {
+                    "compatibility": {
+                        "code": self.compatibility[0],
+                        "message": self.compatibility[1],
+                    }
+                }
+                if self.compatibility is not None
+                else {}
+            ),
             **({"base_text": self.base_text} if self.base_text is not None else {}),
             **(
                 {"merged_text": self.merged_text}
@@ -122,11 +157,17 @@ class ProjectUpdateFile:
         if (
             not isinstance(value, dict)
             or not fields <= set(value)
-            or set(value) - fields - {"base_text", "merged_text"}
+            or set(value) - fields - {"base_text", "merged_text", "compatibility"}
         ):
             raise ValueError("project update file must have the exact field set")
         if value["schema"] != cls.SCHEMA:
             raise ValueError("project update file schema is unsupported")
+        compatibility = value.get("compatibility")
+        if "compatibility" in value and (
+            not isinstance(compatibility, dict)
+            or set(compatibility) != {"code", "message"}
+        ):
+            raise ValueError("update compatibility must have the exact field set")
 
         def optional_identity(candidate: object) -> ContentIdentity | None:
             return None if candidate is None else ContentIdentity.from_dict(candidate)
@@ -139,6 +180,9 @@ class ProjectUpdateFile:
             optional_identity(value["upstream_identity"]),
             value.get("base_text"),
             value.get("merged_text"),
+            (compatibility["code"], compatibility["message"])
+            if compatibility is not None
+            else None,
         )
 
 

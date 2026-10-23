@@ -30686,9 +30686,18 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Conclusion:** Compare the complete prospective closure before apply, retain explicit parent selection and overlays, and offer a safe compatible subset.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Align plan/apply compatibility diagnostics and preserve atomic rollback for incompatible additions.
+  - [x] Align plan/apply compatibility diagnostics and preserve atomic rollback for incompatible additions.
 - **Evidence:**
-  - [ ] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
+  - [x] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
+  - [ ] Required review CI, landing and exact-main confirmation pass.
+
+- **Implementation:** Planning now projects exact current, inherited and selected framework skill bytes before apply. It reuses canonical dependency validation, binds incompatibility diagnostics to the plan and excludes incompatible additions from the safe subset. Parent selectors, overlays, currentness checks and atomic rollback remain intact. Published v1 schema bytes and dependency identity rules are unchanged. The next action in progress is required review CI and landing of the locally qualified change.
+
+- **Combined pre-write guard:** A local provider outside the inherited file set could change between planning and apply. The repository adapter now runs a read-only combined preflight after its currentness checks and before inherited, provenance or baseline writes. The public CLI regression changes a local provider immediately before apply and forbids entering the lineage writer; it failed before this guard and passes after it.
+
+- **Focused implementation evidence:** Ten portable compatibility cases pass through the managed checkpoint runner, including read-only planning, safe-subset apply, unchanged published-wire identity, actual JSON Schema validation, concurrent local-provider drift before the lineage writer, and invocation from a nested directory while updating inherited bytes. Existing lineage/rollback cases (three) and adapter cases (two) also pass.
+
+- **Complete local qualification:** Exact implementation `e1d3e94b` passes all 2,262 selected source cases (2,191 passed, 71 existing skips, zero failures) in 1,246.156 seconds. The exact-source installed-wheel gate passes with wheel `sha256:e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb`. A forced-fresh lifecycle passes all 232 cases with no skips; supported receipt update, check, require-current and verify pass after the metadata-only integration. Receipt `sha256:f0b3fa15b34b5d138bd0f9480a02796e216a6df704cabf6975f6796e6a40a9ac` remains a local assertion. See `verification/project-update-closure-qualification.json`. Review CI and landing remain open; no unrelated native issue is qualified by these portable results.
 
 ### [ ] SDK-OBSERVATION-COST-001 — Bound repeated installed distribution observation
 
@@ -31012,6 +31021,22 @@ harness bytes are unchanged. See
 CI jobs are terminal (24 pass, the two known Windows shards fail). Next:
 update PR #130 and renew exact-head required CI. Keep #116 and #129 open;
 no native full-gate or hardware timeout correction is claimed.
+
+The bounded project-parse experiment for #129 is not selected for production.
+A native Windows source comparison preserves the 41-Flavor identity and all
+246 manifest reads, but does not show reliable improvement: baseline
+2.8339/2.4375 seconds, candidate 2.9388/2.5934 seconds. Host-only improvements
+therefore do not justify this as the native fix. Nine preliminary native cases
+pass; the later copied-context lifetime and concurrent-budget corrections pass
+twelve local cases but remain an unlanded experiment. Its interrupted full
+source/lifecycle attempts are not qualification. The complete experiment remains
+on local branch `fix/catalog-project-parse` at `becbcc7e`; no implementation from
+that branch belongs in the landing queue. See
+`verification/windows-project-parse-negative-comparison.json` and archive
+`sha256:6e930ea7d84003dbdd4e472e36dc781c806fc3b030d437359564108003de1d1f`.
+Next for #129: capture per-command costs for the complete expensive installed
+HTML scenario with the qualified baseline wheel. Do not repeat the full provided
+native qualification before further profiling. Keep the earlier timeouts.
 
 **Current landing state:** PR #130 is merged at `9d62ce09`; its exact-main
 CI run `39980361698` passed all 26 jobs. This closes the hosted integration gate,
