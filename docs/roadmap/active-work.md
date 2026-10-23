@@ -4699,7 +4699,8 @@ The earlier inventories below are historical.
 | --- | --- | --- |
 | [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
 | [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Compose exact head `5faea3b9` into #110; renewed combined qualification pending |
-| [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | WINDOWS-TEST-CONTRACT-001 / issue #116; stacked on #115 | Separate contribution; Linux failure requires diagnosis before landing |
+| [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | Exact head `1a4d3e6e` retained by ancestry in #127 | Superseded review; its branch is retained and issue #116 remains open pending native qualification and landing |
+| [#127](https://github.com/jordanhubbard/literate-ai/pull/127) | Windows fixtures plus optional-import and wheel-timing source repairs | Consolidated draft at `62ce16a0`: exact hosted CI `39926518820` and fresh 228-pass host receipt pass; final native qualification and the newly found identity-fixture correction remain open |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
@@ -30467,6 +30468,8 @@ maintenance pass. Worker alignment refused the configured template with
 `worker_alignment.invalid`; no user-worker qualification jobs were dispatched
 or worker configuration repaired. This operational audit does not close WORKTREE-002's
 reusable migration-contract or platform-qualification obligations.
+
+- **Windows review consolidation:** PR119 exact head `1a4d3e6e` is an ancestor of retained PR127 head `62ce16a0`; the latter has a complete green hosted matrix and fresh host qualification. Close PR119 as superseded while preserving its branch, histories and all issue116 native/landing gates. PR122 and PR124 remain retained: their optional-import and timing runtime/test slices match the accepted #127 source, but their exact receipt-bearing heads were deliberately not merged. Their final disposition follows complete qualification of the consolidated successor. No source contribution is represented as landed by this review closure.
 
 ### [ ] SWIFT-DRIVER-MODE-001 — Preserve Swift compiler mode after executable resolution
 
