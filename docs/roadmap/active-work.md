@@ -28997,7 +28997,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 - **Adversarial review repair:** A literal-free assignment must not exempt a different credential literal elsewhere in the file. Add mixed assignment/dictionary/keyword/default and embedded-private-key controls, then renew qualification.
 
-### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
+### [x] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
 
 - **GitHub issue:** [#51](https://github.com/jordanhubbard/literate-ai/issues/51)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29010,11 +29010,13 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Execution decision:** Use the existing bounded/redacted failure path for empty generation, retain stdout and stderr refusal evidence, and report the selected isolation profile. Preserve the deliberate no-retry policy for deterministic empty output. Verify refusal text, both streams, credential redaction and one attempt.
 
 - **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
+
+- **Closure evidence:** The current managed generator module passes all 20 cases with no skips, including the real error classifier with synthetic successful-empty process output: bounded reasons from both streams, secret redaction, selected isolation profile and one attempt for deterministic policy refusal. The owner and regression bytes exactly match landed main `d5c7b278` and qualified source `20508324` (CI `39790990072`, success). See `verification/generation-refusal-acceptance.json`; no live provider refusal is claimed.
 
 ### [x] HTML-CANVAS-001 — litai render html graph canvas does not grow with its row
 
