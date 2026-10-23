@@ -1,0 +1,43 @@
+{
+  "scope": "Private-runtime alias repair development qualification; fresh lifecycle and final installed/native/CI remain required",
+  "implementation_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+  "source_suite": {
+    "executed": 2139,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2139,
+    "selected": 2210,
+    "skipped": 71
+  },
+  "source_report_sha256": "ef138a8a844ebac5e50023466e3909adb5b49363ddf42ef5c8d84b07d09f5416",
+  "affected_python": "macOS standalone Python 3.11.14",
+  "focused_python_311": {
+    "installer": {
+      "executed": 4,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 4,
+      "selected": 4,
+      "skipped": 0
+    },
+    "real-wheel self-update and reexecution": {
+      "executed": 3,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 3,
+      "selected": 3,
+      "skipped": 0
+    },
+    "standalone bootstrap": {
+      "executed": 11,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 11,
+      "selected": 11,
+      "skipped": 0
+    }
+  },
+  "baseline": "The real-alias regression fails before ensurepip against the preceding owner on Python 3.14.7; its failed report and original public-prefix failure are retained.",
+  "public_prefix_install": "The normal make install succeeds through the affected alias with the patched production owner and creates a non-editable wheel installation. No new host tools are installed.",
+  "custody": "Copied private executables and the native library preservation remain; Windows creation behavior and orphaned-base detection are unchanged."
+}
