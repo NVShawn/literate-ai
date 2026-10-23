@@ -81,6 +81,7 @@ litai project validate
 litai project lifecycle rebind-standard
 litai project documentation-update
 litai project documentation-review
+litai project agent-entrypoints
 litai project parent-readme
 litai project tracker inspect
 litai project peer-work
