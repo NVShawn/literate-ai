@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Patch documentation math rendering to KaTeX 0.18.2, preserving explicit trust
+  options while refusing inherited trust and clearing all dependency audit findings.
+
 - Update the documentation tool lock to patched DOMPurify 3.4.17 while keeping
   critical/high dependency audit gates enforced.
 
