@@ -30201,7 +30201,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 **Windows integration renewal:** Composed code `49a7d52e` preserves #115 head `5faea3b9` by merge ancestry. A fresh uninterrupted six-worker full suite exits zero: 2,202 selected, 2,131 passed, 71 declared skips and no failures in 1,042.865 seconds. Focused retained checks pass 203 with four skips; all 12 descriptor-walk checks pass and the new executable-intent/hardlink/descriptor composition regression passes. Lint/format, layout/export, four strict OpenSpec changes, current driver/documentation reviews, documentation tooling and all 121 diagrams pass. The complete configured host lifecycle passes 226 tests; supported receipt promotion and `verify` pass. Current receipt: `sha256:5f0551e4738d04b9bc2dd17ba3f07bb9f02115e285b83be32394dddaf25364ff`; finalized candidate: `sha256:e7ea4dfdf355c07cf836393db20c12048d32a0edec8fcc62d723a2494ea64836`; reviewed driver: `sha256:eca0dd79ccc80f0cd33eb90c15d6989473049c2f45d6df9c9c5b853d9685c12e`. Earlier source-only and native checkpoints retain their scopes; exact combined hosted CI and landing remain required.
 
-### [ ] REBUILD-ENTRY-001 — Normalize or safely reject Component file entry points in Standard rebuild
+### [x] REBUILD-ENTRY-001 — Normalize or safely reject Component file entry points in Standard rebuild
 
 - **Priority:** P1
 - **Owner:** framework rebuild CLI
@@ -30210,11 +30210,11 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
 - **Conclusion:** An installed-wheel native journey exposed an uncaught authority-reader exception for a Component file argument. Normalize supported file entry points or report a bounded CLI error before provider invocation; preserve project and symlink boundaries.
 - **Depends on:** none
-- **Next action (in progress):** Land the qualified combined change after #77 and its full exact-head hosted CI.
+- **Outcome:** The implementation is already landed in the reviewed main integration; fresh installed native acceptance is renewed below.
 - **Implementation:**
   - [x] Resolve the documented Component entry point before locked authority loading and normalize invalid-input diagnostics.
 - **Evidence:**
-  - [ ] Pass full exact-head hosted CI and land the reviewed combined change.
+  - [x] Pass full exact-head hosted CI and land the reviewed combined change.
   - [x] Installed-wheel file and directory cases, unsafe paths and no provider invocation on invalid input.
 
 - **Local evidence:** The full unchanged production-source suite passes: 1,580 selected, 1,545 passed, 35 skips and no failures in 779.102 seconds. Eight focused CLI tests cover file/directory equivalence, lexical symlink refusals (including relative paths), unavailable/outside/unrelated inputs and a real missing-Component authority error before lifecycle assembly. The missing-authority assertion is strengthened after the full run and rerun in the focused group. Static/export/style checks, strict specifications, current driver/runner/documentation reviews, 21 Node tests and all 121 Mermaid diagrams pass. The subsequent combined acceptance is recorded below; hosted CI and landing remain open.
@@ -30227,8 +30227,10 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 - **Fresh installed selection proof:** The real Standard directory and component.md forms select the same exact host lock; read-only typed-return tracing and unmodified public CLI calls agree. Accepted-only mode deliberately stops at `source_cache.runtime_absent` after lock selection. All five invalid path cases return their precise bounded JSON error with unchanged project trees and no runtime/candidate/build/object roots. No product function or guard is replaced. This proves input selection/refusal; the separate full native library journey is being renewed before closure.
 
+- **Closure qualification:** The fresh non-editable installed CLI completes a force-generated source-derived tiny Python library through its component.md path in 78.522 seconds. Its explicit import map, isolated/module-origin-checking oracle and expected value 7 are unchanged (harness `sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`). Generated tests, import execution and independent acceptance pass; the current receipt has 3 passes, no failures/skips, and verify passes. The exact retained default Bazel profile refuses with its actionable profile error before any coding-CLI launch, with no candidate and only an empty owned runtime allocation. All four cross-platform projection regressions and the complete 2139-pass source suite pass. Directory/file selection and all five pre-artifact invalid-entry refusals are separately recorded. Relevant implementation files match landed `a6a22996`; exact review CI `39790990072` passed before its main integration. See `verification/installed-native-profile-acceptance.json` and `verification/installed-lock-entrypoint-acceptance.json`. This closes the entry/profile contracts and does not claim broad regenerative equivalence or release admission.
 
-### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
+
+### [x] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
 
 - **Priority:** P1
 - **Owner:** framework library profiles and generation preparation
@@ -30237,11 +30239,11 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Direction:** Resolve the installed-wheel native-library defect without weakening authority or acceptance.
 - **Conclusion:** The default promoted Bazel profile exports a file while library test preparation requires a directory, wasting generation retries. Reject unsupported profile combinations before generation or provide a supported directory export without weakening acceptance.
 - **Depends on:** none
-- **Next action (in progress):** Land the qualified combined change after #77 and its full exact-head hosted CI.
+- **Outcome:** The implementation is already landed in the reviewed main integration; fresh installed native acceptance is renewed below.
 - **Implementation:**
   - [x] Validate library artifact shape against the selected build profile before generation and provide actionable profile selection.
 - **Evidence:**
-  - [ ] Pass full exact-head hosted CI and land the reviewed combined change.
+  - [x] Pass full exact-head hosted CI and land the reviewed combined change.
   - [x] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
 
 - **Local evidence:** The standalone profile implementation passes all 11 focused projection/CLI tests, including pre-discovery refusal of Bazel and Make file profiles on Linux, Windows and macOS, unchanged native directory exports and existing wheel-library acceptance. The full standalone suite passes 1,579 selected cases: 1,544 passed, 35 skipped and no failures in 703.524 seconds. Static/export/style, strict specifications, driver/runner/documentation reviews, all 121 diagrams and the pinned root skill evaluation pass. Exact production/test source slices are consolidated with the #75 entry-point fix; subsequent combined acceptance is recorded below, with hosted CI and landing still open.
@@ -30249,7 +30251,10 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Combined checkpoint:** All 19 focused entry-point/profile/qualification cases pass in 9.795 seconds. The combined source passes layout/export, strict lint/format, specifications and current driver/runner/documentation review. The source slices preserve both standalone implementations exactly. Combined local qualification is complete as recorded below; hosted CI and landing remain open.
 
 - **Acceptance evidence:** The full combined evidence is recorded under REBUILD-ENTRY-001 immediately above. The installed CLI rejects the exact retained default Bazel library profile before generation and accepts the supported native directory profile through real generated tests and unchanged independent acceptance. All four installed profile tests pass across the declared Linux, Windows and macOS projections, including existing wheel behavior. The 1,582-case combined suite, package check and fresh current framework receipt pass; full hosted CI and landing remain open.
-  - [ ] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
+  - [x] Default promotion profile and supported native Python profile through installed-wheel library acceptance; incompatible profiles refuse before provider invocation.
+
+- **Closure qualification:** The fresh non-editable installed CLI completes a force-generated source-derived tiny Python library through its component.md path in 78.522 seconds. Its explicit import map, isolated/module-origin-checking oracle and expected value 7 are unchanged (harness `sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`). Generated tests, import execution and independent acceptance pass; the current receipt has 3 passes, no failures/skips, and verify passes. The exact retained default Bazel profile refuses with its actionable profile error before any coding-CLI launch, with no candidate and only an empty owned runtime allocation. All four cross-platform projection regressions and the complete 2139-pass source suite pass. Directory/file selection and all five pre-artifact invalid-entry refusals are separately recorded. Relevant implementation files match landed `a6a22996`; exact review CI `39790990072` passed before its main integration. See `verification/installed-native-profile-acceptance.json` and `verification/installed-lock-entrypoint-acceptance.json`. This closes the entry/profile contracts and does not claim broad regenerative equivalence or release admission.
+
 
 ### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
 

@@ -1,0 +1,77 @@
+{
+  "scope": "Fresh installed native Python library profile and file-entry lifecycle acceptance for issues 75/76; not broad regenerative equivalence or release admission",
+  "installed_wheel_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+  "baseline_archive_sha256": "e2230e775cbf47ad5a70442ac6def65a3917b0336296d627d9feb3fb1d508e1d",
+  "bad_profile": {
+    "error": "standard_command.python_library_export_profile_unsupported",
+    "coding_cli_invocations": 0,
+    "candidate_absent": true,
+    "runtime_absent_or_empty": true
+  },
+  "native_profile": {
+    "component_file_entry": true,
+    "forced_fresh_generation": true,
+    "source_generation": {
+      "sha256:767758268aea3387d7274b015cddec92aac407304e6f449e8ab6e406c68c5bad": "generated"
+    },
+    "unchanged_oracle_identity": "sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b",
+    "expected_import_result": 7,
+    "isolated_startup_and_module_origin_checked": true,
+    "receipt_identity": "sha256:e2516fe0af67f6125ae3e00ae7df47db11db30faee6d7fcfcc0d91284f9170b6",
+    "finalized_candidate_identity": "sha256:2d6ac211d6a2374ce0342e63e46558982039665cb3fea50e07a99a10a76616c0",
+    "summary": {
+      "failed": 0,
+      "passed": 3,
+      "skipped": 0,
+      "total": 3
+    },
+    "verify_passes": true,
+    "test_summary": {
+      "failed": 0,
+      "passed": 3,
+      "skipped": 0,
+      "total": 3
+    },
+    "artifact_export_media_type": "application/vnd.literate-ai.python-package-tree",
+    "artifact_export_identity": "sha256:14f336d0a47bca99f9a3d72d9210cc38e61b20596e3d56289c84436578dadca8"
+  },
+  "initial_helper_assertion": "The original helper demanded no empty runtime allocation; that extra assertion was corrected to the actual pre-model/no-candidate contract without changing production behavior or its oracle.",
+  "landed_implementation_commit": "a6a2299626f9abc51daa1c6d46d98d20b61abc14",
+  "unchanged_relevant_source_files": {
+    "src/literate_ai/cli/rebuild.py": "sha256:2677404fd7e6b233535f9ce854116d71a5c3c9dad32c8a7a398bf8682bec1654",
+    "src/literate_ai/adapters/standard_project.py": "sha256:69fb1248023a152fac4cb27fec64bf8bd39ff17192d28cc799796d8065ebc341",
+    "src/literate_ai/adapters/locked_generation_authority.py": "sha256:670bec5bb2ec7a2434c098294c7f1e0231f502566975649c08040707475fa11c"
+  },
+  "complete_source_suite": {
+    "passed": 2139,
+    "skipped": 71,
+    "failed": 0,
+    "selected": 2210
+  },
+  "projection_regressions": [
+    {
+      "test": "tests.smoke.test_standard_python_projection.StandardPythonProjectionTests.test_competing_profiles_and_multiple_entrypoints_fail_before_discovery",
+      "status": "passed"
+    },
+    {
+      "test": "tests.smoke.test_standard_python_projection.StandardPythonProjectionTests.test_file_export_library_profiles_fail_before_discovery_on_each_os",
+      "status": "passed"
+    },
+    {
+      "test": "tests.smoke.test_standard_python_projection.StandardPythonProjectionTests.test_library_and_application_wheel_authority_on_each_os",
+      "status": "passed"
+    },
+    {
+      "test": "tests.smoke.test_standard_python_projection.StandardPythonProjectionTests.test_native_python_library_keeps_its_directory_export_on_each_os",
+      "status": "passed"
+    }
+  ],
+  "retained_evidence_sha256": {
+    "profile-proof.json": "b02a191e38142ce6cc2fde2233fae8d8f50b06d84cd8d8093185698743ddb6bd",
+    "bad-process-observation-2.json": "eb95356db4d5f1c5787d1c12972b6a30f4c9a32cf0c5dfd0a2849c4acd49e5b4",
+    "native-component-file-rebuild-stdout.log": "3b151639e3d939bf6eec209be8779f1dfb1acf917223c96bf9ed3b1a3a32b4d5",
+    "candidate.json": "6c859141d3ef627ada6e92681c3ed2a5e4480a8d99aea8d17669ebdc145c767e",
+    "receipt-current-stdout.log": "f09c395851cd27fb61ee4647418eef6d7db48883345baa669a8355ed0cb80b30",
+    "native-verify-stdout.log": "62a908d35da856358f1d737b17297167dd4692115a5f9b6d7c2292baa7505d88"
+  }
+}
