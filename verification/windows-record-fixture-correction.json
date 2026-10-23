@@ -12,6 +12,17 @@
     "skips": 0,
     "seconds": 0.024
   },
-  "windows_confirmation": "pending isolated hosted execution",
+  "windows_confirmation": {
+    "workflow_run": 39966279564,
+    "source": "1d188bd1",
+    "owner_tests": 6,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 0.146,
+    "runner": "windows-latest",
+    "python": "3.12.10",
+    "managed_runner": "make python-check",
+    "artifact": "sha256:b0cb5edb23a1b5e944fe9240d04ce02f9019de6867fdeecc12128ea6b248b447"
+  },
   "qualification": "development only"
 }

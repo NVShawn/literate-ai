@@ -30629,3 +30629,8 @@ The resulting CR-CR-LF creates empty RECORD rows, correctly refused by the
 production parser. Write the fixture's exact UTF-8 CSV bytes; retain strict
 production inventory validation. Re-run this owner through the managed runner
 and confirm the same cases on Windows before claiming cross-platform closure.
+
+The exact-byte RECORD fixture correction passes all six owner tests on hosted
+Windows/Python 3.12.10 with zero skips in 0.146 seconds (run 39966279564).
+The same managed owner suite passes locally. This confirms the narrow fixture
+repair; the full matrix's hardware timeout is separate and remains unresolved.
