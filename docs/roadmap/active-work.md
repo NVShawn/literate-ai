@@ -4689,6 +4689,15 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ### Current consolidation inventory
 
+**Follow-up (2026-10-23):** PR #133 is merged at `d17881fa`; exact-main CI 40031696168 passes all 26 jobs. Scoped issues #91, #84, #85, #94 and #134 are closed against their retained evidence. Twenty-six issues remain open. The provided Windows renewal still times out at its unchanged 5400-second limit after 121 completed wheel spans; #121/#123/#129 remain open, and no complete native or release acceptance follows.
+
+| Review | Retained scope | Landing state |
+| --- | --- | --- |
+| [#133](https://github.com/jordanhubbard/literate-ai/pull/133) | Read-only catalog parsing reuse, refreshed Zod tooling and prior diagnostic metadata | Merged at `d17881fa`; exact-head and all 26 exact-main CI jobs pass |
+| [Closure metadata branch](https://github.com/jordanhubbard/literate-ai/compare/main...work/host-runtime-closure) | Five scoped closures and the explicit supplied-worker timeout boundary | Ready for normal review; live review status is owned by the forge, while failed native qualification remains open |
+
+### Historical consolidation inventory (2026-10-22)
+
 **Open-issue review (2026-10-22):** All 52 currently open issues have explicit current-forge roadmap links after adding #88, #92, #113, #116 and #117 and attaching #94 to the existing retained-user owner. Historical NVIDIA-dev issue numbers are a different namespace. #83 has a completed local owner and merits a landed-evidence closure review; no issue is closed merely by this inventory. #114 is owned by #115. #116 / #119 remains separate, with a failing Linux job. #118 has controller implementation in #110 but still requires its installed native positive/negative acceptance. #117 remains measured performance work. Broad native packaging, retained SDK, Windows ARM64 and release claims remain open under their existing owners.
 
 The remaining retained stack is composed in PR #110. PR #105 and PR #82
