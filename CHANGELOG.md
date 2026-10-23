@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep private source-install and worker runtimes usable when POSIX Python is
+  launched through an alias outside its distribution, while retaining copied
+  executables and their native runtime dependencies.
+
 - Update the documentation tool lock to patched DOMPurify 3.4.17 while keeping
   critical/high dependency audit gates enforced.
 
