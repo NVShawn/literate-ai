@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Diagnose incompatible scaffold skill dependencies before update writes, preserve
+  selected parent authority and apply the compatible subset without changing pins.
+
 - Preserve both retained executable declarations when the native Windows identity
   fixture refreshes its manifest, keeping command and late-drift qualification active.
 

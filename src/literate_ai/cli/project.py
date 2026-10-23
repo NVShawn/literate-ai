@@ -82,6 +82,7 @@ from literate_ai.adapters.repository_lineage import (
 from literate_ai.adapters.repository_updates import (
     FilesystemRepositoryUpdateAdapter,
     RepositoryUpdateError,
+    prospective_catalog_update_contents,
 )
 from literate_ai.adapters.retained_evidence_migration import (
     migrate_retained_evidence,
@@ -757,11 +758,11 @@ def update_project_from_args(args) -> dict[str, Any]:
             )
         )
         report_progress("Classifying framework templates")
-        framework_plan = ProjectUpdateService(
-            FilesystemProjectUpdateAdapter(
-                protected_paths=protected_paths, base_reader=provider.update_blobs
-            )
-        ).plan(Path(args.path))
+        # Resolve reviewed text choices before projecting the one complete
+        # prospective catalog. The final returned plan always checks its closure.
+        framework_plan = FilesystemProjectUpdateAdapter(
+            protected_paths=protected_paths, base_reader=provider.update_blobs
+        ).plan(Path(args.path), check_compatibility=False)
         from literate_ai.adapters.update_merge import load_resolutions
 
         resolutions = load_resolutions(
@@ -773,6 +774,33 @@ def update_project_from_args(args) -> dict[str, Any]:
                 "project.update_resolution_invalid",
                 "a path has multiple resolution choices",
             )
+        framework_paths = {item.path for item in framework_plan.files}
+        framework_resolutions = {
+            path: review
+            for path, review in resolutions.items()
+            if path in framework_paths
+        }
+        catalog_overrides = prospective_catalog_update_contents(
+            Path(args.path).resolve(),
+            lineage_update,
+            adopt_added=getattr(args, "adopt_added", False),
+            take_upstream=take_upstream,
+            keep_local=keep_local,
+            resolutions={
+                path: review
+                for path, review in resolutions.items()
+                if path not in framework_paths
+            },
+        )
+        framework_plan = ProjectUpdateService(
+            FilesystemProjectUpdateAdapter(
+                protected_paths=protected_paths,
+                base_reader=provider.update_blobs,
+                catalog_overrides=catalog_overrides,
+                adopt_added=getattr(args, "adopt_added", False),
+                resolutions=framework_resolutions,
+            )
+        ).plan(Path(args.path))
     except (ProjectUpdateError, RepositoryUpdateError, RepositoryReparentError) as exc:
         rollback_staged_reparent()
         raise CliFailure(exc.code, exc.message) from exc
@@ -825,6 +853,8 @@ def update_project_from_args(args) -> dict[str, Any]:
                     FilesystemProjectUpdateAdapter(
                         protected_paths=protected_paths,
                         base_reader=provider.update_blobs,
+                        adopt_added=getattr(args, "adopt_added", False),
+                        resolutions=framework_resolutions,
                     )
                 ).plan(root)
                 applied = apply_project_update(

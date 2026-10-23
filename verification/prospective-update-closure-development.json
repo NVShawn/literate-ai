@@ -1,0 +1,45 @@
+{
+  "scope": "Development prototype for issue88; not fully qualified or landed",
+  "portable_fixture": "Initialize from an older locked parent catalog with dependency A, then plan/apply newer scaffold additions against that unchanged parent selection. Catalog supply is fixture-selected; parsing, validation, filesystem mutation and rollback are real.",
+  "reports": {
+    "portable": {
+      "summary": {
+        "executed": 8,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 8,
+        "selected": 8,
+        "skipped": 0
+      },
+      "sha256": "aec12be750b2f81d839e18f62a7b1be8257a3350fbe1c24e74410ceafff508e2"
+    },
+    "lineage": {
+      "summary": {
+        "executed": 3,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 3,
+        "selected": 3,
+        "skipped": 0
+      },
+      "sha256": "e0ecbfb30f22f13d859e9bc74682c0ac15bd9362882fff5f9a3d0647af7d9c8d"
+    }
+  },
+  "preserved": [
+    "Canonical forward and generic skill dependency validators",
+    "Exact current-v2 wire identity when no compatibility diagnostic exists",
+    "Frozen v1 schema files",
+    "Parent selectors and parent precedence",
+    "Read-only planning and pre-write selected-subset checks",
+    "Complete project validation and atomic rollback"
+  ],
+  "retained_development_failures": [
+    "The existing lineage regression initially expected a late generic rollback error; it now asserts the precise preflight error and forbids starting the write transaction.",
+    "The expanded fixture initially placed a compatible-file assertion in the wrong test; corrected its location and retained the failed report."
+  ],
+  "pending": [
+    "Integrate after PR130 without interrupting its fixed gates",
+    "Complete review of the combined TCB and refresh required authority markers",
+    "Fresh full source/lifecycle/installed-wheel qualification and exact review CI"
+  ]
+}

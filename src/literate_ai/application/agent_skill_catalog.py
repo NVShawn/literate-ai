@@ -20,9 +20,12 @@ _REFERENCE = re.compile(r"`([^`\n]*SKILL\.md)`")
 class AgentSkillCatalogError(ValueError):
     """The skill taxonomy is ambiguous, unsafe, or internally inconsistent."""
 
-    def __init__(self, code: str, message: str) -> None:
+    def __init__(
+        self, code: str, message: str, *, catalog_paths: tuple[str, ...] = ()
+    ) -> None:
         self.code = code
         self.message = message
+        self.catalog_paths = catalog_paths
         super().__init__(f"{code}: {message}")
 
 
@@ -159,6 +162,7 @@ class AgentSkillCatalog:
                     "agent_skill.name_ambiguous",
                     f"skill name {name!r} is declared by both "
                     f"{previous} and {manifest}",
+                    catalog_paths=(str(previous), str(manifest)),
                 )
             names[name] = manifest
             provisional.append(
@@ -258,6 +262,7 @@ class AgentSkillCatalog:
                     raise AgentSkillCatalogError(
                         "agent_skill.dependency_missing",
                         f"{skill.name} requires missing skill {dependency.skill_id}",
+                        catalog_paths=(str(skill.logical_manifest),),
                     )
                 if (
                     dependency.version is not None
@@ -266,6 +271,10 @@ class AgentSkillCatalog:
                     raise AgentSkillCatalogError(
                         "agent_skill.dependency_version_stale",
                         f"{skill.name} pins another version of {dependency.skill_id}",
+                        catalog_paths=(
+                            str(skill.logical_manifest),
+                            str(target.logical_manifest),
+                        ),
                     )
                 if (
                     dependency.identity is not None
@@ -274,6 +283,10 @@ class AgentSkillCatalog:
                     raise AgentSkillCatalogError(
                         "agent_skill.dependency_identity_stale",
                         f"{skill.name} pins stale content for {dependency.skill_id}",
+                        catalog_paths=(
+                            str(skill.logical_manifest),
+                            str(target.logical_manifest),
+                        ),
                     )
 
     def unresolved_references(self) -> tuple[tuple[str, str], ...]:
@@ -418,6 +431,7 @@ def _manifest_authorities(
             raise AgentSkillCatalogError(
                 "agent_skill.authority_ambiguous",
                 f"skill directory contains both SKILL.md and skill.json: {path.parent}",
+                catalog_paths=(str(previous), str(path)),
             )
         authorities[path.parent] = path
     if not authorities:

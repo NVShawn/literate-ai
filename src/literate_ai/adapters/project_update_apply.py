@@ -21,6 +21,7 @@ from literate_ai.contracts import (
     ProjectUpdateFile,
     ProjectUpdatePlan,
 )
+from literate_ai.contracts.project_updates import update_adopts_additions
 
 from .project_updates import (
     ProjectUpdateError,
@@ -66,6 +67,11 @@ class AppliedProjectUpdate:
         # A refusal the operator can lift should say so; silence reads as a verdict.
         if self.refused.get(ProjectUpdateClassification.UPSTREAM_ADDED.value):
             value["hint"] = "re-run with --adopt-added to take the added files"
+        if self.refused.get("dependency-incompatible"):
+            value["hint"] = (
+                "Review incompatible skill dependencies and explicitly update the "
+                "pinned parent catalog before re-planning those additions."
+            )
         return value
 
 
@@ -122,16 +128,7 @@ def apply_project_update(
     # baseline has no such decision to make -- there is nothing local to protect and
     # nothing to reconcile -- so refusing there only obstructs the operator. Divergence
     # means the project changed a framework-owned file: local-only or conflict.
-    diverged = any(
-        item.classification
-        in (
-            ProjectUpdateClassification.LOCAL_ONLY,
-            ProjectUpdateClassification.CONFLICT,
-            ProjectUpdateClassification.MERGEABLE,
-        )
-        for item in plan.files
-    )
-    adopting = adopt_added or not diverged
+    adopting = update_adopts_additions(plan.files, explicit=adopt_added)
     selected = set(MECHANICAL) | (set(OPT_IN) if adopting else set())
 
     upstream_content = _upstream_template(
@@ -145,6 +142,11 @@ def apply_project_update(
     selected_items: list[ProjectUpdateFile] = []
 
     for item in plan.files:
+        if item.compatibility is not None:
+            if item.path in resolutions:
+                raise ProjectUpdateError(*item.compatibility)
+            refused.setdefault("dependency-incompatible", []).append(item.path)
+            continue
         if item.classification not in selected and item.path not in resolutions:
             if item.classification in (
                 ProjectUpdateClassification.CONFLICT,
@@ -200,6 +202,9 @@ def apply_project_update(
         )
         selected_items.append(item)
 
+    from .project_update_compatibility import require_selected_skill_closure
+
+    require_selected_skill_closure(root, write_content)
     written: list[str] = []
     try:
         for item in selected_items:
