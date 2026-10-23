@@ -1,0 +1,35 @@
+{
+  "schema": "literate-ai/documentation-dependency-qualification@1",
+  "issue": 134,
+  "advisory": "GHSA-mrhx-c7xc-m3w5",
+  "puppeteer": "25.16.0",
+  "chromium_bidi": "157.0.8090-0",
+  "zod": "4.6.7",
+  "zod_v3_remaining": false,
+  "new_direct_dependencies": false,
+  "audit_exceptions_added": false,
+  "clean_staged_npm_ci": true,
+  "audit_vulnerabilities": 0,
+  "strict_openspec": {
+    "passed": 4,
+    "failed": 0
+  },
+  "documentation": {
+    "tests_passed": 22,
+    "tests_failed": 0,
+    "diagrams_rendered": 121,
+    "markdown_files": 627
+  },
+  "package_lock_sha256": "44cb2bf18d1dfb7d8d02593737eebcf990ecf6b627dea109ee85dca4fcb47d6e",
+  "local_log_sha256": "411a3f69f1c7003aeffeccaaca2c4a7ad375ea5ddbffdb36de1f0fd01b5bee38",
+  "receipt_require_current": "passed",
+  "verify": {
+    "pass": 2,
+    "skipped": 3,
+    "fail": 0
+  },
+  "exact_head_ci": "pending",
+  "provided_worker_native_gate": "pending",
+  "prior_failed_source": "ff294357db7b017dc9c64b0f4d96162cb3246904",
+  "prior_failures_retained": true
+}

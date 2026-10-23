@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Refresh documentation browser tooling to Puppeteer 25.16.0 and locked Zod
+  4.6.7, eliminating both affected Zod paths while retaining strict audit gates.
+
 - Reuse parsed catalogs within read-only lock checks and diffs while retaining
   fresh input, requested-root and authority validation.
 - Diagnose incompatible scaffold skill dependencies before update writes, preserve

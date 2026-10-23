@@ -3,7 +3,6 @@
   "issue": 129,
   "source_commit": "74417e1a57b2f6e554bfaf9fefdeecc11e6dc6f5",
   "metadata_integration_commit": "9d6111710e88360c2261f1c38c97373c6644f1a6",
-  "authority_and_implementation_bytes_match_qualified_source": true,
   "scope": "Reuse immutable catalog parsing only within read-only check/diff operations; retain every current input, membership and authority revalidation. Complete supplied-worker native admission remains open.",
   "focused_tests": {
     "passed": 14,
@@ -125,7 +124,7 @@
     "documentation_tests_passed": 22,
     "diagrams_rendered": 121,
     "markdown_files_examined": 627,
-    "dependency_audit": "no unexcepted high or critical advisories",
+    "dependency_audit": "passed for the originally qualified tool lock; later advisory and renewal recorded under DOC-DEPENDENCIES-003",
     "all_gate_verify": {
       "pass": 2,
       "skipped": 3,
@@ -142,5 +141,7 @@
   "review_ci_and_landing": "pending for consolidated source head",
   "generated_test_contract_changed": false,
   "dependencies_added": false,
-  "release_or_tag_created": false
+  "release_or_tag_created": false,
+  "qualification_scope_note": "The source/wheel/lifecycle results below qualify source 74417e1a and its Python authority and implementation bytes. The later documentation browser dependency refresh is separately qualified; historical dependency audit success is not a current audit assertion.",
+  "python_authority_and_implementation_bytes_match_qualified_source": true
 }
