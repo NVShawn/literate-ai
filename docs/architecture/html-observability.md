@@ -336,3 +336,12 @@ source identity and provenance remain visible offline. The adapter refuses an
 unavailable or malformed report, different project scope, unexpected gate coverage,
 or inconsistent counts and verdict. Changed diagnostics invalidate the retained
 source binding; edited visible output fails artifact verification.
+
+### Catalog checks during HTML observation
+
+Resolving the complete schema catalog shares successful Draft 2020-12 checks of
+exact canonical JSON values within that operation, up to 512 facts. Each catalog
+still rebuilds its reference registry and retains fresh file and fingerprint
+checks. The scope retains no paths or observations and clears on success or
+failure; later operations validate again. This avoids checking repeated v1 support
+documents twice without treating an earlier filesystem observation as current.

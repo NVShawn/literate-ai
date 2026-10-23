@@ -1,5 +1,5 @@
 {
-  "scope": "Initial source-level HTML reconstruction optimization; native performance and full qualification remain pending",
+  "scope": "Source-level HTML and operation-scoped schema-check optimization; complete qualification pending",
   "source_sha256": {
     "src/literate_ai/adapters/html_staleness.py": "55bef0b6ea7bee7a0e33df0bd2425ba21f74c1df77f7a5c4806013f4f8ebef6b",
     "tests/smoke/test_html_staleness.py": "527993c3e7c14b77dc35f62c439d76176c7d6cff692160329d362e5d4e5b66ff"
@@ -40,11 +40,26 @@
     "Framework identity change at final observation refuses",
     "Output replacement at final observation remains and refuses"
   ],
-  "reviewed_driver_identity": "sha256:494c690a915bfa47caeb2cf44a1e9bdf66199fa6c01b7c62a71650c65eb845a7",
-  "author_review": "Reviewed pure emitter reuse and both independent currentness boundaries. This is author review, not independent security attestation.",
+  "reviewed_driver_identity": "sha256:3af130233a52e573909d4aa338966f5b97bf1c8b1aa6b83dc841483271d65bf6",
+  "author_review": "Reviewed pure emitter reuse and both independent currentness boundaries. This is author review, not independent security attestation. Reviewed exact JSON keys, bounded facts, exception cleanup, independent-call isolation, rebuilt reference registries and same-size/mtime catalog mutation refusal.",
   "pending": [
     "Complete native Windows gate renewal with unchanged bounds",
     "Fresh full source suite, complete installed wheel, current project lifecycle receipt and exact review CI"
   ],
-  "native_comparison_record": "verification/html-reconstruction-native-comparison.json"
+  "native_comparison_record": "verification/html-reconstruction-native-comparison.json",
+  "schema_fact_scope": {
+    "summary": {
+      "executed": 9,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 9,
+      "selected": 9,
+      "skipped": 0
+    },
+    "report_sha256": "0031e00238acfbe34b3450d0c9213b2e1fc62697f5c1e9cdf070dc668adf0dd7",
+    "source_sha256": "2496639999b94a17b6628dbfd3ddc00f867c356b3635299313c688d22aa9c98d",
+    "contract": "At most 512 exact canonical JSON schema-check success facts in one complete catalog operation; no retained paths, registries, filesystem observations or cross-call state. Rebuild every reference registry, retain fresh reads/fingerprints, validate invalid and uncached values normally.",
+    "performance": "Unmeasured for this second change; prior native paired comparison qualifies only d8ab44d2 HTML reconstruction.",
+    "initial_harness_failure": "Physical mutation control initially compared unresolved /var path to canonical /private/var; fixture now resolves its temporary root. Actual mutation refusal passes unchanged."
+  }
 }

@@ -7,6 +7,9 @@ import json
 import os
 import re
 import sysconfig
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from functools import lru_cache
 from pathlib import Path
 from urllib.parse import urljoin
@@ -18,6 +21,10 @@ from .version import SCHEMA_CATALOG_RELEASES
 
 SUPPORTED_SCHEMA_CATALOGS = ("v1", "v2")
 SCHEMA_CATALOG_ROOT_ENVIRONMENT = "LITERATE_AI_SCHEMA_CATALOG_ROOT"
+_MAXIMUM_SCHEMA_CHECK_FACTS = 512
+_SCHEMA_CHECK_FACTS: ContextVar[set[bytes] | None] = ContextVar(
+    "literate_ai_schema_document_checks", default=None
+)
 PUBLISHED_SCHEMA_MANIFEST = "published-v0.1.1.json"
 _PUBLISHED_SCHEMA_MANIFEST_SCHEMA = "literate-ai/published-schema-digests@1"
 _PUBLISHED_SCHEMA_RELEASE = SCHEMA_CATALOG_RELEASES["v1"]
@@ -714,15 +721,29 @@ def _validated_catalog_root(version: str, root_text: str, fingerprint: str) -> P
     return root
 
 
+@contextmanager
+def _schema_check_scope() -> Iterator[None]:
+    """Share pure schema checks only while resolving this complete catalog."""
+    if _SCHEMA_CHECK_FACTS.get() is not None:
+        yield
+        return
+    token = _SCHEMA_CHECK_FACTS.set(set())
+    try:
+        yield
+    finally:
+        _SCHEMA_CHECK_FACTS.reset(token)
+
+
 def _validated_catalog_roots(roots: dict[str, Path]) -> dict[str, Path]:
-    return {
-        version: _validated_catalog_root(
-            version,
-            str(root),
-            _schema_catalog_fingerprint(root),
-        )
-        for version, root in roots.items()
-    }
+    with _schema_check_scope():
+        return {
+            version: _validated_catalog_root(
+                version,
+                str(root),
+                _schema_catalog_fingerprint(root),
+            )
+            for version, root in roots.items()
+        }
 
 
 def schema_catalog_root(catalog_version: str = "v1") -> Path:
@@ -836,6 +857,41 @@ def _v1_support_root(catalog_root: Path) -> Path:
     )
 
 
+def _check_schema_document(document: dict[str, object]) -> None:
+    """Reuse only an exact JSON value's successful Draft 2020-12 check.
+
+    This retains no paths, file observations, registries or invalid results.
+    Frozen v1 support documents can repeat within one complete root resolution;
+    every catalog still rebuilds and checks its own reference registry.
+    """
+    from jsonschema import Draft202012Validator
+
+    facts = _SCHEMA_CHECK_FACTS.get()
+    key = None
+    if facts is not None:
+        try:
+            encoded = json.dumps(
+                document,
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            ).encode("utf-8")
+            key = hashlib.sha256(encoded).digest()
+        except (TypeError, ValueError, UnicodeError, RecursionError):
+            # Preserve the validator's behavior for noncanonical Python values.
+            pass
+        if key is not None and key in facts:
+            return
+    Draft202012Validator.check_schema(document)
+    if (
+        key is not None
+        and facts is not None
+        and len(facts) < _MAXIMUM_SCHEMA_CHECK_FACTS
+    ):
+        facts.add(key)
+
+
 def _verify_schema_documents(
     *,
     catalog_version: str,
@@ -868,7 +924,6 @@ def _verify_schema_documents(
         supporting = (*documents, *loaded)
 
     # jsonschema compiles format grammars on import; load it only to check.
-    from jsonschema import Draft202012Validator
     from jsonschema.exceptions import SchemaError
 
     registry = Registry()
@@ -880,7 +935,7 @@ def _verify_schema_documents(
                 f"schema lacks a root identity: {path.name}",
             )
         try:
-            Draft202012Validator.check_schema(document)
+            _check_schema_document(document)
             registry = registry.with_resource(
                 identifier, Resource.from_contents(document)
             )
@@ -907,6 +962,14 @@ def verify_schema_catalog(
     catalog_version: str, root: Path | None = None
 ) -> dict[str, object]:
     """Verify one complete packaged catalog and its exact resource index."""
+
+    with _schema_check_scope():
+        return _verify_schema_catalog(catalog_version, root)
+
+
+def _verify_schema_catalog(
+    catalog_version: str, root: Path | None = None
+) -> dict[str, object]:
 
     version = _catalog_version(catalog_version)
     unresolved = schema_catalog_root(version) if root is None else Path(root)

@@ -4,6 +4,8 @@
 
 - HTML verification reconstructs retained views from their complete observed
   inputs while preserving independent final source, framework and output checks.
+  Complete catalog resolution shares bounded exact-JSON schema checks within the
+  operation while rebuilding reference registries and retaining fresh file checks.
   Native performance qualification remains in progress.
 
 - Preserve both retained executable declarations when the native Windows identity
