@@ -30651,6 +30651,8 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Evidence:**
   - [ ] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
 
+- **Inspection and next action in progress:** Framework planning classifies installed scaffold bytes but does not validate their complete prospective skill dependency closure; full validation occurs only after writes inside the rollback transaction. Add a read-only exact-byte compatibility projection across current local/inherited inputs and the selected framework plus lineage updates. Reuse the canonical skill parser and dependency rules, bind diagnostics to the plan, exclude incompatible additions through an explicit safe subset, and recheck the same closure before mutation. Preserve parent selectors, local overlays, currentness rechecks and rollback. Exercise the old-parent/new-skill fixture, mutually compatible additions, untouched consumers, missing/mismatched/cyclic dependencies, changed plans and successful safe-subset apply. No change to published v1 schema bytes or dependency identity rules is authorized.
+
 ### [ ] SDK-OBSERVATION-COST-001 — Bound repeated installed distribution observation
 
 **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117).
