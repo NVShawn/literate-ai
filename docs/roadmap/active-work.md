@@ -29541,7 +29541,7 @@ package or release admission is claimed by lock-health verification.
   - [x] Real Git fixtures prove old pinned contents and shallow ancestry, SHA-256 repositories, selected submodule data without private Git metadata, omitted unrelated blobs/submodules, rejected traversal, and no destination mutation on failure. Eleven catalog checks pass; an actual pinned upstream-derived source import succeeds with canonical resolved-commit provenance.
   - [x] Existing catalog and full framework regression checks pass: 1,850 passed, 42 skipped and no failures (1,892 selected) in 1,063.469 seconds. Report SHA-256 `d4885099d94eba41785a4b7795af11a10f20869fe0eca69aa6e8730799e1d5d6`; log SHA-256 `7fc7ae0393d46d09ca5561950edcf298438682e9aa6ef55fc9dd8d00de7bb255`. Lint/format, layout/public-export, strict OpenSpec and reviewed TCB checks pass.
 
-### [ ] SBOM-SCALE-001 — Bound strict validation cost for large retained inventories
+### [x] SBOM-SCALE-001 — Bound strict validation cost for large retained inventories
 
 **GitHub issue:** [#84](https://github.com/jordanhubbard/literate-ai/issues/84).
 
@@ -29555,7 +29555,7 @@ package or release admission is claimed by lock-health verification.
 - **Evidence:**
   - [x] Differential equality fixtures, strict schema/refusal regression, deterministic large-inventory scaling and unchanged actual BOM identity.
   - [x] Complete full framework regression: 1,855 passed, 42 skipped and no failures across 1,897 selected tests in 1,044.628 seconds. Report SHA-256 `95b14ef1ed69a5c656e39d55e77627ca586a34e047f53fd57d7c939e0c1ea97f`; log SHA-256 `90ff8bbc8b73c400188fbf90799094d8bd728907508dac0c95b52cddcfde68e8`.
-  - [ ] Complete native installed renewal.
+  - [x] Complete native installed renewal. Exact installed `6e370033` constructs and verifies source/resolved BOMs during the real FreeBSD retained lifecycle: all 24 original cases pass without skips, all 34 retained records reverify, independent acceptance passes and cleanup is receipt-bound. The strict CycloneDX/uniqueness and SBOM contract bytes remain identical on landed `ef5db15f`; its exact-main CI succeeds in all 26 jobs. See `verification/native-retained-renewal-development.json` and `verification/sbom-uniqueness-closure.json`.
 
 **Partial evidence:** Seven focused checks pass. Structural equality agrees with
 the original validator across nested JSON, numeric/boolean distinctions, object
@@ -29569,7 +29569,7 @@ seconds with the prior validator and 1.417537 seconds with this adapter.
 Baseline log SHA-256 `e491cb95763ae80209daa61ecffdc06113a9d2d583c3f5ad77d18f084fc4b691`;
 optimized log SHA-256 `964c238285967f933ff752546255c74d1be71d8c7dc84ed7dfdc32ca4c1bb77b`.
 These are source-BOM timings, not whole-build or native qualification claims.
-**Next action in progress:** installed/native renewal after the passing full local regression.
+**Completion:** Portable semantics/scaling, full regression, installed native strict-BOM execution and landed platform CI qualify issue #84. The timing comparison remains a source-BOM operation measurement, not a whole-build speedup or SDK/package/release admission.
 
 The first full attempt retained 1,427 completed checks and no recorded failure,
 then was deliberately interrupted for host overload: twelve outer test workers

@@ -1,0 +1,36 @@
+{
+  "schema": "literate-ai/sbom-uniqueness-closure@1",
+  "issue": 84,
+  "implementation_commit": "ca604c000",
+  "native_framework_commit": "6e3700337f2ff2be61b5b86390059878093fc1bd",
+  "native_qualification": "verification/native-retained-renewal-development.json",
+  "native_original_tests": {
+    "passed": 24,
+    "skipped": 0,
+    "failed": 0
+  },
+  "reverified_retained_records": 34,
+  "source_bom_bytes": 4400990,
+  "resolved_bom_bytes": 4846021,
+  "native_wheel_sha256": "34e7801e802d8324eaf3857fe49c18cf5989436dac80b63222833f3ed28eef58",
+  "landed_commit": "ef5db15f1b9637a6d4d721a4cb7dd83dfd1dd195",
+  "exact_main_ci": {
+    "run_id": 40007862532,
+    "successful_jobs": 26,
+    "conclusion": "success"
+  },
+  "native_and_landed_owner_sha256": {
+    "src/literate_ai/adapters/dependencies/cyclonedx.py": "da4bf475382e104ba48f7c5ff4c478c049ce01a8a99eee2c34954fd1109ea494",
+    "src/literate_ai/adapters/dependencies/json_uniqueness.py": "80670499489d115db151ad1864025edc6cb433d2d175f47ca756a28c1ffd4052",
+    "src/literate_ai/contracts/sbom.py": "994f2df166d87a8a2526591560e9010fb32dbda836936b308efcc82586f11548",
+    "src/literate_ai/contracts/retained_project_sbom.py": "2292711cc14cf4757763ad341cc7a012fbb6c6fa6e921b1d40e0e78ce30df37a"
+  },
+  "portable_tests": {
+    "focused_passed": 7,
+    "full_selected": 1897,
+    "full_passed": 1855,
+    "full_skipped": 42,
+    "full_failed": 0
+  },
+  "scope": "Strict SBOM uniqueness optimization and native installed execution only. No whole-build performance, canonical Standard, SDK, package or release admission."
+}
