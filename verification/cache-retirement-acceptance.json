@@ -1,0 +1,73 @@
+{
+  "issue": 100,
+  "scope": "Accepted-cache retirement and verified history; no broader SDK or release claim",
+  "landed_main": "d5c7b2789f52dde497531aab8e09a1340fc16e58",
+  "fresh_cache_suite": {
+    "executed": 11,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 11,
+    "selected": 11,
+    "skipped": 0
+  },
+  "report_sha256": "8c9c660f147a65fd4439e169fe93bcac3838dce06eeb438bf5d817ad160c8adc",
+  "retirement_cases": [
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.critical.test_source_cache_retirement.SourceCacheRetirementTests.test_missing_or_substituted_retirement_record_is_not_accepted"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.critical.test_source_cache_retirement.SourceCacheRetirementTests.test_retired_history_transports_and_can_be_explicitly_reactivated"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.critical.test_source_cache_retirement.SourceCacheRetirementTests.test_retirement_keeps_immutable_history_and_read_only_current_enumeration"
+    }
+  ],
+  "identical_source_revisions": [
+    "9941a6c4c1c4fe0e0e05c474135d204346041f79",
+    "205083242c8ce9fa3835ecc22785126f612ce12c",
+    "1063ecd886e31cf90307b66e4b5675cbd2d90bcf",
+    "d5c7b2789f52dde497531aab8e09a1340fc16e58"
+  ],
+  "owning_files_sha256": {
+    "src/literate_ai/adapters/cache/__init__.py": "db7fe326c5025df896e7836025bb98d94d6eabfd9745ca28a25d5b32f05b072e",
+    "src/literate_ai/adapters/cache/build_result.py": "8a63557c99db46098e3d748c8530f0d06459ffe987be44ec4595fd19d058acbe",
+    "src/literate_ai/adapters/cache/filesystem.py": "0eeae7488192e6736cc28eafb0ff298e9ec1387ec4a68d3d9726186a0c4f83dc",
+    "src/literate_ai/adapters/cache/generated_source.py": "6f829879233b45fe085f538057ef1801be5ae991b15cad5b9e176176b94c2c6f",
+    "src/literate_ai/adapters/cache/http_artifacts.py": "226017851f6607adcb0a7b849e3459ec36b05357c0a15bcc33121d97f72876ad",
+    "src/literate_ai/adapters/cache/layered_artifacts.py": "6b4aa0446be5f87e48a2b7caca966219137ec920eb65e4c997714523b27a876a",
+    "src/literate_ai/adapters/cache/project_publication.py": "4d1fdb401a0e65df40ba8fc1e328f9eae1738cced3ad75de2bf7147d6c7af05a",
+    "src/literate_ai/adapters/cache/rebuild.py": "703aa84968917872806f946ce60cdd55459e03d3de1ff2785f64167ce44822b1",
+    "src/literate_ai/adapters/cache/shared_artifacts.py": "1fc8b98e7d14a2e264e20c063e7fb2f70f2f2f6e6ede0279bd768d733020c3e5",
+    "src/literate_ai/adapters/cache/standard.py": "ce03f4258b5cc9bcbf0274c6776f93598498a7998a5e03b5dde9312012a0d667",
+    "src/literate_ai/adapters/cache/standard_checkpoint.py": "ca63bb1e95b2f88019bbf4105143155223401644a1e1b3802dfd333e2839a626",
+    "src/literate_ai/adapters/source_materialization.py": "47f59e210ca1cc8fa5d136fdb1ac3f413dbc080bffefe7b7db167d41ab054c88",
+    "src/literate_ai/remote_source_guard.py": "8d34ed963b6b475de289eca4ec3fdfdb23d725c4cc35841cc8e073844e0b4a31",
+    "tests/critical/test_source_cache_retirement.py": "3eb260d9877c8ad579d0b3e3a9ece40e56c22626d65684301ad39c0e8f54b8c3"
+  },
+  "criteria": [
+    "Only current membership is eligible; immutable history retained",
+    "Read-only verified enumeration preserves bytes",
+    "Missing active membership, missing retirement record and substituted key refuse",
+    "Portable archive restoration preserves exact retirement",
+    "Explicit republication permits safe reactivation; ambiguity still refuses"
+  ],
+  "qualification_origins": {
+    "host_lifecycle": "9941a6c4: 1827 pass,42 declared skips; fresh lifecycle receipt sha256:31b15788308e9ed7cd762d0a5e230598f102465cedfe44cba00a2dbf8fc9fcad",
+    "native_windows": "21 cases,0 skips; archive sha256:65291999d77cad4917d0d05a1d2925a1271891914a21fcd7db23cc7b7248b1a4",
+    "exact_ci": "39790990072 at 20508324, completed success",
+    "installed_wheel": "1063ecd8: 131 successful timing spans; wheel sha256:3e6f9f8896d7cf66261d190302f899cedbc13cc6995bd115a88df7816165d6eb; original evidence on PR128 verification/private-runtime-alias-development.json"
+  },
+  "provenance": "Original whole-source qualification revisions remain unchanged; exact owning-byte parity supports scoped acceptance only."
+}

@@ -24,6 +24,7 @@ from .channel_events import reject_secret_shaped
 from .generation_cache import SourceCacheConfiguration, SourceCacheRootKind
 from .html_observability import HtmlRenderRequest
 from .identity import SCHEMA_PREFIX, ContentIdentity, contract_identity
+from .paths import canonical_relative_posix_path
 from .repository_orchestration import RepositoryOrchestration
 from .testing import ProjectTestReceiptPolicy
 from .versioning import semantic_version
@@ -1135,11 +1136,13 @@ class ProjectDefinition:
                 "ProjectDefinition.profile",
                 f"must be {CANONICAL_PROJECT_PROFILE!r} in schema v1",
             )
-        _relative_path(self.agent_skill, "ProjectDefinition.agent_skill")
-        if self.agent_skill != "SKILL.md":
+        canonical_relative_posix_path(
+            self.agent_skill, label="ProjectDefinition.agent_skill"
+        )
+        if len(self.agent_skill.encode("utf-8")) > 1024:
             fail(
                 "ProjectDefinition.agent_skill",
-                "must identify the provider-neutral root SKILL.md",
+                "must identify an onboarding file in at most 1024 UTF-8 bytes",
             )
         for label in (
             "component_roots",
@@ -1418,6 +1421,11 @@ class ProjectDefinition:
             isinstance(value, dict)
             and value.get("schema") == LEGACY_PROJECT_DEFINITION_SCHEMA
         ):
+            if value.get("agent_skill") != "SKILL.md":
+                fail(
+                    f"{path}.agent_skill",
+                    "legacy project definitions require root SKILL.md",
+                )
             if "repository_orchestration" in value:
                 fail(
                     path,

@@ -1,0 +1,75 @@
+{
+  "scope": "Configured transport source/build/test/evidence round trip, not a framework lifecycle or SDK admission",
+  "native_os": "Windows",
+  "native_result": {
+    "scope": "Actual native source compilation and compiled-artifact tests through configured SSH/SCP route; not framework lifecycle admission",
+    "python": "3.12.10",
+    "source_sha256": "c883ea8167ca38210a5b8917b05097931c7c59cb8a6877bb07de310c21fb3f5d",
+    "artifact_sha256": "7e8455d4686f7fc68db84e32ac050109b27ce04b5f4eea64dd274264454ea22d",
+    "source_preserved": true,
+    "cases": [
+      {
+        "input": 0,
+        "expected": 1,
+        "actual": 1,
+        "passed": true
+      },
+      {
+        "input": 2,
+        "expected": 7,
+        "actual": 7,
+        "passed": true
+      },
+      {
+        "input": -2,
+        "expected": -5,
+        "actual": -5,
+        "passed": true
+      }
+    ]
+  },
+  "owned_supervisor": {
+    "exit_code": 0,
+    "seconds": 0.2649999996647239
+  },
+  "nondefault_registered_transport_used_by_commands_upload_and_download": true,
+  "source_upload_sha256_verified_remotely": true,
+  "downloaded_archive_sha256_verified_locally": "74966a8ce468c3630d16e01406ac8d9d75d6c382e14361d3bfed25bef1cf03c1",
+  "archive_bytes": 2242,
+  "compiled_artifact_bytes_verified_after_download": true,
+  "default_ssh_argv_unchanged": true,
+  "strict_host_path_deadline_and_artifact_custody_preserved": true,
+  "source_owner_and_test_parity_with_exact_CI_source205_and_landed_main": {
+    "src/literate_ai/adapters/ssh_transport.py": "6e184eb82a8d49829a450d696f169741796685f870712431efb8c231ffe97692",
+    "src/literate_ai/adapters/ssh_execution.py": "d62fbd725d06332ee903d33088964c23884980d9a36083e98671071609ab1442",
+    "tests/critical/test_ssh_transport.py": "0fbf30963c3e87d6d21c6cabbc3d022c0a8fc40c847cbb9590b262f8d39cdf48",
+    "tests/smoke/test_ssh_execution.py": "00d68ec309fa32a8f7847aee5dbadbc7ada058ae7d6f44936fac5d3c59edf5bc"
+  },
+  "reports": {
+    "critical": {
+      "summary": {
+        "executed": 3,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 3,
+        "selected": 3,
+        "skipped": 0
+      },
+      "sha256": "45b45a894bfc1ea78a82f6d9ae675bb56465cc33804bc2e87313e90791b62df2"
+    },
+    "handler": {
+      "summary": {
+        "executed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2,
+        "selected": 2,
+        "skipped": 0
+      },
+      "sha256": "a09f7e269b8fcaaa4976be0d62002121b69008197b1f29ce5fa082e13b865258"
+    }
+  },
+  "prior_exact_full_ci": 39790990072,
+  "candidate_exact_full_ci": 39936620110,
+  "unrelated_main_hardware_recurrence": "Issue116 remains open; no exact-main green claim"
+}

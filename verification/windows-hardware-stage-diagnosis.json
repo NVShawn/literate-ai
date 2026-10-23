@@ -1,0 +1,138 @@
+{
+  "schema": "literate-ai/development-evidence@1",
+  "scope": "Hosted Windows receiver diagnosis, not full qualification",
+  "pr_source": "55e775c78e14813498878da6f2883e1317b85606",
+  "diagnostic_source": "31dab50a",
+  "run": 39966990258,
+  "artifact": "sha256:46e7948d22f19abdbf7cb1382393ab0a3e3c7b2349750adb7b5a9828259d8c97",
+  "production_source_sha256": {
+    "src/literate_ai/adapters/worker_capabilities.py": "50eaa17468de480d047b91c67f72cf3c5ff4c6449551988960084265ac30eb01",
+    "src/literate_ai/adapters/action_hardware.py": "80fb6cefea7aa1f8eaeb2cf1f9826936d51e3fbc0ac200b835106bfdffb2b5f2",
+    "src/literate_ai/action_worker.py": "8778b4d5f6e273d287f17bc0ef4a428c41f85e34ff202b910ea155b8ee1529d6"
+  },
+  "summary": [
+    {
+      "label": "cold-import",
+      "seconds": 1.375,
+      "expired": false,
+      "returncode": 0
+    },
+    {
+      "label": "original-a",
+      "seconds": 81.719,
+      "expired": false,
+      "returncode": 0
+    },
+    {
+      "label": "application-a",
+      "seconds": 22.078,
+      "expired": false,
+      "returncode": 0
+    },
+    {
+      "label": "application-b",
+      "seconds": 21.984,
+      "expired": false,
+      "returncode": 0
+    },
+    {
+      "label": "original-b",
+      "seconds": 22.016,
+      "expired": false,
+      "returncode": 0
+    }
+  ],
+  "native_operation_seconds": {
+    "application-a": {
+      "os-cim": 19.33,
+      "computer-cim": 0.028,
+      "processor-cim": 1.065,
+      "gpu-discovery": 1.451
+    },
+    "original-a": {
+      "os-cim": 56.215,
+      "computer-cim": 0.028,
+      "processor-cim": 1.07,
+      "gpu-discovery": 20.322
+    },
+    "application-b": {
+      "os-cim": 19.174,
+      "computer-cim": 0.028,
+      "processor-cim": 1.078,
+      "gpu-discovery": 1.467
+    },
+    "original-b": {
+      "os-cim": 19.26,
+      "computer-cim": 0.03,
+      "processor-cim": 1.081,
+      "gpu-discovery": 1.433
+    }
+  },
+  "conclusion": "Warm GPU lookup performance does not establish an application-only selector improvement; OS CIM query dominates cold and warm cost. No production change selected.",
+  "next": "Keep #116 open; integrate verified exact-byte RECORD fixture repair into next review candidate after healthy current CI jobs finish. Preserve native query timings for further root-cause work.",
+  "selected_property_comparison": {
+    "run": 39967811302,
+    "source": "b828f33d",
+    "artifact": "sha256:452fb6aca245162dbce9eca58ba9f1b3b5b832af9e715feaf06c9a7951649845",
+    "summary": [
+      {
+        "label": "cold-import",
+        "seconds": 1.594,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "selected-a",
+        "seconds": 49.625,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "original-a",
+        "seconds": 26.313,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "original-b",
+        "seconds": 26.203,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "selected-b",
+        "seconds": 26.281,
+        "expired": false,
+        "returncode": 0
+      }
+    ],
+    "native_operation_seconds": {
+      "original-a": {
+        "os-cim": 23.005,
+        "computer-cim": 0.032,
+        "processor-cim": 1.068,
+        "gpu-discovery": 1.959
+      },
+      "selected-a": {
+        "os-cim": 32.647,
+        "computer-cim": 0.038,
+        "processor-cim": 1.249,
+        "gpu-discovery": 13.052
+      },
+      "selected-b": {
+        "os-cim": 23.167,
+        "computer-cim": 0.034,
+        "processor-cim": 1.074,
+        "gpu-discovery": 1.753
+      },
+      "original-b": {
+        "os-cim": 23.024,
+        "computer-cim": 0.033,
+        "processor-cim": 1.078,
+        "gpu-discovery": 1.829
+      }
+    },
+    "all_native_payloads_identical": true,
+    "conclusion": "Selected Caption/Version properties did not reduce warm query cost; no production patch justified."
+  }
+}

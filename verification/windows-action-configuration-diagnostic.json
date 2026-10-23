@@ -1,0 +1,58 @@
+{
+  "exit_code": 0,
+  "seconds": 48.875,
+  "target_test_sha256": "a5e2b9dbb99c975be84f9fd5f029e67a0ab91e300d213fe26293f9cd607a1dcb",
+  "configuration_source_commit": "76ac4c7a",
+  "native_source_baseline": "dd8a9f357122fea6f8e0daff559ab45907f074f7",
+  "report": {
+    "context_identity": null,
+    "outcomes": [
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.smoke.test_action_execution_config.ActionExecutionConfigurationTests.test_public_factory_automatically_uses_private_configuration"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.smoke.test_action_execution_config.ActionExecutionConfigurationTests.test_public_factory_rejects_invalid_configuration_without_local_fallback"
+      },
+      {
+        "annotation_identity": null,
+        "failure_identity": null,
+        "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+        "status": "passed",
+        "test_key": "tests.smoke.test_action_execution_config.ActionExecutionConfigurationTests.test_source_cas_cannot_overlap_project_authority"
+      }
+    ],
+    "pin_identity": {
+      "algorithm": "sha256",
+      "digest": "0c9bada147b476a90eec48ea2cfa816a55e94ae24d6179918b5856fe4f47ef05",
+      "schema": "urn:literate-ai:schema:v1:content-identity"
+    },
+    "release_evidence": false,
+    "schema": "urn:literate-ai:schema:v2:known-test-failure-report",
+    "suite": "python-unittest",
+    "summary": {
+      "executed": 3,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 3,
+      "selected": 3,
+      "skipped": 0
+    }
+  },
+  "archive_sha256": "00333ea078b62610dd8116a293c19ce6017ba1f212763cef2df2f613fe4ede59",
+  "scope": "Unmodified native Windows diagnosis of the hosted hardware-probe expiry; does not replace exact-head CI qualification",
+  "hosted_failure": {
+    "run": 39936620110,
+    "job": 120357700322,
+    "code": "action_hardware.transport_expired"
+  },
+  "cause": "Not established. Native passing evidence alone does not identify why the hosted probe exceeded its deadline.",
+  "archive_bytes": 688
+}

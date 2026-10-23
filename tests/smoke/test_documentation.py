@@ -74,6 +74,42 @@ class DocumentationTests(unittest.TestCase):
             "project.roadmap_lifecycle_header_missing",
         )
 
+    def test_custom_onboarding_inside_documentation_is_reachable_but_not_its_own_spine(
+        self,
+    ):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            skill = root / "docs/onboarding.md"
+            skill.parent.mkdir()
+            guide = root / "docs/README.md"
+            guide.write_text("# Guide\n")
+            content = "# Onboarding\n\nRead [guide](README.md).\n"
+            skill.write_text(content)
+            graph = validate_documentation_graph(
+                project_root=root,
+                agent_skill=skill,
+                documents={
+                    "docs/onboarding.md": content.encode(),
+                    "docs/README.md": guide.read_bytes(),
+                },
+                assets={},
+            )
+            self.assertEqual(graph["entrypoint"], "docs/onboarding.md")
+            self.assertEqual(
+                graph["reachable_documents"], ["docs/README.md", "docs/onboarding.md"]
+            )
+            skill.write_text("# Onboarding\n\n[Self](onboarding.md)\n")
+            with self.assertRaises(DocumentationError) as refused:
+                validate_documentation_graph(
+                    project_root=root,
+                    agent_skill=skill,
+                    documents={"docs/onboarding.md": skill.read_bytes()},
+                    assets={},
+                )
+            self.assertEqual(
+                refused.exception.code, "project.agent_skill_documentation_missing"
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

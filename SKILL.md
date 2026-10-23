@@ -104,7 +104,11 @@ venv under `$(OBJ_DIR)/python-envs/$(LITAI_SESSION_KEY)`), not an ad hoc venv.
 
 After successful initialization, adoption, update or reparenting, follow
 `skills/agent/maintain-parent-readme/SKILL.md` to reconcile the root README's
-links to the project's actual declared parents.
+links to the project's actual declared parents. Also run
+`litai project agent-entrypoints PATH`. Resolve its missing, stale or unsafe owned
+entry points through reviewed authored changes to the declared `agent_skill`
+before treating onboarding as complete. Preserve custom instructions and
+independent children; the audit never repairs parent or retained-source trees.
 
 ## Author specifications without boilerplate
 

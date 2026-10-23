@@ -72,6 +72,13 @@ development (2026-09-10):
 
 ## Current work
 
+ENTRYPOINT-AUDIT-001 extends Goal 1 with explicit coding-agent discovery readiness.
+A bounded read-only audit observes the selected project's owned delegates and its
+declared onboarding skill; original-source adoption reports the same findings
+without changing original files. Missing or stale delegates require reviewed
+authored repair before onboarding is described as complete. Full installed and
+integration qualification remain open in the owning roadmap item.
+
 INPUT-WALK-001 (issue #86) extends Goal 4 with bounded directory traversal for
 large retained input selections. Each verification may reuse a limited set of
 POSIX directory handles while checking current names and ancestor identities

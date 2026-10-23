@@ -15,6 +15,9 @@ from .errors import CliFailure
 
 
 def original_adoption_from_args(args):
+    from literate_ai.adapters.agent_entrypoints import audit_agent_entrypoints
+    from literate_ai.projects import discover_project
+
     try:
         if args.apply:
             if not args.expected_plan_identity:
@@ -22,11 +25,16 @@ def original_adoption_from_args(args):
                     "original_adoption.plan-required",
                     "Apply requires the reviewed --expected-plan-identity",
                 )
-            return apply_original_project_adoption(
+            result = apply_original_project_adoption(
                 Path(args.project),
                 expected_plan_identity=args.expected_plan_identity,
                 acknowledge=args.acknowledge,
             )
+            project = discover_project(Path(args.project))
+            if project is None:
+                raise CliFailure("project.not_found", "canonical project disappeared")
+            audit = audit_agent_entrypoints(project)
+            return {**result, "agent_entrypoints": audit}
         plan = plan_original_project_adoption(Path(args.project))
         if (
             args.expected_plan_identity
@@ -36,12 +44,17 @@ def original_adoption_from_args(args):
                 "original_adoption.plan-changed",
                 "Original adoption plan differs from the reviewed identity",
             )
+        project = discover_project(Path(args.project))
+        if project is None:
+            raise CliFailure("project.not_found", "canonical project disappeared")
+        audit = audit_agent_entrypoints(project)
         return {
             "schema": "literate-ai/original-adoption-result@1",
             "writes": False,
             "plan_identity": plan.identity.uri,
             "plan": plan.to_dict(),
             "admitted": False,
+            "agent_entrypoints": audit,
         }
     except CliFailure:
         raise

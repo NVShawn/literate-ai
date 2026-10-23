@@ -1,0 +1,80 @@
+{
+  "scope": "Final disposition of the Windows qualification reviews and manual evidence-preserving retirement of superseded checkouts",
+  "landed_main": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+  "qualified_review_head": "76ac4c7a4321c3fc696137126d6a36260055989b",
+  "qualification": {
+    "normal_pr_ci": 39936479834,
+    "full_matrix": 39936620110,
+    "full_matrix_attempt": 2,
+    "all_current_commit_checks_success_or_intentional_skip": true,
+    "retained_first_attempt_failure": "Windows hardware observation expiry; unchanged native cases passed before one terminal failed-shard retry"
+  },
+  "reviews": [
+    {
+      "number": 128,
+      "state": "MERGED",
+      "merge_commit": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf"
+    },
+    {
+      "number": 127,
+      "state": "MERGED",
+      "head": "62ce16a0458db31ae61954468f563a1e1bd65eba",
+      "github_associated_merge_commit": "874da1ba8775432dee4d8908c3d65238aa2607f8",
+      "disposition": "Automatically recognized through landed ancestry; no separate main merge performed"
+    },
+    {
+      "number": 122,
+      "state": "CLOSED",
+      "head": "cfc941233c27209de05d8d9e31b9d5734fcf99d3",
+      "accepted_paths": [
+        "src/literate_ai/cli/project.py",
+        "tests/smoke/test_project_command_imports.py"
+      ],
+      "accepted_paths_byte_identical_to_main": true,
+      "historical_receipt_head_preserved": true
+    },
+    {
+      "number": 124,
+      "state": "CLOSED",
+      "head": "a25b4c435b4701bfd1350f99865be41cc1d5ab06",
+      "accepted_paths": [
+        "scripts/wheel_smoke.py",
+        "scripts/windows_release_gate.py",
+        "tests/smoke/test_wheel_smoke.py",
+        "docs/architecture/project-releases.md"
+      ],
+      "accepted_paths_byte_identical_to_main": true,
+      "historical_receipt_head_preserved": true
+    }
+  ],
+  "retirement": {
+    "journal_sha256": "cc2cd90599e7071f9dbeacf5e77e6a9036f6c0b03cd9c058ce379e596827d0be",
+    "retired": [
+      {
+        "name": "cold",
+        "branch": "fix/optional-project-imports",
+        "head": "cfc941233c27209de05d8d9e31b9d5734fcf99d3",
+        "ignored_roots_preserved": 43
+      },
+      {
+        "name": "wg",
+        "branch": "fix/windows-wheel-timings",
+        "head": "a25b4c435b4701bfd1350f99865be41cc1d5ab06",
+        "ignored_roots_preserved": 45
+      }
+    ],
+    "git_metadata_preserved": true,
+    "same_volume_device_and_inode_checks": true,
+    "all_refs_unchanged": true,
+    "no_open_files_or_container_mount_overlap_detected": true,
+    "observation_limit": "lsof reports an unrelated SMB volume warning; candidates are local APFS with no local-path warning",
+    "remaining_worktrees": 9,
+    "worktree_automation_issue_complete": false
+  },
+  "postmerge_ci": {
+    "run": 39948443185,
+    "head": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+    "state_at_checkpoint": "pending; live commit checks show jobs running despite run-list queued status"
+  },
+  "provided_native_full_gate": "Original 62ce16a0 timeout remains incomplete and independently retained; #129 owns the measured performance follow-up"
+}

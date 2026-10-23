@@ -1,0 +1,29 @@
+{
+  "scope": "Manual retirement of two clean inactive redundant worktrees; not completion of WORKTREE-002 automation",
+  "journal_sha256": "4171b8d74d2c349f2edaf13cfe8bb70ba26446a894e2769078da642907e983be",
+  "retired": [
+    {
+      "name": "dp",
+      "branch": "fix/dompurify-security",
+      "head": "8457144547c03d4e21463cd3fb000bf37edcfeb8",
+      "ignored_roots_preserved": 2
+    },
+    {
+      "name": "rsdk",
+      "branch": "feat/retained-sdk-public-execution",
+      "head": "205083242c8ce9fa3835ecc22785126f612ce12c",
+      "ignored_roots_preserved": 44
+    }
+  ],
+  "checks": {
+    "tracked_and_untracked_clean": true,
+    "no_open_files_detected": true,
+    "container_mounts_no_overlap": true,
+    "git_operations_inactive": true,
+    "same_volume_rename_verified_by_device_and_inode": true,
+    "git_metadata_preserved": true,
+    "all_refs_unchanged": true
+  },
+  "observation_limit": "lsof warns about an unrelated SMB volume; neither candidate has a local-path warning or detected open file. Both candidates are on local APFS.",
+  "environment_reuse": "Moved path-dependent environments require reconfiguration before reuse."
+}
