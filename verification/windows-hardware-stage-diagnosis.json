@@ -69,5 +69,70 @@
     }
   },
   "conclusion": "Warm GPU lookup performance does not establish an application-only selector improvement; OS CIM query dominates cold and warm cost. No production change selected.",
-  "next": "Measure exact Caption/Version selection from same native provider; preserve guards and deadline."
+  "next": "Keep #116 open; integrate verified exact-byte RECORD fixture repair into next review candidate after healthy current CI jobs finish. Preserve native query timings for further root-cause work.",
+  "selected_property_comparison": {
+    "run": 39967811302,
+    "source": "b828f33d",
+    "artifact": "sha256:452fb6aca245162dbce9eca58ba9f1b3b5b832af9e715feaf06c9a7951649845",
+    "summary": [
+      {
+        "label": "cold-import",
+        "seconds": 1.594,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "selected-a",
+        "seconds": 49.625,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "original-a",
+        "seconds": 26.313,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "original-b",
+        "seconds": 26.203,
+        "expired": false,
+        "returncode": 0
+      },
+      {
+        "label": "selected-b",
+        "seconds": 26.281,
+        "expired": false,
+        "returncode": 0
+      }
+    ],
+    "native_operation_seconds": {
+      "original-a": {
+        "os-cim": 23.005,
+        "computer-cim": 0.032,
+        "processor-cim": 1.068,
+        "gpu-discovery": 1.959
+      },
+      "selected-a": {
+        "os-cim": 32.647,
+        "computer-cim": 0.038,
+        "processor-cim": 1.249,
+        "gpu-discovery": 13.052
+      },
+      "selected-b": {
+        "os-cim": 23.167,
+        "computer-cim": 0.034,
+        "processor-cim": 1.074,
+        "gpu-discovery": 1.753
+      },
+      "original-b": {
+        "os-cim": 23.024,
+        "computer-cim": 0.033,
+        "processor-cim": 1.078,
+        "gpu-discovery": 1.829
+      }
+    },
+    "all_native_payloads_identical": true,
+    "conclusion": "Selected Caption/Version properties did not reduce warm query cost; no production patch justified."
+  }
 }

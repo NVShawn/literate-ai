@@ -30640,3 +30640,13 @@ Windows receiver stage diagnosis is retained in
 rejects the earlier GPU lookup attribution; actual warm OS CIM queries dominate
 at about 19 seconds, with 56 seconds for the first OS query. No production
 change or widened deadline follows from these diagnostic observations.
+
+The native selected-property ABBA comparison (39967811302) returns identical
+hardware payloads but no warm improvement: original OS queries 23.005/23.024
+seconds, selected-property warm query 23.167 seconds. No production hardware
+change is selected. Keep #116 open; preserve these rejected attributions.
+Next landing action: integrate the independently Windows-confirmed exact-byte
+RECORD fixture correction when the current candidate's healthy jobs finish,
+then renew the exact candidate gates. Ordinary PR CI 39960853983 is green;
+full Windows wheel job 120438737834 is green at source 55e775c7. Neither is
+a complete passing full matrix or provided native gate.
