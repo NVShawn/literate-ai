@@ -29175,13 +29175,16 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Upgrade OpenSpec without weakening strict validation; split existing overlong requirements while preserving every normative sentence
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
+  - [x] Complete the issue’s clean-audit requirement: remove the five remaining low KaTeX-chain findings through a normally resolved supported renderer release, then require zero total findings and renew all documentation/strict gates.
   - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
 **Current audit:** The exception list is already empty in current main (ancestor `4ceedbe9`). Fresh staged OpenSpec installation reports five low findings and no high/critical findings; strict validation and documentation checks pass. Review #24 for closure against its original contract after confirming the landed dependency change; no exception restoration or dependency downgrade is proposed.
 
-- **Closure qualification:** Main contains OpenSpec 1.14.3 and no `braces` package in the lock; the exception list is empty. A fresh clean staged install and `npm audit --audit-level=high` exit zero: 0 high, 0 critical, 0 moderate, 5 low. The normal documentation gate passes all 21 tool tests and renders all 121 diagrams; all four strict OpenSpec specifications passed on this same tooling source. The remaining low findings are reported honestly and do not reinstate the removed high-severity exception.
+- **Earlier staged audit (not final closure):** Main contains OpenSpec 1.14.3 and no `braces` package in the lock; the exception list is empty. A fresh clean staged install and `npm audit --audit-level=high` exit zero: 0 high, 0 critical, 0 moderate, 5 low. The normal documentation gate passes all 21 tool tests and renders all 121 diagrams; all four strict OpenSpec specifications passed on this same tooling source. The remaining low findings are reported honestly and do not reinstate the removed high-severity exception.
+
+- **Final clean-audit qualification:** A fresh install and audit at every severity report zero vulnerabilities. A normally resolved KaTeX 0.18.2 override removes the five inherited low findings; every other lock package and the Mermaid CLI 11.16.0 pin remain unchanged. The new real-library inherited-trust regression fails on 0.16.47 and passes on the patch while preserving explicit trust. All 22 tool tests, 121 diagram renders and four strict specifications pass. The unchanged CLI also renders two actual mathematical expressions with the patched library. See `verification/documentation-audit-qualification.json`. No advisory exception, audit threshold change or forced dependency downgrade is used.
 
 
 ### [ ] RETAINED-CATALOG-001 — Bind complete retained input ownership to canonical Component catalogs
