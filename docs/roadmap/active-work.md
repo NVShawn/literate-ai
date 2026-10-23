@@ -28586,7 +28586,7 @@ identity. This qualifies wheel installation only; native lifecycle, source and
 evidence custody, retained receipts and release enforcement remain open. The
 subsequent Make-environment correction is not part of that wheel's evidence.
 
-### [ ] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
+### [x] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
 
 - **GitHub issue:** [#69](https://github.com/jordanhubbard/literate-ai/issues/69)
 
@@ -28596,9 +28596,9 @@ subsequent Make-environment correction is not part of that wheel's evidence.
 - **Conclusion:** SCP may remain the fixed transfer executable, but must carry the selected SSH program for nondefault worker transports; direct default routing cannot establish the registered worker identity.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
+  - [x] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
 - **Evidence:**
-  - [ ] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
+  - [x] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
 
 WORKER-SCP-001 implementation checkpoint: SCP helpers accept a validated optional
 SSH program and the selected worker transport now reaches source staging,
@@ -28610,6 +28610,8 @@ SSH/SFTP round trip through the configured route uploaded a 63-byte gzip fixture
 matched its remote SHA-256 and downloaded identical bytes. The result is explicitly
 transport-only, not a complete native lifecycle receipt. Full installed native
 source/build/test/evidence qualification and existing-platform CI remain open.
+
+- **Closure acceptance:** The current validated SSH/SCP owners complete a real Windows/Python3.12 source upload, hash verification, native compilation, three compiled-artifact behavior cases and evidence download through one registered nondefault transport. The downloaded archive (`sha256:74966a8ce468c3630d16e01406ac8d9d75d6c382e14361d3bfed25bef1cf03c1`) is independently hash-verified, and its compiled artifact bytes match the native result. Five current transport/handler cases pass without skips, including exact default OpenSSH argv parity and invalid transport injection refusal. The owning code/tests are byte-identical to exact CI-qualified `20508324` and landed `fe21a198`; existing alignment/release synchronization coverage remains. See `verification/worker-scp-native-acceptance.json`. This is a complete source/build/test/evidence transfer round trip; it does not mint a framework lifecycle, retained SDK or product receipt.
 
 ### [x] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
 
