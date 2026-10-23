@@ -30676,7 +30676,7 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Evidence:**
   - [ ] Real disabled/enabled UFS probes establish early refusal, exact cleanup and unchanged unsupported-brand refusals.
 
-### [ ] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
+### [x] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
 
 **GitHub issue:** [#88](https://github.com/jordanhubbard/literate-ai/issues/88).
 
@@ -30689,15 +30689,15 @@ remain open in their owning items; this controller/sample proof does not close t
   - [x] Align plan/apply compatibility diagnostics and preserve atomic rollback for incompatible additions.
 - **Evidence:**
   - [x] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
-  - [ ] Required review CI, landing and exact-main confirmation pass.
+  - [x] Required review CI, landing and exact-main confirmation pass: PR #131, review run `39990970425`, merged main `ef5db15f`, and all 26 exact-main jobs in `40007862532`.
 
-- **Implementation:** Planning now projects exact current, inherited and selected framework skill bytes before apply. It reuses canonical dependency validation, binds incompatibility diagnostics to the plan and excludes incompatible additions from the safe subset. Parent selectors, overlays, currentness checks and atomic rollback remain intact. Published v1 schema bytes and dependency identity rules are unchanged. The next action in progress is required review CI and landing of the locally qualified change.
+- **Implementation:** Planning now projects exact current, inherited and selected framework skill bytes before apply. It reuses canonical dependency validation, binds incompatibility diagnostics to the plan and excludes incompatible additions from the safe subset. Parent selectors, overlays, currentness checks and atomic rollback remain intact. Published v1 schema bytes and dependency identity rules are unchanged. Complete: required review CI, merge and exact-main confirmation all pass.
 
 - **Combined pre-write guard:** A local provider outside the inherited file set could change between planning and apply. The repository adapter now runs a read-only combined preflight after its currentness checks and before inherited, provenance or baseline writes. The public CLI regression changes a local provider immediately before apply and forbids entering the lineage writer; it failed before this guard and passes after it.
 
 - **Focused implementation evidence:** Ten portable compatibility cases pass through the managed checkpoint runner, including read-only planning, safe-subset apply, unchanged published-wire identity, actual JSON Schema validation, concurrent local-provider drift before the lineage writer, and invocation from a nested directory while updating inherited bytes. Existing lineage/rollback cases (three) and adapter cases (two) also pass.
 
-- **Complete local qualification:** Exact implementation `e1d3e94b` passes all 2,262 selected source cases (2,191 passed, 71 existing skips, zero failures) in 1,246.156 seconds. The exact-source installed-wheel gate passes with wheel `sha256:e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb`. A forced-fresh lifecycle passes all 232 cases with no skips; supported receipt update, check, require-current and verify pass after the metadata-only integration. Receipt `sha256:f0b3fa15b34b5d138bd0f9480a02796e216a6df704cabf6975f6796e6a40a9ac` remains a local assertion. See `verification/project-update-closure-qualification.json`. Review CI and landing remain open; no unrelated native issue is qualified by these portable results.
+- **Complete local qualification:** Exact implementation `e1d3e94b` passes all 2,262 selected source cases (2,191 passed, 71 existing skips, zero failures) in 1,246.156 seconds. The exact-source installed-wheel gate passes with wheel `sha256:e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb`. A forced-fresh lifecycle passes all 232 cases with no skips; supported receipt update, check, require-current and verify pass after the metadata-only integration. Receipt `sha256:f0b3fa15b34b5d138bd0f9480a02796e216a6df704cabf6975f6796e6a40a9ac` remains a local assertion. See `verification/project-update-closure-qualification.json`. PR #131 passes required review CI and lands at `ef5db15f`; exact-main CI `40007862532` passes all 26 jobs. See `verification/project-update-closure-landing.json`. No unrelated native issue is qualified by these portable results.
 
 ### [ ] SDK-OBSERVATION-COST-001 — Bound repeated installed distribution observation
 
