@@ -30794,3 +30794,5 @@ remains required after composition. No Python production code changes.
 - **Evidence:**
   - [ ] Compare equivalent profiles and uninstrumented native timings; retain the original 5400-second failures and all raw evidence
   - [ ] Pass real mutation and stale-artifact controls plus full regression, installed-wheel and exact CI; renew the complete native Windows gate without skipped phases or increased deadlines
+
+**Initial source development:** Pure current-artifact reconstruction reuses the first complete immutable input frame, including excerpts and assets. Both independent full input observations and both installed-framework observations remain; the final comparison checks the whole frame. All seven staleness cases and all 15 selected HTML cases pass without skips, including live source/framework/output drift refusal. Lint, format, layout/export and reviewed driver pin checks pass. See `verification/html-reconstruction-development.json`. Native comparison, full regression/lifecycle/installed gates and complete Windows renewal remain required; no performance improvement is claimed yet.

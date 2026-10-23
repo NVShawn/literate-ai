@@ -1,0 +1,50 @@
+{
+  "scope": "Initial source-level HTML reconstruction optimization; native performance and full qualification remain pending",
+  "source_sha256": {
+    "src/literate_ai/adapters/html_staleness.py": "55bef0b6ea7bee7a0e33df0bd2425ba21f74c1df77f7a5c4806013f4f8ebef6b",
+    "tests/smoke/test_html_staleness.py": "527993c3e7c14b77dc35f62c439d76176c7d6cff692160329d362e5d4e5b66ff"
+  },
+  "reports": {
+    "focused": {
+      "summary": {
+        "executed": 7,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 7,
+        "selected": 7,
+        "skipped": 0
+      },
+      "report_sha256": "2d2fe52f87cebce0881531cf5e576986e8bdfd523876348fb7bf7573b00dc08a"
+    },
+    "all_html": {
+      "summary": {
+        "executed": 15,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 15,
+        "selected": 15,
+        "skipped": 0
+      },
+      "report_sha256": "1c2519c38965683608547305c39132362fedf9589ee61f87162bb0a7695eba27"
+    }
+  },
+  "operation_contract": {
+    "complete_input_observations_per_current_artifact": 2,
+    "independent_framework_observations": 2,
+    "pure_reconstruction_uses_first_complete_immutable_frame": true,
+    "final_comparison_includes_excerpts_and_external_assets": true,
+    "process_global_or_cross_call_success_cache": false
+  },
+  "refusal_controls": [
+    "Live source change after reconstruction remains and refuses",
+    "Framework identity change at final observation refuses",
+    "Output replacement at final observation remains and refuses"
+  ],
+  "reviewed_driver_identity": "sha256:494c690a915bfa47caeb2cf44a1e9bdf66199fa6c01b7c62a71650c65eb845a7",
+  "author_review": "Reviewed pure emitter reuse and both independent currentness boundaries. This is author review, not independent security attestation.",
+  "pending": [
+    "Equivalent native installed profile and uninstrumented timing comparison",
+    "Complete native Windows gate renewal with unchanged bounds",
+    "Fresh full source suite, complete installed wheel, current project lifecycle receipt and exact review CI"
+  ]
+}

@@ -106,6 +106,12 @@ and changed catalogs refuse with the existing `render.surface_unavailable` code.
 The rendering service repeats this observation before publication. This is an
 in-process installation check, not an OS isolation guarantee or installed-release proof.
 
+Staleness verification reconstructs a current artifact from its first complete,
+immutable input observation, including excerpts and external assets. It then
+independently reloads the complete inputs, installation and output bytes before
+returning a verdict. Pure reconstruction does not trigger a third discovery;
+no observation is reused across verification calls.
+
 The existing `storage.ReferenceIndex` now supports read-only snapshots without
 creating directories or lock files. It retains CAS verification on resolution,
 rejects writes, bounds index reads and refuses observed publication drift rather

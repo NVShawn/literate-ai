@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- HTML verification reconstructs retained views from their complete observed
+  inputs while preserving independent final source, framework and output checks.
+  Native performance qualification remains in progress.
+
 - Preserve both retained executable declarations when the native Windows identity
   fixture refreshes its manifest, keeping command and late-drift qualification active.
 
