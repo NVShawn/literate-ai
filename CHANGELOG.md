@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Diagnose incompatible scaffold skill dependencies before update writes, preserve
+  selected parent authority and apply the compatible subset without changing pins.
 - Allow safe custom onboarding paths in v2 projects and audit project-owned
   coding-agent entry points without modifying instructions. Original-source
   adoption reports missing or stale delegates before onboarding is complete.

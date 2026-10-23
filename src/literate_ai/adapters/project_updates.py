@@ -447,12 +447,18 @@ class FilesystemProjectUpdateAdapter:
         origin_provider=discover_installed_initialization_origin,
         protected_paths: frozenset[str] = frozenset(),
         base_reader=None,
+        catalog_overrides=None,
+        adopt_added=False,
+        resolutions=None,
     ):
         self._base_reader = base_reader
         self._origin_provider = origin_provider
         self._protected_paths = frozenset(protected_paths)
+        self._catalog_overrides = dict(catalog_overrides or {})
+        self._adopt_added = adopt_added
+        self._resolutions = dict(resolutions or {})
 
-    def plan(self, selected: Path) -> ProjectUpdatePlan:
+    def plan(self, selected: Path, *, check_compatibility=True) -> ProjectUpdatePlan:
         try:
             project = discover_project(Path(selected))
         except ProjectError as exc:
@@ -505,6 +511,7 @@ class FilesystemProjectUpdateAdapter:
             | _project_owned_generation_input_paths(project, imported)
             | _retained_legacy_shim_authority_paths(root)
             | self._protected_paths
+            | frozenset(self._catalog_overrides)
         )
         # Catalog-imported paths are classified against the resolved parent catalog
         # by the lineage adapter. Comparing them here against the installed
@@ -551,6 +558,17 @@ class FilesystemProjectUpdateAdapter:
             for item in files
         )
         files = _protect_dangling_roadmap_queue_owners(root, files, upstream_content)
+        from .project_update_compatibility import classify_skill_compatibility
+
+        if check_compatibility:
+            files = classify_skill_compatibility(
+                project,
+                files,
+                upstream_content,
+                catalog_overrides=self._catalog_overrides,
+                adopt_added=self._adopt_added,
+                resolutions=self._resolutions,
+            )
         return ProjectUpdatePlan(
             project.definition.identity,
             baseline.identity,

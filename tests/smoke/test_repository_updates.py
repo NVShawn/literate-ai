@@ -244,11 +244,20 @@ class RepositoryLineageUpdateTests(unittest.TestCase):
                         )
                     )
 
-            with self.assertRaises(CliFailure) as raised:
+            with (
+                patch.object(
+                    FilesystemRepositoryUpdateAdapter,
+                    "apply",
+                    side_effect=AssertionError(
+                        "incompatible plan started a write transaction"
+                    ),
+                ),
+                self.assertRaises(CliFailure) as raised,
+            ):
                 invoke([])
 
             self.assertEqual(
-                raised.exception.code, "repository_update.validation_failed"
+                raised.exception.code, "project.skill_dependency_identity_mismatch"
             )
             self.assertEqual(mcp_path.read_bytes(), local_mcp)
             self.assertFalse(rust_path.exists())

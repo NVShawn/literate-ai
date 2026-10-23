@@ -197,6 +197,79 @@ def _catalog_classification(
     return _classification(baseline, local, upstream)
 
 
+def selected_catalog_update_files(
+    files, *, adopt_added, take_upstream, keep_local, resolutions
+):
+    """Share the exact inherited-file selection between planning and apply."""
+    return tuple(
+        item
+        for item in files
+        if (
+            item.classification
+            in (
+                ProjectUpdateClassification.UPSTREAM_ONLY,
+                ProjectUpdateClassification.MERGEABLE,
+            )
+            and item.path not in keep_local
+        )
+        or (
+            adopt_added
+            and item.classification is ProjectUpdateClassification.UPSTREAM_ADDED
+        )
+        or item.path in take_upstream
+        or item.path in resolutions
+    )
+
+
+def prospective_catalog_update_contents(
+    root: Path,
+    planned: PlannedRepositoryLineageUpdate,
+    *,
+    adopt_added=False,
+    take_upstream=frozenset(),
+    keep_local=frozenset(),
+    resolutions=None,
+):
+    """Read the selected exact lineage overlay without materializing any files."""
+    from .project_updates import _local_bytes
+    from .update_merge import resolution_content
+
+    resolutions = resolutions or {}
+    content = _prospective_content(planned.catalogs)
+    result = {}
+    for item in selected_catalog_update_files(
+        planned.contract.files,
+        adopt_added=adopt_added,
+        take_upstream=take_upstream,
+        keep_local=keep_local,
+        resolutions=resolutions,
+    ):
+        source = content.get(item.path)
+        if (source is None and item.upstream_identity is not None) or (
+            source is not None and source.identity != item.upstream_identity
+        ):
+            raise RepositoryUpdateError(
+                "repository_update.upstream_changed",
+                "prospective catalog bytes changed; re-plan",
+            )
+        local = _local_bytes(root, item.path)
+        if (
+            None
+            if local is None
+            else ContentIdentity(
+                HashAlgorithm.SHA256, hashlib.sha256(local).hexdigest()
+            )
+        ) != item.local_identity:
+            raise RepositoryUpdateError(
+                "repository_update.local_changed",
+                "local catalog bytes changed; re-plan",
+            )
+        result[item.path] = resolution_content(
+            item, local, None if source is None else source.content, resolutions
+        )
+    return result
+
+
 def _retired_local_authority_paths(
     root: Path,
     previous_lineage: RepositoryLineage,
@@ -419,6 +492,7 @@ class FilesystemRepositoryUpdateAdapter:
         keep_local: frozenset[str] = frozenset(),
         finalizer: Callable[[Path], object] | None = None,
         resolutions: dict | None = None,
+        preflight: Callable[[Path], object] | None = None,
     ) -> AppliedRepositoryLineageUpdate:
         """Apply safe inherited deltas and one optional final transaction stage."""
 
@@ -494,23 +568,12 @@ class FilesystemRepositoryUpdateAdapter:
                 "keep-local paths must be planned inherited-catalog removals: "
                 + ", ".join(invalid_keep_local),
             )
-        selected_files = tuple(
-            item
-            for item in planned.contract.files
-            if (
-                item.classification
-                in (
-                    ProjectUpdateClassification.UPSTREAM_ONLY,
-                    ProjectUpdateClassification.MERGEABLE,
-                )
-                and item.path not in keep_local
-            )
-            or (
-                adopt_added
-                and item.classification is ProjectUpdateClassification.UPSTREAM_ADDED
-            )
-            or item.path in take_upstream
-            or item.path in resolutions
+        selected_files = selected_catalog_update_files(
+            planned.contract.files,
+            adopt_added=adopt_added,
+            take_upstream=take_upstream,
+            keep_local=keep_local,
+            resolutions=resolutions,
         )
         snapshots: dict[str, tuple[bytes | None, int | None]] = {}
         for item in selected_files:
@@ -592,6 +655,10 @@ class FilesystemRepositoryUpdateAdapter:
         lineage_replaced = False
         written: list[str] = []
         created_directories: set[Path] = set()
+        if preflight is not None:
+            # Check the complete composed update after local/provenance checks,
+            # before any inherited bytes, lineage or baseline are written.
+            preflight(project.root)
         try:
             for item in selected_files:
                 target = _project_path(project.root, item.path)

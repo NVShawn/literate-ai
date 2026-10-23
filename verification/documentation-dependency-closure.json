@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/documentation-dependency-closure@1",
+  "issue": 120,
+  "native_source_commit": "2837124250528de5b18709a22ade3048281d4ea6",
+  "native_gate_log_sha256": "8d38579916be7b91b273e8a32d4b86333e9c2c99b124a2354cc8c214359c8fb7",
+  "retained_native_archive_sha256": "02d73db303b72d79bdd6d145bfe343f674152fdaaa88eebcaf61a53e25c5aa9e",
+  "dependency_gate": {
+    "clean_install": true,
+    "npm_install_reported_vulnerabilities": 0,
+    "unexcepted_high_or_critical": 0,
+    "policy_relaxed": false,
+    "documentation_tool_tests": 22,
+    "test_failures": 0,
+    "test_skips": 0,
+    "diagrams_rendered": 121,
+    "markdown_files": 626
+  },
+  "identical_native_and_main_inputs": {
+    "tools/openspec/package.json": "b686d451233e6870e3db6147824bb6bd2c9ae31b6f0f284a04eeb42420847ea9",
+    "tools/openspec/package-lock.json": "feccf7160fc335cd04cdf3a76b6d30d40c8678441fd8ea09500d11b16b90fd06"
+  },
+  "main_source_commit": "9d62ce0943dc2d3eee45983b6a4e5d5ec782f87a",
+  "exact_main_ci_run": 39980361698,
+  "exact_main_ci_successful_jobs": 26,
+  "complete_native_gate_passed": false,
+  "remaining_native_gate_owner": "issue #129",
+  "scope": "DOMPurify dependency repair, clean installation, audit and complete documentation checks; not complete native lifecycle or release acceptance"
+}

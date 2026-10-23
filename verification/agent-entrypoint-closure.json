@@ -1,0 +1,41 @@
+{
+  "schema": "literate-ai/feature-closure@1",
+  "issue": 113,
+  "work_item": "ENTRYPOINT-AUDIT-001",
+  "scope": "Read-only agent onboarding discovery and explicit authored readiness requirement, not lifecycle admission",
+  "source_head": "a5609e1e4219d24b9f2c260a69d0ef556aacbef4",
+  "merged_main": "9d62ce0943dc2d3eee45983b6a4e5d5ec782f87a",
+  "review_ci": {
+    "run": 39971938723,
+    "conclusion": "success"
+  },
+  "additional_full_ci": {
+    "run": 39971961215,
+    "successful_jobs": 26,
+    "failed_jobs": 0,
+    "conclusion": "success"
+  },
+  "source_qualification": {
+    "source": "35306ad742f0646f64c889ffd3838b8d24e88f69",
+    "selected": 2252,
+    "passed": 2181,
+    "skipped": 71,
+    "failures": 0
+  },
+  "installed_cli_evidence": "verification/agent-entrypoint-installed-final-acceptance.json",
+  "local_cohort_evidence": "verification/windows-record-fixture-cohort-qualification.json",
+  "postmerge_checks": {
+    "require_current": true,
+    "verify": true,
+    "primary_clean_and_synchronized": true
+  },
+  "postmerge_ci": {
+    "run": 39980361698,
+    "state": "pending; not a release claim"
+  },
+  "unchanged_open_work": [
+    "Hardware receiver expiry #116",
+    "Complete provided native Windows verification #129"
+  ],
+  "changelog": "Existing Unreleased entry for safe custom onboarding paths and read-only entrypoint audit"
+}

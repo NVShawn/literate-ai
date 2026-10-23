@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections import Counter
 from pathlib import Path
 from typing import Any, NoReturn
 
@@ -86,9 +87,12 @@ _DOC_IDENTITY_MARKER = "DOC-IDENTITY:"
 class ProjectValidationError(ValueError):
     """Stable filesystem-project validation failure."""
 
-    def __init__(self, code: str, message: str) -> None:
+    def __init__(
+        self, code: str, message: str, *, catalog_paths: tuple[str, ...] = ()
+    ) -> None:
         self.code = code
         self.message = message
+        self.catalog_paths = catalog_paths
         super().__init__(message)
 
 
@@ -215,6 +219,7 @@ def _agent_skill(project: Any, catalog: dict[str, object]) -> dict[str, object]:
 
 def _skill_catalog(project: Any) -> tuple[ResolvedSpecificationToSourceSkill, ...]:
     loaded: list[ResolvedSpecificationToSourceSkill] = []
+    locations: dict[int, str] = {}
     try:
         catalog_paths = specification_to_source_skill_paths(
             project, validate_catalog=False
@@ -241,6 +246,7 @@ def _skill_catalog(project: Any) -> tuple[ResolvedSpecificationToSourceSkill, ..
                     source=f"project catalog {reference.uri}",
                 )
             )
+            locations[id(loaded[-1])] = reference_uri
         except (OSError, UnicodeError, ValueError) as exc:
             selected = (
                 f"specification-to-source-skill:{reference_uri}"
@@ -251,31 +257,59 @@ def _skill_catalog(project: Any) -> tuple[ResolvedSpecificationToSourceSkill, ..
                 "project.skill_invalid",
                 f"invalid specification-to-source skill: {selected}",
             ) from exc
+    return validate_resolved_skill_catalog(tuple(loaded), locations=locations)
+
+
+def validate_resolved_skill_catalog(
+    loaded: tuple[ResolvedSpecificationToSourceSkill, ...],
+    *,
+    locations: dict[int, str],
+) -> tuple[ResolvedSpecificationToSourceSkill, ...]:
+    """Validate exact parsed skill bytes, including a prospective update catalog."""
+
+    def problem(code, message, *skills):
+        raise ProjectValidationError(
+            code,
+            message,
+            catalog_paths=tuple(
+                dict.fromkeys(locations[id(skill)] for skill in skills)
+            ),
+        )
+
     by_id = {item.skill_id: item for item in loaded}
     if len(by_id) != len(loaded):
-        raise ProjectValidationError(
-            "project.skill_duplicate", "skill IDs must be unique across the project"
+        counts = Counter(item.skill_id for item in loaded)
+        duplicate = min(name for name, count in counts.items() if count > 1)
+        problem(
+            "project.skill_duplicate",
+            "skill IDs must be unique across the project",
+            *(item for item in loaded if item.skill_id == duplicate),
         )
     for skill in loaded:
         for dependency in skill.dependencies:
             selected = by_id.get(dependency.skill_id)
             if selected is None:
-                raise ProjectValidationError(
+                problem(
                     "project.skill_dependency_missing",
                     f"skill {skill.skill_id} has a missing dependency",
+                    skill,
                 )
             if selected.ref != dependency:
-                raise ProjectValidationError(
+                problem(
                     "project.skill_dependency_identity_mismatch",
                     f"skill {skill.skill_id} dependency identity changed",
+                    skill,
+                    selected,
                 )
     visiting: set[str] = set()
     complete: set[str] = set()
 
     def visit(skill_id: str) -> None:
         if skill_id in visiting:
-            raise ProjectValidationError(
-                "project.skill_dependency_cycle", "skill dependency graph has a cycle"
+            problem(
+                "project.skill_dependency_cycle",
+                "skill dependency graph has a cycle",
+                *(by_id[name] for name in sorted(visiting)),
             )
         if skill_id in complete:
             return

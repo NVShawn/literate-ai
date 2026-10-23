@@ -30633,7 +30633,7 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Evidence:**
   - [ ] Complete clean local regression, real Windows input/output/admission/package proof and green exact-head hosted CI before landing.
 
-### [ ] ENTRYPOINT-AUDIT-001 — Audit original-source agent entry points
+### [x] ENTRYPOINT-AUDIT-001 — Audit original-source agent entry points
 
 **GitHub issue:** [#113](https://github.com/jordanhubbard/literate-ai/issues/113).
 
@@ -30646,9 +30646,9 @@ remain open in their owning items; this controller/sample proof does not close t
   - [x] Add supported read-only entry-point auditing and an explicit reviewed authoring requirement without modifying pinned parents or retained evidence.
 - **Evidence:**
   - [x] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
-  - [ ] Complete exact review CI and reviewed landing with current qualification.
+  - [x] Complete exact review CI and reviewed landing with current qualification.
 
-- **Next action in progress:** Complete exact review CI and reviewed landing; current source, lifecycle, installed-wheel and installed public CLI qualification are recorded below.
+- **Completion:** Exact review head `a5609e1e` passes ordinary CI `39971938723` and all 26 cells in full comparison CI `39971961215`. PR #130 is merged at `9d62ce09`; the primary checkout is clean and synchronized, and supported receipt require-current plus all-gate verify pass. The source suite, lifecycle and real noneditable CLI acceptance below retain their exact scope. This completes onboarding discovery only; #116 and #129 remain open, and no native lifecycle/product/release acceptance follows.
 
 - **Custom-path authority:** Current v2 definitions admit bounded portable relative onboarding paths through the shared canonical path owner; optional shim validation follows the declared field. Published v1 schema inputs retain the root SKILL.md rule before legacy conversion. Custom-path provider metadata must name the file explicitly. Positive configured projects and original-adoption planning, default-delegate staleness, cross-platform path refusal and frozen-v1 compatibility are covered; no automatic instruction repair or lifecycle admission is added.
 
@@ -30684,9 +30684,18 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Conclusion:** Compare the complete prospective closure before apply, retain explicit parent selection and overlays, and offer a safe compatible subset.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Align plan/apply compatibility diagnostics and preserve atomic rollback for incompatible additions.
+  - [x] Align plan/apply compatibility diagnostics and preserve atomic rollback for incompatible additions.
 - **Evidence:**
-  - [ ] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
+  - [x] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
+  - [ ] Required review CI, landing and exact-main confirmation pass.
+
+- **Implementation:** Planning now projects exact current, inherited and selected framework skill bytes before apply. It reuses canonical dependency validation, binds incompatibility diagnostics to the plan and excludes incompatible additions from the safe subset. Parent selectors, overlays, currentness checks and atomic rollback remain intact. Published v1 schema bytes and dependency identity rules are unchanged. The next action in progress is required review CI and landing of the locally qualified change.
+
+- **Combined pre-write guard:** A local provider outside the inherited file set could change between planning and apply. The repository adapter now runs a read-only combined preflight after its currentness checks and before inherited, provenance or baseline writes. The public CLI regression changes a local provider immediately before apply and forbids entering the lineage writer; it failed before this guard and passes after it.
+
+- **Focused implementation evidence:** Ten portable compatibility cases pass through the managed checkpoint runner, including read-only planning, safe-subset apply, unchanged published-wire identity, actual JSON Schema validation, concurrent local-provider drift before the lineage writer, and invocation from a nested directory while updating inherited bytes. Existing lineage/rollback cases (three) and adapter cases (two) also pass.
+
+- **Complete local qualification:** Exact implementation `e1d3e94b` passes all 2,262 selected source cases (2,191 passed, 71 existing skips, zero failures) in 1,246.156 seconds. The exact-source installed-wheel gate passes with wheel `sha256:e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb`. A forced-fresh lifecycle passes all 232 cases with no skips; supported receipt update, check, require-current and verify pass after the metadata-only integration. Receipt `sha256:f0b3fa15b34b5d138bd0f9480a02796e216a6df704cabf6975f6796e6a40a9ac` remains a local assertion. See `verification/project-update-closure-qualification.json`. Review CI and landing remain open; no unrelated native issue is qualified by these portable results.
 
 ### [ ] SDK-OBSERVATION-COST-001 — Bound repeated installed distribution observation
 
@@ -30749,7 +30758,7 @@ remain open in their owning items; this controller/sample proof does not close t
   - [ ] For each closed issue retain a criterion-by-criterion acceptance result and a landed commit with the required tests and native evidence.
   - [ ] Completion audit finds no unresolved open issues; uncertain, partial and pending qualification remains open.
 
-### [ ] DOC-DEPENDENCIES-002 — Refresh DOMPurify after critical documentation dependency findings
+### [x] DOC-DEPENDENCIES-002 — Refresh DOMPurify after critical documentation dependency findings
 
 - **GitHub issue:** [#120](https://github.com/jordanhubbard/literate-ai/issues/120)
 
@@ -30761,13 +30770,25 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Implementation:**
   - [x] Update the lock with the normal npm resolver; retain audit policy without exceptions
 - **Evidence:**
-  - [ ] Fresh clean install, dependency gate, documentation tool tests and full diagram rendering; renew the native gate after integration
+  - [x] Fresh clean install, dependency gate, documentation tool tests and full diagram rendering; renew the native gate after integration
 
 Implementation: the normal npm resolver changes only DOMPurify's version, registry
 URL and integrity, from 3.4.16 to 3.4.17. A clean installation and dependency gate
 pass without exceptions; all 21 documentation-tool tests and all 121 diagrams
-across 625 Markdown files pass on the controller. Native Windows gate renewal
-remains required after composition. No Python production code changes.
+across 625 Markdown files pass on the controller. At that controller checkpoint,
+native Windows renewal remained required after composition. No Python production
+code changes.
+
+**Completion evidence:** The integrated native Windows attempt at `28371242`
+completed a fresh `npm ci` with zero reported vulnerabilities, the unchanged
+high/critical audit gate, all 22 documentation-tool tests with no skips, and all
+121 diagrams from 626 Markdown files. Its later wheel timeout remains retained
+under issue #129; that timeout does not contradict the completed dependency and
+documentation checks. The documentation package manifests and lock are byte-for-byte
+unchanged between that native revision and exact main `9d62ce09`, whose required
+CI run `39980361698` passed all 26 jobs. See
+`verification/documentation-dependency-closure.json`. This closes the dependency
+repair scope and makes no claim that the complete provided native gate passed.
 
 
 ### [ ] CLI-IMPORT-001 — Defer optional MAC schema parser initialization
@@ -30987,3 +31008,35 @@ harness bytes are unchanged. See
 CI jobs are terminal (24 pass, the two known Windows shards fail). Next:
 update PR #130 and renew exact-head required CI. Keep #116 and #129 open;
 no native full-gate or hardware timeout correction is claimed.
+
+The bounded project-parse experiment for #129 is not selected for production.
+A native Windows source comparison preserves the 41-Flavor identity and all
+246 manifest reads, but does not show reliable improvement: baseline
+2.8339/2.4375 seconds, candidate 2.9388/2.5934 seconds. Host-only improvements
+therefore do not justify this as the native fix. Nine preliminary native cases
+pass; the later copied-context lifetime and concurrent-budget corrections pass
+twelve local cases but remain an unlanded experiment. Its interrupted full
+source/lifecycle attempts are not qualification. The complete experiment remains
+on local branch `fix/catalog-project-parse` at `becbcc7e`; no implementation from
+that branch belongs in the landing queue. See
+`verification/windows-project-parse-negative-comparison.json` and archive
+`sha256:6e930ea7d84003dbdd4e472e36dc781c806fc3b030d437359564108003de1d1f`.
+Next for #129: capture per-command costs for the complete expensive installed
+HTML scenario with the qualified baseline wheel. Do not repeat the full provided
+native qualification before further profiling. Keep the earlier timeouts.
+
+**Current landing state:** PR #130 is merged at `9d62ce09`; its exact-main
+CI run `39980361698` passed all 26 jobs. This closes the hosted integration gate,
+while the independent provided-worker native timeout remains open.
+
+**Complete-scenario diagnostic setup:** An isolated attempt using exact source
+`35306ad7` and its qualified wheel stopped before HTML profiling. The standalone
+launcher omitted the canonical Windows gate's declared tool paths, so the
+unrelated adoption fixture could not find `printf`; no HTML assertion or timing
+result was earned. Its 698.843-second failed terminal result, launcher and logs
+are preserved in a separately hash-verified 5,796-byte archive. See
+`verification/html-profile-setup-failure.json`. A fresh diagnostic uses the
+canonical gate's template-derived native and fallback paths and prepares only the
+created-project prerequisite. All complete HTML scenario assertions, original
+900-second CLI deadlines and the 5,400-second owned-tree bound remain unchanged.
+The first failed directory, source checkout and installed wheel stay retained.

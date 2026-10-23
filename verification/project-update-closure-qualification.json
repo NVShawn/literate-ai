@@ -1,0 +1,48 @@
+{
+  "schema": "literate-ai/project-update-closure-qualification@1",
+  "issue": 88,
+  "implementation_commit": "e1d3e94b003db96e10c7b8b7ccd733fd93eb1e81",
+  "metadata_integration_commit": "ae7c1ea3",
+  "source_suite": {
+    "selected": 2262,
+    "passed": 2191,
+    "skipped": 71,
+    "failed": 0,
+    "seconds": 1246.156,
+    "managed_checkpoint_runner": true
+  },
+  "focused_compatibility_cases": 10,
+  "installed_wheel": {
+    "passed": true,
+    "sha256": "e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb",
+    "embedded_source_commit": "e1d3e94b003db96e10c7b8b7ccd733fd93eb1e81",
+    "distribution_identity": "sha256:b5c8ca61939bbfdbccedc7e1ff8bc7d9a9aa978c9b1f38426440097c3e33980f",
+    "distribution_members": 1238
+  },
+  "forced_lifecycle": {
+    "passed": 232,
+    "skipped": 0,
+    "failed": 0,
+    "receipt_identity": "sha256:f0b3fa15b34b5d138bd0f9480a02796e216a6df704cabf6975f6796e6a40a9ac",
+    "finalized_candidate_identity": "sha256:0d69ba68f7a529f7ee51f107450ffda3bdcd1fc9c196e20fcd4be0f09acef452",
+    "finalization_boundary": "supported-api-tcb",
+    "supported_update_check_and_require_current_passed": true,
+    "local_assertion_authenticated": false
+  },
+  "verify_passed": true,
+  "repository_checks": {
+    "lint": "passed",
+    "format": "passed",
+    "driver_review": "current",
+    "skills": "passed",
+    "repository_layout": "passed",
+    "public_export": "passed",
+    "dependency_audit": "no unexcepted high or critical advisories",
+    "documentation_tests_passed": 22,
+    "diagrams_rendered": 121,
+    "strict_openspec_items_passed": 4,
+    "end_peer_work_survey": "completed; unrelated unfinished work and historical refs retained"
+  },
+  "scope": "Portable old-parent/new-scaffold compatibility fixtures, full host source suite, exact-source installed wheel and forced host lifecycle; unrelated native hardware and release gates remain open",
+  "review_ci_and_landing": "pending"
+}
