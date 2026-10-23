@@ -30702,7 +30702,7 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Evidence:**
   - [ ] Compare equivalent profiles and uninstrumented native timings; prove changed, redirected, missing or altered members fail closed during commands and qualify independent consumer acceptance.
 
-### [ ] WINDOWS-TEST-CONTRACT-001 — Repair Windows test contracts
+### [x] WINDOWS-TEST-CONTRACT-001 — Repair Windows test contracts
 
 **GitHub issue:** [#116](https://github.com/jordanhubbard/literate-ai/issues/116).
 
@@ -30712,9 +30712,20 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Conclusion:** Keep copied Python aliases bound to their native base runtime and exercise structural loader checks on a supported platform while preserving explicit Windows refusal.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Review and land PR #119 separately after #115; diagnose its current Linux CI failure before qualification.
+  - [x] Reconcile PR #119 after #115, diagnose its Linux driver-pin failure, and land its reviewed fixture contribution through the integrated review.
 - **Evidence:**
-  - [ ] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.
+  - [x] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.
+
+**Completion evidence:** PR #119 head `1a4d3e6e` is retained by ancestry in
+main `9d62ce09`. The Python alias fixture retains its real base executable,
+versioned runtime DLL and `pyvenv.cfg` without new test skips; the loader-role
+fixture selects Linux, and the separate Windows unsupported-loader assertion
+remains active. Exact-main run `39980361698` passes all 26 jobs, including both
+Linux Python jobs and all three full Windows/Python 3.12 test shards. See
+`verification/windows-fixture-contract-closure.json`. This completes #116's
+fixture-contract acceptance. It does not establish the cause of the separately
+reproduced hardware observation timeout or qualify the complete provided-worker
+native gate; #90 and #129 retain those remaining requirements.
 
 **Review finding:** Exact-head Linux job `119840524271` in run `39783402916` fails the lifecycle driver review: `retained_project_execution.py` changed while the pin still names `c27617cb`. The contribution also projects ambient `SYSTEMROOT`, overlapping #110's already-bound system-context owner. Reconcile the production delta against the integrated custody path before re-reviewing and repinning; do not treat the failure as only an infrastructure retry.
 

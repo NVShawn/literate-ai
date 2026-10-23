@@ -1,0 +1,27 @@
+{
+  "schema": "literate-ai/windows-fixture-contract-closure@1",
+  "issue": 116,
+  "main_commit": "9d62ce0943dc2d3eee45983b6a4e5d5ec782f87a",
+  "integrated_peer_head": "1a4d3e6e1d5a1bc6ed42ba01df4b652a688513c3",
+  "peer_head_retained_by_ancestry": true,
+  "exact_main_ci_run": 39980361698,
+  "exact_main_ci_successful_jobs": 26,
+  "linux_jobs": [120505846716, 120505846778],
+  "full_windows_test_shard_jobs": [120505846747, 120505846724, 120505846824],
+  "all_listed_jobs_successful": true,
+  "python_alias_fixture": {
+    "uses_actual_base_executable": true,
+    "retains_versioned_runtime_dll": true,
+    "retains_pyvenv_home_binding": true,
+    "ordering_assertions_preserved": true,
+    "new_skip_guards": false
+  },
+  "loader_fixture": {
+    "structural_role_case_selects_linux": true,
+    "explicit_windows_unsupported_assertion_preserved": true
+  },
+  "production_guards_or_deadlines_relaxed": false,
+  "remaining_separate_owners": [90, 129],
+  "complete_provided_worker_native_gate_passed": false,
+  "scope": "Issue 116 Python alias and loader fixture contracts plus exact-head Linux/Windows hosted qualification; not hardware-timeout causality, complete native admission or release qualification"
+}
