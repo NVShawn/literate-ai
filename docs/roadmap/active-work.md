@@ -30346,7 +30346,7 @@ original-source SDK and accepted-retained export programs remain separate.
 
 **Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
 
-### [ ] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
+### [x] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
 
 **GitHub issue:** [#100](https://github.com/jordanhubbard/literate-ai/issues/100)
 
@@ -30359,7 +30359,7 @@ original-source SDK and accepted-retained export programs remain separate.
   - [x] Persist exact retirement records and distinguish them from active membership during lookup and verified enumeration.
 - **Evidence:**
   - [x] Prove current lookup and read-only enumeration after retirement, unchanged immutable history, missing/corrupt-record refusal, safe reactivation and portable archive restoration.
-  - [ ] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
+  - [x] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
 
 **Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.
 
@@ -30385,6 +30385,8 @@ public export case remains in progress. Installed-wheel and exact final review
 CI qualification remain required. The earlier invalid generated candidates and
 interrupted launchers are retained as unsuccessful attempts; no acceptance
 oracle was relaxed to obtain the fresh successful lifecycle.
+
+**Closure audit:** All 11 current cache cases pass with no skips, including all three retirement cases. Every cache-package source file, source-materialization/archive guard and retirement regression is byte-identical across native/lifecycle-qualified `9941a6c4`, exact CI-qualified `20508324`, installed wheel `1063ecd8` and landed main `d5c7b278`. `verification/cache-retirement-acceptance.json` records each criterion and original qualification scope; no broader SDK or release acceptance is inferred.
 
 ### [ ] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
 
