@@ -30279,7 +30279,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Evidence:**
   - [ ] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI.
 
-### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
+### [x] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
 
 **GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
 
@@ -30291,9 +30291,11 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Implementation:**
   - [x] Reuse the existing inert lexical owner for bundle classification and registry location.
 - **Evidence:**
-  - [ ] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
+  - [x] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
 
 **Focused results:** All six fanout checks pass on the host and Linux and in the actual FreeBSD preflight. All four JavaScript handoff/bundle cases and all three retry cases pass on the host, Windows, Linux and FreeBSD preflight. Complete native/installed and exact CI gates remain pending above.
+
+**Closure audit:** All four current handoff cases pass without skips. A real non-editable installed guard on native Windows accepts all six inert forms in both writer locations, performs 12 actual Node invocations with exact expected test/smoke payloads, and preserves all four missing-module/extension/shebang/dispatch refusals. Its guard, lexer, callers and fixture bytes match landed `fe21a198`, exact fully qualified `76ac4c7a` and the complete installed wheel at `52c8b6eb`. That original snapshot also passes a fresh 230-case framework lifecycle. `verification/javascript-registry-acceptance.json` retains the source/wheel/receipt and hash-verified native archive identities; this does not declare the unrelated entrypoint or HTML-performance branches qualified.
 
 ### [ ] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
 
