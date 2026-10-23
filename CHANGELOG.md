@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Reuse parsed catalogs within read-only lock checks and diffs while retaining
+  fresh input, requested-root and authority validation.
 - Diagnose incompatible scaffold skill dependencies before update writes, preserve
   selected parent authority and apply the compatible subset without changing pins.
 - Allow safe custom onboarding paths in v2 projects and audit project-owned
@@ -245,6 +247,7 @@
 - Source installation retains the standalone macOS Python shared library before bootstrapping pip in copied private runtimes, preserving self-update custody.
 - Retained Windows commands bind native system-directory context and revalidate its directory identities without inheriting caller injection.
 - Shared Windows retained fixtures capture executable suffixes and actual Python runtime DLLs before rebuilding their input bindings.
+- Windows Python-discovery aliases retain their base runtime; loader-role fixtures use a supported platform while preserving explicit Windows refusal.
 
 - Python libraries: reject single-file build profiles before generation and identify supported directory or wheel profiles, avoiding futile rebuild retries.
 

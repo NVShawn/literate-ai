@@ -35,6 +35,7 @@ class PreparedComponentLock:
     plan: ComponentLockResolutionPlan
     result: ComponentLockResolutionResult
     catalog_snapshot: ComponentCatalogSnapshot | None = None
+    requested_flavor_roots: tuple[Path, ...] | None = None
 
 
 def prepare_component_lock(
@@ -54,7 +55,9 @@ def prepare_component_lock(
     result = ComponentLockResolver().resolve(
         plan, expected_input_evidence_identity=plan.identity
     )
-    return PreparedComponentLock(component.resolve(strict=True), plan, result, snapshot)
+    return PreparedComponentLock(
+        component.resolve(strict=True), plan, result, snapshot, flavor_roots
+    )
 
 
 def operate_component_lock(
@@ -73,7 +76,11 @@ def operate_component_lock(
     audit_store = ComponentResolutionAuditStore(component_root, target)
 
     def require_inputs_unchanged() -> None:
-        snapshot = prepared.catalog_snapshot if check or difference else None
+        snapshot = (
+            prepared.catalog_snapshot
+            if (check or difference) and prepared.requested_flavor_roots == flavor_roots
+            else None
+        )
         if snapshot is None:
             current = prepare_component_lock(
                 component_root,
@@ -86,7 +93,8 @@ def operate_component_lock(
             # Reuse parsed immutable catalog values only within this read-only
             # transaction. Reopen all bound bytes and membership before planning;
             # plan_snapshot still observes current graph authority and revalidates
-            # selected inputs afterwards. No observation survives this operation.
+            # selected inputs afterwards. This is private prepared-operation state,
+            # not a shared cache of trusted currentness.
             snapshot.require_unchanged()
             plan = planner.plan_snapshot(
                 snapshot, target_name=target, flavor_selectors=flavors
@@ -98,6 +106,7 @@ def operate_component_lock(
                     plan, expected_input_evidence_identity=plan.identity
                 ),
                 snapshot,
+                flavor_roots,
             )
         if (
             current.plan.identity != prepared.plan.identity

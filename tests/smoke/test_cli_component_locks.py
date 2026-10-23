@@ -17,7 +17,10 @@ from literate_ai.adapters.component_lock_operations import (
 from literate_ai.adapters.component_lock_operations import (
     operate_component_lock as _one_component_lock,
 )
-from literate_ai.adapters.component_lock_planning import FilesystemComponentLockPlanner
+from literate_ai.adapters.component_lock_planning import (
+    ComponentLockPlanningError,
+    FilesystemComponentLockPlanner,
+)
 from literate_ai.adapters.component_locks import (
     ComponentLockStore,
     ComponentLockStoreError,
@@ -40,6 +43,35 @@ def _run(arguments: list[str]) -> tuple[int, dict[str, object], str]:
 
 
 class ComponentLockCliTests(unittest.TestCase):
+    def test_read_only_reuse_does_not_hide_changed_requested_flavor_roots(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            component, flavors = _fixture(root)
+            planner = FilesystemComponentLockPlanner()
+            prepared = component_lock_operations.prepare_component_lock(
+                component,
+                target="macos-host",
+                flavors=("+macos", "+python"),
+                flavor_roots=(flavors,),
+                planner=planner,
+            )
+            other = root / "other-flavors"
+            shutil.copytree(flavors, other)
+            changed = other / "lang-python/flavor.md"
+            changed.write_bytes(changed.read_bytes() + b"\n")
+            with self.assertRaises(ComponentLockPlanningError):
+                _one_component_lock(
+                    prepared,
+                    target="macos-host",
+                    flavors=("+macos", "+python"),
+                    flavor_roots=(other,),
+                    planner=planner,
+                    check=True,
+                    difference=False,
+                )
+            self.assertFalse((component / "component.lock.json").exists())
+            self.assertFalse(tuple(component.glob("component.resolution-audit.*.json")))
+
     def test_read_only_check_captures_catalog_once_per_operation(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             component, flavors = _fixture(Path(temporary))
