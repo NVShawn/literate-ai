@@ -1,0 +1,452 @@
+{
+  "scope": "Instrumented read-only installed public verify diagnosis on the preserved native Windows fixture; exit 1 is retained and is not acceptance",
+  "source_commit": "62ce16a0458db31ae61954468f563a1e1bd65eba",
+  "profile": {
+    "command_exit": 1,
+    "seconds": 73.5,
+    "owner_sha256": "bfac8bf7f5f51a4cb9db3e20833abdba535350173e530d1310baa216fb36478f",
+    "instrumented": true,
+    "rows": [
+      {
+        "module": "~",
+        "function": "<built-in method nt.stat>",
+        "calls": 86322,
+        "primitive_calls": 86322,
+        "self_seconds": 4.8354235,
+        "cumulative_seconds": 7.693533800000001
+      },
+      {
+        "module": "standard_lifecycle_binding.py",
+        "function": "observe_installed_framework_distribution",
+        "calls": 2,
+        "primitive_calls": 2,
+        "self_seconds": 0.14644970000000002,
+        "cumulative_seconds": 6.59813
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt._getfinalpathname>",
+        "calls": 34096,
+        "primitive_calls": 34096,
+        "self_seconds": 5.202386300000001,
+        "cumulative_seconds": 5.202386300000001
+      },
+      {
+        "module": "standard_lifecycle_binding.py",
+        "function": "_read_stable_member",
+        "calls": 2470,
+        "primitive_calls": 2470,
+        "self_seconds": 0.0706306,
+        "cumulative_seconds": 4.5857019
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt._path_normpath>",
+        "calls": 20539,
+        "primitive_calls": 20539,
+        "self_seconds": 0.06763720000000001,
+        "cumulative_seconds": 0.5436599000000001
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.fspath>",
+        "calls": 998138,
+        "primitive_calls": 998138,
+        "self_seconds": 0.28518340000000003,
+        "cumulative_seconds": 0.28520850000000003
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.scandir>",
+        "calls": 3501,
+        "primitive_calls": 3501,
+        "self_seconds": 0.2459491,
+        "cumulative_seconds": 0.24787130000000002
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.fstat>",
+        "calls": 4820,
+        "primitive_calls": 4820,
+        "self_seconds": 0.1282366,
+        "cumulative_seconds": 0.1282366
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.read>",
+        "calls": 4822,
+        "primitive_calls": 4822,
+        "self_seconds": 0.110381,
+        "cumulative_seconds": 0.110381
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.open>",
+        "calls": 2410,
+        "primitive_calls": 2410,
+        "self_seconds": 0.1013353,
+        "cumulative_seconds": 0.1051653
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt._path_islink>",
+        "calls": 1818,
+        "primitive_calls": 1818,
+        "self_seconds": 0.0745037,
+        "cumulative_seconds": 0.0745037
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.getcwd>",
+        "calls": 17048,
+        "primitive_calls": 17048,
+        "self_seconds": 0.0470061,
+        "cumulative_seconds": 0.0470061
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.close>",
+        "calls": 2410,
+        "primitive_calls": 2410,
+        "self_seconds": 0.0434096,
+        "cumulative_seconds": 0.0434096
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.listdir>",
+        "calls": 135,
+        "primitive_calls": 135,
+        "self_seconds": 0.0271296,
+        "cumulative_seconds": 0.027901400000000003
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt._getfullpathname>",
+        "calls": 3392,
+        "primitive_calls": 3392,
+        "self_seconds": 0.017048400000000002,
+        "cumulative_seconds": 0.017048400000000002
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.get_terminal_size>",
+        "calls": 1069,
+        "primitive_calls": 1069,
+        "self_seconds": 0.0054443,
+        "cumulative_seconds": 0.0054443
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt._path_splitroot>",
+        "calls": 199,
+        "primitive_calls": 199,
+        "self_seconds": 0.0005172,
+        "cumulative_seconds": 0.0005172
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.lstat>",
+        "calls": 1,
+        "primitive_calls": 1,
+        "self_seconds": 7.93e-05,
+        "cumulative_seconds": 0.0001237
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.urandom>",
+        "calls": 1,
+        "primitive_calls": 1,
+        "self_seconds": 1.1000000000000001e-05,
+        "cumulative_seconds": 1.1000000000000001e-05
+      }
+    ],
+    "top_cumulative": [
+      {
+        "module": "dispatch.py",
+        "function": "main",
+        "calls": 1,
+        "self_seconds": 0.0002479,
+        "cumulative_seconds": 73.4371284
+      },
+      {
+        "module": "dispatch.py",
+        "function": "_handle",
+        "calls": 1,
+        "self_seconds": 1.77e-05,
+        "cumulative_seconds": 72.84174490000001
+      },
+      {
+        "module": "verify.py",
+        "function": "verify_project_from_args",
+        "calls": 1,
+        "self_seconds": 1.93e-05,
+        "cumulative_seconds": 72.83584230000001
+      },
+      {
+        "module": "project_verification.py",
+        "function": "observe_project_verification",
+        "calls": 1,
+        "self_seconds": 0.0001907,
+        "cumulative_seconds": 72.83581190000001
+      },
+      {
+        "module": "project_verification.py",
+        "function": "_html_observability",
+        "calls": 1,
+        "self_seconds": 0.00030730000000000004,
+        "cumulative_seconds": 49.759021700000005
+      },
+      {
+        "module": "html_staleness.py",
+        "function": "verify_html_artifact",
+        "calls": 1,
+        "self_seconds": 0.0020329000000000002,
+        "cumulative_seconds": 44.0229921
+      },
+      {
+        "module": "legacy_generation_catalog.py",
+        "function": "load_legacy_flavor_catalog_entries",
+        "calls": 7,
+        "self_seconds": 0.0820423,
+        "cumulative_seconds": 29.3630865
+      },
+      {
+        "module": "html_framework.py",
+        "function": "observe_html_framework",
+        "calls": 2,
+        "self_seconds": 0.022855,
+        "cumulative_seconds": 25.1948891
+      },
+      {
+        "module": "project_authority_graph.py",
+        "function": "project_authority_graph",
+        "calls": 5,
+        "self_seconds": 0.044111300000000006,
+        "cumulative_seconds": 23.929233
+      },
+      {
+        "module": "project_validation.py",
+        "function": "validate",
+        "calls": 2,
+        "self_seconds": 0.017433,
+        "cumulative_seconds": 23.0478539
+      },
+      {
+        "module": "html_emitter.py",
+        "function": "load_html_inputs",
+        "calls": 3,
+        "self_seconds": 9.42e-05,
+        "cumulative_seconds": 18.2210425
+      },
+      {
+        "module": "html_emitter.py",
+        "function": "_load_html_inputs",
+        "calls": 3,
+        "self_seconds": 0.00038780000000000005,
+        "cumulative_seconds": 18.2209483
+      },
+      {
+        "module": "validators.py",
+        "function": "iter_errors",
+        "calls": 139,
+        "self_seconds": 0.0008486,
+        "cumulative_seconds": 16.8842757
+      },
+      {
+        "module": "validators.py",
+        "function": "descend",
+        "calls": 218877,
+        "self_seconds": 1.3973202,
+        "cumulative_seconds": 16.8795092
+      },
+      {
+        "module": "_keywords.py",
+        "function": "properties",
+        "calls": 85911,
+        "self_seconds": 0.23859770000000002,
+        "cumulative_seconds": 16.7457862
+      },
+      {
+        "module": "html_surfaces.py",
+        "function": "load_html_surface",
+        "calls": 3,
+        "self_seconds": 0.0154213,
+        "cumulative_seconds": 16.543493400000003
+      },
+      {
+        "module": "schema_catalog.py",
+        "function": "schema_catalog_root",
+        "calls": 7,
+        "self_seconds": 0.0003996,
+        "cumulative_seconds": 16.280618500000003
+      },
+      {
+        "module": "schema_catalog.py",
+        "function": "_validated_catalog_roots",
+        "calls": 7,
+        "self_seconds": 0.0004462,
+        "cumulative_seconds": 16.2603069
+      },
+      {
+        "module": "schema_catalog.py",
+        "function": "_validated_catalog_root",
+        "calls": 2,
+        "self_seconds": 0.0019682000000000002,
+        "cumulative_seconds": 16.0472384
+      },
+      {
+        "module": "schema_catalog.py",
+        "function": "verify_schema_catalog",
+        "calls": 2,
+        "self_seconds": 0.0065969,
+        "cumulative_seconds": 16.0080596
+      },
+      {
+        "module": "schema_catalog.py",
+        "function": "_verify_schema_documents",
+        "calls": 2,
+        "self_seconds": 0.013291500000000001,
+        "cumulative_seconds": 15.8264598
+      },
+      {
+        "module": "_keywords.py",
+        "function": "ref",
+        "calls": 88145,
+        "self_seconds": 0.21348050000000002,
+        "cumulative_seconds": 15.277789400000001
+      },
+      {
+        "module": "validators.py",
+        "function": "check_schema",
+        "calls": 136,
+        "self_seconds": 0.0014647,
+        "cumulative_seconds": 14.9794078
+      },
+      {
+        "module": "_keywords.py",
+        "function": "allOf",
+        "calls": 10602,
+        "self_seconds": 0.11369270000000001,
+        "cumulative_seconds": 14.965314800000002
+      },
+      {
+        "module": "_keywords.py",
+        "function": "dynamicRef",
+        "calls": 10466,
+        "self_seconds": 0.022226000000000003,
+        "cumulative_seconds": 14.712236
+      }
+    ],
+    "top_self": [
+      {
+        "module": "~",
+        "function": "<method 'read' of '_io.BufferedReader' objects>",
+        "calls": 14912,
+        "self_seconds": 9.057918500000001,
+        "cumulative_seconds": 9.057918500000001
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt._getfinalpathname>",
+        "calls": 34096,
+        "self_seconds": 5.202386300000001,
+        "cumulative_seconds": 5.202386300000001
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.stat>",
+        "calls": 86322,
+        "self_seconds": 4.8354235,
+        "cumulative_seconds": 7.693533800000001
+      },
+      {
+        "module": "~",
+        "function": "<built-in method builtins.isinstance>",
+        "calls": 7468229,
+        "self_seconds": 2.0092992,
+        "cumulative_seconds": 2.4348233
+      },
+      {
+        "module": "pathlib.py",
+        "function": "_parse_path",
+        "calls": 183412,
+        "self_seconds": 1.6651807,
+        "cumulative_seconds": 3.1382098000000003
+      },
+      {
+        "module": "validators.py",
+        "function": "descend",
+        "calls": 218877,
+        "self_seconds": 1.3973202,
+        "cumulative_seconds": 16.8795092
+      },
+      {
+        "module": "pathlib.py",
+        "function": "__init__",
+        "calls": 398968,
+        "self_seconds": 1.1281754000000002,
+        "cumulative_seconds": 2.1099828
+      },
+      {
+        "module": "~",
+        "function": "<built-in method _io.open>",
+        "calls": 12445,
+        "self_seconds": 1.1006154000000001,
+        "cumulative_seconds": 1.1199909000000001
+      },
+      {
+        "module": "~",
+        "function": "<built-in method builtins.len>",
+        "calls": 4246203,
+        "self_seconds": 1.0794626,
+        "cumulative_seconds": 1.2626309
+      },
+      {
+        "module": "validators.py",
+        "function": "evolve",
+        "calls": 216168,
+        "self_seconds": 0.9963293000000001,
+        "cumulative_seconds": 3.7045179000000004
+      },
+      {
+        "module": "parse.py",
+        "function": "urljoin",
+        "calls": 89438,
+        "self_seconds": 0.9719935000000001,
+        "cumulative_seconds": 3.4309018
+      },
+      {
+        "module": "parse.py",
+        "function": "_coerce_args",
+        "calls": 692736,
+        "self_seconds": 0.9615058000000001,
+        "cumulative_seconds": 1.2527518
+      },
+      {
+        "module": "pathlib.py",
+        "function": "__str__",
+        "calls": 358177,
+        "self_seconds": 0.8159179000000001,
+        "cumulative_seconds": 5.567564
+      },
+      {
+        "module": "<frozen ntpath>",
+        "function": "splitroot",
+        "calls": 332037,
+        "self_seconds": 0.7331125000000001,
+        "cumulative_seconds": 1.0595352
+      },
+      {
+        "module": "pathlib.py",
+        "function": "_str_normcase",
+        "calls": 326142,
+        "self_seconds": 0.6654219,
+        "cumulative_seconds": 2.1049084000000002
+      }
+    ]
+  },
+  "archive_sha256": "02c90d52370f8bd85026138b8fabac3ec04d05c18d08aa3963ffb3e69c1cc743",
+  "archive_bytes": 178381,
+  "interpretation": "Cumulative times overlap. HTML verification and repeated catalog/authority observations dominate this call; installed-distribution observation accounts for 6.598 seconds. Profiling overhead and uncontrolled cache/order effects preclude a release-performance conclusion.",
+  "next_action": "Bound redundant HTML/catalog observations within an exact operation while retaining fresh drift detection, then compare equivalent instrumented counts and uninstrumented native timings."
+}

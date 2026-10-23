@@ -30692,3 +30692,17 @@ URL and integrity, from 3.4.16 to 3.4.17. A clean installation and dependency ga
 pass without exceptions; all 21 documentation-tool tests and all 121 diagrams
 across 625 Markdown files pass on the controller. Native Windows gate renewal
 remains required after composition. No Python production code changes.
+
+### [ ] HTML-VERIFY-COST-001 — Bound repeated installed HTML verification and catalog observation cost
+
+- **Priority:** P1
+- **Owner:** HTML verification and immutable catalog observation
+- **Direction:** Use retained native timing evidence to repair the repeated Windows full-gate timeout without changing execution bounds
+- **Conclusion:** The instrumented installed verify call spends 49.759 of 73.5 seconds in HTML verification; seven Flavor-catalog loads and five authority-graph observations repeat work. Preserve complete staleness, source, asset and framework identity checks while investigating bounded operation-scoped immutable reuse.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Inspect actual caller overlap and bind reusable parsed catalog or framework observations to exact current bytes within one operation
+  - [ ] Retain independent currentness checks and refuse changed, replaced, missing or redirected inputs before completing verification
+- **Evidence:**
+  - [ ] Compare equivalent profiles and uninstrumented native timings; retain the original 5400-second failures and all raw evidence
+  - [ ] Pass real mutation and stale-artifact controls plus full regression, installed-wheel and exact CI; renew the complete native Windows gate without skipped phases or increased deadlines
