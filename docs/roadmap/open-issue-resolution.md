@@ -38,6 +38,7 @@ join this scope. Each linked issue retains its complete original acceptance cont
 
 | Issue | Owning authority | Next evidence or action |
 | --- | --- | --- |
+| [#129](https://github.com/jordanhubbard/literate-ai/issues/129) Bound repeated installed HTML/catalog observations | `HTML-VERIFY-COST-001` | Native timing and instrumented profile identify repeated observations; preserve freshness and measure a bounded repair before renewing the complete Windows gate. |
 | [#123](https://github.com/jordanhubbard/literate-ai/issues/123) Retain wheel-operation timings through the native Windows release gate | `WIN-GATE-001 (peer PR #124)` | Reviewed candidate exists in #124; native timing and integration acceptance remain. |
 | [#121](https://github.com/jordanhubbard/literate-ai/issues/121) Avoid eager MAC schema parser initialization in ordinary project commands | `CLI-IMPORT-001 (peer PR #122)` | Reviewed candidate exists in #122; exact integration/native acceptance remains. |
 | [#120](https://github.com/jordanhubbard/literate-ai/issues/120) Refresh DOMPurify pin for critical and high documentation advisories | `DOC-DEPENDENCIES-002` | Isolated patch passes local documentation gates; hosted CI and native renewal remain. |

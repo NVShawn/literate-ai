@@ -30695,6 +30695,8 @@ remains required after composition. No Python production code changes.
 
 ### [ ] HTML-VERIFY-COST-001 — Bound repeated installed HTML verification and catalog observation cost
 
+**GitHub issue:** [#129](https://github.com/jordanhubbard/literate-ai/issues/129).
+
 - **Priority:** P1
 - **Owner:** HTML verification and immutable catalog observation
 - **Direction:** Use retained native timing evidence to repair the repeated Windows full-gate timeout without changing execution bounds
