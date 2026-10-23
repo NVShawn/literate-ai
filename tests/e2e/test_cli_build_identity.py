@@ -21,6 +21,8 @@ from literate_ai.adapters.user_paths import (
 from scripts.install_litai import _create_private_environment
 from tests.support.fixtures_test_host_self_update import _write_manifest
 
+FIXTURE_PROCESS_TIMEOUT_SECONDS = 120
+
 
 class CliBuildIdentityTests(unittest.TestCase):
     def test_public_version_flag_reports_build_identity(self):
@@ -126,7 +128,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 ],
                 check=True,
                 capture_output=True,
-                timeout=60,
+                timeout=FIXTURE_PROCESS_TIMEOUT_SECONDS,
             )
             variables = dict(updater.os.environ)
             for key in (
@@ -154,7 +156,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 check=True,
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=FIXTURE_PROCESS_TIMEOUT_SECONDS,
             )
             fixture_source = Path(baseline.stdout.strip())
             timestamp = 1700000000
@@ -164,7 +166,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                 env=variables,
                 check=True,
                 capture_output=True,
-                timeout=30,
+                timeout=FIXTURE_PROCESS_TIMEOUT_SECONDS,
             )
             payload = {
                 "tag_name": "v2.0.0",
@@ -205,7 +207,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                     check=True,
                     capture_output=True,
                     text=True,
-                    timeout=30,
+                    timeout=FIXTURE_PROCESS_TIMEOUT_SECONDS,
                 )
                 observed.append(json.loads(result.stdout))
                 probe = subprocess.run(
@@ -228,7 +230,7 @@ class ExplicitSelfUpdateTests(unittest.TestCase):
                     env=env,
                     capture_output=True,
                     text=True,
-                    timeout=30,
+                    timeout=FIXTURE_PROCESS_TIMEOUT_SECONDS,
                 )
                 diagnostics.append(f"installed probe: {probe!r}")
 

@@ -30619,6 +30619,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 **Review finding:** Exact-head Linux job `119840524271` in run `39783402916` fails the lifecycle driver review: `retained_project_execution.py` changed while the pin still names `c27617cb`. The contribution also projects ambient `SYSTEMROOT`, overlapping #110's already-bound system-context owner. Reconcile the production delta against the integrated custody path before re-reviewing and repinning; do not treat the failure as only an infrastructure retry.
 
+**Current integration:** Preserve PR #119 head `1a4d3e6e` by merge ancestry. Retain the current bound Windows system-context owner and captured Python/VC sidecars; reject the peer's ambient `SYSTEMROOT` shim and its superseded direct-helper test. Existing typed context tests own currentness/refusal, and the loader structural case already selects Linux in current main. Compose the peer's deterministic base-runtime alias/DLL fixtures and latest controlled remote toolchain probes. The old Windows Elixir failures occurred during upstream strict-version discovery before tests; both exact OTP tags are currently available. Fresh combined controller and native Windows acceptance remain required.
+
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
 **Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).
