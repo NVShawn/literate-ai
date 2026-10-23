@@ -30825,3 +30825,19 @@ retains the exact terminal result, log and timing frames. See
 timeouts. Keep #129 open; profile the complete expensive HTML scenario before
 another provided full native replay. Hosted Windows wheel CI passes separately,
 which does not turn this native gate into a passing result.
+
+The bounded project-parse experiment for #129 is not selected for production.
+A native Windows source comparison preserves the 41-Flavor identity and all
+246 manifest reads, but does not show reliable improvement: baseline
+2.8339/2.4375 seconds, candidate 2.9388/2.5934 seconds. Host-only improvements
+therefore do not justify this as the native fix. Nine preliminary native cases
+pass; the later copied-context lifetime and concurrent-budget corrections pass
+twelve local cases but remain an unlanded experiment. Its interrupted full
+source/lifecycle attempts are not qualification. The complete experiment remains
+on local branch `fix/catalog-project-parse` at `becbcc7e`; no implementation from
+that branch belongs in the landing queue. See
+`verification/windows-project-parse-negative-comparison.json` and archive
+`sha256:6e930ea7d84003dbdd4e472e36dc781c806fc3b030d437359564108003de1d1f`.
+Next for #129: capture per-command costs for the complete expensive installed
+HTML scenario with the qualified baseline wheel. Do not repeat the full provided
+native qualification before further profiling. Keep the earlier timeouts.

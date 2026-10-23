@@ -1,0 +1,229 @@
+{
+  "schema": "literate-ai/development-evidence@1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/129",
+  "decision": "Not selected for production: host improvement does not establish a native benefit; retain the experiment and profile the complete HTML scenario.",
+  "baseline_source": "a5609e1e4219d24b9f2c260a69d0ef556aacbef4",
+  "experimental_source": "51016250029bf1d3cf7cd8299d4845cc83d97a54",
+  "archived_local_branch": "fix/catalog-project-parse",
+  "archived_local_head": "becbcc7e6a8c8fb2ec1a8dc2713f89ff62b806d1",
+  "native": {
+    "source_commit": "51016250029bf1d3cf7cd8299d4845cc83d97a54",
+    "archive_sha256": "6e930ea7d84003dbdd4e472e36dc781c806fc3b030d437359564108003de1d1f",
+    "archive_bytes": 2694,
+    "supervised_result": {
+      "source_commit": "51016250029bf1d3cf7cd8299d4845cc83d97a54",
+      "state": "completed",
+      "exit_code": 0,
+      "seconds": 182.954,
+      "scope": "focused source tests and catalog diagnostic, not installed-wheel or full native qualification"
+    },
+    "focused_cases": {
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0
+    },
+    "comparison": {
+      "diagnostic_only": true,
+      "comparison": "fresh interpreter ABBA; timing includes complete real catalog, counters in separate load",
+      "results": [
+        {
+          "mode": "baseline",
+          "seconds": 2.833863,
+          "flavors": 41,
+          "identity": "sha256:85f9ee58effe811e69bfb3bbe9ce9cd377c66f8c2782dcd46f75df6b62fe5ca8",
+          "project_parses": 246,
+          "manifest_reads": 246,
+          "verbatim_prior_loader_body": true
+        },
+        {
+          "mode": "candidate",
+          "seconds": 2.938829,
+          "flavors": 41,
+          "identity": "sha256:85f9ee58effe811e69bfb3bbe9ce9cd377c66f8c2782dcd46f75df6b62fe5ca8",
+          "project_parses": 1,
+          "manifest_reads": 246,
+          "verbatim_prior_loader_body": true
+        },
+        {
+          "mode": "candidate",
+          "seconds": 2.593357,
+          "flavors": 41,
+          "identity": "sha256:85f9ee58effe811e69bfb3bbe9ce9cd377c66f8c2782dcd46f75df6b62fe5ca8",
+          "project_parses": 1,
+          "manifest_reads": 246,
+          "verbatim_prior_loader_body": true
+        },
+        {
+          "mode": "baseline",
+          "seconds": 2.437542,
+          "flavors": 41,
+          "identity": "sha256:85f9ee58effe811e69bfb3bbe9ce9cd377c66f8c2782dcd46f75df6b62fe5ca8",
+          "project_parses": 246,
+          "manifest_reads": 246,
+          "verbatim_prior_loader_body": true
+        }
+      ]
+    }
+  },
+  "host_catalog_results": [
+    {
+      "mode": "baseline",
+      "seconds": 0.18403,
+      "flavors": 41,
+      "identity": "sha256:acea33326d0e20756b8b69ed4995cb539d956d3cb6aa4acb97a940ff8b8eab0a",
+      "project_parses": 246,
+      "manifest_reads": 246,
+      "verbatim_prior_loader_body": true
+    },
+    {
+      "mode": "candidate",
+      "seconds": 0.139959,
+      "flavors": 41,
+      "identity": "sha256:acea33326d0e20756b8b69ed4995cb539d956d3cb6aa4acb97a940ff8b8eab0a",
+      "project_parses": 1,
+      "manifest_reads": 246,
+      "verbatim_prior_loader_body": true
+    },
+    {
+      "mode": "candidate",
+      "seconds": 0.141155,
+      "flavors": 41,
+      "identity": "sha256:acea33326d0e20756b8b69ed4995cb539d956d3cb6aa4acb97a940ff8b8eab0a",
+      "project_parses": 1,
+      "manifest_reads": 246,
+      "verbatim_prior_loader_body": true
+    },
+    {
+      "mode": "baseline",
+      "seconds": 0.185615,
+      "flavors": 41,
+      "identity": "sha256:acea33326d0e20756b8b69ed4995cb539d956d3cb6aa4acb97a940ff8b8eab0a",
+      "project_parses": 246,
+      "manifest_reads": 246,
+      "verbatim_prior_loader_body": true
+    }
+  ],
+  "host_source_verify_results": [
+    {
+      "mode": "baseline",
+      "profiled": false,
+      "operation_seconds": 3.079834,
+      "command_exit": 0,
+      "ok": true,
+      "gate_states": {
+        "authority": "pass",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "skipped",
+        "receipt": "pass"
+      },
+      "stderr_chars": 0,
+      "source_cli_diagnostic_only": true,
+      "process_seconds": 3.650234
+    },
+    {
+      "mode": "candidate",
+      "profiled": false,
+      "operation_seconds": 2.88632,
+      "command_exit": 0,
+      "ok": true,
+      "gate_states": {
+        "authority": "pass",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "skipped",
+        "receipt": "pass"
+      },
+      "stderr_chars": 0,
+      "source_cli_diagnostic_only": true,
+      "process_seconds": 3.4423
+    },
+    {
+      "mode": "candidate",
+      "profiled": false,
+      "operation_seconds": 2.897862,
+      "command_exit": 0,
+      "ok": true,
+      "gate_states": {
+        "authority": "pass",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "skipped",
+        "receipt": "pass"
+      },
+      "stderr_chars": 0,
+      "source_cli_diagnostic_only": true,
+      "process_seconds": 3.446833
+    },
+    {
+      "mode": "baseline",
+      "profiled": false,
+      "operation_seconds": 3.057288,
+      "command_exit": 0,
+      "ok": true,
+      "gate_states": {
+        "authority": "pass",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "skipped",
+        "receipt": "pass"
+      },
+      "stderr_chars": 0,
+      "source_cli_diagnostic_only": true,
+      "process_seconds": 3.634063
+    },
+    {
+      "mode": "baseline",
+      "profiled": true,
+      "operation_seconds": 8.18148,
+      "command_exit": 0,
+      "ok": true,
+      "gate_states": {
+        "authority": "pass",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "skipped",
+        "receipt": "pass"
+      },
+      "stderr_chars": 0,
+      "source_cli_diagnostic_only": true,
+      "process_seconds": 8.770136
+    },
+    {
+      "mode": "candidate",
+      "profiled": true,
+      "operation_seconds": 7.643128,
+      "command_exit": 0,
+      "ok": true,
+      "gate_states": {
+        "authority": "pass",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "skipped",
+        "receipt": "pass"
+      },
+      "stderr_chars": 0,
+      "source_cli_diagnostic_only": true,
+      "process_seconds": 8.233219
+    }
+  ],
+  "copied_context_lifetime": {
+    "old_reproduction": {
+      "diagnostic": "copied context surviving a completed catalog load",
+      "first_independent_parse_count": 0,
+      "second_independent_parse_count": 0,
+      "prior_templates_retained": 1,
+      "fresh_reads_still_enforced": true,
+      "conclusion": "A copied context can preserve parse facts after the owner returns; invalidate and clear scope state at exit before considering this implementation complete."
+    },
+    "corrected_local_cases": 12,
+    "native_corrected_cases": "not run; optimization not selected"
+  },
+  "source_and_lifecycle_qualification": "Interrupted after confirmed scope-lifetime violation; not passing qualification.",
+  "limitations": [
+    "Native timings are uncontrolled two-observation ABBA pairs and do not establish an improvement.",
+    "Nine preliminary native focused cases pass, not a full source/wheel/lifecycle gate.",
+    "The twelve-case corrected prototype is retained locally and not selected for landing."
+  ],
+  "next": "Capture per-command timings and debug stages for the complete installed HTML scenario using the qualified baseline wheel."
+}
