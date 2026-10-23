@@ -30,10 +30,6 @@ from literate_ai.adapters.harness_workspace import (
     harness_workspace_link_evidence,
     resolve_harness_workspace_links,
 )
-from literate_ai.adapters.mac_project_contract import (
-    MacProjectContractError,
-    write_mac_repository_contract,
-)
 from literate_ai.adapters.project_initialization import (
     KNOWN_FLAVOR_SELECTORS,
     FilesystemProjectInitializationAdapter,
@@ -488,6 +484,11 @@ def validate_project_from_args(args) -> dict[str, Any]:
 
 def mac_project_contract_from_args(args) -> dict[str, Any]:
     """Project MAC runner authority without resolving dependencies a second time."""
+
+    from literate_ai.adapters.mac_project_contract import (
+        MacProjectContractError,
+        write_mac_repository_contract,
+    )
 
     loaded = discover_project(Path(args.project))
     if loaded is None:

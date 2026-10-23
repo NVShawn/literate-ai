@@ -30624,6 +30624,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 **Review finding:** Exact-head Linux job `119840524271` in run `39783402916` fails the lifecycle driver review: `retained_project_execution.py` changed while the pin still names `c27617cb`. The contribution also projects ambient `SYSTEMROOT`, overlapping #110's already-bound system-context owner. Reconcile the production delta against the integrated custody path before re-reviewing and repinning; do not treat the failure as only an infrastructure retry.
 
+**Current integration:** Preserve PR #119 head `1a4d3e6e` by merge ancestry. Retain the current bound Windows system-context owner and captured Python/VC sidecars; reject the peer's ambient `SYSTEMROOT` shim and its superseded direct-helper test. Existing typed context tests own currentness/refusal, and the loader structural case already selects Linux in current main. Compose the peer's deterministic base-runtime alias/DLL fixtures and latest controlled remote toolchain probes. The old Windows Elixir failures occurred during upstream strict-version discovery before tests; both exact OTP tags are currently available. Fresh combined controller and native Windows acceptance remain required.
+
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
 **Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).
@@ -30659,3 +30661,42 @@ URL and integrity, from 3.4.16 to 3.4.17. A clean installation and dependency ga
 pass without exceptions; all 21 documentation-tool tests and all 121 diagrams
 across 625 Markdown files pass on the controller. Native Windows gate renewal
 remains required after composition. No Python production code changes.
+
+
+### [ ] CLI-IMPORT-001 — Defer optional MAC schema parser initialization
+
+- **Owner:** framework CLI project command dispatch and MAC contract projection
+- **GitHub issue:** [#121](https://github.com/jordanhubbard/literate-ai/issues/121)
+- **Direction:** Ordinary project commands must not initialize optional MAC schema parsers.
+- **Conclusion:** The native installed-wheel profile attributes 235.62 seconds to
+  importing the MAC projector, including 228.89 seconds and 39 parser constructors
+  in RFC3987 grammar initialization. Load that adapter only for `project mac-contract`.
+  Keep strict BOM validation unchanged. Profiling overhead is included; these timings
+  do not establish an unprofiled speedup or explain the entire full-gate timeout.
+- **Implementation and evidence:**
+  - [x] Move the optional import into the MAC command handler.
+  - [x] Prove ordinary project CLI import avoids the adapter and grammar in a fresh process.
+  - [x] Prove MAC command dispatch and strict malformed-BOM rejection remain intact.
+  - [x] Measure native import startup: one baseline/deferred pair took 7.48/2.91 seconds;
+        installed bytes stayed unchanged. See [the diagnostic record](../../verification/optional-project-import-development.json).
+  - [ ] Renew exact-candidate native wheel/full qualification.
+- **Next action:** qualify a wheel built from the exact candidate in a fresh native
+  checkout, preserving the previous gate's temporary evidence. Two focused tests and
+  seven CycloneDX tests pass through `make python-check`; the fresh-process regression
+  fails against the original eager import. Catalog costs and full-gate renewal remain open.
+
+### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
+
+- **GitHub issue:** [#123](https://github.com/jordanhubbard/literate-ai/issues/123)
+
+- **Priority:** P1
+- **Owner:** Native Windows release gate
+- **Direction:** Retain existing wheel-smoke per-operation timing spans through the full native gate without dropping checks or widening execution bounds.
+- **Conclusion:** Issue #123 tracks a 5400.328-second wheel timeout with no stage timing artifact despite an existing timing-report option; isolated successful validation takes 9.187 seconds and does not identify the aggregate bottleneck.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Pass a unique per-attempt timing report to wheel smoke and document its diagnostic scope.
+- **Evidence:**
+  - [x] Completed spans survive partial-write failure on macOS and native Windows; the original writer fails the same check. Eight focused tests, lint, format and driver review pass. Two controlled gate attempts keep distinct reports after deliberate stage failure.
+  - [ ] Renew the configured host lifecycle/receipt and exact native wheel/full qualification.
+- **Evidence:** [Timing development record](../../verification/windows-wheel-timing-development.json). The documentation authority review is recorded; the old receipt is stale until complete renewal. Timing artifacts remain diagnostic and never imply a passing wheel or gate.

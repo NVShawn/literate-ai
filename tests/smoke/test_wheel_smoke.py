@@ -3,16 +3,45 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import tomllib
 import unittest
 from pathlib import Path, PurePosixPath
+from unittest import mock
 
+from scripts import wheel_smoke
 from scripts.installed_html_smoke import _command_timeout
 from scripts.wheel_smoke import _host_flavor
 from tools.build_backend.literate_ai_build_backend import distribution_origin_bytes
 
 
 class CleanWheelSourceProjectionTests(unittest.TestCase):
+    def test_partial_timing_write_preserves_completed_spans(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "timings.json"
+            with (
+                mock.patch.object(wheel_smoke, "_TIMING_REPORT", report),
+                mock.patch.object(wheel_smoke, "_TIMINGS", []),
+            ):
+                with wheel_smoke._timed("completed"):
+                    pass
+                retained = report.read_bytes()
+                self.assertEqual(json.loads(retained)["spans"][0]["stage"], "completed")
+
+                def partial_write(path: Path, value: dict[str, object]) -> None:
+                    path.write_bytes(b'{"schema":')
+                    raise OSError("interrupted timing write")
+
+                with (
+                    mock.patch.object(
+                        wheel_smoke, "_write_canonical_json", side_effect=partial_write
+                    ),
+                    self.assertRaisesRegex(OSError, "interrupted timing write"),
+                    wheel_smoke._timed("later"),
+                ):
+                    pass
+                self.assertEqual(report.read_bytes(), retained)
+
     def test_installed_html_budget_remains_finite_on_every_supported_host(self) -> None:
         for platform_name, seconds in (
             ("win32", 900),
