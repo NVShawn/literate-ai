@@ -58,9 +58,8 @@
     "Unsafe canonical path and symlink/junction refusal"
   ],
   "pending": [
-    "Fresh complete source suite after command-reference correction",
-    "Current framework lifecycle receipt against the corrected documentation authority",
-    "Exact final installed-wheel and review CI qualification, then landing"
+    "Bound YAML alias expansion and parser node/depth resources before landing",
+    "Fresh complete qualification after parser hardening and exact final review CI"
   ],
   "reviewed_driver_identity": {
     "schema": "urn:literate-ai:schema:v1:content-identity",
@@ -153,5 +152,34 @@
   "installed_harness_failures_retained": [
     "Initial harness used unsupported --debug-log spelling",
     "Second harness expected exit 1 instead of the published usage/refusal exit 2; production returned the correct typed refusal"
-  ]
+  ],
+  "final_pre_hardening_source": {
+    "source_commit": "9f8b9dabab1e3dc20daa1a3d56fd8ebdb9d85e7d",
+    "summary": {
+      "executed": 2164,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2164,
+      "selected": 2235,
+      "skipped": 71
+    },
+    "report_sha256": "ffe233844b82dad186ee2875a347cce94e177c62f04efbfa368643d6a6214715"
+  },
+  "final_pre_hardening_lifecycle": {
+    "source_commit": "9f8b9dabab1e3dc20daa1a3d56fd8ebdb9d85e7d",
+    "tests": 230,
+    "receipt_identity": "sha256:dd361350150a367ddaee13491a86cbe66e2dda4030eafc2f93b198259d3cdc8e",
+    "report_sha256": "919825b894b29cf3b2a865e731653675eeb12de58eb1177c04575c50599a2780",
+    "candidate_sha256": "ddef49c7dc1a72304e83daab241f2d17653f3a9c5a8679acb83442c768546f7c",
+    "force_fresh": false,
+    "supported_receipt_update_require_current_and_verify_passed": true
+  },
+  "final_pre_hardening_wheel": {
+    "source_commit": "9f8b9dabab1e3dc20daa1a3d56fd8ebdb9d85e7d",
+    "wheel_identity": "sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f",
+    "complete_smoke_passed": true,
+    "successful_timing_spans": 131,
+    "report_sha256": "9f74cc8e36d9852ae98f88d2dfb3bf45c49511fc92fc2235f979aa37313ef636",
+    "timings_sha256": "0ad2e63b5521d1bc494f721cf79e2a628d1ba3c89a486daa96c9c8f0508813af"
+  }
 }

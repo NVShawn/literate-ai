@@ -30631,6 +30631,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **Retained full-suite refusal:** Frozen source `af620be3` retains 12 passes, 23 skips and one error from 2,235 selected cases at clean two-replay self-replication because the new yaml import is absent from the package manifest/source BOM. Declare the exact runtime PyYAML dependency, retain the failed attempt, qualify replication again, then start a fresh complete run; dependency admission remains enforced.
 
+- **Parser resource follow-up:** A 379-byte valid YAML merge-alias graph expands to 4,096 mapping pairs with ordinary SafeLoader. The byte limit alone does not bound that work. Before landing, bound composed nodes and depth, permit scalar aliases only, and refuse shared container aliases in both onboarding frontmatter and provider pointers. Preserve every input byte and report the existing typed invalid finding. The pre-hardening snapshot `9f8b9dab` passed all 2,235 selected source cases (2,164 pass, 71 explicit skips), its 230-case lifecycle and complete 131-span installed-wheel gate; these facts do not qualify the upcoming parser change.
+
 ### [ ] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
 
 **GitHub issue:** [#92](https://github.com/jordanhubbard/literate-ai/issues/92).
