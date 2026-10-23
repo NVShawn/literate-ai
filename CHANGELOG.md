@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Preserve both retained executable declarations when the native Windows identity
+  fixture refreshes its manifest, keeping command and late-drift qualification active.
+
 - Keep private source-install and worker runtimes usable when POSIX Python is
   launched through an alias outside its distribution, while retaining copied
   executables and their native runtime dependencies.
