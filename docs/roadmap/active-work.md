@@ -4700,6 +4700,7 @@ The earlier inventories below are historical.
 | [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
 | [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Compose exact head `5faea3b9` into #110; renewed combined qualification pending |
 | [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | WINDOWS-TEST-CONTRACT-001 / issue #116; stacked on #115 | Integrated by ancestry into the Windows review branch; exact #119 CI passed after retrying two pre-test OTP setup failures. Current integration host qualification passes; native and new exact-head CI remain pending. |
+| [#127](https://github.com/jordanhubbard/literate-ai/pull/127) | WINDOWS-TEST-CONTRACT-001 / CLI-IMPORT-001 / WIN-GATE-001; consolidates #119, #122 and #124 | Draft: 2138 complete-suite passes and 228 fresh lifecycle passes; current receipt and verify. Final native/package and exact-head CI pending. |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
