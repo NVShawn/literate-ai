@@ -29016,7 +29016,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 - **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
 
-### [ ] HTML-CANVAS-001 — litai render html graph canvas does not grow with its row
+### [x] HTML-CANVAS-001 — litai render html graph canvas does not grow with its row
 
 - **GitHub issue:** [#50](https://github.com/jordanhubbard/literate-ai/issues/50)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29029,11 +29029,14 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
-### [ ] HTML-VERSION-001 — version-check HTML view can never be current at a clean commit
+- **Closure qualification:** A real Chromium browser loads the public installed-CLI graph and SRI-pinned Cytoscape without substitution. The canvas and all three drawing buffers grow from 470 to 1100 pixels with the inspector; zoom changes pixels, filtering changes selection and selected-node focus works. Desktop/mobile screenshots and accessibility structures were inspected: no browser errors, failed requests, invalid numeric text or mobile overflow. Relevant HTML sources match landed `a6a22996`; see `verification/html-issue-acceptance.json`. This is issue acceptance, not release qualification.
+
+
+### [x] HTML-VERSION-001 — version-check HTML view can never be current at a clean commit
 
 - **GitHub issue:** [#49](https://github.com/jordanhubbard/literate-ai/issues/49)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29046,9 +29049,12 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
+
+- **Closure qualification:** The fresh public non-editable CLI renders declared version/graph pages into a real canonical Git project. Dirty-before-commit and clean-after-commit HTML verification both pass across different exact HEADs; changing semantic project version fails as stale and restoration returns current. The HTML owner source matches landed `a6a22996` byte-for-byte; see `verification/html-issue-acceptance.json` for artifact, source and retained proof identities.
+
 
 ### [ ] NATIVE-CHILD-UPDATE-001 — Support reviewed updates to registered native child projects
 
