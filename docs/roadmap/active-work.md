@@ -30813,3 +30813,15 @@ remains required after composition. No Python production code changes.
 - **Evidence:** [Timing development record](../../verification/windows-wheel-timing-development.json). The documentation authority review is recorded; the old receipt is stale until complete renewal. Timing artifacts remain diagnostic and never imply a passing wheel or gate.
 
 - **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
+
+Combined observation candidate `28371242` still times out in the provided
+native Windows gate after 5,400.482578 seconds, at the unchanged 5,400-second
+owned-tree bound. All 112 completed wheel timing spans succeed; wheel completion
+and unit execution remain unearned. The installed HTML subprocess accounts for
+3,125.984 seconds. Hash-verified archive
+`sha256:02d73db303b72d79bdd6d145bfe343f674152fdaaa88eebcaf61a53e25c5aa9e`
+retains the exact terminal result, log and timing frames. See
+`verification/windows-combined-observation-timeout.json`. Preserve all previous
+timeouts. Keep #129 open; profile the complete expensive HTML scenario before
+another provided full native replay. Hosted Windows wheel CI passes separately,
+which does not turn this native gate into a passing result.
