@@ -20,6 +20,39 @@ from literate_ai.projects import (
 )
 
 _MAX_BYTES = 1024 * 1024
+_MAX_YAML_NODES = 4096
+_MAX_YAML_DEPTH = 32
+
+
+class _AuditYamlLoader(yaml.SafeLoader):
+    """Bound parsing and forbid expansion through shared container aliases."""
+
+    def __init__(self, stream):
+        super().__init__(stream)
+        self._audit_nodes = 0
+        self._audit_depth = 0
+
+    def compose_node(self, parent, index):
+        self._audit_nodes += 1
+        if self._audit_nodes > _MAX_YAML_NODES or self._audit_depth >= _MAX_YAML_DEPTH:
+            raise yaml.YAMLError("agent-entrypoint YAML exceeds parser bounds")
+        if self.check_event(yaml.AliasEvent):
+            anchor = self.peek_event().anchor
+            if not isinstance(self.anchors.get(anchor), yaml.ScalarNode):
+                raise yaml.YAMLError("agent-entrypoint YAML container alias refused")
+        self._audit_depth += 1
+        try:
+            return super().compose_node(parent, index)
+        finally:
+            self._audit_depth -= 1
+
+
+def _parse_yaml(text: str):
+    loader = _AuditYamlLoader(text)
+    try:
+        return loader.get_single_data()
+    finally:
+        loader.dispose()
 
 
 def _read(project: LoadedProject, relative: str) -> bytes:
@@ -75,7 +108,7 @@ def _has_reference(text: str, references: set[str]) -> bool:
 def _delegates(text: str, relative: str, skill: str) -> bool:
     references = {skill, posixpath.relpath(skill, posixpath.dirname(relative) or ".")}
     if relative == "agents/openai.yaml":
-        value = yaml.safe_load(text)
+        value = _parse_yaml(text)
         interface = value.get("interface") if isinstance(value, dict) else None
         prompt = (
             interface.get("default_prompt") if isinstance(interface, dict) else None
@@ -100,7 +133,7 @@ def audit_agent_entrypoints(project: LoadedProject) -> dict:
         lines = text.splitlines()
         end = lines[1:].index("---") + 1 if "---" in lines[1:] else 0
         frontmatter = (
-            yaml.safe_load("\n".join(lines[1:end]))
+            _parse_yaml("\n".join(lines[1:end]))
             if lines and lines[0] == "---" and end
             else None
         )

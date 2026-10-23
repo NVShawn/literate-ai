@@ -147,6 +147,60 @@ class AgentEntrypointTests(unittest.TestCase):
         path.write_text('interface:\n  default_prompt: "Use $literate-ai-something"\n')
         self.assertFalse(self.audit()["ready"])
 
+    def test_scalar_yaml_alias_remains_valid_without_writes(self):
+        path = self.root / "agents/openai.yaml"
+        path.write_text(
+            'prompt: &prompt "Use $literate-ai"\ninterface: {default_prompt: *prompt}\n'
+        )
+        before = self.snapshot()
+        self.assertTrue(self.audit()["ready"])
+        self.assertEqual(self.snapshot(), before)
+
+    def test_yaml_container_alias_expansion_is_refused_in_both_owned_documents(self):
+        graph = "a0: &a0 {key: value}\n" + "".join(
+            f"a{i}: &a{i} {{<<: [*a{i - 1}, *a{i - 1}]}}\n" for i in range(1, 13)
+        )
+        for relative in ("agents/openai.yaml", "SKILL.md"):
+            with self.subTest(relative=relative):
+                path = self.root / relative
+                original = path.read_bytes()
+                content = (
+                    graph + 'interface: {default_prompt: "Use $literate-ai"}\n'
+                    if relative.endswith("yaml")
+                    else "---\nname: literate-ai\n" + graph + "---\n"
+                )
+                path.write_text(content)
+                before = self.snapshot()
+                report = self.audit()
+                self.assertFalse(report["ready"])
+                finding = (
+                    next(e for e in report["entries"] if e["path"] == relative)
+                    if relative.endswith("yaml")
+                    else report["agent_skill"]
+                )
+                self.assertEqual(finding["state"], "unsafe-or-invalid")
+                self.assertEqual(self.snapshot(), before)
+                path.write_bytes(original)
+
+    def test_yaml_depth_and_node_limits_are_read_only_findings(self):
+        path = self.root / "agents/openai.yaml"
+        for content in (
+            "nested: " + "[" * 40 + "0" + "]" * 40 + "\n",
+            "items: [" + ",".join("0" for _ in range(4100)) + "]\n",
+            "cycle: &cycle [*cycle]\n",
+        ):
+            with self.subTest(size=len(content)):
+                path.write_text(
+                    content + 'interface: {default_prompt: "Use $literate-ai"}\n'
+                )
+                before = self.snapshot()
+                report = self.audit()
+                finding = next(
+                    e for e in report["entries"] if e["path"] == "agents/openai.yaml"
+                )
+                self.assertEqual(finding["state"], "unsafe-or-invalid")
+                self.assertEqual(self.snapshot(), before)
+
     @unittest.skipIf(os.name == "nt", "requires POSIX symbolic links")
     def test_indirect_and_broken_shim_or_ancestor_are_unsafe_without_following(self):
         import shutil

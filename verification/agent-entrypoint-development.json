@@ -58,13 +58,13 @@
     "Unsafe canonical path and symlink/junction refusal"
   ],
   "pending": [
-    "Bound YAML alias expansion and parser node/depth resources before landing",
-    "Fresh complete qualification after parser hardening and exact final review CI"
+    "Fresh complete source, lifecycle and installed-wheel qualification after YAML hardening",
+    "Exact final review CI and landing"
   ],
   "reviewed_driver_identity": {
     "schema": "urn:literate-ai:schema:v1:content-identity",
     "algorithm": "sha256",
-    "digest": "c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232"
+    "digest": "14742e576917da56868fd272293a307ab2853811fa2c685c67da713f54d41116"
   },
   "initial_full_source": {
     "summary": {
@@ -181,5 +181,26 @@
     "successful_timing_spans": 131,
     "report_sha256": "9f74cc8e36d9852ae98f88d2dfb3bf45c49511fc92fc2235f979aa37313ef636",
     "timings_sha256": "0ad2e63b5521d1bc494f721cf79e2a628d1ba3c89a486daa96c9c8f0508813af"
+  },
+  "bounded_yaml_development": {
+    "summary": {
+      "executed": 25,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 25,
+      "selected": 25,
+      "skipped": 0
+    },
+    "report_sha256": "328040c4e9622b9c73d9a68a54deee942b6a46b6f30fa056b9b9f784fdb1aef4",
+    "driver_identity": "sha256:14742e576917da56868fd272293a307ab2853811fa2c685c67da713f54d41116",
+    "limits": {
+      "bytes": 1048576,
+      "composed_nodes": 4096,
+      "depth": 32
+    },
+    "scalar_aliases": true,
+    "container_aliases": false,
+    "input_preservation": true,
+    "scope": "Focused development proof only. Pre-hardening full qualification above retains its exact original source."
   }
 }

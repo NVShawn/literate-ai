@@ -1733,6 +1733,9 @@ The audit reports each owned delegate, the declared onboarding skill, and a
 result. It does not modify files, initialize operator configuration, invoke a
 coding provider, write telemetry or discover MCP servers. Debug-file output and
 MCP discovery flags are refused for this command.
+The onboarding frontmatter and provider YAML are limited to 1 MiB, 4,096
+composed nodes and 32 nesting levels. Scalar aliases remain supported; shared
+mapping or sequence aliases are reported as unsafe or invalid to bound expansion.
 
 Before treating onboarding as complete, review an authored change that creates
 missing delegates or points stale ones to the declared `agent_skill`, preserving
