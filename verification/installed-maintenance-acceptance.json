@@ -1,0 +1,233 @@
+{
+  "scope": "Actual non-editable installed CLI maintenance acceptance, no lifecycle execution or receipt admission",
+  "installed_wheel_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+  "readme": {
+    "read_only_plan": true,
+    "arbitrary_ssh_parent_browser_link": true,
+    "repeat_idempotent": true,
+    "reparent_multiple_preserves_authored_bytes": true,
+    "root_invents_no_parent": true
+  },
+  "first_binding": {
+    "read_only_exact_plan": true,
+    "denied_authorization_refuses": true,
+    "rehashed_weakening_refuses": true,
+    "exact_apply_preserves_complete_policy": true,
+    "historical_receipt_unchanged": true,
+    "old_plan_replay_refuses": true,
+    "no_lifecycle_admission": true,
+    "plan_identity": "sha256:a0174ad83140fe1f15329d4b3d7b8d46f8353b5d905499fcd5d64a6e6894c79c"
+  },
+  "public_cli_operations": 13,
+  "complete_source_suite": {
+    "executed": 2139,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2139,
+    "selected": 2210,
+    "skipped": 71
+  },
+  "contract_tests": [
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_example_links_do_not_count_as_clickable_attribution"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_existing_authored_link_is_not_duplicated_when_other_parent_changes"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_initialized_instructions_route_successful_reparent_to_actual_direct_parent"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_local_parent_requires_explicit_browser_evidence_and_cli_explains_it"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_plan_create_apply_and_repeat_for_arbitrary_ssh_parent"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_public_cli_discovers_project_and_applies_idempotently"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_public_cli_refuses_missing_project"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_reparent_preserves_authored_content_and_reconciles_multiple_parents"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_root_or_absent_lineage_never_invents_a_parent"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_parent_readme.ParentReadmeTests.test_unsafe_readme_or_ambiguous_markers_are_refused_without_writes"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_bound_driver_without_receipt_policy_refuses"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_bound_rebind_keeps_v1_upgrade_and_byte_preserving_noop"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_apply_requires_authorization"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_cannot_replace_custom_executable_driver"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_preserves_existing_standard_named_policy"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_public_cli_preserves_policy_and_history"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_refuses_changed_installed_policy"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_rejects_project_and_installed_authority_drift"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_rejects_rehashed_policy_weakening_and_false_acceptance"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_rolls_back_when_post_write_observation_fails"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_first_binding_schema_cannot_be_used_for_bound_project"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_initial_binding_rejects_receipt_policy_downgrade"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_initial_binding_requires_receipt_path_during_read_only_plan"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_initial_binding_rolls_back_on_installed_authority_drift"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_post_write_distribution_drift_rolls_back_original_bytes"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_public_cli_initial_binding_uses_complete_installed_policy"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_public_cli_plan_and_apply_preserve_custom_harness"
+    },
+    {
+      "annotation_identity": null,
+      "failure_identity": null,
+      "schema": "urn:literate-ai:schema:v2:known-test-failure-outcome",
+      "status": "passed",
+      "test_key": "tests.smoke.test_standard_lifecycle_rebind.StandardLifecycleRebindTests.test_receipt_only_plan_schema_cannot_initialize_receiptless_project"
+    }
+  ],
+  "landed_implementation_commit": "a6a2299626f9abc51daa1c6d46d98d20b61abc14",
+  "review_ci": "39790990072",
+  "source_parity": "Only cli/project.py optional MAC import and remote_worker_bootstrap.py alias handling differ in production/skills/templates between a6a22996 and installed 625b871d. The README and first-binding owners, contracts and skills are unchanged.",
+  "retained_proof_sha256": "fd52f2ec4d28338a35b9dad9499bb73310a5236dfe079e81b10db6b1a0be36c2",
+  "initial_helper_failure": "The helper initially expected exit 1 for denied authorization; the CLI correctly returned its error envelope with exit 2. The resumed helper checks exit 2; production and fixture authority are unchanged."
+}

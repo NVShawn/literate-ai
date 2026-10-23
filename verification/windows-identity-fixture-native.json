@@ -1,0 +1,66 @@
+{
+  "fixture_source_commit": "d5b11cc8ba29e523842d9a179e4490cb96fd77ee",
+  "production_source_commit": "dd8a9f357122fea6f8e0daff559ab45907f074f7",
+  "fixture_sha256": "ea316103b0e0b05c43073dfc294a3fcbc24f2fbe032a24ddc98bc677930d98b5",
+  "results": [
+    {
+      "interpreter": "base",
+      "exit_code": 0,
+      "summary": {
+        "executed": 6,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 6,
+        "selected": 10,
+        "skipped": 4
+      }
+    },
+    {
+      "interpreter": "venv",
+      "exit_code": 0,
+      "summary": {
+        "executed": 6,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 6,
+        "selected": 10,
+        "skipped": 4
+      }
+    }
+  ],
+  "archive_sha256": "96a9476c96ea1c4dd249a55cff9fe217dfeafe969f9441a5ed17e40156f15bf9",
+  "reports": {
+    "base": {
+      "summary": {
+        "executed": 6,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 6,
+        "selected": 10,
+        "skipped": 4
+      },
+      "native_identity_and_late_source_context_drift": "passed"
+    },
+    "venv": {
+      "summary": {
+        "executed": 6,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 6,
+        "selected": 10,
+        "skipped": 4
+      },
+      "native_identity_and_late_source_context_drift": "passed"
+    }
+  },
+  "archive_bytes": 1081,
+  "scope": "Native Windows fixture qualification on actual base and private-venv interpreters; not full native package or lifecycle qualification",
+  "unchanged_production_and_shared_fixture_files": [
+    "src/literate_ai/adapters/retained_project_execution.py",
+    "src/literate_ai/adapters/retained_project_inputs.py",
+    "src/literate_ai/adapters/retained_windows_context.py",
+    "src/literate_ai/adapters/retained_project_environment.py",
+    "tests/critical/test_retained_project_execution.py"
+  ],
+  "other_source_difference": "The POSIX private-runtime alias correction is the only production-source difference from the native harness baseline; the Windows production context and dependency owners are unchanged."
+}

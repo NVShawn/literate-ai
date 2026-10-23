@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Preserve both retained executable declarations when the native Windows identity
+  fixture refreshes its manifest, keeping command and late-drift qualification active.
+
+- Keep private source-install and worker runtimes usable when POSIX Python is
+  launched through an alias outside its distribution, while retaining copied
+  executables and their native runtime dependencies.
+
+- Load MAC contract schema validation only when its project command is selected,
+  avoiding optional URI parser initialization in ordinary project command startup.
+
 - Patch documentation math rendering to KaTeX 0.18.2, preserving explicit trust
   options while refusing inherited trust and clearing all dependency audit findings.
 

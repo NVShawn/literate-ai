@@ -70,6 +70,17 @@ class WorkerBootstrapError(RuntimeError):
 
 
 class _PrivateEnvironmentBuilder(venv.EnvBuilder):
+    def ensure_directories(self, env_dir):
+        context = super().ensure_directories(env_dir)
+        if os.name == "posix":
+            # A PATH alias can live outside the Python distribution. A copied
+            # interpreter needs the real base directory in pyvenv.cfg to find
+            # its standard library after relocation into the private runtime.
+            executable = Path(context.executable).resolve(strict=True)
+            context.executable = str(executable)
+            context.python_dir = str(executable.parent)
+        return context
+
     def setup_python(self, context) -> None:
         super().setup_python(context)
         # Standalone macOS builds can load libpython relative to the copied
