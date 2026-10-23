@@ -28611,7 +28611,7 @@ matched its remote SHA-256 and downloaded identical bytes. The result is explici
 transport-only, not a complete native lifecycle receipt. Full installed native
 source/build/test/evidence qualification and existing-platform CI remain open.
 
-### [ ] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
+### [x] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
 
 - **GitHub issue:** [#70](https://github.com/jordanhubbard/literate-ai/issues/70)
 - **Priority:** P0
@@ -28622,7 +28622,7 @@ source/build/test/evidence qualification and existing-platform CI remain open.
 - **Implementation:**
   - [x] Add explicit model-free retained source planning and execution wiring while leaving ordinary generation discovery unchanged.
 - **Evidence:**
-  - [ ] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
+  - [x] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
 
 Installed native checkpoint: the exact qualified wheel at `89278c96` bootstraps
 37 verified distributions offline. Public Standard rebind and documentation review
@@ -28686,6 +28686,8 @@ platform/tool skips; log SHA-256
 `3b7603d5171be3e9c5bd4641c240c7af4276a7250229c9408ff5d9a2bb995293`.
 That broad baseline does not qualify later changes or full mixed retained
 projects under #22, typed SSH custody under #69, or a downstream release.
+
+- **Closure acceptance:** A real noneditable installed wheel (`sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f`, exact source `9f8b9dab`) initializes from landed main and admits a reviewed retained Python tree with no coding-agent executable on PATH. Three native behavior cases and independent acceptance pass, supported receipt promotion commits the result, and public accepted-only build exports exact hash-based compiled bytes with no model selector. Real changed-source authorization and failing native behavior refuse while preserving the prior receipt and export; ordinary generation still fails `coding_cli.unavailable`. Thirteen current critical cases and the real accepted-export fixture pass without skips; the latter observes a new actual acceptance identity and refuses unknown/substituted origins, missing admission, corrupted cache bytes and failed fresh acceptance. All 13 relevant owner/test files are byte-identical between the qualified wheel source and main `fe21a198`. See `verification/retained-source-installed-acceptance.json`; the separate hardware CI recurrence, full native SDK and product/package programs remain open.
 
 ### [ ] RELEASE-INTEGRATION-004 — Reconcile and execute the 1.3 release backlog
 
@@ -30372,7 +30374,7 @@ the final review head. Failed and interrupted native attempts above retain their
 original source identities and are not successful qualification. The broader
 original-source SDK and accepted-retained export programs remain separate.
 
-### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
+### [x] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
 
 **GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
 
@@ -30384,9 +30386,11 @@ original-source SDK and accepted-retained export programs remain separate.
 - **Implementation:**
   - [x] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
 - **Evidence:**
-  - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+  - [x] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
 
 **Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
+
+- **Closure acceptance:** A real noneditable installed wheel (`sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f`, exact source `9f8b9dab`) initializes from landed main and admits a reviewed retained Python tree with no coding-agent executable on PATH. Three native behavior cases and independent acceptance pass, supported receipt promotion commits the result, and public accepted-only build exports exact hash-based compiled bytes with no model selector. Real changed-source authorization and failing native behavior refuse while preserving the prior receipt and export; ordinary generation still fails `coding_cli.unavailable`. Thirteen current critical cases and the real accepted-export fixture pass without skips; the latter observes a new actual acceptance identity and refuses unknown/substituted origins, missing admission, corrupted cache bytes and failed fresh acceptance. All 13 relevant owner/test files are byte-identical between the qualified wheel source and main `fe21a198`. See `verification/retained-source-installed-acceptance.json`; the separate hardware CI recurrence, full native SDK and product/package programs remain open.
 
 ### [x] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
 
