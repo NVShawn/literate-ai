@@ -30634,3 +30634,9 @@ The exact-byte RECORD fixture correction passes all six owner tests on hosted
 Windows/Python 3.12.10 with zero skips in 0.146 seconds (run 39966279564).
 The same managed owner suite passes locally. This confirms the narrow fixture
 repair; the full matrix's hardware timeout is separate and remains unresolved.
+
+Windows receiver stage diagnosis is retained in
+`verification/windows-hardware-stage-diagnosis.json`. The reversed comparison
+rejects the earlier GPU lookup attribution; actual warm OS CIM queries dominate
+at about 19 seconds, with 56 seconds for the first OS query. No production
+change or widened deadline follows from these diagnostic observations.
