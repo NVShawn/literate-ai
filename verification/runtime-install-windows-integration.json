@@ -1,0 +1,67 @@
+{
+  "scope": "Consolidated source-install and Windows qualification repair development evidence; native and exact review CI gates remain open",
+  "source_freeze_commit": "d5b11cc8ba29e523842d9a179e4490cb96fd77ee",
+  "complete_source_suite": {
+    "executed": 2139,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2139,
+    "selected": 2210,
+    "skipped": 71
+  },
+  "source_report_sha256": "6e59f89a4cf2a5ebf7a89d9d88b986d0d671c28eb33f6199c187f2017b3e447c",
+  "fresh_uninterrupted_runner_exit_code": 0,
+  "current_framework_receipt": {
+    "identity": "sha256:35189b34504770136936cd41bbc7421a01a8681550ecde0eed5cb70a4ec8a5e5",
+    "summary": {
+      "failed": 0,
+      "passed": 233,
+      "skipped": 0,
+      "total": 233
+    },
+    "driver": "sha256:ceb559c1eaa79ce4db8210a6acd34ccf7ecbf19ad0651092e8aacb105bcd7578"
+  },
+  "verify_counts": {
+    "fail": 0,
+    "pass": 2,
+    "skipped": 3
+  },
+  "documentation": {
+    "audit_findings": 0,
+    "tool_tests_passed": 22,
+    "mermaid_diagrams_rendered": 121,
+    "strict_openspec_passed": 4,
+    "log_sha256": "8570676f4c5116eb1341a8eeb488b523a2b8a32552534ac0e74ff14ae55b7c8e"
+  },
+  "static_checks": [
+    "lint",
+    "format-check",
+    "repository-layout-check",
+    "public-export-check",
+    "documentation-check",
+    "openspec-check",
+    "driver-review"
+  ],
+  "packaged_runtime_source_parity": {
+    "tested_wheel_source_commit": "1063ecd886e31cf90307b66e4b5675cbd2d90bcf",
+    "successful_wheel_smoke_timing_spans": 131,
+    "unchanged_paths": [
+      "src",
+      "schemas",
+      "scripts/wheel_smoke.py",
+      "scripts/install_litai.py"
+    ],
+    "qualification": "Same packaged runtime and package-test implementation; wheel evidence retains its original source identity."
+  },
+  "native_windows": {
+    "identity_fixture_base_interpreter": "passed, 6 cases and 4 existing platform skips; archive custody pending terminal collection",
+    "identity_fixture_private_venv": "running",
+    "finalized_previous_integration": "62ce16a0 gate running; not acceptance of this new fixture correction",
+    "earlier_failed_run": "See verification/windows-development-timeout.json"
+  },
+  "landing_requirements": [
+    "Complete native Windows qualification without new skips or guard relaxation",
+    "Required exact-head hosted CI",
+    "Reviewed merge into main"
+  ]
+}

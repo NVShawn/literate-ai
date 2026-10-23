@@ -30162,6 +30162,8 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 - **Current main failure renewal:** Exact main CI `39922312793`, Windows/Python 3.12 shard 2 (`120310290199`), rejects `test_actual_windows_command_and_late_source_or_context_drift` with `retained.execution.tool-mismatch`. Its rediscovery after copying whoami.exe omits explicit executable intent for both that tool and the existing shared runner. Restore the complete sorted executable declaration in this fixture; keep production executable, PE closure, native command and late context/source drift checks unchanged. Next action: validate the corrected case on actual Windows base and venv interpreters, then renew complete regression and exact review CI.
 
+- **Consolidated source renewal:** Frozen implementation `d5b11cc8` passes a fresh uninterrupted complete local suite: 2139 passed, 71 explicit platform/tool skips, zero failures across 2210 selected. Static gates, zero-finding documentation audit, all 22 tooling tests, 121 diagrams, strict OpenSpec and current reviewed driver pass. The framework receipt remains current with 233 passes and verify has no failing gates. Packaged runtime source and wheel/install drivers are unchanged from the passing 131-span installed-wheel source `1063ecd8`. The corrected identity fixture has an observed native base-interpreter pass; private-venv and complete native qualification plus exact review CI remain open. See `verification/runtime-install-windows-integration.json`.
+
 ### [ ] RETAINED-SDK-PUBLIC-001 — Connect public retained execution to live native SDK producers
 
 - **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
