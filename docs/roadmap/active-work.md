@@ -30618,3 +30618,17 @@ remain open in their owning items; this controller/sample proof does not close t
   - [ ] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.
 
 **Review finding:** Exact-head Linux job `119840524271` in run `39783402916` fails the lifecycle driver review: `retained_project_execution.py` changed while the pin still names `c27617cb`. The contribution also projects ambient `SYSTEMROOT`, overlapping #110's already-bound system-context owner. Reconcile the production delta against the integrated custody path before re-reviewing and repinning; do not treat the failure as only an infrastructure retry.
+
+### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
+
+- **Priority:** P0
+- **Owner:** Framework issue resolution and acceptance qualification
+- **Direction:** Resolve all open issues, preserving the acceptance criteria and scope of each issue.
+- **Conclusion:** Use the live GitHub tracker as the issue set. Reuse reviewed peer work, fix gaps, qualify at the requested native and installed scope, land through exact-head CI, and close only after evidence proves the complete issue contract.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Maintain the live issue-to-authority plan and reconcile peer reviews before starting duplicate work.
+  - [ ] Implement and integrate every outstanding issue without weakening security, native, packaging, release or execution custody boundaries.
+- **Evidence:**
+  - [ ] For each closed issue retain a criterion-by-criterion acceptance result and a landed commit with the required tests and native evidence.
+  - [ ] Completion audit finds no unresolved open issues; uncertain, partial and pending qualification remains open.
