@@ -30621,6 +30621,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
+**Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).
+
 - **Priority:** P0
 - **Owner:** Framework issue resolution and acceptance qualification
 - **Direction:** Resolve all open issues, preserving the acceptance criteria and scope of each issue.
