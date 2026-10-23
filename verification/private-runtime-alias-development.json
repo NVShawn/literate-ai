@@ -41,7 +41,7 @@
   "public_prefix_install": "The normal make install succeeds through the affected alias with the patched production owner and creates a non-editable wheel installation. No new host tools are installed.",
   "custody": "Copied private executables and the native library preservation remain; Windows creation behavior and orphaned-base detection are unchanged.",
   "host_lifecycle": {
-    "authority_commit": "885352add197cc136792f76491b5af452f9fcd0e2",
+    "authority_commit": "885352add197cc136792f76491b54208db8fad1f",
     "forced_fresh_generation": true,
     "driver_identity": "sha256:ceb559c1eaa79ce4db8210a6acd34ccf7ecbf19ad0651092e8aacb105bcd7578",
     "receipt_identity": "sha256:35189b34504770136936cd41bbc7421a01a8681550ecde0eed5cb70a4ec8a5e5",
