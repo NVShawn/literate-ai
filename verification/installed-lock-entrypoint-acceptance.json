@@ -1,0 +1,86 @@
+{
+  "scope": "Installed lock-health issue acceptance and entry-point selection development evidence; native library renewal remains pending for issues 75/76",
+  "landed_implementation_commit": "a6a2299626f9abc51daa1c6d46d98d20b61abc14",
+  "installed_wheel_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+  "unchanged_relevant_source_files": {
+    "src/literate_ai/adapters/project_lock_health.py": "sha256:df66336ea3cd07d9480971139a6bb494dc6981bb31d5f1d9f6d4a2d2becbd3db",
+    "src/literate_ai/adapters/component_lock_application.py": "sha256:ea845aed7fb4436f9da760e3ff45412d83c0ee432af428232fb844e60354192e",
+    "src/literate_ai/adapters/locked_generation_authority.py": "sha256:670bec5bb2ec7a2434c098294c7f1e0231f502566975649c08040707475fa11c",
+    "src/literate_ai/adapters/component_lock_planning.py": "sha256:f290689688b06dac13728f4986f15e09992f8d54bbb679bddd5fe61af2f7e9ea",
+    "src/literate_ai/cli/rebuild.py": "sha256:2677404fd7e6b233535f9ce854116d71a5c3c9dad32c8a7a398bf8682bec1654"
+  },
+  "nonhost_lock": {
+    "scope": "Public installed-wheel acceptance for issue 79; no generation, build, dependency acquisition or external writes",
+    "installed_wheel_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+    "typed_current_lock": {
+      "identity": "sha256:5a34134ef5e43251a15db4f128d96ede0ef1c5d8eb32cd38f232fa044ee06205",
+      "target": "native-test"
+    },
+    "verify_status_and_exact_check_agree": true,
+    "project_files_unchanged": true,
+    "refused_mutations": [
+      "selected-flavor",
+      "target",
+      "audit"
+    ],
+    "standard_binding": "standard"
+  },
+  "entrypoint_selection": {
+    "scope": "Installed Standard entry-point selection and pre-generation refusal acceptance for issue 75; these probes do not claim full lifecycle acceptance",
+    "installed_wheel_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+    "observation": "Read-only interpreter return tracing observes actual typed lock selection; the unmodified public launcher returns the same later cache refusal. No product function or guard is replaced.",
+    "valid_forms": [
+      {
+        "input": "directory",
+        "selected_lock": "sha256:57957f5dd25f73012b1fddfac523a7ba8111751914523d9a9bf0a62da3e32677",
+        "later_refusal": "source_cache.runtime_absent",
+        "unmodified_installed_launcher_agrees": true
+      },
+      {
+        "input": "component.md",
+        "selected_lock": "sha256:57957f5dd25f73012b1fddfac523a7ba8111751914523d9a9bf0a62da3e32677",
+        "later_refusal": "source_cache.runtime_absent",
+        "unmodified_installed_launcher_agrees": true
+      }
+    ],
+    "deliberate_cache_boundary": "Accepted-only mode stops at source_cache.runtime_absent after lock selection; no coding CLI is used.",
+    "invalid_cases": [
+      {
+        "case": 0,
+        "code": "rebuild.specification_unavailable"
+      },
+      {
+        "case": 1,
+        "code": "rebuild.specification_invalid"
+      },
+      {
+        "case": 2,
+        "code": "rebuild.specification_outside_project"
+      },
+      {
+        "case": 3,
+        "code": "rebuild.path_unsafe"
+      },
+      {
+        "case": 4,
+        "code": "rebuild.path_unsafe"
+      }
+    ],
+    "invalid_trees_unchanged": true,
+    "invalid_runtime_candidate_build_and_obj_absent": true,
+    "initial_probe": "A harness assertion incorrectly expected the refusal code to contain accepted; the actual typed cache-absence refusals and traces are retained unchanged."
+  },
+  "complete_source_suite": {
+    "source_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+    "passed": 2139,
+    "skipped": 71,
+    "failed": 0,
+    "selected": 2210
+  },
+  "retained_proof_sha256": {
+    "nonhost-proof.json": "2f78670ff1f84ad904c01516d4331dd676a50d4c7ff2b86ebecec48b11c00842",
+    "entrypoint-proof.json": "534709943a0c2056c09b4c957482026edc26777bd91db19e3da62ed908400f2a",
+    "entry-0-trace.json": "b25385459171da1d946e20c25b2b81a606890b7cfda412d42935eb8495d30984",
+    "entry-1-trace.json": "b25385459171da1d946e20c25b2b81a606890b7cfda412d42935eb8495d30984"
+  }
+}

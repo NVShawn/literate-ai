@@ -29451,7 +29451,7 @@ adoption checks pass; ordinary cleanup and source-integrity assertions remain
 strict. This test-only repair changes no production execution policy. Full
 renewal is still required; none of the interrupted runs is counted as passing.
 
-### [ ] LOCK-TARGET-001 — Verify the committed Component target
+### [x] LOCK-TARGET-001 — Verify the committed Component target
 
 - **GitHub issue:** [#79](https://github.com/jordanhubbard/literate-ai/issues/79)
 
@@ -29464,13 +29464,16 @@ renewal is still required; none of the interrupted runs is counted as passing.
   - [x] Use the catalog-validated committed target in read-only project lock health.
 - **Evidence:**
   - [x] A real non-host project lock passes verify/status and exact lock checks; dependency, target/audit and project selector drift still refuse.
-  - [ ] Complete full-regression and installed/native renewal before deployment.
+  - [x] Complete full-regression and installed/native renewal before deployment.
 
 **Partial evidence:** All seven lock-health regression checks pass, including
 six real non-host target/current-policy/refusal checks and the existing installed
 HTML lock-state fixture. Three project-verification checks also pass. Lint,
 format, repository layout and public-export checks pass. No native build,
 package or release admission is claimed by lock-health verification.
+
+- **Closure qualification:** Fresh native macOS public installed-wheel commands lock a real canonical Standard project for `native-test`; verify, status, the exact lock check and the typed current-lock reader agree on `sha256:5a34134ef5e43251a15db4f128d96ede0ef1c5d8eb32cd38f232fa044ee06205`. Project file bytes remain unchanged. Actual selected-Flavor, target-binding and missing-audit mutations refuse, and restoration returns current. The six portable regressions pass and the complete source suite passes 2139 cases with 71 explicit skips. All relevant lock-owner code matches landed `a6a22996` exactly; see `verification/installed-lock-entrypoint-acceptance.json`. This verifies read-only target selection, not construction for a foreign target.
+
 
 ### [ ] TRACKER-REPO-001 — Bind forge commands to the selected repository
 
@@ -30221,6 +30224,9 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Acceptance evidence:** Combined implementation `8746155526cecb46de83202fc26cd4733b13dd62` passes the full 1,582-case suite (1,547 passed, 35 skipped, no failures; 648.937 seconds), all 19 focused cases, the installed wheel (`sha256:456a7bea81cf93d42892eab9cfd1926f86642281e2a6c133f73d44258584eb93`), strict source/specification/review gates and all 121 diagrams. The installed CLI refuses the exact retained incompatible Bazel library profile before generation. A separate supported native profile rebuilds through its `component.md` path with the unchanged isolated, module-origin-checking oracle and expected value 7. Its current native receipt has 4 passing tests and `verify` passes. Installed API regressions also pass all eight entry-point and four profile cases. The fresh framework lifecycle receipt is current with 231 passing tests; candidate comparison and `verify` pass. Native proof custody: `sha256:4007c044d3fd7ed8c18bc4a7e451a5ec2812c0feb71074af7bb379cfa16b2e28`. This is one successful rebuild per temporary fixture, not regenerative qualification. Full hosted CI and landing remain open.
 
 **Current integration renewal:** Merge the reviewed entry-point and library-profile implementations with current registered-child and retained-project qualification, preserving both sets of requirements and original native proofs. Earlier 1,582-case and installed two-wheel results remain historical. Run the combined current focused/full suite, native installed journey, fresh lifecycle receipt and exact review CI before landing this batch.
+
+- **Fresh installed selection proof:** The real Standard directory and component.md forms select the same exact host lock; read-only typed-return tracing and unmodified public CLI calls agree. Accepted-only mode deliberately stops at `source_cache.runtime_absent` after lock selection. All five invalid path cases return their precise bounded JSON error with unchanged project trees and no runtime/candidate/build/object roots. No product function or guard is replaced. This proves input selection/refusal; the separate full native library journey is being renewed before closure.
+
 
 ### [ ] LIBRARY-PROFILE-001 — Validate Python library build and export profiles before generation
 
