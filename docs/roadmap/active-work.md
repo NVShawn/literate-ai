@@ -29161,7 +29161,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-### [ ] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
+### [x] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
 
 - **GitHub issue:** [#24](https://github.com/jordanhubbard/literate-ai/issues/24)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29172,14 +29172,17 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Upgrade OpenSpec without weakening strict validation; split existing overlong requirements while preserving every normative sentence
+  - [x] Upgrade OpenSpec without weakening strict validation; split existing overlong requirements while preserving every normative sentence
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
 **Current audit:** The exception list is already empty in current main (ancestor `4ceedbe9`). Fresh staged OpenSpec installation reports five low findings and no high/critical findings; strict validation and documentation checks pass. Review #24 for closure against its original contract after confirming the landed dependency change; no exception restoration or dependency downgrade is proposed.
+
+- **Closure qualification:** Main contains OpenSpec 1.14.3 and no `braces` package in the lock; the exception list is empty. A fresh clean staged install and `npm audit --audit-level=high` exit zero: 0 high, 0 critical, 0 moderate, 5 low. The normal documentation gate passes all 21 tool tests and renders all 121 diagrams; all four strict OpenSpec specifications passed on this same tooling source. The remaining low findings are reported honestly and do not reinstate the removed high-severity exception.
+
 
 ### [ ] RETAINED-CATALOG-001 — Bind complete retained input ownership to canonical Component catalogs
 
