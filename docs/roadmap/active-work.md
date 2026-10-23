@@ -29087,7 +29087,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 
 - **Current evidence:** The [1.3 implementation batch](1.3-integration.md#first-implementation-batch) records the exact local checks and remaining native/integration gates.
 
-### [ ] README-PARENT-001 — Ensure project README links to its actual parent repository through a reusable skill
+### [x] README-PARENT-001 — Ensure project README links to its actual parent repository through a reusable skill
 
 - **GitHub issue:** [#46](https://github.com/jordanhubbard/literate-ai/issues/46)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29103,7 +29103,9 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Route initialized and maintainer agent workflows through the reusable parent-README skill and read-only plan / authorized apply helper
   - [x] Cover actual initialized/reparented projects, arbitrary and multiple parents, authored prose, idempotency, local URL evidence and unsafe inputs
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
+
+- **Closure qualification:** The actual non-editable installed public CLI plans without writes, creates a descriptive browser link for an arbitrary SSH parent, applies idempotently, reconciles multiple changed parents while preserving authored CRLF bytes, and invents no parent for a root project. All ten parent-README contract cases pass in the current full 2139-pass source suite. Generated and maintainer instructions route through the reusable skill. Relevant implementation matches already-landed a6a22996. See `verification/installed-maintenance-acceptance.json`.
 
 ### [ ] WORKER-GPU-MEMORY-001 — Preserve unavailable NVIDIA GPU memory in POSIX worker observations
 
@@ -29324,7 +29326,7 @@ suite and native execution before exposing it to the operator workstation.
 - **Evidence:**
   - [ ] Prove no writes when disabled, isolated simultaneous sessions, safe atomic updates, stale-evidence revalidation, secret exclusion, bounded retention and portability across supported CLI providers and hosts before shipping in a later point release.
 
-### [ ] STANDARD-FIRST-BIND-001 — Migrate retained receipt-only projects to reviewed Standard binding
+### [x] STANDARD-FIRST-BIND-001 — Migrate retained receipt-only projects to reviewed Standard binding
 
 - **Priority:** P1
 - **GitHub issue:** [#107](https://github.com/jordanhubbard/literate-ai/issues/107)
@@ -29346,9 +29348,11 @@ suite and native execution before exposing it to the operator workstation.
   - [x] Thirteen focused rebind/first-binding tests, lint, formatting, repository layout, public export, documentation, OpenSpec and reviewed driver closure checks pass on the controller.
   - [x] Complete full controller regression and exact clean-commit installed-wheel qualification. At `73311c69`, Python 3.14.7 passes 1,801 cases with 42 explicit skips and no failures; the exact wheel and all installed smoke checks pass.
   - [x] Qualify the actual installed CLI on a native receipt-only project copy; preserve original evidence and retain missing lifecycle admission. FreeBSD 16 / Python 3.12.14 verifies all 37 offline distributions, passes all five real CLI operations and preserves all 42 historical evidence files. All 13 exact committed contract cases also pass with installed imports and no skips. Two preceding harness failures remain retained; neither changed production authority.
-  - [ ] Pass exact-head required hosted CI before landing.
+  - [x] Pass exact-head required hosted CI before landing.
 
 Evidence: [exact wheel and native migration checkpoint](../../verification/standard-first-binding-development.json). [Draft PR #108](https://github.com/jordanhubbard/literate-ai/pull/108) remains open pending exact-head hosted CI. First binding does not execute or admit a retained source lifecycle, SDK, package, ISO or release.
+
+- **Closure qualification:** Fresh non-editable installed CLI planning binds exact installed authority without writes; denied authorization, rehashed policy weakening and replay refuse. Exact authorized apply preserves the complete receipt policy and historical receipt bytes, and explicitly retains stale-until-rebuild rather than minting acceptance. All current rebind/first-binding contract cases pass in the full 2139-pass source suite; the earlier real FreeBSD custom-policy migration proof remains retained. The implementation already landed with reviewed integration #110 and exact CI 39790990072; earlier draft #108 is superseded. See `verification/installed-maintenance-acceptance.json`.
 
 ### [ ] NATIVE-FIRST-BIND-INTEGRATION-001 — Qualify native original-source admission with reviewed first binding
 
