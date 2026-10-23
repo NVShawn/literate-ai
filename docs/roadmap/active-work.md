@@ -29142,7 +29142,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-### [ ] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
+### [x] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
 
 - **GitHub issue:** [#27](https://github.com/jordanhubbard/literate-ai/issues/27)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29159,7 +29159,9 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Meet the reported real-Git journey budget: 427 launches, 8.9 seconds; retain a <=500-launch regression
   - [x] Pass the existing 24 refresh tests in 210.8 seconds and expanded seven-test input/ref/registration/locator/configuration/object controls
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
+
+- **Closure qualification:** All 26 current refresh cases pass on local macOS with no skips in 216.957 seconds (under the 300-second limit), including the real-Git <=500-launch regression and unchanged index/ref/Gitlink/registration/locator/configuration/rollback refusals. All owning refresh and orchestration source, contracts and fixture/test bytes match original optimization `b7269a9f`, exact CI-qualified `20508324` and landed main `d5c7b278`. See `verification/repository-refresh-performance-acceptance.json`; this does not claim the separate entrypoint-audit suite is green.
 
 ### [ ] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
 
