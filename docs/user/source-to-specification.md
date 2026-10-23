@@ -209,6 +209,33 @@ that owns its promotion evidence. The adopted root can therefore advance to `dra
 without copying generated authority files across project boundaries or rewriting the
 retained project configuration.
 
+To revise a still-unqualified registered child, derive and sign a new current review,
+then plan its replacement using the same acceptance arguments:
+
+```console
+litai spec accept SOURCE BUNDLE --review REVIEW --trust-key KEY \
+  --target accepted-next --integrate-project ADOPTED_ROOT \
+  --plan-native-child-replacement > replacement-plan.json
+# Review the old registration, complete child-tree identities, and new review binding.
+litai spec accept SOURCE BUNDLE --review REVIEW --trust-key KEY \
+  --target accepted-next --integrate-project ADOPTED_ROOT \
+  --replace-native-child replacement-plan.json
+```
+
+Repeat any qualification-profile, target and Flavor options in both commands. Planning
+changes neither the child nor the accepted specification set. Apply rechecks the signed
+source, review, parent registration and complete prior child tree. It preserves the
+project identifier, retains the old promotion and registration beneath the parent's
+`.literate/native-updates/` directory, and restores both on failure. Concurrent edits
+are preserved and reported as a rollback conflict. Retention is bounded to 4,096 nodes,
+64 MiB per file and 256 MiB total; unsafe or oversized trees refuse before replacement.
+
+Replacement accepts parents at `retained` or `drafted`, and refuses qualified children,
+qualified parents, stale inputs, symlinks and reparse points. A prior coordinated
+Standard rebind can supply exact historical manifest custody for checking the original
+promotion audit. That history never makes the live audit or test receipt current. The
+revised child still needs its own verifier-owned oracle and qualification.
+
 When a reviewed `local-regenerative-qualification-profile` is supplied, acceptance
 content-pins it as
 the Component's independent acceptance contract. Every case has a stable ID, a

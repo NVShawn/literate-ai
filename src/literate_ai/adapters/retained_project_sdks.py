@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
+from collections.abc import Mapping
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, replace
 from pathlib import Path
+from types import MappingProxyType
 
 from literate_ai._filesystem import require_safe_directory
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
@@ -21,9 +24,16 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
-from literate_ai.contracts.retained_project import RetainedProjectManifest
+from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
+from literate_ai.contracts.retained_project import (
+    RetainedProjectManifest,
+    RetainedProjectMember,
+)
 from literate_ai.contracts.retained_project_lifecycle import RetainedProjectPlan
-from literate_ai.contracts.retained_project_sdks import RetainedProjectSdkPolicy
+from literate_ai.contracts.retained_project_sdks import (
+    RetainedProjectSdkSelectionPolicy,
+    read_retained_sdk_policy_document,
+)
 
 
 def _inside_prefix(path, prefixes):
@@ -38,16 +48,18 @@ def read_retained_sdk_policy(root, manifest, locks):
     members = [m for m in manifest.members if m.role == "sdk-policy"]
     if len(members) != 1:
         raise ValueError("retained.sdk.exact-policy-input-required")
-    policy = RetainedProjectSdkPolicy.from_dict(
+    policy = read_retained_sdk_policy_document(
         read_retained_project_document(root, members[0], error_prefix="retained.sdk")
     )
     policy.require_locks(locks)
     return policy
 
 
-@dataclass(slots=True)
+@dataclass(frozen=True, slots=True)
 class RetainedSdkCommandScope:
     evidence_identities: tuple = ()
+    argv: tuple[str, ...] | None = None
+    environment: Mapping[str, str] | None = None
 
 
 class RetainedProjectNativeSdkInputs:
@@ -78,41 +90,98 @@ class RetainedProjectNativeSdkInputs:
         self.plan = plan
         self.owners = owners
         self.policy = read_retained_sdk_policy(root, manifest, plan.component_locks)
-        self._prefixes = {
-            (v.component_lock_identity, v.input_identity): v.prefix
-            for v in self.policy.bindings
-        }
         selected = {}
         for lock, owner in zip(locks, owners, strict=True):
             owner.require_unchanged()
             for binding in owner.for_scope(lock.root_revision):
                 selected[lock.identity, binding.identity] = binding
+        if isinstance(self.policy, RetainedProjectSdkSelectionPolicy):
+            expected = {
+                (
+                    v.component_lock_identity,
+                    v.selection_identity,
+                    v.snapshot_identity,
+                ): v.prefix
+                for v in self.policy.bindings
+            }
+            actual = {
+                (
+                    lock_id,
+                    binding.build.selection.identity,
+                    binding.build.product.snapshot.identity,
+                ): input_id
+                for (lock_id, input_id), binding in selected.items()
+            }
+            if len(actual) != len(selected) or set(actual) != set(expected):
+                raise ValueError(
+                    "retained.sdk.complete-selected-snapshot-closure-required"
+                )
+            self._prefixes = {
+                (key[0], actual[key]): prefix for key, prefix in expected.items()
+            }
+        else:
+            self._prefixes = {
+                (v.component_lock_identity, v.input_identity): v.prefix
+                for v in self.policy.bindings
+            }
         if set(selected) != set(self._prefixes):
             raise ValueError("retained.sdk.complete-product-bindings-required")
         expected = {}
         expected_directories = set()
         for key, binding in selected.items():
             prefix = self._prefixes[key]
+            sdk = binding.build.product.snapshot
             expected_directories.add(prefix)
-            for item in binding.build.product.snapshot.files:
+            if isinstance(sdk, NativeSdkTreeSnapshot):
+                if manifest.tree_policy is None or (
+                    sdk.tree.case_sensitive and not manifest.tree_policy.case_sensitive
+                ):
+                    raise ValueError("retained.sdk.selected-tree-policy-required")
+                expected_directories.update(
+                    prefix + "/" + path for path in sdk.tree.directories
+                )
+            for item in sdk.files:
                 path = prefix + "/" + item.path
-                expected[path] = item
+                expected[path] = RetainedProjectMember(
+                    path,
+                    item.blob.size,
+                    0o755 if item.executable else 0o644,
+                    item.blob.digest,
+                    "sdk",
+                )
                 directory = path.rpartition("/")[0]
                 while directory != prefix:
                     expected_directories.add(directory)
                     directory = directory.rpartition("/")[0]
+            if isinstance(sdk, NativeSdkTreeSnapshot):
+                physical = {item.path: item for item in sdk.files}
+                for alias in sdk.tree.aliases:
+                    path = prefix + "/" + alias.path
+                    if alias.kind == "hardlink":
+                        item = physical[alias.target]
+                        expected[path] = RetainedProjectMember(
+                            path,
+                            item.blob.size,
+                            0o755 if item.executable else 0o644,
+                            item.blob.digest,
+                            "sdk",
+                            hardlink_target=prefix + "/" + alias.target,
+                        )
+                    else:
+                        content = alias.target.encode("utf-8")
+                        expected[path] = RetainedProjectMember(
+                            path,
+                            len(content),
+                            0o120000,
+                            hashlib.sha256(content).hexdigest(),
+                            "sdk",
+                            symlink_target=alias.target,
+                        )
         sdk_members = {m.path: m for m in manifest.members if m.role == "sdk"}
         if set(sdk_members) != set(expected):
             raise ValueError("retained.sdk.complete-sdk-file-closure-required")
-        for path, item in expected.items():
-            member = sdk_members[path]
-            if (
-                member.symlink_target is not None
-                or member.sha256 != item.blob.digest
-                or member.size != item.blob.size
-                or member.mode != (0o755 if item.executable else 0o644)
-            ):
-                raise ValueError("retained.sdk.product-file-mismatch")
+        if sdk_members != expected:
+            raise ValueError("retained.sdk.product-file-mismatch")
         prefixes = set(self._prefixes.values())
         if (
             any(
@@ -222,7 +291,8 @@ class RetainedProjectNativeSdkInputs:
     @contextmanager
     def command_scope(self, argv, *, action_identity, **arguments):
         self.require_unchanged()
-        result = RetainedSdkCommandScope()
+        expected_argv = tuple(argv)
+        expected_environment = dict(arguments["environment"])
         with ExitStack() as stack:
             scopes = tuple(
                 stack.enter_context(
@@ -236,7 +306,22 @@ class RetainedProjectNativeSdkInputs:
                 )
                 for execution in self.executions
             )
+            if scopes:
+                if any(
+                    scope.argv != expected_argv
+                    or dict(scope.environment) != expected_environment
+                    for scope in scopes
+                ):
+                    raise ValueError("retained.sdk.command-projection-mismatch")
+            result = RetainedSdkCommandScope(
+                argv=expected_argv if scopes else None,
+                environment=MappingProxyType(expected_environment) if scopes else None,
+            )
             yield result
         self.require_unchanged()
-        result.evidence_identities = tuple(scope.evidence_identity for scope in scopes)
+        object.__setattr__(
+            result,
+            "evidence_identities",
+            tuple(scope.evidence_identity for scope in scopes),
+        )
         self._last_scopes = scopes

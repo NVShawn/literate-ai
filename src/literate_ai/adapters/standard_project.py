@@ -2421,6 +2421,23 @@ def project_locked_standard_toolchain_closure(
                 "without a "
                 "competing build-system, compiler or packaging profile",
             )
+        if (
+            authoring.resolved_kind == "library"
+            and language.target == "python"
+            and build_system is not None
+            and not isinstance(
+                build_system,
+                (StandardRepoManCommandProfile, StandardMixCommandProfile),
+            )
+        ):
+            raise StandardCommandProjectionError(
+                "standard_command.python_library_export_profile_unsupported",
+                "the selected build-system profile exports one file, but Python "
+                "library acceptance requires a directory containing its declared "
+                "modules; select the native Python profile (for example, "
+                "--flavor=-bazel --flavor=+python) or an explicit Python wheel "
+                "profile without a competing build-system profile",
+            )
         if not authoring.entrypoints and npm_profile is not None:
             raise StandardCommandProjectionError(
                 "standard_command.library_npm_unsupported",
@@ -3702,6 +3719,7 @@ def compose_filesystem_standard_source_cache(
     caller_cas: FileSystemCAS,
     indexer: GenerationIndexer,
     materializer: SourceCacheMaterializer | None = None,
+    source_admission: Callable | None = None,
 ) -> FilesystemStandardProjectRuntime:
     """Attach complete durable Standard cache custody to an assembled host runtime."""
 
@@ -3730,6 +3748,7 @@ def compose_filesystem_standard_source_cache(
         cache_key=lambda publication: candidate_key(
             publication.source_output.candidate
         ),
+        source_admission=source_admission,
     )
     restorer = FilesystemStandardSourceRestorer(
         resolver=resolver,
@@ -3929,6 +3948,7 @@ class FilesystemStandardSourceGenerationAdapter:
         pipeline_model: str | None = None,
         accepted_source_provider_id: str | None = None,
         accepted_source_provider_identity: ContentIdentity | None = None,
+        accepted_source_retained_review_identity: ContentIdentity | None = None,
         project_authority_identity: ContentIdentity | None = None,
         native_sdk_inputs=None,
         retained_source=None,
@@ -3947,8 +3967,18 @@ class FilesystemStandardSourceGenerationAdapter:
             raise TypeError(
                 "accepted_source_provider_identity must be a ContentIdentity or null"
             )
+        if accepted_source_retained_review_identity is not None and (
+            accepted_source_provider_identity is None
+            or not isinstance(accepted_source_retained_review_identity, ContentIdentity)
+        ):
+            raise TypeError(
+                "accepted retained review requires a provider binding "
+                "and ContentIdentity"
+            )
         if retained_source is not None and (
-            accepted_source_provider_identity is not None or pipeline_model is not None
+            accepted_source_provider_identity is not None
+            or accepted_source_retained_review_identity is not None
+            or pipeline_model is not None
         ):
             raise ValueError(
                 "retained source cannot select a model or accepted-cache provider"
@@ -3960,6 +3990,7 @@ class FilesystemStandardSourceGenerationAdapter:
                 CodingCliSourceGenerator.for_accepted_source_lookup(
                     accepted_source_provider_id,
                     accepted_source_provider_identity,
+                    retained_review_identity=accepted_source_retained_review_identity,
                 )
                 if accepted_source_provider_identity is not None
                 else (

@@ -124,12 +124,54 @@ the complete Standard lifecycle to pass; the read-only plan grants no admission.
 
 ### Retained whole projects (qualification in progress)
 
+For an existing source tree whose hierarchy must remain in place, first author
+and validate its canonical project metadata, then commit the source and metadata.
+`litai project adopt-original --project PATH` produces a read-only plan binding
+the validated project authority and clean Git commit/tree. Review its identity,
+then repeat with `--apply --acknowledge --expected-plan-identity sha256:...`.
+Apply writes only original-adoption evidence and conversion-authority metadata;
+it does not move source, build, contact a model, or qualify execution. Dirty
+trees, stale plans, unsafe roots and existing authority refuse. Preserve failed
+evidence for diagnosis rather than overwriting it.
+
+The independent initial `original` stage keeps release authority with original
+source. It has no successor in the legacy wrapped/retained/drafted/qualified
+conversion chain. After current locks exist, use explicit retained-project
+manifest/profile planning. Regenerative rebuild and unqualified retained
+execution remain blocked; this adoption record is not a build or test receipt.
+
 Whole-project retained planning uses a streaming binary-capable manifest and an
 explicit command profile, separately from the small UTF-8 source mode above. Its
 `test-policy` input must bind the configured project receipt policy's identity,
 every original case and owning test action, any exact permitted skip reason, and
 the report path sealed by each test action. Action inventories name the actual
 cases; a suite label or successful command exit does not establish coverage.
+
+The same original-source protocol is available on `build`, `test` and `rebuild`.
+For example, review the exact locked selection with:
+
+```sh
+litai build --project path/to/project \
+  --retained-project manifest.json --retained-project-profile profile.json \
+  --retained-project-plan
+```
+
+Execution uses the same manifest/profile, the returned
+`--authorize-retained-project sha256:REVIEWED_PLAN_ID` and explicit
+`--allow-host-execution`. `test` runs the same complete retained lifecycle,
+including build, original tests, documentation and independent acceptance.
+Both verbs return retained admission/custody evidence, not an ordinary generated
+artifact or a `litai run` export. Package and release qualification remain
+separate. `--build-dir` and `--obj-dir` select the retained custody/object roots.
+Selected [secondary-account tests](retained-secondary-access.md) additionally
+require an operator-private live allocation inspector. Their private execution
+sessions live under the inspected allocation prefix, and admission requires
+successful delegated-access cleanup retained with the run.
+Target configuration, Flavors, toolchain and command capacity come from the
+locked profile; generation/model/source-cache and `--jobs` overrides are refused
+instead of being silently ignored. A partial Component selector cannot narrow a
+whole-project retained plan. Planning output says read-only and grants no build
+or publication authority.
 
 The sole `release-policy` input must be the configured `literate.release.json`,
 with the profile binding its exact bytes. Planning reuses the existing release
@@ -174,6 +216,21 @@ unsupported hosts refuse the opt-in. Omission preserves legacy identities and
 default environments. This selects captured runtime libraries for native tools;
 it does not suppress system fallback or establish complete compiler/sysroot
 provenance. Native/installed qualification remains open under RETAINED-LOADER-001.
+When selected SDKs are present, each SDK command also binds the complete captured
+runtime context and preserves SDK-owned placements and the native code/dependency
+graph. Reviewed external byte copies may relocate with equivalent native edges;
+ambient import/preload injection and SDK shadowing remain refusals. Captured
+context records do not establish compiler SDK or product release admission.
+
+Development profiles can also select `output_command_paths`: up to 32 ordered
+output-relative directories at or below declared build products. These precede
+captured tool directories so original tests can find the newly built programs.
+Missing future directories are permitted before their producer runs; existing
+redirected or non-directory ancestors refuse. Export custody still guards the
+produced bytes. The profile and environment bind the selection, and caller PATH
+is never inherited. Omission preserves the captured-tools-only default and legacy
+profile identities. This prepares original-suite execution; it grants no public
+execution or acceptance on its own.
 
 Development retained independent acceptance can opt in to a `filesystem` case.
 It binds private input bytes, expected file lengths and SHA-256 values, optional
@@ -189,10 +246,34 @@ Legacy cases keep their wire identities. Native/installed filesystem qualificati
 remains open under RETAINED-FS-001; this is cooperative custody, not a hostile-code
 filesystem sandbox or permission to execute with greater privileges.
 
-This test gate is not a lifecycle receipt. Public whole-project execution still
-refuses with `retained_project.execution_not_qualified` until native SDK/SBOM,
-independent acceptance, retained-origin receipt, package and release consumers
-are qualified. Original source and conversion authority remain unchanged.
+The development local route joins the existing command workspace, complete
+original-test coverage, independent acceptance, both BOMs and live retained
+receipt admission. It requires the exact reviewed plan authorization plus
+`--allow-host-execution` and reopens current manifest/profile/project/worker
+authority throughout execution. Planning stays read-only. Explicit worker health
+policy uses the existing preflight and active-job polling owner.
+
+Local execution keeps its run under `OBJ_DIR/retained-project-runs` and immutable
+receipt/payload custody under `BUILD_DIR/retained-project-cas`. The run's separate
+`command-diagnostics.json` index points to actual stdout/stderr and command
+observations, including failed commands; that diagnostic index grants no admission.
+Fresh local worker observations enforce authored capacity requirements and the
+selected OS/architecture Flavors across all current Component locks. The local
+probe follows the actual host OS; architecture aliases use the shared host
+normalizer. OS family, OS version or architecture drift refuses continued execution.
+The current-plan guards recheck that context, and live admission retains the
+plan-bound initial/final observations in receipt records. Those records are data;
+decoding them grants no execution or admission. Existing receipt wire identities
+are preserved for callers that omit this optional context.
+The returned retained receipt preserves original authority and cannot replace an
+ordinary generated receipt. Package construction and publication remain separate.
+
+Remote workers and selected SDK inputs without their required live producer
+bindings refuse; this entry never falls back to local execution or ambient SDK
+discovery. Full canonical-project/installed CLI, native and package/release
+qualification remain open under RETAINED-PROJECT-001. The development handler
+checks use the real execution/admission owners but fixture project discovery, so
+they do not qualify those remaining boundaries.
 
 ### Target and worker selection
 

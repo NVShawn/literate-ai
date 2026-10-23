@@ -14,6 +14,7 @@ _MAX_SECTIONS = 8192
 _MAX_DYNAMIC = 65536
 _MAX_STRINGS = 16 * 1024 * 1024
 _LIBRARY = re.compile(r"lib[A-Za-z0-9+_.-]{1,251}\Z")
+_PRIVATE_LIBRARY = re.compile(r"[A-Za-z0-9_][A-Za-z0-9+_.-]{0,251}\Z")
 
 
 def inspect_freebsd_package_elf(stream, size, abi):
@@ -105,14 +106,20 @@ def inspect_freebsd_package_elf(stream, size, abi):
             name = names[value:end].decode("ascii")
         except UnicodeError:
             fail("shared-library name is not canonical ASCII")
+        if tag == 14:
+            sonames += 1
+            if sonames != 1:
+                fail("has more than one shared-library SONAME")
         if _LIBRARY.fullmatch(name) is None:
+            if not name.startswith("lib") and _PRIVATE_LIBRARY.fullmatch(name):
+                # pkg 2.8's analyse_elf records only names starting with lib.
+                # This is native manifest projection, not runtime resolution;
+                # the original SDK observation/BOM must retain all imports.
+                continue
             fail("shared-library name uses an unsupported native encoding")
         if tag == 1:
             required.add(name)
         else:
-            sonames += 1
-            if sonames != 1:
-                fail("has more than one shared-library SONAME")
             provided.add(name)
     if not terminated:
         fail("dynamic table has no terminator")

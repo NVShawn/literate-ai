@@ -1,6 +1,7 @@
 """Captured loader selection, live retained commands and unchanged default wires."""
 
 import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -15,8 +16,203 @@ from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
 from literate_ai.contracts import ContentIdentity
-from literate_ai.contracts.retained_project_lifecycle import RetainedProjectProfile
+from literate_ai.contracts.retained_project_lifecycle import (
+    RetainedProjectAction,
+    RetainedProjectProfile,
+)
 from tests.critical import test_retained_project_execution as commands
+
+
+class RetainedOutputCommandPathTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        commands.RetainedProjectExecutionTests.setUpClass()
+        cls.addClassCleanup(commands.RetainedProjectExecutionTests.doClassCleanups)
+
+    def setUp(self):
+        self.fixture = commands.RetainedProjectExecutionTests()
+        self.fixture.setUp()
+        self.addCleanup(self.fixture.doCleanups)
+        f = self.fixture
+        actions = list(f.actions)
+        actions[0] = replace(
+            actions[0],
+            argv=("export-nested", "{output_root}/bin/retained-child"),
+            outputs=("bin",),
+        )
+        report = json.dumps(
+            {
+                "schema": "literate-ai/retained-project-test-report@1",
+                "action": "tests",
+                "cases": [
+                    {"id": "original-suite", "outcome": "passed", "reason": None}
+                ],
+            }
+        )
+        actions[1] = replace(
+            actions[1],
+            argv=(
+                "via-path",
+                "retained-child",
+                "report",
+                "{output_root}/test-result.json",
+                report,
+            ),
+        )
+        f.profile = replace(
+            f.profile,
+            actions=tuple(actions),
+            package_inventory=("bin", "docs.txt"),
+            output_command_paths=("bin",),
+        )
+        f.plan = replace(f.plan, profile=f.profile)
+        f.current = f.plan
+
+    def test_opt_in_round_trip_preserves_default_wire(self):
+        selected = self.fixture.profile
+        legacy = replace(selected, output_command_paths=())
+        self.assertNotIn("output_command_paths", legacy.to_dict())
+        self.assertEqual(RetainedProjectProfile.from_dict(selected.to_dict()), selected)
+        self.assertNotEqual(legacy.identity, selected.identity)
+        for value in (
+            None,
+            [],
+            "bin",
+            ["../bin"],
+            ["/bin"],
+            ["bin", "BIN"],
+            ["tools"],
+            ["docs.txt"],
+        ):
+            wire = legacy.to_dict() | {"output_command_paths": value}
+            with self.subTest(value=value), self.assertRaises((TypeError, ValueError)):
+                RetainedProjectProfile.from_dict(wire)
+        with self.assertRaises(ValueError):
+            replace(selected, output_command_paths=tuple(f"bin/{i}" for i in range(33)))
+
+    def test_missing_future_directory_and_captured_tools_have_fixed_order(self):
+        f = self.fixture
+        workspace = f.workspace()
+        selected = workspace._environment()["PATH"].split(os.pathsep)
+        self.assertEqual(
+            selected, [str(workspace.outputs / "bin"), str(workspace.inputs / "tools")]
+        )
+        self.assertFalse((workspace.outputs / "bin").exists())
+        self.assertEqual(workspace.observations, ())
+
+    @unittest.skipUnless(os.name == "nt", "Requires native Windows command")
+    def test_actual_windows_command_and_late_source_or_context_drift(self):
+        from literate_ai.adapters import retained_windows_context
+
+        f = self.fixture
+        native = retained_windows_context.RetainedWindowsSystemContext.capture()
+        path = f.source / "tools/whoami.exe"
+        shutil.copyfile(native.root / "System32/whoami.exe", path)
+        f.manifest = discover_retained_project_inputs(
+            f.source,
+            {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
+            f.manifest.limits,
+        )
+        identity = ContentIdentity.parse_uri(
+            "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+        )
+        action = RetainedProjectAction(
+            "native-identity",
+            "stage",
+            "windows-identity",
+            (),
+            (),
+            ("native-windows-identity",),
+            (),
+            10,
+        )
+        f.profile = replace(
+            f.profile,
+            tools=(
+                *f.profile.tools,
+                ("windows-identity", "tools/whoami.exe", identity),
+            ),
+            actions=(
+                action,
+                replace(
+                    f.profile.actions[0],
+                    requires=(action.action_id, *f.profile.actions[0].requires),
+                ),
+                *f.profile.actions[1:],
+            ),
+        )
+        f.plan = replace(
+            f.plan, profile=f.profile, manifest_identity=f.manifest.identity
+        )
+        f.current = f.plan
+        for changed in ("context", "source"):
+            with self.subTest(changed=changed):
+                workspace = f.workspace()
+                workspace.execute_next()
+                self.assertEqual(len(workspace.observations), 1)
+                observed = workspace.observations[0]
+                self.assertEqual(observed.result.returncode, 0)
+                self.assertTrue(observed.result.stdout.strip())
+                self.assertEqual(
+                    workspace._environment()["SystemRoot"], str(native.root)
+                )
+                if changed == "context":
+                    with patch.object(
+                        retained_windows_context,
+                        "_system_windows_directory",
+                        return_value=f.base,
+                    ):
+                        with self.assertRaisesRegex(
+                            ValueError, "system-context-changed"
+                        ):
+                            workspace.execute_next()
+                else:
+                    path.write_bytes(path.read_bytes() + b"substitution")
+                    with self.assertRaises(ValueError):
+                        workspace.execute_next()
+                self.assertEqual(len(workspace.observations), 1)
+
+    @unittest.skipUnless(
+        os.name != "nt" and shutil.which("cc"), "requires native POSIX fixture"
+    )
+    def test_original_style_lookup_executes_new_export_and_refuses_without_selection(
+        self,
+    ):
+        f = self.fixture
+        workspace = f.workspace()
+        workspace.execute_next()
+        with patch.dict(os.environ, {"PATH": "/unreviewed/ambient"}):
+            self.assertNotIn("/unreviewed/ambient", workspace._environment()["PATH"])
+        # Host inspectors retain their own trusted discovery context; only the
+        # target command receives the captured/output-only search path.
+        result = workspace.execute_next()
+        self.assertEqual(result.result.returncode, 0)
+        self.assertEqual(workspace.test_reports[0].report.passed, 1)
+        f.plan = replace(f.plan, profile=replace(f.profile, output_command_paths=()))
+        f.current = f.plan
+        unselected = f.workspace()
+        unselected.execute_next()
+        with self.assertRaises(ValueError):
+            unselected.execute_next()
+        self.assertEqual(len(unselected.observations), 2)
+        self.assertEqual(unselected.observations[-1].result.returncode, 96)
+        self.assertEqual(unselected.test_reports, ())
+
+    @unittest.skipIf(os.name == "nt", "requires POSIX directory symlink")
+    def test_existing_file_and_redirected_directory_refuse(self):
+        f = self.fixture
+        for redirected in (False, True):
+            workspace = f.workspace()
+            path = workspace.outputs / "bin"
+            if redirected:
+                path.symlink_to(f.source / "tools", target_is_directory=True)
+            else:
+                path.write_bytes(b"not a directory")
+            with (
+                self.subTest(redirected=redirected),
+                self.assertRaises((ValueError, OSError, UnsafeFilesystemPathError)),
+            ):
+                workspace._environment()
 
 
 class RetainedRuntimePathTests(unittest.TestCase):
@@ -40,6 +236,7 @@ class RetainedRuntimePathTests(unittest.TestCase):
             f.source,
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             f.manifest.limits,
+            executable_paths=(f.runner_path,),
         )
         f.profile = replace(f.profile, runtime_library_paths=paths)
         f.plan = replace(
@@ -106,9 +303,10 @@ class RetainedRuntimePathTests(unittest.TestCase):
                 {},
             )
 
+    @patch.object(environment.sys, "platform", "linux")
     def test_source_empty_missing_and_file_directories_refuse(self):
         f = self.fixture
-        for name in ("src", "missing", "tools/runner"):
+        for name in ("src", "missing", f.runner_path):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 environment.captured_runtime_environment(
                     f.source,

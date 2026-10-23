@@ -18,6 +18,7 @@ import re
 import shutil
 import signal
 import subprocess
+import sys
 import sysconfig
 import tempfile
 import venv
@@ -66,6 +67,30 @@ class WorkerBootstrapError(RuntimeError):
         self.code = code
         self.message = message
         super().__init__(f"{code}: {message}")
+
+
+class _PrivateEnvironmentBuilder(venv.EnvBuilder):
+    def setup_python(self, context) -> None:
+        super().setup_python(context)
+        # Standalone macOS builds can load libpython relative to the copied
+        # executable. Retain a private library before ensurepip runs while
+        # keeping the executable inside installation custody for self-update.
+        if (
+            sys.platform == "darwin"
+            and sysconfig.get_config_var("Py_ENABLE_SHARED")
+            and not sysconfig.get_config_var("PYTHONFRAMEWORK")
+        ):
+            library = Path(
+                sysconfig.get_config_var("LIBDIR")
+            ) / sysconfig.get_config_var("LDLIBRARY")
+            shutil.copy2(library, Path(context.env_dir) / "lib" / library.name)
+
+
+def _create_python_environment(environment: Path) -> None:
+    """Create an owned copied runtime using only the standard library."""
+    _PrivateEnvironmentBuilder(with_pip=True, clear=False, symlinks=False).create(
+        environment
+    )
 
 
 def _digest(content: bytes) -> str:
@@ -906,7 +931,7 @@ def _wheelhouse_downloader(parent: Path) -> tuple[Path, tuple[str, ...]]:
         tempfile.mkdtemp(prefix=".literate-ai-wheelhouse-resolver-", dir=parent)
     )
     try:
-        venv.EnvBuilder(with_pip=True, clear=False, symlinks=False).create(resolver)
+        _create_python_environment(resolver)
         python = _python_launcher(resolver)
         if not python.is_file():
             raise OSError("resolver Python launcher is missing")
@@ -1320,7 +1345,7 @@ def _install_offline(
     arguments: tuple[str, ...],
 ) -> None:
     try:
-        venv.EnvBuilder(with_pip=True, clear=False, symlinks=False).create(environment)
+        _create_python_environment(environment)
         _run_with_tree_kill(
             (
                 str(_python_launcher(environment)),

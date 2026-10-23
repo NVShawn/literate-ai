@@ -7,6 +7,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import venv
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,13 +17,24 @@ from tests.support.symlinks import symlinks_followable
 
 
 def _install_python_alias(directory: Path, name: str) -> Path:
-    suffix = ".exe" if os.name == "nt" else ""
-    alias = directory / f"{name}{suffix}"
-    runtime = Path(
-        getattr(sys, "_base_executable", sys.executable)
-        if os.name == "nt"
-        else sys.executable
-    )
+    if os.name == "nt":
+        # A relocated base python.exe loses its DLL/stdlib home. Real venv
+        # redirectors retain that home even with this deliberately isolated PATH.
+        scripts = directory / "Scripts"
+        if not (directory / "pyvenv.cfg").exists():
+            venv.EnvBuilder(with_pip=False, symlinks=False).create(directory)
+            launcher = scripts / "python.exe"
+            alias = scripts / f"{name}.exe"
+            launcher.rename(alias)
+        else:
+            launcher = next(
+                p for p in scripts.glob("python*.exe") if p.name != "pythonw.exe"
+            )
+            alias = scripts / f"{name}.exe"
+            shutil.copy2(launcher, alias)
+        return alias
+    alias = directory / name
+    runtime = Path(sys.executable)
     if symlinks_followable(directory):
         alias.symlink_to(runtime)
     else:
@@ -38,7 +50,7 @@ class PythonToolchainDiscoveryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             command = _install_python_alias(root, "python3.12")
-            environment = {"PATH": str(root)}
+            environment = {"PATH": str(command.parent)}
             selected = discover_python_toolchain(environment, minimum_version=(3, 0))
 
             self.assertEqual(selected.command, (str(command),))
@@ -51,10 +63,10 @@ class PythonToolchainDiscoveryTests(unittest.TestCase):
             first.mkdir()
             second.mkdir()
             command = _install_python_alias(first, "python3.12")
-            _install_python_alias(second, "python3")
+            later = _install_python_alias(second, "python3")
 
             selected = discover_python_toolchain(
-                {"PATH": os.pathsep.join((str(first), str(second)))},
+                {"PATH": os.pathsep.join((str(command.parent), str(later.parent)))},
                 minimum_version=(3, 0),
             )
 
@@ -67,25 +79,31 @@ class PythonToolchainDiscoveryTests(unittest.TestCase):
             newer = _install_python_alias(root, "python3.12")
             self.assertEqual(
                 discover_python_toolchain(
-                    {"PATH": str(root)}, minimum_version=(3, 0)
+                    {"PATH": str(newer.parent)}, minimum_version=(3, 0)
                 ).command,
                 (str(newer),),
             )
             alias = _install_python_alias(root, "python")
+            # Windows PATH lookup may return the PATHEXT spelling (.EXE).
             self.assertEqual(
-                discover_python_toolchain(
-                    {"PATH": str(root)}, minimum_version=(3, 0)
-                ).command,
-                (str(alias),),
+                tuple(
+                    map(
+                        Path,
+                        discover_python_toolchain(
+                            {"PATH": str(alias.parent)}, minimum_version=(3, 0)
+                        ).command,
+                    )
+                ),
+                (alias,),
             )
 
     def test_versioned_discovery_does_not_admit_config_tools(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            _install_python_alias(root, "python3.12-config")
+            config = _install_python_alias(root, "python3.12-config")
             with patch.object(python_builder_module, "_probe_python_command") as probe:
                 with self.assertRaises(BuildError) as error:
-                    discover_python_toolchain({"PATH": str(root)})
+                    discover_python_toolchain({"PATH": str(config.parent)})
 
             self.assertEqual(
                 error.exception.code, "builder.python_toolchain_unavailable"
@@ -95,10 +113,10 @@ class PythonToolchainDiscoveryTests(unittest.TestCase):
     def test_versioned_name_cannot_substitute_for_actual_runtime_version(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            _install_python_alias(root, "python3.999")
+            command = _install_python_alias(root, "python3.999")
             with self.assertRaises(BuildError) as error:
                 discover_python_toolchain(
-                    {"PATH": str(root)}, required_version=(3, 999)
+                    {"PATH": str(command.parent)}, required_version=(3, 999)
                 )
 
             self.assertEqual(
@@ -121,7 +139,7 @@ class PythonToolchainDiscoveryTests(unittest.TestCase):
             pinned = _install_python_alias(root, "python3")
             _install_python_alias(root, "python")
             _install_python_alias(root, "python3.12")
-            environment = {"PATH": str(root), "PYTHON": str(pinned)}
+            environment = {"PATH": str(pinned.parent), "PYTHON": str(pinned)}
             with patch.object(
                 python_builder_module,
                 "_probe_python_command",

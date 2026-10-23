@@ -57,6 +57,7 @@ from literate_ai.storage import (
 _LAYOUT_SCHEMA = "literate-ai/source-cache-layout@2"
 _LEGACY_LAYOUT_SCHEMA = "literate-ai/source-cache-layout@1"
 _MEMBERSHIP_SCHEMA = "literate-ai/source-cache-membership@2"
+_RETIRED_MEMBERSHIP_SCHEMA = "literate-ai/source-cache-retired-membership@1"
 _LEGACY_MEMBERSHIP_SCHEMA = "literate-ai/source-cache-membership@1"
 _INTELLIGENCE_MEMBERSHIP_SCHEMA = (
     "literate-ai/source-intelligence-attachment-membership@1"
@@ -426,6 +427,9 @@ class FileSystemSourceCache:
         memberships: list[Path] = []
         try:
             for membership in key_directory.iterdir():
+                if membership.name == ".retired":
+                    self._require_directory(membership)
+                    continue
                 if len(memberships) >= _MAX_CACHE_CANDIDATES:
                     raise SourceCacheError(
                         "source-cache.candidate-limit",
@@ -533,12 +537,37 @@ class FileSystemSourceCache:
                 candidates = self.candidates(key)
                 candidates_by_key[lookup_uri] = candidates
             if entry not in candidates:
+                if self._retired_membership(key, entry.identity):
+                    continue
                 raise SourceCacheError(
                     "source-cache.membership-invalid",
                     "published cache entry has no valid accepted-source key membership",
                 )
             verified.append(entry)
         return tuple(verified)
+
+    def _retired_membership(
+        self, key: SourceDerivationCacheKey, entry_identity: ContentIdentity
+    ) -> bool:
+        lookup = key.accepted_source_lookup_identity
+        directory = self.keys / lookup.digest / ".retired"
+        path = directory / f"{entry_identity.digest}.json"
+        if not path.exists() and not path.is_symlink():
+            return False
+        self._require_directory(directory)
+        document, _ = _read_canonical_json_object(
+            path, maximum_bytes=4096, code="source-cache.retirement-invalid"
+        )
+        if document != {
+            "schema": _RETIRED_MEMBERSHIP_SCHEMA,
+            "accepted_source_lookup_identity": lookup.uri,
+            "entry_identity": entry_identity.uri,
+        }:
+            raise SourceCacheError(
+                "source-cache.retirement-invalid",
+                "retirement record does not bind its exact entry and key",
+            )
+        return True
 
     def _entry(
         self, digest: str
@@ -652,6 +681,9 @@ class FileSystemSourceCache:
         self._require_directory(key_directory)
         retired = False
         for membership in sorted(key_directory.iterdir()):
+            if membership.name == ".retired":
+                self._require_directory(membership)
+                continue
             if membership.is_symlink() or not membership.is_file():
                 raise SourceCacheError(
                     "source-cache.membership-invalid",
@@ -664,6 +696,31 @@ class FileSystemSourceCache:
                 )
             if membership.name == f"{keep.digest}.json":
                 continue
+            entry_digest = membership.name.removesuffix(".json")
+            _require_hex_digest(entry_digest, label="retired entry membership")
+            document, _ = _read_canonical_json_object(
+                membership,
+                maximum_bytes=4096,
+                code="source-cache.membership-invalid",
+            )
+            if document != {
+                "schema": _MEMBERSHIP_SCHEMA,
+                "accepted_source_lookup_identity": lookup_identity.uri,
+                "entry_identity": f"sha256:{entry_digest}",
+            }:
+                raise SourceCacheError(
+                    "source-cache.membership-invalid",
+                    "retired membership does not bind its exact entry and key",
+                )
+            directory = key_directory / ".retired"
+            directory.mkdir(mode=0o700, exist_ok=True)
+            self._require_directory(directory)
+            self._publish_immutable_bytes(
+                directory / membership.name,
+                canonical_json_bytes(
+                    {**document, "schema": _RETIRED_MEMBERSHIP_SCHEMA}
+                ),
+            )
             membership.unlink()
             retired = True
         if retired:

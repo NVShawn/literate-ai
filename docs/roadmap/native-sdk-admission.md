@@ -67,8 +67,9 @@ Component's acceptance identity. Keep ambient `PYTHONPATH` excluded.
 3. Capture the actual SDK product: public Python package or other language import
    surface, native libraries, declared runtime resources and dependency closure.
    Preserve original vendor implementation as dependency content, distinct from
-   generated consumer source. Source trees containing build-time symlinks require
-   explicit regular-file materialization and identity verification before export.
+   generated consumer source. The existing regular-file snapshot refuses symbolic links. Faithful internal
+   aliases require the explicitly selected versioned tree capability below; callers
+   must not silently flatten a source-built SDK to bypass that boundary.
 4. Verify the product against its plan, target/ABI requirements and exact source
    authority. Bind the resulting admission to the consumer's locked SDK dependency.
    A caller-supplied artifact hash or successful vendor test log alone cannot issue
@@ -796,3 +797,290 @@ when Standard passes explicit import authority from its verified SDK dependency
 evidence. It does not add a fictitious pip distribution to the BOM or exempt the
 name globally. Ordinary consumers, unrelated imports, package declarations and
 non-Python imports retain their existing dependency checks.
+
+## Faithful internal SDK aliases
+
+[NATIVE-SDK-ALIAS-001](active-work.md#native-sdk-alias-001-preserve-internal-aliases-through-native-sdk-admission)
+owns this extension ([issue #93](https://github.com/jordanhubbard/literate-ai/issues/93)).
+The preceding regular-file snapshot and build-layout wire identities remain stable.
+Their decoders and capture paths continue refusing aliases unless a new canonical
+capability is explicitly selected and bound into the producer's plan.
+
+The tree contract inventories physical directories, regular file blobs and aliases
+separately. Each alias records its original relative target text; neither capture
+nor serialization replaces it with the target bytes. Every physical member has
+exactly one kind and an inventoried physical directory ancestor chain. An alias
+cannot own physical descendants. Targets resolve segment by segment within the
+inventoried root, including aliases in ancestor positions and parent traversal.
+Absolute targets, root escape, missing ancestors, traversal through regular files,
+dangling links, cycles and excessive expansion refuse before publication. Limits
+bound physical inventory (16,384 members), target size (4,096 UTF-8 bytes),
+alias expansion (64 per resolution), and aggregate validation work (1,048,576
+segments) independently. Resolving
+an alias must not follow the host filesystem or read an unreviewed link.
+
+Capture retains no-follow custody and verifies original member kinds, link text,
+file bytes, modes and directory closure before and after hashing. Materialization
+creates regular content and directories before aliases in a fresh private staging
+root and verifies the exact resulting inventory before returning that private
+placement to its owner. Product publication and admission remain with the live
+SDK producer. Partial failure removes only the owned staging tree. Relocation preserves target text and
+resolution without depending on the original producer location.
+
+The same capability must pass through the actual source lock, recipe, target and
+license authority, completed producer, retained placement and command scopes.
+Runtime observations retain alias relationships and their resolved file identities;
+source/resolved BOM and package records preserve those relationships. Alias text,
+target bytes or ancestor ownership changes invalidate product and consumer authority.
+A decoded tree snapshot remains a byte-custody claim, never an SDK admission.
+
+Required acceptance includes legacy wire identity/refusal regressions, real filesystem
+replacement and cleanup negatives, file and directory alias chains, and actual
+source-built compiler/resource/header/sysroot/library use after relocation and
+producer retirement. Installed-wheel and native consumer evidence remain required;
+this contract does not qualify a complete source/ports catalog or whole-build speedup.
+
+### Hard links and case-sensitive target names
+
+Faithful SDK trees distinguish symbolic aliases from hard-link equivalence.
+Symbolic aliases retain original relative link text. A hard-link alias points to
+one canonical regular-file representative, the lexicographically first member of
+that equivalence group. Its target must be an inventoried regular file, never a
+symbolic alias, directory or another hard-link alias. All names in the group share
+bytes and executable mode; archive link target text remains separate package
+provenance and must not be confused with an observed filesystem inode group.
+
+The tree capability explicitly selects case-sensitive names when required by its
+target. The portable default continues refusing case-fold collisions. A selected
+case-sensitive tree preserves distinct names and ancestor spelling exactly; its
+identity includes that selection. Materialization must verify actual filesystem
+support before creating the payload and refuse a case-insensitive destination.
+The same selection must pass through retained input inventory, verification and
+SDK placement; accepting it solely in an SDK decoder is insufficient. Legacy
+regular-file wire identities and default collision refusals remain unchanged.
+
+### Versioned SDK product authority
+
+The explicit tree capability uses `native-sdk-tree-snapshot@1` and
+`native-sdk-tree-build-layout@1` canonical resources. A snapshot binds the tree
+identity and complete tree to source lock, recipe, target, license and public
+import authority. Its import root must resolve to a nonempty inventoried directory;
+its declared native libraries must resolve to inventoried regular files. The layout
+binds capture limits and case-sensitive naming to the planned target, import,
+license and output paths. Alias-only, target, limit and naming-policy changes must
+change the corresponding product or layout identity.
+
+The preceding regular-file snapshot/layout decoders continue refusing these new
+wire resources. New product decoding alone grants no admission and cannot select
+a tree-aware producer through a legacy recipe. Source-built execution remains
+disabled until canonical recipe selection, the actual completed builder and all
+consumer/retained/package owners carry this capability explicitly. Unsupported
+mixed versions must refuse rather than silently treating the tree as plain files.
+
+### Tree recipe and producer selection
+
+An explicit `native-sdk-tree-build-recipe` contribution selects the versioned
+`native-sdk-tree-build-recipe@1` wire resource. Preserve exact-singleton ownership,
+complete locked source coverage, target/interface matching and tool bindings from
+the existing recipe planner. A tree-aware producer binds the selected layout into
+its authorized plan and uses tree snapshot capture, never the regular-file
+fallback. Current tree bytes and alias topology must reverify before and after
+native runtime inspection. Transported metadata still cannot create a live
+producer handle. Consumers that lack the capability must refuse before use.
+
+### Live tree consumers and dependency evidence
+
+The consumer continues requiring completed live source-build services covering the
+exact locked recipes. Tree products materialize through the tree snapshot owner
+using the selected layout limits, then reobserve and recapture through that same
+capability. No legacy plain-file fallback is permitted. Currentness and cleanup
+remain required across successful and exceptional consumer exits.
+
+Dependency projection selects the runtime schema from the actual snapshot type.
+Tree library bindings must retain the declared logical path and its exact resolved
+physical path/image; absent, substituted or incomplete bindings refuse. Preserve
+case selection, tree identity and each canonical alias relationship in CycloneDX
+SDK package properties so source/resolved dependency evidence retains topology
+without duplicating physical file bytes or inventing an admission. Package input
+and retained-input owners remain separate gates until they support the same tree.
+
+### Retained tree input capability
+
+Retained input manifests select a versioned tree policy explicitly. Its identity
+binds case-sensitive naming and faithful closed hard-link groups. Omitted policy
+preserves legacy manifest/member/role identities and portable collision refusals.
+Hard-link members name the lexicographically first regular-file representative,
+retain identical size, normalized mode and digest, and cannot target another link.
+Every physical inode group must be wholly inside the selected input closure.
+
+Discovery and verification compare topology before and after reading bytes. A
+same-byte copy substituted for a link, an external link, or a changed group refuses.
+Capture creates independent CAS blobs, copies each representative into private
+staging, then creates internal hard links and symbolic links. Runnable files must
+never share inodes with CAS blobs. Case-sensitive placement probes the actual
+staging filesystem before creating payload names. Failure removes only owned
+staging. Role projections retain the selected policy; reconstructed manifests must
+carry it through receipt and completion checks. This custody capability alone does
+not grant SDK producer, package, lifecycle or release admission.
+
+Retained SDK placement joins each captured physical member, symbolic target,
+hard-link representative and directory to the exact completed tree product.
+A tree snapshot requires the retained tree capability; case-sensitive SDKs require
+the corresponding retained naming selection. Byte equality alone cannot replace
+alias authority. The existing live owner reobserves the placed runtime and retains
+source/resolved dependency evidence; transported records still grant no authority.
+
+### Explicit package tree inputs
+
+A versioned package tree input binds an artifact/resource kind, owned package-relative prefix, role,
+source identity and target identity to the complete canonical tree. Its identity
+includes every physical file, directory, alias and naming policy. The input is
+structural provenance, never a live producer grant. Regular-file PackageInput wire
+resources retain their existing format and identity; a tree must never be coerced
+into that format by enumerating only its physical files.
+
+Tree byte custody delegates to the existing no-follow tree capture/materialization
+owner, using caller-selected bounded limits and exact expected input identity.
+Package namespace validation rejects overlapping tree prefixes, regular-file
+ancestors and case aliases, and requires explicit case-sensitive selection when
+any input requires it. Trees own their complete prefixes, so aliases cannot reach
+another input. Legacy providers and action/qualification owners remain disabled
+for tree inputs until their plans, dispatch, output formats and verifiers all
+carry the capability. A structural input or successful byte relocation alone
+cannot qualify a package or enable native runtime execution.
+
+### Tree package plan and TAR provider
+
+A distinct tree package plan binds an exact existing Component package plan,
+ordered tree inputs, aggregate custody limits and explicit namespace case policy.
+It does not change legacy plan decoding or identity. The combined namespace and
+all physical file bytes, link text and directory entries must fit the selected
+bounds before staging. The provider identity selects deterministic PAX TAR output;
+unsupported legacy provider paths cannot receive the new wire plan as a plain plan.
+
+Staging copies regular input bytes from verified CAS, creates each tree through
+existing tree custody, publishes only into its reserved prefix and rechecks the
+complete staging inventory. TAR construction uses no-follow bounded reads and
+exact recorded symbolic/hard-link targets. Independent archive inspection checks
+member order, type, mode, ownership, epoch, bytes, targets, complete directory
+closure and a zero-only end trailer. The result binds the exact plan and provider
+to a bounded archive blob. All publication is private staging/CAS; the result grants
+no producer, installation, runtime, lifecycle or release admission. Native pkg and
+SDK runtime integration remain required beyond this portable archive provider.
+
+The explicit SDK tree-package resource owner accepts only live consumer inputs
+covering the exact lock, root and target. It retains original snapshot/binding
+metadata and binds each complete tree input into a distinct package index. A
+regular-file SDK may be represented as a tree with no aliases without changing
+its original snapshot wire identity. Projection changes after selection refuse.
+The actual producer must remain current before and after TAR construction; losing
+its completed-product registration prevents a successful return. Once a package
+is constructed, independent archive/stage verification needs only its exact plan
+and retained package CAS, not the producer's store. This does not replace fresh
+runtime dependency observation or qualify the Standard packaged execution driver.
+
+At clean revision `9411185a`, the wheel gate passes and retains exact distribution
+`sha256:c1706b8fd78a6a4d197103ae5734c6ddb7085ec9836bd7d070412092280c1139`.
+The same wheel installs offline on FreeBSD with 37 reviewed distributions. Fourteen
+focused TAR, tree-input and real compiled-library API checks pass without skips,
+with all framework modules imported from the installed prefix. This closes focused
+installed-provider qualification; native tree pkg, Standard packaged execution,
+qualification codecs and full source-built compiler SDK admission remain open.
+
+### Native tree package provider boundary
+
+Native pkg must consume the same explicit tree plan without flattening aliases.
+A distinct projection binds the entire plan, native tool/ABI, package coordinates,
+installation prefix and accepted runtime package dependencies. Every relative
+payload path moves under one prefix, preserving exact symbolic target text and
+hard-link groups. Environment/device requirements stay constraints in the original
+plan; they cannot become invented native package coordinates. Specification and
+both source/resolved BOM inputs remain mandatory.
+
+Construction relocates an owned complete staging tree by rename, retaining its
+inodes, and uses the verified native tool with empty configuration and plugins
+disabled. The independent verifier must bind exact native result/provider bytes,
+bound compressed expansion and extended metadata, inspect every file/link/directory
+type and target, verify physical bytes and native checksums, and check exact native
+manifest inventories, ownership, modes, epoch, physical flatsize and ELF library
+metadata. Hooks, undeclared payload, alternate hard-link topology and trailing
+archive frames refuse even when an attacker recomputes the outer archive digest.
+Verification grants no installation, producer, runtime or release admission.
+
+Native shared-library summaries follow pkg 2.8's `analyse_elf`: canonical private
+library names without the `lib` prefix do not appear in its native summary.
+The SDK dependency observer and source/resolved BOMs still retain those imports;
+omission from this provider-specific summary cannot satisfy a runtime obligation.
+See [the native metadata implementation](https://github.com/freebsd/pkg/blob/2.8.4/libpkg/pkg_elf.c).
+
+The source implementation is a separate explicit capability. The live SDK
+resource owner dispatches both TAR and native pkg providers and rechecks actual
+completed-producer ownership after construction. Native tests construct repeatable
+packages with the real tool, preserve links through system-tar extraction, retire
+the producer, relocate the package and call the compiled C API. Same-byte hardlink
+replacement and producer ownership loss refuse. Flavor/default lifecycle selection,
+transport codecs, directory-artifact expansion, exact installed-wheel renewal and
+compiler SDK qualification remain required.
+
+Native Unicode coverage retains libarchive's exact `hdrcharset=BINARY` marker
+and the single trailing slash in a PAX directory path. Decoded member names and
+symbolic targets still match the typed tree exactly. Unknown charset values,
+changed targets and unplanned extended attributes refuse. Native construction
+also covers case-distinct hard links, long NFC file/target names, Unicode
+directories and empty directories through a real system-tar round trip.
+
+
+### Native Windows command system context
+
+Retained commands on Windows obtain `SystemRoot` from the native
+`GetSystemWindowsDirectoryW` API, using a system-directory-only lookup of
+`kernel32.dll`. Caller `SystemRoot`, `WINDIR` and `PATH` do not select this root.
+The workspace binds the observed root and `System32` directory nodes and
+revalidates both, together with the native API result, before constructing each
+command environment. Missing or redirected directories and later context changes
+refuse. This supplies the existing PE dependency guard with native OS context;
+it does not bypass captured tool hashes, runtime observation or source currentness.
+POSIX environments and legacy profile wire identities remain unchanged.
+
+PE dependency observation inspects independent images in bounded concurrent
+frontiers, then merges results in canonical queue order through the existing
+loader resolver. Image and inspector hashes still guard each inspection.
+Failures cancel and join owned work and invalidate facts for the inspector;
+parallelism does not extend receiver or command deadlines. Actual native source
+tests and installed-wheel qualification remain separate evidence gates.
+
+
+### Native tree package descriptor transport
+
+Native tree projections and results have exact, versioned descriptor codecs and
+published v2 schema resources. Decoding preserves the complete tree plan,
+case-sensitive names, link targets, dependencies, native tool/ABI and epoch.
+Unknown fields, other-provider schemas, changed epochs, malformed dependency
+records and non-native result media types refuse. Raw inventory and dependency
+counts are checked before constructing nested tree contracts. The regular-file
+and TAR formats retain their existing identities and do not accept native tree
+result records.
+
+A decoded descriptor grants no completed-producer ownership, package execution
+or installation authority. Existing provider verification still checks the actual
+archive, including rehashed topology and metadata corruption. Selected native
+source/final plan binding is qualified separately below.
+PACKAGE worker LINK proof, live SDK runtime joins and canonical qualification
+remain required integration work.
+
+
+### Native source and selected plan binding
+
+A native projection retains its exact original tree plan. The adapter can describe
+a selected plan by replacing only the base packager identity with its own native
+provider identity. That identity hashes the original projection, avoiding a cycle
+between selected-plan and projection identities. Source-plan archive annotations
+remain bound to the original projection; result records bind the exact submitted
+source or selected plan.
+
+For selected-plan verification, the native identity must match and restoring only
+the original base packager identity must reproduce the complete original plan.
+Changes to limits, provenance, runtime obligations, tree ownership or any other
+field refuse. Existing explicit source-plan construction remains supported;
+canonical worker composition must require the selected plan and independently
+reopen LINK proof and live SDK ownership. Rebinding alone grants no admission.

@@ -58,6 +58,15 @@ missing artifacts or changed post-execution inputs prevent acceptance. Retained-
 receipts must bind original test identity/skip policy and packaged-payload provenance
 when the project's contract requires them. A baseline exception is not a test pass.
 
+Input verification may reuse a bounded set of POSIX directory handles within a
+single verification transaction. Every lookup still checks current ancestor
+names and identities without following directory links; cached lineages are
+revalidated before completion and all handles close on success or failure.
+Complete before/after inventories, byte hashes, executable modes, link text and
+file/path identity checks remain mandatory. No cached trust crosses verification
+boundaries, and unsupported or low-descriptor environments retain the preceding
+traversal. This changes neither manifest identities nor execution authority.
+
 Packaging consumes only the accepted closure through the selected existing package
 provider. A separately authorized release can publish that retained-origin artifact
 only after its current receipt and original release-authority policy pass. Such a
@@ -96,6 +105,48 @@ Acceptance permits implementation and its tests under ADR 0006. It does not itse
 authorize a release, claim qualification, or merge a PR. Implementation and full
 qualification remain open under RETAINED-PROJECT-001.
 
+## In-place original-source authority
+
+An already-authored canonical project may explicitly select initial `original`
+authority through a reviewed `project adopt-original` plan/apply operation. This
+mode preserves the original hierarchy and build definitions rather than invoking
+the legacy quarantine/wrapper conversion. The plan binds validated project
+authority and the clean Git root's current commit/tree. Applying requires that
+exact plan identity and acknowledgment, revalidates those facts, and creates only
+the original-adoption evidence and authority projection under `.literate`.
+
+`original` is a separate initial authority choice, not a conversion milestone or
+baseline/acceptance claim. It has no prior state and no transition into the legacy
+wrapped/retained/drafted/qualified chain. Existing stages and their identities
+remain unchanged. A project in original mode continues to reject ordinary
+regenerative rebuilds; retained planning/execution still need their complete
+input, lock, SDK/toolchain, original-test, independent acceptance, receipt,
+package and release gates. This adoption never runs the existing build, chooses
+language/packaging Flavors, changes source bytes or claims full catalog coverage.
+
+The Git snapshot records the initial adoption boundary, not future build
+acceptance. Subsequent edits remain original-authoritative and must earn current
+retained plans/receipts with their actual bytes. Existing conversion/adoption
+authority cannot be silently replaced by this operation.
+
+## Portable retained executable intent
+
+Input discovery accepts a sorted, unique tuple of reviewed executable paths. On
+POSIX, every declaration must also have a native execute bit; an explicit name
+cannot promote inert bytes. Windows has no corresponding POSIX mode bit, so the
+declaration supplies the portable `0755` intent that is sealed into the retained
+manifest. Later Windows verification reuses only that sealed selection while still
+rechecking the complete path, byte, size and role closure. Missing paths, aliases,
+duplicates and symlinks refuse. Changing executable intent therefore changes the
+manifest identity and cannot silently widen an accepted plan.
+
+Produced executable intent is not inferred from a Windows filesystem either. The
+withheld acceptance policy is the independent reviewed owner of executable output
+paths; output capture projects only cases that fall under the action's declared
+output roots. The sealed output manifest then carries that intent through verifier
+execution, admission and package projection. An absent declared executable fails
+capture instead of being silently packaged as inert data.
+
 ## Captured native runtime search paths
 
 Profiles may opt into an ordered `runtime_library_paths` tuple of at most 32
@@ -124,6 +175,37 @@ compiler closure, suppress system loader fallback, admit SDK products, establish
 tool source-build provenance, or qualify public retained execution. Compiler
 resource directories, sysroots, startup/link inputs and relocated execution
 remain separate explicit requirements.
+
+## Built-product command lookup
+
+Profiles may separately opt into an ordered `output_command_paths` tuple of at
+most 32 canonical output-relative directory names. Every selection must be at
+or below a declared build output; test/documentation-only products, ambient paths,
+aliases and redirected or non-directory existing ancestors refuse. A directory
+may be absent before its build producer runs. Its eventual bytes remain subject
+to the normal sealed export and dependency checks.
+
+These paths precede captured tool directories in the credential-free command
+search path, allowing original tests to invoke newly built programs by name.
+The selection is bound into profile/plan identity and the stable execution
+environment. Caller PATH is never inherited. Omission preserves previous profile
+wire identities and the existing captured-tools-only command path. This does not
+grant execution, qualify a compiled product or replace independent acceptance.
+
+## Observed local execution context
+
+The development local entry obtains actual bounded worker observations through
+the existing probe owner. Authored OS requirements do not select the local probe
+implementation. The resulting observations must satisfy the original worker
+requirements and every selected OS/architecture Flavor; architecture aliases use
+the shared host normalizer. Target labels alone do not establish eligibility.
+
+Current-plan guards repeat the observation, refusing OS-family, OS-version or
+architecture drift. The initial and final observations bind the exact plan and
+authored worker in a typed data-only record. Live receipt admission revalidates
+that record against the run's actual lock closure and retains it in immutable CAS
+records. Existing receipt wire shape and identities are unchanged when this
+optional context is absent. Decoding context never creates an admission capability.
 
 ## Canonical per-Component input ownership
 
@@ -163,9 +245,10 @@ fields preserve legacy wire identities. Ownership rules cover links as ordinary
 input nodes, and a changed link target invalidates the manifest even when the old
 and new destination files have identical contents.
 
-This input custody extension does not admit native actions, executable tool
-aliases, per-unit packages or retained lifecycle acceptance. The public execution
-refusal and independent source/SDK/variant/receipt gates remain unchanged.
+This input custody extension does not itself admit native actions, executable
+tool aliases, per-unit packages or retained lifecycle acceptance. Local execution
+still requires the independent source/SDK/variant/receipt gates; complete public
+and native qualification remain open.
 
 
 ## Explicit independent acceptance of retained exports
@@ -191,7 +274,7 @@ identities; failed-case observations cannot become successful lifecycle evidence
 These observations are independent executable-case evidence, not retained
 lifecycle receipts, complete source/resolved BOM admission, qualified SDK products
 or packaged-artifact acceptance. They never advance conversion or release
-authority. The public retained execution refusal remains while these later
+authority. Full public retained execution qualification remains open while these later
 consumers are integrated and qualified. Legacy profiles produce no new independent
 acceptance observation merely by labeling a zero-exit command as acceptance.
 
@@ -382,3 +465,22 @@ a failed case. Retain immutable actual filesystem observations with ordinary
 process results, including mismatches, and recheck their policy binding during
 whole-run completion and receipt retention. Existing independent authority,
 original test coverage, source/SDK admission and release gates remain mandatory.
+
+## Public selected SDK execution
+
+An SDK placement bound to a particular producer run remains an exact run-bound
+contract. Its identity includes fresh producer authorization, so a later public
+invocation cannot reuse it as a live admission handle. The explicit
+`literate-ai/retained-project-sdk-selection-policy@1` instead pins each exact
+Component lock, recipe selection, complete SDK snapshot and placement. Selection
+includes source, target and recipe authority; snapshot includes complete output
+bytes and selected topology. The earlier schema is neither weakened nor reinterpreted.
+
+Read-only planning validates those expectations without acquiring or compiling
+SDKs. After exact-plan and host-execution authorization, public local execution
+uses the current locked-authority reader and existing native source-build service
+to obtain fresh producer owners for the complete lock closure. It compares actual
+selections and snapshots before consumer commands, retains producer/command evidence
+in its custody CAS and keeps live currentness and revocation through independent
+acceptance and receipt admission. Policy metadata cannot grant source, command,
+package or release authority. Remote execution remains separately qualified work.

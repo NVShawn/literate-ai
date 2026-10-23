@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:tree-package-contracts@1",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:tree-package-plan@1"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:tree-package-result@1"
+    }
+  ],
+  "$defs": {
+    "plan": {
+      "$id": "urn:literate-ai:schema:v2:tree-package-plan@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "base",
+        "trees",
+        "limits",
+        "case_sensitive"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:tree-package-plan@1"
+        },
+        "base": {
+          "$ref": "urn:literate-ai:schema:v2:package-plan"
+        },
+        "trees": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": {
+            "$ref": "urn:literate-ai:schema:v2:package-tree-input@1"
+          }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "max_entries",
+            "max_file_bytes",
+            "max_total_bytes"
+          ],
+          "properties": {
+            "max_entries": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "max_file_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            },
+            "max_total_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9223372036854775807
+            }
+          }
+        },
+        "case_sensitive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "result": {
+      "$id": "urn:literate-ai:schema:v2:tree-package-result@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "package_plan_identity",
+        "packager_identity",
+        "archive"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:tree-package-result@1"
+        },
+        "package_plan_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "packager_identity": {
+          "$ref": "urn:literate-ai:schema:v1:content-identity"
+        },
+        "archive": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/x-tar"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

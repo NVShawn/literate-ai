@@ -19,7 +19,12 @@ from literate_ai.contracts import (
 from literate_ai.projects import ProjectConfigurationStore, ProjectError
 
 STANDARD_REBIND_PLAN_SCHEMA = "literate-ai/standard-lifecycle-rebind-plan@1"
+STANDARD_FIRST_BIND_PLAN_SCHEMA = "literate-ai/standard-lifecycle-first-bind-plan@1"
 STANDARD_REBIND_RESULT_SCHEMA = "literate-ai/standard-lifecycle-rebind-result@1"
+_STALE_EVIDENCE = {
+    "test_receipt": "stale-until-rebuild",
+    "accepted_source_membership": "stale-until-rebuild",
+}
 
 
 class InstalledDistributionMember(Protocol):
@@ -137,12 +142,19 @@ def _receipt_policy(
     driver: StandardProjectLifecycleDriver,
     policy: StandardLifecyclePolicy,
     *,
-    configured_driver: StandardProjectLifecycleDriver,
-    configured_receipt: ProjectTestReceiptPolicy,
+    configured_driver: StandardProjectLifecycleDriver | None,
+    configured_receipt: ProjectTestReceiptPolicy | None,
 ) -> ProjectTestReceiptPolicy:
+    # An unbound project's existing receipt contract is project-owned. Without
+    # an old Standard driver, no runner or suite can be inferred as derived.
+    if configured_driver is None and configured_receipt is not None:
+        return configured_receipt
     # Only the Standard suite belongs to the installed policy. A custom suite's
     # runner can derive from the Standard driver without surrendering its contract.
-    if configured_receipt.suite_id != policy.policy_id:
+    if (
+        configured_receipt is not None
+        and configured_receipt.suite_id != policy.policy_id
+    ):
         if configured_receipt.runner_identity == configured_driver.identity:
             return replace(configured_receipt, runner_identity=driver.identity)
         return configured_receipt
@@ -153,6 +165,34 @@ def _receipt_policy(
         required_evidence_kinds=policy.required_evidence_kinds,
         minimum_test_count=policy.minimum_test_count,
     )
+
+
+def _configured_authority(definition):
+    driver = definition.lifecycle_driver
+    receipt = definition.test_receipt_policy
+    if driver is None:
+        if receipt is None and definition.test_receipt is None:
+            _error(
+                "standard_rebind.test_receipt_path_required",
+                "project must configure a test_receipt path before first "
+                "Standard binding",
+            )
+        return driver, receipt
+    if not isinstance(driver, StandardProjectLifecycleDriver):
+        _error(
+            "standard_rebind.binding_required",
+            "project lifecycle_driver must be absent or use the Standard binding",
+        )
+    if not isinstance(receipt, ProjectTestReceiptPolicy):
+        _error(
+            "standard_rebind.receipt_policy_required",
+            "Standard-bound project must configure its test receipt policy",
+        )
+    return driver, receipt
+
+
+def _authority_document(value):
+    return None if value is None else value.to_dict()
 
 
 def _installed_evidence(
@@ -187,18 +227,7 @@ def plan_standard_lifecycle_rebind(
     """Plan one reviewed Standard rebind without changing project authority."""
 
     _configuration_store, snapshot = _store(project)
-    configured = snapshot.definition.lifecycle_driver
-    configured_receipt = snapshot.definition.test_receipt_policy
-    if not isinstance(configured, StandardProjectLifecycleDriver):
-        _error(
-            "standard_rebind.binding_required",
-            "project lifecycle_driver must use the Standard binding",
-        )
-    if not isinstance(configured_receipt, ProjectTestReceiptPolicy):
-        _error(
-            "standard_rebind.receipt_policy_required",
-            "Standard-bound project must configure its test receipt policy",
-        )
+    configured, configured_receipt = _configured_authority(snapshot.definition)
     distribution, policy, origin = _observe(
         distribution_observer=distribution_observer,
         policy_loader=policy_loader,
@@ -220,19 +249,20 @@ def plan_standard_lifecycle_rebind(
         if old != new
     ]
     result: dict[str, object] = {
-        "schema": STANDARD_REBIND_PLAN_SCHEMA,
+        "schema": (
+            STANDARD_FIRST_BIND_PLAN_SCHEMA
+            if configured is None and configured_receipt is not None
+            else STANDARD_REBIND_PLAN_SCHEMA
+        ),
         "project_configuration_identity": snapshot.content_identity.uri,
-        "configured_binding": configured.to_dict(),
+        "configured_binding": _authority_document(configured),
         "proposed_binding": proposed.to_dict(),
-        "configured_receipt_policy": configured_receipt.to_dict(),
+        "configured_receipt_policy": _authority_document(configured_receipt),
         "proposed_receipt_policy": proposed_receipt.to_dict(),
         "installed_authority": _installed_evidence(distribution, policy, origin),
         "change_required": bool(changed_fields),
         "changed_fields": changed_fields,
-        "evidence_after_apply": {
-            "test_receipt": "stale-until-rebuild",
-            "accepted_source_membership": "stale-until-rebuild",
-        },
+        "evidence_after_apply": dict(_STALE_EVIDENCE),
     }
     result["identity"] = canonical_identity(result).uri
     return result
@@ -253,22 +283,38 @@ def _validated_plan(value: Mapping[str, object]) -> dict[str, object]:
         "evidence_after_apply",
         "identity",
     }
-    if set(plan) != required or plan.get("schema") != STANDARD_REBIND_PLAN_SCHEMA:
+    if set(plan) != required or plan.get("schema") not in (
+        STANDARD_REBIND_PLAN_SCHEMA,
+        STANDARD_FIRST_BIND_PLAN_SCHEMA,
+    ):
         _error("standard_rebind.plan_invalid", "rebind plan has an invalid shape")
     identity = plan.pop("identity")
     if not isinstance(identity, str) or canonical_identity(plan).uri != identity:
         _error("standard_rebind.plan_invalid", "rebind plan identity is invalid")
     plan["identity"] = identity
     try:
-        StandardProjectLifecycleDriver.from_dict(
-            plan["configured_binding"], path="rebind.configured_binding"
-        )
+        if plan["schema"] == STANDARD_FIRST_BIND_PLAN_SCHEMA:
+            if plan["configured_binding"] is not None:
+                raise ValueError("receipt-only first binding must have no driver")
+            ProjectTestReceiptPolicy.from_dict(
+                plan["configured_receipt_policy"],
+                path="rebind.configured_receipt_policy",
+            )
+        elif plan["configured_binding"] is None:
+            if plan["configured_receipt_policy"] is not None:
+                raise ValueError(
+                    "initial binding must have no configured receipt policy"
+                )
+        else:
+            StandardProjectLifecycleDriver.from_dict(
+                plan["configured_binding"], path="rebind.configured_binding"
+            )
+            ProjectTestReceiptPolicy.from_dict(
+                plan["configured_receipt_policy"],
+                path="rebind.configured_receipt_policy",
+            )
         StandardProjectLifecycleDriver.from_dict(
             plan["proposed_binding"], path="rebind.proposed_binding"
-        )
-        ProjectTestReceiptPolicy.from_dict(
-            plan["configured_receipt_policy"],
-            path="rebind.configured_receipt_policy",
         )
         ProjectTestReceiptPolicy.from_dict(
             plan["proposed_receipt_policy"], path="rebind.proposed_receipt_policy"
@@ -277,6 +323,11 @@ def _validated_plan(value: Mapping[str, object]) -> dict[str, object]:
         raise StandardLifecycleRebindError(
             "standard_rebind.plan_invalid", "rebind plan contains invalid authority"
         ) from exc
+    if plan["evidence_after_apply"] != _STALE_EVIDENCE:
+        _error(
+            "standard_rebind.plan_invalid",
+            "binding changes cannot qualify existing evidence",
+        )
     return plan
 
 
@@ -303,18 +354,13 @@ def apply_standard_lifecycle_rebind(
             "standard_rebind.project_changed",
             "project manifest changed after the rebind was planned",
         )
-    if snapshot.definition.lifecycle_driver is None:
-        _error("standard_rebind.binding_required", "project has no lifecycle binding")
-    if snapshot.definition.lifecycle_driver.to_dict() != plan["configured_binding"]:
+    configured, configured_receipt = _configured_authority(snapshot.definition)
+    if _authority_document(configured) != plan["configured_binding"]:
         _error(
             "standard_rebind.project_changed",
             "project Standard binding changed after the rebind was planned",
         )
-    if (
-        snapshot.definition.test_receipt_policy is None
-        or snapshot.definition.test_receipt_policy.to_dict()
-        != plan["configured_receipt_policy"]
-    ):
+    if _authority_document(configured_receipt) != plan["configured_receipt_policy"]:
         _error(
             "standard_rebind.project_changed",
             "project test receipt policy changed after the rebind was planned",
@@ -346,10 +392,6 @@ def apply_standard_lifecycle_rebind(
             "project-pinned Standard policy differs from installed policy",
         )
 
-    configured = snapshot.definition.lifecycle_driver
-    configured_receipt = snapshot.definition.test_receipt_policy
-    if not isinstance(configured, StandardProjectLifecycleDriver):
-        _error("standard_rebind.binding_required", "project must use Standard binding")
     expected_receipt = _receipt_policy(
         proposed,
         policy,
@@ -436,6 +478,7 @@ def apply_standard_lifecycle_rebind(
 
 
 __all__ = [
+    "STANDARD_FIRST_BIND_PLAN_SCHEMA",
     "STANDARD_REBIND_PLAN_SCHEMA",
     "STANDARD_REBIND_RESULT_SCHEMA",
     "StandardLifecycleRebindError",

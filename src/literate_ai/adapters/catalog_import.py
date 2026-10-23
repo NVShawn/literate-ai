@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import tempfile
 from collections.abc import Iterator
@@ -23,6 +24,7 @@ from literate_ai.contracts.catalog_imports import (
     CatalogImportSource,
     TransitiveAncestor,
 )
+from literate_ai.contracts.paths import canonical_relative_posix_path
 from literate_ai.projects import (
     PROJECT_FILENAME,
     ProjectConfigurationStore,
@@ -150,7 +152,62 @@ def _run_git(
         ) from exc
 
 
-def _clone_git_source(source_spec: str) -> tuple[Path, str]:
+def _initialize_submodules(root: Path, paths: tuple[str, ...] | None) -> None:
+    arguments: tuple[str, ...] = ()
+    if paths is not None:
+        if not (root / ".gitmodules").is_file():
+            return
+        values = _run_git(
+            (
+                "git",
+                "config",
+                "--null",
+                "--no-includes",
+                "--file",
+                ".gitmodules",
+                "--list",
+            ),
+            cwd=root,
+        )
+        selected = []
+        for entry in values.split("\0"):
+            name, _, value = entry.partition("\n")
+            if not name.startswith("submodule.") or not name.endswith(".path"):
+                continue
+            try:
+                canonical_relative_posix_path(value, label="catalog submodule path")
+            except ValueError as exc:
+                raise CatalogImportError(
+                    "catalog.import_git_invalid", "catalog submodule path is invalid"
+                ) from exc
+            if any(
+                value == path
+                or value.startswith(path + "/")
+                or path.startswith(value + "/")
+                for path in paths
+            ):
+                selected.append(value)
+        if not selected:
+            return
+        arguments = ("--", *sorted(set(selected)))
+    _run_git(
+        (
+            "git",
+            *_GIT_FILE_PROTOCOL,
+            "submodule",
+            "update",
+            "--init",
+            "--recursive",
+            "--depth=1",
+            *arguments,
+        ),
+        cwd=root,
+    )
+
+
+def _clone_git_source(
+    source_spec: str, paths: tuple[str, ...] | None = None
+) -> tuple[Path, str]:
     raw = source_spec.strip()
     locator = raw[4:].strip() if raw.startswith("git:") else raw
     if not locator:
@@ -172,20 +229,67 @@ def _clone_git_source(source_spec: str) -> tuple[Path, str]:
     clone_parent = Path(tempfile.mkdtemp(prefix="litai-c-"))
     clone_root = clone_parent / "src"
     try:
-        _run_git(
-            (
-                "git",
-                *_GIT_FILE_PROTOCOL,
-                "clone",
-                "--quiet",
-                "--recurse-submodules",
-                "--",
-                url,
-                str(clone_root),
-            ),
-            cwd=clone_parent,
+        immutable = (
+            re.fullmatch(r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}", revision) is not None
         )
-        if revision != "HEAD":
+        if immutable:
+            object_format = "sha256" if len(revision) == 64 else "sha1"
+            _run_git(
+                (
+                    "git",
+                    "init",
+                    "--quiet",
+                    "--object-format=" + object_format,
+                    str(clone_root),
+                ),
+                cwd=clone_parent,
+            )
+            _run_git(("git", "remote", "add", "origin", url), cwd=clone_root)
+            filtering = ()
+            if paths is not None:
+                _run_git(
+                    ("git", "config", "remote.origin.promisor", "true"), cwd=clone_root
+                )
+                _run_git(
+                    ("git", "config", "remote.origin.partialclonefilter", "blob:none"),
+                    cwd=clone_root,
+                )
+                filtering = ("--filter=blob:none",)
+            _run_git(
+                (
+                    "git",
+                    *_GIT_FILE_PROTOCOL,
+                    "fetch",
+                    "--quiet",
+                    "--depth=1",
+                    "--no-tags",
+                    *filtering,
+                    "origin",
+                    revision,
+                ),
+                cwd=clone_root,
+            )
+            if paths is not None:
+                _run_git(
+                    ("git", "sparse-checkout", "set", "--cone", "--", *paths),
+                    cwd=clone_root,
+                )
+            checkout = "FETCH_HEAD"
+        else:
+            _run_git(
+                (
+                    "git",
+                    *_GIT_FILE_PROTOCOL,
+                    "clone",
+                    "--quiet",
+                    "--",
+                    url,
+                    str(clone_root),
+                ),
+                cwd=clone_parent,
+            )
+            checkout = revision
+        if checkout != "HEAD":
             _run_git(
                 (
                     "git",
@@ -193,7 +297,7 @@ def _clone_git_source(source_spec: str) -> tuple[Path, str]:
                     "checkout",
                     "--quiet",
                     "--detach",
-                    revision,
+                    checkout,
                 ),
                 cwd=clone_root,
             )
@@ -201,6 +305,12 @@ def _clone_git_source(source_spec: str) -> tuple[Path, str]:
             ("git", *_GIT_FILE_PROTOCOL, "rev-parse", "HEAD"),
             cwd=clone_root,
         ).strip()
+        if immutable and commit.lower() != revision.lower():
+            raise CatalogImportError(
+                "catalog.import_git_revision_mismatch",
+                "git catalog source did not resolve the requested immutable commit",
+            )
+        _initialize_submodules(clone_root, paths if immutable else None)
         if not (clone_root / PROJECT_FILENAME).exists():
             raise CatalogImportError(
                 "catalog.import_source_invalid",
@@ -225,11 +335,13 @@ def _resolve_local_source(source_spec: str) -> tuple[Path, str]:
 
 
 @contextmanager
-def _open_source(source_spec: str) -> Iterator[tuple[Path, str]]:
+def _open_source(
+    source_spec: str, paths: tuple[str, ...] | None = None
+) -> Iterator[tuple[Path, str]]:
     """Resolve a local path or git URL into a project tree and provenance ref."""
 
     if _is_git_source_spec(source_spec):
-        clone_root, ref = _clone_git_source(source_spec)
+        clone_root, ref = _clone_git_source(source_spec, paths)
         clone_parent = clone_root.parent
         try:
             yield clone_root, ref
@@ -379,6 +491,13 @@ def _parse_item_spec(spec: str) -> tuple[str, str]:
             "catalog.import_item_invalid",
             f"item name must not be empty in spec: {spec!r}",
         )
+    try:
+        canonical_relative_posix_path(name, label="catalog item name")
+    except ValueError as exc:
+        raise CatalogImportError(
+            "catalog.import_item_invalid",
+            "catalog item name must be a canonical relative path",
+        ) from exc
     return kind, name
 
 
@@ -438,7 +557,7 @@ def _copy_item(
     dst_dir.parent.mkdir(parents=True, exist_ok=True)
     if dst_dir.exists():
         shutil.rmtree(dst_dir)
-    shutil.copytree(src_dir, dst_dir)
+    shutil.copytree(src_dir, dst_dir, ignore=shutil.ignore_patterns(".git"))
 
     # Build file records with content identities
     files: list[CatalogImportFile] = []
@@ -465,7 +584,19 @@ def catalog_copy(
     Copy catalog items from source_spec into dest_root, recording provenance.
     Returns a result dict suitable for CLI output.
     """
-    with _open_source(source_spec) as (source_root, ref):
+    items = [_parse_item_spec(s) for s in item_specs]
+    paths = tuple(
+        sorted(
+            {
+                ".literate",
+                *(
+                    str(Path(_KIND_DIR[kind]) / name).replace("\\", "/")
+                    for kind, name in items
+                ),
+            }
+        )
+    )
+    with _open_source(source_spec, paths) as (source_root, ref):
         source_project_id, source_project_identity = _read_source_project(source_root)
         source_ancestors = _read_source_ancestors(source_root)
 
@@ -473,7 +604,6 @@ def catalog_copy(
         check_dag_safe(dest_root, source_project_id, source_ancestors)
 
         # Parse and validate all item specs before touching anything
-        items = [_parse_item_spec(s) for s in item_specs]
         # Verify all source items exist before any writes
         for kind, name in items:
             _source_item_dir(source_root, kind, name)  # raises if missing

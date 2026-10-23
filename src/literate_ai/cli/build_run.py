@@ -58,6 +58,7 @@ from .execution_workers import (
     dispatch_with_worker_health_poll,
     select_execution_worker,
 )
+from .retained_project import retained_project_requested
 
 BUILD_SCHEMA = "literate-ai/component-build@2"
 RUN_SCHEMA = "literate-ai/component-run@2"
@@ -321,7 +322,18 @@ def _scan_coverage_gaps(
 def build_from_args(args: Any) -> dict[str, Any]:
     """Build through the selected exact worker."""
 
+    if retained_project_requested(args):
+        return _retained_from_args(args)
     return _build_from_args(args, action=LifecycleDispatchAction.BUILD)
+
+
+def _retained_from_args(args: Any) -> dict[str, Any]:
+    """Use the existing whole-project owner, without generated artifact export."""
+    from .rebuild import rebuild_from_args
+
+    request = Namespace(**vars(args))
+    request.specification = getattr(args, "component", None) or "."
+    return rebuild_from_args(request)
 
 
 def _demonstration_arguments(
@@ -349,6 +361,8 @@ def _demonstration_arguments(
 def test_from_args(args: Any) -> dict[str, Any]:
     """Require the current build, generated tests, and acceptance gates to pass."""
 
+    if retained_project_requested(args):
+        return _retained_from_args(args)
     built = _build_from_args(args, action=LifecycleDispatchAction.TEST)
     tested = {
         "schema": TEST_SCHEMA,

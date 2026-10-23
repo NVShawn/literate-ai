@@ -1,11 +1,34 @@
 """Project reviewed captured runtime paths; never inherit loader injection."""
 
+import os
 import sys
 from pathlib import Path
 
 from literate_ai._filesystem import require_safe_directory
 from literate_ai.contracts.retained_project import RetainedProjectManifest
 from literate_ai.contracts.retained_project_lifecycle import RetainedProjectProfile
+
+
+def retained_command_path(outputs: Path, profile: RetainedProjectProfile, tools) -> str:
+    """Select reviewed build directories before captured tools, never host PATH.
+
+    Build directories may not exist before their producer runs. Existing ancestors
+    must be direct directories; normal export custody still guards their contents.
+    """
+    paths = []
+    require_safe_directory(outputs)
+    for name in profile.output_command_paths:
+        current = outputs
+        for part in name.split("/"):
+            current = current / part
+            try:
+                current.lstat()
+            except FileNotFoundError:
+                break
+            require_safe_directory(current)
+        paths.append(str(outputs / name))
+    paths.extend(sorted({str(Path(tool.executable).parent) for tool in tools}))
+    return os.pathsep.join(paths)
 
 
 def captured_runtime_environment(

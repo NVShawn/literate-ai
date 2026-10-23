@@ -16,6 +16,7 @@ ONBOARD_PLAN_SCHEMA = "literate-ai/onboard-plan@1"
 class ConversionAuthorityStage(StrEnum):
     """Explicit, ordered authority stages for an adopted source tree."""
 
+    ORIGINAL = "original"
     WRAPPED = "wrapped"
     RETAINED = "retained"
     DRAFTED = "drafted"
@@ -58,9 +59,16 @@ class ConversionAuthorityState:
             self.evidence_identities
         ):
             raise ValueError("conversion authority evidence identities must be sorted")
-        if self.stage is ConversionAuthorityStage.WRAPPED:
+        if self.stage in {
+            ConversionAuthorityStage.WRAPPED,
+            ConversionAuthorityStage.ORIGINAL,
+        }:
             if self.prior_state_identity is not None:
-                raise ValueError("wrapped is the initial conversion authority stage")
+                if self.stage is ConversionAuthorityStage.WRAPPED:
+                    raise ValueError(
+                        "wrapped is the initial conversion authority stage"
+                    )
+                raise ValueError("original authority cannot have a prior state")
         elif self.prior_state_identity is None:
             raise ValueError(
                 "advanced conversion authority requires its prior identity"

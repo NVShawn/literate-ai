@@ -9,6 +9,7 @@ from pathlib import Path
 
 from literate_ai.adapters.catalog_import import (
     CatalogImportError,
+    _open_source,
     catalog_copy,
 )
 
@@ -83,6 +84,203 @@ def _git(root: Path, *arguments: str) -> str:
 
 
 class GitCatalogSourceTests(unittest.TestCase):
+    def test_selected_catalog_slice_leaves_unrelated_blobs_unfetched(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            source = make_project(Path(d) / "source", "proj-src")
+            add_flavor(source, "myflavor")
+            unrelated = source / "unrelated" / "payload"
+            unrelated.parent.mkdir()
+            unrelated.write_bytes(os.urandom(65536))
+            _git(source, "init", "--quiet", "-b", "main")
+            _git(source, "config", "uploadpack.allowFilter", "true")
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "source")
+            selected = _git(source, "rev-parse", "HEAD")
+            excluded_blob = _git(source, "rev-parse", "HEAD:unrelated/payload")
+            with _open_source(
+                f"git:{source.resolve().as_uri()}#{selected}",
+                (".literate", "flavors/myflavor"),
+            ) as (snapshot, _ref):
+                self.assertTrue((snapshot / "literate.project.json").is_file())
+                self.assertTrue((snapshot / "flavors/myflavor/flavor.md").is_file())
+                self.assertFalse((snapshot / "unrelated/payload").exists())
+                missing = _git(
+                    snapshot, "rev-list", "--objects", "--missing=print", "HEAD"
+                )
+                self.assertIn("?" + excluded_blob, missing.splitlines())
+
+    def test_catalog_copy_fetches_selected_submodule_without_git_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            child = Path(d) / "child"
+            child.mkdir()
+            _git(child, "init", "--quiet", "-b", "main")
+            (child / "flavor.md").write_text("selected flavor\n")
+            _git(child, "add", ".")
+            _git(child, "commit", "--quiet", "-m", "selected")
+            source = make_project(Path(d) / "source", "proj-src")
+            dest = make_project(Path(d) / "dest", "proj-dst")
+            _git(source, "init", "--quiet", "-b", "main")
+            for path in ("flavors/myflavor", "unrelated/child"):
+                _git(
+                    source,
+                    "-c",
+                    "protocol.file.allow=always",
+                    "submodule",
+                    "add",
+                    str(child),
+                    path,
+                )
+            # An unavailable unrelated submodule must not prevent catalog acquisition.
+            _git(
+                source,
+                "config",
+                "--file",
+                ".gitmodules",
+                "submodule.unrelated/child.url",
+                str(Path(d) / "missing"),
+            )
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "source")
+            selected = _git(source, "rev-parse", "HEAD")
+            catalog_copy(
+                dest, f"git:{source.resolve().as_uri()}#{selected}", ["flavor:myflavor"]
+            )
+            copied = dest / "flavors/myflavor"
+            self.assertEqual((copied / "flavor.md").read_text(), "selected flavor\n")
+            self.assertFalse((copied / ".git").exists())
+
+    def test_catalog_item_path_traversal_is_rejected_before_acquisition(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            dest = make_project(Path(d) / "dest", "proj-dst")
+            for item in ("flavor:../outside", "skill:/absolute", "flavor:foo/../bar"):
+                with (
+                    self.subTest(item=item),
+                    self.assertRaises(CatalogImportError) as raised,
+                ):
+                    catalog_copy(
+                        dest, "git:https://example.invalid/unreachable.git", [item]
+                    )
+                self.assertEqual(raised.exception.code, "catalog.import_item_invalid")
+
+    def test_exact_pin_fetch_omits_later_history_and_records_selected_commit(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            source = make_project(Path(d) / "source", "proj-src")
+            add_flavor(source, "myflavor")
+            _git(source, "init", "--quiet", "-b", "main")
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "selected")
+            selected = _git(source, "rev-parse", "HEAD")
+            (source / "unselected-later-input").write_bytes(b"later" * 65536)
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "later")
+            later = _git(source, "rev-parse", "HEAD")
+            with _open_source(f"git:{source.resolve().as_uri()}#{selected}") as (
+                snapshot,
+                ref,
+            ):
+                self.assertEqual(_git(snapshot, "rev-parse", "HEAD"), selected)
+                self.assertEqual(
+                    _git(snapshot, "rev-parse", "--is-shallow-repository"), "true"
+                )
+                self.assertEqual(_git(snapshot, "rev-list", "--count", "HEAD"), "1")
+                with self.assertRaises(subprocess.CalledProcessError):
+                    _git(snapshot, "cat-file", "-e", later)
+                self.assertFalse((snapshot / "unselected-later-input").exists())
+                self.assertTrue(ref.endswith("@" + selected))
+
+    def test_sha256_commit_uses_the_matching_git_object_format(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            source = make_project(Path(d) / "source", "proj-src")
+            try:
+                _git(source, "init", "--quiet", "--object-format=sha256", "-b", "main")
+            except subprocess.CalledProcessError:
+                self.skipTest("Git does not support SHA-256 repositories")
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "selected")
+            selected = _git(source, "rev-parse", "HEAD")
+            self.assertEqual(len(selected), 64)
+            with _open_source(f"git:{source.resolve().as_uri()}#{selected}") as (
+                snapshot,
+                ref,
+            ):
+                self.assertEqual(_git(snapshot, "rev-parse", "HEAD"), selected)
+                self.assertEqual(
+                    _git(snapshot, "rev-parse", "--show-object-format"), "sha256"
+                )
+                self.assertEqual(
+                    _git(snapshot, "rev-parse", "--is-shallow-repository"), "true"
+                )
+                self.assertTrue(ref.endswith("@" + selected))
+
+    def test_selected_snapshot_initializes_its_submodule_revision(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            child = Path(d) / "child"
+            child.mkdir()
+            _git(child, "init", "--quiet", "-b", "main")
+            (child / "payload").write_text("selected child\n")
+            _git(child, "add", ".")
+            _git(child, "commit", "--quiet", "-m", "selected child")
+            child_pin = _git(child, "rev-parse", "HEAD")
+            (child / "payload").write_text("later child\n")
+            _git(child, "add", ".")
+            _git(child, "commit", "--quiet", "-m", "later child")
+            child_later = _git(child, "rev-parse", "HEAD")
+            source = make_project(Path(d) / "source", "proj-src")
+            _git(source, "init", "--quiet", "-b", "main")
+            _git(
+                source,
+                "-c",
+                "protocol.file.allow=always",
+                "submodule",
+                "add",
+                str(child),
+                "vendor/child",
+            )
+            _git(source / "vendor/child", "checkout", "--quiet", child_pin)
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "selected parent")
+            selected = _git(source, "rev-parse", "HEAD")
+            _git(source / "vendor/child", "checkout", "--quiet", child_later)
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "later parent")
+            with _open_source(f"git:{source.resolve().as_uri()}#{selected}") as (
+                snapshot,
+                _ref,
+            ):
+                self.assertEqual(
+                    _git(snapshot / "vendor/child", "rev-parse", "HEAD"), child_pin
+                )
+                self.assertEqual(
+                    (snapshot / "vendor/child/payload").read_text(), "selected child\n"
+                )
+
+    def test_missing_pin_does_not_mutate_destination(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            source = make_project(Path(d) / "source", "proj-src")
+            dest = make_project(Path(d) / "dest", "proj-dst")
+            _git(source, "init", "--quiet", "-b", "main")
+            _git(source, "add", ".")
+            _git(source, "commit", "--quiet", "-m", "source")
+            before = {
+                p.relative_to(dest): p.read_bytes()
+                for p in dest.rglob("*")
+                if p.is_file()
+            }
+            with self.assertRaises(CatalogImportError):
+                catalog_copy(
+                    dest,
+                    f"git:{source.resolve().as_uri()}#{'0' * 40}",
+                    ["flavor:missing"],
+                )
+            after = {
+                p.relative_to(dest): p.read_bytes()
+                for p in dest.rglob("*")
+                if p.is_file()
+            }
+            self.assertEqual(after, before)
+
     def test_git_source_pins_requested_revision(self) -> None:
         with tempfile.TemporaryDirectory() as d:
             source = make_project(Path(d) / "source", "proj-src")

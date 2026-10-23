@@ -31,15 +31,17 @@ class RetainedProjectDependencyTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name).resolve()
         (self.root / "sdk").mkdir()
-        tool = self.root / "sdk/tool"
+        tool = self.root / "sdk/tool.exe"
         # The observer is explicitly simulated in this contract fixture.
         # Native inspection is exercised by the real compiled command group.
+        # Windows derives executable mode from the filename, not chmod(0755).
         tool.write_bytes(b"captured tool")
         tool.chmod(0o755)
         self.manifest = discover_retained_project_inputs(
             self.root,
             {"sdk": "sdk"},
             RetainedProjectLimits(10, 4096, 8192),
+            executable_paths=("sdk/tool.exe",),
         )
         plan, _locks = retained_project_sbom_fixture()
         identity = ContentIdentity.parse_uri(
@@ -48,7 +50,7 @@ class RetainedProjectDependencyTests(unittest.TestCase):
         self.plan = replace(
             plan,
             manifest_identity=self.manifest.identity,
-            profile=replace(plan.profile, tools=(("tool", "sdk/tool", identity),)),
+            profile=replace(plan.profile, tools=(("tool", "sdk/tool.exe", identity),)),
         )
         self.binding = LocalComponentToolBinding(str(tool), authority_identity=identity)
         self.environment = {
@@ -199,6 +201,7 @@ class RetainedDependencyLinkTests(unittest.TestCase):
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             fixture.manifest.limits,
             allow_internal_symlinks=True,
+            executable_paths=(fixture.runner_path,),
         )
         fixture.plan = replace(
             fixture.plan, manifest_identity=fixture.manifest.identity

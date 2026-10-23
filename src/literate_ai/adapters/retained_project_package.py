@@ -64,6 +64,11 @@ class _RetainedProjectPackage:
         target = lock.target_profile_identity
         inputs = []
         payload = admission.payload_manifest
+        if any(
+            m.symlink_target is not None or m.hardlink_target is not None
+            for m in payload.members
+        ):
+            raise ValueError("retained.package.payload-links-not-qualified")
         ancestors = set()
         for member in payload.members:
             parent = member.path.rpartition("/")[0]

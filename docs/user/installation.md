@@ -168,6 +168,12 @@ the installer writes `litai.cmd` and uses the environment's `Scripts` directory.
 Contributor targets continue to use the separate ignored `.venv` and do not
 change the installed CLI.
 
+FreeBSD realizes Python SQLite support with the separate `py312-sqlite3` package.
+The OS Flavor probes an in-memory query through the current interpreter and checks
+native package registration. A working `python3.12` command alone does not satisfy
+this dependency; the declared host bootstrap installs and rechecks a missing
+module when installation is authorized.
+
 Remove only the installed Literate AI launcher and its private Python environment with:
 
 ```console

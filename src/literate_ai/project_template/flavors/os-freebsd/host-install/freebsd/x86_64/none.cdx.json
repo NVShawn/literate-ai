@@ -85,6 +85,30 @@
     },
     {
       "type": "application",
+      "bom-ref": "urn:literate-ai:host-install:freebsd:package:py312-sqlite3",
+      "name": "FreeBSD py312-sqlite3",
+      "version": ">=3.12,<4",
+      "properties": [
+        {
+          "name": "literate-ai:host-install:realization-kind",
+          "value": "native-package"
+        },
+        {
+          "name": "literate-ai:host-install:manager-package",
+          "value": "py312-sqlite3"
+        },
+        {
+          "name": "literate-ai:host-install:base-capabilities",
+          "value": "[\"python-sqlite3\"]"
+        },
+        {
+          "name": "literate-ai:host-install:path-entries",
+          "value": "[\"/usr/local/bin\",\"/usr/local/sbin\"]"
+        }
+      ]
+    },
+    {
+      "type": "application",
       "bom-ref": "urn:literate-ai:host-install:freebsd:package:git",
       "name": "FreeBSD git",
       "version": ">=2.30,<3",
@@ -289,6 +313,7 @@
       "ref": "urn:literate-ai:host-install:freebsd:x86_64:none",
       "dependsOn": [
         "urn:literate-ai:host-install:freebsd:package:python312",
+        "urn:literate-ai:host-install:freebsd:package:py312-sqlite3",
         "urn:literate-ai:host-install:freebsd:package:git",
         "urn:literate-ai:host-install:freebsd:package:git-lfs",
         "urn:literate-ai:host-install:freebsd:package:codex",
@@ -301,6 +326,10 @@
     },
     {
       "ref": "urn:literate-ai:host-install:freebsd:package:python312",
+      "dependsOn": []
+    },
+    {
+      "ref": "urn:literate-ai:host-install:freebsd:package:py312-sqlite3",
       "dependsOn": []
     },
     {

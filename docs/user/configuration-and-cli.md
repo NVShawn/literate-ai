@@ -89,6 +89,7 @@ litai project parent checkout
 litai project ci-plan
 litai project guidance
 litai project mac-contract
+litai project adopt-original
 litai project convert-stage show
 litai project convert-stage advance
 litai project source-intelligence sync
@@ -509,7 +510,7 @@ root-integration acceptance still remain.
 | `video verify RECEIPT [--manifest MANIFEST]` | Verify media integrity, caption timing, and optionally current source identity. |
 | `skills evaluate CORPUS [--project PATH] [--fire-threshold N] [--fragile-threshold N]` | Run a synthetic prompt corpus against the real skill catalog and classify each outcome as correct/misroute/over_greedy/fragile_pass -- a behavioral check that a skill's own description would distinguish it, distinct from validate's structural checks. |
 | `catalog graph [--project PATH]` | Inspect the repository provenance DAG rooted at Literate AI. |
-| `catalog copy SOURCE ITEM [ITEM ...] [--project PATH]` | Copy selected Flavor, Skill, or Component catalog items from another Literate AI project. |
+| `catalog copy SOURCE ITEM [ITEM ...] [--project PATH]` | Copy selected Flavor, Skill, or Component catalog items from another Literate AI project. Exact Git commit pins fetch shallow ancestry and selected catalog directories, requesting blob filtering from the server; initialize only relevant submodules at the selected snapshot. Servers without filtering may transfer extra bytes. Provenance retains the resolved commit. |
 | `clean [--project PATH]` | Remove only the marked host-specific `OBJ_DIR`. |
 | `really-clean [--project PATH]` | Ensure marked `OBJ_DIR` and generated-source `BUILD_DIR` are absent. This also removes deliberately tracked or uncommitted entries beneath `BUILD_DIR`. |
 | `component migrate COMPONENT\|PROJECT [--check\|--diff]` | Non-destructively project legacy `component.json` into readable `component.md`; project mode is one preflighted transaction, preserves every legacy file, and never overwrites authored prose. |
@@ -517,7 +518,8 @@ root-integration acceptance still remain.
 | `lock COMPONENT --large-review start\|status\|acknowledge\|apply\|cleanup [--transaction-id ID] [--page-identity ID]` | Review a genuine lock transition larger than 512 semantic differences in bounded identity-chained pages, then perform one final revalidated atomic replacement. |
 | `project validate [PATH]` | Non-mutating validation of the discovered project, catalogs, pins, skills, and generation inputs. |
 | `project tracker inspect [PATH]` | Read Git remotes and name `gh` or `glab` plus issue/review/CI/land argv. Unknown hosts skip tracker work fail closed. |
-| `project lifecycle rebind-standard [PLAN] [--project PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard binding update without mutation, or compare-and-swap an explicitly reviewed plan while changing only lifecycle and derived receipt-policy authority. |
+| `project lifecycle rebind-standard [PLAN] [--project PATH] [--registered-parent PATH] [--output FILE] [--apply --authorize-rebind]` | Plan an exact installed-wheel Standard first binding or update without mutation, or compare-and-swap an explicitly reviewed plan while preserving project-owned receipt authority and coordinating a registered parent. |
+| `project adopt-original [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review a validated canonical project's clean Git commit/tree and explicitly select original source authority with metadata-only writes. Preserve source layout; refuse stale plans, dirty or unsafe roots, existing evidence/authority and legacy conversion transitions. This grants no execution or release admission. |
 | `project convert-stage show [--project PATH]` | Read the canonical evidence-bound conversion authority state for an adopted project. |
 | `project convert-stage advance --to retained\|drafted\|qualified [--project PATH]` | Advance exactly one adjacent stage after independently verifying the current receipt or Component-promotion evidence. No command silently promotes a tree. |
 | `project retained-scope refresh [--project PATH] [--apply --acknowledge --expected-plan-identity SHA256]` | Review exact added/removed retained-source paths and input identities, then revalidate and rebind scope and receipt policy without changing source or historical conversion evidence. |
@@ -554,6 +556,7 @@ root-integration acceptance still remain.
 | `generate COMPONENT --output DIR [--target NAME] [--flavor=+NAME ...] [--model MODEL]` | Generate a complete source tree from the current Component lock and asserted Flavor/model selection. |
 | `build [COMPONENT] [--target NAME] [--model MODEL] [--worker ID] [--worker-param NAME=VALUE ...] [--worker-timeout-seconds N] [--worker-health-config PATH]` | Run the current specification-led lifecycle and retain a runnable artifact bound to the exact generation target, model-scope set, and execution worker. An explicit health policy performs bounded admission before substantial work and rechecks failures. |
 | `test [COMPONENT] [--target NAME] [--model MODEL] [--worker ID] [--worker-param NAME=VALUE ...] [--worker-timeout-seconds N] [--worker-health-config PATH]` | Require the current generated tests and independent acceptance gates through the same build lifecycle and model-scope set, including optional bounded worker-health admission. |
+| `build` or `test --project PATH --retained-project MANIFEST --retained-project-profile PROFILE [--retained-project-plan] [--authorize-retained-project SHA256 --allow-host-execution] [--build-dir DIR] [--obj-dir DIR]` | Use the existing complete original-source retained lifecycle. Planning is read-only; execution preserves retained receipt/custody and does not create a generated runnable export. Profile overrides and partial Component scope refuse. |
 | `run [COMPONENT] [--entrypoint NAME] [--target NAME] [--worker ID] [--flavor SELECTOR ...] [ARGUMENT ...]` | Execute the selected retained entrypoint only when its target profile, worker, and immutable generation authority match the request; omission selects the first declared entrypoint. |
 | `worker health --worker-id ID --health-config PATH [--worker-config PATH] [--job-identity SHA256] [--alert-state PATH]` | Bounded storage and optional sustained CPU/memory/paging/GPU inspection with explicit unknowns, deficit alerts and proceed/hold/recheck decisions. Disk incidents automatically run the configured read-only cleanup investigation. An alert-state file only deduplicates reporting; it authorizes neither dispatch nor cleanup. |
 | `worker cleanup plan --worker-id ID --health-config PATH [--worker-config PATH]` | Re-run the bounded configured candidate scan and emit only exact proved-inactive target identities, measurements, ownership evidence and recovery cost. Planning is read-only and explicitly reports that deletion is unauthorized. |
@@ -588,12 +591,25 @@ root-integration acceptance still remain.
 | `skills [--skills-root DIR]` | List an explicit inverse-skill catalog, or packaged reviewed skills by default. |
 | `format CORPUS --id-prefix ID [--check\|--write]` | Preview canonical layered-spec formatting by default, check without mutation, or explicitly write canonical Markdown frontmatter and line endings. Supporting JSON remains byte-exact. |
 
+
+For source-built SDK inputs, the explicit
+`literate-ai/retained-project-sdk-selection-policy@1` policy binds each
+`component_lock_identity`, `selection_identity`, `snapshot_identity` and `prefix`.
+These are exact expected contents and placement, not producer admission. Planning
+is read-only. Execution first requires the exact plan and host acknowledgment,
+then builds the selected SDKs through the existing source/policy owners and checks
+the complete snapshot closure. It retains fresh SDK command grants, currentness,
+revocation and independent acceptance evidence. The preceding run-bound SDK policy
+keeps its exact identity and refusal semantics; a public invocation requires the
+selection policy to obtain fresh producers.
+
+
 | `validate CORPUS --id-prefix ID` | Non-mutating validation of derived IDs, parents, references, and effective context. |
 | `explain CORPUS --id-prefix ID [--node ID]` | Explain the full derived corpus graph or one node's effective context without mutation. |
 | `derive CASE_OR_SOURCE [--translator static\|coding-cli]` | Produce a reviewable draft bundle; semantic model translation requires explicit egress consent. |
 | `audit CASE_OR_SOURCE --baseline FILE [--translator static\|coding-cli]` | Compare derived behavior with a baseline. |
 | `review BUNDLE [--component-graph FILE]` | Record resolutions and optionally sign the review. A standalone static project promotion requires one explicit source-bound Component graph whose identity is covered by the review signature. |
-| `accept CASE_OR_SOURCE BUNDLE --review FILE --target DIR [--project-target DIR\|--integrate-project ADOPTED_ROOT] [--qualification-target NAME] [--flavor=+NAME ...]` | Verify and promote reviewed artifacts to intent authority; optionally create a standalone source-free Component project or register one beneath an existing retained adopted root, pin a qualification profile, and resolve the exact target/Flavor Component lock without generating source. |
+| `accept CASE_OR_SOURCE BUNDLE --review FILE --target DIR [--project-target DIR\|--integrate-project ADOPTED_ROOT] [--plan-native-child-replacement\|--replace-native-child PLAN] [--qualification-target NAME] [--flavor=+NAME ...]` | Verify and promote reviewed artifacts to intent authority; optionally create a standalone source-free Component project or register one beneath an existing retained adopted root, explicitly plan/apply replacement of an unqualified child, pin a qualification profile, and resolve the exact target/Flavor Component lock without generating source. |
 | `qualify COMPONENT --source DIR --profile FILE --output FILE --key FILE --signer ID --target NAME [--flavor=+NAME ...] --allow-host-execution` | Require the current exact Component lock, then run the historical clean generation/build/test/parity path. Version-1 evidence remains non-authorizing; only complete typed evidence from a trusted lifecycle adapter can enter locked v2 admission. |
 | `refresh CASE_OR_SOURCE --previous FILE` | Incrementally rederive, optionally naming changed paths. |
 | `conformance CASE` | Run one deterministic descriptor-based conformance case. |
@@ -1466,12 +1482,42 @@ uses compare-and-swap. It atomically updates only `lifecycle_driver` and the der
 if that authority moves during the write. Editable, ambiguous, origin-less, tampered,
 or changed installs fail closed.
 
+An adopted project with neither a lifecycle driver nor a test receipt policy can use
+the same plan/apply operation to establish its first Standard binding. The reviewed
+plan records both configured fields as `null`, then derives both new fields from the
+observed installed distribution and its complete Standard policy. This retains the
+native adoption route's original versioned plan. The project must already declare a `test_receipt` output path;
+planning refuses a missing path before it offers a plan that cannot be applied.
+First binding preserves existing source, conversion and release authority and
+produces no build or test receipt.
+
+For a registered native child, add `--registered-parent ADOPTED_ROOT` to both the
+planning and apply commands. The plan binds the parent manifest, exact registry and
+child definition. Apply coordinates both files under the registry lock, retains exact
+before/after metadata as history, and rolls back both if validation or retention fails.
+An uncoordinated registered-child rebind refuses. Concurrent metadata changes are never
+silently registered or overwritten during rollback.
+
 For a custom (non-Standard) receipt suite, rebind preserves its suite ID/version,
 required evidence kinds, and minimum test count. An independent harness runner stays
 unchanged; a runner exactly bound to the old Standard driver advances to the new
 driver identity. Only the Standard suite adopts the installed Standard receipt policy.
 The plan lists only fields that actually change. Re-plan an older proposal that would
 replace custom receipt authority; apply rejects it even if its identity is consistent.
+
+A retained project with an existing receipt policy and no lifecycle driver can use
+the same reviewed command for its first Standard binding. Its distinct
+`literate-ai/standard-lifecycle-first-bind-plan@1` plan shows
+`configured_binding: null` and preserves the entire receipt policy, including
+the independent runner identity. With no old Standard driver, the planner cannot
+infer a derived runner or replace even a Standard-named suite. Planning remains
+read-only; apply requires `--authorize-rebind`, rechecks project and installed
+authority, and retains rollback on post-write drift. A custom executable driver
+is refused, as is a configured Standard driver without its receipt policy. The
+receipt-only plan cannot substitute for the separate completely-unbound route.
+Already-bound projects retain the original versioned rebind plan and semantics.
+First binding does not qualify the existing harness, its native target, or its
+historical receipts; those require separate lifecycle integration and acceptance.
 
 The operation does not build, execute generated code, delete a prior receipt, or rewrite
 accepted source. Changing the binding makes those earlier identities stale by contract;
@@ -2419,6 +2465,36 @@ request identity before taking manual recovery action. Removing a registration o
 provisioner configuration does not delete allocation records or remote machines.
 This hook is explicit on-demand provisioning; automatic scheduling and provider
 resource deletion remain separate work under `WORKER-001`.
+
+For retained secondary-identity execution, the development contract also accepts
+an optional `inspection_command` argument array. Omit it to preserve existing
+configuration serialization. This is a **separate read-only command**: the
+framework never sends an inspection request to `command`. Its implementation
+must inspect the actual allocated instance and its remaining lifetime; returning
+cached state or echoing configured `disposable` claims is insufficient.
+
+The inspection owner requires owner-only configuration and its containing
+directory on POSIX. It sends one bounded JSON request on stdin with schema
+`urn:literate-ai:schema:v1:retained-allocation-inspection-request`, a fresh `nonce`,
+`worker_identity`, `plan_identity`, `policy_identity` and
+`minimum_remaining_seconds`. The response schema is
+`urn:literate-ai:schema:v1:retained-allocation-inspection-response`, with exactly
+`request_identity` (the canonical request hash), `allocation_identity` (the
+provider's content identity for this actual instance), `workspace_prefix`
+(canonical absolute allocated directory), `remaining_seconds` (positive integer)
+and `disposable: true`. Streams are bounded to 64 KiB and inspection to at most
+30 seconds. Remaining lifetime must cover the requested duration plus inspection
+elapsed time. Instance, prefix, configuration or plan drift permanently revokes
+the owner. Observations grant no lifecycle acceptance.
+
+The source-level view owner and local orchestration bridge now enforce the policy
+through cleanup-bound admission. Eleven FreeBSD source checks pass without skips,
+including a complete fixture lifecycle with a protocol-peer inspector. A separate
+allocation-owner probe checks the actual supervised QEMU guest through fresh
+process and QMP observations. Installed distribution qualification, a reusable
+real provisioning inspector and the complete original-source lifecycle remain
+open under `RETAINED-USER-001`. Configuring an inspector alone grants no execution
+or compiler SDK admission. See [secondary-account retained tests](retained-secondary-access.md).
 
 `litai worker list` and `show WORKER_ID` inspect the private catalog selected by
 `--worker-config`, `LITAI_WORKER_CONFIG`, or `litai config paths`.

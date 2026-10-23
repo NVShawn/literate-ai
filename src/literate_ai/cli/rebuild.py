@@ -418,6 +418,15 @@ def _standard_rebuild_from_args(
             "--from-accepted-source instead",
         )
     specification, specification_label = _specification(project, args.specification)
+    if specification.is_file():
+        if specification.name != "component.md":
+            raise CliFailure(
+                "rebuild.specification_invalid",
+                "the Standard rebuild entry point must be a Component directory "
+                "or its component.md file",
+            )
+        specification = specification.parent
+        specification_label = specification.relative_to(project.root).as_posix()
     if specification != project.root:
         return _standard_rebuild_one_component(
             project,
@@ -676,6 +685,7 @@ def _standard_rebuild_one_component(
         )
     except (
         GenerationPreparationError,
+        LockedGenerationAuthorityReaderError,
         CacheDirectoryError,
         ProjectLifecycleLockError,
     ) as exc:
@@ -1056,8 +1066,19 @@ def _specification(project: LoadedProject, configured: str) -> tuple[Path, str]:
     source = Path(configured)
     candidate = source if source.is_absolute() else project.root / source
     try:
+        # Preserve lexical links before resolve() erases them, while allowing
+        # platform aliases above the project (for example macOS /var).
+        for entry in (*reversed(candidate.parents), candidate):
+            if entry.is_symlink() and (
+                entry.parent.resolve(strict=True).is_relative_to(project.root)
+                or entry.resolve(strict=True).is_relative_to(project.root)
+            ):
+                raise CliFailure(
+                    "rebuild.path_unsafe",
+                    "specification entry point cannot traverse a symbolic link",
+                )
         target = candidate.resolve(strict=True)
-    except OSError as exc:
+    except (OSError, RuntimeError) as exc:
         raise CliFailure(
             "rebuild.specification_unavailable",
             "rebuild specification entry point is unavailable",
@@ -1418,16 +1439,11 @@ def _rebuild_from_args_body(
 ) -> dict[str, object]:
     """Run one project-authorized full lifecycle and validate its external receipt."""
 
+    from .retained_project import retained_project_requested
+
     retained_project = getattr(args, "retained_project", None)
     retained_project_plan = getattr(args, "retained_project_plan", False)
-    if not retained_project and any(
-        getattr(args, key, None)
-        for key in (
-            "retained_project_profile",
-            "retained_project_plan",
-            "authorize_retained_project",
-        )
-    ):
+    if not retained_project and retained_project_requested(args):
         raise CliFailure(
             "retained_project.manifest_required",
             "Retained-project options require an explicit manifest",
@@ -1448,7 +1464,7 @@ def _rebuild_from_args_body(
     ):
         raise CliFailure(
             "rebuild.host_execution_not_acknowledged",
-            "a full rebuild compiles and executes generated host code; rerun with "
+            "a full lifecycle compiles and executes host code; rerun with "
             "--allow-host-execution after reviewing the selected specification, "
             "Flavors, skills, and lifecycle driver",
         )
@@ -1482,6 +1498,14 @@ def _rebuild_from_args_body(
         conversion_authority is not None
         and conversion_authority.stage is not ConversionAuthorityStage.QUALIFIED
     ):
+        if conversion_authority.stage is ConversionAuthorityStage.ORIGINAL:
+            raise CliFailure(
+                "rebuild.conversion_authority_not_qualified",
+                "This project retains original-source authority; review an explicit "
+                "--retained-project manifest and --retained-project-profile with "
+                "--retained-project-plan. Original adoption does not "
+                "qualify execution.",
+            )
         raise CliFailure(
             "rebuild.conversion_authority_not_qualified",
             "adopted project remains original-source authoritative at conversion stage "

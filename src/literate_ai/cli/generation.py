@@ -203,7 +203,26 @@ def _plan_from_args_body(args) -> dict[str, Any]:
 
     prepared = _prepare_generation(args)
     recipe = prepared.recipe
-    execution = _execution_plan(prepared)
+    accepted_selection = getattr(args, "accepted_source_selection", None)
+    if accepted_selection is not None:
+        from literate_ai.adapters.models.coding_cli import (
+            AcceptedRetainedSourceSelection,
+            AcceptedSourceCodingCliSelection,
+        )
+
+        if not isinstance(
+            accepted_selection,
+            (AcceptedRetainedSourceSelection, AcceptedSourceCodingCliSelection),
+        ):
+            raise CliFailure(
+                "generation.accepted_source_selection_invalid",
+                "accepted-source planning requires a typed portable selection",
+            )
+    execution = (
+        _execution_plan(prepared, selection=accepted_selection)
+        if accepted_selection is not None
+        else _execution_plan(prepared)
+    )
     project = discover_project(prepared.component_root)
     _require_generation_project_index(project, synchronize=False)
     input_closure = _require_generation_inputs_unchanged(prepared)
@@ -211,9 +230,13 @@ def _plan_from_args_body(args) -> dict[str, Any]:
     component_lock = locked_authority.authority.lock
     pipeline_model = getattr(args, "model", None)
     try:
-        provider_kind = selected_coding_provider()
+        provider_kind = (
+            None if accepted_selection is not None else selected_coding_provider()
+        )
         inherited_selection = (
-            InheritedSessionSelection(
+            accepted_selection
+            if accepted_selection is not None
+            else InheritedSessionSelection(
                 InheritedSessionProviderConfig.from_environment().provider_identity
             )
             if provider_kind == "inherited-session"
@@ -255,7 +278,11 @@ def _plan_from_args_body(args) -> dict[str, Any]:
             **standard.coding_cli.to_dict(),
             "selection_identity": standard.coding_cli.identity,
             "tool_binding_identity": standard.coding_cli.tool_binding_identity,
-            "binding_state": "exact-host-binding",
+            "binding_state": (
+                "accepted-source-lookup"
+                if accepted_selection is not None
+                else "exact-host-binding"
+            ),
         }
     return {
         "schema": GENERATION_PLAN_SCHEMA,

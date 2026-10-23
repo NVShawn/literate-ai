@@ -32,6 +32,7 @@ from literate_ai.contracts import (
     canonical_identity,
     rebuild_project_authority_identity,
 )
+from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
 from literate_ai.projects import LoadedProject, ProjectError
 from literate_ai.storage import FileSystemCAS
 from literate_ai.test_receipts import update_project_test_receipt_finalized_value
@@ -792,6 +793,21 @@ def assemble_filesystem_standard_rebuild_adapter(
                 "GENERATE/BUILD/TEST/EXECUTE/ACCEPT/LINK/PACKAGE/FINALIZE requires "
                 "explicit worker result transport",
             )
+    retained_review = None
+    if accepted_source_provider_id == RETAINED_SOURCE_PROVIDER:
+        from .cache.standard import (
+            StandardSourceCacheRestorationError,
+            accepted_retained_source_review,
+        )
+
+        try:
+            retained_review = accepted_retained_source_review(
+                source_cache_root, accepted_source_provider_identity
+            )
+        except StandardSourceCacheRestorationError as exc:
+            raise FilesystemStandardRebuildError(
+                "standard_rebuild.accepted_retained_binding_invalid", str(exc)
+            ) from exc
     source_generation = FilesystemStandardSourceGenerationAdapter.from_environment(
         project_root=project.root,
         cache_root=generated_source_cache_root,
@@ -799,6 +815,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         pipeline_model=pipeline_model,
         accepted_source_provider_id=accepted_source_provider_id,
         accepted_source_provider_identity=accepted_source_provider_identity,
+        accepted_source_retained_review_identity=retained_review,
         project_authority_identity=project_authority_identity,
         native_sdk_inputs=prepared.native_sdk_inputs,
         **({"retained_source": retained_source} if retained_source is not None else {}),
@@ -904,6 +921,16 @@ def assemble_filesystem_standard_rebuild_adapter(
     )
     configuration, caches = _resolved_source_cache(project, source_cache_root)
     resolver = SourceCacheResolver(configuration, caches)
+    source_admission = None
+    if retained_source is not None:
+        from .retained_source_admission import completed_retained_source_admitter
+
+        source_admission = completed_retained_source_admitter(
+            retained_source,
+            planned.execution_plan,
+            selected_binding.distribution.identity,
+            authored_assets=assets,
+        )
     runtime = compose_filesystem_standard_source_cache(
         runtime,
         generator=generator,
@@ -911,6 +938,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         caller_cas=FileSystemCAS(accepted_cas_root),
         indexer=indexer,
         materializer=SourceCacheMaterializer(),
+        source_admission=source_admission,
     )
     runtime = compose_filesystem_standard_lifecycle_checkpoints(
         runtime,

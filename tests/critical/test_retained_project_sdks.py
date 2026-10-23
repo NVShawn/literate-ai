@@ -8,6 +8,7 @@ import unittest
 from copy import deepcopy
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from literate_ai.adapters import retained_project_execution as execution
@@ -16,10 +17,18 @@ from literate_ai.adapters.retained_project_acceptance import ACCEPTANCE_POLICY_P
 from literate_ai.adapters.retained_project_inputs import (
     discover_retained_project_inputs,
 )
+from literate_ai.adapters.retained_project_planning import RetainedProjectPlanningResult
+from literate_ai.cache_directories import CacheDirectories
 from literate_ai.contracts import (
     ContentIdentity,
+    SourceIntelligenceMode,
     canonical_identity,
     canonical_json_bytes,
+    load_current_standard_lifecycle_policy,
+)
+from literate_ai.contracts.execution_dispatch import (
+    ExecutionWorker,
+    ExecutionWorkerKind,
 )
 from literate_ai.contracts.retained_project_acceptance import (
     RetainedProjectAcceptancePolicy,
@@ -31,15 +40,63 @@ from literate_ai.contracts.retained_project_sbom import (
 from literate_ai.contracts.retained_project_sdks import (
     RetainedProjectSdkBinding,
     RetainedProjectSdkPolicy,
+    RetainedProjectSdkSelectionBinding,
+    RetainedProjectSdkSelectionPolicy,
+    read_retained_sdk_policy_document,
 )
 from literate_ai.security import AuthorizationError, BuildAuthorization, SecurityProfile
 from tests.critical import test_retained_project_completion as completion
 from tests.critical import test_retained_project_execution as commands
 from tests.support import fixtures_test_native_sdk_source_build as producer_fixtures
+from tests.support.fixtures_test_repository_sources import source_intelligence_policy
 from tests.support.fixtures_test_retained_filesystem import select_filesystem_case
 
 
 class RetainedSdkPolicyTests(unittest.TestCase):
+    def test_selected_snapshot_policy_is_explicit_and_does_not_reinterpret_legacy(self):
+        lock = canonical_identity("lock")
+        selection = canonical_identity("recipe selection")
+        snapshot = canonical_identity("snapshot")
+        binding = RetainedProjectSdkSelectionBinding(
+            lock, selection, snapshot, "vendor/math"
+        )
+        policy = RetainedProjectSdkSelectionPolicy((binding,))
+        wire = policy.to_dict()
+        self.assertEqual(read_retained_sdk_policy_document(wire), policy)
+        with self.assertRaises(ValueError):
+            RetainedProjectSdkPolicy.from_dict(wire)
+        legacy = RetainedProjectSdkPolicy(
+            (RetainedProjectSdkBinding(lock, snapshot, "vendor/math"),)
+        )
+        self.assertEqual(read_retained_sdk_policy_document(legacy.to_dict()), legacy)
+        with self.assertRaises(ValueError):
+            RetainedProjectSdkSelectionPolicy.from_dict(legacy.to_dict())
+        with self.assertRaises(ValueError):
+            RetainedProjectSdkSelectionPolicy(
+                (
+                    binding,
+                    replace(binding, snapshot_identity=canonical_identity("different")),
+                )
+            )
+        with self.assertRaises(ValueError):
+            RetainedProjectSdkSelectionPolicy(
+                (
+                    binding,
+                    replace(
+                        binding,
+                        selection_identity=canonical_identity("other"),
+                        prefix="vendor/math/child",
+                    ),
+                )
+            )
+        for field in ("accepted", "input_identity"):
+            altered = deepcopy(wire)
+            altered["bindings"][0][field] = True
+            with self.assertRaises(ValueError):
+                read_retained_sdk_policy_document(altered)
+        with self.assertRaisesRegex(ValueError, "foreign-component-lock"):
+            policy.require_locks((snapshot,))
+
     def test_policy_preserves_exact_lock_product_pairs_and_nonoverlapping_prefixes(
         self,
     ):
@@ -153,6 +210,7 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
                 "vendor": "sdk",
             },
             self.fixture.manifest.limits,
+            executable_paths=(self.fixture.runner_path,),
         )
         path = self.fixture.source / ACCEPTANCE_POLICY_PATH
         policy = RetainedProjectAcceptancePolicy.from_dict(
@@ -221,6 +279,115 @@ class RetainedProjectSdkExecutionTests(unittest.TestCase):
         for _ in self.fixture.plan.profile.actions:
             workspace.execute_next()
         return workspace, workspace.completed_run()
+
+    def select_snapshot_policy(self, **changes):
+        binding = RetainedProjectSdkSelectionBinding(
+            self.lock.identity,
+            self.built.selection.identity,
+            self.built.product.snapshot.identity,
+            "vendor",
+        )
+        policy = RetainedProjectSdkSelectionPolicy((replace(binding, **changes),))
+        (self.fixture.source / "sdk-policy.json").write_bytes(
+            canonical_json_bytes(policy.to_dict())
+        )
+        self.refresh()
+
+    def test_selected_snapshot_accepts_new_live_producer_and_retains_fresh_grants(self):
+        second_service = self.sdk_fixture.service()
+        second = second_service.build()
+        second_owner = NativeSdkConsumerInputs(
+            snapshot=self.sdk_fixture.snapshot, services=(second_service,)
+        )
+        (second_binding,) = second_owner.for_scope(self.lock.root_revision)
+        self.assertNotEqual(second_binding.identity, self.binding.identity)
+        self.assertEqual(
+            second.product.snapshot.identity, self.built.product.snapshot.identity
+        )
+        self.select_snapshot_policy()
+        workspace = self.workspace(native_sdk_owners=(second_owner,))
+        for _ in self.fixture.plan.profile.actions:
+            workspace.execute_next()
+        result = workspace.completed_run()
+        self.assertEqual((workspace.outputs / "scale.txt").read_bytes(), b"4.5")
+        self.assertEqual(
+            result.resolved_bom.sdk_dependencies[0].input_identity,
+            second_binding.identity,
+        )
+        self.assertEqual(len(self.grants), 6)
+        self.assertTrue(
+            self.documents[result.native_sdk_final_check_identity.uri]["checks"]
+        )
+
+    def test_legacy_policy_still_refuses_another_producer_run(self):
+        second_service = self.sdk_fixture.service()
+        second_service.build()
+        second_owner = NativeSdkConsumerInputs(
+            snapshot=self.sdk_fixture.snapshot, services=(second_service,)
+        )
+        with self.assertRaisesRegex(ValueError, "complete-product-bindings-required"):
+            self.workspace(native_sdk_owners=(second_owner,))
+
+    def test_selected_policy_refuses_changed_snapshot_or_recipe(self):
+        for name in ("snapshot_identity", "selection_identity"):
+            with self.subTest(name=name):
+                self.select_snapshot_policy(**{name: canonical_identity("foreign")})
+                with self.assertRaisesRegex(
+                    ValueError, "complete-selected-snapshot-closure-required"
+                ):
+                    self.workspace()
+
+    def public_runtime_arguments(self, **selection_changes):
+        """Supply discovery and local Git routing; use real SDK production owners."""
+        self.select_snapshot_policy(**selection_changes)
+        f = self.fixture
+        worker = ExecutionWorker("local", ExecutionWorkerKind.LOCAL)
+        trust = {"fixture": "reviewed installed Standard binding"}
+        binding = SimpleNamespace(
+            require_unchanged=lambda: None,
+            trust_binding=SimpleNamespace(to_dict=lambda: trust),
+            policy=load_current_standard_lifecycle_policy(),
+        )
+        f.plan = replace(
+            f.plan,
+            standard_binding_identity=canonical_identity(trust),
+            profile=replace(f.plan.profile, worker_identity=worker.identity),
+        )
+        f.current = f.plan
+        recipe = self.sdk_fixture.recipe_fixture
+        project = SimpleNamespace(
+            root=f.source,
+            definition=SimpleNamespace(
+                source_intelligence=source_intelligence_policy(
+                    "none", SourceIntelligenceMode.OFF
+                )
+            ),
+            roots=lambda kind: (recipe.flavors,),
+            flavor_selectors_for=lambda root, selectors: (
+                "+python",
+                "+" + self.sdk_fixture.fixture.layout.operating_system,
+            ),
+        )
+        planning = RetainedProjectPlanningResult(
+            f.plan,
+            project_retained_project_managed_graph(
+                f.plan, (self.lock,), version="1.0.0"
+            ),
+        )
+        return (f.source, f.manifest, planning), {
+            "component_locks": (self.lock,),
+            "worker": worker,
+            "current_plan": lambda: f.current,
+            "test_receipt_policy": f.configured_test_policy,
+            "cache_directories": CacheDirectories(
+                f.source, f.base / "generated", f.base / "objects"
+            ),
+            "authorization": f.plan.identity.uri,
+            "allow_host_execution": True,
+            "operator_environment": dict(os.environ),
+            "sdk_project": project,
+            "sdk_binding": binding,
+        }
 
     def test_real_selected_sdk_executes_in_retained_snapshot_with_boms_and_fresh_grants(
         self,

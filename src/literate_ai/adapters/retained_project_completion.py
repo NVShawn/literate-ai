@@ -44,6 +44,7 @@ def _stage_manifest(manifest, roots):
         tuple(member for member in manifest.members if _under(member.path, roots)),
         manifest.limits,
         tuple(path for path in manifest.directories if _under(path, roots)),
+        tree_policy=manifest.tree_policy,
     )
 
 
@@ -66,6 +67,7 @@ class RetainedProjectCompletedRun:
     acceptance_observations: tuple[RetainedProjectAcceptanceObservation, ...]
     output_manifest: RetainedProjectManifest
     native_sdk_final_check_identity: ContentIdentity | None = None
+    secondary_access_identity: ContentIdentity | None = None
 
     def __post_init__(self):
         if (
@@ -88,6 +90,11 @@ class RetainedProjectCompletedRun:
                 raise TypeError("retained.completion.typed-observations-required")
         plan = self.source_bom.plan
         profile = plan.profile
+        if self.secondary_access_identity is not None and (
+            profile.secondary_access is None
+            or not isinstance(self.secondary_access_identity, ContentIdentity)
+        ):
+            raise ValueError("retained.completion.secondary-evidence-mismatch")
         if self.resolved_bom.source != self.source_bom:
             raise ValueError("retained.completion.bom-source-mismatch")
         if (
@@ -246,6 +253,11 @@ class RetainedProjectCompletedRun:
             "sdk_admitted": False,
             "lifecycle_receipt": False,
             "release_authority": "original-source",
+            **(
+                {"secondary_access_identity": self.secondary_access_identity.uri}
+                if self.secondary_access_identity is not None
+                else {}
+            ),
             **(
                 {
                     "native_sdk_final_check_identity": (

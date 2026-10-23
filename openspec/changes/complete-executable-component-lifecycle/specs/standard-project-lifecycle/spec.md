@@ -6,6 +6,41 @@ Defines one reusable provider-neutral lifecycle for resolving, generating, build
 
 ## ADDED Requirements
 
+### Requirement: Python library planning refuses incompatible file export profiles
+
+Standard command planning SHALL refuse a Python library build profile whose export
+is a single file before tool discovery or generation. The diagnostic SHALL name the
+directory import contract and a supported native Python or Python wheel profile.
+Native directory exports and explicit wheel custody SHALL preserve their existing
+import, test, package and independent acceptance requirements.
+
+#### Scenario: A promoted Python library inherits a Bazel file profile
+
+- **WHEN** a Python library selects the single-file Bazel build profile
+- **THEN** planning refuses before tool discovery and provider invocation
+- **AND** selecting the supported native Python profile retains a directory export
+
+
+
+### Requirement: Standard rebuild accepts canonical Component entry points safely
+
+Standard rebuild SHALL interpret a Component directory and its `component.md` file
+as the same Component. It SHALL reject other file entry points, symbolic-link
+traversal and paths outside the declared project catalog before generation.
+Unavailable or invalid locked authority SHALL produce a bounded CLI diagnostic
+rather than an uncaught reader exception.
+
+#### Scenario: A caller supplies the Component authoring file
+
+- **WHEN** a caller rebuilds a declared Component using its `component.md` path
+- **THEN** Standard preparation receives the containing Component directory
+- **AND** the same lock, Flavor selection and acceptance gates apply as for the directory
+
+#### Scenario: An invalid or indirect entry point is supplied
+
+- **WHEN** an entry point traverses a symbolic link, names an unrelated file or lacks valid locked authority
+- **THEN** rebuild refuses with a CLI diagnostic before provider invocation
+
 ### Requirement: Retained SBOM roots preserve original-source provenance
 A retained managed CycloneDX graph SHALL bind its distinct retained-project root
 to the reviewed plan and complete current Component-lock inventory. Its root SHALL

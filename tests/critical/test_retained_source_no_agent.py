@@ -23,7 +23,7 @@ from literate_ai.adapters.retained_source import (
 from literate_ai.adapters.standard_project import (
     FilesystemStandardSourceGenerationAdapter,
 )
-from literate_ai.contracts import ModelScopeBinding, canonical_identity
+from literate_ai.contracts import ContentIdentity, ModelScopeBinding, canonical_identity
 from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
 
 
@@ -73,6 +73,47 @@ class RetainedSourceNoAgentTests(unittest.TestCase):
             with self.assertRaises(CodingCliError) as raised:
                 self.adapter()
         self.assertEqual(raised.exception.code, "coding_cli.unavailable")
+
+    def test_accepted_lookup_keeps_the_review_without_an_executable_or_model(self):
+        original = CodingCliSourceGenerator.for_retained_source(self.retained).selection
+        with patch(
+            "literate_ai.adapters.models.coding_cli.select_coding_cli",
+            side_effect=AssertionError("accepted lookup discovered an agent"),
+        ):
+            lookup = CodingCliSourceGenerator.for_accepted_source_lookup(
+                RETAINED_SOURCE_PROVIDER,
+                ContentIdentity.parse_uri(original.tool_binding_identity),
+                retained_review_identity=self.retained.identity,
+            )
+        self.assertEqual(lookup.selection.to_dict(), original.to_dict())
+        self.assertFalse(hasattr(lookup.selection, "executable"))
+        self.assertFalse(hasattr(lookup.selection, "isolation"))
+        with self.assertRaises(CodingCliError) as raised:
+            lookup.generate(None, output_root=self.root / "lookup-output")
+        self.assertEqual(raised.exception.code, "coding_cli.accepted_source_only")
+        self.assertFalse((self.root / "lookup-output").exists())
+
+    def test_accepted_lookup_refuses_unknown_or_substituted_origin_bindings(self):
+        original = CodingCliSourceGenerator.for_retained_source(self.retained).selection
+        binding = ContentIdentity.parse_uri(original.tool_binding_identity)
+        for provider, tool, review in (
+            (RETAINED_SOURCE_PROVIDER, binding, None),
+            (RETAINED_SOURCE_PROVIDER, binding, canonical_identity("other-review")),
+            (
+                RETAINED_SOURCE_PROVIDER,
+                canonical_identity("other-tool"),
+                self.retained.identity,
+            ),
+            ("unknown-provider", binding, None),
+            ("codex", binding, self.retained.identity),
+        ):
+            with (
+                self.subTest(provider=provider, review=review),
+                self.assertRaises(CodingCliError),
+            ):
+                CodingCliSourceGenerator.for_accepted_source_lookup(
+                    provider, tool, retained_review_identity=review
+                )
 
     def test_model_or_accepted_cache_cannot_replace_retained_origin(self):
         for changes in (

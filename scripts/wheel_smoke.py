@@ -11,7 +11,6 @@ import sys
 import tempfile
 import time
 import tomllib
-import venv
 from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
 
@@ -31,6 +30,7 @@ from literate_ai.release_files import (
     release_file_path,
     validate_release_files,
 )
+from literate_ai.remote_worker_bootstrap import _create_python_environment
 from literate_ai.repository_urls import canonical_repository_origin
 
 REQUIRED_SOURCE_TO_SPECIFICATION_SKILLS = {
@@ -316,7 +316,7 @@ def _timed(label: str):
 
 def _create_environment(directory: Path) -> None:
     with _timed("venv.create"):
-        venv.EnvBuilder(with_pip=True).create(directory)
+        _create_python_environment(directory)
 
 
 def _remotes_stripped_parent(repository: Path, destination: Path, revision: str) -> str:
