@@ -28586,7 +28586,7 @@ identity. This qualifies wheel installation only; native lifecycle, source and
 evidence custody, retained receipts and release enforcement remain open. The
 subsequent Make-environment correction is not part of that wheel's evidence.
 
-### [ ] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
+### [x] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
 
 - **GitHub issue:** [#69](https://github.com/jordanhubbard/literate-ai/issues/69)
 
@@ -28596,9 +28596,9 @@ subsequent Make-environment correction is not part of that wheel's evidence.
 - **Conclusion:** SCP may remain the fixed transfer executable, but must carry the selected SSH program for nondefault worker transports; direct default routing cannot establish the registered worker identity.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
+  - [x] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
 - **Evidence:**
-  - [ ] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
+  - [x] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
 
 WORKER-SCP-001 implementation checkpoint: SCP helpers accept a validated optional
 SSH program and the selected worker transport now reaches source staging,
@@ -28611,7 +28611,9 @@ matched its remote SHA-256 and downloaded identical bytes. The result is explici
 transport-only, not a complete native lifecycle receipt. Full installed native
 source/build/test/evidence qualification and existing-platform CI remain open.
 
-### [ ] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
+- **Closure acceptance:** The current validated SSH/SCP owners complete a real Windows/Python3.12 source upload, hash verification, native compilation, three compiled-artifact behavior cases and evidence download through one registered nondefault transport. The downloaded archive (`sha256:74966a8ce468c3630d16e01406ac8d9d75d6c382e14361d3bfed25bef1cf03c1`) is independently hash-verified, and its compiled artifact bytes match the native result. Five current transport/handler cases pass without skips, including exact default OpenSSH argv parity and invalid transport injection refusal. The owning code/tests are byte-identical to exact CI-qualified `20508324` and landed `fe21a198`; existing alignment/release synchronization coverage remains. See `verification/worker-scp-native-acceptance.json`. This is a complete source/build/test/evidence transfer round trip; it does not mint a framework lifecycle, retained SDK or product receipt.
+
+### [x] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
 
 - **GitHub issue:** [#70](https://github.com/jordanhubbard/literate-ai/issues/70)
 - **Priority:** P0
@@ -28622,7 +28624,7 @@ source/build/test/evidence qualification and existing-platform CI remain open.
 - **Implementation:**
   - [x] Add explicit model-free retained source planning and execution wiring while leaving ordinary generation discovery unchanged.
 - **Evidence:**
-  - [ ] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
+  - [x] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
 
 Installed native checkpoint: the exact qualified wheel at `89278c96` bootstraps
 37 verified distributions offline. Public Standard rebind and documentation review
@@ -28686,6 +28688,8 @@ platform/tool skips; log SHA-256
 `3b7603d5171be3e9c5bd4641c240c7af4276a7250229c9408ff5d9a2bb995293`.
 That broad baseline does not qualify later changes or full mixed retained
 projects under #22, typed SSH custody under #69, or a downstream release.
+
+- **Closure acceptance:** A real noneditable installed wheel (`sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f`, exact source `9f8b9dab`) initializes from landed main and admits a reviewed retained Python tree with no coding-agent executable on PATH. Three native behavior cases and independent acceptance pass, supported receipt promotion commits the result, and public accepted-only build exports exact hash-based compiled bytes with no model selector. Real changed-source authorization and failing native behavior refuse while preserving the prior receipt and export; ordinary generation still fails `coding_cli.unavailable`. Thirteen current critical cases and the real accepted-export fixture pass without skips; the latter observes a new actual acceptance identity and refuses unknown/substituted origins, missing admission, corrupted cache bytes and failed fresh acceptance. All 13 relevant owner/test files are byte-identical between the qualified wheel source and main `fe21a198`. See `verification/retained-source-installed-acceptance.json`; the separate hardware CI recurrence, full native SDK and product/package programs remain open.
 
 ### [ ] RELEASE-INTEGRATION-004 — Reconcile and execute the 1.3 release backlog
 
@@ -30374,7 +30378,7 @@ the final review head. Failed and interrupted native attempts above retain their
 original source identities and are not successful qualification. The broader
 original-source SDK and accepted-retained export programs remain separate.
 
-### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
+### [x] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
 
 **GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
 
@@ -30386,9 +30390,11 @@ original-source SDK and accepted-retained export programs remain separate.
 - **Implementation:**
   - [x] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
 - **Evidence:**
-  - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+  - [x] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
 
 **Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
+
+- **Closure acceptance:** A real noneditable installed wheel (`sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f`, exact source `9f8b9dab`) initializes from landed main and admits a reviewed retained Python tree with no coding-agent executable on PATH. Three native behavior cases and independent acceptance pass, supported receipt promotion commits the result, and public accepted-only build exports exact hash-based compiled bytes with no model selector. Real changed-source authorization and failing native behavior refuse while preserving the prior receipt and export; ordinary generation still fails `coding_cli.unavailable`. Thirteen current critical cases and the real accepted-export fixture pass without skips; the latter observes a new actual acceptance identity and refuses unknown/substituted origins, missing admission, corrupted cache bytes and failed fresh acceptance. All 13 relevant owner/test files are byte-identical between the qualified wheel source and main `fe21a198`. See `verification/retained-source-installed-acceptance.json`; the separate hardware CI recurrence, full native SDK and product/package programs remain open.
 
 ### [x] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
 
@@ -30829,6 +30835,8 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 **First native comparison:** Exact development wheel `d8ab44d2` preserves current HTML in every paired call, with identical retained non-HTML verification failures. Two uninstrumented ABBA trials per wheel measure baseline 35.375/40.078 seconds and candidate 28.297/34.063 seconds (medians 37.727/31.180). Instrumented totals are 73.438/68.234 seconds; complete source loads fall from three to two while installed-distribution observations remain two. `verification/html-reconstruction-native-comparison.json` retains exact source, wheel, profile and independently verified archive identities. Cache/scheduling effects remain uncontrolled and this small diagnostic is not a complete native or release-performance pass. Inspect remaining costs before the unchanged full Windows gate renewal.
 
 - **Schema check development:** Nine focused catalog checks pass without skips, including changed bytes with identical size/mtime and missing-reference refusal. Only exact JSON meta-schema successes are shared within one complete catalog operation (maximum 512); registry construction, file reads and fingerprints remain independent. No second-patch native timing or complete qualification is claimed.
+
+- **Combined native diagnostic:** Exact candidate `d56857cd` and wheel `sha256:3e7e1abe5ff3c6fe883163b8b7aab1a6ac477fbf7973380d44b7442f4aa6c912` preserve current HTML in all ABBA and instrumented calls, with the same original non-HTML refusal states. Unprofiled baseline 28.750/33.656 and candidate 28.859/28.172 seconds are a small uncontrolled pair. Instrumented complete input observations fall 3→2, framework observations remain 2, schema checks 136→120 (the candidate also adds a schema), and stat calls 84,911→60,243. See `verification/combined-observation-native-comparison.json`; full native qualification remains open.
 
 ### [ ] RETAINED-OBSERVATION-PERF-001 — Bound retained authority and native observation cost
 
