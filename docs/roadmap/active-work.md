@@ -29086,6 +29086,8 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
+- **Installed journey result and next action:** Both non-editable installations import from site-packages. The public CLI completes reviewed registered rebind, stale-registry refusal without mutation, and reviewed unqualified-child replacement; parent validation passes after each. The retained recovery matches all 313 original files, 244 directories and 2,324,779 bytes against the pre-write plan. Final generation writes no source because the zero-argument public API cannot provide three distinct valid argument vectors. Independent acceptance and remaining refusal/rollback controls are incomplete; no candidate receipt is promoted. See `verification/registered-child-installed-partial.json` and blocking [#132](https://github.com/jordanhubbard/literate-ai/issues/132). Review [proposed ADR 0051](../decisions/0051-zero-argument-generated-test-coverage.md) before changing the coverage contract; retain the unchanged independent oracle and existing zero-argument API.
+
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
 - **GitHub issue:** [#47](https://github.com/jordanhubbard/literate-ai/issues/47)
@@ -31026,3 +31028,5 @@ canonical gate's template-derived native and fallback paths and prepares only th
 created-project prerequisite. All complete HTML scenario assertions, original
 900-second CLI deadlines and the 5,400-second owned-tree bound remain unchanged.
 The first failed directory, source checkout and installed wheel stay retained.
+
+**Complete HTML timing diagnostic for #129:** All five original installed HTML stages and 58 CLI commands complete on native Windows. The scenario takes 2,977.625 seconds, with 3,443.5 seconds for setup plus the scenario. Repeated verify/render/update calls dominate; this is an observation, not an optimization result or a full native-gate pass. See `verification/windows-complete-html-diagnostic.json`. Keep the original failed setup and full-gate timeouts. Next: trace operation-local repeated observations and select a causally tested improvement before renewing the unchanged complete native gate.
