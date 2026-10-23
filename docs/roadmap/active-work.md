@@ -30666,6 +30666,8 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Finalized-source native timeout retained:** Provided Windows qualification at `62ce16a0` terminates at its unchanged 5,400-second owned-tree deadline (5,400.761 seconds), during wheel checks and before unit tests. Preflight, environment, compile, lint, 21 documentation-tool tests and 121 diagrams pass. All 111 completed wheel timing spans succeed; the longest installed Python/HTML operation is 3,312.078 seconds, and operator golden paths take 807.891 seconds. Independently verified archive `sha256:e0b1357c9cd6f28a148d959087376f86377c4fa6dd8f9b91ba29c5072a7447d7` retains the original result, log and timings. See `verification/windows-final-head-timeout.json`. Inspect the expensive native operations before another full native gate; this is incomplete qualification and does not replace PR128 exact-head hosted CI.
 
 
+- **Repeated exact-main failure:** Run `39948443185`, job `120396818599` at `fe21a198` fails the same real hardware-probe transport deadline after 497 passes and 84 skips. The candidate retry had passed; recurrence requires stage-level diagnosis before another retry. The 180-second observation bound and 1,800-second action grant remain unchanged. See `verification/windows-main-hardware-recurrence.json`.
+
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
 **Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).

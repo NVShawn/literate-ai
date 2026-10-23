@@ -1,0 +1,20 @@
+{
+  "scope": "Exact post-merge main hosted failure; root cause not yet established",
+  "source_commit": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+  "run_id": 39948443185,
+  "job_id": 120396818599,
+  "test": "tests/smoke/test_action_execution_config.py::ActionExecutionConfigurationTests::test_public_factory_automatically_uses_private_configuration",
+  "error": "action_hardware.transport_expired",
+  "summary": {
+    "passed": 497,
+    "skipped": 84,
+    "failed": 1,
+    "seconds": 1386.57
+  },
+  "hardware_probe_bound_seconds": 180,
+  "action_grant_seconds": 1800,
+  "log_sha256": "4ffee535d0ef4f330fce200e847286b36b3308f7854aca3e8bc2b7b2650b158b",
+  "prior_candidate_run": 39936620110,
+  "prior_retry_passed": true,
+  "conclusion": "The same timeout recurred after the candidate retry passed. Do not blindly retry or increase bounds. Current traceback identifies transport stage, not receiver import versus CIM/driver query or final identity measurement. Preserve existing guards; obtain stage-level timing evidence before selecting a fix."
+}
