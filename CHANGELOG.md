@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Update the documentation tool lock to patched DOMPurify 3.4.17 while keeping
+  critical/high dependency audit gates enforced.
+
 - Preserve reviewed executable intent when capturing and verifying retained inputs
   on Windows. Carry verifier-owned output executable intent into sealed manifests
   and packaging, while POSIX continues to require native execute permission.

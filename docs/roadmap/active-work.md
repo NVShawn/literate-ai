@@ -30618,3 +30618,39 @@ remain open in their owning items; this controller/sample proof does not close t
   - [ ] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.
 
 **Review finding:** Exact-head Linux job `119840524271` in run `39783402916` fails the lifecycle driver review: `retained_project_execution.py` changed while the pin still names `c27617cb`. The contribution also projects ambient `SYSTEMROOT`, overlapping #110's already-bound system-context owner. Reconcile the production delta against the integrated custody path before re-reviewing and repinning; do not treat the failure as only an infrastructure retry.
+
+### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
+
+**Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).
+
+- **Priority:** P0
+- **Owner:** Framework issue resolution and acceptance qualification
+- **Direction:** Resolve all open issues, preserving the acceptance criteria and scope of each issue.
+- **Conclusion:** Use the live GitHub tracker as the issue set. Reuse reviewed peer work, fix gaps, qualify at the requested native and installed scope, land through exact-head CI, and close only after evidence proves the complete issue contract.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Maintain the live issue-to-authority plan and reconcile peer reviews before starting duplicate work.
+  - [ ] Implement and integrate every outstanding issue without weakening security, native, packaging, release or execution custody boundaries.
+- **Evidence:**
+  - [ ] For each closed issue retain a criterion-by-criterion acceptance result and a landed commit with the required tests and native evidence.
+  - [ ] Completion audit finds no unresolved open issues; uncertain, partial and pending qualification remains open.
+
+### [ ] DOC-DEPENDENCIES-002 — Refresh DOMPurify after critical documentation dependency findings
+
+- **GitHub issue:** [#120](https://github.com/jordanhubbard/literate-ai/issues/120)
+
+- **Priority:** P0
+- **Owner:** OpenSpec and Mermaid documentation tooling
+- **Direction:** Resolve newly reported critical and high DOMPurify advisories without weakening the audit gate
+- **Conclusion:** The pinned transitive DOMPurify 3.4.16 is affected by GHSA-cg2g-xh64-v4q7 and GHSA-mrv2-3pqr-j5jr; both identify 3.4.17 as patched. Update only the compatible transitive lock and preserve exact prior qualification scope.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Update the lock with the normal npm resolver; retain audit policy without exceptions
+- **Evidence:**
+  - [ ] Fresh clean install, dependency gate, documentation tool tests and full diagram rendering; renew the native gate after integration
+
+Implementation: the normal npm resolver changes only DOMPurify's version, registry
+URL and integrity, from 3.4.16 to 3.4.17. A clean installation and dependency gate
+pass without exceptions; all 21 documentation-tool tests and all 121 diagrams
+across 625 Markdown files pass on the controller. Native Windows gate renewal
+remains required after composition. No Python production code changes.
