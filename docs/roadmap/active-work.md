@@ -4697,10 +4697,11 @@ The earlier inventories below are historical.
 
 | Review | Retained scope | Landing state |
 | --- | --- | --- |
-| [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
-| [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Compose exact head `5faea3b9` into #110; renewed combined qualification pending |
+| [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Retained integration including exact #115 head and accepted prior review scopes | Merged at `75d73ac2` after exact-head CI `39790990072`; remaining issue-specific native qualification is retained separately |
+| [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; exact reviewed head `5faea3b9` | Merged; exact source is retained by #110 ancestry |
 | [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | Exact head `1a4d3e6e` retained by ancestry in #127 | Superseded review; its branch is retained and issue #116 remains open pending native qualification and landing |
 | [#127](https://github.com/jordanhubbard/literate-ai/pull/127) | Windows fixtures plus optional-import and wheel-timing source repairs | Consolidated draft at `62ce16a0`: exact hosted CI `39926518820` and fresh 228-pass host receipt pass; final native qualification and the newly found identity-fixture correction remain open |
+| [#128](https://github.com/jordanhubbard/literate-ai/pull/128) | Consolidates #127 with private-runtime aliases, corrected Windows identity fixture and installed closure records | Draft: full 2139-pass source suite, current 233-pass framework receipt, 131-span package-source qualification and actual Windows base/venv fixture renewal pass; exact review CI and full native qualification remain open |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
@@ -30163,6 +30164,8 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Current main failure renewal:** Exact main CI `39922312793`, Windows/Python 3.12 shard 2 (`120310290199`), rejects `test_actual_windows_command_and_late_source_or_context_drift` with `retained.execution.tool-mismatch`. Its rediscovery after copying whoami.exe omits explicit executable intent for both that tool and the existing shared runner. Restore the complete sorted executable declaration in this fixture; keep production executable, PE closure, native command and late context/source drift checks unchanged. Next action: validate the corrected case on actual Windows base and venv interpreters, then renew complete regression and exact review CI.
 
 - **Consolidated source renewal:** Frozen implementation `d5b11cc8` passes a fresh uninterrupted complete local suite: 2139 passed, 71 explicit platform/tool skips, zero failures across 2210 selected. Static gates, zero-finding documentation audit, all 22 tooling tests, 121 diagrams, strict OpenSpec and current reviewed driver pass. The framework receipt remains current with 233 passes and verify has no failing gates. Packaged runtime source and wheel/install drivers are unchanged from the passing 131-span installed-wheel source `1063ecd8`. The corrected identity fixture has an observed native base-interpreter pass; private-venv and complete native qualification plus exact review CI remain open. See `verification/runtime-install-windows-integration.json`.
+
+- **Native corrected-fixture renewal:** The unchanged Windows production execution/context/input owners and shared base/venv fixture run the exact corrected environment test file (`sha256:ea316103b0e0b05c43073dfc294a3fcbc24f2fbe032a24ddc98bc677930d98b5`) on actual base Python and a private venv. Each run passes six cases with four existing POSIX-only skips, including the real whoami command and both late source/context drift refusals. Both terminal exits are zero. Downloaded evidence is independently hash-verified (`sha256:96a9476c96ea1c4dd249a55cff9fe217dfeafe969f9441a5ed17e40156f15bf9`); see `verification/windows-identity-fixture-native.json`. Complete native packaging/regression and exact PR128 CI remain required before landing.
 
 ### [ ] RETAINED-SDK-PUBLIC-001 — Connect public retained execution to live native SDK producers
 

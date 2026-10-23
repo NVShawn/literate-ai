@@ -54,10 +54,11 @@
     "qualification": "Same packaged runtime and package-test implementation; wheel evidence retains its original source identity."
   },
   "native_windows": {
-    "identity_fixture_base_interpreter": "passed, 6 cases and 4 existing platform skips; archive custody pending terminal collection",
-    "identity_fixture_private_venv": "running",
+    "identity_fixture_base_interpreter": "passed: 6 cases and 4 existing platform skips",
+    "identity_fixture_private_venv": "passed: 6 cases and 4 existing platform skips",
     "finalized_previous_integration": "62ce16a0 gate running; not acceptance of this new fixture correction",
-    "earlier_failed_run": "See verification/windows-development-timeout.json"
+    "earlier_failed_run": "See verification/windows-development-timeout.json",
+    "fixture_evidence_archive_sha256": "96a9476c96ea1c4dd249a55cff9fe217dfeafe969f9441a5ed17e40156f15bf9"
   },
   "landing_requirements": [
     "Complete native Windows qualification without new skips or guard relaxation",
