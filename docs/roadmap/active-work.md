@@ -29006,7 +29006,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Closure qualification:** Landed implementation on `75d73ac2`; fresh managed `test_source_inventory_credentials.py` passed all five tests, including both complete inert portable fixtures, nine mixed-secret controls, malformed/unknown-language and private-key exclusions, Unicode offsets and typed value-free diagnostics. The full landed source qualification passed 2131 tests with 71 platform skips and no failures; exact-head CI run `39790990072` passed.
 
 
-### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
+### [x] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
 
 - **GitHub issue:** [#51](https://github.com/jordanhubbard/literate-ai/issues/51)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29019,11 +29019,13 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Execution decision:** Use the existing bounded/redacted failure path for empty generation, retain stdout and stderr refusal evidence, and report the selected isolation profile. Preserve the deliberate no-retry policy for deterministic empty output. Verify refusal text, both streams, credential redaction and one attempt.
 
 - **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
+
+- **Closure evidence:** The current managed generator module passes all 20 cases with no skips, including the real error classifier with synthetic successful-empty process output: bounded reasons from both streams, secret redaction, selected isolation profile and one attempt for deterministic policy refusal. The owner and regression bytes exactly match landed main `d5c7b278` and qualified source `20508324` (CI `39790990072`, success). See `verification/generation-refusal-acceptance.json`; no live provider refusal is claimed.
 
 ### [x] HTML-CANVAS-001 — litai render html graph canvas does not grow with its row
 
@@ -30382,7 +30384,7 @@ original-source SDK and accepted-retained export programs remain separate.
 
 **Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
 
-### [ ] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
+### [x] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
 
 **GitHub issue:** [#100](https://github.com/jordanhubbard/literate-ai/issues/100)
 
@@ -30395,7 +30397,7 @@ original-source SDK and accepted-retained export programs remain separate.
   - [x] Persist exact retirement records and distinguish them from active membership during lookup and verified enumeration.
 - **Evidence:**
   - [x] Prove current lookup and read-only enumeration after retirement, unchanged immutable history, missing/corrupt-record refusal, safe reactivation and portable archive restoration.
-  - [ ] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
+  - [x] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
 
 **Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.
 
@@ -30421,6 +30423,8 @@ public export case remains in progress. Installed-wheel and exact final review
 CI qualification remain required. The earlier invalid generated candidates and
 interrupted launchers are retained as unsuccessful attempts; no acceptance
 oracle was relaxed to obtain the fresh successful lifecycle.
+
+**Closure audit:** All 11 current cache cases pass with no skips, including all three retirement cases. Every cache-package source file, source-materialization/archive guard and retirement regression is byte-identical across native/lifecycle-qualified `9941a6c4`, exact CI-qualified `20508324`, installed wheel `1063ecd8` and landed main `d5c7b278`. `verification/cache-retirement-acceptance.json` records each criterion and original qualification scope; no broader SDK or release acceptance is inferred.
 
 ### [ ] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
 
@@ -30508,6 +30512,9 @@ or worker configuration repaired. This operational audit does not close WORKTREE
 reusable migration-contract or platform-qualification obligations.
 
 - **Windows review consolidation:** PR119 exact head `1a4d3e6e` is an ancestor of retained PR127 head `62ce16a0`; the latter has a complete green hosted matrix and fresh host qualification. Close PR119 as superseded while preserving its branch, histories and all issue116 native/landing gates. PR122 and PR124 remain retained: their optional-import and timing runtime/test slices match the accepted #127 source, but their exact receipt-bearing heads were deliberately not merged. Their final disposition follows complete qualification of the consolidated successor. No source contribution is represented as landed by this review closure.
+
+- **Additional inactive checkout retirement:** Two clean, redundant checkouts are retired after process/open-file and container-mount checks. Their exact branch heads and all other Git refs remain unchanged; ignored files move by verified same-volume rename and per-worktree Git metadata is retained. See `verification/worktree-consolidation-followup.json` for the journal identity and observation limits. Ten checkouts remain, including active controllers and unfinished reviews. This manual operation does not satisfy WORKTREE-002 automation; moved environments need path reconfiguration before reuse.
+
 
 ### [ ] SWIFT-DRIVER-MODE-001 — Preserve Swift compiler mode after executable resolution
 
@@ -30699,6 +30706,9 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **PR128 hosted hardware observation:** Full qualification `39936620110`, Windows/Python3.12 shard 3 job `120357700322`, stops at `test_public_factory_automatically_uses_private_configuration` with `action_hardware.transport_expired`. The identical target test and unchanged Windows hardware/configuration owners pass all three cases with no skips on an aligned native Windows worker in 48.875 seconds. Its independently verified evidence archive is `sha256:00333ea078b62610dd8116a293c19ce6017ba1f212763cef2df2f613fe4ede59`; see `verification/windows-action-configuration-diagnostic.json`. The native source baseline and its POSIX-only source difference retain their exact scope: this diagnosis does not replace exact-head CI. The cause of the hosted expiry is not established; no production timeout or guard changed. GitHub refused a failed-job retry while the rest of the workflow was active; retain those healthy jobs and retry only the terminal failed cell after workflow completion.
 
+- **Finalized-source native timeout retained:** Provided Windows qualification at `62ce16a0` terminates at its unchanged 5,400-second owned-tree deadline (5,400.761 seconds), during wheel checks and before unit tests. Preflight, environment, compile, lint, 21 documentation-tool tests and 121 diagrams pass. All 111 completed wheel timing spans succeed; the longest installed Python/HTML operation is 3,312.078 seconds, and operator golden paths take 807.891 seconds. Independently verified archive `sha256:e0b1357c9cd6f28a148d959087376f86377c4fa6dd8f9b91ba29c5072a7447d7` retains the original result, log and timings. See `verification/windows-final-head-timeout.json`. Inspect the expensive native operations before another full native gate; this is incomplete qualification and does not replace PR128 exact-head hosted CI.
+
+
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
 **Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).
@@ -30782,3 +30792,25 @@ remains required after composition. No Python production code changes.
 The dependency correction passed all three unchanged self-hosting checks (0 skips, 568.703 seconds), including both clean stable replay cycles. A fresh full-source run remains required; the earlier failed full run is retained.
 
 **Command-reference qualification repair:** The dependency-corrected full source attempt passes 1,711 cases with 70 skips and one failure before fail-fast termination: the canonical command list omits `litai project agent-entrypoints`. The one-line reference correction passes both current help/reference tests and receives documentation authority review `sha256:e6175f267ceac818d933c46d3a6008f7beb269f80dbbecc957a863814b0beb13`. The unchanged driver remains `sha256:c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232`. Before that documentation correction, exact source `52c8b6eb` passes a forced-fresh 230-case lifecycle and all 131 installed-wheel timing spans, plus the real non-editable public CLI audit cases. Original snapshot and failed harness provenance remain in `verification/agent-entrypoint-development.json`. Renew the complete source suite and current authority-bound qualification; no failed full run is relabeled green.
+
+### [ ] HTML-VERIFY-COST-001 — Bound repeated installed HTML verification and catalog observation cost
+
+**GitHub issue:** [#129](https://github.com/jordanhubbard/literate-ai/issues/129).
+
+- **Priority:** P1
+- **Owner:** HTML verification and immutable catalog observation
+- **Direction:** Use retained native timing evidence to repair the repeated Windows full-gate timeout without changing execution bounds
+- **Conclusion:** The instrumented installed verify call spends 49.759 of 73.5 seconds in HTML verification; seven Flavor-catalog loads and five authority-graph observations repeat work. Preserve complete staleness, source, asset and framework identity checks while investigating bounded operation-scoped immutable reuse.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Inspect actual caller overlap and bind reusable parsed catalog or framework observations to exact current bytes within one operation
+  - [ ] Retain independent currentness checks and refuse changed, replaced, missing or redirected inputs before completing verification
+- **Evidence:**
+  - [ ] Compare equivalent profiles and uninstrumented native timings; retain the original 5400-second failures and all raw evidence
+  - [ ] Pass real mutation and stale-artifact controls plus full regression, installed-wheel and exact CI; renew the complete native Windows gate without skipped phases or increased deadlines
+
+**Initial source development:** Pure current-artifact reconstruction reuses the first complete immutable input frame, including excerpts and assets. Both independent full input observations and both installed-framework observations remain; the final comparison checks the whole frame. All seven staleness cases and all 15 selected HTML cases pass without skips, including live source/framework/output drift refusal. Lint, format, layout/export and reviewed driver pin checks pass. See `verification/html-reconstruction-development.json`. Native comparison, full regression/lifecycle/installed gates and complete Windows renewal remain required; no performance improvement was claimed at that source-only checkpoint.
+
+**First native comparison:** Exact development wheel `d8ab44d2` preserves current HTML in every paired call, with identical retained non-HTML verification failures. Two uninstrumented ABBA trials per wheel measure baseline 35.375/40.078 seconds and candidate 28.297/34.063 seconds (medians 37.727/31.180). Instrumented totals are 73.438/68.234 seconds; complete source loads fall from three to two while installed-distribution observations remain two. `verification/html-reconstruction-native-comparison.json` retains exact source, wheel, profile and independently verified archive identities. Cache/scheduling effects remain uncontrolled and this small diagnostic is not a complete native or release-performance pass. Inspect remaining costs before the unchanged full Windows gate renewal.
+
+- **Schema check development:** Nine focused catalog checks pass without skips, including changed bytes with identical size/mtime and missing-reference refusal. Only exact JSON meta-schema successes are shared within one complete catalog operation (maximum 512); registry construction, file reads and fingerprints remain independent. No second-patch native timing or complete qualification is claimed.

@@ -11,7 +11,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from literate_ai.adapters import html_staleness
+from literate_ai.adapters import html_emitter, html_staleness
 from literate_ai.adapters.html_emitter import HtmlEmission, emit_html
 from literate_ai.adapters.html_framework import HtmlFrameworkObservation
 from literate_ai.cli import dispatch
@@ -20,6 +20,7 @@ from literate_ai.contracts.html_observability import (
     HtmlStalenessReport,
     HtmlView,
 )
+from literate_ai.contracts.identity import canonical_identity
 from tests.support import fixtures_test_html_observability_schema as schema_tests
 from tests.support.fixtures_test_html_emitter import DISTRIBUTION, STAMP, request
 from tests.support.fixtures_test_html_render import _project
@@ -219,3 +220,41 @@ class HtmlStalenessTests(unittest.TestCase):
         with mock.patch.object(html_staleness, "read_output", side_effect=changed):
             self.assert_refused()
         self.assertEqual(self.output.read_bytes(), b"concurrent replacement")
+
+    def test_currency_keeps_two_complete_input_observations(self):
+        self.render()
+        before = self.snapshot()
+        with mock.patch.object(
+            html_emitter, "_load_html_inputs", wraps=html_emitter._load_html_inputs
+        ) as observe:
+            self.assert_report("current")
+        self.assertEqual(observe.call_count, 2)
+        self.assertEqual(self.observer.call_count, 2)
+        self.assertEqual(self.snapshot(), before)
+
+    def test_source_drift_after_reconstruction_is_preserved_and_refuses(self):
+        self.render()
+        original = html_staleness._emit_inputs
+        skill = self.root / "skills/agent/SKILL.md"
+        changed = skill.read_bytes() + b"\nConcurrent authored change.\n"
+
+        def reconstruct(*args, **kwargs):
+            emission = original(*args, **kwargs)
+            skill.write_bytes(changed)
+            return emission
+
+        with mock.patch.object(html_staleness, "_emit_inputs", side_effect=reconstruct):
+            self.assert_refused()
+        self.assertEqual(skill.read_bytes(), changed)
+
+    def test_framework_drift_at_final_observation_still_refuses(self):
+        self.render()
+        before = self.snapshot()
+        self.observer.side_effect = [
+            self.framework,
+            HtmlFrameworkObservation(
+                canonical_identity({"substituted": True}), "1.1.0"
+            ),
+        ]
+        self.assert_refused()
+        self.assertEqual(self.snapshot(), before)
