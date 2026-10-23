@@ -1,0 +1,40 @@
+{
+  "schema": "literate-ai/retained-secondary-closure@1",
+  "issues": [
+    85,
+    94
+  ],
+  "native_framework_commit": "6e3700337f2ff2be61b5b86390059878093fc1bd",
+  "native_qualification": "verification/native-retained-renewal-development.json",
+  "native_original_tests": {
+    "passed": 24,
+    "skipped": 0,
+    "failed": 0
+  },
+  "independent_acceptance_cases": 11,
+  "reverified_retained_records": 34,
+  "allocation_observations": 51,
+  "cleanup": {
+    "receipt_bound": true,
+    "prefix_mode": "0700",
+    "acl_restored_to_root_only": true,
+    "remaining_nullfs_mounts": 0
+  },
+  "landed_commit": "ef5db15f1b9637a6d4d721a4cb7dd83dfd1dd195",
+  "exact_main_ci": {
+    "run_id": 40007862532,
+    "successful_jobs": 26,
+    "conclusion": "success"
+  },
+  "native_and_landed_scoped_owner_sha256": {
+    "src/literate_ai/adapters/retained_readonly_views.py": "9ab92d9a5dcb57ac672e4f18a3a6ca48dcc2cb652d3ede3f6ba3ed32f1ec8223",
+    "src/literate_ai/adapters/retained_prefix_search.py": "c023266f7ab2493c3bc84baf59078118b638a417f464dcac6d6b3b4303129fde",
+    "src/literate_ai/adapters/retained_posix_acl.py": "41a6037264cfa6820acd6e48c324d74728d7ba8fff8c1a7b9c64d9c73818f562",
+    "src/literate_ai/adapters/retained_allocation.py": "3b14b76f559ca84233cf744e86800fc7441f672c236f6d7128c52da1af5a473c",
+    "src/literate_ai/adapters/retained_test_identity.py": "ea9e167b9a0c51bd11413aecedbc6e01aa1adec13402b8f6b9134e38dfc9b582",
+    "src/literate_ai/contracts/retained_secondary_access.py": "44b02375fc367137aa1df87b03bb9b8d6f6f98edda7b550909e5cd32e6a43cf2",
+    "src/literate_ai/contracts/retained_secondary_evidence.py": "ac2f48bf6e305d6f6028f13dae009c221338b877c6100c20136b003e9cf085ee"
+  },
+  "directory_access_class_sha256": "8c5d87b159567b434f805df7726d686cc8e8dbc3b5f559173755ea0bcb11d593",
+  "scope": "Scoped secondary identity, FreeBSD view and private-prefix search delegation only. The complete execution/SDK modules are not byte-identical and their later features require separate qualification. No canonical Standard, SDK, package or release admission."
+}
