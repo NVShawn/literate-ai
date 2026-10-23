@@ -4699,7 +4699,8 @@ The earlier inventories below are historical.
 | --- | --- | --- |
 | [#110](https://github.com/jordanhubbard/literate-ai/pull/110) | Includes #105, #82, #87, #108 and #109 by ancestry, current main and the Swift repair | Full local suite and configured lifecycle pass; exact-head CI required |
 | [#115](https://github.com/jordanhubbard/literate-ai/pull/115) | RETAINED-WIN-EXEC-001; reviewed Windows executable intent for issue #114 | Compose exact head `5faea3b9` into #110; renewed combined qualification pending |
-| [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | WINDOWS-TEST-CONTRACT-001 / issue #116; stacked on #115 | Separate contribution; Linux failure requires diagnosis before landing |
+| [#119](https://github.com/jordanhubbard/literate-ai/pull/119) | WINDOWS-TEST-CONTRACT-001 / issue #116; stacked on #115 | Integrated by ancestry into the Windows review branch; exact #119 CI passed after retrying two pre-test OTP setup failures. Current integration host qualification passes; native and new exact-head CI remain pending. |
+| [#127](https://github.com/jordanhubbard/literate-ai/pull/127) | WINDOWS-TEST-CONTRACT-001 / CLI-IMPORT-001 / WIN-GATE-001; consolidates #119, #122 and #124 | Draft: 2138 complete-suite passes and 228 fresh lifecycle passes; current receipt and verify. Final native/package and exact-head CI pending. |
 
 
 PR #106 merged at `ccd4c030b8ce9188f07b81d4c8427ca1a20dd19a` after its green
@@ -30626,6 +30627,9 @@ remain open in their owning items; this controller/sample proof does not close t
 
 **Current integration:** Preserve PR #119 head `1a4d3e6e` by merge ancestry. Retain the current bound Windows system-context owner and captured Python/VC sidecars; reject the peer's ambient `SYSTEMROOT` shim and its superseded direct-helper test. Existing typed context tests own currentness/refusal, and the loader structural case already selects Linux in current main. Compose the peer's deterministic base-runtime alias/DLL fixtures and latest controlled remote toolchain probes. The old Windows Elixir failures occurred during upstream strict-version discovery before tests; both exact OTP tags are currently available. Fresh combined controller and native Windows acceptance remain required.
 
+- **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
+
+
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
 **Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).
@@ -30685,6 +30689,9 @@ remains required after composition. No Python production code changes.
   seven CycloneDX tests pass through `make python-check`; the fresh-process regression
   fails against the original eager import. Catalog costs and full-gate renewal remain open.
 
+- **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
+
+
 ### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
 
 - **GitHub issue:** [#123](https://github.com/jordanhubbard/literate-ai/issues/123)
@@ -30700,3 +30707,5 @@ remains required after composition. No Python production code changes.
   - [x] Completed spans survive partial-write failure on macOS and native Windows; the original writer fails the same check. Eight focused tests, lint, format and driver review pass. Two controlled gate attempts keep distinct reports after deliberate stage failure.
   - [ ] Renew the configured host lifecycle/receipt and exact native wheel/full qualification.
 - **Evidence:** [Timing development record](../../verification/windows-wheel-timing-development.json). The documentation authority review is recorded; the old receipt is stale until complete renewal. Timing artifacts remain diagnostic and never imply a passing wheel or gate.
+
+- **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
