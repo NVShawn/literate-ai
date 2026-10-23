@@ -43,8 +43,8 @@
   "reviewed_driver_identity": "sha256:494c690a915bfa47caeb2cf44a1e9bdf66199fa6c01b7c62a71650c65eb845a7",
   "author_review": "Reviewed pure emitter reuse and both independent currentness boundaries. This is author review, not independent security attestation.",
   "pending": [
-    "Equivalent native installed profile and uninstrumented timing comparison",
     "Complete native Windows gate renewal with unchanged bounds",
     "Fresh full source suite, complete installed wheel, current project lifecycle receipt and exact review CI"
-  ]
+  ],
+  "native_comparison_record": "verification/html-reconstruction-native-comparison.json"
 }
