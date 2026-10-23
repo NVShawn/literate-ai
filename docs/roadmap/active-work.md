@@ -30633,7 +30633,7 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Evidence:**
   - [ ] Complete clean local regression, real Windows input/output/admission/package proof and green exact-head hosted CI before landing.
 
-### [ ] ENTRYPOINT-AUDIT-001 — Audit original-source agent entry points
+### [x] ENTRYPOINT-AUDIT-001 — Audit original-source agent entry points
 
 **GitHub issue:** [#113](https://github.com/jordanhubbard/literate-ai/issues/113).
 
@@ -30646,9 +30646,9 @@ remain open in their owning items; this controller/sample proof does not close t
   - [x] Add supported read-only entry-point auditing and an explicit reviewed authoring requirement without modifying pinned parents or retained evidence.
 - **Evidence:**
   - [x] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
-  - [ ] Complete exact review CI and reviewed landing with current qualification.
+  - [x] Complete exact review CI and reviewed landing with current qualification.
 
-- **Next action in progress:** Complete exact review CI and reviewed landing; current source, lifecycle, installed-wheel and installed public CLI qualification are recorded below.
+- **Completion:** Exact review head `a5609e1e` passes ordinary CI `39971938723` and all 26 cells in full comparison CI `39971961215`. PR #130 is merged at `9d62ce09`; the primary checkout is clean and synchronized, and supported receipt require-current plus all-gate verify pass. The source suite, lifecycle and real noneditable CLI acceptance below retain their exact scope. This completes onboarding discovery only; #116 and #129 remain open, and no native lifecycle/product/release acceptance follows.
 
 - **Custom-path authority:** Current v2 definitions admit bounded portable relative onboarding paths through the shared canonical path owner; optional shim validation follows the declared field. Published v1 schema inputs retain the root SKILL.md rule before legacy conversion. Custom-path provider metadata must name the file explicitly. Positive configured projects and original-adoption planning, default-delegate staleness, cross-platform path refusal and frozen-v1 compatibility are covered; no automatic instruction repair or lifecycle admission is added.
 
