@@ -30722,6 +30722,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **Repeated exact-main failure:** Run `39948443185`, job `120396818599` at `fe21a198` fails the same real hardware-probe transport deadline after 497 passes and 84 skips. The candidate retry had passed; recurrence requires stage-level diagnosis before another retry. The 180-second observation bound and 1,800-second action grant remain unchanged. See `verification/windows-main-hardware-recurrence.json`.
 
+- **Recurrence diagnosis before repair:** Exact-main run `39948443185` is now terminal with the hardware expiry. Its exception identifies transport but discards whether the shared 180-second lease was first consumed by controller receiver-code observation or by the child transport. Add bounded scalar timings to the existing real factory regression on failure, delegating to every unchanged production call and preserving the original exception chain, positive assertions and execution bounds. This is diagnostic coverage, not a timeout fix or green main claim. Renew that exact fixture before the next combined CI run; do not blindly retry the failed main cell.
+
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
 **Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).

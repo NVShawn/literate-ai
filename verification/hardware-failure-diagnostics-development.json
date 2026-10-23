@@ -1,0 +1,34 @@
+{
+  "scope": "Failure-only test observability; no production timeout, guard or root-cause fix",
+  "original_main_commit": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+  "original_main_run": 39948443185,
+  "original_main_result": {
+    "success": 25,
+    "failure": 1
+  },
+  "reported_stages": [
+    "controller receiver code identity",
+    "real receiver transport"
+  ],
+  "method": "Measure unchanged production calls using monotonic time; attach only scalar elapsed/completed facts to the original factory exception, preserving its type and chain. Native observation is neither replaced nor supplied.",
+  "bounds_unchanged": {
+    "hardware_seconds": 180,
+    "action_seconds": 1800
+  },
+  "focused_report": {
+    "summary": {
+      "executed": 3,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 3,
+      "selected": 3,
+      "skipped": 0
+    },
+    "sha256": "267c21036a014ea46e86cb2c172fb8ff64ff2d5161246158343de725d17a62d8"
+  },
+  "production_source_changed": false,
+  "pending": [
+    "Exact native and hosted execution of the diagnostic fixture",
+    "Use a reproduced expiry timing to select and qualify a root-cause repair; do not label the old failure passing"
+  ]
+}
