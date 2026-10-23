@@ -30616,12 +30616,18 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Priority:** P1
 - **Owner:** Agent onboarding and original-source adoption
 - **Direction:** Reconcile open GitHub issue #113: report missing or stale agent delegates on authored projects.
-- **Conclusion:** Preserve metadata-only adoption and custom instructions; add read-only audit and an explicitly reviewed repair path using the declared agent skill.
+- **Conclusion:** Preserve metadata-only adoption and custom instructions. Use the issue-authorized read-only audit plus explicit authoring-requirement route: report missing/stale/unsafe owned delegates against the declared agent_skill, expose readiness in original-adoption planning/apply results, and require reviewed authored repair before onboarding is described as complete. The audit never writes agent files, pinned parents or retained snapshots; it does not grant lifecycle admission.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Add supported entry-point auditing and safe reviewed repair without modifying pinned parents or retained evidence.
+  - [x] Add supported read-only entry-point auditing and an explicit reviewed authoring requirement without modifying pinned parents or retained evidence.
 - **Evidence:**
   - [ ] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
+
+- **Next action in progress:** Run fresh full source regression, then complete installed-wheel/public CLI acceptance, a fresh current framework receipt, exact review CI and landing.
+
+- **Custom-path authority:** Current v2 definitions admit bounded portable relative onboarding paths through the shared canonical path owner; optional shim validation follows the declared field. Published v1 schema inputs retain the root SKILL.md rule before legacy conversion. Custom-path provider metadata must name the file explicitly. Positive configured projects and original-adoption planning, default-delegate staleness, cross-platform path refusal and frozen-v1 compatibility are covered; no automatic instruction repair or lifecycle admission is added.
+
+- **Focused development qualification:** 22 audit cases, 12 original-adoption cases and three documentation-graph cases pass with no skips or failures on the controller; two schema-catalog checks also pass. Positive custom-path original planning/apply preserves source and authored delegates after the required documentation review. V1 root-only parsing, cross-platform path refusals, owned/absorbed/nested slots, empty/comment-only references, reparse/symlink refusal and self-only documentation-spine refusal remain tested. Skill admission passes. See `verification/agent-entrypoint-development.json`; complete qualification remains open.
 
 ### [ ] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
 

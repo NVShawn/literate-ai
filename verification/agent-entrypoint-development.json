@@ -1,0 +1,71 @@
+{
+  "scope": "Agent-entrypoint audit and safe current-v2 custom onboarding development evidence; not lifecycle or release admission",
+  "focused_results": {
+    "current-audit": {
+      "summary": {
+        "executed": 22,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 22,
+        "selected": 22,
+        "skipped": 0
+      },
+      "report_sha256": "3f77081afb106fbd8cd5214e739aaa8f2b02a17eb4c4c910c35b69c8c479a784"
+    },
+    "current-original": {
+      "summary": {
+        "executed": 12,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 12,
+        "selected": 12,
+        "skipped": 0
+      },
+      "report_sha256": "cece1fb9e1cdde6be61011b63cb448a20048c69c521e37523c97ef7a66957ac9"
+    },
+    "current-docgraph": {
+      "summary": {
+        "executed": 3,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 3,
+        "selected": 3,
+        "skipped": 0
+      },
+      "report_sha256": "df792fb076103d5845efd3aba4bfc5608191b1459f4ab801c723f617cbcca11f"
+    },
+    "schemas": {
+      "summary": {
+        "executed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2,
+        "selected": 2,
+        "skipped": 0
+      },
+      "report_sha256": "2c990270adc3f06a42251953775f152098c2d6bc7e187a464b1c32c90a782bbc"
+    }
+  },
+  "skills_static_admission_exit_code": 0,
+  "skills_log_sha256": "d3ea22b05f8f677bd183d49d5a96c194a0dd2c5427a2953e5dfeb74b630de8d3",
+  "author_review": "Reviewed the new bounded reader, owned-slot selection, inert text handling, parser failure bounds, read-only CLI isolation, original-source preservation, portable custom paths, legacy-v1 refusal and complete documentation-spine checks. This is author review, not an independent security attestation.",
+  "preserved_invariants": [
+    "No repair writes, host execution or provider calls in the audit",
+    "No implicit host configuration, MCP discovery, journal, fan-out or telemetry effects",
+    "No recursive rewriting of children, parents or retained snapshots",
+    "Original adoption retains acknowledgment, exact-plan identity, clean Git and documentation-review gates",
+    "Root-only published v1 input remains unchanged",
+    "Unsafe canonical path and symlink/junction refusal"
+  ],
+  "pending": [
+    "Fresh full source suite",
+    "Complete installed-wheel and public CLI acceptance",
+    "Fresh current framework lifecycle receipt",
+    "Exact review CI and landing"
+  ],
+  "reviewed_driver_identity": {
+    "schema": "urn:literate-ai:schema:v1:content-identity",
+    "algorithm": "sha256",
+    "digest": "c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232"
+  }
+}

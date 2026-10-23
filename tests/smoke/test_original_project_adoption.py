@@ -40,6 +40,87 @@ class OriginalProjectAdoptionTests(unittest.TestCase):
     def git(self, *args):
         return fixture_git(self.root, "-c", "core.fsmonitor=false", *args)
 
+    def test_missing_agent_entrypoint_is_reported_without_mutating_original_tree(self):
+        (self.root / "AGENTS.md").unlink()
+        self.git("add", ".")
+        self.commit()
+        before = self.snapshot()
+        code, planned = invoke("project", "adopt-original", "--project", str(self.root))
+        self.assertEqual(code, 0, planned)
+        audit = planned["result"]["agent_entrypoints"]
+        self.assertFalse(audit["ready"])
+        self.assertFalse(audit["writes"])
+        self.assertEqual(self.snapshot(), before)
+        identity = planned["result"]["plan_identity"]
+        code, applied = invoke(
+            "project",
+            "adopt-original",
+            "--project",
+            str(self.root),
+            "--apply",
+            "--acknowledge",
+            "--expected-plan-identity",
+            identity,
+        )
+        self.assertEqual(code, 0, applied)
+        self.assertFalse(applied["result"]["agent_entrypoints"]["ready"])
+        self.assertFalse(applied["result"]["admitted"])
+        after = self.snapshot()
+        self.assertEqual({name: after[name] for name in before}, before)
+        self.assertFalse((self.root / "AGENTS.md").exists())
+        self.assertLessEqual(
+            set(after) - set(before),
+            {
+                ".literate/original-adoption.json",
+                ".literate/conversion-authority.json",
+                ".literate/conversion-authority.lock",
+            },
+        )
+
+    def test_custom_onboarding_skill_original_adoption_preserves_authored_delegates(
+        self,
+    ):
+        from tests.smoke.test_agent_entrypoints import configure_custom_skill
+
+        declared = configure_custom_skill(self.root)
+        self.git("add", ".")
+        self.commit()
+        before_review = self.snapshot()
+        code, refused = invoke("project", "adopt-original", "--project", str(self.root))
+        self.assertNotEqual(code, 0)
+        self.assertIn("review is stale", refused["error"]["message"])
+        self.assertEqual(self.snapshot(), before_review)
+        code, reviewed = invoke(
+            "project", "documentation-review", str(self.root), "--record"
+        )
+        self.assertEqual(code, 0, reviewed)
+        self.git("add", ".")
+        self.commit()
+        before = self.snapshot()
+        code, result = invoke("project", "adopt-original", "--project", str(self.root))
+        self.assertEqual(code, 0, result)
+        audit = result["result"]["agent_entrypoints"]
+        self.assertTrue(audit["ready"])
+        self.assertEqual(audit["agent_skill"]["path"], declared)
+        self.assertEqual(self.snapshot(), before)
+        self.assertFalse(result["result"]["admitted"])
+        code, applied = invoke(
+            "project",
+            "adopt-original",
+            "--project",
+            str(self.root),
+            "--apply",
+            "--acknowledge",
+            "--expected-plan-identity",
+            result["result"]["plan_identity"],
+        )
+        self.assertEqual(code, 0, applied)
+        self.assertTrue(applied["result"]["agent_entrypoints"]["ready"])
+        self.assertFalse(applied["result"]["admitted"])
+        after = self.snapshot()
+        self.assertEqual({name: after[name] for name in before}, before)
+        self.assertFalse((self.root / "SKILL.md").exists())
+
     def test_fixture_git_does_not_detach_maintenance_during_cleanup(self):
         self.git("config", "maintenance.auto", "true")
         self.git("config", "gc.auto", "1")

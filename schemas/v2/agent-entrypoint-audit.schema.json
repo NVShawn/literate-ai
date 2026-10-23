@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:agent-entrypoint-audit",
+  "description": "Read-only project-owned coding-agent entry-point observations. Readiness is agent discovery only and confers no lifecycle admission. Repair requires explicit reviewed authored changes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_identity",
+    "agent_skill",
+    "entries",
+    "ready",
+    "writes",
+    "repair_policy",
+    "lifecycle_admitted",
+    "identity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:literate-ai:schema:v2:agent-entrypoint-audit"
+    },
+    "project_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "agent_skill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "state",
+        "identity"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "state": {
+          "enum": [
+            "current",
+            "missing",
+            "invalid",
+            "unsafe-or-invalid"
+          ]
+        },
+        "identity": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "state"
+        ],
+        "properties": {
+          "path": {
+            "enum": [
+              "AGENTS.md",
+              "CLAUDE.md",
+              ".cursor/rules/literate-ai.mdc",
+              "agents/openai.yaml"
+            ]
+          },
+          "state": {
+            "enum": [
+              "current",
+              "missing",
+              "stale",
+              "unsafe-or-invalid",
+              "independent-child"
+            ]
+          },
+          "identity": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "required_action": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "minItems": 4
+    },
+    "ready": {
+      "type": "boolean"
+    },
+    "writes": {
+      "const": false
+    },
+    "repair_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle_admitted": {
+      "const": false
+    },
+    "identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

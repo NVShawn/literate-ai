@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Allow safe custom onboarding paths in v2 projects and audit project-owned
+  coding-agent entry points without modifying instructions. Original-source
+  adoption reports missing or stale delegates before onboarding is complete.
+
 - Preserve both retained executable declarations when the native Windows identity
   fixture refreshes its manifest, keeping command and late-drift qualification active.
 

@@ -538,6 +538,7 @@ root-integration acceptance still remain.
 | `project source-intelligence check [PATH] [--binary COMMAND]` | Verify the configured external provider, current source binding, and project-local artifact without changing the project. |
 | `project documentation-update [PATH] [--apply --allow-model-egress] [--model MODEL]` | Produce a deterministic, read-only documentation-drift plan by default; with both explicit authorizations, request bounded documentation-only replacements from the selected coding CLI. |
 | `project documentation-review [PATH] [--record]` | Calculate the exact marker for the current reviewed authority and documentation graph; `--record` atomically replaces the one existing marker and verifies it became current. |
+| `project agent-entrypoints [PATH]` | Audit owned coding-agent delegates against the declared onboarding skill without writes; exit 1 reports missing, stale or unsafe entries requiring reviewed authored repair. |
 | `project parent-readme [PATH] [--apply] [--browser-url REPOSITORY=URL]` | Plan or reconcile root README links to validated direct parents using the installed framework runtime; preserve authored content and require explicit browser identity for local-only parents. |
 | `spec scxml-review CHART [--trace SIDECAR ...]` | Read-only bounded structural validation and supported-subset trace replay for one exact SCXML 1.0 chart and its explicit JSON sidecars. |
 | `project test-receipt run-retained CANDIDATE [--project PATH] [--evidence PATH] [--worker-id ID] [--worker-config PATH] [--timeout-seconds N] [--known-failure-report PATH] [--harness-workspace-link DESTINATION=SOURCE ...]` | Execute a qualified converted project's exact admitted harness in a disposable authored-source copy and emit one outer-finalized candidate plus external run evidence. `local` remains controller-local; every other ID must select an exact configured POSIX SSH worker. Explicit Linux, macOS and FreeBSD SSH workers preserve their native OS identity; the receiver checks that OS and any configured CPU architecture before executing commands. Admitted `uv` stages and Ninja declarations in their evidence scripts require a native optional tool provider. The current provider requires Linux with an explicit `x86_64` or `amd64` CPU architecture and supplies pinned, digest-verified binaries without changing the worker installation. Unsupported OS/architecture combinations refuse before transfer, and receivers independently reject foreign tool archives. Source-only harnesses require no optional provider. External sibling projections remain local-only in this first remote slice. |
@@ -1722,6 +1723,32 @@ litai project documentation-review . --record
 
 Then run `litai project validate .` and commit the reviewed documentation. Planning or
 applying documentation updates never claims that a person performed this final review.
+
+### Coding-agent entry points
+
+After initialization or adoption, run `litai project agent-entrypoints PATH`.
+The audit reports each owned delegate, the declared onboarding skill, and a
+`ready` flag. A missing, stale or unsafe entry returns exit 1 with the normal JSON
+result. It does not modify files, initialize operator configuration, invoke a
+coding provider, write telemetry or discover MCP servers. Debug-file output and
+MCP discovery flags are refused for this command.
+
+Before treating onboarding as complete, review an authored change that creates
+missing delegates or points stale ones to the declared `agent_skill`, preserving
+existing custom instructions. Rerun the audit until ready. Provider metadata must
+retain its actual `$literate-ai` prompt; fenced examples and comments do not
+satisfy Markdown delegation. The current v2 project definition also permits a
+portable relative `agent_skill` path such as `docs/onboarding.md`; it must retain
+the Literate AI onboarding frontmatter. Delegates must reference that declared
+file, and a custom-path provider prompt must name it alongside `$literate-ai`.
+Legacy v1 definitions retain their published root `SKILL.md` requirement. The audit checks only the selected canonical root,
+uses the nearest project for a nested path, and leaves independently owned child
+metadata alone. It never recursively repairs pinned parents or retained evidence.
+
+`litai project adopt-original` includes the same `agent_entrypoints` observation
+in its plan and apply results. A successful metadata-only authority binding can
+still have `agent_entrypoints.ready: false`. It does not create compatibility
+files or claim agent-discovery, native lifecycle, package or release admission.
 
 ### Parent README links
 

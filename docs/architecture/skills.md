@@ -5,7 +5,7 @@ boundaries. Keeping them separate is the important part.
 
 | Skill layer | Location | Consumer | Enters a generation prompt? |
 | --- | --- | --- | --- |
-| Project onboarding | root `SKILL.md` | Any agent working on the project | No |
+| Project onboarding | declared `agent_skill` (default root `SKILL.md`) | Any agent working on the project | No |
 | Agent catalog (parent) | `skills/agent/SKILL.md` | Nested agent skills; wrap Python, keep deltas | No |
 | Worker assignment | `skills/agent/configure-test-workers/` | Agent selecting private static or dynamic workers | No |
 | Host bootstrap | `skills/agent/detect-before-install/` | Agent or routed worker preparing a host | No |
@@ -41,7 +41,12 @@ propagates the selected versions and content pins. It uses atomic file replaceme
 and rolls back an ordinary I/O failure, but a process crash is not an atomic
 multi-file transaction: rerun check before committing after interruption.
 
-`SKILL.md` is the provider-neutral front door. It routes: wrap `litai`, open only
+The declared onboarding skill, normally root `SKILL.md`, is the provider-neutral
+front door. Current v2 projects may select a bounded portable relative path;
+legacy v1 input retains its published root-file rule. Owned compatibility
+entry points must reference the declared file, and `litai project agent-entrypoints`
+reports discovery readiness without repairing files or granting execution authority.
+The skill routes: wrap `litai`, open only
 the nested `skills/agent/` skill that matches the task, preserve authority
 boundaries, and keep generated source out of the repository. Protocol, flags,
 deadlines, and error catalogs stay in Python (`litai help`). `AGENTS.md`,

@@ -1022,6 +1022,11 @@
         "literate-ai/freebsd-tree-pkg-projection@1",
         "literate-ai/freebsd-tree-pkg-result@1"
       ]
+    },
+    {
+      "file": "agent-entrypoint-audit.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:agent-entrypoint-audit",
+      "public_ids": []
     }
   ]
 }
