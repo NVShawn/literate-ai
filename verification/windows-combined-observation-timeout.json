@@ -1,0 +1,39 @@
+{
+  "schema": "literate-ai/windows-gate-outcome@1",
+  "source_commit": "2837124250528de5b18709a22ade3048281d4ea6",
+  "gate": {
+    "state": "timed_out",
+    "exit_code": 124,
+    "seconds": 5400.482578039169,
+    "source_commit": "2837124250528de5b18709a22ade3048281d4ea6",
+    "test_workers": 4
+  },
+  "archive_sha256": "02d73db303b72d79bdd6d145bfe343f674152fdaaa88eebcaf61a53e25c5aa9e",
+  "archive_bytes": 3214,
+  "completed_wheel_spans": 112,
+  "failed_completed_spans": 0,
+  "longest_spans": [
+    {
+      "seconds": 3125.984,
+      "stage": "subprocess._main.python.exe",
+      "successful": true
+    },
+    {
+      "seconds": 798.437,
+      "stage": "scenario.assert_installed_operator_golden_paths",
+      "successful": true
+    },
+    {
+      "seconds": 300.547,
+      "stage": "scenario.assert_installed_repository_refresh",
+      "successful": true
+    }
+  ],
+  "wheel_completed": false,
+  "unit_tests_started": false,
+  "native_full_qualification_passed": false,
+  "execution_bound_changed": false,
+  "guards_changed": false,
+  "conclusion": "Combined entrypoint and observation candidate still reaches unchanged native Windows gate deadline during wheel verification. Preserve preceding attempts; do not claim native admission or close #129.",
+  "next": "Profile the complete expensive installed HTML scenario before another provided native full gate. Hosted Windows wheel result remains separate successful evidence; native gate remains failed."
+}

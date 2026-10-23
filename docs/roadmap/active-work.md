@@ -30965,3 +30965,25 @@ The complete entrypoint/observation cohort and verified Windows CSV fixture
 correction are now integrated locally for a fresh full managed source run.
 Production, schema and harness bytes are unchanged from PR #130 head 55e775c7.
 The review branch remains frozen until its healthy CI jobs finish.
+Combined observation candidate `28371242` still times out in the provided
+native Windows gate after 5,400.482578 seconds, at the unchanged 5,400-second
+owned-tree bound. All 112 completed wheel timing spans succeed; wheel completion
+and unit execution remain unearned. The installed HTML subprocess accounts for
+3,125.984 seconds. Hash-verified archive
+`sha256:02d73db303b72d79bdd6d145bfe343f674152fdaaa88eebcaf61a53e25c5aa9e`
+retains the exact terminal result, log and timing frames. See
+`verification/windows-combined-observation-timeout.json`. Preserve all previous
+timeouts. Keep #129 open; profile the complete expensive HTML scenario before
+another provided full native replay. Hosted Windows wheel CI passes separately,
+which does not turn this native gate into a passing result.
+
+The exact integrated fixture candidate `35306ad7` passes a fresh complete
+2,252-case managed source run (2,181 pass, 71 existing skips, zero failures)
+in 1,224.064 seconds and all 131 installed-wheel spans. Its wheel is
+`sha256:456801162efc3c80966e7b757ef2b80119389b71daab3cc167aa95b7ab89cace`.
+The supported retained lifecycle require-current check passes; production and
+harness bytes are unchanged. See
+`verification/windows-record-fixture-cohort-qualification.json`. All earlier
+CI jobs are terminal (24 pass, the two known Windows shards fail). Next:
+update PR #130 and renew exact-head required CI. Keep #116 and #129 open;
+no native full-gate or hardware timeout correction is claimed.
