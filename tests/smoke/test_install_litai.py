@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,55 @@ from scripts.install_litai import (
 
 
 class InstallLitaiCleanCheckoutTests(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "POSIX interpreter aliases")
+    def test_private_environment_from_a_real_interpreter_alias(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            alias = root / "python-alias"
+            alias.symlink_to(Path(sys._base_executable).resolve(strict=True))
+            environment = root / "private-runtime"
+            bootstrap = (
+                Path(__file__).resolve().parents[2]
+                / "src/literate_ai/remote_worker_bootstrap.py"
+            )
+            created = subprocess.run(
+                (
+                    str(alias),
+                    "-I",
+                    "-c",
+                    "import runpy, sys; from pathlib import Path; "
+                    "runpy.run_path(sys.argv[1])['_create_python_environment']"
+                    "(Path(sys.argv[2]))",
+                    str(bootstrap),
+                    str(environment),
+                ),
+                capture_output=True,
+                text=True,
+                timeout=90,
+            )
+            self.assertEqual(created.returncode, 0, created.stderr)
+            python = environment / "bin/python"
+            self.assertFalse(python.is_symlink())
+            probe = subprocess.run(
+                (
+                    str(python),
+                    "-I",
+                    "-c",
+                    "import json, sys, pip; "
+                    "print(json.dumps([sys.prefix, sys.base_prefix, pip.__version__]))",
+                ),
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            prefix, base_prefix, pip_version = json.loads(probe.stdout)
+            self.assertEqual(Path(prefix).resolve(), environment)
+            self.assertEqual(
+                Path(base_prefix).resolve(), Path(sys.base_prefix).resolve()
+            )
+            self.assertTrue(pip_version)
+
     def test_private_environment_runs_its_python_and_pip(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             environment = Path(temporary).resolve() / "private-runtime"

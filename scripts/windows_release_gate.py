@@ -17,6 +17,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -229,7 +230,22 @@ def main(argv: list[str] | None = None) -> int:
                     step="openspec",
                 )
         if "wheel" in selected:
-            _run([str(python), "scripts/wheel_smoke.py"], environment, step="wheel")
+            timing_root = ROOT / "_build"
+            timing_root.mkdir(parents=True, exist_ok=True)
+            timing_report = (
+                Path(tempfile.mkdtemp(prefix="wg-", dir=timing_root))
+                / "wheel-timings.json"
+            )
+            _run(
+                [
+                    str(python),
+                    "scripts/wheel_smoke.py",
+                    "--timing-report",
+                    str(timing_report),
+                ],
+                environment,
+                step="wheel",
+            )
         if "tests" in selected:
             # A fixed base directory keeps pytest from maintaining numbered
             # directories behind a `pytest-current` symlink, whose session-end

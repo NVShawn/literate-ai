@@ -1,0 +1,47 @@
+{
+  "scope": "Windows integration host qualification; native and exact-head CI remain required",
+  "implementation_commit": "dd8a9f357122fea6f8e0daff559ab45907f074f7",
+  "fresh_source_suite": {
+    "executed": 2138,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2138,
+    "selected": 2209,
+    "skipped": 71
+  },
+  "fresh_source_report_sha256": "af2f88eba9432a774705a031adf628260cf072e46673e848f761b7ac9cc9f84b",
+  "prior_failed_attempt": {
+    "summary": {
+      "executed": 253,
+      "failed": 1,
+      "known_failed": 0,
+      "passed": 252,
+      "selected": 2209,
+      "skipped": 23
+    },
+    "report_sha256": "706378c06922b6006431d1ea07eca5262034b3584d05ac90f4d2198ba3f141e0",
+    "cause": "Empty successful SSH capability response; cause not established. Isolated selection and a fresh full run pass without a source change. Preserve original failure."
+  },
+  "host_lifecycle": {
+    "force_generated": true,
+    "passed": true,
+    "driver_implementation_identity": "sha256:b5271b7524bfda1fc6cbe606c5e1c1266772222a15e4bc51376415e54b5c5d88",
+    "finalized_candidate_identity": "sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217",
+    "receipt_identity": "sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857",
+    "project_revision_identity": "sha256:4941c2685a57a5df2ee06a4b4ed523c471adc0dd8b8a4df5dfcad96a1d9b8ff3",
+    "summary": {
+      "failed": 0,
+      "passed": 228,
+      "skipped": 0,
+      "total": 228
+    },
+    "state": "current"
+  },
+  "native_status": "The dd8a9f35 development gate remains live. Renew exact installed/native package evidence against the finalized receipt before release admission.",
+  "provenance": {
+    "windows_contract_parent": "1a4d3e6e1d5a1bc6ed42ba01df4b652a688513c3",
+    "optional_import_patch": "8f1b7df634e0c34ccd55bba1486f2c7e4b2539ad",
+    "wheel_timing_patch": "46c14963b5ee48b5f12a9869af2910b21ba1c10a",
+    "security_pin_pr": 125
+  }
+}

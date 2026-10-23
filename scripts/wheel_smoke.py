@@ -305,13 +305,15 @@ def _timed(label: str):
                 }
             )
             _TIMING_REPORT.parent.mkdir(parents=True, exist_ok=True)
+            temporary = _TIMING_REPORT.with_name(_TIMING_REPORT.name + ".tmp")
             _write_canonical_json(
-                _TIMING_REPORT,
+                temporary,
                 {
                     "schema": "literate-ai/wheel-smoke-timings@1",
                     "spans": _TIMINGS,
                 },
             )
+            temporary.replace(_TIMING_REPORT)
 
 
 def _create_environment(directory: Path) -> None:

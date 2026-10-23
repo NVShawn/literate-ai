@@ -204,7 +204,7 @@ class NativeSdkBuildTests(unittest.TestCase):
             SecurityProfile.YOLO,
             request.requested_privileges,
             now - timedelta(seconds=1),
-            now + timedelta(minutes=10),
+            now + timedelta(minutes=30),
             warning="Explicit isolated test grant for unsandboxed native fixture",
         )
         identity = canonical_identity(grant.to_dict())
