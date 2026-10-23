@@ -1,0 +1,62 @@
+{
+  "scope": "Incomplete provided native Windows qualification, preserving its unchanged 5400-second owned-tree deadline",
+  "source_commit": "62ce16a0458db31ae61954468f563a1e1bd65eba",
+  "result": {
+    "state": "timed_out",
+    "exit_code": 124,
+    "seconds": 5400.760888576508,
+    "source_commit": "62ce16a0458db31ae61954468f563a1e1bd65eba",
+    "test_workers": 4
+  },
+  "worker_capacity": {
+    "logical_cpus": 16,
+    "memory_gib": 64
+  },
+  "passed_phases": [
+    "preflight",
+    "environment",
+    "compile",
+    "lint",
+    "openspec"
+  ],
+  "openspec": {
+    "tool_tests": 21,
+    "diagrams": 121
+  },
+  "terminal_phase": "wheel",
+  "unit_tests_reached": false,
+  "completed_wheel_spans": 111,
+  "all_completed_spans_successful": true,
+  "longest_completed_spans": [
+    {
+      "seconds": 3312.078,
+      "stage": "subprocess._main.python.exe",
+      "successful": true
+    },
+    {
+      "seconds": 807.891,
+      "stage": "scenario.assert_installed_operator_golden_paths",
+      "successful": true
+    },
+    {
+      "seconds": 312.765,
+      "stage": "subprocess.assert_installed_operator_golden_paths.litai.exe",
+      "successful": true
+    },
+    {
+      "seconds": 300.985,
+      "stage": "scenario.assert_installed_repository_refresh",
+      "successful": true
+    },
+    {
+      "seconds": 283.203,
+      "stage": "subprocess.assert_installed_operator_golden_paths.litai.exe",
+      "successful": true
+    }
+  ],
+  "wheel_timing_sha256": "431fa7d5e9878f5ad6d0893b8a2bb647b79a67f779603a5c495de0b2a4c05ea3",
+  "retained_archive_sha256": "e0b1357c9cd6f28a148d959087376f86377c4fa6dd8f9b91ba29c5072a7447d7",
+  "retained_archive_bytes": 3332,
+  "cause": "Installed HTML qualification is the longest completed operation at 3312.078 seconds. The cause of its native cost is not established; this is not a complete wheel or unit gate pass.",
+  "next_action": "Investigate the expensive installed operations before repeating full native qualification; preserve exact-head hosted qualification and the isolated Windows fixture/hardware diagnostic evidence."
+}
