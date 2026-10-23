@@ -67,5 +67,29 @@
     "schema": "urn:literate-ai:schema:v1:content-identity",
     "algorithm": "sha256",
     "digest": "c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232"
+  },
+  "initial_full_source": {
+    "summary": {
+      "executed": 13,
+      "failed": 1,
+      "known_failed": 0,
+      "passed": 12,
+      "selected": 2235,
+      "skipped": 23
+    },
+    "report_sha256": "5efb390442c0b6dfa471d74a824f1c89d7afc39af1579df3501455b631f980d0",
+    "failure": "Source BOM rejected undeclared direct yaml import. Added exact PyYAML==6.0.3 runtime dependency; no validation waiver."
+  },
+  "dependency_repair_replication": {
+    "summary": {
+      "executed": 3,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 3,
+      "selected": 3,
+      "skipped": 0
+    },
+    "report_sha256": "a1eac09c0d46bd96a7a32abd4da2cd1228dfc39e956b4d3ce6abcc6bf1069346",
+    "scope": "All three unchanged self-hosting cases, including two clean stable replay cycles, passed after declaring the direct runtime dependency. Full-suite qualification remains pending."
   }
 }

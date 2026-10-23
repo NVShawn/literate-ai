@@ -30629,6 +30629,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **Focused development qualification:** 22 audit cases, 12 original-adoption cases and three documentation-graph cases pass with no skips or failures on the controller; two schema-catalog checks also pass. Positive custom-path original planning/apply preserves source and authored delegates after the required documentation review. V1 root-only parsing, cross-platform path refusals, owned/absorbed/nested slots, empty/comment-only references, reparse/symlink refusal and self-only documentation-spine refusal remain tested. Skill admission passes. See `verification/agent-entrypoint-development.json`; complete qualification remains open.
 
+- **Retained full-suite refusal:** Frozen source `af620be3` retains 12 passes, 23 skips and one error from 2,235 selected cases at clean two-replay self-replication because the new yaml import is absent from the package manifest/source BOM. Declare the exact runtime PyYAML dependency, retain the failed attempt, qualify replication again, then start a fresh complete run; dependency admission remains enforced.
+
 ### [ ] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
 
 **GitHub issue:** [#92](https://github.com/jordanhubbard/literate-ai/issues/92).
@@ -30774,3 +30776,5 @@ remains required after composition. No Python production code changes.
 - **Evidence:** [Timing development record](../../verification/windows-wheel-timing-development.json). The documentation authority review is recorded; the old receipt is stale until complete renewal. Timing artifacts remain diagnostic and never imply a passing wheel or gate.
 
 - **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
+
+The dependency correction passed all three unchanged self-hosting checks (0 skips, 568.703 seconds), including both clean stable replay cycles. A fresh full-source run remains required; the earlier failed full run is retained.
