@@ -29154,7 +29154,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-### [ ] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
+### [x] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
 
 - **GitHub issue:** [#27](https://github.com/jordanhubbard/literate-ai/issues/27)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29171,7 +29171,9 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Meet the reported real-Git journey budget: 427 launches, 8.9 seconds; retain a <=500-launch regression
   - [x] Pass the existing 24 refresh tests in 210.8 seconds and expanded seven-test input/ref/registration/locator/configuration/object controls
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
+
+- **Closure qualification:** All 26 current refresh cases pass on local macOS with no skips in 216.957 seconds (under the 300-second limit), including the real-Git <=500-launch regression and unchanged index/ref/Gitlink/registration/locator/configuration/rollback refusals. All owning refresh and orchestration source, contracts and fixture/test bytes match original optimization `b7269a9f`, exact CI-qualified `20508324` and landed main `d5c7b278`. See `verification/repository-refresh-performance-acceptance.json`; this does not claim the separate entrypoint-audit suite is green.
 
 ### [x] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
 
@@ -30317,7 +30319,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Evidence:**
   - [ ] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI.
 
-### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
+### [x] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
 
 **GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
 
@@ -30329,9 +30331,11 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Implementation:**
   - [x] Reuse the existing inert lexical owner for bundle classification and registry location.
 - **Evidence:**
-  - [ ] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
+  - [x] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
 
 **Focused results:** All six fanout checks pass on the host and Linux and in the actual FreeBSD preflight. All four JavaScript handoff/bundle cases and all three retry cases pass on the host, Windows, Linux and FreeBSD preflight. Complete native/installed and exact CI gates remain pending above.
+
+**Closure audit:** All four current handoff cases pass without skips. A real non-editable installed guard on native Windows accepts all six inert forms in both writer locations, performs 12 actual Node invocations with exact expected test/smoke payloads, and preserves all four missing-module/extension/shebang/dispatch refusals. Its guard, lexer, callers and fixture bytes match landed `fe21a198`, exact fully qualified `76ac4c7a` and the complete installed wheel at `52c8b6eb`. That original snapshot also passes a fresh 230-case framework lifecycle. `verification/javascript-registry-acceptance.json` retains the source/wheel/receipt and hash-verified native archive identities; this does not declare the unrelated entrypoint or HTML-performance branches qualified.
 
 ### [ ] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
 
@@ -30428,7 +30432,7 @@ oracle was relaxed to obtain the fresh successful lifecycle.
 
 **Closure audit:** All 11 current cache cases pass with no skips, including all three retirement cases. Every cache-package source file, source-materialization/archive guard and retirement regression is byte-identical across native/lifecycle-qualified `9941a6c4`, exact CI-qualified `20508324`, installed wheel `1063ecd8` and landed main `d5c7b278`. `verification/cache-retirement-acceptance.json` records each criterion and original qualification scope; no broader SDK or release acceptance is inferred.
 
-### [ ] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
+### [x] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
 
 - **GitHub issue:** [#104](https://github.com/jordanhubbard/literate-ai/issues/104)
 - **Current release target:** 1.3.0
@@ -30441,11 +30445,13 @@ oracle was relaxed to obtain the fresh successful lifecycle.
 - **Implementation:**
   - [x] Update the owning generation guidance and shipped template, preserve exact versioned skill references and record issue104.
 - **Evidence:**
-  - [ ] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
+  - [x] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
 
 **Swift repair development evidence:** Skill version 1.0.7 and both authored/shipped Flavor contracts require the native builder's complete single-executable source set. Two actual Swift compiler tests pass, including three conflicting-entrypoint refusal variants and successful support/test linkage and execution. Ten skill/template tests, SkillEvaluator, lint/format, strict OpenSpec and supported authority reviews pass. A fresh live macOS LaunchAgent sample succeeds on the first generation attempt (one source-cache miss): 3 generated tests, 3 independent verifier tests and 2 assertions, with 6 invocations. The earlier exhausted three-candidate attempt remains retained. A current complete project lifecycle receipt, installed wheel and exact-head CI remain required before landing.
 
 **Current Swift-repaired integration lifecycle:** At implementation `595da5b25931eaf5bfa94977512596b7eccd7570`, the complete project lifecycle passes. Supported receipt update/check/require-current and `litai verify` pass with 230 tests, no failures or skips. Current receipt: `sha256:40585141e6ec627f44b1573bf8ca10868ffd945f0938dc59455feeb4f241d5b0`; finalized candidate: `sha256:37c2663be538e67fadd94d5ce8f760c66209608e2c04e05c8b2bd142b40bb759`; driver: `sha256:5d1b8a0f8f67ac284a33b72af22ab8cff9de19b7ddbacf42c0978a7f4be905b6`. This run revalidates eligible admitted source through the complete current lifecycle; the separately recorded Swift sample was freshly generated. Final package/native renewal and exact-head CI remain open.
+
+**Closure audit:** All three current real-Swift tests pass without skips, including support/generated-test linkage, direct compiler alias execution and three competing-entrypoint refusals. Version 1.0.7 authored/shipped guidance and Flavor contracts match their actual qualified wheel bytes. The guide remains identical to the separately recorded fresh Swift generation; current owner/test bytes match landed main and exact CI-qualified `20508324`. A forced-fresh framework lifecycle at `52c8b6eb` passes 230 tests and its complete installed wheel passes all 131 timing spans. `verification/swift-single-executable-acceptance.json` retains each original source/receipt/wheel boundary; the unrelated entrypoint-audit final full run remains pending.
 
 ### [ ] CI-BAZEL-ACTION-001 — Review the Bazel setup action patch for release 1.3
 
@@ -30514,6 +30520,9 @@ or worker configuration repaired. This operational audit does not close WORKTREE
 reusable migration-contract or platform-qualification obligations.
 
 - **Windows review consolidation:** PR119 exact head `1a4d3e6e` is an ancestor of retained PR127 head `62ce16a0`; the latter has a complete green hosted matrix and fresh host qualification. Close PR119 as superseded while preserving its branch, histories and all issue116 native/landing gates. PR122 and PR124 remain retained: their optional-import and timing runtime/test slices match the accepted #127 source, but their exact receipt-bearing heads were deliberately not merged. Their final disposition follows complete qualification of the consolidated successor. No source contribution is represented as landed by this review closure.
+
+- **Landed review disposition:** PR128 exact head `76ac4c7a` passes its normal CI and complete platform matrix `39936620110` (one retained hardware expiry, followed by only that failed shard retry). It merges as `fe21a198`, and local main fast-forwards cleanly. GitHub recognizes PR127 through ancestry, associating existing integration merge `874da1ba`. PR122 and PR124 close as superseded after exact contributed source/test/documentation byte comparison to landed main; their historical heads and receipts remain retained. Two further clean inactive checkouts retire after process/container checks, with all ignored state and Git metadata preserved by verified same-volume rename and every ref unchanged. Nine checkouts remain. See `verification/review-consolidation-landing.json`; exact-main CI `39948443185` and #129 native performance renewal remain separate pending gates.
+
 
 - **Additional inactive checkout retirement:** Two clean, redundant checkouts are retired after process/open-file and container-mount checks. Their exact branch heads and all other Git refs remain unchanged; ignored files move by verified same-volume rename and per-worktree Git metadata is retained. See `verification/worktree-consolidation-followup.json` for the journal identity and observation limits. Ten checkouts remain, including active controllers and unfinished reviews. This manual operation does not satisfy WORKTREE-002 automation; moved environments need path reconfiguration before reuse.
 
@@ -30710,6 +30719,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **Finalized-source native timeout retained:** Provided Windows qualification at `62ce16a0` terminates at its unchanged 5,400-second owned-tree deadline (5,400.761 seconds), during wheel checks and before unit tests. Preflight, environment, compile, lint, 21 documentation-tool tests and 121 diagrams pass. All 111 completed wheel timing spans succeed; the longest installed Python/HTML operation is 3,312.078 seconds, and operator golden paths take 807.891 seconds. Independently verified archive `sha256:e0b1357c9cd6f28a148d959087376f86377c4fa6dd8f9b91ba29c5072a7447d7` retains the original result, log and timings. See `verification/windows-final-head-timeout.json`. Inspect the expensive native operations before another full native gate; this is incomplete qualification and does not replace PR128 exact-head hosted CI.
 
+
+- **Repeated exact-main failure:** Run `39948443185`, job `120396818599` at `fe21a198` fails the same real hardware-probe transport deadline after 497 passes and 84 skips. The candidate retry had passed; recurrence requires stage-level diagnosis before another retry. The 180-second observation bound and 1,800-second action grant remain unchanged. See `verification/windows-main-hardware-recurrence.json`.
 
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 

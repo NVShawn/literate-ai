@@ -1,0 +1,76 @@
+{
+  "issue": 96,
+  "scope": "JavaScript lexical handoff classification and actual bundle execution; every broader qualification retains original provenance",
+  "landed_main": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+  "source_byte_parity_revisions": [
+    "205083242c8ce9fa3835ecc22785126f612ce12c",
+    "76ac4c7a4321c3fc696137126d6a36260055989b",
+    "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+    "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+    "d8ab44d2a0ac9fc22a787f611f8cd4f87e1c0433"
+  ],
+  "owner_and_regression_sha256": {
+    "src/literate_ai/adapters/models/generated_source_validation.py": "4838fab03f67cc0578573320e886beb85d9950401b9ff3e6063a3cfbb81e7a1d",
+    "src/literate_ai/adapters/dependencies/javascript_imports.py": "5aad1f211bc0aa6a63cfb7174c0afe263d7d9df9125d86ee74cd032b18dda97e",
+    "src/literate_ai/adapters/models/coding_cli.py": "c4286b36c4fbacd48d855f3e9911d94c54e420da760acc02d11a31b805b81413",
+    "src/literate_ai/adapters/source_generation.py": "65903c7eff7d5e4f7b4482ace3f9088a21b52100d955cbd053769b5b2b39d102",
+    "tests/smoke/test_javascript_generation_self_check.py": "d93501c46b5bb6326be31a912b2a7dc556c5695f2e8db2cea862ef008e84a643"
+  },
+  "fresh_managed_cases": {
+    "executed": 4,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 4,
+    "selected": 4,
+    "skipped": 0
+  },
+  "managed_report_sha256": "0e86df956539362c1e4b14d283bb824f7ff9463cff0ff6414947e365d36e8285",
+  "native_windows_installed": {
+    "scope": "Hand-authored bundle fixtures through the actual installed guard and native Node; not a generated project lifecycle or product admission",
+    "installed_source_commit": "d8ab44d2a0ac9fc22a787f611f8cd4f87e1c0433",
+    "guard_sha256": "4838fab03f67cc0578573320e886beb85d9950401b9ff3e6063a3cfbb81e7a1d",
+    "lexer_sha256": "5aad1f211bc0aa6a63cfb7174c0afe263d7d9df9125d86ee74cd032b18dda97e",
+    "fixture_source_sha256": "d93501c46b5bb6326be31a912b2a7dc556c5695f2e8db2cea862ef008e84a643",
+    "node_version": "v24.19.0",
+    "node_sha256": "3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237",
+    "positive_inert_writer_cases": 12,
+    "native_node_invocations": 12,
+    "negative_refusals": {
+      "missing-module": "coding_cli.generated_javascript_bundle_module_missing",
+      "extensionless": "coding_cli.generated_javascript_local_specifier_extensionless",
+      "embedded-shebang": "coding_cli.generated_javascript_bundle_shebang",
+      "undispatched": "coding_cli.generated_javascript_bundle_entrypoint_undispatched"
+    },
+    "all_passed": true
+  },
+  "native_seconds": 5.92200000025332,
+  "native_evidence_archive_sha256": "c10aa08fd3ec90a0212d960d73e8db37b1e9a8f6c77cc1c243708293cf41e237",
+  "native_evidence_archive_bytes": 4134,
+  "criteria": {
+    "all_six_inert_lexical_forms_in_both_writer_locations": true,
+    "leading_inert_registry_text_preserves_real_bundle": true,
+    "actual_native_node_test_and_smoke_payloads": true,
+    "missing_modules_extensions_shebang_dispatch_guards_preserved": true
+  },
+  "qualification_origins": {
+    "fresh_complete_framework_lifecycle": {
+      "source_commit": "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+      "rebuild_report_sha256": "f923ce66cfbd821587f422a03f39659492f2d94b9e3941229c8bc0fa816c01da",
+      "candidate_sha256": "90a1e901c0792ff2b6ad39dee7c654f389a4436cb11673d6fc7102e5978a8b03",
+      "tests": 230,
+      "receipt_identity": "sha256:91afbe0eba8f6d1bc80a5b49dbe613caf9b85ed9d2ae192f163f911af4f703e9",
+      "finalized_candidate_identity": "sha256:4cb725ec5ea7478952c9f48bad58ddbfbd3d0f904cdea2e648c4128f986190a6",
+      "driver_identity": "sha256:c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232",
+      "scope": "Passing forced-fresh lifecycle before the subsequent command-reference documentation correction; original source/authority provenance retained"
+    },
+    "complete_installed_wheel": {
+      "source_commit": "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+      "sha256": "d4399371619f330e8cc6ac5f9a1255b012532fae88ccc8a1ead80966d1a7ff87",
+      "all_131_timing_spans_passed": true,
+      "packaged_owners_match_current": true
+    },
+    "full_source_and_exact_ci": "76ac4c7a: 2139 pass,71 declared skips,0 failures; complete qualification 39936620110 success, original timeout and single failed-cell retry retained. Exact integration CI 39790990072 at 20508324 also succeeded.",
+    "landing": "PR128 fe21a198 contains the previously landed implementation; postmerge main CI is a separate pending run."
+  },
+  "failed_harness_retained": "First inline launcher was rejected by transport before execution; replaced with hash-verified staged sources, syntax-checked before dispatch. No guard changed."
+}
