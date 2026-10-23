@@ -1,0 +1,26 @@
+{
+  "schema": "literate-ai/html-profile-setup-outcome@1",
+  "issue": 129,
+  "source_commit": "35306ad742f0646f64c889ffd3838b8d24e88f69",
+  "wheel_sha256": "456801162efc3c80966e7b757ef2b80119389b71daab3cc167aa95b7ab89cace",
+  "terminal": {
+    "state": "completed",
+    "exit_code": 1,
+    "seconds": 698.8429999998771
+  },
+  "archive_sha256": "19f4a053e245d40abd4d87c2dc38b28c65ce2ef02c7dff39a960dfa420cd762f",
+  "archive_bytes": 5796,
+  "archive_download_independently_verified": true,
+  "failed_stage": "operator-golden-paths prerequisite adoption",
+  "error_code": "project.convert_legacy_gate_failed",
+  "cause": "Standalone diagnostic omitted canonical gate tool paths; the adoption fixture could not find printf",
+  "html_scenario_started": false,
+  "html_performance_observation_earned": false,
+  "native_full_qualification_passed": false,
+  "correction": "Use canonical template-derived native and fallback tool directories, with a fresh acknowledged and validated created-project fixture",
+  "complete_html_assertions_changed": false,
+  "cli_deadline_seconds": 900,
+  "owned_tree_deadline_seconds": 5400,
+  "prior_failed_attempt_preserved": true,
+  "scope": "Diagnostic setup failure and correction; no wheel, product, performance or native gate acceptance"
+}

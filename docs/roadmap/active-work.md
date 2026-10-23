@@ -30999,3 +30999,19 @@ harness bytes are unchanged. See
 CI jobs are terminal (24 pass, the two known Windows shards fail). Next:
 update PR #130 and renew exact-head required CI. Keep #116 and #129 open;
 no native full-gate or hardware timeout correction is claimed.
+
+**Current landing state:** PR #130 is merged at `9d62ce09`; its exact-main
+CI run `39980361698` passed all 26 jobs. This closes the hosted integration gate,
+while the independent provided-worker native timeout remains open.
+
+**Complete-scenario diagnostic setup:** An isolated attempt using exact source
+`35306ad7` and its qualified wheel stopped before HTML profiling. The standalone
+launcher omitted the canonical Windows gate's declared tool paths, so the
+unrelated adoption fixture could not find `printf`; no HTML assertion or timing
+result was earned. Its 698.843-second failed terminal result, launcher and logs
+are preserved in a separately hash-verified 5,796-byte archive. See
+`verification/html-profile-setup-failure.json`. A fresh diagnostic uses the
+canonical gate's template-derived native and fallback paths and prepares only the
+created-project prerequisite. All complete HTML scenario assertions, original
+900-second CLI deadlines and the 5,400-second owned-tree bound remain unchanged.
+The first failed directory, source checkout and installed wheel stay retained.
