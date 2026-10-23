@@ -30471,6 +30471,9 @@ reusable migration-contract or platform-qualification obligations.
 
 - **Windows review consolidation:** PR119 exact head `1a4d3e6e` is an ancestor of retained PR127 head `62ce16a0`; the latter has a complete green hosted matrix and fresh host qualification. Close PR119 as superseded while preserving its branch, histories and all issue116 native/landing gates. PR122 and PR124 remain retained: their optional-import and timing runtime/test slices match the accepted #127 source, but their exact receipt-bearing heads were deliberately not merged. Their final disposition follows complete qualification of the consolidated successor. No source contribution is represented as landed by this review closure.
 
+- **Additional inactive checkout retirement:** Two clean, redundant checkouts are retired after process/open-file and container-mount checks. Their exact branch heads and all other Git refs remain unchanged; ignored files move by verified same-volume rename and per-worktree Git metadata is retained. See `verification/worktree-consolidation-followup.json` for the journal identity and observation limits. Ten checkouts remain, including active controllers and unfinished reviews. This manual operation does not satisfy WORKTREE-002 automation; moved environments need path reconfiguration before reuse.
+
+
 ### [ ] SWIFT-DRIVER-MODE-001 — Preserve Swift compiler mode after executable resolution
 
 - **Priority:** P0
