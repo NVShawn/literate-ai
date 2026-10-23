@@ -30755,7 +30755,7 @@ remain open in their owning items; this controller/sample proof does not close t
   - [ ] For each closed issue retain a criterion-by-criterion acceptance result and a landed commit with the required tests and native evidence.
   - [ ] Completion audit finds no unresolved open issues; uncertain, partial and pending qualification remains open.
 
-### [ ] DOC-DEPENDENCIES-002 — Refresh DOMPurify after critical documentation dependency findings
+### [x] DOC-DEPENDENCIES-002 — Refresh DOMPurify after critical documentation dependency findings
 
 - **GitHub issue:** [#120](https://github.com/jordanhubbard/literate-ai/issues/120)
 
@@ -30767,13 +30767,25 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Implementation:**
   - [x] Update the lock with the normal npm resolver; retain audit policy without exceptions
 - **Evidence:**
-  - [ ] Fresh clean install, dependency gate, documentation tool tests and full diagram rendering; renew the native gate after integration
+  - [x] Fresh clean install, dependency gate, documentation tool tests and full diagram rendering; renew the native gate after integration
 
 Implementation: the normal npm resolver changes only DOMPurify's version, registry
 URL and integrity, from 3.4.16 to 3.4.17. A clean installation and dependency gate
 pass without exceptions; all 21 documentation-tool tests and all 121 diagrams
-across 625 Markdown files pass on the controller. Native Windows gate renewal
-remains required after composition. No Python production code changes.
+across 625 Markdown files pass on the controller. At that controller checkpoint,
+native Windows renewal remained required after composition. No Python production
+code changes.
+
+**Completion evidence:** The integrated native Windows attempt at `28371242`
+completed a fresh `npm ci` with zero reported vulnerabilities, the unchanged
+high/critical audit gate, all 22 documentation-tool tests with no skips, and all
+121 diagrams from 626 Markdown files. Its later wheel timeout remains retained
+under issue #129; that timeout does not contradict the completed dependency and
+documentation checks. The documentation package manifests and lock are byte-for-byte
+unchanged between that native revision and exact main `9d62ce09`, whose required
+CI run `39980361698` passed all 26 jobs. See
+`verification/documentation-dependency-closure.json`. This closes the dependency
+repair scope and makes no claim that the complete provided native gate passed.
 
 
 ### [ ] CLI-IMPORT-001 — Defer optional MAC schema parser initialization
@@ -30993,6 +31005,7 @@ harness bytes are unchanged. See
 CI jobs are terminal (24 pass, the two known Windows shards fail). Next:
 update PR #130 and renew exact-head required CI. Keep #116 and #129 open;
 no native full-gate or hardware timeout correction is claimed.
+
 The bounded project-parse experiment for #129 is not selected for production.
 A native Windows source comparison preserves the 41-Flavor identity and all
 246 manifest reads, but does not show reliable improvement: baseline
@@ -31008,3 +31021,19 @@ that branch belongs in the landing queue. See
 Next for #129: capture per-command costs for the complete expensive installed
 HTML scenario with the qualified baseline wheel. Do not repeat the full provided
 native qualification before further profiling. Keep the earlier timeouts.
+
+**Current landing state:** PR #130 is merged at `9d62ce09`; its exact-main
+CI run `39980361698` passed all 26 jobs. This closes the hosted integration gate,
+while the independent provided-worker native timeout remains open.
+
+**Complete-scenario diagnostic setup:** An isolated attempt using exact source
+`35306ad7` and its qualified wheel stopped before HTML profiling. The standalone
+launcher omitted the canonical Windows gate's declared tool paths, so the
+unrelated adoption fixture could not find `printf`; no HTML assertion or timing
+result was earned. Its 698.843-second failed terminal result, launcher and logs
+are preserved in a separately hash-verified 5,796-byte archive. See
+`verification/html-profile-setup-failure.json`. A fresh diagnostic uses the
+canonical gate's template-derived native and fallback paths and prepares only the
+created-project prerequisite. All complete HTML scenario assertions, original
+900-second CLI deadlines and the 5,400-second owned-tree bound remain unchanged.
+The first failed directory, source checkout and installed wheel stay retained.
