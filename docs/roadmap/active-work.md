@@ -30390,7 +30390,7 @@ oracle was relaxed to obtain the fresh successful lifecycle.
 
 **Closure audit:** All 11 current cache cases pass with no skips, including all three retirement cases. Every cache-package source file, source-materialization/archive guard and retirement regression is byte-identical across native/lifecycle-qualified `9941a6c4`, exact CI-qualified `20508324`, installed wheel `1063ecd8` and landed main `d5c7b278`. `verification/cache-retirement-acceptance.json` records each criterion and original qualification scope; no broader SDK or release acceptance is inferred.
 
-### [ ] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
+### [x] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
 
 - **GitHub issue:** [#104](https://github.com/jordanhubbard/literate-ai/issues/104)
 - **Current release target:** 1.3.0
@@ -30403,11 +30403,13 @@ oracle was relaxed to obtain the fresh successful lifecycle.
 - **Implementation:**
   - [x] Update the owning generation guidance and shipped template, preserve exact versioned skill references and record issue104.
 - **Evidence:**
-  - [ ] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
+  - [x] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
 
 **Swift repair development evidence:** Skill version 1.0.7 and both authored/shipped Flavor contracts require the native builder's complete single-executable source set. Two actual Swift compiler tests pass, including three conflicting-entrypoint refusal variants and successful support/test linkage and execution. Ten skill/template tests, SkillEvaluator, lint/format, strict OpenSpec and supported authority reviews pass. A fresh live macOS LaunchAgent sample succeeds on the first generation attempt (one source-cache miss): 3 generated tests, 3 independent verifier tests and 2 assertions, with 6 invocations. The earlier exhausted three-candidate attempt remains retained. A current complete project lifecycle receipt, installed wheel and exact-head CI remain required before landing.
 
 **Current Swift-repaired integration lifecycle:** At implementation `595da5b25931eaf5bfa94977512596b7eccd7570`, the complete project lifecycle passes. Supported receipt update/check/require-current and `litai verify` pass with 230 tests, no failures or skips. Current receipt: `sha256:40585141e6ec627f44b1573bf8ca10868ffd945f0938dc59455feeb4f241d5b0`; finalized candidate: `sha256:37c2663be538e67fadd94d5ce8f760c66209608e2c04e05c8b2bd142b40bb759`; driver: `sha256:5d1b8a0f8f67ac284a33b72af22ab8cff9de19b7ddbacf42c0978a7f4be905b6`. This run revalidates eligible admitted source through the complete current lifecycle; the separately recorded Swift sample was freshly generated. Final package/native renewal and exact-head CI remain open.
+
+**Closure audit:** All three current real-Swift tests pass without skips, including support/generated-test linkage, direct compiler alias execution and three competing-entrypoint refusals. Version 1.0.7 authored/shipped guidance and Flavor contracts match their actual qualified wheel bytes. The guide remains identical to the separately recorded fresh Swift generation; current owner/test bytes match landed main and exact CI-qualified `20508324`. A forced-fresh framework lifecycle at `52c8b6eb` passes 230 tests and its complete installed wheel passes all 131 timing spans. `verification/swift-single-executable-acceptance.json` retains each original source/receipt/wheel boundary; the unrelated entrypoint-audit final full run remains pending.
 
 ### [ ] CI-BAZEL-ACTION-001 — Review the Bazel setup action patch for release 1.3
 
