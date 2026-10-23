@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import io
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from literate_ai.adapters import component_lock_operations
 from literate_ai.adapters.component_lock_operations import (
     PreparedComponentLock as _PreparedComponentLock,
 )
 from literate_ai.adapters.component_lock_operations import (
     operate_component_lock as _one_component_lock,
+)
+from literate_ai.adapters.component_lock_planning import (
+    ComponentLockPlanningError,
+    FilesystemComponentLockPlanner,
 )
 from literate_ai.adapters.component_locks import (
     ComponentLockStore,
@@ -37,6 +43,123 @@ def _run(arguments: list[str]) -> tuple[int, dict[str, object], str]:
 
 
 class ComponentLockCliTests(unittest.TestCase):
+    def test_read_only_reuse_does_not_hide_changed_requested_flavor_roots(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            component, flavors = _fixture(root)
+            planner = FilesystemComponentLockPlanner()
+            prepared = component_lock_operations.prepare_component_lock(
+                component,
+                target="macos-host",
+                flavors=("+macos", "+python"),
+                flavor_roots=(flavors,),
+                planner=planner,
+            )
+            other = root / "other-flavors"
+            shutil.copytree(flavors, other)
+            changed = other / "lang-python/flavor.md"
+            changed.write_bytes(changed.read_bytes() + b"\n")
+            with self.assertRaises(ComponentLockPlanningError):
+                _one_component_lock(
+                    prepared,
+                    target="macos-host",
+                    flavors=("+macos", "+python"),
+                    flavor_roots=(other,),
+                    planner=planner,
+                    check=True,
+                    difference=False,
+                )
+            self.assertFalse((component / "component.lock.json").exists())
+            self.assertFalse(tuple(component.glob("component.resolution-audit.*.json")))
+
+    def test_read_only_check_captures_catalog_once_per_operation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            component, flavors = _fixture(Path(temporary))
+            common = [
+                "lock",
+                str(component),
+                "--target",
+                "macos-host",
+                "--flavor-root",
+                str(flavors),
+                "--flavor=+macos",
+                "--flavor=+python",
+            ]
+            self.assertEqual(_run(common)[0], 0)
+            lock_path = component / "component.lock.json"
+            original = lock_path.read_bytes()
+            capture = FilesystemComponentLockPlanner.snapshot
+            with patch.object(
+                FilesystemComponentLockPlanner,
+                "snapshot",
+                autospec=True,
+                side_effect=capture,
+            ) as observations:
+                for operation in ("--check", "--diff"):
+                    status, result, errors = _run([*common, operation])
+                    self.assertEqual((status, errors), (0, ""))
+                    self.assertTrue(result["result"]["current"])
+                self.assertEqual(observations.call_count, 2)
+            self.assertEqual(lock_path.read_bytes(), original)
+
+    def test_read_only_snapshot_reuse_refuses_in_operation_catalog_drift(self) -> None:
+        for mutation in ("component", "flavor", "specification", "membership"):
+            with (
+                self.subTest(mutation=mutation),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                component, flavors = _fixture(Path(temporary))
+                common = [
+                    "lock",
+                    str(component),
+                    "--target",
+                    "macos-host",
+                    "--flavor-root",
+                    str(flavors),
+                    "--flavor=+macos",
+                    "--flavor=+python",
+                ]
+                self.assertEqual(_run(common)[0], 0)
+                artifacts = [
+                    component / "component.lock.json",
+                    component / "component.resolution-audit.macos-host.json",
+                ]
+                original = {path: path.read_bytes() for path in artifacts}
+                real_checks = component_lock_operations.component_artifact_checks
+                changed = False
+
+                def checks(
+                    *args,
+                    real_checks=real_checks,
+                    mutation=mutation,
+                    component=component,
+                    flavors=flavors,
+                ):
+                    nonlocal changed
+                    result = real_checks(*args)
+                    if not changed:
+                        changed = True
+                        if mutation == "membership":
+                            shutil.copytree(flavors / "lang-python", flavors / "added")
+                        else:
+                            path = {
+                                "component": component / "component.md",
+                                "flavor": flavors / "lang-python/flavor.md",
+                                "specification": component / "specs/spec.md",
+                            }[mutation]
+                            path.write_bytes(path.read_bytes() + b"\n")
+                    return result
+
+                with patch.object(
+                    component_lock_operations, "component_artifact_checks", checks
+                ):
+                    status, _, _ = _run([*common, "--check"])
+                self.assertTrue(changed)
+                self.assertEqual(status, 2)
+                self.assertEqual(
+                    {path: path.read_bytes() for path in artifacts}, original
+                )
+
     def test_update_check_diff_and_catalog_audit_are_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             component, flavors = _fixture(Path(temporary))
@@ -119,8 +242,8 @@ class ComponentLockCliTests(unittest.TestCase):
             prepared = _PreparedComponentLock(root, plan, result)
 
             class Planner:
-                def plan(self, *args, **kwargs):
-                    return plan
+                def plan_with_snapshot(self, *args, **kwargs):
+                    return plan, None
 
             events: list[str] = []
             real_audit_update = ComponentResolutionAuditStore.update

@@ -29086,6 +29086,8 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
+- **Installed journey result and next action:** Both non-editable installations import from site-packages. The public CLI completes reviewed registered rebind, stale-registry refusal without mutation, and reviewed unqualified-child replacement; parent validation passes after each. The retained recovery matches all 313 original files, 244 directories and 2,324,779 bytes against the pre-write plan. Final generation writes no source because the zero-argument public API cannot provide three distinct valid argument vectors. Independent acceptance and remaining refusal/rollback controls are incomplete; no candidate receipt is promoted. See `verification/registered-child-installed-partial.json` and blocking [#132](https://github.com/jordanhubbard/literate-ai/issues/132). Review [proposed ADR 0051](../decisions/0051-zero-argument-generated-test-coverage.md) before changing the coverage contract; retain the unchanged independent oracle and existing zero-argument API.
+
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
 - **GitHub issue:** [#47](https://github.com/jordanhubbard/literate-ai/issues/47)
@@ -30674,7 +30676,7 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Evidence:**
   - [ ] Real disabled/enabled UFS probes establish early refusal, exact cleanup and unchanged unsupported-brand refusals.
 
-### [ ] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
+### [x] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
 
 **GitHub issue:** [#88](https://github.com/jordanhubbard/literate-ai/issues/88).
 
@@ -30687,15 +30689,15 @@ remain open in their owning items; this controller/sample proof does not close t
   - [x] Align plan/apply compatibility diagnostics and preserve atomic rollback for incompatible additions.
 - **Evidence:**
   - [x] Older pinned parent plus newer installed scaffold fixtures cover mismatched dependencies, safe subsets and destination preservation.
-  - [ ] Required review CI, landing and exact-main confirmation pass.
+  - [x] Required review CI, landing and exact-main confirmation pass: PR #131, review run `39990970425`, merged main `ef5db15f`, and all 26 exact-main jobs in `40007862532`.
 
-- **Implementation:** Planning now projects exact current, inherited and selected framework skill bytes before apply. It reuses canonical dependency validation, binds incompatibility diagnostics to the plan and excludes incompatible additions from the safe subset. Parent selectors, overlays, currentness checks and atomic rollback remain intact. Published v1 schema bytes and dependency identity rules are unchanged. The next action in progress is required review CI and landing of the locally qualified change.
+- **Implementation:** Planning now projects exact current, inherited and selected framework skill bytes before apply. It reuses canonical dependency validation, binds incompatibility diagnostics to the plan and excludes incompatible additions from the safe subset. Parent selectors, overlays, currentness checks and atomic rollback remain intact. Published v1 schema bytes and dependency identity rules are unchanged. Complete: required review CI, merge and exact-main confirmation all pass.
 
 - **Combined pre-write guard:** A local provider outside the inherited file set could change between planning and apply. The repository adapter now runs a read-only combined preflight after its currentness checks and before inherited, provenance or baseline writes. The public CLI regression changes a local provider immediately before apply and forbids entering the lineage writer; it failed before this guard and passes after it.
 
 - **Focused implementation evidence:** Ten portable compatibility cases pass through the managed checkpoint runner, including read-only planning, safe-subset apply, unchanged published-wire identity, actual JSON Schema validation, concurrent local-provider drift before the lineage writer, and invocation from a nested directory while updating inherited bytes. Existing lineage/rollback cases (three) and adapter cases (two) also pass.
 
-- **Complete local qualification:** Exact implementation `e1d3e94b` passes all 2,262 selected source cases (2,191 passed, 71 existing skips, zero failures) in 1,246.156 seconds. The exact-source installed-wheel gate passes with wheel `sha256:e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb`. A forced-fresh lifecycle passes all 232 cases with no skips; supported receipt update, check, require-current and verify pass after the metadata-only integration. Receipt `sha256:f0b3fa15b34b5d138bd0f9480a02796e216a6df704cabf6975f6796e6a40a9ac` remains a local assertion. See `verification/project-update-closure-qualification.json`. Review CI and landing remain open; no unrelated native issue is qualified by these portable results.
+- **Complete local qualification:** Exact implementation `e1d3e94b` passes all 2,262 selected source cases (2,191 passed, 71 existing skips, zero failures) in 1,246.156 seconds. The exact-source installed-wheel gate passes with wheel `sha256:e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb`. A forced-fresh lifecycle passes all 232 cases with no skips; supported receipt update, check, require-current and verify pass after the metadata-only integration. Receipt `sha256:f0b3fa15b34b5d138bd0f9480a02796e216a6df704cabf6975f6796e6a40a9ac` remains a local assertion. See `verification/project-update-closure-qualification.json`. PR #131 passes required review CI and lands at `ef5db15f`; exact-main CI `40007862532` passes all 26 jobs. See `verification/project-update-closure-landing.json`. No unrelated native issue is qualified by these portable results.
 
 ### [ ] SDK-OBSERVATION-COST-001 — Bound repeated installed distribution observation
 
@@ -30711,7 +30713,7 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Evidence:**
   - [ ] Compare equivalent profiles and uninstrumented native timings; prove changed, redirected, missing or altered members fail closed during commands and qualify independent consumer acceptance.
 
-### [ ] WINDOWS-TEST-CONTRACT-001 — Repair Windows test contracts
+### [x] WINDOWS-TEST-CONTRACT-001 — Repair Windows test contracts
 
 **GitHub issue:** [#116](https://github.com/jordanhubbard/literate-ai/issues/116).
 
@@ -30721,9 +30723,20 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Conclusion:** Keep copied Python aliases bound to their native base runtime and exercise structural loader checks on a supported platform while preserving explicit Windows refusal.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Review and land PR #119 separately after #115; diagnose its current Linux CI failure before qualification.
+  - [x] Reconcile PR #119 after #115, diagnose its Linux driver-pin failure, and land its reviewed fixture contribution through the integrated review.
 - **Evidence:**
-  - [ ] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.
+  - [x] Focused alias ordering and loader cases plus exact-head Linux and Windows CI pass without weakening production checks.
+
+**Completion evidence:** PR #119 head `1a4d3e6e` is retained by ancestry in
+main `9d62ce09`. The Python alias fixture retains its real base executable,
+versioned runtime DLL and `pyvenv.cfg` without new test skips; the loader-role
+fixture selects Linux, and the separate Windows unsupported-loader assertion
+remains active. Exact-main run `39980361698` passes all 26 jobs, including both
+Linux Python jobs and all three full Windows/Python 3.12 test shards. See
+`verification/windows-fixture-contract-closure.json`. This completes #116's
+fixture-contract acceptance. It does not establish the cause of the separately
+reproduced hardware observation timeout or qualify the complete provided-worker
+native gate; #90 and #129 retain those remaining requirements.
 
 **Review finding:** Exact-head Linux job `119840524271` in run `39783402916` fails the lifecycle driver review: `retained_project_execution.py` changed while the pin still names `c27617cb`. The contribution also projects ambient `SYSTEMROOT`, overlapping #110's already-bound system-context owner. Reconcile the production delta against the integrated custody path before re-reviewing and repinning; do not treat the failure as only an infrastructure retry.
 
@@ -31040,3 +31053,28 @@ canonical gate's template-derived native and fallback paths and prepares only th
 created-project prerequisite. All complete HTML scenario assertions, original
 900-second CLI deadlines and the 5,400-second owned-tree bound remain unchanged.
 The first failed directory, source checkout and installed wheel stay retained.
+
+**#129 lock-check investigation in progress:** The unchanged native public lock gate passes in 47.531 instrumented seconds; four plan preparations include four complete authority graphs, five catalog captures and ten input revalidations. Prototype reuse of the already captured immutable catalog only within one read-only check/diff transaction. Retain fresh bound-byte and membership checks at every existing revalidation boundary and rebuild current authority; mutating publication retains its existing preparation path. Require actual in-operation source/Flavor/membership mutation refusals, unchanged lock/audit bytes, operation isolation, and a native before/after comparison before keeping the optimization. The prior project-parser prototype remains rejected.
+**Complete HTML timing diagnostic for #129:** All five original installed HTML stages and 58 CLI commands complete on native Windows. The scenario takes 2,977.625 seconds, with 3,443.5 seconds for setup plus the scenario. Repeated verify/render/update calls dominate; this is an observation, not an optimization result or a full native-gate pass. See `verification/windows-complete-html-diagnostic.json`. Keep the original failed setup and full-gate timeouts. Next: trace operation-local repeated observations and select a causally tested improvement before renewing the unchanged complete native gate.
+
+**#129 prototype qualification and review:** Prototype `d8f84b98` passes the complete 2,264-case source suite (2,193 passes, 71 existing skips) and full installed-wheel harness. Native A/B calls retain identical passing reports and fixture restoration; three-call medians are 36.141 seconds baseline and 29.531 candidate with warm-cache/ordering variation. Catalog captures fall from five to two while ten input revalidations and four current authority graphs remain. This is scoped evidence, not a complete native-gate result. Review adds a cache-key control: changed requested Flavor roots must use fresh planning rather than be hidden by the captured catalog; its regression fails before the control and passes after. The root lifecycle correctly refuses the prototype's stale driver pin before execution. Record the reviewed final TCB pin through `review_lifecycle_driver.py`, renew documentation authority and qualify the corrected exact source before promotion. Retain all preceding wheel/source reports and lifecycle refusals.
+
+**#129 qualified read-only catalog reuse:** Exact source `74417e1a` passes the full 2,265-case source suite (2,194 passed, 71 existing skips, zero failures), all installed-wheel assertions, 14 focused cases including actual in-operation mutations, and the forced lifecycle with 229 passing checks and no skips. The generated suite count is producer-bound; the declared conformance inventory and minimums are unchanged. Supported receipt update/check/require-current and all-gate verify pass on the metadata-only consolidated tree. The native Windows public lock check returns identical passing reports across both installations and restores its fixture; three-call medians are 35.172 seconds baseline and 28.187 candidate, with cache/order variation. Catalog captures fall from five to two; all ten input revalidations and four current authority-graph observations remain. See `verification/lock-check-catalog-qualification.json`. The next action is ordinary review CI and landing of this scoped improvement, then complete unchanged provided-worker native renewal before closing #129. No generator-diversity exemption, dependency, release, or native admission is claimed.
+
+### [ ] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
+
+- **GitHub issue:** [#134](https://github.com/jordanhubbard/literate-ai/issues/134)
+
+- **Priority:** P1
+- **Owner:** Pinned OpenSpec and documentation dependency lock
+- **Direction:** Resolve the high Zod advisory blocking required CI and the provided Windows gate; preserve the audit and all qualification bounds.
+- **Conclusion:** Refresh the compatible transitive resolution, prove clean locked audit/docs/OpenSpec checks, then renew the failed qualification. This is dependency maintenance, not native performance acceptance.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Update the existing Zod resolution to a patched compatible 4.x release without new dependencies or audit exceptions.
+- **Evidence:**
+  - [ ] Clean npm ci, strict audit, documentation tests/diagrams and strict OpenSpec validation pass; renew affected exact-head CI and native gate and preserve failed evidence.
+
+**DOC-DEPENDENCIES-003 dependency selection:** The affected graph contains root Zod 4.4.3 and Chromium BiDi's nested Zod 3.25.76. Puppeteer 25.16.0 keeps the existing Node 22.12 floor and uses upstream Chromium BiDi with a Zod 4 dependency, permitting patched Zod without forcing a new major into a v3 consumer. Refresh that existing browser-tool pin, its matching allowed install-script entry, and the locked Zod 4 resolution; retain every audit and documentation check.
+
+**DOC-DEPENDENCIES-003 local qualification:** A fresh canonical staged `npm ci` installed the exact lock with zero vulnerabilities. Strict OpenSpec validation passes all four items; the unchanged audit and 22 documentation tests pass, and Puppeteer renders all 121 Mermaid diagrams across 627 Markdown files. The supported receipt check remains current; all-gate verify reports two passes, three existing declared skips and zero failures. The prior exact-head CI and supplied-worker gate failures remain retained. Next: publish this fix through existing PR #133 and renew exact-head CI and the unchanged provided-worker native gate before closure.

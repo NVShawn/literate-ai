@@ -1,0 +1,147 @@
+{
+  "schema": "literate-ai/lock-check-catalog-qualification@1",
+  "issue": 129,
+  "source_commit": "74417e1a57b2f6e554bfaf9fefdeecc11e6dc6f5",
+  "metadata_integration_commit": "9d6111710e88360c2261f1c38c97373c6644f1a6",
+  "scope": "Reuse immutable catalog parsing only within read-only check/diff operations; retain every current input, membership and authority revalidation. Complete supplied-worker native admission remains open.",
+  "focused_tests": {
+    "passed": 14,
+    "failed": 0,
+    "changed_root_request_control_failed_before_fix": true,
+    "actual_in_operation_component_flavor_specification_membership_mutations_refused": true,
+    "read_only_lock_audit_bytes_preserved": true,
+    "new_operation_gets_a_fresh_catalog": true
+  },
+  "source_suite": {
+    "executed": 2194,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2194,
+    "selected": 2265,
+    "skipped": 71,
+    "seconds": 686.885,
+    "managed_checkpoint_runner": true,
+    "retained_report_sha256": "26abce73d5de347462e16c3d42bd354c69decd63c7184c91d2750534995fbdad"
+  },
+  "installed_wheel": {
+    "passed": true,
+    "wheel_sha256": "3b0dec5db965b6b2a454bed791be29038acb01ba66821b8d335de07a879ef52b",
+    "embedded_source_commit": "74417e1a57b2f6e554bfaf9fefdeecc11e6dc6f5",
+    "completed_timing_spans": 130,
+    "failed_completed_spans": 0
+  },
+  "native_windows_comparison": {
+    "terminal": {
+      "state": "completed",
+      "exit_code": 0,
+      "seconds": 387.7039999999106
+    },
+    "baseline_source_commit": "35306ad742f0646f64c889ffd3838b8d24e88f69",
+    "candidate_source_commit": "74417e1a57b2f6e554bfaf9fefdeecc11e6dc6f5",
+    "baseline_wheel_sha256": "456801162efc3c80966e7b757ef2b80119389b71daab3cc167aa95b7ab89cace",
+    "candidate_wheel_sha256": "3b0dec5db965b6b2a454bed791be29038acb01ba66821b8d335de07a879ef52b",
+    "candidate_import_from_own_site_packages": true,
+    "reports_identical": true,
+    "original_fixture_restored": true,
+    "uninstrumented_order": "baseline,candidate,candidate,baseline,baseline,candidate",
+    "uninstrumented_seconds": [
+      {
+        "role": "baseline",
+        "seconds": 36.344
+      },
+      {
+        "role": "candidate",
+        "seconds": 28.187
+      },
+      {
+        "role": "candidate",
+        "seconds": 31.656
+      },
+      {
+        "role": "baseline",
+        "seconds": 35.172
+      },
+      {
+        "role": "baseline",
+        "seconds": 31.14
+      },
+      {
+        "role": "candidate",
+        "seconds": 27.906
+      }
+    ],
+    "median_seconds": {
+      "baseline": 35.172,
+      "candidate": 28.187
+    },
+    "instrumented_seconds": {
+      "baseline": 52.5,
+      "candidate": 45.063
+    },
+    "call_counts": {
+      "catalog_captures": {
+        "baseline": 5,
+        "candidate": 2
+      },
+      "input_revalidations": {
+        "baseline": 10,
+        "candidate": 10
+      },
+      "authority_graph_observations": {
+        "baseline": 4,
+        "candidate": 4
+      }
+    },
+    "retained_result_sha256": "964880340250a2c7f10dbef07d8eaaf38cb53055dc308d1fa25702bd33ef2a8b",
+    "limits": "Three uninstrumented calls per distribution with runtime and cache/order variation. This is the public lock-check path, not a complete HTML/native-gate speedup claim.",
+    "per_command_timeout_seconds": 900
+  },
+  "forced_lifecycle": {
+    "passed": true,
+    "summary": {
+      "failed": 0,
+      "passed": 229,
+      "skipped": 0,
+      "total": 229
+    },
+    "receipt_identity": "sha256:1f9eb1ff79c96b99cf4bcc3eee475104ad087eac5cdedfacd218535e3905e60b",
+    "finalized_candidate_identity": "sha256:ad178283b09895a668c6bc04acfbaafa4b4321a235f9414704ff2a79f9af196b",
+    "driver_implementation_identity": "sha256:4f946868864c8daaed3546f50569196ac28c73784850218547f267d91ce507c0",
+    "force_regeneration": true,
+    "source_cache_mode": "unconfigured",
+    "supported_update_check_require_current": true,
+    "local_assertion_authenticated": false,
+    "configured_coding_pair_used_without_ambient_cli_override": true
+  },
+  "repository_checks": {
+    "ruff": "passed",
+    "format_files": 1684,
+    "driver_review": "current via supported review script",
+    "skills": "passed",
+    "layout": "passed",
+    "public_export": "passed",
+    "strict_openspec": "passed",
+    "documentation_tests_passed": 22,
+    "diagrams_rendered": 121,
+    "markdown_files_examined": 627,
+    "dependency_audit": "passed for the originally qualified tool lock; later advisory and renewal recorded under DOC-DEPENDENCIES-003",
+    "all_gate_verify": {
+      "pass": 2,
+      "skipped": 3,
+      "fail": 0
+    },
+    "end_peer_survey": {
+      "open_reviews": 1,
+      "worktrees": 9,
+      "collectable_worktrees": 0,
+      "historical_refs_retained": true
+    }
+  },
+  "complete_provided_native_gate_passed": false,
+  "review_ci_and_landing": "pending for consolidated source head",
+  "generated_test_contract_changed": false,
+  "dependencies_added": false,
+  "release_or_tag_created": false,
+  "qualification_scope_note": "The source/wheel/lifecycle results below qualify source 74417e1a and its Python authority and implementation bytes. The later documentation browser dependency refresh is separately qualified; historical dependency audit success is not a current audit assertion.",
+  "python_authority_and_implementation_bytes_match_qualified_source": true
+}

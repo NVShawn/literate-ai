@@ -1,0 +1,15 @@
+{
+  "schema": "literate-ai/project-update-closure-landing@1",
+  "issue": 88,
+  "review_pr": 131,
+  "review_head": "7ce37b38105015709b37ad34b3baf8fcf39b8661",
+  "review_ci_run": 39990970425,
+  "review_ci_conclusion": "success",
+  "merged_main_commit": "ef5db15f1b9637a6d4d721a4cb7dd83dfd1dd195",
+  "exact_main_ci_run": 40007862532,
+  "exact_main_successful_jobs": 26,
+  "exact_main_failed_jobs": 0,
+  "review_source_tests_schemas_skills_match_merged_main": true,
+  "implementation_qualification": "verification/project-update-closure-qualification.json",
+  "scope": "Completed portable update-closure issue acceptance, required review CI, merge and exact-main confirmation; no unrelated native performance or release qualification claim"
+}

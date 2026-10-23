@@ -1,0 +1,49 @@
+{
+  "schema": "literate-ai/registered-child-installed-partial@1",
+  "issue": 48,
+  "blocking_issue": 132,
+  "source_commit": "e1d3e94b003db96e10c7b8b7ccd733fd93eb1e81",
+  "old_wheel_sha256": "456801162efc3c80966e7b757ef2b80119389b71daab3cc167aa95b7ab89cace",
+  "new_wheel_sha256": "e3c5852b83d857030243048364223063af3b8b0ecde53a6a9d501a384c7ad4cb",
+  "both_framework_imports_from_installed_site_packages": true,
+  "reviewed_standard_rebind_completed": true,
+  "stale_registry_refused_without_child_or_registry_mutation": true,
+  "reviewed_unqualified_replacement_completed": true,
+  "parent_validation_passed_after_rebind_and_replacement": true,
+  "recovery": {
+    "reviewed_plan_identity": "sha256:dc8e0d3dc662eb9c255940532461ae479fec77b0743da8732358c20f10279bf0",
+    "complete_old_tree_matches_prewrite_plan": true,
+    "files": 313,
+    "directories": 244,
+    "file_bytes": 2324779,
+    "parent_manifest_and_registry_match_original_plan": true,
+    "historical_rebind_records": 1,
+    "completed_marker": true
+  },
+  "oracle_declaration": {
+    "component": "components/implementation/component.md",
+    "oracle_identity": "sha256:604e29df495a6005aead283976993b1278f1bf2fc2920804cf71df3648908f79",
+    "harness_identity": "sha256:7ab846fa65ac1ff1816e108d69ec1775333edaa54ccaec67b044a73085381645",
+    "import_surface_identity": "sha256:d203e7e59b989e2e99c7696f76b5156cf3b13620d9ed1e64378c0b96b21e2548",
+    "module": "tiny.api",
+    "expected_result": 7,
+    "isolated_startup_and_export_origin_assertions": true
+  },
+  "failure": {
+    "stage": "major-rebuild generation",
+    "no_source_written": true,
+    "reason": "Zero-argument callable has one valid argument vector; generated-test contract requires at least three unique argument vectors",
+    "transcript_sha256": "df16d4b7c0bab48786c82a3df7945978889029c8513cd6babc8792271301673c",
+    "evidence_identity": "sha256:94ff829a1ced8d93eb028b156f612b94aa0960897a2269040fe9be4cd4fe5d59"
+  },
+  "independent_acceptance_passed": false,
+  "candidate_receipt_promoted": false,
+  "remaining_controls": [
+    "complete independent acceptance",
+    "source/review drift",
+    "symlink containment",
+    "qualified replacement refusal",
+    "rollback failure injection"
+  ],
+  "scope": "Synthetic installed CLI integration and actual recovery-byte proof; partial issue evidence, not completed native-child qualification"
+}

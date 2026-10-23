@@ -1,0 +1,89 @@
+{
+  "schema": "literate-ai/complete-html-timing-diagnostic@1",
+  "issue": 129,
+  "scope": "Complete real installed HTML scenario on native Windows; observational timings, not full native admission or a controlled before/after performance claim",
+  "terminal": {
+    "state": "completed",
+    "exit_code": 0,
+    "seconds": 3443.5,
+    "source_commit": "35306ad742f0646f64c889ffd3838b8d24e88f69",
+    "wheel_sha256": "456801162efc3c80966e7b757ef2b80119389b71daab3cc167aa95b7ab89cace",
+    "scope": "complete installed HTML scenario diagnostic, not full wheel/native admission"
+  },
+  "archive_sha256": "ebec4c0cb059bf36b2a3bd721636314dfc27cd33bd181376fa60a5554137fae6",
+  "archive_bytes": 77352,
+  "installed_html_script_sha256": "1b45a08ee2f8f2823c1893e91ace54181e4ec840a70b0d489a560593fe137715",
+  "html_scenario_seconds": 2977.625,
+  "stages": [
+    {
+      "stage": "qualify",
+      "state": "completed",
+      "seconds": 240.26599999982864
+    },
+    {
+      "stage": "qualify_update",
+      "state": "completed",
+      "seconds": 933.625
+    },
+    {
+      "stage": "qualify_version_health",
+      "state": "completed",
+      "seconds": 168.31199999991804
+    },
+    {
+      "stage": "qualify_lock_health",
+      "state": "completed",
+      "seconds": 836.9219999997877
+    },
+    {
+      "stage": "qualify_verification_health",
+      "state": "completed",
+      "seconds": 798.4840000001714
+    }
+  ],
+  "commands": 58,
+  "all_commands_completed": true,
+  "command_groups": {
+    "graph": {
+      "calls": 4,
+      "total_seconds": 28.329,
+      "maximum_seconds": 7.594
+    },
+    "render.html": {
+      "calls": 19,
+      "total_seconds": 843.626,
+      "maximum_seconds": 161.344
+    },
+    "git": {
+      "calls": 9,
+      "total_seconds": 76.484,
+      "maximum_seconds": 66.765
+    },
+    "verify": {
+      "calls": 21,
+      "total_seconds": 1073.768,
+      "maximum_seconds": 120.734
+    },
+    "update": {
+      "calls": 2,
+      "total_seconds": 693.157,
+      "maximum_seconds": 456.297
+    },
+    "version": {
+      "calls": 1,
+      "total_seconds": 17.14,
+      "maximum_seconds": 17.14
+    },
+    "lock": {
+      "calls": 2,
+      "total_seconds": 121.234,
+      "maximum_seconds": 61.609
+    }
+  },
+  "original_assertions_changed": false,
+  "cli_timeout_seconds": 900,
+  "owned_tree_timeout_seconds": 5400,
+  "setup": "Acknowledged exact onboard-create plan with canonical project validation and canonical Windows gate tool search paths; adoption is outside this HTML-only diagnostic",
+  "full_native_gate_passed": false,
+  "next_action": "Trace the repeated verify/render/update costs; require equivalent mutation controls and native before/after timings before selecting or claiming an optimization"
+}
