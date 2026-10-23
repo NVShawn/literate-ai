@@ -30645,9 +30645,10 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Implementation:**
   - [x] Add supported read-only entry-point auditing and an explicit reviewed authoring requirement without modifying pinned parents or retained evidence.
 - **Evidence:**
-  - [ ] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
+  - [x] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
+  - [ ] Complete exact review CI and reviewed landing with current qualification.
 
-- **Next action in progress:** Run fresh full source regression, then complete installed-wheel/public CLI acceptance, a fresh current framework receipt, exact review CI and landing.
+- **Next action in progress:** Complete exact review CI and reviewed landing; current source, lifecycle, installed-wheel and installed public CLI qualification are recorded below.
 
 - **Custom-path authority:** Current v2 definitions admit bounded portable relative onboarding paths through the shared canonical path owner; optional shim validation follows the declared field. Published v1 schema inputs retain the root SKILL.md rule before legacy conversion. Custom-path provider metadata must name the file explicitly. Positive configured projects and original-adoption planning, default-delegate staleness, cross-platform path refusal and frozen-v1 compatibility are covered; no automatic instruction repair or lifecycle admission is added.
 
@@ -30656,6 +30657,8 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Retained full-suite refusal:** Frozen source `af620be3` retains 12 passes, 23 skips and one error from 2,235 selected cases at clean two-replay self-replication because the new yaml import is absent from the package manifest/source BOM. Declare the exact runtime PyYAML dependency, retain the failed attempt, qualify replication again, then start a fresh complete run; dependency admission remains enforced.
 
 - **Parser resource follow-up:** A 379-byte valid YAML merge-alias graph expands to 4,096 mapping pairs with ordinary SafeLoader. The byte limit alone does not bound that work. Before landing, bound composed nodes and depth, permit scalar aliases only, and refuse shared container aliases in both onboarding frontmatter and provider pointers. Preserve every input byte and report the existing typed invalid finding. The pre-hardening snapshot `9f8b9dab` passed all 2,235 selected source cases (2,164 pass, 71 explicit skips), its 230-case lifecycle and complete 131-span installed-wheel gate; these facts do not qualify the upcoming parser change.
+
+- **Final installed public CLI acceptance:** Exact qualified wheel `1e848368` passes all nine public discovery cases plus real YAML container-alias, onboarding alias, depth and node-limit refusals. Scalar aliases remain ready; every audit preserves exact file bytes and mtimes, and authored inputs restore ready. Installed module bytes match the reviewed source. See `verification/agent-entrypoint-installed-final-acceptance.json`; no lifecycle admission is asserted by the discovery command.
 
 ### [ ] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
 

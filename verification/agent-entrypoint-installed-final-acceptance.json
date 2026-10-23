@@ -1,0 +1,39 @@
+{
+  "source_commit": "2837124250528de5b18709a22ade3048281d4ea6",
+  "wheel_sha256": "1e8483682163652f58fec34621a9ea106f83a46d3cc8636100b7c671316fdaf0",
+  "installed_module_sha256": "d207df99000277f9ffa0a3c127d226aa0d620deca2fa19e7765cd9a32e23d98a",
+  "installed_module_from_noneditable_site_packages": true,
+  "checks": {
+    "public_init_ready": true,
+    "audit_read_only_idempotent": true,
+    "nearest_nested_missing_delegate": true,
+    "custom_authored_crlf_preserved": true,
+    "custom_declared_skill_with_no_root_fallback": true,
+    "stale_delegates_refuse_until_explicitly_authored": true,
+    "custom_provider_pointer_required": true,
+    "debug_file_creation_refused": true,
+    "unsafe_declared_path_refused": true
+  },
+  "scope": "Installed public CLI discovery only; no lifecycle admission or repair writes claimed.",
+  "bounded_yaml": {
+    "wheel_source_commit": "2837124250528de5b18709a22ade3048281d4ea6",
+    "wheel_sha256": "1e8483682163652f58fec34621a9ea106f83a46d3cc8636100b7c671316fdaf0",
+    "installed_public_cli": true,
+    "checks": {
+      "container_alias_graph_refuses": true,
+      "onboarding_alias_graph_refuses": true,
+      "scalar_alias_remains_ready": true,
+      "depth_bound_refuses": true,
+      "node_bound_refuses": true,
+      "every_audit_preserves_exact_bytes_and_mtimes": true,
+      "authored_inputs_restored_ready": true
+    },
+    "scope": "Real installed CLI discovery only; no lifecycle admission"
+  },
+  "retained_evidence_sha256": {
+    "audit.py": "f1d5a81d9ec6c64a6026b7a7e39d7d9074cc8e345463c123705f4d505b66567e",
+    "yaml_bounds.py": "63bf121be71bf787ac4e23de2bdf7b34529dcdc571b9441e6b8600db6f50cde5",
+    "proof.json": "72a6575bf4a72286f11eaf9f549be46c611999efbd3ac8b78a00cbdf7e78d155",
+    "yaml-proof.json": "54aa4207eb0f69d3a57531fea39e2e8eedee6a0e72b9e4296bc567df2f14d9d2"
+  }
+}
