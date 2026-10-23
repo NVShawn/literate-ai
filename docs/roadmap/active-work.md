@@ -31040,3 +31040,5 @@ canonical gate's template-derived native and fallback paths and prepares only th
 created-project prerequisite. All complete HTML scenario assertions, original
 900-second CLI deadlines and the 5,400-second owned-tree bound remain unchanged.
 The first failed directory, source checkout and installed wheel stay retained.
+
+**#129 lock-check investigation in progress:** The unchanged native public lock gate passes in 47.531 instrumented seconds; four plan preparations include four complete authority graphs, five catalog captures and ten input revalidations. Prototype reuse of the already captured immutable catalog only within one read-only check/diff transaction. Retain fresh bound-byte and membership checks at every existing revalidation boundary and rebuild current authority; mutating publication retains its existing preparation path. Require actual in-operation source/Flavor/membership mutation refusals, unchanged lock/audit bytes, operation isolation, and a native before/after comparison before keeping the optimization. The prior project-parser prototype remains rejected.

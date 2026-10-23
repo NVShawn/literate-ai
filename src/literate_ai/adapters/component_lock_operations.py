@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from literate_ai.adapters.component_lock_planning import (
+    ComponentCatalogSnapshot,
     ComponentLockPlanningError,
     FilesystemComponentLockPlanner,
 )
@@ -33,6 +34,7 @@ class PreparedComponentLock:
     component_root: Path
     plan: ComponentLockResolutionPlan
     result: ComponentLockResolutionResult
+    catalog_snapshot: ComponentCatalogSnapshot | None = None
 
 
 def prepare_component_lock(
@@ -43,7 +45,7 @@ def prepare_component_lock(
     flavor_roots: tuple[Path, ...],
     planner: FilesystemComponentLockPlanner,
 ) -> PreparedComponentLock:
-    plan = planner.plan(
+    plan, snapshot = planner.plan_with_snapshot(
         component,
         target_name=target,
         flavor_selectors=flavors,
@@ -52,7 +54,7 @@ def prepare_component_lock(
     result = ComponentLockResolver().resolve(
         plan, expected_input_evidence_identity=plan.identity
     )
-    return PreparedComponentLock(component.resolve(strict=True), plan, result)
+    return PreparedComponentLock(component.resolve(strict=True), plan, result, snapshot)
 
 
 def operate_component_lock(
@@ -71,13 +73,32 @@ def operate_component_lock(
     audit_store = ComponentResolutionAuditStore(component_root, target)
 
     def require_inputs_unchanged() -> None:
-        current = prepare_component_lock(
-            component_root,
-            target=target,
-            flavors=flavors,
-            flavor_roots=flavor_roots,
-            planner=planner,
-        )
+        snapshot = prepared.catalog_snapshot if check or difference else None
+        if snapshot is None:
+            current = prepare_component_lock(
+                component_root,
+                target=target,
+                flavors=flavors,
+                flavor_roots=flavor_roots,
+                planner=planner,
+            )
+        else:
+            # Reuse parsed immutable catalog values only within this read-only
+            # transaction. Reopen all bound bytes and membership before planning;
+            # plan_snapshot still observes current graph authority and revalidates
+            # selected inputs afterwards. No observation survives this operation.
+            snapshot.require_unchanged()
+            plan = planner.plan_snapshot(
+                snapshot, target_name=target, flavor_selectors=flavors
+            )
+            current = PreparedComponentLock(
+                component_root,
+                plan,
+                ComponentLockResolver().resolve(
+                    plan, expected_input_evidence_identity=plan.identity
+                ),
+                snapshot,
+            )
         if (
             current.plan.identity != prepared.plan.identity
             or current.result.lock.identity != result.lock.identity
