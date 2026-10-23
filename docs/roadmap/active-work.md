@@ -30915,3 +30915,5 @@ not a single-variable performance attribution. All ten installed context control
 now pass with zero skips; 469 production modules resolve from the installed prefix. Compiler SDK, package, product
 receipt and release admission remain unearned. Renew exact composed
 Windows/descriptor regression, wheel and lifecycle qualification before landing.
+
+**Combined qualification cohort:** Entry-point audit/YAML bounds (#113), retained installed-distribution observation (#117/#118), and HTML/catalog cost (#129) now preserve all source and evidence branch heads in one integration candidate. The combined driver is reviewed and recorded through the supported command. Next: freeze the source for fresh full source, forced-generation lifecycle and clean installed-wheel gates, then renew native evidence and exact review CI. Prior scoped passes retain their original source; the retained receipt is stale until supported promotion of the new passing candidate. Exact-main Windows hardware recurrence (#116) remains separately open.

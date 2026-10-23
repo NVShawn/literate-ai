@@ -1,0 +1,24 @@
+{
+  "scope": "Consolidated development candidate; fresh complete qualification pending",
+  "integrated_heads": {
+    "main": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+    "fix/html-observation-cost": "2501b75ec281c2355682dcb7caea27b3b5909645",
+    "fix/retained-observation-cost": "41babbe3868379c7ea25a1ea96d022609189cf69",
+    "work/installed-issue-acceptance": "5b1cd90f5b02912e3957284b0903df12f0d6ed22"
+  },
+  "driver_identity": "sha256:962b22c677b71828da895ca4e1823ad3f82a3affb03bace48b02c231368b1ad8",
+  "author_review": "Reviewed merge source: agent YAML bounds, immutable HTML reconstruction with final independent observations, exact-JSON operation-scoped schema checks with fresh registries, and descriptor-based current-byte installed distribution observation. Preserve original evidence and no global observation success cache. Author review is not an independent attestation.",
+  "conflict_resolution": [
+    "Union changelog outcomes and retain separate owning roadmap items",
+    "Retain original entrypoint receipt unchanged as stale prior evidence; renew through supported API after qualifying the combined authority",
+    "Recompute combined reviewed driver and documentation authority markers through supported commands",
+    "Preserve closure rows from both branches, including patched KaTeX and measured repository-refresh closure"
+  ],
+  "pending": [
+    "Fresh uninterrupted full source suite",
+    "Fresh complete forced-generation framework lifecycle and supported current receipt",
+    "Complete clean exact installed-wheel smoke",
+    "Equivalent native profile and unchanged complete Windows gate",
+    "Exact review and post-merge CI including hardware failure diagnosis"
+  ]
+}
