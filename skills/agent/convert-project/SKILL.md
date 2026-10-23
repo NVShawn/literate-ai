@@ -40,7 +40,12 @@ the prompt or move `_legacy/` content manually.
    regenerative qualification authorizes `qualified`. Run the generated lifecycle only
    with its required host-execution acknowledgement. A remote CI declaration is
    recorded evidence, not a locally executed success.
-5. Use the generated native-rewrite roadmap for later one-boundary-at-a-time work.
+5. Run `litai project agent-entrypoints PATH` before calling onboarding complete.
+   Resolve missing or stale owned delegates through reviewed authored changes to the
+   declared `agent_skill`; preserve custom instructions. Original-source adoption
+   also reports this audit, but its metadata binding never repairs agent files,
+   pinned parents or retained snapshots and does not establish discovery readiness.
+6. Use the generated native-rewrite roadmap for later one-boundary-at-a-time work.
    Conversion proves adoption and parity; it does not authorize automatic
    source-to-specification recovery or a native rewrite.
 

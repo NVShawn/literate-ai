@@ -1,0 +1,206 @@
+{
+  "scope": "Agent-entrypoint audit and safe current-v2 custom onboarding development evidence; not lifecycle or release admission",
+  "focused_results": {
+    "current-audit": {
+      "summary": {
+        "executed": 22,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 22,
+        "selected": 22,
+        "skipped": 0
+      },
+      "report_sha256": "3f77081afb106fbd8cd5214e739aaa8f2b02a17eb4c4c910c35b69c8c479a784"
+    },
+    "current-original": {
+      "summary": {
+        "executed": 12,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 12,
+        "selected": 12,
+        "skipped": 0
+      },
+      "report_sha256": "cece1fb9e1cdde6be61011b63cb448a20048c69c521e37523c97ef7a66957ac9"
+    },
+    "current-docgraph": {
+      "summary": {
+        "executed": 3,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 3,
+        "selected": 3,
+        "skipped": 0
+      },
+      "report_sha256": "df792fb076103d5845efd3aba4bfc5608191b1459f4ab801c723f617cbcca11f"
+    },
+    "schemas": {
+      "summary": {
+        "executed": 2,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 2,
+        "selected": 2,
+        "skipped": 0
+      },
+      "report_sha256": "2c990270adc3f06a42251953775f152098c2d6bc7e187a464b1c32c90a782bbc"
+    }
+  },
+  "skills_static_admission_exit_code": 0,
+  "skills_log_sha256": "d3ea22b05f8f677bd183d49d5a96c194a0dd2c5427a2953e5dfeb74b630de8d3",
+  "author_review": "Reviewed the new bounded reader, owned-slot selection, inert text handling, parser failure bounds, read-only CLI isolation, original-source preservation, portable custom paths, legacy-v1 refusal and complete documentation-spine checks. This is author review, not an independent security attestation.",
+  "preserved_invariants": [
+    "No repair writes, host execution or provider calls in the audit",
+    "No implicit host configuration, MCP discovery, journal, fan-out or telemetry effects",
+    "No recursive rewriting of children, parents or retained snapshots",
+    "Original adoption retains acknowledgment, exact-plan identity, clean Git and documentation-review gates",
+    "Root-only published v1 input remains unchanged",
+    "Unsafe canonical path and symlink/junction refusal"
+  ],
+  "pending": [
+    "Fresh complete source, lifecycle and installed-wheel qualification after YAML hardening",
+    "Exact final review CI and landing"
+  ],
+  "reviewed_driver_identity": {
+    "schema": "urn:literate-ai:schema:v1:content-identity",
+    "algorithm": "sha256",
+    "digest": "14742e576917da56868fd272293a307ab2853811fa2c685c67da713f54d41116"
+  },
+  "initial_full_source": {
+    "summary": {
+      "executed": 13,
+      "failed": 1,
+      "known_failed": 0,
+      "passed": 12,
+      "selected": 2235,
+      "skipped": 23
+    },
+    "report_sha256": "5efb390442c0b6dfa471d74a824f1c89d7afc39af1579df3501455b631f980d0",
+    "failure": "Source BOM rejected undeclared direct yaml import. Added exact PyYAML==6.0.3 runtime dependency; no validation waiver."
+  },
+  "dependency_repair_replication": {
+    "summary": {
+      "executed": 3,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 3,
+      "selected": 3,
+      "skipped": 0
+    },
+    "report_sha256": "a1eac09c0d46bd96a7a32abd4da2cd1228dfc39e956b4d3ce6abcc6bf1069346",
+    "scope": "All three unchanged self-hosting cases, including two clean stable replay cycles, passed after declaring the direct runtime dependency. Full-suite qualification remains pending."
+  },
+  "dependency_repaired_full_source_attempt": {
+    "summary": {
+      "executed": 1712,
+      "failed": 1,
+      "known_failed": 0,
+      "passed": 1711,
+      "selected": 2235,
+      "skipped": 70
+    },
+    "report_sha256": "9a790463cce3652d3be326605eff0f4410349554a0bb8b4dabd39b56cfd76517",
+    "failure": "The complete command reference omitted project agent-entrypoints. Added its canonical command-list entry; no implementation or guard change."
+  },
+  "corrected_command_reference": {
+    "summary": {
+      "executed": 2,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2,
+      "selected": 2,
+      "skipped": 0
+    },
+    "report_sha256": "43cda682a5aa84bb94abb4d8848ce78cf20a315696a13dd2511ce38a30830be3"
+  },
+  "pre_reference_lifecycle": {
+    "source_commit": "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+    "rebuild_report_sha256": "f923ce66cfbd821587f422a03f39659492f2d94b9e3941229c8bc0fa816c01da",
+    "candidate_sha256": "90a1e901c0792ff2b6ad39dee7c654f389a4436cb11673d6fc7102e5978a8b03",
+    "tests": 230,
+    "receipt_identity": "sha256:91afbe0eba8f6d1bc80a5b49dbe613caf9b85ed9d2ae192f163f911af4f703e9",
+    "finalized_candidate_identity": "sha256:4cb725ec5ea7478952c9f48bad58ddbfbd3d0f904cdea2e648c4128f986190a6",
+    "driver_identity": "sha256:c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232",
+    "scope": "Passing forced-fresh lifecycle before the subsequent command-reference documentation correction; original source/authority provenance retained"
+  },
+  "pre_reference_installed_wheel": {
+    "source_commit": "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+    "wheel_identity": "sha256:d4399371619f330e8cc6ac5f9a1255b012532fae88ccc8a1ead80966d1a7ff87",
+    "complete_smoke_passed": true,
+    "successful_timing_spans": 131,
+    "report_sha256": "9e9bfbb83712b6d933c033998f355f61a257881691c4186c11fd485abcc3d284",
+    "timings_sha256": "fbd7563fea3aa4456d8868a14a1714f69aa81288f361a07c9398a66d5ce7a845"
+  },
+  "installed_public_audit": {
+    "source_commit": "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+    "wheel_sha256": "d4399371619f330e8cc6ac5f9a1255b012532fae88ccc8a1ead80966d1a7ff87",
+    "installed_module_sha256": "868bf939d96617cc11634c5c39eede1589f895ddb3d66fd3a9a293d065fdf382",
+    "installed_module_from_noneditable_site_packages": true,
+    "checks": {
+      "public_init_ready": true,
+      "audit_read_only_idempotent": true,
+      "nearest_nested_missing_delegate": true,
+      "custom_authored_crlf_preserved": true,
+      "custom_declared_skill_with_no_root_fallback": true,
+      "stale_delegates_refuse_until_explicitly_authored": true,
+      "custom_provider_pointer_required": true,
+      "debug_file_creation_refused": true,
+      "unsafe_declared_path_refused": true
+    },
+    "scope": "Installed public CLI discovery only; no lifecycle admission or repair writes claimed."
+  },
+  "installed_harness_failures_retained": [
+    "Initial harness used unsupported --debug-log spelling",
+    "Second harness expected exit 1 instead of the published usage/refusal exit 2; production returned the correct typed refusal"
+  ],
+  "final_pre_hardening_source": {
+    "source_commit": "9f8b9dabab1e3dc20daa1a3d56fd8ebdb9d85e7d",
+    "summary": {
+      "executed": 2164,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2164,
+      "selected": 2235,
+      "skipped": 71
+    },
+    "report_sha256": "ffe233844b82dad186ee2875a347cce94e177c62f04efbfa368643d6a6214715"
+  },
+  "final_pre_hardening_lifecycle": {
+    "source_commit": "9f8b9dabab1e3dc20daa1a3d56fd8ebdb9d85e7d",
+    "tests": 230,
+    "receipt_identity": "sha256:dd361350150a367ddaee13491a86cbe66e2dda4030eafc2f93b198259d3cdc8e",
+    "report_sha256": "919825b894b29cf3b2a865e731653675eeb12de58eb1177c04575c50599a2780",
+    "candidate_sha256": "ddef49c7dc1a72304e83daab241f2d17653f3a9c5a8679acb83442c768546f7c",
+    "force_fresh": false,
+    "supported_receipt_update_require_current_and_verify_passed": true
+  },
+  "final_pre_hardening_wheel": {
+    "source_commit": "9f8b9dabab1e3dc20daa1a3d56fd8ebdb9d85e7d",
+    "wheel_identity": "sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f",
+    "complete_smoke_passed": true,
+    "successful_timing_spans": 131,
+    "report_sha256": "9f74cc8e36d9852ae98f88d2dfb3bf45c49511fc92fc2235f979aa37313ef636",
+    "timings_sha256": "0ad2e63b5521d1bc494f721cf79e2a628d1ba3c89a486daa96c9c8f0508813af"
+  },
+  "bounded_yaml_development": {
+    "summary": {
+      "executed": 25,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 25,
+      "selected": 25,
+      "skipped": 0
+    },
+    "report_sha256": "328040c4e9622b9c73d9a68a54deee942b6a46b6f30fa056b9b9f784fdb1aef4",
+    "driver_identity": "sha256:14742e576917da56868fd272293a307ab2853811fa2c685c67da713f54d41116",
+    "limits": {
+      "bytes": 1048576,
+      "composed_nodes": 4096,
+      "depth": 32
+    },
+    "scalar_aliases": true,
+    "container_aliases": false,
+    "input_preservation": true,
+    "scope": "Focused development proof only. Pre-hardening full qualification above retains its exact original source."
+  }
+}

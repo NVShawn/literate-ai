@@ -1,0 +1,35 @@
+{
+  "schema": "literate-ai/optional-project-import-diagnostic@1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/121",
+  "base_revision": "23d0b678dc63eedbae673d2603dfad5e13ef09bb",
+  "candidate_module_sha256": "706a7cd4e2b2c0948d75aae8fe2961e72859969875c620ac149a2a1c1e5aa6b6",
+  "native_platform": "Windows",
+  "method": "One baseline/deferred ordered pair using the same retained installed interpreter; in-memory command-module substitution only; no installed payload changes",
+  "observations": [
+    {
+      "mode": "baseline",
+      "seconds": 7.480990740004927,
+      "mac_loaded": true,
+      "jsonschema_loaded": true,
+      "uri_grammar_loaded": true,
+      "exit_code": 0,
+      "supervisor_seconds": 8.140999999945052
+    },
+    {
+      "mode": "deferred",
+      "seconds": 2.907386273960583,
+      "mac_loaded": false,
+      "jsonschema_loaded": false,
+      "uri_grammar_loaded": false,
+      "exit_code": 0,
+      "supervisor_seconds": 3.344000000040978
+    }
+  ],
+  "installed_module_unchanged": true,
+  "limitations": [
+    "Single ordered pair; filesystem and interpreter cache effects not controlled",
+    "Import-only diagnostic; project validation and full wheel/unit gates not renewed",
+    "Prior cProfile times include substantial profiler overhead and are not unprofiled latency estimates"
+  ],
+  "native_gate_passed": false
+}

@@ -1,0 +1,175 @@
+{
+  "scope": "Single paired provided native Windows diagnostic; HTML is current in every call, while overall verify exit 1 and identical non-HTML gate failures are retained",
+  "baseline_source_commit": "62ce16a0458db31ae61954468f563a1e1bd65eba",
+  "candidate_source_commit": "d8ab44d2a0ac9fc22a787f611f8cd4f87e1c0433",
+  "baseline_wheel_sha256": "d309fcb461d5830e53365061d3b63e2152637af616a071d799e14092f26768a1",
+  "candidate_wheel_sha256": "cad8250d98694faf985fa640ca2b97a0bf5358465f6c14ba1b95bedccb21c5ef",
+  "owner_sha256": {
+    "baseline": "8a785ae9a6e9e6d7d5f3e726b24854372f4dcc9cb5656e48f9c449aa3891773c",
+    "candidate": "55bef0b6ea7bee7a0e33df0bd2425ba21f74c1df77f7a5c4806013f4f8ebef6b"
+  },
+  "uninstrumented_seconds": {
+    "baseline": [
+      35.375,
+      40.07799999974668
+    ],
+    "candidate": [
+      28.29699999978766,
+      34.063000000081956
+    ]
+  },
+  "uninstrumented_order": [
+    "baseline",
+    "candidate",
+    "candidate",
+    "baseline"
+  ],
+  "median_seconds": {
+    "baseline": 37.72649999987334,
+    "candidate": 31.179999999934807
+  },
+  "relative_median_reduction": 0.17352524087738097,
+  "instrumented_seconds": {
+    "baseline": 73.43800000008196,
+    "candidate": 68.23400000017136
+  },
+  "instrumented_call_counts": {
+    "baseline": {
+      "observe_installed_framework_distribution": 2,
+      "verify_html_artifact": 1,
+      "_emit_inputs": 1,
+      "_load_html_inputs": 3,
+      "project_authority_graph": 5,
+      "load_legacy_flavor_catalog_entries": 7,
+      "<built-in method nt.stat>": 84911
+    },
+    "candidate": {
+      "observe_installed_framework_distribution": 2,
+      "verify_html_artifact": 1,
+      "_load_html_inputs": 2,
+      "_emit_inputs": 1,
+      "load_legacy_flavor_catalog_entries": 6,
+      "project_authority_graph": 4,
+      "<built-in method nt.stat>": 74261
+    }
+  },
+  "profile_rows": {
+    "baseline": [
+      {
+        "module": "standard_lifecycle_binding.py",
+        "function": "observe_installed_framework_distribution",
+        "calls": 2,
+        "self_seconds": 0.15495340000000002,
+        "cumulative_seconds": 6.6928517
+      },
+      {
+        "module": "html_staleness.py",
+        "function": "verify_html_artifact",
+        "calls": 1,
+        "self_seconds": 0.0041849,
+        "cumulative_seconds": 47.739544900000006
+      },
+      {
+        "module": "html_emitter.py",
+        "function": "_emit_inputs",
+        "calls": 1,
+        "self_seconds": 0.0017169000000000002,
+        "cumulative_seconds": 0.5048844
+      },
+      {
+        "module": "html_emitter.py",
+        "function": "_load_html_inputs",
+        "calls": 3,
+        "self_seconds": 0.0005931,
+        "cumulative_seconds": 20.2120593
+      },
+      {
+        "module": "project_authority_graph.py",
+        "function": "project_authority_graph",
+        "calls": 5,
+        "self_seconds": 0.057499400000000006,
+        "cumulative_seconds": 28.3242343
+      },
+      {
+        "module": "legacy_generation_catalog.py",
+        "function": "load_legacy_flavor_catalog_entries",
+        "calls": 7,
+        "self_seconds": 0.09224750000000001,
+        "cumulative_seconds": 31.7037115
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.stat>",
+        "calls": 84911,
+        "self_seconds": 5.3535703,
+        "cumulative_seconds": 8.379685400000001
+      }
+    ],
+    "candidate": [
+      {
+        "module": "standard_lifecycle_binding.py",
+        "function": "observe_installed_framework_distribution",
+        "calls": 2,
+        "self_seconds": 0.16440390000000002,
+        "cumulative_seconds": 6.7988308
+      },
+      {
+        "module": "html_staleness.py",
+        "function": "verify_html_artifact",
+        "calls": 1,
+        "self_seconds": 0.0015825000000000001,
+        "cumulative_seconds": 43.107622600000006
+      },
+      {
+        "module": "html_emitter.py",
+        "function": "_load_html_inputs",
+        "calls": 2,
+        "self_seconds": 0.0005169,
+        "cumulative_seconds": 13.752655800000001
+      },
+      {
+        "module": "html_emitter.py",
+        "function": "_emit_inputs",
+        "calls": 1,
+        "self_seconds": 0.0009305,
+        "cumulative_seconds": 0.5041464
+      },
+      {
+        "module": "legacy_generation_catalog.py",
+        "function": "load_legacy_flavor_catalog_entries",
+        "calls": 6,
+        "self_seconds": 0.07726920000000001,
+        "cumulative_seconds": 26.4653446
+      },
+      {
+        "module": "project_authority_graph.py",
+        "function": "project_authority_graph",
+        "calls": 4,
+        "self_seconds": 0.0426493,
+        "cumulative_seconds": 20.647574000000002
+      },
+      {
+        "module": "~",
+        "function": "<built-in method nt.stat>",
+        "calls": 74261,
+        "self_seconds": 4.6266116,
+        "cumulative_seconds": 7.204409500000001
+      }
+    ]
+  },
+  "identical_gate_states": {
+    "authority": "fail",
+    "locks": "skipped",
+    "source-intelligence": "skipped",
+    "html-observability": "pass",
+    "receipt": "fail"
+  },
+  "all_html_verdicts_current": true,
+  "overall_verify_exit": 1,
+  "retained_archive_sha256": "366c152861c74b2ac18fe09588f2e326b37eedf347c9a33ac5013491cb3aed5f",
+  "retained_archive_bytes": 247087,
+  "limits": "Two uninstrumented trials per wheel and one instrumented trial per wheel. ABBA order reduces order bias; cache and scheduling effects remain uncontrolled. These results do not establish a generic speedup or satisfy complete native-gate acceptance.",
+  "complete_native_gate_qualified": false,
+  "release_performance_qualified": false,
+  "next_action": "Use the remaining profile costs to decide further bounded changes before complete native gate renewal; retain all freshness guards and unchanged full-gate bounds."
+}

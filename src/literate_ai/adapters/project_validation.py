@@ -116,7 +116,7 @@ def _documentation_catalog(project: Any) -> dict[str, object]:
         skill_content = closure.pin(
             project.agent_skill,
             boundary=project.root,
-            label="documentation:SKILL.md",
+            label="documentation:" + project.definition.agent_skill,
         )
         captured = {
             path.relative_to(project.root).as_posix(): closure.pin(

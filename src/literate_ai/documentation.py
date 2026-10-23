@@ -573,13 +573,13 @@ def validate_documentation_graph(
                 )
             )
 
-    roots = edges[skill_relative]
+    roots = edges[skill_relative] - {skill_relative}
     if not roots:
         raise DocumentationError(
             "project.agent_skill_documentation_missing",
             "agent onboarding skill must link to declared documentation",
         )
-    reachable: set[str] = set()
+    reachable: set[str] = {skill_relative} & document_paths
     pending = deque(sorted(roots))
     while pending:
         current = pending.popleft()
@@ -591,7 +591,7 @@ def validate_documentation_graph(
     if unreachable:
         raise DocumentationError(
             "project.documentation_unreachable",
-            "declared documentation is unreachable from SKILL.md: "
+            f"declared documentation is unreachable from {skill_relative}: "
             + ", ".join(unreachable[:5]),
         )
     unreferenced_assets = sorted(asset_paths - referenced_assets)

@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- Allow safe custom onboarding paths in v2 projects and audit project-owned
+  coding-agent entry points without modifying instructions. Original-source
+  adoption reports missing or stale delegates before onboarding is complete.
+
+- HTML verification reconstructs retained views from their complete observed
+  inputs while preserving independent final source, framework and output checks.
+  Complete catalog resolution shares bounded exact-JSON schema checks within the
+  operation while rebuilding reference registries and retaining fresh file checks.
+  Native performance qualification remains in progress.
+
+- Preserve both retained executable declarations when the native Windows identity
+  fixture refreshes its manifest, keeping command and late-drift qualification active.
+
+- Keep private source-install and worker runtimes usable when POSIX Python is
+  launched through an alias outside its distribution, while retaining copied
+  executables and their native runtime dependencies.
+
+- Load MAC contract schema validation only when its project command is selected,
+  avoiding optional URI parser initialization in ordinary project command startup.
+
+- Patch documentation math rendering to KaTeX 0.18.2, preserving explicit trust
+  options while refusing inherited trust and clearing all dependency audit findings.
+
+- Update the documentation tool lock to patched DOMPurify 3.4.17 while keeping
+  critical/high dependency audit gates enforced.
+
+- Preserve reviewed executable intent when capturing and verifying retained inputs
+  on Windows. Carry verifier-owned output executable intent into sealed manifests
+  and packaging, while POSIX continues to require native execute permission.
+
 - Read installed wheel RECORD inventories directly while verifying every selected
   member from current bytes. Avoid redundant metadata existence scans and refuse
   missing recorded payloads; preserve canonical distribution identities. Read

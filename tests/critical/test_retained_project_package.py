@@ -164,7 +164,10 @@ class RetainedProjectPackageTests(unittest.TestCase):
         if include_specification:
             roles["specs"] = "specification"
         f.manifest = discover_retained_project_inputs(
-            f.source, roles, f.manifest.limits
+            f.source,
+            roles,
+            f.manifest.limits,
+            executable_paths=(f.runner_path,),
         )
         path = f.source / ACCEPTANCE_POLICY_PATH
         policy = RetainedProjectAcceptancePolicy.from_dict(
@@ -236,6 +239,10 @@ class RetainedProjectPackageTests(unittest.TestCase):
         self.finish()
         before = set(self.store.iter_refs())
         provider = self.provider()
+        executable = next(
+            item for item in provider.plan.inputs if item.path == "app.bin"
+        )
+        self.assertTrue(executable.executable)
         self.assertEqual(set(self.store.iter_refs()), before)
         result = provider.construct(self.fixture.fixture.base)
         self.assertEqual(result, provider.construct(self.fixture.fixture.base))

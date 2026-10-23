@@ -1,0 +1,138 @@
+{
+  "scope": "Development acceptance for issues 49 and 50; not a release attestation",
+  "landed_implementation_commit": "a6a2299626f9abc51daa1c6d46d98d20b61abc14",
+  "installed_wheel_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+  "unchanged_html_source_files": {
+    "src/literate_ai/adapters/html_emitter.py": "sha256:96cf0d1a536606c44480130fededc70f278f40a87717a5c82d57728ec09cb89b",
+    "src/literate_ai/adapters/html_dag_view.py": "sha256:9e8d1f660a42145e3f7084a881149f4585f077598bb2723e8a2c88f8db2098ba",
+    "src/literate_ai/adapters/html_surfaces.py": "sha256:fe679fb1c7d56c0b5980ac1e66c866338d8266d2c70e1a56c1fd88762392c8c8",
+    "src/literate_ai/adapters/html_staleness.py": "sha256:8a785ae9a6e9e6d7d5f3e726b24854372f4dcc9cb5656e48f9c449aa3891773c",
+    "src/literate_ai/adapters/html_framework.py": "sha256:6c68ab0a454cba302d2540b25060381f9b9c4538bbfc1a6b4fb83fbc11388bb9",
+    "src/literate_ai/project_authority_graph.py": "sha256:62c61f66449f3cc3d4df4e987da337ce27ed5e421d4e39f8b505837264b9ee0c",
+    "src/literate_ai/version_check.py": "sha256:86119b46ef2467988ca122d42fd09282cb0d5b153f16579aba2764081a744712",
+    "src/literate_ai/contracts/html_observability.py": "sha256:44c323912b063025be6b1f83ded2325df4b377f0624e3ab3953663c5d79ea2dc"
+  },
+  "currency": {
+    "source_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+    "initial_project_commit": "aaf9cabe8ec92e012175f7444b4da888d753d8ca",
+    "render_project_commit": "c7b2209b0cb5e8ebbf8e318e11c3fc193e27ce27",
+    "clean_after_render_and_commit": true,
+    "semantic_version_change_refused": true,
+    "public_installed_cli": true
+  },
+  "browser": {
+    "source_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
+    "initial": {
+      "canvasHeight": 470,
+      "rowHeight": 472,
+      "backings": [
+        {
+          "height": 470,
+          "cssHeight": 470
+        },
+        {
+          "height": 470,
+          "cssHeight": 470
+        },
+        {
+          "height": 470,
+          "cssHeight": 470
+        }
+      ],
+      "overflow": false
+    },
+    "expanded": {
+      "canvasHeight": 1100,
+      "rowHeight": 1102,
+      "backings": [
+        {
+          "height": 1100,
+          "cssHeight": 1100
+        },
+        {
+          "height": 1100,
+          "cssHeight": 1100
+        },
+        {
+          "height": 1100,
+          "cssHeight": 1100
+        }
+      ],
+      "overflow": false
+    },
+    "mobile": {
+      "canvasHeight": 1100,
+      "rowHeight": 1338.734375,
+      "backings": [
+        {
+          "height": 1100,
+          "cssHeight": 1100
+        },
+        {
+          "height": 1100,
+          "cssHeight": 1100
+        },
+        {
+          "height": 1100,
+          "cssHeight": 1100
+        }
+      ],
+      "overflow": false
+    },
+    "zoomChangesPixels": true,
+    "filterChangesSelection": true,
+    "focusSelectedNode": true,
+    "errors": [],
+    "requests": [
+      "local HTML",
+      "https://cdn.jsdelivr.net/npm/cytoscape@3.34.3/dist/cytoscape.min.js"
+    ]
+  },
+  "artifacts": {
+    "authority-graph": {
+      "identity": {
+        "algorithm": "sha256",
+        "digest": "ba4b2fb79b1c850a6ca7932fbe2305c39b3517bfab252618af83db39fdefecd1",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      },
+      "framework_distribution_identity": {
+        "algorithm": "sha256",
+        "digest": "a61642cd22fb9837a28f2f0b9109caee234a22a864dda5c95ca5b2f33d1cf1ba",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      },
+      "renderer_template_identity": {
+        "algorithm": "sha256",
+        "digest": "8f9fd25e549e0a98cf4a3092966d8443c5c8632835c6b36519cf77b937a230d2",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      }
+    },
+    "version-check": {
+      "identity": {
+        "algorithm": "sha256",
+        "digest": "45656a7965447b43f8dd1669a3ff83d39c6310eea1f0c0a0d42f9e5e0725f2c0",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      },
+      "framework_distribution_identity": {
+        "algorithm": "sha256",
+        "digest": "a61642cd22fb9837a28f2f0b9109caee234a22a864dda5c95ca5b2f33d1cf1ba",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      },
+      "renderer_template_identity": {
+        "algorithm": "sha256",
+        "digest": "58fa9dadcf99c9b4d5ecf35edd8ab1b2b671c67f35c9ab55c3a23d8aec604657",
+        "schema": "urn:literate-ai:schema:v1:content-identity"
+      }
+    }
+  },
+  "retained_evidence_sha256": {
+    "currency-proof.json": "5bd68fb6ce249baba8e7e18aad10f5067337457fa4e1b83fbe61bc2c5d07e6bf",
+    "browser-proof.json": "95fe3f2754f40ad093c4b8ab4d4fdc1d6aa069e03eaff8378ad4051f85150b62",
+    "clean-after-commit.json": "11fd2d985eb7103bd6b91b657b5d6aee18591295bc012d09ca1e1622e81f69a8",
+    "semantic-change.json": "4d4a658850f7ae931950e9cbcc94c2c88d8b4cd500df539409c621de6a83c4f0",
+    "restored-current.json": "11fd2d985eb7103bd6b91b657b5d6aee18591295bc012d09ca1e1622e81f69a8",
+    "graph-desktop.png": "e460270f894d9f5a783c7ff363489e257cdf1f21af25a2d86ec95fe70a73521a",
+    "graph-expanded.png": "72b0eefd3e1bec7c5889592e5c644d52a4135b77dbf46e62b54d4beb10310fb3",
+    "graph-mobile.png": "05473f3ef8219c0f138b2adba4f2f128158cd7294896e3cd6c5fab710da733b9"
+  },
+  "visual_review": "Desktop controls, graph, inspector and catalog render coherently; mobile controls wrap without document overflow. Expanded desktop drawing buffers match the 1100 pixel row. Captures were inspected alongside geometry and interaction assertions."
+}

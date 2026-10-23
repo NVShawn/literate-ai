@@ -1,0 +1,31 @@
+{
+  "scope": "Documentation dependency and math-rendering development qualification; exact-head hosted CI remains required",
+  "advisory": "https://github.com/advisories/GHSA-238p-pmpm-9mq7",
+  "package": "katex",
+  "previous_version": "0.16.47",
+  "patched_version": "0.18.2",
+  "dependency_selection": "Explicit npm override; normal resolver regenerated the lock. All other package records and the reviewed Mermaid CLI 11.16.0 pin remain unchanged.",
+  "audit_severity_counts": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  },
+  "audit_exceptions": [],
+  "tool_tests_passed": 22,
+  "tracked_mermaid_diagrams_rendered": 121,
+  "strict_openspec_specifications_passed": 4,
+  "trust_regression": {
+    "baseline": "The installed 0.16.47 emitted a link for inherited trust; the new rejection assertion failed against those actual library bytes.",
+    "patched": "Inherited trust is rejected and explicitly authorized trust still renders the link.",
+    "baseline_log_sha256": "e3a73a9a716481cca2b2ed45cfcd19d08d9763365451fedf8c33c4a516037c1b"
+  },
+  "real_mermaid_math_render": {
+    "katex_subtrees": 2,
+    "raw_math_delimiters": false,
+    "svg_sha256": "c8cb5855f27f48db2a2d8509172756d283d62f6b8093234c59b7927d5d23e0ca"
+  },
+  "documentation_log_sha256": "6f8be3572e3ad45e4cd6cc5553f392b64e6caf614a57fa6ecee1e0d53011f241"
+}

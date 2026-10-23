@@ -1,0 +1,46 @@
+{
+  "scope": "Failed native Windows development qualification retained separately from finalized candidate acceptance",
+  "terminal": {
+    "state": "timed_out",
+    "exit_code": 124,
+    "seconds": 5400.815953493118,
+    "source_commit": "dd8a9f357122fea6f8e0daff559ab45907f074f7",
+    "test_workers": 1
+  },
+  "archive_sha256": "d802e2da8e91835de502d692f1d280cccb748637d706e13a0726b34e95122e39",
+  "archive_bytes": 3325,
+  "configured_nondefault_transport_used_for_commands_source_upload_and_hash_verified_evidence_download": true,
+  "passed_gate_steps": [
+    "preflight",
+    "environment",
+    "compile",
+    "lint",
+    "openspec"
+  ],
+  "tool_tests_passed": 21,
+  "mermaid_diagrams_rendered": 121,
+  "wheel_completed": false,
+  "unit_gate_reached": false,
+  "completed_wheel_timing_spans": 112,
+  "completed_span_failures": 0,
+  "longest_completed_spans": [
+    {
+      "seconds": 3031.953,
+      "stage": "subprocess._main.python.exe",
+      "successful": true
+    },
+    {
+      "seconds": 721.906,
+      "stage": "scenario.assert_installed_operator_golden_paths",
+      "successful": true
+    },
+    {
+      "seconds": 267.891,
+      "stage": "scenario.assert_installed_repository_refresh",
+      "successful": true
+    }
+  ],
+  "wheel_timings_sha256": "1f1c97be47528e3b2c9eac15b151695350a048edd4246a024a3f4b5529d18cf7",
+  "timing_interpretation": "The longest subprocess span records elapsed time only; its underlying cause has not been established. No deadline or production guard is relaxed.",
+  "successor": "Finalized source 62ce16a0 is undergoing native qualification on another aligned Windows worker; no success is implied."
+}

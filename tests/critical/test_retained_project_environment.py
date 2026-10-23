@@ -112,6 +112,7 @@ class RetainedOutputCommandPathTests(unittest.TestCase):
             f.source,
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             f.manifest.limits,
+            executable_paths=tuple(sorted((f.runner_path, "tools/whoami.exe"))),
         )
         identity = ContentIdentity.parse_uri(
             "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
@@ -236,6 +237,7 @@ class RetainedRuntimePathTests(unittest.TestCase):
             f.source,
             {"src": "source", "tools": "toolchain", "test-policy.json": "test-policy"},
             f.manifest.limits,
+            executable_paths=(f.runner_path,),
         )
         f.profile = replace(f.profile, runtime_library_paths=paths)
         f.plan = replace(

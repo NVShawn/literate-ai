@@ -167,6 +167,33 @@ class RetainedProjectTreeInputTests(unittest.TestCase):
         )
         self.assertEqual((placed / "sdk/public/compiler").read_bytes(), b"compiler")
 
+    def test_reviewed_executables_compose_with_tree_and_descriptor_custody(self):
+        manifest = inputs.discover_retained_project_inputs(
+            self.source,
+            {"sdk": "sdk"},
+            self.limits,
+            allow_internal_symlinks=True,
+            tree_policy=RetainedProjectTreePolicy(),
+            executable_paths=("sdk/bin/compiler",),
+        )
+        placed = inputs.capture_retained_project_inputs(
+            self.source, manifest, self.base / "reviewed-snapshot"
+        )
+        inputs.verify_retained_project_inputs(placed, manifest)
+        members = {member.path: member for member in manifest.members}
+        self.assertEqual(members["sdk/bin/compiler"].mode, 0o755)
+        self.assertEqual(members["sdk/bin/compiler"].hardlink_target, "sdk/bin/cc")
+        (self.source / "sdk/bin/compiler").chmod(0o644)
+        with self.assertRaisesRegex(ValueError, "execute permission"):
+            inputs.discover_retained_project_inputs(
+                self.source,
+                {"sdk": "sdk"},
+                self.limits,
+                allow_internal_symlinks=True,
+                tree_policy=RetainedProjectTreePolicy(),
+                executable_paths=("sdk/bin/compiler",),
+            )
+
     def test_same_bytes_independent_replacement_refuses(self):
         manifest = self.discover()
         path = self.source / "sdk/bin/compiler"

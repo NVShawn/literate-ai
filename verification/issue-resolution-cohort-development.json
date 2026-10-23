@@ -1,0 +1,41 @@
+{
+  "scope": "Consolidated development candidate; fresh complete qualification pending",
+  "integrated_heads": {
+    "main": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+    "fix/html-observation-cost": "2501b75ec281c2355682dcb7caea27b3b5909645",
+    "fix/retained-observation-cost": "41babbe3868379c7ea25a1ea96d022609189cf69",
+    "work/installed-issue-acceptance": "5b1cd90f5b02912e3957284b0903df12f0d6ed22"
+  },
+  "driver_identity": "sha256:962b22c677b71828da895ca4e1823ad3f82a3affb03bace48b02c231368b1ad8",
+  "author_review": "Reviewed merge source: agent YAML bounds, immutable HTML reconstruction with final independent observations, exact-JSON operation-scoped schema checks with fresh registries, and descriptor-based current-byte installed distribution observation. Preserve original evidence and no global observation success cache. Author review is not an independent attestation.",
+  "conflict_resolution": [
+    "Union changelog outcomes and retain separate owning roadmap items",
+    "Retain original entrypoint receipt unchanged as stale prior evidence; renew through supported API after qualifying the combined authority",
+    "Recompute combined reviewed driver and documentation authority markers through supported commands",
+    "Preserve closure rows from both branches, including patched KaTeX and measured repository-refresh closure"
+  ],
+  "pending": [
+    "Integrate failure-only hardware diagnostics and remaining closure/native records without changing production bytes",
+    "Fresh final exact-source checks and native Windows full gate",
+    "Required exact review and post-merge CI"
+  ],
+  "qualification": {
+    "source_commit": "d56857cd09b4578c63033b9629b612cf34d18b93",
+    "complete_source_suite": {
+      "executed": 2181,
+      "failed": 0,
+      "known_failed": 0,
+      "passed": 2181,
+      "selected": 2252,
+      "skipped": 71
+    },
+    "source_report_sha256": "edbf1be61e2942ee5b95b39180a7a311ddd350fd7d07e42dd797c0fdedd360bd",
+    "lifecycle_tests": 231,
+    "lifecycle_receipt_identity": "sha256:61cba87b45fd0918b1e69ee05de96a9dedd6e84935e7dbeb862b361e189464ca",
+    "finalized_candidate_sha256": "8d516187fdaa2c86e9cef61002973728db28cd2fe74dc4a210558260d04f3fb1",
+    "forced_generation": true,
+    "complete_wheel_sha256": "3e7e1abe5ff3c6fe883163b8b7aab1a6ac477fbf7973380d44b7442f4aa6c912",
+    "wheel_spans": 131,
+    "supported_receipt_update_require_current_verify_passed": true
+  }
+}

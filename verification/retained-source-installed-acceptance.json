@@ -1,0 +1,125 @@
+{
+  "scope": "Installed public retained-source admission and accepted-only artifact export for issues70/97; no generated-provider, native SDK, package or release claim",
+  "wheel_source_commit": "9f8b9dabab1e3dc20daa1a3d56fd8ebdb9d85e7d",
+  "wheel_sha256": "0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f",
+  "project_parent_commit": "fe21a198eeca7920e06d3f1b182bff730dd0a9cf",
+  "noneditable_installed_framework": true,
+  "coding_agent_executables_on_path": 0,
+  "admission": {
+    "passed": true,
+    "test_summary": {
+      "failed": 0,
+      "passed": 3,
+      "skipped": 0,
+      "total": 3
+    },
+    "receipt_committed": true,
+    "receipt_identity": "sha256:ab197ab013cf76068d8d45c716d1e0a7d532b73cabbc64c921b5329325ce0e51",
+    "finalized_candidate_identity": "sha256:b3348d70811d885d7e006874f904d2fe8943df6b8c4fa3d3aa8195c17a9e3ed0"
+  },
+  "accepted_source_export": {
+    "passed": true,
+    "test_summary": {
+      "failed": 0,
+      "passed": 3,
+      "skipped": 0,
+      "total": 3
+    },
+    "artifact_sha256": "0def6e01bccdb281b1ebad7602d633bf8514d4f8dd2c4b3660cea628af879e37",
+    "accepted_source_only": true,
+    "model_selector": null,
+    "exact_hash_based_compilation_matches": true,
+    "export_unchanged_through_refusals": true
+  },
+  "source_bytes_preserved_and_restored": true,
+  "refusals": {
+    "stale_authorization": "retained_source.authorization_mismatch",
+    "actual_native_behavior_failure": "standard_rebuild.lifecycle_failed",
+    "ordinary_generation_without_agent": "coding_cli.unavailable",
+    "prior_passing_receipt_preserved": true
+  },
+  "source_owner_and_test_parity_with_landed_main": {
+    "src/literate_ai/adapters/models/coding_cli.py": "c4286b36c4fbacd48d855f3e9911d94c54e420da760acc02d11a31b805b81413",
+    "src/literate_ai/contracts/model_scopes.py": "79dfbf83c8b27a51a3c22140d38b60a20f99abb8f52aaf411d3dcf8a74d7914a",
+    "src/literate_ai/adapters/retained_source.py": "f2dd8eb596ad67b509f44d0a8ea0dc961d256856d0d83653b91a18744130e2fe",
+    "src/literate_ai/adapters/retained_source_admission.py": "4a648014d7d82251926607109c8423a7402f05fa7c5c85a65c2e28fa06ec626c",
+    "src/literate_ai/adapters/standard_project.py": "69fb1248023a152fac4cb27fec64bf8bd39ff17192d28cc799796d8065ebc341",
+    "src/literate_ai/adapters/standard_rebuild.py": "9e02a0732ffe25c97e9bda5ef1b1b6e85b24bb204ce555b6877bbe0218ab37ce",
+    "src/literate_ai/adapters/lifecycle/standard_local.py": "7ed13d7790b3b841e3b3f12297461813854b3d6c49ab824d38dc5a9ba1b6026e",
+    "src/literate_ai/adapters/generation_preparation.py": "b9f820a21a79c6c2711337702a13c713ec4560888b7d423bfd69655bdf85e6bb",
+    "src/literate_ai/adapters/command_builder.py": "90135cec2f35e109378a5bea9e78cdbd023165538a2eee32eb9dd37ea876b922",
+    "tests/critical/test_retained_source_no_agent.py": "681e2d8bc0e4f9d12001625cf0b8378f8209ab94894c379409a2122e73a9e6f4",
+    "tests/critical/test_retained_source_admission.py": "2cbd62815dab34abb43bcd22573c08ed0a739e5125ffbf0f40c04801540fd90e",
+    "tests/critical/test_retained_source_cache_trust.py": "06a8c7b20e3f6fa9df248ba0a32af7a6ca3b138714a5ed02b2217748aa21595e",
+    "tests/e2e/test_accepted_retained_source_export.py": "9dc60308da0e2068f21dfdd13133ba73e6c82d7aabc41963e5a53e199976a018"
+  },
+  "focused_reports": {
+    "critical": {
+      "summary": {
+        "executed": 13,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 13,
+        "selected": 13,
+        "skipped": 0
+      },
+      "sha256": "325297a740f7f00d5fce13ef2b7b9852a3fbd142ab8d82ec48ad7ba53613be4b"
+    },
+    "export": {
+      "summary": {
+        "executed": 1,
+        "failed": 0,
+        "known_failed": 0,
+        "passed": 1,
+        "selected": 1,
+        "skipped": 0
+      },
+      "sha256": "ede2055564d2d867c9c643e2a27957e0de3ea7924d8e92ea3363f98f2463fea2"
+    }
+  },
+  "retained_evidence_sha256": {
+    "behavior-refusal.stderr": "9308bb88d693aeb2b1986e43a25f075bc9a66cddebc82860a04cd4d3eb727152",
+    "stale-refusal.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "admit.stdout": "9b3f96ec8d06653ecdf22a586032530ddc384189902a0e336b7b08f56ed5e874",
+    "run.py": "b242d3e0d3fb6fae9234b578494fb19386022d771272251fd19e3116dacc5b25",
+    "initial-stale-refusal.stderr": "0cef49dc465c1e494b895621d80526c3777417bd2b66e5f8e35f641572fff4a8",
+    "bad-plan.stdout": "41b82de2d8340746b5c51ac1bb2a0eaab80c4efbb21503ebe1bcf40b14c5a281",
+    "initial-refusal-harness-failure.log": "365e95619c14f9e2f2a0d57d0e07a5549c19e88419e0466dcfa60782ec20ac27",
+    "plan.stdout": "7f8052e6a054d88a4c957243b0be8e701cc95b50e28c0fddc7e4b1cd927b82cb",
+    "original-main.py": "c4eeb0cd6719f6adfdddf60387e8f9f3fbaef62ff464337ee3687795d0c63609",
+    "bad-plan.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "plan.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "admit.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stale-refusal.stderr": "0cef49dc465c1e494b895621d80526c3777417bd2b66e5f8e35f641572fff4a8",
+    "initial-stale-refusal.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "export_custody.py": "4758abe303e634d10f16b0690cb3dcdd6007f0287661db9e02618c5260d45d62",
+    "refusal-proof.json": "2c7fc5f41263cd698392e77e59f5e203fd4fc4432ae843312eb59213d8217764",
+    "behavior-refusal.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ordinary-no-agent.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "refusals.py": "6346a33378558b670294927d3ae48ef76f0d9ed24641ed6783004cd08e38f9f3",
+    "probe.py": "f96fc1a0f2ba35431ec9331069b9deabd96ec7fb4c196a626cd0fb7f57f34670",
+    "init.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "export.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "init.stdout": "0253de0a8afa76ec704f4d6a8c7a1c2f38fba9d14de5605de060450a3da36761",
+    "export.stdout": "da051344ef9dff89b6d4b2c0c3fc2e093601dfa563859b9f1918a252ca8f4290",
+    "install.log": "a2fc0f80206d8059d20b19e440e61cc006af01b3531e8dd833974b39bd848643",
+    "custody-proof.json": "32838ad65efdae592b79e67fcdf17ea4d71fc7bacc930f9691d7c822cdeb3d34",
+    "ordinary-no-agent.stderr": "54ae86609637e90591cea50883fe3c19c9d2998df38e1f18a448e68a62c5a35b",
+    "proof.json": "2f939a21870f520a7de36c5f3db5b11decfd6ae9867c1f13b7e821eb99c26abb"
+  },
+  "prior_qualification": {
+    "pre_hardening_wheel": "Complete131spanpass at9f; see agent-entrypoint-development.json on branch587be970",
+    "landed_candidate_full_suite": {
+      "source": "76ac4c7a4321c3fc696137126d6a36260055989b",
+      "passed": 2139,
+      "skipped": 71,
+      "failed": 0
+    },
+    "candidate_full_ci": 39936620110,
+    "post_merge_main_ci": "Hardware transport recurrence remains open in issue116; not claimed green"
+  },
+  "harness_repairs": [
+    "Initial refusal harness parsed only stdout; typed CLI refusals correctly use stderr. Corrected reader and retained initial failure.",
+    "Export custody helper initially selected BUILD_DIR instead of public build default project/generated; selected actual published export location without production changes."
+  ]
+}
