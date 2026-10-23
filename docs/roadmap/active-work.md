@@ -30687,6 +30687,8 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **Retained development failure:** The native Windows run at `dd8a9f35` passes preflight/environment/compile/lint/OpenSpec (21 tooling tests and 121 diagrams), then reaches its unchanged 5,400-second owned-tree deadline during wheel checks. It does not reach the unit gate. All 112 completed timing spans succeeded, but that is not a complete wheel pass. The evidence archive is downloaded through the configured nondefault transport and independently hash-verified (`sha256:d802e2da8e91835de502d692f1d280cccb748637d706e13a0726b34e95122e39`); no routing configuration is published. See `verification/windows-development-timeout.json`. Finalized-candidate qualification and the corrected Windows identity fixture remain open.
 
+- **Recurrence diagnosis before repair:** Exact-main run `39948443185` is now terminal with the hardware expiry. Its exception identifies transport but discards whether the shared 180-second lease was first consumed by controller receiver-code observation or by the child transport. Add bounded scalar timings to the existing real factory regression on failure, delegating to every unchanged production call and preserving the original exception chain, positive assertions and execution bounds. This is diagnostic coverage, not a timeout fix or green main claim. Renew that exact fixture before the next combined CI run; do not blindly retry the failed main cell.
+
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
 **Detailed execution and acceptance:** [Open issue resolution](open-issue-resolution.md).
