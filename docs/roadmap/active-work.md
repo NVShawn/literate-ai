@@ -30769,6 +30769,8 @@ remains required after composition. No Python production code changes.
   - [ ] Pass real mutation and stale-artifact controls plus full regression, installed-wheel and exact CI; renew the complete native Windows gate without skipped phases or increased deadlines
 
 
+- **Combined native diagnostic:** Exact candidate `d56857cd` and wheel `sha256:3e7e1abe5ff3c6fe883163b8b7aab1a6ac477fbf7973380d44b7442f4aa6c912` preserve current HTML in all ABBA and instrumented calls, with the same original non-HTML refusal states. Unprofiled baseline 28.750/33.656 and candidate 28.859/28.172 seconds are a small uncontrolled pair. Instrumented complete input observations fall 3→2, framework observations remain 2, schema checks 136→120 (the candidate also adds a schema), and stat calls 84,911→60,243. See `verification/combined-observation-native-comparison.json`; full native qualification remains open.
+
 ### [ ] CLI-IMPORT-001 — Defer optional MAC schema parser initialization
 
 - **Owner:** framework CLI project command dispatch and MAC contract projection

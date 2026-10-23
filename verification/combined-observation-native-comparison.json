@@ -1,0 +1,259 @@
+{
+  "baseline_source_commit": "62ce16a0458db31ae61954468f563a1e1bd65eba",
+  "candidate_source_commit": "d56857cd09b4578c63033b9629b612cf34d18b93",
+  "baseline_wheel_sha256": "d309fcb461d5830e53365061d3b63e2152637af616a071d799e14092f26768a1",
+  "candidate_wheel_sha256": "3e7e1abe5ff3c6fe883163b8b7aab1a6ac477fbf7973380d44b7442f4aa6c912",
+  "results": [
+    {
+      "profiled": false,
+      "seconds": 28.75,
+      "command_exit": 1,
+      "gate_states": {
+        "authority": "fail",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "pass",
+        "receipt": "fail"
+      },
+      "html_current": true,
+      "owner_sha256": "8a785ae9a6e9e6d7d5f3e726b24854372f4dcc9cb5656e48f9c449aa3891773c",
+      "rows": [],
+      "label": "baseline"
+    },
+    {
+      "profiled": false,
+      "seconds": 28.859000000171363,
+      "command_exit": 1,
+      "gate_states": {
+        "authority": "fail",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "pass",
+        "receipt": "fail"
+      },
+      "html_current": true,
+      "owner_sha256": "55bef0b6ea7bee7a0e33df0bd2425ba21f74c1df77f7a5c4806013f4f8ebef6b",
+      "rows": [],
+      "label": "candidate"
+    },
+    {
+      "profiled": false,
+      "seconds": 28.17199999978766,
+      "command_exit": 1,
+      "gate_states": {
+        "authority": "fail",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "pass",
+        "receipt": "fail"
+      },
+      "html_current": true,
+      "owner_sha256": "55bef0b6ea7bee7a0e33df0bd2425ba21f74c1df77f7a5c4806013f4f8ebef6b",
+      "rows": [],
+      "label": "candidate"
+    },
+    {
+      "profiled": false,
+      "seconds": 33.65599999995902,
+      "command_exit": 1,
+      "gate_states": {
+        "authority": "fail",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "pass",
+        "receipt": "fail"
+      },
+      "html_current": true,
+      "owner_sha256": "8a785ae9a6e9e6d7d5f3e726b24854372f4dcc9cb5656e48f9c449aa3891773c",
+      "rows": [],
+      "label": "baseline"
+    },
+    {
+      "profiled": true,
+      "seconds": 63.01599999982864,
+      "command_exit": 1,
+      "gate_states": {
+        "authority": "fail",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "pass",
+        "receipt": "fail"
+      },
+      "html_current": true,
+      "owner_sha256": "8a785ae9a6e9e6d7d5f3e726b24854372f4dcc9cb5656e48f9c449aa3891773c",
+      "rows": [
+        {
+          "module": "standard_lifecycle_binding.py",
+          "function": "observe_installed_framework_distribution",
+          "calls": 2,
+          "self_seconds": 0.1395691,
+          "cumulative_seconds": 5.4349661000000005
+        },
+        {
+          "module": "standard_lifecycle_binding.py",
+          "function": "_read_stable_member",
+          "calls": 2470,
+          "self_seconds": 0.0623538,
+          "cumulative_seconds": 3.8165026
+        },
+        {
+          "module": "html_staleness.py",
+          "function": "verify_html_artifact",
+          "calls": 1,
+          "self_seconds": 0.0035840000000000004,
+          "cumulative_seconds": 42.2391607
+        },
+        {
+          "module": "html_emitter.py",
+          "function": "_load_html_inputs",
+          "calls": 3,
+          "self_seconds": 0.0003436,
+          "cumulative_seconds": 17.020035200000002
+        },
+        {
+          "module": "html_emitter.py",
+          "function": "_emit_inputs",
+          "calls": 1,
+          "self_seconds": 0.0013950000000000002,
+          "cumulative_seconds": 0.3068921
+        },
+        {
+          "module": "project_authority_graph.py",
+          "function": "project_authority_graph",
+          "calls": 5,
+          "self_seconds": 0.038912100000000005,
+          "cumulative_seconds": 22.920811
+        },
+        {
+          "module": "legacy_generation_catalog.py",
+          "function": "load_legacy_flavor_catalog_entries",
+          "calls": 7,
+          "self_seconds": 0.07026210000000001,
+          "cumulative_seconds": 26.2596926
+        },
+        {
+          "module": "validators.py",
+          "function": "check_schema",
+          "calls": 136,
+          "self_seconds": 0.001041,
+          "cumulative_seconds": 15.355924300000002
+        },
+        {
+          "module": "~",
+          "function": "<built-in method nt.stat>",
+          "calls": 84911,
+          "self_seconds": 4.3308073,
+          "cumulative_seconds": 6.846175100000001
+        }
+      ],
+      "label": "baseline"
+    },
+    {
+      "profiled": true,
+      "seconds": 54.14099999982864,
+      "command_exit": 1,
+      "gate_states": {
+        "authority": "fail",
+        "locks": "skipped",
+        "source-intelligence": "skipped",
+        "html-observability": "pass",
+        "receipt": "fail"
+      },
+      "html_current": true,
+      "owner_sha256": "55bef0b6ea7bee7a0e33df0bd2425ba21f74c1df77f7a5c4806013f4f8ebef6b",
+      "rows": [
+        {
+          "module": "schema_catalog.py",
+          "function": "_check_schema_document",
+          "calls": 137,
+          "self_seconds": 0.0041053,
+          "cumulative_seconds": 13.819138800000001
+        },
+        {
+          "module": "html_emitter.py",
+          "function": "_load_html_inputs",
+          "calls": 2,
+          "self_seconds": 0.0002503,
+          "cumulative_seconds": 11.8020853
+        },
+        {
+          "module": "html_emitter.py",
+          "function": "_emit_inputs",
+          "calls": 1,
+          "self_seconds": 0.0012188000000000001,
+          "cumulative_seconds": 0.3665977
+        },
+        {
+          "module": "standard_lifecycle_binding.py",
+          "function": "_recorded_distribution_paths",
+          "calls": 2,
+          "self_seconds": 0.017509900000000002,
+          "cumulative_seconds": 0.0239785
+        },
+        {
+          "module": "standard_lifecycle_binding.py",
+          "function": "observe_installed_framework_distribution",
+          "calls": 2,
+          "self_seconds": 0.11373100000000001,
+          "cumulative_seconds": 3.9317595
+        },
+        {
+          "module": "html_staleness.py",
+          "function": "verify_html_artifact",
+          "calls": 1,
+          "self_seconds": 0.0013511,
+          "cumulative_seconds": 33.429063400000004
+        },
+        {
+          "module": "legacy_generation_catalog.py",
+          "function": "load_legacy_flavor_catalog_entries",
+          "calls": 6,
+          "self_seconds": 0.0651477,
+          "cumulative_seconds": 22.722357000000002
+        },
+        {
+          "module": "project_authority_graph.py",
+          "function": "project_authority_graph",
+          "calls": 4,
+          "self_seconds": 0.029925100000000003,
+          "cumulative_seconds": 18.0770124
+        },
+        {
+          "module": "standard_lifecycle_binding.py",
+          "function": "_read_stable_member",
+          "calls": 2474,
+          "self_seconds": 0.0700053,
+          "cumulative_seconds": 3.1390801
+        },
+        {
+          "module": "validators.py",
+          "function": "check_schema",
+          "calls": 120,
+          "self_seconds": 0.0008917,
+          "cumulative_seconds": 13.7761987
+        },
+        {
+          "module": "~",
+          "function": "<built-in method nt.stat>",
+          "calls": 60243,
+          "self_seconds": 2.9761485000000003,
+          "cumulative_seconds": 4.9038434
+        }
+      ],
+      "label": "candidate"
+    }
+  ],
+  "scope": "Native paired diagnostic of the combined HTML/schema/distribution candidate; all HTML current, retained fixture authority/receipt fail states identical; not lifecycle or full native gate acceptance",
+  "archive_sha256": "733b6506a7fbf8b07a02c6324d2e28cf5dc0f1597657eecbcb8e59da6e58fc86",
+  "archive_bytes": 246342,
+  "unprofiled_medians": {
+    "baseline": 31.20299999997951,
+    "candidate": 28.51549999997951
+  },
+  "limitations": [
+    "Two unprofiled calls per wheel, cache/scheduling effects uncontrolled",
+    "Combined source changes do not isolate each optimization",
+    "Fixture intentionally retains original authority/receipt failures; no successful verify or admission is claimed",
+    "Unchanged complete native Windows gate remains pending"
+  ]
+}
