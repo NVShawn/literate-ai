@@ -1,0 +1,59 @@
+{
+  "scope": "Complete local qualification of combined entrypoint audit and installed-observation changes; native and exact CI pending",
+  "qualified_source_commit": "2837124250528de5b18709a22ade3048281d4ea6",
+  "source_suite": {
+    "executed": 2181,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 2181,
+    "selected": 2252,
+    "skipped": 71
+  },
+  "source_report_sha256": "ce7f77f27b138bf467b993d912d05c6974c1916f85b8adcb679f5454578c6c88",
+  "source_suite_seconds": 1245.271,
+  "installed_wheel": {
+    "sha256": "sha256:1e8483682163652f58fec34621a9ea106f83a46d3cc8636100b7c671316fdaf0",
+    "successful_spans": 131,
+    "complete_smoke_passed": true,
+    "report_sha256": "f7e0a83082c7a659c2b2f00be947c16258e6597636195c4a0b4bbb041247af8a"
+  },
+  "current_lifecycle": {
+    "source_commit": "d56857cd09b4578c63033b9629b612cf34d18b93",
+    "forced_generation": true,
+    "tests": 231,
+    "receipt_identity": "sha256:61cba87b45fd0918b1e69ee05de96a9dedd6e84935e7dbeb862b361e189464ca",
+    "candidate_identity": "sha256:4a0dd3650eeec6ed44c3e9ce19cb461df689a788c2e51e1d977568ce4246e414",
+    "driver_identity": "sha256:962b22c677b71828da895ca4e1823ad3f82a3affb03bace48b02c231368b1ad8",
+    "supported_receipt_update_require_current_verify_passed": true,
+    "production_source_schema_and_harness_parity": true
+  },
+  "native_comparison": "verification/combined-observation-native-comparison.json",
+  "independent_native_windows_gate": {
+    "source_commit": "2837124250528de5b18709a22ade3048281d4ea6",
+    "owned_deadline_seconds": 5400,
+    "test_workers": 4,
+    "terminal_result": null,
+    "scope": "Full unchanged gate dispatched from hash-verified exact Git snapshot; no completed qualification claimed"
+  },
+  "survey": {
+    "open_reviews": 0,
+    "worktrees": 9,
+    "paths_conform_to_user_root": true,
+    "active_unintegrated_work": [
+      "Issue88 prospective update closure in existing hv checkout; prior HTML head2501 preserved by ancestry",
+      "Retained SDK composition in sm checkout; source and evidence retained"
+    ],
+    "consolidated_heads": [
+      "fix/html-observation-cost",
+      "fix/retained-observation-cost",
+      "fix/windows-hardware-probe-diagnostics",
+      "work/installed-issue-acceptance"
+    ],
+    "branches_or_evidence_deleted": false
+  },
+  "pending": [
+    "Complete provided native Windows gate and required exact-head hosted CI",
+    "Investigate any reproduced hardware expiry with preserved failure-stage notes",
+    "Reviewed landing and exact post-merge main qualification"
+  ]
+}

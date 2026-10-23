@@ -147,6 +147,7 @@ SDLC catalog (verbs unchanged; grouped for flow):
     litai catalog graph | migrate-flavor-names
     litai graph [show | rebalance]
     litai project validate | documentation-update | documentation-review
+    litai project agent-entrypoints [PATH]
     litai project tracker inspect | peer-work | parent checkout | ci-plan
     litai project retained-cargo check | materialize | admit
     litai project test-receipt run-retained | update | check | require-current
@@ -360,6 +361,7 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
         raise CliFailure("cli.usage", "a component command is required")
     if args.command == "project":
         from .project import (
+            agent_entrypoints_from_args,
             documentation_review_from_args,
             documentation_update_from_args,
             mac_project_contract_from_args,
@@ -378,6 +380,9 @@ def _handle(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
 
         if args.project_command == "validate":
             return validate_project_from_args(args), 0
+        if args.project_command == "agent-entrypoints":
+            report = agent_entrypoints_from_args(args)
+            return report, 0 if report["ready"] else 1
         if args.project_command == "ci-plan":
             return project_ci_plan_from_args(args), 0
         if args.project_command == "guidance":
@@ -2045,6 +2050,11 @@ def _parser() -> JsonArgumentParser:
     project_documentation_update.add_argument(
         "--model", help="explicit coding-CLI model for authorized reconciliation"
     )
+    project_agent_entrypoints = project_commands.add_parser(
+        "agent-entrypoints",
+        help="audit owned coding-agent onboarding delegates without writes",
+    )
+    project_agent_entrypoints.add_argument("path", nargs="?", default=".")
     project_parent_readme = project_commands.add_parser(
         "parent-readme",
         help="plan or apply root README links to declared direct parents",
@@ -3284,7 +3294,10 @@ def main(
     )
     scoped_retained_cargo = command == "project.retained-cargo"
     scoped_worker_health = command == "worker.health"
-    scoped_orchestration = scoped_orchestration or scoped_worker_health
+    scoped_agent_entrypoints = command == "project.agent-entrypoints"
+    scoped_orchestration = (
+        scoped_orchestration or scoped_worker_health or scoped_agent_entrypoints
+    )
     scoped_evidence = (
         command.startswith("project.")
         and "test-receipt" in arguments
@@ -3342,9 +3355,13 @@ def main(
             or getattr(args, "debug", None) not in {None, "-"}
         ):
             raise CliFailure(
-                "worker.health_read_only_options"
-                if scoped_worker_health
-                else "orchestration.read_only_options",
+                "project.agent_entrypoints_read_only_options"
+                if scoped_agent_entrypoints
+                else (
+                    "worker.health_read_only_options"
+                    if scoped_worker_health
+                    else "orchestration.read_only_options"
+                ),
                 "read-only inspection does not admit MCP discovery "
                 "or debug-file output",
             )

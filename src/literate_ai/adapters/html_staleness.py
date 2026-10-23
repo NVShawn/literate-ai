@@ -13,16 +13,18 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 from literate_ai._filesystem import UnsafeFilesystemPathError
-from literate_ai.adapters.html_emitter import emit_html, load_html_inputs
+from literate_ai.adapters.html_emitter import (
+    HtmlRenderInputs,
+    _emit_inputs,
+    load_html_inputs,
+)
 from literate_ai.adapters.html_framework import (
     HtmlFrameworkObservation,
     observe_html_framework,
 )
 from literate_ai.adapters.html_publication import html_output_path, read_output
-from literate_ai.adapters.html_surfaces import HtmlSurfaceSource
 from literate_ai.contracts.html_observability import (
     HtmlProvenance,
-    HtmlRendererBinding,
     HtmlRenderRefusal,
     HtmlRenderRequest,
     HtmlStalenessReport,
@@ -82,16 +84,13 @@ class _ProvenanceParser(HTMLParser):
 
 def _inputs(
     root: Path, request: HtmlRenderRequest, framework: HtmlFrameworkObservation
-) -> tuple[HtmlSurfaceSource, HtmlRendererBinding] | HtmlRenderRefusal:
-    inputs = load_html_inputs(
+) -> HtmlRenderInputs | HtmlRenderRefusal:
+    return load_html_inputs(
         root,
         request,
         framework_distribution_identity=framework.framework_distribution_identity,
         schema_catalog_release=framework.schema_catalog_release,
     )
-    if isinstance(inputs, HtmlRenderRefusal):
-        return inputs
-    return inputs.source, inputs.renderer
 
 
 def verify_html_artifact(
@@ -106,7 +105,7 @@ def verify_html_artifact(
         inputs = _inputs(root, request, framework)
         if isinstance(inputs, HtmlRenderRefusal):
             return inputs
-        source, renderer = inputs
+        source, renderer = inputs.source, inputs.renderer
         expected = render_inputs_identity((source.binding,), request.view, renderer)
 
         def report(status, observed=None, labels=()):
@@ -140,13 +139,10 @@ def verify_html_artifact(
                     "stale", provenance.render_inputs_identity, tuple(labels)
                 )
             else:
-                emitted = emit_html(
-                    root,
-                    request,
-                    framework_distribution_identity=framework.framework_distribution_identity,
-                    schema_catalog_release=framework.schema_catalog_release,
-                    generated_at=provenance.generated_at,
-                )
+                # Reconstruct from this exact immutable observation. The complete
+                # inputs and installation are independently read again below;
+                # another discovery inside the pure emitter adds no boundary.
+                emitted = _emit_inputs(inputs, request, provenance.generated_at)
                 if isinstance(emitted, HtmlRenderRefusal):
                     return emitted
                 if emitted.artifact.provenance.render_inputs_identity != expected:

@@ -1,0 +1,28 @@
+{
+  "schema": "literate-ai/development-evidence@1",
+  "scope": "Windows RECORD fixture byte preservation; not full Windows qualification",
+  "ci_run": 39960983882,
+  "failed_job": 120438738913,
+  "cause": "csv.writer produced CRLF then Windows Path.write_text translated LF again; empty inventory rows correctly refused",
+  "correction": "write exact encoded UTF-8 bytes; production strict CSV validation unchanged",
+  "local": {
+    "owner": "tests/critical/test_standard_lifecycle_binding_adapter.py",
+    "tests": 6,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 0.024
+  },
+  "windows_confirmation": {
+    "workflow_run": 39966279564,
+    "source": "1d188bd1",
+    "owner_tests": 6,
+    "failures": 0,
+    "skips": 0,
+    "seconds": 0.146,
+    "runner": "windows-latest",
+    "python": "3.12.10",
+    "managed_runner": "make python-check",
+    "artifact": "sha256:b0cb5edb23a1b5e944fe9240d04ce02f9019de6867fdeecc12128ea6b248b447"
+  },
+  "qualification": "development only"
+}

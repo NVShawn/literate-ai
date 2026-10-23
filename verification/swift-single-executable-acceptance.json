@@ -1,0 +1,59 @@
+{
+  "issue": 104,
+  "scope": "Swift single-executable generation contract and actual native source-set compilation/execution; no product release claim",
+  "landed_main": "d5c7b2789f52dde497531aab8e09a1340fc16e58",
+  "fresh_managed_native_swift": {
+    "executed": 3,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 3,
+    "selected": 3,
+    "skipped": 0
+  },
+  "report_sha256": "6c7a67504ad4e17d050033d8bf504f7dff814a3e3b8cbf126c597ee57c8409e4",
+  "positive": "Actual swiftc links support and generated test files into one executable; normal output 42 and test output passed are checked. Real direct compiler alias also executes.",
+  "negative": "Top-level cleanup, auxiliary @main and @main in main.swift each fail native compilation without artifact publication or source mutation.",
+  "guidance": {
+    "version": "1.0.7",
+    "authored_and_shipped_templates_identical": true,
+    "one_dispatcher_in_main": true,
+    "support_files_declaration_only": true,
+    "self_check_compiles_complete_native_source_set": true
+  },
+  "files_sha256": {
+    "skills/specification-to-source/swift-portable-json-application/SKILL.md": "710b71cb485ed4c486fc5e030eb2593c0746e5b50e3f15cde55b8091b4cb0d58",
+    "flavors/lang-swift/openspec/spec.md": "2c62b78923b5b9c9aa11954b178b0fad230c3ce9c5b29d621439706c831e49bd",
+    "flavors/lang-swift/standard-command-profile.json": "7791e0c37881933d610aa2ba19566aff674209fa815d34264643a50121b9beb8",
+    "src/literate_ai/project_template/skills/specification-to-source/swift-portable-json-application/SKILL.md": "710b71cb485ed4c486fc5e030eb2593c0746e5b50e3f15cde55b8091b4cb0d58",
+    "src/literate_ai/project_template/flavors/lang-swift/openspec/spec.md": "2c62b78923b5b9c9aa11954b178b0fad230c3ce9c5b29d621439706c831e49bd",
+    "src/literate_ai/project_template/flavors/lang-swift/standard-command-profile.json": "7791e0c37881933d610aa2ba19566aff674209fa815d34264643a50121b9beb8",
+    "src/literate_ai/adapters/builders/swift.py": "14a886f778491d3bf1348404e9c7340a674fd320aa6d923cc6e3553608c9a842",
+    "src/literate_ai/adapters/builders/cpp.py": "8c1b12e77a8cb491f5a3e4fbcf9ca7654a732e655835446673efa7d08687fb55",
+    "tests/critical/test_guarded_swift_builder.py": "67e91a31e6046369040200b0d01b39b2cb19d09e176af628522a786e76f402f0"
+  },
+  "qualification_origins": {
+    "fresh_swift_generation": "595da5b2: real macOS application succeeds on first generation; 3 generated tests,3 independent verifier tests,2 assertions,6 invocations. Exact guide/template bytes remain unchanged. Original failed three-candidate attempt retained.",
+    "fresh_framework_lifecycle": {
+      "source_commit": "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+      "rebuild_report_sha256": "f923ce66cfbd821587f422a03f39659492f2d94b9e3941229c8bc0fa816c01da",
+      "candidate_sha256": "90a1e901c0792ff2b6ad39dee7c654f389a4436cb11673d6fc7102e5978a8b03",
+      "tests": 230,
+      "receipt_identity": "sha256:91afbe0eba8f6d1bc80a5b49dbe613caf9b85ed9d2ae192f163f911af4f703e9",
+      "finalized_candidate_identity": "sha256:4cb725ec5ea7478952c9f48bad58ddbfbd3d0f904cdea2e648c4128f986190a6",
+      "driver_identity": "sha256:c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232",
+      "scope": "Passing forced-fresh lifecycle before the subsequent command-reference documentation correction; original source/authority provenance retained"
+    },
+    "complete_installed_wheel": {
+      "source_commit": "52c8b6eb4f0fd67d4fc7bb4fe3abce90e34077b8",
+      "wheel_sha256": "d4399371619f330e8cc6ac5f9a1255b012532fae88ccc8a1ead80966d1a7ff87",
+      "all_131_timing_spans_successful": true,
+      "packaged_swift_guidance_and_builder_bytes_match_current": true
+    },
+    "exact_integration_ci": {
+      "run": 39790990072,
+      "head": "205083242c8ce9fa3835ecc22785126f612ce12c",
+      "conclusion": "success"
+    }
+  },
+  "boundary": "All provenance remains at its original revision. Current Swift owner/test bytes match landed qualified source; the separate entrypoint-audit full source run remains pending."
+}

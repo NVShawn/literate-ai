@@ -1,0 +1,37 @@
+{
+  "schema": "literate-ai/local-cohort-qualification@1",
+  "source_commit": "35306ad742f0646f64c889ffd3838b8d24e88f69",
+  "scope": "Integrated entrypoint and observation cohort plus Windows exact-byte inventory fixture",
+  "source_suite": {
+    "selected": 2252,
+    "passed": 2181,
+    "skipped": 71,
+    "failed": 0,
+    "seconds": 1224.064,
+    "runner": "make python-check, four workers, fresh checkpoint",
+    "report_sha256": "400e10295e865a1929ad60eea33ce29a38b7fd206bd7c715d52fb22bf954229f"
+  },
+  "installed_wheel": {
+    "completed_spans": 131,
+    "failed_spans": 0,
+    "identity": "sha256:456801162efc3c80966e7b757ef2b80119389b71daab3cc167aa95b7ab89cace",
+    "ok": true
+  },
+  "current_lifecycle_receipt": "sha256:61cba87b45fd0918b1e69ee05de96a9dedd6e84935e7dbeb862b361e189464ca",
+  "require_current": "passed; production and lifecycle harness unchanged from prior qualified cohort",
+  "windows_fixture_confirmation": {
+    "run": 39966279564,
+    "passed": 6,
+    "skipped": 0,
+    "seconds": 0.146
+  },
+  "preceding_full_ci": {
+    "run": 39960983882,
+    "passed_jobs": 24,
+    "failed_jobs": 2,
+    "conclusion": "failure; fixture defect and separate hardware receiver timeout retained"
+  },
+  "provided_native_gate": "failed at unchanged 5400-second deadline; see windows-combined-observation-timeout.json",
+  "new_review_head_ci": "pending after metadata integration; no current merge or release admission claimed",
+  "production_hardware_patch": null
+}

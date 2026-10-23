@@ -28586,7 +28586,7 @@ identity. This qualifies wheel installation only; native lifecycle, source and
 evidence custody, retained receipts and release enforcement remain open. The
 subsequent Make-environment correction is not part of that wheel's evidence.
 
-### [ ] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
+### [x] WORKER-SCP-001 — Carry configured SSH routing through source and evidence SCP transfers
 
 - **GitHub issue:** [#69](https://github.com/jordanhubbard/literate-ai/issues/69)
 
@@ -28596,9 +28596,9 @@ subsequent Make-environment correction is not part of that wheel's evidence.
 - **Conclusion:** SCP may remain the fixed transfer executable, but must carry the selected SSH program for nondefault worker transports; direct default routing cannot establish the registered worker identity.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
+  - [x] Add validated optional SSH-program selection to SCP helpers; propagate it through worker uploads, downloads and file synchronization without changing default OpenSSH behavior or weakening host, path, deadline or custody checks.
 - **Evidence:**
-  - [ ] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
+  - [x] Invalid transport injection refuses before execution; default platform transfer contracts remain green; an actual native worker performs source/build/test/evidence round trips through its configured route.
 
 WORKER-SCP-001 implementation checkpoint: SCP helpers accept a validated optional
 SSH program and the selected worker transport now reaches source staging,
@@ -28611,7 +28611,9 @@ matched its remote SHA-256 and downloaded identical bytes. The result is explici
 transport-only, not a complete native lifecycle receipt. Full installed native
 source/build/test/evidence qualification and existing-platform CI remain open.
 
-### [ ] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
+- **Closure acceptance:** The current validated SSH/SCP owners complete a real Windows/Python3.12 source upload, hash verification, native compilation, three compiled-artifact behavior cases and evidence download through one registered nondefault transport. The downloaded archive (`sha256:74966a8ce468c3630d16e01406ac8d9d75d6c382e14361d3bfed25bef1cf03c1`) is independently hash-verified, and its compiled artifact bytes match the native result. Five current transport/handler cases pass without skips, including exact default OpenSSH argv parity and invalid transport injection refusal. The owning code/tests are byte-identical to exact CI-qualified `20508324` and landed `fe21a198`; existing alignment/release synchronization coverage remains. See `verification/worker-scp-native-acceptance.json`. This is a complete source/build/test/evidence transfer round trip; it does not mint a framework lifecycle, retained SDK or product receipt.
+
+### [x] RETAINED-ADMISSION-002 — Qualify retained source without a generation agent
 
 - **GitHub issue:** [#70](https://github.com/jordanhubbard/literate-ai/issues/70)
 - **Priority:** P0
@@ -28622,7 +28624,7 @@ source/build/test/evidence qualification and existing-platform CI remain open.
 - **Implementation:**
   - [x] Add explicit model-free retained source planning and execution wiring while leaving ordinary generation discovery unchanged.
 - **Evidence:**
-  - [ ] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
+  - [x] Installed public CLI on a native worker without coding agents completes real build, behavior tests and independent acceptance; stale authorization and failed tests refuse without a passing receipt or regenerative cache promotion.
 
 Installed native checkpoint: the exact qualified wheel at `89278c96` bootstraps
 37 verified distributions offline. Public Standard rebind and documentation review
@@ -28686,6 +28688,8 @@ platform/tool skips; log SHA-256
 `3b7603d5171be3e9c5bd4641c240c7af4276a7250229c9408ff5d9a2bb995293`.
 That broad baseline does not qualify later changes or full mixed retained
 projects under #22, typed SSH custody under #69, or a downstream release.
+
+- **Closure acceptance:** A real noneditable installed wheel (`sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f`, exact source `9f8b9dab`) initializes from landed main and admits a reviewed retained Python tree with no coding-agent executable on PATH. Three native behavior cases and independent acceptance pass, supported receipt promotion commits the result, and public accepted-only build exports exact hash-based compiled bytes with no model selector. Real changed-source authorization and failing native behavior refuse while preserving the prior receipt and export; ordinary generation still fails `coding_cli.unavailable`. Thirteen current critical cases and the real accepted-export fixture pass without skips; the latter observes a new actual acceptance identity and refuses unknown/substituted origins, missing admission, corrupted cache bytes and failed fresh acceptance. All 13 relevant owner/test files are byte-identical between the qualified wheel source and main `fe21a198`. See `verification/retained-source-installed-acceptance.json`; the separate hardware CI recurrence, full native SDK and product/package programs remain open.
 
 ### [ ] RELEASE-INTEGRATION-004 — Reconcile and execute the 1.3 release backlog
 
@@ -29006,7 +29010,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Closure qualification:** Landed implementation on `75d73ac2`; fresh managed `test_source_inventory_credentials.py` passed all five tests, including both complete inert portable fixtures, nine mixed-secret controls, malformed/unknown-language and private-key exclusions, Unicode offsets and typed value-free diagnostics. The full landed source qualification passed 2131 tests with 71 platform skips and no failures; exact-head CI run `39790990072` passed.
 
 
-### [ ] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
+### [x] GENERATION-REFUSAL-001 — litai test --target host: generation returns empty source when the coding CLI refuses shell use
 
 - **GitHub issue:** [#51](https://github.com/jordanhubbard/literate-ai/issues/51)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29019,11 +29023,13 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Implementation:**
   - [x] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
 
 - **Execution decision:** Use the existing bounded/redacted failure path for empty generation, retain stdout and stderr refusal evidence, and report the selected isolation profile. Preserve the deliberate no-retry policy for deterministic empty output. Verify refusal text, both streams, credential redaction and one attempt.
 
 - **Current evidence:** See the [source admission batch](1.3-integration.md#source-admission-and-diagnostics-batch) for local tests and remaining integration qualification.
+
+- **Closure evidence:** The current managed generator module passes all 20 cases with no skips, including the real error classifier with synthetic successful-empty process output: bounded reasons from both streams, secret redaction, selected isolation profile and one attempt for deterministic policy refusal. The owner and regression bytes exactly match landed main `d5c7b278` and qualified source `20508324` (CI `39790990072`, success). See `verification/generation-refusal-acceptance.json`; no live provider refusal is claimed.
 
 ### [x] HTML-CANVAS-001 — litai render html graph canvas does not grow with its row
 
@@ -29152,7 +29158,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-### [ ] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
+### [x] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
 
 - **GitHub issue:** [#27](https://github.com/jordanhubbard/literate-ai/issues/27)
 - **Current release target:** 1.3.0 (2026-10-18 reconciliation)
@@ -29169,7 +29175,9 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Meet the reported real-Git journey budget: 427 launches, 8.9 seconds; retain a <=500-launch regression
   - [x] Pass the existing 24 refresh tests in 210.8 seconds and expanded seven-test input/ref/registration/locator/configuration/object controls
 - **Evidence:**
-  - [ ] Run the issue acceptance cases and required integration qualification before closing
+  - [x] Run the issue acceptance cases and required integration qualification before closing
+
+- **Closure qualification:** All 26 current refresh cases pass on local macOS with no skips in 216.957 seconds (under the 300-second limit), including the real-Git <=500-launch regression and unchanged index/ref/Gitlink/registration/locator/configuration/rollback refusals. All owning refresh and orchestration source, contracts and fixture/test bytes match original optimization `b7269a9f`, exact CI-qualified `20508324` and landed main `d5c7b278`. See `verification/repository-refresh-performance-acceptance.json`; this does not claim the separate entrypoint-audit suite is green.
 
 ### [x] BRACES-AUDIT-001 — Remove the temporary braces audit exception once a patched release exists
 
@@ -30213,10 +30221,12 @@ hosted CI and canonical tree worker/live SDK integration remain open.
   independent acceptance. Supported receipt promotion and current verification
   pass. This result keeps its own test count, distinct from the predecessor's
   227-test lifecycle. Exact-wheel offline FreeBSD installation verifies all 37
-  distributions. Ten installed context cases and the fresh canonical native CLI
-  replay are running; neither has a completed qualification claim. The latter
-  retains the default receipt policy, removes the consumer RPATH, requires the
-  captured loader path and checks missing host/plan authorization separately.
+  distributions. All ten installed native context cases pass with 469 production
+  modules verified from the installed prefix. The fresh canonical native CLI
+  passes SDK production, original adoption, planning and separate missing host/plan
+  refusals, then exceeds its unchanged 3,600-second execution bound. Partial
+  products and original test output earn no receipt or independent admission.
+  The default receipt policy and captured loader requirements remain intact.
   Compiler SDK admission and release authorization remain open. See
   [the scoped record](../../verification/retained-sdk-runtime-context-development.json).
 - **Depends on:** RETAINED-PROJECT-001,NATIVE-SDK-001
@@ -30313,7 +30323,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Evidence:**
   - [ ] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI.
 
-### [ ] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
+### [x] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
 
 **GitHub issue:** [#96](https://github.com/jordanhubbard/literate-ai/issues/96)
 
@@ -30325,9 +30335,11 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Implementation:**
   - [x] Reuse the existing inert lexical owner for bundle classification and registry location.
 - **Evidence:**
-  - [ ] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
+  - [x] Pass valid-writer, leading-inert-text, real broken-bundle refusal and actual Node execution checks; renew full source regression, driver/document review, lifecycle/receipt, native/installed qualification and exact required CI.
 
 **Focused results:** All six fanout checks pass on the host and Linux and in the actual FreeBSD preflight. All four JavaScript handoff/bundle cases and all three retry cases pass on the host, Windows, Linux and FreeBSD preflight. Complete native/installed and exact CI gates remain pending above.
+
+**Closure audit:** All four current handoff cases pass without skips. A real non-editable installed guard on native Windows accepts all six inert forms in both writer locations, performs 12 actual Node invocations with exact expected test/smoke payloads, and preserves all four missing-module/extension/shebang/dispatch refusals. Its guard, lexer, callers and fixture bytes match landed `fe21a198`, exact fully qualified `76ac4c7a` and the complete installed wheel at `52c8b6eb`. That original snapshot also passes a fresh 230-case framework lifecycle. `verification/javascript-registry-acceptance.json` retains the source/wheel/receipt and hash-verified native archive identities; this does not declare the unrelated entrypoint or HTML-performance branches qualified.
 
 ### [ ] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
 
@@ -30366,7 +30378,7 @@ the final review head. Failed and interrupted native attempts above retain their
 original source identities and are not successful qualification. The broader
 original-source SDK and accepted-retained export programs remain separate.
 
-### [ ] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
+### [x] ACCEPTED-RETAINED-EXPORT-001 — Export verifier-admitted retained source without a coding CLI
 
 **GitHub issue:** [#97](https://github.com/jordanhubbard/literate-ai/issues/97)
 
@@ -30378,11 +30390,13 @@ original-source SDK and accepted-retained export programs remain separate.
 - **Implementation:**
   - [x] Reconstruct accepted retained origins through their existing provider-neutral selection without invoking or inventing a coding CLI.
 - **Evidence:**
-  - [ ] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
+  - [x] Admit a tiny real retained tree, publish its accepted cache entry, build from accepted source and export unchanged bytes/provenance after fresh independent acceptance; refuse unknown origins, missing admission, changed tree/review/tool bindings and stale acceptance.
 
 **Admission gap found by the real fixture:** The planned keys now match, but the first complete retained lifecycle publishes full accepted cache membership, not the distinct verifier-owned source-admission evidence required by accepted-only execution. Keep that refusal intact. Extend canonical admission with explicit retained-origin evidence and no invented coding-agent transcript, mint it only from a live reviewed retained qualification with actual passing verifier facts, and retain it alongside the complete accepted membership in one exact cache entry. Old entries without admission must still refuse; reuse still rebuilds, retests and independently reaccepts.
 
-### [ ] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
+- **Closure acceptance:** A real noneditable installed wheel (`sha256:0d2f0153c8b98afe2ac54e480ce4c4faaf35848deb1c5b027bbe69fc07bfa57f`, exact source `9f8b9dab`) initializes from landed main and admits a reviewed retained Python tree with no coding-agent executable on PATH. Three native behavior cases and independent acceptance pass, supported receipt promotion commits the result, and public accepted-only build exports exact hash-based compiled bytes with no model selector. Real changed-source authorization and failing native behavior refuse while preserving the prior receipt and export; ordinary generation still fails `coding_cli.unavailable`. Thirteen current critical cases and the real accepted-export fixture pass without skips; the latter observes a new actual acceptance identity and refuses unknown/substituted origins, missing admission, corrupted cache bytes and failed fresh acceptance. All 13 relevant owner/test files are byte-identical between the qualified wheel source and main `fe21a198`. See `verification/retained-source-installed-acceptance.json`; the separate hardware CI recurrence, full native SDK and product/package programs remain open.
+
+### [x] CACHE-RETIREMENT-001 — Keep explicit retired cache history verifiable
 
 **GitHub issue:** [#100](https://github.com/jordanhubbard/literate-ai/issues/100)
 
@@ -30395,7 +30409,7 @@ original-source SDK and accepted-retained export programs remain separate.
   - [x] Persist exact retirement records and distinguish them from active membership during lookup and verified enumeration.
 - **Evidence:**
   - [x] Prove current lookup and read-only enumeration after retirement, unchanged immutable history, missing/corrupt-record refusal, safe reactivation and portable archive restoration.
-  - [ ] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
+  - [x] Complete the combined fresh host suite, current framework lifecycle receipt, installed package qualification and exact review CI before landing.
 
 **Current retained-export implementation evidence:** The real public CLI fixture passes live reviewed retained admission, accepted-only build/export with byte-identical hash-based Python output, a new independent acceptance identity, failed-fresh-acceptance refusal without changing the prior receipt/export, refusal of legacy complete entries without source admission, explicit fresh requalification upgrade, and tampered retained-cache byte refusal. Four admission/closed-wire cases, eight no-agent selection cases, the existing retained-cache guard and all three retirement cases pass. Existing model admission and the combined admission regression also pass. Fresh complete host, lifecycle, installed-wheel and exact review CI gates remain open.
 
@@ -30422,7 +30436,9 @@ CI qualification remain required. The earlier invalid generated candidates and
 interrupted launchers are retained as unsuccessful attempts; no acceptance
 oracle was relaxed to obtain the fresh successful lifecycle.
 
-### [ ] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
+**Closure audit:** All 11 current cache cases pass with no skips, including all three retirement cases. Every cache-package source file, source-materialization/archive guard and retirement regression is byte-identical across native/lifecycle-qualified `9941a6c4`, exact CI-qualified `20508324`, installed wheel `1063ecd8` and landed main `d5c7b278`. `verification/cache-retirement-acceptance.json` records each criterion and original qualification scope; no broader SDK or release acceptance is inferred.
+
+### [x] SWIFT-ENTRYPOINT-001 — Align Swift generation and native single-executable compilation
 
 - **GitHub issue:** [#104](https://github.com/jordanhubbard/literate-ai/issues/104)
 - **Current release target:** 1.3.0
@@ -30435,11 +30451,13 @@ oracle was relaxed to obtain the fresh successful lifecycle.
 - **Implementation:**
   - [x] Update the owning generation guidance and shipped template, preserve exact versioned skill references and record issue104.
 - **Evidence:**
-  - [ ] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
+  - [x] Pass actual Swift compilation and execution including support/tests, competing-entrypoint rejection, skill/template checks, a fresh current lifecycle and required CI.
 
 **Swift repair development evidence:** Skill version 1.0.7 and both authored/shipped Flavor contracts require the native builder's complete single-executable source set. Two actual Swift compiler tests pass, including three conflicting-entrypoint refusal variants and successful support/test linkage and execution. Ten skill/template tests, SkillEvaluator, lint/format, strict OpenSpec and supported authority reviews pass. A fresh live macOS LaunchAgent sample succeeds on the first generation attempt (one source-cache miss): 3 generated tests, 3 independent verifier tests and 2 assertions, with 6 invocations. The earlier exhausted three-candidate attempt remains retained. A current complete project lifecycle receipt, installed wheel and exact-head CI remain required before landing.
 
 **Current Swift-repaired integration lifecycle:** At implementation `595da5b25931eaf5bfa94977512596b7eccd7570`, the complete project lifecycle passes. Supported receipt update/check/require-current and `litai verify` pass with 230 tests, no failures or skips. Current receipt: `sha256:40585141e6ec627f44b1573bf8ca10868ffd945f0938dc59455feeb4f241d5b0`; finalized candidate: `sha256:37c2663be538e67fadd94d5ce8f760c66209608e2c04e05c8b2bd142b40bb759`; driver: `sha256:5d1b8a0f8f67ac284a33b72af22ab8cff9de19b7ddbacf42c0978a7f4be905b6`. This run revalidates eligible admitted source through the complete current lifecycle; the separately recorded Swift sample was freshly generated. Final package/native renewal and exact-head CI remain open.
+
+**Closure audit:** All three current real-Swift tests pass without skips, including support/generated-test linkage, direct compiler alias execution and three competing-entrypoint refusals. Version 1.0.7 authored/shipped guidance and Flavor contracts match their actual qualified wheel bytes. The guide remains identical to the separately recorded fresh Swift generation; current owner/test bytes match landed main and exact CI-qualified `20508324`. A forced-fresh framework lifecycle at `52c8b6eb` passes 230 tests and its complete installed wheel passes all 131 timing spans. `verification/swift-single-executable-acceptance.json` retains each original source/receipt/wheel boundary; the unrelated entrypoint-audit final full run remains pending.
 
 ### [ ] CI-BAZEL-ACTION-001 — Review the Bazel setup action patch for release 1.3
 
@@ -30508,6 +30526,12 @@ or worker configuration repaired. This operational audit does not close WORKTREE
 reusable migration-contract or platform-qualification obligations.
 
 - **Windows review consolidation:** PR119 exact head `1a4d3e6e` is an ancestor of retained PR127 head `62ce16a0`; the latter has a complete green hosted matrix and fresh host qualification. Close PR119 as superseded while preserving its branch, histories and all issue116 native/landing gates. PR122 and PR124 remain retained: their optional-import and timing runtime/test slices match the accepted #127 source, but their exact receipt-bearing heads were deliberately not merged. Their final disposition follows complete qualification of the consolidated successor. No source contribution is represented as landed by this review closure.
+
+- **Landed review disposition:** PR128 exact head `76ac4c7a` passes its normal CI and complete platform matrix `39936620110` (one retained hardware expiry, followed by only that failed shard retry). It merges as `fe21a198`, and local main fast-forwards cleanly. GitHub recognizes PR127 through ancestry, associating existing integration merge `874da1ba`. PR122 and PR124 close as superseded after exact contributed source/test/documentation byte comparison to landed main; their historical heads and receipts remain retained. Two further clean inactive checkouts retire after process/container checks, with all ignored state and Git metadata preserved by verified same-volume rename and every ref unchanged. Nine checkouts remain. See `verification/review-consolidation-landing.json`; exact-main CI `39948443185` and #129 native performance renewal remain separate pending gates.
+
+
+- **Additional inactive checkout retirement:** Two clean, redundant checkouts are retired after process/open-file and container-mount checks. Their exact branch heads and all other Git refs remain unchanged; ignored files move by verified same-volume rename and per-worktree Git metadata is retained. See `verification/worktree-consolidation-followup.json` for the journal identity and observation limits. Ten checkouts remain, including active controllers and unfinished reviews. This manual operation does not satisfy WORKTREE-002 automation; moved environments need path reconfiguration before reuse.
+
 
 ### [ ] SWIFT-DRIVER-MODE-001 — Preserve Swift compiler mode after executable resolution
 
@@ -30616,12 +30640,25 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Priority:** P1
 - **Owner:** Agent onboarding and original-source adoption
 - **Direction:** Reconcile open GitHub issue #113: report missing or stale agent delegates on authored projects.
-- **Conclusion:** Preserve metadata-only adoption and custom instructions; add read-only audit and an explicitly reviewed repair path using the declared agent skill.
+- **Conclusion:** Preserve metadata-only adoption and custom instructions. Use the issue-authorized read-only audit plus explicit authoring-requirement route: report missing/stale/unsafe owned delegates against the declared agent_skill, expose readiness in original-adoption planning/apply results, and require reviewed authored repair before onboarding is described as complete. The audit never writes agent files, pinned parents or retained snapshots; it does not grant lifecycle admission.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Add supported entry-point auditing and safe reviewed repair without modifying pinned parents or retained evidence.
+  - [x] Add supported read-only entry-point auditing and an explicit reviewed authoring requirement without modifying pinned parents or retained evidence.
 - **Evidence:**
-  - [ ] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
+  - [x] Cover initialization, original adoption, nested projects, custom skill paths, custom shims and unsafe paths.
+  - [ ] Complete exact review CI and reviewed landing with current qualification.
+
+- **Next action in progress:** Complete exact review CI and reviewed landing; current source, lifecycle, installed-wheel and installed public CLI qualification are recorded below.
+
+- **Custom-path authority:** Current v2 definitions admit bounded portable relative onboarding paths through the shared canonical path owner; optional shim validation follows the declared field. Published v1 schema inputs retain the root SKILL.md rule before legacy conversion. Custom-path provider metadata must name the file explicitly. Positive configured projects and original-adoption planning, default-delegate staleness, cross-platform path refusal and frozen-v1 compatibility are covered; no automatic instruction repair or lifecycle admission is added.
+
+- **Focused development qualification:** 22 audit cases, 12 original-adoption cases and three documentation-graph cases pass with no skips or failures on the controller; two schema-catalog checks also pass. Positive custom-path original planning/apply preserves source and authored delegates after the required documentation review. V1 root-only parsing, cross-platform path refusals, owned/absorbed/nested slots, empty/comment-only references, reparse/symlink refusal and self-only documentation-spine refusal remain tested. Skill admission passes. See `verification/agent-entrypoint-development.json`; complete qualification remains open.
+
+- **Retained full-suite refusal:** Frozen source `af620be3` retains 12 passes, 23 skips and one error from 2,235 selected cases at clean two-replay self-replication because the new yaml import is absent from the package manifest/source BOM. Declare the exact runtime PyYAML dependency, retain the failed attempt, qualify replication again, then start a fresh complete run; dependency admission remains enforced.
+
+- **Parser resource follow-up:** A 379-byte valid YAML merge-alias graph expands to 4,096 mapping pairs with ordinary SafeLoader. The byte limit alone does not bound that work. Before landing, bound composed nodes and depth, permit scalar aliases only, and refuse shared container aliases in both onboarding frontmatter and provider pointers. Preserve every input byte and report the existing typed invalid finding. The pre-hardening snapshot `9f8b9dab` passed all 2,235 selected source cases (2,164 pass, 71 explicit skips), its 230-case lifecycle and complete 131-span installed-wheel gate; these facts do not qualify the upcoming parser change.
+
+- **Final installed public CLI acceptance:** Exact qualified wheel `1e848368` passes all nine public discovery cases plus real YAML container-alias, onboarding alias, depth and node-limit refusals. Scalar aliases remain ready; every audit preserves exact file bytes and mtimes, and authored inputs restore ready. Installed module bytes match the reviewed source. See `verification/agent-entrypoint-installed-final-acceptance.json`; no lifecycle admission is asserted by the discovery command.
 
 ### [ ] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
 
@@ -30688,6 +30725,15 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
 
 - **Retained development failure:** The native Windows run at `dd8a9f35` passes preflight/environment/compile/lint/OpenSpec (21 tooling tests and 121 diagrams), then reaches its unchanged 5,400-second owned-tree deadline during wheel checks. It does not reach the unit gate. All 112 completed timing spans succeeded, but that is not a complete wheel pass. The evidence archive is downloaded through the configured nondefault transport and independently hash-verified (`sha256:d802e2da8e91835de502d692f1d280cccb748637d706e13a0726b34e95122e39`); no routing configuration is published. See `verification/windows-development-timeout.json`. Finalized-candidate qualification and the corrected Windows identity fixture remain open.
+
+- **PR128 hosted hardware observation:** Full qualification `39936620110`, Windows/Python3.12 shard 3 job `120357700322`, stops at `test_public_factory_automatically_uses_private_configuration` with `action_hardware.transport_expired`. The identical target test and unchanged Windows hardware/configuration owners pass all three cases with no skips on an aligned native Windows worker in 48.875 seconds. Its independently verified evidence archive is `sha256:00333ea078b62610dd8116a293c19ce6017ba1f212763cef2df2f613fe4ede59`; see `verification/windows-action-configuration-diagnostic.json`. The native source baseline and its POSIX-only source difference retain their exact scope: this diagnosis does not replace exact-head CI. The cause of the hosted expiry is not established; no production timeout or guard changed. GitHub refused a failed-job retry while the rest of the workflow was active; retain those healthy jobs and retry only the terminal failed cell after workflow completion.
+
+- **Finalized-source native timeout retained:** Provided Windows qualification at `62ce16a0` terminates at its unchanged 5,400-second owned-tree deadline (5,400.761 seconds), during wheel checks and before unit tests. Preflight, environment, compile, lint, 21 documentation-tool tests and 121 diagrams pass. All 111 completed wheel timing spans succeed; the longest installed Python/HTML operation is 3,312.078 seconds, and operator golden paths take 807.891 seconds. Independently verified archive `sha256:e0b1357c9cd6f28a148d959087376f86377c4fa6dd8f9b91ba29c5072a7447d7` retains the original result, log and timings. See `verification/windows-final-head-timeout.json`. Inspect the expensive native operations before another full native gate; this is incomplete qualification and does not replace PR128 exact-head hosted CI.
+
+
+- **Repeated exact-main failure:** Run `39948443185`, job `120396818599` at `fe21a198` fails the same real hardware-probe transport deadline after 497 passes and 84 skips. The candidate retry had passed; recurrence requires stage-level diagnosis before another retry. The 180-second observation bound and 1,800-second action grant remain unchanged. See `verification/windows-main-hardware-recurrence.json`.
+
+- **Recurrence diagnosis before repair:** Exact-main run `39948443185` is now terminal with the hardware expiry. Its exception identifies transport but discards whether the shared 180-second lease was first consumed by controller receiver-code observation or by the child transport. Add bounded scalar timings to the existing real factory regression on failure, delegating to every unchanged production call and preserving the original exception chain, positive assertions and execution bounds. This is diagnostic coverage, not a timeout fix or green main claim. Renew that exact fixture before the next combined CI run; do not blindly retry the failed main cell.
 
 ### [ ] ISSUE-RESOLUTION-001 — Resolve all open issues with verified closure
 
@@ -30768,3 +30814,178 @@ remains required after composition. No Python production code changes.
 - **Evidence:** [Timing development record](../../verification/windows-wheel-timing-development.json). The documentation authority review is recorded; the old receipt is stale until complete renewal. Timing artifacts remain diagnostic and never imply a passing wheel or gate.
 
 - **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
+
+The dependency correction passed all three unchanged self-hosting checks (0 skips, 568.703 seconds), including both clean stable replay cycles. A fresh full-source run remains required; the earlier failed full run is retained.
+
+**Command-reference qualification repair:** The dependency-corrected full source attempt passes 1,711 cases with 70 skips and one failure before fail-fast termination: the canonical command list omits `litai project agent-entrypoints`. The one-line reference correction passes both current help/reference tests and receives documentation authority review `sha256:e6175f267ceac818d933c46d3a6008f7beb269f80dbbecc957a863814b0beb13`. The unchanged driver remains `sha256:c9d1c7650e2c5b78391c73348485498ed2b29d1871dceb8bf59e45889ec48232`. Before that documentation correction, exact source `52c8b6eb` passes a forced-fresh 230-case lifecycle and all 131 installed-wheel timing spans, plus the real non-editable public CLI audit cases. Original snapshot and failed harness provenance remain in `verification/agent-entrypoint-development.json`. Renew the complete source suite and current authority-bound qualification; no failed full run is relabeled green.
+
+### [ ] HTML-VERIFY-COST-001 — Bound repeated installed HTML verification and catalog observation cost
+
+**GitHub issue:** [#129](https://github.com/jordanhubbard/literate-ai/issues/129).
+
+- **Priority:** P1
+- **Owner:** HTML verification and immutable catalog observation
+- **Direction:** Use retained native timing evidence to repair the repeated Windows full-gate timeout without changing execution bounds
+- **Conclusion:** The instrumented installed verify call spends 49.759 of 73.5 seconds in HTML verification; seven Flavor-catalog loads and five authority-graph observations repeat work. Preserve complete staleness, source, asset and framework identity checks while investigating bounded operation-scoped immutable reuse.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Inspect actual caller overlap and bind reusable parsed catalog or framework observations to exact current bytes within one operation
+  - [ ] Retain independent currentness checks and refuse changed, replaced, missing or redirected inputs before completing verification
+- **Evidence:**
+  - [ ] Compare equivalent profiles and uninstrumented native timings; retain the original 5400-second failures and all raw evidence
+  - [ ] Pass real mutation and stale-artifact controls plus full regression, installed-wheel and exact CI; renew the complete native Windows gate without skipped phases or increased deadlines
+
+**Initial source development:** Pure current-artifact reconstruction reuses the first complete immutable input frame, including excerpts and assets. Both independent full input observations and both installed-framework observations remain; the final comparison checks the whole frame. All seven staleness cases and all 15 selected HTML cases pass without skips, including live source/framework/output drift refusal. Lint, format, layout/export and reviewed driver pin checks pass. See `verification/html-reconstruction-development.json`. Native comparison, full regression/lifecycle/installed gates and complete Windows renewal remain required; no performance improvement was claimed at that source-only checkpoint.
+
+**First native comparison:** Exact development wheel `d8ab44d2` preserves current HTML in every paired call, with identical retained non-HTML verification failures. Two uninstrumented ABBA trials per wheel measure baseline 35.375/40.078 seconds and candidate 28.297/34.063 seconds (medians 37.727/31.180). Instrumented totals are 73.438/68.234 seconds; complete source loads fall from three to two while installed-distribution observations remain two. `verification/html-reconstruction-native-comparison.json` retains exact source, wheel, profile and independently verified archive identities. Cache/scheduling effects remain uncontrolled and this small diagnostic is not a complete native or release-performance pass. Inspect remaining costs before the unchanged full Windows gate renewal.
+
+- **Schema check development:** Nine focused catalog checks pass without skips, including changed bytes with identical size/mtime and missing-reference refusal. Only exact JSON meta-schema successes are shared within one complete catalog operation (maximum 512); registry construction, file reads and fingerprints remain independent. No second-patch native timing or complete qualification is claimed.
+
+- **Combined native diagnostic:** Exact candidate `d56857cd` and wheel `sha256:3e7e1abe5ff3c6fe883163b8b7aab1a6ac477fbf7973380d44b7442f4aa6c912` preserve current HTML in all ABBA and instrumented calls, with the same original non-HTML refusal states. Unprofiled baseline 28.750/33.656 and candidate 28.859/28.172 seconds are a small uncontrolled pair. Instrumented complete input observations fall 3→2, framework observations remain 2, schema checks 136→120 (the candidate also adds a schema), and stat calls 84,911→60,243. See `verification/combined-observation-native-comparison.json`; full native qualification remains open.
+
+### [ ] RETAINED-OBSERVATION-PERF-001 — Bound retained authority and native observation cost
+
+- **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117)
+
+- **Priority:** P1
+- **Owner:** Standard installed-distribution, retained runtime and native dependency observers
+- **Direction:** Make the installed public retained SDK lifecycle complete within reviewed native bounds while preserving exact authority, loader and revocation checks.
+- **Conclusion:** Issue117 owns the measured bottleneck. Profile the public planning path and native dependency guard separately, then reduce redundant work at its owning boundary with current byte and topology validation. Never cache stale success, omit freshness checks or raise the one-hour deadline to label the current attempt passing.
+- **Depends on:** RETAINED-SDK-PUBLIC-001
+- **Implementation:**
+  - [x] Record exact installed public-plan and native observation call counts and costs before selecting the optimization.
+  - [ ] Implement operation-scoped observation reuse or lower-cost equivalent verification with current member bytes, native graph, authorization and revocation intact.
+- **Evidence:**
+  - [ ] Changed, replaced, redirected, missing or unreadable members and changes during actual SDK commands fail closed; all existing tamper and revocation cases remain covered.
+  - [ ] Compare equivalent instrumented counts and uninstrumented native timings, then pass full regression, exact wheel and canonical installed public CLI build/tests/docs/independent acceptance.
+
+The exact installed native dependency observer now has a successful read-only
+profile: 14.613 instrumented seconds, 34 components, 97 edges, 217 inspector
+processes and 10,520 stat calls. The public retained-plan profile passes in 105.045 instrumented seconds:
+four installed-distribution observations consume 75.589 cumulative seconds,
+including 32.782 seconds in the metadata library inventory existence prefilter. These are scoped preparation
+measurements, not an uninstrumented release benchmark or accepted lifecycle.
+The first dependency-profile attempt refused retired inputs; its replacement
+captures a fresh verified diagnostic snapshot without repairing the retired run.
+
+Next in progress: read the wheel RECORD inventory directly in each fresh
+distribution observation, avoiding the metadata library existence prefilter.
+Every selected member still undergoes current byte verification; missing recorded
+members must refuse rather than disappear from the inventory. Keep the existing
+non-RECORD distribution fallback and canonical identity format. Measure the exact
+installed path before deciding whether additional observation work is required.
+
+The initial direct-RECORD implementation passes five focused installed-distribution
+cases, including a real wheel metadata fixture, unchanged canonical identity,
+missing nonmandatory members, mutation across observations and malformed/oversized
+inventories. Full regression and native comparison remain required.
+
+The direct-RECORD candidate `760bfa09` now passes all 2,201 controller cases:
+2,131 passes, 70 declared skips, no failures (2,336.332 seconds). Exact clean
+Linux wheel qualification passes in 524.198 seconds with 1,235 framework members.
+Offline FreeBSD installation verifies the reviewed dependency closure, and fresh
+project initialization passes. The canonical installed public SDK replay reached authorized execution but
+timed out at the unchanged 3,600-second budget (4,162.132 seconds supervised
+total). Its owned source server exited successfully. No admission was earned;
+profile the actual execution path before selecting further observation changes.
+The complete configured framework host lifecycle now passes 233 cases in
+1,385.562 seconds, including execution and independent acceptance. Its finalized
+candidate is promoted through `litai project test-receipt update`; `litai verify`
+confirms the receipt is current. Canonical installed FreeBSD SDK qualification
+and exact-head hosted CI remain required before landing the performance repair.
+
+A 300-second diagnostic of actual authorized execution records 202,949 stat
+calls and 19 full distribution observations. Broad alternating metadata probes
+find equivalent pathname APIs similarly costly; repeated access to one warm
+member is fast. Descriptor-first no-follow reads now hash every member and compare current
+descriptor/path identities. A new open-boundary symlink control reproduces the
+prior acceptance of a link to the original inode; the candidate refuses with
+and without a platform no-follow flag. Six focused controller and six native
+source-import cases pass. The uninterrupted controller regression passes 2,132 cases with 70 declared
+skips. The exact clean Linux wheel passes, and six binding controls pass from
+the installed FreeBSD prefix. A fresh complete configured host lifecycle passes
+228 tests and independent acceptance in 1,823.130 seconds. Its candidate is
+promoted through the supported command and verifies current; the preceding
+233-test receipt retains its original scope. Canonical installed FreeBSD SDK
+execution also timed out at the unchanged 3,600-second command budget
+(4,103.472 seconds supervised total); its owned source server exited zero.
+This newer failure preserves the preceding direct-RECORD failure as separate
+evidence. No native SDK admission was earned. Profile the installed descriptor
+candidate before another canonical replay. A separate directory-relative
+metadata probe was slower and was not adopted.
+No cached distribution success or expanded execution deadline is authorized.
+
+The [isolated FreeBSD public CLI qualification](../../verification/native-sdk-isolated-cli-development.json)
+now passes exact wheel code `4ed7e5a1` in 575.845 supervised seconds, without
+changing the 3,600-second authorized execution limit. Three original consumer
+cases, documentation and two withheld acceptance cases pass. The CLI admits
+original source at local-runtime scope; all 28 retained records reverify from
+current CAS bytes. The sealed app fails without the reviewed loader context.
+Both authorization refusals remain intact and the owned source server exits zero.
+Six binding controls pass from this new installed prefix. The primary worker's
+timeouts remain retained. Its bounded diagnostic identifies vnode processing
+latency alongside a root-owned periodic scan; the scan and kernel settings are
+unchanged. The isolated comparison also changes kernel/filesystem/load, so it is
+not a single-variable performance attribution. All ten installed context controls
+now pass with zero skips; 469 production modules resolve from the installed prefix. Compiler SDK, package, product
+receipt and release admission remain unearned. Renew exact composed
+Windows/descriptor regression, wheel and lifecycle qualification before landing.
+
+**Combined qualification cohort:** Entry-point audit/YAML bounds (#113), retained installed-distribution observation (#117/#118), and HTML/catalog cost (#129) now preserve all source and evidence branch heads in one integration candidate. The combined driver is reviewed and recorded through the supported command. Next: freeze the source for fresh full source, forced-generation lifecycle and clean installed-wheel gates, then renew native evidence and exact review CI. Prior scoped passes retain their original source; the retained receipt is stale until supported promotion of the new passing candidate. Exact-main Windows hardware recurrence (#116) remains separately open.
+
+**Final combined local qualification:** Exact source `28371242` passes all 2,252 selected source checks (2,181 pass, 71 existing skips, zero failures) in 1,245.271 seconds and the complete 131-span installed-wheel gate (`sha256:1e8483682163652f58fec34621a9ea106f83a46d3cc8636100b7c671316fdaf0`). The forced-generation 231-case lifecycle at `d56857cd` has a supported current receipt (`sha256:61cba87b45fd0918b1e69ee05de96a9dedd6e84935e7dbeb862b361e189464ca`); all production/schema/harness bytes remain identical, while the current source suite includes the failure-only hardware diagnostic. Require-current and all-gate verify pass. See `verification/issue-resolution-cohort-local-qualification.json`. The provided native gate preserves its 5,400-second bound; it and exact-head review CI remain pending.
+
+Windows fixture correction pending for #117: PR #130 full Windows shard 2
+found that CSV's CRLF rows were translated a second time by Path.write_text.
+The resulting CR-CR-LF creates empty RECORD rows, correctly refused by the
+production parser. Write the fixture's exact UTF-8 CSV bytes; retain strict
+production inventory validation. Re-run this owner through the managed runner
+and confirm the same cases on Windows before claiming cross-platform closure.
+
+The exact-byte RECORD fixture correction passes all six owner tests on hosted
+Windows/Python 3.12.10 with zero skips in 0.146 seconds (run 39966279564).
+The same managed owner suite passes locally. This confirms the narrow fixture
+repair; the full matrix's hardware timeout is separate and remains unresolved.
+
+Windows receiver stage diagnosis is retained in
+`verification/windows-hardware-stage-diagnosis.json`. The reversed comparison
+rejects the earlier GPU lookup attribution; actual warm OS CIM queries dominate
+at about 19 seconds, with 56 seconds for the first OS query. No production
+change or widened deadline follows from these diagnostic observations.
+
+The native selected-property ABBA comparison (39967811302) returns identical
+hardware payloads but no warm improvement: original OS queries 23.005/23.024
+seconds, selected-property warm query 23.167 seconds. No production hardware
+change is selected. Keep #116 open; preserve these rejected attributions.
+Next landing action: integrate the independently Windows-confirmed exact-byte
+RECORD fixture correction when the current candidate's healthy jobs finish,
+then renew the exact candidate gates. Ordinary PR CI 39960853983 is green;
+full Windows wheel job 120438737834 is green at source 55e775c7. Neither is
+a complete passing full matrix or provided native gate.
+
+The complete entrypoint/observation cohort and verified Windows CSV fixture
+correction are now integrated locally for a fresh full managed source run.
+Production, schema and harness bytes are unchanged from PR #130 head 55e775c7.
+The review branch remains frozen until its healthy CI jobs finish.
+Combined observation candidate `28371242` still times out in the provided
+native Windows gate after 5,400.482578 seconds, at the unchanged 5,400-second
+owned-tree bound. All 112 completed wheel timing spans succeed; wheel completion
+and unit execution remain unearned. The installed HTML subprocess accounts for
+3,125.984 seconds. Hash-verified archive
+`sha256:02d73db303b72d79bdd6d145bfe343f674152fdaaa88eebcaf61a53e25c5aa9e`
+retains the exact terminal result, log and timing frames. See
+`verification/windows-combined-observation-timeout.json`. Preserve all previous
+timeouts. Keep #129 open; profile the complete expensive HTML scenario before
+another provided full native replay. Hosted Windows wheel CI passes separately,
+which does not turn this native gate into a passing result.
+
+The exact integrated fixture candidate `35306ad7` passes a fresh complete
+2,252-case managed source run (2,181 pass, 71 existing skips, zero failures)
+in 1,224.064 seconds and all 131 installed-wheel spans. Its wheel is
+`sha256:456801162efc3c80966e7b757ef2b80119389b71daab3cc167aa95b7ab89cace`.
+The supported retained lifecycle require-current check passes; production and
+harness bytes are unchanged. See
+`verification/windows-record-fixture-cohort-qualification.json`. All earlier
+CI jobs are terminal (24 pass, the two known Windows shards fail). Next:
+update PR #130 and renew exact-head required CI. Keep #116 and #129 open;
+no native full-gate or hardware timeout correction is claimed.

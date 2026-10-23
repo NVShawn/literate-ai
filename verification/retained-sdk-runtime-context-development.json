@@ -1,9 +1,9 @@
 {
   "schema": "literate-ai/retained-sdk-runtime-context-development@1",
-  "observed_utc": "2026-10-22T10:24:19.917881+00:00",
+  "observed_utc": "2026-10-22T12:04:43.686471+00:00",
   "work_item": "RETAINED-SDK-PUBLIC-001",
   "issue": "https://github.com/jordanhubbard/literate-ai/issues/118",
-  "scope": "Controller source regression, exact installed-wheel qualification and current full configured host lifecycle; native execution renewal remains pending",
+  "scope": "Controller and exact-wheel qualification with current host lifecycle; ten installed native fixture cases pass; canonical installed CLI times out before complete admission",
   "qualified_code_revision": "4eab5e2584b21772ae070197049ccb29a31acd5e",
   "source_tree": "68f2c6bbe227840322ba7baf73e1f1e8bb478450",
   "test_tree": "4313c61e0c68b3152ef07921e9c174a12370b60c",
@@ -81,18 +81,42 @@
     "seconds": 145.926
   },
   "native_installed_fixture_checks": {
-    "status_at_observation": "running",
-    "selected": 10,
-    "qualification_claimed": false
+    "tests": 10,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "successful": true,
+    "production_modules_verified": 469,
+    "imports_sha256": "67cb85eec7c6eef713238cbc9b8a37449f3df3d64c90d8b0e4ec185c01ba4c77",
+    "target": {
+      "sys_platform": "freebsd16",
+      "machine": "amd64",
+      "release": "16.0-CURRENT",
+      "python": "3.12.14"
+    },
+    "scope": "Fixture-supplied project discovery and local Git routing; real source build, grants, custody and acceptance. Not canonical public CLI or actual compiler SDK qualification.",
+    "status_at_observation": "passed",
+    "supervised_seconds": 2727.663
   },
   "canonical_native_cli": {
-    "status_at_observation": "running",
+    "status_at_observation": "failed_timeout",
     "fresh_installed_initialization_passed": true,
     "consumer_rpath_disabled_in_authored_probe": true,
     "separate_missing_host_and_plan_checks_configured": true,
     "qualification_claimed": false,
     "initial_required_evidence_kinds": 16,
-    "standard_distribution_identity": "sha256:0ff58bd5a0332856bbc0ed57cc1417bc8ab75902edcd3ce5de24e79cd9667c92"
+    "standard_distribution_identity": "sha256:0ff58bd5a0332856bbc0ed57cc1417bc8ab75902edcd3ce5de24e79cd9667c92",
+    "stage": "authorized-execution",
+    "deadline_seconds": 3600,
+    "supervised_seconds": 4246.29,
+    "terminal_exit_code": 1,
+    "retained_plan_passed": true,
+    "native_library_sdk_production_passed": true,
+    "missing_host_authorization_refused": true,
+    "missing_exact_plan_authorization_refused": true,
+    "receipt_admitted": false,
+    "independent_acceptance_passed": false,
+    "performance_issue": "https://github.com/jordanhubbard/literate-ai/issues/117"
   },
   "canonical_installed_cli_qualified": false,
   "native_installed_qualified": false,
@@ -101,6 +125,98 @@
   "retained_development_failures": [
     "Initial mutation fault setup encountered a read-only file; the test now temporarily permits its deliberate mutation and restores the original mode.",
     "Initial native identity parsing required file hashes for shared-cache images; the observer-owned architecture UUID representation is retained.",
-    "Host lifecycle invocation needed external runtime and candidate paths; the mismatched ambient coding CLI was removed so the configured CLI/model pair remained selected."
-  ]
+    "Host lifecycle invocation needed external runtime and candidate paths; the mismatched ambient coding CLI was removed so the configured CLI/model pair remained selected.",
+    "The public installed CLI exceeded its unchanged 3600-second authorized-execution bound; partial compiled products and original test output do not establish a completed receipt or independent admission.",
+    "The first read-only dependency profile selected already-retired execution inputs and refused. Its replacement captures a fresh verified diagnostic snapshot; it grants no execution or admission."
+  ],
+  "read_only_native_dependency_profile": {
+    "seconds": 14.613,
+    "components": 34,
+    "edges": 97,
+    "observation_bytes": 54122,
+    "observation_sha256": "588ea64e7a94038f1fc12d4e74e429c39ba3af6b55d1abf1d4509e2c230b8627",
+    "profile_sha256": "ce43bf7e626a789d16ba7f80a6daa056160373b70d85fecf59e1d5b5a52e2538",
+    "scope": "Instrumented read-only native input/dependency observation; excludes binding-owner checks, command execution and admission; not an uninstrumented performance benchmark",
+    "supervised_seconds": 28.232,
+    "stat_calls": 10520,
+    "inspector_processes": 217,
+    "top_functions": [
+      {
+        "file": "profile-retained-native-observation-v2.py",
+        "line": 22,
+        "function": "observe",
+        "calls": 1,
+        "self_seconds": 6.8e-05,
+        "cumulative_seconds": 14.600424
+      },
+      {
+        "file": "observation.py",
+        "line": 884,
+        "function": "observe",
+        "calls": 1,
+        "self_seconds": 2.9e-05,
+        "cumulative_seconds": 12.93156
+      },
+      {
+        "file": "freebsd.py",
+        "line": 40,
+        "function": "observe",
+        "calls": 1,
+        "self_seconds": 0.000173,
+        "cumulative_seconds": 12.931514
+      },
+      {
+        "file": "freebsd.py",
+        "line": 49,
+        "function": "_observe",
+        "calls": 1,
+        "self_seconds": 0.001566,
+        "cumulative_seconds": 12.931341
+      },
+      {
+        "file": "freebsd.py",
+        "line": 249,
+        "function": "_closure",
+        "calls": 1,
+        "self_seconds": 0.011338,
+        "cumulative_seconds": 11.288538
+      },
+      {
+        "file": "freebsd.py",
+        "line": 262,
+        "function": "image",
+        "calls": 152,
+        "self_seconds": 0.005865,
+        "cumulative_seconds": 8.623032
+      },
+      {
+        "file": "observation.py",
+        "line": 2329,
+        "function": "_run_bounded_tool",
+        "calls": 217,
+        "self_seconds": 0.025345,
+        "cumulative_seconds": 8.366793
+      },
+      {
+        "file": "_process.py",
+        "line": 41,
+        "function": "run_bounded_process",
+        "calls": 217,
+        "self_seconds": 0.050313,
+        "cumulative_seconds": 7.275915
+      }
+    ]
+  },
+  "read_only_public_plan_profile": {
+    "seconds": 105.045,
+    "exit_code": 0,
+    "ok": true,
+    "profile_sha256": "f0b37fff4733c1cbbe7fc9931ec19ac192a0e6b953ea61e957757cc768eae506",
+    "scope": "Instrumented read-only public retained plan; no execution, SDK admission or release benchmark",
+    "supervised_seconds": 105.98,
+    "stat_calls": 43832,
+    "installed_distribution_observations": 4,
+    "distribution_cumulative_seconds": 75.588888,
+    "inventory_prefilter_cumulative_seconds": 32.781708
+  }
 }

@@ -1,0 +1,80 @@
+{
+  "issue": 27,
+  "scope": "Fresh local macOS refresh performance and tamper acceptance on the landed implementation",
+  "landed_main": "d5c7b2789f52dde497531aab8e09a1340fc16e58",
+  "suite_summary": {
+    "executed": 26,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 26,
+    "selected": 26,
+    "skipped": 0
+  },
+  "suite_seconds": 216.957,
+  "suite_limit_seconds": 300,
+  "report_sha256": "492a4cf5249b61f56476b658883d2e265cde1b2b5dce2bc25cc2584a4275415b",
+  "git_launch_budget": {
+    "actual_git_subprocess_regression_passed": true,
+    "maximum": 500,
+    "original_reported": 5319
+  },
+  "freshness_controls": [
+    "Index bytes and flags",
+    "HEAD and loose/packed refs",
+    "Gitlinks and source cleanliness",
+    "Registered worktrees and common-store locators",
+    "Manifest and configuration/include drift",
+    "Packed commit availability/corruption",
+    "Concurrent foreign writes and rollback preservation",
+    "Live write reservations and terminal ownership"
+  ],
+  "source_byte_parity": {
+    "original_optimization_commit": "b7269a9f671a526db298a5725a8027afca14ff31",
+    "verified_revisions": [
+      "205083242c8ce9fa3835ecc22785126f612ce12c",
+      "d5c7b2789f52dde497531aab8e09a1340fc16e58"
+    ],
+    "current_files_sha256": {
+      "src/literate_ai/adapters/repository_orchestration.py": "4aa8cffe07e2e6db118510b656407a1c786420e1f11eb5062f610e5994b194fd",
+      "src/literate_ai/adapters/repository_refresh.py": "4aa4b18744e079bd4800181582b69cc31325ac46e88a3717d5e0a79a6f8c3d1f",
+      "src/literate_ai/adapters/repository_refresh_application.py": "626bfbc9879515e4855100073c1f9f88c37665e09cbafd60cd859c5187af6f18",
+      "src/literate_ai/adapters/repository_refresh_directories.py": "9a5bed0c24270a78417714ed2a38a18ac972cc20a8cea4c78e0cb3d6f75bc675",
+      "src/literate_ai/adapters/repository_refresh_files.py": "f189e0f7a076bfad0c3c0ae148917d1b0e53a282fcc07577ec96847feaffd299",
+      "src/literate_ai/adapters/repository_refresh_index.py": "8c1e3a674a26825895b4d6fe63fc2cd935de1506cae982d764f1ece6ae5fde2f",
+      "src/literate_ai/adapters/repository_refresh_metadata.py": "47b5436f1ec2e5fc5509972d07409369d60392cdb9a224a38d393bd6a7ce397e",
+      "src/literate_ai/adapters/repository_refresh_objects.py": "731455d8fc491e3add8eb0a35859ff54eacd12817b422c62b4e87e7e687f8c5c",
+      "src/literate_ai/adapters/repository_refresh_ownership.py": "5ba5cc6f39983516ff9c79b0eb8db07da3b04bb6d62b4281cef45b418e3d78d9",
+      "src/literate_ai/adapters/repository_refresh_planning.py": "204b2f1a874c284fcfe3700fc2c5f29060e1d145d84c85e960299999f4c6260b",
+      "src/literate_ai/adapters/repository_refresh_publication.py": "9431952e762a703b07e868d6e7110dfea0807e2be21107d8e8e095f0bf381253",
+      "src/literate_ai/adapters/repository_refresh_reflogs.py": "3e652355f20f8e9384d655b75882f7fc52c353adaede27bcafd776491379346b",
+      "src/literate_ai/adapters/repository_refresh_refs.py": "09394420824a52bfb5897374e48358b27f7d7d9abd883c605fc2137c58b438b5",
+      "src/literate_ai/adapters/repository_refresh_reservations.py": "51039fc1defa64b0e8844a35dc40f0ffa89afed6afe48bdee00dd884ff9ddfae",
+      "src/literate_ai/adapters/repository_refresh_revalidation.py": "56d70b808c15fa2aa42f72f52ba51a73c9f48fdade17fda103c35bac746f1ef2",
+      "src/literate_ai/adapters/repository_refresh_staging.py": "04e09081b9b4a785579d5d53996d5aeb728a8acbab767e245690b92da7682751",
+      "src/literate_ai/adapters/repository_refresh_worktrees.py": "396be69b9e93b0fa87a3bc5fdcd7db45391265f51e2173fd901060d6fc7369c2",
+      "src/literate_ai/contracts/repository_refresh.py": "8dd4753d426f09ce0a3dd9d5b7ba868d603a4e0797abb22502f2d4cc92f17ad6",
+      "tests/critical/test_repository_refresh_application_transitions.py": "7b04e02a3c322d970c0a3f386fce1f1b08f0de4352a200f3aba63864b422f99a",
+      "tests/critical/test_repository_refresh_inputs.py": "32444593d9093c65b8eeee75450da75ccc998fd715400114d953427a3acd8eea",
+      "tests/critical/test_repository_refresh_performance.py": "b3679ce86373752e79023f6b185cb6bbdb0843845d086d10681161ef822b8b71",
+      "tests/critical/test_repository_refresh_publication.py": "790a928f2ac84e69bc4608e7ae3f769e0322d2797a7179ad53536ae935e2c2e7",
+      "tests/critical/test_repository_refresh_reservations.py": "ca3a8ff04c486e6272a1dd5b6f9523f7bfa6f1a65a420050cca983619f85c5ce",
+      "tests/critical/test_repository_refresh_staging.py": "c43b4ef8f23891444117aaefa15d7d34cfafd4ae9a36a1e4958470860134645d",
+      "tests/critical/test_repository_refresh_worktrees.py": "21885272e0a8d8554a519c9d9de3e0195c91c8cd1a92f045fb54a5c0ec4b020a",
+      "tests/e2e/test_repository_refresh_application.py": "f6bb99d680c92f62f3a0c92f78face0b895bbc37db7b71f85f3595e2e8ac6800",
+      "tests/e2e/test_repository_refresh_cli.py": "3f315ea86b2127ad3a3ba8abc7dc121b0e9e10998b939c4896053bf67e328a56",
+      "tests/e2e/test_repository_refresh_cli_surface.py": "806120dfc956cc3c13c1ffe0b41373255d7cf47060cdb6bba23787d6290ad691",
+      "tests/e2e/test_repository_refresh_planning.py": "06bab60b7e91bf5d7ad5a8cf22620acaf51342490eccac101623e2156457e318",
+      "tests/support/fixtures_test_repository_refresh_application.py": "05ce7e5582c755a46e9edffe5229aa31a7e7cb079b0beef62dda9fcc4aca2f1f",
+      "tests/support/fixtures_test_repository_refresh_inputs.py": "745c5da7f4952e0d7bcd589115b7439ad461acaca94e43bad11928e65836617e",
+      "tests/support/fixtures_test_repository_refresh_publication.py": "cec1b3a600a6703b72ba11fc8a2cd31f67d31fb553bea41a14e236d3108c1e22",
+      "tests/support/fixtures_test_repository_refresh_refs.py": "9b260966aa72591231209dc9f38a81d036ef6dec5c5156a48a3ae512dc1729e6"
+    }
+  },
+  "integration_ci": {
+    "run": 39790990072,
+    "head": "205083242c8ce9fa3835ecc22785126f612ce12c",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "qualification_boundary": "This closes the unchanged refresh contract. The separate entrypoint-audit branch full suite remains failed on a missing command-reference entry; that failure is not relabeled green."
+}

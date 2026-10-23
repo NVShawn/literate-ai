@@ -88,7 +88,17 @@
         "project_id": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
         "version": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/semver"},
         "profile": {"const": "canonical"},
-        "agent_skill": {"const": "SKILL.md"},
+        "agent_skill": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePath"
+            },
+            {
+              "maxLength": 1024,
+              "pattern": "^(?![A-Za-z]:)(?!.*[<>:\"|?*\\u0000-\\u001f]).+$"
+            }
+          ]
+        },
         "component_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
         "flavor_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},
         "skill_roots": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/relativePaths"},

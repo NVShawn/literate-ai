@@ -1016,6 +1016,26 @@ def project_source_intelligence_from_args(args) -> dict[str, Any]:
         raise CliFailure(exc.code, exc.message) from exc
 
 
+def agent_entrypoints_from_args(args) -> dict[str, Any]:
+    """Audit owned delegates without changing source or adoption authority."""
+    from literate_ai.adapters.agent_entrypoints import audit_agent_entrypoints
+
+    try:
+        project = discover_project(Path(args.path))
+        if project is None:
+            raise CliFailure("project.not_found", "no canonical project found")
+        return audit_agent_entrypoints(project)
+    except CliFailure:
+        raise
+    except ProjectError as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise CliFailure(
+            "project.agent_entrypoints_invalid",
+            "agent entry points could not be inspected",
+        ) from exc
+
+
 def parent_readme_from_args(args) -> dict[str, Any]:
     """Use the installed runtime to reconcile the selected project's README."""
     from literate_ai.adapters.parent_readme import (
@@ -1473,6 +1493,7 @@ def parent_checkout_from_args(args) -> dict[str, Any]:
 
 
 __all__ = [
+    "agent_entrypoints_from_args",
     "PROJECT_INITIALIZATION_SCHEMA",
     "PROJECT_VALIDATION_SCHEMA",
     "documentation_review_from_args",

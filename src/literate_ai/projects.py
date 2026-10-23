@@ -1287,6 +1287,8 @@ def validate_project_structure(project: LoadedProject) -> dict[str, object]:
             )
     _require_disjoint_source_cache_roots(project, paths)
     for relative, marker in CANONICAL_AGENT_SHIMS.items():
+        if marker == "SKILL.md":
+            marker = project.definition.agent_skill
         if not project_owns_agent_shim(project.definition, relative):
             continue
         path = project.root.joinpath(*Path(relative).parts)

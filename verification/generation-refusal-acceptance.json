@@ -1,0 +1,34 @@
+{
+  "issue": 51,
+  "scope": "Typed bounded refusal diagnostics; no claim of a real model refusing during this check",
+  "landed_main": "d5c7b2789f52dde497531aab8e09a1340fc16e58",
+  "qualified_source": "205083242c8ce9fa3835ecc22785126f612ce12c",
+  "exact_qualified_ci": {
+    "run": 39790990072,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "owner_and_regression_sha256_identical_across_qualified_main_and_observed": {
+    "src/literate_ai/adapters/models/coding_cli.py": "c4286b36c4fbacd48d855f3e9911d94c54e420da760acc02d11a31b805b81413",
+    "tests/critical/test_coding_cli_generation.py": "3af67c9a106af52780382b17b6aa2c8a1ce96f1975ea96de37c564a8f8cccf91"
+  },
+  "fresh_managed_suite": {
+    "executed": 20,
+    "failed": 0,
+    "known_failed": 0,
+    "passed": 20,
+    "selected": 20,
+    "skipped": 0
+  },
+  "fresh_report_sha256": "8b547f1f000e7f84c0975e62798c5079a916cde82e92807c30766aca33b8bc54",
+  "refusal_case": "tests.critical.test_coding_cli_generation.CodingCliInvocationTests.test_empty_generation_reports_redacted_refusal_from_both_streams_once",
+  "criteria": {
+    "empty_success_exit_is_typed": "coding_cli.empty_generation",
+    "reason_from_both_streams": true,
+    "credential_redacted": true,
+    "diagnostic_bounded_below_5000_characters": true,
+    "selected_isolation_profile_reported": true,
+    "one_attempt_for_deterministic_policy_refusal": true
+  },
+  "test_scope": "Synthetic process-result regression invokes the real generator and error classifier with a controlled bounded-runner result. Existing exact-source integration CI and full suite provide the integration gate; no external provider success is claimed."
+}
