@@ -1,5 +1,5 @@
 {
-  "scope": "Private-runtime alias repair development qualification; fresh lifecycle and final installed/native/CI remain required",
+  "scope": "Private-runtime alias repair source, affected-interpreter and fresh host lifecycle qualification; exact wheel and hosted/native gates remain required",
   "implementation_commit": "625b871d8d3b29cde2587a96907c1f9798246224",
   "source_suite": {
     "executed": 2139,
@@ -39,5 +39,25 @@
   },
   "baseline": "The real-alias regression fails before ensurepip against the preceding owner on Python 3.14.7; its failed report and original public-prefix failure are retained.",
   "public_prefix_install": "The normal make install succeeds through the affected alias with the patched production owner and creates a non-editable wheel installation. No new host tools are installed.",
-  "custody": "Copied private executables and the native library preservation remain; Windows creation behavior and orphaned-base detection are unchanged."
+  "custody": "Copied private executables and the native library preservation remain; Windows creation behavior and orphaned-base detection are unchanged.",
+  "host_lifecycle": {
+    "authority_commit": "885352add197cc136792f76491b5af452f9fcd0e2",
+    "forced_fresh_generation": true,
+    "driver_identity": "sha256:ceb559c1eaa79ce4db8210a6acd34ccf7ecbf19ad0651092e8aacb105bcd7578",
+    "receipt_identity": "sha256:35189b34504770136936cd41bbc7421a01a8681550ecde0eed5cb70a4ec8a5e5",
+    "finalized_candidate_identity": "sha256:e760890282ba6aaf3f9603909a06b314ea860549624c1b321d80025ba0ae5bab",
+    "project_revision_identity": "sha256:8b65242e14fb594f142f02363f42a399f5fae0ff4d61e37b822ebc27e8c96a1d",
+    "summary": {
+      "failed": 0,
+      "passed": 233,
+      "skipped": 0,
+      "total": 233
+    },
+    "current": true,
+    "verify_counts": {
+      "fail": 0,
+      "pass": 2,
+      "skipped": 3
+    }
+  }
 }

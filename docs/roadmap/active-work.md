@@ -29629,9 +29629,11 @@ rather than treating resumed partial coverage as release qualification.
   - [x] Run Python and pip from an actual new private runtime under the affected Python 3.11 distribution and pass real-wheel self-update. The fresh full Python 3.11 gate exits zero in 1,021.195 seconds with four workers; its report records 1,910 passed, 81 skipped and zero failures across 1,991 selected cases. Report SHA-256 `d770be5e04081dfe8fa59374a3e3b6a9b988b2390347f6dbe459ab3cd466d24d`; log SHA-256 `13969000d45edfbf9443089b50f1f25ee7e119032c62c85527b409d175989617`. This is a complete unit regression with explicit platform/dependency skips, not release or native FreeBSD acceptance.
   - [ ] Qualify the exact committed wheel and pass the hosted platform matrix before closing this item.
 
-- **Next action (in progress):** Complete a fresh combined lifecycle and exact installed/native/hosted qualification for the canonical-base repair.
+- **Next action (in progress):** Finish exact installed-wheel and hosted/native qualification for the now-current combined candidate.
 
 - **Alias repair qualification:** At implementation `625b871d`, the real-alias regression passes after failing against the preceding owner. All 18 installer/bootstrap/self-update checks pass on the affected macOS standalone Python 3.11 distribution. The public make-install prefix succeeds as a non-editable installation; the fresh full source suite passes 2139 tests with 71 explicit skips and no failures (2210 selected). See `verification/private-runtime-alias-development.json`. A fresh combined lifecycle and exact package/native/CI renewal remain required; the preceding Windows-only receipt is preserved under its own authority identity.
+
+- **Fresh combined lifecycle:** The force-generated complete framework lifecycle at authority commit `885352ad` passes all 233 cases with no failures/skips. Supported receipt update/check/require-current and verify pass. Receipt `sha256:35189b34504770136936cd41bbc7421a01a8681550ecde0eed5cb70a4ec8a5e5`; finalized candidate `sha256:e760890282ba6aaf3f9603909a06b314ea860549624c1b321d80025ba0ae5bab`; driver `sha256:ceb559c1eaa79ce4db8210a6acd34ccf7ecbf19ad0651092e8aacb105bcd7578`. This renews the integrated alias/Windows source under its actual authority and preserves the older Windows-only receipt separately.
 
 
 ### [ ] NATIVE-SDK-ALIAS-001 — Preserve internal aliases through native SDK admission
