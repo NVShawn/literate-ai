@@ -1,10 +1,33 @@
 {
-  "status": "Technical checks retained; user validated voices and rejected animation; replacement performance score authored, implementation pending",
-  "source_base": "c345e652b91863e72526f25f8e31a03ec34bec01",
+  "status": "Directed cut rendered and technically verified; user visual validation pending; approved audition recordings reused unchanged",
+  "source_evidence_revision": "c345e652b91863e72526f25f8e31a03ec34bec01",
   "unit_tests": 9,
+  "performance_admission_refusals": {
+    "performanceRefusalsPassed": 10,
+    "admittedBeats": 46,
+    "coveredTurns": 8,
+    "boundary": "Admission does not establish motion quality"
+  },
+  "prepared_input_drift_refusals": {
+    "driftRefusalsPassed": 10,
+    "cases": [
+      "scene",
+      "combined-audio",
+      "recording",
+      "story",
+      "staged-lock",
+      "score",
+      "cue-map",
+      "storyboard",
+      "compiled-score",
+      "html"
+    ]
+  },
   "browser_checks": [
     "Same-time DOM and pixels repeat after seeking from different prior positions",
     "Every dialogue caption fits inside the frame",
+    "Directed holds, hover before Apply, unchanged source and spoken pending-gate focus are observable in the DOM",
+    "Hand trajectories remain continuous across the full 24 fps timeline, including dialogue boundaries",
     "Keyboard Tab and Space operate Play/Pause without global shortcuts",
     "Reduced-motion preference works on load and on change; rigs remain static across time",
     "Static SVG characters and complete transcript exist without JavaScript",
@@ -28,14 +51,24 @@
     "colorProfile": "srgb",
     "framesPerSecond": 24
   },
+  "performance": {
+    "beats": 46,
+    "phrase_cues": 23,
+    "timing_method": "Local Whisper base.en word timestamp estimates with curated script-to-word-span mapping; recognition errors retained, not authoritative dialogue",
+    "maximum_hand_step_at_24fps": {
+      "step": 29.190381949156574,
+      "seconds": 6.208333333333333,
+      "actor": "litai"
+    },
+    "recurring_arm_or_breathing_cycles": false
+  },
   "video": {
-    "source_identity": "cb2fd4465506ed669121efa207b457b966a824a64035991fc6ff00da953779dc",
-    "mp4_sha256": "bfc228fa6ce72923c69867963c5987d5d4a896cfbb24de919ecae01d81db959a",
+    "source_identity": "745a72e0c3d900c18fab30f98e4caf2b87589a70503847c08cb0deb2df5bc8eb",
+    "mp4_sha256": "812ae7b997400a58c22747e74164bdc27da3f0fc1a13f0d68d5359e70388c724",
     "seconds": 38.437989,
     "captions": 8,
     "canonical_media_verification": true,
-    "publication_authorized": false,
-    "media_identical_to_inspected_cut": true
+    "publication_authorized": false
   },
   "voices": {
     "provider": "NVIDIA NIM",
@@ -44,7 +77,8 @@
     "requested_litai": "Magpie-Multilingual.EN-US.Aria",
     "effective_voice_confirmation": null,
     "backend_checkpoint": null,
-    "recorded_turns": 8
+    "recorded_turns": 8,
+    "review": "User validated original audition voices; all eight WAV hashes remain identical to review-decision.json"
   },
   "audio_signal_check": {
     "clipped_samples": 0,
@@ -58,29 +92,19 @@
     "decoded_midpoint_frames_inspected_at_1280_by_720": 8,
     "contact_sheet_inspected": true,
     "clipping_or_unintended_overlap_observed": false,
-    "complete_moving_film_review": "User rejected animation in the short segment; no complete full-episode review inferred."
+    "complete_moving_film_review": "Pending user visual validation; sampled frames and trajectories do not establish acting quality"
+  },
+  "previous_audition": {
+    "mp4_sha256": "bfc228fa6ce72923c69867963c5987d5d4a896cfbb24de919ecae01d81db959a",
+    "animation_status": "rejected",
+    "voices_status": "validated",
+    "decision": "review-decision.json",
+    "preserved": true
   },
   "limits": [
     "A short audition, not the complete next onboarding episode.",
     "Walkthrough visuals; the separate actual source-CLI observation proves only a read-only two-file adopt plan.",
     "No onboarding apply, generated-code execution, release or native qualification is claimed.",
     "Film and recordings remain local review material; accepted public media is preserved."
-  ],
-  "prepared_input_drift_refusals": {
-    "driftRefusalsPassed": 6,
-    "cases": [
-      "scene",
-      "combined-audio",
-      "recording",
-      "story",
-      "staged-lock",
-      "html"
-    ]
-  },
-  "review_decision": "review-decision.json",
-  "replacement_direction": {
-    "score": "STORYBOARD.md",
-    "implemented": false,
-    "motion_review": "pending new moving cut"
-  }
+  ]
 }

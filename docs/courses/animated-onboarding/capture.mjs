@@ -33,6 +33,8 @@ async function unchangedInputs() {
   }
   await check(path.join(output, 'PRODUCTION.md'), provenance.source_sha256['PRODUCTION.md']);
   await check(path.join(output, 'source-evidence.json'), provenance.source_sha256['evidence.json']);
+  await check(path.join(output, 'performance-compiled.json'), provenance.performance_compiled_sha256);
+  for (const name of ['STORYBOARD.md', 'performance.json', 'cue-map.json', 'review-decision.json']) await check(path.join(output, name), provenance.source_sha256[name]);
   await check(path.join(output, 'authoring.json'), sha(provenanceBytes));
 }
 await unchangedInputs();
@@ -75,6 +77,42 @@ try {
     }), 'caption exceeds frame or clips');
   }
   checks.push('Every dialogue caption fits inside the frame');
+  const choreography = JSON.parse(await fs.readFile(path.join(output, 'performance-compiled.json'), 'utf8'));
+  const cue = id => choreography.cues.find(c => c.id === id).time;
+  await seek(scene.turns.find(t => t.id === 'changes').start + .3);
+  const resting = await page.$eval('#sam-hand', e => e.getAttribute('transform'));
+  await seek(scene.turns.find(t => t.id === 'changes').start + 1.1);
+  assert.equal(await page.$eval('#sam-hand', e => e.getAttribute('transform')), resting, 'Sam waves during a deliberate listening/reading hold');
+  await seek(cue('changes.changes') + .45);
+  assert(await page.evaluate(() => {
+    const hand = document.querySelector('#sam-hand').getBoundingClientRect(), apply = document.querySelector('#focus-apply').getBoundingClientRect();
+    return hand.right < apply.left && apply.left - hand.right < 45;
+  }), 'hover must remain visibly short of Apply');
+  const folder = await page.$eval('#repository', e => e.innerHTML);
+  for (const name of ['build', 'test', 'acceptance']) {
+    await seek(cue(`earn.${name}`) + .35);
+    assert(await page.evaluate(name => {
+      const width = id => Number(document.querySelector(`#focus-${id}`).getAttribute('stroke-width'));
+      return ['build', 'test', 'acceptance'].every(id => document.querySelector(`#gate-${id}`).textContent.includes('PENDING')) && ['build', 'test', 'acceptance'].filter(id => id !== name).every(id => width(name) > width(id));
+    }, name), `missing spoken focus or fabricated pass at ${name}`);
+  }
+  await seek(scene.duration);
+  assert.equal(await page.$eval('#repository', e => e.innerHTML), folder, 'original source-folder contents changed');
+  checks.push('Directed holds, hover before Apply, unchanged source and spoken pending-gate focus are observable in the DOM');
+  const maximumStep = await page.evaluate(async duration => {
+    let previous, maximum = { step: 0, seconds: 0, actor: '' };
+    for (let i = 0; i <= Math.ceil(duration * 24); i++) {
+      await window.presentation.renderAt(Math.min(duration, i / 24));
+      const points = ['sam', 'litai'].map(id => { const e = document.querySelector(`#${id}-hand`), m = e.getCTM(); return [m.e, m.f]; });
+      if (previous) for (let n = 0; n < points.length; n++) { const step = Math.hypot(points[n][0] - previous[n][0], points[n][1] - previous[n][1]); if (step > maximum.step) maximum = { step, seconds: i / 24, actor: ['sam', 'litai'][n] }; }
+      previous = points;
+    }
+    return maximum;
+  }, scene.duration);
+  assert(maximumStep.step < 35, `hand pose snaps between adjacent film frames: ${JSON.stringify(maximumStep)}`);
+  checks.push('Hand trajectories remain continuous across the full 24 fps timeline, including dialogue boundaries');
+
+  await seek(0);
   await page.evaluate(() => document.activeElement?.blur()); await page.keyboard.press('Tab');
   assert.equal(await page.evaluate(() => document.activeElement.id), 'play');
   await page.keyboard.press('Space'); await page.waitForFunction(() => window.presentation.snapshot().playing, { timeout: 5000 });
@@ -124,7 +162,7 @@ try {
     }
   }
   await unchangedInputs();
-  const qa = { checks, frames, renderer, inputs_sha256: sha(provenanceBytes), story_sha256: provenance.story_sha256, runtime_lock_sha256: provenance.source_sha256['package-lock.json'], font_sha256: provenance.fonts, reducedMotion: 'Static characters verified on load and preference change', externalRequests: network.length, animatic: scene.animatic, complete_listening_review: 'pending', human_viewing_review: 'pending', boundary: 'Automated frame/media checks are not factual or human creative approval' };
+  const qa = { checks, frames, renderer, trajectory_maximum: maximumStep, inputs_sha256: sha(provenanceBytes), story_sha256: provenance.story_sha256, runtime_lock_sha256: provenance.source_sha256['package-lock.json'], font_sha256: provenance.fonts, reducedMotion: 'Static characters verified on load and preference change', externalRequests: network.length, animatic: scene.animatic, complete_listening_review: 'pending', human_viewing_review: 'pending', boundary: 'Automated frame/media checks are not factual or human creative approval' };
   await fs.writeFile(path.join(output, 'qa.json'), JSON.stringify(qa, null, 2) + '\n');
   console.log(JSON.stringify({ checksPassed: checks.length, framesChecked: frames.length, animatic: scene.animatic }));
 } finally {

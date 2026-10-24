@@ -152,6 +152,10 @@ def prepare(story_path, output, audio_dir=None, animatic=False):
                 "story_sha256": digest(raw),
                 "audio_sha256": digest(audio),
                 "scene_sha256": digest(scene_bytes),
+                "performance_sources": {
+                    name: digest(Path(__file__).with_name(name).read_bytes())
+                    for name in ("STORYBOARD.md", "performance.json", "cue-map.json")
+                },
                 "recording_assets": {
                     "assets/" + name + ".wav": digest(recording)
                     for name, recording in recordings
@@ -181,6 +185,11 @@ def prepare(story_path, output, audio_dir=None, animatic=False):
             "qa.json",
             "source-evidence.json",
             "PRODUCTION.md",
+            "STORYBOARD.md",
+            "performance.json",
+            "performance-compiled.json",
+            "cue-map.json",
+            "review-decision.json",
         ],
         "scenes": [
             {

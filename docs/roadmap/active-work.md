@@ -4695,7 +4695,7 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 | --- | --- | --- |
 | [#133](https://github.com/jordanhubbard/literate-ai/pull/133) | Read-only catalog parsing reuse, refreshed Zod tooling and prior diagnostic metadata | Merged at `d17881fa`; exact-head and all 26 exact-main CI jobs pass |
 | [#135](https://github.com/jordanhubbard/literate-ai/pull/135) | Five scoped closures and the explicit supplied-worker timeout boundary | Merged at `c345e652`; all 26 exact-main CI jobs pass; supplied-worker qualification remains open |
-| [Animated onboarding pilot](https://github.com/jordanhubbard/literate-ai/compare/main...work/onboarding-motion) | COURSE-004: optional Motion/SVG authoring package and recorded NVIDIA voice audition | Source review draft; voices user-validated, first animation rejected; directed performance score authored, renderer implementation and new moving-cut review pending; live review state is owned by the forge |
+| [Animated onboarding pilot](https://github.com/jordanhubbard/literate-ai/compare/main...work/onboarding-motion) | COURSE-004: optional Motion/SVG authoring package and recorded NVIDIA voice audition | Source review draft; voices user-validated, first animation rejected; directed score implemented and new cut rendered, user visual validation pending; live review state is owned by the forge |
 
 ### Historical consolidation inventory (2026-10-22)
 
@@ -31115,7 +31115,8 @@ The first failed directory, source checkout and installed wheel stay retained.
   - [x] Retain captions, transcript, integrity result and complete listening/viewing review state; do not equate integrity with human approval.
   - [x] Record the user's voice approval and animation rejection separately from technical verification.
   - [x] Pair approved dialogue with purposeful character, listener, prop and attention beats; strengthen reusable motion-review guidance.
-  - [ ] Implement and review the directed animation without generic gesture substitution.
+  - [x] Implement and render the directed animation with approved audio and no generic gesture substitution.
+  - [ ] Obtain the user's visual validation of the new moving cut.
   - [ ] Expand the next onboarding episode with fresh execution evidence and complete playback review before publication.
 - **Pilot result:** [Authoring package](../courses/animated-onboarding/README.md)
   and [QA](../courses/animated-onboarding/QA.md) retain nine unit checks, seven browser
@@ -31131,5 +31132,9 @@ The first failed directory, source checkout and installed wheel stay retained.
   phrase cues and holds. Both craft skills and their initialized copies require
   explicit visual direction and complete moving-cut review. Technical skill checks
   and exact dialogue/audio/media identity checks pass; they do not approve acting.
-  Next action: implement the score and review a new moving cut. No new visual
-  approval or publication is inferred.
+  The new directed cut is implemented and independently media-verified: 46 finite
+  beats, 23 locally estimated phrase cues, nine browser checks, ten score-admission
+  and ten input-drift refusals pass. Approved WAVs remain unchanged. See
+  [current QA](../courses/animated-onboarding/QA.md) for its media identity and limits.
+  Next action: the user's visual validation of the new moving cut. Technical
+  verification does not grant visual approval or publication.

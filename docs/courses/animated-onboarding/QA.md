@@ -1,64 +1,55 @@
-# Animated onboarding pilot QA
+# Directed onboarding cut QA
 
-Status: **voices validated by the user; animation rejected**. The
-[review decision](review-decision.json) binds those separate verdicts to the original
-audition and eight retained recordings. This is not production or publication approval. [Machine-readable observations](qa-summary.json)
-record the exact media identity and tested scope.
+Status: **implemented and rendered; user visual validation pending**. The user
+validated the voices and rejected the first cut's animation. The
+[original review decision](review-decision.json) is preserved; the new MP4 has a
+different identity in [machine-readable observations](qa-summary.json). No creative
+approval or publication is inferred from technical verification.
 
-- Nine authoring unit checks passed; Python lint passed.
-- Six integration refusals passed against changed scenes, combined audio,
-  individual recordings, story, staged dependency lock and built HTML. Invalid
-  prepared inputs fail before browser launch; copied fixture inputs preserve the
-  accepted outputs. The pilot timeline also has a three-minute duration bound.
-- Seven browser checks passed, including repeated same-time DOM/pixel captures,
-  every caption's bounds, keyboard Play/Pause, reduced-motion on load and while
-  playing, a static no-JavaScript transcript/character fallback, finite seek
-  refusal and actual offline local-file launch with external requests blocked.
-- Five timeline positions repeat after seeking from different prior positions.
-  Runtime lock, fonts, browser/platform and viewport are bound in local frame QA.
-- The standard video builder and independent `litai video verify --manifest`
-  passed for the 38.437989-second, eight-caption H.264/AAC film. Visible captions
-  are rendered in the picture; SRT/WebVTT sidecars are retained.
-- Decoded midpoint frames from all eight final-film turns and their contact sheet
-  were inspected. Character silhouettes, panel copy, speaker identification and
-  captions remain readable; no unintended overlap or clipped text was observed.
-  This is sampled frame inspection, not a claim of watching the complete film.
-- All eight source recordings contain signal with no clipped PCM samples. RMS
-  levels range from -31.70 to -27.68 dBFS. These are signal observations, not
-  an assessment of naturalness, pronunciation or perceived loudness.
-- Stock NVIDIA Magpie requests used Jason Neutral for Sam and Aria for LitAI.
-  Raw recordings, per-turn provenance and the observed catalog are retained.
-  Backend checkpoint and separate effective-voice confirmation were not exposed.
-- The actual read-only source-CLI adopt observation in [evidence.json](evidence.json)
-  reports `writes: false`, no blockers and unchanged original source for its
-  authored two-file C++/Make fixture. Nothing was applied or compiled.
+## New cut
 
-## Animation correction and remaining review
+- The 38.437989-second H.264/AAC film has eight captions, visible captions in the
+  picture, retained SRT/WebVTT and an offline browser companion. Independent
+  `litai video verify --manifest` accepts the canonical output.
+- All eight approved WAVs and their original generation records remain unchanged.
+  Sidecar caption bytes also match the previous audition. There was no new speech
+  synthesis, cast selection or voice substitution.
+- The renderer realizes the [performance score](STORYBOARD.md) through 46 finite
+  beats and 23 recording-bound phrase cues. Two-joint working arms, a source folder,
+  gaze, brow, expression, listener reactions, deliberate holds and pending-gate
+  emphasis replace the old arm/nod cycle. The composition remains a stable two-shot.
+- Local Whisper base.en provided estimated word times. The cue map retains raw
+  recognition and curated word spans, model and recording identities. Recognition
+  errors are not promoted into dialogue. These are not verified phoneme timings.
+- Nine Python guards and lint/format pass. Ten score-admission refusals cover changed
+  recordings, unknown targets/poses, bad timing, omitted turns and off-story cues.
+  Ten real builder/capture refusals cover drift in scene, combined/individual audio,
+  story, dependency lock, narrative, score, cues, compiled score and HTML.
+- Nine browser checks pass. Five requested times repeat in both pixels and DOM
+  after different seek histories. Captions fit; keyboard controls, offline local-file
+  playback, reduced motion on load/change, static rigs and no-JavaScript transcript
+  are checked. The browser performs no external requests.
+- Directed checks observe an intentional hand hold, a hand stopping short of Apply,
+  unchanged folder contents and spoken-order emphasis on three still-pending gates.
+  Every adjacent hand position across the full 24 fps timeline is checked; the
+  maximum step is 29.190382 pixels against the retained 35-pixel limit. This bounds
+  snapping, not expressiveness or acting quality.
+- Decoded midpoint frames from all eight turns and their contact sheet were
+  inspected. No clipped captions or unintended overlap were observed. An early
+  hand/panel layering issue and an over-fast reach were corrected before this cut.
+  Sampled frames do not constitute watching the complete moving performance.
 
-The user found the short segment's arm flapping unhelpful. This exposed three gaps:
-`story.json` supplied generic gesture labels; `player.mjs` mapped most of them to
-one arm/nod cycle; the checks above evaluated timing, repeatability and layout,
-not communicative performance. Sampled frames could not expose repetitive motion.
-The existing video skill required storyboarding and complete playback review;
-that requirement was not fulfilled by the technical pass.
+## User review and remaining production
 
-The [performance score](STORYBOARD.md) now pairs exact dialogue with phrase cues,
-meaningful speaker actions, listening, focus, props and stillness. The reusable
-skills now require that score and a separate motion-quality review. This is an
-authored correction, not a rendered fix: the existing renderer does not consume it.
-Approved narration and original generation receipts remain unchanged. Revision
-checks confirmed all eight score lines exactly match the spoken story, all eight
-retained WAV hashes match the review decision, and the reviewed MP4 identity is
-unchanged. Canonical and initialized video/presentation skills are byte-identical
-and pass the required SkillEvaluator checks. These checks validate source coverage
-and integrity, not the unimplemented performance.
+The next action is the user's visual validation of this moving cut. Check whether
+each action communicates a thought or learning step; whether eyelines, listening,
+anticipation, holds and settles feel coherent; and whether captions, mouth cues and
+spoken emphasis line up. Mouth cues remain audio-energy-driven, not viseme alignment.
+Review the sequence with sound and then muted; compare with the static fallback.
+Keep voice, motion, factual and accessibility verdicts separate.
 
-Next: implement the score, measure cues from approved audio, bind all visual inputs,
-and review a new complete moving cut at playback speed with sound and then muted.
-Every movement must contribute to the explanation or an earned reaction. Check
-mouth/caption timing, readable holds, eyelines, focus and static/reduced-motion
-meaning separately. Mouth cues are currently audio-energy-driven, not phoneme-aligned.
-
-The full episode still needs complete installation/acquisition coverage, fresh
-execution evidence and complete playback review. The user's approval of these
-voices does not approve new utterances, this animation, or publication.
+The full episode still needs installation/acquisition coverage, fresh scoped
+execution evidence and complete playback review. The retained source-CLI observation
+in [evidence.json](evidence.json) proves only a read-only two-file adopt plan with no
+writes; no apply, compilation, release or native qualification is claimed. The
+accepted longer film, rejected audition and native Windows evidence remain intact.

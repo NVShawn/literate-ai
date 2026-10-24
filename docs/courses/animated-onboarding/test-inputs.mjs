@@ -10,7 +10,7 @@ if (!preparedArg || !toolchainArg) throw new Error('Usage: node test-inputs.mjs 
 const prepared = path.resolve(preparedArg), toolchain = path.resolve(toolchainArg);
 const source = path.dirname(fileURLToPath(import.meta.url));
 const root = await fs.mkdtemp(path.join(path.dirname(prepared), 'guard-tests-'));
-const cases = ['scene', 'combined-audio', 'recording', 'story', 'staged-lock', 'html'];
+const cases = ['scene', 'combined-audio', 'recording', 'story', 'staged-lock', 'score', 'cue-map', 'storyboard', 'compiled-score', 'html'];
 try {
   for (const name of cases) {
     const fixture = path.join(root, name); await fs.mkdir(fixture);
@@ -26,11 +26,12 @@ try {
     if (name === 'recording') await mutate(path.join(output, 'assets', JSON.parse(await fs.readFile(path.join(author, 'story.json'), 'utf8')).turns[0].id + '.wav'));
     if (name === 'story') await mutate(path.join(author, 'story.json'));
     if (name === 'staged-lock') await mutate(path.join(tools, 'package-lock.json'));
-    if (name === 'html') {
+    for (const [kind, file] of [['score', 'performance.json'], ['cue-map', 'cue-map.json'], ['storyboard', 'STORYBOARD.md']]) if (name === kind) await mutate(path.join(author, file));
+    if (name === 'html' || name === 'compiled-score') {
       const built = invoke('build.mjs', [output, tools]); assert.equal(built.status, 0, built.stderr);
-      await mutate(path.join(output, 'index.html'));
+      await mutate(path.join(output, name === 'html' ? 'index.html' : 'performance-compiled.json'));
       const result = invoke('capture.mjs', [output, tools, 'browser-must-not-launch', '--qa-only']);
-      assert.notEqual(result.status, 0); assert.match(result.stderr, /Current input changed: index.html/);
+      assert.notEqual(result.status, 0); assert.match(result.stderr, /Current input changed: (index.html|performance-compiled.json)/);
     } else {
       const result = invoke('build.mjs', [output, tools]);
       assert.notEqual(result.status, 0); assert.match(result.stderr, /Prepared input changed:/);

@@ -4,10 +4,11 @@
 
 - Add an optional animated onboarding authoring pilot with articulated SVG
   characters, recorded NVIDIA Magpie voice auditions, an offline Motion companion
-  and deterministic frame/media checks. Voices are user-validated; the rejected
-  animation now has a line-by-line performance score awaiting implementation and
-  moving-cut review. Video and presentation skills require purposeful visual
-  direction and separate motion-quality review before publication.
+  and deterministic frame/media checks. Voices are user-validated; a directed
+  replacement cut now implements phrase-cued poses, listener reactions, props
+  and purposeful holds, awaiting user visual validation. Video and presentation
+  skills require explicit visual direction and separate motion-quality review
+  before publication.
 
 - Refresh documentation browser tooling to Puppeteer 25.16.0 and locked Zod
   4.6.7, eliminating both affected Zod paths while retaining strict audit gates.

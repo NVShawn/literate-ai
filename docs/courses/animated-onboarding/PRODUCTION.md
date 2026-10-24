@@ -16,7 +16,9 @@ The first renderer used deterministic generic arm/nod cycles, fixed gaze and
 procedural blinks/breathing. It did not realize purposeful acting; the user rejected
 that animation. The replacement direction is specified in the
 [line-by-line performance score](STORYBOARD.md), including listener reactions,
-props, eyelines and deliberate stillness. Its implementation remains pending. No portrait is edited, and no third-party
+props, eyelines and deliberate stillness. The directed renderer now implements that score with two-joint foreground arms,
+phrase-cued poses and focus, gaze, expressions and explicit holds. Visual validation
+belongs to the user; implementation and technical checks do not grant it. No portrait is edited, and no third-party
 character artwork or voice likeness is used.
 
 The browser companion and film share the same scene and recording clock. A
@@ -68,10 +70,11 @@ license and dependency licenses must remain with a distributed companion.
 ## From audition to the full episode
 
 1. Preserve the user-approved audition voices and unchanged spoken dialogue.
-   Implement the [performance score](STORYBOARD.md), measuring its phrase cues from
-   the retained recordings. Review the full moving revision for communicative
-   acting, listener reactions and readable holds. The old animation is rejected;
-   the new score has not yet been rendered or approved.
+   The [performance score](STORYBOARD.md) is implemented with locally estimated,
+   recording-bound phrase cues. Render and technically verify the new cut, then
+   hand it to the user for visual validation of communicative acting, listener
+   reactions and readable holds. The old animation remains rejected; no visual
+   approval is inferred for this revision.
 2. Expand into installation/acquisition, doctor, an observed adopt plan, explicit
    acknowledgement, and the first real verification/failure-recovery path. Capture
    fresh disposable-project evidence and bind the actual tested revision.

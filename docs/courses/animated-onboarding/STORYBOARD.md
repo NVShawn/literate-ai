@@ -1,7 +1,6 @@
 # A plan before surprises — performance score
 
-Status: authored revision for the next animation pass; **not implemented or visually
-approved**. The user approved the voices and rejected the first cut's animation.
+Status: **implemented in the directed renderer; user visual validation pending**. The user approved the voices and rejected the first cut's animation.
 [Review decision](review-decision.json) binds that verdict to the original audition.
 [story.json](story.json) remains the exact spoken-dialogue authority; this score
 adds the missing visual narrative without changing approved audio or provenance.
@@ -151,16 +150,27 @@ walkthrough label visible and captions clear. No animated action executes a comm
 
 ## Realization requirements and review
 
-The current `player.mjs` does **not** consume this score. It maps four generic
-`gesture` labels to essentially the same arm/nod cycle and has fixed pupil direction.
-The existing rig cannot perform the folder interaction, hand targeting and nuanced
-listening above. These are required next-pass capabilities, not completed features.
-Implement or deliberately simplify each beat; report unsupported directions instead
-of silently substituting the old loop. Preserve previous takes and approved WAVs.
+The directed `player.mjs` consumes the executable [performance](performance.json)
+through [performance.mjs](performance.mjs) and the retained [cue map](cue-map.json).
+It replaces the old generic arm cycle with 46 finite pose/focus beats across all
+23 phrase cues. Two-joint working arms are composited above the desk and panel;
+gaze, brow, expression and a source folder carry the speaker/listener direction.
+The other arm rests. The stable two-shot is retained without camera motion; folder
+placement is a small slide beside the preview. These are deliberate staging choices,
+not a claim of full-body or 3D acting. No direction silently falls back to the old loop.
 
-Bind the next build to the score hash, exact dialogue/turn identities, measured cue
-map, prop/rig assets and renderer. Validate cue existence/order, supported targets,
-pose continuity, finite seeking and repeatability. Those structural checks establish
+Cue times are local Whisper word-timestamp estimates mapped to approved script
+phrases. Raw recognition includes errors (for example, splitting “working” into
+“work in”); it is not a replacement transcript or pronunciation assessment.
+The cue map retains raw word spans, tool/model and recording identities. Timing
+and performance remain subject to the user's moving-cut review. Previous takes
+and approved WAVs are preserved.
+
+Build inputs bind this narrative, executable score, exact dialogue/turn identities,
+estimated cue map, prop/rig assets and renderer. Admission validates cue existence,
+word-span timing, recording identity, supported targets, bounded pose channels and
+turn coverage. Browser checks validate intentional holds, the hover gap, pending
+gate emphasis, adjacent-frame continuity, finite seeking and repeatability. Those structural checks establish
 that a score was followed; they cannot establish good acting.
 
 Review the complete moving sequence at playback size and speed with its approved
