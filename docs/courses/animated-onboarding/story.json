@@ -1,0 +1,28 @@
+{
+  "id": "plan-before-surprises",
+  "title": "A plan before surprises",
+  "subtitle": "Sam meets Literate AI · onboarding audition",
+  "source_revision": "c345e652b91863e72526f25f8e31a03ec34bec01",
+  "speakers": { "sam": "Sam", "litai": "Literate AI" },
+  "turns": [
+    { "id": "existing", "speaker": "sam", "shot": "existing", "gesture": "question", "seconds": 5.5, "text": "I have a working repository. Please tell me onboarding doesn't mean rewriting it." },
+    { "id": "doctor", "speaker": "litai", "shot": "doctor", "gesture": "explain", "seconds": 7, "text": "It doesn't. Start with doctor, then ask for an adopt plan. Your source stays yours." },
+    { "id": "changes", "speaker": "sam", "shot": "plan", "gesture": "question", "seconds": 4.2, "text": "And when I run that command, what changes?" },
+    { "id": "readonly", "speaker": "litai", "shot": "plan", "gesture": "explain", "seconds": 8, "text": "The plan is read-only. Review the files and the recorded checks. Applying it is a separate, acknowledged step." },
+    { "id": "green", "speaker": "sam", "shot": "evidence", "gesture": "question", "seconds": 5, "text": "Good. And a green plan means the project's ready to ship?" },
+    { "id": "earn", "speaker": "litai", "shot": "evidence", "gesture": "explain", "seconds": 8, "text": "No. It means we're ready to discuss the next step. Builds, tests, and independent acceptance still have to earn their evidence." },
+    { "id": "surprises", "speaker": "sam", "shot": "next", "gesture": "agree", "seconds": 4.5, "text": "A plan before surprises. I can work with that." },
+    { "id": "inspect", "speaker": "litai", "shot": "next", "gesture": "invite", "seconds": 2.5, "text": "Let's inspect yours." }
+  ],
+  "sources": [
+    "docs/user/getting-started.md",
+    "src/literate_ai/cli/operator.py",
+    "skills/agent/author-instructional-videos/SKILL.md"
+  ],
+  "limitations": [
+    "An audition, not the complete installation and onboarding course.",
+    "Illustrated commands are walkthroughs unless linked to a retained real capture.",
+    "Silent animatic timing is authored, not measured speech; recorded audio replaces it before narration acceptance.",
+    "No onboarding apply, generated-code execution, release, or publication is performed by the renderer."
+  ]
+}

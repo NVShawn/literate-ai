@@ -1,0 +1,80 @@
+{
+  "status": "Automated authoring pilot verified; complete human playback/listening review pending",
+  "source_base": "c345e652b91863e72526f25f8e31a03ec34bec01",
+  "unit_tests": 9,
+  "browser_checks": [
+    "Same-time DOM and pixels repeat after seeking from different prior positions",
+    "Every dialogue caption fits inside the frame",
+    "Keyboard Tab and Space operate Play/Pause without global shortcuts",
+    "Reduced-motion preference works on load and on change; rigs remain static across time",
+    "Static SVG characters and complete transcript exist without JavaScript",
+    "Negative, non-finite and out-of-range seeks fail",
+    "Actual local-file launch is self-contained with external requests blocked"
+  ],
+  "deterministic_frame_samples": 5,
+  "renderer": {
+    "browser": "Chrome/155.0.8059.85",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "viewport": {
+      "width": 1280,
+      "height": 900,
+      "deviceScaleFactor": 1
+    },
+    "stage": {
+      "width": 1280,
+      "height": 720
+    },
+    "colorProfile": "srgb",
+    "framesPerSecond": 24
+  },
+  "video": {
+    "source_identity": "cb2fd4465506ed669121efa207b457b966a824a64035991fc6ff00da953779dc",
+    "mp4_sha256": "bfc228fa6ce72923c69867963c5987d5d4a896cfbb24de919ecae01d81db959a",
+    "seconds": 38.437989,
+    "captions": 8,
+    "canonical_media_verification": true,
+    "publication_authorized": false,
+    "media_identical_to_inspected_cut": true
+  },
+  "voices": {
+    "provider": "NVIDIA NIM",
+    "api_model_family": "magpie-tts-multilingual",
+    "requested_sam": "Magpie-Multilingual.EN-US.Jason.Neutral",
+    "requested_litai": "Magpie-Multilingual.EN-US.Aria",
+    "effective_voice_confirmation": null,
+    "backend_checkpoint": null,
+    "recorded_turns": 8
+  },
+  "audio_signal_check": {
+    "clipped_samples": 0,
+    "rms_dbfs_range": [
+      -31.7,
+      -27.68
+    ],
+    "listening_review": "pending; signal checks cannot establish naturalness or correct spoken words"
+  },
+  "visual_inspection": {
+    "decoded_midpoint_frames_inspected_at_1280_by_720": 8,
+    "contact_sheet_inspected": true,
+    "clipping_or_unintended_overlap_observed": false,
+    "complete_moving_film_review": "pending"
+  },
+  "limits": [
+    "A short audition, not the complete next onboarding episode.",
+    "Walkthrough visuals; the separate actual source-CLI observation proves only a read-only two-file adopt plan.",
+    "No onboarding apply, generated-code execution, release or native qualification is claimed.",
+    "Film and recordings remain local review material; accepted public media is preserved."
+  ],
+  "prepared_input_drift_refusals": {
+    "driftRefusalsPassed": 6,
+    "cases": [
+      "scene",
+      "combined-audio",
+      "recording",
+      "story",
+      "staged-lock",
+      "html"
+    ]
+  }
+}

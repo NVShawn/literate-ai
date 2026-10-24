@@ -25,6 +25,12 @@ in the public repository's issue tracker.
 
 ## Earlier cuts, retained for comparison
 
+The next-video [animated onboarding authoring pilot](animated-onboarding/README.md)
+adds articulated Sam/LitAI characters, an offline Motion/SVG companion and recorded
+NVIDIA Magpie voice auditions. Its short local review cut is awaiting complete
+viewing/listening feedback. The package records its tested scope and the steps
+for expanding it into the next onboarding episode.
+
 The cuts below are superseded creative drafts, not the recommended viewing path.
 The [creative brief](creative-brief.md) and [accepted audition package](preview/README.md)
 record how the project-owned story evolved without prescribing a cast to children.

@@ -4694,7 +4694,8 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 | Review | Retained scope | Landing state |
 | --- | --- | --- |
 | [#133](https://github.com/jordanhubbard/literate-ai/pull/133) | Read-only catalog parsing reuse, refreshed Zod tooling and prior diagnostic metadata | Merged at `d17881fa`; exact-head and all 26 exact-main CI jobs pass |
-| [Closure metadata branch](https://github.com/jordanhubbard/literate-ai/compare/main...work/host-runtime-closure) | Five scoped closures and the explicit supplied-worker timeout boundary | Ready for normal review; live review status is owned by the forge, while failed native qualification remains open |
+| [#135](https://github.com/jordanhubbard/literate-ai/pull/135) | Five scoped closures and the explicit supplied-worker timeout boundary | Merged at `c345e652`; all 26 exact-main CI jobs pass; supplied-worker qualification remains open |
+| [Animated onboarding pilot](https://github.com/jordanhubbard/literate-ai/compare/main...work/onboarding-motion) | COURSE-004: optional Motion/SVG authoring package and recorded NVIDIA voice audition | Source review draft; local technical/media checks pass, complete listening/viewing feedback and the full episode remain pending; live review state is owned by the forge |
 
 ### Historical consolidation inventory (2026-10-22)
 
@@ -31095,3 +31096,30 @@ The first failed directory, source checkout and installed wheel stay retained.
 **DOC-DEPENDENCIES-003 closure:** PR #133 lands the existing browser-tool upgrade and patched Zod lock at `d17881fa`; exact-main CI 40031696168 passes all 26 jobs. The actual provided Windows audit/documentation gates also pass. This completes dependency maintenance only, as issue #134 explicitly separates native-performance issue #129. The renewed full gate times out later in wheel smoke after 121 completed spans, with no test phase reached; its immutable failure bundle and source identity remain retained. See `verification/documentation-zod-qualification.json` and `verification/windows-lock-reuse-native-timeout.json`.
 
 **#129 / WIN-GATE-001 current native outcome:** Supplied-worker source `2615e568` has the same tracked tree as merged `d17881fa`. The unchanged 5400-second gate reaches 121 completed wheel operations but times out before wheel completion and the test phase. The complete five-stage HTML scenario passes in 2871.062 seconds; default and scoped initialization take 252.563 and 196.578 seconds. These are retained operation observations, not a controlled whole-gate speedup or admission. Existing timing evidence survives the timeout. The last completed graph-export scenario is followed by an uninstrumented missing-CodeGraph run probe and update planning; identify the unfinished operation and remaining initialization/observation costs before another full renewal. Keep #121, #123 and #129 open; do not increase deadlines, skip assertions or promote this failed outcome.
+
+### [ ] COURSE-004 — Animated onboarding conversations with auditioned neural voices
+
+- **Priority:** P1
+- **Owner:** docs/courses/animated-onboarding; author-instructional-videos and author-presentations-and-documents craft
+- **Direction:** Use the approved Motion design for the next onboarding video, with animated Sam and LitAI characters, livelier conversation, and natural speech selected after inspecting NVIDIA inference and codex-ios.
+- **Conclusion:** Implement a project-owned offline Motion/SVG authoring pilot and a short recorded-voice review cut before a full episode. Preserve the existing film and native qualification work. codex-ios supplies live Codex voice discovery, not standalone downloadable model weights. NVIDIA Magpie is an explicitly requested speech provider; retain generated audio, discover voice support, bind source and renderer inputs, and require separate human viewing/listening review before publication.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Record source-backed storyboard and characterize voice providers without changing codex-ios.
+  - [x] Add isolated locked authoring toolchain, articulated characters, audio-driven cues, fixed-time export and explicit reduced-motion/static mode.
+  - [x] Synthesize representative two-voice audition, retain WAV and provider provenance, render captioned review cut and offline companion.
+  - [x] Record review boundaries and the next full-episode production step without replacing accepted media.
+- **Evidence:**
+  - [x] Validate actual demo evidence, voice selection and audio regeneration identities without credentials.
+  - [x] Run deterministic seek, offline, reduced-motion, keyboard and negative-input checks; inspect representative frames and media streams.
+  - [x] Retain captions, transcript, integrity result and complete listening/viewing review state; do not equate integrity with human approval.
+  - [ ] Obtain complete playback/listening feedback and expand the next onboarding episode with fresh execution evidence before publication.
+- **Pilot result:** [Authoring package](../courses/animated-onboarding/README.md)
+  and [QA](../courses/animated-onboarding/QA.md) retain nine unit checks, seven browser
+  checks, five repeatable timeline frames, an actual read-only source-CLI adopt
+  plan and the independently verified 38.437989-second/eight-caption local film.
+  Stock voice requests use NVIDIA Magpie Jason Neutral and Aria; model checkpoint
+  and separate effective-voice confirmation are unreported. The accepted film and
+  Windows native qualification evidence remain intact. Human complete playback,
+  listening and naturalness approval remain pending. The one next action is to
+  collect timestamped audition feedback; inherited skill promotion is deferred.

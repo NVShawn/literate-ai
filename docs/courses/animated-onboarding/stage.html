@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>A plan before surprises — onboarding audition</title>
+<style>
+/* FONT */
+*{box-sizing:border-box}body{margin:0;background:#163441;color:#f6f0e6;font-family:Plex,Arial,sans-serif}main{max-width:1280px;margin:auto}#stage{position:relative;width:1280px;height:720px;background:#f4f0e7;color:#183641;overflow:hidden}svg.scene{position:absolute;inset:0;width:100%;height:100%}.caption{position:absolute;left:94px;top:606px;width:1092px;min-height:91px;background:#193b46;color:#fff9ee;border-radius:15px;padding:11px 22px;box-shadow:0 5px 0 #102b3420}.caption strong{font-size:15px;letter-spacing:.07em;text-transform:uppercase;color:#e9bd73}.caption p{font-size:21px;line-height:1.35;margin:3px 0 0}.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:18px}button,input{font:inherit}button{padding:9px 16px;border:1px solid #72979c;border-radius:8px;background:#234b57;color:white;cursor:pointer}button:focus-visible,input:focus-visible{outline:3px solid #f6c368;outline-offset:3px}#seek{flex:1;min-width:150px;accent-color:#e5ac51}.transcript{padding:12px 24px 40px;max-width:960px;line-height:1.6}.transcript h2{font-size:25px}.transcript li{padding:6px 0}.transcript a{color:#e9c17b}#status{padding:0 24px;font-size:14px}label{font-size:14px}.small{font-size:14px;color:#d3dfdd}noscript p{padding:0 24px}
+</style></head><body><main>
+<section id="stage" aria-label="Animated onboarding conversation with a persistent transcript below">
+<svg class="scene" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" aria-labelledby="scene-title scene-desc">
+  <title id="scene-title">A plan before surprises</title><desc id="scene-desc">Sam and Literate AI discuss keeping original source, reviewing a read-only onboarding plan, and earning build and acceptance evidence.</desc>
+  <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#d8d7cd"/></pattern></defs>
+  <rect width="1280" height="720" fill="#f4f0e7"/><rect width="1280" height="600" fill="url(#grid)" opacity=".65"/>
+  <path d="M0 516 Q640 448 1280 516 L1280 600 L0 600Z" fill="#e5e8dc"/>
+  <rect x="42" y="32" width="33" height="33" rx="9" fill="#1d6d66"/><path d="M52 40 V57 H65" fill="none" stroke="#f5eddb" stroke-width="4"/>
+  <text x="88" y="55" font-size="21" font-weight="600" fill="#193b46">Literate AI</text><text x="1200" y="54" text-anchor="end" font-size="14" fill="#5f7677">FIELD NOTES / 01</text>
+  <text x="640" y="112" text-anchor="middle" font-size="43" font-weight="600" fill="#183641">A plan before surprises.</text>
+  <text x="640" y="144" text-anchor="middle" font-size="17" fill="#5f7677">Keep what works. Understand what changes.</text>
+  <g transform="translate(184 164)"><g id="sam-slot"></g></g>
+  <g transform="translate(1096 164) scale(-1 1)"><g id="litai-slot"></g></g>
+  <rect id="sam-badge" x="96" y="568" width="176" height="29" rx="14" fill="#e6ac47"/><text x="184" y="588" text-anchor="middle" font-size="16" font-weight="600" fill="#193b46">Sam</text>
+  <rect id="litai-badge" x="1002" y="568" width="188" height="29" rx="14" fill="#dce0d8"/><text x="1096" y="588" text-anchor="middle" font-size="16" font-weight="600" fill="#193b46">Literate AI</text>
+  <rect x="375" y="207" width="530" height="314" rx="22" fill="#d5dbcf"/>
+  <rect x="375" y="199" width="530" height="314" rx="22" fill="#193b46"/>
+  <circle cx="399" cy="222" r="5" fill="#d59b54"/><circle cx="417" cy="222" r="5" fill="#6ab5a6"/><circle cx="435" cy="222" r="5" fill="#8a9e9c"/>
+  <text id="shot-tag" x="399" y="263" font-size="14" letter-spacing="2" fill="#9bc9bd">KEEP WHAT WORKS</text>
+  <text id="panel-title" x="399" y="308" font-size="25" font-weight="600" fill="#fff7e7">Your repository</text>
+  <path d="M399 328 H878" stroke="#53757c"/>
+  <text id="line-1" x="399" y="369" font-size="21" fill="#f6ead5">Original source</text>
+  <text id="line-2" x="399" y="411" font-size="21" fill="#f6ead5">Existing build and tests</text>
+  <rect x="395" y="446" width="490" height="42" rx="9" fill="#254d55"/>
+  <text id="panel-note" x="640" y="473" text-anchor="middle" font-size="16" fill="#b6e0ca">Onboarding starts with inspection</text>
+  <text id="review-label" x="640" y="550" text-anchor="middle" font-size="14" fill="#607474">REVIEW CUT · ILLUSTRATED WALKTHROUGH · NOT A LIVE EXECUTION</text>
+  <text id="audio-label" x="640" y="576" text-anchor="middle" font-size="14" font-weight="600" fill="#956427">/* AUDIO LABEL */</text>
+</svg>
+<div class="caption" aria-live="off"><strong id="caption-speaker">Sam</strong><p id="caption">I have a working repository. Please tell me onboarding doesn't mean rewriting it.</p></div>
+</section>
+<div class="controls" aria-label="Playback controls"><button id="play">Play</button><button id="reset">Reset</button><button id="back" aria-label="Previous dialogue turn">Previous</button><button id="next" aria-label="Next dialogue turn">Next</button><input id="seek" aria-label="Timeline in seconds" type="range" min="0" value="0" step="0.1"><output id="elapsed"></output><label><input id="static-mode" type="checkbox"> Static characters</label></div>
+<p id="status" role="status">No autoplay. Reduced-motion preferences use static characters.</p>
+<noscript><p>The static scene and complete transcript remain available without JavaScript.</p></noscript>
+<section class="transcript"><h2>Transcript and viewing notes</h2><p class="small">/* VIEWING NOTE */</p><ol>/* TRANSCRIPT */</ol><p>Install the exact release wheel using the <a href="https://github.com/jordanhubbard/literate-ai/releases/latest">release page</a> and <a href="https://github.com/jordanhubbard/literate-ai/blob/main/docs/user/getting-started.md">getting-started instructions</a>. This audition starts after installation and is not the complete course.</p></section>
+<script id="scene-data" type="application/json">/* SCENE DATA */</script><script>/* PLAYER */</script>
+</main></body></html>

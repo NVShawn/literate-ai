@@ -71,6 +71,16 @@ revision records, and verification results in the `evidence` file list.
 All referenced paths must stay inside the manifest's directory, including through
 symlinks. Do not include private addresses, tokens, or personal data.
 
+## Optional animated authoring
+
+The [animated onboarding pilot](../courses/animated-onboarding/README.md) shows a
+project-owned Motion/SVG authoring path: finite character timelines, measured
+recorded narration, per-turn video clips and an offline browser companion. It
+passes those clips and recordings through the existing video CLI. Neither Motion
+nor a hosted speech service becomes a framework dependency. Its cast and voices
+are project choices; the reusable parts are the timing, accessibility and QA
+patterns. The pilot remains local review material until viewing/listening feedback.
+
 ## Acceptance and publication
 
 `build` measures every rendered scene clip and the final film from their decodable
