@@ -4689,6 +4689,15 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 
 ### Current consolidation inventory
 
+**Follow-up (2026-10-23):** PR #133 is merged at `d17881fa`; exact-main CI 40031696168 passes all 26 jobs. Scoped issues #91, #84, #85, #94 and #134 are closed against their retained evidence. Twenty-six issues remain open. The provided Windows renewal still times out at its unchanged 5400-second limit after 121 completed wheel spans; #121/#123/#129 remain open, and no complete native or release acceptance follows.
+
+| Review | Retained scope | Landing state |
+| --- | --- | --- |
+| [#133](https://github.com/jordanhubbard/literate-ai/pull/133) | Read-only catalog parsing reuse, refreshed Zod tooling and prior diagnostic metadata | Merged at `d17881fa`; exact-head and all 26 exact-main CI jobs pass |
+| [Closure metadata branch](https://github.com/jordanhubbard/literate-ai/compare/main...work/host-runtime-closure) | Five scoped closures and the explicit supplied-worker timeout boundary | Ready for normal review; live review status is owned by the forge, while failed native qualification remains open |
+
+### Historical consolidation inventory (2026-10-22)
+
 **Open-issue review (2026-10-22):** All 52 currently open issues have explicit current-forge roadmap links after adding #88, #92, #113, #116 and #117 and attaching #94 to the existing retained-user owner. Historical NVIDIA-dev issue numbers are a different namespace. #83 has a completed local owner and merits a landed-evidence closure review; no issue is closed merely by this inventory. #114 is owned by #115. #116 / #119 remains separate, with a failing Linux job. #118 has controller implementation in #110 but still requires its installed native positive/negative acceptance. #117 remains measured performance work. Broad native packaging, retained SDK, Windows ARM64 and release claims remain open under their existing owners.
 
 The remaining retained stack is composed in PR #110. PR #105 and PR #82
@@ -29541,7 +29550,7 @@ package or release admission is claimed by lock-health verification.
   - [x] Real Git fixtures prove old pinned contents and shallow ancestry, SHA-256 repositories, selected submodule data without private Git metadata, omitted unrelated blobs/submodules, rejected traversal, and no destination mutation on failure. Eleven catalog checks pass; an actual pinned upstream-derived source import succeeds with canonical resolved-commit provenance.
   - [x] Existing catalog and full framework regression checks pass: 1,850 passed, 42 skipped and no failures (1,892 selected) in 1,063.469 seconds. Report SHA-256 `d4885099d94eba41785a4b7795af11a10f20869fe0eca69aa6e8730799e1d5d6`; log SHA-256 `7fc7ae0393d46d09ca5561950edcf298438682e9aa6ef55fc9dd8d00de7bb255`. Lint/format, layout/public-export, strict OpenSpec and reviewed TCB checks pass.
 
-### [ ] SBOM-SCALE-001 — Bound strict validation cost for large retained inventories
+### [x] SBOM-SCALE-001 — Bound strict validation cost for large retained inventories
 
 **GitHub issue:** [#84](https://github.com/jordanhubbard/literate-ai/issues/84).
 
@@ -29555,7 +29564,7 @@ package or release admission is claimed by lock-health verification.
 - **Evidence:**
   - [x] Differential equality fixtures, strict schema/refusal regression, deterministic large-inventory scaling and unchanged actual BOM identity.
   - [x] Complete full framework regression: 1,855 passed, 42 skipped and no failures across 1,897 selected tests in 1,044.628 seconds. Report SHA-256 `95b14ef1ed69a5c656e39d55e77627ca586a34e047f53fd57d7c939e0c1ea97f`; log SHA-256 `90ff8bbc8b73c400188fbf90799094d8bd728907508dac0c95b52cddcfde68e8`.
-  - [ ] Complete native installed renewal.
+  - [x] Complete native installed renewal. Exact installed `6e370033` constructs and verifies source/resolved BOMs during the real FreeBSD retained lifecycle: all 24 original cases pass without skips, all 34 retained records reverify, independent acceptance passes and cleanup is receipt-bound. The strict CycloneDX/uniqueness and SBOM contract bytes remain identical on landed `ef5db15f`; its exact-main CI succeeds in all 26 jobs. See `verification/native-retained-renewal-development.json` and `verification/sbom-uniqueness-closure.json`.
 
 **Partial evidence:** Seven focused checks pass. Structural equality agrees with
 the original validator across nested JSON, numeric/boolean distinctions, object
@@ -29569,7 +29578,7 @@ seconds with the prior validator and 1.417537 seconds with this adapter.
 Baseline log SHA-256 `e491cb95763ae80209daa61ecffdc06113a9d2d583c3f5ad77d18f084fc4b691`;
 optimized log SHA-256 `964c238285967f933ff752546255c74d1be71d8c7dc84ed7dfdc32ca4c1bb77b`.
 These are source-BOM timings, not whole-build or native qualification claims.
-**Next action in progress:** installed/native renewal after the passing full local regression.
+**Completion:** Portable semantics/scaling, full regression, installed native strict-BOM execution and landed platform CI qualify issue #84. The timing comparison remains a source-BOM operation measurement, not a whole-build speedup or SDK/package/release admission.
 
 The first full attempt retained 1,427 completed checks and no recorded failure,
 then was deliberately interrupted for host overload: twelve outer test workers
@@ -29577,7 +29586,7 @@ plus nested builds saturated the twelve-core host. Its logs/checkpoint remain;
 it is not a passing full gate. A fresh complete run now uses four outer workers,
 rather than treating resumed partial coverage as release qualification.
 
-### [ ] RETAINED-USER-001 — Bind secondary test identities to scoped workspace access
+### [x] RETAINED-USER-001 — Bind secondary test identities to scoped workspace access
 
 **GitHub issue:** [#85](https://github.com/jordanhubbard/literate-ai/issues/85).
 
@@ -29619,7 +29628,7 @@ rather than treating resumed partial coverage as release qualification.
   - [x] Complete a fresh full framework run after the authority repairs: 1,928 passed, 61 skipped, no failures across 1,989 selected in 1,149.784 seconds. Report SHA-256 `ad7792ac49072c67f1429f4020cbb37133eddbe9e07446df3cd1de2001444b86`. Wheel packaging and the local fast gates pass. This does not qualify the installed native lifecycle.
   - [x] Reproduce the hosted Python 3.11 FreeBSD host-install fixture failure locally, then model Python 3.12 explicitly in the simulated native host. Nine focused checks pass on both Python 3.11 and 3.14, including rejection of Python 3.11 even when package registration and the SQLite query succeed. Production probing and the declared version requirement remain unchanged; renewed full-suite and hosted CI confirmation remain open.
   - [x] Complete scope/currentness refusal fixtures plus real privileged and unprivileged original cases through the installed framework in a disposable native guest; preserve legacy identities and private defaults. Installed `6e370033` completes in 1,717.496 seconds with 24 original passes, no skips, and 11 independent observations matching declared exits and stream hashes. One invalid-input case correctly expects exit 1. All 34 retained records reverify; cleanup is bound into completion, the prefix ACL is root-only and no nullfs mounts remain. Fifty-one fresh observations bind the same actual allocation. Receipt identity `sha256:924264d401159e317059b69c80087ec3a9cd047ca4652a53ca7903fa6c29f559` is admitted for local runtime use; canonical Standard lifecycle, SDK, pkg and release flags remain false.
-  - [ ] Complete exact-current required CI and land the reviewed integration. Native retained execution is qualified; this does not mark the broader FreeBSD program complete.
+  - [x] Complete exact-current required CI and land the reviewed integration. Landed `ef5db15f` exact-main CI [40007862532](https://github.com/jordanhubbard/literate-ai/actions/runs/40007862532) passes all 26 jobs. Seven scoped identity/ACL/view/prefix owner and contract files, plus `_DirectoryAccess`, are byte-identical to installed native `6e370033`; the actual 24-case original-suite and cleanup-bound acceptance remain recorded in `verification/native-retained-renewal-development.json`. This closes issues #85/#94 only, not the broader FreeBSD or canonical Standard/SDK program.
 
 ### [ ] INPUT-WALK-001 — Bound retained input ancestor traversal cost
 
@@ -29646,7 +29655,7 @@ rather than treating resumed partial coverage as release qualification.
   - **Preserved renderer failure:** The final gate’s managed Chromium timed out on the unchanged authority-learning-loop diagram. The supported `PUPPETEER_EXECUTABLE_PATH` system Chrome selection renders all 121 diagrams from 621 Markdown files and passes the current driver review. Sandbox defaults and validation coverage are unchanged.
   - **Preserved failed gate:** An earlier broad run selected 1,216 checks and stopped with a self-host snapshot-currentness error after the final lexical change modified its live inputs (36 skipped). That failed gate remains preserved; the fresh complete run above passed the unchanged-snapshot proof.
 
-### [ ] HOST-RUNTIME-001 — Preserve executable private runtimes with standalone POSIX Python
+### [x] HOST-RUNTIME-001 — Preserve executable private runtimes with standalone POSIX Python
 
 - **GitHub issue:** [#91](https://github.com/jordanhubbard/literate-ai/issues/91)
 - **Priority:** P1
@@ -29665,9 +29674,9 @@ rather than treating resumed partial coverage as release qualification.
   - [x] Review the shared bootstrap change explicitly and renew its trusted-driver pin. Author-review report SHA-256 `de394586676a8d7267c93466a2a59c43a72e47d14766d35b3d740a074c635629`; no blocking finding is recorded. This is an author review, not an independent security attestation. Exact wheel/dependency verification, pip arguments, process deadlines, cleanup, wire identities and admission rules are unchanged. New driver identity: `ecd6f7320cd8f6da0056406dea80165e4e31d753085bfba00c79a1d884f260c0`.
   - [x] The managed Python 3.11 suite reproduces the original native loader abort after 1,291 tests (57 skips); the macOS crash report identifies missing executable-relative `libpython3.11.dylib`. After the repair, three installer checks pass in 3.789 seconds and three build-identity/real-wheel self-update checks pass in 5.599 seconds. The same groups pass on Python 3.14 in 2.899 and 4.227 seconds. These checks use real private environments, Python, pip, wheels and launcher reexecution. The earlier symlink-only experiment passed startup but failed the unchanged enrollment containment check and was replaced.
   - [x] Run Python and pip from an actual new private runtime under the affected Python 3.11 distribution and pass real-wheel self-update. The fresh full Python 3.11 gate exits zero in 1,021.195 seconds with four workers; its report records 1,910 passed, 81 skipped and zero failures across 1,991 selected cases. Report SHA-256 `d770be5e04081dfe8fa59374a3e3b6a9b988b2390347f6dbe459ab3cd466d24d`; log SHA-256 `13969000d45edfbf9443089b50f1f25ee7e119032c62c85527b409d175989617`. This is a complete unit regression with explicit platform/dependency skips, not release or native FreeBSD acceptance.
-  - [ ] Qualify the exact committed wheel and pass the hosted platform matrix before closing this item.
+  - [x] Qualify the exact committed wheel and pass the hosted platform matrix before closing this item. The complete installed-wheel gate at `1063ecd8` passes 131 spans; its runtime/bootstrap/self-update owners are byte-identical to landed `ef5db15f`. Exact-main CI [40007862532](https://github.com/jordanhubbard/literate-ai/actions/runs/40007862532) succeeds in all 26 jobs, including all macOS Python 3.11 shards and Windows platform cells.
 
-- **Next action (in progress):** Finish exact installed-wheel and hosted/native qualification for the now-current combined candidate.
+- **Completion:** Issue #91 is qualified by the actual affected-interpreter checks, exact installed wheel, combined lifecycle and successful landed platform matrix. This closes the private-runtime repair only; native retained SDK and performance issues remain separately open.
 
 - **Alias repair qualification:** At implementation `625b871d`, the real-alias regression passes after failing against the preceding owner. All 18 installer/bootstrap/self-update checks pass on the affected macOS standalone Python 3.11 distribution. The public make-install prefix succeeds as a non-editable installation; the fresh full source suite passes 2139 tests with 71 explicit skips and no failures (2210 selected). See `verification/private-runtime-alias-development.json`. A fresh combined lifecycle and exact package/native/CI renewal remain required; the preceding Windows-only receipt is preserved under its own authority identity.
 
@@ -31061,7 +31070,7 @@ The first failed directory, source checkout and installed wheel stay retained.
 
 **#129 qualified read-only catalog reuse:** Exact source `74417e1a` passes the full 2,265-case source suite (2,194 passed, 71 existing skips, zero failures), all installed-wheel assertions, 14 focused cases including actual in-operation mutations, and the forced lifecycle with 229 passing checks and no skips. The generated suite count is producer-bound; the declared conformance inventory and minimums are unchanged. Supported receipt update/check/require-current and all-gate verify pass on the metadata-only consolidated tree. The native Windows public lock check returns identical passing reports across both installations and restores its fixture; three-call medians are 35.172 seconds baseline and 28.187 candidate, with cache/order variation. Catalog captures fall from five to two; all ten input revalidations and four current authority-graph observations remain. See `verification/lock-check-catalog-qualification.json`. The next action is ordinary review CI and landing of this scoped improvement, then complete unchanged provided-worker native renewal before closing #129. No generator-diversity exemption, dependency, release, or native admission is claimed.
 
-### [ ] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
+### [x] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
 
 - **GitHub issue:** [#134](https://github.com/jordanhubbard/literate-ai/issues/134)
 
@@ -31073,8 +31082,16 @@ The first failed directory, source checkout and installed wheel stay retained.
 - **Implementation:**
   - [x] Update the existing Zod resolution to a patched compatible 4.x release without new dependencies or audit exceptions.
 - **Evidence:**
-  - [ ] Clean npm ci, strict audit, documentation tests/diagrams and strict OpenSpec validation pass; renew affected exact-head CI and native gate and preserve failed evidence.
+  - [x] Clean npm ci, strict audit, documentation tests/diagrams and strict OpenSpec validation pass; exact-head CI (16 successful jobs and its placeholder skip) and exact-main CI (all 26 jobs) pass. The renewed provided Windows gate passes strict audit/OpenSpec, all 22 documentation tests and 121 diagrams. Its later 5400-second wheel timeout is retained under #129; no complete native qualification is inferred.
 
 **DOC-DEPENDENCIES-003 dependency selection:** The affected graph contains root Zod 4.4.3 and Chromium BiDi's nested Zod 3.25.76. Puppeteer 25.16.0 keeps the existing Node 22.12 floor and uses upstream Chromium BiDi with a Zod 4 dependency, permitting patched Zod without forcing a new major into a v3 consumer. Refresh that existing browser-tool pin, its matching allowed install-script entry, and the locked Zod 4 resolution; retain every audit and documentation check.
 
 **DOC-DEPENDENCIES-003 local qualification:** A fresh canonical staged `npm ci` installed the exact lock with zero vulnerabilities. Strict OpenSpec validation passes all four items; the unchanged audit and 22 documentation tests pass, and Puppeteer renders all 121 Mermaid diagrams across 627 Markdown files. The supported receipt check remains current; all-gate verify reports two passes, three existing declared skips and zero failures. The prior exact-head CI and supplied-worker gate failures remain retained. Next: publish this fix through existing PR #133 and renew exact-head CI and the unchanged provided-worker native gate before closure.
+
+**HOST-RUNTIME-001 closure:** All required private-runtime acceptance is complete. The affected macOS standalone Python 3.11.14 executes Python and pip and passes real-wheel self-update/reexecution; the public non-editable prefix install and complete source/wheel/lifecycle qualification pass. Source owner parity is checked against landed `ef5db15f`, whose exact-main CI succeeds in all 26 jobs. Retain the original loader abort and symlink-only containment failure. See `verification/private-runtime-closure.json`; this is not FreeBSD/native SDK or performance admission.
+
+**RETAINED-USER-001 closure:** The installed original suite already qualifies privileged and unprivileged execution under a private 0700 allocation prefix, with all 24 cases passing, no skips, exact ACL restoration, no remaining nullfs mounts, current observed account/allocation custody, 34 reverified records and independent cleanup-bound acceptance. Landed platform CI and unchanged scoped owners complete the recorded remaining requirement. See `verification/retained-secondary-closure.json`; whole execution/SDK modules have later changes and are not asserted byte-identical or newly natively qualified here.
+
+**DOC-DEPENDENCIES-003 closure:** PR #133 lands the existing browser-tool upgrade and patched Zod lock at `d17881fa`; exact-main CI 40031696168 passes all 26 jobs. The actual provided Windows audit/documentation gates also pass. This completes dependency maintenance only, as issue #134 explicitly separates native-performance issue #129. The renewed full gate times out later in wheel smoke after 121 completed spans, with no test phase reached; its immutable failure bundle and source identity remain retained. See `verification/documentation-zod-qualification.json` and `verification/windows-lock-reuse-native-timeout.json`.
+
+**#129 / WIN-GATE-001 current native outcome:** Supplied-worker source `2615e568` has the same tracked tree as merged `d17881fa`. The unchanged 5400-second gate reaches 121 completed wheel operations but times out before wheel completion and the test phase. The complete five-stage HTML scenario passes in 2871.062 seconds; default and scoped initialization take 252.563 and 196.578 seconds. These are retained operation observations, not a controlled whole-gate speedup or admission. Existing timing evidence survives the timeout. The last completed graph-export scenario is followed by an uninstrumented missing-CodeGraph run probe and update planning; identify the unfinished operation and remaining initialization/observation costs before another full renewal. Keep #121, #123 and #129 open; do not increase deadlines, skip assertions or promote this failed outcome.

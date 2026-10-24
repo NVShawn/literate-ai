@@ -1,0 +1,24 @@
+{
+  "schema": "literate-ai/private-runtime-closure@1",
+  "issue": 91,
+  "landed_commit": "ef5db15f1b9637a6d4d721a4cb7dd83dfd1dd195",
+  "exact_main_ci": {
+    "run_id": 40007862532,
+    "conclusion": "success",
+    "successful_jobs": 26
+  },
+  "prior_qualification": "verification/private-runtime-alias-development.json",
+  "qualified_wheel_source": "1063ecd886e31cf90307b66e4b5675cbd2d90bcf",
+  "qualified_wheel_sha256": "3e6f9f8896d7cf66261d190302f899cedbc13cc6995bd115a88df7816165d6eb",
+  "installed_wheel_successful_spans": 131,
+  "affected_interpreter": "macOS standalone Python 3.11.14",
+  "affected_interpreter_cases_passed": 18,
+  "public_noneditable_prefix_install_passed": true,
+  "runtime_owners_byte_identical_to_landed_commit": [
+    "src/literate_ai/remote_worker_bootstrap.py",
+    "scripts/install_litai.py",
+    "src/literate_ai/adapters/host_self_update.py"
+  ],
+  "original_failures_retained": true,
+  "scope": "Private source-install runtime and real-wheel self-update repair only; no native retained SDK, performance or release admission."
+}

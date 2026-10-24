@@ -1,0 +1,37 @@
+{
+  "schema": "literate-ai/native-lock-reuse-timeout@1",
+  "source_commit": "2615e568e9bfac05731acbe15738182e586befe6",
+  "landed_main_commit": "d17881fa04630ef27339670c2f74b321ccf5fb18",
+  "tracked_candidate_and_main_trees_equal": true,
+  "terminal": {
+    "state": "timed_out",
+    "exit_code": 124,
+    "seconds": 5400.452250480652,
+    "source_commit": "2615e568e9bfac05731acbe15738182e586befe6",
+    "test_workers": 4
+  },
+  "completed_wheel_spans": 121,
+  "failed_completed_spans": 0,
+  "wheel_passed": false,
+  "full_test_phase_started": false,
+  "full_native_qualification": false,
+  "full_html_scenario": {
+    "passed": true,
+    "seconds": 2871.062,
+    "original_five_stages_unchanged": true
+  },
+  "last_completed_stage": "scenario.assert_installed_graph_exports",
+  "initialization_cli_seconds": [
+    252.563,
+    196.578
+  ],
+  "initialization_scope_note": "Default and explicit-Flavor initialization, identified by the unchanged harness call order; these are individual operation timings, not a controlled speedup claim.",
+  "incomplete_operation_boundary": "After graph exports; an uninstrumented missing-CodeGraph run probe precedes the next update call, so completed spans alone do not identify which was active at timeout.",
+  "evidence_archive_sha256": "0e68f6e6f3108e97d13a9d4432913f4768c1c11654e889946227cd46457e7326",
+  "main_ci": {
+    "run_id": 40031696168,
+    "conclusion": "success",
+    "successful_jobs": 26
+  },
+  "scope": "The provided gate exhausted its existing 5400-second budget. No deadline, test inventory or admission policy was weakened; completed subcases do not qualify the complete native gate."
+}

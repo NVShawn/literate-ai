@@ -28,8 +28,34 @@
     "skipped": 3,
     "fail": 0
   },
-  "exact_head_ci": "pending",
-  "provided_worker_native_gate": "pending",
+  "exact_head_ci": {
+    "run_id": 40025501730,
+    "source_commit": "2615e568e9bfac05731acbe15738182e586befe6",
+    "conclusion": "success",
+    "successful_jobs": 16,
+    "placeholder_skipped": 1
+  },
+  "provided_worker_native_gate": {
+    "state": "timed_out",
+    "exit_code": 124,
+    "seconds": 5400.452250480652,
+    "source_commit": "2615e568e9bfac05731acbe15738182e586befe6",
+    "test_workers": 4
+  },
   "prior_failed_source": "ff294357db7b017dc9c64b0f4d96162cb3246904",
-  "prior_failures_retained": true
+  "prior_failures_retained": true,
+  "exact_main_ci": {
+    "run_id": 40031696168,
+    "conclusion": "success",
+    "successful_jobs": 26
+  },
+  "native_documentation_gates": {
+    "passed": true,
+    "strict_audit": "no unexcepted high or critical findings",
+    "strict_openspec_passed": 4,
+    "documentation_tests_passed": 22,
+    "diagrams_rendered": 121
+  },
+  "full_native_qualification": false,
+  "scope": "Documentation dependency maintenance is qualified. The later whole-native timeout is retained separately under #129; it is not a Zod audit failure or a performance/admission pass."
 }
