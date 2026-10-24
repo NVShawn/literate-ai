@@ -10,9 +10,17 @@ review an adopt plan, acknowledge changes separately, and then qualify the actua
 build and independent acceptance. The audition isolates the central conversation
 and visual treatment. It does not demonstrate installation or an apply.
 
+The user has **validated the voices and rejected the first animation**. The
+[performance score](STORYBOARD.md) now pairs every approved line with purposeful
+acting and listener direction. [Review decision](review-decision.json) identifies
+the audition and recordings. The current renderer still produces the rejected
+motion; the rebuild commands below reproduce that baseline, not the new score.
+Implementing the score and reviewing a new moving cut are the next production step.
+
 ## Source and output custody
 
-- [Story](story.json), [production brief and sources](PRODUCTION.md),
+- [Spoken story](story.json), [performance score](STORYBOARD.md),
+  [production brief and sources](PRODUCTION.md),
   [read-only demo evidence](evidence.json), [QA and review state](QA.md),
   and [character rig](characters.mjs)
   remain authored documentation.
@@ -86,8 +94,9 @@ python3 "$AUTHOR/speech.py" synthesize --catalog "$OBJ_DIR/voice-catalog.json" \
 ```
 
 Use only a voice returned by the live catalog. The audition uses Jason Neutral
-for Sam and Aria for Literate AI. Their suitability is a listening-review question,
-not established by receiving WAV bytes. All eight turns must be recorded with
+for Sam and Aria for Literate AI. The user validated these voices in the retained audition. New spoken material
+still needs pronunciation and delivery review; receiving WAV bytes alone cannot
+establish suitability. All eight turns must be recorded with
 matching story/text identities. A failed or uncertain request is not retried
 automatically. Retain previous takes when trying another voice.
 

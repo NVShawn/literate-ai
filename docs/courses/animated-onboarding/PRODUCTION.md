@@ -12,8 +12,11 @@ before acknowledging a mutation.
 Preserve the established project identities from `../assets/PROMPTS.md`: Sam's
 dark hair, beard, navy/amber engineering clothes, and LitAI's teal hair and jacket.
 The new vector puppets have separate head, arm, eyes, eyebrows and mouth groups.
-Nods, listening posture, blinks, gaze and short hand gestures are deterministic;
-the listener rests between reactions. No portrait is edited, and no third-party
+The first renderer used deterministic generic arm/nod cycles, fixed gaze and
+procedural blinks/breathing. It did not realize purposeful acting; the user rejected
+that animation. The replacement direction is specified in the
+[line-by-line performance score](STORYBOARD.md), including listener reactions,
+props, eyelines and deliberate stillness. Its implementation remains pending. No portrait is edited, and no third-party
 character artwork or voice likeness is used.
 
 The browser companion and film share the same scene and recording clock. A
@@ -64,8 +67,11 @@ license and dependency licenses must remain with a distributed companion.
 
 ## From audition to the full episode
 
-1. Listen to both cast samples and watch the entire short cut. Record actual
-   feedback on delivery, pronunciation, pacing, expressiveness and character fit.
+1. Preserve the user-approved audition voices and unchanged spoken dialogue.
+   Implement the [performance score](STORYBOARD.md), measuring its phrase cues from
+   the retained recordings. Review the full moving revision for communicative
+   acting, listener reactions and readable holds. The old animation is rejected;
+   the new score has not yet been rendered or approved.
 2. Expand into installation/acquisition, doctor, an observed adopt plan, explicit
    acknowledgement, and the first real verification/failure-recovery path. Capture
    fresh disposable-project evidence and bind the actual tested revision.

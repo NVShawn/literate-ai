@@ -1,5 +1,5 @@
 {
-  "status": "Automated authoring pilot verified; complete human playback/listening review pending",
+  "status": "Technical checks retained; user validated voices and rejected animation; replacement performance score authored, implementation pending",
   "source_base": "c345e652b91863e72526f25f8e31a03ec34bec01",
   "unit_tests": 9,
   "browser_checks": [
@@ -52,13 +52,13 @@
       -31.7,
       -27.68
     ],
-    "listening_review": "pending; signal checks cannot establish naturalness or correct spoken words"
+    "listening_review": "User validated audition voices; see review-decision.json. Signal checks alone do not establish quality."
   },
   "visual_inspection": {
     "decoded_midpoint_frames_inspected_at_1280_by_720": 8,
     "contact_sheet_inspected": true,
     "clipping_or_unintended_overlap_observed": false,
-    "complete_moving_film_review": "pending"
+    "complete_moving_film_review": "User rejected animation in the short segment; no complete full-episode review inferred."
   },
   "limits": [
     "A short audition, not the complete next onboarding episode.",
@@ -76,5 +76,11 @@
       "staged-lock",
       "html"
     ]
+  },
+  "review_decision": "review-decision.json",
+  "replacement_direction": {
+    "score": "STORYBOARD.md",
+    "implemented": false,
+    "motion_review": "pending new moving cut"
   }
 }

@@ -80,6 +80,21 @@ Create project artifacts from current authority, not from memory or stale market
     and resume only the missing member after repeating the complete preflight. A pair is
     not published merely because the first member or its local export succeeded.
 
+## Animated narratives
+
+When a deck or companion uses animation, preserve a visual score beside its
+narrative: communication purpose, phrase or presentation cue, actor/object action,
+visible target, audience focus, and a final pose or hold. Use movement to reveal a
+relationship or change understanding, not to decorate every sentence. For speaking
+characters include intent, listening, eyelines and meaningful reactions; follow
+`skills/agent/author-instructional-videos/SKILL.md` for the performance and moving-cut
+review. Confirm the chosen runtime/export supports the score; explicitly revise
+unsupported effects instead of substituting generic movement. Bind score and cue
+inputs to regeneration, and preserve a static/reduced-motion version containing
+the same facts. Review the complete animation at its intended pace separately from
+slide/page geometry and deterministic validation. A PDF or contact sheet cannot
+validate movement that it does not retain.
+
 ## Layout that survives publication
 
 A bounding-box-inside-the-surface scan (geometry-escape) is necessary and not

@@ -4695,7 +4695,7 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 | --- | --- | --- |
 | [#133](https://github.com/jordanhubbard/literate-ai/pull/133) | Read-only catalog parsing reuse, refreshed Zod tooling and prior diagnostic metadata | Merged at `d17881fa`; exact-head and all 26 exact-main CI jobs pass |
 | [#135](https://github.com/jordanhubbard/literate-ai/pull/135) | Five scoped closures and the explicit supplied-worker timeout boundary | Merged at `c345e652`; all 26 exact-main CI jobs pass; supplied-worker qualification remains open |
-| [Animated onboarding pilot](https://github.com/jordanhubbard/literate-ai/compare/main...work/onboarding-motion) | COURSE-004: optional Motion/SVG authoring package and recorded NVIDIA voice audition | Source review draft; local technical/media checks pass, complete listening/viewing feedback and the full episode remain pending; live review state is owned by the forge |
+| [Animated onboarding pilot](https://github.com/jordanhubbard/literate-ai/compare/main...work/onboarding-motion) | COURSE-004: optional Motion/SVG authoring package and recorded NVIDIA voice audition | Source review draft; voices user-validated, first animation rejected; directed performance score authored, renderer implementation and new moving-cut review pending; live review state is owned by the forge |
 
 ### Historical consolidation inventory (2026-10-22)
 
@@ -31113,13 +31113,23 @@ The first failed directory, source checkout and installed wheel stay retained.
   - [x] Validate actual demo evidence, voice selection and audio regeneration identities without credentials.
   - [x] Run deterministic seek, offline, reduced-motion, keyboard and negative-input checks; inspect representative frames and media streams.
   - [x] Retain captions, transcript, integrity result and complete listening/viewing review state; do not equate integrity with human approval.
-  - [ ] Obtain complete playback/listening feedback and expand the next onboarding episode with fresh execution evidence before publication.
+  - [x] Record the user's voice approval and animation rejection separately from technical verification.
+  - [x] Pair approved dialogue with purposeful character, listener, prop and attention beats; strengthen reusable motion-review guidance.
+  - [ ] Implement and review the directed animation without generic gesture substitution.
+  - [ ] Expand the next onboarding episode with fresh execution evidence and complete playback review before publication.
 - **Pilot result:** [Authoring package](../courses/animated-onboarding/README.md)
   and [QA](../courses/animated-onboarding/QA.md) retain nine unit checks, seven browser
   checks, five repeatable timeline frames, an actual read-only source-CLI adopt
   plan and the independently verified 38.437989-second/eight-caption local film.
   Stock voice requests use NVIDIA Magpie Jason Neutral and Aria; model checkpoint
   and separate effective-voice confirmation are unreported. The accepted film and
-  Windows native qualification evidence remain intact. Human complete playback,
-  listening and naturalness approval remain pending. The one next action is to
-  collect timestamped audition feedback; inherited skill promotion is deferred.
+  Windows native qualification evidence remain intact. The user validated the
+  voices and rejected the animation as unhelpful arm flapping. Generic gesture
+  labels, a repeated renderer cycle and missing semantic motion review all
+  contributed. The [performance score](../courses/animated-onboarding/STORYBOARD.md)
+  now pairs all eight unchanged lines with purposeful action, listener reactions,
+  phrase cues and holds. Both craft skills and their initialized copies require
+  explicit visual direction and complete moving-cut review. Technical skill checks
+  and exact dialogue/audio/media identity checks pass; they do not approve acting.
+  Next action: implement the score and review a new moving cut. No new visual
+  approval or publication is inferred.

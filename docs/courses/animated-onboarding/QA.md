@@ -1,7 +1,8 @@
 # Animated onboarding pilot QA
 
-Status: **local audition ready for complete viewing/listening feedback**. This is
-not production or publication approval. [Machine-readable observations](qa-summary.json)
+Status: **voices validated by the user; animation rejected**. The
+[review decision](review-decision.json) binds those separate verdicts to the original
+audition and eight retained recordings. This is not production or publication approval. [Machine-readable observations](qa-summary.json)
 record the exact media identity and tested scope.
 
 - Nine authoring unit checks passed; Python lint passed.
@@ -32,14 +33,32 @@ record the exact media identity and tested scope.
   reports `writes: false`, no blockers and unchanged original source for its
   authored two-file C++/Make fixture. Nothing was applied or compiled.
 
-## Review still required
+## Animation correction and remaining review
 
-Listen to the complete soundtrack and watch the full moving cut. Check delivery,
-voice fit, pronunciation, perceived levels, pauses, motion restraint, mouth cues,
-caption synchronization and whether the conversation changes the explanation.
-Mouth cues are audio-energy-driven rather than phoneme-aligned.
+The user found the short segment's arm flapping unhelpful. This exposed three gaps:
+`story.json` supplied generic gesture labels; `player.mjs` mapped most of them to
+one arm/nod cycle; the checks above evaluated timing, repeatability and layout,
+not communicative performance. Sampled frames could not expose repetitive motion.
+The existing video skill required storyboarding and complete playback review;
+that requirement was not fulfilled by the technical pass.
 
-The next action is timestamped feedback on this audition. The full episode still
-needs complete installation/acquisition coverage and fresh, explicitly scoped
-execution evidence. Generic skill promotion and media publication follow that
-review rather than being inferred from these technical checks.
+The [performance score](STORYBOARD.md) now pairs exact dialogue with phrase cues,
+meaningful speaker actions, listening, focus, props and stillness. The reusable
+skills now require that score and a separate motion-quality review. This is an
+authored correction, not a rendered fix: the existing renderer does not consume it.
+Approved narration and original generation receipts remain unchanged. Revision
+checks confirmed all eight score lines exactly match the spoken story, all eight
+retained WAV hashes match the review decision, and the reviewed MP4 identity is
+unchanged. Canonical and initialized video/presentation skills are byte-identical
+and pass the required SkillEvaluator checks. These checks validate source coverage
+and integrity, not the unimplemented performance.
+
+Next: implement the score, measure cues from approved audio, bind all visual inputs,
+and review a new complete moving cut at playback speed with sound and then muted.
+Every movement must contribute to the explanation or an earned reaction. Check
+mouth/caption timing, readable holds, eyelines, focus and static/reduced-motion
+meaning separately. Mouth cues are currently audio-energy-driven, not phoneme-aligned.
+
+The full episode still needs complete installation/acquisition coverage, fresh
+execution evidence and complete playback review. The user's approval of these
+voices does not approve new utterances, this animation, or publication.
