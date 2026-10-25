@@ -48,6 +48,12 @@ Do not treat a plausible interpretation as permission to improvise silently.
 6. Link a detailed roadmap document instead of copying it when one already owns the
    design. The active file must still name the next unchecked action so a new agent can
    resume without conversation history.
+7. When work is a release goal, add its ID to the policy-declared release-goal
+   manifest and give the queue item an exact `Release target`. Do not silently move
+   it later. An agent may recommend a named future release, but only an explicit user
+   approval authorizes an atomic update that retains the original release's deferred
+   record with its approval reference, changes the queue target, and adds the goal to
+   the future release. Until then the incomplete goal blocks release readiness.
 
 Create a new detailed file beneath `docs/roadmap/` only when the program's rationale,
 ordering, and acceptance contract cannot remain readable in one queue item. Immediately

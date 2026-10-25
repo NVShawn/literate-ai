@@ -118,6 +118,12 @@ def _release_from_args_body(args: argparse.Namespace) -> tuple[dict[str, Any], i
                     current_milestone=selected_milestone,
                     remote=args.remote,
                     default_branch=args.default_branch,
+                    roadmap_goal_manifest=(
+                        None
+                        if release_policy is None
+                        or release_policy.contributions is None
+                        else release_policy.contributions.roadmap_goal_manifest
+                    ),
                 )
                 if args.require_ready:
                     require_release_contributions_ready(result)

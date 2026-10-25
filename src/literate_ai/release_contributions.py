@@ -30,6 +30,14 @@ _GIT_TIMEOUT_SECONDS = 30
 _RELEASE_BRANCH = re.compile(r"release/[0-9]+\.[0-9]+\.x")
 _VERSION = re.compile(r"[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?")
 _REMOTE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
+_GOAL_ID = re.compile(r"[A-Z][A-Z0-9-]*-[0-9]+")
+_ROADMAP_HEADING = re.compile(
+    r"^### \[(?P<state>[ x])\] (?P<id>[A-Z][A-Z0-9-]*-[0-9]+)\b",
+    re.MULTILINE,
+)
+_RELEASE_TARGET = re.compile(
+    r"^- \*\*Release target:\*\*\s*(?P<target>.+?)\s*$", re.MULTILINE
+)
 _MARKER = re.compile(
     rf"<!--\s*{re.escape(RELEASE_DISPOSITION_MARKER)}\s*\n"
     r"(?P<payload>\{[^\n]+\})\s*\n-->",
@@ -43,6 +51,136 @@ class ReleaseContributionsError(RuntimeError):
         self.code = code
         self.message = message
         super().__init__(message)
+
+
+def _roadmap_release_goals(
+    root: Path, *, release: str, manifest_path: str
+) -> dict[str, object]:
+    """Validate the durable release-goal ledger against its roadmap authority."""
+
+    manifest_file = root / manifest_path
+    try:
+        manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ReleaseContributionsError(
+            "release.roadmap_goal_manifest_invalid",
+            f"cannot read roadmap goal manifest: {manifest_path}",
+        ) from exc
+    if not isinstance(manifest, dict) or set(manifest) != {
+        "schema",
+        "roadmap",
+        "releases",
+    }:
+        raise ReleaseContributionsError(
+            "release.roadmap_goal_manifest_invalid",
+            "roadmap goal manifest must contain only schema, roadmap, and releases",
+        )
+    if manifest["schema"] != "literate-ai/release-roadmap-goals@1":
+        raise ReleaseContributionsError(
+            "release.roadmap_goal_manifest_invalid", "unsupported roadmap goal schema"
+        )
+    roadmap_path = manifest["roadmap"]
+    releases = manifest["releases"]
+    if (
+        not isinstance(roadmap_path, str)
+        or Path(roadmap_path).is_absolute()
+        or ".." in Path(roadmap_path).parts
+        or not isinstance(releases, dict)
+    ):
+        raise ReleaseContributionsError(
+            "release.roadmap_goal_manifest_invalid",
+            "roadmap and releases have invalid types",
+        )
+    try:
+        roadmap = (root / roadmap_path).read_text(encoding="utf-8")
+    except OSError as exc:
+        raise ReleaseContributionsError(
+            "release.roadmap_goal_manifest_invalid",
+            f"cannot read roadmap authority: {roadmap_path}",
+        ) from exc
+    sections: dict[str, tuple[bool, str | None]] = {}
+    headings = list(_ROADMAP_HEADING.finditer(roadmap))
+    for index, heading in enumerate(headings):
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(roadmap)
+        body = roadmap[heading.end() : end]
+        target_match = _RELEASE_TARGET.search(body)
+        sections[heading.group("id")] = (
+            heading.group("state") == "x",
+            None if target_match is None else target_match.group("target").strip(),
+        )
+    entries = releases.get(release)
+    if not isinstance(entries, list) or not entries:
+        raise ReleaseContributionsError(
+            "release.roadmap_goals_missing",
+            f"release {release} has no explicitly documented roadmap goals",
+        )
+    open_goals: list[str] = []
+    invalid: list[dict[str, str]] = []
+    seen: set[str] = set()
+    normalized: list[dict[str, object]] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("id"), str):
+            invalid.append({"id": "", "reason": "invalid-goal-entry"})
+            continue
+        goal = entry["id"]
+        disposition = entry.get("disposition", "include")
+        if _GOAL_ID.fullmatch(goal) is None or goal in seen:
+            invalid.append({"id": goal, "reason": "invalid-or-duplicate-goal-id"})
+            continue
+        seen.add(goal)
+        section = sections.get(goal)
+        if section is None:
+            invalid.append({"id": goal, "reason": "goal-missing-from-roadmap"})
+            continue
+        complete, target = section
+        if disposition == "include":
+            if set(entry) != {"id"}:
+                invalid.append({"id": goal, "reason": "included-goal-has-extra-fields"})
+            elif target != release:
+                invalid.append(
+                    {"id": goal, "reason": "roadmap-release-target-mismatch"}
+                )
+            elif not complete:
+                open_goals.append(goal)
+            normalized.append(
+                {"id": goal, "disposition": "include", "complete": complete}
+            )
+            continue
+        expected = {"id", "disposition", "to", "approved_by", "approval_reference"}
+        destination = entry.get("to")
+        approval = entry.get("approval_reference")
+        future_entries = (
+            releases.get(destination) if isinstance(destination, str) else None
+        )
+        future_ids = (
+            {item.get("id") for item in future_entries if isinstance(item, dict)}
+            if isinstance(future_entries, list)
+            else set()
+        )
+        if (
+            disposition != "defer"
+            or set(entry) != expected
+            or entry.get("approved_by") != "user"
+            or not isinstance(approval, str)
+            or not approval.strip()
+            or not isinstance(destination, str)
+            or destination == release
+            or goal not in future_ids
+            or target != destination
+        ):
+            invalid.append({"id": goal, "reason": "unapproved-or-incomplete-deferral"})
+        normalized.append({"id": goal, "disposition": "defer", "to": destination})
+    for goal, (_complete, target) in sections.items():
+        if target == release and goal not in seen:
+            invalid.append({"id": goal, "reason": "roadmap-goal-missing-from-manifest"})
+    return {
+        "manifest": manifest_path,
+        "roadmap": roadmap_path,
+        "goals": normalized,
+        "open": open_goals,
+        "invalid": invalid,
+        "ready": not open_goals and not invalid,
+    }
 
 
 def _run(
@@ -612,6 +750,7 @@ def sweep_release_contributions(
     default_branch: str = "main",
     run_command: CommandRunner | None = None,
     refresh_remote: bool = True,
+    roadmap_goal_manifest: str | None = None,
 ) -> dict[str, object]:
     """Return a read-only normalized contribution closure for one release cycle."""
 
@@ -749,6 +888,13 @@ def sweep_release_contributions(
         for item in (*issues, *reviews)
         if not item["reasons"] and item["decision"] == "include"
     ]
+    roadmap_goals = (
+        None
+        if roadmap_goal_manifest is None
+        else _roadmap_release_goals(
+            root, release=release, manifest_path=roadmap_goal_manifest
+        )
+    )
     result: dict[str, object] = {
         "schema": RELEASE_CONTRIBUTIONS_SCHEMA,
         "release": release,
@@ -769,7 +915,10 @@ def sweep_release_contributions(
         "worktrees": worktrees,
         "unclassified": unclassified,
         "in_scope_open": in_scope_open,
-        "ready": not unclassified and not in_scope_open,
+        "ready": not unclassified
+        and not in_scope_open
+        and (roadmap_goals is None or bool(roadmap_goals["ready"])),
+        **({"roadmap_goals": roadmap_goals} if roadmap_goals is not None else {}),
     }
     result["identity"] = canonical_identity(result).uri
     return result
@@ -788,6 +937,20 @@ def require_release_contributions_ready(result: Mapping[str, object]) -> None:
             "release.contributions_in_scope_open",
             f"{len(in_scope)} current-release contributions remain open",
         )
+    roadmap = result.get("roadmap_goals")
+    if isinstance(roadmap, Mapping):
+        invalid = roadmap.get("invalid")
+        if isinstance(invalid, list) and invalid:
+            raise ReleaseContributionsError(
+                "release.roadmap_goals_invalid",
+                f"{len(invalid)} roadmap release goals are invalid or unapproved",
+            )
+        open_goals = roadmap.get("open")
+        if isinstance(open_goals, list) and open_goals:
+            raise ReleaseContributionsError(
+                "release.roadmap_goals_incomplete",
+                f"{len(open_goals)} roadmap release goals remain incomplete",
+            )
 
 
 def disposition_release_contribution(

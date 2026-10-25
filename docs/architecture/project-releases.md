@@ -279,7 +279,9 @@ Humans own the *schedule* of the next minor or major (`0.8.0`, `1.0.0`, …).
 Agents own *patch content* on the current `release/<major>.<minor>.x` line:
 which already-landed default-branch fixes are small enough to cherry-pick, and
 which wait. Record that decision in `docs/roadmap/active-work.md` and execute
-it; do not stall a patch for a human cherry-pick list unless they override.
+it; do not stall a patch for a human cherry-pick list unless they override. This
+authority does not permit removing a goal already recorded for the release. An agent
+may propose that move, but only explicit user approval can defer it.
 
 A patch is correctness, safety, or reliability work with a bounded blast
 radius. It is not a catalog-wide identity re-pin, a protocol or schema version
@@ -304,6 +306,16 @@ the forge milestone has that name. Sweeps use the declared milestone even when
 `--version` is explicit; `--current-milestone` remains an explicit override. With an
 explicit version and no policy file, standalone sweeps retain the version-name
 fallback. A malformed or unreadable policy refuses instead of silently changing scope.
+
+When `contributions.roadmap_goal_manifest` is configured, the manifest is the durable
+release-scope ledger and its referenced Markdown file is the human-readable roadmap.
+Every goal targeted at the release must appear in both, and every included goal's
+parent checkbox must be complete. A defer remains in the source release's manifest,
+records `approved_by: user` plus a durable approval reference, names a different future
+release, appears in that release's goal list, and changes the roadmap target in the
+same update. Missing goals, incomplete goals, and partial or agent-only deferrals block
+plan, prepare, check, publish, and verification through the repeated contribution
+sweep. A release without at least one explicitly documented goal also fails closed.
 
 Every open issue or review must carry one current-cycle machine-readable disposition
 comment and a matching milestone:
