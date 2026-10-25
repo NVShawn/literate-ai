@@ -10,14 +10,19 @@ import unittest
 import wave
 from pathlib import Path
 
-SOURCE = Path(__file__).parent
+SOURCE = Path(__file__).resolve().parents[2] / "docs" / "courses" / "full-onboarding"
 SPEC = importlib.util.spec_from_file_location(
     "full_onboarding_prepare", SOURCE / "prepare.py"
 )
 assert SPEC and SPEC.loader
 MODULE = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = MODULE
-SPEC.loader.exec_module(MODULE)
+_DONT_WRITE_BYTECODE = sys.dont_write_bytecode
+try:
+    sys.dont_write_bytecode = True
+    SPEC.loader.exec_module(MODULE)
+finally:
+    sys.dont_write_bytecode = _DONT_WRITE_BYTECODE
 
 
 def digest(value: bytes) -> str:

@@ -34,7 +34,8 @@ The rebuildable sources are the [story compiler](compile_story.py),
 [batch synthesizer](synthesize.py), [measured-input preparer](prepare.py),
 [offline player](player.mjs), [stage template](stage.html),
 [browser build](build.mjs) and [fixed-time capture](capture.mjs). Focused
-[compiler](test_compile_story.py) and [preparation](test_prepare.py) tests protect
+[compiler](../../../tests/critical/test_full_onboarding_compile.py) and
+[preparation](../../../tests/critical/test_full_onboarding_prepare.py) tests protect
 the narrative and retained-audio boundaries.
 
 ## Build the 1.3.1 candidate

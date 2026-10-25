@@ -14,7 +14,12 @@ SPEC = importlib.util.spec_from_file_location("onboarding_speech", SPEECH_PATH)
 assert SPEC and SPEC.loader
 SPEECH = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = SPEECH
-SPEC.loader.exec_module(SPEECH)
+_DONT_WRITE_BYTECODE = sys.dont_write_bytecode
+try:
+    sys.dont_write_bytecode = True
+    SPEC.loader.exec_module(SPEECH)
+finally:
+    sys.dont_write_bytecode = _DONT_WRITE_BYTECODE
 
 
 def _validate_retained(
