@@ -307,8 +307,9 @@ the forge milestone has that name. Sweeps use the declared milestone even when
 explicit version and no policy file, standalone sweeps retain the version-name
 fallback. A malformed or unreadable policy refuses instead of silently changing scope.
 
-When `contributions.roadmap_goal_manifest` is configured, the manifest is the durable
-release-scope ledger and its referenced Markdown file is the human-readable roadmap.
+When `contributions.roadmap_goal_manifest` is configured, the
+[release-goal manifest](../roadmap/release-goals.json) is the durable release-scope
+ledger and its referenced Markdown file is the human-readable roadmap.
 Every goal targeted at the release must appear in both, and every included goal's
 parent checkbox must be complete. A defer remains in the source release's manifest,
 records `approved_by: user` plus a durable approval reference, names a different future

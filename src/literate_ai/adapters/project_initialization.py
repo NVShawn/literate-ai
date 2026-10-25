@@ -1054,6 +1054,7 @@ _TEMPLATE_FILES = {
     "CLAUDE.md": "CLAUDE.md",
     "agents/openai.yaml": "agents/openai.yaml",
     "docs/roadmap/active-work.md": "docs/roadmap/active-work.md",
+    "docs/roadmap/release-goals.json": "docs/roadmap/release-goals.json",
     "docs/user/test-matrix.md": "docs/user/test-matrix.md",
     "literate.test.example.json": "literate.test.example.json",
     "literate.workers.example.json": "literate.workers.example.json",
