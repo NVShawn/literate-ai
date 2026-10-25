@@ -1,5 +1,27 @@
 # QA ledger
 
+## 2026-10-24 1.3.0 retained-source and native-custody edition accepted
+
+- Regenerated both required members after the 1.3 contribution sweep reached a
+  closed, machine-readable disposition. The edition records reviewed original-source
+  binding, target-bound Python projection, FreeBSD worker and target foundations,
+  native SDK tree custody, and retained execution hardening while keeping incomplete
+  Windows, FreeBSD, remote-package, and production-dispatch work explicitly deferred.
+- Independent document-pair acceptance passed all 11 scenarios: 26 slides at
+  1280x720, zero escaping elements, zero overlapping text-bearing frames, notes on
+  26/26 slides, 73 narrative headings with no skipped level, no unresolved
+  placeholders, and no credential material.
+- Inspected the complete 26-slide contact sheet and full-resolution slide 23. Also
+  rendered the DOCX with the bundled LibreOffice/Poppler toolchain and inspected all
+  13 pages at full resolution. No clipping, overflow, broken pagination, unintended
+  overlap, or title-rule residue remains. The Google Docs title sanitizer passes with
+  zero changes required.
+- Local artifact identities:
+  - PPTX: `sha256:e84b0819f7ed6858da3171ac44d6a3778a6e631fdc28fa0801e7f7ba55b7ca7f`
+  - DOCX: `sha256:f2ffee56a4adc3877798e28287e638ba9773d8b1f3ca01d29aeaca6f7d5ca0f9`
+- Google Workspace preflight, in-place publication, export-back verification, and the
+  release-bound publication receipt remain pending the exact committed revision.
+
 ## 2026-10-11 1.2.0 (public) edition published
 
 - Read-only preflight confirmed the active account and both stable resources. The

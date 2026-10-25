@@ -37,6 +37,15 @@ INK = RGBColor(0x10, 0x13, 0x17)
 STEEL = RGBColor(0x65, 0x70, 0x7C)
 
 
+def _remove_title_style_border(doc: Document) -> None:
+    """Keep Word's built-in Title style safe for Google Docs import."""
+    ppr = doc.styles["Title"]._element.pPr
+    if ppr is None:
+        return
+    for border in list(ppr.findall(qn("w:pBdr"))):
+        ppr.remove(border)
+
+
 def _set_run_font(run, *, name: str, size: Pt, color=INK, bold=False, italic=False):
     run.font.name = name
     run.font.size = size
@@ -122,6 +131,7 @@ def write_manifest(pptx_path: Path, docx_path: Path) -> Path:
 
 def build() -> Path:
     doc = Document()
+    _remove_title_style_border(doc)
     section = doc.sections[0]
     section.page_width = Inches(8.5)
     section.page_height = Inches(11)
@@ -132,18 +142,18 @@ def build() -> Path:
     core = doc.core_properties
     core.title = "Literate-AI: the application foundry"
     core.author = "Literate AI maintainers"
-    core.subject = "1.2.0 edition narrative member of component://literate-ai/literate-ai-overview"
+    core.subject = "1.3.0 edition narrative member of component://literate-ai/literate-ai-overview"
 
     heading(doc, 1, "Literate-AI: the application foundry")
     body(
         doc,
-        "This is the 1.2.0 edition of the narrative member of "
+        "This is the 1.3.0 edition of the narrative member of "
         "component://literate-ai/literate-ai-overview. It is the comprehensive technical "
         "account that accompanies the 26-slide presentation built from deck-specification.md. "
         "Both members share the factual ledger in source-notes.md and must not diverge on a "
         "shared claim. This edition is the major/minor regeneration required before the "
-        "1.2.0 cut. Tag v1.1.0 is already published; this document describes implemented "
-        "candidate authority, does not claim that v1.2.0 is already published, and does "
+        "1.3.0 cut. Tag v1.2.0 is already published; this document describes implemented "
+        "candidate authority, does not claim that v1.3.0 is already published, and does "
         "not grant release authority.",
     )
 
@@ -548,7 +558,7 @@ def build() -> Path:
         "regenerate, independently verify, preflight, publish, and export back the terminal "
         "document pair using one explicit active gcloud account. Authority: "
         "docs/decisions/0034-continuous-evidence-bound-release-closure.md. This edition does "
-        "not claim that tag v1.2.0 is already published.",
+        "not claim that tag v1.3.0 is already published.",
     )
     heading(doc, 2, "Gates that remember where they stopped")
     heading(doc, 3, "Fail-fast, checkpointed, content-fingerprinted resume")
@@ -688,21 +698,23 @@ def build() -> Path:
         "create/adopt plans, explicit conversion stages, and an installed-wheel golden path. "
         "1.1 added dependency-aware bounded action scheduling, provider-neutral "
         "cache authority, real local Debian packages, native CLI and gRPC acceptance, and "
-        "repository-owned worktree placement. The 1.2 candidate adds bounded candidate "
+        "repository-owned worktree placement. The 1.2 release added bounded candidate "
         "repair, cross-host action workers, native Mix builds, and forge coordination. The "
+        "1.3 candidate adds reviewed original-source binding, target-bound Python projection, "
+        "FreeBSD worker and target foundations, native SDK tree custody, and retained hardening. The "
         "next horizon remains investment framing rather than a "
         "measured delivery guarantee.",
     )
     heading(doc, 3, "Operator adoption is now an explicit front door")
     body(
         doc,
-        "Installed 1.2 projects retain the project-independent "
+        "Installed 1.3 projects retain the project-independent "
         "doctor, status over existing authority, lock, receipt, tracker, and host services, "
         "acknowledged create/adopt plans, and explicit wrapped, retained, drafted, and qualified "
         "stages. Original source remains release authority until current regenerative "
         "qualification. A release-candidate-wheel gate proves create through a validated hello "
         "project and adopt through a current retained receipt. These are implemented candidate "
-        "claims inherited from 1.0, not a claim that v1.2.0 is already published.",
+        "claims inherited from 1.0, not a claim that v1.3.0 is already published.",
     )
     heading(doc, 3, "Exact scheduling, cache, package, and native acceptance slices")
     body(
@@ -722,54 +734,38 @@ def build() -> Path:
         "composition. Production command and SSH dispatch, measured real LAN warm-cache "
         "hits, remote native-package custody, complete synthetic native-CLI lifecycle proof, "
         "and audited legacy-worktree retirement remain open. Production action-DAG dispatch "
-        "with multi-worker shared LAN-cache qualification (issue #4) is deferred to 1.3 by "
-        "maintainer decision.",
+        "with multi-worker shared-LAN-cache qualification remains deferred to 1.4.",
     )
-    heading(doc, 3, "What 1.2 adds: bounded repair, cross-host workers, Mix, and forge coordination")
+    heading(doc, 3, "What 1.3 adds: retained source and native custody")
     body(
         doc,
-        "litai rebuild now runs bounded candidate repair: a retryable build or generated-test "
-        "rejection requests up to two fresh replacement candidates, each in its own durable "
-        "attempt chained to the rejected one, and the rebuild result's repair field reports "
-        "the replacements that ran. The repair prompt carries only a bounded, sanitized "
-        "failure fact. Separately, the conformance sample runner retains a bounded, redacted "
-        "diagnostic excerpt — builder output for build rejections, generated expected and "
-        "observed values for generated-test mismatches — in retained evidence and in the next "
-        "attempt's repair feedback. Authority: src/literate_ai/adapters/candidate_repair.py, "
-        "tests/conformance/support/sample_runner.py, and "
-        "tests/smoke/test_candidate_rejection_diagnostics.py.",
+        "Reviewed first Standard binding and original-source admission preserve an existing "
+        "receipt policy, historical evidence, and source authority while refusing stale plans, "
+        "policy weakening, and custom executable-driver replacement. These framework paths do "
+        "not by themselves grant retained execution or downstream release admission.",
     )
     body(
         doc,
-        "When BUILD, TEST, EXECUTE and FINALIZE all run on admitted workers, litai rebuild "
-        "derives locked toolchain identities, commands and native dependencies from the "
-        "worker, so the controller needs none of the project's tools. python -m "
-        "literate_ai.standard_receiver is a reference action receiver for portable "
-        "single-Component Make/Python Standard projects, and FINALIZE grants are checked in "
-        "both the receiver's parent and child. Production worker grant provisioning and "
-        "complete CLI rebuild qualification remain pending. Authority: "
-        "src/literate_ai/standard_receiver.py and docs/architecture/component-execution-plans.md.",
+        "Target-bound Python source projection keeps original source and requirements intact "
+        "while binding reviewed backend exclusions to exact marker, lock, and source identities. "
+        "FreeBSD worker and target identities, host observations, and native package foundations "
+        "also landed, but complete platform and downstream lifecycle admission remain open.",
     )
     body(
         doc,
-        "The build-mix Flavor and mix-build-system skill build native Elixir Mix "
-        "applications and libraries. The source BOM pins each Hex package's exact version, "
-        "checksums and requirements; ranges are refused, the native lock must equal those "
-        "pins before anything compiles, and each extracted dependency is replaced by bytes "
-        "from its verified archive. Mix builds are local-only in 1.2. Authority: "
-        "flavors/build-mix/ and skills/specification-to-source/mix-build-system/.",
+        "Versioned SDK tree, alias, hard-link, package-plan, and topology contracts preserve "
+        "exact producer and consumer custody through capture, relocation, inspection, and "
+        "packaging. Retained execution also binds native Windows system context, executable "
+        "intent, captured runtime paths, scoped secondary identities, and current installed "
+        "bytes. Decoding or relocating a tree grants no producer, package, or release admission.",
     )
     body(
         doc,
-        "Forge issues and pull or merge requests are the default tracker and agent "
-        "coordination channel; Gerrit or another system is an explicit override (ADR 0050). "
-        "litai prompt translate recognizes the generic external envelope "
-        "(literate-ai/prompt-task@2). Remote live gates still require opencode but no longer "
-        "require OPENAI_API_KEY (ADR 0017 amendment). Skill-catalog discovery now runs once "
-        "per validation operation, removing most of the filesystem calls that slowed Windows "
-        "gates. Clean three-way update merging and reviewed resolution application (issue #2) "
-        "remain deferred to 1.3; in 1.2, conflict review is plan-only and update apply "
-        "preserves conflicts.",
+        "The release sweep defers incomplete work rather than promoting partial native evidence. "
+        "Windows diagnostics, observation cost, ACL preflight, and fixture repairs move to "
+        "1.3.1. Complete FreeBSD admission, Windows ARM64 realization, remote native packaging, "
+        "production action-DAG and LAN-cache qualification, and broader retained-project "
+        "contracts move to 1.4.",
     )
     heading(doc, 3, "Production containment backends")
     body(
@@ -809,14 +805,14 @@ def build() -> Path:
         "through an explicit retained receipt. Use the next investment cycle for production "
         "containment and operational hardening while preserving the architecture needed for "
         "many. The requested decision is production-hardening investment plus selection of "
-        "that first downstream 1.2 production adoption.",
+        "that first downstream 1.3 production adoption.",
     )
     heading(doc, 2, "Building for the portfolio")
     body(
         doc,
         "Build for the portfolio from the first application: current gates, no shortcuts, "
         "and a regeneratable knowledge system rather than another copied implementation. "
-        "The presentation and this narrative are the 1.2.0 edition of that "
+        "The presentation and this narrative are the 1.3.0 edition of that "
         "argument. They do not grant release authority.",
     )
 

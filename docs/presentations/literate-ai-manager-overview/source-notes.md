@@ -1,5 +1,28 @@
 # Factual claim ledger
 
+## 1.3.0 edition candidate (2026-10-24)
+
+This is the major/minor document-pair regeneration required before the `1.3.0` cut.
+It preserves the published 1.2 foundation and records landed framework slices from the
+current public `main`: reviewed original-source first binding, target-bound Python source
+projection, FreeBSD worker/target identities, native SDK tree and package-topology
+custody, and retained execution hardening. Exact-main CI run `40063151931` passed at
+`c345e652b91863e72526f25f8e31a03ec34bec01` before this regeneration.
+
+The 1.3 contribution sweep deliberately defers unfinished work rather than promoting
+partial evidence. Bounded native Windows diagnostics, observation cost, ACL preflight,
+and fixture repairs move to 1.3.1. Complete FreeBSD admission, Windows ARM64 host
+realization, remote native packaging, production action-DAG/LAN-cache qualification,
+and broader retained-project contracts move to 1.4. The document pair does not claim
+those outcomes, does not claim the `v1.3.0` tag exists, and does not grant release
+authority. Both stable Google Workspace resources retain the 1.2.0 edition until the
+explicit account-bound publication and export-back verification succeed.
+
+Current authority used for the 1.3 summary includes `CHANGELOG.md`,
+`docs/roadmap/active-work.md`, `literate.release.json`, the merged pull requests from
+`v1.2.0..c345e652`, and the machine-readable contribution dispositions on milestones
+`1.3.1` and `1.4`.
+
 ## 1.2.0 edition (2026-10-11)
 
 This is the major/minor document-pair regeneration required before the `1.2.0` cut.
