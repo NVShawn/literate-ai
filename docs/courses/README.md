@@ -84,7 +84,9 @@ for supported backends, manifest fields, tools, integrity and publication bounda
 [Eight Hours to Make Coffee](full-onboarding/README.md) expands the approved
 Sam/LitAI treatment into a skeptical, source-backed pre-CI argument with five
 project case studies. The 12-chapter script, animation annotations and offline
-authoring/capture system are authored and pass synthetic structural QA. New narration,
-fresh execution evidence, final rendering and complete playback approval remain
-mandatory 1.3.1 release goals. The currently linked 11:52 film stays published until
-the exact replacement is approved and its GitHub asset and documentation links exist.
+authoring/capture system are authored. All 86 approved-voice turns have been rendered
+into a 12:04.896 local candidate that passes deterministic chapter QA and independent
+continuous-media verification. Fresh execution evidence and complete listening,
+factual, accessibility and normal-speed playback approval remain mandatory 1.3.1
+release goals. The currently linked 11:52 film stays published until the exact
+replacement is approved and its GitHub asset and documentation links exist.

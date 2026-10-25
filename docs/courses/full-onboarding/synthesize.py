@@ -6,6 +6,7 @@ import argparse
 import importlib.util
 import json
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).parent
@@ -47,7 +48,15 @@ def main() -> None:
     parser.add_argument("--catalog", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--api-key-file", type=Path, required=True)
+    parser.add_argument(
+        "--minimum-request-interval-seconds",
+        type=float,
+        default=7.0,
+        help="pace new provider requests without retrying a rejected request",
+    )
     args = parser.parse_args()
+    if args.minimum_request_interval_seconds < 0:
+        parser.error("minimum request interval must be non-negative")
     story_bytes = args.story.read_bytes()
     story = json.loads(story_bytes)
     catalog_bytes = args.catalog.read_bytes()
@@ -56,6 +65,7 @@ def main() -> None:
     key = SPEECH.read_key(args.api_key_file)
     args.output.mkdir(parents=True, exist_ok=True)
     retained = generated = 0
+    last_request_at: float | None = None
     for turn in story["turns"]:
         voice = turn["voice"]
         if voice not in available:
@@ -68,6 +78,13 @@ def main() -> None:
             _validate_retained(story_bytes, turn, audio_path, receipt_path)
             retained += 1
             continue
+        if last_request_at is not None:
+            remaining = args.minimum_request_interval_seconds - (
+                time.monotonic() - last_request_at
+            )
+            if remaining > 0:
+                time.sleep(remaining)
+        last_request_at = time.monotonic()
         audio = SPEECH.request(
             "/synthesize",
             key,

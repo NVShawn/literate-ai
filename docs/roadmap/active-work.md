@@ -31157,9 +31157,12 @@ The first failed directory, source checkout and installed wheel stay retained.
   coffee/laundry/garage excuses carry the comic arc. The full narrative now has a
   compiled, offline 12-chapter authoring and capture path whose synthetic fixture
   passes deterministic seek, caption, arm-continuity, reduced-motion and no-network
-  QA. That fixture is not candidate media. The retained NVIDIA credential returned
-  HTTP 401 on 2026-10-25, so full speech, fresh evidence, rendering and complete
-  playback approval remain open. No eight-hour-to-minutes benchmark or replacement of
+  QA. That fixture is not candidate media. A second NVIDIA credential supplied by the
+  user exposed the approved live catalog; all 86 lines were recorded with paced,
+  no-retry requests, and the 12:04.896 local candidate passes deterministic capture
+  QA plus independent continuous-media verification. Fresh execution evidence and
+  complete listening, factual, accessibility and normal-speed playback approval remain
+  open. No eight-hour-to-minutes benchmark or replacement of
   mandatory CI, native qualification or release gates is claimed. An initial
   authority-renewal attempt rejected a generated publication-sample bundle whose
   smoke path retained an unresolved module import. The

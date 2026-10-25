@@ -1,11 +1,12 @@
 # Production plan — Eight Hours to Make Coffee
 
-**State:** 1.3.1 release goal with a compiled 12-chapter/86-turn authoring path;
-new speech synthesis, full rendering and complete playback approval remain blocked on
-a refreshed NVIDIA credential after the retained credential returned HTTP 401 on
-2026-10-25. This is not yet a replacement for the accepted pilot or published film.
-The user passed visual inspection of the exact directed pilot; its cast and visual
-treatment are the starting point.
+**State:** 1.3.1 release goal with a compiled 12-chapter/86-turn authoring path and
+a 12:04.896 local candidate rendered from newly recorded approved-voice takes. The
+standard video verifier accepts its 86 captions and continuous media. Fresh execution
+evidence and complete listening, factual, accessibility and normal-speed playback
+approval remain open. This is not yet a replacement for the accepted pilot or
+published film. The user passed visual inspection of the exact directed pilot; its
+cast and visual treatment are the starting point.
 
 ## Version and factual contract
 

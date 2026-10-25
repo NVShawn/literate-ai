@@ -113,7 +113,7 @@ def prepare(story_path: Path, audio_dir: Path, output: Path) -> dict[str, object
             receipt_hashes[f"{name}.voice.json"] = digest(receipt_bytes)
             course_scenes.append(
                 {
-                    "title": f"{chapter['id']} · {chapter['title']} · {name}",
+                    "title": f"{chapter['id']} · {chapter['shot']} · {name}",
                     "points": [],
                     "terminal": [],
                     "recording": f"segments/{name}.mp4",

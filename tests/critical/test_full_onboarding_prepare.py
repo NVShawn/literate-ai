@@ -92,6 +92,10 @@ class FullOnboardingPrepareTests(unittest.TestCase):
             self.assertEqual(len(result["recording_assets"]), 1)
             self.assertTrue((output / "chapters" / "01" / "scene.json").is_file())
             self.assertTrue((output / "course.json").is_file())
+            course = json.loads((output / "course.json").read_text(encoding="utf-8"))
+            self.assertTrue(
+                all(1 <= len(scene["title"]) <= 48 for scene in course["scenes"])
+            )
 
 
 if __name__ == "__main__":

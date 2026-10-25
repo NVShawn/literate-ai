@@ -10,11 +10,12 @@ GitHub commits; [snapshot data](research-snapshot.json) records the inspected fi
 The user approved the [directed pilot](../animated-onboarding/README.md)'s visual
 treatment and previously approved its voices. The full replacement is an explicit
 1.3.1 release goal. Its chapter compiler, measured-audio preparation, offline Motion
-player and fixed-time capture path are now authored, but **the new script has not been
-voiced or rendered** because the retained NVIDIA credential returned HTTP 401 on
-2026-10-25. The [production plan](PRODUCTION.md) names the remaining credential,
-new-audio, rendering and complete-playback review gates. The pilot and published film
-remain intact until the replacement passes all of them.
+player and fixed-time capture path are authored. All 86 turns have now been recorded
+with the approved NVIDIA Magpie voices, rendered into a 12:04.896 local candidate and
+independently media-verified. **Complete listening and normal-speed playback approval
+remain pending.** The [production plan](PRODUCTION.md) names the remaining fresh
+evidence, review and publication gates. The pilot and published film remain intact
+until the replacement passes all of them.
 
 The argument preserves required CI, independent review and native/release gates.
 It challenges waiting for CI to provide the first useful feedback. Sam's eight-hour
@@ -57,7 +58,8 @@ python3 "$PILOT/speech.py" voices \
   --output "$OBJ_DIR/voice-catalog.json"
 python3 "$FULL/synthesize.py" --story "$OBJ_DIR/story.json" \
   --catalog "$OBJ_DIR/voice-catalog.json" --output "$OBJ_DIR/voices" \
-  --api-key-file /private/path/to/nvidia-key
+  --api-key-file /private/path/to/nvidia-key \
+  --minimum-request-interval-seconds 7
 python3 "$FULL/prepare.py" --story "$OBJ_DIR/story.json" \
   --audio-dir "$OBJ_DIR/voices" --output "$OBJ_DIR/package"
 
@@ -74,8 +76,8 @@ litai video verify /path/to/video-result.json \
   --manifest "$OBJ_DIR/package/course.json"
 ```
 
-The batch synthesizer performs no retry or fallback. It validates and preserves any
-already completed take before continuing, so a provider interruption does not replace
-earlier audio. Release approval still requires listening to every new utterance and
+The batch synthesizer performs no retry or fallback and paces new provider requests.
+It validates and preserves any already completed take before continuing, so a provider
+interruption does not replace earlier audio. Release approval still requires listening to every new utterance and
 watching the assembled film at normal speed, with a separate factual, accessibility
 and visual verdict recorded against exact media identities.

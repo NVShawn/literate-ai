@@ -9,9 +9,11 @@
   and purposeful holds, now visually accepted by the user. Add a full annotated
   pre-CI narrative with sharper Sam/LitAI banter and commit-pinned research into
   five real project integrations, with recorded-result and native-scope limits.
-  New full-episode narration and rendering remain pending. Video and presentation
-  skills require explicit visual direction and separate motion-quality review
-  before publication.
+  Add a paced, restart-safe full-episode speech and rendering pipeline; the resulting
+  12:04.896 local candidate passes deterministic chapter QA and independent media
+  verification. Complete listening/playback approval and publication remain pending.
+  Video and presentation skills require explicit visual direction and separate
+  motion-quality review before publication.
 - Fail document-pair publication preflight when a stable Google Workspace resource
   has an anonymous or foreign-domain reader grant, preserving the declared
   organization-restricted audience.
