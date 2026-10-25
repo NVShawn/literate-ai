@@ -581,3 +581,36 @@ accepted dispatch envelope. Failed production reaches all waiters, leaves no
 success entry, and permits a subsequent explicit retry. The adapter is scoped to
 one finite coordinator; native transport, attempt logs and persistent shared-cache
 admission remain executor responsibilities.
+
+### Command BUILD payload custody and bounded retries
+
+`CommandComponentBuilder(coalesce_artifacts=True)` opts into the concrete command
+artifact executor. It preserves existing command/SSH transport checks, admits the
+exact current BUILD input and grant, imports and verifies the archive and every
+supporting record into CAS, and reopens those bytes on each current request. A
+separate controller admission record binds the request, requested worker, original
+build evidence and archive; it explicitly records that native execution was not
+repeated. Subsequent TEST handoffs retain their existing current-input checks.
+Producer attempt records retain UTC start/end, elapsed nanoseconds, request/worker
+and input identity, status and failure code. An owned receiver's nonzero exit
+also retains bounded stdout/stderr diagnostics; timeout/launch failures retain
+explicitly unavailable output rather than invented logs.
+
+The initial concrete key is the complete admitted `BuildWorkerInput` identity.
+This safely removes duplicate exact-input execution, including a changed request
+route/affinity, without relabeling old build evidence. A different current plan,
+source custody, SBOM, grant or BUILD input still misses. Cross-release semantic
+payload adoption requires its own explicit current qualification contract; it
+cannot change an immutable `BuildWorkerResult` into a newly executed build.
+
+Retry policy is explicit, bounded and identity-bound: only declared retry-safe
+BUILD/TEST actions may retry named failure codes, up to sixteen total attempts
+under the original deadline. Mutable side-effect claims prohibit retries. Each
+retry receives a distinct request identity, prefers an untried eligible worker,
+and retains the failed attempt in the schedule result. Descendants wait until
+success or cancellation after exhaustion; unrelated branches remain independent.
+No retry resets a deadline or silently converts a failed attempt into success.
+Cancellation of one coalesced waiter leaves other users' producer running; only
+cancellation of every registered user reaches the owned producer transport.
+Controller protocol tests do not establish physical worker-loss or native
+multi-machine acceptance.

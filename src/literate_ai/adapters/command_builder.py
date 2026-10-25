@@ -1,5 +1,6 @@
 """Queued command BUILD dispatch and verified controller artifact admission."""
 
+import threading
 from datetime import UTC, datetime
 from functools import partial
 
@@ -15,6 +16,10 @@ from literate_ai.adapters.action_build_result import (
 from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
 from literate_ai.adapters.action_test_record import TestWorkerInput
 from literate_ai.adapters.build_handoff import capture_build_input
+from literate_ai.adapters.coalescing_command_build import CommandBuildArtifactExecutor
+from literate_ai.application.action_artifact_dispatch import (
+    CoalescingArtifactDispatcher,
+)
 from literate_ai.application.action_dag_planning import (
     lifecycle_action_payload,
     plan_lifecycle_action_dag,
@@ -29,7 +34,15 @@ from literate_ai.contracts import canonical_identity, canonical_json_bytes
 class CommandComponentBuilder:
     """Dispatch only to admitted BUILD workers; result transport is private binding."""
 
-    def __init__(self, indexer, admission, local_ports, *, result_source=None):
+    def __init__(
+        self,
+        indexer,
+        admission,
+        local_ports,
+        *,
+        result_source=None,
+        coalesce_artifacts=False,
+    ):
         if (
             indexer.catalog.identity != admission.catalog.identity
             or indexer.workers != admission.workers
@@ -39,6 +52,21 @@ class CommandComponentBuilder:
             raise TypeError("BUILD result source must be privately callable")
         self.indexer, self.admission, self.local_ports = indexer, admission, local_ports
         self.result_source = result_source
+        if type(coalesce_artifacts) is not bool:
+            raise TypeError("artifact coalescing selection must be boolean")
+        self._coalescing_lock = threading.Lock()
+        self._coalescing_requests = {}
+        self._artifact_dispatcher = None
+        if coalesce_artifacts:
+            self._artifact_dispatcher = CoalescingArtifactDispatcher(
+                CommandBuildArtifactExecutor(
+                    self._transport_for,
+                    indexer.cas,
+                    blob_source=lambda request, reference: self._fetch_blob(
+                        request, reference
+                    ),
+                )
+            )
         self._provider_receipts = {}
         self._test_handoffs = {}
         self.eligible = tuple(
@@ -59,6 +87,20 @@ class CommandComponentBuilder:
             plan.component_revision: plan
             for plan in indexer.execution_plan.generation_plans
         }
+
+    def _transport_for(self, request):
+        with self._coalescing_lock:
+            transport, _ = self._coalescing_requests[request.identity]
+        return transport
+
+    def _fetch_blob(self, request, reference):
+        if self.result_source is None:
+            raise ActionWireError(
+                "action_build.payload_missing", "worker artifact source unavailable"
+            )
+        return self.result_source(
+            self.indexer.catalog.worker(request.worker.worker_id), reference
+        )
 
     def test_handoff(self, plan, exports):
         """Read only a successfully imported BUILD handoff under current authority."""
@@ -188,7 +230,30 @@ class CommandComponentBuilder:
             self.indexer.deadline.identity,
         )
         results = {}
-        outcome = self.indexer._dispatcher(records, results).dispatch(request)
+        if self._artifact_dispatcher is None:
+            outcome = self.indexer._dispatcher(records, results).dispatch(request)
+        else:
+            with self._coalescing_lock:
+                if request.identity in self._coalescing_requests:
+                    raise ActionWireError(
+                        "action_dispatch.duplicate",
+                        "exact BUILD request is already active",
+                    )
+                transport = self.indexer._dispatcher(records, results)
+                sink = transport.record_result
+
+                def retain(identity, content):
+                    self.local_ports.retain_evidence_record(identity, content)
+                    sink(identity, content)
+
+                transport.record_result = retain
+                transport.record_failure = retain
+                self._coalescing_requests[request.identity] = (transport, results)
+            try:
+                outcome = self._artifact_dispatcher.dispatch(request)
+            finally:
+                with self._coalescing_lock:
+                    self._coalescing_requests.pop(request.identity, None)
         if outcome.failure_code is not None:
             raise ActionWireError(outcome.failure_code, "worker BUILD failed")
         result = results.get(outcome.result_identity)

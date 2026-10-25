@@ -359,10 +359,43 @@ class LifecycleActionResult:
 
 
 @dataclass(frozen=True, slots=True)
+class LifecycleActionAttempt:
+    number: int
+    result: LifecycleActionResult
+
+    def __post_init__(self) -> None:
+        if (
+            type(self.number) is not int
+            or not 1 <= self.number <= 16
+            or not isinstance(self.result, LifecycleActionResult)
+            or self.result.disposition
+            not in {
+                LifecycleActionDisposition.ACCEPTED,
+                LifecycleActionDisposition.FAILED,
+            }
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.attempt_invalid",
+                "attempt must bind an actual dispatched result",
+            )
+
+    @property
+    def identity(self) -> ContentIdentity:
+        return canonical_identity(
+            {
+                "schema": "literate-ai/lifecycle-action-attempt@1",
+                "number": self.number,
+                "result_identity": self.result.identity.uri,
+            }
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class LifecycleActionScheduleResult:
     schedule_identity: ContentIdentity
     max_parallelism: int
     results: tuple[LifecycleActionResult, ...]
+    attempts: tuple[LifecycleActionAttempt, ...] = ()
 
     def __post_init__(self) -> None:
         if (
@@ -380,11 +413,49 @@ class LifecycleActionScheduleResult:
                 "schedule result is not canonical and typed",
             )
 
+        if not isinstance(self.attempts, tuple) or any(
+            not isinstance(item, LifecycleActionAttempt) for item in self.attempts
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.attempt_invalid", "schedule attempts must be typed"
+            )
+        keys = tuple((item.result.action_id, item.number) for item in self.attempts)
+        if keys != tuple(sorted(set(keys))):
+            raise ActionDagSchedulingError(
+                "action_dag.attempt_invalid",
+                "schedule attempts must be canonical and unique",
+            )
+        final = {item.action_id: item for item in self.results}
+        grouped = defaultdict(list)
+        for attempt in self.attempts:
+            grouped[attempt.result.action_id].append(attempt)
+        for action_id, values in grouped.items():
+            if (
+                tuple(item.number for item in values)
+                != tuple(range(1, len(values) + 1))
+                or final.get(action_id) != values[-1].result
+            ):
+                raise ActionDagSchedulingError(
+                    "action_dag.attempt_invalid",
+                    "attempt sequence must retain the final result",
+                )
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
-                "schema": "literate-ai/lifecycle-action-schedule-result@1",
+                "schema": "literate-ai/lifecycle-action-schedule-result@2"
+                if self.attempts
+                else "literate-ai/lifecycle-action-schedule-result@1",
+                **(
+                    {
+                        "attempt_identities": [
+                            attempt.identity.uri for attempt in self.attempts
+                        ]
+                    }
+                    if self.attempts
+                    else {}
+                ),
                 "schedule_identity": self.schedule_identity.uri,
                 "max_parallelism": self.max_parallelism,
                 "result_identities": [item.identity.uri for item in self.results],
@@ -425,6 +496,14 @@ class LifecycleActionDagScheduler:
                 "resource policy names unknown or untyped authority",
             )
         for action_id, policy in policies.items():
+            if policy.max_attempts > 1 and node_map[action_id].kind not in {
+                LifecycleActionKind.BUILD,
+                LifecycleActionKind.TEST,
+            }:
+                raise ActionDagSchedulingError(
+                    "action_dag.retry_unsafe",
+                    "only declared safe BUILD/TEST actions may retry",
+                )
             if any(policy.resources.values) and not any(
                 worker_id in capacities
                 and all(
@@ -501,6 +580,10 @@ class LifecycleActionDagScheduler:
         ] = {}
         results: dict[str, LifecycleActionResult] = {}
 
+        attempt_counts = {key: 0 for key in node_map}
+        tried_workers = {key: {} for key in node_map}
+        attempts = {}
+        record_attempts = any(policy.max_attempts > 1 for policy in policies.values())
         reserved = {key: [0, 0, 0, 0] for key in worker_map}
         held_claims: set[str] = set()
 
@@ -533,7 +616,12 @@ class LifecycleActionDagScheduler:
             affinity = set(node.cache_affinity_worker_ids)
             candidates = sorted(
                 (
-                    (0 if worker_id in affinity else 1, worker_id, min(slots))
+                    (
+                        tried_workers[node.action_id].get(worker_id, 0),
+                        0 if worker_id in affinity else 1,
+                        worker_id,
+                        min(slots),
+                    )
                     for worker_id, slots in free_slots.items()
                     if slots
                     and worker_id in node.eligible_worker_ids
@@ -542,7 +630,7 @@ class LifecycleActionDagScheduler:
             )
             if not candidates:
                 return None
-            _, worker_id, slot = candidates[0]
+            _, _, worker_id, slot = candidates[0]
             return worker_id, slot
 
         def cancel_descendants(failed: str) -> None:
@@ -585,8 +673,20 @@ class LifecycleActionDagScheduler:
                             "action_dag.predecessor_missing",
                             "ready action lacks accepted predecessor evidence",
                         )
+                    attempt_number = attempt_counts[action_id] + 1
                     request = LifecycleActionDispatchRequest(
-                        schedule_identity,
+                        schedule_identity
+                        if attempt_number == 1
+                        else canonical_identity(
+                            {
+                                "schema": (
+                                    "literate-ai/lifecycle-action-attempt-schedule@1"
+                                ),
+                                "schedule_identity": schedule_identity.uri,
+                                "action_identity": node.identity.uri,
+                                "attempt": attempt_number,
+                            }
+                        ),
                         node,
                         worker_map[worker_id],
                         slot,
@@ -627,6 +727,10 @@ class LifecycleActionDagScheduler:
                                 child_node = node_map[child]
                                 heapq.heappush(ready, (child_node.identity.uri, child))
                         continue
+                    attempt_counts[action_id] = attempt_number
+                    tried_workers[action_id][worker_id] = (
+                        tried_workers[action_id].get(worker_id, 0) + 1
+                    )
                     active[pool.submit(dispatcher.dispatch, request)] = (
                         action_id,
                         request,
@@ -677,6 +781,20 @@ class LifecycleActionDagScheduler:
                             None,
                             outcome.failure_code,
                         )
+                        if record_attempts:
+                            attempts[(action_id, attempt_counts[action_id])] = (
+                                LifecycleActionAttempt(
+                                    attempt_counts[action_id], results[action_id]
+                                )
+                            )
+                        policy = policies.get(action_id, ActionDispatchPolicy())
+                        if (
+                            outcome.failure_code in policy.retryable_failure_codes
+                            and attempt_counts[action_id] < policy.max_attempts
+                        ):
+                            results.pop(action_id)
+                            heapq.heappush(ready, (node.identity.uri, action_id))
+                            continue
                         cancel_descendants(action_id)
                         continue
                     assert outcome.result_identity is not None
@@ -689,6 +807,12 @@ class LifecycleActionDagScheduler:
                         outcome.result_identity,
                         None,
                     )
+                    if record_attempts:
+                        attempts[(action_id, attempt_counts[action_id])] = (
+                            LifecycleActionAttempt(
+                                attempt_counts[action_id], results[action_id]
+                            )
+                        )
                     for child in successors[action_id]:
                         if child in results:
                             continue
@@ -700,6 +824,7 @@ class LifecycleActionDagScheduler:
             schedule_identity,
             limit,
             tuple(results[key] for key in sorted(results)),
+            tuple(attempts[key] for key in sorted(attempts)),
         )
 
     @staticmethod
@@ -774,6 +899,7 @@ class LifecycleActionDagScheduler:
 __all__ = [
     "ActionDagSchedulingError",
     "LifecycleActionDagScheduler",
+    "LifecycleActionAttempt",
     "LifecycleActionDispatchOutcome",
     "LifecycleActionDispatchRequest",
     "LifecycleActionDispatcher",

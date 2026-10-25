@@ -5,6 +5,10 @@
 - Bound optional action-DAG reservations across CPU, memory, disk and network,
   serialize named mutable authorities within one coordinator, and coalesce
   immutable payload production while separately admitting each current request.
+  Opt-in command BUILD integration reopens exact verified payload custody, keeps
+  original build and fresh admission evidence separate, and retains failed command
+  diagnostics. Declared safe BUILD/TEST actions support bounded identity-bound
+  retries with retained attempts; mutable package/signing actions cannot retry.
 
 - Fail document-pair publication preflight when a stable Google Workspace resource
   has an anonymous or foreign-domain reader grant, preserving the declared

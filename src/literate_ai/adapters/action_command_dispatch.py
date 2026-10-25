@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import os
 import tempfile
 import threading
@@ -32,7 +33,11 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
 )
-from literate_ai.contracts.identity import ContentIdentity
+from literate_ai.contracts.identity import (
+    ContentIdentity,
+    canonical_identity,
+    canonical_json_bytes,
+)
 
 
 def command_worker_environment(
@@ -88,6 +93,7 @@ class CommandLifecycleActionDispatcher:
             [LifecycleActionDispatchRequest], Mapping[ContentIdentity, bytes]
         ],
         record_result: Callable[[ContentIdentity, bytes], None],
+        record_failure: Callable[[ContentIdentity, bytes], None] | None = None,
         revalidate_worker: Callable[[LifecycleActionWorker], None],
         environment: Mapping[str, str] | None = None,
         attested_boundary: Callable[[LifecycleActionWorker], ContentIdentity]
@@ -120,6 +126,7 @@ class CommandLifecycleActionDispatcher:
         self.deadline = deadline
         self.input_records = input_records
         self.record_result = record_result
+        self.record_failure = record_failure
         self.revalidate_worker = revalidate_worker
         # When set, boundaries skip the separate capability probe: the receiver
         # measures the admitted capability in process and attests it. A response
@@ -171,6 +178,28 @@ class CommandLifecycleActionDispatcher:
         self, request: LifecycleActionDispatchRequest
     ) -> LifecycleActionDispatchOutcome:
         return self._exchange(request, mode=None)[0]
+
+    def dispatch_record(
+        self, request: LifecycleActionDispatchRequest
+    ) -> tuple[LifecycleActionDispatchOutcome, bytes | None]:
+        """Actuate the exact request and expose its verified result record.
+
+        Result recording and all transport/worker/deadline checks remain owned
+        by the same exchange as ordinary dispatch. This permits typed artifact
+        custody adapters without reaching into the transport's private exchange.
+        """
+        return self._exchange(request, mode=None)
+
+    def validate_request(self, request: LifecycleActionDispatchRequest) -> None:
+        """Revalidate exact routing/current worker before local artifact admission."""
+        self._selection(request)
+        self.deadline.remaining()
+        self.revalidate_worker(request.worker)
+        with self._lock:
+            if request.identity in self._cancelled:
+                raise ActionWireError(
+                    "action_dispatch.cancelled", "action was cancelled"
+                )
 
     def describe(
         self, request: LifecycleActionDispatchRequest, *, mode: str
@@ -252,6 +281,28 @@ class CommandLifecycleActionDispatcher:
                     assert outcome.result_identity is not None
                     self.record_result(outcome.result_identity, result_record)
             return outcome, result_record
+        except BaseException as exc:
+            if mode is None and self.record_failure is not None:
+                diagnostic = {
+                    "schema": "literate-ai/action-command-failure@1",
+                    "request_identity": request.identity.uri,
+                    "worker_identity": request.worker.worker_identity.uri,
+                    "failure_code": getattr(exc, "code", None) or type(exc).__name__,
+                    "exit_status": getattr(exc, "process_exit_status", None),
+                    "elapsed_ns": None
+                    if not hasattr(exc, "process_elapsed_seconds")
+                    else int(exc.process_elapsed_seconds * 1_000_000_000),
+                    "stdout_base64": None
+                    if not hasattr(exc, "process_stdout")
+                    else base64.b64encode(exc.process_stdout).decode("ascii"),
+                    "stderr_base64": None
+                    if not hasattr(exc, "process_stderr")
+                    else base64.b64encode(exc.process_stderr).decode("ascii"),
+                }
+                self.record_failure(
+                    canonical_identity(diagnostic), canonical_json_bytes(diagnostic)
+                )
+            raise
         finally:
             with self._lock:
                 self._active.pop(request.identity, None)
@@ -295,8 +346,13 @@ class CommandLifecycleActionDispatcher:
                 code, "command action process failed its execution bounds"
             ) from exc
         if completed.returncode != 0:
-            raise ActionWireError(
+            error = ActionWireError(
                 "action_dispatch.failed",
                 f"worker exited with status {completed.returncode}",
             )
+            error.process_exit_status = completed.returncode
+            error.process_elapsed_seconds = completed.elapsed_seconds
+            error.process_stdout = completed.stdout
+            error.process_stderr = completed.stderr
+            raise error
         return completed.stdout

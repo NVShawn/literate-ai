@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+import time
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 
@@ -35,6 +36,7 @@ class Executor:
         self.release = threading.Event()
         self.started = threading.Event()
         self.failed = False
+        self.cancelled = []
 
     def action_key(self, request):
         return _identity("complete-semantic-key")
@@ -55,7 +57,8 @@ class Executor:
         )
 
     def cancel(self, request):
-        pass
+        self.cancelled.append(request.identity)
+        self.release.set()
 
 
 class ArtifactDispatchTests(unittest.TestCase):
@@ -84,6 +87,44 @@ class ArtifactDispatchTests(unittest.TestCase):
         executor.failed = False
         dispatcher.dispatch(request("one"))
         self.assertEqual(executor.produced, 2)
+
+    def test_cancelled_waiter_does_not_terminate_another_requests_producer(self):
+        executor = Executor()
+        dispatcher = CoalescingArtifactDispatcher(executor)
+        first_request, second_request = request("one"), request("two")
+        with ThreadPoolExecutor(2) as pool:
+            first = pool.submit(dispatcher.dispatch, first_request)
+            self.assertTrue(executor.started.wait(2))
+            second = pool.submit(dispatcher.dispatch, second_request)
+            until = time.monotonic() + 2
+            while time.monotonic() < until:
+                with dispatcher._lock:
+                    users = sum(len(group) for group in dispatcher._users.values())
+                if users == 2:
+                    break
+                threading.Event().wait(0.001)
+            self.assertEqual(users, 2)
+            dispatcher.cancel(first_request)
+            self.assertEqual(executor.cancelled, [])
+            executor.release.set()
+            with self.assertRaises(ActionDagSchedulingError):
+                first.result()
+            self.assertEqual(second.result().request_identity, second_request.identity)
+        self.assertEqual(executor.produced, 1)
+        self.assertEqual(executor.admitted, [second_request.identity])
+
+    def test_cancelling_every_user_reaches_owned_producer(self):
+        executor = Executor()
+        dispatcher = CoalescingArtifactDispatcher(executor)
+        current = request("one")
+        with ThreadPoolExecutor(1) as pool:
+            future = pool.submit(dispatcher.dispatch, current)
+            self.assertTrue(executor.started.wait(2))
+            dispatcher.cancel(current)
+            with self.assertRaises(ActionDagSchedulingError):
+                future.result()
+        self.assertEqual(executor.cancelled, [current.identity])
+        self.assertEqual(executor.admitted, [])
 
     def test_substituted_request_admission_refuses(self):
         executor = Executor()

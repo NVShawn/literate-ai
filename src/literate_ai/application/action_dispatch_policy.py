@@ -44,6 +44,9 @@ class ActionResources:
 class ActionDispatchPolicy:
     resources: ActionResources = ActionResources()
     exclusive_claims: tuple[str, ...] = ()
+    retry_safe: bool = False
+    max_attempts: int = 1
+    retryable_failure_codes: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.resources, ActionResources):
@@ -56,11 +59,48 @@ class ActionDispatchPolicy:
         ):
             raise ValueError("exclusive claims must be canonical unique names")
 
+        if (
+            type(self.retry_safe) is not bool
+            or type(self.max_attempts) is not int
+            or not 1 <= self.max_attempts <= 16
+        ):
+            raise ValueError("retry selection and attempt bound must be typed")
+        codes = self.retryable_failure_codes
+        if (
+            not isinstance(codes, tuple)
+            or any(
+                not isinstance(code, str) or not code or len(code) > 127
+                for code in codes
+            )
+            or codes != tuple(sorted(set(codes)))
+        ):
+            raise ValueError("retry failure codes must be canonical and unique")
+        if self.max_attempts > 1 and (not self.retry_safe or not codes or claims):
+            raise ValueError(
+                "retries require declared safe work and explicit failures "
+                "without mutable side-effect claims"
+            )
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
-                "schema": "literate-ai/action-dispatch-policy@1",
+                "schema": "literate-ai/action-dispatch-policy@2"
+                if self.retry_safe
+                or self.max_attempts != 1
+                or self.retryable_failure_codes
+                else "literate-ai/action-dispatch-policy@1",
+                **(
+                    {
+                        "retry_safe": self.retry_safe,
+                        "max_attempts": self.max_attempts,
+                        "retryable_failure_codes": list(self.retryable_failure_codes),
+                    }
+                    if self.retry_safe
+                    or self.max_attempts != 1
+                    or self.retryable_failure_codes
+                    else {}
+                ),
                 "resources": self.resources.to_dict(),
                 "exclusive_claims": list(self.exclusive_claims),
             }
