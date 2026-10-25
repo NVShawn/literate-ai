@@ -31100,3 +31100,19 @@ The first failed directory, source checkout and installed wheel stay retained.
 **DOC-DEPENDENCIES-003 closure:** PR #133 lands the existing browser-tool upgrade and patched Zod lock at `d17881fa`; exact-main CI 40031696168 passes all 26 jobs. The actual provided Windows audit/documentation gates also pass. This completes dependency maintenance only, as issue #134 explicitly separates native-performance issue #129. The renewed full gate times out later in wheel smoke after 121 completed spans, with no test phase reached; its immutable failure bundle and source identity remain retained. See `verification/documentation-zod-qualification.json` and `verification/windows-lock-reuse-native-timeout.json`.
 
 **#129 / WIN-GATE-001 current native outcome:** Supplied-worker source `2615e568` has the same tracked tree as merged `d17881fa`. The unchanged 5400-second gate reaches 121 completed wheel operations but times out before wheel completion and the test phase. The complete five-stage HTML scenario passes in 2871.062 seconds; default and scoped initialization take 252.563 and 196.578 seconds. These are retained operation observations, not a controlled whole-gate speedup or admission. Existing timing evidence survives the timeout. The last completed graph-export scenario is followed by an uninstrumented missing-CodeGraph run probe and update planning; identify the unfinished operation and remaining initialization/observation costs before another full renewal. Keep #121, #123 and #129 open; do not increase deadlines, skip assertions or promote this failed outcome.
+
+### [ ] ACTION-RESOURCES-001 — Reserve action resources and serialize mutable authorities
+
+- **GitHub issue:** [#144](https://github.com/jordanhubbard/literate-ai/issues/144), refinement of [#4](https://github.com/jordanhubbard/literate-ai/issues/4)
+- **Priority:** P1
+- **Owner:** framework action DAG scheduler
+- **Direction:** Bound aggregate CPU, memory, disk and network reservations and serialize named side effects across compatible workers.
+- **Conclusion:** Extend existing exact scheduler with optional identity-bound reservations; resource admission remains caller-owned and claims serialize one coordinator only. Issue #144 refines broader #4.
+- **Depends on:** WORKER-DAG-001
+- **Implementation:**
+  - [x] Bind optional action demands and worker budgets into schedule identity; preserve omitted-policy identities.
+  - [x] Reserve aggregate budgets and exclusive claims before dispatch and release on every outcome.
+- **Evidence:**
+  - [x] Controller concurrency, failure-release, capacity refusal, identity and fresh per-request artifact-admission regressions: eight focused tests pass via `make python-check`; legacy scheduler failure-isolation regression passes. Immutable payload production coalesces within one coordinator, while every current request obtains fresh admission.
+- **Next action:** connect the optional API to admitted production phase dispatch, retain worker-loss attempt evidence, and obtain actual multi-machine/shared-cache qualification under #4.
+  - [ ] Actual native multi-worker/shared-cache qualification remains in issue #4.

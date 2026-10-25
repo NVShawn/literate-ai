@@ -10,6 +10,10 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Protocol
 
+from literate_ai.application.action_dispatch_policy import (
+    ActionDispatchPolicy,
+    ActionResources,
+)
 from literate_ai.contracts.identity import ContentIdentity, canonical_identity
 
 
@@ -400,12 +404,43 @@ class LifecycleActionDagScheduler:
         deadline_identity: ContentIdentity,
         max_parallelism: int | None = None,
         recovery: Mapping[str, LifecycleActionRecoveryCandidate] | None = None,
+        action_policies: Mapping[str, ActionDispatchPolicy] | None = None,
+        worker_resources: Mapping[str, ActionResources] | None = None,
     ) -> LifecycleActionScheduleResult:
         if not isinstance(deadline_identity, ContentIdentity):
             raise ActionDagSchedulingError(
                 "action_dag.deadline_invalid", "deadline identity is not typed"
             )
         node_map, worker_map, successors = self._preflight(nodes, workers)
+        policies = {} if action_policies is None else dict(action_policies)
+        capacities = {} if worker_resources is None else dict(worker_resources)
+        if (
+            set(policies) - set(node_map)
+            or set(capacities) - set(worker_map)
+            or any(not isinstance(x, ActionDispatchPolicy) for x in policies.values())
+            or any(not isinstance(x, ActionResources) for x in capacities.values())
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.policy_invalid",
+                "resource policy names unknown or untyped authority",
+            )
+        for action_id, policy in policies.items():
+            if any(policy.resources.values) and not any(
+                worker_id in capacities
+                and all(
+                    demand <= capacity
+                    for demand, capacity in zip(
+                        policy.resources.values,
+                        capacities[worker_id].values,
+                        strict=True,
+                    )
+                )
+                for worker_id in node_map[action_id].eligible_worker_ids
+            ):
+                raise ActionDagSchedulingError(
+                    "action_dag.capacity_insufficient",
+                    "no eligible worker can reserve the action resource demand",
+                )
         total_slots = sum(item.slots for item in worker_map.values())
         limit = total_slots if max_parallelism is None else max_parallelism
         if (
@@ -428,7 +463,23 @@ class LifecycleActionDagScheduler:
             )
         schedule_identity = canonical_identity(
             {
-                "schema": "literate-ai/lifecycle-action-schedule@1",
+                "schema": (
+                    "literate-ai/lifecycle-action-schedule@2"
+                    if policies or capacities
+                    else "literate-ai/lifecycle-action-schedule@1"
+                ),
+                **(
+                    {
+                        "action_policies": {
+                            key: policies[key].identity.uri for key in sorted(policies)
+                        },
+                        "worker_resources": {
+                            key: capacities[key].to_dict() for key in sorted(capacities)
+                        },
+                    }
+                    if policies or capacities
+                    else {}
+                ),
                 "nodes": [node_map[key].identity.uri for key in sorted(node_map)],
                 "workers": [worker_map[key].identity.uri for key in sorted(worker_map)],
                 "deadline_identity": deadline_identity.uri,
@@ -450,13 +501,43 @@ class LifecycleActionDagScheduler:
         ] = {}
         results: dict[str, LifecycleActionResult] = {}
 
+        reserved = {key: [0, 0, 0, 0] for key in worker_map}
+        held_claims: set[str] = set()
+
+        def reserve(action_id: str, worker_id: str, direction: int) -> None:
+            policy = policies.get(action_id, ActionDispatchPolicy())
+            for index, amount in enumerate(policy.resources.values):
+                reserved[worker_id][index] += direction * amount
+            if direction > 0:
+                held_claims.update(policy.exclusive_claims)
+            else:
+                held_claims.difference_update(policy.exclusive_claims)
+
+        def fits(node: LifecycleActionNode, worker_id: str) -> bool:
+            policy = policies.get(node.action_id, ActionDispatchPolicy())
+            if held_claims.intersection(policy.exclusive_claims):
+                return False
+            if not any(policy.resources.values):
+                return True
+            return worker_id in capacities and all(
+                used + demand <= capacity
+                for used, demand, capacity in zip(
+                    reserved[worker_id],
+                    policy.resources.values,
+                    capacities[worker_id].values,
+                    strict=True,
+                )
+            )
+
         def worker_slot(node: LifecycleActionNode) -> tuple[str, int] | None:
             affinity = set(node.cache_affinity_worker_ids)
             candidates = sorted(
                 (
                     (0 if worker_id in affinity else 1, worker_id, min(slots))
                     for worker_id, slots in free_slots.items()
-                    if slots and worker_id in node.eligible_worker_ids
+                    if slots
+                    and worker_id in node.eligible_worker_ids
+                    and fits(node, worker_id)
                 )
             )
             if not candidates:
@@ -517,6 +598,7 @@ class LifecycleActionDagScheduler:
                         deadline_identity,
                     )
                     free_slots[worker_id].remove(slot)
+                    reserve(action_id, worker_id, 1)
                     candidate = recovery_map.get(action_id)
                     if candidate is not None:
                         if (
@@ -538,6 +620,7 @@ class LifecycleActionDagScheduler:
                             None,
                         )
                         free_slots[worker_id].add(slot)
+                        reserve(action_id, worker_id, -1)
                         for child in successors[action_id]:
                             remaining[child] -= 1
                             if remaining[child] == 0:
@@ -566,6 +649,7 @@ class LifecycleActionDagScheduler:
                 for future in ordered:
                     action_id, request = active.pop(future)
                     free_slots[request.worker.worker_id].add(request.slot)
+                    reserve(action_id, request.worker.worker_id, -1)
                     node = node_map[action_id]
                     try:
                         outcome = future.result()

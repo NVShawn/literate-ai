@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Bound optional action-DAG reservations across CPU, memory, disk and network,
+  serialize named mutable authorities within one coordinator, and coalesce
+  immutable payload production while separately admitting each current request.
+
 - Fail document-pair publication preflight when a stable Google Workspace resource
   has an anonymous or foreign-domain reader grant, preserving the declared
   organization-restricted audience.

@@ -554,3 +554,30 @@ Retain only the existing runtime allowlist and explicit worker bindings. In part
 uppercase SYSTEMROOT and COMSPEC must reach child processes as runtime bindings;
 PowerShell may fail before receiver startup when these are accidentally discarded.
 This correction does not authorize forwarding additional ambient credentials.
+
+### Aggregate reservations and mutable side effects
+
+The action-DAG API optionally accepts typed per-action CPU (millicores), memory
+(MiB), temporary disk (MiB), and network (Mbps) reservations and admitted available
+worker budgets. These budgets are conservative reservations, not measured host
+capacity or substitutes for fresh health observations. Reject impossible demands
+before dispatch; with active work, defer a ready action until all of its budgets
+fit. Bind policy and budget changes into the schedule identity. Omitted policy
+preserves existing schedule and request identities.
+
+Named exclusive claims serialize mutable authorities across all slots and workers
+in one coordinator run. Use one canonical claim per package database and protected
+signing authority; unrelated databases may proceed concurrently. Claims release
+on success, failure and accepted recovery. They do not establish a cross-controller
+lock: the owning database/signer must retain its external lock and custody controls.
+This API alone does not qualify native remote execution, shared cache admission,
+worker-loss retries or duplicate-key artifact coalescing.
+
+The coalescing artifact dispatcher shares only a verified immutable payload
+identity for a caller-admitted complete semantic action key. Its executor performs
+current authorization, verified CAS production, and fresh target/receipt admission
+for each request. It rejects another request's result rather than copying an
+accepted dispatch envelope. Failed production reaches all waiters, leaves no
+success entry, and permits a subsequent explicit retry. The adapter is scoped to
+one finite coordinator; native transport, attempt logs and persistent shared-cache
+admission remain executor responsibilities.
