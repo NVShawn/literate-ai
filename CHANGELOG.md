@@ -6,7 +6,10 @@
   characters, recorded NVIDIA Magpie voice auditions, an offline Motion companion
   and deterministic frame/media checks. Voices are user-validated; a directed
   replacement cut now implements phrase-cued poses, listener reactions, props
-  and purposeful holds, awaiting user visual validation. Video and presentation
+  and purposeful holds, now visually accepted by the user. Add a full annotated
+  pre-CI narrative with sharper Sam/LitAI banter and commit-pinned research into
+  five real project integrations, with recorded-result and native-scope limits.
+  New full-episode narration and rendering remain pending. Video and presentation
   skills require explicit visual direction and separate motion-quality review
   before publication.
 

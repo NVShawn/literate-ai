@@ -78,3 +78,10 @@ Builds preserve previous outputs. Change the dialogue and evidence to refresh a
 lesson; supply recorded audio for portable narration or screen recordings for
 new coding demonstrations. See [video authoring](../user/instructional-videos.md)
 for supported backends, manifest fields, tools, integrity and publication boundaries.
+
+## Full animated narrative in development
+
+[Eight Hours to Make Coffee](full-onboarding/README.md) expands the approved
+Sam/LitAI treatment into a skeptical, source-backed pre-CI argument with five
+project case studies. The full script and animation annotations are authored;
+new narration, demonstration capture and full-episode rendering remain pending.

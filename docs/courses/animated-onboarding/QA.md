@@ -1,6 +1,7 @@
 # Directed onboarding cut QA
 
-Status: **implemented and rendered; user visual validation pending**. The user
+Status: **directed pilot visual inspection passed by the user**; see the
+[separate visual decision](visual-review.json). The user
 validated the voices and rejected the first cut's animation. The
 [original review decision](review-decision.json) is preserved; the new MP4 has a
 different identity in [machine-readable observations](qa-summary.json). No creative
@@ -41,7 +42,10 @@ approval or publication is inferred from technical verification.
 
 ## User review and remaining production
 
-The next action is the user's visual validation of this moving cut. Check whether
+The user has passed visual inspection of this exact directed cut. That approves
+this pilot's treatment, not new dialogue, a full episode or publication. The next
+creative artifact is the [full annotated narrative](../full-onboarding/NARRATIVE.md).
+For the future full episode, check whether
 each action communicates a thought or learning step; whether eyelines, listening,
 anticipation, holds and settles feel coherent; and whether captions, mouth cues and
 spoken emphasis line up. Mouth cues remain audio-energy-driven, not viseme alignment.

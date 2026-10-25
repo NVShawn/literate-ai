@@ -4695,7 +4695,7 @@ invalid. Ordinary queue items do not gain separate files merely to satisfy this 
 | --- | --- | --- |
 | [#133](https://github.com/jordanhubbard/literate-ai/pull/133) | Read-only catalog parsing reuse, refreshed Zod tooling and prior diagnostic metadata | Merged at `d17881fa`; exact-head and all 26 exact-main CI jobs pass |
 | [#135](https://github.com/jordanhubbard/literate-ai/pull/135) | Five scoped closures and the explicit supplied-worker timeout boundary | Merged at `c345e652`; all 26 exact-main CI jobs pass; supplied-worker qualification remains open |
-| [Animated onboarding pilot](https://github.com/jordanhubbard/literate-ai/compare/main...work/onboarding-motion) | COURSE-004: optional Motion/SVG authoring package and recorded NVIDIA voice audition | Source review draft; voices user-validated, first animation rejected; directed score implemented and new cut rendered, user visual validation pending; live review state is owned by the forge |
+| [Animated onboarding pilot](https://github.com/jordanhubbard/literate-ai/compare/main...work/onboarding-motion) | COURSE-004: optional Motion/SVG authoring package and recorded NVIDIA voice audition | Source review draft; voices user-validated, first animation rejected; pilot visually accepted; full annotated pre-CI narrative researched and authored, new full-episode production pending; live review state is owned by the forge |
 
 ### Historical consolidation inventory (2026-10-22)
 
@@ -31116,7 +31116,8 @@ The first failed directory, source checkout and installed wheel stay retained.
   - [x] Record the user's voice approval and animation rejection separately from technical verification.
   - [x] Pair approved dialogue with purposeful character, listener, prop and attention beats; strengthen reusable motion-review guidance.
   - [x] Implement and render the directed animation with approved audio and no generic gesture substitution.
-  - [ ] Obtain the user's visual validation of the new moving cut.
+  - [x] Obtain the user's visual validation of the new moving cut.
+  - [x] Research public Literate AI projects and author the full annotated pre-CI narrative with a skeptical Sam, sharper LitAI banter, languages, OS targets and substantial worker testing.
   - [ ] Expand the next onboarding episode with fresh execution evidence and complete playback review before publication.
 - **Pilot result:** [Authoring package](../courses/animated-onboarding/README.md)
   and [QA](../courses/animated-onboarding/QA.md) retain nine unit checks, seven browser
@@ -31136,5 +31137,18 @@ The first failed directory, source checkout and installed wheel stay retained.
   beats, 23 locally estimated phrase cues, nine browser checks, ten score-admission
   and ten input-drift refusals pass. Approved WAVs remain unchanged. See
   [current QA](../courses/animated-onboarding/QA.md) for its media identity and limits.
-  Next action: the user's visual validation of the new moving cut. Technical
-  verification does not grant visual approval or publication.
+  The user has now passed visual inspection of that exact directed cut. This
+  approves the short treatment, not new dialogue or a full episode. The
+  [full narrative](../courses/full-onboarding/NARRATIVE.md) and
+  [research ledger](../courses/full-onboarding/RESEARCH.md) now cover five verified
+  project integrations from sixteen inspected public snapshots, with concrete
+  implementation use and explicit native/adoption limits. Sam's escalating
+  coffee/laundry/garage excuses carry the comic arc. Next action: review the full
+  script before recording new dialogue, realizing chapter choreography and obtaining
+  fresh demo evidence. No eight-hour-to-minutes benchmark or replacement of
+  mandatory CI, native qualification or release gates is claimed. An initial
+  authority-renewal attempt rejected a generated publication-sample bundle whose
+  smoke path retained an unresolved module import. The
+  [failed-generation observation](../../verification/onboarding-narrative-generation-failure.json)
+  preserves its identity and diagnosis; no failed receipt or patched generated
+  source is promoted. Narrative and documentation checks pass independently.

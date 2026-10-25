@@ -10,13 +10,14 @@ review an adopt plan, acknowledge changes separately, and then qualify the actua
 build and independent acceptance. The audition isolates the central conversation
 and visual treatment. It does not demonstrate installation or an apply.
 
-The user has **validated the voices and rejected the first animation**. The
-[performance score](STORYBOARD.md) now pairs every approved line with purposeful
-acting and listener direction. [Review decision](review-decision.json) identifies
-the audition and recordings. The directed renderer now implements that score with purposeful poses, listener
-reactions and phrase-cued visual emphasis. The rebuild commands below produce the
-new treatment. The user will perform visual validation; technical checks do not
-approve its creative quality. Earlier outputs remain retained as the rejected baseline.
+The user has **validated the voices and passed visual inspection of the directed
+replacement cut**. [Visual approval](visual-review.json) identifies that exact film;
+the [original decision](review-decision.json) preserves the rejected first animation.
+The [performance score](STORYBOARD.md) and bound production inputs describe the
+rendered pilot and are retained unchanged; the review decision is separate.
+The next episode's [full annotated narrative](../full-onboarding/NARRATIVE.md) now
+expands the story with researched project examples. New dialogue and the future
+full film need their own review. Existing accepted media remains intact.
 
 ## Source and output custody
 

@@ -1,5 +1,5 @@
 {
-  "status": "Directed cut rendered and technically verified; user visual validation pending; approved audition recordings reused unchanged",
+  "status": "Directed pilot voice and visual treatment validated by user; new full narrative and future full episode require separate review",
   "source_evidence_revision": "c345e652b91863e72526f25f8e31a03ec34bec01",
   "unit_tests": 9,
   "performance_admission_refusals": {
@@ -92,7 +92,7 @@
     "decoded_midpoint_frames_inspected_at_1280_by_720": 8,
     "contact_sheet_inspected": true,
     "clipping_or_unintended_overlap_observed": false,
-    "complete_moving_film_review": "Pending user visual validation; sampled frames and trajectories do not establish acting quality"
+    "complete_moving_film_review": "User reported: Visual inspection passes. Scope is the exact directed pilot in visual-review.json, not a new full episode."
   },
   "previous_audition": {
     "mp4_sha256": "bfc228fa6ce72923c69867963c5987d5d4a896cfbb24de919ecae01d81db959a",
@@ -106,5 +106,6 @@
     "Walkthrough visuals; the separate actual source-CLI observation proves only a read-only two-file adopt plan.",
     "No onboarding apply, generated-code execution, release or native qualification is claimed.",
     "Film and recordings remain local review material; accepted public media is preserved."
-  ]
+  ],
+  "visual_review": "visual-review.json"
 }
