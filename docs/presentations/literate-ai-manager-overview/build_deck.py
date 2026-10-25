@@ -827,9 +827,9 @@ def build() -> Path:
         "Every PR body has exactly one Literate-AI-Release: major.minor or Literate-AI-Release: none line. Missing, duplicate, malformed, stale, and other-line values remain unknown.",
         "LitAI enforces command authorization and state. Forge branch protection is separate and should mirror this policy; no live forge-protection claim is made here.",
         "Peer-work collection records exact merged or reason-bearing dead markers, inspects open PRs and every worktree, rejects stale/unmerged/protected/dirty state, plans by default, and requires --apply --authorize-delete.",
-        "ADR 0034 adds a Python-owned contribution sweep and authenticated document-pair preflight for every major or minor cut. This slide does not claim v1.2.0 is already published.",
+        "ADR 0034 adds a Python-owned contribution sweep and authenticated document-pair preflight for every major or minor cut. This slide does not claim v1.3.0 is already published.",
         "Gate target selection remains local worker fleet or GitHub Actions with the same declared gate; GitLab is recognized but fail-closed, and a single legacy-local VM remains complete when no fleet is configured.",
-        "1.2 requires an explicit SemVer release policy. When the policy declares qualification, release check defaults to a tiered target: each platform x action cell is covered by the host running the coding CLI, then one workers.json worker per remaining platform, then CI; litai release qualify records exact-HEAD coverage.",
+        "1.3 retains the explicit SemVer release policy. When the policy declares qualification, release check defaults to a tiered target: each platform x action cell is covered by the host running the coding CLI, then one workers.json worker per remaining platform, then CI; litai release qualify records exact-HEAD coverage.",
     ])
 
     # 21 - RELEASE ENGINEERING 3/4 - every step times itself
@@ -890,27 +890,27 @@ def build() -> Path:
     add_image_cover(s, "engineering-section")
     wash(s, 0, 0, 700, H, 0.58)
     wash(s, 700, 0, W - 700, 252, 0.62)
-    title(s, "1.2 distributes exact work and bounds candidate repair.", "Candidate repair, cross-host action workers, native Mix builds, and forge coordination build on the 1.1 scheduler and cache.", True, 23)
+    title(s, "1.3 advances retained source and native custody.", "Reviewed original-source binding, target-bound Python projection, FreeBSD identities, and SDK tree custody build on 1.2.", True, 23)
     work = [
-        ("REPAIR", "Up to two fresh replacement candidates"),
-        ("DISTRIBUTE", "BUILD → FINALIZE on admitted workers"),
-        ("BUILD", "Elixir/Mix with checksum-pinned Hex"),
-        ("COORDINATE", "Forge issues and PRs by default"),
+        ("ADOPT", "Reviewed original-source first binding"),
+        ("TARGET", "Python projections + FreeBSD identities"),
+        ("CARRY", "SDK trees, aliases, and package topology"),
+        ("HARDEN", "Retained execution and receipt boundaries"),
     ]
     for i, (a, b) in enumerate(work):
         y = 272 + i * 80
         line(s, 70, y, 8, 64, C["green2"] if i == 0 else C["orange"])
         text(s, a, 96, y, 480, 26, 18, C["white"], True)
         text(s, b, 96, y + 28, 480, 28, 15, C["fog"])
-    caption_bar(s, "1.2 slices; production DAG dispatch, LAN cache proof, and clean update merging move to 1.3.", 648, C["code"], C["orange2"], True)
+    caption_bar(s, "Landed framework slices; unfinished native and platform admission moves to 1.3.1 or 1.4.", 648, C["code"], C["orange2"], True)
     footer(s, 23, True)
     notes(s, [
-        "The 1.1 foundation remains: dependency-aware bounded scheduling, provider-neutral cache authority, real local Debian construction, native CLI and gRPC acceptance, and canonical worktree placement, plus native custody and the 1.0 operator/release boundaries.",
-        "REPAIR: litai rebuild turns a retryable build or generated-test rejection into up to two fresh replacement candidates, each a durable attempt chained to the rejected one. The repair prompt carries only a bounded, sanitized failure fact; separately, the conformance sample runner retains a bounded, redacted diagnostic excerpt in its evidence and next-attempt feedback. Authority: src/literate_ai/adapters/candidate_repair.py and tests/conformance/support/sample_runner.py.",
-        "DISTRIBUTE: when BUILD, TEST, EXECUTE and FINALIZE all run on admitted workers, rebuild derives toolchain identities, commands and native dependencies from the worker; python -m literate_ai.standard_receiver is the reference receiver for portable single-Component Make/Python projects. Production FINALIZE grant provisioning remains pending.",
-        "BUILD: the build-mix Flavor pins each Hex package's exact version and checksums, refuses ranges, and requires the native lock to equal those pins before compiling. Mix builds are local-only in 1.2. Hex is a toolchain constraint and dependency input, not a package provider.",
-        "COORDINATE: ADR 0050 makes forge issues and PRs/MRs the default tracker and agent channel; other trackers are overrides. prompt-task@2 is the generic external envelope. Remote live gates no longer require OPENAI_API_KEY.",
-        "Deferred to 1.3 by maintainer decision: production action-DAG dispatch with multi-worker shared LAN-cache qualification (#4) and clean three-way update merging with reviewed resolution application (#2); in 1.2, conflict review is plan-only and update apply preserves conflicts. Remote native-package custody, complete native-CLI lifecycle proof, and audited legacy-worktree retirement also remain open.",
+        "The 1.2 foundation remains: bounded candidate repair, cross-host action workers, native Mix builds, forge-default coordination, tiered qualification, plus the 1.1 scheduler/cache/package/native-acceptance foundation and 1.0 operator/release boundaries.",
+        "ADOPT: reviewed first Standard binding and original-source admission preserve existing receipt policy, historical evidence, and source authority. Retained execution and downstream release admission remain separate gates.",
+        "TARGET: target-bound Python source projection keeps original source intact while binding reviewed exclusions to exact marker and lock authority. FreeBSD worker and target identities landed as development foundations, not complete platform acceptance.",
+        "CARRY: versioned SDK tree, alias, hard-link, package-plan, and topology contracts preserve exact producer and consumer custody. Decoding or relocating a tree grants no producer, package, or release admission by itself.",
+        "HARDEN: retained execution now binds Windows system context, executable intent, scoped secondary identities, runtime paths, and current installed bytes more tightly. Several native end-to-end qualifications remain deliberately deferred.",
+        "Deferred from 1.3.0: bounded diagnostics and reliability fixes move to 1.3.1; complete FreeBSD admission, Windows ARM64 realization, remote native packaging, production action-DAG/LAN-cache proof, and broader retained-project feature contracts move to 1.4.",
     ])
 
     # 24 - end state
@@ -929,7 +929,7 @@ def build() -> Path:
 
     # 25 - the ask
     s = add_slide(C["fog"])
-    title(s, "Use the exact parallel path. Harden for the portfolio.", "Take one demanding downstream application through installed 1.2 repair, cross-host workers, cache, and native acceptance, then invest in production operations.", False, 25)
+    title(s, "Use the exact parallel path. Harden for the portfolio.", "Take one demanding downstream application through installed 1.3 retained-source, worker, package, and native-custody paths, then invest in production operations.", False, 25)
     asks = [
         ("TWO WEEKS", "Containment + operational hardening", C["orange"]),
         ("ONE APPLICATION", "Installed adoption through retained", C["blue"]),

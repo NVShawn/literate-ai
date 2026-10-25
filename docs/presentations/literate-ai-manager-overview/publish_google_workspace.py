@@ -231,6 +231,23 @@ def _resource_preflight(
             f"authenticated principal cannot export the configured {member} resource"
         )
     access = _permissions(token, file_id)
+    broad_readers = [
+        item
+        for item in access
+        if item.get("role") in {"reader", "commenter"}
+        and (
+            item.get("type") == "anyone"
+            or (
+                item.get("type") == "domain"
+                and item.get("domain") != "nvidia.com"
+            )
+        )
+    ]
+    if broad_readers:
+        raise RuntimeError(
+            f"{member} access exceeds the declared organization-restricted audience: "
+            f"{broad_readers}"
+        )
     has_org_reader = any(
         item.get("type") == "domain"
         and item.get("domain") == "nvidia.com"
