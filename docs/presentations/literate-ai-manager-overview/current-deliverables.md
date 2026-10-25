@@ -1,14 +1,14 @@
 # Current deliverables
 
-The checked-in members below are the published **1.2.0 repair, cross-host worker,
-and Mix edition**. Both stable Google Workspace resources were refreshed in place on
-2026-10-11 and export-back verified against these accepted local members. Their stable
-IDs and links did not change.
+The checked-in members below are the verified local **1.3.0 retained-source and
+native-custody edition**. The stable Google Workspace resources carry the same
+published 1.3.0 edition, verified by export-back. Their stable IDs and links did not
+change.
 
-- Native Google Slides (1.2.0 edition): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
-  — stable ID; 26 slides / 26 notes pages required on export-back.
-- Native Google Doc (1.2.0 edition): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
-  — stable ID; 73 headings with no skipped level required on export-back of the 1.2.0 edition.
+- Native Google Slides (stable 1.3.0 resource): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
+  — export-back verified 26 slides / 26 notes pages.
+- Native Google Doc (stable 1.3.0 resource): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
+  — export-back verified 73 headings, matching the accepted local member.
 - Generated PowerPoint:
   [literate-ai-manager-and-engineering-overview.pptx](literate-ai-manager-and-engineering-overview.pptx)
 - Generated Word:
@@ -30,7 +30,7 @@ SHA-256. Trust the acceptance report for the digest of the exact committed artif
 | Component | `component://literate-ai/literate-ai-overview` (terminal) |
 | Capability | `literate-ai.document-pair` |
 | Ecosystem | `google-workspace` |
-| Edition | 1.2.0 (published in place and export-back verified, 2026-10-11) |
+| Edition | 1.3.0 (local and Google Workspace members verified) |
 | Members | `presentation`, `narrative` |
 | Local presentation | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.pptx` |
 | Local narrative | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.docx` |
@@ -38,9 +38,8 @@ SHA-256. Trust the acceptance report for the digest of the exact committed artif
 | Published narrative | Doc file `1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA` |
 | Slides | 26 local; 26 on export-back |
 | Notes slides | 26 local; 26 on export-back |
-| Narrative headings | 73 local, no skipped level; 73 required on export-back |
-| Local presentation size / SHA-256 | 1,376,406 bytes / `ee7b402c7675d151f331e98517627d22229047d01df31959f68fb2788bc169e3` |
-| Local narrative size / SHA-256 | 50,364 bytes / `6a0d4a8f0e4c2e67ca214ea2aa1b5abb565bd1f5c3fd26672864554a03cad58c` |
+| Narrative headings | Verified by the current acceptance report; export-back must match |
+| Local identities | Recorded by the current acceptance report and publication receipt |
 | Geometry scan | 0 elements outside 1280 × 720; 0 overlapping text-bearing frames. Geometry-escape is not the overflow gate — `scripts/verify_document_pair.py` now checks both; `render_slides.py` prints an AABB overlap report for inspection. |
 
 ## Access record

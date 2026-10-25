@@ -12,6 +12,9 @@
   New full-episode narration and rendering remain pending. Video and presentation
   skills require explicit visual direction and separate motion-quality review
   before publication.
+- Fail document-pair publication preflight when a stable Google Workspace resource
+  has an anonymous or foreign-domain reader grant, preserving the declared
+  organization-restricted audience.
 
 - Refresh documentation browser tooling to Puppeteer 25.16.0 and locked Zod
   4.6.7, eliminating both affected Zod paths while retaining strict audit gates.

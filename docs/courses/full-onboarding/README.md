@@ -30,6 +30,13 @@ The draft has 12 chapters, 86 spoken turns and 1,732 spoken words.
 Allow roughly 13–16 minutes with source-reading and acting holds; this is an
 authoring estimate, not measured narration or a completed film duration.
 
+The rebuildable sources are the [story compiler](compile_story.py),
+[batch synthesizer](synthesize.py), [measured-input preparer](prepare.py),
+[offline player](player.mjs), [stage template](stage.html),
+[browser build](build.mjs) and [fixed-time capture](capture.mjs). Focused
+[compiler](test_compile_story.py) and [preparation](test_prepare.py) tests protect
+the narrative and retained-audio boundaries.
+
 ## Build the 1.3.1 candidate
 
 All generated speech and media stay under ignored `_build/` custody. The compiler
