@@ -8,6 +8,10 @@ approval remain open. This is not yet a replacement for the accepted pilot or
 published film. The user passed visual inspection of the exact directed pilot; its
 cast and visual treatment are the starting point.
 
+The exact candidate revision's [fresh evidence](../../../verification/onboarding-1.3.1-fresh-evidence.json)
+records a ready host and read-only adoption plan over an unchanged eight-file native
+fixture. It does not claim apply, build, retained-harness or native qualification.
+
 ## Version and factual contract
 
 Use [the research ledger](RESEARCH.md) and [snapshot](research-snapshot.json) as

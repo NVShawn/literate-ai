@@ -14,8 +14,10 @@ player and fixed-time capture path are authored. All 86 turns have now been reco
 with the approved NVIDIA Magpie voices, rendered into a 12:04.896 local candidate and
 independently media-verified. **Complete listening and normal-speed playback approval
 remain pending.** The [production plan](PRODUCTION.md) names the remaining fresh
-evidence, review and publication gates. The pilot and published film remain intact
-until the replacement passes all of them.
+evidence, review and publication gates. Fresh [host and read-only adoption evidence](../../../verification/onboarding-1.3.1-fresh-evidence.json)
+is retained against the exact candidate source revision without claiming apply or
+build. The pilot and published film remain intact until the replacement passes every
+remaining gate.
 
 The argument preserves required CI, independent review and native/release gates.
 It challenges waiting for CI to provide the first useful feedback. Sam's eight-hour

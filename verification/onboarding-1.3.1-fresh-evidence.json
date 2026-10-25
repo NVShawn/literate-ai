@@ -1,0 +1,57 @@
+{
+  "schema": "literate-ai/onboarding-film-fresh-evidence@1",
+  "observed_at": "2026-10-25T21:23:45Z",
+  "source_revision": "250ed43419dbcf78e6b560ff593d9df7566e1d66",
+  "doctor": {
+    "command": "litai doctor",
+    "ok": true,
+    "host_ready": true,
+    "target": {
+      "operating_system": "macos",
+      "architecture": "arm64",
+      "accelerator": "none"
+    },
+    "observed_capabilities": {
+      "python": "3.14.7",
+      "git": "2.54.0",
+      "git-lfs": "3.8.0",
+      "coding_cli": "claude 2.1.310"
+    }
+  },
+  "adopt_plan": {
+    "command": "litai onboard adopt tests/fixtures/native_sdk --project-id onboarding-review-131 --flavor lang-cpp --flavor build-cmake",
+    "ok": true,
+    "schema": "literate-ai/onboard-plan@1",
+    "plan_identity": "sha256:fd2b0acdfb28a6fe1e75502e830b108d283ab1e7a1f304d4d3138a7cec55582f",
+    "mode": "adopt",
+    "writes": false,
+    "apply_supported": true,
+    "blocker_count": 0,
+    "readiness": "ready",
+    "detected_languages": [
+      "cpp",
+      "python"
+    ],
+    "detected_build_system": "cmake",
+    "retained_runners": [
+      "build",
+      "test"
+    ]
+  },
+  "source_fixture": {
+    "path": "tests/fixtures/native_sdk",
+    "file_count": 8,
+    "before_and_after_sha256": {
+      "CMakeLists.txt": "67e81c6f3495b8f47102738aaa7914b7b87225f28d7225900b4008e9b8c46b67",
+      "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "README.md": "2896d8759ba5d159fc5b10c1446ca9f9ec42327bae248933741c80067040422c",
+      "include/vendor_math.h": "aa6e7f789547023cd2907461c5bd6a7c1c65f67ccf6202e4bda90272dc1acc2d",
+      "interface.md": "4b62867966a9a9c86e05e56c6c9cd6a11aefcaaad450b983ef2f757c03221908",
+      "python/vendor_math/__init__.py": "2b29741e2887e021c21b8c6893a5cca4b561030f42303f256b21148eec1a97c7",
+      "vendor_factor.c": "118822fd634e3832776ba6e2db4da6165e2bd1a66dcdd04153c4e65e11ece070",
+      "vendor_math.c": "c9dafb55f0c88497206b0aa269507f717f4e8bdf1d9125c10bf4042cc5570999"
+    },
+    "unchanged": true
+  },
+  "boundary": "Fresh evidence covers host preflight and a read-only adoption plan only. No apply, baseline execution, build, retained-harness admission, generated source, native qualification, release, benchmark, or publication is claimed."
+}
