@@ -1,6 +1,13 @@
 # Factual claim ledger
 
-## 1.3.0 edition candidate (2026-10-24)
+## 1.3.0 edition publication (2026-10-24)
+
+The stable Google Workspace pair was updated in place from exact source revision
+`eb5b82bfa2b03f042c9f2b65dfccfa5184bccd26`. Export-back verified 26 slides,
+26 notes pages, and 73 narrative headings. The release-bound receipt identity is
+`sha256:e38fd2edbfab5be38eeb4c73369cae735a9eea640989ee4b858bd717d08a831a`.
+Both resources expose the NVIDIA-domain reader grant plus their owner only; legacy
+anonymous-reader grants were removed before publication.
 
 This is the major/minor document-pair regeneration required before the `1.3.0` cut.
 It preserves the published 1.2 foundation and records landed framework slices from the

@@ -1,6 +1,6 @@
 # QA ledger
 
-## 2026-10-24 1.3.0 retained-source and native-custody edition accepted
+## 2026-10-24 1.3.0 retained-source and native-custody edition published
 
 - Regenerated both required members after the 1.3 contribution sweep reached a
   closed, machine-readable disposition. The edition records reviewed original-source
@@ -24,8 +24,14 @@
   owner grants, matching the declared organization-restricted audience. The focused
   publisher regression passes and the live pair-wide preflight identity is
   `sha256:c82c59db7d0e5393d6d253afc33df8d16ba57b6b8ecca1b0fd33c7377ca93a08`.
-  In-place publication, export-back verification, and the release-bound publication
-  receipt remain pending the exact committed revision.
+  In-place publication from exact source revision
+  `eb5b82bfa2b03f042c9f2b65dfccfa5184bccd26` completed. Export-back matched 26
+  slides, 26 notes pages, and 73 narrative headings. Export identities are
+  `sha256:d4bc6d332940b2355434f7cc89b2267a777582757d995acd001a470b86d5b460`
+  for the presentation and
+  `sha256:5bc192a528b92d77d273ad845c47ce3b958d90e06efe489b27ee6d4b7627f131`
+  for the narrative. The complete release-bound receipt identity is
+  `sha256:e38fd2edbfab5be38eeb4c73369cae735a9eea640989ee4b858bd717d08a831a`.
 
 ## 2026-10-11 1.2.0 (public) edition published
 

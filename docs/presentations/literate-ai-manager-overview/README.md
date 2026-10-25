@@ -4,12 +4,12 @@ This is the reproducible authoring package for the current manager and engineeri
 document pair: a `presentation` member (Google Slides deck) and a `narrative` member
 (Google Doc), per `component://literate-ai/literate-ai-overview`'s declared realization.
 
-**1.3.0 edition candidate.** This package carries the verified local 1.3.0 edition:
+**1.3.0 edition.** This package carries the verified local 1.3.0 edition:
 reviewed original-source first binding, target-bound Python source projection,
 FreeBSD worker and target foundations, native SDK tree custody, and retained
 execution hardening on the 1.2 repair, cross-host worker, Mix, and forge foundation.
-The stable Google Workspace pair below still carries the published 1.2.0 edition
-until the account-bound in-place update and export-back verification complete.
+The stable Google Workspace pair below carries the same 1.3.0 edition after an
+account-bound in-place update and successful export-back verification.
 
 Published presentation: [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
 

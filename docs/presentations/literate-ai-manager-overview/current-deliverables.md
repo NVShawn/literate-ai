@@ -1,14 +1,14 @@
 # Current deliverables
 
 The checked-in members below are the verified local **1.3.0 retained-source and
-native-custody edition candidate**. The stable Google Workspace resources still carry
-the published 1.2.0 edition until the pair-wide 1.3.0 publication and export-back
-verification complete. Their stable IDs and links do not change.
+native-custody edition**. The stable Google Workspace resources carry the same
+published 1.3.0 edition, verified by export-back. Their stable IDs and links did not
+change.
 
-- Native Google Slides (stable resource; 1.2.0 until publication): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
-  — 26 slides / 26 notes pages required on 1.3.0 export-back.
-- Native Google Doc (stable resource; 1.2.0 until publication): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
-  — the local and exported heading counts must match with no skipped level.
+- Native Google Slides (stable 1.3.0 resource): [Literate-AI — Application Foundry Vision](https://docs.google.com/presentation/d/1zGugAIHdxXNSDKJia9jak55_0J0LnpSq2dFt2F5OZpE/edit?usp=drivesdk)
+  — export-back verified 26 slides / 26 notes pages.
+- Native Google Doc (stable 1.3.0 resource): [Literate-AI — Application Foundry Narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk)
+  — export-back verified 73 headings, matching the accepted local member.
 - Generated PowerPoint:
   [literate-ai-manager-and-engineering-overview.pptx](literate-ai-manager-and-engineering-overview.pptx)
 - Generated Word:
@@ -30,7 +30,7 @@ SHA-256. Trust the acceptance report for the digest of the exact committed artif
 | Component | `component://literate-ai/literate-ai-overview` (terminal) |
 | Capability | `literate-ai.document-pair` |
 | Ecosystem | `google-workspace` |
-| Edition | 1.3.0 (local candidate; Google Workspace publication pending) |
+| Edition | 1.3.0 (local and Google Workspace members verified) |
 | Members | `presentation`, `narrative` |
 | Local presentation | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.pptx` |
 | Local narrative | `docs/presentations/literate-ai-manager-overview/literate-ai-manager-and-engineering-overview.docx` |
