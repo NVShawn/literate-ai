@@ -19,8 +19,13 @@
 - Local artifact identities:
   - PPTX: `sha256:e84b0819f7ed6858da3171ac44d6a3778a6e631fdc28fa0801e7f7ba55b7ca7f`
   - DOCX: `sha256:f2ffee56a4adc3877798e28287e638ba9773d8b1f3ca01d29aeaca6f7d5ca0f9`
-- Google Workspace preflight, in-place publication, export-back verification, and the
-  release-bound publication receipt remain pending the exact committed revision.
+- Google Workspace preflight passed after removing legacy anonymous-reader grants
+  from both stable resources. The pair now exposes only the NVIDIA-domain reader and
+  owner grants, matching the declared organization-restricted audience. The focused
+  publisher regression passes and the live pair-wide preflight identity is
+  `sha256:c82c59db7d0e5393d6d253afc33df8d16ba57b6b8ecca1b0fd33c7377ca93a08`.
+  In-place publication, export-back verification, and the release-bound publication
+  receipt remain pending the exact committed revision.
 
 ## 2026-10-11 1.2.0 (public) edition published
 

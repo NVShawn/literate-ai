@@ -28712,10 +28712,15 @@ projects under #22, typed SSH custody under #69, or a downstream release.
   - [x] Implement and qualify Python library wheel dependencies (issue 47)
   - [ ] Complete remaining scoped fixes and qualification in dependency order
   - [x] Integrate reviewed maintenance PRs and preserve unresolved worktree evidence
+  - [x] Refuse document-pair publication when a stable resource has an anonymous
+        reader grant, and restore both 1.3 resources to their declared
+        organization-restricted audience before publication
 - **Evidence:**
   - [ ] Every open issue and review has a linked queue owner and current release disposition
   - [ ] Meaningful focused tests and required consolidated qualification pass for changed behavior
   - [ ] Remaining release and acceptance blockers remain explicit until proven complete
+  - [x] Publisher access-policy regression passes and pair-wide preflight reports only
+        the NVIDIA-domain reader plus resource owners/editors
 
 - **GitHub pull request:** [#66](https://github.com/jordanhubbard/literate-ai/pull/66), including the reviewed ancestry of #60–#62.
 - **Policy reconciliation:** Correct stale repository pre-release target 1.2 to 1.3 through the public release-state command; record native and installed qualification without claiming final release readiness.
