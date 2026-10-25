@@ -31100,7 +31100,8 @@ The first failed directory, source checkout and installed wheel stay retained.
 ### [ ] COURSE-004 — Animated onboarding conversations with auditioned neural voices
 
 - **Priority:** P1
-- **Owner:** docs/courses/animated-onboarding; author-instructional-videos and author-presentations-and-documents craft
+- **Release target:** 1.3.1
+- **Owner:** docs/courses/animated-onboarding, docs/courses/full-onboarding, front-door onboarding documentation, and author-instructional-videos craft
 - **Direction:** Use the approved Motion design for the next onboarding video, with animated Sam and LitAI characters, livelier conversation, and natural speech selected after inspecting NVIDIA inference and codex-ios.
 - **Conclusion:** Implement a project-owned offline Motion/SVG authoring pilot and a short recorded-voice review cut before a full episode. Preserve the existing film and native qualification work. codex-ios supplies live Codex voice discovery, not standalone downloadable model weights. NVIDIA Magpie is an explicitly requested speech provider; retain generated audio, discover voice support, bind source and renderer inputs, and require separate human viewing/listening review before publication.
 - **Depends on:** none
@@ -31118,7 +31119,12 @@ The first failed directory, source checkout and installed wheel stay retained.
   - [x] Implement and render the directed animation with approved audio and no generic gesture substitution.
   - [x] Obtain the user's visual validation of the new moving cut.
   - [x] Research public Literate AI projects and author the full annotated pre-CI narrative with a skeptical Sam, sharper LitAI banter, languages, OS targets and substantial worker testing.
-  - [ ] Expand the next onboarding episode with fresh execution evidence and complete playback review before publication.
+  - [x] Compile the full 12-chapter/86-turn narrative into bounded measured-audio inputs; add the offline Motion player, fixed-time renderer, retained-input provenance, reduced-motion behavior and deterministic synthetic structural QA.
+  - [ ] Refresh the explicitly selected NVIDIA credential, observe the live voice catalog, synthesize every turn with the approved Jason Neutral and Aria stock voices, and complete line-by-line listening and pronunciation review without fallback speech.
+  - [ ] Capture and retain fresh execution evidence for the film's current Literate AI claims, preserving native, retained-source and benchmark boundaries.
+  - [ ] Render and verify the complete film, captions and media receipts; inspect representative frames and watch the assembled film at normal speed with separate factual, accessibility, listening and visual approval recorded against exact identities.
+  - [ ] Publish the approved 1.3.1 media and provenance on GitHub, then update README, getting-started, installation, course-index and video-authoring links to the exact asset without removing the prior film.
+  - [ ] Pass the declared 1.3.1 release-goal gate and exact release qualification; do not publish or close the milestone while any item above remains incomplete.
 - **Pilot result:** [Authoring package](../courses/animated-onboarding/README.md)
   and [QA](../courses/animated-onboarding/QA.md) retain nine unit checks, seven browser
   checks, five repeatable timeline frames, an actual read-only source-CLI adopt
@@ -31143,9 +31149,12 @@ The first failed directory, source checkout and installed wheel stay retained.
   [research ledger](../courses/full-onboarding/RESEARCH.md) now cover five verified
   project integrations from sixteen inspected public snapshots, with concrete
   implementation use and explicit native/adoption limits. Sam's escalating
-  coffee/laundry/garage excuses carry the comic arc. Next action: review the full
-  script before recording new dialogue, realizing chapter choreography and obtaining
-  fresh demo evidence. No eight-hour-to-minutes benchmark or replacement of
+  coffee/laundry/garage excuses carry the comic arc. The full narrative now has a
+  compiled, offline 12-chapter authoring and capture path whose synthetic fixture
+  passes deterministic seek, caption, arm-continuity, reduced-motion and no-network
+  QA. That fixture is not candidate media. The retained NVIDIA credential returned
+  HTTP 401 on 2026-10-25, so full speech, fresh evidence, rendering and complete
+  playback approval remain open. No eight-hour-to-minutes benchmark or replacement of
   mandatory CI, native qualification or release gates is claimed. An initial
   authority-renewal attempt rejected a generated publication-sample bundle whose
   smoke path retained an unresolved module import. The

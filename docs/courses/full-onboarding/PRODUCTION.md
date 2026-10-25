@@ -11,10 +11,10 @@ treatment are the starting point.
 
 Use [the research ledger](RESEARCH.md) and [snapshot](research-snapshot.json) as
 source authority for project case studies. Freeze the actual framework version used
-for filming and refresh the inspected project commits before production. The
-observed published wheel is v1.2.0; the current FreeBSD Flavor is development-source
-work absent from that release. Identify development-only functionality on screen;
-do not imply that downloading the released wheel enables every source-tree feature.
+for filming and refresh the inspected project commits before production. The prior
+film demonstrates v1.2.0; v1.3.0 is the currently published wheel and this replacement
+is a blocking v1.3.1 goal. Identify development-only functionality on screen; do not
+imply that downloading an earlier wheel enables every source-tree feature.
 
 The narrative's project test counts are records at named commits, not tests rerun
 for this film, comparisons of whole-pipeline speed, current-HEAD green guarantees
@@ -61,10 +61,11 @@ LitAI punctures the ritual while preserving the engineering rigor he values.
 
 Retain the accepted stable workbench, two-joint foreground arms, meaningful gaze,
 expressions, purposeful holds and static alternative. The existing pilot only
-implements its own finite target/pose vocabulary. The full script is **not** a
-machine-executable performance score yet. Implement each chapter's actual targets,
-prop contacts, cue map and finite tracks before rendering; reject unsupported beats
-rather than mapping new dialogue back to a generic gesture.
+implements its own finite target/pose vocabulary. The full script now compiles into
+finite per-turn intentions and twelve chapter-specific visual panels, with a bounded
+reach-and-settle performance instead of an idle gesture loop. Synthetic structural QA
+does not approve the performance: inspect every actual voiced chapter and reject any
+unsupported beat rather than mapping new dialogue back to a generic gesture.
 
 | Capability | Direction and realization requirement |
 | --- | --- |
@@ -106,16 +107,16 @@ an observed demonstration. Source-backed diagrams need no invented live result.
 
 ## Review and delivery gates
 
-First review the full script for tone, technical claims and case-study scope. Then
-record and align its new dialogue, realize chapter choreography and produce a
-representative new exchange before committing to the whole render. Check every
-chapter at playback size and speed, with sound and then muted. The accepted pilot
-is not blanket approval of new jokes, delivery, props or a longer sequence.
+The full script, compiler and chapter choreography are authored. After credential
+refresh, record and align every new line, then check every chapter at playback size
+and speed, with sound and then muted. The accepted pilot is not blanket approval of
+new jokes, delivery, props or a longer sequence.
 
 Run score admission, audio/source drift refusals, full-timeline pose continuity,
 caption bounds, offline/keyboard and reduced-motion/static checks at the actual
 chapter scope. Assemble with the existing video CLI and independently verify the
 final manifest and media. Retain captions, source records and a local review copy.
-Record voice, visual, factual and accessibility judgments separately. Publication
-still requires its explicit destination authorization; no release or media upload
-is part of this narrative draft.
+Record voice, visual, factual and accessibility judgments separately. The user has
+authorized GitHub publication as part of v1.3.1, but publication remains prohibited
+until those judgments and every declared release goal pass. Retain the prior film and
+make all new front-door links resolve to the exact approved media identity.
