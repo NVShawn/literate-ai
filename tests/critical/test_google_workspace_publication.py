@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
 import unittest
+from pathlib import Path
 from unittest import mock
-
 
 SCRIPT = (
     Path(__file__).parents[2]
