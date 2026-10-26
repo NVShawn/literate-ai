@@ -578,7 +578,12 @@ identity for a caller-admitted complete semantic action key. Its executor perfor
 current authorization, verified CAS production, and fresh target/receipt admission
 for each request. It rejects another request's result rather than copying an
 accepted dispatch envelope. Failed production reaches all waiters without transferring terminal authority
-between request envelopes. Definite terminal production leaves no success entry
+between request envelopes. A trusted controller-only no-actuation record binds a
+failed waiter, its selected worker and producer-failure correlation: it proves
+that waiter never invoked production or admission, so its unused reservation can
+release without inventing native termination evidence. The failed attempt retains
+this record. It cannot authorize a retry or clear the actual producer's unknown
+ownership/key hold. Definite terminal production leaves no success entry
 and permits a subsequent explicit retry. Unresolved production keeps its key
 blocked, including attempts on other workers, until exact owner resolution. The adapter is scoped to
 one finite coordinator; native transport, attempt logs and persistent shared-cache

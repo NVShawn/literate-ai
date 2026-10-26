@@ -273,6 +273,12 @@ class CommandComponentBuilder:
                             "failure_code": getattr(exc, "code", None)
                             or "dispatch-failed",
                             "owned_process_started": False,
+                            "no_actuation_evidence_identity": (
+                                exc.no_actuation_evidence.identity.uri
+                                if getattr(exc, "no_actuation_evidence", None)
+                                is not None
+                                else None
+                            ),
                             "terminal_authority_transferred": False,
                         }
                     )

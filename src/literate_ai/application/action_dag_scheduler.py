@@ -304,12 +304,51 @@ class LifecycleActionProducerFailure:
 
 
 @dataclass(frozen=True, slots=True)
+class LifecycleActionNoActuation:
+    """Trusted adapter proof that a failed waiter never started an owned process.
+
+    This is controller routing evidence, never native terminal/fencing authority.
+    No transport deserializer may mint it from a worker's claim.
+    """
+
+    request_identity: ContentIdentity
+    worker_identity: ContentIdentity
+    producer_failure_identity: ContentIdentity
+
+    def __post_init__(self):
+        if any(
+            not isinstance(value, ContentIdentity)
+            for value in (
+                self.request_identity,
+                self.worker_identity,
+                self.producer_failure_identity,
+            )
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.no_actuation_invalid", "no-actuation evidence must be typed"
+            )
+
+    @property
+    def identity(self):
+        return canonical_identity(
+            {
+                "schema": "literate-ai/coalesced-waiter-not-actuated@1",
+                "request_identity": self.request_identity.uri,
+                "worker_identity": self.worker_identity.uri,
+                "producer_failure_identity": self.producer_failure_identity.uri,
+                "owned_process_started": False,
+            }
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class LifecycleActionDispatchOutcome:
     request_identity: ContentIdentity
     result_identity: ContentIdentity | None
     failure_code: str | None = None
     termination: LifecycleActionTermination | None = None
     producer_failure: LifecycleActionProducerFailure | None = None
+    no_actuation: LifecycleActionNoActuation | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.request_identity, ContentIdentity):
@@ -329,6 +368,19 @@ class LifecycleActionDispatchOutcome:
             raise ActionDagSchedulingError(
                 "action_dag.failure_correlation_invalid",
                 "producer failure must bind this failed request",
+            )
+        if self.no_actuation is not None and (
+            not isinstance(self.no_actuation, LifecycleActionNoActuation)
+            or self.no_actuation.request_identity != self.request_identity
+            or self.producer_failure is None
+            or self.no_actuation.producer_failure_identity
+            != self.producer_failure.identity
+            or self.termination is not None
+            or self.failure_code is None
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.no_actuation_invalid",
+                "no-actuation proof must bind this failed waiter and correlation",
             )
         if self.termination is not None and (
             not isinstance(self.termination, LifecycleActionTermination)
@@ -473,6 +525,7 @@ class LifecycleActionAttempt:
     result: LifecycleActionResult
     termination: LifecycleActionTermination | None = None
     producer_failure: LifecycleActionProducerFailure | None = None
+    no_actuation: LifecycleActionNoActuation | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -510,13 +563,33 @@ class LifecycleActionAttempt:
                 "attempt producer correlation differs",
             )
 
+        if self.no_actuation is not None and (
+            not isinstance(self.no_actuation, LifecycleActionNoActuation)
+            or self.no_actuation.request_identity != self.result.request_identity
+            or self.no_actuation.worker_identity != self.result.worker_identity
+            or self.producer_failure is None
+            or self.no_actuation.producer_failure_identity
+            != self.producer_failure.identity
+            or self.termination is not None
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.no_actuation_invalid", "attempt no-actuation proof differs"
+            )
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
-                "schema": "literate-ai/lifecycle-action-attempt@2"
+                "schema": "literate-ai/lifecycle-action-attempt@3"
+                if self.no_actuation
+                else "literate-ai/lifecycle-action-attempt@2"
                 if self.termination or self.producer_failure
                 else "literate-ai/lifecycle-action-attempt@1",
+                **(
+                    {"no_actuation_identity": self.no_actuation.identity.uri}
+                    if self.no_actuation
+                    else {}
+                ),
                 **(
                     {"producer_failure_identity": self.producer_failure.identity.uri}
                     if self.producer_failure
@@ -1041,6 +1114,7 @@ class LifecycleActionDagScheduler:
                             getattr(exc, "code", None) or "dispatch-failed",
                             getattr(exc, "termination_evidence", None),
                             getattr(exc, "producer_failure", None),
+                            getattr(exc, "no_actuation_evidence", None),
                         )
                     if (
                         not isinstance(outcome, LifecycleActionDispatchOutcome)
@@ -1071,8 +1145,19 @@ class LifecycleActionDagScheduler:
                             "action_dag.fencing_policy_invalid",
                             "worker loss does not bind the admitted fencing policy",
                         )
+                    if (
+                        outcome.no_actuation is not None
+                        and outcome.no_actuation.worker_identity
+                        != request.worker.worker_identity
+                    ):
+                        raise ActionDagSchedulingError(
+                            "action_dag.no_actuation_invalid",
+                            "no-actuation proof names another worker",
+                        )
                     if outcome.failure_code is not None:
-                        uncertain = outcome.termination is None
+                        uncertain = (
+                            outcome.termination is None and outcome.no_actuation is None
+                        )
                         if uncertain:
                             pending = LifecycleActionUnresolvedOwnership(
                                 request, policies.get(action_id, ActionDispatchPolicy())
@@ -1101,6 +1186,7 @@ class LifecycleActionDagScheduler:
                                 results[action_id],
                                 outcome.termination,
                                 outcome.producer_failure,
+                                outcome.no_actuation,
                             )
                         )
                         policy = policies.get(action_id, ActionDispatchPolicy())

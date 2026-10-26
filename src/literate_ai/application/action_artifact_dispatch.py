@@ -10,6 +10,7 @@ from literate_ai.application.action_dag_scheduler import (
     ActionDagSchedulingError,
     LifecycleActionDispatchOutcome,
     LifecycleActionDispatchRequest,
+    LifecycleActionNoActuation,
     LifecycleActionProducerFailure,
     LifecycleActionTermination,
 )
@@ -148,6 +149,11 @@ class CoalescingArtifactDispatcher:
                         termination.evidence_identity
                         if isinstance(termination, LifecycleActionTermination)
                         else None,
+                    )
+                    error.no_actuation_evidence = LifecycleActionNoActuation(
+                        request.identity,
+                        request.worker.worker_identity,
+                        error.producer_failure.identity,
                     )
                 raise error from exc
             with self._lock:

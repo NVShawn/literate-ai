@@ -213,6 +213,7 @@ class UnknownOwnershipTests(unittest.TestCase):
     def test_coalesced_bound_terminal_failure_never_becomes_waiter_authority(self):
         class Executor:
             dispatcher = None
+            producer_terminal = True
 
             def action_key(inner, request):
                 return _identity("complete-key")
@@ -228,13 +229,14 @@ class UnknownOwnershipTests(unittest.TestCase):
                         error = ActionDagSchedulingError(
                             "worker-lost", "fixture owned process exited"
                         )
-                        error.termination_evidence = LifecycleActionTermination(
-                            request.identity,
-                            request.worker.worker_identity,
-                            _identity("producer-terminal"),
-                            "owned-terminal",
-                            1,
-                        )
+                        if inner.producer_terminal:
+                            error.termination_evidence = LifecycleActionTermination(
+                                request.identity,
+                                request.worker.worker_identity,
+                                _identity("producer-terminal"),
+                                "owned-terminal",
+                                1,
+                            )
                         raise error
                     threading.Event().wait(0.001)
                 raise TimeoutError("second fixture request never joined")
@@ -275,8 +277,42 @@ class UnknownOwnershipTests(unittest.TestCase):
             waiter.producer_failure.evidence_identity,
             producer.termination.evidence_identity,
         )
-        self.assertEqual(waiter.result.disposition, LifecycleActionDisposition.UNKNOWN)
+        self.assertIsNotNone(waiter.no_actuation)
+        self.assertEqual(waiter.result.disposition, LifecycleActionDisposition.FAILED)
+        self.assertEqual(result.unresolved_ownership, ())
         self.assertEqual(producer.result.disposition, LifecycleActionDisposition.FAILED)
+
+        unknown_executor = Executor()
+        unknown_executor.producer_terminal = False
+        unknown_dispatcher = CoalescingArtifactDispatcher(unknown_executor)
+        unknown_executor.dispatcher = unknown_dispatcher
+        scheduler = LifecycleActionDagScheduler()
+        unknown = scheduler.run(
+            (_node("one"), _node("two", workers=("beta",))),
+            (_worker("alpha"), _worker("beta")),
+            unknown_dispatcher,
+            deadline_identity=_identity("deadline"),
+        )
+        self.assertEqual(len(unknown.unresolved_ownership), 1)
+        waiter = next(attempt for attempt in unknown.attempts if attempt.no_actuation)
+        self.assertIsNone(waiter.termination)
+        self.assertEqual(waiter.result.disposition, LifecycleActionDisposition.FAILED)
+        self.assertNotEqual(
+            waiter.result.request_identity,
+            unknown.unresolved_ownership[0].request.identity,
+        )
+        self.assertEqual(len(unknown_dispatcher.unresolved_productions), 1)
+        owner = unknown.unresolved_ownership[0].request.worker.worker_id
+        unused = "beta" if owner == "alpha" else "alpha"
+        healthy = scheduler.run(
+            (_node("other", workers=(unused,)),),
+            (_worker(unused),),
+            _RecordingDispatcher(),
+            deadline_identity=_identity("deadline"),
+        )
+        self.assertEqual(
+            healthy.results[0].disposition, LifecycleActionDisposition.ACCEPTED
+        )
 
 
 if __name__ == "__main__":
