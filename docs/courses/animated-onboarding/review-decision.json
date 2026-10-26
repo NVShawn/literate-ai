@@ -1,0 +1,35 @@
+{
+  "review_scope": "Original short audition; user feedback, not an automated quality result",
+  "story_sha256": "a0a29fdac1d6ea6b2fd6d3902db202e0de0e88c067eb076d8f22162623b65a7c",
+  "video_mp4_sha256": "bfc228fa6ce72923c69867963c5987d5d4a896cfbb24de919ecae01d81db959a",
+  "voice_recordings_sha256": {
+    "changes": "3cfb45ccaaef6681798944d997999e35f6e5c66d6d3b43548673d0c8eb57529a",
+    "doctor": "eac396e3e16e550c65d479166c5e65f7666fcff21cced06afc0f6ae0d3386ce1",
+    "earn": "d43c420a0de5a3ab4f73925abf069a9f315ac9f859e63fc26125c094c1466e23",
+    "existing": "e9a416fecdf2736a06d8cbaa5f4ee1c3fbe8c6e7718e6e47c0e355837d690a10",
+    "green": "422ab9fcbf3c66f1010ca55d203d0d31d5f867000059c0b398ea370a46a3130d",
+    "inspect": "e0b9455a51e84919c2ff058936bd702c6440cb4b96e859ff14a23fcdeef70269",
+    "readonly": "4a93ee3d5765220cac9e20a598db73c4d1cca0095f3be9c23c8b911f0baffb29",
+    "surprises": "2c1c511e887697e64bca19fcb578cbce93231da9e37586c6a7c75398227872aa"
+  },
+  "voice_review": {
+    "status": "validated",
+    "reviewer": "user",
+    "feedback": "The voices are good - this step is validated.",
+    "scope": "Retained audition voices; new dialogue still needs delivery and pronunciation review."
+  },
+  "animation_review": {
+    "status": "rejected",
+    "reviewer": "user",
+    "feedback": "The character arms just flapped slightly up and down and did not add anything to the presentation.",
+    "scope": "The short segment; no full-episode review or visual approval is inferred."
+  },
+  "cause": [
+    "Narrative specified generic gesture labels rather than purposeful performance beats.",
+    "Renderer reduced most speech to the same short arm/nod cycle.",
+    "Technical validation and sampled stills did not evaluate semantic contribution or full moving performance."
+  ],
+  "next_step": "Implement the separate STORYBOARD.md performance score, bind measured phrase cues and retain a new cut for motion review.",
+  "replacement_animation_implemented": false,
+  "publication_authorized": false
+}

@@ -39,6 +39,29 @@ interview, documentary, or another appropriate format is equally valid.
   two voices reading independent lectures. Humor is an optional project choice,
   not a framework requirement, and must not obscure the instructions.
 
+## Score purposeful animation alongside dialogue
+
+When animation is chosen, pair each spoken turn or visual beat with its teaching
+objective, speaker intent, visible action and target, listener reaction when
+applicable, audience focus, and ending pose or deliberate hold. Anchor cues to
+phrases in retained speech; measure their times before rendering rather than
+spacing gestures evenly through a line. Keep the visual score beside the exact
+dialogue so the story specifies both what is said and what happens.
+
+Movement must communicate a thought, relationship, demonstration step or earned
+reaction. Prefer coherent eyelines, readable poses, anticipation and settling to
+constant activity. Rest is valid. Do not substitute a repeating arm cycle, generic
+nod or random idle motion for authored acting. Keep one focal action at a time and
+let listeners respond without competing with the explanation. Project-specific
+cast and direction belong in the consuming project's package.
+
+Check rig, prop, camera and timing support before rendering. Implement or explicitly
+revise an unsupported direction; never silently flatten it into a generic gesture.
+Bind the visual score, measured cues, assets and renderer into regeneration inputs.
+Preserve approved recordings when only staging changes. Reduced-motion and static
+fallbacks must retain the explanation through poses, labels and transcript; no
+instruction or factual claim may depend exclusively on motion.
+
 ## Audition before producing a series
 
 Produce a short representative review cut with the intended voices, a visual
@@ -62,6 +85,14 @@ captions for timing, readable line lengths, speaker attribution when useful, and
 collision with important UI. Check that the viewer can follow the installation
 and example without unstated steps. Record human review separately from media
 verification; an attractive contact sheet cannot substitute for watching a cut.
+
+For animated content, review the complete moving cut at normal playback speed
+with sound, then inspect staging muted. For each movement, name what it contributes
+to the viewer's understanding or the conversation. Remove purposeless movement;
+check eyelines, readable holds, transitions, listening and competing focal actions.
+Compare with the static fallback. Deterministic pixels, cue coverage and clean
+geometry cannot prove acting quality. Record voice, motion, factual and accessibility
+review outcomes separately; voice approval does not approve animation or a new script.
 
 Rebuild after changing evidence, dialogue, recordings, or assets; retain prior
 outputs until their replacement is accepted. Scan media, captions and evidence

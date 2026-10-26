@@ -1,0 +1,22 @@
+{
+  "kind": "retained-failed-generation-observation-not-a-passing-receipt",
+  "project_authority": "sha256:cf9dd39955d634b3a5e6101bae2f78cf4494a3f070aec7db149e5a8f0582c76a",
+  "driver_implementation": "sha256:5e8eb7c7eac3bc67e823f5ef7396a4259e04dbed7f29ac5ea642ca093acb3c03",
+  "sample": "publication-import",
+  "language": "javascript",
+  "terminal_exit": 2,
+  "error_code": "rebuild.driver_failed",
+  "failed_phase": "execute.failed",
+  "diagnosis": "Generated bundle tool used single-occurrence String.replace for the repeated test-module import. The test-mode import was rewritten; the smoke-mode import remained a filesystem require outside the runnable bundle. The source test file exists.",
+  "generated_source_sha256": {
+    "main.js": "bad7889a7b972f98d6f1f4bf9869aece66aef0115b9141f7b32efd376fc99249",
+    "tools/bundle.js": "d624b92b1bdf6731d093b54ce3f122265c2e9dd2710d5db6b7dcb8e72b77810e",
+    "tests/litai_test.js": "37c4ebe93910a8af357086f76d568ba8cc1422aa6c74c560941d54d89b63b2b2"
+  },
+  "failed_runtime_retained": true,
+  "candidate_receipt_promoted": false,
+  "disposable_source_hand_edited": false,
+  "policy_or_test_relaxed": false,
+  "narrative_checks": "The narrative structure, project-source research, documentation and layout checks passed independently of this rejected generated candidate.",
+  "scope": "This records the failed attempt, not the outcome of any later fresh generation or the current project receipt."
+}

@@ -1,0 +1,17 @@
+{
+  "observation": "actual read-only source-CLI onboarding plan",
+  "source_revision": "c345e652b91863e72526f25f8e31a03ec34bec01",
+  "command": "litai onboard adopt ./existing-project --project-id onboarding-review --flavor lang-cpp --flavor build-make",
+  "ok": true,
+  "plan_schema": "literate-ai/onboard-plan@1",
+  "mode": "adopt",
+  "apply_supported": true,
+  "writes": false,
+  "blocker_count": 0,
+  "original_source_unchanged": true,
+  "original_files": {
+    "main.cpp": "974422d6c23dd60ff9f3a69616e57d0ffa8f1bc42572ba42637b1577024ce881",
+    "Makefile": "ab1859538d72a37358eef7abc12a88c414208eacaf69f3e6d211e5f5f570d22d"
+  },
+  "boundary": "No --apply, baseline build, generated code, release qualification or publication. An authored two-file fixture, not a claim about a complete real-world repository."
+}

@@ -25,6 +25,12 @@ in the public repository's issue tracker.
 
 ## Earlier cuts, retained for comparison
 
+The next-video [animated onboarding authoring pilot](animated-onboarding/README.md)
+adds articulated Sam/LitAI characters, an offline Motion/SVG companion and recorded
+NVIDIA Magpie voice auditions. The user approved the pilot voices and directed moving
+cut. That approval establishes the treatment; it does not approve the new full script
+or a replacement film.
+
 The cuts below are superseded creative drafts, not the recommended viewing path.
 The [creative brief](creative-brief.md) and [accepted audition package](preview/README.md)
 record how the project-owned story evolved without prescribing a cast to children.
@@ -72,3 +78,15 @@ Builds preserve previous outputs. Change the dialogue and evidence to refresh a
 lesson; supply recorded audio for portable narration or screen recordings for
 new coding demonstrations. See [video authoring](../user/instructional-videos.md)
 for supported backends, manifest fields, tools, integrity and publication boundaries.
+
+## 1.3.1 animated replacement in development
+
+[Eight Hours to Make Coffee](full-onboarding/README.md) expands the approved
+Sam/LitAI treatment into a skeptical, source-backed pre-CI argument with five
+project case studies. The 12-chapter script, animation annotations and offline
+authoring/capture system are authored. All 86 approved-voice turns have been rendered
+into a 12:04.896 local candidate that passes deterministic chapter QA and independent
+continuous-media verification. Fresh execution evidence and complete listening,
+factual, accessibility and normal-speed playback approval remain mandatory 1.3.1
+release goals. The currently linked 11:52 film stays published until the exact
+replacement is approved and its GitHub asset and documentation links exist.

@@ -16,10 +16,22 @@
   diagnostics. Declared safe BUILD/TEST actions support bounded identity-bound
   retries with retained attempts; mutable package/signing actions cannot retry.
 
+- Add an optional animated onboarding authoring pilot with articulated SVG
+  characters, recorded NVIDIA Magpie voice auditions, an offline Motion companion
+  and deterministic frame/media checks. Voices are user-validated; a directed
+  replacement cut now implements phrase-cued poses, listener reactions, props
+  and purposeful holds, now visually accepted by the user. Add a full annotated
+  pre-CI narrative with sharper Sam/LitAI banter and commit-pinned research into
+  five real project integrations, with recorded-result and native-scope limits.
+  Add a paced, restart-safe full-episode speech and rendering pipeline; the resulting
+  12:04.896 local candidate passes deterministic chapter QA and independent media
+  verification. Complete listening/playback approval and publication remain pending.
+  Video and presentation skills require explicit visual direction and separate
+  motion-quality review before publication.
+
 - Require every release goal to be explicit in the roadmap and complete before
   publication. Preserve deferred goals in a machine-checked release ledger and allow
   a move only with recorded user approval and a named future release.
-
 - Fail document-pair publication preflight when a stable Google Workspace resource
   has an anonymous or foreign-domain reader grant, preserving the declared
   organization-restricted audience.
