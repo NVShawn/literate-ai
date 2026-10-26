@@ -22,6 +22,7 @@ from literate_ai.application.action_dag_planning import (
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchRequest,
     LifecycleActionKind,
+    LifecycleActionTermination,
 )
 from literate_ai.contracts import (
     ContentIdentity,
@@ -227,16 +228,62 @@ class CommandProjectFinalizer:
             Path(temporary).unlink(missing_ok=True)
             raise
 
+    def _resolve_grant_refusal(self, request, transport):
+        """Resolve one held grant refusal before this reservation resends it.
+
+        A command exit alone never proves termination (ADR 0044). This narrow
+        rule applies only on the grant-wait path, while this finalizer still
+        holds the same worker/slot reservation, and only to the exact request
+        whose exact-bound ``grant_unavailable`` response came from a receiver
+        whose admitted capability the dispatcher verified at the response
+        boundary (in-process attestation or fresh revalidation). The receiver
+        checks the private grant synchronously and answers only after its owned
+        process tree has exited, so that refusal is receiver-owned terminal
+        evidence for this request. Every other failure, and any refusal without
+        that verified boundary, remains unknown ownership for an external owner.
+        """
+        response = transport.admitted_failures.get(request.identity)
+        if response is None:
+            return
+        evidence = {
+            "schema": "literate-ai/finalize-grant-refusal-resolution@1",
+            "request_identity": request.identity.uri,
+            "worker_identity": request.worker.worker_identity.uri,
+            "failure_code": "action_finalize.grant_unavailable",
+            "admitted_response_identity": record_identity(response).uri,
+            "reservation_held": True,
+        }
+        content = canonical_json_bytes(evidence)
+        evidence_identity = canonical_identity(evidence)
+        for raw in (response, content):
+            if self.indexer.cas.put_bytes(raw).identity != record_identity(raw).uri:
+                raise ActionWireError(
+                    "action_finalize.refusal_custody_invalid",
+                    "grant refusal evidence custody differs",
+                )
+            self.indexer.remember_action_result(raw)
+        self.indexer.slots.resolve_ownership(
+            LifecycleActionTermination(
+                request.identity,
+                request.worker.worker_identity,
+                evidence_identity,
+                "owned-terminal",
+                0,
+            )
+        )
+
     def _execute(self, lock, project, graph, plan, package, worker, slot):
         value, proof, raw, input_id, request, records, current, current_handoff = (
             self._request(lock, project, graph, plan, package, worker, slot)
         )
         returned = {}
-        outcome = self.indexer._dispatcher(records, returned).dispatch(request)
+        transport = self.indexer._dispatcher(records, returned)
+        outcome = transport.dispatch(request)
         if (
             outcome.failure_code == "action_finalize.grant_unavailable"
             and self.grant_request_path is not None
         ):
+            self._resolve_grant_refusal(request, transport)
             # The input is exact to this run, so the operator must grant it
             # while the run waits; a later rerun would need a new grant.
             self._write_grant_request(value, request, records, current_handoff)
@@ -254,7 +301,10 @@ class CommandProjectFinalizer:
                 time.sleep(self.grant_poll_seconds)
                 current_handoff()
                 returned = {}
-                outcome = self.indexer._dispatcher(records, returned).dispatch(request)
+                transport = self.indexer._dispatcher(records, returned)
+                outcome = transport.dispatch(request)
+                if outcome.failure_code == "action_finalize.grant_unavailable":
+                    self._resolve_grant_refusal(request, transport)
         if outcome.failure_code is not None:
             raise ActionWireError(outcome.failure_code, "worker FINALIZE failed")
         content = returned.get(outcome.result_identity)

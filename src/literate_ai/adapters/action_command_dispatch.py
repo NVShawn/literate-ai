@@ -138,6 +138,11 @@ class CommandLifecycleActionDispatcher:
         self.environment = dict(os.environ if environment is None else environment)
         self._lock = threading.Lock()
         self._active: dict[ContentIdentity, threading.Event] = {}
+        # Exact-bound failure responses whose receiver capability was verified at
+        # the response boundary (attested in process, or freshly revalidated).
+        # Correlation only: the dispatcher never turns these into termination;
+        # an owning caller that holds the reservation may decide.
+        self.admitted_failures: dict[ContentIdentity, bytes] = {}
         self._cancelled: set[ContentIdentity] = set()
 
     def _selection(self, request: LifecycleActionDispatchRequest) -> ExecutionWorker:
@@ -276,12 +281,12 @@ class CommandLifecycleActionDispatcher:
                     "action_admission.runtime_changed",
                     "worker runtime or supported capabilities changed",
                 )
-            if (
-                mode is None
-                and outcome.failure_code is not None
-                and self.on_unknown_ownership is not None
-            ):
-                self.on_unknown_ownership(request)
+            if mode is None and outcome.failure_code is not None:
+                # Reached only after the boundary check above passed.
+                with self._lock:
+                    self.admitted_failures[request.identity] = output
+                if self.on_unknown_ownership is not None:
+                    self.on_unknown_ownership(request)
             with self._lock:
                 if event.is_set():
                     raise ActionWireError(

@@ -632,7 +632,16 @@ native build termination authority. SSH client exit likewise cannot prove the
 remote build terminated. Unknown ownership holds the worker's capacity, all its
 slots and the action's exclusive claims; independent work may use healthy workers
 only when its claims do not conflict. Explicit matching trusted termination or
-fencing resolves the hold. These barriers persist within the scheduler, slot and
+fencing resolves the hold. One narrow self-resolution exists: on the FINALIZE
+grant-wait path, while the finalizer still holds the same worker/slot
+reservation, an exact-bound `action_finalize.grant_unavailable` response from a
+receiver whose admitted capability was verified at the response boundary is
+receiver-owned terminal evidence for that one request, because the receiver
+checks its private grant synchronously and answers only after its owned process
+tree exits. The finalizer retains that response and a resolution record in CAS,
+resolves only that request and resends; resolution never frees a slot a live
+reservation holds. Any other failure, any refusal without a verified boundary and
+any refusal outside a held grant-wait reservation stays unknown ownership. These barriers persist within the scheduler, slot and
 coalescer instances, including a subsequent schedule; durable cross-controller
 custody and restart recovery remain unqualified. Remote lease/fencing admission and stale
 publication rejection require their own production worker-side qualification.

@@ -694,6 +694,35 @@ def assert_finalize_proof(
     )
     case.assertEqual(run_controller(), finalized)
     case.assertGreater(configuration_guard.call_count, 2)
+    # Grant-wait: the first dispatch is refused while the reservation is held;
+    # the finalizer resolves exactly that admitted refusal itself, resends, and
+    # leaves the worker reusable without any external owner resolution.
+    granted = grant_file.read_bytes()
+    grant_file.unlink()
+    controller.grant_request_path = private / "grant-request.json"
+    controller.grant_wait_seconds = 60
+    controller.grant_poll_seconds = 0.2
+    import threading
+
+    def grant_when_requested():
+        for _ in range(600):
+            if controller.grant_request_path.exists():
+                grant_file.write_bytes(granted)
+                return
+            threading.Event().wait(0.05)
+
+    granter = threading.Thread(target=grant_when_requested, daemon=True)
+    granter.start()
+    try:
+        case.assertEqual(run_controller(), finalized)
+    finally:
+        granter.join(timeout=60)
+        controller.grant_request_path = None
+        controller.grant_wait_seconds = 0
+    case.assertEqual(linker.indexer.slots.unresolved_ownership, ())
+    reusable = linker.indexer.slots.try_reserve(lambda worker, slot: None)
+    case.assertIsNotNone(reusable)
+    reusable.release()
     # Atomic revocation stops the next dispatch at the receiver.
     revoked_grant = private / "grant.next"
     revoked_grant.write_bytes(

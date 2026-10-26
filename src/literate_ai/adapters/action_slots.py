@@ -42,6 +42,7 @@ class ReservedAction:
             if not self.released:
                 self.released = True
                 key = (self.worker.worker_id, self.slot)
+                self.owner._held.discard(key)
                 if not any(
                     (request.worker.worker_id, request.slot) == key
                     for request in self.owner._unknown.values()
@@ -57,6 +58,8 @@ class CommandActionSlots:
         self.condition = threading.Condition()
         self._occupied = set()
         self._unknown = {}
+        # Slots a live reservation still holds; resolution never frees these.
+        self._held = set()
         self.loss_fencing_policy_identity = loss_fencing_policy_identity
         self.started = False
         if (
@@ -109,7 +112,9 @@ class CommandActionSlots:
                     "resolution differs from retained request/worker/fencing policy",
                 )
             self._unknown.pop(request.identity)
-            self._occupied.discard((request.worker.worker_id, request.slot))
+            key = (request.worker.worker_id, request.slot)
+            if key not in self._held:
+                self._occupied.discard(key)
             self.condition.notify_all()
 
     def try_reserve(self, operation, *, eligible_worker_ids=None):
@@ -137,6 +142,7 @@ class CommandActionSlots:
                     key = (worker.worker_id, slot)
                     if key not in self._occupied:
                         self._occupied.add(key)
+                        self._held.add(key)
                         return ReservedAction(self, worker, slot, operation)
             return None
 
