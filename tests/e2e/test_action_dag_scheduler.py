@@ -121,6 +121,49 @@ class ActionDagSchedulerTests(unittest.TestCase):
             {"failed", "independent"},
         )
 
+    def test_successor_waits_for_accepted_predecessor_while_independent_overlaps(
+        self,
+    ):
+        release_parent = threading.Event()
+        independent_started = threading.Event()
+
+        class Dispatcher(_RecordingDispatcher):
+            def dispatch(inner, request):
+                action_id = request.action.action_id
+                if action_id == "parent":
+                    # The independent action must start while the parent holds.
+                    self.assertTrue(independent_started.wait(5))
+                    release_parent.wait(5)
+                elif action_id == "independent":
+                    independent_started.set()
+                    release_parent.set()
+                elif action_id == "child":
+                    self.assertTrue(release_parent.is_set())
+                return super().dispatch(request)
+
+        dispatcher = Dispatcher()
+        result = self.scheduler.run(
+            (
+                _node("parent"),
+                _node("child", predecessors=("parent",)),
+                _node("independent"),
+            ),
+            (_worker("alpha", slots=2),),
+            dispatcher,
+            deadline_identity=self.deadline,
+        )
+
+        order = [item.action.action_id for item in dispatcher.requests]
+        self.assertEqual(order.index("child"), 2)
+        child = dispatcher.requests[2]
+        self.assertEqual(
+            child.predecessor_result_identities, (_identity("result-parent"),)
+        )
+        self.assertEqual(
+            {item.disposition for item in result.results},
+            {LifecycleActionDisposition.ACCEPTED},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

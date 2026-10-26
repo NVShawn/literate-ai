@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 import time
 import unittest
 
@@ -79,6 +80,48 @@ class ResourceDispatchTests(unittest.TestCase):
         self.assertEqual(len(dispatcher.requests), 3)
         self.assertEqual(
             sum(item.failure_code is not None for item in result.results), 1
+        )
+
+    def test_distinct_package_database_and_signer_claims_do_not_serialize(self):
+        barrier = threading.Barrier(2, timeout=5)
+
+        class Dispatcher(_RecordingDispatcher):
+            active: set[str] = set()
+            overlaps: list[frozenset[str]] = []
+
+            def dispatch(inner, request):
+                action_id = request.action.action_id
+                with inner.lock:
+                    inner.active.add(action_id)
+                    inner.overlaps.append(frozenset(inner.active))
+                try:
+                    if action_id in {"one", "two"}:
+                        barrier.wait()
+                    else:
+                        time.sleep(0.02)
+                finally:
+                    with inner.lock:
+                        inner.active.discard(action_id)
+                return super().dispatch(request)
+
+        dispatcher = Dispatcher()
+        result = self.schedule(
+            dispatcher,
+            {
+                "one": ActionDispatchPolicy(exclusive_claims=("pkgdb:target",)),
+                "two": ActionDispatchPolicy(exclusive_claims=("signing-authority",)),
+                "three": ActionDispatchPolicy(
+                    exclusive_claims=("pkgdb:target", "signing-authority")
+                ),
+            },
+            {},
+        )
+        self.assertEqual(len(dispatcher.requests), 3)
+        self.assertTrue(all(item.failure_code is None for item in result.results))
+        self.assertTrue(
+            all(
+                "three" not in seen or seen == {"three"} for seen in dispatcher.overlaps
+            )
         )
 
     def test_impossible_reservation_refuses_before_any_dispatch(self):
