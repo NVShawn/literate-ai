@@ -1,0 +1,947 @@
+{
+  "story_sha256": "a0a29fdac1d6ea6b2fd6d3902db202e0de0e88c067eb076d8f22162623b65a7c",
+  "method": "Local Whisper base.en word timestamp estimates, curated phrase-to-word-span mapping; not forced phoneme alignment or verified transcription.",
+  "tool": "openai-whisper 20250625",
+  "model_sha256": "25a8566e1d0c1e2231d1c762132cd20e0f96a85d16145c3a00adf5d1ac670ead",
+  "turns": [
+    {
+      "id": "existing",
+      "audio_sha256": "e9a416fecdf2736a06d8cbaa5f4ee1c3fbe8c6e7718e6e47c0e355837d690a10",
+      "alignment_sha256": "de4af47f4eae61c6813b4d8c6e2c083c972956ad4a857959674eed2a3fe42ed0",
+      "words": [
+        {
+          "word": " I",
+          "start": 0.0,
+          "end": 0.08,
+          "probability": 0.8832924365997314
+        },
+        {
+          "word": " have",
+          "start": 0.08,
+          "end": 0.22,
+          "probability": 0.9941719174385071
+        },
+        {
+          "word": " a",
+          "start": 0.22,
+          "end": 0.3,
+          "probability": 0.998938262462616
+        },
+        {
+          "word": " work",
+          "start": 0.3,
+          "end": 0.48,
+          "probability": 0.5366154909133911
+        },
+        {
+          "word": " in",
+          "start": 0.48,
+          "end": 0.62,
+          "probability": 0.866093099117279
+        },
+        {
+          "word": " repository,",
+          "start": 0.62,
+          "end": 0.78,
+          "probability": 0.9307270050048828
+        },
+        {
+          "word": " please",
+          "start": 1.86,
+          "end": 2.04,
+          "probability": 0.9749749898910522
+        },
+        {
+          "word": " tell",
+          "start": 2.04,
+          "end": 2.28,
+          "probability": 0.9971826076507568
+        },
+        {
+          "word": " me",
+          "start": 2.28,
+          "end": 2.44,
+          "probability": 0.9993983507156372
+        },
+        {
+          "word": " onboarding",
+          "start": 2.44,
+          "end": 3.0,
+          "probability": 0.8446448445320129
+        },
+        {
+          "word": " doesn't",
+          "start": 3.0,
+          "end": 3.28,
+          "probability": 0.9855637848377228
+        },
+        {
+          "word": " mean",
+          "start": 3.28,
+          "end": 3.42,
+          "probability": 0.9971875548362732
+        },
+        {
+          "word": " rewriting",
+          "start": 3.42,
+          "end": 3.76,
+          "probability": 0.9339612126350403
+        },
+        {
+          "word": " it.",
+          "start": 3.76,
+          "end": 4.12,
+          "probability": 0.9939731955528259
+        }
+      ],
+      "cues": [
+        {
+          "id": "existing.working",
+          "phrase": "working repository",
+          "start": 0.3,
+          "end": 0.78,
+          "word_span": [
+            3,
+            5
+          ],
+          "recognized_span": "work in repository,"
+        },
+        {
+          "id": "existing.rewrite",
+          "phrase": "rewriting it",
+          "start": 3.42,
+          "end": 4.12,
+          "word_span": [
+            12,
+            13
+          ],
+          "recognized_span": "rewriting it."
+        }
+      ],
+      "seconds": 4.365351473922902
+    },
+    {
+      "id": "doctor",
+      "audio_sha256": "eac396e3e16e550c65d479166c5e65f7666fcff21cced06afc0f6ae0d3386ce1",
+      "alignment_sha256": "6b195fb89aea0f749a234209d3196b8a417f028596e7ec8581d2636f8304569d",
+      "words": [
+        {
+          "word": " It",
+          "start": 0.0,
+          "end": 0.1,
+          "probability": 0.2740432620048523
+        },
+        {
+          "word": " doesn't.",
+          "start": 0.1,
+          "end": 0.54,
+          "probability": 0.9945760667324066
+        },
+        {
+          "word": " Start",
+          "start": 1.06,
+          "end": 1.32,
+          "probability": 0.9953558444976807
+        },
+        {
+          "word": " with",
+          "start": 1.32,
+          "end": 1.5,
+          "probability": 0.999371349811554
+        },
+        {
+          "word": " doctor,",
+          "start": 1.5,
+          "end": 1.72,
+          "probability": 0.6439165472984314
+        },
+        {
+          "word": " then",
+          "start": 2.38,
+          "end": 2.6,
+          "probability": 0.9934720993041992
+        },
+        {
+          "word": " ask",
+          "start": 2.6,
+          "end": 2.82,
+          "probability": 0.9951209425926208
+        },
+        {
+          "word": " for",
+          "start": 2.82,
+          "end": 3.14,
+          "probability": 0.9993237257003784
+        },
+        {
+          "word": " an",
+          "start": 3.14,
+          "end": 3.26,
+          "probability": 0.9815458655357361
+        },
+        {
+          "word": " adopt",
+          "start": 3.26,
+          "end": 3.48,
+          "probability": 0.735085666179657
+        },
+        {
+          "word": " plan.",
+          "start": 3.48,
+          "end": 3.92,
+          "probability": 0.9969972372055054
+        },
+        {
+          "word": " Your",
+          "start": 4.96,
+          "end": 5.14,
+          "probability": 0.9924485683441162
+        },
+        {
+          "word": " source",
+          "start": 5.14,
+          "end": 5.36,
+          "probability": 0.9737368822097778
+        },
+        {
+          "word": " stays",
+          "start": 5.36,
+          "end": 5.9,
+          "probability": 0.9692413806915283
+        },
+        {
+          "word": " yours.",
+          "start": 5.9,
+          "end": 6.26,
+          "probability": 0.9970480799674988
+        }
+      ],
+      "cues": [
+        {
+          "id": "doctor.deny",
+          "phrase": "It doesn't",
+          "start": 0.0,
+          "end": 0.54,
+          "word_span": [
+            0,
+            1
+          ],
+          "recognized_span": "It doesn't."
+        },
+        {
+          "id": "doctor.doctor",
+          "phrase": "doctor",
+          "start": 1.5,
+          "end": 1.72,
+          "word_span": [
+            4,
+            4
+          ],
+          "recognized_span": "doctor,"
+        },
+        {
+          "id": "doctor.plan",
+          "phrase": "adopt plan",
+          "start": 3.26,
+          "end": 3.92,
+          "word_span": [
+            9,
+            10
+          ],
+          "recognized_span": "adopt plan."
+        },
+        {
+          "id": "doctor.yours",
+          "phrase": "source stays yours",
+          "start": 5.14,
+          "end": 6.26,
+          "word_span": [
+            12,
+            14
+          ],
+          "recognized_span": "source stays yours."
+        }
+      ],
+      "seconds": 6.594467120181406
+    },
+    {
+      "id": "changes",
+      "audio_sha256": "3cfb45ccaaef6681798944d997999e35f6e5c66d6d3b43548673d0c8eb57529a",
+      "alignment_sha256": "8ca0364819135e0dbbce58ea4d742af411ba0371170b2e16f3bf8dcde061aa89",
+      "words": [
+        {
+          "word": " And",
+          "start": 0.0,
+          "end": 0.1,
+          "probability": 0.6773272156715393
+        },
+        {
+          "word": " when",
+          "start": 0.1,
+          "end": 0.22,
+          "probability": 0.986995279788971
+        },
+        {
+          "word": " I",
+          "start": 0.22,
+          "end": 0.36,
+          "probability": 0.9961563944816589
+        },
+        {
+          "word": " run",
+          "start": 0.36,
+          "end": 0.56,
+          "probability": 0.9969283938407898
+        },
+        {
+          "word": " that",
+          "start": 0.56,
+          "end": 0.78,
+          "probability": 0.9973166584968567
+        },
+        {
+          "word": " command,",
+          "start": 0.78,
+          "end": 1.14,
+          "probability": 0.994438648223877
+        },
+        {
+          "word": " what",
+          "start": 1.74,
+          "end": 1.86,
+          "probability": 0.9883989095687866
+        },
+        {
+          "word": " changes?",
+          "start": 1.86,
+          "end": 2.24,
+          "probability": 0.9992934465408325
+        }
+      ],
+      "cues": [
+        {
+          "id": "changes.command",
+          "phrase": "that command",
+          "start": 0.56,
+          "end": 1.14,
+          "word_span": [
+            4,
+            5
+          ],
+          "recognized_span": "that command,"
+        },
+        {
+          "id": "changes.changes",
+          "phrase": "what changes",
+          "start": 1.74,
+          "end": 2.24,
+          "word_span": [
+            6,
+            7
+          ],
+          "recognized_span": "what changes?"
+        }
+      ],
+      "seconds": 2.7399546485260773
+    },
+    {
+      "id": "readonly",
+      "audio_sha256": "4a93ee3d5765220cac9e20a598db73c4d1cca0095f3be9c23c8b911f0baffb29",
+      "alignment_sha256": "1da0c305ff23eb6563c776e062047e9e3dcf8778e2c19d8d0d05ea8835621625",
+      "words": [
+        {
+          "word": " If",
+          "start": 0.0,
+          "end": 0.0,
+          "probability": 0.3332545757293701
+        },
+        {
+          "word": " a",
+          "start": 0.0,
+          "end": 0.04,
+          "probability": 0.7454374432563782
+        },
+        {
+          "word": " plan",
+          "start": 0.04,
+          "end": 0.3,
+          "probability": 0.9813759326934814
+        },
+        {
+          "word": " is",
+          "start": 0.3,
+          "end": 0.56,
+          "probability": 0.9917004704475403
+        },
+        {
+          "word": " read,",
+          "start": 0.56,
+          "end": 0.76,
+          "probability": 0.9244024157524109
+        },
+        {
+          "word": " only",
+          "start": 1.12,
+          "end": 1.42,
+          "probability": 0.9839514493942261
+        },
+        {
+          "word": " review",
+          "start": 1.42,
+          "end": 1.8,
+          "probability": 0.9918395280838013
+        },
+        {
+          "word": " the",
+          "start": 1.8,
+          "end": 2.08,
+          "probability": 0.9944772124290466
+        },
+        {
+          "word": " files",
+          "start": 2.08,
+          "end": 2.46,
+          "probability": 0.9893282055854797
+        },
+        {
+          "word": " and",
+          "start": 2.46,
+          "end": 2.72,
+          "probability": 0.9906222224235535
+        },
+        {
+          "word": " the",
+          "start": 2.72,
+          "end": 2.8,
+          "probability": 0.9646337032318115
+        },
+        {
+          "word": " recorded",
+          "start": 2.8,
+          "end": 3.06,
+          "probability": 0.9969749450683594
+        },
+        {
+          "word": " checks.",
+          "start": 3.06,
+          "end": 3.52,
+          "probability": 0.9781306385993958
+        },
+        {
+          "word": " Applying",
+          "start": 4.34,
+          "end": 4.72,
+          "probability": 0.9618514180183411
+        },
+        {
+          "word": " it",
+          "start": 4.72,
+          "end": 4.98,
+          "probability": 0.974185585975647
+        },
+        {
+          "word": " is",
+          "start": 4.98,
+          "end": 5.12,
+          "probability": 0.9823211431503296
+        },
+        {
+          "word": " a",
+          "start": 5.12,
+          "end": 5.22,
+          "probability": 0.9969128370285034
+        },
+        {
+          "word": " separate,",
+          "start": 5.22,
+          "end": 5.52,
+          "probability": 0.9922520518302917
+        },
+        {
+          "word": " acknowledged",
+          "start": 5.84,
+          "end": 6.24,
+          "probability": 0.9979562759399414
+        },
+        {
+          "word": " step.",
+          "start": 6.24,
+          "end": 6.8,
+          "probability": 0.9780802726745605
+        }
+      ],
+      "cues": [
+        {
+          "id": "readonly.readonly",
+          "phrase": "read-only",
+          "start": 0.56,
+          "end": 1.42,
+          "word_span": [
+            4,
+            5
+          ],
+          "recognized_span": "read, only"
+        },
+        {
+          "id": "readonly.files",
+          "phrase": "files and the recorded checks",
+          "start": 2.08,
+          "end": 3.52,
+          "word_span": [
+            8,
+            12
+          ],
+          "recognized_span": "files and the recorded checks."
+        },
+        {
+          "id": "readonly.separate",
+          "phrase": "separate, acknowledged step",
+          "start": 5.22,
+          "end": 6.8,
+          "word_span": [
+            17,
+            19
+          ],
+          "recognized_span": "separate, acknowledged step."
+        }
+      ],
+      "seconds": 6.965986394557823
+    },
+    {
+      "id": "green",
+      "audio_sha256": "422ab9fcbf3c66f1010ca55d203d0d31d5f867000059c0b398ea370a46a3130d",
+      "alignment_sha256": "9906e96f58880b6c4d75ed4494681d9d87e1d143b03e9c609b01b8ba4497fb9f",
+      "words": [
+        {
+          "word": " Good.",
+          "start": 0.0,
+          "end": 0.2,
+          "probability": 0.5796135663986206
+        },
+        {
+          "word": " And",
+          "start": 0.92,
+          "end": 1.0,
+          "probability": 0.9509178400039673
+        },
+        {
+          "word": " a",
+          "start": 1.0,
+          "end": 1.08,
+          "probability": 0.9745235443115234
+        },
+        {
+          "word": " green",
+          "start": 1.08,
+          "end": 1.26,
+          "probability": 0.7786470055580139
+        },
+        {
+          "word": " plan",
+          "start": 1.26,
+          "end": 1.66,
+          "probability": 0.9888335466384888
+        },
+        {
+          "word": " means",
+          "start": 1.66,
+          "end": 1.96,
+          "probability": 0.9958582520484924
+        },
+        {
+          "word": " the",
+          "start": 1.96,
+          "end": 2.18,
+          "probability": 0.993861198425293
+        },
+        {
+          "word": " project's",
+          "start": 2.18,
+          "end": 2.72,
+          "probability": 0.8878649175167084
+        },
+        {
+          "word": " ready",
+          "start": 2.72,
+          "end": 2.9,
+          "probability": 0.9967629909515381
+        },
+        {
+          "word": " to",
+          "start": 2.9,
+          "end": 3.14,
+          "probability": 0.9980828762054443
+        },
+        {
+          "word": " ship...",
+          "start": 3.14,
+          "end": 3.6,
+          "probability": 0.5908651947975159
+        }
+      ],
+      "cues": [
+        {
+          "id": "green.good",
+          "phrase": "Good",
+          "start": 0.0,
+          "end": 0.2,
+          "word_span": [
+            0,
+            0
+          ],
+          "recognized_span": "Good."
+        },
+        {
+          "id": "green.green",
+          "phrase": "green plan",
+          "start": 1.08,
+          "end": 1.66,
+          "word_span": [
+            3,
+            4
+          ],
+          "recognized_span": "green plan"
+        },
+        {
+          "id": "green.ship",
+          "phrase": "ready to ship",
+          "start": 2.72,
+          "end": 3.6,
+          "word_span": [
+            8,
+            10
+          ],
+          "recognized_span": "ready to ship..."
+        }
+      ],
+      "seconds": 3.622312925170068
+    },
+    {
+      "id": "earn",
+      "audio_sha256": "d43c420a0de5a3ab4f73925abf069a9f315ac9f859e63fc26125c094c1466e23",
+      "alignment_sha256": "06ba12273ee8bee4b4a3cfaf6561d783181618e7e4ff482dff1000e5608dcff7",
+      "words": [
+        {
+          "word": " No,",
+          "start": 0.0,
+          "end": 0.18,
+          "probability": 0.8132291436195374
+        },
+        {
+          "word": " it",
+          "start": 0.66,
+          "end": 0.86,
+          "probability": 0.9937334656715393
+        },
+        {
+          "word": " means",
+          "start": 0.86,
+          "end": 1.02,
+          "probability": 0.9991351962089539
+        },
+        {
+          "word": " we're",
+          "start": 1.02,
+          "end": 1.28,
+          "probability": 0.9648337066173553
+        },
+        {
+          "word": " ready",
+          "start": 1.28,
+          "end": 1.48,
+          "probability": 0.9987660646438599
+        },
+        {
+          "word": " to",
+          "start": 1.48,
+          "end": 1.66,
+          "probability": 0.9993522763252258
+        },
+        {
+          "word": " discuss",
+          "start": 1.66,
+          "end": 1.94,
+          "probability": 0.9993956089019775
+        },
+        {
+          "word": " the",
+          "start": 1.94,
+          "end": 2.2,
+          "probability": 0.9981539845466614
+        },
+        {
+          "word": " next",
+          "start": 2.2,
+          "end": 2.36,
+          "probability": 0.9991312623023987
+        },
+        {
+          "word": " step.",
+          "start": 2.36,
+          "end": 2.8,
+          "probability": 0.9972892999649048
+        },
+        {
+          "word": " Builds,",
+          "start": 3.4800000000000004,
+          "end": 4.0,
+          "probability": 0.8492455184459686
+        },
+        {
+          "word": " tests,",
+          "start": 4.2,
+          "end": 4.46,
+          "probability": 0.9868074059486389
+        },
+        {
+          "word": " and",
+          "start": 5.22,
+          "end": 5.34,
+          "probability": 0.9976401329040527
+        },
+        {
+          "word": " independent",
+          "start": 5.34,
+          "end": 5.8,
+          "probability": 0.9968453049659729
+        },
+        {
+          "word": " acceptance",
+          "start": 5.8,
+          "end": 6.28,
+          "probability": 0.9960105419158936
+        },
+        {
+          "word": " still",
+          "start": 6.28,
+          "end": 6.92,
+          "probability": 0.9922337532043457
+        },
+        {
+          "word": " have",
+          "start": 6.92,
+          "end": 7.12,
+          "probability": 0.9989160299301147
+        },
+        {
+          "word": " to",
+          "start": 7.12,
+          "end": 7.26,
+          "probability": 0.9993197917938232
+        },
+        {
+          "word": " earn",
+          "start": 7.26,
+          "end": 7.46,
+          "probability": 0.9989609718322754
+        },
+        {
+          "word": " their",
+          "start": 7.46,
+          "end": 7.66,
+          "probability": 0.9925816059112549
+        },
+        {
+          "word": " evidence.",
+          "start": 7.66,
+          "end": 7.92,
+          "probability": 0.9950358271598816
+        }
+      ],
+      "cues": [
+        {
+          "id": "earn.no",
+          "phrase": "No",
+          "start": 0.0,
+          "end": 0.18,
+          "word_span": [
+            0,
+            0
+          ],
+          "recognized_span": "No,"
+        },
+        {
+          "id": "earn.next",
+          "phrase": "next step",
+          "start": 2.2,
+          "end": 2.8,
+          "word_span": [
+            8,
+            9
+          ],
+          "recognized_span": "next step."
+        },
+        {
+          "id": "earn.build",
+          "phrase": "Builds",
+          "start": 3.4800000000000004,
+          "end": 4.0,
+          "word_span": [
+            10,
+            10
+          ],
+          "recognized_span": "Builds,"
+        },
+        {
+          "id": "earn.test",
+          "phrase": "tests",
+          "start": 4.2,
+          "end": 4.46,
+          "word_span": [
+            11,
+            11
+          ],
+          "recognized_span": "tests,"
+        },
+        {
+          "id": "earn.acceptance",
+          "phrase": "independent acceptance",
+          "start": 5.34,
+          "end": 6.28,
+          "word_span": [
+            13,
+            14
+          ],
+          "recognized_span": "independent acceptance"
+        },
+        {
+          "id": "earn.evidence",
+          "phrase": "earn their evidence",
+          "start": 7.26,
+          "end": 7.92,
+          "word_span": [
+            18,
+            20
+          ],
+          "recognized_span": "earn their evidence."
+        }
+      ],
+      "seconds": 8.359183673469389
+    },
+    {
+      "id": "surprises",
+      "audio_sha256": "2c1c511e887697e64bca19fcb578cbce93231da9e37586c6a7c75398227872aa",
+      "alignment_sha256": "c93a72e467b05d034bdf301a648839c24b4d0ed8abd81ab9735982835ddf554b",
+      "words": [
+        {
+          "word": " a",
+          "start": 0.0,
+          "end": 0.08,
+          "probability": 0.5068692564964294
+        },
+        {
+          "word": " plan",
+          "start": 0.08,
+          "end": 0.34,
+          "probability": 0.96159428358078
+        },
+        {
+          "word": " before",
+          "start": 0.34,
+          "end": 0.62,
+          "probability": 0.9945007562637329
+        },
+        {
+          "word": " surprises.",
+          "start": 0.62,
+          "end": 1.12,
+          "probability": 0.989937424659729
+        },
+        {
+          "word": " I",
+          "start": 2.18,
+          "end": 2.28,
+          "probability": 0.9869278073310852
+        },
+        {
+          "word": " can",
+          "start": 2.28,
+          "end": 2.42,
+          "probability": 0.9983481168746948
+        },
+        {
+          "word": " work",
+          "start": 2.42,
+          "end": 2.6,
+          "probability": 0.9986677169799805
+        },
+        {
+          "word": " with",
+          "start": 2.6,
+          "end": 2.78,
+          "probability": 0.9989494681358337
+        },
+        {
+          "word": " that.",
+          "start": 2.78,
+          "end": 3.04,
+          "probability": 0.9972084164619446
+        }
+      ],
+      "cues": [
+        {
+          "id": "surprises.plan",
+          "phrase": "plan before surprises",
+          "start": 0.08,
+          "end": 1.12,
+          "word_span": [
+            1,
+            3
+          ],
+          "recognized_span": "plan before surprises."
+        },
+        {
+          "id": "surprises.agree",
+          "phrase": "I can work with that",
+          "start": 2.18,
+          "end": 3.04,
+          "word_span": [
+            4,
+            8
+          ],
+          "recognized_span": "I can work with that."
+        }
+      ],
+      "seconds": 3.297233560090703
+    },
+    {
+      "id": "inspect",
+      "audio_sha256": "e0b9455a51e84919c2ff058936bd702c6440cb4b96e859ff14a23fcdeef70269",
+      "alignment_sha256": "66ae65c7ef70c6e1430d623e67c51139dcf4960d665e03c20eccaf661dfcc3ee",
+      "words": [
+        {
+          "word": " Let's",
+          "start": 0.0,
+          "end": 0.24,
+          "probability": 0.8992942869663239
+        },
+        {
+          "word": " inspect",
+          "start": 0.24,
+          "end": 0.52,
+          "probability": 0.9512775540351868
+        },
+        {
+          "word": " yours.",
+          "start": 0.52,
+          "end": 0.84,
+          "probability": 0.9113541841506958
+        }
+      ],
+      "cues": [
+        {
+          "id": "inspect.invite",
+          "phrase": "inspect",
+          "start": 0.24,
+          "end": 0.52,
+          "word_span": [
+            1,
+            1
+          ],
+          "recognized_span": "inspect"
+        }
+      ],
+      "seconds": 1.1145578231292517
+    }
+  ]
+}

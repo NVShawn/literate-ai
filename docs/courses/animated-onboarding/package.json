@@ -1,0 +1,8 @@
+{
+  "name": "litai-animated-onboarding",
+  "private": true,
+  "type": "module",
+  "description": "Optional offline authoring toolchain; install in ignored OBJ_DIR only",
+  "dependencies": { "motion": "14.6.0" },
+  "devDependencies": { "esbuild": "0.28.2", "puppeteer-core": "25.16.0", "@fontsource/ibm-plex-sans": "5.3.0" }
+}

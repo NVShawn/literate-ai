@@ -1,0 +1,608 @@
+{
+  "story_sha256": "a0a29fdac1d6ea6b2fd6d3902db202e0de0e88c067eb076d8f22162623b65a7c",
+  "beats": [
+    {
+      "cue": "existing.working",
+      "actor": "sam",
+      "target": "folder",
+      "purpose": "Value the existing working source.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "gazeX": 3,
+        "gazeY": 4,
+        "smile": 0.15
+      }
+    },
+    {
+      "cue": "existing.rewrite",
+      "actor": "sam",
+      "target": "partner",
+      "purpose": "Protect the folder while asking whether source will be rewritten.",
+      "offset": 0,
+      "duration": 0.4,
+      "pose": {
+        "handX": 120,
+        "handY": 305,
+        "elbowX": 104,
+        "elbowY": 310,
+        "gazeX": 4,
+        "gazeY": -1,
+        "tilt": -3,
+        "brow": -3
+      }
+    },
+    {
+      "cue": "existing.rewrite",
+      "actor": "stage",
+      "target": "folder",
+      "purpose": "The same folder is pulled slightly closer, never rewritten.",
+      "offset": 0,
+      "duration": 0.4,
+      "pose": {
+        "folderX": -12
+      }
+    },
+    {
+      "cue": "doctor.deny",
+      "actor": "litai",
+      "target": "partner",
+      "purpose": "One calm denial, then a settle.",
+      "offset": 0,
+      "duration": 0.18,
+      "pose": {
+        "tilt": -2
+      }
+    },
+    {
+      "cue": "doctor.deny",
+      "actor": "litai",
+      "target": "partner",
+      "purpose": "Finish the single head shake.",
+      "offset": 0.18,
+      "duration": 0.18,
+      "pose": {
+        "tilt": 2
+      }
+    },
+    {
+      "cue": "doctor.deny",
+      "actor": "litai",
+      "target": "rest",
+      "purpose": "Settle after reassurance.",
+      "offset": 0.36,
+      "duration": 0.18,
+      "pose": {
+        "tilt": 0
+      }
+    },
+    {
+      "cue": "doctor.doctor",
+      "actor": "litai",
+      "target": "doctor",
+      "purpose": "Present the inspection command once.",
+      "offset": 0,
+      "duration": 0.5,
+      "pose": {
+        "handX": 171,
+        "handY": 236,
+        "elbowX": 118,
+        "elbowY": 285,
+        "gazeX": 4,
+        "gazeY": 2,
+        "palm": -65
+      }
+    },
+    {
+      "cue": "doctor.doctor",
+      "actor": "stage",
+      "target": "doctor",
+      "purpose": "Focus the host-inspection command.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "doctor": 1
+      }
+    },
+    {
+      "cue": "doctor.plan",
+      "actor": "stage",
+      "target": "plan",
+      "purpose": "Shift attention to the next inspection step without another arm sweep.",
+      "offset": 0,
+      "duration": 0.35,
+      "pose": {
+        "doctor": 0.15,
+        "plan": 1
+      }
+    },
+    {
+      "cue": "doctor.plan",
+      "actor": "litai",
+      "target": "plan",
+      "purpose": "Follow the preview with gaze, keeping the presenting hand held.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "gazeY": 4
+      }
+    },
+    {
+      "cue": "doctor.yours",
+      "actor": "sam",
+      "target": "folder",
+      "purpose": "Release the protective grip as ownership is reassured.",
+      "offset": 0,
+      "duration": 0.6,
+      "pose": {
+        "handX": 50,
+        "handY": 350,
+        "elbowX": 110,
+        "elbowY": 307,
+        "tilt": 0,
+        "brow": 0,
+        "smile": 0.35,
+        "gazeY": 3
+      }
+    },
+    {
+      "cue": "doctor.yours",
+      "actor": "litai",
+      "target": "rest",
+      "purpose": "Rest the presenting hand after the reassurance.",
+      "offset": 0,
+      "duration": 0.6,
+      "pose": {
+        "handX": 91,
+        "handY": 350,
+        "elbowX": 110,
+        "elbowY": 307,
+        "palm": 0
+      }
+    },
+    {
+      "cue": "changes.command",
+      "actor": "sam",
+      "target": "plan",
+      "purpose": "Look from the preview toward the separate action.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "gazeX": 4,
+        "gazeY": 3,
+        "smile": 0
+      }
+    },
+    {
+      "cue": "changes.changes",
+      "actor": "sam",
+      "target": "apply",
+      "purpose": "Hover before Apply without touching or activating it.",
+      "offset": 0,
+      "duration": 0.7,
+      "pose": {
+        "handX": 195,
+        "handY": 307,
+        "elbowX": 144,
+        "elbowY": 281,
+        "brow": -2,
+        "tilt": -2,
+        "palm": -55
+      }
+    },
+    {
+      "cue": "changes.changes",
+      "actor": "litai",
+      "target": "apply",
+      "purpose": "Notice what Sam is concerned about while remaining still.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "gazeX": 4,
+        "gazeY": 4
+      }
+    },
+    {
+      "cue": "readonly.readonly",
+      "actor": "stage",
+      "target": "boundary",
+      "purpose": "Make the read-only preview boundary explicit.",
+      "offset": 0,
+      "duration": 0.35,
+      "pose": {
+        "boundary": 1,
+        "apply": 0
+      }
+    },
+    {
+      "cue": "readonly.files",
+      "actor": "stage",
+      "target": "plan",
+      "purpose": "Focus the preview contents without fabricating test passes.",
+      "offset": 0,
+      "duration": 0.35,
+      "pose": {
+        "plan": 1
+      }
+    },
+    {
+      "cue": "readonly.separate",
+      "actor": "stage",
+      "target": "boundary",
+      "purpose": "Highlight the separation from acknowledged Apply.",
+      "offset": 0,
+      "duration": 0.35,
+      "pose": {
+        "apply": 1,
+        "boundary": 0.4
+      }
+    },
+    {
+      "cue": "readonly.separate",
+      "actor": "litai",
+      "target": "boundary",
+      "purpose": "Indicate the gap once, not the Apply control.",
+      "offset": 0,
+      "duration": 0.35,
+      "pose": {
+        "handX": 166,
+        "handY": 296,
+        "elbowX": 116,
+        "elbowY": 320,
+        "palm": -70
+      }
+    },
+    {
+      "cue": "readonly.separate",
+      "actor": "sam",
+      "target": "rest",
+      "purpose": "Withdraw the hovering hand without a click.",
+      "offset": 0.4,
+      "duration": 0.7,
+      "pose": {
+        "handX": 50,
+        "handY": 350,
+        "elbowX": 110,
+        "elbowY": 307,
+        "tilt": 0,
+        "brow": 0,
+        "palm": 0
+      }
+    },
+    {
+      "cue": "readonly.separate",
+      "actor": "litai",
+      "target": "rest",
+      "purpose": "Settle after indicating the boundary.",
+      "offset": 0.75,
+      "duration": 0.45,
+      "pose": {
+        "handX": 91,
+        "handY": 350,
+        "elbowX": 110,
+        "elbowY": 307,
+        "palm": 0
+      }
+    },
+    {
+      "cue": "green.good",
+      "actor": "sam",
+      "target": "partner",
+      "purpose": "Relax after understanding the mutation boundary.",
+      "offset": 0,
+      "duration": 0.2,
+      "pose": {
+        "smile": 0.3,
+        "tilt": 0,
+        "gazeY": 0
+      }
+    },
+    {
+      "cue": "green.green",
+      "actor": "sam",
+      "target": "plan",
+      "purpose": "Consider plan readiness first.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "gazeY": 3
+      }
+    },
+    {
+      "cue": "green.ship",
+      "actor": "stage",
+      "target": "shipping",
+      "purpose": "Present shipping readiness as a question, not a success result.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "shipping": 1
+      }
+    },
+    {
+      "cue": "green.ship",
+      "actor": "sam",
+      "target": "shipping",
+      "purpose": "Ask the next question with brow and eyeline, hands resting.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "brow": -3,
+        "tilt": -3,
+        "gazeY": -1,
+        "smile": 0
+      }
+    },
+    {
+      "cue": "earn.no",
+      "actor": "litai",
+      "target": "partner",
+      "purpose": "One small head shake corrects the inference.",
+      "offset": 0,
+      "duration": 0.18,
+      "pose": {
+        "tilt": -2
+      }
+    },
+    {
+      "cue": "earn.no",
+      "actor": "litai",
+      "target": "partner",
+      "purpose": "Complete the head shake.",
+      "offset": 0.18,
+      "duration": 0.18,
+      "pose": {
+        "tilt": 2
+      }
+    },
+    {
+      "cue": "earn.no",
+      "actor": "litai",
+      "target": "rest",
+      "purpose": "Settle; leave the shipping hypothesis unanswered by any fake result.",
+      "offset": 0.36,
+      "duration": 0.18,
+      "pose": {
+        "tilt": 0
+      }
+    },
+    {
+      "cue": "earn.next",
+      "actor": "stage",
+      "target": "plan",
+      "purpose": "Return attention to discussing the next step.",
+      "offset": 0,
+      "duration": 0.35,
+      "pose": {
+        "shipping": 0
+      }
+    },
+    {
+      "cue": "earn.build",
+      "actor": "stage",
+      "target": "build",
+      "purpose": "Emphasize the first pending gate on its spoken name.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "build": 1,
+        "test": 0,
+        "acceptance": 0
+      }
+    },
+    {
+      "cue": "earn.build",
+      "actor": "litai",
+      "target": "build",
+      "purpose": "Follow the build gate with gaze rather than pointing.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "gazeX": 4,
+        "gazeY": 2
+      }
+    },
+    {
+      "cue": "earn.test",
+      "actor": "stage",
+      "target": "test",
+      "purpose": "Emphasize the second still-pending gate.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "build": 0.15,
+        "test": 1
+      }
+    },
+    {
+      "cue": "earn.test",
+      "actor": "sam",
+      "target": "test",
+      "purpose": "Listen and follow the gate sequence.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "gazeX": 4,
+        "gazeY": 3,
+        "brow": 0,
+        "tilt": 0
+      }
+    },
+    {
+      "cue": "earn.acceptance",
+      "actor": "stage",
+      "target": "acceptance",
+      "purpose": "Emphasize independent acceptance as a separate pending gate.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "test": 0.15,
+        "acceptance": 1
+      }
+    },
+    {
+      "cue": "earn.acceptance",
+      "actor": "litai",
+      "target": "acceptance",
+      "purpose": "Follow the third gate with gaze, hands still.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "gazeY": 4
+      }
+    },
+    {
+      "cue": "earn.evidence",
+      "actor": "stage",
+      "target": "receipt",
+      "purpose": "Link the pending gates to an unfilled evidence record.",
+      "offset": 0,
+      "duration": 0.3,
+      "pose": {
+        "receipt": 1,
+        "acceptance": 0.25
+      }
+    },
+    {
+      "cue": "earn.evidence",
+      "actor": "litai",
+      "target": "receipt",
+      "purpose": "One restrained open-hand presentation of the evidence relationship.",
+      "offset": 0,
+      "duration": 0.4,
+      "pose": {
+        "handX": 160,
+        "handY": 298,
+        "elbowX": 116,
+        "elbowY": 320,
+        "palm": -70
+      }
+    },
+    {
+      "cue": "surprises.plan",
+      "actor": "litai",
+      "target": "rest",
+      "purpose": "Yield focus to Sam and settle the presenting hand.",
+      "offset": 0,
+      "duration": 0.45,
+      "pose": {
+        "handX": 91,
+        "handY": 350,
+        "elbowX": 110,
+        "elbowY": 307,
+        "palm": 0,
+        "gazeY": 0,
+        "smile": 0.4
+      }
+    },
+    {
+      "cue": "surprises.plan",
+      "actor": "sam",
+      "target": "folder",
+      "purpose": "Place the unchanged repository beside the plan deliberately.",
+      "offset": 0,
+      "duration": 0.45,
+      "pose": {
+        "handX": 145,
+        "handY": 305,
+        "elbowX": 109,
+        "elbowY": 308,
+        "gazeY": 4
+      }
+    },
+    {
+      "cue": "surprises.plan",
+      "actor": "stage",
+      "target": "folder",
+      "purpose": "Slide the same folder along the desk, preserving its contents.",
+      "offset": 0.5,
+      "duration": 0.55,
+      "pose": {
+        "folderX": 13
+      }
+    },
+    {
+      "cue": "surprises.plan",
+      "actor": "sam",
+      "target": "folder",
+      "purpose": "Keep the hand with the folder as it slides.",
+      "offset": 0.5,
+      "duration": 0.55,
+      "pose": {
+        "handX": 157,
+        "handY": 305
+      }
+    },
+    {
+      "cue": "surprises.agree",
+      "actor": "sam",
+      "target": "partner",
+      "purpose": "An earned nod resolves the concern.",
+      "offset": 0,
+      "duration": 0.22,
+      "pose": {
+        "tilt": 3,
+        "smile": 0.6,
+        "gazeY": 0
+      }
+    },
+    {
+      "cue": "surprises.agree",
+      "actor": "sam",
+      "target": "rest",
+      "purpose": "Settle the nod and release the folder.",
+      "offset": 0.22,
+      "duration": 0.65,
+      "pose": {
+        "tilt": 0,
+        "handX": 50,
+        "handY": 350,
+        "elbowX": 110,
+        "elbowY": 307
+      }
+    },
+    {
+      "cue": "inspect.invite",
+      "actor": "litai",
+      "target": "plan",
+      "purpose": "A small invitation toward inspection, then get out of the way.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "handX": 149,
+        "handY": 311,
+        "elbowX": 112,
+        "elbowY": 327,
+        "palm": -60,
+        "gazeY": 3
+      }
+    },
+    {
+      "cue": "inspect.invite",
+      "actor": "sam",
+      "target": "plan",
+      "purpose": "Join the final shared attention on the plan.",
+      "offset": 0,
+      "duration": 0.25,
+      "pose": {
+        "gazeX": 4,
+        "gazeY": 3
+      }
+    },
+    {
+      "cue": "inspect.invite",
+      "actor": "litai",
+      "target": "rest",
+      "purpose": "Rest without waving; the command has been readable throughout the final two turns.",
+      "offset": 0.45,
+      "duration": 0.3,
+      "pose": {
+        "handX": 91,
+        "handY": 350,
+        "elbowX": 110,
+        "elbowY": 307,
+        "palm": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,333 @@
+{
+  "kind": "public-repository-research-not-execution",
+  "observed_date": "2026-10-24",
+  "framework_main_revision": "c345e652b91863e72526f25f8e31a03ec34bec01",
+  "latest_published_release": "v1.2.0",
+  "repositories": [
+    {
+      "repository": "jordanhubbard/bookscan",
+      "revision": "cecfb84169e2166407219febe0cd66aa9901c69e",
+      "commit_date": "2026-10-21T05:06:39Z",
+      "classification": "verified project metadata and implementation integration; milestone scopes below",
+      "sources": [
+        {
+          "claim": "B1",
+          "path": "literate.project.json",
+          "sha256": "40b4cbb6b23d33cfa4d43ff5be355a49ea397e0a51501079dfca010f78b7ad46",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/literate.project.json"
+        },
+        {
+          "claim": "B1",
+          "path": "PROJECT.md",
+          "sha256": "40252af6047a0b381950f106d77093196dfe449f1fb92a3207db45958f665452",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/PROJECT.md"
+        },
+        {
+          "claim": "B2",
+          "path": "components/legacy-project-wrapper/component.md",
+          "sha256": "d4600f21f1d7b3e80874a21b4ff05582da49bbf0afa4dc3686bf4756d5d94abd",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/components/legacy-project-wrapper/component.md"
+        },
+        {
+          "claim": "B2",
+          "path": "Makefile",
+          "sha256": "3900c95365fa33f124f92cfde57586f29ea9e141db27661ad3f9e0b59385fb41",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/Makefile"
+        },
+        {
+          "claim": "B3",
+          "path": "components/legacy-project-wrapper/implementation/tests/test_workflow.py",
+          "sha256": "07256b8974499f01de0d2d6578254a258279f58f6394d12c8b68b55a18ec870e",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/components/legacy-project-wrapper/implementation/tests/test_workflow.py"
+        },
+        {
+          "claim": "B3",
+          "path": "components/legacy-project-wrapper/implementation/tests/test_smoke.py",
+          "sha256": "028fdded09caf739d5198aa77619afe264c22c7c9d3a7950da579618e5b9c093",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/components/legacy-project-wrapper/implementation/tests/test_smoke.py"
+        },
+        {
+          "claim": "B4",
+          "path": "verification/current.json",
+          "sha256": "9a05a71f21fc54769354969b5a5ba2970917e7130d77a9487ec9cb775aac993a",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/verification/current.json"
+        },
+        {
+          "claim": "B4",
+          "path": ".literate/legacy-harness-baseline.json",
+          "sha256": "99743fe6b1f15c80a6f0abf13e0024059c29a704cd2d9b5d4551f4122641c45d",
+          "url": "https://github.com/jordanhubbard/bookscan/blob/cecfb84169e2166407219febe0cd66aa9901c69e/.literate/legacy-harness-baseline.json"
+        }
+      ],
+      "scope": "Python/PySide6 document-camera application, adopted with retained original source.\nThe project definition binds the standard lifecycle and a retained-parity receipt;\nits wrapper preserves directly observed build/test stages and explicitly has no\nproven package stage. The root Makefile forwards check/smoke to the implementation.\nTests actually name cancellation of a late camera callback, save rollback, durable\nbook/page order, original-resolution crop, selected-book PDF export and preservation\nof an existing PDF on export failure. The committed retained receipt records **126**\ntests. This is inspected repository evidence, not a fresh run or certification of\nall cameras and OS combinations. Its PROJECT limits camera evidence to the tested\nNETUM device and defers native regeneration. Do not call it spec-generated Python."
+    },
+    {
+      "repository": "jordanhubbard/Aviation",
+      "revision": "7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2",
+      "commit_date": "2026-10-24T20:24:52Z",
+      "classification": "verified project metadata and implementation integration; milestone scopes below",
+      "sources": [
+        {
+          "claim": "A1",
+          "path": "literate.project.json",
+          "sha256": "de0e03dc1fd7e67ec4f10f0081583bfaee9977c90c20f81e3ec95c411f3d9d09",
+          "url": "https://github.com/jordanhubbard/Aviation/blob/7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2/literate.project.json"
+        },
+        {
+          "claim": "A1",
+          "path": "README.md",
+          "sha256": "6af5c1036e010bf31a4d11d3f98304804627a22be4a6a4cb009d9fac71152531",
+          "url": "https://github.com/jordanhubbard/Aviation/blob/7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2/README.md"
+        },
+        {
+          "claim": "A2",
+          "path": "components/legacy-project-wrapper/component.md",
+          "sha256": "c0c822d25a9e2bfd64136da8445cb8cae0e411a874b70ca2c67de9ed30291f3d",
+          "url": "https://github.com/jordanhubbard/Aviation/blob/7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2/components/legacy-project-wrapper/component.md"
+        },
+        {
+          "claim": "A2",
+          "path": "Makefile",
+          "sha256": "21d5fe7d9e0021fb835f49a5f05dc1ca8f257ac3c9a3f9b7af3d78d61036029b",
+          "url": "https://github.com/jordanhubbard/Aviation/blob/7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2/Makefile"
+        },
+        {
+          "claim": "A2",
+          "path": "components/legacy-project-wrapper/implementation/Makefile",
+          "sha256": "14d9ebef5d01a7998162e39d8f3c26be39f21c264338277255878686b817bfb7",
+          "url": "https://github.com/jordanhubbard/Aviation/blob/7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2/components/legacy-project-wrapper/implementation/Makefile"
+        },
+        {
+          "claim": "A3",
+          "path": "components/flight-analyzer/component.md",
+          "sha256": "aebeb19de09f010e021e3c090a4dfae29c3ed1c77343f02fed63a7ccffa5ff0a",
+          "url": "https://github.com/jordanhubbard/Aviation/blob/7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2/components/flight-analyzer/component.md"
+        },
+        {
+          "claim": "A4",
+          "path": "verification/current.json",
+          "sha256": "283f98372f1ebb041dcec2b4a132c95d07a4a79272a438f799713c90585b865a",
+          "url": "https://github.com/jordanhubbard/Aviation/blob/7b41ed2c6de8d348b13a9dfcb3d30a4ee7a9cda2/verification/current.json"
+        }
+      ],
+      "scope": "Retained monorepo with a real Literate AI definition, a retained wrapper and a\nseparate flight-track analysis contract. The root Makefile delegates to retained\ncommands. The implementation Makefile has Node, Python, Go and Clojure build/test\nsurfaces; this does not assert a canonical Clojure generation Flavor or that every\nsuite ran. Some optional test branches explicitly report unavailable suites as\nskipped. The retained wrapper names proven build, test and package stages; the\ncommitted receipt records **273** tests at its recorded scope. The flight analyzer\ncontract covers KML encodings, bounded/untrusted XML, aircraft association before\nstorage, track conditioning, uncertain units and browser presentation. These are\nconcrete requirements, not a claim this research executed or independently proved\nevery behavior. The project explicitly excludes real flight-operation approval."
+    },
+    {
+      "repository": "jordanhubbard/ElixirSSI",
+      "revision": "49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53",
+      "commit_date": "2026-10-10T17:35:49Z",
+      "classification": "verified project metadata and implementation integration; milestone scopes below",
+      "sources": [
+        {
+          "claim": "E1",
+          "path": "literate.project.json",
+          "sha256": "486edd842d13a546ea873126b33f6778212586b620cb849b31cdea6b907fba99",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/literate.project.json"
+        },
+        {
+          "claim": "E1",
+          "path": "PROJECT.md",
+          "sha256": "dc7740e877345aade5968d6488e515e61e2e8cad5a725f6e1c6ed4c580b6be9a",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/PROJECT.md"
+        },
+        {
+          "claim": "E2",
+          "path": "Makefile",
+          "sha256": "66a0b211c92cb6f2554d1131c2215ec434743b6427ae33db39dfee4182dc8734",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/Makefile"
+        },
+        {
+          "claim": "E2",
+          "path": "os/Makefile",
+          "sha256": "8377416aa8184cdfe6555b4af88038d777422447043d00f2cbe0f42d3d2ca2ee",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/os/Makefile"
+        },
+        {
+          "claim": "E3",
+          "path": "scripts/verify-project.py",
+          "sha256": "05ec073ac644dc2b6dbc86913cc6f41a08cc6423f233d01331d64a5f0ec2eb89",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/scripts/verify-project.py"
+        },
+        {
+          "claim": "E3",
+          "path": "scripts/test-verification.py",
+          "sha256": "f973f9ef3564497be4807345a1c500a8fd3a8d33a0177c7c48dfe9f1cb5de953",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/scripts/test-verification.py"
+        },
+        {
+          "claim": "E4",
+          "path": "verification/system-image.json",
+          "sha256": "578e587559d24fa8c60c333d4d1825e14a39e2e6ed56a350836e7b87b8f7adfc",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/verification/system-image.json"
+        },
+        {
+          "claim": "E4",
+          "path": "verification/current.json",
+          "sha256": "5c87b511581d3c32ccdd2a69e8d106db333828c5a9bfdaacedb0df2ccc070e43",
+          "url": "https://github.com/jordanhubbard/ElixirSSI/blob/49bf27f4d25fdaf5c148e79451c5ed0c6bafdb53/verification/current.json"
+        }
+      ],
+      "scope": "An Elixir/BEAM system with Linux as hardware abstraction and Pi 5/CM5 image targets.\nThe project definition's receipt policy requires four stages. The actual verifier\nruns `build`, `test`, `test-emulator` and `test-cm5`; the last target invokes the\ncluster acceptance tool on CM5 emulation. It invalidates the previous receipt\nbefore execution, checks source/authority and artifact identities, and refuses a\nnew receipt on failed stages or input drift. The committed image report records\nall four stage exits as zero and scopes acceptance to this host and **three emulated\nCM5 boards; physical hardware is unqualified**. Four is a stage count, not the\nnumber of individual assertions. Do not call emulator results physical-board proof."
+    },
+    {
+      "repository": "jordanhubbard/LeRTX",
+      "revision": "0ac4c58dfa07f2fdbe310e88c5fb2930706f97da",
+      "commit_date": "2026-10-18T05:06:08Z",
+      "classification": "verified project metadata and implementation integration; milestone scopes below",
+      "sources": [
+        {
+          "claim": "L1",
+          "path": "literate.project.json",
+          "sha256": "6519349390356505e52f5fd4a8916f65aaa706ac8f32a15760b633d97ee7cdfb",
+          "url": "https://github.com/jordanhubbard/LeRTX/blob/0ac4c58dfa07f2fdbe310e88c5fb2930706f97da/literate.project.json"
+        },
+        {
+          "claim": "L1",
+          "path": "PROJECT.md",
+          "sha256": "64f9aa73f0d1408ac1234831e26d1f4d699016f252fce28da3f675bf139d86f4",
+          "url": "https://github.com/jordanhubbard/LeRTX/blob/0ac4c58dfa07f2fdbe310e88c5fb2930706f97da/PROJECT.md"
+        },
+        {
+          "claim": "L2",
+          "path": "components/desktop/component.md",
+          "sha256": "58f2c86ae1cbd7a06b34e752b095e1f0d0d71f4400697666737ab6481cec37b2",
+          "url": "https://github.com/jordanhubbard/LeRTX/blob/0ac4c58dfa07f2fdbe310e88c5fb2930706f97da/components/desktop/component.md"
+        },
+        {
+          "claim": "L3",
+          "path": "verification/prototype-admission-review.json",
+          "sha256": "008a222a7792a5cc7d3251bd012d8628dfe7df2c3da4d8a5d1ff80b7fe2dbd2a",
+          "url": "https://github.com/jordanhubbard/LeRTX/blob/0ac4c58dfa07f2fdbe310e88c5fb2930706f97da/verification/prototype-admission-review.json"
+        },
+        {
+          "claim": "L4",
+          "path": "verification/native/linux/retained-admission-regression.json",
+          "sha256": "ad3526fbe2492498b829bbad303f81a533757ae80eb0d13cd797971fe272c5b5",
+          "url": "https://github.com/jordanhubbard/LeRTX/blob/0ac4c58dfa07f2fdbe310e88c5fb2930706f97da/verification/native/linux/retained-admission-regression.json"
+        },
+        {
+          "claim": "L4",
+          "path": "verification/current.json",
+          "sha256": "53a5146d56d13d5a74d55f489f52ffcd4ed49ff99d0d31458cfe27a70a36526c",
+          "url": "https://github.com/jordanhubbard/LeRTX/blob/0ac4c58dfa07f2fdbe310e88c5fb2930706f97da/verification/current.json"
+        }
+      ],
+      "scope": "A hybrid specification/retained native digital-twin workspace with a real project\ndefinition, desktop Component, language/OS slots and pinned native SDK inputs.\nThe desktop contract separates native NVIDIA OVRTX/OVStage work on Linux/Windows\nfrom a Darwin-only Metal implementation and requires real rendering rather than\na mock success. Its prototype admission record reports **160** tests against the\nadmitted ARM64 artifact and sealed SDK closure, while preserving module/source\ncomparison and limitations. This is a recorded prototype milestone, not current\nHEAD or every-platform release qualification. A separate 157-test regression record\nretains three initial failures and a narrower passing rerun; that rerun does not\nprove cold-start reliability or formal admission. The top-level standard receipt\nrecords 30 tests and must not be conflated with the 160-test native milestone.\nPROJECT calls for fresh qualification of the newly combined source/SDK release.\nDo not claim present physical-arm qualification, generic GPU independence or an\neight-hour-to-108-second speedup from the scoped native duration."
+    },
+    {
+      "repository": "jordanhubbard/daemonarchy",
+      "revision": "cebd8e7f5779513b64ee273f4fdfd02d28e7cc87",
+      "commit_date": "2026-10-24T20:20:20Z",
+      "classification": "partial original-source contract adoption",
+      "sources": [
+        {
+          "claim": "D1",
+          "path": "literate.project.json",
+          "sha256": "9d14926554106c7c79ef490da366e1674b0251b1601c4f937d1aeb57dbc0a89a",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/literate.project.json"
+        },
+        {
+          "claim": "D1",
+          "path": "PROJECT.md",
+          "sha256": "bde4de080a0162edce5721de125cb7eb3386c00d692547601a4b8ef7eedd0e69",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/PROJECT.md"
+        },
+        {
+          "claim": "D2",
+          "path": "components/installer/component.md",
+          "sha256": "abdb68aa27931400ca37a2d2a77a855b0b0a62c1e6dff907b7d6c85f62b33b13",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/components/installer/component.md"
+        },
+        {
+          "claim": "D2",
+          "path": "components/installer/acceptance.md",
+          "sha256": "d3de564e81231aeeba2075965ce2ecd7de13490a53f55307b6c7604402093904",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/components/installer/acceptance.md"
+        },
+        {
+          "claim": "D2",
+          "path": "components/updates/component.md",
+          "sha256": "a8bc0ff16204f571c8fe05433c42b6c2ce818b1f12404a7f4e9fa4253cb61448",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/components/updates/component.md"
+        },
+        {
+          "claim": "D2",
+          "path": "components/verified-boot/component.md",
+          "sha256": "f98af526e0c89780c75248a6e35c5712e77a6efc6ef59ee97446d1e8a205c094",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/components/verified-boot/component.md"
+        },
+        {
+          "claim": "D3",
+          "path": "verification/adoption-checks.json",
+          "sha256": "4c232fe6069303d93dde8b235876d3cc3151015a6ad7765bafc8b622c2b8ae46",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/verification/adoption-checks.json"
+        },
+        {
+          "claim": "D4",
+          "path": "docs/testing-1.1.1.md",
+          "sha256": "70306c827fff6487030efb9a94b54fe09d6e168eb25949fa07bcc90f8098d185",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/docs/testing-1.1.1.md"
+        },
+        {
+          "claim": "D4",
+          "path": "verification/composed-framework-qualification-development.json",
+          "sha256": "e2056bafd1057de38c9a9f899193dfb2dcec7ec1ff0a1cd0ccab5a9dd8c22696",
+          "url": "https://github.com/jordanhubbard/daemonarchy/blob/cebd8e7f5779513b64ee273f4fdfd02d28e7cc87/verification/composed-framework-qualification-development.json"
+        }
+      ],
+      "scope": "FreeBSD desktop/installer project with an in-place original-source authority layer\nand eight retained product contracts: installation, packages, updates, desktop,\ndiagnostics, compatibility, release and verified boot. Installer requirements cover\nexplicit storage intent, verified completion and boot-environment isolation. This\nis genuine Literate AI use, but a **partial adoption**, not a completed native\nlifecycle or a regenerated FreeBSD tree. The adoption report says controller\ncontract locks pass while native execution and release enforcement are not yet\nqualified; `verification/current.json` is absent from the inspected tree. Its\npublished 1.1.1 product record retains physical graphics/firmware and other limits.\nLater framework development records are scoped framework work, not a product\nreceipt or a new released ISO. This case demonstrates honest boundaries; do not\npresent it as a fully qualified successful native adoption or a measured build speedup."
+    }
+  ],
+  "framework_sources": [
+    {
+      "claim": "F1",
+      "path": "docs/user/getting-started.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/docs/user/getting-started.md"
+    },
+    {
+      "claim": "F2",
+      "path": "docs/user/framework-flow.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/docs/user/framework-flow.md"
+    },
+    {
+      "claim": "F3",
+      "path": "skills/agent/develop-in-production-workflow/staging/dev/SKILL.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/skills/agent/develop-in-production-workflow/staging/dev/SKILL.md"
+    },
+    {
+      "claim": "F4",
+      "path": "skills/agent/develop-in-production-workflow/staging/dev/land/SKILL.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/skills/agent/develop-in-production-workflow/staging/dev/land/SKILL.md"
+    },
+    {
+      "claim": "F4",
+      "path": "skills/agent/align-workers/SKILL.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/skills/agent/align-workers/SKILL.md"
+    },
+    {
+      "claim": "F5",
+      "path": "src/literate_ai/cli/operator.py",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/src/literate_ai/cli/operator.py"
+    },
+    {
+      "claim": "F6",
+      "path": "docs/user/test-matrix.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/docs/user/test-matrix.md"
+    },
+    {
+      "claim": "F6",
+      "path": "flavors/os-freebsd/flavor.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/flavors/os-freebsd/flavor.md"
+    },
+    {
+      "claim": "F2",
+      "path": "samples/full-stack-rust-js/component.md",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/samples/full-stack-rust-js/component.md"
+    },
+    {
+      "claim": "F2",
+      "path": "samples/_harness/full-stack-rust-js/acceptance/oracle.json",
+      "url": "https://github.com/jordanhubbard/literate-ai/blob/c345e652b91863e72526f25f8e31a03ec34bec01/samples/_harness/full-stack-rust-js/acceptance/oracle.json"
+    }
+  ]
+}
