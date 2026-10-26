@@ -616,10 +616,33 @@ def assert_finalize_proof(
         finally:
             case.assertEqual(list(workspace.iterdir()), [])
 
+    def resolve_owned_refusal():
+        # A receiver failure response is transport-only evidence, so the
+        # dispatcher holds the worker as unknown ownership. This fixture owns and
+        # observes its synchronous local receiver, which exited zero after its
+        # parent guard refused; only that owner may assert terminal ownership.
+        from literate_ai.application.action_dag_scheduler import (
+            LifecycleActionTermination,
+        )
+
+        pending = linker.indexer.slots.unresolved_ownership
+        case.assertEqual(len(pending), 1)
+        linker.indexer.slots.resolve_ownership(
+            LifecycleActionTermination(
+                pending[0].identity,
+                pending[0].worker.worker_identity,
+                canonical_identity("fixture-owned-local-receiver-terminal"),
+                "owned-terminal",
+                0,
+            )
+        )
+        case.assertEqual(linker.indexer.slots.unresolved_ownership, ())
+
     # The receiver refuses before staging any input when no grant exists.
     with case.assertRaises(ActionWireError) as refused:
         run_controller()
     case.assertEqual(refused.exception.code, "action_finalize.grant_unavailable")
+    resolve_owned_refusal()
     # The operator plans the exact request the receiver parent will measure.
     planner = PortableFinalizeParentAuthority(
         grant_path=grant_file,
@@ -665,6 +688,7 @@ def assert_finalize_proof(
     with case.assertRaises(ActionWireError) as refused:
         run_controller()
     case.assertEqual(refused.exception.code, "action_finalize.authority_invalid")
+    resolve_owned_refusal()
     grant_file.write_bytes(
         canonical_json_bytes(issue_finalize_grant(value, request_to_grant).to_dict())
     )
@@ -681,6 +705,7 @@ def assert_finalize_proof(
     with case.assertRaises(ActionWireError) as refused:
         run_controller()
     case.assertEqual(refused.exception.code, "action_finalize.authority_invalid")
+    resolve_owned_refusal()
     released = linker.indexer.slots.try_reserve(lambda worker, slot: None)
     case.assertIsNotNone(released)
     released.release()
