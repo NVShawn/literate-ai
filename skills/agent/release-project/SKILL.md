@@ -36,6 +36,13 @@ fastest-turnaround path; do not wait on hosted CI that the record makes optional
    Deferred items name their next or maintenance milestone and reason. Repeat the
    sweep after every merge or scope change and immediately before planning; never
    infer an empty queue from an earlier snapshot.
+   Treat the policy-declared roadmap goal manifest as immutable release scope: every
+   current-release goal must exist in the roadmap with the exact release target and
+   a completed parent checkbox before planning or publication. An agent may propose
+   deferral, but may not move a goal. Only explicit user approval permits one atomic
+   change that retains the source-release deferral record, names the future release,
+   records the approval reference, moves the roadmap target, and adds the goal to the
+   future release manifest. No patch-content judgment overrides this boundary.
    For the first stable initial, major, or minor cut, the candidate release line must
    contain the current remote default branch at plan, prepare, check, and publish.
    Backport or merge approved release work when that invariant fails. Patch releases
@@ -75,8 +82,9 @@ fastest-turnaround path; do not wait on hosted CI that the record makes optional
 
 - Humans decide *when* the next minor or major ships. Agents decide *what*
   goes in a patch on the current `release/<major>.<minor>.x` line. Record that
-  patch-content decision in the queue and execute it; do not wait for the human
-  to pick cherry-picks unless they override.
+  patch-content decision in the queue and execute it, but never remove a recorded
+  release goal without the explicit user-approved deferral procedure above; do not
+  wait for the human to pick cherry-picks unless they override.
 - A patch is already-landed (or landing now on the default branch)
   correctness, safety, or reliability work with a bounded blast radius. It is
   not a catalog-wide identity re-pin, protocol/schema version bump, Flavor

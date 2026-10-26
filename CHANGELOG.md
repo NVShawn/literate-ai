@@ -16,6 +16,10 @@
   diagnostics. Declared safe BUILD/TEST actions support bounded identity-bound
   retries with retained attempts; mutable package/signing actions cannot retry.
 
+- Require every release goal to be explicit in the roadmap and complete before
+  publication. Preserve deferred goals in a machine-checked release ledger and allow
+  a move only with recorded user approval and a named future release.
+
 - Fail document-pair publication preflight when a stable Google Workspace resource
   has an anonymous or foreign-domain reader grant, preserving the declared
   organization-restricted audience.
