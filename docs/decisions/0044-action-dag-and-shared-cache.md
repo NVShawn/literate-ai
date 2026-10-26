@@ -554,3 +554,160 @@ Retain only the existing runtime allowlist and explicit worker bindings. In part
 uppercase SYSTEMROOT and COMSPEC must reach child processes as runtime bindings;
 PowerShell may fail before receiver startup when these are accidentally discarded.
 This correction does not authorize forwarding additional ambient credentials.
+
+### Aggregate reservations and mutable side effects
+
+The action-DAG API optionally accepts typed per-action CPU (millicores), memory
+(MiB), temporary disk (MiB), and network (Mbps) reservations and admitted available
+worker budgets. These budgets are conservative reservations, not measured host
+capacity or substitutes for fresh health observations. Reject impossible demands
+before dispatch; with active work, defer a ready action until all of its budgets
+fit. Bind policy and budget changes into the schedule identity. Omitted policy
+preserves existing schedule and request identities.
+
+Named exclusive claims serialize mutable authorities across all slots and workers
+in one coordinator run. Use one canonical claim per package database and protected
+signing authority; unrelated databases may proceed concurrently. Claims release
+on accepted success, proven terminal failure and accepted recovery. They do not establish a cross-controller
+lock: the owning database/signer must retain its external lock and custody controls.
+This API alone does not qualify native remote execution, shared cache admission,
+worker-loss retries or duplicate-key artifact coalescing.
+
+The coalescing artifact dispatcher shares only a verified immutable payload
+identity for a caller-admitted complete semantic action key. Its executor performs
+current authorization, verified CAS production, and fresh target/receipt admission
+for each request. It rejects another request's result rather than copying an
+accepted dispatch envelope. Failed production reaches all waiters without transferring terminal authority
+between request envelopes. A trusted controller-only no-actuation record binds a
+failed waiter, its selected worker and producer-failure correlation: it proves
+that waiter never invoked production or admission, so its unused reservation can
+release without inventing native termination evidence. The failed attempt retains
+this record. It cannot authorize a retry or clear the actual producer's unknown
+ownership/key hold. Definite terminal production leaves no success entry
+and permits a subsequent explicit retry. Unresolved production keeps its key
+blocked, including attempts on other workers, until exact owner resolution. The adapter is scoped to
+one finite coordinator; native transport, attempt logs and persistent shared-cache
+admission remain executor responsibilities.
+
+### Command BUILD payload custody and bounded retries
+
+`CommandComponentBuilder(coalesce_artifacts=True)` opts into the concrete command
+artifact executor. It preserves existing command/SSH transport checks, admits the
+exact current BUILD input and grant, imports and verifies the archive and every
+supporting record into CAS, and reopens those bytes on each current request. A
+separate controller admission record binds the request, requested worker, original
+build evidence and archive; it explicitly records that native execution was not
+repeated. Subsequent TEST handoffs retain their existing current-input checks.
+Producer attempt records retain UTC start/end, elapsed nanoseconds, request/worker
+and input identity, status and failure code. An owned receiver's nonzero exit
+also retains bounded stdout/stderr diagnostics; timeout/launch failures retain
+explicitly unavailable output rather than invented logs.
+
+The initial concrete key is the complete admitted `BuildWorkerInput` identity.
+This safely removes duplicate exact-input execution, including a changed request
+route/affinity, without relabeling old build evidence. A different current plan,
+source custody, SBOM, grant or BUILD input still misses. Cross-release semantic
+payload adoption requires its own explicit current qualification contract; it
+cannot change an immutable `BuildWorkerResult` into a newly executed build.
+
+Retry policy is explicit, bounded and identity-bound: only declared retry-safe
+BUILD/TEST actions may retry named failure codes, up to sixteen total attempts
+under the original deadline. Mutable side-effect claims prohibit retries. Each
+retry receives a distinct request identity, prefers an untried eligible worker,
+and retains the failed attempt in the schedule result. Descendants wait until
+success or cancellation after exhaustion; unrelated branches remain independent.
+No retry resets a deadline or silently converts a failed attempt into success.
+Cancellation of one coalesced waiter leaves other users' producer running; only
+cancellation of every registered user reaches the owned producer transport.
+Controller protocol tests do not establish physical worker-loss or native
+multi-machine acceptance.
+
+A failure code alone never establishes terminal ownership. Automatic retry also
+requires a retained, request/worker-bound trusted owner proof of definite terminal
+exit/cancellation, or a verified fenced lease under the exact selected fencing
+policy. Silence, SSH loss and observation/transport timeouts remain `unknown`;
+they do not authorize resubmitting work that could still be running. The generic command transport retains nonzero exit diagnostics with transport-only
+ownership scope: a command can itself invoke remote work, so its exit cannot mint
+native build termination authority. SSH client exit likewise cannot prove the
+remote build terminated. Unknown ownership holds the worker's capacity, all its
+slots and the action's exclusive claims; independent work may use healthy workers
+only when its claims do not conflict. Explicit matching trusted termination or
+fencing resolves the hold. One narrow self-resolution exists: on the FINALIZE
+grant-wait path, while the finalizer still holds the same worker/slot
+reservation (the slots verify it), an exact-bound
+`action_finalize.grant_unavailable` response from a receiver whose admitted
+capability was verified at the response boundary is receiver-owned terminal
+evidence for that one request. The configured FINALIZE receiver emits that code only from
+its first admission check, before it stages inputs or starts the child. Every
+later failure inside its post-admission execution that carries
+`grant_unavailable` is reported as `action_finalize.grant_lost`. That covers
+staging, the prepared-authority guard, each supervision poll, the child's stage
+checks and the post-run import. Those reads may follow partial or complete
+execution, and teardown of a running child is best-effort, so such a loss stays
+unknown ownership. The finalizer first confirms the unknown request still
+occupies the slot its live reservation holds. Only then does it retain the
+re-decoded response and a resolution record of the pre-staging phase and slot
+in CAS, so a refused self-resolution persists nothing. It resolves only that request and resends,
+and it refuses rather than resends when no verified response exists. Resolution
+never frees a slot a live reservation holds. Any other failure, any refusal
+without a verified boundary and any refusal outside a held grant-wait
+reservation stays unknown ownership. A retry that cannot be placed because
+unresolved ownership quarantined its eligible workers ends `blocked`, keeping
+its definite failed attempts, accepted results and unresolved-ownership list.
+These barriers persist within the scheduler, slot and
+coalescer instances, including a subsequent schedule; durable cross-controller
+custody and restart recovery remain unqualified. Remote lease/fencing admission and stale
+publication rejection require their own production worker-side qualification.
+Per-run claims remain coordination within one plan, not cross-controller signer
+or package-database locks, and cannot authorize racing another or older plan.
+
+### Explicit semantic re-admission and prior signed binary inputs
+
+`contracts.semantic_payload.SemanticBuildInputs` seals the exact compile/link/build
+projection: target, base build ABI, compiler/toolchain/sysroot, command/CWD and
+allowlisted environment, source/header/static/shared and generated member bytes,
+registered ownership, tools, generated/build producer-output identities, options,
+flavor and output format. `payload_scope` and `phase` are separate. Paths remain
+literal; `path_contract` needs native qualification before any path equivalence is
+admitted. Runtime OSVERSION, selected package bytes, SONAME/version constraints,
+scripts and current test/application policy belong to
+`NativePayloadQualificationInputs`, outside this compile projection. Missing
+edges or compiler/header provenance cannot be concealed by matching hash labels.
+
+`SemanticPayloadReadmissionRequest` binds a fresh request/current retained plan,
+policy, semantic and qualification inputs, verified payload and immutable prior
+result. `SemanticPayloadReadmitter` reopens the current retained planner and unique
+`payload-admission-policy` member, validates actual CAS bytes, verifies prior
+provenance and fresh current qualification through signed evidence graphs, and
+requires a current single-use issuer grant. The authenticated native producer
+closure must bind the current plan, manifest, profile and exact semantic inputs
+with no unknown edges. Mandatory checks include path/base ABI, runtime ABI,
+package constraints/scripts, native install/executable and application behavior.
+The separate re-admission receipt retains both checked graphs and supporting
+objects in CAS. It never rewrites an old `BuildWorkerResult` or claims compilation
+ran again. Kernel payloads remain rebuild-only.
+
+A retained signed release binary can lack a canonical original build result.
+`SignedReleaseBinaryAdoptionRequest` and `SignedReleaseBinaryAdopter` provide a
+separate policy-controlled input path without inventing that result or compiling
+solely to manufacture provenance. `PayloadAdmissionPolicy` must name an explicit
+`BinaryInputAdoptionAction`: a distinct acquire action and its source BUILD action,
+with declared owned outputs. The existing prospective source-build profile and
+its BUILD/TEST/docs/accept requirements remain intact. Prior signed release,
+catalogue, payload checksum and known producer facts need trusted provenance;
+current native checks bind the new request and exact payload selection. Known
+source/header/static/generated/options/environment/compiler changes refuse
+adoption. Original compiler/toolchain/command/environment provenance can remain
+explicitly unknown only under the bounded current policy; this cannot excuse
+unknown current graph ownership or missing source inputs.
+
+The resulting signed-release-binary-input adoption receipt records
+`build_key_cache_hit:false`, `source_build_equivalence:false`, original unknowns,
+and fresh current custody. It is neither an unchanged-build cache hit nor a source
+BUILD outcome. Neither adapter is wired into native production dispatch by this
+checkpoint. Cryptographic fixture tests exercise real evidence verification and
+single-use admissions; their native check objects are fixtures, not native
+qualification. Complete producer closures, installed-runtime qualification,
+policy review, native receipts and multi-physical-machine observation remain
+required before activation. Do not advance a derived project's selected runtime
+binding as a side effect of importing these APIs.

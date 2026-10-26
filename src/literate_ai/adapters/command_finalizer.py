@@ -7,7 +7,11 @@ from contextlib import nullcontext
 from functools import partial
 from pathlib import Path
 
-from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
+from literate_ai.adapters.action_dispatch_wire import (
+    ActionWireError,
+    decode_attested_action_response,
+    record_identity,
+)
 from literate_ai.adapters.action_finalize import admit_finalize_action
 from literate_ai.adapters.action_finalize_grant_request import (
     decode_finalize_grant_request,
@@ -22,6 +26,7 @@ from literate_ai.application.action_dag_planning import (
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchRequest,
     LifecycleActionKind,
+    LifecycleActionTermination,
 )
 from literate_ai.contracts import (
     ContentIdentity,
@@ -227,16 +232,75 @@ class CommandProjectFinalizer:
             Path(temporary).unlink(missing_ok=True)
             raise
 
+    def _resolve_grant_refusal(self, request, transport):
+        """Resolve one held pre-staging grant refusal before this reservation resends.
+
+        A command exit alone never proves termination (ADR 0044). This narrow
+        rule applies only on the grant-wait path, while this finalizer still
+        holds the same worker/slot reservation (checked by the slots), and only
+        to the exact request whose exact-bound ``grant_unavailable`` response
+        came from a receiver whose admitted capability the dispatcher verified
+        at the response boundary. The receiver emits that code only from its
+        first admission check, before it stages inputs or starts the FINALIZE
+        child; a grant lost later is ``grant_lost`` and stays unknown ownership,
+        as does every other failure.
+        """
+        response = transport.admitted_failures.get(request.identity)
+        if response is None:
+            raise ActionWireError(
+                "action_finalize.refusal_unverified",
+                "grant refusal has no boundary-verified receiver response",
+            )
+        outcome, _record, _capability = decode_attested_action_response(
+            response, request
+        )
+        if outcome.failure_code != "action_finalize.grant_unavailable":
+            raise ActionWireError(
+                "action_finalize.refusal_unverified",
+                "retained receiver response is not a pre-staging grant refusal",
+            )
+        evidence = {
+            "schema": "literate-ai/finalize-grant-refusal-resolution@2",
+            "request_identity": request.identity.uri,
+            "worker_identity": request.worker.worker_identity.uri,
+            "slot": request.slot,
+            "failure_code": outcome.failure_code,
+            "refusal_phase": "pre-staging-admission",
+            "admitted_response_identity": record_identity(response).uri,
+        }
+        # Refuse before persisting anything when the live reservation no longer
+        # holds this request's slot; only that reservation can release it.
+        self.indexer.slots.require_held_unknown(request)
+        content = canonical_json_bytes(evidence)
+        termination = LifecycleActionTermination(
+            request.identity,
+            request.worker.worker_identity,
+            canonical_identity(evidence),
+            "owned-terminal",
+            0,
+        )
+        for raw in (response, content):
+            if self.indexer.cas.put_bytes(raw).identity != record_identity(raw).uri:
+                raise ActionWireError(
+                    "action_finalize.refusal_custody_invalid",
+                    "grant refusal evidence custody differs",
+                )
+            self.indexer.remember_action_result(raw)
+        # Re-checked under the slots lock while resolving.
+        self.indexer.slots.resolve_ownership(termination, require_held=True)
+
     def _execute(self, lock, project, graph, plan, package, worker, slot):
         value, proof, raw, input_id, request, records, current, current_handoff = (
             self._request(lock, project, graph, plan, package, worker, slot)
         )
         returned = {}
-        outcome = self.indexer._dispatcher(records, returned).dispatch(request)
+        transport = self.indexer._dispatcher(records, returned)
+        outcome = transport.dispatch(request)
         if (
             outcome.failure_code == "action_finalize.grant_unavailable"
             and self.grant_request_path is not None
         ):
+            self._resolve_grant_refusal(request, transport)
             # The input is exact to this run, so the operator must grant it
             # while the run waits; a later rerun would need a new grant.
             self._write_grant_request(value, request, records, current_handoff)
@@ -254,7 +318,10 @@ class CommandProjectFinalizer:
                 time.sleep(self.grant_poll_seconds)
                 current_handoff()
                 returned = {}
-                outcome = self.indexer._dispatcher(records, returned).dispatch(request)
+                transport = self.indexer._dispatcher(records, returned)
+                outcome = transport.dispatch(request)
+                if outcome.failure_code == "action_finalize.grant_unavailable":
+                    self._resolve_grant_refusal(request, transport)
         if outcome.failure_code is not None:
             raise ActionWireError(outcome.failure_code, "worker FINALIZE failed")
         content = returned.get(outcome.result_identity)

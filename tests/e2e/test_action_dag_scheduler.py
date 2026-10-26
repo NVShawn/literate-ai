@@ -11,6 +11,7 @@ from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDisposition,
     LifecycleActionKind,
     LifecycleActionNode,
+    LifecycleActionTermination,
     LifecycleActionWorker,
 )
 from literate_ai.contracts.identity import canonical_identity
@@ -63,6 +64,17 @@ class _RecordingDispatcher:
             request.identity,
             None if failure else _identity(f"result-{request.action.action_id}"),
             failure,
+            LifecycleActionTermination(
+                request.identity,
+                request.worker.worker_identity,
+                _identity("fixture-owned-terminal"),
+                "owned-terminal",
+                1,
+            )
+            if failure
+            and failure
+            not in {"worker-lost", "timeout", "observation-timeout", "dispatch-failed"}
+            else None,
         )
 
     def cancel(self, request):
@@ -107,6 +119,49 @@ class ActionDagSchedulerTests(unittest.TestCase):
         self.assertEqual(
             {item.action.action_id for item in dispatcher.requests},
             {"failed", "independent"},
+        )
+
+    def test_successor_waits_for_accepted_predecessor_while_independent_overlaps(
+        self,
+    ):
+        release_parent = threading.Event()
+        independent_started = threading.Event()
+
+        class Dispatcher(_RecordingDispatcher):
+            def dispatch(inner, request):
+                action_id = request.action.action_id
+                if action_id == "parent":
+                    # The independent action must start while the parent holds.
+                    self.assertTrue(independent_started.wait(5))
+                    release_parent.wait(5)
+                elif action_id == "independent":
+                    independent_started.set()
+                    release_parent.set()
+                elif action_id == "child":
+                    self.assertTrue(release_parent.is_set())
+                return super().dispatch(request)
+
+        dispatcher = Dispatcher()
+        result = self.scheduler.run(
+            (
+                _node("parent"),
+                _node("child", predecessors=("parent",)),
+                _node("independent"),
+            ),
+            (_worker("alpha", slots=2),),
+            dispatcher,
+            deadline_identity=self.deadline,
+        )
+
+        order = [item.action.action_id for item in dispatcher.requests]
+        self.assertEqual(order.index("child"), 2)
+        child = dispatcher.requests[2]
+        self.assertEqual(
+            child.predecessor_result_identities, (_identity("result-parent"),)
+        )
+        self.assertEqual(
+            {item.disposition for item in result.results},
+            {LifecycleActionDisposition.ACCEPTED},
         )
 
 
