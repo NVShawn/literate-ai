@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add explicit current-request semantic payload re-admission and separately
+  policy-controlled prior signed release binary input adoption. Both retain
+  immutable prior evidence and require fresh signed native qualification and
+  single-use authorization; neither adapter activates native dispatch or asserts
+  source-build equivalence for binaries with unknown original compiler facts.
+
 - Bound optional action-DAG reservations across CPU, memory, disk and network,
   serialize named mutable authorities within one coordinator, and coalesce
   immutable payload production while separately admitting each current request.

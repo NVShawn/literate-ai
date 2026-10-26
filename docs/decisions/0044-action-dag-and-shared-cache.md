@@ -633,3 +633,54 @@ custody and restart recovery remain unqualified. Remote lease/fencing admission 
 publication rejection require their own production worker-side qualification.
 Per-run claims remain coordination within one plan, not cross-controller signer
 or package-database locks, and cannot authorize racing another or older plan.
+
+### Explicit semantic re-admission and prior signed binary inputs
+
+`contracts.semantic_payload.SemanticBuildInputs` seals the exact compile/link/build
+projection: target, base build ABI, compiler/toolchain/sysroot, command/CWD and
+allowlisted environment, source/header/static/shared and generated member bytes,
+registered ownership, tools, generated/build producer-output identities, options,
+flavor and output format. `payload_scope` and `phase` are separate. Paths remain
+literal; `path_contract` needs native qualification before any path equivalence is
+admitted. Runtime OSVERSION, selected package bytes, SONAME/version constraints,
+scripts and current test/application policy belong to
+`NativePayloadQualificationInputs`, outside this compile projection. Missing
+edges or compiler/header provenance cannot be concealed by matching hash labels.
+
+`SemanticPayloadReadmissionRequest` binds a fresh request/current retained plan,
+policy, semantic and qualification inputs, verified payload and immutable prior
+result. `SemanticPayloadReadmitter` reopens the current retained planner and unique
+`payload-admission-policy` member, validates actual CAS bytes, verifies prior
+provenance and fresh current qualification through signed evidence graphs, and
+requires a current single-use issuer grant. The authenticated native producer
+closure must bind the current plan, manifest, profile and exact semantic inputs
+with no unknown edges. Mandatory checks include path/base ABI, runtime ABI,
+package constraints/scripts, native install/executable and application behavior.
+The separate re-admission receipt retains both checked graphs and supporting
+objects in CAS. It never rewrites an old `BuildWorkerResult` or claims compilation
+ran again. Kernel payloads remain rebuild-only.
+
+A retained signed release binary can lack a canonical original build result.
+`SignedReleaseBinaryAdoptionRequest` and `SignedReleaseBinaryAdopter` provide a
+separate policy-controlled input path without inventing that result or compiling
+solely to manufacture provenance. `PayloadAdmissionPolicy` must name an explicit
+`BinaryInputAdoptionAction`: a distinct acquire action and its source BUILD action,
+with declared owned outputs. The existing prospective source-build profile and
+its BUILD/TEST/docs/accept requirements remain intact. Prior signed release,
+catalogue, payload checksum and known producer facts need trusted provenance;
+current native checks bind the new request and exact payload selection. Known
+source/header/static/generated/options/environment/compiler changes refuse
+adoption. Original compiler/toolchain/command/environment provenance can remain
+explicitly unknown only under the bounded current policy; this cannot excuse
+unknown current graph ownership or missing source inputs.
+
+The resulting signed-release-binary-input adoption receipt records
+`build_key_cache_hit:false`, `source_build_equivalence:false`, original unknowns,
+and fresh current custody. It is neither an unchanged-build cache hit nor a source
+BUILD outcome. Neither adapter is wired into native production dispatch by this
+checkpoint. Cryptographic fixture tests exercise real evidence verification and
+single-use admissions; their native check objects are fixtures, not native
+qualification. Complete producer closures, installed-runtime qualification,
+policy review, native receipts and multi-physical-machine observation remain
+required before activation. Do not advance a derived project's selected runtime
+binding as a side effect of importing these APIs.

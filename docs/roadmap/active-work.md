@@ -31111,9 +31111,24 @@ The first failed directory, source checkout and installed wheel stay retained.
 - **Depends on:** WORKER-DAG-001
 - **Implementation:**
   - [x] Bind optional action demands and worker budgets into schedule identity; preserve omitted-policy identities.
-  - [x] Reserve aggregate budgets and exclusive claims before dispatch and release on every outcome.
+  - [x] Reserve aggregate budgets and exclusive claims before dispatch; release only with accepted success/recovery or proven owned terminal evidence, holding unknown workers and claims.
 - **Evidence:**
   - [x] Controller concurrency, failure-release, capacity refusal, identity and fresh per-request artifact-admission regressions: eight focused tests pass via `make python-check`; legacy scheduler failure-isolation regression passes. Immutable payload production coalesces within one coordinator, while every current request obtains fresh admission.
 - **Next action:** qualify the explicit semantic payload re-admission contract against complete native producer closures and current trusted receipts, then obtain actual multi-machine/shared-cache and worker-loss qualification under #4.
 - **Concrete controller checkpoint:** opt-in command BUILD integration uses real transport plus verified archive/support-record CAS custody; exact-input reruns obtain fresh controller admission, original native build evidence and existing TEST handoffs. Nonzero owned receiver exits retain diagnostics and failed attempt metadata before explicit retry. Bounded declared-safe scheduler retry retains each attempt and a distinct request identity; package/signing side effects cannot opt into retry. Native physical-worker loss and cross-release semantic re-admission remain unqualified.
   - [ ] Actual native multi-worker/shared-cache qualification remains in issue #4.
+
+
+**ACTION-RESOURCES-001 / issue #4 semantic contract checkpoint:**
+Distinct semantic re-admission and signed-release binary-input adoption contracts
+are implemented behind verifier-owned current retained planning, explicit current
+policy, actual signed evidence graph verification and single-use grants. Sixteen
+cryptographic fixture tests pass; these do not supply native producer or application
+receipts. Existing source BUILD profiles remain unchanged; a policy-declared
+alternate acquire action never becomes a new BUILD result. Unknown old compiler
+facts remain explicit and cannot establish a build-key cache hit. Activation,
+complete native closure, installed-runtime qualification and actual physical-worker
+speedup/loss evidence remain open. Unknown dispatch custody now quarantines worker
+slots/resources/claims and coalesced keys until matching trusted resolution; the
+barriers are per instance, with durable cross-controller worker-side custody still
+open.
