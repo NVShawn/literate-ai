@@ -700,23 +700,27 @@ def assert_finalize_proof(
     granted = grant_file.read_bytes()
     grant_file.unlink()
     controller.grant_request_path = private / "grant-request.json"
-    controller.grant_wait_seconds = 60
+    controller.grant_wait_seconds = 600
     controller.grant_poll_seconds = 0.2
     import threading
 
+    stop = threading.Event()
+
     def grant_when_requested():
-        for _ in range(600):
+        # Grant only after the finalizer published the exact refused request;
+        # slow workers may take a while to reach that first refusal.
+        while not stop.wait(0.05):
             if controller.grant_request_path.exists():
                 grant_file.write_bytes(granted)
                 return
-            threading.Event().wait(0.05)
 
     granter = threading.Thread(target=grant_when_requested, daemon=True)
     granter.start()
     try:
         case.assertEqual(run_controller(), finalized)
     finally:
-        granter.join(timeout=60)
+        stop.set()
+        granter.join(timeout=10)
         controller.grant_request_path = None
         controller.grant_wait_seconds = 0
     case.assertEqual(linker.indexer.slots.unresolved_ownership, ())
