@@ -678,11 +678,23 @@ class LifecycleActionScheduleResult:
         for attempt in self.attempts:
             grouped[attempt.result.action_id].append(attempt)
         for action_id, values in grouped.items():
-            if (
-                tuple(item.number for item in values)
-                != tuple(range(1, len(values) + 1))
-                or final.get(action_id) != values[-1].result
-            ):
+            last = values[-1].result
+            current = final.get(action_id)
+            # A queued retry that could not be placed (blocked by unresolved
+            # ownership, or cancelled) keeps its definite failed attempts and
+            # ends undispatched; it never claims another attempt ran.
+            unplaced_retry = (
+                current is not None
+                and current.disposition
+                in {
+                    LifecycleActionDisposition.BLOCKED,
+                    LifecycleActionDisposition.CANCELLED,
+                }
+                and last.disposition is LifecycleActionDisposition.FAILED
+            )
+            if tuple(item.number for item in values) != tuple(
+                range(1, len(values) + 1)
+            ) or (current != last and not unplaced_retry):
                 raise ActionDagSchedulingError(
                     "action_dag.attempt_invalid",
                     "attempt sequence must retain the final result",

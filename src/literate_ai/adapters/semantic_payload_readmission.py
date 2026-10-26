@@ -270,11 +270,23 @@ class SemanticPayloadReadmitter:
         inputs = SemanticBuildInputs(self._content(request.semantic_inputs))
         descriptor = inputs.to_dict()
         action = next(
-            item
-            for item in current.profile.actions
-            if item.action_id == request.action_id
+            (
+                item
+                for item in current.profile.actions
+                if item.action_id == request.action_id
+            ),
+            None,
         )
-        tool = next(item for item in current.profile.tools if item[0] == action.tool)
+        tool = (
+            None
+            if action is None
+            else next(
+                (item for item in current.profile.tools if item[0] == action.tool),
+                None,
+            )
+        )
+        if action is None or tool is None:
+            raise ValueError("semantic_payload.action_or_tool_unknown")
         if descriptor["payload_scope"] != "userland":
             raise ValueError("semantic_payload.kernel_rebuild_required")
         if (

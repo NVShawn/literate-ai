@@ -44,6 +44,22 @@ from tests.support.fixtures_test_evidence_graph import _Graph
 from tests.support.fixtures_test_standard_post_source_evidence import _evidence
 
 
+class _Override:
+    """Delegate to a real object while overriding named attributes."""
+
+    def __init__(self, target, **overrides):
+        self._target, self._overrides = target, overrides
+
+    def __getattr__(self, name):
+        if name in self._overrides:
+            return self._overrides[name]
+        return getattr(self._target, name)
+
+
+def _without_profile_actions(current):
+    return _Override(current, profile=_Override(current.profile, actions=()))
+
+
 class SemanticReadmissionTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -547,6 +563,21 @@ class SemanticReadmissionTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "current_plan_changed"):
             self.readmitter.readmit(self.request, self.grant)
+        self.assertEqual(self.spent, set())
+
+    def test_unknown_action_is_a_coded_refusal_not_stop_iteration(self):
+        original = self.readmitter._current
+        with (
+            patch.object(
+                self.readmitter,
+                "_current",
+                lambda request: _without_profile_actions(original(request)),
+            ),
+            self.assertRaises(ValueError) as refused,
+        ):
+            self.readmitter.readmit(self.request, self.grant)
+        self.assertNotIsInstance(refused.exception, StopIteration)
+        self.assertTrue(str(refused.exception).startswith("semantic_payload."))
         self.assertEqual(self.spent, set())
 
     def test_corrupt_payload_or_missing_native_checks_refuses(self):

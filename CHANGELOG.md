@@ -29,6 +29,22 @@
   Video and presentation skills require explicit visual direction and separate
   motion-quality review before publication.
 
+- Command action adapters (generation, test, acceptance, link, package,
+  authorization, execution, build intent, plan finalization, build and
+  finalize) now hold a worker as unknown ownership after any receiver
+  `failure_code` response or post-actuation transport failure. The hold covers
+  all of that worker's slots for the life of the indexer's slots, and the next
+  acquisition fails with `action_slots.ownership_unknown` when no other eligible
+  worker remains. Only trusted owner evidence passed to
+  `CommandActionSlots.resolve_ownership` (owned-terminal exit or an admitted
+  fenced lease) releases it. The one built-in self-resolution is a pre-staging
+  FINALIZE `grant_unavailable` on a held grant-wait reservation; a grant lost
+  later is reported as `action_finalize.grant_lost`. Known follow-ups: opt-in
+  coalesced BUILD production has no production caller of `resolve_production`,
+  so an unknown producer failure keeps that input key blocked for the builder's
+  life. The unactivated semantic/binary adapters still spend their single-use
+  grant before the final policy/plan re-check.
+
 - Require every release goal to be explicit in the roadmap and complete before
   publication. Preserve deferred goals in a machine-checked release ledger and allow
   a move only with recorded user approval and a named future release.

@@ -7,7 +7,11 @@ from contextlib import nullcontext
 from functools import partial
 from pathlib import Path
 
-from literate_ai.adapters.action_dispatch_wire import ActionWireError, record_identity
+from literate_ai.adapters.action_dispatch_wire import (
+    ActionWireError,
+    decode_attested_action_response,
+    record_identity,
+)
 from literate_ai.adapters.action_finalize import admit_finalize_action
 from literate_ai.adapters.action_finalize_grant_request import (
     decode_finalize_grant_request,
@@ -229,32 +233,49 @@ class CommandProjectFinalizer:
             raise
 
     def _resolve_grant_refusal(self, request, transport):
-        """Resolve one held grant refusal before this reservation resends it.
+        """Resolve one held pre-staging grant refusal before this reservation resends.
 
         A command exit alone never proves termination (ADR 0044). This narrow
         rule applies only on the grant-wait path, while this finalizer still
-        holds the same worker/slot reservation, and only to the exact request
-        whose exact-bound ``grant_unavailable`` response came from a receiver
-        whose admitted capability the dispatcher verified at the response
-        boundary (in-process attestation or fresh revalidation). The receiver
-        checks the private grant synchronously and answers only after its owned
-        process tree has exited, so that refusal is receiver-owned terminal
-        evidence for this request. Every other failure, and any refusal without
-        that verified boundary, remains unknown ownership for an external owner.
+        holds the same worker/slot reservation (checked by the slots), and only
+        to the exact request whose exact-bound ``grant_unavailable`` response
+        came from a receiver whose admitted capability the dispatcher verified
+        at the response boundary. The receiver emits that code only from its
+        first admission check, before it stages inputs or starts the FINALIZE
+        child; a grant lost later is ``grant_lost`` and stays unknown ownership,
+        as does every other failure.
         """
         response = transport.admitted_failures.get(request.identity)
         if response is None:
-            return
+            raise ActionWireError(
+                "action_finalize.refusal_unverified",
+                "grant refusal has no boundary-verified receiver response",
+            )
+        outcome, _record, _capability = decode_attested_action_response(
+            response, request
+        )
+        if outcome.failure_code != "action_finalize.grant_unavailable":
+            raise ActionWireError(
+                "action_finalize.refusal_unverified",
+                "retained receiver response is not a pre-staging grant refusal",
+            )
         evidence = {
-            "schema": "literate-ai/finalize-grant-refusal-resolution@1",
+            "schema": "literate-ai/finalize-grant-refusal-resolution@2",
             "request_identity": request.identity.uri,
             "worker_identity": request.worker.worker_identity.uri,
-            "failure_code": "action_finalize.grant_unavailable",
+            "slot": request.slot,
+            "failure_code": outcome.failure_code,
+            "refusal_phase": "pre-staging-admission",
             "admitted_response_identity": record_identity(response).uri,
-            "reservation_held": True,
         }
         content = canonical_json_bytes(evidence)
-        evidence_identity = canonical_identity(evidence)
+        termination = LifecycleActionTermination(
+            request.identity,
+            request.worker.worker_identity,
+            canonical_identity(evidence),
+            "owned-terminal",
+            0,
+        )
         for raw in (response, content):
             if self.indexer.cas.put_bytes(raw).identity != record_identity(raw).uri:
                 raise ActionWireError(
@@ -262,15 +283,8 @@ class CommandProjectFinalizer:
                     "grant refusal evidence custody differs",
                 )
             self.indexer.remember_action_result(raw)
-        self.indexer.slots.resolve_ownership(
-            LifecycleActionTermination(
-                request.identity,
-                request.worker.worker_identity,
-                evidence_identity,
-                "owned-terminal",
-                0,
-            )
-        )
+        # The slots refuse unless this live reservation still holds the slot.
+        self.indexer.slots.resolve_ownership(termination, require_held=True)
 
     def _execute(self, lock, project, graph, plan, package, worker, slot):
         value, proof, raw, input_id, request, records, current, current_handoff = (

@@ -11,6 +11,7 @@ from types import SimpleNamespace
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
+    encode_action_response,
 )
 from literate_ai.adapters.action_slots import CommandActionSlots
 from literate_ai.adapters.command_finalizer import CommandProjectFinalizer
@@ -55,38 +56,54 @@ class FinalizeGrantRefusalTests(unittest.TestCase):
             self.finalizer, request, SimpleNamespace(admitted_failures=admitted)
         )
 
+    def refusal(self, request, code="action_finalize.grant_unavailable"):
+        return {request.identity: encode_action_response(request, failure_code=code)}
+
     def test_admitted_refusal_resolves_while_reservation_still_holds_slot(self):
         with self.slots.acquire() as (_worker_selected, slot):
             request = self.request(slot)
             self.slots.quarantine(request)
-            response = b'{"fixture":"admitted grant refusal"}'
-            self.resolve(request, {request.identity: response})
+            admitted = self.refusal(request)
+            self.resolve(request, admitted)
             self.assertEqual(self.slots.unresolved_ownership, ())
             # Resolution never frees a slot this reservation still holds.
             self.assertIsNone(self.slots.try_reserve(lambda worker, slot: None))
-            self.assertEqual(
-                self.finalizer.indexer.cas.get_bytes(
-                    self.finalizer.indexer.cas.put_bytes(response)
-                ),
-                response,
-            )
+            response = admitted[request.identity]
+            cas = self.finalizer.indexer.cas
+            self.assertEqual(cas.get_bytes(cas.put_bytes(response)), response)
             self.assertEqual(len(self.remembered), 2)
+            self.assertIn(
+                b'"refusal_phase":"pre-staging-admission"', self.remembered[1]
+            )
         reusable = self.slots.try_reserve(lambda worker, slot: None)
         self.assertIsNotNone(reusable)
         reusable.release()
 
-    def test_unverified_or_other_request_refusal_stays_unknown(self):
+    def test_unverified_other_code_or_unheld_refusal_raises_and_stays_unknown(self):
         with self.slots.acquire() as (_worker_selected, slot):
             request = self.request(slot)
             self.slots.quarantine(request)
-            self.resolve(request, {})
-            self.resolve(request, {_identity("other-request"): b"{}"})
+            for admitted in (
+                {},
+                {_identity("other-request"): b"{}"},
+                self.refusal(request, "action_finalize.grant_lost"),
+            ):
+                with self.subTest(admitted=sorted(item.uri for item in admitted)):
+                    with self.assertRaises(ActionWireError) as refused:
+                        self.resolve(request, admitted)
+                    self.assertEqual(
+                        refused.exception.code, "action_finalize.refusal_unverified"
+                    )
             self.assertEqual(self.slots.unresolved_ownership, (request,))
+        # Once the reservation is released, self-resolution is refused.
+        with self.assertRaises(ActionWireError) as refused:
+            self.resolve(request, self.refusal(request))
+        self.assertEqual(refused.exception.code, "action_slots.ownership_invalid")
+        self.assertEqual(self.slots.unresolved_ownership, (request,))
         self.assertIsNone(self.slots.try_reserve(lambda worker, slot: None))
         with self.assertRaisesRegex(ActionWireError, "unresolved"):
             with self.slots.acquire():
                 pass
-        self.assertEqual(self.remembered, [])
 
     def test_external_resolution_after_release_still_frees_capacity(self):
         with self.slots.acquire() as (_worker_selected, slot):

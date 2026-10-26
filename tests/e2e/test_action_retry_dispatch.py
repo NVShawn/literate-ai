@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import threading
+import time
 import unittest
 from dataclasses import replace
 
 from literate_ai.application.action_dag_scheduler import (
     ActionDagSchedulingError,
     LifecycleActionDagScheduler,
+    LifecycleActionDispatchOutcome,
     LifecycleActionDisposition,
     LifecycleActionKind,
     LifecycleActionTermination,
@@ -184,6 +187,79 @@ class RetryDispatchTests(unittest.TestCase):
                 },
             )
         self.assertEqual(dispatcher.requests, [])
+
+    def test_retry_blocked_by_unresolved_ownership_returns_schedule_result(self):
+        other_done = threading.Event()
+
+        class Dispatcher:
+            def __init__(self):
+                self.requests = []
+
+            def dispatch(self, request):
+                self.requests.append(request)
+                if request.action.action_id == "other":
+                    other_done.set()
+                    # Silence: no termination, so ownership stays unknown.
+                    return LifecycleActionDispatchOutcome(
+                        request.identity, None, "worker-lost"
+                    )
+                other_done.wait(5)
+                time.sleep(0.2)
+                return LifecycleActionDispatchOutcome(
+                    request.identity,
+                    None,
+                    "worker-lost",
+                    LifecycleActionTermination(
+                        request.identity,
+                        request.worker.worker_identity,
+                        _identity("owned-terminal"),
+                        "owned-terminal",
+                        1,
+                    ),
+                )
+
+        dispatcher = Dispatcher()
+        scheduler = LifecycleActionDagScheduler()
+        result = scheduler.run(
+            (_node("build"), _node("child", predecessors=("build",)), _node("other")),
+            (_worker("alpha", slots=2),),
+            dispatcher,
+            deadline_identity=_identity("deadline"),
+            action_policies={
+                "build": ActionDispatchPolicy(
+                    retry_safe=True,
+                    max_attempts=2,
+                    retryable_failure_codes=("worker-lost",),
+                )
+            },
+        )
+        results = {item.action_id: item for item in result.results}
+        self.assertEqual(
+            results["build"].disposition, LifecycleActionDisposition.BLOCKED
+        )
+        self.assertEqual(
+            results["child"].disposition, LifecycleActionDisposition.CANCELLED
+        )
+        self.assertEqual(
+            results["other"].disposition, LifecycleActionDisposition.UNKNOWN
+        )
+        build_attempts = [
+            item for item in result.attempts if item.result.action_id == "build"
+        ]
+        self.assertEqual(len(build_attempts), 1)
+        self.assertEqual(
+            build_attempts[0].result.disposition, LifecycleActionDisposition.FAILED
+        )
+        self.assertEqual(
+            [item.request.action.action_id for item in result.unresolved_ownership],
+            ["other"],
+        )
+        self.assertEqual(len(scheduler.unresolved_ownership), 1)
+        # The blocked retry never dispatched a second attempt.
+        self.assertEqual(
+            sorted(item.action.action_id for item in dispatcher.requests),
+            ["build", "other"],
+        )
 
 
 if __name__ == "__main__":

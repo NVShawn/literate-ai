@@ -2,11 +2,17 @@
 
 import os
 import sys
+import tempfile
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 from literate_ai.adapters.action_capabilities import CAPABILITY_PROTOCOL
-from literate_ai.adapters.action_dispatch_wire import ACTION_WIRE_PROTOCOL
+from literate_ai.adapters.action_dispatch_wire import (
+    ACTION_WIRE_PROTOCOL,
+    ActionWireError,
+)
 from literate_ai.adapters.action_finalize_parent import portable_child_environment
 from literate_ai.adapters.action_finalize_worker import ConfiguredFinalizeWorker
 from literate_ai.adapters.lifecycle import LocalComponentToolBinding
@@ -57,3 +63,59 @@ class ConfiguredFinalizeWorkerTests(unittest.TestCase):
         self.assertEqual(measured.get("LITAI_DEBUG"), "1")
         key = "SYSTEMROOT" if os.name == "nt" else "SystemRoot"
         self.assertEqual(measured.get(key), "C:/Windows")
+
+    def grant_refusal_code(self, refuse_on_call):
+        calls = 0
+
+        def authority(value):
+            nonlocal calls
+            calls += 1
+            if calls >= refuse_on_call:
+                raise ActionWireError(
+                    "action_finalize.grant_unavailable", "fixture grant unreadable"
+                )
+
+        profile = canonical_identity("private-finalize-test-runtime")
+        worker = ConfiguredFinalizeWorker(
+            LocalComponentToolBinding(sys.executable),
+            environment={"RUNTIME_MODE": "production"},
+            runtime_identity=profile,
+            observe_runtime=lambda: profile,
+            require_execution_authority=authority,
+            verify_package=lambda *args: None,
+            verify_stages=lambda *args: None,
+        )
+        request = SimpleNamespace(
+            input_record_identities=(canonical_identity("input"),),
+            action=SimpleNamespace(payload_identity=canonical_identity("payload")),
+        )
+        with tempfile.TemporaryDirectory() as root:
+            workspace = Path(root).resolve() / "workspace"
+            workspace.mkdir(mode=0o700)
+            with (
+                mock.patch(
+                    "literate_ai.adapters.action_finalize_worker.admit_finalize_action",
+                    return_value=object(),
+                ),
+                self.assertRaises(ActionWireError) as refused,
+            ):
+                worker.execute(
+                    request,
+                    SimpleNamespace(remaining=lambda: 60.0),
+                    {},
+                    expected_worker_identity=canonical_identity("worker"),
+                    cas=SimpleNamespace(root=Path(root).resolve() / "cas"),
+                    workspace_root=workspace,
+                    admission_guard=lambda: None,
+                )
+            # Nothing staged by this receiver survives either refusal.
+            self.assertEqual(list(workspace.iterdir()), [])
+        return refused.exception.code
+
+    def test_only_the_pre_staging_grant_refusal_is_grant_unavailable(self):
+        self.assertEqual(
+            self.grant_refusal_code(1), "action_finalize.grant_unavailable"
+        )
+        # A grant that becomes unreadable at any later check is a distinct,
+        # post-admission refusal that never authorizes owner self-resolution.
+        self.assertEqual(self.grant_refusal_code(2), "action_finalize.grant_lost")

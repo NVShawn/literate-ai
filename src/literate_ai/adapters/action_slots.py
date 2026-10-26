@@ -92,7 +92,12 @@ class CommandActionSlots:
             self._unknown[request.identity] = request
             self.condition.notify_all()
 
-    def resolve_ownership(self, termination):
+    def resolve_ownership(self, termination, *, require_held=False):
+        """Resolve one retained unknown request with trusted owner evidence.
+
+        ``require_held`` admits a self-resolution only while the same live
+        reservation still holds the request's worker/slot.
+        """
         with self.condition:
             if not isinstance(termination, LifecycleActionTermination):
                 raise ActionWireError(
@@ -102,6 +107,8 @@ class CommandActionSlots:
             request = self._unknown.get(termination.request_identity)
             if (
                 request is None
+                or require_held
+                and (request.worker.worker_id, request.slot) not in self._held
                 or request.worker.worker_identity != termination.worker_identity
                 or termination.kind == "fenced-lease"
                 and termination.fencing_policy_identity

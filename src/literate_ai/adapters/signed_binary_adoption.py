@@ -62,12 +62,16 @@ class SignedReleaseBinaryAdopter(SemanticPayloadReadmitter):
             None,
         )
         source_action = next(
-            item
-            for item in current.profile.actions
-            if item.action_id == request.source_action_id
+            (
+                item
+                for item in current.profile.actions
+                if item.action_id == request.source_action_id
+            ),
+            None,
         )
         if (
             binding is None
+            or source_action is None
             or binding.source_action_id != request.source_action_id
             or tuple(sorted(binding.action.outputs))
             != tuple(sorted(source_action.outputs))

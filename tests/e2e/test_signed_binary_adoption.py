@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import unittest
 from dataclasses import replace
+from unittest.mock import patch
 
 from literate_ai.adapters.signed_binary_adoption import SignedReleaseBinaryAdopter
 from literate_ai.contracts import canonical_identity
@@ -18,6 +19,22 @@ from literate_ai.contracts.semantic_payload import (
     SignedReleaseBinaryAdoptionRequest,
 )
 from tests.e2e import test_semantic_payload_readmission as fixture_module
+
+
+class _Override:
+    """Delegate to a real object while overriding named attributes."""
+
+    def __init__(self, target, **overrides):
+        self._target, self._overrides = target, overrides
+
+    def __getattr__(self, name):
+        if name in self._overrides:
+            return self._overrides[name]
+        return getattr(self._target, name)
+
+
+def _without_profile_actions(current):
+    return _Override(current, profile=_Override(current.profile, actions=()))
 
 
 class SignedBinaryAdoptionTests(unittest.TestCase):
@@ -164,6 +181,21 @@ class SignedBinaryAdoptionTests(unittest.TestCase):
         request = replace(fixture.request, admission_policy_identity=policy.identity)
         with self.assertRaisesRegex(ValueError, "unknown_original_provenance"):
             self.adopter.adopt(request, fixture.grant)
+        self.assertEqual(fixture.spent, set())
+
+    def test_unknown_source_action_is_a_coded_refusal_not_stop_iteration(self):
+        fixture = self.fixture
+        original = self.adopter._current
+        with (
+            patch.object(
+                self.adopter,
+                "_current",
+                lambda request: _without_profile_actions(original(request)),
+            ),
+            self.assertRaises(ValueError) as refused,
+        ):
+            self.adopter.adopt(fixture.request, fixture.grant)
+        self.assertTrue(str(refused.exception).startswith("binary_adoption."))
         self.assertEqual(fixture.spent, set())
 
     def test_known_source_options_or_compiler_change_refuses_despite_unknowns(self):

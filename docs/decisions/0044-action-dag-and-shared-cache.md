@@ -634,14 +634,24 @@ slots and the action's exclusive claims; independent work may use healthy worker
 only when its claims do not conflict. Explicit matching trusted termination or
 fencing resolves the hold. One narrow self-resolution exists: on the FINALIZE
 grant-wait path, while the finalizer still holds the same worker/slot
-reservation, an exact-bound `action_finalize.grant_unavailable` response from a
-receiver whose admitted capability was verified at the response boundary is
-receiver-owned terminal evidence for that one request, because the receiver
-checks its private grant synchronously and answers only after its owned process
-tree exits. The finalizer retains that response and a resolution record in CAS,
-resolves only that request and resends; resolution never frees a slot a live
-reservation holds. Any other failure, any refusal without a verified boundary and
-any refusal outside a held grant-wait reservation stays unknown ownership. These barriers persist within the scheduler, slot and
+reservation (the slots verify it), an exact-bound
+`action_finalize.grant_unavailable` response from a receiver whose admitted
+capability was verified at the response boundary is receiver-owned terminal
+evidence for that one request. The receiver emits that code only from its first
+admission check, before it stages inputs or starts the FINALIZE child. The grant
+is re-read at later checks: staging, every supervision poll, the child's stage
+checks and post-run import. A grant lost at any of those checks may follow
+partial or complete execution, and the receiver's teardown of a running child is
+best-effort, so it is reported as `action_finalize.grant_lost` and stays unknown
+ownership. The finalizer re-decodes the retained response and records its
+pre-staging phase and slot in CAS. It resolves only that request and resends,
+and it refuses rather than resends when no verified response exists. Resolution
+never frees a slot a live reservation holds. Any other failure, any refusal
+without a verified boundary and any refusal outside a held grant-wait
+reservation stays unknown ownership. A retry that cannot be placed because
+unresolved ownership quarantined its eligible workers ends `blocked`, keeping
+its definite failed attempts, accepted results and unresolved-ownership list.
+These barriers persist within the scheduler, slot and
 coalescer instances, including a subsequent schedule; durable cross-controller
 custody and restart recovery remain unqualified. Remote lease/fencing admission and stale
 publication rejection require their own production worker-side qualification.
