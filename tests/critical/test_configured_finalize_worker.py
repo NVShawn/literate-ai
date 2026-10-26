@@ -1,5 +1,6 @@
 """Receiver transport metadata must not change private FINALIZE identity."""
 
+import contextlib
 import os
 import sys
 import tempfile
@@ -111,6 +112,77 @@ class ConfiguredFinalizeWorkerTests(unittest.TestCase):
             # Nothing staged by this receiver survives either refusal.
             self.assertEqual(list(workspace.iterdir()), [])
         return refused.exception.code
+
+    def prepared_refusal_code(self, phase):
+        """Refuse the production prepared-authority grant read in one phase."""
+        state = {"phase": "staging"}
+        admitted = object()
+
+        def prepared_authority(prepared, root, environment):
+            if state["phase"] == phase:
+                # PortableFinalizeParentAuthority.require re-reads the grant
+                # through the provider, which raises exactly this code.
+                raise ActionWireError(
+                    "action_finalize.grant_unavailable", "fixture grant unreadable"
+                )
+
+        @contextlib.contextmanager
+        def materialize(**kwargs):
+            yield object()
+
+        def run_child(*, require_execution_authority, **kwargs):
+            state["phase"] = "supervision"
+            for _ in range(3):  # supervision polls while the child runs
+                require_execution_authority(admitted)
+            state["phase"] = "post-run"
+            return b"{}"
+
+        profile = canonical_identity("private-finalize-test-runtime")
+        worker = ConfiguredFinalizeWorker(
+            LocalComponentToolBinding(sys.executable),
+            environment={"RUNTIME_MODE": "production"},
+            runtime_identity=profile,
+            observe_runtime=lambda: profile,
+            require_execution_authority=lambda value: None,
+            require_prepared_authority=prepared_authority,
+            verify_package=lambda *args: None,
+            verify_stages=lambda *args: None,
+        )
+        input_id = canonical_identity("input")
+        request = SimpleNamespace(
+            input_record_identities=(input_id,),
+            action=SimpleNamespace(payload_identity=canonical_identity("payload")),
+        )
+        module = "literate_ai.adapters.action_finalize_worker"
+        with tempfile.TemporaryDirectory() as root:
+            workspace = Path(root).resolve() / "workspace"
+            workspace.mkdir(mode=0o700)
+            with (
+                mock.patch(f"{module}.admit_finalize_action", return_value=admitted),
+                mock.patch(f"{module}.materialize_finalize_inputs", materialize),
+                mock.patch(f"{module}.run_finalize_worker_process", run_child),
+                mock.patch(f"{module}.import_finalize_result", lambda **kwargs: None),
+                self.assertRaises(ActionWireError) as refused,
+            ):
+                worker.execute(
+                    request,
+                    SimpleNamespace(remaining=lambda: 60.0),
+                    {input_id: b"{}"},
+                    expected_worker_identity=canonical_identity("worker"),
+                    cas=SimpleNamespace(root=Path(root).resolve() / "cas"),
+                    workspace_root=workspace,
+                    admission_guard=lambda: None,
+                )
+            self.assertEqual(state["phase"], phase)
+            self.assertEqual(list(workspace.iterdir()), [])
+        return refused.exception.code
+
+    def test_prepared_authority_grant_loss_is_never_pre_staging(self):
+        for phase in ("staging", "supervision", "post-run"):
+            with self.subTest(phase=phase):
+                self.assertEqual(
+                    self.prepared_refusal_code(phase), "action_finalize.grant_lost"
+                )
 
     def test_only_the_pre_staging_grant_refusal_is_grant_unavailable(self):
         self.assertEqual(

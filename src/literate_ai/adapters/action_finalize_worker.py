@@ -130,7 +130,6 @@ class ConfiguredFinalizeWorker:
             expected_worker_identity=expected_worker_identity,
         )
         profile = self.identity
-        pre_staging = True
 
         def current():
             deadline.remaining()
@@ -143,22 +142,48 @@ class ConfiguredFinalizeWorker:
                 raise ActionWireError(
                     "action_finalize.profile_changed", "private startup changed"
                 )
-            try:
-                self.require_execution_authority(value)
-            except ActionWireError as exc:
-                # Only the first check precedes staging and the child. A grant
-                # that later becomes unreadable is a distinct, post-admission
-                # refusal that may follow partial or complete execution.
-                if exc.code == "action_finalize.grant_unavailable" and not pre_staging:
-                    raise ActionWireError(
-                        "action_finalize.grant_lost",
-                        "private FINALIZE grant became unavailable after admission",
-                    ) from exc
-                raise
+            self.require_execution_authority(value)
             deadline.remaining()
 
+        # The first admission check precedes staging and the child; it alone may
+        # report action_finalize.grant_unavailable.
         current()
-        pre_staging = False
+        try:
+            return self._execute_admitted(
+                request,
+                deadline,
+                records,
+                value=value,
+                current=current,
+                cas=cas,
+                workspace_root=workspace_root,
+                blob_source=blob_source,
+                cancelled=cancelled,
+            )
+        except ActionWireError as exc:
+            # Every later grant read (staging, prepared authority, each
+            # supervision poll, post-run import) may follow partial or complete
+            # execution, so it is a distinct post-admission refusal.
+            if exc.code == "action_finalize.grant_unavailable":
+                raise ActionWireError(
+                    "action_finalize.grant_lost",
+                    "private FINALIZE grant became unavailable after admission",
+                ) from exc
+            raise
+
+    def _execute_admitted(
+        self,
+        request,
+        deadline,
+        records,
+        *,
+        value,
+        current,
+        cas,
+        workspace_root,
+        blob_source,
+        cancelled,
+    ):
         if not workspace_root.is_absolute() or not cas.root.is_absolute():
             raise ActionWireError(
                 "action_finalize.workspace_invalid", "absolute paths required"

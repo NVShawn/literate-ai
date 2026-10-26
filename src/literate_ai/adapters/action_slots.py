@@ -92,6 +92,24 @@ class CommandActionSlots:
             self._unknown[request.identity] = request
             self.condition.notify_all()
 
+    def require_held_unknown(self, request):
+        """Refuse unless ``request`` is unknown and its slot is still held.
+
+        A held slot is released only by its own reservation, so a caller that
+        owns that reservation may persist evidence and then resolve.
+        """
+        with self.condition:
+            retained = self._unknown.get(getattr(request, "identity", None))
+            if (
+                retained is None
+                or retained != request
+                or (request.worker.worker_id, request.slot) not in self._held
+            ):
+                raise ActionWireError(
+                    "action_slots.ownership_invalid",
+                    "self-resolution requires the same unknown request on a held slot",
+                )
+
     def resolve_ownership(self, termination, *, require_held=False):
         """Resolve one retained unknown request with trusted owner evidence.
 

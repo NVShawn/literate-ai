@@ -268,6 +268,9 @@ class CommandProjectFinalizer:
             "refusal_phase": "pre-staging-admission",
             "admitted_response_identity": record_identity(response).uri,
         }
+        # Refuse before persisting anything when the live reservation no longer
+        # holds this request's slot; only that reservation can release it.
+        self.indexer.slots.require_held_unknown(request)
         content = canonical_json_bytes(evidence)
         termination = LifecycleActionTermination(
             request.identity,
@@ -283,7 +286,7 @@ class CommandProjectFinalizer:
                     "grant refusal evidence custody differs",
                 )
             self.indexer.remember_action_result(raw)
-        # The slots refuse unless this live reservation still holds the slot.
+        # Re-checked under the slots lock while resolving.
         self.indexer.slots.resolve_ownership(termination, require_held=True)
 
     def _execute(self, lock, project, graph, plan, package, worker, slot):

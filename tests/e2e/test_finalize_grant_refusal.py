@@ -100,6 +100,8 @@ class FinalizeGrantRefusalTests(unittest.TestCase):
             self.resolve(request, self.refusal(request))
         self.assertEqual(refused.exception.code, "action_slots.ownership_invalid")
         self.assertEqual(self.slots.unresolved_ownership, (request,))
+        # A refused self-resolution persists no response or resolution record.
+        self.assertEqual(self.remembered, [])
         self.assertIsNone(self.slots.try_reserve(lambda worker, slot: None))
         with self.assertRaisesRegex(ActionWireError, "unresolved"):
             with self.slots.acquire():

@@ -637,14 +637,17 @@ grant-wait path, while the finalizer still holds the same worker/slot
 reservation (the slots verify it), an exact-bound
 `action_finalize.grant_unavailable` response from a receiver whose admitted
 capability was verified at the response boundary is receiver-owned terminal
-evidence for that one request. The receiver emits that code only from its first
-admission check, before it stages inputs or starts the FINALIZE child. The grant
-is re-read at later checks: staging, every supervision poll, the child's stage
-checks and post-run import. A grant lost at any of those checks may follow
-partial or complete execution, and the receiver's teardown of a running child is
-best-effort, so it is reported as `action_finalize.grant_lost` and stays unknown
-ownership. The finalizer re-decodes the retained response and records its
-pre-staging phase and slot in CAS. It resolves only that request and resends,
+evidence for that one request. The configured FINALIZE receiver emits that code only from
+its first admission check, before it stages inputs or starts the child. Every
+later failure inside its post-admission execution that carries
+`grant_unavailable` is reported as `action_finalize.grant_lost`. That covers
+staging, the prepared-authority guard, each supervision poll, the child's stage
+checks and the post-run import. Those reads may follow partial or complete
+execution, and teardown of a running child is best-effort, so such a loss stays
+unknown ownership. The finalizer first confirms the unknown request still
+occupies the slot its live reservation holds. Only then does it retain the
+re-decoded response and a resolution record of the pre-staging phase and slot
+in CAS, so a refused self-resolution persists nothing. It resolves only that request and resends,
 and it refuses rather than resends when no verified response exists. Resolution
 never frees a slot a live reservation holds. Any other failure, any refusal
 without a verified boundary and any refusal outside a held grant-wait
