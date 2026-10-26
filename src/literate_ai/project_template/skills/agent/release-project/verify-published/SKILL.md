@@ -27,10 +27,19 @@ writes nothing.
    prerelease candidates must be published prereleases.
    For a major/minor document pair, require the release-bound receipt and its
    exported read-back hashes to match the exact prepared revision.
-5. Run a final `litai release contributions sweep` after remote verification.
+5. For a stable release, after the README update from `../SKILL.md` lands,
+   check the remote default branch's root `README.md`. It must name the
+   just-published tag and release title as the latest release. Every user-facing
+   asset it lists must match the published provider release by name, size and
+   SHA-256, and no other release may still be called "latest" or "current". The
+   CLI does not check this yet. Report any mismatch as the named failure
+   `readme-latest-release-stale`, with the expected and observed values, and
+   repeat the check after the fix lands. A prerelease leaves the stable entry
+   unchanged unless the release policy says otherwise.
+6. Run a final `litai release contributions sweep` after remote verification.
    New work is not silently swept into the release that just shipped: classify
    it for the next milestone so the next cycle begins from durable state.
-6. Never delete, move, overwrite, or force-push a published tag to make
+7. Never delete, move, overwrite, or force-push a published tag to make
    this command pass.
 
 A local tag is not proof, and a provider URL is not proof that notes, assets,

@@ -74,7 +74,18 @@ fastest-turnaround path; do not wait on hosted CI that the record makes optional
 6. Follow `verify-published/SKILL.md` with that same prepared record, then run one
    final contribution sweep so work arriving during publication starts the next
    disposition loop instead of disappearing from release evidence.
-7. Follow `advance/SKILL.md` when the default branch still reports a shipped
+7. After `verify-published` succeeds for a stable release, update the root
+   `README.md` latest-release or download section to that release. Take the tag
+   link, release title, and every user-facing asset name, size and SHA-256 from
+   the verified published provider release (`draft=false`). Never take them from
+   local build outputs, the prepared record alone, or a draft or unpublished
+   release. Remove or demote any text that still calls the previous release
+   "latest" or "current", for example by moving it under previous releases.
+   A prerelease does not replace the stable entry unless the release policy
+   says so. Land the change on the default branch through
+   `develop-in-production-workflow/staging/dev/land/`. Then repeat
+   `verify-published/SKILL.md` until its README check passes.
+8. Follow `advance/SKILL.md` when the default branch still reports a shipped
    version. Then follow `notify-descendants/SKILL.md` for operator-named
    children.
 
