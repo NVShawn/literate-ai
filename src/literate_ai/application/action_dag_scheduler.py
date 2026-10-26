@@ -44,6 +44,7 @@ class LifecycleActionDisposition(StrEnum):
     FAILED = "failed"
     CANCELLED = "cancelled"
     RECOVERED = "recovered"
+    UNKNOWN = "unknown"
 
 
 @dataclass(frozen=True, slots=True)
@@ -218,10 +219,64 @@ class LifecycleActionDispatchRequest:
 
 
 @dataclass(frozen=True, slots=True)
+class LifecycleActionTermination:
+    """Trusted owner evidence; never deserialize a transport claim into this proof."""
+
+    request_identity: ContentIdentity
+    worker_identity: ContentIdentity
+    evidence_identity: ContentIdentity
+    kind: str
+    exit_status: int | None = None
+    fenced_lease_identity: ContentIdentity | None = None
+    fencing_policy_identity: ContentIdentity | None = None
+
+    def __post_init__(self):
+        if any(
+            not isinstance(value, ContentIdentity)
+            for value in (
+                self.request_identity,
+                self.worker_identity,
+                self.evidence_identity,
+            )
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.termination_invalid", "termination authority must be typed"
+            )
+        if self.kind in {"owned-terminal", "owned-cancelled"}:
+            if (
+                type(self.exit_status) is not int
+                or self.exit_status == 0
+                or self.fenced_lease_identity is not None
+                or self.fencing_policy_identity is not None
+            ):
+                raise ActionDagSchedulingError(
+                    "action_dag.termination_invalid",
+                    "owned termination requires actual nonzero exit "
+                    "and no inferred lease",
+                )
+        elif self.kind == "fenced-lease":
+            if (
+                self.exit_status is not None
+                or not isinstance(self.fenced_lease_identity, ContentIdentity)
+                or not isinstance(self.fencing_policy_identity, ContentIdentity)
+            ):
+                raise ActionDagSchedulingError(
+                    "action_dag.termination_invalid",
+                    "fenced loss requires verified lease and policy custody",
+                )
+        else:
+            raise ActionDagSchedulingError(
+                "action_dag.termination_invalid",
+                "silence or timeout is not termination proof",
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class LifecycleActionDispatchOutcome:
     request_identity: ContentIdentity
     result_identity: ContentIdentity | None
     failure_code: str | None = None
+    termination: LifecycleActionTermination | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.request_identity, ContentIdentity):
@@ -232,6 +287,15 @@ class LifecycleActionDispatchOutcome:
             raise ActionDagSchedulingError(
                 "action_dag.outcome_invalid",
                 "outcome must contain exactly one result identity or failure",
+            )
+        if self.termination is not None and (
+            not isinstance(self.termination, LifecycleActionTermination)
+            or self.termination.request_identity != self.request_identity
+            or self.failure_code is None
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.termination_invalid",
+                "termination must bind this failed dispatch",
             )
         if self.result_identity is not None and not isinstance(
             self.result_identity, ContentIdentity
@@ -362,6 +426,7 @@ class LifecycleActionResult:
 class LifecycleActionAttempt:
     number: int
     result: LifecycleActionResult
+    termination: LifecycleActionTermination | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -372,6 +437,7 @@ class LifecycleActionAttempt:
             not in {
                 LifecycleActionDisposition.ACCEPTED,
                 LifecycleActionDisposition.FAILED,
+                LifecycleActionDisposition.UNKNOWN,
             }
         ):
             raise ActionDagSchedulingError(
@@ -379,11 +445,33 @@ class LifecycleActionAttempt:
                 "attempt must bind an actual dispatched result",
             )
 
+        if self.termination is not None and (
+            not isinstance(self.termination, LifecycleActionTermination)
+            or self.termination.request_identity != self.result.request_identity
+            or self.termination.worker_identity != self.result.worker_identity
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.termination_invalid",
+                "attempt termination differs from dispatched authority",
+            )
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
-                "schema": "literate-ai/lifecycle-action-attempt@1",
+                "schema": "literate-ai/lifecycle-action-attempt@2"
+                if self.termination
+                else "literate-ai/lifecycle-action-attempt@1",
+                **(
+                    {
+                        "termination_evidence_identity": (
+                            self.termination.evidence_identity.uri
+                        ),
+                        "termination_kind": self.termination.kind,
+                    }
+                    if self.termination
+                    else {}
+                ),
                 "number": self.number,
                 "result_identity": self.result.identity.uri,
             }
@@ -762,6 +850,7 @@ class LifecycleActionDagScheduler:
                             request.identity,
                             None,
                             getattr(exc, "code", None) or "dispatch-failed",
+                            getattr(exc, "termination_evidence", None),
                         )
                     if (
                         not isinstance(outcome, LifecycleActionDispatchOutcome)
@@ -771,25 +860,68 @@ class LifecycleActionDagScheduler:
                             "action_dag.outcome_mismatch",
                             "dispatcher returned evidence for another request",
                         )
+                    if (
+                        outcome.termination is not None
+                        and outcome.termination.worker_identity
+                        != request.worker.worker_identity
+                    ):
+                        raise ActionDagSchedulingError(
+                            "action_dag.termination_invalid",
+                            "terminal evidence names another worker",
+                        )
+                    if (
+                        outcome.termination is not None
+                        and outcome.termination.kind == "fenced-lease"
+                        and outcome.termination.fencing_policy_identity
+                        != policies.get(
+                            action_id, ActionDispatchPolicy()
+                        ).loss_fencing_policy_identity
+                    ):
+                        raise ActionDagSchedulingError(
+                            "action_dag.fencing_policy_invalid",
+                            "worker loss does not bind the admitted fencing policy",
+                        )
                     if outcome.failure_code is not None:
+                        uncertain = (
+                            outcome.termination is None
+                            and outcome.failure_code
+                            in {
+                                "worker-lost",
+                                "timeout",
+                                "observation-timeout",
+                                "dispatch-failed",
+                                "action_dispatch.failed",
+                                "action_wire.expired",
+                            }
+                        )
                         results[action_id] = LifecycleActionResult(
                             action_id,
                             node.identity,
                             request.identity,
                             request.worker.worker_identity,
-                            LifecycleActionDisposition.FAILED,
+                            LifecycleActionDisposition.UNKNOWN
+                            if uncertain
+                            else LifecycleActionDisposition.FAILED,
                             None,
                             outcome.failure_code,
                         )
                         if record_attempts:
                             attempts[(action_id, attempt_counts[action_id])] = (
                                 LifecycleActionAttempt(
-                                    attempt_counts[action_id], results[action_id]
+                                    attempt_counts[action_id],
+                                    results[action_id],
+                                    outcome.termination,
                                 )
                             )
                         policy = policies.get(action_id, ActionDispatchPolicy())
                         if (
                             outcome.failure_code in policy.retryable_failure_codes
+                            and outcome.termination is not None
+                            and (
+                                outcome.termination.kind != "fenced-lease"
+                                or outcome.termination.fencing_policy_identity
+                                == policy.loss_fencing_policy_identity
+                            )
                             and attempt_counts[action_id] < policy.max_attempts
                         ):
                             results.pop(action_id)
@@ -900,6 +1032,7 @@ __all__ = [
     "ActionDagSchedulingError",
     "LifecycleActionDagScheduler",
     "LifecycleActionAttempt",
+    "LifecycleActionTermination",
     "LifecycleActionDispatchOutcome",
     "LifecycleActionDispatchRequest",
     "LifecycleActionDispatcher",

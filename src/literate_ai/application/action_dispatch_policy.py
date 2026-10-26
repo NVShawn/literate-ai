@@ -47,6 +47,7 @@ class ActionDispatchPolicy:
     retry_safe: bool = False
     max_attempts: int = 1
     retryable_failure_codes: tuple[str, ...] = ()
+    loss_fencing_policy_identity: ContentIdentity | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.resources, ActionResources):
@@ -75,6 +76,10 @@ class ActionDispatchPolicy:
             or codes != tuple(sorted(set(codes)))
         ):
             raise ValueError("retry failure codes must be canonical and unique")
+        if self.loss_fencing_policy_identity is not None and not isinstance(
+            self.loss_fencing_policy_identity, ContentIdentity
+        ):
+            raise ValueError("worker-loss fencing policy must be a typed identity")
         if self.max_attempts > 1 and (not self.retry_safe or not codes or claims):
             raise ValueError(
                 "retries require declared safe work and explicit failures "
@@ -89,16 +94,21 @@ class ActionDispatchPolicy:
                 if self.retry_safe
                 or self.max_attempts != 1
                 or self.retryable_failure_codes
+                or self.loss_fencing_policy_identity is not None
                 else "literate-ai/action-dispatch-policy@1",
                 **(
                     {
                         "retry_safe": self.retry_safe,
                         "max_attempts": self.max_attempts,
                         "retryable_failure_codes": list(self.retryable_failure_codes),
+                        "loss_fencing_policy_identity": None
+                        if self.loss_fencing_policy_identity is None
+                        else self.loss_fencing_policy_identity.uri,
                     }
                     if self.retry_safe
                     or self.max_attempts != 1
                     or self.retryable_failure_codes
+                    or self.loss_fencing_policy_identity is not None
                     else {}
                 ),
                 "resources": self.resources.to_dict(),

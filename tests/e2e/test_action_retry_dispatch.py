@@ -10,6 +10,7 @@ from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDagScheduler,
     LifecycleActionDisposition,
     LifecycleActionKind,
+    LifecycleActionTermination,
 )
 from literate_ai.application.action_dispatch_policy import ActionDispatchPolicy
 from tests.e2e.test_action_dag_scheduler import (
@@ -48,7 +49,21 @@ class RetryDispatchTests(unittest.TestCase):
                     inner.failures["build"] = (
                         "worker-lost" if not inner.requests else None
                     )
-                return super().dispatch(request)
+                outcome = super().dispatch(request)
+                return (
+                    replace(
+                        outcome,
+                        termination=LifecycleActionTermination(
+                            request.identity,
+                            request.worker.worker_identity,
+                            _identity("owned-terminal"),
+                            "owned-terminal",
+                            1,
+                        ),
+                    )
+                    if outcome.failure_code
+                    else outcome
+                )
 
         dispatcher = Once()
         result = self.run_schedule(dispatcher)
@@ -82,7 +97,21 @@ class RetryDispatchTests(unittest.TestCase):
             replace(result, attempts=tuple(reversed(result.attempts)))
 
     def test_retry_budget_is_finite_and_descendants_cancel_only_after_exhaustion(self):
-        dispatcher = _RecordingDispatcher({"build": "worker-lost"})
+        class Terminal(_RecordingDispatcher):
+            def dispatch(inner, request):
+                outcome = super().dispatch(request)
+                return replace(
+                    outcome,
+                    termination=LifecycleActionTermination(
+                        request.identity,
+                        request.worker.worker_identity,
+                        _identity("owned-terminal"),
+                        "owned-terminal",
+                        1,
+                    ),
+                )
+
+        dispatcher = Terminal({"build": "worker-lost"})
         result = self.run_schedule(dispatcher, 3)
         self.assertEqual(len(dispatcher.requests), 3)
         self.assertEqual(len(result.attempts), 3)
@@ -92,6 +121,36 @@ class RetryDispatchTests(unittest.TestCase):
         self.assertEqual(
             result.results[1].disposition, LifecycleActionDisposition.CANCELLED
         )
+
+    def test_timeout_or_silence_is_unknown_and_never_authorizes_retry(self):
+        dispatcher = _RecordingDispatcher({"build": "worker-lost"})
+        result = self.run_schedule(dispatcher, 3)
+        self.assertEqual(len(dispatcher.requests), 1)
+        self.assertEqual(
+            result.results[0].disposition, LifecycleActionDisposition.UNKNOWN
+        )
+        self.assertIsNone(result.attempts[0].termination)
+
+    def test_fenced_loss_requires_the_exact_admitted_fencing_policy(self):
+        class Fenced(_RecordingDispatcher):
+            def dispatch(inner, request):
+                outcome = super().dispatch(request)
+                return replace(
+                    outcome,
+                    termination=LifecycleActionTermination(
+                        request.identity,
+                        request.worker.worker_identity,
+                        _identity("fence-receipt"),
+                        "fenced-lease",
+                        fenced_lease_identity=_identity("old-lease"),
+                        fencing_policy_identity=_identity("unadmitted-policy"),
+                    ),
+                )
+
+        dispatcher = Fenced({"build": "worker-lost"})
+        with self.assertRaises(ActionDagSchedulingError):
+            self.run_schedule(dispatcher, 3)
+        self.assertEqual(len(dispatcher.requests), 1)
 
     def test_other_failure_never_retries(self):
         dispatcher = _RecordingDispatcher({"build": "compile-failed"})

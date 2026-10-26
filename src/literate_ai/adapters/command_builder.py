@@ -243,6 +243,11 @@ class CommandComponentBuilder:
                 sink = transport.record_result
 
                 def retain(identity, content):
+                    if self.indexer.cas.put_bytes(content).identity != identity.uri:
+                        raise ActionWireError(
+                            "action_build.record_invalid",
+                            "retained command record identity differs",
+                        )
                     self.local_ports.retain_evidence_record(identity, content)
                     sink(identity, content)
 

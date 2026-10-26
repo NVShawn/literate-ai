@@ -26,6 +26,7 @@ from literate_ai.adapters.builders.python import BuildError
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchOutcome,
     LifecycleActionDispatchRequest,
+    LifecycleActionTermination,
     LifecycleActionWorker,
 )
 from literate_ai.contracts.execution_dispatch import (
@@ -302,6 +303,18 @@ class CommandLifecycleActionDispatcher:
                 self.record_failure(
                     canonical_identity(diagnostic), canonical_json_bytes(diagnostic)
                 )
+                if (
+                    worker.kind is ExecutionWorkerKind.COMMAND
+                    and type(diagnostic["exit_status"]) is int
+                    and diagnostic["exit_status"] != 0
+                ):
+                    exc.termination_evidence = LifecycleActionTermination(
+                        request.identity,
+                        request.worker.worker_identity,
+                        canonical_identity(diagnostic),
+                        "owned-terminal",
+                        diagnostic["exit_status"],
+                    )
             raise
         finally:
             with self._lock:

@@ -614,3 +614,15 @@ Cancellation of one coalesced waiter leaves other users' producer running; only
 cancellation of every registered user reaches the owned producer transport.
 Controller protocol tests do not establish physical worker-loss or native
 multi-machine acceptance.
+
+A failure code alone never establishes terminal ownership. Automatic retry also
+requires a retained, request/worker-bound trusted owner proof of definite terminal
+exit/cancellation, or a verified fenced lease under the exact selected fencing
+policy. Silence, SSH loss and observation/transport timeouts remain `unknown`;
+they do not authorize resubmitting work that could still be running. The owned
+local command transport emits terminal proof only after a definite nonzero exit
+and durable failure-record retention. It never treats the SSH client's exit as
+proof of the remote build's termination. Remote lease/fencing admission and stale
+publication rejection require their own production worker-side qualification.
+Per-run claims remain coordination within one plan, not cross-controller signer
+or package-database locks, and cannot authorize racing another or older plan.

@@ -78,6 +78,7 @@ class CommandBuildArtifactExecutor:
         transport, input_identity, input_record = self._inputs(request)
         started, started_utc = time.monotonic_ns(), datetime.now(UTC).isoformat()
         failure = None
+        termination = None
         try:
             outcome, content = transport.dispatch_record(request)
             if outcome.failure_code is not None:
@@ -110,6 +111,7 @@ class CommandBuildArtifactExecutor:
             return identity
         except BaseException as exc:
             failure = getattr(exc, "code", None) or type(exc).__name__
+            termination = getattr(exc, "termination_evidence", None)
             raise
         finally:
             self._retain(
@@ -124,6 +126,9 @@ class CommandBuildArtifactExecutor:
                     "wall_time_ns": time.monotonic_ns() - started,
                     "outcome": "passed" if failure is None else "failed",
                     "failure_code": failure,
+                    "termination_evidence_identity": None
+                    if termination is None
+                    else termination.evidence_identity.uri,
                 },
             )
 
