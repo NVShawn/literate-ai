@@ -89,6 +89,7 @@ literate_ai = ["py.typed", "_distribution_origin.json"]
   "CLAUDE.md",
   "agents/*.yaml",
   "docs/roadmap/*.md",
+  "docs/roadmap/*.json",
   "docs/user/*.md",
   "orchestration/*.md",
   "cursor/*.mdc",

@@ -141,6 +141,114 @@ class ReleaseContributionsTests(unittest.TestCase):
             refresh_remote=False,
         )
 
+    def roadmap_sweep(
+        self,
+        root: Path,
+        *,
+        roadmap: str,
+        releases: dict[str, list[dict[str, str]]],
+        release: str = "1.3.1",
+    ):
+        (root / "docs" / "roadmap").mkdir(parents=True)
+        (root / "docs" / "roadmap" / "active-work.md").write_text(
+            roadmap, encoding="utf-8"
+        )
+        (root / "docs" / "roadmap" / "release-goals.json").write_text(
+            json.dumps(
+                {
+                    "schema": "literate-ai/release-roadmap-goals@1",
+                    "roadmap": "docs/roadmap/active-work.md",
+                    "releases": releases,
+                }
+            ),
+            encoding="utf-8",
+        )
+        return sweep_release_contributions(
+            root,
+            release=release,
+            current_milestone=release,
+            roadmap_goal_manifest="docs/roadmap/release-goals.json",
+            run_command=lambda command, _cwd, _timeout: self.completed(command, []),
+            refresh_remote=False,
+        )
+
+    def test_roadmap_goal_gate_requires_documented_complete_goals(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.repository(Path(temporary))
+            result = self.roadmap_sweep(
+                root,
+                roadmap=("### [ ] COURSE-004 — Film\n\n- **Release target:** 1.3.1\n"),
+                releases={"1.3.1": [{"id": "COURSE-004"}]},
+            )
+            self.assertEqual(result["roadmap_goals"]["open"], ["COURSE-004"])
+            with self.assertRaises(ReleaseContributionsError) as blocked:
+                require_release_contributions_ready(result)
+            self.assertEqual(blocked.exception.code, "release.roadmap_goals_incomplete")
+
+    def test_roadmap_goal_gate_rejects_goal_omitted_from_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.repository(Path(temporary))
+            result = self.roadmap_sweep(
+                root,
+                roadmap=(
+                    "### [x] RELEASE-019 — Gate\n\n"
+                    "- **Release target:** 1.3.1\n\n"
+                    "### [x] COURSE-004 — Film\n\n"
+                    "- **Release target:** 1.3.1\n"
+                ),
+                releases={"1.3.1": [{"id": "RELEASE-019"}]},
+            )
+            self.assertEqual(
+                result["roadmap_goals"]["invalid"],
+                [{"id": "COURSE-004", "reason": "roadmap-goal-missing-from-manifest"}],
+            )
+
+    def test_roadmap_goal_gate_rejects_unapproved_deferral(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.repository(Path(temporary))
+            result = self.roadmap_sweep(
+                root,
+                roadmap=("### [ ] COURSE-004 — Film\n\n- **Release target:** 1.4.0\n"),
+                releases={
+                    "1.3.1": [
+                        {"id": "COURSE-004", "disposition": "defer", "to": "1.4.0"}
+                    ],
+                    "1.4.0": [{"id": "COURSE-004"}],
+                },
+            )
+            self.assertEqual(
+                result["roadmap_goals"]["invalid"][0]["reason"],
+                "unapproved-or-incomplete-deferral",
+            )
+
+    def test_roadmap_goal_gate_accepts_completed_and_user_approved_moves(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = self.repository(Path(temporary))
+            result = self.roadmap_sweep(
+                root,
+                roadmap=(
+                    "### [x] RELEASE-019 — Gate\n\n"
+                    "- **Release target:** 1.3.1\n\n"
+                    "### [ ] COURSE-004 — Film\n\n"
+                    "- **Release target:** 1.4.0\n"
+                ),
+                releases={
+                    "1.3.1": [
+                        {"id": "RELEASE-019"},
+                        {
+                            "id": "COURSE-004",
+                            "disposition": "defer",
+                            "to": "1.4.0",
+                            "approved_by": "user",
+                            "approval_reference": "roadmap decision 2026-10-25",
+                        },
+                    ],
+                    "1.4.0": [{"id": "COURSE-004"}],
+                },
+            )
+            require_release_contributions_ready(result)
+            self.assertTrue(result["ready"])
+
     def test_merged_topic_worktree_is_resolved_from_a_secondary_checkout(self):
         with tempfile.TemporaryDirectory() as temporary:
             root, topic, secondary = self.merged_worktrees(Path(temporary))

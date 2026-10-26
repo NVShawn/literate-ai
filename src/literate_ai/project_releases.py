@@ -159,11 +159,12 @@ class VersionBinding:
 @dataclass(frozen=True, slots=True)
 class ReleaseContributionsPolicy:
     current_milestone: str
+    roadmap_goal_manifest: str | None = None
 
     @classmethod
     def from_dict(cls, value: object, *, path: str) -> ReleaseContributionsPolicy:
         data = _mapping(value, path)
-        _keys(data, path, {"current_milestone"})
+        _keys(data, path, {"current_milestone", "roadmap_goal_manifest"})
         milestone = _string(data["current_milestone"], f"{path}.current_milestone")
         remainder = milestone.replace("{version}", "")
         if milestone.count("{version}") > 1 or "{" in remainder or "}" in remainder:
@@ -171,10 +172,23 @@ class ReleaseContributionsPolicy:
                 f"{path}.current_milestone",
                 "must be a literal milestone or contain one {version} placeholder",
             )
-        return cls(milestone)
+        manifest_raw = data.get("roadmap_goal_manifest")
+        manifest = (
+            None
+            if manifest_raw is None
+            else _relative_path(manifest_raw, f"{path}.roadmap_goal_manifest")
+        )
+        return cls(milestone, manifest)
 
     def to_dict(self) -> dict[str, str]:
-        return {"current_milestone": self.current_milestone}
+        return {
+            "current_milestone": self.current_milestone,
+            **(
+                {"roadmap_goal_manifest": self.roadmap_goal_manifest}
+                if self.roadmap_goal_manifest is not None
+                else {}
+            ),
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -1657,6 +1671,7 @@ def _release_contribution_summary(
             current_milestone=milestone,
             remote=policy.remote,
             default_branch=policy.default_branch or "main",
+            roadmap_goal_manifest=configured.roadmap_goal_manifest,
         )
         require_release_contributions_ready(result)
     except ReleaseContributionsError as exc:
@@ -1671,6 +1686,11 @@ def _release_contribution_summary(
         "branch_count": len(result["branches"]),
         "worktree_count": len(result["worktrees"]),
         "ready": True,
+        **(
+            {"roadmap_goals": result["roadmap_goals"]}
+            if "roadmap_goals" in result
+            else {}
+        ),
     }
 
 
