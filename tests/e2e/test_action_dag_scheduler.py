@@ -11,6 +11,7 @@ from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDisposition,
     LifecycleActionKind,
     LifecycleActionNode,
+    LifecycleActionTermination,
     LifecycleActionWorker,
 )
 from literate_ai.contracts.identity import canonical_identity
@@ -63,6 +64,17 @@ class _RecordingDispatcher:
             request.identity,
             None if failure else _identity(f"result-{request.action.action_id}"),
             failure,
+            LifecycleActionTermination(
+                request.identity,
+                request.worker.worker_identity,
+                _identity("fixture-owned-terminal"),
+                "owned-terminal",
+                1,
+            )
+            if failure
+            and failure
+            not in {"worker-lost", "timeout", "observation-timeout", "dispatch-failed"}
+            else None,
         )
 
     def cancel(self, request):

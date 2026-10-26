@@ -45,6 +45,7 @@ class LifecycleActionDisposition(StrEnum):
     CANCELLED = "cancelled"
     RECOVERED = "recovered"
     UNKNOWN = "unknown"
+    BLOCKED = "blocked"
 
 
 @dataclass(frozen=True, slots=True)
@@ -245,13 +246,12 @@ class LifecycleActionTermination:
         if self.kind in {"owned-terminal", "owned-cancelled"}:
             if (
                 type(self.exit_status) is not int
-                or self.exit_status == 0
                 or self.fenced_lease_identity is not None
                 or self.fencing_policy_identity is not None
             ):
                 raise ActionDagSchedulingError(
                     "action_dag.termination_invalid",
-                    "owned termination requires actual nonzero exit "
+                    "owned termination requires an actual terminal exit "
                     "and no inferred lease",
                 )
         elif self.kind == "fenced-lease":
@@ -272,11 +272,44 @@ class LifecycleActionTermination:
 
 
 @dataclass(frozen=True, slots=True)
+class LifecycleActionProducerFailure:
+    request_identity: ContentIdentity
+    producer_request_identity: ContentIdentity
+    evidence_identity: ContentIdentity | None = None
+
+    def __post_init__(self):
+        if (
+            not isinstance(self.request_identity, ContentIdentity)
+            or not isinstance(self.producer_request_identity, ContentIdentity)
+            or self.evidence_identity is not None
+            and not isinstance(self.evidence_identity, ContentIdentity)
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.failure_correlation_invalid",
+                "producer failure correlation must contain typed references",
+            )
+
+    @property
+    def identity(self):
+        return canonical_identity(
+            {
+                "schema": "literate-ai/coalesced-producer-failure@1",
+                "request_identity": self.request_identity.uri,
+                "producer_request_identity": self.producer_request_identity.uri,
+                "evidence_identity": None
+                if self.evidence_identity is None
+                else self.evidence_identity.uri,
+            }
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class LifecycleActionDispatchOutcome:
     request_identity: ContentIdentity
     result_identity: ContentIdentity | None
     failure_code: str | None = None
     termination: LifecycleActionTermination | None = None
+    producer_failure: LifecycleActionProducerFailure | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.request_identity, ContentIdentity):
@@ -287,6 +320,15 @@ class LifecycleActionDispatchOutcome:
             raise ActionDagSchedulingError(
                 "action_dag.outcome_invalid",
                 "outcome must contain exactly one result identity or failure",
+            )
+        if self.producer_failure is not None and (
+            not isinstance(self.producer_failure, LifecycleActionProducerFailure)
+            or self.producer_failure.request_identity != self.request_identity
+            or self.failure_code is None
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.failure_correlation_invalid",
+                "producer failure must bind this failed request",
             )
         if self.termination is not None and (
             not isinstance(self.termination, LifecycleActionTermination)
@@ -391,7 +433,10 @@ class LifecycleActionResult:
                 "action_dag.result_invalid",
                 "result disposition does not match its evidence",
             )
-        dispatched = self.disposition is not LifecycleActionDisposition.CANCELLED
+        dispatched = self.disposition not in {
+            LifecycleActionDisposition.CANCELLED,
+            LifecycleActionDisposition.BLOCKED,
+        }
         if dispatched != (
             self.request_identity is not None and self.worker_identity is not None
         ):
@@ -427,6 +472,7 @@ class LifecycleActionAttempt:
     number: int
     result: LifecycleActionResult
     termination: LifecycleActionTermination | None = None
+    producer_failure: LifecycleActionProducerFailure | None = None
 
     def __post_init__(self) -> None:
         if (
@@ -455,13 +501,27 @@ class LifecycleActionAttempt:
                 "attempt termination differs from dispatched authority",
             )
 
+        if self.producer_failure is not None and (
+            not isinstance(self.producer_failure, LifecycleActionProducerFailure)
+            or self.producer_failure.request_identity != self.result.request_identity
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.failure_correlation_invalid",
+                "attempt producer correlation differs",
+            )
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
                 "schema": "literate-ai/lifecycle-action-attempt@2"
-                if self.termination
+                if self.termination or self.producer_failure
                 else "literate-ai/lifecycle-action-attempt@1",
+                **(
+                    {"producer_failure_identity": self.producer_failure.identity.uri}
+                    if self.producer_failure
+                    else {}
+                ),
                 **(
                     {
                         "termination_evidence_identity": (
@@ -479,11 +539,38 @@ class LifecycleActionAttempt:
 
 
 @dataclass(frozen=True, slots=True)
+class LifecycleActionUnresolvedOwnership:
+    request: LifecycleActionDispatchRequest
+    policy: ActionDispatchPolicy
+
+    def __post_init__(self):
+        if not isinstance(
+            self.request, LifecycleActionDispatchRequest
+        ) or not isinstance(self.policy, ActionDispatchPolicy):
+            raise ActionDagSchedulingError(
+                "action_dag.ownership_invalid",
+                "unresolved ownership must retain exact request and policy",
+            )
+
+    @property
+    def identity(self):
+        return canonical_identity(
+            {
+                "schema": "literate-ai/unresolved-action-ownership@1",
+                "request_identity": self.request.identity.uri,
+                "worker_identity": self.request.worker.worker_identity.uri,
+                "policy_identity": self.policy.identity.uri,
+            }
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class LifecycleActionScheduleResult:
     schedule_identity: ContentIdentity
     max_parallelism: int
     results: tuple[LifecycleActionResult, ...]
     attempts: tuple[LifecycleActionAttempt, ...] = ()
+    unresolved_ownership: tuple[LifecycleActionUnresolvedOwnership, ...] = ()
 
     def __post_init__(self) -> None:
         if (
@@ -528,11 +615,31 @@ class LifecycleActionScheduleResult:
                     "attempt sequence must retain the final result",
                 )
 
+        if (
+            not isinstance(self.unresolved_ownership, tuple)
+            or any(
+                not isinstance(item, LifecycleActionUnresolvedOwnership)
+                for item in self.unresolved_ownership
+            )
+            or tuple(item.request.identity.uri for item in self.unresolved_ownership)
+            != tuple(
+                sorted(
+                    {item.request.identity.uri for item in self.unresolved_ownership}
+                )
+            )
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.ownership_invalid",
+                "unresolved ownership must be canonical and typed",
+            )
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(
             {
-                "schema": "literate-ai/lifecycle-action-schedule-result@2"
+                "schema": "literate-ai/lifecycle-action-schedule-result@3"
+                if self.unresolved_ownership
+                else "literate-ai/lifecycle-action-schedule-result@2"
                 if self.attempts
                 else "literate-ai/lifecycle-action-schedule-result@1",
                 **(
@@ -544,6 +651,15 @@ class LifecycleActionScheduleResult:
                     if self.attempts
                     else {}
                 ),
+                **(
+                    {
+                        "unresolved_ownership": [
+                            item.identity.uri for item in self.unresolved_ownership
+                        ]
+                    }
+                    if self.unresolved_ownership
+                    else {}
+                ),
                 "schedule_identity": self.schedule_identity.uri,
                 "max_parallelism": self.max_parallelism,
                 "result_identities": [item.identity.uri for item in self.results],
@@ -553,6 +669,42 @@ class LifecycleActionScheduleResult:
 
 class LifecycleActionDagScheduler:
     """Run every ready action on stable compatible worker slots."""
+
+    def __init__(self):
+        self._unresolved_ownership = {}
+
+    @property
+    def unresolved_ownership(self):
+        return tuple(
+            self._unresolved_ownership[key]
+            for key in sorted(self._unresolved_ownership, key=lambda key: key.uri)
+        )
+
+    def resolve_ownership(self, termination: LifecycleActionTermination) -> None:
+        """Apply trusted owner/fence proof for subsequent runs of this coordinator.
+
+        This is not remote lease discovery or a cross-controller lock. A new
+        controller must restore its verifier-owned unresolved journal before
+        production admission; this in-memory slice cannot replace that service.
+        """
+        if not isinstance(termination, LifecycleActionTermination):
+            raise ActionDagSchedulingError(
+                "action_dag.termination_invalid",
+                "ownership resolution requires trusted typed evidence",
+            )
+        pending = self._unresolved_ownership.get(termination.request_identity)
+        if (
+            pending is None
+            or pending.request.worker.worker_identity != termination.worker_identity
+            or termination.kind == "fenced-lease"
+            and termination.fencing_policy_identity
+            != pending.policy.loss_fencing_policy_identity
+        ):
+            raise ActionDagSchedulingError(
+                "action_dag.ownership_invalid",
+                "resolution does not bind the held request/worker/fencing policy",
+            )
+        self._unresolved_ownership.pop(termination.request_identity)
 
     def run(
         self,
@@ -673,7 +825,15 @@ class LifecycleActionDagScheduler:
         attempts = {}
         record_attempts = any(policy.max_attempts > 1 for policy in policies.values())
         reserved = {key: [0, 0, 0, 0] for key in worker_map}
-        held_claims: set[str] = set()
+        pending_ownership = dict(self._unresolved_ownership)
+        quarantined = {
+            item.request.worker.worker_id for item in pending_ownership.values()
+        }
+        held_claims: set[str] = {
+            claim
+            for item in pending_ownership.values()
+            for claim in item.policy.exclusive_claims
+        }
 
         def reserve(action_id: str, worker_id: str, direction: int) -> None:
             policy = policies.get(action_id, ActionDispatchPolicy())
@@ -713,6 +873,7 @@ class LifecycleActionDagScheduler:
                     for worker_id, slots in free_slots.items()
                     if slots
                     and worker_id in node.eligible_worker_ids
+                    and worker_id not in quarantined
                     and fits(node, worker_id)
                 )
             )
@@ -826,6 +987,22 @@ class LifecycleActionDagScheduler:
                 for item in deferred:
                     heapq.heappush(ready, item)
                 if not active:
+                    if ready and pending_ownership:
+                        while ready:
+                            _, blocked = heapq.heappop(ready)
+                            if blocked in results:
+                                continue
+                            results[blocked] = LifecycleActionResult(
+                                blocked,
+                                node_map[blocked].identity,
+                                None,
+                                None,
+                                LifecycleActionDisposition.BLOCKED,
+                                None,
+                                "worker-ownership-unresolved",
+                            )
+                            cancel_descendants(blocked)
+                        continue
                     if ready:
                         raise ActionDagSchedulingError(
                             "action_dag.worker_unavailable",
@@ -840,9 +1017,13 @@ class LifecycleActionDagScheduler:
                 ordered = sorted(completed, key=lambda item: active[item][0])
                 for future in ordered:
                     action_id, request = active.pop(future)
-                    free_slots[request.worker.worker_id].add(request.slot)
-                    reserve(action_id, request.worker.worker_id, -1)
                     node = node_map[action_id]
+                    # Keep custody even when malformed dispatcher evidence raises
+                    # before a normal failure result can be constructed.
+                    pending = LifecycleActionUnresolvedOwnership(
+                        request, policies.get(action_id, ActionDispatchPolicy())
+                    )
+                    self._unresolved_ownership[request.identity] = pending
                     try:
                         outcome = future.result()
                     except Exception as exc:
@@ -851,6 +1032,7 @@ class LifecycleActionDagScheduler:
                             None,
                             getattr(exc, "code", None) or "dispatch-failed",
                             getattr(exc, "termination_evidence", None),
+                            getattr(exc, "producer_failure", None),
                         )
                     if (
                         not isinstance(outcome, LifecycleActionDispatchOutcome)
@@ -882,18 +1064,18 @@ class LifecycleActionDagScheduler:
                             "worker loss does not bind the admitted fencing policy",
                         )
                     if outcome.failure_code is not None:
-                        uncertain = (
-                            outcome.termination is None
-                            and outcome.failure_code
-                            in {
-                                "worker-lost",
-                                "timeout",
-                                "observation-timeout",
-                                "dispatch-failed",
-                                "action_dispatch.failed",
-                                "action_wire.expired",
-                            }
-                        )
+                        uncertain = outcome.termination is None
+                        if uncertain:
+                            pending = LifecycleActionUnresolvedOwnership(
+                                request, policies.get(action_id, ActionDispatchPolicy())
+                            )
+                            pending_ownership[request.identity] = pending
+                            self._unresolved_ownership[request.identity] = pending
+                            quarantined.add(request.worker.worker_id)
+                        else:
+                            self._unresolved_ownership.pop(request.identity)
+                            free_slots[request.worker.worker_id].add(request.slot)
+                            reserve(action_id, request.worker.worker_id, -1)
                         results[action_id] = LifecycleActionResult(
                             action_id,
                             node.identity,
@@ -905,14 +1087,14 @@ class LifecycleActionDagScheduler:
                             None,
                             outcome.failure_code,
                         )
-                        if record_attempts:
-                            attempts[(action_id, attempt_counts[action_id])] = (
-                                LifecycleActionAttempt(
-                                    attempt_counts[action_id],
-                                    results[action_id],
-                                    outcome.termination,
-                                )
+                        attempts[(action_id, attempt_counts[action_id])] = (
+                            LifecycleActionAttempt(
+                                attempt_counts[action_id],
+                                results[action_id],
+                                outcome.termination,
+                                outcome.producer_failure,
                             )
+                        )
                         policy = policies.get(action_id, ActionDispatchPolicy())
                         if (
                             outcome.failure_code in policy.retryable_failure_codes
@@ -929,6 +1111,9 @@ class LifecycleActionDagScheduler:
                             continue
                         cancel_descendants(action_id)
                         continue
+                    self._unresolved_ownership.pop(request.identity)
+                    free_slots[request.worker.worker_id].add(request.slot)
+                    reserve(action_id, request.worker.worker_id, -1)
                     assert outcome.result_identity is not None
                     results[action_id] = LifecycleActionResult(
                         action_id,
@@ -957,6 +1142,10 @@ class LifecycleActionDagScheduler:
             limit,
             tuple(results[key] for key in sorted(results)),
             tuple(attempts[key] for key in sorted(attempts)),
+            tuple(
+                pending_ownership[key]
+                for key in sorted(pending_ownership, key=lambda key: key.uri)
+            ),
         )
 
     @staticmethod
@@ -1033,6 +1222,8 @@ __all__ = [
     "LifecycleActionDagScheduler",
     "LifecycleActionAttempt",
     "LifecycleActionTermination",
+    "LifecycleActionProducerFailure",
+    "LifecycleActionUnresolvedOwnership",
     "LifecycleActionDispatchOutcome",
     "LifecycleActionDispatchRequest",
     "LifecycleActionDispatcher",

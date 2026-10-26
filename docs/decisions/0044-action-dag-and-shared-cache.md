@@ -568,7 +568,7 @@ preserves existing schedule and request identities.
 Named exclusive claims serialize mutable authorities across all slots and workers
 in one coordinator run. Use one canonical claim per package database and protected
 signing authority; unrelated databases may proceed concurrently. Claims release
-on success, failure and accepted recovery. They do not establish a cross-controller
+on accepted success, proven terminal failure and accepted recovery. They do not establish a cross-controller
 lock: the owning database/signer must retain its external lock and custody controls.
 This API alone does not qualify native remote execution, shared cache admission,
 worker-loss retries or duplicate-key artifact coalescing.
@@ -577,8 +577,10 @@ The coalescing artifact dispatcher shares only a verified immutable payload
 identity for a caller-admitted complete semantic action key. Its executor performs
 current authorization, verified CAS production, and fresh target/receipt admission
 for each request. It rejects another request's result rather than copying an
-accepted dispatch envelope. Failed production reaches all waiters, leaves no
-success entry, and permits a subsequent explicit retry. The adapter is scoped to
+accepted dispatch envelope. Failed production reaches all waiters without transferring terminal authority
+between request envelopes. Definite terminal production leaves no success entry
+and permits a subsequent explicit retry. Unresolved production keeps its key
+blocked, including attempts on other workers, until exact owner resolution. The adapter is scoped to
 one finite coordinator; native transport, attempt logs and persistent shared-cache
 admission remain executor responsibilities.
 
@@ -619,10 +621,15 @@ A failure code alone never establishes terminal ownership. Automatic retry also
 requires a retained, request/worker-bound trusted owner proof of definite terminal
 exit/cancellation, or a verified fenced lease under the exact selected fencing
 policy. Silence, SSH loss and observation/transport timeouts remain `unknown`;
-they do not authorize resubmitting work that could still be running. The owned
-local command transport emits terminal proof only after a definite nonzero exit
-and durable failure-record retention. It never treats the SSH client's exit as
-proof of the remote build's termination. Remote lease/fencing admission and stale
+they do not authorize resubmitting work that could still be running. The generic command transport retains nonzero exit diagnostics with transport-only
+ownership scope: a command can itself invoke remote work, so its exit cannot mint
+native build termination authority. SSH client exit likewise cannot prove the
+remote build terminated. Unknown ownership holds the worker's capacity, all its
+slots and the action's exclusive claims; independent work may use healthy workers
+only when its claims do not conflict. Explicit matching trusted termination or
+fencing resolves the hold. These barriers persist within the scheduler, slot and
+coalescer instances, including a subsequent schedule; durable cross-controller
+custody and restart recovery remain unqualified. Remote lease/fencing admission and stale
 publication rejection require their own production worker-side qualification.
 Per-run claims remain coordination within one plan, not cross-controller signer
 or package-database locks, and cannot authorize racing another or older plan.

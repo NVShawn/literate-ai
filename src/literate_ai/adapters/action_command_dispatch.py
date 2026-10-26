@@ -26,7 +26,6 @@ from literate_ai.adapters.builders.python import BuildError
 from literate_ai.application.action_dag_scheduler import (
     LifecycleActionDispatchOutcome,
     LifecycleActionDispatchRequest,
-    LifecycleActionTermination,
     LifecycleActionWorker,
 )
 from literate_ai.contracts.execution_dispatch import (
@@ -95,6 +94,8 @@ class CommandLifecycleActionDispatcher:
         ],
         record_result: Callable[[ContentIdentity, bytes], None],
         record_failure: Callable[[ContentIdentity, bytes], None] | None = None,
+        on_unknown_ownership: Callable[[LifecycleActionDispatchRequest], None]
+        | None = None,
         revalidate_worker: Callable[[LifecycleActionWorker], None],
         environment: Mapping[str, str] | None = None,
         attested_boundary: Callable[[LifecycleActionWorker], ContentIdentity]
@@ -128,6 +129,7 @@ class CommandLifecycleActionDispatcher:
         self.input_records = input_records
         self.record_result = record_result
         self.record_failure = record_failure
+        self.on_unknown_ownership = on_unknown_ownership
         self.revalidate_worker = revalidate_worker
         # When set, boundaries skip the separate capability probe: the receiver
         # measures the admitted capability in process and attests it. A response
@@ -229,6 +231,7 @@ class CommandLifecycleActionDispatcher:
                     "action_dispatch.duplicate", "action is already running"
                 )
             self._active[request.identity] = event
+        actuated = False
         try:
             capability = None
             if self.attested_boundary is None:
@@ -258,6 +261,7 @@ class CommandLifecycleActionDispatcher:
                         str(path) if item == "{request_file}" else item for item in argv
                     )
                     stdin = None
+                actuated = True
                 output = self._run(argv, environment, stdin, event)
             outcome, result_record, attested = decode_attested_action_response(
                 output, request
@@ -272,6 +276,12 @@ class CommandLifecycleActionDispatcher:
                     "action_admission.runtime_changed",
                     "worker runtime or supported capabilities changed",
                 )
+            if (
+                mode is None
+                and outcome.failure_code is not None
+                and self.on_unknown_ownership is not None
+            ):
+                self.on_unknown_ownership(request)
             with self._lock:
                 if event.is_set():
                     raise ActionWireError(
@@ -283,9 +293,18 @@ class CommandLifecycleActionDispatcher:
                     self.record_result(outcome.result_identity, result_record)
             return outcome, result_record
         except BaseException as exc:
+            if (
+                mode is None
+                and actuated
+                and not getattr(exc, "process_not_started", False)
+            ):
+                exc.unknown_ownership_request = request
+                if self.on_unknown_ownership is not None:
+                    self.on_unknown_ownership(request)
             if mode is None and self.record_failure is not None:
                 diagnostic = {
                     "schema": "literate-ai/action-command-failure@1",
+                    "ownership_scope": "transport-process-only",
                     "request_identity": request.identity.uri,
                     "worker_identity": request.worker.worker_identity.uri,
                     "failure_code": getattr(exc, "code", None) or type(exc).__name__,
@@ -300,21 +319,17 @@ class CommandLifecycleActionDispatcher:
                     if not hasattr(exc, "process_stderr")
                     else base64.b64encode(exc.process_stderr).decode("ascii"),
                 }
-                self.record_failure(
-                    canonical_identity(diagnostic), canonical_json_bytes(diagnostic)
-                )
-                if (
-                    worker.kind is ExecutionWorkerKind.COMMAND
-                    and type(diagnostic["exit_status"]) is int
-                    and diagnostic["exit_status"] != 0
-                ):
-                    exc.termination_evidence = LifecycleActionTermination(
-                        request.identity,
-                        request.worker.worker_identity,
-                        canonical_identity(diagnostic),
-                        "owned-terminal",
-                        diagnostic["exit_status"],
+                try:
+                    self.record_failure(
+                        canonical_identity(diagnostic), canonical_json_bytes(diagnostic)
                     )
+                except BaseException as retention_error:
+                    if hasattr(exc, "unknown_ownership_request"):
+                        retention_error.unknown_ownership_request = request
+                    raise
+                exc.failure_evidence_identity = canonical_identity(diagnostic)
+                # A command may itself be a remote dispatcher. Its local exit
+                # is diagnostic transport evidence, never native-job termination.
             raise
         finally:
             with self._lock:
@@ -355,9 +370,11 @@ class CommandLifecycleActionDispatcher:
                 "action_dispatch_timeout": "action_wire.expired",
                 "action_dispatch_output_limit": "action_dispatch.output_oversized",
             }.get(exc.code, "action_dispatch.failed")
-            raise ActionWireError(
+            error = ActionWireError(
                 code, "command action process failed its execution bounds"
-            ) from exc
+            )
+            error.process_not_started = exc.code == "action_dispatch_launch_failed"
+            raise error from exc
         if completed.returncode != 0:
             error = ActionWireError(
                 "action_dispatch.failed",

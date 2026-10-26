@@ -256,6 +256,28 @@ class CommandComponentBuilder:
                 self._coalescing_requests[request.identity] = (transport, results)
             try:
                 outcome = self._artifact_dispatcher.dispatch(request)
+            except Exception as exc:
+                correlation = getattr(exc, "producer_failure", None)
+                if correlation is not None:
+                    record = canonical_json_bytes(
+                        {
+                            "schema": "literate-ai/coalesced-build-request-failure@1",
+                            "request_identity": request.identity.uri,
+                            "worker_identity": request.worker.worker_identity.uri,
+                            "producer_request_identity": (
+                                correlation.producer_request_identity.uri
+                            ),
+                            "producer_failure_evidence_identity": None
+                            if correlation.evidence_identity is None
+                            else correlation.evidence_identity.uri,
+                            "failure_code": getattr(exc, "code", None)
+                            or "dispatch-failed",
+                            "owned_process_started": False,
+                            "terminal_authority_transferred": False,
+                        }
+                    )
+                    transport.record_failure(record_identity(record), record)
+                raise
             finally:
                 with self._coalescing_lock:
                     self._coalescing_requests.pop(request.identity, None)

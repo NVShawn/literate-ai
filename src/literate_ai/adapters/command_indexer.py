@@ -158,6 +158,13 @@ class CommandGenerationIndexer:
         self._recorder = None
 
     def _dispatcher(self, records, results):
+        def retain_failure(identity, content):
+            if self.cas.put_bytes(content).identity != identity.uri:
+                raise ActionWireError(
+                    "action_dispatch.failure_invalid", "failure record custody differs"
+                )
+            self.remember_action_result(content)
+
         return CommandLifecycleActionDispatcher(
             self.catalog,
             self.workers,
@@ -165,6 +172,8 @@ class CommandGenerationIndexer:
             cwd=self.cwd,
             input_records=lambda _request: records,
             record_result=lambda identity, content: results.update({identity: content}),
+            record_failure=retain_failure,
+            on_unknown_ownership=lambda request: self.slots.quarantine(request),
             revalidate_worker=self.revalidate_worker,
             environment=self.environment,
             attested_boundary=self.attested_boundary,

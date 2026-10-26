@@ -70,7 +70,7 @@ class ResourceDispatchTests(unittest.TestCase):
                 self.assertEqual(dispatcher.maximum, 1 if field == "claim" else 2)
 
     def test_failure_releases_claim_for_independent_action(self):
-        dispatcher = _RecordingDispatcher({"one": "worker-lost"})
+        dispatcher = _RecordingDispatcher({"one": "build-failed"})
         policies = {
             name: ActionDispatchPolicy(exclusive_claims=("pkgdb:target",))
             for name in ("one", "two", "three")

@@ -10,6 +10,8 @@ from unittest.mock import patch
 
 from literate_ai.adapters.action_dispatch_wire import ActionWireError
 from literate_ai.adapters.command_builder import CommandComponentBuilder
+from literate_ai.application.action_dag_scheduler import LifecycleActionTermination
+from literate_ai.contracts import canonical_identity
 from literate_ai.storage.cas import BlobIntegrityError
 from tests.critical import test_command_builder as builder_fixture
 
@@ -84,6 +86,19 @@ class CoalescingCommandBuildTests(unittest.TestCase):
             b"FileNotFoundError", base64.b64decode(diagnostics[0]["stderr_base64"])
         )
         self.assertFalse(fixture.marker.exists())
+        # This fixture owns and observes its synchronous local receiver. Generic
+        # command/SSH transport alone may not assert remote terminal ownership.
+        pending = fixture.indexer.slots.unresolved_ownership[0]
+        termination = LifecycleActionTermination(
+            pending.identity,
+            pending.worker.worker_identity,
+            canonical_identity("fixture-owner-terminal"),
+            "owned-terminal",
+            diagnostics[0]["exit_status"],
+        )
+        key, _ = self.builder._artifact_dispatcher.unresolved_productions[0]
+        fixture.indexer.slots.resolve_ownership(termination)
+        self.builder._artifact_dispatcher.resolve_production(key, termination)
         self.builder.build(fixture.plan, ())
         self.assertTrue(fixture.marker.exists())
         self.assertEqual(len(self.records("literate-ai/command-build-attempt@1")), 2)

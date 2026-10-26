@@ -10,6 +10,8 @@ from literate_ai.application.action_dag_scheduler import (
     ActionDagSchedulingError,
     LifecycleActionDispatchOutcome,
     LifecycleActionDispatchRequest,
+    LifecycleActionProducerFailure,
+    LifecycleActionTermination,
 )
 from literate_ai.contracts.identity import ContentIdentity
 
@@ -42,8 +44,21 @@ class CoalescingArtifactDispatcher:
     This is not a distributed lock or a persistent success/receipt cache.
     """
 
-    def __init__(self, executor: ActionArtifactExecutor) -> None:
+    def __init__(
+        self,
+        executor: ActionArtifactExecutor,
+        *,
+        loss_fencing_policy_identity: ContentIdentity | None = None,
+    ) -> None:
+        if loss_fencing_policy_identity is not None and not isinstance(
+            loss_fencing_policy_identity, ContentIdentity
+        ):
+            raise TypeError("coalesced loss resolution requires a typed fencing policy")
+        self.loss_fencing_policy_identity = loss_fencing_policy_identity
         self.executor = executor
+        self._blocked_productions: dict[
+            ContentIdentity, LifecycleActionDispatchRequest
+        ] = {}
         self._lock = threading.Lock()
         self._artifacts: dict[ContentIdentity, Future[ContentIdentity]] = {}
         self._users: dict[
@@ -72,6 +87,9 @@ class CoalescingArtifactDispatcher:
                 future = Future()
                 self._artifacts[key] = future
                 self._producers[key] = request
+            producer_request = self._producers.get(
+                key
+            ) or self._blocked_productions.get(key)
         assert future is not None
         try:
             if owner:
@@ -84,8 +102,26 @@ class CoalescingArtifactDispatcher:
                         )
                 except BaseException as exc:
                     future.set_exception(exc)
+                    termination = getattr(exc, "termination_evidence", None)
+                    terminal = (
+                        isinstance(termination, LifecycleActionTermination)
+                        and termination.request_identity == request.identity
+                        and termination.worker_identity
+                        == request.worker.worker_identity
+                        and (
+                            termination.kind != "fenced-lease"
+                            or termination.fencing_policy_identity
+                            == self.loss_fencing_policy_identity
+                        )
+                    )
                     with self._lock:
-                        self._artifacts.pop(key, None)
+                        if terminal:
+                            self._artifacts.pop(key, None)
+                        else:
+                            # Unknown production may still own remote resources.
+                            # Preserve its failed Future to block this key on every
+                            # worker until an explicit trusted owner/fence resolution.
+                            self._blocked_productions[key] = request
                     raise
                 else:
                     future.set_result(artifact)
@@ -93,7 +129,27 @@ class CoalescingArtifactDispatcher:
                     with self._lock:
                         if self._producers.get(key) == request:
                             self._producers.pop(key, None)
-            artifact = future.result()
+            try:
+                artifact = future.result()
+            except Exception as exc:
+                if owner:
+                    raise
+                termination = getattr(exc, "termination_evidence", None)
+                code = getattr(exc, "code", None) or "dispatch-failed"
+                error = ActionDagSchedulingError(
+                    code,
+                    "coalesced artifact producer failed; "
+                    "this request did not own its process",
+                )
+                if producer_request is not None:
+                    error.producer_failure = LifecycleActionProducerFailure(
+                        request.identity,
+                        producer_request.identity,
+                        termination.evidence_identity
+                        if isinstance(termination, LifecycleActionTermination)
+                        else None,
+                    )
+                raise error from exc
             with self._lock:
                 if request.identity in self._cancelled:
                     raise ActionDagSchedulingError(
@@ -120,6 +176,39 @@ class CoalescingArtifactDispatcher:
                 users.pop(request.identity, None)
                 if not users:
                     self._users.pop(key, None)
+
+    @property
+    def unresolved_productions(self):
+        with self._lock:
+            return tuple(
+                (key, self._blocked_productions[key])
+                for key in sorted(self._blocked_productions, key=lambda key: key.uri)
+            )
+
+    def resolve_production(
+        self, key: ContentIdentity, termination: LifecycleActionTermination
+    ) -> None:
+        if not isinstance(termination, LifecycleActionTermination):
+            raise ActionDagSchedulingError(
+                "action_dag.termination_invalid",
+                "production resolution requires trusted owner evidence",
+            )
+        with self._lock:
+            request = self._blocked_productions.get(key)
+            if (
+                request is None
+                or termination.request_identity != request.identity
+                or termination.worker_identity != request.worker.worker_identity
+                or termination.kind == "fenced-lease"
+                and termination.fencing_policy_identity
+                != self.loss_fencing_policy_identity
+            ):
+                raise ActionDagSchedulingError(
+                    "action_dag.ownership_invalid",
+                    "production resolution differs from held key/request/worker/policy",
+                )
+            self._blocked_productions.pop(key)
+            self._artifacts.pop(key, None)
 
     def cancel(self, request: LifecycleActionDispatchRequest) -> None:
         producer = None

@@ -14,6 +14,7 @@ from literate_ai.application.action_dag_scheduler import (
     ActionDagSchedulingError,
     LifecycleActionDispatchOutcome,
     LifecycleActionDispatchRequest,
+    LifecycleActionTermination,
 )
 from tests.e2e.test_action_dag_scheduler import _identity, _node, _worker
 
@@ -36,6 +37,7 @@ class Executor:
         self.release = threading.Event()
         self.started = threading.Event()
         self.failed = False
+        self.failure_terminal = True
         self.cancelled = []
 
     def action_key(self, request):
@@ -47,7 +49,17 @@ class Executor:
         if not self.release.wait(2):
             raise TimeoutError("bounded test wait")
         if self.failed:
-            raise RuntimeError("worker-lost")
+            error = RuntimeError("worker-lost")
+            error.code = "worker-lost"
+            if self.failure_terminal:
+                error.termination_evidence = LifecycleActionTermination(
+                    request.identity,
+                    request.worker.worker_identity,
+                    _identity("fixture-terminal"),
+                    "owned-terminal",
+                    1,
+                )
+            raise error
         return _identity("verified-payload")
 
     def admit(self, request, artifact):
@@ -125,6 +137,34 @@ class ArtifactDispatchTests(unittest.TestCase):
                 future.result()
         self.assertEqual(executor.cancelled, [current.identity])
         self.assertEqual(executor.admitted, [])
+
+    def test_unknown_production_key_cannot_restart_on_another_worker(self):
+        executor = Executor()
+        executor.release.set()
+        executor.failed = True
+        executor.failure_terminal = False
+        dispatcher = CoalescingArtifactDispatcher(executor)
+        original = request("one")
+        with self.assertRaises(RuntimeError):
+            dispatcher.dispatch(original)
+        executor.failed = False
+        with self.assertRaises(RuntimeError):
+            dispatcher.dispatch(request("two"))
+        self.assertEqual(executor.produced, 1)
+        self.assertEqual(len(dispatcher.unresolved_productions), 1)
+        dispatcher.resolve_production(
+            executor.action_key(original),
+            LifecycleActionTermination(
+                original.identity,
+                original.worker.worker_identity,
+                _identity("later-owner-terminal"),
+                "owned-terminal",
+                0,
+            ),
+        )
+        dispatcher.dispatch(request("two"))
+        self.assertEqual(executor.produced, 2)
+        self.assertEqual(dispatcher.unresolved_productions, ())
 
     def test_substituted_request_admission_refuses(self):
         executor = Executor()
