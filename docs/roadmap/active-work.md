@@ -31170,3 +31170,22 @@ The first failed directory, source checkout and installed wheel stay retained.
   [failed-generation observation](../../verification/onboarding-narrative-generation-failure.json)
   preserves its identity and diagnosis; no failed receipt or patched generated
   source is promoted. Narrative and documentation checks pass independently.
+
+### [ ] RELEASE-019 — Require explicit completion or approved deferral of every release goal
+
+- **Priority:** P0
+- **Release target:** 1.3.1
+- **Owner:** release workflow, roadmap authority, and initialized-project template
+- **Direction:** For 1.3.1 and every subsequent release, document every release goal in the roadmap and block publication until every goal is complete. An agent may propose moving a goal to a future release, but only explicit user approval authorizes that scope change.
+- **Conclusion:** Make roadmap release scope machine-checkable. A goal assigned to the release remains blocking until complete; deferral requires a recorded proposal, explicit user approval, and an atomic roadmap move to a named future release before the release can become ready. The user's instruction in this session explicitly moves COURSE-004 and its full replacement onboarding film to 1.3.1.
+- **Depends on:** none
+- **Implementation:**
+  - [x] Add roadmap goal and approval records to the canonical release contribution policy and CLI.
+  - [x] Reject release readiness when a goal is missing from the roadmap, incomplete, or deferred without explicit user approval and a future release target.
+  - [x] Update release-project and record-user-directed-work skills plus initialized-project copies with the same approval boundary.
+  - [ ] Move COURSE-004 and all replacement-onboarding production work to 1.3.1, then complete and publish the film before the patch release.
+- **Evidence:**
+  - [x] Deterministic release-contribution tests reject undocumented, incomplete, and unapproved-deferred goals and accept only completed or explicitly approved future moves; 35 focused release, initialization, and CLI tests plus 33 subtests pass.
+  - [x] Root/template skill copies are byte-identical; repository layout, SkillEvaluator, 22 documentation tests, and all 121 Mermaid renders pass.
+  - [ ] The complete replacement onboarding film passes voice, motion, factual, accessibility, media-integrity, and full-playback review gates.
+  - [ ] The 1.3.1 release plan, qualification, publication, verification, and exact post-release synchronization gates pass with no incomplete release goals.
