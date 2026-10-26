@@ -980,6 +980,14 @@ class LifecycleActionDagScheduler:
                     tried_workers[action_id][worker_id] = (
                         tried_workers[action_id].get(worker_id, 0) + 1
                     )
+                    # Retain every actuated request before handing control to a
+                    # dispatcher. An unrelated malformed result can abort this
+                    # schedule while other remote requests remain unresolved.
+                    self._unresolved_ownership[request.identity] = (
+                        LifecycleActionUnresolvedOwnership(
+                            request, policies.get(action_id, ActionDispatchPolicy())
+                        )
+                    )
                     active[pool.submit(dispatcher.dispatch, request)] = (
                         action_id,
                         request,

@@ -137,6 +137,36 @@ class UnknownOwnershipTests(unittest.TestCase):
             result.results[0].disposition, LifecycleActionDisposition.BLOCKED
         )
 
+    def test_aborted_schedule_keeps_other_inflight_request_custody(self):
+        both = threading.Barrier(2)
+
+        class Dispatcher:
+            def dispatch(self, request):
+                both.wait(timeout=2)
+                if request.worker.worker_id == "alpha":
+                    return object()
+                threading.Event().wait(0.05)
+                raise TimeoutError("remote status unknown")
+
+        scheduler = LifecycleActionDagScheduler()
+        with self.assertRaises(ActionDagSchedulingError):
+            scheduler.run(
+                (_node("bad"), _node("other", workers=("beta",))),
+                (_worker("alpha"), _worker("beta")),
+                Dispatcher(),
+                deadline_identity=_identity("deadline"),
+            )
+        self.assertEqual(len(scheduler.unresolved_ownership), 2)
+        after = scheduler.run(
+            (_node("later", workers=("beta",)),),
+            (_worker("beta"),),
+            _RecordingDispatcher(),
+            deadline_identity=_identity("deadline"),
+        )
+        self.assertEqual(
+            after.results[0].disposition, LifecycleActionDisposition.BLOCKED
+        )
+
     def test_production_slot_reservation_retains_unknown_actuation(self):
         worker = _worker("alpha", slots=2)
         deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(seconds=10))
