@@ -1,0 +1,33 @@
+{
+  "schema": "literate-ai/onboarding-film-approval@1",
+  "release": "1.3.1",
+  "course_id": "eight-hours-to-make-coffee",
+  "reviewer": "user",
+  "reviewed_at": "2026-10-25",
+  "decision": "approved",
+  "approval_record": "User stated: I approve.",
+  "reviewed_candidate": {
+    "source_identity": "ef6e22f3436ecd9c9814c24944cb02270b7fd990262c0aa8c4865baf23922273",
+    "mp4_sha256": "d01ce010654c55d6a1b3de16fa3cd8d640b758fe3559783236cfc9754e7d8e97",
+    "srt_sha256": "d0628463c74bc3a7b931d2777d05730a01c93e66da28d6e58db73f2fc62f291e",
+    "vtt_sha256": "0e6cbde161e0fe0e059cc61828366d06392d02ea08c9bb01983050932e1d1d16",
+    "video_result_sha256": "985b5c8b080ace522cf686d8723dcb73dd3811494c165c36891e6ef4b8711070",
+    "duration_seconds": 724.896322,
+    "caption_count": 86
+  },
+  "approved_rebuild": {
+    "source_identity": "8603d033d745d99ce2e7e777f07f29d9c4a5f44293d6b78977fbb2ca767efc8e",
+    "mp4_sha256": "d01ce010654c55d6a1b3de16fa3cd8d640b758fe3559783236cfc9754e7d8e97",
+    "srt_sha256": "d0628463c74bc3a7b931d2777d05730a01c93e66da28d6e58db73f2fc62f291e",
+    "vtt_sha256": "0e6cbde161e0fe0e059cc61828366d06392d02ea08c9bb01983050932e1d1d16",
+    "video_result_sha256": "75ae78f47625edc19b58c6a9672dbea8b838d2b5af293c4a15a79672b92f2ccc",
+    "media_byte_equivalent": true,
+    "verification": {
+      "accepted": true,
+      "duration_seconds": 724.896322,
+      "caption_count": 86
+    }
+  },
+  "scope": "Normal-speed listening, factual, accessibility and visual approval applies to the exact reviewed media. The approved rebuild changes only the bound review evidence and preserves identical MP4 and caption bytes.",
+  "limitations": "This approval does not broaden the film's stated native, retained-source, benchmark, or project-currentness claims."
+}

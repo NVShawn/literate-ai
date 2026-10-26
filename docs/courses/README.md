@@ -2,34 +2,34 @@
 
 ## Start here: the continuous video play
 
-**[Watch or download: Settle the Argument. Before CI.](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4)**
+**[Watch or download: Eight Hours to Make Coffee.](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)**
 
-LitAI paints the big picture of agentic development; Sam, a skeptical C++/Make
-engineer, calls it the usual AI slop pitch, and seven of his beliefs are settled
-with real terminal sessions recorded against the 1.2 build; remote workers and the
-learning loop are labelled walkthroughs. One continuous film,
-two local neural voices, visible captions, and SRT/VTT sidecars. The 1.1 feedback
-edition (13:38) remains at the `v1.1.0` tag.
-Running time: **11:52**. [Chapter timestamps](play/CHAPTERS.md).
+Sam, a skeptical C++/Make engineer, defends an eight-hour CI loop while LitAI moves
+useful feedback earlier without weakening required CI, independent review, native
+qualification or release gates. Twelve animated chapters use two approved NVIDIA
+Magpie voices, 86 visible captions and five source-backed project case studies with
+explicit limits. Running time: **12:04.896**.
 
-[SRT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.srt) · [WebVTT](../../media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.vtt) ·
-[Production and limitations](play/README.md) · [Script](play/story.json) ·
-[Rebuildable manifest](../../media/courses/sam-meets-literate-ai/package/course.json) · [Session excerpts](../../media/courses/sam-meets-literate-ai/package/sessions.json) ·
-[Media receipt](../../media/courses/sam-meets-literate-ai/video/video-result.json)
+[SRT](../../media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.srt) · [WebVTT](../../media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.vtt) ·
+[Production and limitations](full-onboarding/PRODUCTION.md) · [Script and annotations](full-onboarding/NARRATIVE.md) ·
+[Authoring sources](full-onboarding/README.md) ·
+[Media receipt](../../media/courses/eight-hours-to-make-coffee/video/video-result.json) ·
+[Approval and hashes](../../verification/onboarding-1.3.1-approval.json)
 
-The coding sections are edited terminal replays of actual execution, not raw screen
-recordings. Installation and remote-worker setup are labeled walkthroughs. An
-inherited-starter acceptance defect is shown honestly, including its demo-local
-correction; the framework-level repair is still open. Report timestamped feedback
-in the public repository's issue tracker.
+The film is an illustrated walkthrough, not a recording of the five projects running.
+Its retained fresh evidence is a read-only adoption plan over an unchanged fixture;
+it does not claim apply, build, native execution or an eight-hour-to-minutes benchmark.
+Report timestamped feedback in the public repository's issue tracker.
 
 ## Earlier cuts, retained for comparison
 
-The next-video [animated onboarding authoring pilot](animated-onboarding/README.md)
+The [animated onboarding authoring pilot](animated-onboarding/README.md)
 adds articulated Sam/LitAI characters, an offline Motion/SVG companion and recorded
 NVIDIA Magpie voice auditions. The user approved the pilot voices and directed moving
-cut. That approval establishes the treatment; it does not approve the new full script
-or a replacement film.
+cut. That approval established the treatment; the separate full-film approval is
+bound to the published replacement's exact media hashes.
+
+The superseded 1.2 film, [Settle the Argument. Before CI.](https://github.com/jordanhubbard/literate-ai/raw/v1.2.0/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4), remains available with its [chapter timestamps](play/CHAPTERS.md).
 
 The cuts below are superseded creative drafts, not the recommended viewing path.
 The [creative brief](creative-brief.md) and [accepted audition package](preview/README.md)
@@ -79,14 +79,13 @@ lesson; supply recorded audio for portable narration or screen recordings for
 new coding demonstrations. See [video authoring](../user/instructional-videos.md)
 for supported backends, manifest fields, tools, integrity and publication boundaries.
 
-## 1.3.1 animated replacement in development
+## 1.3.1 animated replacement
 
 [Eight Hours to Make Coffee](full-onboarding/README.md) expands the approved
 Sam/LitAI treatment into a skeptical, source-backed pre-CI argument with five
 project case studies. The 12-chapter script, animation annotations and offline
 authoring/capture system are authored. All 86 approved-voice turns have been rendered
-into a 12:04.896 local candidate that passes deterministic chapter QA and independent
-continuous-media verification. Fresh execution evidence and complete listening,
-factual, accessibility and normal-speed playback approval remain mandatory 1.3.1
-release goals. The currently linked 11:52 film stays published until the exact
-replacement is approved and its GitHub asset and documentation links exist.
+into the published 12:04.896 film, which passes deterministic chapter QA and independent
+continuous-media verification. Fresh scoped evidence and complete listening, factual,
+accessibility and normal-speed playback approval are recorded against exact identities.
+The previous 11:52 film remains available as historical course evidence.

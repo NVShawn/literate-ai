@@ -73,15 +73,17 @@ symlinks. Do not include private addresses, tokens, or personal data.
 
 ## Optional animated authoring
 
-The user-approved [animated onboarding pilot](../courses/animated-onboarding/README.md) shows a
+The user-approved [animated onboarding pilot](../courses/animated-onboarding/README.md) established a
 project-owned Motion/SVG authoring path: finite character timelines, measured
 recorded narration, per-turn video clips and an offline browser companion. It
 passes those clips and recordings through the existing video CLI. Neither Motion
 nor a hosted speech service becomes a framework dependency. Its cast and voices
 are project choices; the reusable parts are the timing, accessibility and QA
-patterns. The [full 1.3.1 narrative](../courses/full-onboarding/README.md) uses that
-treatment, but remains unpublished until new speech, fresh evidence, final rendering
-and complete listening/viewing approval all pass.
+patterns. The [full 1.3.1 film](../courses/full-onboarding/README.md) uses that
+treatment. Its 86 recorded turns, final rendering, fresh scoped evidence, captions,
+normal-speed listening/viewing review and exact media approval are published with the
+[release media](../../media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)
+and its [verification receipt](../../media/courses/eight-hours-to-make-coffee/video/video-result.json).
 
 ## Acceptance and publication
 

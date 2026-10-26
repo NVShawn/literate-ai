@@ -14,21 +14,20 @@ durable talent.
 
 ## Watch the onboarding video
 
-**[Settle the Argument. Before CI. — watch the 11:52 onboarding film](https://github.com/jordanhubbard/literate-ai/raw/v1.2.0/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4)**
+**[Eight Hours to Make Coffee — watch the 12:04 animated onboarding film](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)**
 
-[![Watch Sam and LitAI in Settle the Argument. Before CI.](https://raw.githubusercontent.com/jordanhubbard/literate-ai/v1.2.0/media/courses/sam-meets-literate-ai/poster.png)](https://github.com/jordanhubbard/literate-ai/raw/v1.2.0/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4)
+[![Watch Sam and LitAI in Eight Hours to Make Coffee](media/courses/eight-hours-to-make-coffee/poster.png)](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4)
 
-LitAI opens with the big picture of agentic software development. Sam, a skeptical
-C++/Make engineer whose company is split over going agent-first, calls it the usual
-AI slop pitch, and his beliefs are settled one at a time with real terminal sessions
-recorded against the 1.2 build: reviewable promises, independent acceptance, the
-whole release gate before CI, `litai render html` views, adoption without a rewrite,
-learning as reviewed changes, and a locally built, verified release wheel; remote
-workers and the learning loop are labelled walkthroughs. The tutorial comes with the
-argument.
+Sam wants an eight-hour CI run to be the first useful result because it leaves time
+for coffee, laundry and the garage. LitAI keeps the rigor while moving useful feedback
+earlier: reviewed plans, selected targets, aligned workers, independent evidence and
+required CI. Five source-backed project case studies retain their native and adoption
+limits; the eight-hour story is an anecdote, not a benchmark.
 
-[Chapters](https://github.com/jordanhubbard/literate-ai/blob/v1.2.0/docs/courses/play/CHAPTERS.md)
-· [Subtitles (SRT)](https://raw.githubusercontent.com/jordanhubbard/literate-ai/v1.2.0/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.srt)
+[Production and source notes](docs/courses/full-onboarding/README.md)
+· [Subtitles (SRT)](media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.srt)
+· [WebVTT](media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.vtt)
+· [Approval and exact hashes](verification/onboarding-1.3.1-approval.json)
 · [Leave timestamped feedback](https://github.com/jordanhubbard/literate-ai/issues)
 
 Use the [getting-started guide](docs/user/getting-started.md)

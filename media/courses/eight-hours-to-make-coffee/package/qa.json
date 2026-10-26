@@ -1,0 +1,257 @@
+{
+  "schema": "literate-ai/full-onboarding-qa@1",
+  "checks": [
+    "Chapter 01: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 02: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 03: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 04: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 05: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 06: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 07: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 08: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 09: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 10: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 11: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "Chapter 12: repeatable seek, caption bounds, continuous directed arms, and reduced motion",
+    "All chapters launch from local files with external requests blocked"
+  ],
+  "frames": [
+    {
+      "chapter": "01",
+      "seconds": 0,
+      "file": "frame-01-0.png",
+      "sha256": "5534ac41d04003526e114b71b2501661999f90365323a627a2132602c7f826b0"
+    },
+    {
+      "chapter": "01",
+      "seconds": 20.94424036281179,
+      "file": "frame-01-1.png",
+      "sha256": "7cd946f3775034960162eaa7ef0818003cae4d5a9620f409fe1cd5bb9b97411a"
+    },
+    {
+      "chapter": "01",
+      "seconds": 39.02716553287982,
+      "file": "frame-01-2.png",
+      "sha256": "bfd02ef6b56c543fac6a70cac81cf96182de4a7d6196dc87dc46a22cf7a6010e"
+    },
+    {
+      "chapter": "02",
+      "seconds": 0,
+      "file": "frame-02-3.png",
+      "sha256": "974e01d670a41f73e24230bebf303dab752f1ca51be8f345e42a0fc5d77a28c5"
+    },
+    {
+      "chapter": "02",
+      "seconds": 39.40224489795918,
+      "file": "frame-02-4.png",
+      "sha256": "000bdfe00c19913d79dbec15bda38b08f692c94ff16e47003299be713fcf6122"
+    },
+    {
+      "chapter": "02",
+      "seconds": 87.92467120181406,
+      "file": "frame-02-5.png",
+      "sha256": "d6098c6da03a96bc10df7e4ada10e7bd0254f136b78ed1bb75ed9c9ae0bd6852"
+    },
+    {
+      "chapter": "03",
+      "seconds": 0,
+      "file": "frame-03-6.png",
+      "sha256": "39f19dc2d4897c58dc1570c9ebc12897972b4311855044b9f1912412e2ba5a84"
+    },
+    {
+      "chapter": "03",
+      "seconds": 20.851360544217684,
+      "file": "frame-03-7.png",
+      "sha256": "8a603b02b7638cd157a51e64ed5f288bbe6dd8fc50ba2e766d2aece32bddfe25"
+    },
+    {
+      "chapter": "03",
+      "seconds": 49.661904761904765,
+      "file": "frame-03-8.png",
+      "sha256": "a6ed1ffe6ecf40293be4823c9bba341e7b9a496b6741bfe0214f8819431ece2a"
+    },
+    {
+      "chapter": "04",
+      "seconds": 0,
+      "file": "frame-04-9.png",
+      "sha256": "ce45b092e4c8e340070063061e20a2d40dc62a61e28c0fb720ce4aeeff6edf12"
+    },
+    {
+      "chapter": "04",
+      "seconds": 34.318934240362815,
+      "file": "frame-04-10.png",
+      "sha256": "7352aa1a03dea9c0b79023ae0eebd3ed8ec598b4124cbd5c26d5125f70407e1a"
+    },
+    {
+      "chapter": "04",
+      "seconds": 61.50408163265306,
+      "file": "frame-04-11.png",
+      "sha256": "9d0db87b7b615aa0e45bbc5a7328ae28bfb8eb288aa4a6b8f8447924fc1ce46e"
+    },
+    {
+      "chapter": "05",
+      "seconds": 0,
+      "file": "frame-05-12.png",
+      "sha256": "836fda67fd3b467916b490c5fadcea4525a988e6c442e257ee9de5634c837616"
+    },
+    {
+      "chapter": "05",
+      "seconds": 60.08936507936507,
+      "file": "frame-05-13.png",
+      "sha256": "cc0322fd6055aac8c15cf02ad2820841bb3e23f07e7814541f0969d43e1b65f9"
+    },
+    {
+      "chapter": "05",
+      "seconds": 113.78798185941044,
+      "file": "frame-05-14.png",
+      "sha256": "4a5a003513d3c05af2733232bcc2cb9c84aaa512a4e9eb9e51df76bf86bcbd61"
+    },
+    {
+      "chapter": "06",
+      "seconds": 0,
+      "file": "frame-06-15.png",
+      "sha256": "1f3e8c4bf0f89423214767422d43bfaf5582ddd072a392811d9e1490e9a488c1"
+    },
+    {
+      "chapter": "06",
+      "seconds": 24.705873015873014,
+      "file": "frame-06-16.png",
+      "sha256": "dbf1565a09dae41a8e9bdc56596ad1d0d36b7c4cb7243d560eb0995479db5a13"
+    },
+    {
+      "chapter": "06",
+      "seconds": 52.6340589569161,
+      "file": "frame-06-17.png",
+      "sha256": "321e21a79c30c630b7aad0e5f9bed613ebd7dc32a9c2ce7aeec042c7e18e5ed9"
+    },
+    {
+      "chapter": "07",
+      "seconds": 0,
+      "file": "frame-07-18.png",
+      "sha256": "70769696962f96449e4ac3a1dad8cd58e17a2fdfe9fbbb1fb7f8fd0499181a58"
+    },
+    {
+      "chapter": "07",
+      "seconds": 23.080476190476187,
+      "file": "frame-07-19.png",
+      "sha256": "13ebd4f3c0bee62bb37f0d0f636a8cefc60dae899fa46dd7b089d6f2e0a2796e"
+    },
+    {
+      "chapter": "07",
+      "seconds": 53.88793650793651,
+      "file": "frame-07-20.png",
+      "sha256": "a4c1f3ad8b7f501be7738b57e0b9ac3d15b36267d9de81677d76a09c72aa2f1c"
+    },
+    {
+      "chapter": "08",
+      "seconds": 0,
+      "file": "frame-08-21.png",
+      "sha256": "43f7c192e24f44ff79423b53ca13bc4999a6f2a0d9312c62f2f051b3a0da774a"
+    },
+    {
+      "chapter": "08",
+      "seconds": 25.54179138321995,
+      "file": "frame-08-22.png",
+      "sha256": "8f21137aa0767eb10a8800fc82ecc5bbe5e01feddeeea5802b31ba81786d80fc"
+    },
+    {
+      "chapter": "08",
+      "seconds": 49.5225850340136,
+      "file": "frame-08-23.png",
+      "sha256": "e8312dc0b3740cdf73e44775f6f3cc7198dc0c30144963ea0717c1ffcc1d772a"
+    },
+    {
+      "chapter": "09",
+      "seconds": 0,
+      "file": "frame-09-24.png",
+      "sha256": "86eca2af7f050875d6ef8cc20276e0c3e5389df0d3521ecf78b7cd8bdd4969f4"
+    },
+    {
+      "chapter": "09",
+      "seconds": 24.00927437641723,
+      "file": "frame-09-25.png",
+      "sha256": "bad5fc35d215328bd16b10f726b1f17af39a4f289d4f5a54f21cd96471d2ffe7"
+    },
+    {
+      "chapter": "09",
+      "seconds": 52.21609977324263,
+      "file": "frame-09-26.png",
+      "sha256": "452e46c8a5ccac9a49e22169b00f8e2d6e044ce70a5955b4dbd1e5fd72421bf6"
+    },
+    {
+      "chapter": "10",
+      "seconds": 0,
+      "file": "frame-10-27.png",
+      "sha256": "70fcde4edbe0a06be656e9130f2282c9b02e03a44056dd7a23f841bab99e96b5"
+    },
+    {
+      "chapter": "10",
+      "seconds": 27.21362811791383,
+      "file": "frame-10-28.png",
+      "sha256": "95653594bf79abdb3e9b5c4c360be77d0a26559eff8fc5de909444486bd1ad18"
+    },
+    {
+      "chapter": "10",
+      "seconds": 58.996326530612244,
+      "file": "frame-10-29.png",
+      "sha256": "8165d5aecef16dc5b1185a0670dadb17afd500318eab26aea5bf432696d8c69a"
+    },
+    {
+      "chapter": "11",
+      "seconds": 0,
+      "file": "frame-11-30.png",
+      "sha256": "869d21641596cfe1f31c19522735782e869b825b1d5929557e35bacacdd69199"
+    },
+    {
+      "chapter": "11",
+      "seconds": 21.17643990929705,
+      "file": "frame-11-31.png",
+      "sha256": "5c5eb19bee0fd6c5046c0cdec2bf0a91ae7e272607d6c9a685ac5def307c5bf1"
+    },
+    {
+      "chapter": "11",
+      "seconds": 42.41727891156462,
+      "file": "frame-11-32.png",
+      "sha256": "e5512993803c3bdb08e450d95ca4dce204e9a588555a1bfbdac4d98bede6673e"
+    },
+    {
+      "chapter": "12",
+      "seconds": 0,
+      "file": "frame-12-33.png",
+      "sha256": "62678bd93d68c9a7c7f290f98f4c1010fed19d921e3bd94a04f2e7b7d87f0828"
+    },
+    {
+      "chapter": "12",
+      "seconds": 37.30176870748299,
+      "file": "frame-12-34.png",
+      "sha256": "4545450407df9913267d99067a854b024cc4f5c486fddbf71a8293bd58716bba"
+    },
+    {
+      "chapter": "12",
+      "seconds": 61.571882086167804,
+      "file": "frame-12-35.png",
+      "sha256": "075e277889a48a849be2c454e694a2387a82e267f11aa78c1ca79b4070b82dde"
+    }
+  ],
+  "renderer": {
+    "browser": "Chrome/155.0.8059.85",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "stage": {
+      "width": 1280,
+      "height": 720
+    },
+    "frames_per_second": 24
+  },
+  "authoring_sha256": "a873e1f9cc5082c404edb153a5ba7a52d619d968b29c9785d17f1f561632ab73",
+  "external_requests": 0,
+  "complete_listening_review": "pending",
+  "complete_viewing_review": "pending",
+  "factual_review": "pending",
+  "accessibility_review": "pending",
+  "boundary": "Automated QA and media integrity are not complete playback approval"
+}

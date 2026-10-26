@@ -1,0 +1,24 @@
+{
+  "schema": "literate-ai/full-onboarding-review@1",
+  "inputs_sha256": "08872a963f190ec174f2164be0aeec7cc0c0cbd8e8eceb6aaeb7b6d0beae2016",
+  "authoring_sha256": "a873e1f9cc5082c404edb153a5ba7a52d619d968b29c9785d17f1f561632ab73",
+  "qa_sha256": "e0a37b68f98c112a0dce1589e43599a29353d686dd58deaffb3ac8178ad2aa4f",
+  "reviewer": "user",
+  "reviewed_at": "2026-10-25",
+  "decision": "approved",
+  "approval_record": "User stated: I approve.",
+  "reviewed_candidate": {
+    "mp4_sha256": "d01ce010654c55d6a1b3de16fa3cd8d640b758fe3559783236cfc9754e7d8e97",
+    "srt_sha256": "d0628463c74bc3a7b931d2777d05730a01c93e66da28d6e58db73f2fc62f291e",
+    "vtt_sha256": "0e6cbde161e0fe0e059cc61828366d06392d02ea08c9bb01983050932e1d1d16",
+    "video_result_sha256": "985b5c8b080ace522cf686d8723dcb73dd3811494c165c36891e6ef4b8711070",
+    "duration_seconds": 724.896322,
+    "caption_count": 86
+  },
+  "listening": "approved after complete assembled-film review at normal speed",
+  "viewing": "approved after complete normal-speed playback review",
+  "factual": "approved for the reviewed candidate",
+  "accessibility": "approved for the reviewed candidate and its complete captions",
+  "publication": "authorized for the exact reviewed candidate and a byte-equivalent rebuild bound to this review record",
+  "boundary": "Approval is limited to the exact reviewed media identities above and the final rebuild that differs only by binding this review evidence."
+}

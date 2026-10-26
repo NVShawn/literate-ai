@@ -31125,9 +31125,9 @@ The first failed directory, source checkout and installed wheel stay retained.
   - [x] Obtain the user's visual validation of the new moving cut.
   - [x] Research public Literate AI projects and author the full annotated pre-CI narrative with a skeptical Sam, sharper LitAI banter, languages, OS targets and substantial worker testing.
   - [x] Compile the full 12-chapter/86-turn narrative into bounded measured-audio inputs; add the offline Motion player, fixed-time renderer, retained-input provenance, reduced-motion behavior and deterministic synthetic structural QA.
-  - [ ] Refresh the explicitly selected NVIDIA credential, observe the live voice catalog, synthesize every turn with the approved Jason Neutral and Aria stock voices, and complete line-by-line listening and pronunciation review without fallback speech.
+  - [x] Refresh the explicitly selected NVIDIA credential, observe the live voice catalog, synthesize every turn with the approved Jason Neutral and Aria stock voices, and complete line-by-line listening and pronunciation review without fallback speech.
   - [x] Capture and retain fresh execution evidence for the film's current Literate AI claims, preserving native, retained-source and benchmark boundaries.
-  - [ ] Render and verify the complete film, captions and media receipts; inspect representative frames and watch the assembled film at normal speed with separate factual, accessibility, listening and visual approval recorded against exact identities.
+  - [x] Render and verify the complete film, captions and media receipts; inspect representative frames and watch the assembled film at normal speed with separate factual, accessibility, listening and visual approval recorded against exact identities.
   - [ ] Publish the approved 1.3.1 media and provenance on GitHub, then update README, getting-started, installation, course-index and video-authoring links to the exact asset without removing the prior film.
   - [ ] Pass the declared 1.3.1 release-goal gate and exact release qualification; do not publish or close the milestone while any item above remains incomplete.
 - **Pilot result:** [Authoring package](../courses/animated-onboarding/README.md)
@@ -31162,8 +31162,10 @@ The first failed directory, source checkout and installed wheel stay retained.
   no-retry requests, and the 12:04.896 local candidate passes deterministic capture
   QA plus independent continuous-media verification. Exact-revision fresh evidence
   records a ready host and read-only adoption plan over an unchanged eight-file native
-  fixture, without claiming apply or build. Complete listening, factual, accessibility
-  and normal-speed playback approval remain open. No eight-hour-to-minutes benchmark or replacement of
+  fixture, without claiming apply or build. The user approved the complete film at
+  normal speed; exact approval evidence binds the reviewed candidate and byte-identical
+  review-bound rebuild, including listening, factual, accessibility and visual scope.
+  No eight-hour-to-minutes benchmark or replacement of
   mandatory CI, native qualification or release gates is claimed. An initial
   authority-renewal attempt rejected a generated publication-sample bundle whose
   smoke path retained an unresolved module import. The
