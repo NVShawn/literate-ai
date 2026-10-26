@@ -31102,6 +31102,41 @@ The first failed directory, source checkout and installed wheel stay retained.
 
 **#129 / WIN-GATE-001 current native outcome:** Supplied-worker source `2615e568` has the same tracked tree as merged `d17881fa`. The unchanged 5400-second gate reaches 121 completed wheel operations but times out before wheel completion and the test phase. The complete five-stage HTML scenario passes in 2871.062 seconds; default and scoped initialization take 252.563 and 196.578 seconds. These are retained operation observations, not a controlled whole-gate speedup or admission. Existing timing evidence survives the timeout. The last completed graph-export scenario is followed by an uninstrumented missing-CodeGraph run probe and update planning; identify the unfinished operation and remaining initialization/observation costs before another full renewal. Keep #121, #123 and #129 open; do not increase deadlines, skip assertions or promote this failed outcome.
 
+### [ ] ACTION-RESOURCES-001 — Reserve action resources and serialize mutable authorities
+
+- **GitHub issue:** [#144](https://github.com/jordanhubbard/literate-ai/issues/144), refinement of [#4](https://github.com/jordanhubbard/literate-ai/issues/4)
+- **Priority:** P1
+- **Owner:** framework action DAG scheduler
+- **Direction:** Bound aggregate CPU, memory, disk and network reservations and serialize named side effects across compatible workers.
+- **Conclusion:** Extend existing exact scheduler with optional identity-bound reservations; resource admission remains caller-owned and claims serialize one coordinator only. Issue #144 refines broader #4.
+- **Depends on:** WORKER-DAG-001
+- **Implementation:**
+  - [x] Bind optional action demands and worker budgets into schedule identity; preserve omitted-policy identities.
+  - [x] Reserve aggregate budgets and exclusive claims before dispatch; release only with accepted success/recovery or proven owned terminal evidence, holding unknown workers and claims.
+- **Evidence:**
+  - [x] Controller concurrency, failure-release, capacity refusal, identity and fresh per-request artifact-admission regressions: eight focused tests pass via `make python-check`; legacy scheduler failure-isolation regression passes. Immutable payload production coalesces within one coordinator, while every current request obtains fresh admission.
+  - [x] Dependency-ready dispatch (a successor waits for its accepted predecessor and binds its result identity while an independent action overlaps) and distinct package-database/signer claims (overlap when disjoint, serialize when shared) have focused controller regressions; these are fixture checks, not native receipts.
+  - [x] FINALIZE grant-wait resends after `grant_unavailable` no longer leave the worker held: the finalizer resolves only the exact boundary-verified refusal on its still-held reservation (CAS-retained evidence), and resolution never frees a held slot. Three focused slot/finalizer tests and the real-receiver grant-wait fixture cover it; fixture evidence only.
+  - [x] Independent review follow-ups: a retry blocked by unresolved ownership returns its schedule result (accepted results, attempts, unresolved ownership) instead of raising; only the receiver's pre-staging grant check reports `grant_unavailable`, while any later grant loss (staging, prepared authority, supervision, post-run) is `grant_lost` and stays unknown; self-resolution requires a re-decoded verified response and a slot the live reservation still holds, checked before any evidence is persisted; unknown adapter actions are coded refusals. Each has a focused regression; fixture evidence only. Open follow-ups: `resolve_production` has no production caller under opt-in coalescing, and the unactivated adapters spend single-use grants before the final re-check.
+- **Next action:** qualify the explicit semantic payload re-admission contract against complete native producer closures and current trusted receipts, then obtain actual multi-machine/shared-cache and worker-loss qualification under #4.
+- **Concrete controller checkpoint:** opt-in command BUILD integration uses real transport plus verified archive/support-record CAS custody; exact-input reruns obtain fresh controller admission, original native build evidence and existing TEST handoffs. Nonzero owned receiver exits retain diagnostics and failed attempt metadata before explicit retry. Bounded declared-safe scheduler retry retains each attempt and a distinct request identity; package/signing side effects cannot opt into retry. Native physical-worker loss and cross-release semantic re-admission remain unqualified.
+  - [ ] Actual native multi-worker/shared-cache qualification remains in issue #4.
+
+
+**ACTION-RESOURCES-001 / issue #4 semantic contract checkpoint:**
+Distinct semantic re-admission and signed-release binary-input adoption contracts
+are implemented behind verifier-owned current retained planning, explicit current
+policy, actual signed evidence graph verification and single-use grants. Sixteen
+cryptographic fixture tests pass; these do not supply native producer or application
+receipts. Existing source BUILD profiles remain unchanged; a policy-declared
+alternate acquire action never becomes a new BUILD result. Unknown old compiler
+facts remain explicit and cannot establish a build-key cache hit. Activation,
+complete native closure, installed-runtime qualification and actual physical-worker
+speedup/loss evidence remain open. Unknown dispatch custody now quarantines worker
+slots/resources/claims and coalesced keys until matching trusted resolution; the
+barriers are per instance, with durable cross-controller worker-side custody still
+open.
+
 ### [ ] COURSE-004 — Animated onboarding conversations with auditioned neural voices
 
 - **Priority:** P1

@@ -616,10 +616,33 @@ def assert_finalize_proof(
         finally:
             case.assertEqual(list(workspace.iterdir()), [])
 
+    def resolve_owned_refusal():
+        # A receiver failure response is transport-only evidence, so the
+        # dispatcher holds the worker as unknown ownership. This fixture owns and
+        # observes its synchronous local receiver, which exited zero after its
+        # parent guard refused; only that owner may assert terminal ownership.
+        from literate_ai.application.action_dag_scheduler import (
+            LifecycleActionTermination,
+        )
+
+        pending = linker.indexer.slots.unresolved_ownership
+        case.assertEqual(len(pending), 1)
+        linker.indexer.slots.resolve_ownership(
+            LifecycleActionTermination(
+                pending[0].identity,
+                pending[0].worker.worker_identity,
+                canonical_identity("fixture-owned-local-receiver-terminal"),
+                "owned-terminal",
+                0,
+            )
+        )
+        case.assertEqual(linker.indexer.slots.unresolved_ownership, ())
+
     # The receiver refuses before staging any input when no grant exists.
     with case.assertRaises(ActionWireError) as refused:
         run_controller()
     case.assertEqual(refused.exception.code, "action_finalize.grant_unavailable")
+    resolve_owned_refusal()
     # The operator plans the exact request the receiver parent will measure.
     planner = PortableFinalizeParentAuthority(
         grant_path=grant_file,
@@ -665,11 +688,45 @@ def assert_finalize_proof(
     with case.assertRaises(ActionWireError) as refused:
         run_controller()
     case.assertEqual(refused.exception.code, "action_finalize.authority_invalid")
+    resolve_owned_refusal()
     grant_file.write_bytes(
         canonical_json_bytes(issue_finalize_grant(value, request_to_grant).to_dict())
     )
     case.assertEqual(run_controller(), finalized)
     case.assertGreater(configuration_guard.call_count, 2)
+    # Grant-wait: the first dispatch is refused while the reservation is held;
+    # the finalizer resolves exactly that admitted refusal itself, resends, and
+    # leaves the worker reusable without any external owner resolution.
+    granted = grant_file.read_bytes()
+    grant_file.unlink()
+    controller.grant_request_path = private / "grant-request.json"
+    controller.grant_wait_seconds = 600
+    controller.grant_poll_seconds = 0.2
+    import threading
+
+    stop = threading.Event()
+
+    def grant_when_requested():
+        # Grant only after the finalizer published the exact refused request;
+        # slow workers may take a while to reach that first refusal.
+        while not stop.wait(0.05):
+            if controller.grant_request_path.exists():
+                grant_file.write_bytes(granted)
+                return
+
+    granter = threading.Thread(target=grant_when_requested, daemon=True)
+    granter.start()
+    try:
+        case.assertEqual(run_controller(), finalized)
+    finally:
+        stop.set()
+        granter.join(timeout=10)
+        controller.grant_request_path = None
+        controller.grant_wait_seconds = 0
+    case.assertEqual(linker.indexer.slots.unresolved_ownership, ())
+    reusable = linker.indexer.slots.try_reserve(lambda worker, slot: None)
+    case.assertIsNotNone(reusable)
+    reusable.release()
     # Atomic revocation stops the next dispatch at the receiver.
     revoked_grant = private / "grant.next"
     revoked_grant.write_bytes(
@@ -681,6 +738,7 @@ def assert_finalize_proof(
     with case.assertRaises(ActionWireError) as refused:
         run_controller()
     case.assertEqual(refused.exception.code, "action_finalize.authority_invalid")
+    resolve_owned_refusal()
     released = linker.indexer.slots.try_reserve(lambda worker, slot: None)
     case.assertIsNotNone(released)
     released.release()

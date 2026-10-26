@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import os
 import tempfile
 import threading
@@ -32,7 +33,11 @@ from literate_ai.contracts.execution_dispatch import (
     ExecutionWorkerCatalog,
     ExecutionWorkerKind,
 )
-from literate_ai.contracts.identity import ContentIdentity
+from literate_ai.contracts.identity import (
+    ContentIdentity,
+    canonical_identity,
+    canonical_json_bytes,
+)
 
 
 def command_worker_environment(
@@ -88,6 +93,9 @@ class CommandLifecycleActionDispatcher:
             [LifecycleActionDispatchRequest], Mapping[ContentIdentity, bytes]
         ],
         record_result: Callable[[ContentIdentity, bytes], None],
+        record_failure: Callable[[ContentIdentity, bytes], None] | None = None,
+        on_unknown_ownership: Callable[[LifecycleActionDispatchRequest], None]
+        | None = None,
         revalidate_worker: Callable[[LifecycleActionWorker], None],
         environment: Mapping[str, str] | None = None,
         attested_boundary: Callable[[LifecycleActionWorker], ContentIdentity]
@@ -120,6 +128,8 @@ class CommandLifecycleActionDispatcher:
         self.deadline = deadline
         self.input_records = input_records
         self.record_result = record_result
+        self.record_failure = record_failure
+        self.on_unknown_ownership = on_unknown_ownership
         self.revalidate_worker = revalidate_worker
         # When set, boundaries skip the separate capability probe: the receiver
         # measures the admitted capability in process and attests it. A response
@@ -128,6 +138,11 @@ class CommandLifecycleActionDispatcher:
         self.environment = dict(os.environ if environment is None else environment)
         self._lock = threading.Lock()
         self._active: dict[ContentIdentity, threading.Event] = {}
+        # Exact-bound failure responses whose receiver capability was verified at
+        # the response boundary (attested in process, or freshly revalidated).
+        # Correlation only: the dispatcher never turns these into termination;
+        # an owning caller that holds the reservation may decide.
+        self.admitted_failures: dict[ContentIdentity, bytes] = {}
         self._cancelled: set[ContentIdentity] = set()
 
     def _selection(self, request: LifecycleActionDispatchRequest) -> ExecutionWorker:
@@ -172,6 +187,28 @@ class CommandLifecycleActionDispatcher:
     ) -> LifecycleActionDispatchOutcome:
         return self._exchange(request, mode=None)[0]
 
+    def dispatch_record(
+        self, request: LifecycleActionDispatchRequest
+    ) -> tuple[LifecycleActionDispatchOutcome, bytes | None]:
+        """Actuate the exact request and expose its verified result record.
+
+        Result recording and all transport/worker/deadline checks remain owned
+        by the same exchange as ordinary dispatch. This permits typed artifact
+        custody adapters without reaching into the transport's private exchange.
+        """
+        return self._exchange(request, mode=None)
+
+    def validate_request(self, request: LifecycleActionDispatchRequest) -> None:
+        """Revalidate exact routing/current worker before local artifact admission."""
+        self._selection(request)
+        self.deadline.remaining()
+        self.revalidate_worker(request.worker)
+        with self._lock:
+            if request.identity in self._cancelled:
+                raise ActionWireError(
+                    "action_dispatch.cancelled", "action was cancelled"
+                )
+
     def describe(
         self, request: LifecycleActionDispatchRequest, *, mode: str
     ) -> LifecycleActionDispatchOutcome | bytes:
@@ -199,6 +236,7 @@ class CommandLifecycleActionDispatcher:
                     "action_dispatch.duplicate", "action is already running"
                 )
             self._active[request.identity] = event
+        actuated = False
         try:
             capability = None
             if self.attested_boundary is None:
@@ -228,6 +266,7 @@ class CommandLifecycleActionDispatcher:
                         str(path) if item == "{request_file}" else item for item in argv
                     )
                     stdin = None
+                actuated = True
                 output = self._run(argv, environment, stdin, event)
             outcome, result_record, attested = decode_attested_action_response(
                 output, request
@@ -242,6 +281,12 @@ class CommandLifecycleActionDispatcher:
                     "action_admission.runtime_changed",
                     "worker runtime or supported capabilities changed",
                 )
+            if mode is None and outcome.failure_code is not None:
+                # Reached only after the boundary check above passed.
+                with self._lock:
+                    self.admitted_failures[request.identity] = output
+                if self.on_unknown_ownership is not None:
+                    self.on_unknown_ownership(request)
             with self._lock:
                 if event.is_set():
                     raise ActionWireError(
@@ -252,6 +297,45 @@ class CommandLifecycleActionDispatcher:
                     assert outcome.result_identity is not None
                     self.record_result(outcome.result_identity, result_record)
             return outcome, result_record
+        except BaseException as exc:
+            if (
+                mode is None
+                and actuated
+                and not getattr(exc, "process_not_started", False)
+            ):
+                exc.unknown_ownership_request = request
+                if self.on_unknown_ownership is not None:
+                    self.on_unknown_ownership(request)
+            if mode is None and self.record_failure is not None:
+                diagnostic = {
+                    "schema": "literate-ai/action-command-failure@1",
+                    "ownership_scope": "transport-process-only",
+                    "request_identity": request.identity.uri,
+                    "worker_identity": request.worker.worker_identity.uri,
+                    "failure_code": getattr(exc, "code", None) or type(exc).__name__,
+                    "exit_status": getattr(exc, "process_exit_status", None),
+                    "elapsed_ns": None
+                    if not hasattr(exc, "process_elapsed_seconds")
+                    else int(exc.process_elapsed_seconds * 1_000_000_000),
+                    "stdout_base64": None
+                    if not hasattr(exc, "process_stdout")
+                    else base64.b64encode(exc.process_stdout).decode("ascii"),
+                    "stderr_base64": None
+                    if not hasattr(exc, "process_stderr")
+                    else base64.b64encode(exc.process_stderr).decode("ascii"),
+                }
+                try:
+                    self.record_failure(
+                        canonical_identity(diagnostic), canonical_json_bytes(diagnostic)
+                    )
+                except BaseException as retention_error:
+                    if hasattr(exc, "unknown_ownership_request"):
+                        retention_error.unknown_ownership_request = request
+                    raise
+                exc.failure_evidence_identity = canonical_identity(diagnostic)
+                # A command may itself be a remote dispatcher. Its local exit
+                # is diagnostic transport evidence, never native-job termination.
+            raise
         finally:
             with self._lock:
                 self._active.pop(request.identity, None)
@@ -291,12 +375,19 @@ class CommandLifecycleActionDispatcher:
                 "action_dispatch_timeout": "action_wire.expired",
                 "action_dispatch_output_limit": "action_dispatch.output_oversized",
             }.get(exc.code, "action_dispatch.failed")
-            raise ActionWireError(
+            error = ActionWireError(
                 code, "command action process failed its execution bounds"
-            ) from exc
+            )
+            error.process_not_started = exc.code == "action_dispatch_launch_failed"
+            raise error from exc
         if completed.returncode != 0:
-            raise ActionWireError(
+            error = ActionWireError(
                 "action_dispatch.failed",
                 f"worker exited with status {completed.returncode}",
             )
+            error.process_exit_status = completed.returncode
+            error.process_elapsed_seconds = completed.elapsed_seconds
+            error.process_stdout = completed.stdout
+            error.process_stderr = completed.stderr
+            raise error
         return completed.stdout
