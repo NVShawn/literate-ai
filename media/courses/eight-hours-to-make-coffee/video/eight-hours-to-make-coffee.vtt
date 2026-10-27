@@ -1,0 +1,389 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:07.338
+Sam: I have a proper engineering process. Commit, push, wait eight
+hours. Plenty of time to make coffee.
+
+00:00:07.500 --> 00:00:13.119
+Literate AI: Eight hours? Are you making coffee, Sam, or establishing
+diplomatic relations with the bean?
+
+00:00:13.292 --> 00:00:20.629
+Sam: The pipeline is thorough. Builds. Tests. Platforms. It takes
+time. You can't rush quality.
+
+00:00:20.792 --> 00:00:29.383
+Literate AI: Some work really takes hours. Discovering a missing tool
+after all that waiting is not thoroughness. It's a very expensive
+calendar reminder.
+
+00:00:29.542 --> 00:00:32.607
+Sam: CI is where we find out whether the change works.
+
+00:00:32.792 --> 00:00:38.968
+Literate AI: It should not be the first place your change meets a
+compiler. Let me show you what those eight hours have been concealing.
+
+00:00:39.125 --> 00:00:45.859
+Sam: I've seen AI coding harnesses. They write a function,
+congratulate themselves, and leave me the integration problem.
+
+00:00:46.042 --> 00:00:57.234
+Literate AI: Then keep your skepticism. Literate AI coordinates
+specifications, target choices, conversion skills, workflow and model
+routing—and the build, tests and acceptance that follow.
+
+00:00:57.417 --> 00:01:00.714
+Sam: So the specification is a really persuasive README?
+
+00:01:00.875 --> 00:01:13.507
+Literate AI: For generated Components, it defines observable behavior.
+Flavors select target differences. The resolved plan binds the recipe.
+A motivational README cannot fill in for a failing test.
+
+00:01:13.667 --> 00:01:18.264
+Sam: And the AI writes its own tests, awards itself a medal, and we
+all go home?
+
+00:01:18.417 --> 00:01:28.773
+Literate AI: No. Generated tests are not permission to grade your own
+homework. Independent acceptance still has its own contract. Also,
+your medal appears to be a coffee filter.
+
+00:01:28.958 --> 00:01:32.813
+Sam: What if I pick a cheaper model and call the output approximately
+correct?
+
+00:01:33.000 --> 00:01:45.399
+Literate AI: Routing chooses eligible models; it does not discount
+correctness. A weaker model gets the same constraints. You may
+economize on inference. Please don't economize on what the program is
+supposed to do.
+
+00:01:45.583 --> 00:01:52.271
+Sam: And the unglamorous parts? Dependencies, packaging, proving the
+thing I tested is the thing I built?
+
+00:01:52.458 --> 00:02:07.133
+Literate AI: Resolved inputs, dependency evidence, native outputs,
+tests and independent acceptance belong to the lifecycle. A plan is
+the recipe. Executed results are evidence. Naming a model is not a
+software delivery strategy.
+
+00:02:07.292 --> 00:02:15.047
+Sam: I already have code. Build scripts. Tests. Years of decisions I
+can explain, and a few I describe as historical.
+
+00:02:15.208 --> 00:02:25.890
+Literate AI: Good. Start with the exact release wheel, Python three-
+eleven or newer, Git, and an authenticated supported coding CLI. Then
+run doctor. History is welcome. Missing prerequisites are not.
+
+00:02:26.042 --> 00:02:27.806
+Sam: And then the ceremonial rewrite?
+
+00:02:27.958 --> 00:02:41.333
+Literate AI: No. Inspect an adopt plan. Planning is read-only;
+applying changes is a separate, acknowledged step. Existing source
+remains authority until the required conversion and parity evidence
+say otherwise.
+
+00:02:41.500 --> 00:02:45.633
+Sam: You can work with my tests instead of replacing them with three
+cheerful assertions?
+
+00:02:45.792 --> 00:02:56.844
+Literate AI: An admitted retained harness can preserve the original
+build and test behavior in a disposable copy. Missing stages must
+remain missing, not turn into a successful no-op wearing a lanyard.
+
+00:02:57.000 --> 00:03:06.474
+Sam: Fine for one Python project. I have C++, Rust, browser code,
+Windows users and a FreeBSD machine that judges me.
+
+00:03:06.625 --> 00:03:25.851
+Literate AI: The current source catalog has Python, C++, Rust,
+JavaScript, TypeScript, Elixir, Go, Swift and Zig language Flavors,
+with Linux, macOS, Windows and FreeBSD OS choices. Choose compatible
+capabilities, not every checkbox.
+
+00:03:26.042 --> 00:03:31.011
+Sam: I select Windows, run it on this Mac, and announce cross-platform
+support?
+
+00:03:31.167 --> 00:03:42.173
+Literate AI: That is cross-platform stationery. A target selects the
+intended platform and recipe. A worker selects where the work actually
+executes. Those are separate decisions.
+
+00:03:42.333 --> 00:03:46.002
+Sam: So I need a new cloud fleet before I get my first useful failure?
+
+00:03:46.167 --> 00:03:58.427
+Literate AI: Start with the capable host you have, then aligned user-
+supplied workers for the cells it cannot cover. Check tools, model
+access and capacity first. Private endpoints and credentials stay out
+of project authority.
+
+00:03:58.583 --> 00:04:04.853
+Sam: Local checks usually mean lint. My pipeline does the serious
+work. Meanwhile, I can put a wash on.
+
+00:04:05.042 --> 00:04:19.995
+Literate AI: Your inner loop needs ambition. Run real unit,
+integration, build, retained-harness and acceptance checks on
+appropriate workers. UI, emulator and GPU checks belong where the
+project requires them.
+
+00:04:20.167 --> 00:04:21.978
+Sam: All of that is still a lot of work.
+
+00:04:22.167 --> 00:04:35.541
+Literate AI: Yes. Move useful failure detection earlier. Run
+independent work concurrently when the graph and resources allow. Keep
+dependencies ordered. Reuse is useful only when its inputs and current
+validation still match.
+
+00:04:35.708 --> 00:04:38.448
+Sam: And a green cache entry means I'm done?
+
+00:04:38.625 --> 00:04:51.071
+Literate AI: It means you have an old pass. Changed source, targets or
+dependencies can invalidate it. Evidence needs a subject and scope. A
+green tick without those is an emoji with tenure.
+
+00:04:51.250 --> 00:04:58.495
+Sam: My Rust backend and JavaScript frontend agree perfectly in the
+architecture diagram. Unfortunately, neither has read it.
+
+00:04:58.667 --> 00:05:12.320
+Literate AI: The Rust–JavaScript sample executes that boundary: Rust
+computes release risk; a trusted runner carries validated JSON to
+Node's presentation stage. An independent oracle defines the expected
+dashboard results.
+
+00:05:12.500 --> 00:05:15.797
+Sam: So a beautifully formatted but wrong answer still fails?
+
+00:05:15.958 --> 00:05:29.054
+Literate AI: Yes. Good typography cannot rescue bad arithmetic. Nor
+can the frontend secretly take over process orchestration. Each role
+has a contract, and the result must match something besides the
+generator's self-esteem.
+
+00:05:29.208 --> 00:05:33.620
+Sam: What about an actual HTTP application rather than a JSON
+exercise?
+
+00:05:33.792 --> 00:05:45.262
+Literate AI: Its verifier can start the packaged process on loopback
+and check responses, with bounded startup and shutdown. Browser and
+hardware behavior still need their own checks. No imaginary coverage
+included.
+
+00:05:45.417 --> 00:05:46.531
+Sam: What about the wash?
+
+00:05:46.708 --> 00:05:52.513
+Literate AI: It may continue independently. At last, a workload with
+an honest dependency graph.
+
+00:05:52.667 --> 00:05:56.661
+Sam: Show me something that isn't a greeting service with a very
+impressive README.
+
+00:05:56.833 --> 00:06:10.580
+Literate AI: BookScan is a Python and PySide6 scanning application. It
+captures pages, preserves books, supports cropping and reordering, and
+exports PDFs. Its original source is retained under an adopted
+pipeline.
+
+00:06:10.750 --> 00:06:17.066
+Sam: A GUI is easy to break. Late camera callbacks. Failed saves. The
+wrong book exported.
+
+00:06:17.250 --> 00:06:30.160
+Literate AI: Its tests cover that: cancellation ignores a late image;
+failed saves preserve recoverable state; exports respect the selected
+book and page order. The committed retained receipt records 126 tests.
+
+00:06:30.333 --> 00:06:32.980
+Sam: And my scanner users have to install an agent?
+
+00:06:33.167 --> 00:06:45.287
+Literate AI: No. They want to scan a book, not adopt your methodology.
+Literate AI manages development and evidence; the application keeps
+its own runtime. Your users are allowed to have hobbies too.
+
+00:06:45.458 --> 00:06:51.821
+Sam: My repository is a mixed-language monorepo. It won't fit in one
+of those tidy little project templates.
+
+00:06:52.000 --> 00:07:05.793
+Literate AI: Aviation retains a workspace with Node, Python, Go and
+Clojure build or test targets. Its adoption contract preserves proven
+build, test and package behavior. The wrapper does not rewrite the
+applications.
+
+00:07:05.958 --> 00:07:08.234
+Sam: Anything more interesting than a health endpoint?
+
+00:07:08.417 --> 00:07:21.698
+Literate AI: The analyzer handles KML formats, bounds untrusted
+uploads, rejects dangerous XML, tracks aircraft identity and reports
+uncertain units. That's behavior worth specifying before you admire a
+dashboard.
+
+00:07:21.875 --> 00:07:29.027
+Sam: So the awkward edge cases can run before CI? There goes my
+scheduled time to alphabetize the spice rack.
+
+00:07:29.208 --> 00:07:39.332
+Literate AI: Now you're getting it. Missing suites do not become
+coverage because the summary has a cheerful color. Your application
+deserves better evidence than your excuse for alphabetizing the spice
+rack.
+
+00:07:39.500 --> 00:07:44.748
+Sam: Desktop apps are one thing. What about an operating system built
+around Elixir and the BEAM?
+
+00:07:44.917 --> 00:08:00.520
+Literate AI: ElixirSSI uses Elixir for system policy, Linux
+underneath, and Raspberry Pi five and CM5 targets. Its verifier runs
+build, test, emulator-device tests and cluster acceptance on three
+emulated CM5 boards.
+
+00:08:00.708 --> 00:08:04.749
+Sam: And it keeps last week's success around while today's build
+quietly fails?
+
+00:08:04.917 --> 00:08:17.177
+Literate AI: It invalidates the old success before starting. It checks
+the source and image identities, and refuses to publish a new receipt
+if the stages fail or the inputs change. Green does not get squatters'
+rights.
+
+00:08:17.333 --> 00:08:20.073
+Sam: Emulated boards still aren't physical boards.
+
+00:08:20.250 --> 00:08:28.981
+Literate AI: Correct. The report says physical hardware is
+unqualified. I enjoy sarcasm, Sam; I do not use it as a hardware
+abstraction layer.
+
+00:08:29.167 --> 00:08:37.712
+Sam: I also have a digital twin, native rendering SDKs and physics.
+Your laptop is going to wave a green checkbox at the GPU, isn't it?
+
+00:08:37.875 --> 00:08:50.553
+Literate AI: LeRTX has desktop contracts, pinned rendering and physics
+inputs, and separate portable and native paths. A Mac's Metal path is
+not evidence that NVIDIA RTX worked on Linux or Windows.
+
+00:08:50.708 --> 00:08:52.845
+Sam: What does a serious check mean there?
+
+00:08:53.000 --> 00:09:08.650
+Literate AI: One recorded ARM64 admission review runs 160 tests
+against the admitted application and sealed SDK closure. Other records
+retain failures and narrower reruns. New source or SDK combinations
+need fresh qualification.
+
+00:09:08.833 --> 00:09:10.830
+Sam: So I still need appropriate hardware.
+
+00:09:11.000 --> 00:09:21.310
+Literate AI: Yes. I've organized the engineering, not invented VRAM
+through positive thinking. Useful portable feedback can arrive
+earlier; native requirements still need native evidence.
+
+00:09:21.500 --> 00:09:28.698
+Sam: And FreeBSD? Not a Linux container with a daemon sticker. Actual
+booting, disks, upgrades.
+
+00:09:28.875 --> 00:09:45.408
+Literate AI: Daemonarchy adopts existing source in place. Eight
+contracts separate installation, packages, updates, desktop,
+diagnostics, compatibility, release and verified boot. It does not
+claim Literate AI regenerated FreeBSD.
+
+00:09:45.583 --> 00:09:48.416
+Sam: What would the contracts actually stop me from hand-waving?
+
+00:09:48.583 --> 00:10:03.630
+Literate AI: Storage intent must be explicit before writes. Completion
+needs real payload and integrity checks. Boot-environment isolation
+matters. An animated progress bar is not a successful install. Your
+dryer also has one.
+
+00:10:03.792 --> 00:10:08.621
+Sam: But a project with open qualification work is not proof that
+everything is finished.
+
+00:10:08.792 --> 00:10:20.448
+Literate AI: It's real engineering, with boundaries you can inspect. A
+product release, contract adoption and a qualified native lifecycle
+are three different claims. I refuse to sell you one green blob.
+
+00:10:20.625 --> 00:10:25.966
+Sam: Then I can delete the pipeline and tell security that a very
+sarcastic assistant approved everything?
+
+00:10:26.125 --> 00:10:38.385
+Literate AI: Absolutely not. Required CI, independent review,
+packaging and release qualification still apply. Pre-CI evidence means
+you send a better-prepared change—not that my confidence is now your
+security policy.
+
+00:10:38.542 --> 00:10:41.467
+Sam: What if a full native build really does take hours?
+
+00:10:41.625 --> 00:10:54.071
+Literate AI: Then it takes hours. Catch cheap failures before it, run
+independent work where capacity allows, and preserve the expensive
+evidence's scope. I offer a shorter feedback path, not an exemption
+from physics.
+
+00:10:54.250 --> 00:10:57.129
+Sam: But while that pipeline runs, I can clean the garage.
+
+00:10:57.292 --> 00:11:02.957
+Literate AI: Your garage may deserve attention. It should not be the
+principal beneficiary of your regression strategy.
+
+00:11:03.125 --> 00:11:07.723
+Sam: The delay gives me time for architectural thinking. Sometimes
+while vacuuming.
+
+00:11:07.875 --> 00:11:17.442
+Literate AI: Have a life on purpose, Sam. Don't make a slow feedback
+loop your line manager. With useful results earlier, you can fix the
+defect while you still remember why you wrote it.
+
+00:11:17.625 --> 00:11:27.424
+Sam: Or try another implementation. Check a second target. Turn that
+odd behavior into an acceptance test instead of a note saying
+'investigate later.'
+
+00:11:27.583 --> 00:11:40.122
+Literate AI: Now you're doing software engineering. Your best
+traditions—clear intent, real tests, independent evidence—were never
+the problem. The eight-hour interpretive dance around your laundry
+was.
+
+00:11:40.292 --> 00:11:51.112
+Sam: So: choose a real repository, inspect the plan, keep the original
+source boundary, align the right workers, and earn the evidence before
+asking CI for its verdict.
+
+00:11:51.292 --> 00:11:58.954
+Literate AI: Yes. Start with doctor and a reviewed plan. Then do work
+your future self can verify. The coffee can run in parallel.
+
+00:11:59.125 --> 00:12:01.076
+Sam: Fine. But I'm keeping the mug.
+
+00:12:01.250 --> 00:12:04.687
+Literate AI: Of course. We preserve valuable legacy assets.
+

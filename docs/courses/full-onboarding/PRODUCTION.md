@@ -1,12 +1,11 @@
 # Production plan — Eight Hours to Make Coffee
 
-**State:** 1.3.1 release goal with a compiled 12-chapter/86-turn authoring path and
-a 12:04.896 local candidate rendered from newly recorded approved-voice takes. The
-standard video verifier accepts its 86 captions and continuous media. Fresh execution
-evidence and complete listening, factual, accessibility and normal-speed playback
-approval remain open. This is not yet a replacement for the accepted pilot or
-published film. The user passed visual inspection of the exact directed pilot; its
-cast and visual treatment are the starting point.
+**State:** completed 1.3.1 media goal. The 12-chapter/86-turn, 12:04.896 film uses
+newly recorded approved-voice takes. The standard verifier accepts its 86 captions
+and continuous media. Fresh scoped execution evidence is retained, and the user
+approved listening, factual, accessibility and normal-speed playback against exact
+media hashes. The review-bound rebuild is byte-identical and is published alongside
+its captions, receipt, poster, manifest, QA and review provenance.
 
 The exact candidate revision's [fresh evidence](../../../verification/onboarding-1.3.1-fresh-evidence.json)
 records a ready host and read-only adoption plan over an unchanged eight-file native
@@ -112,16 +111,15 @@ an observed demonstration. Source-backed diagrams need no invented live result.
 
 ## Review and delivery gates
 
-The full script, compiler and chapter choreography are authored. After credential
-refresh, record and align every new line, then check every chapter at playback size
-and speed, with sound and then muted. The accepted pilot is not blanket approval of
-new jokes, delivery, props or a longer sequence.
+The full script, compiler and chapter choreography are authored. Every line was
+recorded and aligned after live catalog discovery. Every chapter and the assembled
+film were checked at playback size and normal speed; the final approval is recorded
+against the exact reviewed bytes rather than inferred from the accepted pilot.
 
 Run score admission, audio/source drift refusals, full-timeline pose continuity,
 caption bounds, offline/keyboard and reduced-motion/static checks at the actual
 chapter scope. Assemble with the existing video CLI and independently verify the
 final manifest and media. Retain captions, source records and a local review copy.
-Record voice, visual, factual and accessibility judgments separately. The user has
-authorized GitHub publication as part of v1.3.1, but publication remains prohibited
-until those judgments and every declared release goal pass. Retain the prior film and
-make all new front-door links resolve to the exact approved media identity.
+Voice, visual, factual and accessibility judgments are recorded in the exact approval
+evidence. The user authorized GitHub publication as part of v1.3.1. Retain the prior
+film and make all new front-door links resolve to the approved media identity.

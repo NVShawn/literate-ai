@@ -1,0 +1,22 @@
+{
+  "schema": "literate-ai/video-course-result@1",
+  "course_id": "eight-hours-to-make-coffee",
+  "source_identity": "8603d033d745d99ce2e7e777f07f29d9c4a5f44293d6b78977fbb2ca767efc8e",
+  "renderer_sha256": "70add560a2d00ea2233871b21458ede1e398ed9ae2361a12655aaa775adf1740",
+  "font_sha256": "525979822591a3447cfc49d943d6f7683508e25543407871c0ed8fed05fd2bd9",
+  "narration_backend": "recorded",
+  "duration_seconds": 724.896322,
+  "caption_count": 86,
+  "embed_subtitles": false,
+  "publication_authorized": false,
+  "artifacts": {
+    "eight-hours-to-make-coffee.mp4": "d01ce010654c55d6a1b3de16fa3cd8d640b758fe3559783236cfc9754e7d8e97",
+    "eight-hours-to-make-coffee.srt": "d0628463c74bc3a7b931d2777d05730a01c93e66da28d6e58db73f2fc62f291e",
+    "eight-hours-to-make-coffee.vtt": "0e6cbde161e0fe0e059cc61828366d06392d02ea08c9bb01983050932e1d1d16"
+  },
+  "tools": {
+    "ffmpeg": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "ffprobe": "ffprobe version 9.0.2 Copyright (c) 2007-2026 the FFmpeg developers",
+    "magick": "Version: ImageMagick 7.1.2-33 Q16-HDRI aarch64 4bab3bc37:20261010 https://imagemagick.org"
+  }
+}

@@ -5,9 +5,8 @@ as a disposable, verifiable build artifact. The shortest useful introduction sta
 from an installed release wheel, checks the host, and follows one reviewed onboarding
 plan into either a new project or an adopted source tree.
 
-Prefer to watch first? The 11:52 onboarding film,
-[Settle the Argument. Before CI.](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/sam-meets-literate-ai/video/sam-meets-literate-ai-settle-the-argument.mp4), follows a real
-greenfield session and a real TinyXML2 adoption. The
+Prefer to watch first? The 12:04 animated onboarding film,
+[Eight Hours to Make Coffee](https://github.com/jordanhubbard/literate-ai/raw/main/media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.mp4), explains how reviewed plans, selected targets, aligned workers and independent evidence provide useful feedback before required CI. Its source-backed project case studies retain explicit native and adoption limits. The
 [instructional courses](../courses/README.md) break the same ground into short lessons:
 [your first greenfield project](../courses/01-greenfield-first-project/01-greenfield-first-project.mp4),
 [using machines you already have](../courses/02-use-your-existing-machines/02-use-your-existing-machines.mp4)

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Publish the user-approved 1.3.1 animated onboarding film, *Eight Hours to Make
+  Coffee*, with 86 recorded NVIDIA Magpie voice turns, complete SRT/WebVTT captions,
+  poster, rebuildable authoring sources, exact review provenance and independently
+  verified media hashes. Retain the previous film and its historical evidence.
+
 - Add explicit current-request semantic payload re-admission and separately
   policy-controlled prior signed release binary input adoption. Both retain
   immutable prior evidence and require fresh signed native qualification and
