@@ -1,8 +1,8 @@
 # Literate AI labs
 
 These labs teach Literate AI by making increasingly unreasonable little machines.
-Each lab has a readable Component specification, a small source module, a visible
-Component DAG, and a generated `index.html` that runs offline with no server or
+Each current lab has an authored Markdown specification, a small source module, an
+illustrative lesson flow, and a bundled `index.html` that runs offline with no server or
 external dependencies.
 
 The authoring support is shared under `shared/`; `scripts/build_labs.py` inlines it
@@ -25,12 +25,29 @@ python3 labs/scripts/build_labs.py
 python3 labs/scripts/verify_labs.py
 ```
 
-Then open any lab's `index.html` directly. The graph on the left is part of the
-lesson: select a node to see which visible behavior that authority owns.
+Then open any lab's `index.html` directly. Select a lesson role to inspect its
+responsibility. These roles are not resolved canonical Components. The separate
+surrounding-harness panel records manual language choice, shared runtime/style,
+HTML assembly, project registration, and absent Flavor/lifecycle selection.
+The exact-source inspector includes complete authored bytes and project/catalog
+context; hashes identify bytes, not lifecycle admission.
+
+LAB-AUTHORITY-001 tracks the user-requested replacement with independent canonical
+Literate AI labs: progressively richer real Component graphs, explicit Flavors,
+locks, skills/workflows and genuine lifecycle evidence. The present authored
+browser examples are not completion of that curriculum.
 
 The shared authoring inputs are [the visual system](shared/lab.css) and
-[the component-DAG runtime](shared/lab-runtime.js). The
+[the shared lab runtime](shared/lab-runtime.js). The
 [builder](scripts/build_labs.py) creates the independent artifacts, and the
 [verifier](scripts/verify_labs.py) checks their structure, media coverage, and
 offline boundary.
 
+
+Regression checks: `python3 labs/scripts/test_lab_sources.py`. Real-browser checks:
+`node labs/scripts/test_labs_browser.cjs` with an existing Playwright installation
+and Chromium (optionally `LAB_PLAYWRIGHT_MODULE` and
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`). Captures stay under ignored `_build/`.
+
+Validation sources: [source-integrity regressions](scripts/test_lab_sources.py) and
+[real-browser interaction checks](scripts/test_labs_browser.cjs).

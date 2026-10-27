@@ -31394,7 +31394,7 @@ run `40460869302`, including the repaired isolated Windows receiver gate.
 - **Priority:** P0
 - **Owner:** front-door documentation, conference collateral, samples, and HTML observability
 - **Direction:** Synchronize user documentation with the 1.4.0 development feature set; create a conference-ready deck on Literate AI goals and evolution; and add progressively more complex, cheeky, independent visual labs spanning component DAGs, audio, video, 3D, music, mathematics, and physics.
-- **Conclusion:** Treat general documentation as 1.4.0 development authority while preserving 1.3.1 release-specific collateral. Build one DRY lab kit with independent lab entry points, visible component graphs, and deterministic browser-friendly artifacts. Produce an editable local conference deck through the repository presentation pipeline; do not publish externally without separate authorization.
+- **Conclusion:** Treat general documentation as 1.4.0 development authority while preserving 1.3.1 release-specific collateral. Build one DRY lab kit with independent lab entry points, lesson-flow diagrams, and deterministic browser-friendly artifacts. The original claim that those diagrams were resolved Component graphs was incorrect; LAB-AUTHORITY-001 owns the correction and real canonical curriculum. Produce an editable local conference deck through the repository presentation pipeline; do not publish externally without separate authorization.
 - **Depends on:** current 1.4.0 main authority; existing HTML explorer and presentation toolchain
 - **Next action:** Complete. Keep the current-feature page synchronized with release
       authority, rebuild the deck from its checked-in source when claims change, and
@@ -31408,7 +31408,7 @@ run `40460869302`, including the repaired isolated Windows receiver gate.
         1.3.1, development, and open qualification.
   - [x] Six standalone lab artifacts pass `build_labs.py`, `verify_labs.py`, desktop
         browser interaction checks, offline-resource checks, and a 390-pixel viewport
-        bounds check; each exposes its Component specification and interactive DAG.
+        bounds check; each exposed its authored Markdown and illustrative role flow. Those checks did not establish canonical Components, Flavor selection or lifecycle admission; LAB-AUTHORITY-001 adds the missing curriculum.
   - [x] The 14-slide editable PPTX has 14 speaker-note pages. Package integrity,
         layout geometry, font policy, slide bounds, render count, and full-slide visual
         review pass with zero structural findings or layout warnings; exact deck SHA-256
@@ -31417,6 +31417,33 @@ run `40460869302`, including the repaired isolated Windows receiver gate.
         `sha256:6f40bac8e467374e03aaa0fa72b656f8d6a52fff2fb0c0f8c8fe551f24d636d5`;
         `litai project validate`, `make lint repository-layout-check`, and the clean
         full `make python-check` pass (2,332 tests, 70 skipped).
+
+### [ ] LAB-AUTHORITY-001 — Make lab diagrams, specifications and source provenance accurate
+
+- **Priority:** P0
+- **Owner:** labs documentation and offline artifact builder
+- **Direction:** The user found that Grumpy Counter graph roles look like real Components while its short specification omits visible UI behavior. https://github.com/jordanhubbard/literate-ai/issues/159
+- **Conclusion:** Labs are authored offline documentation examples, not locked canonical Component realizations. Correct the diagram and bundle claims, expose exact source inputs, fully specify and verify Grumpy Counter without inventing Components or receipts. Follow-up to DOCS-LABS-001 under PROJECT Goals 2 and 4.
+- **Depends on:** DOCS-LABS-001
+- **GitHub issue:** [#159](https://github.com/jordanhubbard/literate-ai/issues/159)
+- **Release target:** 1.4.0 (same development curriculum scope as DOCS-LABS-001).
+- **Next action:** Convert every lab to independently resolvable canonical Components and explicit Flavor selections, then qualify actual locks, generation and browser lifecycle evidence in increasing complexity.
+- **User clarification:** Self-contained means no dependency on earlier labs or external repositories; all labs must use Literate AI. Start small, progressively add real Components/Flavors and other harness dimensions, and finish with a visually substantial composed capstone. A labels-only correction is not completion.
+- **Implementation:**
+  - [x] Distinguish lesson roles from resolved Components across the shared lab shell; expose exact bundled sources and provenance.
+  - [ ] Convert all six lessons to standalone canonical lab graphs with full UI specifications and progressively richer real Flavor/skill/workflow selections; derive displayed graphs from exact framework resolution, never hand-authored role counts.
+  - [x] Complete Grumpy Counter layout, labeled modulus control, rendering, input behavior and acceptance contract; align implementation.
+  - [x] Separate lab behavior from color-keyed surrounding inputs and harness context; distinguish manual selection from actual canonical bindings.
+- **Evidence:**
+  - [ ] Rebuild and structurally verify all six offline artifacts; reject changed embedded source or false graph/custody claims.
+  - [ ] Actual desktop/mobile browser checks verify Grumpy Counter default, bounds, keyboard/pointer input, source parity, graph selection and offline behavior; authority and required repository checks pass.
+
+LAB-AUTHORITY-001 development checkpoint: six offline bundles and five tamper/refusal
+checks pass. Actual offline Chromium at 1440 and 390 pixels verifies pointer/keyboard
+input, 239 rendered arithmetic dots, eight exact source/context records, graph role
+activation, six shared shells and no page errors or network fetches. The canvas is
+positioned independently of its backing-store size to prevent intrinsic sizing
+feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RICH-HTML5-PRESENTATIONS-001 — Rich HTML5 presentation authoring and delivery
 

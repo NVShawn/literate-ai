@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Correct the visual labs' illustrative-role diagrams and authored-source provenance;
+  expand Grumpy Counter's UI/animation/acceptance specification, label its modulus
+  control and neutral integer 1, and expose complete bundled sources plus a separate
+  color-keyed surrounding-harness panel. Canonical progressive lab conversion remains
+  in progress; these documentation checks are not lifecycle admission.
+
 - Restore proportional PR feedback for Elixir/Mix: ordinary changes retain one
   Ubuntu native smoke cell, Elixir-scoped changes run all six OS/version cells, and
   main and release qualification remain exhaustive. Treat `PROJECT.md` and

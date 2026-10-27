@@ -76,6 +76,15 @@ development (2026-09-10):
 
 ## Current work
 
+LAB-AUTHORITY-001 extends Goals 2 and 4 with an independent, progressively richer
+canonical lab curriculum. Each lab must use actual Components, selected Flavors,
+locks, skills/workflows and truthful lifecycle evidence from this framework,
+without depending on earlier labs or external repositories. The initial authored
+browser demos are retained teaching fixtures, not proof of that complete flow.
+The corrected source inspector and surrounding-harness panel expose their actual
+inputs; canonical conversion and final multi-Component/multi-Flavor capstone remain
+in progress.
+
 RICH-HTML5-PRESENTATIONS-001 extends Goals 2, 4, and 7. The conference evolution deck
 is the first concrete standalone HTML5 artifact and is usable before the generalized
 skill: its repository-owned builder produces one offline file with native navigation,

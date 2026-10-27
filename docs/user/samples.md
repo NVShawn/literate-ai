@@ -6,8 +6,8 @@ Two collections serve different jobs:
   framework qualification.
 - [`labs/`](../../labs/) contains six progressively composed, free-standing visual
   lessons. They reuse one authoring runtime but generate an offline `index.html` in
-  every lab, with its Component specification and interactive DAG visible beside the
-  artifact. The sequence spans math, physics, music, audio, 3D graphics, and video.
+  every lab, with an authored specification, illustrative lesson flow and exact-source
+  inspector visible beside the artifact. The sequence spans math, physics, music, audio, 3D graphics, and video.
 
 Start with the labs when learning how readable authority composes. Use the samples when
 testing the real generation, native build, package, worker, and receipt boundaries.
