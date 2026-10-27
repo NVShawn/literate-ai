@@ -31230,11 +31230,21 @@ open.
   - [x] Add roadmap goal and approval records to the canonical release contribution policy and CLI.
   - [x] Reject release readiness when a goal is missing from the roadmap, incomplete, or deferred without explicit user approval and a future release target.
   - [x] Update release-project and record-user-directed-work skills plus initialized-project copies with the same approval boundary.
+  - [x] Always load an existing release policy during contribution sweeps, even when
+    both the version and current milestone are supplied explicitly, so callers cannot
+    bypass the policy-bound roadmap goal manifest. Preserve standalone explicit-version
+    sweeps only when the policy file is genuinely absent; malformed policy remains an
+    error.
   - [ ] Complete WINDOWS-PE-OBSERVE-001 after repairing the exact-main Windows dependency-observation failure without weakening live receiver or dependency-closure checks.
   - [ ] Move COURSE-004 and all replacement-onboarding production work to 1.3.1, then complete and publish the film before the patch release.
 - **Evidence:**
   - [x] Deterministic release-contribution tests reject undocumented, incomplete, and unapproved-deferred goals and accept only completed or explicitly approved future moves; 35 focused release, initialization, and CLI tests plus 33 subtests pass.
   - [x] Root/template skill copies are byte-identical; repository layout, SkillEvaluator, 22 documentation tests, and all 121 Mermaid renders pass.
+  - [x] Focused CLI regressions prove explicit version and milestone arguments retain
+    the policy goal manifest, absent-policy standalone sweeps remain available, and a
+    malformed existing policy cannot be bypassed. Ten focused contribution tests plus
+    three subtests pass, and the real explicit `1.3.1` sweep reports all three open
+    roadmap goals from `docs/roadmap/release-goals.json`.
   - [ ] A focused deadline regression and the exact post-merge Windows partition pass with dependency observations still bounded by the caller deadline.
   - [ ] The complete replacement onboarding film passes voice, motion, factual, accessibility, media-integrity, and full-playback review gates.
   - [ ] The 1.3.1 release plan, qualification, publication, verification, and exact post-release synchronization gates pass with no incomplete release goals.

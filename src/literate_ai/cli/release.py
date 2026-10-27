@@ -83,18 +83,18 @@ def _release_from_args_body(args: argparse.Namespace) -> tuple[dict[str, Any], i
                     )
                 selected_version = args.version
                 release_policy = None
-                if selected_version is None or args.current_milestone is None:
-                    try:
-                        release_root, release_policy = load_release_policy(
-                            Path(args.project)
-                        )
-                    except ProjectReleaseError as exc:
-                        # Explicit-version standalone sweeps remain available when
-                        # no policy exists. A malformed/unreadable policy is an error.
-                        if selected_version is None or not isinstance(
-                            exc.__cause__, FileNotFoundError
-                        ):
-                            raise
+                try:
+                    release_root, release_policy = load_release_policy(
+                        Path(args.project)
+                    )
+                except ProjectReleaseError as exc:
+                    # Explicit-version standalone sweeps remain available when no
+                    # policy exists. Explicit scope arguments never bypass an
+                    # existing policy; malformed/unreadable policy is an error.
+                    if selected_version is None or not isinstance(
+                        exc.__cause__, FileNotFoundError
+                    ):
+                        raise
                 if selected_version is None:
                     assert release_policy is not None
                     selected_version = current_release_version(
