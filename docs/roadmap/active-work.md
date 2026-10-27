@@ -31235,6 +31235,9 @@ open.
     bypass the policy-bound roadmap goal manifest. Preserve standalone explicit-version
     sweeps only when the policy file is genuinely absent; malformed policy remains an
     error.
+  - [x] Record the reviewed lifecycle-driver identity after the release CLI policy
+    correction; exact-head CI exposed the stale TCB pin after the complete 2,301-case
+    source suite passed, so no failing run is relabeled green.
   - [ ] Complete WINDOWS-PE-OBSERVE-001 after repairing the exact-main Windows dependency-observation failure without weakening live receiver or dependency-closure checks.
   - [ ] Move COURSE-004 and all replacement-onboarding production work to 1.3.1, then complete and publish the film before the patch release.
 - **Evidence:**
@@ -31245,6 +31248,16 @@ open.
     malformed existing policy cannot be bypassed. Ten focused contribution tests plus
     three subtests pass, and the real explicit `1.3.1` sweep reports all three open
     roadmap goals from `docs/roadmap/release-goals.json`.
+  - [ ] The supported lifecycle-driver review passes against the recorded exact
+    `src/literate_ai/cli/release.py` bytes, followed by exact-head and exact-main CI.
   - [ ] A focused deadline regression and the exact post-merge Windows partition pass with dependency observations still bounded by the caller deadline.
   - [ ] The complete replacement onboarding film passes voice, motion, factual, accessibility, media-integrity, and full-playback review gates.
   - [ ] The 1.3.1 release plan, qualification, publication, verification, and exact post-release synchronization gates pass with no incomplete release goals.
+
+**Lifecycle-driver pin repair:** The supported recorder reviewed the sole changed TCB
+file, `src/literate_ai/cli/release.py`, and advanced the driver identity from
+`sha256:67e843f8c183463ab0fb0ba49f4083f42877873801293196f575d8dea5ac996a` to
+`sha256:81c7b3cd7f7a5bdbade5be8e591790fd8005ba14d7ba6a6bcc34ad73e3089189`.
+The refreshed documentation authority is current at
+`sha256:bb21b286f15ceee36ae2ebcebe71893578062c3fc57b3454f6eb737841590909`.
+Exact-head and exact-main CI remain required.
