@@ -1,2 +1,73 @@
-{"level":"04","title":"Glitch Opera for One Nervous Rectangle","subtitle":"A video synthesizer rehearses evidence capture while the rectangle requests a union representative.","learning":"Evidence is its own artifact: the running view, optional audio and captured video have distinct custody.","stage":"Dress rehearsal for unstable geometry","media":["html","math","audio","music","video"],"nodes":[{"id":"spec","label":"Component","detail":"The Component owns deterministic motion, optional sound and bounded capture."},{"id":"signal","label":"Signal","detail":"Mathematical signals generate frame state."},{"id":"view","label":"Video view","detail":"Canvas turns state into a moving image."},{"id":"audio","label":"Audio Flavor","detail":"A user-authorized oscillator may accompany the picture."},{"id":"capture","label":"Evidence","detail":"MediaRecorder retains a separate WebM observation when supported."},{"id":"accept","label":"Acceptance","detail":"Unsupported capture and audio consent fail visibly without breaking animation."}],"edges":[["spec","signal"],["signal","view"],["signal","audio"],["view","capture"],["capture","accept"],["audio","accept"]]}
-
+{
+  "level": "04",
+  "title": "Glitch Opera for One Nervous Rectangle",
+  "subtitle": "A video synthesizer rehearses evidence capture while the rectangle requests a union representative.",
+  "learning": "Explore optional audio and video capture. A browser recording alone is not a lifecycle acceptance receipt.",
+  "stage": "Dress rehearsal for unstable geometry",
+  "media": [
+    "html",
+    "math",
+    "audio",
+    "music",
+    "video"
+  ],
+  "nodes": [
+    {
+      "id": "spec",
+      "label": "Lab spec",
+      "detail": "component.md is the authored lab specification. It is documentation, not a resolved canonical Component."
+    },
+    {
+      "id": "signal",
+      "label": "Signal",
+      "detail": "Mathematical signals generate frame state."
+    },
+    {
+      "id": "view",
+      "label": "Video view",
+      "detail": "Canvas turns state into a moving image."
+    },
+    {
+      "id": "audio",
+      "label": "Audio choice",
+      "detail": "A user-authorized oscillator may accompany the picture. This is a runtime control, not a selected canonical Flavor."
+    },
+    {
+      "id": "capture",
+      "label": "Evidence",
+      "detail": "MediaRecorder retains a separate WebM observation when supported."
+    },
+    {
+      "id": "accept",
+      "label": "Criteria",
+      "detail": "The authored acceptance criteria describe checks to perform; this node is not an independent verifier or acceptance receipt."
+    }
+  ],
+  "edges": [
+    [
+      "spec",
+      "signal"
+    ],
+    [
+      "signal",
+      "view"
+    ],
+    [
+      "signal",
+      "audio"
+    ],
+    [
+      "view",
+      "capture"
+    ],
+    [
+      "capture",
+      "accept"
+    ],
+    [
+      "audio",
+      "accept"
+    ]
+  ],
+  "diagram_kind": "illustrative-lesson-flow"
+}

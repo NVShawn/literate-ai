@@ -54,4 +54,7 @@ closure. Work on `main` does not silently satisfy those patch gates.
 The [visual labs](../../labs/) are six progressively composed, free-standing examples.
 They begin with a grumpy counter and end with a component cathedral combining math,
 physics, 3D projection, music, audio, and video capture. Each lab exposes its readable
-Component specification and interactive DAG beside the running artifact.
+lab specification, illustrative lesson flow and exact bundled source beside the
+running artifact. The surrounding-harness panel distinguishes authored browser
+implementation from actual canonical Flavor and lifecycle selection. Canonical
+progressive curriculum work remains open under LAB-AUTHORITY-001.

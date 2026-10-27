@@ -1,2 +1,48 @@
-{"level":"00","title":"The Grumpy Counter","subtitle":"A modular arithmetic creature with strong opinions about composite numbers.","learning":"A readable Component can own visible behavior and acceptance without hiding the mechanism.","stage":"Arithmetic having a mood","media":["html","math"],"nodes":[{"id":"spec","label":"Component","detail":"The specification owns prime/composite color and the modulus control."},{"id":"series","label":"Number goblin","detail":"The realization classifies integers and maps them into polar coordinates."},{"id":"view","label":"Canvas","detail":"The HTML artifact renders the candidate behavior."},{"id":"accept","label":"Acceptance","detail":"Offline execution, visible graph and current modulus are independently observable."}],"edges":[["spec","series"],["series","view"],["view","accept"]]}
-
+{
+  "level": "00",
+  "title": "The Grumpy Counter",
+  "subtitle": "A modular arithmetic creature with strong opinions about composite numbers.",
+  "learning": "Read an authored specification beside its implementation; distinguish a lesson flow from a resolved Component DAG.",
+  "stage": "Arithmetic having a mood",
+  "media": [
+    "html",
+    "math"
+  ],
+  "nodes": [
+    {
+      "id": "spec",
+      "label": "Lab spec",
+      "detail": "component.md is the authored lab specification. It is documentation, not a resolved canonical Component."
+    },
+    {
+      "id": "series",
+      "label": "Number goblin",
+      "detail": "The realization classifies integers and maps them into polar coordinates."
+    },
+    {
+      "id": "view",
+      "label": "Canvas",
+      "detail": "The HTML artifact renders the candidate behavior."
+    },
+    {
+      "id": "accept",
+      "label": "Criteria",
+      "detail": "The authored acceptance criteria describe checks to perform; this node is not an independent verifier or acceptance receipt."
+    }
+  ],
+  "edges": [
+    [
+      "spec",
+      "series"
+    ],
+    [
+      "series",
+      "view"
+    ],
+    [
+      "view",
+      "accept"
+    ]
+  ],
+  "diagram_kind": "illustrative-lesson-flow"
+}

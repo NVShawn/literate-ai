@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Correct the visual labs' illustrative-role diagrams and authored-source provenance;
+  expand Grumpy Counter's UI/animation/acceptance specification, label its modulus
+  control and neutral integer 1, and expose complete bundled sources plus a separate
+  color-keyed surrounding-harness panel. Canonical progressive lab conversion remains
+  in progress; these documentation checks are not lifecycle admission.
+
 - Add a version-aware current-feature map, synchronize the main documentation entry
   points with the 1.4.0 development line and separate 1.3.1 patch program, and add a
   reproducible conference evolution deck.

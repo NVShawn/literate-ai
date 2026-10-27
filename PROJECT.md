@@ -72,6 +72,15 @@ development (2026-09-10):
 
 ## Current work
 
+LAB-AUTHORITY-001 extends Goals 2 and 4 with an independent, progressively richer
+canonical lab curriculum. Each lab must use actual Components, selected Flavors,
+locks, skills/workflows and truthful lifecycle evidence from this framework,
+without depending on earlier labs or external repositories. The initial authored
+browser demos are retained teaching fixtures, not proof of that complete flow.
+The corrected source inspector and surrounding-harness panel expose their actual
+inputs; canonical conversion and final multi-Component/multi-Flavor capstone remain
+in progress.
+
 ENTRYPOINT-AUDIT-001 extends Goal 1 with explicit coding-agent discovery readiness.
 A bounded read-only audit observes the selected project's owned delegates and its
 declared onboarding skill; original-source adoption reports the same findings
