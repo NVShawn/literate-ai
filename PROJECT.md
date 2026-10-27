@@ -46,6 +46,10 @@ disposable output. The framework's own goals are:
 6. Let a project inherit and extend another project's Components, Flavors, and skills
    through the repository lineage/DAG mechanism, so framework and derived-project
    authority stay composable rather than duplicated.
+7. Let presentation work choose an ecosystem-appropriate artifact without surrendering
+   repository ownership: PowerPoint and Google Slides remain supported, while the open
+   1.4 Rich HTML5 presentation goal will generalize browser-native, self-contained,
+   component-aware decks from the qualified conference-deck reference implementation.
 
 ## Dependencies
 
@@ -71,6 +75,13 @@ development (2026-09-10):
 | Samples | Non-inheritable demos under `samples/`, except `hello-component` (the inheritable starter `litai init` seeds). | See the open taxonomy question in `docs/roadmap/active-work.md`. |
 
 ## Current work
+
+RICH-HTML5-PRESENTATIONS-001 extends Goals 2, 4, and 7. The conference evolution deck
+is the first concrete standalone HTML5 artifact and is usable before the generalized
+skill: its repository-owned builder produces one offline file with native navigation,
+speaker notes, accessibility, printing, and embedded visual assets. The reusable 1.4
+presentation skill, authoring contracts, output routing, and publication acceptance
+remain open; the existence of this deck does not claim those broader capabilities.
 
 ENTRYPOINT-AUDIT-001 extends Goal 1 with explicit coding-agent discovery readiness.
 A bounded read-only audit observes the selected project's owned delegates and its

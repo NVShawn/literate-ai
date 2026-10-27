@@ -41,7 +41,8 @@ jobs:
 
   # Documentation-only PRs receive documentation/package-integrity feedback. Changes
   # to this classifier receive its focused policy test. Any unrecognized product path
-  # fails closed to the ordinary cross-platform PR matrix. Full qualification below
+  # fails closed to the ordinary cross-platform PR matrix, which includes one Ubuntu
+  # Elixir smoke cell. Elixir-scoped changes add all six native cells. Full qualification
   # remains mandatory for main/release pushes and release-branch PRs.
   checks:
     needs: profile
