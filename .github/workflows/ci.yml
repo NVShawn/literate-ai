@@ -35,16 +35,18 @@ jobs:
         id: select
         env:
           CI_EVENT: ${{ github.event_name }}
-          CI_BASE_REF: ${{ github.base_ref }}
-          CI_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CI_BASE_REF: ${{ github.base_ref || github.ref }}
+          CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CI_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python3 scripts/select_ci_profile.py >> "$GITHUB_OUTPUT"
 
   # Documentation-only PRs receive documentation/package-integrity feedback. Changes
   # to this classifier receive its focused policy test. Any unrecognized product path
   # fails closed to the ordinary cross-platform PR matrix, which includes one Ubuntu
   # Elixir smoke cell. Elixir-scoped changes add all six native cells. Full qualification
-  # remains mandatory for main/release pushes and release-branch PRs.
+  # remains mandatory for product-code pushes, release refs, release-branch PRs,
+  # manual qualification, and unknown changes. Exact documentation/policy-only
+  # pushes to main use the same focused profiles as ordinary PRs.
 
   freebsd-posix-acl:
     needs: profile

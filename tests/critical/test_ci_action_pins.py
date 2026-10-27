@@ -108,16 +108,82 @@ class CiActionPinTests(unittest.TestCase):
         )
         self.assertTrue(selector.select_freebsd_acl("push", "", ("README.md",)))
 
+    def test_default_branch_pushes_scope_docs_but_preserve_qualification(self) -> None:
+        selector = self.selector()
+        for paths, tasks in (
+            (("README.md", "docs/conference/README.md"), ["documentation"]),
+            (
+                ("docs/README.md", "scripts/select_ci_profile.py"),
+                ["documentation", "ci-policy"],
+            ),
+        ):
+            with self.subTest(paths=paths):
+                selected = selector.select_matrix("push", "refs/heads/main", paths)
+                self.assertEqual([row["task"] for row in selected["include"]], tasks)
+                self.assertFalse(
+                    selector.select_freebsd_acl("push", "refs/heads/main", paths)
+                )
+
+        for event, ref, paths in (
+            ("push", "refs/heads/main", None),
+            ("push", "refs/heads/main", ()),
+            ("push", "refs/heads/main", ("README.md", "src/literate_ai/cli.py")),
+            ("push", "refs/heads/main", ("unclassified-input",)),
+            ("push", "refs/heads/release/1.3.x", ("README.md",)),
+            ("push", "refs/tags/v1.3.1", ("README.md",)),
+            ("workflow_dispatch", "refs/heads/main", ("README.md",)),
+        ):
+            with self.subTest(event=event, ref=ref, paths=paths):
+                rows = selector.select_matrix(event, ref, paths)["include"]
+                self.assertTrue(rows)
+                self.assertTrue(all("scoped" not in row for row in rows))
+                self.assertEqual(
+                    len([row for row in rows if row["task"] == "elixir-native"]), 6
+                )
+                self.assertTrue(selector.select_freebsd_acl(event, ref, paths))
+
+        self.assertTrue(
+            selector.select_freebsd_acl(
+                "push", "refs/heads/main", (".github/workflows/ci.yml",)
+            )
+        )
+
+    def test_push_diff_uses_both_endpoints_and_unknown_diff_fails_closed(self) -> None:
+        selector = self.selector()
+        with mock.patch.object(selector.subprocess, "run") as run:
+            run.return_value = mock.Mock(returncode=0, stdout=b"README.md\0")
+            self.assertEqual(
+                selector._changed_paths("before", "after", push=True), ("README.md",)
+            )
+            self.assertEqual(run.call_args.args[0][-2:], ("before", "after"))
+            selector._changed_paths("before", "after")
+            self.assertEqual(run.call_args.args[0][-1], "before...after")
+            run.return_value = mock.Mock(returncode=128, stdout=b"")
+            self.assertIsNone(selector._changed_paths("before", "after", push=True))
+            run.side_effect = selector.subprocess.TimeoutExpired("git", 30)
+            self.assertIsNone(selector._changed_paths("before", "after", push=True))
+            run.side_effect = OSError("git unavailable")
+            self.assertIsNone(selector._changed_paths("before", "after", push=True))
+            run.side_effect = None
+            run.return_value = mock.Mock(returncode=0, stdout=b"\xff\0")
+            self.assertIsNone(selector._changed_paths("before", "after", push=True))
+            run.reset_mock()
+            self.assertIsNone(selector._changed_paths("", "after", push=True))
+            run.assert_not_called()
+
     def test_workflow_runs_only_the_checks_owned_by_each_scoped_profile(self) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
         profile = workflow["jobs"]["profile"]["steps"][-1]
         self.assertEqual(
+            profile["env"]["CI_BASE_REF"], "${{ github.base_ref || github.ref }}"
+        )
+        self.assertEqual(
             profile["env"]["CI_BASE_SHA"],
-            "${{ github.event.pull_request.base.sha }}",
+            "${{ github.event.pull_request.base.sha || github.event.before }}",
         )
         self.assertEqual(
             profile["env"]["CI_HEAD_SHA"],
-            "${{ github.event.pull_request.head.sha }}",
+            "${{ github.event.pull_request.head.sha || github.sha }}",
         )
         freebsd = workflow["jobs"]["freebsd-posix-acl"]
         self.assertEqual(freebsd["needs"], "profile")

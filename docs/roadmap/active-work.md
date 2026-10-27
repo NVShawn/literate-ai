@@ -31219,13 +31219,13 @@ slots/resources/claims and coalesced keys until matching trusted resolution; the
 barriers are per instance, with durable cross-controller worker-side custody still
 open.
 
-### [x] DOCS-CI-SCOPE-001 — Document the HTML explorer and scope documentation CI
+### [ ] DOCS-CI-SCOPE-001 — Document the HTML explorer and scope documentation CI
 
 - **Release target:** 1.3.1
 - **Priority:** P0
 - **Owner:** front-door documentation, HTML observability user guidance and CI feedback selection
 - **Direction:** Make the built-in HTML authority-graph explorer discoverable for the 1.3.1 symposium and prevent documentation-only changes from launching unrelated native product qualification.
-- **Conclusion:** Document the exact implemented explorer, provenance contract, command path, verification behavior and code-navigation boundary. Select documentation and presentation checks from exact pull-request paths; select a focused policy regression for the classifier itself; fail closed to the established cross-platform PR matrix for every unrecognized product path. Main, release branches and tags retain full qualification.
+- **Conclusion:** Document the exact implemented explorer, provenance contract, command path, verification behavior and code-navigation boundary. Select documentation and presentation checks from exact pull-request paths and exact before/after default-branch push paths; select a focused policy regression for the classifier itself. Product changes, unknown comparisons, manual qualification, release branches and tags retain their full qualification. The earlier default-branch exception caused documentation handoff commits to rebuild the product matrix and did not satisfy the user's requested scope.
 - **Depends on:** RELEASE-019
 - **Implementation:**
   - [x] Add a task-oriented user guide and stable README/documentation-index links for the built-in HTML repository explorer.
@@ -31233,10 +31233,12 @@ open.
   - [x] Add fail-closed documentation and CI-policy profiles selected from the exact pull-request base/head diff.
   - [x] Keep full main/release qualification and the ordinary cross-platform profile for every unknown or product-code change.
   - [x] Land the exact scoped workflow and documentation through reviewed exact-head CI, then verify exact-main CI uses full qualification.
+  - [x] Extend documentation and policy selection to exact default-branch push changes, preserving complete release/tag/manual and product qualification.
 - **Evidence:**
   - [x] The preceding documentation-only PR run `40467590036` launched the complete 17-job ordinary PR matrix, including native C++, Elixir, samples, wheel and platform work; this is retained as the motivating over-selection evidence rather than relabelled efficient.
   - [x] PR #154 exact-head run `40469396361` selected only `Documentation and presentation integrity` plus `CI change-scope policy`; both passed, alongside the independent GitGuardian check.
   - [x] The latest exact-main commit `8f93802adf5ce77a9b3600e28a002b940239ce1e` ran the complete 26-job qualification matrix in run `40494175198`; all 26 jobs passed. The earlier exact-main run `40469746346` also selected the full matrix but was correctly cancelled when PR #155 advanced `main`, so it is not relabelled green.
+  - [ ] Verify default-branch push selection, unknown-change refusals, exact push endpoint comparison and release/tag/manual controls with the focused CI-policy suite. Eight focused CI-policy tests pass, including exact endpoint selection, missing/failed/timed-out/invalid-UTF-8 comparisons and full product/release/tag/manual controls. Running the actual selector over conference documentation commits `0ef44bcd7` → `2d37d577f` selects only documentation with `freebsd_acl=false`. Record the resulting forge push profile after publication; do not wait for unrelated product CI, as explicitly directed for conference publication.
 
 ### [x] RELEASE-DECK-001 — Publish the Literate AI 1.3.1 release briefing
 

@@ -56,17 +56,23 @@ def _scope(path: str) -> str | None:
     return None
 
 
-def _changed_paths(base_sha: str, head_sha: str) -> tuple[str, ...] | None:
-    """Return exact PR paths, or ``None`` so selection fails closed to normal CI."""
+def _changed_paths(
+    base_sha: str, head_sha: str, *, push: bool = False
+) -> tuple[str, ...] | None:
+    """Compare PR merge-base paths or exact push endpoints; fail closed on error."""
 
     if not base_sha or not head_sha:
         return None
-    completed = subprocess.run(
-        ("git", "diff", "--name-only", "-z", f"{base_sha}...{head_sha}"),
-        check=False,
-        capture_output=True,
-        timeout=30,
-    )
+    revisions = (base_sha, head_sha) if push else (f"{base_sha}...{head_sha}",)
+    try:
+        completed = subprocess.run(
+            ("git", "diff", "--name-only", "-z", *revisions),
+            check=False,
+            capture_output=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
     if completed.returncode != 0:
         return None
     try:
@@ -77,6 +83,19 @@ def _changed_paths(base_sha: str, head_sha: str) -> tuple[str, ...] | None:
         return None
 
 
+def _scoped_main_push(
+    event: str, base_ref: str, changed_paths: tuple[str, ...] | None
+) -> bool:
+    return (
+        event == "push"
+        and base_ref == "refs/heads/main"
+        and bool(changed_paths)
+        and all(
+            _scope(path) in {"documentation", "ci-policy"} for path in changed_paths
+        )
+    )
+
+
 def select_matrix(
     event: str, base_ref: str, changed_paths: tuple[str, ...] | None = None
 ) -> dict:
@@ -84,6 +103,9 @@ def select_matrix(
         (Path(__file__).resolve().parents[1] / ".github/ci-matrix.json").read_text()
     )
     ordinary_pr = event == "pull_request" and not base_ref.startswith("release/")
+    if _scoped_main_push(event, base_ref, changed_paths):
+        scopes = {_scope(path) for path in changed_paths}
+        return {"include": [row for row in rows if row.get("scoped") in scopes]}
     if not ordinary_pr:
         return {"include": [row for row in rows if "scoped" not in row]}
     if changed_paths:
@@ -109,6 +131,8 @@ def select_freebsd_acl(
     """Run the privileged ACL probe only where it can qualify the change."""
 
     ordinary_pr = event == "pull_request" and not base_ref.startswith("release/")
+    if _scoped_main_push(event, base_ref, changed_paths):
+        return any(path in _FREEBSD_ACL_FILES for path in changed_paths)
     if not ordinary_pr:
         return True
     if not changed_paths:
@@ -120,9 +144,13 @@ if __name__ == "__main__":
     event = os.environ["CI_EVENT"]
     base_ref = os.environ.get("CI_BASE_REF", "")
     paths = None
-    if event == "pull_request" and not base_ref.startswith("release/"):
+    if (event == "pull_request" and not base_ref.startswith("release/")) or (
+        event == "push" and base_ref == "refs/heads/main"
+    ):
         paths = _changed_paths(
-            os.environ.get("CI_BASE_SHA", ""), os.environ.get("CI_HEAD_SHA", "")
+            os.environ.get("CI_BASE_SHA", ""),
+            os.environ.get("CI_HEAD_SHA", ""),
+            push=event == "push",
         )
     matrix = select_matrix(event, base_ref, paths)
     print("matrix=" + json.dumps(matrix, separators=(",", ":")))

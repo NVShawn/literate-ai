@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Apply documentation-only CI selection to exact default-branch pushes as well as
+  pull requests. Keep full qualification for product changes, unknown diffs, manual
+  runs, release branches and tags; documentation publication remains independent.
+
 - Publish a browsable conference documentation website with the HTML deck, approved
   onboarding film and captions, truthful interactive lab material, a two-hour presenter
   guide, search and a downloadable offline attendee kit. Deploy the website independently
