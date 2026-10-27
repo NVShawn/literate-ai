@@ -8,12 +8,28 @@
   color-keyed surrounding-harness panel. Canonical progressive lab conversion remains
   in progress; these documentation checks are not lifecycle admission.
 
+- Restore proportional PR feedback for Elixir/Mix: ordinary changes retain one
+  Ubuntu native smoke cell, Elixir-scoped changes run all six OS/version cells, and
+  main and release qualification remain exhaustive. Treat `PROJECT.md` and
+  `CONTRIBUTING.md` as documentation-only inputs so prose changes do not rebuild the
+  product matrix.
 - Add a version-aware current-feature map, synchronize the main documentation entry
   points with the 1.4.0 development line and separate 1.3.1 patch program, and add a
-  reproducible conference evolution deck.
+  reproducible conference evolution deck. Its primary artifact is now a self-contained,
+  offline HTML5 presentation with keyboard, touch, notes, fullscreen, deep-link, reduced
+  motion, and print support; PowerPoint remains an editable compatibility export.
 - Add six progressive, cheeky, free-standing visual labs that expose their Component
   specifications and interactive DAGs while spanning math, physics, audio, music, 3D,
   and video.
+- Preflight the selected FreeBSD POSIX ACL backend inside the authorized retained
+  workspace before input capture. Apply, read back and exactly restore a real
+  named-user access/default ACL probe, remove its private directory, and report an
+  actionable POSIX.1e mount-option diagnostic when the filesystem refuses ACLs.
+- Preserve fail-closed retained-root verification while reporting the exact
+  missing, redirected or identity-replaced ancestor, lineage depth and
+  expected/current filesystem identities. Add deterministic concurrent ancestor
+  replacement coverage so a byte-identical replacement remains a refusal with
+  actionable evidence.
 
 - Always load an existing release policy during contribution sweeps, including
   when callers supply both version and current milestone explicitly, so those

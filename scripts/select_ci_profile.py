@@ -7,7 +7,9 @@ import os
 import subprocess
 from pathlib import Path
 
-_DOCUMENTATION_FILES = frozenset({"CHANGELOG.md", "README.md"})
+_DOCUMENTATION_FILES = frozenset(
+    {"CHANGELOG.md", "CONTRIBUTING.md", "PROJECT.md", "README.md"}
+)
 _DOCUMENTATION_PREFIXES = ("docs/",)
 _CI_POLICY_FILES = frozenset(
     {
@@ -17,6 +19,31 @@ _CI_POLICY_FILES = frozenset(
         "tests/critical/test_ci_action_pins.py",
     }
 )
+_FREEBSD_ACL_FILES = frozenset(
+    {
+        ".github/workflows/ci.yml",
+        "src/literate_ai/adapters/retained_posix_acl.py",
+        "src/literate_ai/adapters/retained_project_execution.py",
+        "tests/critical/test_ci_action_pins.py",
+        "tests/critical/test_retained_posix_acl.py",
+        "tests/critical/test_retained_project_execution.py",
+    }
+)
+_ELIXIR_PREFIXES = (
+    "flavors/build-mix/",
+    "flavors/lang-elixir/",
+    "scripts/stage_elixir_",
+    "skills/specification-to-source/elixir-portable-application/",
+    "skills/specification-to-source/mix-build-system/",
+    "src/literate_ai/adapters/builders/elixir.py",
+    "src/literate_ai/adapters/builders/hex.py",
+    "src/literate_ai/adapters/builders/mix",
+    "src/literate_ai/adapters/lifecycle/standard_mix.py",
+    "src/literate_ai/adapters/qualification_mix.py",
+    "src/literate_ai/contracts/elixir_libraries.py",
+    "src/literate_ai/contracts/mix_projects.py",
+    "src/literate_ai/source_to_specification/builtin_skills/language-elixir/",
+)
 
 
 def _scope(path: str) -> str | None:
@@ -24,6 +51,8 @@ def _scope(path: str) -> str | None:
         return "documentation"
     if path in _CI_POLICY_FILES:
         return "ci-policy"
+    if path.startswith(_ELIXIR_PREFIXES) or "test_elixir" in path:
+        return "elixir"
     return None
 
 
@@ -60,8 +89,31 @@ def select_matrix(
     if changed_paths:
         scopes = {_scope(path) for path in changed_paths}
         if None not in scopes:
+            if "elixir" in scopes:
+                return {
+                    "include": [
+                        row
+                        for row in rows
+                        if row.get("pr")
+                        or row["task"] == "elixir-native"
+                        or row.get("scoped") in scopes
+                    ]
+                }
             return {"include": [row for row in rows if row.get("scoped") in scopes]}
     return {"include": [row for row in rows if row["pr"]]}
+
+
+def select_freebsd_acl(
+    event: str, base_ref: str, changed_paths: tuple[str, ...] | None = None
+) -> bool:
+    """Run the privileged ACL probe only where it can qualify the change."""
+
+    ordinary_pr = event == "pull_request" and not base_ref.startswith("release/")
+    if not ordinary_pr:
+        return True
+    if not changed_paths:
+        return True
+    return any(path in _FREEBSD_ACL_FILES for path in changed_paths)
 
 
 if __name__ == "__main__":
@@ -74,3 +126,4 @@ if __name__ == "__main__":
         )
     matrix = select_matrix(event, base_ref, paths)
     print("matrix=" + json.dumps(matrix, separators=(",", ":")))
+    print("freebsd_acl=" + str(select_freebsd_acl(event, base_ref, paths)).lower())

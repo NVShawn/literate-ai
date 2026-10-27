@@ -11,8 +11,11 @@ demonstration. Never imply that unchecked roadmap work is shipped.
 
 Use the maintained manager deck's charcoal, cream, orange, blue, and NVIDIA-green
 language. Prefer one diagram or visual field per slide, generous negative space, short
-headlines, and native editable shapes. Lab screenshots may appear once each. Every
-slide carries speaker notes and a small source pointer.
+headlines, and browser-native HTML/CSS composition. Lab screenshots may appear once
+each in the narrative (the cathedral also returns as the full argument on slide 12).
+Every slide carries speaker notes and a small source pointer. The primary artifact is
+one offline HTML file with keyboard, touch, URL, fullscreen, notes, reduced-motion,
+accessibility, and print behavior; PowerPoint is a compatibility export.
 
 ## Slide map
 
@@ -27,6 +30,8 @@ slide carries speaker notes and a small source pointer.
 9. Failure custody and why model-produced tests are insufficient.
 10. HTML observability surface.
 11. Labs as a progressive curriculum.
-12. Component cathedral: artistic composition across media.
+12. Component cathedral: artistic composition across media, with the explicit reminder
+    that yes, it has a pipe organ and no, finance did not ask for it.
 13. Honest release posture and open boundaries.
-14. Close: readable systems can be rigorous and strange.
+14. Close: readable systems can be rigorous, renewable, and fun; the grumpy counter
+    has opinions.

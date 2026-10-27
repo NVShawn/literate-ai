@@ -4749,7 +4749,7 @@ an independent agent review against the 1.2 branch:
 | [#39](https://github.com/jordanhubbard/literate-ai/pull/39) — SemVer prerelease planning and GitHub status | `4c858dc8` | RELEASE-INVARIANTS-001 | **Included** with review fixes: the plan test declares the release line, and a SemVer draft with no PEP 440 form refuses wheel naming as `release.package_metadata_invalid` instead of a traceback. |
 | [#41](https://github.com/jordanhubbard/literate-ai/pull/41) — Retained Cargo selected-suite accounting | `61fc2c28` | RETAINED-READMISSION-001 | **Included**; its test imports the shared retained-receipt fixtures instead of another test module. |
 | [#42](https://github.com/jordanhubbard/literate-ai/pull/42) — setup-uv 10.2.0 | `9d480956` | AUD-CI-001 | **Included**; the pinned commit is the upstream `v10.2.0` tag. Supersedes archived #508. |
-| [#45](https://github.com/jordanhubbard/literate-ai/pull/45) — Elixir Mix builds, library graphs, and native qualification | `d2284009` | ELIXIR-002 | **Included in 1.2** by merge commit (contributor history preserved), after independent review. Conflicts resolved toward 1.2: `ArtifactBuildGraph` carries both `assembly_dependencies` and the optional `driver_composition` (single-driver wire identities unchanged); mixed-driver composition is applied in `assemble_standard_project_artifacts` only, while the release graph still requires one driver; Mix plan finalization goes through the 1.2 `StandardPlanFinalizationInputs` path as a local-only `mix` dependency-resolution mode with an explicit Mix builder/toolchain binding (remote action documents still accept only `none`/`npm`/`python`, so remote Mix builds fail closed); the 1.2 directory-export and local-tree member order are kept; tests are re-homed under `tests/critical`, `tests/smoke` and `tests/conformance` with shared helpers in `tests/support`. All six `elixir-native` CI cells run on every pull request; public retained Mix importer admission remains open. Review follow-up: locked Hex acquisition from exact BOM pins, verified dependency re-extraction, contract-bound Mix finalization binding and explicit local-only Mix builds. |
+| [#45](https://github.com/jordanhubbard/literate-ai/pull/45) — Elixir Mix builds, library graphs, and native qualification | `d2284009` | ELIXIR-002 | **Included in 1.2** by merge commit (contributor history preserved), after independent review. Conflicts resolved toward 1.2: `ArtifactBuildGraph` carries both `assembly_dependencies` and the optional `driver_composition` (single-driver wire identities unchanged); mixed-driver composition is applied in `assemble_standard_project_artifacts` only, while the release graph still requires one driver; Mix plan finalization goes through the 1.2 `StandardPlanFinalizationInputs` path as a local-only `mix` dependency-resolution mode with an explicit Mix builder/toolchain binding (remote action documents still accept only `none`/`npm`/`python`, so remote Mix builds fail closed); the 1.2 directory-export and local-tree member order are kept; tests are re-homed under `tests/critical`, `tests/smoke` and `tests/conformance` with shared helpers in `tests/support`. Ordinary PRs retain one Ubuntu native Elixir smoke cell; Elixir-scoped changes, release branches, and main run all six `elixir-native` cells. Public retained Mix importer admission remains open. Review follow-up: locked Hex acquisition from exact BOM pins, verified dependency re-extraction, contract-bound Mix finalization binding and explicit local-only Mix builds. |
 
 The table below retains the earlier source-repository snapshot, including historical
 CI observations; it is not a current landing queue. The full 1.2 program remains
@@ -30714,9 +30714,27 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Conclusion:** Probe the actual selected ACL backend and workspace with reversible named-user/default grants; keep worker mount policy and account custody unchanged.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Run bounded capability preflight before capture and emit an actionable unsupported-filesystem diagnostic.
+  - [x] Run bounded capability preflight before capture and emit an actionable unsupported-filesystem diagnostic.
 - **Evidence:**
   - [ ] Real disabled/enabled UFS probes establish early refusal, exact cleanup and unchanged unsupported-brand refusals.
+
+**Current direction:** Before retained input capture, create one private probe directory
+inside the already authorized allocation prefix, hold it by descriptor, apply and read
+back a real named-user access plus default POSIX ACL, restore the original ACLs, and
+remove the empty directory. Translate native unsupported-filesystem refusal into an
+actionable POSIX.1e mount-option diagnostic while retaining all existing brand, account,
+path, descriptor and cleanup guards. This preflight does not change worker mounts.
+
+**Controller result:** The ACL and retained-execution groups pass 33 tests, ten
+declared platform skips and 37 subtests. They prove the preflight precedes input
+capture, projects both named-user access and default ACL entries, reads current state,
+restores custody, removes its probe after success, translates native
+`EOPNOTSUPP` into the actionable filesystem diagnostic, and removes the probe after an
+open failure. Static lint and formatting pass. Actual disabled/enabled FreeBSD UFS
+probes remain required; no configured aligned worker currently supplies that platform,
+so a SHA-pinned FreeBSD 14.3 VM cell now provisions separate UFS mounts without and
+with POSIX.1e ACLs and runs those two native acceptance cases. Its exact-head result
+remains pending.
 
 ### [x] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
 
@@ -31118,10 +31136,27 @@ The first failed directory, source checkout and installed wheel stay retained.
 - **Conclusion:** The first exact 1.3.0 tiered qualification produced one changed-ancestor refusal, while repeated isolated execution, the checkpoint repair pass, the required 2,267-case reset/full rerun and exact-main CI all passed. A one-off green rerun does not explain or close the concurrency risk.
 - **Depends on:** Retained root ancestor verification and parallel package qualification
 - **Implementation:**
-  - [ ] Add deterministic concurrency coverage that reproduces the fixture-lifecycle race, or add stronger diagnostics that distinguish legitimate concurrent retirement from an invalid root replacement without weakening the refusal.
+  - [x] Add deterministic concurrent ancestor-replacement coverage and report the exact changed lineage depth, name, reason, and expected/current filesystem identities without weakening the refusal.
 - **Evidence:**
-  - [ ] Exercise the exact parallel retained-package path repeatedly with the new coverage or diagnostics and retain the original refusal plus current passing controls.
+  - [x] Exercise the exact parallel retained-package path repeatedly with the new coverage or diagnostics and retain the original refusal plus current passing controls.
   - [ ] Pass focused mutation/refusal checks, full parallel regression, exact installed wheel and exact-head CI with unchanged production guards.
+
+**Current direction:** Extend the existing descriptor-lineage guard rather than changing
+retained-package cleanup or accepting a replacement. A synchronized test will replace
+an intermediate test-owned ancestor with an identical tree between descriptor capture
+and transaction completion. The transaction must still refuse, and its message must
+identify whether the observed ancestor was missing, redirected or replaced plus the
+lineage position and both identities when available. This is diagnostic hardening, not
+a relaxation of root currentness.
+
+**Focused result:** The descriptor-walk group passes 14 tests plus seven subtests,
+including synchronized byte-identical replacement of an intermediate ancestor and
+separate missing, redirected and identity-replaced diagnostics. The original
+retained-package case passes three consecutive exact invocations under the repository's
+parallel test configuration, and its complete file passes nine tests plus two subtests.
+The post-format combined group passes 15 tests plus seven subtests. No retained-root
+comparison, production deadline or package-cleanup behavior is relaxed. Full parallel,
+installed-wheel and exact-head CI gates remain open.
 
 ### [x] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
 
@@ -31409,3 +31444,23 @@ input, 239 rendered arithmetic dots, eight exact source/context records, graph r
 activation, six shared shells and no page errors or network fetches. The canvas is
 positioned independently of its backing-store size to prevent intrinsic sizing
 feedback. Canonical curriculum and generated lifecycle admission remain open.
+
+### [ ] RICH-HTML5-PRESENTATIONS-001 — Rich HTML5 presentation authoring and delivery
+
+- **Priority:** P0
+- **Owner:** presentation authoring, browser verification, and release collateral
+- **Direction:** Deliver the current conference deck now as a self-contained browser-native HTML5 presentation, while treating reusable Rich HTML5 presentation authoring as a 1.4 feature alongside PowerPoint and Google Slides.
+- **Conclusion:** Make the checked-in HTML deck the primary conference artifact now: offline, accessible, keyboard/touch navigable, speaker-note capable, printable, and independently browser-verified. Keep the reusable authoring skill open for 1.4 until its routing, component contracts, publication behavior, and cross-browser acceptance are generalized beyond this deck.
+- **Depends on:** DOCS-LABS-001 conference narrative and factual source ledger; current presentation authoring guidance; browser verification
+- **Implementation:**
+  - [x] Build and check in a deterministic single-file HTML5 conference deck from repository-owned content and assets; make it the primary local artifact and retain PowerPoint only as an editable compatibility export.
+  - [x] Stage the exact accepted HTML file as the 1.3.1 conference release asset and remove the superseded PowerPoint asset only after fresh-download verification.
+  - [ ] Generalize the proven deck architecture into a Rich HTML5 presentation skill for 1.4 and integrate it alongside PowerPoint and Google Slides.
+- **Evidence:**
+  - [x] Fourteen slides and notes, four embedded-only image uses, restrictive offline policy, stable controls, and print behavior pass deterministic structural checks. Real Chrome passes desktop and portrait-mobile layout, keyboard/click navigation, notes, URL state, external-request, console-failure, and viewport-overflow checks; all fourteen desktop slides pass contact-sheet review.
+  - [x] Draft release asset `literate-ai-1.3.1-conference-deck.html` (asset ID
+        `682314847`) fresh-downloads as 1,353,936 bytes with SHA-256
+        `88d552df6d9829a1ab059e393436ee3468f3f2ccb567ce08af0cd6505ac58ca5`;
+        the draft now contains only that HTML asset after removal of the superseded
+        PowerPoint asset.
+  - [ ] Close this roadmap item only after the reusable 1.4 skill, routing, publication contract, and cross-browser acceptance are independently qualified.

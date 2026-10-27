@@ -35,6 +35,8 @@ class CiActionPinTests(unittest.TestCase):
             "main",
             (
                 "README.md",
+                "CONTRIBUTING.md",
+                "PROJECT.md",
                 "docs/user/html-repository-explorer.md",
                 "docs/presentations/release/deck.pptx",
             ),
@@ -56,6 +58,19 @@ class CiActionPinTests(unittest.TestCase):
             ["documentation", "ci-policy"],
         )
 
+        elixir = selector.select_matrix(
+            "pull_request",
+            "main",
+            (
+                "flavors/build-mix/flavor.md",
+                "tests/conformance/test_elixir_mix_qualification.py",
+            ),
+        )["include"]
+        self.assertEqual(
+            len([row for row in elixir if row["task"] == "elixir-native"]), 6
+        )
+        self.assertIn("conformance", {row["task"] for row in elixir})
+
         for changed_paths in ((), ("src/literate_ai/cli/render.py",)):
             with self.subTest(changed_paths=changed_paths):
                 selected = selector.select_matrix(
@@ -70,6 +85,29 @@ class CiActionPinTests(unittest.TestCase):
         self.assertTrue(full)
         self.assertNotIn("scoped", {key for row in full for key in row})
 
+        self.assertFalse(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("README.md", "docs/user/guide.md")
+            )
+        )
+        self.assertFalse(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("src/literate_ai/cli/render.py",)
+            )
+        )
+        self.assertTrue(
+            selector.select_freebsd_acl(
+                "pull_request",
+                "main",
+                ("src/literate_ai/adapters/retained_posix_acl.py",),
+            )
+        )
+        self.assertTrue(selector.select_freebsd_acl("pull_request", "main", None))
+        self.assertTrue(
+            selector.select_freebsd_acl("pull_request", "release/1.3.x", ("README.md",))
+        )
+        self.assertTrue(selector.select_freebsd_acl("push", "", ("README.md",)))
+
     def test_workflow_runs_only_the_checks_owned_by_each_scoped_profile(self) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
         profile = workflow["jobs"]["profile"]["steps"][-1]
@@ -81,6 +119,9 @@ class CiActionPinTests(unittest.TestCase):
             profile["env"]["CI_HEAD_SHA"],
             "${{ github.event.pull_request.head.sha }}",
         )
+        freebsd = workflow["jobs"]["freebsd-posix-acl"]
+        self.assertEqual(freebsd["needs"], "profile")
+        self.assertEqual(freebsd["if"], "needs.profile.outputs.freebsd_acl == 'true'")
         steps = workflow["jobs"]["checks"]["steps"]
         documentation_steps = [
             step for step in steps if step.get("if") == "matrix.task == 'documentation'"
@@ -197,17 +238,19 @@ class CiActionPinTests(unittest.TestCase):
                 "--build-from-source" if row["otp_major"] == "29" else "",
             )
         selector = self.selector()
-        for event, base in (
-            ("pull_request", "main"),
-            ("pull_request", "release/1.2"),
-            ("push", ""),
-        ):
+        selected = selector.select_matrix("pull_request", "main")["include"]
+        selected_elixir = [row for row in selected if row["task"] == "elixir-native"]
+        self.assertEqual(len(selected_elixir), 1)
+        self.assertEqual(selected_elixir[0]["os"], "ubuntu-24.04")
+        self.assertEqual(selected_elixir[0]["elixir"], "1.18.0")
+
+        for event, base in (("pull_request", "release/1.2"), ("push", "")):
             with self.subTest(event=event, base=base):
                 selected = selector.select_matrix(event, base)["include"]
                 self.assertEqual(
                     [row for row in selected if row["task"] == "elixir-native"],
                     elixir_rows,
-                    "every native Elixir cell runs on every pull request",
+                    "release qualification runs every native Elixir cell",
                 )
         self.assertEqual(native["env"]["LITERATE_AI_ELIXIR_MIX_QUALIFICATION"], "1")
         self.assertEqual(native["env"]["LITERATE_AI_ELIXIR_BUILD_SYSTEMS"], "1")

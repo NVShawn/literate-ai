@@ -26,6 +26,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
+      freebsd_acl: ${{ steps.select.outputs.freebsd_acl }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -41,8 +42,47 @@ jobs:
 
   # Documentation-only PRs receive documentation/package-integrity feedback. Changes
   # to this classifier receive its focused policy test. Any unrecognized product path
-  # fails closed to the ordinary cross-platform PR matrix. Full qualification below
+  # fails closed to the ordinary cross-platform PR matrix, which includes one Ubuntu
+  # Elixir smoke cell. Elixir-scoped changes add all six native cells. Full qualification
   # remains mandatory for main/release pushes and release-branch PRs.
+
+  freebsd-posix-acl:
+    needs: profile
+    if: needs.profile.outputs.freebsd_acl == 'true'
+    name: FreeBSD POSIX.1e ACL preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Exercise disabled and enabled UFS ACL backends
+        uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
+        with:
+          release: "14.3"
+          copyback: false
+          prepare: pkg install -y python311
+          run: |
+            set -eu
+            disabled_device="$(mdconfig -a -t swap -s 64m)"
+            enabled_device="$(mdconfig -a -t swap -s 64m)"
+            disabled_root=/tmp/litai-acl-disabled
+            enabled_root=/tmp/litai-acl-enabled
+            cleanup() {
+              umount "$enabled_root" 2>/dev/null || true
+              umount "$disabled_root" 2>/dev/null || true
+              mdconfig -d -u "${enabled_device#md}" 2>/dev/null || true
+              mdconfig -d -u "${disabled_device#md}" 2>/dev/null || true
+            }
+            trap cleanup EXIT INT TERM
+            newfs -U "/dev/$disabled_device"
+            newfs -U "/dev/$enabled_device"
+            mkdir -p "$disabled_root" "$enabled_root"
+            mount -t ufs "/dev/$disabled_device" "$disabled_root"
+            mount -t ufs -o acls "/dev/$enabled_device" "$enabled_root"
+            LITAI_FREEBSD_POSIX_ACL_DISABLED_ROOT="$disabled_root" \
+              LITAI_FREEBSD_POSIX_ACL_ENABLED_ROOT="$enabled_root" \
+              PYTHONPATH=src python3.11 -m unittest -v \
+                tests.critical.test_retained_posix_acl.FreeBsdPosixAclPreflightAcceptanceTests
+
   checks:
     needs: profile
     name: ${{ matrix.name }}

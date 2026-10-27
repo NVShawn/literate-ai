@@ -1,12 +1,15 @@
 """POSIX mask projection and actual descriptor custody on an enabled FreeBSD guest."""
 
+import errno
 import os
 import stat
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
+from literate_ai.adapters import retained_posix_acl as acl
 from literate_ai.adapters.retained_posix_acl import (
     DescriptorAclCustody,
     FreeBsdPosixAcl,
@@ -89,6 +92,119 @@ class PosixAclProjectionTests(unittest.TestCase):
             self.skipTest("native backend supported on this platform")
         with self.assertRaisesRegex(ValueError, "unsupported-platform"):
             FreeBsdPosixAcl()
+
+    def test_preflight_applies_reads_restores_and_removes_probe(self):
+        observed = {}
+
+        class Custody:
+            def __init__(self, backend, descriptor):
+                observed["backend"] = backend
+                observed["directory"] = stat.S_ISDIR(os.fstat(descriptor).st_mode)
+                self.original = {2: BASE, 3: BASE}
+                self.closed = False
+
+            def replace(self, access, default):
+                observed["access"] = access
+                observed["default"] = default
+
+            def require_current(self):
+                observed["current"] = True
+
+            def restore(self):
+                observed["restored"] = True
+                self.closed = True
+
+        backend = object()
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(acl, "FreeBsdPosixAcl", return_value=backend),
+            patch.object(acl, "DescriptorAclCustody", Custody),
+        ):
+            parent = Path(directory)
+            acl.preflight_freebsd_posix_acl(parent, 2001)
+            self.assertEqual(list(parent.iterdir()), [])
+        self.assertIs(observed["backend"], backend)
+        self.assertTrue(observed["directory"])
+        self.assertEqual(entries(observed["access"])["user", "2001"], "--x")
+        self.assertEqual(entries(observed["default"])["user", "2001"], "---")
+        self.assertTrue(observed["current"])
+        self.assertTrue(observed["restored"])
+
+    def test_preflight_builds_temporary_default_from_access_when_absent(self):
+        observed = {}
+
+        class Custody:
+            def __init__(self, _backend, _descriptor):
+                self.original = {2: BASE, 3: b""}
+                self.closed = False
+
+            def replace(self, _access, default):
+                observed["default"] = default
+
+            def require_current(self):
+                pass
+
+            def restore(self):
+                self.closed = True
+
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(acl, "FreeBsdPosixAcl", return_value=object()),
+            patch.object(acl, "DescriptorAclCustody", Custody),
+        ):
+            acl.preflight_freebsd_posix_acl(Path(directory), 2001)
+        self.assertEqual(entries(observed["default"])["user", "2001"], "---")
+
+    def test_preflight_names_unsupported_filesystem_and_removes_probe(self):
+        def unsupported(_backend, _descriptor):
+            raise OSError(errno.EOPNOTSUPP, "ACLs disabled")
+
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(acl, "FreeBsdPosixAcl", return_value=object()),
+            patch.object(acl, "DescriptorAclCustody", side_effect=unsupported),
+        ):
+            parent = Path(directory)
+            with self.assertRaisesRegex(
+                ValueError, "filesystem-unsupported: enable POSIX.1e ACLs"
+            ):
+                acl.preflight_freebsd_posix_acl(parent, 2001)
+            self.assertEqual(list(parent.iterdir()), [])
+
+    def test_preflight_open_failure_removes_probe(self):
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            patch.object(acl, "FreeBsdPosixAcl", return_value=object()),
+            patch.object(acl.os, "open", side_effect=PermissionError("denied")),
+        ):
+            parent = Path(directory)
+            with self.assertRaisesRegex(PermissionError, "denied"):
+                acl.preflight_freebsd_posix_acl(parent, 2001)
+            self.assertEqual(list(parent.iterdir()), [])
+
+
+@unittest.skipUnless(
+    sys.platform.startswith("freebsd")
+    and os.environ.get("LITAI_FREEBSD_POSIX_ACL_DISABLED_ROOT")
+    and os.environ.get("LITAI_FREEBSD_POSIX_ACL_ENABLED_ROOT"),
+    "requires explicit FreeBSD UFS ACL-disabled and ACL-enabled mounts",
+)
+class FreeBsdPosixAclPreflightAcceptanceTests(unittest.TestCase):
+    def assert_no_probe(self, root):
+        self.assertEqual(list(root.glob(".litai-acl-preflight-*")), [])
+
+    def test_disabled_ufs_refuses_before_capture_and_cleans_probe(self):
+        root = Path(os.environ["LITAI_FREEBSD_POSIX_ACL_DISABLED_ROOT"])
+        with self.assertRaisesRegex(
+            ValueError, "filesystem-unsupported: enable POSIX.1e ACLs"
+        ):
+            acl.preflight_freebsd_posix_acl(root, 2001)
+        self.assert_no_probe(root)
+
+    def test_enabled_ufs_applies_restores_and_cleans_probe(self):
+        root = Path(os.environ["LITAI_FREEBSD_POSIX_ACL_ENABLED_ROOT"])
+        acl.preflight_freebsd_posix_acl(root, 2001)
+        self.assert_no_probe(root)
 
 
 @unittest.skipUnless(

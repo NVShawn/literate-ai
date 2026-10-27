@@ -9,6 +9,7 @@ The same-user workspace detects input mutation; it is not an OS sandbox.
 from __future__ import annotations
 
 import hashlib
+import sys
 import tempfile
 from collections.abc import Callable
 from contextlib import contextmanager, nullcontext
@@ -22,6 +23,7 @@ from literate_ai.adapters.builders._process import BoundedProcessResult
 from literate_ai.adapters.lifecycle.standard_local import LocalComponentToolBinding
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.adapters.retained_allocation import RetainedAllocationOwner
+from literate_ai.adapters.retained_posix_acl import preflight_freebsd_posix_acl
 from literate_ai.adapters.retained_project_acceptance import (
     read_retained_acceptance_policy,
     verify_retained_acceptance_action,
@@ -70,6 +72,10 @@ from literate_ai.contracts.sbom import CycloneDxManagedGraph
 # distribution binding in the reviewed plan, rather than ambient runner options.
 _PROCESS_OUTPUT_BYTES = 4 * 1024 * 1024
 _TOTAL_OUTPUT_BYTES = 64 * 1024 * 1024
+
+
+def _requires_freebsd_acl_preflight() -> bool:
+    return sys.platform.startswith("freebsd")
 
 
 @dataclass(frozen=True, slots=True)
@@ -256,6 +262,10 @@ class RetainedProjectExecutionWorkspace:
         self._resolved_bom = None
         self._system_context = retained_system_context()
         require_safe_directory(parent)
+        if allocation_owner is not None and _requires_freebsd_acl_preflight():
+            preflight_freebsd_posix_acl(
+                parent, self.plan.profile.secondary_access.account.uid
+            )
         self.root = Path(tempfile.mkdtemp(prefix="retained-run-", dir=parent))
         try:
             self.inputs = capture_retained_project_inputs(
