@@ -29640,6 +29640,7 @@ rather than treating resumed partial coverage as release qualification.
 
 **GitHub issue:** [#86](https://github.com/jordanhubbard/literate-ai/issues/86).
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Retained input filesystem adapter
 - **Direction:** Reduce elapsed build orchestration without omitting source, hashing or currentness checks.
@@ -29970,6 +29971,7 @@ the guard or replace this failure with an empty dependency observation.
 ### [ ] RETAINED-WIN-CONTEXT-001 — Bind native Windows retained system context
 
 - **GitHub issue:** [#102](https://github.com/jordanhubbard/literate-ai/issues/102)
+- **Release target:** 1.3.1
 - **Owner:** Retained execution environment, dependency observation and native runtime custody
 - **Direction:** Supply explicitly bound native Windows system context and complete
   captured tool runtime while preserving caller-injection refusal and POSIX identities.
@@ -29980,7 +29982,7 @@ the guard or replace this failure with an empty dependency observation.
   source/context/runtime drift refuses; existing loader-policy assertions and
   finite observation deadlines remain intact. Renew full, installed and exact CI gates.
 
-### [ ] WINDOWS-PE-OBSERVE-001 — Bound native Windows PE dependency observation
+### [x] WINDOWS-PE-OBSERVE-001 — Bound native Windows PE dependency observation
 
 - **GitHub issue:** [#90](https://github.com/jordanhubbard/literate-ai/issues/90)
 - **Priority:** P0
@@ -29992,10 +29994,10 @@ the guard or replace this failure with an empty dependency observation.
 - **Implementation:**
   - [x] Inspect independent images in bounded concurrent frontiers; merge through the existing loader resolver in canonical queue order.
   - [x] Preserve content-bound fact caching and cancel/join outstanding bounded inspections on refusal.
-  - [ ] Run the real admitted-receiver case outside xdist contention in its own profiled Windows CI step; retain the unchanged 300-second bound on every production observation and fail the job on any omitted or failed isolated case.
+  - [x] Run the real admitted-receiver case outside xdist contention in its own profiled Windows CI step; retain the unchanged 300-second bound on every production observation and fail the job on any omitted or failed isolated case.
 - **Evidence:**
   - [x] Serial/parallel graph equivalence, real overlap, image substitution and inspector mutation refusals pass.
-  - [ ] Actual native Windows retained workspace and admitted receiver complete inside unchanged deadlines; full regression, exact installed wheel and CI pass.
+  - [x] Actual native Windows retained workspace and admitted receiver complete inside unchanged deadlines; full regression, exact installed wheel and CI pass.
 
 Native Windows source qualification of the context and concurrent PE observer
 passes 53 cases: 39 pass, 14 existing skips, no failures in 167.082 test seconds
@@ -30109,6 +30111,15 @@ Next: commit the fixture/evidence update, push the draft PR and require fresh
 exact-revision hosted CI. All larger SDK, runtime, source/ports catalogue and
 release-matrix gates remain open.
 
+PR #151 isolates the unchanged real admitted-receiver case from xdist contention
+while preserving its production 300-second observation bound and its existing
+1,800-second test budget. Exact merge `a4dd27c01b6cfc918a2a749a76b59871baa40e6b`
+is contained by exact `main` commit
+`3b606d42c93b04b3be354f78152a0b3ac11e3059`; CI run `40460869302` passes all
+26 jobs, including every Windows partition and exact installed-wheel gate. This
+completes issue #90 without weakening dependency closure, live receiver custody or
+failure propagation.
+
 ### [ ] NATIVE-TREE-WIRE-001 — Transport complete native package tree contracts without flattening
 
 - **GitHub issue:** [#93](https://github.com/jordanhubbard/literate-ai/issues/93)
@@ -30149,6 +30160,7 @@ to produce the same physical archive with distinct exact result-plan bindings.
 
 - **GitHub issue:** [#103](https://github.com/jordanhubbard/literate-ai/issues/103)
 
+- **Release target:** 1.3.1
 - **Priority:** P0
 - **Owner:** Shared retained execution test fixture and platform coverage
 - **Direction:** Repair actual hosted Windows failures without bypassing executable checks or PE runtime dependency observation.
@@ -30206,6 +30218,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 - **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Retained public runtime and native SDK acquisition
 - **Direction:** Execute original-source projects with their complete selected source-built SDK closure through the public retained CLI.
@@ -30340,6 +30353,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 **GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Native process-group termination fixture
 - **Direction:** Finish native qualification without confusing interpreter startup with failed signal delivery.
@@ -30372,6 +30386,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 **GitHub issue:** [#98](https://github.com/jordanhubbard/literate-ai/issues/98)
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Complete command LINK/PACKAGE integration fixture
 - **Direction:** Make native qualification reach its intended archive-format and custody assertions under a fresh valid test grant.
@@ -30691,6 +30706,7 @@ remain open in their owning items; this controller/sample proof does not close t
 
 **GitHub issue:** [#92](https://github.com/jordanhubbard/literate-ai/issues/92).
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Retained workspace grant admission
 - **Direction:** Reconcile open GitHub issue #92: detect unsupported execution filesystem ACLs before expensive capture.
@@ -30728,6 +30744,7 @@ remain open in their owning items; this controller/sample proof does not close t
 
 **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117).
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Installed retained SDK authorization
 - **Direction:** Reconcile open GitHub issue #117: repeated full distribution observation dominates installed FreeBSD preparation.
@@ -30833,6 +30850,7 @@ repair scope and makes no claim that the complete provided native gate passed.
 
 - **Owner:** framework CLI project command dispatch and MAC contract projection
 - **GitHub issue:** [#121](https://github.com/jordanhubbard/literate-ai/issues/121)
+- **Release target:** 1.3.1
 - **Direction:** Ordinary project commands must not initialize optional MAC schema parsers.
 - **Conclusion:** The native installed-wheel profile attributes 235.62 seconds to
   importing the MAC projector, including 228.89 seconds and 39 parser constructors
@@ -30858,6 +30876,7 @@ repair scope and makes no claim that the complete provided native gate passed.
 
 - **GitHub issue:** [#123](https://github.com/jordanhubbard/literate-ai/issues/123)
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Native Windows release gate
 - **Direction:** Retain existing wheel-smoke per-operation timing spans through the full native gate without dropping checks or widening execution bounds.
@@ -30880,6 +30899,7 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 
 **GitHub issue:** [#129](https://github.com/jordanhubbard/literate-ai/issues/129).
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** HTML verification and immutable catalog observation
 - **Direction:** Use retained native timing evidence to repair the repeated Windows full-gate timeout without changing execution bounds
@@ -30904,6 +30924,7 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 
 - **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117)
 
+- **Release target:** 1.3.1
 - **Priority:** P1
 - **Owner:** Standard installed-distribution, retained runtime and native dependency observers
 - **Direction:** Make the installed public retained SDK lifecycle complete within reviewed native bounds while preserving exact authority, loader and revocation checks.
@@ -31086,6 +31107,21 @@ The first failed directory, source checkout and installed wheel stay retained.
 
 **#129 qualified read-only catalog reuse:** Exact source `74417e1a` passes the full 2,265-case source suite (2,194 passed, 71 existing skips, zero failures), all installed-wheel assertions, 14 focused cases including actual in-operation mutations, and the forced lifecycle with 229 passing checks and no skips. The generated suite count is producer-bound; the declared conformance inventory and minimums are unchanged. Supported receipt update/check/require-current and all-gate verify pass on the metadata-only consolidated tree. The native Windows public lock check returns identical passing reports across both installations and restores its fixture; three-call medians are 35.172 seconds baseline and 28.187 candidate, with cache/order variation. Catalog captures fall from five to two; all ten input revalidations and four current authority-graph observations remain. See `verification/lock-check-catalog-qualification.json`. The next action is ordinary review CI and landing of this scoped improvement, then complete unchanged provided-worker native renewal before closing #129. No generator-diversity exemption, dependency, release, or native admission is claimed.
 
+### [ ] RETAINED-PACKAGE-CONCURRENCY-001 — Diagnose parallel retained-package ancestor replacement
+
+- **GitHub issue:** [#140](https://github.com/jordanhubbard/literate-ai/issues/140)
+- **Release target:** 1.3.1
+- **Priority:** P1
+- **Owner:** Retained package fixture lifecycle and parallel test isolation
+- **Direction:** Determine whether parallel fixture setup or cleanup can retire or replace a test-owned retained temporary ancestor between workspace execution and admission. Preserve fail-closed retained-root verification.
+- **Conclusion:** The first exact 1.3.0 tiered qualification produced one changed-ancestor refusal, while repeated isolated execution, the checkpoint repair pass, the required 2,267-case reset/full rerun and exact-main CI all passed. A one-off green rerun does not explain or close the concurrency risk.
+- **Depends on:** Retained root ancestor verification and parallel package qualification
+- **Implementation:**
+  - [ ] Add deterministic concurrency coverage that reproduces the fixture-lifecycle race, or add stronger diagnostics that distinguish legitimate concurrent retirement from an invalid root replacement without weakening the refusal.
+- **Evidence:**
+  - [ ] Exercise the exact parallel retained-package path repeatedly with the new coverage or diagnostics and retain the original refusal plus current passing controls.
+  - [ ] Pass focused mutation/refusal checks, full parallel regression, exact installed wheel and exact-head CI with unchanged production guards.
+
 ### [x] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
 
 - **GitHub issue:** [#134](https://github.com/jordanhubbard/literate-ai/issues/134)
@@ -31146,6 +31182,51 @@ speedup/loss evidence remain open. Unknown dispatch custody now quarantines work
 slots/resources/claims and coalesced keys until matching trusted resolution; the
 barriers are per instance, with durable cross-controller worker-side custody still
 open.
+
+### [ ] DOCS-CI-SCOPE-001 — Document the HTML explorer and scope documentation CI
+
+- **Release target:** 1.3.1
+- **Priority:** P0
+- **Owner:** front-door documentation, HTML observability user guidance and CI feedback selection
+- **Direction:** Make the built-in HTML authority-graph explorer discoverable for the 1.3.1 symposium and prevent documentation-only changes from launching unrelated native product qualification.
+- **Conclusion:** Document the exact implemented explorer, provenance contract, command path, verification behavior and code-navigation boundary. Select documentation and presentation checks from exact pull-request paths; select a focused policy regression for the classifier itself; fail closed to the established cross-platform PR matrix for every unrecognized product path. Main, release branches and tags retain full qualification.
+- **Depends on:** RELEASE-019
+- **Implementation:**
+  - [x] Add a task-oriented user guide and stable README/documentation-index links for the built-in HTML repository explorer.
+  - [x] Distinguish graph-bound Markdown/JSON excerpts from the separate debug specification-to-source map and from unimplemented arbitrary code browsing.
+  - [x] Add fail-closed documentation and CI-policy profiles selected from the exact pull-request base/head diff.
+  - [x] Keep full main/release qualification and the ordinary cross-platform profile for every unknown or product-code change.
+  - [ ] Land the exact scoped workflow and documentation through reviewed exact-head CI, then verify exact-main CI uses full qualification.
+- **Evidence:**
+  - [x] The preceding documentation-only PR run `40467590036` launched the complete 17-job ordinary PR matrix, including native C++, Elixir, samples, wheel and platform work; this is retained as the motivating over-selection evidence rather than relabelled efficient.
+  - [ ] Exact-head selection runs only `Documentation and presentation integrity` plus `CI change-scope policy` for this mixed documentation/classifier change, and both pass.
+  - [ ] Exact-main CI still runs the complete configured qualification matrix after landing.
+
+### [ ] RELEASE-DECK-001 — Publish the Literate AI 1.3.1 release briefing
+
+- **Release target:** 1.3.1
+- **Priority:** P0
+- **Owner:** release collateral and presentation publication
+- **Direction:** Publish an editable slide deck that explains the release scope, Literate AI core concepts, lessons from the first release through 1.3.1, current evidence, ETA, and the compliant path to publication.
+- **Conclusion:** Treat the requested briefing as release scope rather than an ignored local build artifact. Keep its readiness claims synchronized with the explicit roadmap manifest, link it from stable repository documentation, and retain structural, layout, font, visual and re-import evidence for its exact bytes.
+- **Depends on:** RELEASE-019
+- **Implementation:**
+  - [x] Create the 12-slide editable briefing with source-backed speaker notes and the approved Literate AI visual language.
+  - [x] Update the readiness slides after reconciling the full 1.3.1 goal and milestone scope.
+  - [ ] Publish the exact validated deck, specification and receipt at stable repository links.
+- **Evidence:**
+  - [x] Structural package, layout geometry, Aptos font-policy and first-party re-import checks pass with zero findings; complete montage review finds no clipping, overlap or unreadable content.
+  - [ ] Exact-head CI and post-merge link/hash verification pass for the published presentation package.
+
+The synchronized 27 October deck now reports exact-main run `40460869302` as
+26/26 green and WINDOWS-PE-OBSERVE-001 as the first completed goal, leaving 17 of
+18 release goals open. It also documents the built-in HTML repository explorer and
+its code-navigation boundary. Its exact PowerPoint SHA-256 is
+`1f6293c799ca7d85c62eb2e54127f91f6c71db7027755f2c851e399d566bea07`
+(161,574 bytes, 12 slides). Structural package, layout, Aptos font-policy and
+first-party re-import checks pass with zero findings; every rendered slide and the
+complete montage pass visual review. Repository publication and exact-head/main
+link verification remain open.
 
 ### [ ] COURSE-004 — Animated onboarding conversations with auditioned neural voices
 
@@ -31238,7 +31319,8 @@ open.
   - [x] Record the reviewed lifecycle-driver identity after the release CLI policy
     correction; exact-head CI exposed the stale TCB pin after the complete 2,301-case
     source suite passed, so no failing run is relabeled green.
-  - [ ] Complete WINDOWS-PE-OBSERVE-001 after repairing the exact-main Windows dependency-observation failure without weakening live receiver or dependency-closure checks.
+  - [x] Reconcile every open GitHub milestone 1.3.1 issue into the release-goal manifest and an explicit roadmap target; keep every incomplete item blocking.
+  - [x] Complete WINDOWS-PE-OBSERVE-001 after repairing the exact-main Windows dependency-observation failure without weakening live receiver or dependency-closure checks.
   - [ ] Move COURSE-004 and all replacement-onboarding production work to 1.3.1, then complete and publish the film before the patch release.
 - **Evidence:**
   - [x] Deterministic release-contribution tests reject undocumented, incomplete, and unapproved-deferred goals and accept only completed or explicitly approved future moves; 35 focused release, initialization, and CLI tests plus 33 subtests pass.
@@ -31246,11 +31328,15 @@ open.
   - [x] Focused CLI regressions prove explicit version and milestone arguments retain
     the policy goal manifest, absent-policy standalone sweeps remain available, and a
     malformed existing policy cannot be bypassed. Ten focused contribution tests plus
-    three subtests pass, and the real explicit `1.3.1` sweep reports all three open
-    roadmap goals from `docs/roadmap/release-goals.json`.
-  - [ ] The supported lifecycle-driver review passes against the recorded exact
+    three subtests pass. After milestone reconciliation, the real explicit `1.3.1`
+    sweep originally reported all 17 reconciled roadmap goals from
+    `docs/roadmap/release-goals.json`, with one complete and 16 open. The later
+    user-directed symposium documentation and CI-scope goal raises the current exact
+    manifest to 18 goals, one complete and 17 open, and keeps release readiness false.
+  - [x] The supported lifecycle-driver review passes against the recorded exact
     `src/literate_ai/cli/release.py` bytes, followed by exact-head and exact-main CI.
-  - [ ] A focused deadline regression and the exact post-merge Windows partition pass with dependency observations still bounded by the caller deadline.
+  - [x] The 1.3.1 manifest resolves all 18 declared roadmap headings and explicitly covers milestone issues #86, #90, #92, #95, #98, #102, #103, #117, #118, #121, #123, #129, and #140 plus the requested release briefing and symposium documentation/CI-scope goal. Issue #117 spans `SDK-OBSERVATION-COST-001` and `RETAINED-OBSERVATION-PERF-001`; issue #118 is the captured-loader scope of `RETAINED-SDK-PUBLIC-001`. Scope reconciliation inferred no completion; exact-main evidence later completed #90.
+  - [x] A focused deadline regression and the exact post-merge Windows partition pass with dependency observations still bounded by the caller deadline.
   - [ ] The complete replacement onboarding film passes voice, motion, factual, accessibility, media-integrity, and full-playback review gates.
   - [ ] The 1.3.1 release plan, qualification, publication, verification, and exact post-release synchronization gates pass with no incomplete release goals.
 
@@ -31258,6 +31344,8 @@ open.
 file, `src/literate_ai/cli/release.py`, and advanced the driver identity from
 `sha256:67e843f8c183463ab0fb0ba49f4083f42877873801293196f575d8dea5ac996a` to
 `sha256:81c7b3cd7f7a5bdbade5be8e591790fd8005ba14d7ba6a6bcc34ad73e3089189`.
-The refreshed documentation authority is current at
-`sha256:bb21b286f15ceee36ae2ebcebe71893578062c3fc57b3454f6eb737841590909`.
-Exact-head and exact-main CI remain required.
+The current documentation authority, including the synchronized release briefing,
+is `sha256:0a3e2414af9a1459656fa09821f7d152e4b2409c46c4b8a2c8d53a574ce7e774`.
+PR #153 exact-head run `40457678449` passes all 16 jobs. Its merge commit
+`3b606d42c93b04b3be354f78152a0b3ac11e3059` passes all 26 exact-main jobs in
+run `40460869302`, including the repaired isolated Windows receiver gate.

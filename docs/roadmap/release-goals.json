@@ -4,6 +4,21 @@
   "releases": {
     "1.3.1": [
       {"id": "COURSE-004"},
+      {"id": "INPUT-WALK-001"},
+      {"id": "RETAINED-ACL-PREFLIGHT-001"},
+      {"id": "NATIVE-SUPERVISOR-READY-001"},
+      {"id": "NATIVE-PACKAGE-BUDGET-001"},
+      {"id": "RETAINED-WIN-CONTEXT-001"},
+      {"id": "RETAINED-WIN-FIXTURE-001"},
+      {"id": "SDK-OBSERVATION-COST-001"},
+      {"id": "RETAINED-OBSERVATION-PERF-001"},
+      {"id": "RETAINED-SDK-PUBLIC-001"},
+      {"id": "CLI-IMPORT-001"},
+      {"id": "WIN-GATE-001"},
+      {"id": "HTML-VERIFY-COST-001"},
+      {"id": "RETAINED-PACKAGE-CONCURRENCY-001"},
+      {"id": "DOCS-CI-SCOPE-001"},
+      {"id": "RELEASE-DECK-001"},
       {"id": "RELEASE-019"},
       {"id": "WINDOWS-PE-OBSERVE-001"}
     ]

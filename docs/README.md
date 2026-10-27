@@ -18,6 +18,10 @@ For a presentation-length introduction, use the editable
 thesis, lifecycle, evidence model, source-promotion path, cost controls, and enterprise
 agent-system boundary for a technically sophisticated new audience.
 
+The [Literate AI 1.3.1 release briefing](presentations/literate-ai-1.3.1-release-briefing/README.md)
+summarizes the patch scope, core concepts, lessons from the first release onward,
+release-goal policy, current evidence, ETA, and publication path.
+
 For the current manager and engineering narrative, use the reproducible
 [manager and engineering overview package](presentations/literate-ai-manager-overview/README.md).
 Maintained presentations and documents are modeled inside the Component system; read
@@ -76,6 +80,7 @@ lists the per-project fields and their defaults.
 - [Caches, packages, and publication](user/caches-packages-publication.md)
 - [Source trust and build security](user/security.md)
 - [Configuration and CLI reference](user/configuration-and-cli.md)
+- [HTML repository explorer](user/html-repository-explorer.md)
 - [Samples and tutorials](user/samples.md)
 - [OVA, migration, and rollback](user/ova-and-migration.md)
 - [Troubleshooting](user/troubleshooting.md)
@@ -98,7 +103,7 @@ lists the per-project fields and their defaults.
 - [Source promotion and regenerative qualification](architecture/source-promotion.md)
 - [Literate AI and agent-ledger boundary](architecture/agent-ledger-boundary.md)
 - [Authority learning loop](architecture/authority-learning-loop.md)
-- [HTML observability boundary and contracts](architecture/html-observability.md)
+- [HTML repository explorer boundary and observability contracts](architecture/html-observability.md)
 - [Accepted 1.1 capability boundaries](decisions/0039-1.1-capability-boundaries.md)
 - [Proposed retained Cargo library bridge](decisions/0040-retained-cargo-library-bridge.md)
 - [Accepted action-DAG scheduling and shared verified caches](decisions/0044-action-dag-and-shared-cache.md)

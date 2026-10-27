@@ -897,6 +897,13 @@ The HTML gate checks only the optional `html_render_requests` array in
 `literate.project.json`; it skips when the array is absent or empty. Declare an
 artifact before rendering it, using your project's scope identifier:
 
+The `authority-graph/dag` surface is the built-in
+[HTML repository explorer](html-repository-explorer.md): an interactive view of the
+effective repository and catalog authority graph with filtering, keyboard navigation,
+pan/zoom, node focus, provenance, and identity-checked Markdown/JSON excerpts. It is not
+a general filesystem or source-code browser, and the separate debug spec-to-source map
+is not embedded in this HTML view.
+
 ```json
 {
   "html_render_requests": [
