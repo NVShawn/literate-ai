@@ -31169,7 +31169,11 @@ Its synthetic merge and review head have the same Git tree. All current producti
 source and the relevant package/input tests remain byte-identical; the wheel's
 repaired module hashes to current `aa3e5a2a3d10bc1ce82c91775c91ff2690fb40e0069a9f74cd654d59cf26bd93`.
 The bounded concurrency goal is complete; this development-wheel proof does not
-publish or qualify the future 1.3.1 distribution.
+publish or qualify the future 1.3.1 distribution. The original sporadic trigger is
+not attributed to a particular fixture or process. The completed scope supplies
+the deterministic replacement coverage and stronger diagnostics requested by #140;
+it does not assert a causal fix for the historical event. The issue remains open
+for maintainer disposition and still participates in the release contribution gate.
 
 ### [x] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
 

@@ -61,6 +61,7 @@
     "packaged_repaired_module_matches_current_source": true
   },
   "limits": [
+    "The original sporadic 1.3.0 refusal is not causally attributed to a particular fixture or process; completed concurrency scope is deterministic replacement coverage and stronger fail-closed diagnostics.",
     "This qualifies the bounded fixes on unchanged development source, not a prepared 1.3.1 wheel.",
     "No full native FreeBSD lifecycle or newly changed-source acceptance is inferred from the two ACL probes.",
     "The newly added negative regression ran locally; pending CI is not reported as passed.",
