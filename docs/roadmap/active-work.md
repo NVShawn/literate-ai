@@ -31453,8 +31453,12 @@ The initial selective backport omitted the separate one-line `77eaf1619` package
 declaration; the earlier `2704931a3` initialization change alone did not package it.
 The correction and scope record are pushed on `fix/p131-package-goals` at
 `37dd413b7`. Ten managed initialization cases pass, and a clean wheel contains the
-exact source manifest. The canonical isolated installed-wheel gate is running;
-archive membership alone is not an installed lifecycle pass. The native Windows
+exact source manifest. The canonical isolated installed-wheel gate now passes on
+that exact source, including actual installed create/adopt paths and a 1,239-member
+Standard binding. Its retained wheel is
+`sha256:f92c3e659d3eecb339c7da821c46b63dcdca250e33ea9e0cc4763d9bbdb28816`;
+`fix/p131-package-goals` also retains the scoped qualification record. This is an
+unprepared 1.3.0-versioned development wheel, not a published 1.3.1 artifact. The native Windows
 attempt for the known-bad `14dea5b83` package was explicitly stopped through its
 verified owned process tree, with checkout, logs and terminal failure retained.
 Fresh configured host lifecycle qualification continues on its frozen source.
