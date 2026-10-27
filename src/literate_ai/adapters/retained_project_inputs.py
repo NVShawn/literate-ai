@@ -81,6 +81,53 @@ class _DirectoryAccess:
             metadata.st_gid,
         )
 
+    @staticmethod
+    def _observed_identity(metadata):
+        return (
+            metadata.st_dev,
+            metadata.st_ino,
+            metadata.st_mode,
+            metadata.st_uid,
+            metadata.st_gid,
+        )
+
+    @staticmethod
+    def _root_change(*, reason, depth, name, expected, actual=None):
+        def encoded(value):
+            return "unavailable" if value is None else ":".join(map(str, value))
+
+        return RetainedProjectInputError(
+            "Retained root ancestor changed "
+            f"(reason={reason}; depth={depth}; name={name!r}; "
+            f"expected={encoded(expected)}; actual={encoded(actual)})"
+        )
+
+    def _require_root_identity(self, *, depth, name, expected, parent=None):
+        try:
+            current = os.stat(name, dir_fd=parent, follow_symlinks=False)
+        except FileNotFoundError as error:
+            raise self._root_change(
+                reason="missing", depth=depth, name=name, expected=expected
+            ) from error
+        try:
+            actual = self._identity(current)
+        except RetainedProjectInputError as error:
+            raise self._root_change(
+                reason="redirected",
+                depth=depth,
+                name=name,
+                expected=expected,
+                actual=self._observed_identity(current),
+            ) from error
+        if actual != expected:
+            raise self._root_change(
+                reason="identity",
+                depth=depth,
+                name=name,
+                expected=expected,
+                actual=actual,
+            )
+
     def _open_directory(self, parent, name, expected):
         descriptor = os.open(name, self._flags, dir_fd=parent)
         try:
@@ -93,12 +140,16 @@ class _DirectoryAccess:
 
     def _root_current(self):
         first = self._absolute[0]
-        if self._identity(os.stat(first[0], follow_symlinks=False)) != first[2]:
-            raise RetainedProjectInputError("Retained root ancestor changed")
-        for parent, child in zip(self._absolute, self._absolute[1:], strict=False):
-            current = os.stat(child[0], dir_fd=parent[1], follow_symlinks=False)
-            if self._identity(current) != child[2]:
-                raise RetainedProjectInputError("Retained root ancestor changed")
+        self._require_root_identity(depth=0, name=first[0], expected=first[2])
+        for depth, (parent, child) in enumerate(
+            zip(self._absolute, self._absolute[1:], strict=False), start=1
+        ):
+            self._require_root_identity(
+                depth=depth,
+                name=child[0],
+                expected=child[2],
+                parent=parent[1],
+            )
 
     def directory(self, parts):
         self._root_current()

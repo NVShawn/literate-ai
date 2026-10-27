@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from contextlib import contextmanager, nullcontext
 from pathlib import Path
@@ -219,6 +220,70 @@ class RetainedInputWalkTests(unittest.TestCase):
                 access.metadata(self.directory / "file-000.h")
                 self.directory.rename(self.base / "saved-last-directory")
                 self.directory.mkdir()
+
+    def test_root_diagnostics_distinguish_missing_redirected_and_replaced(self):
+        for reason in ("missing", "redirected", "identity"):
+            with self.subTest(reason=reason):
+                parent = self.base / f"diagnostic-{reason}"
+                root = parent / "source"
+                root.mkdir(parents=True)
+                member = root / "member"
+                member.write_bytes(b"current")
+                retired = parent / "retired"
+                with self.assertRaisesRegex(
+                    inputs.RetainedProjectInputError,
+                    rf"reason={reason}; depth=[0-9]+; name='source'; "
+                    r"expected=[0-9:]+; actual=(?:unavailable|[0-9:]+)",
+                ):
+                    with inputs._directory_access(root) as access:
+                        self.assertIsNotNone(access)
+                        access.metadata(member)
+                        root.rename(retired)
+                        if reason == "redirected":
+                            root.write_bytes(b"not a directory")
+                        elif reason == "identity":
+                            shutil.copytree(retired, root)
+
+    def test_concurrent_intermediate_ancestor_replacement_is_diagnostic(self):
+        ancestor = self.base / "concurrent-root"
+        root = ancestor / "source"
+        root.mkdir(parents=True)
+        member = root / "member"
+        member.write_bytes(b"current")
+        retired = self.base / "retired-concurrent-root"
+        replace = threading.Event()
+        replaced = threading.Event()
+        failures = []
+
+        def replace_ancestor():
+            try:
+                self.assertTrue(replace.wait(5))
+                ancestor.rename(retired)
+                shutil.copytree(retired, ancestor)
+            except BaseException as error:
+                failures.append(error)
+            finally:
+                replaced.set()
+
+        worker = threading.Thread(target=replace_ancestor)
+        worker.start()
+        try:
+            with self.assertRaisesRegex(
+                inputs.RetainedProjectInputError,
+                r"reason=identity; depth=[0-9]+; name='concurrent-root'; "
+                r"expected=[0-9:]+; actual=[0-9:]+",
+            ):
+                with inputs._directory_access(root) as access:
+                    self.assertIsNotNone(access)
+                    access.metadata(member)
+                    replace.set()
+                    self.assertTrue(replaced.wait(5))
+        finally:
+            replace.set()
+            worker.join(5)
+        self.assertFalse(worker.is_alive())
+        if failures:
+            raise failures[0]
 
     def test_cached_directory_handles_do_not_preserve_revoked_read_permissions(self):
         self.addCleanup(self.directory.chmod, 0o755)
