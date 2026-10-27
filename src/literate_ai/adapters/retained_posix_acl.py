@@ -8,9 +8,12 @@ turns deserialized configuration into authority.
 from __future__ import annotations
 
 import ctypes
+import errno
 import os
 import stat
 import sys
+import tempfile
+from pathlib import Path
 
 _ACCESS = 2
 _DEFAULT = 3
@@ -219,6 +222,43 @@ class DescriptorAclCustody:
     def __exit__(self, exc_type, exc, traceback):
         self.restore()
         return False
+
+
+def preflight_freebsd_posix_acl(parent: Path, uid: int) -> None:
+    """Prove reversible access/default ACL support before retained input capture."""
+
+    backend = FreeBsdPosixAcl()
+    path = Path(tempfile.mkdtemp(prefix=".litai-acl-preflight-", dir=parent))
+    descriptor = None
+    custody = None
+    try:
+        path.chmod(0o700)
+        descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            custody = DescriptorAclCustody(backend, descriptor)
+            default_base = custody.original[_DEFAULT] or custody.original[_ACCESS]
+            custody.replace(
+                project_secondary_acl(custody.original[_ACCESS], uid, "--x"),
+                project_secondary_acl(default_base, uid, "---"),
+            )
+            custody.require_current()
+            custody.restore()
+        except OSError as error:
+            if error.errno in {errno.ENOTSUP, errno.EOPNOTSUPP}:
+                raise ValueError(
+                    "retained.acl.filesystem-unsupported: enable POSIX.1e ACLs "
+                    "on the retained execution workspace filesystem"
+                ) from error
+            raise
+    finally:
+        if custody is not None and not custody.closed:
+            custody.restore()
+        if descriptor is not None:
+            os.close(descriptor)
+        try:
+            path.rmdir()
+        except OSError as error:
+            raise ValueError("retained.acl.preflight-cleanup-incomplete") from error
 
 
 def project_secondary_acl(original, uid, permissions):

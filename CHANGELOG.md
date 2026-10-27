@@ -8,6 +8,10 @@
 - Add six progressive, cheeky, free-standing visual labs that expose their Component
   specifications and interactive DAGs while spanning math, physics, audio, music, 3D,
   and video.
+- Preflight the selected FreeBSD POSIX ACL backend inside the authorized retained
+  workspace before input capture. Apply, read back and exactly restore a real
+  named-user access/default ACL probe, remove its private directory, and report an
+  actionable POSIX.1e mount-option diagnostic when the filesystem refuses ACLs.
 
 - Always load an existing release policy during contribution sweeps, including
   when callers supply both version and current milestone explicitly, so those

@@ -319,7 +319,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         )
         self.current = self.plan
 
-    def secondary_workspace(self, *, parent=None):
+    def secondary_workspace(self, *, parent=None, preflight_effect=None):
         policy = RetainedSecondaryAccessPolicy(
             self.plan.profile.worker_identity,
             RetainedSecondaryTestIdentity("litaitest", 2001, 2001, (2001,)),
@@ -336,12 +336,36 @@ class RetainedProjectExecutionTests(unittest.TestCase):
         views = Mock()
         views.paths = {"runtime": self.base / "runtime", "work": self.base / "work"}
         views.evidence.return_value = ({"event": "reserved"},)
-        with patch.object(execution, "FreeBsdRetainedViewOwner", return_value=views):
+        with (
+            patch.object(
+                execution, "_requires_freebsd_acl_preflight", return_value=True
+            ),
+            patch.object(
+                execution,
+                "preflight_freebsd_posix_acl",
+                side_effect=preflight_effect,
+            ) as preflight,
+            patch.object(execution, "FreeBsdRetainedViewOwner", return_value=views),
+        ):
             workspace = self.workspace(
                 allocation_owner=allocation, parent=parent or self.base
             )
+        preflight.assert_called_once_with(
+            parent or self.base, self.plan.profile.secondary_access.account.uid
+        )
         self.addCleanup(workspace.close_secondary_access)
         return workspace, allocation, views
+
+    def test_secondary_acl_preflight_refuses_before_input_capture(self):
+        with (
+            patch.object(execution, "capture_retained_project_inputs") as capture,
+            self.assertRaisesRegex(ValueError, "filesystem-unsupported"),
+        ):
+            self.secondary_workspace(
+                preflight_effect=ValueError("retained.acl.filesystem-unsupported")
+            )
+        capture.assert_not_called()
+        self.assertEqual(list(self.base.glob("retained-run-*")), [])
 
     @unittest.skipIf(os.name == "nt", "native fixture executable requires POSIX")
     def test_secondary_paths_build_binding_and_test_scope_are_explicit(self):
@@ -429,6 +453,7 @@ class RetainedProjectExecutionTests(unittest.TestCase):
                 "FreeBsdRetainedViewOwner",
                 side_effect=ValueError("partial mount"),
             ),
+            patch.object(execution, "preflight_freebsd_posix_acl"),
             patch.object(execution, "_remove_tree") as remove,
         ):
             with self.assertRaisesRegex(ValueError, "partial mount"):
