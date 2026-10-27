@@ -15,7 +15,7 @@ remain subordinate to the canonical [release-goal manifest](../../roadmap/releas
 ## Exact artifact
 
 - Slides: 12, editable widescreen PowerPoint
-- SHA-256: `1f6293c799ca7d85c62eb2e54127f91f6c71db7027755f2c851e399d566bea07`
+- SHA-256: `5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca`
 - Validation: [presentation-finalization receipt](validation.json)
 - Narrative authority: [deck specification](deck-specification.md)
 

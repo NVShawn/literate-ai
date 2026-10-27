@@ -31184,7 +31184,7 @@ slots/resources/claims and coalesced keys until matching trusted resolution; the
 barriers are per instance, with durable cross-controller worker-side custody still
 open.
 
-### [ ] DOCS-CI-SCOPE-001 — Document the HTML explorer and scope documentation CI
+### [x] DOCS-CI-SCOPE-001 — Document the HTML explorer and scope documentation CI
 
 - **Release target:** 1.3.1
 - **Priority:** P0
@@ -31197,13 +31197,13 @@ open.
   - [x] Distinguish graph-bound Markdown/JSON excerpts from the separate debug specification-to-source map and from unimplemented arbitrary code browsing.
   - [x] Add fail-closed documentation and CI-policy profiles selected from the exact pull-request base/head diff.
   - [x] Keep full main/release qualification and the ordinary cross-platform profile for every unknown or product-code change.
-  - [ ] Land the exact scoped workflow and documentation through reviewed exact-head CI, then verify exact-main CI uses full qualification.
+  - [x] Land the exact scoped workflow and documentation through reviewed exact-head CI, then verify exact-main CI uses full qualification.
 - **Evidence:**
   - [x] The preceding documentation-only PR run `40467590036` launched the complete 17-job ordinary PR matrix, including native C++, Elixir, samples, wheel and platform work; this is retained as the motivating over-selection evidence rather than relabelled efficient.
-  - [ ] Exact-head selection runs only `Documentation and presentation integrity` plus `CI change-scope policy` for this mixed documentation/classifier change, and both pass.
-  - [ ] Exact-main CI still runs the complete configured qualification matrix after landing.
+  - [x] PR #154 exact-head run `40469396361` selected only `Documentation and presentation integrity` plus `CI change-scope policy`; both passed, alongside the independent GitGuardian check.
+  - [x] The latest exact-main commit `8f93802adf5ce77a9b3600e28a002b940239ce1e` ran the complete 26-job qualification matrix in run `40494175198`; all 26 jobs passed. The earlier exact-main run `40469746346` also selected the full matrix but was correctly cancelled when PR #155 advanced `main`, so it is not relabelled green.
 
-### [ ] RELEASE-DECK-001 — Publish the Literate AI 1.3.1 release briefing
+### [x] RELEASE-DECK-001 — Publish the Literate AI 1.3.1 release briefing
 
 - **Release target:** 1.3.1
 - **Priority:** P0
@@ -31214,20 +31214,21 @@ open.
 - **Implementation:**
   - [x] Create the 12-slide editable briefing with source-backed speaker notes and the approved Literate AI visual language.
   - [x] Update the readiness slides after reconciling the full 1.3.1 goal and milestone scope.
-  - [ ] Publish the exact validated deck, specification and receipt at stable repository links.
+  - [x] Publish the exact validated deck, specification and receipt at stable repository links.
 - **Evidence:**
   - [x] Structural package, layout geometry, Aptos font-policy and first-party re-import checks pass with zero findings; complete montage review finds no clipping, overlap or unreadable content.
-  - [ ] Exact-head CI and post-merge link/hash verification pass for the published presentation package.
+  - [x] PR #154 exact-head documentation integrity passed in run `40469396361`; post-merge public-export and link checks passed in exact-main run `40494175198` for the originally published package at SHA-256 `1f6293c799ca7d85c62eb2e54127f91f6c71db7027755f2c851e399d566bea07`. The subsequent readiness refresh is locally finalized at SHA-256 `5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca`; its PPTX, README and receipt agree exactly.
 
-The synchronized 27 October deck now reports exact-main run `40460869302` as
-26/26 green and WINDOWS-PE-OBSERVE-001 as the first completed goal, leaving 17 of
-18 release goals open. It also documents the built-in HTML repository explorer and
+The synchronized 27 October deck reports exact-main run `40494175198` as
+26/26 green and records WINDOWS-PE-OBSERVE-001, DOCS-CI-SCOPE-001 and
+RELEASE-DECK-001 complete, leaving 15 of 18 release goals open. The deck also
+documents the built-in HTML repository explorer and
 its code-navigation boundary. Its exact PowerPoint SHA-256 is
-`1f6293c799ca7d85c62eb2e54127f91f6c71db7027755f2c851e399d566bea07`
-(161,574 bytes, 12 slides). Structural package, layout, Aptos font-policy and
+`5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca`
+(161,540 bytes, 12 slides). Structural package, layout, Aptos font-policy and
 first-party re-import checks pass with zero findings; every rendered slide and the
-complete montage pass visual review. Repository publication and exact-head/main
-link verification remain open.
+complete montage pass visual review. PR #154 and exact-main run `40494175198`
+complete repository publication plus exact-head/main link and hash verification.
 
 ### [ ] COURSE-004 — Animated onboarding conversations with auditioned neural voices
 
@@ -31333,7 +31334,9 @@ link verification remain open.
     sweep originally reported all 17 reconciled roadmap goals from
     `docs/roadmap/release-goals.json`, with one complete and 16 open. The later
     user-directed symposium documentation and CI-scope goal raises the current exact
-    manifest to 18 goals, one complete and 17 open, and keeps release readiness false.
+    manifest to 18 goals. The later symposium publication and CI evidence complete
+    DOCS-CI-SCOPE-001 and RELEASE-DECK-001, leaving three complete and 15 open;
+    release readiness remains false.
   - [x] The supported lifecycle-driver review passes against the recorded exact
     `src/literate_ai/cli/release.py` bytes, followed by exact-head and exact-main CI.
   - [x] The 1.3.1 manifest resolves all 18 declared roadmap headings and explicitly covers milestone issues #86, #90, #92, #95, #98, #102, #103, #117, #118, #121, #123, #129, and #140 plus the requested release briefing and symposium documentation/CI-scope goal. Issue #117 spans `SDK-OBSERVATION-COST-001` and `RETAINED-OBSERVATION-PERF-001`; issue #118 is the captured-loader scope of `RETAINED-SDK-PUBLIC-001`. Scope reconciliation inferred no completion; exact-main evidence later completed #90.
