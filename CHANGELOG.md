@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Match the native Windows gate to hosted CI's dependency-observation isolation:
+  run the live admitted-receiver case serially, then run the remaining suite once
+  with normal parallelism. Retain separate JUnit reports and unchanged live deadlines.
+
 - Add explicit non-POSIX ACL-brand refusal and handle-cleanup regression coverage;
   retain source-bound native, parallel-package and installed-wheel proof for the
   completed ACL-preflight and changed-ancestor diagnostics goals.

@@ -18,6 +18,14 @@ documentation pass does not qualify a software release or renew a product receip
 The conference website has its own build, link/archive check and deployment workflow,
 which does not wait for product CI.
 
+The native `scripts/windows_release_gate.py` runner follows hosted CI's isolation
+of the live admitted-receiver dependency observation. Its `tests` phase runs that
+case without xdist first, then runs every remaining test root with the requested
+workers and deselects only the already executed case. Separate
+`_build/windows-admitted-receiver.xml` and `_build/windows-tests.xml` reports retain
+both results. A failure in either command fails the gate; the live observation's
+production deadline and the full qualification requirement are unchanged.
+
 ## FreeBSD workers
 
 FreeBSD workers may be physical machines or virtual guests. Their OS Flavor is

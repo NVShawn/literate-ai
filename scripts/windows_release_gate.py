@@ -31,6 +31,10 @@ _COMPILED = (
     "scripts/run_source_to_specification_fixtures.py",
 )
 _TEST_ROOTS = ("tests/e2e", "tests/smoke", "tests/critical", "tests/conformance")
+_ADMITTED_RECEIVER_TEST = (
+    "tests/smoke/test_remote_standard_toolchains.py::RemoteStandardToolchainTests::"
+    "test_actual_admitted_receiver_supplies_discovery_and_live_profile_guard"
+)
 
 
 class GateFailure(RuntimeError):
@@ -112,6 +116,45 @@ def _run(argv: list[str], environment: dict[str, str], *, step: str) -> None:
             f"{step} failed with exit status {completed.returncode} after {elapsed}s"
         )
     print(f"[windows-release-gate] {step}: passed in {elapsed}s", flush=True)
+
+
+def _run_tests(python: Path, test_workers: str, environment: dict[str, str]) -> None:
+    # Match hosted CI: qualify the unchanged 60-second dependency observation
+    # without contention, then run every other test once with the usual workers.
+    _run(
+        [
+            str(python),
+            "-m",
+            "pytest",
+            "-q",
+            "-rA",
+            "-o",
+            "addopts=",
+            f"--junitxml={ROOT / '_build/windows-admitted-receiver.xml'}",
+            _ADMITTED_RECEIVER_TEST,
+        ],
+        environment,
+        step="tests",
+    )
+    # A fixed base directory avoids pytest-current symlink cleanup failures.
+    _run(
+        [
+            str(python),
+            "-m",
+            "pytest",
+            "-q",
+            "-n",
+            "0" if test_workers == "1" else test_workers,
+            "--dist=loadfile",
+            "--maxfail=1",
+            f"--deselect={_ADMITTED_RECEIVER_TEST}",
+            f"--basetemp={TEMPORARY / 'pytest'}",
+            f"--junitxml={ROOT / '_build/windows-tests.xml'}",
+            *_TEST_ROOTS,
+        ],
+        environment,
+        step="tests",
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -247,27 +290,7 @@ def main(argv: list[str] | None = None) -> int:
                 step="wheel",
             )
         if "tests" in selected:
-            # A fixed base directory keeps pytest from maintaining numbered
-            # directories behind a `pytest-current` symlink, whose session-end
-            # cleanup raised WinError 1463 on the worker and hid the summary.
-            # The JUnit report keeps per-test results even if the session dies.
-            _run(
-                [
-                    str(python),
-                    "-m",
-                    "pytest",
-                    "-q",
-                    "-n",
-                    "0" if args.test_workers == "1" else args.test_workers,
-                    "--dist=loadfile",
-                    "--maxfail=1",
-                    f"--basetemp={TEMPORARY / 'pytest'}",
-                    f"--junitxml={ROOT / '_build/windows-tests.xml'}",
-                    *_TEST_ROOTS,
-                ],
-                environment,
-                step="tests",
-            )
+            _run_tests(python, args.test_workers, environment)
     except GateFailure as exc:
         print(f"[windows-release-gate] FAILED: {exc}", file=sys.stderr, flush=True)
         return 1

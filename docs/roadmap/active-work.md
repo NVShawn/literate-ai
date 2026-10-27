@@ -30911,8 +30911,11 @@ repair scope and makes no claim that the complete provided native gate passed.
 - **Depends on:** none
 - **Implementation:**
   - [x] Pass a unique per-attempt timing report to wheel smoke and document its diagnostic scope.
+  - [x] Match hosted Windows CI's isolated admitted-receiver dependency test in the native release gate, then run the remaining suite once with that exact case deselected. Preserve production deadlines, failure propagation and all existing test roots.
 - **Evidence:**
   - [x] Completed spans survive partial-write failure on macOS and native Windows; the original writer fails the same check. Eight focused tests, lint, format and driver review pass. Two controlled gate attempts keep distinct reports after deliberate stage failure.
+  - [x] Prove serial-before-parallel sequencing and failure propagation with a focused orchestration regression. Four controller orchestration checks plus eight CI-policy checks pass. They cover serial isolation, exact deselection from the remaining roots, distinct JUnit reports, single-worker selection, and refusal to continue or report success after either stage fails. These are controller sequencing checks, not a claim of native execution.
+  - [ ] Retain both native JUnit reports on the next full run. Audit found that hosted CI had the contention repair while the provided native gate still placed the 60-second live dependency case inside the parallel suite; final native/full qualification remains required.
   - [ ] Renew the configured host lifecycle/receipt and exact native wheel/full qualification.
 - **Evidence:** [Timing development record](../../verification/windows-wheel-timing-development.json). The documentation authority review is recorded; the old receipt is stale until complete renewal. Timing artifacts remain diagnostic and never imply a passing wheel or gate.
 
