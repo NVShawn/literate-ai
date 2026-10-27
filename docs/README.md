@@ -1,5 +1,10 @@
 # Documentation
 
+**[Browse the documentation website](https://jordanhubbard.github.io/literate-ai/docs/README.html)**
+or open the [conference attendee hub](conference/README.md) for slides, the film,
+interactive labs and an offline download pack. The [presenter guide](conference/presenter-guide.md)
+includes a two-hour running order.
+
 - [Coding CLI release plugins](user/coding-cli-plugins.md)
 - [1.1 SDLC audit and graded concept assessment](roadmap/1.1-sdlc-audit.md)
 

@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = '''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,">
 <title>{title}</title><style>{css}</style></head><body>
 <div class="shell"><aside class="lesson"><div class="eyebrow" data-level></div>
 <h1 data-title></h1><p data-subtitle></p><p class="learning" data-learning></p>

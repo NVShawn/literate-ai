@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Publish a browsable conference documentation website with the HTML deck, approved
+  onboarding film and captions, truthful interactive lab material, a two-hour presenter
+  guide, search and a downloadable offline attendee kit. Deploy the website independently
+  of product CI so conference documentation can reach attendees promptly.
+
 - Correct the visual labs' illustrative-role diagrams and authored-source provenance;
   expand Grumpy Counter's UI/animation/acceptance specification, label its modulus
   control and neutral integer 1, and expose complete bundled sources plus a separate

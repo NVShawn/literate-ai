@@ -1,5 +1,10 @@
 # Literate AI
 
+**[Conference website and attendee materials](https://jordanhubbard.github.io/literate-ai/)** ·
+[Browser slides](https://jordanhubbard.github.io/literate-ai/docs/presentations/literate-ai-evolution-conference/index.html) ·
+[Offline conference kit](https://jordanhubbard.github.io/literate-ai/downloads/literate-ai-conference-kit.zip) ·
+[Browsable documentation](https://jordanhubbard.github.io/literate-ai/docs/README.html)
+
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 Literate AI is a release-engineering and SDLC harness for specification-led

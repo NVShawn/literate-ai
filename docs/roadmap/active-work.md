@@ -31291,7 +31291,7 @@ complete repository publication plus exact-head/main link and hash verification.
   - [x] Refresh the explicitly selected NVIDIA credential, observe the live voice catalog, synthesize every turn with the approved Jason Neutral and Aria stock voices, and complete line-by-line listening and pronunciation review without fallback speech.
   - [x] Capture and retain fresh execution evidence for the film's current Literate AI claims, preserving native, retained-source and benchmark boundaries.
   - [x] Render and verify the complete film, captions and media receipts; inspect representative frames and watch the assembled film at normal speed with separate factual, accessibility, listening and visual approval recorded against exact identities.
-  - [ ] Publish the approved 1.3.1 media and provenance on GitHub, then update README, getting-started, installation, course-index and video-authoring links to the exact asset without removing the prior film.
+  - [x] Publish the approved 1.3.1 media and provenance on GitHub, then update README, getting-started, installation, course-index and video-authoring links to the exact asset without removing the prior film. Publication commit `11841cefc49bc62c5b77b6cfcea8900da2c9186b` is on `main`; the remote MP4 hashes to approved `d01ce010654c55d6a1b3de16fa3cd8d640b758fe3559783236cfc9754e7d8e97`, and all five entry points link to it. Final patch qualification remains open.
   - [ ] Pass the declared 1.3.1 release-goal gate and exact release qualification; do not publish or close the milestone while any item above remains incomplete.
 - **Pilot result:** [Authoring package](../courses/animated-onboarding/README.md)
   and [QA](../courses/animated-onboarding/QA.md) retain nine unit checks, seven browser
@@ -31464,3 +31464,15 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
         the draft now contains only that HTML asset after removal of the superseded
         PowerPoint asset.
   - [ ] Close this roadmap item only after the reusable 1.4 skill, routing, publication contract, and cross-browser acceptance are independently qualified.
+
+### [ ] CONFERENCE-WEB-001 — Publish conference attendee documentation and materials on the web
+
+- **Priority:** P0
+- **Owner:** documentation website and conference materials
+- **Direction:** Commit and push all updates without waiting for CI; prioritize a usable public documentation website and attendee materials before the conference in two hours.
+- **Conclusion:** Publish a GitHub Pages attendee hub from the reviewed repository, with browsable documentation, offline HTML deck, truthful labs, approved film and captions, downloads and an explicit release-status boundary. Use scoped local browser/link checks and deploy independently of product CI.
+- **Depends on:** none
+- **Implementation:**
+  - [ ] Integrate pending reviewed updates and publish a reproducible static documentation site with a conference landing page and a dedicated deployment workflow.
+- **Evidence:**
+  - [ ] Verify desktop and mobile pages, live deployed links, deck navigation, film/caption downloads and publication status; record any CI still running without making release-success claims.

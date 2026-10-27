@@ -61,7 +61,10 @@ def verify_lab(lab: Path, page: str | None = None) -> set[str]:
     assert 'Lesson flow (illustrative)' in page
     assert 'No resolved Component DAG is supplied.' in page
     assert 'Readable lab specification' in page and 'Exact bundled source' in page
-    assert '<script src=' not in page and '<link ' not in page
+    # An empty data-URL favicon prevents the browser's implicit network request.
+    # Every other linked resource remains forbidden for these standalone labs.
+    resources = page.replace('<link rel="icon" href="data:,">', '')
+    assert '<script src=' not in resources and '<link ' not in resources
     assert not re.search(r'<(?:script|link|img|iframe)[^>]+(?:src|href)=[\"\']https?://', page)
     assert not re.search(r'\{(?:title|css|runtime|main|config)\}', page.split('<script>')[0])
     assert page == build_page(lab), 'stale or modified bundled executable/style/wrapper'

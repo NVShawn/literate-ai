@@ -1,0 +1,62 @@
+name: Conference documentation website
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'labs/**'
+      - 'media/**'
+      - 'components/**'
+      - 'flavors/**'
+      - 'skills/**'
+      - 'samples/**'
+      - 'schemas/**'
+      - 'README.md'
+      - 'PROJECT.md'
+      - 'CHANGELOG.md'
+      - 'CONTRIBUTING.md'
+      - 'scripts/build_conference_site.mjs'
+      - 'scripts/verify_conference_site.py'
+      - 'tools/openspec/package*.json'
+      - '.github/workflows/conference-pages.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: conference-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: tools/openspec/package-lock.json
+      - name: Install locked documentation tools without lifecycle scripts
+        run: npm ci --prefix tools/openspec --ignore-scripts
+      - name: Build documentation, conference materials and offline kit
+        run: node scripts/build_conference_site.mjs
+      - name: Check attendee links and offline download integrity
+        run: python3 scripts/verify_conference_site.py
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d
+      - uses: actions/upload-pages-artifact@5f327015a708106f6f1b7c9a633901af30fe80cb
+        with:
+          path: _build/conference-site/literate-ai
+      - name: Publish attendee website
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346
