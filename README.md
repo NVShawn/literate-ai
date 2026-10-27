@@ -46,6 +46,10 @@ without flattening every implementation detail into one model context.
 `litai onboard adopt PATH` before explicitly applying its plan. `make bootstrap`
 is the maintainer setup for this checkout.
 
+For the version-aware product surface, read [current features and release posture](docs/user/current-features.md).
+For a playful, visual path through specifications and Component DAGs, open the
+[Literate AI labs](labs/README.md); every generated lab runs as one offline HTML file.
+
 A stakeholder-facing overview is also maintained separately. The 1.2.0 edition was
 published in place and export-back verified against its checked-in presentation and
 narrative at these stable links:
@@ -56,6 +60,8 @@ The authoring package is
 [`docs/presentations/literate-ai-manager-overview/`](docs/presentations/literate-ai-manager-overview/).
 For the patch-release scope, evidence status, release history, and current ETA, use the
 [editable 1.3.1 release briefing](docs/presentations/literate-ai-1.3.1-release-briefing/README.md).
+For the conference story of how Literate AI evolved from readable intent to executable
+evidence, use the [evolution deck](docs/presentations/literate-ai-evolution-conference/README.md).
 
 ## Adopt, then rebuild
 

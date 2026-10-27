@@ -1,5 +1,17 @@
 # Samples and tutorials
 
+Two collections serve different jobs:
+
+- [`samples/`](../../samples/) contains lifecycle and portability fixtures exercised by
+  framework qualification.
+- [`labs/`](../../labs/) contains six progressively composed, free-standing visual
+  lessons. They reuse one authoring runtime but generate an offline `index.html` in
+  every lab, with its Component specification and interactive DAG visible beside the
+  artifact. The sequence spans math, physics, music, audio, 3D graphics, and video.
+
+Start with the labs when learning how readable authority composes. Use the samples when
+testing the real generation, native build, package, worker, and receipt boundaries.
+
 Samples are executable living demonstrations: complete libraries, applications, or
 modules that compose reusable Components, Flavors, and skills to teach one concept and
 prove the entire lifecycle. Canonical reusable providers belong in `components/`, not

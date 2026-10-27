@@ -5,6 +5,8 @@
 
 ## User documentation
 
+- [Current features and release posture](user/current-features.md)
+- [Progressive visual labs](../labs/README.md)
 - [Rebuildable instructional videos](user/instructional-videos.md)
 - [Watch the introductory courses](courses/README.md)
 - [Native gRPC oracle declarations and qualification boundary](user/native-grpc-oracles.md)
@@ -21,6 +23,10 @@ agent-system boundary for a technically sophisticated new audience.
 The [Literate AI 1.3.1 release briefing](presentations/literate-ai-1.3.1-release-briefing/README.md)
 summarizes the patch scope, core concepts, lessons from the first release onward,
 release-goal policy, current evidence, ETA, and publication path.
+
+The [Literate AI evolution conference deck](presentations/literate-ai-evolution-conference/README.md)
+connects the project's goals, release-by-release evolution, current 1.4.0 development
+surface, deliberate limits, and the visual lab progression.
 
 For the current manager and engineering narrative, use the reproducible
 [manager and engineering overview package](presentations/literate-ai-manager-overview/README.md).
