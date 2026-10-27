@@ -31465,7 +31465,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
         PowerPoint asset.
   - [ ] Close this roadmap item only after the reusable 1.4 skill, routing, publication contract, and cross-browser acceptance are independently qualified.
 
-### [ ] CONFERENCE-WEB-001 — Publish conference attendee documentation and materials on the web
+### [x] CONFERENCE-WEB-001 — Publish conference attendee documentation and materials on the web
 
 - **Priority:** P0
 - **Owner:** documentation website and conference materials
@@ -31473,6 +31473,6 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Conclusion:** Publish a GitHub Pages attendee hub from the reviewed repository, with browsable documentation, offline HTML deck, truthful labs, approved film and captions, downloads and an explicit release-status boundary. Use scoped local browser/link checks and deploy independently of product CI.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Integrate pending reviewed updates and publish a reproducible static documentation site with a conference landing page and a dedicated deployment workflow.
+  - [x] Integrate pending reviewed updates and publish a reproducible static documentation site with a conference landing page and a dedicated deployment workflow. PRs #158 and #160 are merged; site source `0ef44bcd7282c8d3efb904e9049669b98de0d3a8` deployed successfully in run `40567956679` to https://jordanhubbard.github.io/literate-ai/.
 - **Evidence:**
-  - [ ] Verify desktop and mobile pages, live deployed links, deck navigation, film/caption downloads and publication status; record any CI still running without making release-success claims.
+  - [x] Verify desktop and mobile pages, live deployed links, deck navigation, film/caption downloads and publication status; record any CI still running without making release-success claims. The 442-page build passes 4,149 local-link checks. Live Chrome passes fourteen navigation/interaction checks at widths 1440 and 390, including search, film metadata/captions and lab input; all eight framework-flow diagrams render. The fourteen-slide deck passes desktop/mobile controls and layout checks. Fresh public deck, film, caption and downloaded-kit content hashes match reviewed sources; archive CRC passes. See [publication evidence](../conference/publication.json). Product CI remains separate and was not awaited by explicit user direction; 1.3.1 software qualification and the canonical lab curriculum remain open.

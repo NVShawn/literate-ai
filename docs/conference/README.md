@@ -72,4 +72,6 @@ checks local navigation, required attendee artifacts and offline archive integri
 The [browser check](../../scripts/verify_conference_browser.mjs) exercises attendee
 navigation, search, media metadata and desktop/mobile layout using the existing
 documentation browser toolchain.
+The [publication record](publication.json) identifies the first verified deployment,
+its public asset hashes and the scope of the checks.
 
