@@ -8,6 +8,11 @@
 - Add six progressive, cheeky, free-standing visual labs that expose their Component
   specifications and interactive DAGs while spanning math, physics, audio, music, 3D,
   and video.
+- Preserve fail-closed retained-root verification while reporting the exact
+  missing, redirected or identity-replaced ancestor, lineage depth and
+  expected/current filesystem identities. Add deterministic concurrent ancestor
+  replacement coverage so a byte-identical replacement remains a refusal with
+  actionable evidence.
 
 - Always load an existing release policy during contribution sweeps, including
   when callers supply both version and current milestone explicitly, so those
