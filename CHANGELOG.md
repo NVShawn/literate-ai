@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Always load an existing release policy during contribution sweeps, including
+  when callers supply both version and current milestone explicitly, so those
+  convenience arguments cannot bypass the policy-bound roadmap goal manifest.
+  Explicit-version standalone sweeps remain available only when the policy file
+  is genuinely absent; malformed policy still fails closed.
+
 - Qualify the real Windows admitted-receiver dependency closure in a dedicated
   non-xdist CI step so hosted-runner contention cannot consume its unchanged
   per-observation production deadline; retain the same live profile and native
