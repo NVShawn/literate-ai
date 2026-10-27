@@ -31428,6 +31428,23 @@ the development-tree digest is not a patch attestation. Qualification and releas
 publication remain pending, and the proposed correction to the two self-referential
 goal criteria remains unapplied while awaiting user approval.
 
+**Selective backport checkpoint (27 October):** The patch line is pushed at
+`14dea5b83`, with the full 18-goal ledger and existing acceptance criteria intact.
+The approved film, authoring sources, captions and review provenance match main;
+the decks and HTML-explorer guidance are included. The patch has its own reviewed
+lifecycle pin and documentation authority. Managed focused checks pass: 10
+contribution, 17 release-policy, 10 initialization, eight CI-policy, four Windows
+controller and four film cases. The retained group completes 353 selected cases
+with 322 passes, 31 platform skips and no failures; its directly affected owners
+include all nine retained-package cases. Changed-skill admission, changed Python
+lint/format, layout/export checks, 22 documentation tests and 121 Mermaid renders
+pass. These are backport checks, not final native release qualification. A fresh
+sweep reports 13 open goals, no invalid goal records, 13 open included issues and
+34 unclassified contributions. The old receipt correctly refuses as stale; renew
+it through the configured lifecycle rather than copying a 1.4 receipt. See the
+patch line's `verification/patch-backport-scope.json` and
+`verification/patch-backport-validation.json`.
+
 ### [x] DOCS-LABS-001 — Modernize 1.4 documentation, conference evolution deck, and visual labs
 
 - **Priority:** P0
