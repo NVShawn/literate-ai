@@ -31417,7 +31417,8 @@ run `40460869302`, including the repaired isolated Windows receiver gate.
 (`fca515383`) first. The bounded follow-on source fixes are latest-README policy
 (`04668ac3d`), changed-ancestor diagnostics (`c3b0c13d1`), ACL preflight
 (`849c5cc7a`), the additional ACL refusal test (`b79cf33a0`, reviewed authored
-slice), and native Windows test isolation (`8f6015f28`). Bring the approved film,
+slice), native Windows test isolation (`8f6015f28`), and the wheel's roadmap-JSON
+package declaration (`77eaf1619`). Bring the approved film,
 its authoring/provenance and corresponding documentation as their own authored
 collateral; reconcile the complete existing 18-goal manifest on the patch line.
 Do not cherry-pick broad integration merges. Exclude the 1.4 resource-dispatch,
@@ -31444,6 +31445,20 @@ sweep reports 13 open goals, no invalid goal records, 13 open included issues an
 it through the configured lifecycle rather than copying a 1.4 receipt. See the
 patch line's `verification/patch-backport-scope.json` and
 `verification/patch-backport-validation.json`.
+
+**Cold-wheel packaging correction:** Exact patch CI run `40585686603` passes the
+FreeBSD ACL preflight but its Windows installed-wheel job correctly refuses
+onboarding because the wheel lacks `project_template/docs/roadmap/release-goals.json`.
+The initial selective backport omitted the separate one-line `77eaf1619` package-data
+declaration; the earlier `2704931a3` initialization change alone did not package it.
+The correction and scope record are pushed on `fix/p131-package-goals` at
+`37dd413b7`. Ten managed initialization cases pass, and a clean wheel contains the
+exact source manifest. The canonical isolated installed-wheel gate is running;
+archive membership alone is not an installed lifecycle pass. The native Windows
+attempt for the known-bad `14dea5b83` package was explicitly stopped through its
+verified owned process tree, with checkout, logs and terminal failure retained.
+Fresh configured host lifecycle qualification continues on its frozen source.
+No software release or native success is claimed.
 
 ### [x] DOCS-LABS-001 — Modernize 1.4 documentation, conference evolution deck, and visual labs
 
