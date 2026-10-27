@@ -31219,7 +31219,7 @@ slots/resources/claims and coalesced keys until matching trusted resolution; the
 barriers are per instance, with durable cross-controller worker-side custody still
 open.
 
-### [ ] DOCS-CI-SCOPE-001 — Document the HTML explorer and scope documentation CI
+### [x] DOCS-CI-SCOPE-001 — Document the HTML explorer and scope documentation CI
 
 - **Release target:** 1.3.1
 - **Priority:** P0
@@ -31231,14 +31231,14 @@ open.
   - [x] Add a task-oriented user guide and stable README/documentation-index links for the built-in HTML repository explorer.
   - [x] Distinguish graph-bound Markdown/JSON excerpts from the separate debug specification-to-source map and from unimplemented arbitrary code browsing.
   - [x] Add fail-closed documentation and CI-policy profiles selected from the exact pull-request base/head diff.
-  - [x] Keep full main/release qualification and the ordinary cross-platform profile for every unknown or product-code change.
-  - [x] Land the exact scoped workflow and documentation through reviewed exact-head CI, then verify exact-main CI uses full qualification.
+  - [x] Keep full qualification for product-code pushes to main and release refs, plus the ordinary cross-platform profile for unknown or product-code PR changes. Documentation-only default-branch pushes use their scoped checks.
+  - [x] Land the original PR-only scoped workflow and documentation through reviewed CI; its historical exact-main full qualification is retained below. The later push-scoping correction follows the user's explicit instruction to publish conference updates without waiting for product CI.
   - [x] Extend documentation and policy selection to exact default-branch push changes, preserving complete release/tag/manual and product qualification. The separately declared five-cell macOS qualification job now depends on the same profile instead of bypassing it with an unconditional push predicate. Initial run `40569986418` exposed that independent job path; it is retained as corrective evidence, not a successful scoped run.
 - **Evidence:**
   - [x] The preceding documentation-only PR run `40467590036` launched the complete 17-job ordinary PR matrix, including native C++, Elixir, samples, wheel and platform work; this is retained as the motivating over-selection evidence rather than relabelled efficient.
   - [x] PR #154 exact-head run `40469396361` selected only `Documentation and presentation integrity` plus `CI change-scope policy`; both passed, alongside the independent GitGuardian check.
   - [x] The latest exact-main commit `8f93802adf5ce77a9b3600e28a002b940239ce1e` ran the complete 26-job qualification matrix in run `40494175198`; all 26 jobs passed. The earlier exact-main run `40469746346` also selected the full matrix but was correctly cancelled when PR #155 advanced `main`, so it is not relabelled green.
-  - [ ] Verify default-branch push selection, unknown-change refusals, exact push endpoint comparison and release/tag/manual controls with the focused CI-policy suite. Eight focused CI-policy tests pass, including exact endpoint selection, missing/failed/timed-out/invalid-UTF-8 comparisons and full product/release/tag/manual controls. Running the actual selector over conference documentation commits `0ef44bcd7` → `2d37d577f` selects only documentation with `freebsd_acl=false`. Record the resulting forge push profile after publication; do not wait for unrelated product CI, as explicitly directed for conference publication.
+  - [x] Verify default-branch push selection, unknown-change refusals, exact push endpoint comparison and release/tag/manual controls with the focused CI-policy suite. Eight focused CI-policy tests pass, including exact endpoint selection, missing/failed/timed-out/invalid-UTF-8 comparisons and full product/release/tag/manual controls. Running the actual selector over conference documentation commits `0ef44bcd7` → `2d37d577f` selects only documentation with `freebsd_acl=false` and `full_qualification=false`. Actual main-push run `40570436040` for `579b73932ae310627d6bf8577f38b5e23520b08e` completes its profile successfully and selects only documentation, CI-policy and the workflow-policy-owned FreeBSD check; the independent macOS qualification job is skipped. The superseded full run is cancelled. Remaining CI results are not relabelled green or awaited as a conference publication prerequisite.
 
 ### [x] RELEASE-DECK-001 — Publish the Literate AI 1.3.1 release briefing
 
