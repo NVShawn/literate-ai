@@ -24,9 +24,9 @@ why schedule pressure cannot override evidence-bound release policy.
 7. Release package: onboarding film, action custody/re-admission, the HTML repository explorer, governance and Windows evidence.
 8. Onboarding film: rebuilt 12:04 episode, 86 lines, captions, poster and provenance.
 9. Publication contract: roadmap, completion, exact head, current receipt, release CLI, publish and verify.
-10. Readiness snapshot: 18 explicit goals, one completed goal, all 13 milestone issues, CI and contribution-sweep state.
+10. Readiness snapshot: 18 explicit goals, three completed goals, all 13 milestone issues, CI and contribution-sweep state.
 11. ETA: due-date assessment, best case, working estimate and risk range.
-12. Critical path: retain exact-main evidence, land enforced scope, close the remaining 17 goals, cut and verify 1.3.1.
+12. Critical path: retain exact-main evidence, land enforced scope, close the remaining 15 goals, cut and verify 1.3.1.
 
 ## Authority boundary
 

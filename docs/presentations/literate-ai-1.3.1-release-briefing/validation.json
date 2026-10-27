@@ -1,7 +1,7 @@
 {
   "schemaVersion": "presentation-finalization.v1",
-  "finalSha256": "1f6293c799ca7d85c62eb2e54127f91f6c71db7027755f2c851e399d566bea07",
-  "byteCount": 161574,
+  "finalSha256": "5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca",
+  "byteCount": 161540,
   "packageIntegrity": {
     "chart_count": 0,
     "claim_boundary": "Structural package checks only; no slide text, notes, formulas, chart values, or native PowerPoint execution were inspected.",
@@ -75,9 +75,9 @@
     "performed": true,
     "passed": true,
     "slideCount": 12,
-    "sha256": "1f6293c799ca7d85c62eb2e54127f91f6c71db7027755f2c851e399d566bea07",
-    "runtimeNodeModules": "/Users/jkh/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-0sLuhH/runtime/node_modules",
-    "nodeExecutable": "/Users/jkh/Library/Application Support/Codex/artifact-sessions/runtime-generations/generation-0sLuhH/runtime/bin/node"
+    "sha256": "5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca",
+    "runtimeNodeModules": "/Users/jkh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules",
+    "nodeExecutable": "/Users/jkh/.hermes/node/bin/node"
   },
   "nativeTableArithmetic": {
     "performed": true,
@@ -103,7 +103,7 @@
     "native_chart_count": 0,
     "native_powerpoint_verified": false,
     "passed": true,
-    "presentation_sha256": "1f6293c799ca7d85c62eb2e54127f91f6c71db7027755f2c851e399d566bea07",
+    "presentation_sha256": "5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca",
     "schema_version": "presentation-native-chart-titles.v1",
     "slide_count": 12,
     "source_text_emitted": false,
