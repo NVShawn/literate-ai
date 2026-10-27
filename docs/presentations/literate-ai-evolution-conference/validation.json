@@ -1,0 +1,27 @@
+{
+  "schema": "literate-ai/conference-deck-validation@1",
+  "status": "pass",
+  "checks": {
+    "slide_count": true,
+    "speaker_notes": true,
+    "aspect_ratio": true,
+    "fonts": true,
+    "slide_bounds": true,
+    "render_count": true,
+    "visual_review": true
+  },
+  "slide_count": 14,
+  "speaker_notes_count": 14,
+  "slide_size_emu": [
+    12191695,
+    6858000
+  ],
+  "observed_fonts": [
+    "Courier New",
+    "Helvetica Neue"
+  ],
+  "outside_slide_objects": [],
+  "render_count": 14,
+  "sha256": "6acba9f614be620284f83c1da1e33f952532670c39a834fcaa32f1b05132f532",
+  "byte_count": 786137
+}

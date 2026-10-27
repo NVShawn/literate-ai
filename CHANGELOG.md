@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Add a version-aware current-feature map, synchronize the main documentation entry
+  points with the 1.4.0 development line and separate 1.3.1 patch program, and add a
+  reproducible conference evolution deck.
+- Add six progressive, cheeky, free-standing visual labs that expose their Component
+  specifications and interactive DAGs while spanning math, physics, audio, music, 3D,
+  and video.
+
 - Always load an existing release policy during contribution sweeps, including
   when callers supply both version and current milestone explicitly, so those
   convenience arguments cannot bypass the policy-bound roadmap goal manifest.

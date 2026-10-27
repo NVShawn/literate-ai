@@ -6,11 +6,12 @@ linked roadmap documents. Follow
 direction. Check an item only when its evidence is
 recorded; Git preserves prior states.
 
-**Current development release: 1.3.0.** [RELEASE-INTEGRATION-004](#release-integration-004-reconcile-and-execute-the-13-release-backlog)
-owns the [current 1.3 scope and execution order](1.3-integration.md). The
-2026-10-18 public-tracker reconciliation includes all 20 open issues and PRs
-#60–#62, with #47 first. Existing unchecked acceptance remains open; historical
-1.1/1.2 directives and evidence do not establish 1.3 readiness.
+**Current development release: 1.4.0.** The latest published release is 1.3.0;
+1.3.1 is a separately governed patch program with explicit goals in
+[`release-goals.json`](release-goals.json). [RELEASE-INTEGRATION-004](#release-integration-004-reconcile-and-execute-the-13-release-backlog)
+and the [1.3 integration plan](1.3-integration.md) are retained as 1.3.0 history.
+Existing unchecked acceptance remains open; evidence from an older release does not
+establish readiness for either the patch line or 1.4.0.
 
 **Maintainer approvals, 2026-09-13:** ADR 0011 is accepted for 1.1, including
 opt-in `literate-markdown@2` domain metadata and typed acceptance while preserving
@@ -31349,3 +31350,32 @@ is `sha256:0a3e2414af9a1459656fa09821f7d152e4b2409c46c4b8a2c8d53a574ce7e774`.
 PR #153 exact-head run `40457678449` passes all 16 jobs. Its merge commit
 `3b606d42c93b04b3be354f78152a0b3ac11e3059` passes all 26 exact-main jobs in
 run `40460869302`, including the repaired isolated Windows receiver gate.
+
+### [x] DOCS-LABS-001 — Modernize 1.4 documentation, conference evolution deck, and visual labs
+
+- **Priority:** P0
+- **Owner:** front-door documentation, conference collateral, samples, and HTML observability
+- **Direction:** Synchronize user documentation with the 1.4.0 development feature set; create a conference-ready deck on Literate AI goals and evolution; and add progressively more complex, cheeky, independent visual labs spanning component DAGs, audio, video, 3D, music, mathematics, and physics.
+- **Conclusion:** Treat general documentation as 1.4.0 development authority while preserving 1.3.1 release-specific collateral. Build one DRY lab kit with independent lab entry points, visible component graphs, and deterministic browser-friendly artifacts. Produce an editable local conference deck through the repository presentation pipeline; do not publish externally without separate authorization.
+- **Depends on:** current 1.4.0 main authority; existing HTML explorer and presentation toolchain
+- **Next action:** Complete. Keep the current-feature page synchronized with release
+      authority, rebuild the deck from its checked-in source when claims change, and
+      extend the lab sequence only when each new artifact remains offline and independently
+      verifiable.
+- **Implementation:**
+  - [x] Audit and reconcile front-door and user documentation against current commands and features; add a labs curriculum with shared support and progressively richer independent examples; create an editable conference deck with speaker notes and source ledger; link all new surfaces from stable indexes.
+- **Evidence:**
+  - [x] `make documentation-check` renders 121 Mermaid diagrams from 639 Markdown
+        files; the 1.4.0 current-feature page distinguishes published 1.3.0, patch
+        1.3.1, development, and open qualification.
+  - [x] Six standalone lab artifacts pass `build_labs.py`, `verify_labs.py`, desktop
+        browser interaction checks, offline-resource checks, and a 390-pixel viewport
+        bounds check; each exposes its Component specification and interactive DAG.
+  - [x] The 14-slide editable PPTX has 14 speaker-note pages. Package integrity,
+        layout geometry, font policy, slide bounds, render count, and full-slide visual
+        review pass with zero structural findings or layout warnings; exact deck SHA-256
+        is recorded in its checked-in `validation.json`.
+  - [x] The reviewed documentation authority marker is current at
+        `sha256:6f40bac8e467374e03aaa0fa72b656f8d6a52fff2fb0c0f8c8fe551f24d636d5`;
+        `litai project validate`, `make lint repository-layout-check`, and the clean
+        full `make python-check` pass (2,332 tests, 70 skipped).

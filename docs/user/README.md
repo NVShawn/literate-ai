@@ -59,6 +59,12 @@ Start with [Getting started](getting-started.md) for a runnable tour, then use
 [canonical project layout](project-layout.md) for the repository taxonomy. The sections
 below are task-specific follow-ons.
 
+Use [current features and release posture](current-features.md) when you need the
+version-aware answer: `main` is the 1.4.0 development line, 1.3.0 is the latest
+published release, and 1.3.1 has its own patch-release gates. The
+[visual labs](../../labs/) provide the shortest playful route from one Component to a
+multimedia Component DAG.
+
 For a presentation-ready view of a project's effective repositories, Components,
 Flavors, skills and exact source bindings, generate the built-in
 [HTML repository explorer](html-repository-explorer.md). It is a provenance-bound
@@ -114,6 +120,8 @@ authority-graph view, not a general source-code browser.
 
 ## Reference
 
+- [Current features and release posture](current-features.md)
+- [Progressive visual labs](../../labs/)
 - [HTML repository explorer](html-repository-explorer.md)
 - [Troubleshooting](troubleshooting.md)
 - [Glossary](glossary.md)

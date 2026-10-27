@@ -169,8 +169,10 @@ pass; actual native construction, installed/public retained execution and
 per-unit source/ports package qualification remain open. Existing ZIP plan/result
 wire identities are preserved.
 
-The current development release is **1.3.0**. [RELEASE-INTEGRATION-004](docs/roadmap/1.3-integration.md)
-owns the current public issue and review scope. The first implementation batch
+The current development release is **1.4.0**. The published **1.3.0** release and the
+separately governed **1.3.1** patch program remain historical/current release-line
+context; [RELEASE-INTEGRATION-004](docs/roadmap/1.3-integration.md) records how the 1.3.0
+integration scope was assembled. The first implementation batch
 landed through PR #66 at `5d92797a`, including eleven issue repairs and dependency
 PRs #60–#62; its exact candidate `0990bd76` passed all 26 CI jobs. This is development
 integration evidence, not a release qualification or publication.
@@ -368,7 +370,7 @@ at `558861b5` passed all 17 Linux, macOS and Windows jobs, including dedicated B
 outcomes and no skips. The built-in-profile enablement changes flavor authority and
 therefore still requires a new exact-head hosted run before landing.
 
-The current development release is **1.1.0**. The user-directed
+During 1.1.0 development, the user-directed
 [SDLC audit delivery program](docs/roadmap/1.1-sdlc-audit.md) grades architecture,
 onboarding, software intelligence and research potential, and orders all audit
 findings before release preparation. Standardized Codex/Claude plugin artifacts are
