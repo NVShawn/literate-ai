@@ -4749,7 +4749,7 @@ an independent agent review against the 1.2 branch:
 | [#39](https://github.com/jordanhubbard/literate-ai/pull/39) — SemVer prerelease planning and GitHub status | `4c858dc8` | RELEASE-INVARIANTS-001 | **Included** with review fixes: the plan test declares the release line, and a SemVer draft with no PEP 440 form refuses wheel naming as `release.package_metadata_invalid` instead of a traceback. |
 | [#41](https://github.com/jordanhubbard/literate-ai/pull/41) — Retained Cargo selected-suite accounting | `61fc2c28` | RETAINED-READMISSION-001 | **Included**; its test imports the shared retained-receipt fixtures instead of another test module. |
 | [#42](https://github.com/jordanhubbard/literate-ai/pull/42) — setup-uv 10.2.0 | `9d480956` | AUD-CI-001 | **Included**; the pinned commit is the upstream `v10.2.0` tag. Supersedes archived #508. |
-| [#45](https://github.com/jordanhubbard/literate-ai/pull/45) — Elixir Mix builds, library graphs, and native qualification | `d2284009` | ELIXIR-002 | **Included in 1.2** by merge commit (contributor history preserved), after independent review. Conflicts resolved toward 1.2: `ArtifactBuildGraph` carries both `assembly_dependencies` and the optional `driver_composition` (single-driver wire identities unchanged); mixed-driver composition is applied in `assemble_standard_project_artifacts` only, while the release graph still requires one driver; Mix plan finalization goes through the 1.2 `StandardPlanFinalizationInputs` path as a local-only `mix` dependency-resolution mode with an explicit Mix builder/toolchain binding (remote action documents still accept only `none`/`npm`/`python`, so remote Mix builds fail closed); the 1.2 directory-export and local-tree member order are kept; tests are re-homed under `tests/critical`, `tests/smoke` and `tests/conformance` with shared helpers in `tests/support`. All six `elixir-native` CI cells run on every pull request; public retained Mix importer admission remains open. Review follow-up: locked Hex acquisition from exact BOM pins, verified dependency re-extraction, contract-bound Mix finalization binding and explicit local-only Mix builds. |
+| [#45](https://github.com/jordanhubbard/literate-ai/pull/45) — Elixir Mix builds, library graphs, and native qualification | `d2284009` | ELIXIR-002 | **Included in 1.2** by merge commit (contributor history preserved), after independent review. Conflicts resolved toward 1.2: `ArtifactBuildGraph` carries both `assembly_dependencies` and the optional `driver_composition` (single-driver wire identities unchanged); mixed-driver composition is applied in `assemble_standard_project_artifacts` only, while the release graph still requires one driver; Mix plan finalization goes through the 1.2 `StandardPlanFinalizationInputs` path as a local-only `mix` dependency-resolution mode with an explicit Mix builder/toolchain binding (remote action documents still accept only `none`/`npm`/`python`, so remote Mix builds fail closed); the 1.2 directory-export and local-tree member order are kept; tests are re-homed under `tests/critical`, `tests/smoke` and `tests/conformance` with shared helpers in `tests/support`. Ordinary PRs retain one Ubuntu native Elixir smoke cell; Elixir-scoped changes, release branches, and main run all six `elixir-native` cells. Public retained Mix importer admission remains open. Review follow-up: locked Hex acquisition from exact BOM pins, verified dependency re-extraction, contract-bound Mix finalization binding and explicit local-only Mix builds. |
 
 The table below retains the earlier source-repository snapshot, including historical
 CI observations; it is not a current landing queue. The full 1.2 program remains
@@ -31417,3 +31417,23 @@ run `40460869302`, including the repaired isolated Windows receiver gate.
         `sha256:6f40bac8e467374e03aaa0fa72b656f8d6a52fff2fb0c0f8c8fe551f24d636d5`;
         `litai project validate`, `make lint repository-layout-check`, and the clean
         full `make python-check` pass (2,332 tests, 70 skipped).
+
+### [ ] RICH-HTML5-PRESENTATIONS-001 — Rich HTML5 presentation authoring and delivery
+
+- **Priority:** P0
+- **Owner:** presentation authoring, browser verification, and release collateral
+- **Direction:** Deliver the current conference deck now as a self-contained browser-native HTML5 presentation, while treating reusable Rich HTML5 presentation authoring as a 1.4 feature alongside PowerPoint and Google Slides.
+- **Conclusion:** Make the checked-in HTML deck the primary conference artifact now: offline, accessible, keyboard/touch navigable, speaker-note capable, printable, and independently browser-verified. Keep the reusable authoring skill open for 1.4 until its routing, component contracts, publication behavior, and cross-browser acceptance are generalized beyond this deck.
+- **Depends on:** DOCS-LABS-001 conference narrative and factual source ledger; current presentation authoring guidance; browser verification
+- **Implementation:**
+  - [x] Build and check in a deterministic single-file HTML5 conference deck from repository-owned content and assets; make it the primary local artifact and retain PowerPoint only as an editable compatibility export.
+  - [x] Stage the exact accepted HTML file as the 1.3.1 conference release asset and remove the superseded PowerPoint asset only after fresh-download verification.
+  - [ ] Generalize the proven deck architecture into a Rich HTML5 presentation skill for 1.4 and integrate it alongside PowerPoint and Google Slides.
+- **Evidence:**
+  - [x] Fourteen slides and notes, four embedded-only image uses, restrictive offline policy, stable controls, and print behavior pass deterministic structural checks. Real Chrome passes desktop and portrait-mobile layout, keyboard/click navigation, notes, URL state, external-request, console-failure, and viewport-overflow checks; all fourteen desktop slides pass contact-sheet review.
+  - [x] Draft release asset `literate-ai-1.3.1-conference-deck.html` (asset ID
+        `682314847`) fresh-downloads as 1,353,936 bytes with SHA-256
+        `88d552df6d9829a1ab059e393436ee3468f3f2ccb567ce08af0cd6505ac58ca5`;
+        the draft now contains only that HTML asset after removal of the superseded
+        PowerPoint asset.
+  - [ ] Close this roadmap item only after the reusable 1.4 skill, routing, publication contract, and cross-browser acceptance are independently qualified.

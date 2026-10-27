@@ -35,6 +35,8 @@ class CiActionPinTests(unittest.TestCase):
             "main",
             (
                 "README.md",
+                "CONTRIBUTING.md",
+                "PROJECT.md",
                 "docs/user/html-repository-explorer.md",
                 "docs/presentations/release/deck.pptx",
             ),
@@ -55,6 +57,19 @@ class CiActionPinTests(unittest.TestCase):
             [row["task"] for row in policy_and_documentation],
             ["documentation", "ci-policy"],
         )
+
+        elixir = selector.select_matrix(
+            "pull_request",
+            "main",
+            (
+                "flavors/build-mix/flavor.md",
+                "tests/conformance/test_elixir_mix_qualification.py",
+            ),
+        )["include"]
+        self.assertEqual(
+            len([row for row in elixir if row["task"] == "elixir-native"]), 6
+        )
+        self.assertIn("conformance", {row["task"] for row in elixir})
 
         for changed_paths in ((), ("src/literate_ai/cli/render.py",)):
             with self.subTest(changed_paths=changed_paths):
@@ -223,17 +238,19 @@ class CiActionPinTests(unittest.TestCase):
                 "--build-from-source" if row["otp_major"] == "29" else "",
             )
         selector = self.selector()
-        for event, base in (
-            ("pull_request", "main"),
-            ("pull_request", "release/1.2"),
-            ("push", ""),
-        ):
+        selected = selector.select_matrix("pull_request", "main")["include"]
+        selected_elixir = [row for row in selected if row["task"] == "elixir-native"]
+        self.assertEqual(len(selected_elixir), 1)
+        self.assertEqual(selected_elixir[0]["os"], "ubuntu-24.04")
+        self.assertEqual(selected_elixir[0]["elixir"], "1.18.0")
+
+        for event, base in (("pull_request", "release/1.2"), ("push", "")):
             with self.subTest(event=event, base=base):
                 selected = selector.select_matrix(event, base)["include"]
                 self.assertEqual(
                     [row for row in selected if row["task"] == "elixir-native"],
                     elixir_rows,
-                    "every native Elixir cell runs on every pull request",
+                    "release qualification runs every native Elixir cell",
                 )
         self.assertEqual(native["env"]["LITERATE_AI_ELIXIR_MIX_QUALIFICATION"], "1")
         self.assertEqual(native["env"]["LITERATE_AI_ELIXIR_BUILD_SYSTEMS"], "1")

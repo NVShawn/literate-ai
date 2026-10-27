@@ -216,7 +216,7 @@ def build():
     footer(s,10,True); add_notes(s,["The boundary matters: calling it a source browser would overstate the implementation.","Source: docs/user/html-repository-explorer.md."])
 
     # 11
-    s=slide("fog"); header(s,11,"Six labs teach composition by becoming progressively less sensible.","Every lab is one offline HTML artifact with its specification and interactive DAG in view.")
+    s=slide("fog"); header(s,11,"Six labs make increasingly questionable life choices.","No KPI dashboards were harmed. Every lab is offline, free-standing, and inspectable.")
     image_crop(s,ASSETS/"00-grumpy-counter.png",.72,2.82,3.7,2.35)
     image_crop(s,ASSETS/"03-impossible-furniture.png",4.82,2.82,3.7,2.35)
     image_crop(s,ASSETS/"05-component-cathedral.png",8.92,2.82,3.7,2.35)
@@ -226,7 +226,7 @@ def build():
     footer(s,11); add_notes(s,["The source is DRY, but each generated index.html is free-standing and works without a server or network.","Source: labs/README.md and labs/scripts/verify_labs.py."])
 
     # 12
-    s=slide("ink"); header(s,12,"The cathedral is the argument: rigor does not have to look corporate.","Math, physics, 3D, music, audio, and video become replaceable capabilities in one readable DAG.",True)
+    s=slide("ink"); header(s,12,"The cathedral is the argument: rigor can wear better clothes.","Yes, it has a pipe organ. No, finance did not ask for it.",True)
     image_crop(s,ASSETS/"05-component-cathedral.png",.72,2.72,8.25,3.95)
     card(s,9.38,2.72,3.2,1.15,"READABLE","Select a node and inspect the authority it owns.","panel","orange",True)
     card(s,9.38,4.08,3.2,1.15,"REPLACEABLE","Change one capability without rewriting the whole artifact.","panel","blue",True)
@@ -244,14 +244,14 @@ def build():
     # 14
     s=slide("ink")
     pill(s,"LITERATE-AI",.76,.55,1.4,"white","ink")
-    txt(s,"Readable systems can be\nrigorous, renewable—and strange.",.8,1.55,8.1,1.55,34,"white",True,fit=True)
+    txt(s,"Readable systems can be\nrigorous, renewable—and fun.",.8,1.55,8.1,1.55,34,"white",True,fit=True)
     txt(s,"Keep intent human-readable.\nKeep implementation replaceable.\nMake evidence earn the release.",.82,3.55,6.4,1.35,21,"fog",fit=True)
     rect(s,.82,5.42,1.1,.07,"orange")
-    txt(s,"Start with the visual labs. Then inspect the authority graph.",.82,5.72,8.8,.36,16,"orange2",True)
+    txt(s,"Start with the visual labs. The grumpy counter has opinions.",.82,5.72,8.8,.36,16,"orange2",True)
     for i,c in enumerate(["orange","blue","green2","orange2","green"]):
         rect(s,9.2+(i%2)*1.45,1.0+(i*1.08),1.2,.45,c,True)
     txt(s,"github.com/jordanhubbard/literate-ai",.82,6.72,5.2,.25,11,"muted",False,font=MONO)
-    add_notes(s,["Close on the three imperatives: readable intent, renewable implementation, earned evidence.","Invite attendees to open labs/ and the generated HTML authority graph."])
+    add_notes(s,["Close on the three imperatives: readable intent, renewable implementation, earned evidence.","Invite attendees to meet the grumpy counter and inspect the generated HTML authority graph."])
 
     prs.save(OUT)
     digest=hashlib.sha256(OUT.read_bytes()).hexdigest()

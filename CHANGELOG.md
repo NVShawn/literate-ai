@@ -2,9 +2,16 @@
 
 ## Unreleased
 
+- Restore proportional PR feedback for Elixir/Mix: ordinary changes retain one
+  Ubuntu native smoke cell, Elixir-scoped changes run all six OS/version cells, and
+  main and release qualification remain exhaustive. Treat `PROJECT.md` and
+  `CONTRIBUTING.md` as documentation-only inputs so prose changes do not rebuild the
+  product matrix.
 - Add a version-aware current-feature map, synchronize the main documentation entry
   points with the 1.4.0 development line and separate 1.3.1 patch program, and add a
-  reproducible conference evolution deck.
+  reproducible conference evolution deck. Its primary artifact is now a self-contained,
+  offline HTML5 presentation with keyboard, touch, notes, fullscreen, deep-link, reduced
+  motion, and print support; PowerPoint remains an editable compatibility export.
 - Add six progressive, cheeky, free-standing visual labs that expose their Component
   specifications and interactive DAGs while spanning math, physics, audio, music, 3D,
   and video.
