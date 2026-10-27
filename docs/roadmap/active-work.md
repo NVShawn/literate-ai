@@ -31411,6 +31411,23 @@ PR #153 exact-head run `40457678449` passes all 16 jobs. Its merge commit
 `3b606d42c93b04b3be354f78152a0b3ac11e3059` passes all 26 exact-main jobs in
 run `40460869302`, including the repaired isolated Windows receiver gate.
 
+**Selective 1.3.1 patch-content decision:** Start from the existing
+`release/1.3.x` line, not the 1.4 development tree. Stage the explicit-goal guard
+(`79903e680`), packaged manifest (`2704931a3`) and explicit-sweep correction
+(`fca515383`) first. The bounded follow-on source fixes are latest-README policy
+(`04668ac3d`), changed-ancestor diagnostics (`c3b0c13d1`), ACL preflight
+(`849c5cc7a`), the additional ACL refusal test (`b79cf33a0`, reviewed authored
+slice), and native Windows test isolation (`8f6015f28`). Bring the approved film,
+its authoring/provenance and corresponding documentation as their own authored
+collateral; reconcile the complete existing 18-goal manifest on the patch line.
+Do not cherry-pick broad integration merges. Exclude the 1.4 resource-dispatch,
+coalescing and semantic-payload feature work, the 1.4 version advance, and catalog
+version mirrors for that development release. Any copied lifecycle pin must be
+reviewed and regenerated for the selected patch tree with the supported recorder;
+the development-tree digest is not a patch attestation. Qualification and release
+publication remain pending, and the proposed correction to the two self-referential
+goal criteria remains unapplied while awaiting user approval.
+
 ### [x] DOCS-LABS-001 — Modernize 1.4 documentation, conference evolution deck, and visual labs
 
 - **Priority:** P0
