@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Qualify the real Windows admitted-receiver dependency closure in a dedicated
+  non-xdist CI step so hosted-runner contention cannot consume its unchanged
+  per-observation production deadline; retain the same live profile and native
+  dependency checks and fail the Windows job if the isolated proof fails.
+
 - Publish the user-approved 1.3.1 animated onboarding film, *Eight Hours to Make
   Coffee*, with 86 recorded NVIDIA Magpie voice turns, complete SRT/WebVTT captions,
   poster, rebuildable authoring sources, exact review provenance and independently
