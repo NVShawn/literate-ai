@@ -30714,9 +30714,27 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Conclusion:** Probe the actual selected ACL backend and workspace with reversible named-user/default grants; keep worker mount policy and account custody unchanged.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Run bounded capability preflight before capture and emit an actionable unsupported-filesystem diagnostic.
+  - [x] Run bounded capability preflight before capture and emit an actionable unsupported-filesystem diagnostic.
 - **Evidence:**
   - [ ] Real disabled/enabled UFS probes establish early refusal, exact cleanup and unchanged unsupported-brand refusals.
+
+**Current direction:** Before retained input capture, create one private probe directory
+inside the already authorized allocation prefix, hold it by descriptor, apply and read
+back a real named-user access plus default POSIX ACL, restore the original ACLs, and
+remove the empty directory. Translate native unsupported-filesystem refusal into an
+actionable POSIX.1e mount-option diagnostic while retaining all existing brand, account,
+path, descriptor and cleanup guards. This preflight does not change worker mounts.
+
+**Controller result:** The ACL and retained-execution groups pass 33 tests, ten
+declared platform skips and 37 subtests. They prove the preflight precedes input
+capture, projects both named-user access and default ACL entries, reads current state,
+restores custody, removes its probe after success, translates native
+`EOPNOTSUPP` into the actionable filesystem diagnostic, and removes the probe after an
+open failure. Static lint and formatting pass. Actual disabled/enabled FreeBSD UFS
+probes remain required; no configured aligned worker currently supplies that platform,
+so a SHA-pinned FreeBSD 14.3 VM cell now provisions separate UFS mounts without and
+with POSIX.1e ACLs and runs those two native acceptance cases. Its exact-head result
+remains pending.
 
 ### [x] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
 

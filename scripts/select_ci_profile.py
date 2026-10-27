@@ -19,6 +19,16 @@ _CI_POLICY_FILES = frozenset(
         "tests/critical/test_ci_action_pins.py",
     }
 )
+_FREEBSD_ACL_FILES = frozenset(
+    {
+        ".github/workflows/ci.yml",
+        "src/literate_ai/adapters/retained_posix_acl.py",
+        "src/literate_ai/adapters/retained_project_execution.py",
+        "tests/critical/test_ci_action_pins.py",
+        "tests/critical/test_retained_posix_acl.py",
+        "tests/critical/test_retained_project_execution.py",
+    }
+)
 _ELIXIR_PREFIXES = (
     "flavors/build-mix/",
     "flavors/lang-elixir/",
@@ -93,6 +103,19 @@ def select_matrix(
     return {"include": [row for row in rows if row["pr"]]}
 
 
+def select_freebsd_acl(
+    event: str, base_ref: str, changed_paths: tuple[str, ...] | None = None
+) -> bool:
+    """Run the privileged ACL probe only where it can qualify the change."""
+
+    ordinary_pr = event == "pull_request" and not base_ref.startswith("release/")
+    if not ordinary_pr:
+        return True
+    if not changed_paths:
+        return True
+    return any(path in _FREEBSD_ACL_FILES for path in changed_paths)
+
+
 if __name__ == "__main__":
     event = os.environ["CI_EVENT"]
     base_ref = os.environ.get("CI_BASE_REF", "")
@@ -103,3 +126,4 @@ if __name__ == "__main__":
         )
     matrix = select_matrix(event, base_ref, paths)
     print("matrix=" + json.dumps(matrix, separators=(",", ":")))
+    print("freebsd_acl=" + str(select_freebsd_acl(event, base_ref, paths)).lower())

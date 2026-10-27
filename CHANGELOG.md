@@ -15,6 +15,10 @@
 - Add six progressive, cheeky, free-standing visual labs that expose their Component
   specifications and interactive DAGs while spanning math, physics, audio, music, 3D,
   and video.
+- Preflight the selected FreeBSD POSIX ACL backend inside the authorized retained
+  workspace before input capture. Apply, read back and exactly restore a real
+  named-user access/default ACL probe, remove its private directory, and report an
+  actionable POSIX.1e mount-option diagnostic when the filesystem refuses ACLs.
 - Preserve fail-closed retained-root verification while reporting the exact
   missing, redirected or identity-replaced ancestor, lineage depth and
   expected/current filesystem identities. Add deterministic concurrent ancestor

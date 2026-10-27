@@ -34,6 +34,15 @@ Original privileged tests remain trusted code. Use an allocation whose trusted
 provisioner verifies that the actual machine is disposable. The view owner controls
 delegated paths and cleanup; it does not contain arbitrary privileged code.
 
+On FreeBSD, the filesystem containing the provisioner's allocated retained-workspace
+prefix must have POSIX.1e ACLs enabled. An NFSv4 ACL brand or the mere presence of
+`getfacl`/`setfacl` does not satisfy this requirement. Before capturing inputs or
+creating a retained-run root, Literate AI creates a private probe beneath the
+allocation prefix and proves that it can apply, read back and exactly restore the
+named-user access and default ACL entries used by secondary access. Unsupported
+filesystems fail closed with an instruction to enable POSIX.1e ACLs; the preflight
+does not mount, remount or otherwise reconfigure the filesystem.
+
 ## Configure the operator's inspector
 
 The CLI resolves `worker-provisioner.json` from the operator's configuration root

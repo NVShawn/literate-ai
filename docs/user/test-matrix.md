@@ -43,6 +43,11 @@ active qualification in issue #67. End-to-end installed-wheel build/test, retain
 source custody and release qualification remain required; a hardware probe is not
 a substitute for those gates. Native quota observation is explicitly unsupported
 and requiring capacity policies continue to hold rather than infer no quotas.
+Retained secondary-account execution additionally requires POSIX.1e ACLs enabled on
+the filesystem containing the allocated workspace prefix. Literate AI tests the
+required named-user access and default ACL operations beneath that prefix before it
+captures inputs; it refuses unsupported or NFSv4-only ACL backends and never changes
+mount configuration itself.
 
 ## Configure workers and selections
 

@@ -85,6 +85,29 @@ class CiActionPinTests(unittest.TestCase):
         self.assertTrue(full)
         self.assertNotIn("scoped", {key for row in full for key in row})
 
+        self.assertFalse(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("README.md", "docs/user/guide.md")
+            )
+        )
+        self.assertFalse(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("src/literate_ai/cli/render.py",)
+            )
+        )
+        self.assertTrue(
+            selector.select_freebsd_acl(
+                "pull_request",
+                "main",
+                ("src/literate_ai/adapters/retained_posix_acl.py",),
+            )
+        )
+        self.assertTrue(selector.select_freebsd_acl("pull_request", "main", None))
+        self.assertTrue(
+            selector.select_freebsd_acl("pull_request", "release/1.3.x", ("README.md",))
+        )
+        self.assertTrue(selector.select_freebsd_acl("push", "", ("README.md",)))
+
     def test_workflow_runs_only_the_checks_owned_by_each_scoped_profile(self) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
         profile = workflow["jobs"]["profile"]["steps"][-1]
@@ -96,6 +119,9 @@ class CiActionPinTests(unittest.TestCase):
             profile["env"]["CI_HEAD_SHA"],
             "${{ github.event.pull_request.head.sha }}",
         )
+        freebsd = workflow["jobs"]["freebsd-posix-acl"]
+        self.assertEqual(freebsd["needs"], "profile")
+        self.assertEqual(freebsd["if"], "needs.profile.outputs.freebsd_acl == 'true'")
         steps = workflow["jobs"]["checks"]["steps"]
         documentation_steps = [
             step for step in steps if step.get("if") == "matrix.task == 'documentation'"
