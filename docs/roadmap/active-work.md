@@ -30703,7 +30703,7 @@ remain open in their owning items; this controller/sample proof does not close t
 
 - **Final installed public CLI acceptance:** Exact qualified wheel `1e848368` passes all nine public discovery cases plus real YAML container-alias, onboarding alias, depth and node-limit refusals. Scalar aliases remain ready; every audit preserves exact file bytes and mtimes, and authored inputs restore ready. Installed module bytes match the reviewed source. See `verification/agent-entrypoint-installed-final-acceptance.json`; no lifecycle admission is asserted by the discovery command.
 
-### [ ] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
+### [x] RETAINED-ACL-PREFLIGHT-001 — Preflight retained workspace ACL support
 
 **GitHub issue:** [#92](https://github.com/jordanhubbard/literate-ai/issues/92).
 
@@ -30715,8 +30715,9 @@ remain open in their owning items; this controller/sample proof does not close t
 - **Depends on:** none
 - **Implementation:**
   - [x] Run bounded capability preflight before capture and emit an actionable unsupported-filesystem diagnostic.
+  - [x] Add an explicit negative regression proving unsupported ACL brands refuse before text conversion and still release the native ACL handle; the production guard is unchanged.
 - **Evidence:**
-  - [ ] Real disabled/enabled UFS probes establish early refusal, exact cleanup and unchanged unsupported-brand refusals.
+  - [x] Real disabled/enabled UFS probes establish early refusal and exact cleanup in native job `122392255232`, review run `40561422042`. The unchanged unsupported-brand guard has an explicit three-brand negative port regression; the combined ACL/execution suite passes 36 tests with 12 platform skips. Production source remains byte-identical to the qualified review. See [bounded evidence and limits](../../verification/retained-patch-goal-evidence.json); this does not qualify a complete FreeBSD lifecycle or the final patch candidate.
 
 **Current direction:** Before retained input capture, create one private probe directory
 inside the already authorized allocation prefix, hold it by descriptor, apply and read
@@ -30733,8 +30734,15 @@ restores custody, removes its probe after success, translates native
 open failure. Static lint and formatting pass. Actual disabled/enabled FreeBSD UFS
 probes remain required; no configured aligned worker currently supplies that platform,
 so a SHA-pinned FreeBSD 14.3 VM cell now provisions separate UFS mounts without and
-with POSIX.1e ACLs and runs those two native acceptance cases. Its exact-head result
-remains pending.
+with POSIX.1e ACLs and runs those two native acceptance cases. Review run
+`40561422042` for `2380afa031cf59182ad2d31ca1ece7aa703e3d87` now succeeds,
+including native job `122392255232`. Production source, project pins, execution
+tests and the two native acceptance cases remain unchanged. The additional
+negative test supplies native-port brands 0, 2 and 3 and proves refusal before
+conversion or mutation plus exact handle release. This is a controlled negative
+fixture, not native NFSv4 filesystem acceptance. All 48 selected ACL/execution
+tests complete: 36 pass and 12 have explicit platform skips. The bounded goal is
+complete; final 1.3.1 candidate and broader FreeBSD qualification remain separate.
 
 ### [x] UPDATE-CLOSURE-001 — Check prospective update scaffold dependency closure
 
@@ -31126,7 +31134,7 @@ The first failed directory, source checkout and installed wheel stay retained.
 
 **#129 qualified read-only catalog reuse:** Exact source `74417e1a` passes the full 2,265-case source suite (2,194 passed, 71 existing skips, zero failures), all installed-wheel assertions, 14 focused cases including actual in-operation mutations, and the forced lifecycle with 229 passing checks and no skips. The generated suite count is producer-bound; the declared conformance inventory and minimums are unchanged. Supported receipt update/check/require-current and all-gate verify pass on the metadata-only consolidated tree. The native Windows public lock check returns identical passing reports across both installations and restores its fixture; three-call medians are 35.172 seconds baseline and 28.187 candidate, with cache/order variation. Catalog captures fall from five to two; all ten input revalidations and four current authority-graph observations remain. See `verification/lock-check-catalog-qualification.json`. The next action is ordinary review CI and landing of this scoped improvement, then complete unchanged provided-worker native renewal before closing #129. No generator-diversity exemption, dependency, release, or native admission is claimed.
 
-### [ ] RETAINED-PACKAGE-CONCURRENCY-001 — Diagnose parallel retained-package ancestor replacement
+### [x] RETAINED-PACKAGE-CONCURRENCY-001 — Diagnose parallel retained-package ancestor replacement
 
 - **GitHub issue:** [#140](https://github.com/jordanhubbard/literate-ai/issues/140)
 - **Release target:** 1.3.1
@@ -31139,7 +31147,7 @@ The first failed directory, source checkout and installed wheel stay retained.
   - [x] Add deterministic concurrent ancestor-replacement coverage and report the exact changed lineage depth, name, reason, and expected/current filesystem identities without weakening the refusal.
 - **Evidence:**
   - [x] Exercise the exact parallel retained-package path repeatedly with the new coverage or diagnostics and retain the original refusal plus current passing controls.
-  - [ ] Pass focused mutation/refusal checks, full parallel regression, exact installed wheel and exact-head CI with unchanged production guards.
+  - [x] Pass focused mutation/refusal checks, full parallel regression, exact installed wheel and exact-head CI with unchanged production guards. Review run `40561422042` passes 12 jobs with one intentional skip; its four-worker source regression completes 2,312 tests (2,221 passed, 91 skipped), including all nine retained-package and fourteen input-walk cases. Its exact source-tree wheel passes the installed gate outside the checkout and contains the byte-identical repaired adapter. See [source-bound evidence and limits](../../verification/retained-patch-goal-evidence.json); final 1.3.1 candidate qualification remains separate.
 
 **Current direction:** Extend the existing descriptor-lineage guard rather than changing
 retained-package cleanup or accepting a replacement. A synchronized test will replace
@@ -31155,8 +31163,13 @@ separate missing, redirected and identity-replaced diagnostics. The original
 retained-package case passes three consecutive exact invocations under the repository's
 parallel test configuration, and its complete file passes nine tests plus two subtests.
 The post-format combined group passes 15 tests plus seven subtests. No retained-root
-comparison, production deadline or package-cleanup behavior is relaxed. Full parallel,
-installed-wheel and exact-head CI gates remain open.
+comparison, production deadline or package-cleanup behavior is relaxed. The later
+completed review run supplies the full parallel and installed-wheel evidence above.
+Its synthetic merge and review head have the same Git tree. All current production
+source and the relevant package/input tests remain byte-identical; the wheel's
+repaired module hashes to current `aa3e5a2a3d10bc1ce82c91775c91ff2690fb40e0069a9f74cd654d59cf26bd93`.
+The bounded concurrency goal is complete; this development-wheel proof does not
+publish or qualify the future 1.3.1 distribution.
 
 ### [x] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
 

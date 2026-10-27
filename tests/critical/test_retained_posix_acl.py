@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from literate_ai.adapters import retained_posix_acl as acl
 from literate_ai.adapters.retained_posix_acl import (
@@ -92,6 +92,27 @@ class PosixAclProjectionTests(unittest.TestCase):
             self.skipTest("native backend supported on this platform")
         with self.assertRaisesRegex(ValueError, "unsupported-platform"):
             FreeBsdPosixAcl()
+
+    def test_non_posix_brands_refuse_before_conversion_and_free_native_handle(self):
+        for brand in (0, 2, 3):
+            with self.subTest(brand=brand):
+                backend = FreeBsdPosixAcl.__new__(FreeBsdPosixAcl)
+                backend.libc = Mock()
+                handle = object()
+                backend.libc.acl_get_fd_np.return_value = handle
+
+                def observe_brand(_handle, output, value=brand):
+                    acl.ctypes.cast(
+                        output, acl.ctypes.POINTER(acl.ctypes.c_int)
+                    ).contents.value = value
+                    return 0
+
+                backend.libc.acl_get_brand_np.side_effect = observe_brand
+                with self.assertRaisesRegex(ValueError, "posix-brand-required"):
+                    backend.read(17, 2)
+                backend.libc.acl_to_text_np.assert_not_called()
+                backend.libc.acl_set_fd_np.assert_not_called()
+                backend.libc.acl_free.assert_called_once_with(handle)
 
     def test_preflight_applies_reads_restores_and_removes_probe(self):
         observed = {}

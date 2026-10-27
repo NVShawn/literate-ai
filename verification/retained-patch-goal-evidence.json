@@ -1,0 +1,69 @@
+{
+  "scope": "Bounded implementation evidence for RETAINED-ACL-PREFLIGHT-001 and RETAINED-PACKAGE-CONCURRENCY-001; not final 1.3.1 release qualification",
+  "review_head": "2380afa031cf59182ad2d31ca1ece7aa703e3d87",
+  "checked_out_merge": "c0a2ddd7e3f55e3545a687d6cde707c739b5d621",
+  "equal_review_and_merge_tree": "852e21808da42a4ebd1af352471e28762cd6119a",
+  "review_run": "https://github.com/jordanhubbard/literate-ai/actions/runs/40561422042",
+  "review_result": {"passed_jobs": 12, "skipped_jobs": 1, "failed_jobs": 0},
+  "source_equivalence": {
+    "audited_main": "87ae56c6af441bf66b1fb443e13bc06573b0ea5f",
+    "unchanged_since_review": [
+      "src/literate_ai",
+      "literate.project.json",
+      "tests/critical/test_retained_input_walk.py",
+      "tests/critical/test_retained_project_package.py",
+      "tests/critical/test_retained_project_execution.py"
+    ],
+    "method": "git diff --exit-code against review_head; no differences",
+    "production_sha256": {
+      "src/literate_ai/adapters/retained_posix_acl.py": "2e7216d7c85dcd715cf6b064a1e98d33112135d8597496d34854a3e71f26a11c",
+      "src/literate_ai/adapters/retained_project_execution.py": "5a9dafc315e44f79743a4c1c47db5ae060ddb07708fbf819938a895876fb8a53",
+      "src/literate_ai/adapters/retained_project_inputs.py": "aa3e5a2a3d10bc1ce82c91775c91ff2690fb40e0069a9f74cd654d59cf26bd93"
+    }
+  },
+  "acl": {
+    "native_job": "https://github.com/jordanhubbard/literate-ai/actions/runs/40561422042/job/122392255232",
+    "platform": "FreeBSD 14.3, real separate ACL-disabled and ACL-enabled UFS mounts",
+    "native_acceptance": [
+      "test_disabled_ufs_refuses_before_capture_and_cleans_probe",
+      "test_enabled_ufs_applies_restores_and_cleans_probe"
+    ],
+    "native_result": "both passed; production source and native acceptance cases unchanged",
+    "additional_negative_regression": {
+      "test": "PosixAclProjectionTests.test_non_posix_brands_refuse_before_conversion_and_free_native_handle",
+      "method": "controlled native-port responses for ACL brands 0, 2 and 3; refusal before text conversion or write, and exactly one handle release",
+      "test_module_sha256": "9e1f302d77653bf4e8dc67579a553723e7b1083c5061f114c4b2134f6f962871",
+      "combined_acl_execution_suite": {"total": 48, "passed": 36, "platform_skips": 12, "failed": 0},
+      "limit": "The negative port fixture is not a native NFSv4 filesystem execution. Real UFS acceptance is established separately above."
+    }
+  },
+  "parallel_regression": {
+    "job": "https://github.com/jordanhubbard/literate-ai/actions/runs/40561422042/job/122392255738",
+    "workers": 4,
+    "total": 2312,
+    "passed": 2221,
+    "skipped": 91,
+    "failed": 0,
+    "retained_package_cases_passed": 9,
+    "input_walk_cases_passed": 14,
+    "retained_stderr_sha256": "85d3dadb296742bde77d51c3050cbd933954f42d6fb449246edddd7a9265b2c4",
+    "provider_artifact_id": 12763596433
+  },
+  "installed_wheel": {
+    "provider_artifact_id": 12763326765,
+    "filename": "literate_ai-1.4.0-py3-none-any.whl",
+    "version": "1.4.0",
+    "source_revision": "c0a2ddd7e3f55e3545a687d6cde707c739b5d621",
+    "sha256": "750550d7c3c8e3c8dad85621bf2be0e0f0ba9cc3a602ad35db540a8c446aa0d5",
+    "installed_gate": "passed outside the checkout; retained ledger and JSON both report passed",
+    "installed_gate_stdout_sha256": "05ac5cc2c7c97e3b7b526bd3d2fa9e556511cbd59ee64ecb50aa72a6ffeea631",
+    "packaged_retained_project_inputs_sha256": "aa3e5a2a3d10bc1ce82c91775c91ff2690fb40e0069a9f74cd654d59cf26bd93",
+    "packaged_repaired_module_matches_current_source": true
+  },
+  "limits": [
+    "This qualifies the bounded fixes on unchanged development source, not a prepared 1.3.1 wheel.",
+    "No full native FreeBSD lifecycle or newly changed-source acceptance is inferred from the two ACL probes.",
+    "The newly added negative regression ran locally; pending CI is not reported as passed.",
+    "Remaining release goals and final candidate qualification still block publication."
+  ]
+}

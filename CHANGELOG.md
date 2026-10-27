@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add explicit non-POSIX ACL-brand refusal and handle-cleanup regression coverage;
+  retain source-bound native, parallel-package and installed-wheel proof for the
+  completed ACL-preflight and changed-ancestor diagnostics goals.
+
 - Apply documentation-only CI selection to exact default-branch pushes as well as
   pull requests. Keep full qualification for product changes, unknown diffs, manual
   runs, release branches and tags; documentation publication remains independent.
