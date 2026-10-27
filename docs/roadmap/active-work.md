@@ -31136,10 +31136,27 @@ The first failed directory, source checkout and installed wheel stay retained.
 - **Conclusion:** The first exact 1.3.0 tiered qualification produced one changed-ancestor refusal, while repeated isolated execution, the checkpoint repair pass, the required 2,267-case reset/full rerun and exact-main CI all passed. A one-off green rerun does not explain or close the concurrency risk.
 - **Depends on:** Retained root ancestor verification and parallel package qualification
 - **Implementation:**
-  - [ ] Add deterministic concurrency coverage that reproduces the fixture-lifecycle race, or add stronger diagnostics that distinguish legitimate concurrent retirement from an invalid root replacement without weakening the refusal.
+  - [x] Add deterministic concurrent ancestor-replacement coverage and report the exact changed lineage depth, name, reason, and expected/current filesystem identities without weakening the refusal.
 - **Evidence:**
-  - [ ] Exercise the exact parallel retained-package path repeatedly with the new coverage or diagnostics and retain the original refusal plus current passing controls.
+  - [x] Exercise the exact parallel retained-package path repeatedly with the new coverage or diagnostics and retain the original refusal plus current passing controls.
   - [ ] Pass focused mutation/refusal checks, full parallel regression, exact installed wheel and exact-head CI with unchanged production guards.
+
+**Current direction:** Extend the existing descriptor-lineage guard rather than changing
+retained-package cleanup or accepting a replacement. A synchronized test will replace
+an intermediate test-owned ancestor with an identical tree between descriptor capture
+and transaction completion. The transaction must still refuse, and its message must
+identify whether the observed ancestor was missing, redirected or replaced plus the
+lineage position and both identities when available. This is diagnostic hardening, not
+a relaxation of root currentness.
+
+**Focused result:** The descriptor-walk group passes 14 tests plus seven subtests,
+including synchronized byte-identical replacement of an intermediate ancestor and
+separate missing, redirected and identity-replaced diagnostics. The original
+retained-package case passes three consecutive exact invocations under the repository's
+parallel test configuration, and its complete file passes nine tests plus two subtests.
+The post-format combined group passes 15 tests plus seven subtests. No retained-root
+comparison, production deadline or package-cleanup behavior is relaxed. Full parallel,
+installed-wheel and exact-head CI gates remain open.
 
 ### [x] DOC-DEPENDENCIES-003 — Refresh vulnerable transitive Zod in documentation tooling
 
