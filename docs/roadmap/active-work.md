@@ -31233,7 +31233,7 @@ open.
   - [x] Add fail-closed documentation and CI-policy profiles selected from the exact pull-request base/head diff.
   - [x] Keep full main/release qualification and the ordinary cross-platform profile for every unknown or product-code change.
   - [x] Land the exact scoped workflow and documentation through reviewed exact-head CI, then verify exact-main CI uses full qualification.
-  - [x] Extend documentation and policy selection to exact default-branch push changes, preserving complete release/tag/manual and product qualification.
+  - [x] Extend documentation and policy selection to exact default-branch push changes, preserving complete release/tag/manual and product qualification. The separately declared five-cell macOS qualification job now depends on the same profile instead of bypassing it with an unconditional push predicate. Initial run `40569986418` exposed that independent job path; it is retained as corrective evidence, not a successful scoped run.
 - **Evidence:**
   - [x] The preceding documentation-only PR run `40467590036` launched the complete 17-job ordinary PR matrix, including native C++, Elixir, samples, wheel and platform work; this is retained as the motivating over-selection evidence rather than relabelled efficient.
   - [x] PR #154 exact-head run `40469396361` selected only `Documentation and presentation integrity` plus `CI change-scope policy`; both passed, alongside the independent GitGuardian check.

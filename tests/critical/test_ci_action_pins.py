@@ -123,6 +123,9 @@ class CiActionPinTests(unittest.TestCase):
                 self.assertFalse(
                     selector.select_freebsd_acl("push", "refs/heads/main", paths)
                 )
+                self.assertFalse(
+                    selector.select_full_qualification("push", "refs/heads/main", paths)
+                )
 
         for event, ref, paths in (
             ("push", "refs/heads/main", None),
@@ -141,6 +144,7 @@ class CiActionPinTests(unittest.TestCase):
                     len([row for row in rows if row["task"] == "elixir-native"]), 6
                 )
                 self.assertTrue(selector.select_freebsd_acl(event, ref, paths))
+                self.assertTrue(selector.select_full_qualification(event, ref, paths))
 
         self.assertTrue(
             selector.select_freebsd_acl(
@@ -188,6 +192,11 @@ class CiActionPinTests(unittest.TestCase):
         freebsd = workflow["jobs"]["freebsd-posix-acl"]
         self.assertEqual(freebsd["needs"], "profile")
         self.assertEqual(freebsd["if"], "needs.profile.outputs.freebsd_acl == 'true'")
+        macos = workflow["jobs"]["macos-qualification"]
+        self.assertEqual(macos["needs"], "profile")
+        self.assertEqual(
+            macos["if"], "needs.profile.outputs.full_qualification == 'true'"
+        )
         steps = workflow["jobs"]["checks"]["steps"]
         documentation_steps = [
             step for step in steps if step.get("if") == "matrix.task == 'documentation'"

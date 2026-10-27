@@ -125,6 +125,13 @@ def select_matrix(
     return {"include": [row for row in rows if row["pr"]]}
 
 
+def select_full_qualification(
+    event: str, base_ref: str, changed_paths: tuple[str, ...] | None = None
+) -> bool:
+    ordinary_pr = event == "pull_request" and not base_ref.startswith("release/")
+    return not ordinary_pr and not _scoped_main_push(event, base_ref, changed_paths)
+
+
 def select_freebsd_acl(
     event: str, base_ref: str, changed_paths: tuple[str, ...] | None = None
 ) -> bool:
@@ -155,3 +162,7 @@ if __name__ == "__main__":
     matrix = select_matrix(event, base_ref, paths)
     print("matrix=" + json.dumps(matrix, separators=(",", ":")))
     print("freebsd_acl=" + str(select_freebsd_acl(event, base_ref, paths)).lower())
+    print(
+        "full_qualification="
+        + str(select_full_qualification(event, base_ref, paths)).lower()
+    )

@@ -27,6 +27,7 @@ jobs:
     outputs:
       matrix: ${{ steps.select.outputs.matrix }}
       freebsd_acl: ${{ steps.select.outputs.freebsd_acl }}
+      full_qualification: ${{ steps.select.outputs.full_qualification }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -852,7 +853,8 @@ jobs:
 
   macos-qualification:
     # Never interpret the ordinary PR smoke cell as exact-source release proof.
-    if: github.event_name != 'pull_request' || startsWith(github.base_ref, 'release/')
+    needs: profile
+    if: needs.profile.outputs.full_qualification == 'true'
     name: ${{ matrix.name }}
     runs-on: macos-latest
     timeout-minutes: 240
