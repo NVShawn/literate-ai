@@ -524,7 +524,13 @@ jobs:
         if: matrix.task == 'windows-tests'
         shell: pwsh
         run: |
-          python scripts/profile_pytest.py logs/profile-${{ matrix.group }}.ndjson logs/profile-report-${{ matrix.group }}.json -- --splits 3 --group ${{ matrix.group }} --durations-path=.test_durations tests/e2e tests/smoke tests/critical tests/conformance
+          python scripts/profile_pytest.py logs/profile-${{ matrix.group }}.ndjson logs/profile-report-${{ matrix.group }}.json -- --deselect=tests/smoke/test_remote_standard_toolchains.py::RemoteStandardToolchainTests::test_actual_admitted_receiver_supplies_discovery_and_live_profile_guard --splits 3 --group ${{ matrix.group }} --durations-path=.test_durations tests/e2e tests/smoke tests/critical tests/conformance
+      - name: Qualify the native receiver without xdist contention
+        if: matrix.task == 'windows-tests' && matrix.group == 3
+        timeout-minutes: 45
+        shell: pwsh
+        run: |
+          python scripts/profile_pytest.py logs/profile-${{ matrix.group }}-receiver.ndjson logs/profile-report-${{ matrix.group }}-receiver.json -- -o addopts='' tests/smoke/test_remote_standard_toolchains.py::RemoteStandardToolchainTests::test_actual_admitted_receiver_supplies_discovery_and_live_profile_guard
       - name: Upload the profiling trace and hotspot report
         if: matrix.task == 'windows-tests' && (always())
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
@@ -533,6 +539,8 @@ jobs:
           path: |
             logs/profile-${{ matrix.group }}.ndjson
             logs/profile-report-${{ matrix.group }}.json
+            logs/profile-${{ matrix.group }}-receiver.ndjson
+            logs/profile-report-${{ matrix.group }}-receiver.json
           if-no-files-found: warn
 
       # cpp-native

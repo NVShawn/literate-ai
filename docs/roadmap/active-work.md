@@ -29984,6 +29984,7 @@ the guard or replace this failure with an empty dependency observation.
 
 - **GitHub issue:** [#90](https://github.com/jordanhubbard/literate-ai/issues/90)
 - **Priority:** P0
+- **Release target:** 1.3.1
 - **Owner:** Framework PE dependency observation and receiver custody
 - **Direction:** Complete native Windows dependency closure within existing finite receiver and retained-command limits; issue #90.
 - **Conclusion:** Integrate the reviewed independent-image frontier implementation from peer commit 1fbc7e7f, retaining deterministic resolution, image and inspector hashes, complete graph semantics and owned failure cleanup; qualify it on actual Windows before acceptance.
@@ -29991,6 +29992,7 @@ the guard or replace this failure with an empty dependency observation.
 - **Implementation:**
   - [x] Inspect independent images in bounded concurrent frontiers; merge through the existing loader resolver in canonical queue order.
   - [x] Preserve content-bound fact caching and cancel/join outstanding bounded inspections on refusal.
+  - [ ] Run the real admitted-receiver case outside xdist contention in its own profiled Windows CI step; retain the unchanged 300-second bound on every production observation and fail the job on any omitted or failed isolated case.
 - **Evidence:**
   - [x] Serial/parallel graph equivalence, real overlap, image substitution and inspector mutation refusals pass.
   - [ ] Actual native Windows retained workspace and admitted receiver complete inside unchanged deadlines; full regression, exact installed wheel and CI pass.
@@ -30054,6 +30056,14 @@ capped this entire multi-observation test at 300 seconds and is preserved as a
 harness timeout; the corrected harness reads both existing policies from verified
 source. No repository deadline changes. Native archive remains
 `sha256:3f8702850abf911950dfeab1ebb3d80c8c16c401c9709f9a1e86cd44a6edffde`.
+
+Exact-main run `40428755660` then passed 25 of 26 jobs but reproduced the same
+receiver expiry in Windows shard 3 twice, including a failed-only rerun. The fresh
+interpreter remained nested under an xdist worker while the rest of the shard
+continued competing for the hosted runner. Preserve both failures. Keep the real
+case and all production deadlines unchanged; deselect it only from the parallel
+shard and run it once, explicitly and without inherited pytest parallelism, in a
+separate bounded/profiled Windows step whose failure still fails the same job.
 
 These are source-development gates. Next: commit the reviewed batch, build and
 qualify its exact wheel, repeat the 55-case FreeBSD group from installed modules,
@@ -31220,9 +31230,11 @@ open.
   - [x] Add roadmap goal and approval records to the canonical release contribution policy and CLI.
   - [x] Reject release readiness when a goal is missing from the roadmap, incomplete, or deferred without explicit user approval and a future release target.
   - [x] Update release-project and record-user-directed-work skills plus initialized-project copies with the same approval boundary.
+  - [ ] Complete WINDOWS-PE-OBSERVE-001 after repairing the exact-main Windows dependency-observation failure without weakening live receiver or dependency-closure checks.
   - [ ] Move COURSE-004 and all replacement-onboarding production work to 1.3.1, then complete and publish the film before the patch release.
 - **Evidence:**
   - [x] Deterministic release-contribution tests reject undocumented, incomplete, and unapproved-deferred goals and accept only completed or explicitly approved future moves; 35 focused release, initialization, and CLI tests plus 33 subtests pass.
   - [x] Root/template skill copies are byte-identical; repository layout, SkillEvaluator, 22 documentation tests, and all 121 Mermaid renders pass.
+  - [ ] A focused deadline regression and the exact post-merge Windows partition pass with dependency observations still bounded by the caller deadline.
   - [ ] The complete replacement onboarding film passes voice, motion, factual, accessibility, media-integrity, and full-playback review gates.
   - [ ] The 1.3.1 release plan, qualification, publication, verification, and exact post-release synchronization gates pass with no incomplete release goals.

@@ -18,6 +18,41 @@ PIN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+@[0-9a-f]{40}")
 
 
 class CiActionPinTests(unittest.TestCase):
+    def test_windows_native_receiver_runs_once_without_xdist_contention(self) -> None:
+        workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = workflow["jobs"]["checks"]["steps"]
+        shard = next(
+            step for step in steps if step.get("name") == "Run this shard's tests"
+        )
+        receiver = next(
+            step
+            for step in steps
+            if step.get("name")
+            == "Qualify the native receiver without xdist contention"
+        )
+        upload = next(
+            step
+            for step in steps
+            if step.get("name") == "Upload the profiling trace and hotspot report"
+        )
+        test_id = (
+            "tests/smoke/test_remote_standard_toolchains.py::"
+            "RemoteStandardToolchainTests::"
+            "test_actual_admitted_receiver_supplies_discovery_and_live_profile_guard"
+        )
+        self.assertIn(f"--deselect={test_id}", shard["run"])
+        self.assertEqual(
+            receiver["if"], "matrix.task == 'windows-tests' && matrix.group == 3"
+        )
+        self.assertEqual(receiver["timeout-minutes"], 45)
+        self.assertIn("-o addopts=''", receiver["run"])
+        self.assertIn(test_id, receiver["run"])
+        self.assertIn(
+            "profile-${{ matrix.group }}-receiver.ndjson", upload["with"]["path"]
+        )
+        self.assertLess(steps.index(shard), steps.index(receiver))
+        self.assertLess(steps.index(receiver), steps.index(upload))
+
     def test_all_external_actions_use_full_commit_ids(self) -> None:
         references = []
         for path in sorted((ROOT / ".github/workflows").glob("*.y*ml")):
