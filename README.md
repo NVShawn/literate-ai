@@ -54,6 +54,8 @@ and
 [narrative](https://docs.google.com/document/d/1C6jtFrm9oAj6dg4CuLimylzu5HdaP6CovP2KY8U1HRA/edit?usp=drivesdk).
 The authoring package is
 [`docs/presentations/literate-ai-manager-overview/`](docs/presentations/literate-ai-manager-overview/).
+For the patch-release scope, evidence status, release history, and current ETA, use the
+[editable 1.3.1 release briefing](docs/presentations/literate-ai-1.3.1-release-briefing/README.md).
 
 ## Adopt, then rebuild
 
@@ -265,6 +267,10 @@ litai graph --format mermaid --output docs/authority.mmd
 litai graph rebalance --format text  # advisory; never moves authority
 litai graph --kind component --ownership inherited --inheritance inheritable
 
+# Generate the built-in HTML repository explorer; open graph.html in a browser.
+litai render html --project . --surface authority-graph --view dag \
+  --output graph.html --external-asset-policy pinned-cdn
+
 # Show each framework-owned child command and its bounded output on stderr.
 litai --verbose build samples/hello-component --target host
 
@@ -331,6 +337,14 @@ its local/inherited provenance and inheritance policy. The same canonical solver
 cycles and exports compact JSON, text, Mermaid, Graphviz DOT, or dependency-free SVG.
 This makes inheritance review and upward-migration discussions inspectable without
 turning a suggested rebalancing into an automatic source move.
+
+The same canonical DAG powers the built-in
+[HTML repository explorer](docs/user/html-repository-explorer.md). Its single-file view
+adds filters, node focus, pan/zoom, keyboard navigation, provenance metadata, and
+identity-checked Markdown/JSON source excerpts. It is not an arbitrary source-code
+browser: symbol search, go-to-definition and reference navigation are outside the
+current HTML surface, while debug specification-to-source maps remain a separate
+sidecar and stderr feature.
 
 The global `-v`/`--verbose` option may appear before or after a command verb. It prints
 safely quoted child argv, working directories, exit status, and bounded stdout/stderr to

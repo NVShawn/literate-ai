@@ -1,5 +1,23 @@
 [
   {
+    "task": "documentation",
+    "name": "Documentation and presentation integrity",
+    "os": "ubuntu-latest",
+    "python": "3.13",
+    "group": 0,
+    "pr": false,
+    "scoped": "documentation"
+  },
+  {
+    "task": "ci-policy",
+    "name": "CI change-scope policy",
+    "os": "ubuntu-latest",
+    "python": "3.13",
+    "group": 0,
+    "pr": false,
+    "scoped": "ci-policy"
+  },
+  {
     "task": "skill-evaluation",
     "name": "Changed skill admission",
     "os": "ubuntu-latest",

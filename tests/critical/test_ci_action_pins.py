@@ -18,6 +18,87 @@ PIN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+@[0-9a-f]{40}")
 
 
 class CiActionPinTests(unittest.TestCase):
+    @staticmethod
+    def selector():
+        spec = importlib.util.spec_from_file_location(
+            "select_ci_profile", ROOT / "scripts/select_ci_profile.py"
+        )
+        selector = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(selector)
+        return selector
+
+    def test_change_scoped_profiles_are_narrow_and_fail_closed(self) -> None:
+        selector = self.selector()
+
+        documentation = selector.select_matrix(
+            "pull_request",
+            "main",
+            (
+                "README.md",
+                "docs/user/html-repository-explorer.md",
+                "docs/presentations/release/deck.pptx",
+            ),
+        )["include"]
+        self.assertEqual([row["task"] for row in documentation], ["documentation"])
+
+        policy_and_documentation = selector.select_matrix(
+            "pull_request",
+            "main",
+            (
+                "README.md",
+                ".github/workflows/ci.yml",
+                "scripts/select_ci_profile.py",
+                "tests/critical/test_ci_action_pins.py",
+            ),
+        )["include"]
+        self.assertEqual(
+            [row["task"] for row in policy_and_documentation],
+            ["documentation", "ci-policy"],
+        )
+
+        for changed_paths in ((), ("src/literate_ai/cli/render.py",)):
+            with self.subTest(changed_paths=changed_paths):
+                selected = selector.select_matrix(
+                    "pull_request", "main", changed_paths
+                )["include"]
+                self.assertTrue(selected)
+                self.assertNotIn("documentation", {row["task"] for row in selected})
+                self.assertNotIn("ci-policy", {row["task"] for row in selected})
+                self.assertIn("conformance", {row["task"] for row in selected})
+
+        full = selector.select_matrix("push", "", ("README.md",))["include"]
+        self.assertTrue(full)
+        self.assertNotIn("scoped", {key for row in full for key in row})
+
+    def test_workflow_runs_only_the_checks_owned_by_each_scoped_profile(self) -> None:
+        workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
+        profile = workflow["jobs"]["profile"]["steps"][-1]
+        self.assertEqual(
+            profile["env"]["CI_BASE_SHA"],
+            "${{ github.event.pull_request.base.sha }}",
+        )
+        self.assertEqual(
+            profile["env"]["CI_HEAD_SHA"],
+            "${{ github.event.pull_request.head.sha }}",
+        )
+        steps = workflow["jobs"]["checks"]["steps"]
+        documentation_steps = [
+            step for step in steps if step.get("if") == "matrix.task == 'documentation'"
+        ]
+        policy_steps = [
+            step for step in steps if step.get("if") == "matrix.task == 'ci-policy'"
+        ]
+        self.assertTrue(documentation_steps)
+        self.assertTrue(policy_steps)
+        documentation_text = json.dumps(documentation_steps)
+        self.assertIn("documentation-check", documentation_text)
+        self.assertIn("public-export-check", documentation_text)
+        self.assertIn("test_roadmap_goal_gate", documentation_text)
+        policy_text = json.dumps(policy_steps)
+        self.assertIn("tests.critical.test_ci_action_pins", policy_text)
+        self.assertNotIn("make validate", documentation_text + policy_text)
+        self.assertNotIn("wheel-check", documentation_text + policy_text)
+
     def test_windows_native_receiver_runs_once_without_xdist_contention(self) -> None:
         workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
         steps = workflow["jobs"]["checks"]["steps"]
@@ -115,11 +196,7 @@ class CiActionPinTests(unittest.TestCase):
                 row["hex_args"],
                 "--build-from-source" if row["otp_major"] == "29" else "",
             )
-        spec = importlib.util.spec_from_file_location(
-            "select_ci_profile", ROOT / "scripts/select_ci_profile.py"
-        )
-        selector = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(selector)
+        selector = self.selector()
         for event, base in (
             ("pull_request", "main"),
             ("pull_request", "release/1.2"),
