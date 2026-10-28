@@ -132,6 +132,7 @@ class CiActionPinTests(unittest.TestCase):
             ("push", "refs/heads/main", ()),
             ("push", "refs/heads/main", ("README.md", "src/literate_ai/cli.py")),
             ("push", "refs/heads/main", ("unclassified-input",)),
+            ("push", "refs/heads/main", ("verification/current.json",)),
             ("push", "refs/heads/release/1.3.x", ("README.md",)),
             ("push", "refs/tags/v1.3.1", ("README.md",)),
             ("workflow_dispatch", "refs/heads/main", ("README.md",)),
@@ -157,6 +158,7 @@ class CiActionPinTests(unittest.TestCase):
         paths = (
             "tests/critical/test_roadmap_dependencies.py",
             "tests/critical/test_retained_posix_acl.py",
+            "verification/windows-portable-fixtures-qualification.json",
             "docs/roadmap/active-work.md",
         )
         for event, ref in (("pull_request", "main"), ("push", "refs/heads/main")):

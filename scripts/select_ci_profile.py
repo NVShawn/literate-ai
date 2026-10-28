@@ -23,6 +23,7 @@ _QUALIFICATION_FIXTURE_FILES = frozenset(
     {
         "tests/critical/test_roadmap_dependencies.py",
         "tests/critical/test_retained_posix_acl.py",
+        "verification/windows-portable-fixtures-qualification.json",
     }
 )
 _FREEBSD_ACL_FILES = frozenset(
