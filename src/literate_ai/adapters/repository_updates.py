@@ -651,6 +651,14 @@ class FilesystemRepositoryUpdateAdapter:
                 "repository_update.provenance_invalid",
                 "repository update provenance could not be prepared",
             ) from exc
+        from literate_ai.application.roadmap_dependencies import RoadmapDependencyError
+
+        from .roadmap_dependencies import require_project_roadmap_acyclic
+
+        try:
+            require_project_roadmap_acyclic(project.root, write_content)
+        except RoadmapDependencyError as exc:
+            raise RepositoryUpdateError(exc.code, exc.message) from exc
         store = FilesystemRepositoryLineageStore(project.root)
         lineage_replaced = False
         written: list[str] = []

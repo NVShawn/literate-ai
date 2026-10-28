@@ -143,6 +143,11 @@ def _documentation_catalog(project: Any) -> dict[str, object]:
         if Path(path).suffix.casefold() != ".md"
     }
     try:
+        from literate_ai.application.roadmap_dependencies import RoadmapDependencyError
+
+        from .roadmap_dependencies import require_project_roadmap_acyclic
+
+        require_project_roadmap_acyclic(project.root, captured)
         graph = validate_documentation_graph(
             project_root=project.root,
             agent_skill=project.agent_skill,
@@ -151,7 +156,7 @@ def _documentation_catalog(project: Any) -> dict[str, object]:
             assets=assets,
         )
         closure.require_unchanged()
-    except (DocumentationError, PinnedInputClosureError) as exc:
+    except (DocumentationError, PinnedInputClosureError, RoadmapDependencyError) as exc:
         _error(exc, "project.documentation_invalid", "project documentation is invalid")
     document_report: list[dict[str, str]] = []
     for path, content in sorted(documents.items()):

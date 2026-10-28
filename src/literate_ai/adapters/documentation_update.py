@@ -559,6 +559,17 @@ def apply_documentation_update(
                 "project.documentation_update_concurrent_change",
                 f"documentation changed after the model proposal: {relative}",
             )
+    from literate_ai.application.roadmap_dependencies import RoadmapDependencyError
+
+    from .roadmap_dependencies import require_project_roadmap_acyclic
+
+    try:
+        require_project_roadmap_acyclic(
+            project.root,
+            {relative: replacement for relative, replacement, _reasons in changes},
+        )
+    except RoadmapDependencyError as exc:
+        raise DocumentationUpdateError(exc.code, exc.message) from exc
     written: list[tuple[str, bytes]] = []
     try:
         for relative, replacement, _reasons in changes:

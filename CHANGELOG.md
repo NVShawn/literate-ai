@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reject cyclic roadmap completion prerequisites before supported work/template
+  imports and during documentation, project and release validation. Report cycle
+  paths through work items and release phases without removing release goals.
+
 - Match the native Windows gate to hosted CI's dependency-observation isolation:
   run the live admitted-receiver case serially, then run the remaining suite once
   with normal parallelism. Retain separate JUnit reports and unchanged live deadlines.

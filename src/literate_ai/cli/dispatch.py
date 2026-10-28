@@ -874,6 +874,12 @@ def _parser() -> JsonArgumentParser:
     work_record.add_argument("--direction", required=True)
     work_record.add_argument("--conclusion", required=True)
     work_record.add_argument("--depends-on", action="append", default=[])
+    work_record.add_argument(
+        "--completion-prerequisite",
+        action="append",
+        default=[],
+        help="existing work ID or release:VERSION:PHASE; repeat for each prerequisite",
+    )
     work_record.add_argument("--implementation", action="append", required=True)
     work_record.add_argument("--evidence", action="append", required=True)
     work_record.add_argument("--project", default=".")

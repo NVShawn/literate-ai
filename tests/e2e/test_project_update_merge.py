@@ -202,6 +202,22 @@ class FrameworkMergeTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, "project.update_local_changed")
         self.assertEqual(self.target.read_bytes(), b"concurrent edit\n")
 
+    def test_cyclic_upstream_roadmap_is_rejected_before_files_or_baseline_change(self):
+        queue = "docs/roadmap/active-work.md"
+        before_queue = (self.root / queue).read_bytes()
+        self.upstream[queue] = (
+            b"# Work\n\n### [ ] AAA-001 -- Cyclic\n"
+            b"- **Completion prerequisites:** AAA-001\n"
+        )
+        before_checkpoint = (self.root / CHECKPOINT).read_bytes()
+        plan = self.adapter.plan(self.root)
+        with self.assertRaises(ProjectUpdateError) as caught:
+            apply_project_update(plan, self.root)
+        self.assertEqual(caught.exception.code, "roadmap.dependency_cycle")
+        self.assertEqual((self.root / queue).read_bytes(), before_queue)
+        self.assertEqual(self.target.read_bytes(), OURS)
+        self.assertEqual((self.root / CHECKPOINT).read_bytes(), before_checkpoint)
+
     def test_tampered_base_fails_closed(self):
         path = self.root / CHECKPOINT
         document = json.loads(path.read_bytes())

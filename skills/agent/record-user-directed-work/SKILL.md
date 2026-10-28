@@ -54,6 +54,12 @@ Do not treat a plausible interpretation as permission to improvise silently.
    approval authorizes an atomic update that retains the original release's deferred
    record with its approval reference, changes the queue target, and adds the goal to
    the future release. Until then the incomplete goal blocks release readiness.
+8. Put completion ordering in `Completion prerequisites` (existing work IDs or
+   `release:VERSION:PHASE`), using `none` when independent. `litai work record`
+   accepts repeated `--completion-prerequisite` arguments. Keep deliverable
+   completion separate from its consuming release's readiness/publication.
+   The shared graph validator rejects explicit and implicit phase cycles;
+   prose-only prerequisites still require review.
 
 Create a new detailed file beneath `docs/roadmap/` only when the program's rationale,
 ordering, and acceptance contract cannot remain readable in one queue item. Immediately
