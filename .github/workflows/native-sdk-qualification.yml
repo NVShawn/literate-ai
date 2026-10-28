@@ -1,0 +1,122 @@
+name: Native FreeBSD SDK qualification
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_revision:
+        description: Exact clean Literate AI commit to build and qualify
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  public-sdk:
+    name: Installed public SDK / FreeBSD 14.3 amd64
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      CANDIDATE_REVISION: ${{ inputs.candidate_revision }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - name: Build the exact candidate wheel and test-data archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os, re, shutil, tempfile
+          from pathlib import Path
+          assert re.fullmatch(r"[0-9a-f]{40}", os.environ["CANDIDATE_REVISION"])
+          for target in (Path.cwd(), Path(tempfile.gettempdir()), Path.home() / ".cache/pip"):
+              while not target.exists():
+                  target = target.parent
+              assert shutil.disk_usage(target).free > 20 * 1024**3
+          PY
+          git cat-file -e "$CANDIDATE_REVISION^{commit}"
+          mkdir -p "$HOME/.worktrees/literate-ai" qualification-wheel
+          git worktree add --detach "$HOME/.worktrees/literate-ai/native-sdk" "$CANDIDATE_REVISION"
+          python -m pip wheel --no-deps --wheel-dir qualification-wheel "$HOME/.worktrees/literate-ai/native-sdk"
+          git archive --format=tar "$CANDIDATE_REVISION" > qualification-wheel/test-source.tar
+          python - <<'PY'
+          import hashlib, json, os, zipfile
+          from pathlib import Path
+          directory = Path("qualification-wheel")
+          wheels = list(directory.glob("*.whl"))
+          assert len(wheels) == 1
+          wheel = wheels[0]
+          with zipfile.ZipFile(wheel) as archive:
+              origin = json.loads(archive.read("literate_ai/_distribution_origin.json"))
+              assert origin["git_revision"] == os.environ["CANDIDATE_REVISION"]
+              archive.read("literate_ai/project_template/docs/roadmap/release-goals.json")
+          (directory / "wheel.json").write_text(json.dumps({
+              "revision": os.environ["CANDIDATE_REVISION"], "wheel": wheel.name,
+              "qualification_harness_revision": os.environ["GITHUB_SHA"],
+              "sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),
+              "test_source_sha256": hashlib.sha256((directory / "test-source.tar").read_bytes()).hexdigest(),
+          }, indent=2))
+          PY
+      - name: Exercise canonical CLI and installed owner controls on FreeBSD
+        uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
+        with:
+          release: "14.3"
+          mem: 4096
+          cpu: 2
+          copyback: true
+          prepare: |
+            set -eu
+            df -Pk / /tmp /home
+            test "$(df -Pk / | awk 'END {print $4}')" -gt 10485760
+            pkg install -y python311 py311-pip cmake git rust pkgconf libffi
+          run: |
+            set -eu
+            source_checkout=$(pwd -P)
+            df -Pk / /tmp /home
+            python3.11 -c 'import shutil; assert shutil.disk_usage("/home").free > 10 * 1024**3'
+            pw useradd -n litai-qual -m -s /bin/sh -w random > /dev/null
+            work=/home/litai-qual/qualification
+            mkdir -p "$work/harness" "$work/wheel" "$work/test-source"
+            cp .github/qualifications/native_sdk/*.py "$work/harness/"
+            cp qualification-wheel/* "$work/wheel/"
+            tar -xf "$work/wheel/test-source.tar" -C "$work/test-source"
+            git -c safe.directory="$source_checkout" clone --bare --no-hardlinks "$source_checkout" "$work/framework.git"
+            python3.11 -m venv /home/litai-qual/venv
+            /home/litai-qual/venv/bin/python -m pip install "$work"/wheel/*.whl
+            chown -R litai-qual:litai-qual /home/litai-qual
+            set +e
+            su - litai-qual -c '/home/litai-qual/venv/bin/python -I /home/litai-qual/qualification/harness/run_cell.py --wheel-dir /home/litai-qual/qualification/wheel --framework /home/litai-qual/qualification/framework.git --fixture /home/litai-qual/qualification/test-source/tests/fixtures/native_sdk --test-source /home/litai-qual/qualification/test-source --output /home/litai-qual/qualification/result'
+            status=$?
+            set -e
+            mkdir -p qualification-results
+            cp qualification-wheel/wheel.json qualification-results/
+            if [ -d "$work/result" ]; then
+              python3.11 - <<'PY'
+            from pathlib import Path
+            import shutil
+            root = Path("/home/litai-qual/qualification/result")
+            destination = Path("qualification-results")
+            for pattern in ("*.json", "*.stdout", "*.stderr", "transport/result.json", "transport/qualification/*.json", "transport/qualification/*.stdout", "transport/qualification/*.stderr"):
+                for source in root.glob(pattern):
+                    if source.is_file():
+                        target = destination / source.relative_to(root)
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copyfile(source, target)
+            PY
+            fi
+            exit "$status"
+      - name: Retain source-bound reports and failure diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: freebsd-native-sdk-qualification
+          path: |
+            qualification-results
+            qualification-wheel/wheel.json
+            qualification-wheel/*.whl
+          if-no-files-found: warn
+          retention-days: 30

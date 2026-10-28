@@ -17,6 +17,12 @@ _CI_POLICY_FILES = frozenset(
         ".github/workflows/ci.yml",
         "scripts/select_ci_profile.py",
         "tests/critical/test_ci_action_pins.py",
+        ".github/workflows/native-sdk-qualification.yml",
+        ".github/qualifications/native_sdk/qualify_public_sdk.py",
+        ".github/qualifications/native_sdk/source_transport.py",
+        ".github/qualifications/native_sdk/run_cell.py",
+        "tests/critical/test_native_sdk_qualification_harness.py",
+        "verification/freebsd-native-sdk-qualification.json",
     }
 )
 _QUALIFICATION_FIXTURE_FILES = frozenset(

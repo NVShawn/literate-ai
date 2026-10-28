@@ -155,9 +155,11 @@ jobs:
       - name: Verify exact CI change-scope selection
         if: matrix.task == 'ci-policy'
         run: |
-          python -m unittest tests.critical.test_ci_action_pins
+          python -m unittest tests.critical.test_ci_action_pins tests.critical.test_native_sdk_qualification_harness
           ruff check scripts/select_ci_profile.py tests/critical/test_ci_action_pins.py
           ruff format --check scripts/select_ci_profile.py tests/critical/test_ci_action_pins.py
+          ruff check .github/qualifications/native_sdk tests/critical/test_native_sdk_qualification_harness.py
+          ruff format --check .github/qualifications/native_sdk tests/critical/test_native_sdk_qualification_harness.py
 
       # Qualification fixture portability
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

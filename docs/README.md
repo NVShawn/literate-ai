@@ -86,6 +86,7 @@ lists the per-project fields and their defaults.
 - [Flavors and target profiles](user/flavors-and-targets.md)
 - [Concurrent target matrices](user/target-matrices.md)
 - [Private cross-platform test matrix](user/test-matrix.md)
+- [Native FreeBSD installed SDK qualification](user/native-sdk-qualification.md)
 - [Source to specification](user/source-to-specification.md)
 - [Model groups, selectors, and generation](user/models-and-generation.md)
 - [Caches, packages, and publication](user/caches-packages-publication.md)
