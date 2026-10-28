@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Accept FreeBSD readelf's exact ELF64 x86-64 machine spelling during native SDK
+  admission, alongside GNU's spelling. Preserve the raw observation and all
+  target/byte checks; architecture refusals now report expected and observed values.
+
 - Reject cyclic roadmap completion prerequisites before supported work/template
   imports and during documentation, project and release validation. Report cycle
   paths through work items and release phases without removing release goals.

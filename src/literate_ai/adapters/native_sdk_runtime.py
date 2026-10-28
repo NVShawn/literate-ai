@@ -66,6 +66,8 @@ def _architectures(properties: list[dict[str, str]], operating_system: str) -> s
         architecture = values.get("literate-ai:elf-architecture")
         return {
             "ELF64/Advanced Micro Devices X86-64": {"x86_64"},
+            # FreeBSD elftoolchain readelf's spelling of the same EM_X86_64.
+            "ELF64/Advanced Micro Devices x86-64": {"x86_64"},
             "ELF64/AArch64": {"arm64"},
         }.get(architecture, set())
     if operating_system == "macos":
@@ -247,11 +249,19 @@ def observe_native_sdk_runtime(
     for ref in runtime_refs:
         properties = components[ref].get("properties", [])
         if any(item["name"] == path_property for item in properties):
-            if architecture not in _architectures(properties, operating_system):
-                raise ValueError(
-                    "SDK native image architecture differs from the selected target"
-                )
             values = {item["name"]: item["value"] for item in properties}
+            observed_architectures = _architectures(properties, operating_system)
+            if architecture not in observed_architectures:
+                labels = sorted(observed_architectures)
+                detail = (
+                    f"; ELF description {values.get('literate-ai:elf-architecture')!r}"
+                    if operating_system in {"linux", "freebsd"}
+                    else ""
+                )
+                raise ValueError(
+                    "SDK native image architecture differs from the selected target: "
+                    f"expected {architecture}; observed {labels}" + detail
+                )
             hashes = components[ref].get("hashes", ())
             if hashes:
                 path = Path(values[path_property])
