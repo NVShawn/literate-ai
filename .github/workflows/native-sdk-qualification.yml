@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   public-sdk:
-    name: Installed public SDK / FreeBSD 14.4 amd64
+    name: Installed public SDK / FreeBSD 15.1 amd64
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
@@ -64,7 +64,7 @@ jobs:
       - name: Exercise canonical CLI and installed owner controls on FreeBSD
         uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
         with:
-          release: "14.4"
+          release: "15.1"
           mem: 4096
           cpu: 2
           copyback: true

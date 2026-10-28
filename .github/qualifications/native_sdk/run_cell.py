@@ -70,6 +70,46 @@ def root_acl_preflight(argv: list[str]) -> int:
     return 0
 
 
+def publication_preflight(test_source: Path, output: Path) -> dict:
+    """Require actual installed publication controls before expensive SDK work."""
+    command(
+        "publication-preflight",
+        [
+            sys.executable,
+            "-I",
+            "-c",
+            "import json,sys,unittest; from pathlib import Path; "
+            "import literate_ai.adapters.exclusive_directory as publication; "
+            "assert Path(publication.__file__).resolve().is_relative_to("
+            "Path(sys.prefix).resolve()); "
+            "sys.path.insert(0,sys.argv[1]); "
+            "suite=unittest.defaultTestLoader.loadTestsFromName("
+            "'tests.critical.test_exclusive_directory'); "
+            "result=unittest.TextTestRunner(verbosity=2).run(suite); "
+            "summary={'selected':result.testsRun,'failures':len(result.failures),"
+            "'errors':len(result.errors),'skipped':len(result.skipped)}; "
+            "Path(sys.argv[2]).write_text(json.dumps(summary)); "
+            "raise SystemExit(0 if result.wasSuccessful() and not result.skipped "
+            "and result.testsRun >= 5 else 1)",
+            str(test_source.resolve()),
+            str(output / "publication-preflight.json"),
+        ],
+        output,
+        120,
+    )
+    summary = json.loads((output / "publication-preflight.json").read_text())
+    if (
+        type(summary.get("selected")) is not int
+        or summary["selected"] < 5
+        or any(
+            type(summary.get(key)) is not int or summary[key] != 0
+            for key in ("failures", "errors", "skipped")
+        )
+    ):
+        raise ValueError("native publication inventory failed, skipped or incomplete")
+    return summary
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheel-dir", type=Path, required=True)
@@ -137,6 +177,7 @@ def main() -> int:
         "passed": False,
     }
     (output / "platform.json").write_text(json.dumps(record, indent=2))
+    record["publication_preflight"] = publication_preflight(args.test_source, output)
     project = output.parent / "consumer"
     command(
         "initialize",
