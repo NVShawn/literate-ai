@@ -1728,6 +1728,7 @@ def _reconcile_authoritative_source_sbom(
                         "literate-ai:bzlmod-requested-version",
                         "literate-ai:dependency-kind",
                         "literate-ai:dependency-scope",
+                        "literate-ai:python-top-level-import",
                     }
                     for name, _value in property_pairs
                 )
