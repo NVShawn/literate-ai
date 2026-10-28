@@ -1,0 +1,51 @@
+{
+  "schema": "literate-ai/lineage-flavor-installed-qualification@1",
+  "candidate_revision": "821ed83bf7785e5111da5561ca51da4d77a54654",
+  "merged_review_head": "093cc8c7960ec3d47a2b613f159590af3c6fde32",
+  "merge_scope": "Merge main adds already-landed FreeBSD harness/docs; all five candidate production module bytes are unchanged. Combined documentation authority and unchanged candidate TCB pass.",
+  "platform": "macOS",
+  "runner": "make wheel-check in isolated exact-revision worktree, Make-managed environment; isolated installed-prefix control children",
+  "wheel_identity": "sha256:5f9d2dcdb2c9d2c7b41ee7f879e9d694f6cf7eca92a16d9c40e601ab326b2ecb",
+  "wheel_version": "1.4.0",
+  "wheel_check_passed": true,
+  "installed_controls": {
+    "lineage": {
+      "selected": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "installed_production_modules_verified": 450
+    },
+    "roadmap": {
+      "selected": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "installed_production_modules_verified": 395
+    }
+  },
+  "production_module_sha256": {
+    "adapters/legacy_generation_catalog.py": "9fb61678fb657c2cb879b9276c4aec06af9cd1ec04bd28508c2f24e11f848506",
+    "project_authority_graph.py": "33e1d6ceda5976de7fe90ffab49837222a73410234d96095d50e3da55780a06c",
+    "adapters/component_lock_operations.py": "87b5ce9f02cff497d93f20c38a1441acef4bf71f0c3924ecec7ca0121f5c56f5",
+    "adapters/component_lock_commands.py": "03ce4a94f6a6bdbb4a6a625692c011fd998c51a39bf5bc30c5bf4908b9f67494",
+    "adapters/component_lock_planning.py": "f1f769e58bb311239609d098912c4da8af818d2f8fd8b7011d8a6a3146aa055c"
+  },
+  "raw_log_sha256": {
+    "p131-lc175-wheel-check.private.log": "4d6be9038da3c020a36536f026ecae280fd8129ed023d4bf3c879423d1cf17e4",
+    "p131-lc175-installed-controls.private.log": "0f165c76c59701fc0f5912537cd466f8cdaf7f04bbc88973a88e790ec4114687",
+    "p131-lc175-installed-roadmap-controls.private.log": "43334defda0f3e4b7b21addf0879a40dc04f8f958a6f0d870bf547404d479170"
+  },
+  "retained_wheel_manifest": "_build/ci-wheels/run-5ole1r6t/manifest.json",
+  "prior_development_evidence": "verification/lineage-flavor-observation-development.json",
+  "harness_correction": "The first additional control invocation failed before tests on a report-key typo. The failed log is retained; the corrected invocation verifies source_sha256 and passes.",
+  "limits": [
+    "This is a development 1.4.0 wheel, not final 1.3.1 qualification.",
+    "The unchanged 150-second Windows baseline diagnostic timeout remains unresolved; no reliable wall-time speedup is claimed.",
+    "Full native Windows gate, final lifecycle receipt and exact patch qualification remain required.",
+    "No release goal was closed, deferred or removed."
+  ],
+  "full_native_windows_gate_passed": false,
+  "software_release_qualified": false,
+  "software_release_published": false
+}

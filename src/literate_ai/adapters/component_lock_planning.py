@@ -475,7 +475,7 @@ class _CatalogBudget:
             )
 
 
-def _effective_authority_graph_identity(project) -> str | None:
+def _effective_authority_graph_identity(project, *, lineage_flavors=None) -> str | None:
     """Bind project-mode planning without creating an adapter import cycle.
 
     Bind only repository lineage (issue #36): the full project entity graph churns
@@ -489,7 +489,14 @@ def _effective_authority_graph_identity(project) -> str | None:
         return None
     from literate_ai.project_authority_graph import project_lineage_authority_identity
 
-    return project_lineage_authority_identity(project.root)
+    return project_lineage_authority_identity(
+        project.root,
+        **(
+            {"flavor_observation": lineage_flavors}
+            if lineage_flavors is not None
+            else {}
+        ),
+    )
 
 
 class FilesystemComponentLockPlanner:
@@ -529,6 +536,7 @@ class FilesystemComponentLockPlanner:
         target_name: str,
         flavor_selectors: tuple[str, ...] = (),
         flavor_roots: tuple[Path, ...] = (),
+        lineage_flavors=None,
     ) -> tuple[ComponentLockResolutionPlan, ComponentCatalogSnapshot]:
         """Plan from one catalog observation and return that exact observation."""
 
@@ -537,6 +545,11 @@ class FilesystemComponentLockPlanner:
             snapshot,
             target_name=target_name,
             flavor_selectors=flavor_selectors,
+            **(
+                {"lineage_flavors": lineage_flavors}
+                if lineage_flavors is not None
+                else {}
+            ),
         )
         return plan, snapshot
 
@@ -547,6 +560,7 @@ class FilesystemComponentLockPlanner:
         target_name: str,
         flavor_selectors: tuple[str, ...] = (),
         locked_repository_sources: tuple[RepositorySourceLock, ...] | None = None,
+        lineage_flavors=None,
     ) -> ComponentLockResolutionPlan:
         """Reproduce captured authority, optionally replaying its exact source locks.
 
@@ -662,7 +676,12 @@ class FilesystemComponentLockPlanner:
             {
                 "schema": "literate-ai/component-lock-catalog@2",
                 "effective_authority_graph": _effective_authority_graph_identity(
-                    project
+                    project,
+                    **(
+                        {"lineage_flavors": lineage_flavors}
+                        if lineage_flavors is not None
+                        else {}
+                    ),
                 ),
                 "authorings": [
                     item.identity.uri

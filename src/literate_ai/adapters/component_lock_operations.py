@@ -9,6 +9,10 @@ from __future__ import annotations
 from contextlib import nullcontext
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .legacy_generation_catalog import LegacyFlavorGraphObservation
 
 from literate_ai.adapters.component_lock_planning import (
     ComponentCatalogSnapshot,
@@ -36,6 +40,7 @@ class PreparedComponentLock:
     result: ComponentLockResolutionResult
     catalog_snapshot: ComponentCatalogSnapshot | None = None
     requested_flavor_roots: tuple[Path, ...] | None = None
+    lineage_flavors: LegacyFlavorGraphObservation | None = None
 
 
 def prepare_component_lock(
@@ -45,18 +50,36 @@ def prepare_component_lock(
     flavors: tuple[str, ...],
     flavor_roots: tuple[Path, ...],
     planner: FilesystemComponentLockPlanner,
+    reuse_lineage_catalog: bool = False,
 ) -> PreparedComponentLock:
+    lineage_flavors = None
+    if reuse_lineage_catalog:
+        from literate_ai.projects import discover_project
+
+        from .legacy_generation_catalog import LegacyFlavorGraphObservation
+
+        project = discover_project(component)
+        if project is not None:
+            lineage_flavors = LegacyFlavorGraphObservation.capture(
+                project.roots("flavor")
+            )
     plan, snapshot = planner.plan_with_snapshot(
         component,
         target_name=target,
         flavor_selectors=flavors,
         flavor_roots=flavor_roots,
+        **({"lineage_flavors": lineage_flavors} if lineage_flavors is not None else {}),
     )
     result = ComponentLockResolver().resolve(
         plan, expected_input_evidence_identity=plan.identity
     )
     return PreparedComponentLock(
-        component.resolve(strict=True), plan, result, snapshot, flavor_roots
+        component.resolve(strict=True),
+        plan,
+        result,
+        snapshot,
+        flavor_roots,
+        lineage_flavors,
     )
 
 
@@ -97,7 +120,14 @@ def operate_component_lock(
             # not a shared cache of trusted currentness.
             snapshot.require_unchanged()
             plan = planner.plan_snapshot(
-                snapshot, target_name=target, flavor_selectors=flavors
+                snapshot,
+                target_name=target,
+                flavor_selectors=flavors,
+                **(
+                    {"lineage_flavors": prepared.lineage_flavors}
+                    if prepared.lineage_flavors is not None
+                    else {}
+                ),
             )
             current = PreparedComponentLock(
                 component_root,
