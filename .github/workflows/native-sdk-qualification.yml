@@ -92,7 +92,7 @@ jobs:
             cp .github/qualifications/native_sdk/*.py "$work/harness/"
             cp qualification-wheel/* "$work/wheel/"
             tar -xf "$work/wheel/test-source.tar" -C "$work/test-source"
-            git -c safe.directory="$source_checkout" clone --bare --no-hardlinks "$source_checkout" "$work/framework.git"
+            git -c safe.directory="$source_checkout" -c safe.directory="$source_checkout/.git" clone --bare --no-hardlinks "$source_checkout" "$work/framework.git"
             "$qualification_python" -m venv /home/litai-qual/venv
             /home/litai-qual/venv/bin/python -m pip install "$work"/wheel/*.whl
             chown -R litai-qual:litai-qual /home/litai-qual
