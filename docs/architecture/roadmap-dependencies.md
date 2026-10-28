@@ -100,6 +100,8 @@ transcription rather than claiming natural-language inference.
   Model-assisted documentation reconciliation validates the entire proposed batch
   before replacing any document, including unrelated documents in that batch.
 - Initialization/adoption checks selected templates before scaffold writes.
+  Native rewrite planning checks the appended ADOPT-002 proposal before writing
+  its queue, companion decision, detailed program or documentation-index links.
   Onboard delegates there. Reparent changes lineage rather than roadmap bytes;
   normal authority validation checks the roadmap and composite update imports use
   the prospective-overlay check.
