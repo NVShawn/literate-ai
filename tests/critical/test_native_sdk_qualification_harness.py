@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -12,6 +14,99 @@ from pathlib import Path
 
 
 class NativeSdkQualificationHarnessTests(unittest.TestCase):
+    def test_foreign_owned_framework_staging_trust_is_exact_and_command_scoped(self):
+        workflow = Path(__file__).resolve().parents[2] / (
+            ".github/workflows/native-sdk-qualification.yml"
+        )
+        clone = next(
+            line.strip()
+            for line in workflow.read_text(encoding="utf-8").splitlines()
+            if " clone --bare --no-hardlinks " in line
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            source, unrelated = root / "source", root / "unrelated"
+            work = root / "work"
+            work.mkdir()
+            global_config = root / "global-config"
+            global_config.write_bytes(b"# Existing operator configuration\n")
+            original = global_config.read_bytes()
+            environment = {
+                key: value
+                for key, value in os.environ.items()
+                if not key.startswith("GIT_")
+            }
+            environment.update(
+                GIT_CONFIG_GLOBAL=str(global_config),
+                GIT_CONFIG_NOSYSTEM="1",
+                GIT_TEST_ASSUME_DIFFERENT_OWNER="1",
+                GIT_TERMINAL_PROMPT="0",
+            )
+
+            def git(*argv):
+                return subprocess.run(
+                    ["git", *argv],
+                    env=environment,
+                    capture_output=True,
+                    text=True,
+                    timeout=20,
+                )
+
+            for path in (source, unrelated):
+                self.assertEqual(git("init", "--template=", str(path)).returncode, 0)
+            (source / "input").write_bytes(b"Exact framework fixture\n")
+            trusted = ("-c", f"safe.directory={source.as_posix()}", "-C", str(source))
+            self.assertEqual(git(*trusted, "add", "input").returncode, 0)
+            committed = git(
+                *trusted,
+                "-c",
+                "user.name=Qualification fixture",
+                "-c",
+                "user.email=qualification@example.invalid",
+                "-c",
+                "commit.gpgsign=false",
+                "commit",
+                "-m",
+                "Fixture",
+            )
+            self.assertEqual(committed.returncode, 0, committed.stderr)
+            expected = git(*trusted, "rev-parse", "HEAD").stdout.strip()
+            # The original checkout-only trust fails in upload-pack, which sees .git.
+            refused = git(
+                "-c",
+                f"safe.directory={source.as_posix()}",
+                "clone",
+                "--bare",
+                "--no-hardlinks",
+                str(source),
+                str(work / "old"),
+            )
+            self.assertNotEqual(refused.returncode, 0)
+            self.assertIn("dubious ownership", refused.stderr)
+            argv = [
+                part.replace("$source_checkout", source.as_posix()).replace(
+                    "$work", work.as_posix()
+                )
+                for part in shlex.split(clone)
+            ]
+            accepted = git(*argv[1:])
+            self.assertEqual(accepted.returncode, 0, accepted.stderr)
+            actual = git(
+                "-c",
+                f"safe.directory={(work / 'framework.git').as_posix()}",
+                "--git-dir",
+                str(work / "framework.git"),
+                "rev-parse",
+                "HEAD",
+            )
+            self.assertEqual(actual.returncode, 0, actual.stderr)
+            self.assertEqual(actual.stdout.strip(), expected)
+            argv[-2:] = [str(unrelated), str(work / "unrelated.git")]
+            refused = git(*argv[1:])
+            self.assertNotEqual(refused.returncode, 0)
+            self.assertIn("dubious ownership", refused.stderr)
+            self.assertEqual(global_config.read_bytes(), original)
+
     @staticmethod
     def harness():
         path = Path(__file__).resolve().parents[2] / (
