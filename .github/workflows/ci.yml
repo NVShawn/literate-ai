@@ -47,7 +47,9 @@ jobs:
   # Elixir smoke cell. Elixir-scoped changes add all six native cells. Full qualification
   # remains mandatory for product-code pushes, release refs, release-branch PRs,
   # manual qualification, and unknown changes. Exact documentation/policy-only
-  # pushes to main use the same focused profiles as ordinary PRs.
+  # pushes to main use the same focused profiles as ordinary PRs. The two portable
+  # qualification-fixture modules receive their own Windows/macOS/Linux cells,
+  # including when mixed with product changes; release refs retain full coverage.
 
   freebsd-posix-acl:
     needs: profile
@@ -156,6 +158,28 @@ jobs:
           python -m unittest tests.critical.test_ci_action_pins
           ruff check scripts/select_ci_profile.py tests/critical/test_ci_action_pins.py
           ruff format --check scripts/select_ci_profile.py tests/critical/test_ci_action_pins.py
+
+      # Qualification fixture portability
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: matrix.task == 'qualification-fixtures'
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        if: matrix.task == 'qualification-fixtures'
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install qualification fixture test tools
+        if: matrix.task == 'qualification-fixtures'
+        run: python -m pip install -e ".[dev]"
+      - name: Verify portable roadmap and ACL controller fixtures
+        if: matrix.task == 'qualification-fixtures'
+        env:
+          PYTHONPATH: src
+          PYTHONUTF8: "0"
+        run: >-
+          python -m unittest
+          tests.critical.test_roadmap_dependencies.RoadmapDependencyTests
+          tests.critical.test_retained_posix_acl.PosixAclProjectionTests
 
       # skill-evaluation
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -26,6 +26,33 @@
     "pr": true
   },
   {
+    "task": "qualification-fixtures",
+    "name": "Qualification fixtures / Windows",
+    "os": "windows-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": false,
+    "scoped": "qualification-fixtures"
+  },
+  {
+    "task": "qualification-fixtures",
+    "name": "Qualification fixtures / macOS",
+    "os": "macos-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": false,
+    "scoped": "qualification-fixtures"
+  },
+  {
+    "task": "qualification-fixtures",
+    "name": "Qualification fixtures / Linux",
+    "os": "ubuntu-latest",
+    "python": "3.12",
+    "group": 0,
+    "pr": false,
+    "scoped": "qualification-fixtures"
+  },
+  {
     "task": "sample-composition",
     "name": "Sample composition / ubuntu-latest",
     "os": "ubuntu-latest",

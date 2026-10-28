@@ -60,7 +60,7 @@ class RoadmapDependencyTests(unittest.TestCase):
         fixture = json.loads(
             (
                 Path(__file__).parents[1] / "fixtures/roadmap-release-cycle-1.3.1.json"
-            ).read_text()
+            ).read_text(encoding="utf-8")
         )
         for case in fixture["cases"]:
             with self.subTest(goal=case["id"]):
@@ -168,7 +168,7 @@ class RoadmapDependencyTests(unittest.TestCase):
         queue = "docs/roadmap/custom.md" if custom else "docs/roadmap/active-work.md"
         target = root / queue
         target.parent.mkdir(parents=True)
-        target.write_text(content)
+        target.write_text(content, encoding="utf-8")
         manifest = "docs/roadmap/goals.json"
         (root / manifest).write_text(
             json.dumps(
@@ -177,14 +177,16 @@ class RoadmapDependencyTests(unittest.TestCase):
                     "roadmap": queue,
                     "releases": {"1.3.1": [{"id": "AAA-001"}]},
                 }
-            )
+            ),
+            encoding="utf-8",
         )
         (root / "literate.release.json").write_text(
             json.dumps(
                 {
                     "contributions": {"roadmap_goal_manifest": manifest},
                 }
-            )
+            ),
+            encoding="utf-8",
         )
         return queue, target
 
@@ -217,7 +219,9 @@ class RoadmapDependencyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             skill = root / "SKILL.md"
-            skill.write_text("Read [queue](docs/roadmap/active-work.md).\n")
+            skill.write_text(
+                "Read [queue](docs/roadmap/active-work.md).\n", encoding="utf-8"
+            )
             with self.assertRaises(DocumentationError) as caught:
                 validate_documentation_graph(
                     project_root=root,
@@ -266,7 +270,7 @@ class RoadmapDependencyTests(unittest.TestCase):
                 result, status = work_from_args(args)
             self.assertEqual(status, 0)
             self.assertTrue(result["changed"])
-            self.assertIn("BBB-001", target.read_text())
+            self.assertIn("BBB-001", target.read_text(encoding="utf-8"))
 
     def test_update_derived_import_rejects_bad_existing_data_without_writing(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -292,7 +296,7 @@ class RoadmapDependencyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             queue = root / "custom.md"
-            queue.write_text(item("AAA-001", "AAA-001"))
+            queue.write_text(item("AAA-001", "AAA-001"), encoding="utf-8")
             before = queue.read_bytes()
             with self.assertRaises(ProjectUpdateWorkItemError):
                 record_work_items(root, (), queue_path="custom.md")
@@ -345,7 +349,7 @@ class RoadmapDependencyTests(unittest.TestCase):
                 standard_binding_provider=lambda: None,
             ).initialize(root, empty=True, source_intelligence_provider="none")
             queue = root / "docs/roadmap/active-work.md"
-            queue.write_text(item("AAA-001", "AAA-001"))
+            queue.write_text(item("AAA-001", "AAA-001"), encoding="utf-8")
             before = queue.read_bytes()
             with self.assertRaises(ProjectValidationError) as caught:
                 validate_project(root, require_authority_review=False)
@@ -374,7 +378,9 @@ class RoadmapDependencyTests(unittest.TestCase):
                     {"implementation_directory": "retained"}, project_root=root
                 )
             self.assertEqual(caught.exception.code, "roadmap.dependency_cycle")
-            self.assertEqual(queue.read_text(), item("AAA-001", "AAA-001"))
+            self.assertEqual(
+                queue.read_text(encoding="utf-8"), item("AAA-001", "AAA-001")
+            )
             self.assertEqual(
                 before,
                 {
