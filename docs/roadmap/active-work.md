@@ -30910,6 +30910,7 @@ repair scope and makes no claim that the complete provided native gate passed.
 - **Conclusion:** Issue #123 tracks a 5400.328-second wheel timeout with no stage timing artifact despite an existing timing-report option; isolated successful validation takes 9.187 seconds and does not identify the aggregate bottleneck.
 - **Depends on:** none
 - **Implementation:**
+  - [ ] Repair the exact-main Windows fixture failures from run `40610757747`: roadmap regression fixtures must write/read canonical UTF-8 rather than the Windows ANSI default, and synthetic FreeBSD ACL preflight cases must simulate their native descriptor port instead of calling POSIX-only flags on Windows. Qualify the unchanged assertions on a native Windows runner; this is separate from repairing the 5400-second full-gate HTML bottleneck.
   - [x] Pass a unique per-attempt timing report to wheel smoke and document its diagnostic scope.
   - [x] Match hosted Windows CI's isolated admitted-receiver dependency test in the native release gate, then run the remaining suite once with that exact case deselected. Preserve production deadlines, failure propagation and all existing test roots.
 - **Evidence:**

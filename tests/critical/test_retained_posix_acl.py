@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from literate_ai.adapters import retained_posix_acl as acl
@@ -29,6 +30,27 @@ def entries(text):
     return dict(
         (tuple(line.split(":")[:2]), line.split(":")[2])
         for line in text.decode("ascii").splitlines()
+    )
+
+
+def preflight_directory_port():
+    """Simulate the FreeBSD fd boundary without POSIX-only host flags/syscalls.
+
+    Native descriptor/ACL behavior remains owned by the FreeBSD acceptance cases.
+    These controller cases exercise projection, restoration and probe cleanup.
+    """
+
+    def open_directory(path, flags):
+        if flags != 7 or not Path(path).is_dir() or Path(path).is_symlink():
+            raise AssertionError("preflight must open its actual no-follow directory")
+        return 17
+
+    return SimpleNamespace(
+        O_RDONLY=1,
+        O_DIRECTORY=2,
+        O_NOFOLLOW=4,
+        open=Mock(side_effect=open_directory),
+        close=Mock(),
     )
 
 
@@ -116,11 +138,12 @@ class PosixAclProjectionTests(unittest.TestCase):
 
     def test_preflight_applies_reads_restores_and_removes_probe(self):
         observed = {}
+        port = preflight_directory_port()
 
         class Custody:
             def __init__(self, backend, descriptor):
                 observed["backend"] = backend
-                observed["directory"] = stat.S_ISDIR(os.fstat(descriptor).st_mode)
+                observed["descriptor"] = descriptor
                 self.original = {2: BASE, 3: BASE}
                 self.closed = False
 
@@ -140,12 +163,15 @@ class PosixAclProjectionTests(unittest.TestCase):
             tempfile.TemporaryDirectory() as directory,
             patch.object(acl, "FreeBsdPosixAcl", return_value=backend),
             patch.object(acl, "DescriptorAclCustody", Custody),
+            patch.object(acl, "os", port),
         ):
             parent = Path(directory)
             acl.preflight_freebsd_posix_acl(parent, 2001)
             self.assertEqual(list(parent.iterdir()), [])
         self.assertIs(observed["backend"], backend)
-        self.assertTrue(observed["directory"])
+        self.assertEqual(observed["descriptor"], 17)
+        port.open.assert_called_once()
+        port.close.assert_called_once_with(17)
         self.assertEqual(entries(observed["access"])["user", "2001"], "--x")
         self.assertEqual(entries(observed["default"])["user", "2001"], "---")
         self.assertTrue(observed["current"])
@@ -153,6 +179,7 @@ class PosixAclProjectionTests(unittest.TestCase):
 
     def test_preflight_builds_temporary_default_from_access_when_absent(self):
         observed = {}
+        port = preflight_directory_port()
 
         class Custody:
             def __init__(self, _backend, _descriptor):
@@ -172,11 +199,15 @@ class PosixAclProjectionTests(unittest.TestCase):
             tempfile.TemporaryDirectory() as directory,
             patch.object(acl, "FreeBsdPosixAcl", return_value=object()),
             patch.object(acl, "DescriptorAclCustody", Custody),
+            patch.object(acl, "os", port),
         ):
             acl.preflight_freebsd_posix_acl(Path(directory), 2001)
         self.assertEqual(entries(observed["default"])["user", "2001"], "---")
+        port.close.assert_called_once_with(17)
 
     def test_preflight_names_unsupported_filesystem_and_removes_probe(self):
+        port = preflight_directory_port()
+
         def unsupported(_backend, _descriptor):
             raise OSError(errno.EOPNOTSUPP, "ACLs disabled")
 
@@ -184,6 +215,7 @@ class PosixAclProjectionTests(unittest.TestCase):
             tempfile.TemporaryDirectory() as directory,
             patch.object(acl, "FreeBsdPosixAcl", return_value=object()),
             patch.object(acl, "DescriptorAclCustody", side_effect=unsupported),
+            patch.object(acl, "os", port),
         ):
             parent = Path(directory)
             with self.assertRaisesRegex(
@@ -191,17 +223,21 @@ class PosixAclProjectionTests(unittest.TestCase):
             ):
                 acl.preflight_freebsd_posix_acl(parent, 2001)
             self.assertEqual(list(parent.iterdir()), [])
+        port.close.assert_called_once_with(17)
 
     def test_preflight_open_failure_removes_probe(self):
+        port = preflight_directory_port()
+        port.open.side_effect = PermissionError("denied")
         with (
             tempfile.TemporaryDirectory() as directory,
             patch.object(acl, "FreeBsdPosixAcl", return_value=object()),
-            patch.object(acl.os, "open", side_effect=PermissionError("denied")),
+            patch.object(acl, "os", port),
         ):
             parent = Path(directory)
             with self.assertRaisesRegex(PermissionError, "denied"):
                 acl.preflight_freebsd_posix_acl(parent, 2001)
             self.assertEqual(list(parent.iterdir()), [])
+        port.close.assert_not_called()
 
 
 @unittest.skipUnless(
