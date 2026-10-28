@@ -207,6 +207,7 @@ class CiActionPinTests(unittest.TestCase):
             ".github/qualifications/native_sdk/qualify_public_sdk.py",
             ".github/qualifications/native_sdk/source_transport.py",
             ".github/qualifications/native_sdk/run_cell.py",
+            ".github/qualifications/native_sdk/collect_results.py",
             "tests/critical/test_native_sdk_qualification_harness.py",
             "verification/freebsd-native-sdk-qualification.json",
         )
