@@ -18,12 +18,14 @@ The guest installs the SQLite package matching its pip/interpreter flavor and
 checks an actual in-memory query before building wheel dependencies. Installing
 Python and pip alone did not provide `_sqlite3` in the observed base image.
 
-The installed owner inventory also exercises private retained allocations. The
-disposable guest uses UFS with POSIX.1e ACLs enabled; before initialization, the
-unprivileged runner exercises the installed reversible ACL probe on its actual
-workspace filesystem. Failed probes, unsupported filesystems and incomplete
-restoration fail qualification. This does not replace the separate disabled-UFS
-refusal and enabled-UFS acceptance controls.
+The disposable guest uses UFS with POSIX.1e ACLs enabled. Root setup exercises the
+installed reversible ACL backend on a root-owned temporary resource, projecting
+the actual consumer UID, and retains its streams and terminal status before
+transferring the result directory to the consumer. Failed probes, unsupported
+filesystems and incomplete restoration fail qualification. The SDK scenario and
+owner controls still run unprivileged. Private-inspector owner tests use a mocked
+workspace and do not prove native private allocation; the separate disabled-UFS
+refusal and enabled-UFS acceptance requirements remain unchanged.
 
 ## Run and inspect
 

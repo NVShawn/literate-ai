@@ -116,6 +116,7 @@ jobs:
             "$qualification_python" -m venv /home/litai-qual/venv
             /home/litai-qual/venv/bin/python -I -c 'import sqlite3; connection = sqlite3.connect(":memory:"); assert connection.execute("SELECT 1").fetchone() == (1,); connection.close()'
             /home/litai-qual/venv/bin/python -m pip install "$work"/wheel/*.whl
+            /home/litai-qual/venv/bin/python -I "$work/harness/run_cell.py" acl-preflight --parent "$work" --uid "$(id -u litai-qual)" --output "$work/result"
             chown -R litai-qual:litai-qual /home/litai-qual
             su - litai-qual -c '/home/litai-qual/venv/bin/python -I /home/litai-qual/qualification/harness/run_cell.py --wheel-dir /home/litai-qual/qualification/wheel --framework /home/litai-qual/qualification/framework.git --fixture /home/litai-qual/qualification/test-source/tests/fixtures/native_sdk --test-source /home/litai-qual/qualification/test-source --output /home/litai-qual/qualification/result'
       - name: Require copied-back native qualification success

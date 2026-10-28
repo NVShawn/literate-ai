@@ -40,6 +40,36 @@ def command(name: str, argv: list[str], output: Path, timeout: int) -> None:
         )
 
 
+def root_acl_preflight(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description="Probe root-owned ACL custody")
+    parser.add_argument("--parent", type=Path, required=True)
+    parser.add_argument("--uid", type=int, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args(argv)
+    if not sys.platform.startswith("freebsd") or os.geteuid() != 0:
+        parser.error("ACL custody preflight requires native FreeBSD root setup")
+    if not 1 <= args.uid < 2**32 - 1:
+        parser.error("ACL projection requires a nonroot UID")
+    args.output.mkdir(mode=0o700)
+    command(
+        "acl-preflight",
+        [
+            sys.executable,
+            "-I",
+            "-c",
+            "import sys; from pathlib import Path; "
+            "from literate_ai.adapters.retained_posix_acl "
+            "import preflight_freebsd_posix_acl; "
+            "preflight_freebsd_posix_acl(Path(sys.argv[1]), int(sys.argv[2]))",
+            str(args.parent),
+            str(args.uid),
+        ],
+        args.output,
+        60,
+    )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--wheel-dir", type=Path, required=True)
@@ -56,7 +86,12 @@ def main() -> int:
     if os.geteuid() == 0:
         parser.error("the SDK qualification must run as an unprivileged account")
     output = args.output.resolve()
-    output.mkdir(mode=0o700)
+    # Root setup created this directory and transferred it to the consumer.
+    if not output.is_dir():
+        raise ValueError("root ACL preflight output is missing")
+    acl_terminal = json.loads((output / "acl-preflight.terminal.json").read_text())
+    if acl_terminal["exit_code"] != 0 or acl_terminal["timed_out"]:
+        raise ValueError("root ACL preflight did not pass")
     metadata = json.loads((args.wheel_dir / "wheel.json").read_text(encoding="utf-8"))
     wheel = args.wheel_dir / metadata["wheel"]
     if hashlib.sha256(wheel.read_bytes()).hexdigest() != metadata["sha256"]:
@@ -102,20 +137,6 @@ def main() -> int:
         "passed": False,
     }
     (output / "platform.json").write_text(json.dumps(record, indent=2))
-    command(
-        "acl-preflight",
-        [
-            sys.executable,
-            "-I",
-            "-c",
-            "import os; from pathlib import Path; "
-            "from literate_ai.adapters.retained_posix_acl "
-            "import preflight_freebsd_posix_acl; "
-            "preflight_freebsd_posix_acl(Path.home(), os.getuid() + 1)",
-        ],
-        output,
-        60,
-    )
     project = output.parent / "consumer"
     command(
         "initialize",
@@ -221,4 +242,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["acl-preflight"]:
+        raise SystemExit(root_acl_preflight(sys.argv[2:]))
     raise SystemExit(main())
