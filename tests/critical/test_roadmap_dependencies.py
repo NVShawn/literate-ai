@@ -351,3 +351,35 @@ class RoadmapDependencyTests(unittest.TestCase):
                 validate_project(root, require_authority_review=False)
             self.assertEqual(caught.exception.code, "roadmap.dependency_cycle")
             self.assertEqual(queue.read_bytes(), before)
+
+    def test_native_rewrite_adoption_rejects_before_any_companion_write(self):
+        from literate_ai.adapters.harness_inventory import (
+            prepare_native_rewrite_program,
+        )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "retained").mkdir()
+            (root / "docs/decisions").mkdir(parents=True)
+            _, queue = self.project(root, item("AAA-001", "AAA-001"))
+            decision = root / "docs/decisions/0002-native-literate-ai-rewrite.md"
+            decision.write_bytes(b"Existing decision\n")
+            before = {
+                path.relative_to(root): path.read_bytes()
+                for path in root.rglob("*")
+                if path.is_file()
+            }
+            with self.assertRaises(RoadmapDependencyError) as caught:
+                prepare_native_rewrite_program(
+                    {"implementation_directory": "retained"}, project_root=root
+                )
+            self.assertEqual(caught.exception.code, "roadmap.dependency_cycle")
+            self.assertEqual(queue.read_text(), item("AAA-001", "AAA-001"))
+            self.assertEqual(
+                before,
+                {
+                    path.relative_to(root): path.read_bytes()
+                    for path in root.rglob("*")
+                    if path.is_file()
+                },
+            )

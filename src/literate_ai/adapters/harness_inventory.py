@@ -2227,6 +2227,33 @@ def prepare_native_rewrite_program(
     )
     adr_relative = "docs/decisions/0002-native-literate-ai-rewrite.md"
     roadmap_relative = "docs/roadmap/native-rewrite-program.md"
+    active = project_root / "docs" / "roadmap" / "active-work.md"
+    active_text = active.read_text(encoding="utf-8")
+    item = f"""
+
+<a id="adopt-002"></a>
+### [ ] ADOPT-002 — Native Literate AI rewrite
+
+- **Completion prerequisites:** none
+- **Owner:** project architecture / Components / Flavors / skills / assets
+- **Direction:** Execute
+  [ADR 0002](../decisions/0002-native-literate-ai-rewrite.md) through the
+  [native rewrite program](native-rewrite-program.md), preserving retained source
+  authority until each boundary independently qualifies.
+- **Next action:** Produce the evidence-linked boundary inventory for
+  `{implementation}`.
+- **Evidence:** Phase 1.2 lift-and-shift identity `{lift_shift_identity}`.
+"""
+    proposed = (
+        active_text
+        if "### [ ] ADOPT-002" in active_text
+        else active_text.rstrip("\n") + item
+    )
+    from .roadmap_dependencies import require_project_roadmap_acyclic
+
+    require_project_roadmap_acyclic(
+        project_root, {"docs/roadmap/active-work.md": proposed.encode("utf-8")}
+    )
     (project_root / adr_relative).write_text(
         render_native_rewrite_adr(
             implementation_directory=implementation,
@@ -2240,26 +2267,8 @@ def prepare_native_rewrite_program(
         encoding="utf-8",
         newline="\n",
     )
-    active = project_root / "docs" / "roadmap" / "active-work.md"
-    active_text = active.read_text(encoding="utf-8")
-    item = f"""
-
-<a id="adopt-002"></a>
-### [ ] ADOPT-002 — Native Literate AI rewrite
-
-- **Owner:** project architecture / Components / Flavors / skills / assets
-- **Direction:** Execute
-  [ADR 0002](../decisions/0002-native-literate-ai-rewrite.md) through the
-  [native rewrite program](native-rewrite-program.md), preserving retained source
-  authority until each boundary independently qualifies.
-- **Next action:** Produce the evidence-linked boundary inventory for
-  `{implementation}`.
-- **Evidence:** Phase 1.2 lift-and-shift identity `{lift_shift_identity}`.
-"""
-    if "### [ ] ADOPT-002" not in active_text:
-        active.write_text(
-            active_text.rstrip("\n") + item, encoding="utf-8", newline="\n"
-        )
+    if proposed != active_text:
+        active.write_text(proposed, encoding="utf-8", newline="\n")
     docs_readme = project_root / "docs" / "README.md"
     links = (
         "- [Native rewrite decision](decisions/0002-native-literate-ai-rewrite.md)\n"

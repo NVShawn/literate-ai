@@ -1,0 +1,17 @@
+{
+  "schema": "literate-ai/roadmap-adoption-cycle-qualification@1",
+  "base_revision": "f7a4b1483c00a3be1ecdfaf7fc578d01b951e334",
+  "lifecycle_driver_identity": "sha256:2042285a578e7b46a226ebfd5c0c56b223abb91786d55571162708e142d45717",
+  "platform": "macos",
+  "runner": "make python-check using the existing Make-managed development environment",
+  "focused_suites": [
+    {"pattern": "tests/critical/test_roadmap_dependencies.py", "passed": 20},
+    {"pattern": "tests/e2e/test_harness_inventory.py", "passed": 8}
+  ],
+  "failed": 0,
+  "skipped": 0,
+  "negative_evidence": "A cyclic native-rewrite queue is refused before any companion decision, roadmap or index replacement; a complete before/after file snapshot remains identical.",
+  "positive_evidence": "Existing source adoption, lift-and-shift and native-rewrite planning workflows pass without replacing original source authority.",
+  "prior_qualification": "verification/roadmap-cycle-qualification.json",
+  "boundary": "Scoped source qualification only. Final lifecycle, installed-wheel and native release evidence still needs renewal."
+}
