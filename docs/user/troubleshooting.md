@@ -413,7 +413,12 @@ applies to the checkpoint adapter; pytest has its own scheduling rules.
 
 The native Windows release gate accepts `--test-workers auto|N`, also defaulting
 from `PYTHON_TEST_WORKERS`. Its pytest step uses file-group workers, a private
-base temporary directory, fail-fast and the existing JUnit report. `1` disables
+base temporary directory, fail-fast and JUnit reports. Each Windows invocation
+allocates a fresh short `wg-*` directory beside the checkout and prints its path.
+Temporary fixtures and both JUnit reports remain there after failure or success;
+a later invocation does not delete earlier runs or the legacy `<checkout>.tmp`
+tree. Inspect and archive evidence before explicitly cleaning completed runs.
+`1` disables
 xdist. Its pytest gate has no checkpoint resume contract; the Make adapter retains
 that contract. Parallel repair still exits 2 after finishing a resumed run and
 requires a fresh from-zero pass for release evidence. Worker count does not bypass

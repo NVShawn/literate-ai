@@ -118,7 +118,15 @@ def _run(argv: list[str], environment: dict[str, str], *, step: str) -> None:
     print(f"[windows-release-gate] {step}: passed in {elapsed}s", flush=True)
 
 
-def _run_tests(python: Path, test_workers: str, environment: dict[str, str]) -> None:
+def _run_tests(
+    python: Path,
+    test_workers: str,
+    environment: dict[str, str],
+    *,
+    temporary: Path | None = None,
+) -> None:
+    reports = temporary if temporary is not None else ROOT / "_build"
+    test_temporary = temporary if temporary is not None else TEMPORARY
     # Match hosted CI: qualify the unchanged 60-second dependency observation
     # without contention, then run every other test once with the usual workers.
     _run(
@@ -130,7 +138,7 @@ def _run_tests(python: Path, test_workers: str, environment: dict[str, str]) -> 
             "-rA",
             "-o",
             "addopts=",
-            f"--junitxml={ROOT / '_build/windows-admitted-receiver.xml'}",
+            f"--junitxml={reports / 'windows-admitted-receiver.xml'}",
             _ADMITTED_RECEIVER_TEST,
         ],
         environment,
@@ -148,8 +156,8 @@ def _run_tests(python: Path, test_workers: str, environment: dict[str, str]) -> 
             "--dist=loadfile",
             "--maxfail=1",
             f"--deselect={_ADMITTED_RECEIVER_TEST}",
-            f"--basetemp={TEMPORARY / 'pytest'}",
-            f"--junitxml={ROOT / '_build/windows-tests.xml'}",
+            f"--basetemp={test_temporary / 'pytest'}",
+            f"--junitxml={reports / 'windows-tests.xml'}",
             *_TEST_ROOTS,
         ],
         environment,
@@ -195,15 +203,19 @@ def main(argv: list[str] | None = None) -> int:
         ]
     )
     environment.pop("PYTHONPATH", None)
+    temporary = None
     if _windows():
         # Keep smoke and test trees beside the checkout, under the worker
         # workspace that the template excludes from Defender scanning, but
         # outside the checkout: project discovery walks up from test fixtures
         # and would otherwise adopt this repository's own project manifest.
-        # Each gate starts empty; git never discovers this checkout from them.
-        temporary = TEMPORARY
-        shutil.rmtree(temporary, ignore_errors=True)
-        temporary.mkdir(parents=True, exist_ok=True)
+        # Each invocation starts empty without deleting an earlier run's failed
+        # fixtures or evidence. Keep names short for Windows path limits.
+        temporary = Path(tempfile.mkdtemp(prefix="wg-", dir=ROOT.parent))
+        print(
+            f"[windows-release-gate] retained temporary evidence: {temporary}",
+            flush=True,
+        )
         environment["TEMP"] = environment["TMP"] = str(temporary)
         environment["GIT_CEILING_DIRECTORIES"] = os.pathsep.join(
             item
@@ -290,7 +302,7 @@ def main(argv: list[str] | None = None) -> int:
                 step="wheel",
             )
         if "tests" in selected:
-            _run_tests(python, args.test_workers, environment)
+            _run_tests(python, args.test_workers, environment, temporary=temporary)
     except GateFailure as exc:
         print(f"[windows-release-gate] FAILED: {exc}", file=sys.stderr, flush=True)
         return 1
