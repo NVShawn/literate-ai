@@ -72,13 +72,13 @@ jobs:
             set -eu
             df -Pk / /tmp /home
             test "$(df -Pk / | awk 'END {print $4}')" -gt 10485760
-            pip_package=$(pkg rquery -x '%n' '^py3(11|12|13|14)-pip$' | sort -Vr | head -n 1)
+            pip_package=$(pkg rquery -x '%n' '^py3(11|12|13|14)-pip$' | sort -r | head -n 1)
             test -n "$pip_package"
             pkg install -y "$pip_package" cmake git rust pkgconf libffi
           run: |
             set -eu
             source_checkout=$(pwd -P)
-            pip_package=$(pkg query -g '%n' 'py3*-pip' | grep -E '^py3(11|12|13|14)-pip$' | sort -Vr | head -n 1)
+            pip_package=$(pkg query -g '%n' 'py3*-pip' | grep -E '^py3(11|12|13|14)-pip$' | sort -r | head -n 1)
             python_minor=${pip_package#py3}
             python_minor=${python_minor%-pip}
             qualification_python="/usr/local/bin/python3.$python_minor"
