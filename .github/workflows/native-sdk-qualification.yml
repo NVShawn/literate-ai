@@ -72,6 +72,8 @@ jobs:
             set -eu
             df -Pk / /tmp /home
             test "$(df -Pk / | awk 'END {print $4}')" -gt 10485760
+            test "$(mount -p | awk '$2 == "/" {print $3}')" = ufs
+            mount -u -o acls /
             pkg update
             pip_package=$(pkg rquery -x '%n' '^py3(11|12|13|14)-pip$' | sort -r | head -n 1)
             test -n "$pip_package"
