@@ -19,6 +19,12 @@ _CI_POLICY_FILES = frozenset(
         "tests/critical/test_ci_action_pins.py",
     }
 )
+_QUALIFICATION_FIXTURE_FILES = frozenset(
+    {
+        "tests/critical/test_roadmap_dependencies.py",
+        "tests/critical/test_retained_posix_acl.py",
+    }
+)
 _FREEBSD_ACL_FILES = frozenset(
     {
         ".github/workflows/ci.yml",
@@ -51,6 +57,8 @@ def _scope(path: str) -> str | None:
         return "documentation"
     if path in _CI_POLICY_FILES:
         return "ci-policy"
+    if path in _QUALIFICATION_FIXTURE_FILES:
+        return "qualification-fixtures"
     if path.startswith(_ELIXIR_PREFIXES) or "test_elixir" in path:
         return "elixir"
     return None
@@ -91,7 +99,8 @@ def _scoped_main_push(
         and base_ref == "refs/heads/main"
         and bool(changed_paths)
         and all(
-            _scope(path) in {"documentation", "ci-policy"} for path in changed_paths
+            _scope(path) in {"documentation", "ci-policy", "qualification-fixtures"}
+            for path in changed_paths
         )
     )
 
@@ -122,7 +131,17 @@ def select_matrix(
                     ]
                 }
             return {"include": [row for row in rows if row.get("scoped") in scopes]}
-    return {"include": [row for row in rows if row["pr"]]}
+    fixture_changed = bool(changed_paths) and any(
+        _scope(path) == "qualification-fixtures" for path in changed_paths
+    )
+    return {
+        "include": [
+            row
+            for row in rows
+            if row["pr"]
+            or (fixture_changed and row.get("scoped") == "qualification-fixtures")
+        ]
+    }
 
 
 def select_full_qualification(

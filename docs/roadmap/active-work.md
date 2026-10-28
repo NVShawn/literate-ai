@@ -30910,7 +30910,8 @@ repair scope and makes no claim that the complete provided native gate passed.
 - **Conclusion:** Issue #123 tracks a 5400.328-second wheel timeout with no stage timing artifact despite an existing timing-report option; isolated successful validation takes 9.187 seconds and does not identify the aggregate bottleneck.
 - **Depends on:** none
 - **Implementation:**
-  - [ ] Repair the exact-main Windows fixture failures from run `40610757747`: roadmap regression fixtures must write/read canonical UTF-8 rather than the Windows ANSI default, and synthetic FreeBSD ACL preflight cases must simulate their native descriptor port instead of calling POSIX-only flags on Windows. Qualify the unchanged assertions on a native Windows runner; this is separate from repairing the 5400-second full-gate HTML bottleneck.
+  - [x] Repair the exact-main Windows fixture failures from run `40610757747`: roadmap regression fixtures now use explicit UTF-8, and synthetic FreeBSD ACL cases simulate their descriptor port. All 30 cases pass on actual Windows 11 / Python 3.12.10 with default `cp1252` and zero skips. Production guards, real FreeBSD acceptance and the full-gate HTML bottleneck remain unchanged. See `verification/windows-portable-fixtures-qualification.json`.
+  - [x] Give these fixture-only changes explicit native Windows/macOS/Linux CI cells rather than unrelated product builds. Product PRs that also change these fixtures retain normal coverage plus portability cells; release refs, manual qualification and unknown changes retain full coverage. Ten focused CI-policy checks pass.
   - [x] Pass a unique per-attempt timing report to wheel smoke and document its diagnostic scope.
   - [x] Match hosted Windows CI's isolated admitted-receiver dependency test in the native release gate, then run the remaining suite once with that exact case deselected. Preserve production deadlines, failure propagation and all existing test roots.
 - **Evidence:**

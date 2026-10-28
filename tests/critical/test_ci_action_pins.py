@@ -152,6 +152,52 @@ class CiActionPinTests(unittest.TestCase):
             )
         )
 
+    def test_fixture_only_changes_receive_three_native_scoped_cells(self):
+        selector = self.selector()
+        paths = (
+            "tests/critical/test_roadmap_dependencies.py",
+            "tests/critical/test_retained_posix_acl.py",
+            "docs/roadmap/active-work.md",
+        )
+        for event, ref in (("pull_request", "main"), ("push", "refs/heads/main")):
+            with self.subTest(event=event):
+                rows = selector.select_matrix(event, ref, paths)["include"]
+                fixtures = [r for r in rows if r["task"] == "qualification-fixtures"]
+                self.assertEqual(len(fixtures), 3)
+                self.assertEqual(
+                    {r["os"] for r in fixtures},
+                    {
+                        "windows-latest",
+                        "macos-latest",
+                        "ubuntu-latest",
+                    },
+                )
+                self.assertTrue(all(r.get("scoped") for r in rows))
+                self.assertFalse(selector.select_full_qualification(event, ref, paths))
+                self.assertTrue(selector.select_freebsd_acl(event, ref, paths))
+        for event, ref in (
+            ("push", "refs/heads/release/1.3.x"),
+            ("pull_request", "release/1.3.x"),
+            ("workflow_dispatch", "refs/heads/main"),
+        ):
+            with self.subTest(event=event, ref=ref):
+                rows = selector.select_matrix(event, ref, paths)["include"]
+                self.assertTrue(all("scoped" not in r for r in rows))
+                self.assertTrue(selector.select_full_qualification(event, ref, paths))
+
+    def test_product_prs_retain_normal_cells_and_changed_fixture_cells(self):
+        selector = self.selector()
+        rows = selector.select_matrix(
+            "pull_request",
+            "main",
+            (
+                "src/literate_ai/application/roadmap_dependencies.py",
+                "tests/critical/test_roadmap_dependencies.py",
+            ),
+        )["include"]
+        self.assertIn("conformance", {r["task"] for r in rows})
+        self.assertEqual(sum(r["task"] == "qualification-fixtures" for r in rows), 3)
+
     def test_push_diff_uses_both_endpoints_and_unknown_diff_fails_closed(self) -> None:
         selector = self.selector()
         with mock.patch.object(selector.subprocess, "run") as run:

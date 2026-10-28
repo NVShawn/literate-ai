@@ -1,0 +1,35 @@
+{
+  "schema": "literate-ai/windows-portable-fixtures-qualification@1",
+  "source_revision": "56bb4e4b77c058b26f81fad7426d6eefb08633f2",
+  "observed_failure_run": 40610757747,
+  "platform": "Windows-11-10.0.26100-SP0",
+  "python": "3.12.10",
+  "default_encoding": "cp1252",
+  "utf8_mode": false,
+  "selected": 30,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": true,
+  "cases": [
+    "tests.critical.test_roadmap_dependencies.RoadmapDependencyTests",
+    "tests.critical.test_retained_posix_acl.PosixAclProjectionTests"
+  ],
+  "native_evidence_run": "20261028T033153Z-10758b",
+  "preserved_failed_dispatch": "20261028T032714Z-f26ac7 failed before test execution because the diagnostic inline Python command lost quotes at the native shell boundary; encoded payload repair does not change product behavior.",
+  "local_checks": {
+    "roadmap_cases_passed": 20,
+    "acl_controller_cases_passed": 10,
+    "native_freebsd_cases_explicitly_skipped_on_macos": 11,
+    "ci_scope_cases_passed": 10,
+    "changed_python_lint_and_format": "passed"
+  },
+  "unchanged_boundaries": [
+    "Production UTF-8 readers remain strict",
+    "FreeBSD native descriptor and ACL acceptance cases are unchanged",
+    "No production deadline or release gate is relaxed",
+    "Release refs, manual qualification and unknown changes still receive full qualification"
+  ],
+  "scope": "Native Windows fixture/controller qualification, separate from full native wheel/gate and installed-wheel qualification",
+  "software_release_qualified": false
+}
