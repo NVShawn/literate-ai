@@ -1,6 +1,10 @@
 {
   "schema": "literate-ai/freebsd-native-sdk-qualification@1",
-  "state": "harness-verified-native-execution-pending",
+  "state": "native-bootstrap-repair-awaiting-renewal",
+  "rejected_short_selector_run": 40629258691,
+  "failed_native_run": 40629313430,
+  "failed_stage": "Native FreeBSD package installation: py311-pip is unavailable in that repository",
+  "repair": "Detect available pip packages for the supported Python 3.11 through 3.14 range, install an exact flavor and use its matching interpreter; preserve all execution and admission gates.",
   "release": "1.3.1",
   "native_passed": false,
   "canonical_cli_test_doubles": false,
