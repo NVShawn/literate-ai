@@ -1,11 +1,17 @@
 # Native FreeBSD installed SDK qualification
 
 Use the **Native FreeBSD SDK qualification** workflow to renew the 1.3.1 patch
-program's installed public retained-SDK acceptance on an actual FreeBSD 14.3
+program's installed public retained-SDK acceptance on an actual FreeBSD 14.4
 guest. It builds a wheel from one exact commit, installs it non-editably and runs
 the consumer as an unprivileged account in a disposable VM on hosted Linux.
 No configured FreeBSD worker is currently available; this is the platform cell
 that the aligned worker fleet cannot cover.
+
+The original 14.3 guest could not install current packages: that release
+[reached end of life on June 30, 2026](https://lists.freebsd.org/archives/freebsd-announce/2026-June/000277.html),
+and its userland is older than the package repository requires. The workflow uses
+14.4 with normal package OS-version checks. Results from it provide 14.4 evidence;
+the failed 14.3 bootstrap attempts provide no SDK acceptance evidence.
 
 ## Run and inspect
 
