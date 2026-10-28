@@ -12,9 +12,76 @@ import tempfile
 import textwrap
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 class NativeSdkQualificationHarnessTests(unittest.TestCase):
+    def test_acl_probe_rejects_wrong_owner_platform_and_uid_before_writes(self):
+        harness = self.harness()
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "result"
+            for platform, uid, secondary in (
+                ("freebsd14", 1001, "1002"),
+                ("linux", 0, "1001"),
+                ("freebsd14", 0, "0"),
+            ):
+                with (
+                    self.subTest(platform=platform, uid=uid, secondary=secondary),
+                    patch.object(harness.sys, "platform", platform),
+                    patch.object(harness.os, "geteuid", return_value=uid, create=True),
+                    patch.object(harness, "command") as command,
+                    self.assertRaises(SystemExit) as refusal,
+                ):
+                    harness.root_acl_preflight(
+                        [
+                            "--parent",
+                            directory,
+                            "--uid",
+                            secondary,
+                            "--output",
+                            str(output),
+                        ]
+                    )
+                self.assertEqual(refusal.exception.code, 2)
+                command.assert_not_called()
+                self.assertFalse(output.exists())
+
+    def test_root_acl_probe_retains_real_child_failure_for_copyback(self):
+        harness = self.harness()
+        original_command = harness.command
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "result"
+
+            def fail(name, argv, destination, timeout):
+                self.assertEqual(argv[-2:], [directory, "1001"])
+                self.assertIn("preflight_freebsd_posix_acl", argv[3])
+                original_command(
+                    name,
+                    [
+                        sys.executable,
+                        "-c",
+                        "print('partial ACL probe');raise SystemExit(17)",
+                    ],
+                    destination,
+                    timeout,
+                )
+
+            with (
+                patch.object(harness.sys, "platform", "freebsd14"),
+                patch.object(harness.os, "geteuid", return_value=0, create=True),
+                patch.object(harness, "command", side_effect=fail),
+                self.assertRaisesRegex(RuntimeError, "exit 17"),
+            ):
+                harness.root_acl_preflight(
+                    ["--parent", directory, "--uid", "1001", "--output", str(output)]
+                )
+            terminal = json.loads((output / "acl-preflight.terminal.json").read_text())
+            self.assertEqual(terminal["exit_code"], 17)
+            self.assertFalse(terminal["timed_out"])
+            self.assertIn(
+                b"partial ACL probe", (output / "acl-preflight.stdout").read_bytes()
+            )
+
     def test_sqlite_preflight_executes_binding_and_refuses_missing_extension(self):
         workflow = (
             self.collector().parents[2] / "workflows/native-sdk-qualification.yml"
