@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   public-sdk:
-    name: Installed public SDK / FreeBSD 14.4 amd64
+    name: Installed public SDK / FreeBSD 15.1 amd64
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
@@ -64,7 +64,7 @@ jobs:
       - name: Exercise canonical CLI and installed owner controls on FreeBSD
         uses: vmactions/freebsd-vm@c46abacb49f09938ca4e1702d15d836285d694cc # v1.5.9
         with:
-          release: "14.4"
+          release: "15.1"
           mem: 4096
           cpu: 2
           copyback: true
@@ -72,8 +72,6 @@ jobs:
             set -eu
             df -Pk / /tmp /home
             test "$(df -Pk / | awk 'END {print $4}')" -gt 10485760
-            test "$(mount -p | awk '$2 == "/" {print $3}')" = ufs
-            mount -u -o acls /
             pkg update
             pip_package=$(pkg rquery -x '%n' '^py3(11|12|13|14)-pip$' | sort -r | head -n 1)
             test -n "$pip_package"
@@ -108,7 +106,20 @@ jobs:
             "$qualification_python" -c 'import shutil,sys; assert (3,11) <= sys.version_info[:2] <= (3,14); assert shutil.disk_usage("/home").free > 10 * 1024**3'
             pw useradd -n litai-qual -m -s /bin/sh -w random > /dev/null
             work=/home/litai-qual/qualification
-            mkdir -p "$work/harness" "$work/wheel" "$work/test-source"
+            mkdir -p "$work"
+            # The 15.1 image has a ZFS root. Keep it intact and provision the
+            # declared POSIX.1e workspace on a private sparse vnode-backed UFS.
+            # The disposable VM owns the device/image through teardown.
+            workspace_image=$(mktemp /var/tmp/litai-sdk-ufs.XXXXXXXX)
+            truncate -s 16g "$workspace_image"
+            workspace_device=$(mdconfig -a -t vnode -f "$workspace_image")
+            newfs -U "/dev/$workspace_device"
+            mount -t ufs -o acls "/dev/$workspace_device" "$work"
+            test "$(mount -p | awk -v target="$work" '$2 == target {print $3}')" = ufs
+            test "$(df -Pk "$work" | awk 'END {print $4}')" -gt 10485760
+            chmod 700 "$work"
+            mkdir -p "$work/harness" "$work/wheel" "$work/test-source" "$work/tmp"
+            chmod 700 "$work/tmp"
             cp .github/qualifications/native_sdk/*.py "$work/harness/"
             cp qualification-wheel/* "$work/wheel/"
             tar -xf "$work/wheel/test-source.tar" -C "$work/test-source"
@@ -118,7 +129,7 @@ jobs:
             /home/litai-qual/venv/bin/python -m pip install "$work"/wheel/*.whl
             /home/litai-qual/venv/bin/python -I "$work/harness/run_cell.py" acl-preflight --parent "$work" --uid "$(id -u litai-qual)" --output "$work/result"
             chown -R litai-qual:litai-qual /home/litai-qual
-            su - litai-qual -c '/home/litai-qual/venv/bin/python -I /home/litai-qual/qualification/harness/run_cell.py --wheel-dir /home/litai-qual/qualification/wheel --framework /home/litai-qual/qualification/framework.git --fixture /home/litai-qual/qualification/test-source/tests/fixtures/native_sdk --test-source /home/litai-qual/qualification/test-source --output /home/litai-qual/qualification/result'
+            su - litai-qual -c 'env TMPDIR=/home/litai-qual/qualification/tmp /home/litai-qual/venv/bin/python -I /home/litai-qual/qualification/harness/run_cell.py --wheel-dir /home/litai-qual/qualification/wheel --framework /home/litai-qual/qualification/framework.git --fixture /home/litai-qual/qualification/test-source/tests/fixtures/native_sdk --test-source /home/litai-qual/qualification/test-source --output /home/litai-qual/qualification/result'
       - name: Require copied-back native qualification success
         if: always()
         run: |
