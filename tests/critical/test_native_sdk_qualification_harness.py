@@ -15,6 +15,41 @@ from pathlib import Path
 
 
 class NativeSdkQualificationHarnessTests(unittest.TestCase):
+    def test_sqlite_preflight_executes_binding_and_refuses_missing_extension(self):
+        workflow = (
+            self.collector().parents[2] / "workflows/native-sdk-qualification.yml"
+        )
+        line = next(
+            line.strip()
+            for line in workflow.read_text(encoding="utf-8").splitlines()
+            if " -c " in line and "import sqlite3" in line
+        )
+        arguments = shlex.split(line)
+        code = arguments[arguments.index("-c") + 1]
+        healthy = subprocess.run(
+            [sys.executable, "-I", "-c", code],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        self.assertEqual(healthy.returncode, 0, healthy.stderr)
+        missing = (
+            "import importlib.abc,sys\n"
+            "class MissingExtension(importlib.abc.MetaPathFinder):\n"
+            " def find_spec(self,fullname,path=None,target=None):\n"
+            "  if fullname=='_sqlite3': raise ModuleNotFoundError('_sqlite3 missing')\n"
+            "sys.meta_path.insert(0,MissingExtension())\n"
+            f"exec({code!r})\n"
+        )
+        refused = subprocess.run(
+            [sys.executable, "-I", "-c", missing],
+            capture_output=True,
+            text=True,
+            timeout=20,
+        )
+        self.assertNotEqual(refused.returncode, 0)
+        self.assertIn("_sqlite3 missing", refused.stderr)
+
     @staticmethod
     def collector():
         return Path(__file__).resolve().parents[2] / (

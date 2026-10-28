@@ -13,6 +13,11 @@ and its userland is older than the package repository requires. The workflow use
 14.4 with normal package OS-version checks. Results from it provide 14.4 evidence;
 the failed 14.3 bootstrap attempts provide no SDK acceptance evidence.
 
+FreeBSD distributes Python's [SQLite standard binding as a separate flavored package](https://cgit.freebsd.org/ports/tree/databases/py-sqlite3/Makefile).
+The guest installs the SQLite package matching its pip/interpreter flavor and
+checks an actual in-memory query before building wheel dependencies. Installing
+Python and pip alone did not provide `_sqlite3` in the observed base image.
+
 ## Run and inspect
 
 Push the candidate first, then supply its complete 40-character commit ID:
