@@ -31,7 +31,11 @@ The guest installs the SQLite package matching its pip/interpreter flavor and
 checks an actual in-memory query before building wheel dependencies. Installing
 Python and pip alone did not provide `_sqlite3` in the observed base image.
 
-The disposable guest uses UFS with POSIX.1e ACLs enabled. Root setup exercises the
+The 15.1 image has a ZFS root. Setup leaves it intact and mounts a private sparse
+vnode-backed UFS volume for the workspace and its `TMPDIR`, with POSIX.1e ACLs
+enabled. The backing file remains root-owned outside the consumer's home and is
+not exported; disposal of the ephemeral VM owns its teardown. Root/backing storage
+and the mounted workspace must both pass their free-space checks. Root setup exercises the
 installed reversible ACL backend on a root-owned temporary resource, projecting
 the actual consumer UID, and retains its streams and terminal status before
 transferring the result directory to the consumer. Failed probes, unsupported
