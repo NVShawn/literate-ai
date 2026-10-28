@@ -72,12 +72,20 @@ jobs:
             set -eu
             df -Pk / /tmp /home
             test "$(df -Pk / | awk 'END {print $4}')" -gt 10485760
-            pkg install -y python311 py311-pip cmake git rust pkgconf libffi
+            pkg update
+            pip_package=$(pkg rquery -x '%n' '^py3(11|12|13|14)-pip$' | sort -r | head -n 1)
+            test -n "$pip_package"
+            pkg install -y "$pip_package" cmake git rust pkgconf libffi
           run: |
             set -eu
             source_checkout=$(pwd -P)
+            pip_package=$(pkg query -g '%n' 'py3*-pip' | grep -E '^py3(11|12|13|14)-pip$' | sort -r | head -n 1)
+            python_minor=${pip_package#py3}
+            python_minor=${python_minor%-pip}
+            qualification_python="/usr/local/bin/python3.$python_minor"
+            test -x "$qualification_python"
             df -Pk / /tmp /home
-            python3.11 -c 'import shutil; assert shutil.disk_usage("/home").free > 10 * 1024**3'
+            "$qualification_python" -c 'import shutil,sys; assert (3,11) <= sys.version_info[:2] <= (3,14); assert shutil.disk_usage("/home").free > 10 * 1024**3'
             pw useradd -n litai-qual -m -s /bin/sh -w random > /dev/null
             work=/home/litai-qual/qualification
             mkdir -p "$work/harness" "$work/wheel" "$work/test-source"
@@ -85,7 +93,7 @@ jobs:
             cp qualification-wheel/* "$work/wheel/"
             tar -xf "$work/wheel/test-source.tar" -C "$work/test-source"
             git -c safe.directory="$source_checkout" clone --bare --no-hardlinks "$source_checkout" "$work/framework.git"
-            python3.11 -m venv /home/litai-qual/venv
+            "$qualification_python" -m venv /home/litai-qual/venv
             /home/litai-qual/venv/bin/python -m pip install "$work"/wheel/*.whl
             chown -R litai-qual:litai-qual /home/litai-qual
             set +e
@@ -95,7 +103,7 @@ jobs:
             mkdir -p qualification-results
             cp qualification-wheel/wheel.json qualification-results/
             if [ -d "$work/result" ]; then
-              python3.11 - <<'PY'
+              "$qualification_python" - <<'PY'
             from pathlib import Path
             import shutil
             root = Path("/home/litai-qual/qualification/result")
