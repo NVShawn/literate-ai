@@ -102,6 +102,20 @@ def main() -> int:
         "passed": False,
     }
     (output / "platform.json").write_text(json.dumps(record, indent=2))
+    command(
+        "acl-preflight",
+        [
+            sys.executable,
+            "-I",
+            "-c",
+            "import os; from pathlib import Path; "
+            "from literate_ai.adapters.retained_posix_acl "
+            "import preflight_freebsd_posix_acl; "
+            "preflight_freebsd_posix_acl(Path.home(), os.getuid() + 1)",
+        ],
+        output,
+        60,
+    )
     project = output.parent / "consumer"
     command(
         "initialize",

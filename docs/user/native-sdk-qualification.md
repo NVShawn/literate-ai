@@ -18,6 +18,13 @@ The guest installs the SQLite package matching its pip/interpreter flavor and
 checks an actual in-memory query before building wheel dependencies. Installing
 Python and pip alone did not provide `_sqlite3` in the observed base image.
 
+The installed owner inventory also exercises private retained allocations. The
+disposable guest uses UFS with POSIX.1e ACLs enabled; before initialization, the
+unprivileged runner exercises the installed reversible ACL probe on its actual
+workspace filesystem. Failed probes, unsupported filesystems and incomplete
+restoration fail qualification. This does not replace the separate disabled-UFS
+refusal and enabled-UFS acceptance controls.
+
 ## Run and inspect
 
 Push the candidate first, then supply its complete 40-character commit ID:
@@ -51,6 +58,11 @@ status, incomplete collection, changed diagnostics or missing/failed acceptance.
 Symlinked evidence and private SSH key files are not exported. A forcibly killed
 VM may prevent copyback; host logs and wheel metadata remain available, and a
 missing terminal record fails qualification.
+
+On an architecture refusal, inspect the expected/observed values and the retained
+`host-elf-header.stdout` diagnostic. That header describes the guest's `/bin/sh`
+and its actual readelf spelling; it is diagnostic context, not SDK acceptance.
+The SDK's own observed image, target and byte checks must still pass.
 
 ## What a passing result proves
 

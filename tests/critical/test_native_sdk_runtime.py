@@ -153,6 +153,42 @@ class NativeSdkRuntimeTests(unittest.TestCase):
             wire["edges"], [[self.snapshot.identity.uri, "sdk"], ["sdk", "system"]]
         )
 
+    def test_freebsd_readelf_spelling_preserves_exact_observed_properties(self):
+        # FreeBSD releng/14.4 readelf spells EM_X86_64 with a lowercase x;
+        # GNU readelf uses X86-64. These are the same 64-bit target.
+        observed = self.observation("freebsd")
+        for component in observed.components:
+            for item in component["properties"]:
+                if item["name"] == "literate-ai:elf-architecture":
+                    item["value"] = "ELF64/Advanced Micro Devices x86-64"
+        result = self.observe(observed, operating_system="freebsd")
+        wire = json.loads(self.store.get_bytes(result))
+        self.assertEqual(wire["architecture"], "x86_64")
+        self.assertEqual(wire["components"], list(observed.components))
+
+    def test_freebsd_unknown_and_wrong_class_refuse_for_sdk_and_system_images(self):
+        for ref in ("sdk", "system"):
+            for label in (
+                "ELF32/Advanced Micro Devices x86-64",
+                "ELF64/unknown machine",
+                "ELF64/Advanced Micro Devices x86-64 (unrecognized extension)",
+                "ELF64/AArch64",
+            ):
+                with self.subTest(ref=ref, label=label):
+                    observed = self.observation("freebsd")
+                    component = next(
+                        c for c in observed.components if c["bom-ref"] == ref
+                    )
+                    for item in component["properties"]:
+                        if item["name"] == "literate-ai:elf-architecture":
+                            item["value"] = label
+                    with self.assertRaisesRegex(
+                        ValueError, "architecture differs"
+                    ) as refused:
+                        self.observe(observed, operating_system="freebsd")
+                    self.assertIn(label, str(refused.exception))
+                    self.assertIn("expected x86_64", str(refused.exception))
+
     def test_freebsd_sdk_refuses_foreign_host_and_architecture(self):
         with self.assertRaisesRegex(ValueError, "selected target host"):
             self.observe(operating_system="freebsd", host_platform="linux")

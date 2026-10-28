@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 import shutil
 import subprocess
 import sys
@@ -235,6 +236,29 @@ project = load_project(root)
 snapshot = FilesystemLockedGenerationAuthorityReader().read(
     component, target_name="host", flavor_roots=project.roots("flavor")
 )
+if sys.platform.startswith("freebsd"):
+    # Diagnostic only: retain the actual tool spelling without replacing observers.
+    readelf = shutil.which("readelf")
+    if readelf:
+        header_result = {"diagnostic_only": True, "host_machine": platform.machine()}
+        with (
+            (output / "host-elf-header.stdout").open("wb") as stdout,
+            (output / "host-elf-header.stderr").open("wb") as stderr,
+        ):
+            try:
+                header = subprocess.run(
+                    [readelf, "-h", "/bin/sh"],
+                    stdout=stdout,
+                    stderr=stderr,
+                    timeout=30,
+                    check=False,
+                )
+                header_result["exit_code"] = header.returncode
+            except (OSError, subprocess.TimeoutExpired) as error:
+                header_result["error"] = type(error).__name__
+        (output / "host-elf-header.json").write_text(
+            json.dumps(header_result, indent=2) + "\n", encoding="utf-8"
+        )
 checkpoint("observing-selected-sdk")
 acquisition = NativeSdkProjectAcquisition(
     cache_root=output / "selected-sdk",
