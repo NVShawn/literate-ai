@@ -1,0 +1,22 @@
+{
+  "schema": "literate-ai/roadmap-cycle-regression@1",
+  "interpretation": "These prerequisites are explicit semantic transcriptions of the quoted historical checkboxes, not claims that arbitrary prose is automatically parsed.",
+  "cases": [
+    {
+      "id": "RELEASE-019",
+      "introducing_commit": "79903e680e907c2fa297cffa9886323f82abc91f",
+      "historical_requirement": "The 1.3.1 release plan, qualification, publication, verification, and exact post-release synchronization gates pass with no incomplete release goals.",
+      "modeled_prerequisite": "release:1.3.1:synchronized",
+      "cycle": "RELEASE-019 -> release:1.3.1:synchronized -> release:1.3.1:verified -> release:1.3.1:published -> release:1.3.1:checked -> release:1.3.1:prepared -> release:1.3.1:ready -> RELEASE-019"
+    },
+    {
+      "id": "COURSE-004",
+      "introducing_commit": "61da15eee63a5590da71bc8574b28ce1a98fde35",
+      "activation_merge": "8cae3cf86",
+      "main_landing": "8d5c83c11",
+      "historical_requirement": "Pass the declared 1.3.1 release-goal gate and exact release qualification; do not publish or close the milestone while any item above remains incomplete.",
+      "modeled_prerequisite": "release:1.3.1:ready",
+      "cycle": "COURSE-004 -> release:1.3.1:ready -> COURSE-004"
+    }
+  ]
+}

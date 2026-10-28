@@ -264,6 +264,7 @@ openspec-check: python-version $(RUNTIME_PREREQUISITE) $(OPENSPEC_TOOL_STAMP) ##
 	$(STEP) openspec-check -- $(OPENSPEC) validate --all --strict --no-interactive
 
 documentation-check: python-version $(RUNTIME_PREREQUISITE) $(OPENSPEC_TOOL_STAMP) ## Extract and render every Mermaid diagram in Markdown.
+	PYTHONPATH=src $(RUN_PYTHON_COMMAND) scripts/check_roadmap_dependencies.py .
 	$(STEP) documentation-check -- $(NPM) --prefix "$(OPENSPEC_RUNTIME_DIR)" run documentation:check -- "$(CURDIR)"
 
 documentation-review: python-version $(RUNTIME_PREREQUISITE) ## Calculate the reviewed documentation authority marker.

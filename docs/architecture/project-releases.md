@@ -1,5 +1,8 @@
 # Project release protocol
 
+Roadmap prerequisites and implicit release ordering must form an acyclic graph;
+see [completion dependencies and the 1.3.1 incident](roadmap-dependencies.md).
+
 Local release gates own their subprocess tree. Interruption or timeout terminates
 and reaps that tree before returning control, for both streamed and captured
 output. The gate retains its transcripts and failure, and unfinished descendant

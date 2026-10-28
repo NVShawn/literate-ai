@@ -16,10 +16,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from literate_ai.adapters.roadmap_dependencies import require_project_roadmap_acyclic
 from literate_ai.application.project_update_work_items import (
     WORK_ITEM_PREFIX,
     ProjectUpdateWorkItem,
 )
+from literate_ai.application.roadmap_dependencies import RoadmapDependencyError
 
 DEFAULT_QUEUE_PATH = "docs/roadmap/active-work.md"
 SECTION_HEADING = "## Upstream updates"
@@ -88,6 +90,12 @@ def record_work_items(
 
     pending = [item for item in items if item.item_id not in present]
     skipped = tuple(item.item_id for item in items if item.item_id in present)
+    try:
+        require_project_roadmap_acyclic(
+            project_root, {queue_path: existing.encode()}, additional_queue=queue_path
+        )
+    except RoadmapDependencyError as exc:
+        raise ProjectUpdateWorkItemError(exc.code, exc.message) from exc
     if not pending:
         return RecordedWorkItems(queue_path, (), skipped)
 
@@ -96,6 +104,12 @@ def record_work_items(
         body += f"\n{SECTION_HEADING}\n\nAdvisory items derived from `litai update`.\n"
     for item in pending:
         body += "\n" + _render(item)
+    try:
+        require_project_roadmap_acyclic(
+            project_root, {queue_path: body.encode()}, additional_queue=queue_path
+        )
+    except RoadmapDependencyError as exc:
+        raise ProjectUpdateWorkItemError(exc.code, exc.message) from exc
     target.write_text(body, encoding="utf-8")
     return RecordedWorkItems(
         queue_path, tuple(item.item_id for item in pending), skipped

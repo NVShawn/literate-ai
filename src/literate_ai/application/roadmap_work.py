@@ -5,6 +5,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from .roadmap_dependencies import validate_roadmap_dependencies
+
 _ID = re.compile(r"^[A-Z][A-Z0-9-]{2,63}$")
 
 
@@ -26,6 +28,7 @@ class RoadmapWorkRecord:
     dependencies: tuple[str, ...]
     implementation: tuple[str, ...]
     evidence: tuple[str, ...]
+    completion_prerequisites: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if _ID.fullmatch(self.work_id) is None:
@@ -39,6 +42,7 @@ class RoadmapWorkRecord:
             *self.dependencies,
             *self.implementation,
             *self.evidence,
+            *self.completion_prerequisites,
         )
         if any(not value.strip() or "\n" in value for value in values):
             raise RoadmapWorkError(
@@ -65,16 +69,21 @@ def record_work(content: str, record: RoadmapWorkRecord) -> str:
         f"- **Direction:** {record.direction}",
         f"- **Conclusion:** {record.conclusion}",
         f"- **Depends on:** {dependencies}",
+        "- **Completion prerequisites:** "
+        + (", ".join(record.completion_prerequisites) or "none"),
         "- **Implementation:**",
         *(f"  - [ ] {item}" for item in record.implementation),
         "- **Evidence:**",
         *(f"  - [ ] {item}" for item in record.evidence),
         "",
     ]
-    return content.rstrip() + "\n\n" + "\n".join(lines)
+    updated = content.rstrip() + "\n\n" + "\n".join(lines)
+    validate_roadmap_dependencies(updated)
+    return updated
 
 
 def close_work(content: str, work_id: str) -> str:
+    validate_roadmap_dependencies(content)
     if _ID.fullmatch(work_id) is None:
         raise RoadmapWorkError("roadmap_work.id_invalid", "work ID is invalid")
     heading = re.compile(rf"^### \[(?P<state>[ ~x])\] {re.escape(work_id)}\b.*$", re.M)

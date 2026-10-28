@@ -130,6 +130,7 @@ jobs:
           PYTHONPATH: src
         run: >-
           python -m unittest
+          tests.critical.test_roadmap_dependencies
           tests.e2e.test_release_contributions.ReleaseContributionsTests.test_roadmap_goal_gate_requires_documented_complete_goals
           tests.e2e.test_release_contributions.ReleaseContributionsTests.test_roadmap_goal_gate_rejects_goal_omitted_from_manifest
           tests.e2e.test_release_contributions.ReleaseContributionsTests.test_roadmap_goal_gate_rejects_unapproved_deferral

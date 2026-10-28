@@ -205,6 +205,14 @@ def apply_project_update(
     from .project_update_compatibility import require_selected_skill_closure
 
     require_selected_skill_closure(root, write_content)
+    from literate_ai.application.roadmap_dependencies import RoadmapDependencyError
+
+    from .roadmap_dependencies import require_project_roadmap_acyclic
+
+    try:
+        require_project_roadmap_acyclic(root, write_content)
+    except RoadmapDependencyError as exc:
+        raise ProjectUpdateError(exc.code, exc.message) from exc
     written: list[str] = []
     try:
         for item in selected_items:

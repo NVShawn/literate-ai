@@ -19,6 +19,10 @@ from literate_ai.adapters.project_tracker import (
     _git_environment,
     inspect_project_tracker,
 )
+from literate_ai.application.roadmap_dependencies import (
+    RoadmapDependencyError,
+    validate_roadmap_dependencies,
+)
 from literate_ai.contracts.identity import canonical_identity
 
 RELEASE_CONTRIBUTIONS_SCHEMA = "literate-ai/release-contributions@1"
@@ -98,6 +102,10 @@ def _roadmap_release_goals(
             "release.roadmap_goal_manifest_invalid",
             f"cannot read roadmap authority: {roadmap_path}",
         ) from exc
+    try:
+        validate_roadmap_dependencies(roadmap, manifest)
+    except RoadmapDependencyError as exc:
+        raise ReleaseContributionsError(exc.code, exc.message) from exc
     sections: dict[str, tuple[bool, str | None]] = {}
     headings = list(_ROADMAP_HEADING.finditer(roadmap))
     for index, heading in enumerate(headings):

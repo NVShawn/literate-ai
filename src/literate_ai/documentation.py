@@ -457,6 +457,16 @@ def validate_documentation_graph(
                 "project.documentation_invalid",
                 f"declared Markdown document is not UTF-8: {path}",
             ) from exc
+    from literate_ai.application.roadmap_dependencies import (
+        RoadmapDependencyError,
+        validate_roadmap_dependencies,
+    )
+
+    try:
+        if _ACTIVE_WORK_PATH in contents:
+            validate_roadmap_dependencies(contents[_ACTIVE_WORK_PATH])
+    except RoadmapDependencyError as exc:
+        raise DocumentationError(exc.code, exc.message) from exc
     validate_roadmap_lifecycle(contents)
     skill_path = agent_skill.resolve(strict=True)
     skill_relative = skill_path.relative_to(root).as_posix()

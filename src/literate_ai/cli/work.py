@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 from typing import Any
 
+from literate_ai.adapters.roadmap_dependencies import require_project_roadmap_acyclic
+from literate_ai.application.roadmap_dependencies import RoadmapDependencyError
 from literate_ai.application.roadmap_work import (
     RoadmapWorkError,
     RoadmapWorkRecord,
@@ -37,15 +39,19 @@ def work_from_args(args: Any) -> tuple[dict[str, object], int]:
                     tuple(args.depends_on),
                     tuple(args.implementation),
                     tuple(args.evidence),
+                    tuple(getattr(args, "completion_prerequisite", ())),
                 ),
             )
         else:
             updated = close_work(content, args.work_id)
+        require_project_roadmap_acyclic(
+            project.root, {"docs/roadmap/active-work.md": updated.encode("utf-8")}
+        )
         if updated != content:
             staging = path.with_name(f".{path.name}.{os.getpid()}.tmp")
             staging.write_text(updated, encoding="utf-8", newline="\n")
             os.replace(staging, path)
-    except (OSError, UnicodeError, RoadmapWorkError) as exc:
+    except (OSError, UnicodeError, RoadmapWorkError, RoadmapDependencyError) as exc:
         raise CliFailure(
             getattr(exc, "code", "roadmap_work.write_failed"),
             getattr(exc, "message", str(exc)),

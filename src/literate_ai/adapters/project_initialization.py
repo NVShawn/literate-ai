@@ -2878,6 +2878,21 @@ class FilesystemProjectInitializationAdapter:
             for selector in flavor_selectors
         )
         _validate_template_skill_catalog(active_flavors)
+        from literate_ai.application.roadmap_dependencies import RoadmapDependencyError
+
+        from .roadmap_dependencies import require_project_roadmap_acyclic
+
+        try:
+            require_project_roadmap_acyclic(
+                resolved_target,
+                {
+                    destination: _template_text(resource).encode("utf-8")
+                    for destination, resource in _TEMPLATE_FILES.items()
+                    if _include_template_file(destination, active_flavors)
+                },
+            )
+        except RoadmapDependencyError as exc:
+            raise ProjectInitializationError(exc.code, exc.message) from exc
         if root_plan is not None:
             from literate_ai.adapters.monorepo_adoption import MonorepoAdoptionError
             from literate_ai.adapters.monorepo_components import (

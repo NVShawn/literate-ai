@@ -112,6 +112,42 @@ class DocumentationUpdateTests(unittest.TestCase):
                 )
             self.assertEqual(guide.read_text(encoding="utf-8"), "# Old guide\n")
 
+    def test_cyclic_proposal_rejects_whole_batch_before_any_replace(self):
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as directory:
+            project = self.project(Path(directory))
+            queue = project.root / "docs/roadmap/active-work.md"
+            queue.parent.mkdir()
+            before = b"# Work\n\n### [ ] AAA-001 -- Work\n"
+            queue.write_bytes(before)
+            guide = project.root / "docs/guide.md"
+            proposal = self.proposal(
+                "docs/guide.md", guide.read_bytes(), "# New guide\n"
+            )
+            proposal["changes"].extend(
+                self.proposal(
+                    "docs/roadmap/active-work.md",
+                    before,
+                    before.decode() + "- **Completion prerequisites:** AAA-001\n",
+                )["changes"]
+            )
+            with patch(
+                "literate_ai.adapters.documentation_update._atomic_replace"
+            ) as replace:
+                with self.assertRaises(DocumentationUpdateError) as caught:
+                    apply_documentation_update(
+                        project,
+                        review={"state": "current", "document": "docs/guide.md"},
+                        receipt_state="unconfigured",
+                        authority={"project_id": "documentation-test"},
+                        task_runner=ScriptedTaskRunner(proposal),
+                    )
+            self.assertEqual(caught.exception.code, "roadmap.dependency_cycle")
+            replace.assert_not_called()
+            self.assertEqual(queue.read_bytes(), before)
+            self.assertEqual(guide.read_text(), "# Old guide\n")
+
     def test_rejects_secret_bearing_document_before_model_egress(self) -> None:
         secrets = (
             "api_key = abcdefghijklmnopqrstuvwxyz\n",

@@ -1,0 +1,38 @@
+{
+  "schema": "literate-ai/roadmap-cycle-qualification@1",
+  "release": "1.3.1",
+  "base_revision": "2dd4f9ea5f293a816a1260f19a9af4860ce39dcd",
+  "lifecycle_driver_identity": "sha256:f871b590bf03c60e3b4c8476fb82de704c1b05109fb3049834892e4e49d6a3a2",
+  "platform": "macos",
+  "runner": "make python-check with the existing Make-managed development environment",
+  "focused_suites": [
+    {"pattern": "tests/critical/test_roadmap_dependencies.py", "passed": 19},
+    {"pattern": "tests/e2e/test_project_update_merge.py", "passed": 9},
+    {"pattern": "tests/e2e/test_release_contributions*.py", "passed": 10},
+    {"pattern": "tests/e2e/test_project_initialization_adapter.py", "passed": 10},
+    {"pattern": "tests/smoke/test_documentation.py", "passed": 3},
+    {"pattern": "tests/critical/test_documentation_update.py", "passed": 3},
+    {"pattern": "tests/critical/test_ci_action_pins.py", "passed": 8},
+    {"pattern": "tests/e2e/test_project_releases.py", "passed": 17}
+  ],
+  "total_passed": 79,
+  "failed": 0,
+  "additional_checks": [
+    "Changed Python lint and format: 17 files pass",
+    "Changed skills and template copies pass SkillEvaluator",
+    "Repository layout and public-export audit pass",
+    "Full repository declared completion graph is acyclic",
+    "All 18 release manifest IDs are unchanged from base_revision",
+    "Documentation graph and authority review pass"
+  ],
+  "regression_fixture": "tests/fixtures/roadmap-release-cycle-1.3.1.json",
+  "rejected_write_evidence": "Actual work CLI, initialization, framework-update application and documentation-reconciliation boundaries reject cyclic proposals before replacing files; assertions preserve existing bytes and the update baseline. Custom advisory queues and no-op imports also reject existing cycles.",
+  "valid_ordering_evidence": "Diamond/transitive ordering, cross-release ordering, separate final execution and standalone clean-source qualification remain accepted.",
+  "limits": [
+    "Arbitrary narrative prerequisites require human review and explicit modeling",
+    "Manual editors and Git can persist bad data; validation/CI and readiness reject it",
+    "These focused source checks are not final installed-wheel or native release qualification"
+  ],
+  "software_release_qualified": false,
+  "software_release_published": false
+}
