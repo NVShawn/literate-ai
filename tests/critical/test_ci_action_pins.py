@@ -200,6 +200,34 @@ class CiActionPinTests(unittest.TestCase):
         self.assertIn("conformance", {r["task"] for r in rows})
         self.assertEqual(sum(r["task"] == "qualification-fixtures" for r in rows), 3)
 
+    def test_native_sdk_harness_changes_select_policy_checks_not_product_builds(self):
+        selector = self.selector()
+        paths = (
+            ".github/workflows/native-sdk-qualification.yml",
+            ".github/qualifications/native_sdk/qualify_public_sdk.py",
+            ".github/qualifications/native_sdk/source_transport.py",
+            ".github/qualifications/native_sdk/run_cell.py",
+            "tests/critical/test_native_sdk_qualification_harness.py",
+            "verification/freebsd-native-sdk-qualification.json",
+        )
+        for event, ref in (("pull_request", "main"), ("push", "refs/heads/main")):
+            with self.subTest(event=event):
+                self.assertEqual(
+                    [
+                        r["task"]
+                        for r in selector.select_matrix(event, ref, paths)["include"]
+                    ],
+                    ["ci-policy"],
+                )
+                self.assertFalse(selector.select_full_qualification(event, ref, paths))
+        self.assertTrue(
+            selector.select_full_qualification(
+                "push",
+                "refs/heads/release/1.3.x",
+                paths,
+            )
+        )
+
     def test_push_diff_uses_both_endpoints_and_unknown_diff_fails_closed(self) -> None:
         selector = self.selector()
         with mock.patch.object(selector.subprocess, "run") as run:
