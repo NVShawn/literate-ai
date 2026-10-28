@@ -37,6 +37,16 @@ gh run download RUN_ID --name freebsd-native-sdk-qualification
 records explain failures. A timeout retains partial streams and a failed terminal
 record. An unfinished or failed run provides diagnostic evidence only.
 
+The guest exit trap exports its original status and the reviewed diagnostic
+whitelist before the VM action copies files back. The VM transport step can
+therefore succeed after a guest failure; the separate **Require copied-back
+native qualification success** step still fails the workflow on a nonzero guest
+status, incomplete collection, changed diagnostics or missing/failed acceptance.
+`guest-terminal.json` retains the original status and copied file hashes.
+Symlinked evidence and private SSH key files are not exported. A forcibly killed
+VM may prevent copyback; host logs and wheel metadata remain available, and a
+missing terminal record fails qualification.
+
 ## What a passing result proves
 
 - The installed public CLI initializes an owned consumer using the published

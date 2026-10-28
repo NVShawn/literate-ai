@@ -9,6 +9,10 @@
   "failed_catalogue_stage": "Package repository requires userland 1404000; the 14.3 guest reports 1403000. SDK tests did not run.",
   "failed_ownership_run": 40631668336,
   "failed_ownership_stage": "FreeBSD 14.4 package provisioning passes; bare-clone staging refuses the foreign-owned source .git directory before SDK execution.",
+  "failed_initialize_run": 40632599324,
+  "failed_initialize_artifact": 12792108411,
+  "failed_initialize_stage": "Actual non-editable wheel and dependency installation passes, then the public initialization CLI exits 1. Its detailed guest refusal was lost because the VM action throws before copyback on a nonzero guest command. No initialization root cause or SDK pass is inferred.",
+  "copyback_repair": "An EXIT trap retains original guest and collector statuses while allowing transport copyback. A separate host guard requires successful statuses, complete unchanged diagnostics and passing native acceptance. Private keys and symlinked evidence remain excluded.",
   "repair": "Use the supported FreeBSD 14.4 guest with package OS-version checks intact; detect and install an exact supported Python pip flavor. Scope staging trust to the exact checkout and its .git directory in one Git command; no global or consumer trust changes. Preserve all execution and admission gates.",
   "release": "1.3.1",
   "native_passed": false,
@@ -18,6 +22,8 @@
   "harness_checks": {
     "real_child_failure_and_timeout_cases_passed": 2,
     "real_git_ownership_boundary_cases_passed": 1,
+    "macos_harness_controls_passed": 7,
+    "failure_copyback_controls": "Real workflow exit-trap subprocess failure retains exit 17 and partial streams while host qualification refuses. Additional controls reject absent acceptance, changed copyback, stale success after failed recollection and a real POSIX directory symlink to private fixture material.",
     "ownership_regression_method": "Real Git processes with GIT_TEST_ASSUME_DIFFERENT_OWNER: original clone refuses, exact checkout/.git command accepts the same commit, unrelated repository refuses, existing global config bytes remain unchanged.",
     "native_windows_harness_controls": {
       "python": "3.12.10",
