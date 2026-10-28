@@ -18,12 +18,30 @@
     "runner": "make python-check with the existing Make-managed environment",
     "platform": "macos",
     "suites": [
-      {"pattern": "tests/critical/test_lineage_flavor_observation.py", "passed": 13},
-      {"pattern": "tests/critical/test_current_component_locks.py", "passed": 6},
-      {"pattern": "tests/critical/test_locked_generation_authority.py", "passed": 2},
-      {"pattern": "tests/smoke/test_cli_component_locks.py", "passed": 6},
-      {"pattern": "tests/smoke/test_component_lock_planning.py", "passed": 1},
-      {"pattern": "tests/smoke/test_html_emitter.py", "passed": 2}
+      {
+        "pattern": "tests/critical/test_lineage_flavor_observation.py",
+        "passed": 13
+      },
+      {
+        "pattern": "tests/critical/test_current_component_locks.py",
+        "passed": 6
+      },
+      {
+        "pattern": "tests/critical/test_locked_generation_authority.py",
+        "passed": 2
+      },
+      {
+        "pattern": "tests/smoke/test_cli_component_locks.py",
+        "passed": 6
+      },
+      {
+        "pattern": "tests/smoke/test_component_lock_planning.py",
+        "passed": 1
+      },
+      {
+        "pattern": "tests/smoke/test_html_emitter.py",
+        "passed": 2
+      }
     ],
     "passed": 30,
     "failed": 0,
@@ -35,12 +53,24 @@
     "python": "3.12.10",
     "method": "Separate source copies with five candidate modules overlaid; retained installed prefix unchanged. Real committed-lock fixture created through the installed public CLI and restored afterwards.",
     "order": "baseline,candidate,candidate,baseline",
-    "baseline_seconds": [29.024147499818355, 31.500005799811333],
-    "candidate_seconds": [28.952386100310832, 25.389451699797064],
+    "baseline_seconds": [
+      29.024147499818355,
+      31.500005799811333
+    ],
+    "candidate_seconds": [
+      28.952386100310832,
+      25.389451699797064
+    ],
     "reports_identical": true,
     "fixture_restored": true,
-    "full_catalog_loads": {"baseline": 4, "candidate": 1},
-    "full_graph_builds": {"baseline": 4, "candidate": 4},
+    "full_catalog_loads": {
+      "baseline": 4,
+      "candidate": 1
+    },
+    "full_graph_builds": {
+      "baseline": 4,
+      "candidate": 4
+    },
     "raw_controller_sha256": "b2a458abf161e5d5a802495ecfbb9c4179d5e85acedd75b26b44fcc2c5d061b2",
     "limits": "Two samples per role, uncontrolled scheduling/cache effects, source copies rather than candidate wheels. This comparison predates final CLI error-code normalization and factory-only observation construction. No reliable wall-time speedup, native negative-control qualification or final software admission claimed."
   },
@@ -48,9 +78,18 @@
     "complete": false,
     "terminal_exit": 1,
     "completed_samples": [
-      {"role": "baseline", "seconds": 31.525199099909514},
-      {"role": "candidate", "seconds": 27.61349909985438},
-      {"role": "candidate", "seconds": 25.277705800253898}
+      {
+        "role": "baseline",
+        "seconds": 31.525199099909514
+      },
+      {
+        "role": "candidate",
+        "seconds": 27.61349909985438
+      },
+      {
+        "role": "candidate",
+        "seconds": 25.277705800253898
+      }
     ],
     "failed_stage": "The next baseline child exceeded its unchanged 150-second diagnostic timeout. Do not treat this as a passing repetition or a candidate speedup.",
     "fixture_restored": true,
@@ -59,7 +98,11 @@
   },
   "post_stall_resource_observation": {
     "method": "GetSystemTimes and GlobalMemoryStatusEx, three five-second windows",
-    "cpu_percent": [9.756572541382669, 9.601873536299765, 9.03954802259887],
+    "cpu_percent": [
+      9.756572541382669,
+      9.601873536299765,
+      9.03954802259887
+    ],
     "minimum_available_memory_bytes": 58126651392,
     "free_volume_bytes": 27737997312,
     "volume_total_bytes": 535389253632,
@@ -68,5 +111,6 @@
   "installed_wheel_qualified": false,
   "full_native_gate_passed": false,
   "software_release_qualified": false,
-  "software_release_published": false
+  "software_release_published": false,
+  "subsequent_installed_qualification": "verification/lineage-flavor-installed-qualification.json"
 }
