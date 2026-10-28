@@ -30287,6 +30287,8 @@ hosted CI and canonical tree worker/live SDK integration remain open.
   - [ ] A real locked source-built SDK fixture passes the canonical installed public CLI retained build/test/docs/independent acceptance; missing authorization, producer drift, policy mismatch and revocation refuse before accepted evidence.
   - [ ] Full regression, static/driver/documentation checks, installed wheel and native renewal pass at the exact resulting candidate.
 
+**Python import-alias correction:** Preserve the existing `literate-ai:python-top-level-import` observation during generated third-party SBOM reconciliation, so distributions such as `cupy-cuda13x` may accurately name the `cupy` import. Installed payload observation still independently verifies every claimed alias; invented framework properties still refuse. All 22 focused generation checks pass without skips, including preservation and forged-property negative controls. This is source qualification; installed public SDK, lifecycle and native release acceptance remain required.
+
 ### [ ] MERGE-STACK-001 — Resolve and qualify the remaining retained integration stack
 
 - **Priority:** P0

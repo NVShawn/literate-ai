@@ -381,6 +381,50 @@ class SourceSbomAuthorityTests(unittest.TestCase):
             self.reconcile(repeat_component)
         self.assertEqual(raised.exception.code, "coding_cli.generated_metadata_invalid")
 
+    def test_third_party_python_import_alias_is_preserved(self):
+        component = {
+            "type": "library",
+            "bom-ref": "pkg:pypi/cupy-cuda13x@14.1.1",
+            "name": "cupy-cuda13x",
+            "version": "14.1.1",
+            "properties": [
+                {"name": "literate-ai:dependency-kind", "value": "runtime"},
+                {"name": "literate-ai:dependency-scope", "value": "runtime"},
+                {"name": "literate-ai:python-top-level-import", "value": "cupy"},
+            ],
+        }
+
+        def add_python_distribution(document):
+            document["components"].append(component)
+            document["dependencies"][0]["dependsOn"].append(component["bom-ref"])
+            document["dependencies"].append(
+                {"ref": component["bom-ref"], "dependsOn": []}
+            )
+
+        repaired = self.reconcile(add_python_distribution)
+
+        self.assertIn(component, repaired["components"])
+
+    def test_third_party_component_cannot_invent_framework_property(self):
+        component = {
+            "type": "library",
+            "bom-ref": "pkg:pypi/example@1.0.0",
+            "name": "example",
+            "version": "1.0.0",
+            "properties": [{"name": "literate-ai:forged", "value": "x"}],
+        }
+
+        def add_forged_property(document):
+            document["components"].append(component)
+            document["dependencies"][0]["dependsOn"].append(component["bom-ref"])
+            document["dependencies"].append(
+                {"ref": component["bom-ref"], "dependsOn": []}
+            )
+
+        with self.assertRaises(CodingCliError) as raised:
+            self.reconcile(add_forged_property)
+        self.assertEqual(raised.exception.code, "coding_cli.generated_metadata_invalid")
+
     def test_prompt_documents_fit_a_line_truncating_reader(self):
         document = json.dumps({"items": ["x" * 40] * 200}).encode()
 
