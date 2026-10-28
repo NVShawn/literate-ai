@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Preserve verified Python import aliases in generated third-party SBOMs, including
+  CUDA distributions that import under a different name; retain installed payload
+  verification and refusal of invented framework authority.
+
 - Accept FreeBSD readelf's exact ELF64 x86-64 machine spelling during native SDK
   admission, alongside GNU's spelling. Preserve the raw observation and all
   target/byte checks; architecture refusals now report expected and observed values.
