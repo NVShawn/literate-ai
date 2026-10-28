@@ -16,6 +16,65 @@ from unittest.mock import patch
 
 
 class NativeSdkQualificationHarnessTests(unittest.TestCase):
+    def test_publication_preflight_requires_complete_unskipped_inventory(self):
+        harness = self.harness()
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            for summary in (
+                {"selected": 4, "failures": 0, "errors": 0, "skipped": 0},
+                {"selected": 5, "failures": 0, "errors": 0, "skipped": 1},
+                {"selected": 5, "failures": 1, "errors": 0, "skipped": 0},
+                {"selected": 5, "failures": 0, "errors": 1, "skipped": 0},
+                {
+                    "selected": True,
+                    "failures": False,
+                    "errors": False,
+                    "skipped": False,
+                },
+            ):
+                with self.subTest(summary=summary):
+                    (output / "publication-preflight.json").write_text(
+                        json.dumps(summary)
+                    )
+                    with (
+                        patch.object(harness, "command"),
+                        self.assertRaisesRegex(ValueError, "inventory"),
+                    ):
+                        harness.publication_preflight(output, output)
+
+    def test_publication_preflight_preserves_actual_child_failure(self):
+        harness = self.harness()
+        original = harness.command
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+
+            def failed(name, argv, destination, timeout):
+                self.assertIn("tests.critical.test_exclusive_directory", argv[3])
+                self.assertIn("publication.__file__", argv[3])
+                original(
+                    name,
+                    [
+                        sys.executable,
+                        "-c",
+                        "print('publication unavailable');raise SystemExit(17)",
+                    ],
+                    destination,
+                    timeout,
+                )
+
+            with patch.object(harness, "command", side_effect=failed):
+                with self.assertRaisesRegex(RuntimeError, "exit 17"):
+                    harness.publication_preflight(output, output)
+            terminal = json.loads(
+                (output / "publication-preflight.terminal.json").read_text()
+            )
+            self.assertEqual(terminal["exit_code"], 17)
+            self.assertFalse(terminal["timed_out"])
+            self.assertIn(
+                b"publication unavailable",
+                (output / "publication-preflight.stdout").read_bytes(),
+            )
+
     def test_acl_probe_rejects_wrong_owner_platform_and_uid_before_writes(self):
         harness = self.harness()
         with tempfile.TemporaryDirectory() as directory:

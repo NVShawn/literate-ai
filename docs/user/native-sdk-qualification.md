@@ -1,7 +1,7 @@
 # Native FreeBSD installed SDK qualification
 
 Use the **Native FreeBSD SDK qualification** workflow to renew the 1.3.1 patch
-program's installed public retained-SDK acceptance on an actual FreeBSD 14.4
+program's installed public retained-SDK acceptance on an actual FreeBSD 15.1
 guest. It builds a wheel from one exact commit, installs it non-editably and runs
 the consumer as an unprivileged account in a disposable VM on hosted Linux.
 No configured FreeBSD worker is currently available; this is the platform cell
@@ -10,8 +10,21 @@ that the aligned worker fleet cannot cover.
 The original 14.3 guest could not install current packages: that release
 [reached end of life on June 30, 2026](https://lists.freebsd.org/archives/freebsd-announce/2026-June/000277.html),
 and its userland is older than the package repository requires. The workflow uses
-14.4 with normal package OS-version checks. Results from it provide 14.4 evidence;
-the failed 14.3 bootstrap attempts provide no SDK acceptance evidence.
+normal package OS-version checks. The retained 14.4 run `40641794273` passes the
+actual SDK scenario and 39 of 40 owner controls; payload publication correctly
+refuses because that image lacks the required native no-replace API. It remains
+an overall failed qualification, not a skipped or waived test.
+
+The positive cell now selects 15.1: its
+[release source exports `renameat2`](https://github.com/freebsd/freebsd-src/blob/96841ea08dcfa84b954a32dc5ae1a26c28966cf4/lib/libsys/Symbol.sys.map#L396)
+and [defines `AT_RENAME_NOREPLACE`](https://github.com/freebsd/freebsd-src/blob/96841ea08dcfa84b954a32dc5ae1a26c28966cf4/sys/sys/fcntl.h#L255).
+Before expensive SDK work, five installed publication controls must pass without
+skips, including actual native publication and a destination created after
+prechecks. Symbols, filesystem support and behavior must agree; selecting a
+version alone does not prove capability. The same canonical SDK scenario and all
+40 owner controls remain mandatory. The 14.4 evidence is retained with its partial
+boundary; older unsupported systems keep the production refusal with no replacing
+fallback. No release goal is moved or deferred.
 
 FreeBSD distributes Python's [SQLite standard binding as a separate flavored package](https://cgit.freebsd.org/ports/tree/databases/py-sqlite3/Makefile).
 The guest installs the SQLite package matching its pip/interpreter flavor and
