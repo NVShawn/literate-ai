@@ -1,0 +1,44 @@
+{
+  "schema": "literate-ai/windows-gate-retention-qualification@1",
+  "release": "1.3.1",
+  "issue": "https://github.com/jordanhubbard/literate-ai/issues/129",
+  "problem": "The native gate deleted its legacy temporary tree before every invocation, destroying prior failed-run fixtures used by ongoing diagnostics.",
+  "change": "Allocate a short fresh sibling directory per Windows invocation; print its location and retain temporary fixtures plus both per-run JUnit reports. Do not delete the legacy tree or earlier runs.",
+  "source_sha256": {
+    "scripts/windows_release_gate.py": "5bdf603608b447e182895d365fda16d1d511afaf62698d0da475bbb7da809837",
+    "tests/critical/test_windows_gate_isolation.py": "4cf439b8e4c5a0302603c8b029bdd24b9ba49f8efeefa50584d11341e6791199"
+  },
+  "source_checks": {
+    "runner": "make python-check using the existing Make-managed environment",
+    "suite": "tests/critical/test_windows_gate_isolation.py",
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  },
+  "native_checks": {
+    "platform": "win32 AMD64",
+    "python": "3.12.10",
+    "suite": "tests/critical/test_windows_gate_isolation.py",
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 0.506,
+    "source_hashes_verified": true,
+    "scope": "Real filesystem preservation and real failing child processes; test subprocess command construction uses a controlled port. This is not a full Windows release gate."
+  },
+  "related_runner_checks": {
+    "suite": "tests/smoke/test_parallel_unittests.py",
+    "passed": 14,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 28.446
+  },
+  "negative_evidence": "Two real children exit 7; each main invocation returns failure and both partial files remain. Existing legacy evidence is byte-identical. The isolated live-test failure still prevents the parallel suite, and a parallel failure still fails.",
+  "preserved_controls": [
+    "Git discovery ceiling and temporary fixtures outside the checkout",
+    "Complete test roots and exactly-once serial admitted-receiver case",
+    "Worker count, fail-fast policy and all production deadlines"
+  ],
+  "software_release_qualified": false,
+  "software_release_published": false
+}

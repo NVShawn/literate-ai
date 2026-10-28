@@ -30903,6 +30903,8 @@ repair scope and makes no claim that the complete provided native gate passed.
   seven CycloneDX tests pass through `make python-check`; the fresh-process regression
   fails against the original eager import. Catalog costs and full-gate renewal remain open.
 
+- **Renewal evidence retention:** Before another full Windows renewal, replace the gate's destructive startup cleanup of the legacy temporary tree with a fresh short per-invocation sibling directory. Retain failed fixtures, both per-run JUnit reports and prior timing evidence; preserve Git-discovery isolation, the complete test inventory and unchanged deadlines. Qualify repeated real child failures without deleting either earlier-run or legacy evidence. This harness repair does not complete native wheel/full qualification.
+
 - **Integrated host qualification:** Exact implementation `dd8a9f35` passes a fresh uninterrupted complete source suite: 2138 passed, 71 explicit skips, no failures (2209 selected). The fresh force-generated project lifecycle passes all 228 cases with no skips; supported receipt update/check/require-current and verify pass. Receipt `sha256:0037edcc8b082a9b2554851e6cd9cc1598ccb8715750e45de6b8a9f59638b857`; finalized candidate `sha256:03fd1ef649f40933ffb35c52a380bc18ae5d9638407e0a9ca27cfb10258f8217`. See `verification/windows-integration-host-qualification.json`; preserve the earlier failed SSH response attempt. Exact-head hosted CI and finalized-receipt native/package renewal remain required.
 
 

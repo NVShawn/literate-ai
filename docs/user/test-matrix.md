@@ -21,9 +21,12 @@ which does not wait for product CI.
 The native `scripts/windows_release_gate.py` runner follows hosted CI's isolation
 of the live admitted-receiver dependency observation. Its `tests` phase runs that
 case without xdist first, then runs every remaining test root with the requested
-workers and deselects only the already executed case. Separate
-`_build/windows-admitted-receiver.xml` and `_build/windows-tests.xml` reports retain
-both results. A failure in either command fails the gate; the live observation's
+workers and deselects only the already executed case. On Windows, a fresh short
+`wg-*` directory beside the checkout retains temporary fixtures and separate
+`windows-admitted-receiver.xml` and `windows-tests.xml` reports. The runner prints
+that directory and preserves previous runs, including the legacy `<checkout>.tmp`
+tree. Non-Windows diagnostic calls retain the `_build/` report locations.
+A failure in either command fails the gate; the live observation's
 production deadline and the full qualification requirement are unchanged.
 
 ## FreeBSD workers
