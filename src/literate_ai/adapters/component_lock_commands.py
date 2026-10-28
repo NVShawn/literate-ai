@@ -43,8 +43,13 @@ from literate_ai.adapters.standard_lifecycle_binding import (
 from literate_ai.application.component_lock_resolution import (
     ComponentLockResolutionError,
 )
+from literate_ai.application.generation_preparation import GenerationPreparationError
 from literate_ai.contracts.identity import canonical_identity
-from literate_ai.projects import PROJECT_FILENAME, discover_project
+from literate_ai.projects import (
+    PROJECT_FILENAME,
+    PinnedInputClosureError,
+    discover_project,
+)
 
 from .lock_command_errors import LockCommandError
 
@@ -110,6 +115,7 @@ def _component_locks_from_args(args, *, allow_empty: bool = False):
                     flavors=flavors_for(component),
                     flavor_roots=flavor_roots,
                     planner=planner,
+                    reuse_lineage_catalog=bool(args.check or args.diff),
                 ),
                 flavors_for(component),
             )
@@ -128,6 +134,8 @@ def _component_locks_from_args(args, *, allow_empty: bool = False):
             for item, flavors in prepared
         )
     except (
+        GenerationPreparationError,
+        PinnedInputClosureError,
         ComponentLockPlanningError,
         ComponentLockResolutionError,
         ComponentLockStoreError,

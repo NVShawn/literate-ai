@@ -148,6 +148,104 @@ class _LoadedFlavor:
     toolchain_constraints: tuple[_ResolvedToolchainConstraint, ...] = ()
 
 
+@dataclass(frozen=True, slots=True)
+class FlavorGraphMetadata:
+    """Immutable graph projection; prompt recipes never escape into reuse."""
+
+    source_identity: str | None
+    flavor_id: str
+    revision_digest: str
+
+
+def flavor_graph_metadata(
+    catalog: Sequence[_LoadedFlavor],
+) -> tuple[FlavorGraphMetadata, ...]:
+    return tuple(
+        FlavorGraphMetadata(
+            item.revision.source_snapshot.uri
+            if item.revision.source_snapshot is not None
+            else None,
+            item.recipe.flavor_id,
+            item.revision.identity.digest,
+        )
+        for item in catalog
+    )
+
+
+def _project_discovery_inputs(
+    paths: Sequence[Path],
+) -> tuple[tuple[Path, bytes | None], ...]:
+    """Bind nearest project manifests and absence of nearer manifests."""
+    markers: dict[Path, bytes | None] = {}
+    for definition in paths:
+        for root in (definition.parent, *definition.parent.parents):
+            path = root / PROJECT_FILENAME
+            if path not in markers:
+                markers[path] = (
+                    _bounded_file_content(
+                        path, code="generate.invalid_project", label="project manifest"
+                    )
+                    if path.is_file() and not path.is_symlink()
+                    else None
+                )
+            if markers[path] is not None:
+                break
+    return tuple(sorted(markers.items()))
+
+
+@dataclass(frozen=True, slots=True, init=False)
+class LegacyFlavorGraphObservation:
+    """Owned by one read-only lock check, never a cache of currentness."""
+
+    roots: tuple[Path, ...]
+    _paths: tuple[Path, ...]
+    _project_inputs: tuple[tuple[Path, bytes | None], ...]
+    _closures: tuple[PinnedInputClosure, ...]
+    _metadata: tuple[FlavorGraphMetadata, ...]
+
+    def __init__(self):
+        raise TypeError("Flavor graph observations require filesystem capture")
+
+    def __reduce__(self):
+        raise TypeError("Flavor graph observations cannot be transported")
+
+    @classmethod
+    def capture(cls, roots: Sequence[Path]) -> LegacyFlavorGraphObservation:
+        roots = tuple(roots)
+        paths = _flavor_definition_paths(roots)
+        project_inputs = _project_discovery_inputs(paths)
+        loaded = _load_legacy_flavor_entries(paths)
+        result = object.__new__(cls)
+        for name, value in (
+            ("roots", roots),
+            ("_paths", paths),
+            ("_project_inputs", project_inputs),
+            ("_closures", tuple(item.input_closure for item in loaded)),
+            ("_metadata", flavor_graph_metadata(loaded)),
+        ):
+            object.__setattr__(result, name, value)
+        result.require_current(roots)
+        return result
+
+    def require_current(self, roots: Sequence[Path]) -> tuple[FlavorGraphMetadata, ...]:
+        def membership() -> None:
+            if (
+                tuple(roots) != self.roots
+                or _flavor_definition_paths(roots) != self._paths
+                or _project_discovery_inputs(self._paths) != self._project_inputs
+            ):
+                raise CliFailure(
+                    "generate.input_capture_drift",
+                    "Flavor catalog membership or project discovery changed",
+                )
+
+        membership()
+        for closure in self._closures:
+            closure.require_unchanged()
+        membership()
+        return self._metadata
+
+
 def _flavor_catalog_audit_identity(
     catalog: Sequence[_LoadedFlavor],
 ) -> ContentIdentity:
@@ -1259,7 +1357,10 @@ def _reject_duplicate_canonical_flavors(
 def load_legacy_flavor_catalog_entries(
     roots: Sequence[Path],
 ) -> tuple[_LoadedFlavor, ...]:
-    catalog_cache: dict[Path, frozenset[Path]] = {}
+    return _load_legacy_flavor_entries(_flavor_definition_paths(roots))
+
+
+def _flavor_definition_paths(roots: Sequence[Path]) -> tuple[Path, ...]:
     definition_paths: set[Path] = set()
     for configured in roots:
         if configured.is_symlink():
@@ -1300,6 +1401,13 @@ def load_legacy_flavor_catalog_entries(
                             "Flavor catalog entries cannot be symlinks",
                         )
                     definition_paths.add(candidate)
+    return tuple(sorted(definition_paths))
+
+
+def _load_legacy_flavor_entries(
+    definition_paths: Sequence[Path],
+) -> tuple[_LoadedFlavor, ...]:
+    catalog_cache: dict[Path, frozenset[Path]] = {}
     flavors: list[_LoadedFlavor] = []
     loaded_paths: list[Path] = []
     for definition_path in sorted(definition_paths):

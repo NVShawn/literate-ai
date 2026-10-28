@@ -8,6 +8,8 @@ from pathlib import Path, PurePath
 
 from literate_ai.adapters.component_markdown import parse_component_markdown
 from literate_ai.adapters.legacy_generation_catalog import (
+    LegacyFlavorGraphObservation,
+    flavor_graph_metadata,
     load_legacy_flavor_catalog_entries,
 )
 from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
@@ -233,9 +235,18 @@ def _orchestration_entities(
 
 
 def project_authority_graph(
-    selected: Path, *, include_component_locks: bool = True
+    selected: Path,
+    *,
+    include_component_locks: bool = True,
+    flavor_observation: LegacyFlavorGraphObservation | None = None,
 ) -> AuthorityGraph:
     """Compose repository lineage and effective local/inherited catalog authority."""
+
+    if (
+        flavor_observation is not None
+        and type(flavor_observation) is not LegacyFlavorGraphObservation
+    ):
+        raise TypeError("Flavor graph metadata requires a filesystem-owned observation")
 
     project = discover_project(selected)
     if project is None:
@@ -291,11 +302,16 @@ def project_authority_graph(
     entity_by_path: dict[str, str] = {}
     component_by_coordinate: dict[tuple[str, str], str] = {}
     component_inputs: list[tuple[str, tuple[str, ...]]] = []
-    loaded_flavors = load_legacy_flavor_catalog_entries(project.roots("flavor"))
+    flavor_roots = project.roots("flavor")
+    flavor_metadata = (
+        flavor_graph_metadata(load_legacy_flavor_catalog_entries(flavor_roots))
+        if flavor_observation is None
+        else flavor_observation.require_current(flavor_roots)
+    )
     flavor_name_by_source_identity = {
-        item.revision.source_snapshot.uri: item.recipe.flavor_id
-        for item in loaded_flavors
-        if item.revision.source_snapshot is not None
+        item.source_identity: item.flavor_id
+        for item in flavor_metadata
+        if item.source_identity is not None
     }
     skill_manifests: tuple[Path, ...] = ()
     if project.roots("skill"):
@@ -484,8 +500,7 @@ def project_authority_graph(
         if selected in {node.node_id for node in nodes}:
             edges.append(AuthorityGraphEdge(candidate_id, selected, "shadowed-by"))
     flavor_by_revision = {
-        item.revision.identity.digest: f"flavor:{item.recipe.flavor_id}"
-        for item in loaded_flavors
+        item.revision_digest: f"flavor:{item.flavor_id}" for item in flavor_metadata
     }
     locked_flavor_revision_nodes: set[str] = set()
     for component_id, references in component_inputs:
@@ -582,10 +597,17 @@ def project_authority_graph(
                         provider_id, consumer_id, "component-dependency", requirement
                     )
                 )
-    return AuthorityGraph.create(project_id, nodes, edges)
+    graph = AuthorityGraph.create(project_id, nodes, edges)
+    if flavor_observation is not None:
+        flavor_observation.require_current(flavor_roots)
+    return graph
 
 
-def project_lineage_authority_identity(project_root: Path) -> str:
+def project_lineage_authority_identity(
+    project_root: Path,
+    *,
+    flavor_observation: LegacyFlavorGraphObservation | None = None,
+) -> str:
     """Bind only repository-lineage state, not the whole project's entity catalog.
 
     A Component lock must fail closed when the exact repository this project was
@@ -597,7 +619,15 @@ def project_lineage_authority_identity(project_root: Path) -> str:
     edges between them.
     """
 
-    graph = project_authority_graph(project_root, include_component_locks=False)
+    graph = project_authority_graph(
+        project_root,
+        include_component_locks=False,
+        **(
+            {"flavor_observation": flavor_observation}
+            if flavor_observation is not None
+            else {}
+        ),
+    )
     lineage_nodes = tuple(node for node in graph.nodes if node.kind == "repository")
     lineage_node_ids = {node.node_id for node in lineage_nodes}
     lineage_edges = tuple(
