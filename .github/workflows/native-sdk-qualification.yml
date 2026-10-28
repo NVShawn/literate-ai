@@ -75,7 +75,8 @@ jobs:
             pkg update
             pip_package=$(pkg rquery -x '%n' '^py3(11|12|13|14)-pip$' | sort -r | head -n 1)
             test -n "$pip_package"
-            pkg install -y "$pip_package" cmake git rust pkgconf libffi
+            sqlite_package="${pip_package%-pip}-sqlite3"
+            pkg install -y "$pip_package" "$sqlite_package" cmake git rust pkgconf libffi
           run: |
             set -eu
             finish_guest() {
@@ -111,6 +112,7 @@ jobs:
             tar -xf "$work/wheel/test-source.tar" -C "$work/test-source"
             git -c safe.directory="$source_checkout" -c safe.directory="$source_checkout/.git" clone --bare --no-hardlinks "$source_checkout" "$work/framework.git"
             "$qualification_python" -m venv /home/litai-qual/venv
+            /home/litai-qual/venv/bin/python -I -c 'import sqlite3; connection = sqlite3.connect(":memory:"); assert connection.execute("SELECT 1").fetchone() == (1,); connection.close()'
             /home/litai-qual/venv/bin/python -m pip install "$work"/wheel/*.whl
             chown -R litai-qual:litai-qual /home/litai-qual
             su - litai-qual -c '/home/litai-qual/venv/bin/python -I /home/litai-qual/qualification/harness/run_cell.py --wheel-dir /home/litai-qual/qualification/wheel --framework /home/litai-qual/qualification/framework.git --fixture /home/litai-qual/qualification/test-source/tests/fixtures/native_sdk --test-source /home/litai-qual/qualification/test-source --output /home/litai-qual/qualification/result'

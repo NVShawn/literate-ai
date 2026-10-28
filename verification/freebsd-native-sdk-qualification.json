@@ -1,6 +1,6 @@
 {
   "schema": "literate-ai/freebsd-native-sdk-qualification@1",
-  "state": "native-bootstrap-repair-awaiting-renewal",
+  "state": "native-stdlib-repair-awaiting-renewal",
   "rejected_short_selector_run": 40629258691,
   "failed_native_run": 40629313430,
   "failed_stage": "Native FreeBSD package installation: py311-pip is unavailable in that repository",
@@ -13,6 +13,11 @@
   "failed_initialize_artifact": 12792108411,
   "failed_initialize_stage": "Actual non-editable wheel and dependency installation passes, then the public initialization CLI exits 1. Its detailed guest refusal was lost because the VM action throws before copyback on a nonzero guest command. No initialization root cause or SDK pass is inferred.",
   "copyback_repair": "An EXIT trap retains original guest and collector statuses while allowing transport copyback. A separate host guard requires successful statuses, complete unchanged diagnostics and passing native acceptance. Private keys and symlinked evidence remain excluded.",
+  "copyback_native_run": 40634138619,
+  "copyback_native_artifact": 12792877836,
+  "copyback_native_result": {"guest_exit_code": 1, "collection_exit_code": 0, "collection_complete": true, "diagnostic_files": 4, "host_qualification": "failed as required"},
+  "current_blocker": "The FreeBSD CPython 3.12 base image lacks _sqlite3. The CLI fails during import before initialization or SDK execution. This separately packaged prerequisite was already documented in docs/user/installation.md but omitted from the new VM harness.",
+  "stdlib_repair": "Install the SQLite binding matching the selected Python pip flavor and execute an actual in-memory query before expensive wheel dependency builds. Keep all public CLI, SDK and installed-owner acceptance unchanged.",
   "repair": "Use the supported FreeBSD 14.4 guest with package OS-version checks intact; detect and install an exact supported Python pip flavor. Scope staging trust to the exact checkout and its .git directory in one Git command; no global or consumer trust changes. Preserve all execution and admission gates.",
   "release": "1.3.1",
   "native_passed": false,
@@ -22,7 +27,8 @@
   "harness_checks": {
     "real_child_failure_and_timeout_cases_passed": 2,
     "real_git_ownership_boundary_cases_passed": 1,
-    "macos_harness_controls_passed": 7,
+    "macos_harness_controls_passed": 8,
+    "sqlite_preflight_control": "The actual workflow preflight succeeds with a working binding and refuses a deterministic missing _sqlite3 extension in a fresh interpreter.",
     "failure_copyback_controls": "Real workflow exit-trap subprocess failure retains exit 17 and partial streams while host qualification refuses. Additional controls reject absent acceptance, changed copyback, stale success after failed recollection and a real POSIX directory symlink to private fixture material.",
     "ownership_regression_method": "Real Git processes with GIT_TEST_ASSUME_DIFFERENT_OWNER: original clone refuses, exact checkout/.git command accepts the same commit, unrelated repository refuses, existing global config bytes remain unchanged.",
     "native_windows_harness_controls": {
