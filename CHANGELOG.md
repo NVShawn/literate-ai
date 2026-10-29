@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Record the release owner’s explicit 1.3.1-only Windows qualification exception.
+  Linux and macOS, current lifecycle evidence, artifact custody and publication
+  verification remain required; Windows qualification is not claimed.
+
 - Overlap independent installed-wheel HTML and project/package fixtures with
   separate mutable parent repositories and synchronized timing writes. Require
   both branches before retaining qualified artifacts; preserve every check and
