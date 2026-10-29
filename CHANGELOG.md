@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Give the isolated native Windows live test its own fixed pytest temporary
+  directory, preserving its JUnit report without relying on pytest-current symlinks.
+
 - Reuse byte-revalidated Flavor graph metadata within a single read-only verify,
   while rebuilding each authority graph and checking current skills independently.
 - Run native Windows wheel checks and the remaining test suite concurrently after

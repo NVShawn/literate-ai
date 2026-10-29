@@ -128,8 +128,8 @@ def _test_commands(
 ) -> tuple[list[str], list[str]]:
     reports = temporary if temporary is not None else ROOT / "_build"
     test_temporary = temporary if temporary is not None else TEMPORARY
-    # Match hosted CI: qualify the unchanged 60-second dependency observation
-    # without contention, then run every other test once with the usual workers.
+    # Match hosted CI: qualify the live dependency observation without contention,
+    # then run every other test once with the usual workers.
     return (
         [
             str(python),
@@ -139,6 +139,7 @@ def _test_commands(
             "-rA",
             "-o",
             "addopts=",
+            f"--basetemp={test_temporary / 'admitted'}",
             f"--junitxml={reports / 'windows-admitted-receiver.xml'}",
             _ADMITTED_RECEIVER_TEST,
         ],
