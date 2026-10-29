@@ -44,8 +44,11 @@ coverage gaps; the history does not establish any individual's review rationale.
 The user approved correcting the circular checks. COURSE-004 means exact approved
 film delivery, reviews, provenance and published links. RELEASE-019 means tested
 enforcement, scope controls and the newly requested cycle prevention; it stays
-open until that work passes. All 18 goals and their 1.3.1 targets remain, with none
-removed or deferred. The [same-release execution checklist](../roadmap/1.3.1-release-execution.md)
+open until that work passes. At the correction checkpoint, all 18 goals and their 1.3.1 targets remained,
+with none removed or deferred by that correction. The user subsequently approved
+ten included goals and eight deferrals to 1.4.0; the original ledger retains the
+approved deferral records and future entries. See the
+[scope approval](../../verification/1.3.1-approved-deferrals.json). The [same-release execution checklist](../roadmap/1.3.1-release-execution.md)
 retains plan, preparation, every qualification, check, publication, published
 verification, synchronization and milestone closure as mandatory unfinished steps.
 A document's ownership link does not itself make every step a completion prerequisite.

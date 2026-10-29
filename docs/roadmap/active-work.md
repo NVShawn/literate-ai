@@ -29972,7 +29972,7 @@ the guard or replace this failure with an empty dependency observation.
 ### [ ] RETAINED-WIN-CONTEXT-001 — Bind native Windows retained system context
 
 - **GitHub issue:** [#102](https://github.com/jordanhubbard/literate-ai/issues/102)
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Owner:** Retained execution environment, dependency observation and native runtime custody
 - **Direction:** Supply explicitly bound native Windows system context and complete
   captured tool runtime while preserving caller-injection refusal and POSIX identities.
@@ -30161,7 +30161,7 @@ to produce the same physical archive with distinct exact result-plan bindings.
 
 - **GitHub issue:** [#103](https://github.com/jordanhubbard/literate-ai/issues/103)
 
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Priority:** P0
 - **Owner:** Shared retained execution test fixture and platform coverage
 - **Direction:** Repair actual hosted Windows failures without bypassing executable checks or PE runtime dependency observation.
@@ -30219,7 +30219,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 - **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
 
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Priority:** P1
 - **Owner:** Retained public runtime and native SDK acquisition
 - **Native FreeBSD renewal:** Add a manually dispatched, source-bound installed-wheel qualification on an ephemeral FreeBSD 14.4 VM because no configured FreeBSD runner is available. Use the real authenticated loopback Git source fixture, actual CMake SDK acquisition and public retained CLI, authorization refusals, independent acceptance and loader-less negative control, followed by 40 installed owner controls. Record bootstrap/compiler and product-release boundaries honestly; validate all production imports remain inside the non-editable prefix, retain timeout diagnostics, and never upload fresh SSH private keys. This is development acceptance before final prepared-candidate qualification, not a substitute for it.
@@ -30782,7 +30782,7 @@ complete; final 1.3.1 candidate and broader FreeBSD qualification remain separat
 
 **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117).
 
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Priority:** P1
 - **Owner:** Installed retained SDK authorization
 - **Direction:** Reconcile open GitHub issue #117: repeated full distribution observation dominates installed FreeBSD preparation.
@@ -30888,7 +30888,7 @@ repair scope and makes no claim that the complete provided native gate passed.
 
 - **Owner:** framework CLI project command dispatch and MAC contract projection
 - **GitHub issue:** [#121](https://github.com/jordanhubbard/literate-ai/issues/121)
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Direction:** Ordinary project commands must not initialize optional MAC schema parsers.
 - **Conclusion:** The native installed-wheel profile attributes 235.62 seconds to
   importing the MAC projector, including 228.89 seconds and 39 parser constructors
@@ -30937,7 +30937,7 @@ pass locally; a new exact-source full native pass is still required.
 
 - **GitHub issue:** [#123](https://github.com/jordanhubbard/literate-ai/issues/123)
 
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Priority:** P1
 - **Owner:** Native Windows release gate
 - **Direction:** Retain existing wheel-smoke per-operation timing spans through the full native gate without dropping checks or widening execution bounds.
@@ -30965,7 +30965,7 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 
 **GitHub issue:** [#129](https://github.com/jordanhubbard/literate-ai/issues/129).
 
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Priority:** P1
 - **Owner:** HTML verification and immutable catalog observation
 - **Direction:** Use retained native timing evidence to repair the repeated Windows full-gate timeout without changing execution bounds
@@ -30999,7 +30999,7 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 
 - **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117)
 
-- **Release target:** 1.3.1
+- **Release target:** 1.4.0
 - **Priority:** P1
 - **Owner:** Standard installed-distribution, retained runtime and native dependency observers
 - **Direction:** Make the installed public retained SDK lifecycle complete within reviewed native bounds while preserving exact authority, loader and revocation checks.
@@ -31405,6 +31405,14 @@ complete repository publication plus exact-head/main link and hash verification.
   source is promoted. Narrative and documentation checks pass independently.
 
 ### [x] RELEASE-019 — Require explicit completion or approved deferral of every release goal
+
+**Superseding scope approval:** The user confirmed ten included 1.3.1 goals and
+eight approved deferrals to 1.4.0 after conflicting directions. The original
+18-entry source ledger remains auditable: ten included goals plus eight explicit
+user-approved deferral records and corresponding future entries. See
+[the exact approval](../../verification/1.3.1-approved-deferrals.json). Every
+mandatory release gate and all deferred acceptance criteria remain in force.
+
 
 - **Priority:** P0
 - **Release target:** 1.3.1
