@@ -108,6 +108,41 @@ class CiActionPinTests(unittest.TestCase):
         )
         self.assertTrue(selector.select_freebsd_acl("push", "", ("README.md",)))
 
+    def test_conference_publication_changes_scope_without_hiding_product_code(
+        self,
+    ) -> None:
+        selector = self.selector()
+        paths = (
+            "README.md",
+            "labs/README.md",
+            "docs/conference/attendee-setup.md",
+            "scripts/build_conference_site.mjs",
+            "scripts/verify_conference_browser.mjs",
+            "verification/1.3.1-release-publication.json",
+            "verification/1.3.1-windows-qualification-exception.json",
+        )
+        for event, ref in (("pull_request", "main"), ("push", "refs/heads/main")):
+            with self.subTest(event=event):
+                rows = selector.select_matrix(event, ref, paths)["include"]
+                self.assertEqual([row["task"] for row in rows], ["documentation"])
+                self.assertFalse(selector.select_full_qualification(event, ref, paths))
+                self.assertFalse(selector.select_freebsd_acl(event, ref, paths))
+                for product in (
+                    "src/literate_ai/cli.py",
+                    "labs/00-grumpy-counter/main.js",
+                    "verification/another-release.json",
+                ):
+                    mixed = paths + (product,)
+                    tasks = {
+                        row["task"]
+                        for row in selector.select_matrix(event, ref, mixed)["include"]
+                    }
+                    self.assertIn("conformance", tasks)
+                    if event == "push":
+                        self.assertTrue(
+                            selector.select_full_qualification(event, ref, mixed)
+                        )
+
     def test_default_branch_pushes_scope_docs_but_preserve_qualification(self) -> None:
         selector = self.selector()
         for paths, tasks in (

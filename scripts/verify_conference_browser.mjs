@@ -22,7 +22,7 @@ try{
     page.on('pageerror',error=>errors.push(error.message));
     page.on('console',message=>{if(message.type()==='error')errors.push(message.text())});
     page.on('response',response=>{if(response.status()>=400)errors.push(`${response.status()} ${response.url()}`)});
-    for(const suffix of ['', 'docs/README.html','docs/user/getting-started.html','docs/user/concepts.html','docs/user/html-repository-explorer.html','docs/conference/presenter-guide.html']){
+    for(const suffix of ['', 'docs/README.html','docs/user/getting-started.html','docs/user/concepts.html','docs/user/html-repository-explorer.html','docs/conference/presenter-guide.html','docs/conference/attendee-setup.html','README.html']){
       const response=await page.goto(base+suffix,{waitUntil:'networkidle0'});
       assert.equal(response.status(),200,`${width} ${suffix}`);
       assert.ok(await page.$('main h1'),`missing heading ${suffix}`);
@@ -39,6 +39,15 @@ try{
         assert.ok(Math.abs(await page.$eval('video',video=>video.duration)-724.896322)<1);
         await page.screenshot({path:path.join(output,`home-${width}.png`),fullPage:true});
         await fs.writeFile(path.join(output,`home-${width}-structure.txt`),await page.$eval('main',node=>node.innerText));
+      }
+      if(suffix==='README.html'){
+        await page.click('summary');
+        assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`download table overflow ${width}`);
+        await page.screenshot({path:path.join(output,`welcome-${width}.png`),fullPage:true});
+      }
+      if(suffix==='docs/conference/attendee-setup.html'){
+        await page.screenshot({path:path.join(output,`setup-${width}.png`),fullPage:true});
+        await fs.writeFile(path.join(output,`setup-${width}-structure.txt`),await page.$eval('main',node=>node.innerText));
       }
       results.push({width,path:suffix||'index.html',status:200,overflow:false});
     }

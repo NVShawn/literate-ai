@@ -1,5 +1,11 @@
 # Literate AI labs
 
+Welcome, Unprompted AI attendees—welcome aboard! These labs accompany Jordan Hubbard’s session. Literate AI connects readable specifications, Components and Flavors with actual builds, tests and receipts. Start with a browser preview, then use the documented project lifecycle for the canonical exercises.
+
+From zero, have a Mac, Linux computer or Windows 11/WSL 2 machine; a current browser and terminal; Python 3.11+, Git/Git LFS, Node.js 20+ and GNU Make; Literate AI 1.3.1; and the OpenRouter key in your session email. Choose OpenCode or Claude Code for the documented emailed-key path. Codex CLI and Cursor Agent are also framework adapters with separate authentication/configuration requirements. Follow the [attendee setup guide](../docs/conference/attendee-setup.md) for exact installation and assistant steps.
+
+The Windows test matrix is temporarily suspended for 1.3.1 because of resource availability, with explicit approval, and returns in the next release. Browser previews and native qualification are distinct evidence scopes.
+
 These labs teach Literate AI by making increasingly unreasonable little machines.
 Each current lab has an authored Markdown specification, a small source module, an
 illustrative lesson flow, and a bundled `index.html` that runs offline with no server or

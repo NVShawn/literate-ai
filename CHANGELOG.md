@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Welcome Unprompted AI attendees with a from-zero setup guide, emailed OpenRouter key instructions and accurate assistant choices. Record the published 1.3.1 downloads and the temporary resource-driven Windows matrix suspension, with restoration required next release.
+- Scope conference website scripts and the two 1.3.1 publication records to documentation feedback; preserve broader qualification for product source, lab implementations and unknown records.
+
 - Record the release owner’s explicit 1.3.1-only Windows qualification exception.
   Linux and macOS, current lifecycle evidence, artifact custody and publication
   verification remain required; Windows qualification is not claimed.
@@ -121,7 +124,9 @@
   five real project integrations, with recorded-result and native-scope limits.
   Add a paced, restart-safe full-episode speech and rendering pipeline; the resulting
   12:04.896 local candidate passes deterministic chapter QA and independent media
-  verification. Complete listening/playback approval and publication remain pending.
+  verification. The user subsequently approved the complete film, which is now
+  published with 1.3.1; the pilot-stage pending status is superseded by the
+  approved-film publication entry above.
   Video and presentation skills require explicit visual direction and separate
   motion-quality review before publication.
 
