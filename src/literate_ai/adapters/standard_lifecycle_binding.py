@@ -323,6 +323,31 @@ def _read_stable_member(path: Path) -> tuple[int, str]:
                 "standard_binding.distribution_payload_unsafe",
                 "installed framework payload contains a symbolic link",
             ) from exc
+        # Windows may refuse an open through a file symlink before returning a
+        # descriptor, even when O_NOFOLLOW is unavailable.  Re-observe the name
+        # so an open-time redirection is classified as the detected safety race,
+        # rather than as an indistinguishable availability failure.
+        if prior is not None:
+            try:
+                named_failed = os.lstat(path)
+            except OSError:
+                pass
+            else:
+                if stat.S_ISLNK(named_failed.st_mode):
+                    raise StandardLifecycleBindingError(
+                        "standard_binding.distribution_payload_unsafe",
+                        "installed framework payload contains a symbolic link",
+                    ) from exc
+                stable_fields = ("st_dev", "st_ino", "st_size", "st_mtime_ns")
+                if not stat.S_ISREG(named_failed.st_mode) or any(
+                    getattr(prior, field) != getattr(named_failed, field)
+                    for field in stable_fields
+                ):
+                    raise StandardLifecycleBindingError(
+                        "standard_binding.distribution_changed",
+                        "installed framework payload changed while it was being "
+                        "observed",
+                    ) from exc
         raise StandardLifecycleBindingError(
             "standard_binding.distribution_payload_unavailable",
             "installed framework payload member is unavailable",

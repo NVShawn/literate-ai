@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import errno
 import io
 import json
 import os
@@ -238,6 +239,51 @@ class StandardLifecycleBindingAdapterTests(unittest.TestCase):
         self.assertEqual(
             caught.exception.code, "standard_binding.distribution_payload_incomplete"
         )
+
+    def test_open_error_reobserves_prior_member_without_nofollow(self) -> None:
+        cases = {
+            "symlink": "standard_binding.distribution_payload_unsafe",
+            "replacement": "standard_binding.distribution_changed",
+            "directory": "standard_binding.distribution_changed",
+            "unchanged": "standard_binding.distribution_payload_unavailable",
+            "missing": "standard_binding.distribution_payload_unavailable",
+        }
+        for change, expected in cases.items():
+            with self.subTest(change=change):
+                distribution = FakeDistribution(self.root / f"open-refusal-{change}")
+                member = distribution.locations["literate_ai/__init__.py"]
+                backing = member.with_name("saved-member.py")
+                original_open = os.open
+
+                def refused(
+                    file,
+                    *args,
+                    member=member,
+                    backing=backing,
+                    change=change,
+                    original_open=original_open,
+                    **kwargs,
+                ):
+                    if isinstance(file, (str, os.PathLike)) and Path(file) == member:
+                        if change != "unchanged":
+                            member.rename(backing)
+                        if change == "symlink":
+                            member.symlink_to(backing.name)
+                        elif change == "replacement":
+                            member.write_bytes(b"replacement payload")
+                        elif change == "directory":
+                            member.mkdir()
+                        raise PermissionError(errno.EACCES, "forced open-time refusal")
+                    return original_open(file, *args, **kwargs)
+
+                with (
+                    mock.patch.object(os, "O_NOFOLLOW", 0, create=True),
+                    mock.patch.object(os, "open", side_effect=refused),
+                ):
+                    with self.assertRaises(StandardLifecycleBindingError) as caught:
+                        observe(distribution)
+                self.assertEqual(caught.exception.code, expected)
+                self.assertIsInstance(caught.exception.__cause__, PermissionError)
 
     def test_member_redirected_to_its_original_inode_at_open_refuses(self) -> None:
         for nofollow in sorted({0, getattr(os, "O_NOFOLLOW", 0)}):
