@@ -10,6 +10,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from literate_ai.adapters._processes import run_with_tree_kill
+
 
 class WindowsGateIsolationTests(unittest.TestCase):
     @classmethod
@@ -18,6 +20,75 @@ class WindowsGateIsolationTests(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("windows_gate_fixture", source)
         cls.gate = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.gate)
+
+    def test_real_script_entrypoint_reaches_help_once(self):
+        result = run_with_tree_kill(
+            [sys.executable, self.gate.__file__, "--help"], timeout=20, text=True
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.stdout.count("usage:"), 1)
+        self.assertIn("--environment", result.stdout)
+
+    def test_whole_script_watchdog_cancels_its_real_child(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / "started"
+            program = (
+                "from pathlib import Path; import time; "
+                f"Path({str(marker)!r}).write_text('started'); time.sleep(60)"
+            )
+            processes = []
+            popen = subprocess.Popen
+
+            def start(*args, **kwargs):
+                process = popen(*args, **kwargs)
+                processes.append(process)
+                return process
+
+            with (
+                patch.object(self.gate, "ROOT", root),
+                patch.object(
+                    self.gate,
+                    "_gate_child_command",
+                    return_value=[sys.executable, "-c", program],
+                ),
+                patch.object(self.gate.subprocess, "Popen", side_effect=start),
+            ):
+                status = self.gate._run_with_budget([], timeout_seconds=5)
+            self.assertEqual(status, 124)
+            self.assertEqual(marker.read_text(), "started")
+            self.assertTrue(processes)
+            self.assertTrue(all(process.poll() is not None for process in processes))
+
+    def test_whole_script_watchdog_preserves_success_and_original_arguments(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / "arguments.json"
+            argv = ["--only", "tests", "--test-workers", "1"]
+
+            def command(arguments):
+                self.assertEqual(arguments, argv)
+                program = (
+                    "import json,sys; from pathlib import Path; "
+                    f"Path({str(marker)!r}).write_text(json.dumps(sys.argv[1:]))"
+                )
+                return [sys.executable, "-c", program, *arguments]
+
+            with (
+                patch.object(self.gate, "ROOT", root),
+                patch.object(self.gate, "_gate_child_command", side_effect=command),
+            ):
+                self.assertEqual(self.gate._run_with_budget(argv), 0)
+            self.assertEqual(json.loads(marker.read_text()), argv)
+
+    def test_whole_script_watchdog_refuses_a_larger_or_unbounded_grant(self):
+        self.assertEqual(self.gate.WINDOWS_GATE_BUDGET_SECONDS, 5400)
+        with patch.object(self.gate.subprocess, "Popen") as start:
+            for budget in (0, -1, 5401, float("inf"), float("nan")):
+                with self.subTest(budget=budget):
+                    with self.assertRaises(self.gate.GateFailure):
+                        self.gate._run_with_budget([], timeout_seconds=budget)
+            start.assert_not_called()
 
     def test_independent_checks_overlap_and_retain_separate_complete_streams(self):
         with tempfile.TemporaryDirectory() as directory:

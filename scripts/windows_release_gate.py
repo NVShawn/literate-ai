@@ -172,6 +172,81 @@ def _run_tests(
         _run(command, environment, step="tests")
 
 
+WINDOWS_GATE_BUDGET_SECONDS = 5400
+
+
+def _process_tree_tools():
+    source = str(Path(__file__).resolve().parents[1] / "src")
+    sys.path.insert(0, source)
+    try:
+        from literate_ai.adapters._processes import (
+            create_process_tree_ownership,
+            terminate_process_tree,
+        )
+    finally:
+        sys.path.pop(0)
+    return create_process_tree_ownership, terminate_process_tree
+
+
+def _gate_child_command(argv: list[str]) -> list[str]:
+    # run_path loads the same script without recursively entering its watchdog.
+    return [
+        sys.executable,
+        "-c",
+        "import runpy,sys; path=sys.argv.pop(1); sys.argv[0]=path; "
+        "raise SystemExit(runpy.run_path(path)['main']())",
+        str(Path(__file__).resolve()),
+        *argv,
+    ]
+
+
+def _run_with_budget(
+    argv: list[str] | None = None,
+    *,
+    timeout_seconds: float = WINDOWS_GATE_BUDGET_SECONDS,
+) -> int:
+    """Bound the complete script, even when a caller permits a longer job."""
+    if not 0 < timeout_seconds <= WINDOWS_GATE_BUDGET_SECONDS:
+        raise GateFailure(
+            "native gate budget must be positive and at most 5400 seconds"
+        )
+    started = time.monotonic()
+    create, terminate = _process_tree_tools()
+    owner = create()
+    process = None
+    try:
+        process = subprocess.Popen(
+            _gate_child_command(list(sys.argv[1:] if argv is None else argv)),
+            cwd=ROOT,
+            stdin=subprocess.DEVNULL,
+            **owner.popen_options,
+        )
+        owner.bind(process.pid)
+        try:
+            return process.wait(
+                timeout=max(0, timeout_seconds - (time.monotonic() - started))
+            )
+        except subprocess.TimeoutExpired:
+            print(
+                f"[windows-release-gate] FAILED: complete gate exceeded "
+                f"{timeout_seconds:g} seconds; terminating its owned tree",
+                file=sys.stderr,
+                flush=True,
+            )
+            return 124
+    finally:
+        try:
+            if process is not None:
+                terminate(process, ownership=owner)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait(timeout=5)
+        finally:
+            owner.release()
+
+
 def _run_parallel_checks(
     commands: tuple[tuple[str, list[str]], ...],
     environment: dict[str, str],
@@ -189,15 +264,7 @@ def _run_parallel_checks(
             digest = hashlib.file_digest(stream, "sha256").hexdigest()
         return {"path": path.name, "bytes": path.stat().st_size, "sha256": digest}
 
-    source = str(Path(__file__).resolve().parents[1] / "src")
-    sys.path.insert(0, source)
-    try:
-        from literate_ai.adapters._processes import (
-            create_process_tree_ownership,
-            terminate_process_tree,
-        )
-    finally:
-        sys.path.pop(0)
+    create_process_tree_ownership, terminate_process_tree = _process_tree_tools()
     jobs = []
     started = time.monotonic()
     with ExitStack() as streams:
@@ -482,4 +549,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_run_with_budget())
