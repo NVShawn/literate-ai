@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import tomllib
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path, PurePosixPath
+from threading import Event
 from unittest import mock
 
 from scripts import wheel_smoke
@@ -16,6 +19,88 @@ from tools.build_backend.literate_ai_build_backend import distribution_origin_by
 
 
 class CleanWheelSourceProjectionTests(unittest.TestCase):
+    def test_concurrent_timing_writes_hold_one_guard_and_keep_every_span(self) -> None:
+        entered = Event()
+        release = Event()
+        writer = wheel_smoke._write_canonical_json
+
+        def blocked_write(path: Path, value: dict[str, object]) -> None:
+            if not entered.is_set():
+                entered.set()
+                if not release.wait(5):
+                    raise RuntimeError("timing writer was not released")
+            writer(path, value)
+
+        def record(label: str) -> None:
+            with wheel_smoke._timed(label):
+                pass
+
+        with tempfile.TemporaryDirectory() as directory:
+            report = Path(directory) / "timings.json"
+            with (
+                mock.patch.object(wheel_smoke, "_TIMING_REPORT", report),
+                mock.patch.object(wheel_smoke, "_TIMINGS", []),
+                mock.patch.object(
+                    wheel_smoke, "_write_canonical_json", side_effect=blocked_write
+                ),
+                ThreadPoolExecutor(max_workers=2) as pool,
+            ):
+                first = pool.submit(record, "first")
+                try:
+                    self.assertTrue(entered.wait(5), "first writer did not start")
+                    second = pool.submit(record, "second")
+                    acquired = wheel_smoke._TIMING_LOCK.acquire(blocking=False)
+                    if acquired:
+                        wheel_smoke._TIMING_LOCK.release()
+                    self.assertFalse(acquired, "timing replacement was not guarded")
+                finally:
+                    release.set()
+                first.result(timeout=5)
+                second.result(timeout=5)
+            spans = json.loads(report.read_bytes())["spans"]
+            self.assertEqual(
+                sorted(item["stage"] for item in spans), ["first", "second"]
+            )
+            self.assertTrue(all(item["successful"] for item in spans))
+            self.assertFalse(report.with_name("timings.json.tmp").exists())
+
+    def test_fixture_parent_fork_survives_other_branch_ref_changes(self) -> None:
+        def git(*args: str) -> str:
+            return subprocess.check_output(["git", *args], text=True).strip()
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source"
+            source.mkdir()
+            git("-C", str(source), "init", "-q", "-b", "main")
+            git("-C", str(source), "config", "user.name", "Fixture")
+            git("-C", str(source), "config", "user.email", "fixture@example.test")
+            (source / "input.txt").write_text("original\n")
+            git("-C", str(source), "add", "input.txt")
+            git("-C", str(source), "commit", "-qm", "original")
+            revision = git("-C", str(source), "rev-parse", "HEAD")
+            html_parent = root / "html-parent.git"
+            project_parent = root / "project-parent.git"
+            wheel_smoke._remotes_stripped_parent(source, html_parent, revision)
+            locator = wheel_smoke._remotes_stripped_parent(
+                html_parent, project_parent, revision
+            )
+            self.assertEqual(locator, f"{project_parent.resolve().as_uri()}#{revision}")
+            (source / "input.txt").write_text("HTML update\n")
+            git("-C", str(source), "commit", "-qam", "advance HTML parent")
+            git("-C", str(source), "push", "-q", str(html_parent), "HEAD:main")
+            self.assertNotEqual(
+                git("--git-dir", str(html_parent), "rev-parse", "HEAD"), revision
+            )
+            self.assertEqual(
+                git("--git-dir", str(project_parent), "rev-parse", "HEAD"), revision
+            )
+            self.assertEqual(
+                git("--git-dir", str(project_parent), "show", "HEAD:input.txt"),
+                "original",
+            )
+            self.assertEqual(git("--git-dir", str(project_parent), "remote"), "")
+
     def test_partial_timing_write_preserves_completed_spans(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             report = Path(directory) / "timings.json"

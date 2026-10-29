@@ -11,8 +11,10 @@ import sys
 import tempfile
 import time
 import tomllib
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path, PurePosixPath
+from threading import RLock
 
 from literate_ai.adapters.html_publication import html_output_path, read_output
 from literate_ai.contracts import canonical_identity
@@ -286,6 +288,7 @@ print(json.dumps({"round_trip": True, "tamper_rejected": True,
 
 _TIMING_REPORT: Path | None = None
 _TIMINGS: list[dict[str, object]] = []
+_TIMING_LOCK = RLock()
 
 
 @contextmanager
@@ -297,23 +300,29 @@ def _timed(label: str):
         successful = True
     finally:
         if _TIMING_REPORT is not None:
-            _TIMINGS.append(
-                {
-                    "stage": label,
-                    "seconds": round(time.monotonic() - started, 6),
-                    "successful": successful,
-                }
-            )
-            _TIMING_REPORT.parent.mkdir(parents=True, exist_ok=True)
-            temporary = _TIMING_REPORT.with_name(_TIMING_REPORT.name + ".tmp")
-            _write_canonical_json(
-                temporary,
-                {
-                    "schema": "literate-ai/wheel-smoke-timings@1",
-                    "spans": _TIMINGS,
-                },
-            )
-            temporary.replace(_TIMING_REPORT)
+            with _TIMING_LOCK:
+                _record_timing(label, started, successful)
+
+
+def _record_timing(label: str, started: float, successful: bool) -> None:
+    if _TIMING_REPORT is not None:
+        _TIMINGS.append(
+            {
+                "stage": label,
+                "seconds": round(time.monotonic() - started, 6),
+                "successful": successful,
+            }
+        )
+        _TIMING_REPORT.parent.mkdir(parents=True, exist_ok=True)
+        temporary = _TIMING_REPORT.with_name(_TIMING_REPORT.name + ".tmp")
+        _write_canonical_json(
+            temporary,
+            {
+                "schema": "literate-ai/wheel-smoke-timings@1",
+                "spans": _TIMINGS,
+            },
+        )
+        temporary.replace(_TIMING_REPORT)
 
 
 def _create_environment(directory: Path) -> None:
@@ -1603,7 +1612,10 @@ def _main() -> int:
         "LITAI_BUILD_REPOSITORY_URL": repository_url,
         "LITAI_BUILD_GIT_REVISION": git_revision,
     }
-    with _runtime_directory() as directory:
+    with (
+        _runtime_directory() as directory,
+        ThreadPoolExecutor(max_workers=1, thread_name_prefix="wheel-html") as fixtures,
+    ):
         root = Path(directory)
         parent_source = _remotes_stripped_parent(
             repository, root / "parent.git", git_revision
@@ -1846,18 +1858,22 @@ def _main() -> int:
             litai, root, parent_source=parent_source
         )
         repository_refresh = assert_installed_repository_refresh(litai, root)
-        html_observability = json.loads(
-            run(
-                str(python),
-                "-I",
-                str(repository / "scripts" / "installed_html_smoke.py"),
-                str(litai),
-                str(root / "golden-created"),
-                standard_binding["distribution"],
-                "--parent-repository",
-                str(root / "parent.git"),
-                cwd=root,
-            ).stdout
+        # HTML update qualification advances parent.git. The independent project
+        # fixtures must keep their own immutable parent while that branch runs.
+        parent_source = _remotes_stripped_parent(
+            root / "parent.git", root / "project-parent.git", git_revision
+        )
+        html_check = fixtures.submit(
+            run,
+            str(python),
+            "-I",
+            str(repository / "scripts" / "installed_html_smoke.py"),
+            str(litai),
+            str(root / "golden-created"),
+            standard_binding["distribution"],
+            "--parent-repository",
+            str(root / "parent.git"),
+            cwd=root,
         )
         sbom_profile = run(
             str(python),
@@ -2346,6 +2362,9 @@ def _main() -> int:
             or not planned["result"]["standard_component_execution"]["generation_plans"]
         ):
             raise RuntimeError("installed starter Component cannot be planned")
+        # Require HTML success before retaining any qualified HTML or wheel.
+        # Future.result preserves a child failure when other fixtures pass.
+        html_observability = json.loads(html_check.result().stdout)
         if (
             run("git", "rev-parse", "HEAD", cwd=repository).stdout.strip()
             != git_revision

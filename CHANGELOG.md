@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Overlap independent installed-wheel HTML and project/package fixtures with
+  separate mutable parent repositories and synchronized timing writes. Require
+  both branches before retaining qualified artifacts; preserve every check and
+  the existing native release deadline.
+
 - Distinguish detected installed-payload replacement from ordinary open failures on systems without `O_NOFOLLOW`, preserving fail-closed payload admission.
 
 - Keep standard Python bytecode caches out of documentation asset authority and isolate native qualification caches per run; explicit cache links remain invalid.
