@@ -450,6 +450,11 @@ def main(argv: list[str] | None = None) -> int:
             for item in (str(temporary), environment.get("GIT_CEILING_DIRECTORIES"))
             if item
         )
+    # Imports of documentation publishing helpers must not create source-tree
+    # assets during parallel validation. Preserve each native run's own cache.
+    environment["PYTHONPYCACHEPREFIX"] = str(
+        (temporary if temporary is not None else ROOT / "_build") / "pc"
+    )
     python = _environment_python(args.environment.resolve())
     npm = shutil.which("npm.cmd" if _windows() else "npm", path=environment["PATH"])
     try:

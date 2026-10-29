@@ -206,6 +206,14 @@ must exist, remote images are rejected, every declared document must be reachabl
 the root `SKILL.md`, and every declared asset must be referenced. Ambient Markdown
 outside those roots does not join the graph.
 
+Standard `.pyc` and `.pyo` bytecode beneath a `__pycache__` directory, including
+CPython numeric temporary suffixes during atomic writes, is generated cache data
+and does not join documentation authority. Explicit links to those cache files
+are rejected; link to the authored source instead. Other files in a cache
+directory and bytecode outside it remain ordinary assets. Traversal, symlink,
+path and entry-count limits still apply to cache entries. Native Windows
+qualification redirects child bytecode to its own retained run directory.
+
 One marker records that a human reviewed the current narrative against the current
 authority graph. Its digest covers the project definition, onboarding skill,
 Components, Flavors, exact forward and inverse skills, workflow/routing catalogs,
