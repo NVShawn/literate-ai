@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Keep standard Python bytecode caches out of documentation asset authority and isolate native qualification caches per run; explicit cache links remain invalid.
+
 - Give the isolated native Windows live test its own fixed pytest temporary
   directory, preserving its JUnit report without relying on pytest-current symlinks.
 

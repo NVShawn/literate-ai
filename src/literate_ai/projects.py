@@ -26,6 +26,7 @@ from literate_ai.contracts import (
     SourceCacheRootKind,
     canonical_identity,
 )
+from literate_ai.documentation import is_python_bytecode_cache_path
 
 # Windows ``msvcrt.locking`` has no blocking-with-clean-error mode: ``LK_LOCK``
 # retries internally for ~10s and then raises a bare ``OSError`` that surfaces as
@@ -1168,6 +1169,10 @@ def documentation_files(project: LoadedProject) -> tuple[Path, ...]:
                     "project.documentation_invalid",
                     "declared documentation file escapes its documentation root",
                 )
+            if is_python_bytecode_cache_path(
+                resolved.relative_to(project.root).as_posix()
+            ):
+                continue
             size = resolved.stat().st_size
             if size > DEFAULT_MAXIMUM_DOCUMENTATION_FILE_BYTES:
                 raise ProjectError(

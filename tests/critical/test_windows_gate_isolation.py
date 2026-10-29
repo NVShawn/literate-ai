@@ -303,6 +303,10 @@ class WindowsGateIsolationTests(unittest.TestCase):
             def execute(argv, environment, *, step):
                 temporary = Path(environment["TEMP"])
                 self.assertEqual(environment["TMP"], str(temporary))
+                self.assertEqual(
+                    environment["PYTHONPYCACHEPREFIX"], str(temporary / "pc")
+                )
+                self.assertFalse((temporary / "pc").is_relative_to(root))
                 self.assertIn(
                     str(temporary),
                     environment["GIT_CEILING_DIRECTORIES"].split(self.gate.os.pathsep),
