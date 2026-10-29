@@ -4,7 +4,7 @@ Two collections serve different jobs:
 
 - [`samples/`](../../samples/) contains lifecycle and portability fixtures exercised by
   framework qualification.
-- [`labs/`](../../labs/) contains six progressively composed, free-standing visual
+- [`labs/`](https://github.com/jordanhubbard/literate-ai/blob/main/labs) contains six progressively composed, free-standing visual
   lessons. They reuse one authoring runtime but generate an offline `index.html` in
   every lab, with an authored specification, illustrative lesson flow and exact-source
   inspector visible beside the artifact. The sequence spans math, physics, music, audio, 3D graphics, and video.

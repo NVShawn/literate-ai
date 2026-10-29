@@ -1,0 +1,63 @@
+{
+  "schema": "literate-ai/browser-interaction-acceptance@1",
+  "specification_set_identity": "sha256:c8d578938f158dc8dfa73af653194fff1a427d85dfc175595b561d85f57cc700",
+  "process": {
+    "arguments": [
+      "{port}"
+    ],
+    "startup_timeout_seconds": 15,
+    "timeout_seconds": 60,
+    "shutdown_timeout_seconds": 5,
+    "stdout_limit_bytes": 65536,
+    "stderr_limit_bytes": 65536
+  },
+  "readiness_path": "/health",
+  "viewports": [
+    {
+      "label": "desktop",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "label": "mobile",
+      "width": 390,
+      "height": 1000
+    }
+  ],
+  "steps": [
+    {
+      "action": "keyboard",
+      "selector": "input[type=range]",
+      "value": "End"
+    }
+  ],
+  "postconditions": [
+    {
+      "postcondition_id": "lab-interaction",
+      "kind": "text",
+      "selector": "[data-readout]",
+      "expected": "modulus 97"
+    }
+  ],
+  "required_roles": [
+    {
+      "role": "heading",
+      "name": "The Grumpy Counter"
+    },
+    {
+      "role": "slider",
+      "name": "Modulus"
+    }
+  ],
+  "required_landmarks": [
+    "main"
+  ],
+  "rejection_classes": [
+    "console-error",
+    "page-error",
+    "failed-request",
+    "http-error"
+  ],
+  "reject_horizontal_overflow": true,
+  "expected_request_count": 0
+}

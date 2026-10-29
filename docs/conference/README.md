@@ -39,17 +39,19 @@ retain their stated native-platform and qualification limits.
 
 ## Explore the examples
 
-The [six visual labs](../../labs/README.md) span arithmetic, orbital motion, audio,
+The [six visual labs](https://github.com/jordanhubbard/literate-ai/blob/main/labs/README.md) span arithmetic, orbital motion, audio,
 3D, music and video. Each opens independently and includes its specification and
-exact authored sources. Their displayed lesson roles are illustrative; conversion
-to a complete canonical Component curriculum remains in progress.
+exact authored sources. Each includes an independent 1.3.1 project with a real
+application Component, selected Flavors and a lock-derived authority graph. Use
+`litai build` and `litai run` from its project directory. Progressive multi-Component
+composition remains in progress; internal drawing/audio roles are not extra Components.
 
-Start with [Grumpy Counter](../../labs/00-grumpy-counter/index.html), then explore
-[Orbital Teapot](../../labs/01-orbital-teapot/index.html),
-[Unlicensed Birdsong](../../labs/02-unlicensed-birdsong/index.html),
-[Impossible Furniture](../../labs/03-impossible-furniture/index.html),
-[Glitch Opera](../../labs/04-glitch-opera/index.html), and
-[Component Cathedral](../../labs/05-component-cathedral/index.html).
+Start with [Grumpy Counter](https://github.com/jordanhubbard/literate-ai/blob/main/labs/00-grumpy-counter/index.html), then explore
+[Orbital Teapot](https://github.com/jordanhubbard/literate-ai/blob/main/labs/01-orbital-teapot/index.html),
+[Unlicensed Birdsong](https://github.com/jordanhubbard/literate-ai/blob/main/labs/02-unlicensed-birdsong/index.html),
+[Impossible Furniture](https://github.com/jordanhubbard/literate-ai/blob/main/labs/03-impossible-furniture/index.html),
+[Glitch Opera](https://github.com/jordanhubbard/literate-ai/blob/main/labs/04-glitch-opera/index.html), and
+[Component Cathedral](https://github.com/jordanhubbard/literate-ai/blob/main/labs/05-component-cathedral/index.html).
 
 ## Try Literate AI after the session
 
@@ -70,8 +72,8 @@ development line. The decks retain dated readiness snapshots; see the
 [verified publication record](../../verification/1.3.1-release-publication.json)
 and [current README](https://github.com/jordanhubbard/literate-ai#readme) for the published state.
 
-The six browser previews remain available. Their conversion into independent,
-fully qualified 1.3.1 Component projects is being completed under
+The six browser previews and their complete project inputs are included in the
+offline kit. The remaining progressive composition work is tracked under
 [LAB-AUTHORITY-001](../roadmap/active-work.md).
 
 [Source repository and questions](https://github.com/jordanhubbard/literate-ai)

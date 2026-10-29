@@ -1,12 +1,6 @@
-# Council of impossible furniture
+# Council of Impossible Furniture
 
-## Behavior
-
-Project a rotating wireframe chair-like object from deterministic vertices and edges.
-The wobble control changes geometry without changing the Component contract.
-
-## Acceptance
-
-The model remains finite at every control value and the authority graph identifies the
-geometry, projection and view boundaries.
-
+The canonical behavioral specification is
+[the project Component](project/components/frontend-application/impossible-furniture/component.md).
+This pointer is documentation; the Component lock selects the specification in
+the self-contained project.

@@ -24,6 +24,8 @@ const escape = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '
 const webPath = file => base + file.split('/').map(encodeURIComponent).join('/').replace(/\.md$/i, '.html');
 function hrefFor(href, source) {
   if (href?.startsWith('https://jordanhubbard.github.io/literate-ai/')) return href.slice('https://jordanhubbard.github.io'.length);
+  const github = href?.match(/^https:\/\/github\.com\/jordanhubbard\/literate-ai\/blob\/main\/([^?#]+)(.*)$/);
+  if (github && published.has(github[1])) return webPath(github[1]) + github[2];
   if (!href || /^(?:[a-z][a-z0-9+.-]*:|\/|#)/i.test(href)) return href;
   const match = href.match(/^([^?#]*)(.*)$/);
   let file;
@@ -105,6 +107,7 @@ fs.writeFileSync(path.join(output,'.nojekyll'),'');
 const revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
 fs.writeFileSync(path.join(output,'publication.json'),JSON.stringify({revision,files:count,markdown_pages:search.length,release_status:'1.3.1 published; Windows matrix temporarily suspended due to resource availability and restored next release; 1.4 development'},null,2)+'\n');
 const bundle=path.join(root,'_build/conference-download');
+fs.rmSync(bundle,{recursive:true,force:true});
 fs.mkdirSync(bundle,{recursive:true});
 const artifacts = {
   'slides.html':'docs/presentations/literate-ai-evolution-conference/index.html',
@@ -113,9 +116,9 @@ const artifacts = {
   'onboarding.vtt':'media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.vtt',
   'onboarding.srt':'media/courses/eight-hours-to-make-coffee/video/eight-hours-to-make-coffee.srt',
 };
-for(const file of published)if(/^labs\/[^/]+\/index\.html$/.test(file))artifacts[file]=file;
+for(const file of published)if(file.startsWith('labs/'))artifacts[file]=file;
 for(const [name,file] of Object.entries(artifacts)){const target=path.join(bundle,name);fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(path.join(root,file),target);}
-fs.writeFileSync(path.join(bundle,'START-HERE.txt'),'Literate AI conference materials\n\nOpen slides.html in any modern browser. Arrow keys navigate; N opens speaker notes; browser Print produces a handout. Each labs/*/index.html is self-contained and opens offline. The labs are authored teaching demonstrations; canonical curriculum work remains open. Play onboarding.mp4 with the matching captions.\n\nWebsite: https://jordanhubbard.github.io/literate-ai/\nSource and current release status: https://github.com/jordanhubbard/literate-ai\n1.3.1 is published; its Windows test matrix is temporarily suspended due to resource availability and must return next release; 1.4 is development.\n');
+fs.writeFileSync(path.join(bundle,'START-HERE.txt'),'Literate AI conference materials\n\nWelcome aboard, Unprompted AI! Open slides.html in any modern browser. Arrow keys navigate; N opens speaker notes; browser Print produces a handout. Each labs/*/index.html is self-contained and opens offline. Complete lab projects and initial retained inputs are included: read labs/README.md, install Literate AI 1.3.1, then use litai build and litai run from a lab project directory. Progressive multi-Component curriculum work remains open. Play onboarding.mp4 with the matching captions.\n\nWebsite: https://jordanhubbard.github.io/literate-ai/\nSource and current release status: https://github.com/jordanhubbard/literate-ai\n1.3.1 is published; 1.4 is development. See the release notes for qualification scope.\n');
 fs.mkdirSync(path.join(output,'downloads'),{recursive:true});
 execFileSync('python3',['-m','zipfile','-c',path.join(output,'downloads/literate-ai-conference-kit.zip'),'START-HERE.txt',...Object.keys(artifacts).filter(name=>!name.startsWith('labs/')),'labs'],{cwd:bundle});
 console.log(JSON.stringify({output,files:count,markdown_pages:search.length,revision}));

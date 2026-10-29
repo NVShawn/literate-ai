@@ -11,7 +11,7 @@ includes a two-hour running order.
 ## User documentation
 
 - [Current features and release posture](user/current-features.md)
-- [Progressive visual labs](../labs/README.md)
+- [Progressive visual labs](https://github.com/jordanhubbard/literate-ai/blob/main/labs/README.md)
 - [Rebuildable instructional videos](user/instructional-videos.md)
 - [Watch the introductory courses](courses/README.md)
 - [Native gRPC oracle declarations and qualification boundary](user/native-grpc-oracles.md)

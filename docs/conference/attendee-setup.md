@@ -31,7 +31,7 @@ and revises code; Literate AI keeps the requirements and the evidence connected.
   OpenRouter key. Literate AI also supports Codex CLI and Cursor Agent, with the
   separate credential and clean-configuration limitations described below.
 - **Literate AI 1.3.1 and this lab kit:** install the release wheel in a Python
-  virtual environment, then obtain the [labs](../../labs/README.md).
+  virtual environment, then obtain the [labs](https://github.com/jordanhubbard/literate-ai/blob/main/labs/README.md).
 - **Internet access for setup and model calls:** finished browser previews work
   offline. Generation uses your OpenRouter key’s available models and credit limits.
 
@@ -54,7 +54,7 @@ python -m playwright install chromium
 litai --version
 
 git clone --depth 1 https://github.com/jordanhubbard/literate-ai.git
-cd literate-ai/labs
+cd literate-ai
 ```
 
 Native Windows PowerShell uses `py -3 -m venv .venv-litai` and
@@ -150,7 +150,7 @@ not establish that its CLI can use the emailed OpenRouter credential. Set
 
 ## Your first lab session
 
-Start with [Grumpy Counter](../../labs/00-grumpy-counter/README.md), then follow the
+Start with [Grumpy Counter](https://github.com/jordanhubbard/literate-ai/blob/main/labs/00-grumpy-counter/README.md), then follow the
 numbered lab sequence. Read the specification before changing behavior. Ask your
 assistant to explain the Component graph and selected Flavors, then change one
 requirement, regenerate or rebuild through the documented lifecycle, and inspect
