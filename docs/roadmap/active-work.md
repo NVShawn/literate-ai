@@ -31620,3 +31620,18 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [x] Integrate pending reviewed updates and publish a reproducible static documentation site with a conference landing page and a dedicated deployment workflow. PRs #158 and #160 are merged; site source `0ef44bcd7282c8d3efb904e9049669b98de0d3a8` deployed successfully in run `40567956679` to https://jordanhubbard.github.io/literate-ai/.
 - **Evidence:**
   - [x] Verify desktop and mobile pages, live deployed links, deck navigation, film/caption downloads and publication status; record any CI still running without making release-success claims. The 442-page build passes 4,149 local-link checks. Live Chrome passes fourteen navigation/interaction checks at widths 1440 and 390, including search, film metadata/captions and lab input; all eight framework-flow diagrams render. The fourteen-slide deck passes desktop/mobile controls and layout checks. Fresh public deck, film, caption and downloaded-kit content hashes match reviewed sources; archive CRC passes. See [publication evidence](../conference/publication.json). Product CI remains separate and was not awaited by explicit user direction; 1.3.1 software qualification and the canonical lab curriculum remain open.
+
+### [x] CARGO-REUSE-001 — Reuse Cargo target output across Standard builds
+
+- **Priority:** P1
+- **Owner:** framework core; PROJECT Goals 4 and 5
+- **Direction:** Reuse CARGO_TARGET_DIR where compatible to avoid recompiling unchanged Rust dependencies and targets.
+- **Conclusion:** Retain a locked target/toolchain-scoped Cargo workspace, preserve unchanged source timestamps, synchronize additions/deletions, and discard failed workspace state. Keep fresh authorization, lock derivation, dependency evidence, artifact sealing and acceptance.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Implement persistent Cargo workspace and source synchronization with safe path checks. Compatible source revisions share locked intermediates; successful state is sealed over bytes, modes and freshness timestamps, and interrupted/failed work is discarded.
+  - [x] Document reuse boundaries and add focused native Cargo and failure/isolation regression coverage. User cache/configuration guides and the root changelog describe local reuse independently of sccache.
+- **Evidence:**
+  - [x] Focused Standard Cargo tests prove warm freshness, source-edit rebuild, failure cleanup and unsafe-path refusal. All nine `tests.smoke.test_standard_cargo_lifecycle` cases pass on macOS arm64 with native Cargo/rustc 1.97.1: a warm forced artifact miss preserves the executable timestamp, a binary source edit rebuilds it while preserving the unchanged library artifact, and namespace isolation, stale-input removal, tampering/link refusal and interrupted/failed workspace cleanup pass.
+  - [x] Run scoped make python-check and lint/format checks; record local-only scope and unavailable tracker survey. Scoped `make python-check` runs pass 63 Standard smoke cases (four expected skips), 33 critical cache cases, and a final nine-case Cargo rerun. Changed Python files pass Ruff lint/format and `git diff --check`; compileall and host path policy pass. Validation explicitly selected the existing rustup toolchain because ambient Homebrew Cargo cannot load its llhttp dependency. Start/end tracker surveys and the read-only GC plan fail through the configured GitHub alias; no peer changes were collected. This is local development evidence, not native cross-platform or release qualification.

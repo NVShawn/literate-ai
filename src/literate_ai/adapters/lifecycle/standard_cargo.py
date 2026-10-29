@@ -7,7 +7,6 @@ import json
 import os
 import re
 import shutil
-import tempfile
 import time
 import tomllib
 from collections.abc import Callable, Mapping
@@ -16,7 +15,7 @@ from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 
 from literate_ai._cache_lock import exclusive_cache_lock
-from literate_ai._filesystem import require_safe_directory
+from literate_ai._filesystem import path_is_link_or_reparse, require_safe_directory
 from literate_ai.adapters.builders import BuildError, run_bounded_process
 from literate_ai.adapters.compiler_cache import compiler_cache_session
 from literate_ai.adapters.dependencies import HostDependencyObservation
@@ -36,6 +35,7 @@ from literate_ai.contracts import (
 from literate_ai.diagnostics import redact_secrets
 from literate_ai.storage import canonical_json_bytes
 
+from .cargo_workspace import sync_projection, workspace_digest
 from .standard_local import (
     LocalComponentToolBinding,
     LocalSourceTreeRegistry,
@@ -404,25 +404,59 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
         contract: ComponentCommandContract,
     ) -> StandardBuildOutput:
         target = self.cargo_targets.get(plan.component_revision.uri)
-        if (
-            self.shared_cache is None
-            or self.shared_cache.compiler_tool is None
-            or target is None
-        ):
+        if target is None:
             return self._build_cargo_locked(plan, provider_artifacts, contract)
-        # Rust cache keys include the working directory and Cargo environment.
-        # An exact target owns one stable disposable location across rebuilds.
-        # Cross-process locking prevents one rebuild cleaning another's workspace.
+        # Revisions and source bytes deliberately do not partition intermediates:
+        # Cargo invalidates changed inputs. Toolchain, target and providers do.
+        compatibility = target.identity_document()
+        compatibility.pop("component_revision")
+        workspace_key = canonical_identity(
+            {
+                "schema": "literate-ai/cargo-workspace@1",
+                "cargo": compatibility,
+                "target": contract.artifact_export.target_identity.uri,
+                "abi": contract.artifact_export.abi_identity.uri,
+                "providers": self._provider_materials(
+                    provider_artifacts, consumer_revision=plan.component_revision
+                ),
+                "compiler_cache": (
+                    self.shared_cache.identity.uri if self.shared_cache else None
+                ),
+            }
+        )
         with exclusive_cache_lock(
-            self.object_root / ".cargo-locks" / target.identity.digest
+            self.object_root / ".cargo-locks" / workspace_key.digest
         ):
-            stable = self.object_root / "cargo-work" / target.identity.digest
+            stable = self.object_root / "cargo-work" / workspace_key.digest
+            seal = stable.with_suffix(".seal")
             require_safe_directory(stable, allow_missing=True)
-            if stable.exists():
+            if path_is_link_or_reparse(seal):
+                raise LocalStandardLifecycleError("Cargo workspace seal is unsafe")
+            if stable.exists() and seal.exists():
+                previous = self._read_bounded(seal, label="workspace seal")
+                if previous.decode("utf-8") != workspace_digest(stable):
+                    raise LocalStandardLifecycleError(
+                        "Cargo workspace changed since build"
+                    )
+            elif stable.exists():
+                # Interrupted work has no successful-build seal.
+                workspace_digest(stable)  # Refuse unsafe nodes before cleanup.
                 shutil.rmtree(stable)
-            return self._build_cargo_locked(
-                plan, provider_artifacts, contract, stable_staging=stable
-            )
+            # An interrupted process must not leave a successful-build marker
+            # attached to partially updated inputs or compiler output.
+            seal.unlink(missing_ok=True)
+            try:
+                result = self._build_cargo_locked(
+                    plan, provider_artifacts, contract, stable_staging=stable
+                )
+                if stable.exists():
+                    seal.write_text(workspace_digest(stable), encoding="utf-8")
+                return result
+            except Exception:
+                if stable.exists():
+                    shutil.rmtree(stable)
+                seal.unlink(missing_ok=True)
+                raise
 
     def _build_cargo_locked(
         self,
@@ -513,22 +547,19 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                 return reused
 
         if stable_staging is None:
-            staging = Path(
-                tempfile.mkdtemp(prefix="standard-cargo-", dir=self.object_root)
-            )
-        else:
-            staging = stable_staging
-            staging.mkdir(parents=True)
+            raise LocalStandardLifecycleError("Cargo build requires a locked workspace")
+        staging = stable_staging
+        staging.mkdir(parents=True, exist_ok=True)
         projection = staging / "projection"
         object_workspace = staging / "objects"
         artifact_workspace = staging / "artifact"
         try:
-            shutil.copytree(source, projection)
+            sync_projection(source, projection)
             projected_manifest = projection / Path(
                 *PurePosixPath(target.manifest).parts
             )
             projected_lock = projected_manifest.with_name("Cargo.lock")
-            object_workspace.mkdir()
+            object_workspace.mkdir(exist_ok=True)
             artifact_workspace.mkdir()
             binding_identity = contract.tool_binding(
                 ComponentCommandPhase.BUILD
@@ -752,7 +783,8 @@ class StandardCargoLifecyclePorts(LocalStandardLifecyclePorts):
                 artifact_workspace,
                 conflict="Cargo-addressed local artifact has conflicting bytes",
             )
-            shutil.rmtree(staging)
+            if artifact_workspace.exists():
+                shutil.rmtree(artifact_workspace)
         except Exception:
             if staging.exists():
                 shutil.rmtree(staging)

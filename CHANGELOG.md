@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Reuse compatible Cargo target directories across Standard builds, preserving
+  unchanged source timestamps and verifying retained workspace integrity. Keep
+  toolchain/target isolation, fresh dependency evidence and failed-build cleanup.
+
 - Welcome Unprompted AI attendees with a from-zero setup guide, emailed OpenRouter key instructions and accurate assistant choices. Record the published 1.3.1 downloads and the temporary resource-driven Windows matrix suspension, with restoration required next release.
 - Scope conference website scripts and the two 1.3.1 publication records to documentation feedback; preserve broader qualification for product source, lab implementations and unknown records.
 

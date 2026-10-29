@@ -369,8 +369,17 @@ and ignores ambient sccache settings.
 Cargo incremental compilation is disabled for this mode. Link steps remain normal
 compiler work; supported library compilations can reuse cached objects.
 
-An exact Cargo target uses a locked, stable disposable build directory because
-sccache's Rust key includes the working directory and Cargo settings. Read-only
+Cargo builds retain a locked workspace and `CARGO_TARGET_DIR` beneath `OBJ_DIR`,
+including when sccache is disabled. Compatible builds preserve unchanged source
+timestamps, allowing Cargo to reuse dependencies, incremental state and finished
+targets. Source edits share this workspace; toolchain, target/ABI, provider or
+compiler-cache configuration changes select separate workspaces. When Cargo runs,
+the lifecycle derives its current lock and captures fresh dependency evidence.
+Workspace bytes, file modes
+and freshness timestamps are rehashed before reuse; drift or unsafe nodes are refused,
+and failed builds discard their workspace. This verification adds I/O proportional to
+the retained workspace. Removing the object cache also removes these intermediates.
+The stable working directory also preserves sccache's Rust keys. Read-only
 compiler caching uses a disposable local copy to preserve shared-file timestamps.
 Native C++ drivers compile each translation unit separately through the cache tool,
 then link each executable with the selected compiler. Multiple entrypoints use the
