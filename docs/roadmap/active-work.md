@@ -31406,6 +31406,8 @@ complete repository publication plus exact-head/main link and hash verification.
 
 ### [x] RELEASE-019 — Require explicit completion or approved deferral of every release goal
 
+**Additional release-owner authorization:** “I approve 1.3.1 without the windows qualification”. See the [1.3.1-only exception](../../verification/1.3.1-windows-qualification-exception.json). It changes only the required platform set on the 1.3.1 release line; feature scope, Linux/macOS qualification, lifecycle and artifact custody, publication and verification remain mandatory. Main retains Windows qualification for subsequent releases.
+
 **Superseding scope approval:** The user confirmed ten included 1.3.1 goals and
 eight approved deferrals to 1.4.0 after conflicting directions. The original
 18-entry source ledger remains auditable: ten included goals plus eight explicit

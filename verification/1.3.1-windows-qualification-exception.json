@@ -1,0 +1,38 @@
+{
+  "schema": "literate-ai/release-qualification-exception@1",
+  "release": "1.3.1",
+  "approved_by": "user",
+  "approval_quote": "I approve 1.3.1 without the windows qualification",
+  "waived_platform": "windows",
+  "scope": "Complete Windows release qualification for 1.3.1 only; no Windows qualification success is claimed.",
+  "required_platforms": [
+    "linux",
+    "macos"
+  ],
+  "retained_failed_evidence": {
+    "source_commit": "0509425bfed0e86eafaecdb9bfc2bdecb059fbfe",
+    "run_id": "20261029T064334Z-5c39e7",
+    "node_id": "n0004",
+    "reason": "Whole native Windows gate exceeded its unchanged 5400-second limit with installed-wheel qualification incomplete.",
+    "isolated_live_case": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "remaining_tests": {
+      "passed": 4340,
+      "failed": 0,
+      "skipped": 409
+    },
+    "successful_wheel_operations": 126
+  },
+  "unchanged_requirements": [
+    "Ten included release goals and eight previously approved 1.4.0 deferrals",
+    "Exact prepared-commit Linux and macOS qualification",
+    "Current lifecycle receipt",
+    "Qualified wheel, Codex plugin and Claude plugin artifact custody",
+    "Provider publication verification, public documentation and synchronization"
+  ],
+  "implementation": "On release/1.3.x for 1.3.1, declare only linux and macos in qualification.platforms. Keep main on its original linux/macos/windows policy. Retain this exception with the published source and notes.",
+  "future_releases": "This authorization applies only to 1.3.1. Before preparing any later version on release/1.3.x, restore windows in qualification.platforms. Main retains its original three-platform policy throughout."
+}
