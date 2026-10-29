@@ -86,7 +86,8 @@ class HtmlStalenessTests(unittest.TestCase):
             return_value="1.3.0 (development source)",
         ):
             self.assert_report("current")
-            definition["version"] = "1.3.1"
+            major, minor, patch = map(int, str(definition["version"]).split("."))
+            definition["version"] = f"{major}.{minor}.{patch + 1}"
             manifest.write_text(json.dumps(definition))
             self.assert_report("stale")
 

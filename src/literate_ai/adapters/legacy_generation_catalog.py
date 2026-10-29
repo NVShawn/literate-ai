@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
@@ -195,7 +197,7 @@ def _project_discovery_inputs(
 
 @dataclass(frozen=True, slots=True, init=False)
 class LegacyFlavorGraphObservation:
-    """Owned by one read-only lock check, never a cache of currentness."""
+    """Owned by one read-only operation, never a cache of currentness."""
 
     roots: tuple[Path, ...]
     _paths: tuple[Path, ...]
@@ -244,6 +246,42 @@ class LegacyFlavorGraphObservation:
             closure.require_unchanged()
         membership()
         return self._metadata
+
+
+_READ_ONLY_FLAVOR_OBSERVATIONS: ContextVar[
+    dict[tuple[str, ...], LegacyFlavorGraphObservation] | None
+] = ContextVar("read_only_flavor_graph_observations", default=None)
+
+
+@contextmanager
+def read_only_flavor_graph_observations() -> Iterator[None]:
+    """Share parsed metadata within one verification, including final revalidation.
+
+    Nested verifications get independent observations. The map is cleared on every
+    exit; writers and callers outside this scope keep the ordinary fresh loader.
+    """
+    observations: dict[tuple[str, ...], LegacyFlavorGraphObservation] = {}
+    token = _READ_ONLY_FLAVOR_OBSERVATIONS.set(observations)
+    try:
+        yield
+        for observation in tuple(observations.values()):
+            observation.require_current(observation.roots)
+    finally:
+        observations.clear()
+        _READ_ONLY_FLAVOR_OBSERVATIONS.reset(token)
+
+
+def scoped_flavor_graph_observation(
+    roots: Sequence[Path],
+) -> LegacyFlavorGraphObservation | None:
+    observations = _READ_ONLY_FLAVOR_OBSERVATIONS.get()
+    if observations is None:
+        return None
+    # Do not collapse differently spelled Windows paths through Path equality.
+    key = tuple(str(root) for root in roots)
+    if key not in observations:
+        observations[key] = LegacyFlavorGraphObservation.capture(tuple(roots))
+    return observations[key]
 
 
 def _flavor_catalog_audit_identity(

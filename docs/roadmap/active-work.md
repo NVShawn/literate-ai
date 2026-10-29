@@ -30914,6 +30914,17 @@ repair scope and makes no claim that the complete provided native gate passed.
 
 ### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
 
+**Current repair under qualification:** Source `0ed46e91` completed the wheel in
+5073.0 seconds but exceeded the unchanged 5400-second whole-gate budget before
+the remaining suite finished. The installed HTML scenario alone took 2562.234
+seconds. After the isolated 60-second live dependency control, run the independent
+wheel and remaining native tests concurrently, retaining their complete separate
+streams and terminating only owned process trees on failure. All existing roots,
+deselection of only the already-executed live case, both JUnit reports and deadlines
+remain mandatory. Deterministic overlap, failure cleanup and orchestration tests
+pass locally; a new exact-source full native pass is still required.
+
+
 - **GitHub issue:** [#123](https://github.com/jordanhubbard/literate-ai/issues/123)
 
 - **Release target:** 1.3.1
@@ -30971,6 +30982,8 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 - **Read-only lineage catalog candidate:** A real installed committed-lock probe on Windows / Python 3.12.10 binds six measured modules to baseline `42e99cdd`; four full legacy catalog loads consume 10.129 of 28.534 coarse seconds. A bounded candidate retains only immutable Flavor graph metadata within one check/diff operation, rechecks exact source closures, catalog membership and nearest-project discovery, and still builds four fresh authority graphs. Writers and independent operations remain fresh. Eleven new source controls plus seventeen related source checks pass, including same-size/mtime byte drift, missing/added/redirected members, nearer project creation, a real component self-cycle and invalid skill authority. Initial native source-copy ABBA observations preserve reports and restore the fixture: baseline 29.024/31.500 seconds; candidate 28.952/25.389, with full catalog loads 4→1 and graph builds unchanged at four. This small uncontrolled development comparison is not a reliable speedup or installed-wheel qualification. A larger repetition and exact-wheel/full qualification remain required; this goal stays open.
 - **Candidate qualification boundary:** Thirteen focused controls now pass, including factory-only construction, refusal of transported or untyped success claims, specific public drift errors and an explicit POSIX-link platform scope; all thirty scoped source checks pass. The larger native repetition retains three completed samples, then stops when a baseline child exceeds the unchanged 150-second diagnostic deadline. Fixture restoration passes. The subsequent worker health probe times out; hold further timing work while health is unknown. Preserve the failed repetition, keep exact-wheel/full native qualification mandatory, and make no reliable wall-time improvement or release-admission claim. See `verification/lineage-flavor-observation-development.json`.
 - **Post-stall resource observation:** A bounded connectivity retry succeeds. Direct Windows APIs then report 9.0–9.8% CPU across three five-second windows and at least 58.1 GB available RAM; required volumes have 27.7 GB free of 535.4 GB, still a disk warning. This recovers resource visibility after the CIM timeout but does not explain the baseline stall. Preserve the failed operation and diagnose it before another full-gate renewal; no deadline, test inventory or admission gate is weakened.
+
+**Current bounded repair:** A retained complete native wheel passed in 5,073 seconds, including 2,562 seconds in installed HTML qualification, before the unchanged 5,400-second full-gate budget expired during the serial live test. A read-only baseline profile observes four fresh authority graphs and six Flavor-catalog parses; four parses come from those graphs. Extend the existing exact-input graph-metadata observation across one read-only verification, retaining every fresh graph and final source revalidation. Keep the live dependency case isolated, then run independent wheel and remaining-test ladders together as hosted CI does. Separate durable phase streams and cancellation must retain both JUnit paths and clean up only owned process trees. All acceptance and deadline requirements remain open until exact qualification succeeds; no wall-time improvement is claimed by the profile.
 
 ### [ ] RETAINED-OBSERVATION-PERF-001 — Bound retained authority and native observation cost
 

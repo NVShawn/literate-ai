@@ -200,7 +200,7 @@ _GATES = {
 }
 
 
-def observe_project_verification(
+def _observe_project_verification(
     root: Path, *, gates: tuple[str, ...] | list[str] | None = None
 ) -> tuple[dict[str, Any], int]:
     """Run the selected gates in declared order and report each one separately."""
@@ -239,6 +239,22 @@ def observe_project_verification(
         },
         "ok": not failed,
     }, (1 if failed else 0)
+
+
+def observe_project_verification(
+    root: Path, *, gates: tuple[str, ...] | list[str] | None = None
+) -> tuple[dict[str, Any], int]:
+    """Run fresh gates while sharing only revalidated immutable Flavor metadata."""
+    from literate_ai.adapters.legacy_generation_catalog import (
+        read_only_flavor_graph_observations,
+    )
+    from literate_ai.cli.errors import CliFailure
+
+    try:
+        with read_only_flavor_graph_observations():
+            return _observe_project_verification(root, gates=gates)
+    except (CliFailure, ProjectError) as exc:
+        raise ProjectVerificationError(exc.code, exc.message) from exc
 
 
 __all__ = [
