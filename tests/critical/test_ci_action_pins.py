@@ -219,6 +219,76 @@ class CiActionPinTests(unittest.TestCase):
         self.assertNotIn("make validate", text)
         self.assertNotIn("wheel-check", text)
 
+    def test_scoped_workflow_steps_do_not_requalify_unchanged_freebsd_job(self):
+        selector = self.selector()
+        # CI selector tests run in ci-policy; the actual native fixture still
+        # requires its target probe.
+        self.assertFalse(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("tests/critical/test_ci_action_pins.py",)
+            )
+        )
+        self.assertTrue(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("tests/critical/test_retained_posix_acl.py",)
+            )
+        )
+        before = (
+            "jobs:\n  profile:\n    runs-on: ubuntu-latest\n"
+            "  checks:\n    steps:\n      - name: Docs\n"
+            "        if: matrix.task == 'documentation'\n        run: old-check\n"
+            "  freebsd-posix-acl:\n    runs-on: ubuntu-latest\n"
+        )
+        scoped = before.replace("run: old-check", "run: new-check")
+        for after, expected in (
+            (scoped, False),
+            ("permissions:\n  contents: write\n" + scoped, True),
+            (
+                scoped.replace(
+                    "run: new-check", "run: new-check\n        env: &shared {}"
+                ),
+                True,
+            ),
+            (
+                scoped.replace(
+                    "  freebsd-posix-acl:\n    runs-on: ubuntu-latest",
+                    "  freebsd-posix-acl:\n    runs-on: different",
+                ),
+                True,
+            ),
+            (
+                scoped.replace(
+                    "  profile:\n    runs-on: ubuntu-latest",
+                    "  profile:\n    runs-on: different",
+                ),
+                True,
+            ),
+        ):
+            with (
+                self.subTest(after=after),
+                mock.patch.dict(
+                    selector.os.environ, {"CI_BASE_SHA": "base", "CI_HEAD_SHA": "head"}
+                ),
+                mock.patch.object(selector.subprocess, "run") as run,
+            ):
+                run.side_effect = [
+                    mock.Mock(returncode=0, stdout=t.encode()) for t in (before, after)
+                ]
+                self.assertEqual(
+                    selector.select_freebsd_acl(
+                        "pull_request", "main", (".github/workflows/ci.yml",)
+                    ),
+                    expected,
+                )
+        with mock.patch.dict(
+            selector.os.environ, {"CI_BASE_SHA": "", "CI_HEAD_SHA": ""}
+        ):
+            self.assertTrue(
+                selector.select_freebsd_acl(
+                    "pull_request", "main", (".github/workflows/ci.yml",)
+                )
+            )
+
     def test_default_branch_pushes_scope_docs_but_preserve_qualification(self) -> None:
         selector = self.selector()
         for paths, tasks in (
