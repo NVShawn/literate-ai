@@ -29637,7 +29637,7 @@ rather than treating resumed partial coverage as release qualification.
   - [x] Complete scope/currentness refusal fixtures plus real privileged and unprivileged original cases through the installed framework in a disposable native guest; preserve legacy identities and private defaults. Installed `6e370033` completes in 1,717.496 seconds with 24 original passes, no skips, and 11 independent observations matching declared exits and stream hashes. One invalid-input case correctly expects exit 1. All 34 retained records reverify; cleanup is bound into completion, the prefix ACL is root-only and no nullfs mounts remain. Fifty-one fresh observations bind the same actual allocation. Receipt identity `sha256:924264d401159e317059b69c80087ec3a9cd047ca4652a53ca7903fa6c29f559` is admitted for local runtime use; canonical Standard lifecycle, SDK, pkg and release flags remain false.
   - [x] Complete exact-current required CI and land the reviewed integration. Landed `ef5db15f` exact-main CI [40007862532](https://github.com/jordanhubbard/literate-ai/actions/runs/40007862532) passes all 26 jobs. Seven scoped identity/ACL/view/prefix owner and contract files, plus `_DirectoryAccess`, are byte-identical to installed native `6e370033`; the actual 24-case original-suite and cleanup-bound acceptance remain recorded in `verification/native-retained-renewal-development.json`. This closes issues #85/#94 only, not the broader FreeBSD or canonical Standard/SDK program.
 
-### [ ] INPUT-WALK-001 — Bound retained input ancestor traversal cost
+### [x] INPUT-WALK-001 — Bound retained input ancestor traversal cost
 
 **GitHub issue:** [#86](https://github.com/jordanhubbard/literate-ai/issues/86).
 
@@ -30361,7 +30361,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Closure qualification:** The fresh non-editable installed CLI completes a force-generated source-derived tiny Python library through its component.md path in 78.522 seconds. Its explicit import map, isolated/module-origin-checking oracle and expected value 7 are unchanged (harness `sha256:64c2a0fd2a118b406b4e340278bf2b8db7823bca290719ca0f140b1f49981b1b`). Generated tests, import execution and independent acceptance pass; the current receipt has 3 passes, no failures/skips, and verify passes. The exact retained default Bazel profile refuses with its actionable profile error before any coding-CLI launch, with no candidate and only an empty owned runtime allocation. All four cross-platform projection regressions and the complete 2139-pass source suite pass. Directory/file selection and all five pre-artifact invalid-entry refusals are separately recorded. Relevant implementation files match landed `a6a22996`; exact review CI `39790990072` passed before its main integration. See `verification/installed-native-profile-acceptance.json` and `verification/installed-lock-entrypoint-acceptance.json`. This closes the entry/profile contracts and does not claim broad regenerative equivalence or release admission.
 
 
-### [ ] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
+### [x] NATIVE-SUPERVISOR-READY-001 — Bind process-group timeout evidence to child readiness
 
 **GitHub issue:** [#95](https://github.com/jordanhubbard/literate-ai/issues/95)
 
@@ -30374,7 +30374,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Implementation:**
   - [x] Wait for actual child handler readiness before starting the existing supervision deadline.
 - **Evidence:**
-  - [ ] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI.
+  - [x] Pass focused POSIX checks and a fresh full native regression with no new skips; retain current source identity and exact landing CI. The complete FreeBSD renewal recorded under NATIVE-PACKAGE-BUDGET-001 passes the process-group termination case, 1,801 total cases with no failures, and exact CI run `39519805647`; the final 1.3.1 candidate also passed exact qualification in run `40756301500`.
 
 ### [x] JAVASCRIPT-REGISTRY-LEX-001 — Distinguish bundle registries from inert writer text
 
@@ -30394,7 +30394,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 
 **Closure audit:** All four current handoff cases pass without skips. A real non-editable installed guard on native Windows accepts all six inert forms in both writer locations, performs 12 actual Node invocations with exact expected test/smoke payloads, and preserves all four missing-module/extension/shebang/dispatch refusals. Its guard, lexer, callers and fixture bytes match landed `fe21a198`, exact fully qualified `76ac4c7a` and the complete installed wheel at `52c8b6eb`. That original snapshot also passes a fresh 230-case framework lifecycle. `verification/javascript-registry-acceptance.json` retains the source/wheel/receipt and hash-verified native archive identities; this does not declare the unrelated entrypoint or HTML-performance branches qualified.
 
-### [ ] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
+### [x] NATIVE-PACKAGE-BUDGET-001 — Keep complete packaging proof fixture within its test grant
 
 **GitHub issue:** [#98](https://github.com/jordanhubbard/literate-ai/issues/98)
 
@@ -30407,7 +30407,7 @@ hosted CI and canonical tree worker/live SDK integration remain open.
 - **Implementation:**
   - [x] Use two standard test budgets only for the complete multi-component packaging-chain fixture.
 - **Evidence:**
-  - [ ] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged.
+  - [x] Run the affected host fixture and dedicated expiry checks, renew fresh complete native and exact CI qualification, preserve failed-source evidence, and keep the production source, trusted driver and current receipt unchanged. The completed native renewal below and exact CI runs `39519805647` and `40756301500` satisfy the scoped release acceptance without changing production deadlines.
 
 **Observed failed native gate:** source `7625cc05` retains 1,149 passes, 34 existing skips and one expired-grant failure across 1,859 selected cases after 2,097.788 seconds. The negative archive-format oracle must run before its fixture grant expires; accepting the earlier expiry code would erase that format coverage. Only this full-chain fixture receives two standard test budgets.
 
@@ -31561,6 +31561,8 @@ No software release or native success is claimed.
         full `make python-check` pass (2,332 tests, 70 skipped).
 
 ### [ ] LAB-AUTHORITY-001 — Make lab diagrams, specifications and source provenance accurate
+
+**Unprompted AI delivery direction:** Update the labs on main to work as independent Literate AI 1.3.1 projects, with actual canonical authority and verifiable lifecycle boundaries. Give first-time session attendees a stand-alone README welcome and a from-zero checklist covering machines, tools, emailed OpenRouter keys and supported coding assistants. Keep the frozen framework distribution qualification separate from this conference curriculum; qualify the labs using the exact 1.3.1 wheel and do not label browser demos as canonical projects.
 
 - **Priority:** P0
 - **Owner:** labs documentation and offline artifact builder

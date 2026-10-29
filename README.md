@@ -1,5 +1,59 @@
 # Literate AI
 
+## Welcome, Unprompted AI attendees!
+
+Welcome to Jordan Hubbard’s Literate AI session. We’re glad you’re here—welcome
+aboard! Literate AI connects readable software specifications to code, builds,
+tests and evidence. Your coding assistant helps write the implementation;
+Components describe responsibilities, Flavors choose how to realize them, and
+locks and receipts record exactly what was selected and checked.
+
+**Starting from zero? You will need:**
+
+- A **Mac, Linux computer, or Windows 11 machine**; an ordinary laptop is enough.
+  Use WSL 2 for the Linux command examples on Windows. No local NVIDIA GPU is needed.
+- A **modern browser and terminal**, **Python 3.11+**, **Git/Git LFS**, and
+  **Node.js 20+** and **GNU Make** for the JavaScript labs.
+- The **OpenRouter.ai API key in your session email**, plus internet access for
+  installation and model calls. Keep the key out of your repository.
+- **One coding assistant:** use OpenCode or Claude Code with the emailed
+  OpenRouter key. Literate AI also supports Codex CLI and Cursor Agent; those
+  adapters have separate credential/configuration requirements. See the setup guide
+  before choosing them for this session.
+- **Literate AI 1.3.1 and the lab kit**. Follow the
+  [step-by-step attendee setup](docs/conference/attendee-setup.md), then start the
+  [labs](labs/README.md). The completed browser previews can be opened offline.
+
+The **Windows test matrix is temporarily suspended for 1.3.1 because of resource
+availability**, with the release owner’s approval. It **returns in the next
+release**; 1.3.1 does not claim Windows qualification. Linux/macOS and the other
+release gates remain required. [Recorded exception](verification/1.3.1-windows-qualification-exception.json).
+
+
+## Latest stable release: v1.3.1
+
+[Download v1.3.1](https://github.com/jordanhubbard/literate-ai/releases/tag/v1.3.1).
+Linux and macOS passed the complete native release gate. The Windows matrix is
+suspended for this release only, as described above, and returns next release.
+[Publication and fresh-download verification](verification/1.3.1-release-publication.json).
+
+<details>
+<summary>Verified downloads: exact asset sizes and SHA-256</summary>
+
+| Published asset | Bytes | SHA-256 |
+| --- | ---: | --- |
+| [eight-hours-to-make-coffee-poster.png](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee-poster.png) | 95,639 | `5534ac41d04003526e114b71b2501661999f90365323a627a2132602c7f826b0` |
+| [eight-hours-to-make-coffee.mp4](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.mp4) | 23,051,695 | `d01ce010654c55d6a1b3de16fa3cd8d640b758fe3559783236cfc9754e7d8e97` |
+| [eight-hours-to-make-coffee.srt](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.srt) | 14,814 | `d0628463c74bc3a7b931d2777d05730a01c93e66da28d6e58db73f2fc62f291e` |
+| [eight-hours-to-make-coffee.vtt](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.vtt) | 14,573 | `0e6cbde161e0fe0e059cc61828366d06392d02ea08c9bb01983050932e1d1d16` |
+| [literate-ai-1.3.1-conference-deck.html](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate-ai-1.3.1-conference-deck.html) | 1,353,967 | `5243a93edda7a81c4ab93c3fb6268a208eafc3515872086ef95fd0c1b0d9b509` |
+| [literate-ai-1.3.1-release-briefing.pptx](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate-ai-1.3.1-release-briefing.pptx) | 161,540 | `5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca` |
+| [literate_ai-1.3.1-claude-plugin.zip](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate_ai-1.3.1-claude-plugin.zip) | 5,544,988 | `55f52a2917b58fdf62d3b56b4a1c4736cc9ee3bb96ffef7240f6c17c0201f123` |
+| [literate_ai-1.3.1-codex-plugin.zip](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate_ai-1.3.1-codex-plugin.zip) | 5,545,400 | `d68e001020dc64735797b8f6241ffd7271be5912ddd9882e7b2ab75687dcb1aa` |
+| [literate_ai-1.3.1-py3-none-any.whl](https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate_ai-1.3.1-py3-none-any.whl) | 3,817,215 | `4b075b0b7727a11785a59359ccc3fc2de327baad46ec45350faeb66ddfc14c15` |
+
+</details>
+
 **[Conference website and attendee materials](https://jordanhubbard.github.io/literate-ai/)** ·
 [Browser slides](https://jordanhubbard.github.io/literate-ai/docs/presentations/literate-ai-evolution-conference/index.html) ·
 [Offline conference kit](https://jordanhubbard.github.io/literate-ai/downloads/literate-ai-conference-kit.zip) ·

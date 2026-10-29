@@ -1,5 +1,7 @@
 # Literate AI 1.3.1 release briefing
 
+**Current status:** [1.3.1 is published](https://github.com/jordanhubbard/literate-ai/releases/tag/v1.3.1). The deck preserves its reviewed pre-publication snapshot and schedule; it is not a current ETA. Linux/macOS qualification passed. The Windows matrix is temporarily suspended for 1.3.1 due to resource availability and must return in the next release. See the [publication record](../../../verification/1.3.1-release-publication.json).
+
 The [editable PowerPoint deck](literate-ai-1.3.1-release-briefing.pptx) explains:
 
 - Literate AI's specification-to-evidence execution model and first-class authorities;

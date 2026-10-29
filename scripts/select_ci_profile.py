@@ -8,7 +8,17 @@ import subprocess
 from pathlib import Path
 
 _DOCUMENTATION_FILES = frozenset(
-    {"CHANGELOG.md", "CONTRIBUTING.md", "PROJECT.md", "README.md"}
+    {
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
+        "PROJECT.md",
+        "README.md",
+        "labs/README.md",
+        "scripts/build_conference_site.mjs",
+        "scripts/verify_conference_browser.mjs",
+        "verification/1.3.1-release-publication.json",
+        "verification/1.3.1-windows-qualification-exception.json",
+    }
 )
 _DOCUMENTATION_PREFIXES = ("docs/",)
 _CI_POLICY_FILES = frozenset(

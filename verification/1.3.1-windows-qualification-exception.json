@@ -34,5 +34,7 @@
     "Provider publication verification, public documentation and synchronization"
   ],
   "implementation": "On release/1.3.x for 1.3.1, declare only linux and macos in qualification.platforms. Keep main on its original linux/macos/windows policy. Retain this exception with the published source and notes.",
-  "future_releases": "This authorization applies only to 1.3.1. Before preparing any later version on release/1.3.x, restore windows in qualification.platforms. Main retains its original three-platform policy throughout."
+  "future_releases": "This authorization applies only to 1.3.1. Before preparing any later version on release/1.3.x, restore windows in qualification.platforms. Main retains its original three-platform policy throughout.",
+  "reason": "Temporary Windows test-matrix suspension due to resource availability, explicitly directed by the release owner.",
+  "restoration": "The Windows test matrix must return in the next release, including any next maintenance release."
 }

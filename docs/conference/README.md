@@ -57,11 +57,22 @@ Start with [Grumpy Counter](../../labs/00-grumpy-counter/index.html), then explo
 provide the runnable entry points. Use the [user guide](../user/README.md) for the
 task map and the [documentation index](../README.md) for deeper architecture.
 
-**Release status:** 1.3.0 is the latest published software release. The approved
-onboarding film is already available. Patch 1.3.1 still has open qualification goals;
-1.4 is the development line. Publishing these conference materials does not publish
-the patch or complete its milestone. See the [1.3.1 briefing](../presentations/literate-ai-1.3.1-release-briefing/README.md)
-and [roadmap](../roadmap/active-work.md) for the recorded work.
+**Welcome, Unprompted AI attendees!** Start with the
+[from-zero setup guide](attendee-setup.md): machines and tools, your emailed
+OpenRouter key, assistant choices, and the first lab.
+
+**Release status:** [1.3.1 is published](https://github.com/jordanhubbard/literate-ai/releases/tag/v1.3.1).
+Linux and macOS passed their complete native gates. The Windows test matrix is
+temporarily suspended for this release because of resource availability and
+must return in the next release. The approved film, caption files, browser deck
+and editable briefing are attached to the release. Version 1.4 remains the
+development line. The decks retain dated readiness snapshots; see the
+[verified publication record](../../verification/1.3.1-release-publication.json)
+and [current README](https://github.com/jordanhubbard/literate-ai#readme) for the published state.
+
+The six browser previews remain available. Their conversion into independent,
+fully qualified 1.3.1 Component projects is being completed under
+[LAB-AUTHORITY-001](../roadmap/active-work.md).
 
 [Source repository and questions](https://github.com/jordanhubbard/literate-ai)
 
