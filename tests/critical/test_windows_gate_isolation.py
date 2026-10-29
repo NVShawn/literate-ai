@@ -1,6 +1,9 @@
 """Native gate keeps the live dependency observation outside xdist contention."""
 
 import importlib.util
+import json
+import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -15,6 +18,154 @@ class WindowsGateIsolationTests(unittest.TestCase):
         spec = importlib.util.spec_from_file_location("windows_gate_fixture", source)
         cls.gate = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.gate)
+
+    def test_independent_checks_overlap_and_retain_separate_complete_streams(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            commands = []
+            for step, other in (("wheel", "tests"), ("tests", "wheel")):
+                program = (
+                    "from pathlib import Path\nimport time\n"
+                    f"ready=Path({str(root / (step + '.ready'))!r})\n"
+                    f"other=Path({str(root / (other + '.ready'))!r})\n"
+                    "ready.write_text('ready')\n"
+                    "deadline=time.monotonic()+10\n"
+                    "while not other.exists() and time.monotonic()<deadline:\n"
+                    " time.sleep(0.01)\n"
+                    "assert other.exists(), 'independent check was never started'\n"
+                    f"print({step!r}+' complete',flush=True)\n"
+                )
+                commands.append((step, [sys.executable, "-c", program]))
+            with patch.object(self.gate, "ROOT", root):
+                self.gate._run_parallel_checks(tuple(commands), dict(os.environ), root)
+            record = json.loads((root / "parallel-verification.json").read_text())
+            self.assertTrue(record["passed"])
+            self.assertEqual([item["exit"] for item in record["steps"]], [0, 0])
+            for step in ("wheel", "tests"):
+                self.assertEqual(
+                    (root / f"{step}.stdout.log").read_text().strip(),
+                    f"{step} complete",
+                )
+                self.assertEqual((root / f"{step}.stderr.log").read_bytes(), b"")
+
+    def test_failed_check_terminates_its_owned_competing_process(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ready = root / "sibling.ready"
+            sleeping = (
+                "from pathlib import Path\nimport time\n"
+                f"Path({str(ready)!r}).write_text('ready')\ntime.sleep(60)\n"
+            )
+            failing = (
+                "from pathlib import Path\nimport time\n"
+                f"ready=Path({str(ready)!r})\ndeadline=time.monotonic()+10\n"
+                "while not ready.exists() and time.monotonic()<deadline:\n"
+                " time.sleep(0.01)\nassert ready.exists()\nraise SystemExit(7)\n"
+            )
+            launched = []
+            popen = subprocess.Popen
+
+            def start(*args, **kwargs):
+                process = popen(*args, **kwargs)
+                launched.append(process)
+                return process
+
+            try:
+                with (
+                    patch.object(self.gate, "ROOT", root),
+                    patch.object(self.gate.subprocess, "Popen", side_effect=start),
+                ):
+                    with self.assertRaisesRegex(
+                        self.gate.GateFailure, "failed with exit status 7"
+                    ):
+                        self.gate._run_parallel_checks(
+                            (
+                                ("wheel", [sys.executable, "-c", sleeping]),
+                                ("tests", [sys.executable, "-c", failing]),
+                            ),
+                            dict(os.environ),
+                            root,
+                        )
+                self.assertGreaterEqual(len(launched), 2)
+                self.assertTrue(all(p.poll() is not None for p in launched))
+            finally:
+                for process in launched:
+                    if process.poll() is None:
+                        process.kill()
+                        process.wait(timeout=5)
+            record = json.loads((root / "parallel-verification.json").read_text())
+            self.assertFalse(record["passed"])
+            self.assertEqual(record["steps"][1]["exit"], 7)
+
+    def test_main_keeps_live_control_before_both_independent_ladders(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "repo"
+            root.mkdir()
+            environment = root / "env"
+            python = self.gate._environment_python(environment)
+            python.parent.mkdir(parents=True)
+            python.touch()
+            events = []
+            with (
+                patch.object(self.gate, "ROOT", root),
+                patch.object(self.gate, "_template_commands", return_value=[]),
+                patch.object(
+                    self.gate,
+                    "_run",
+                    side_effect=lambda argv, *_a, **_k: events.append(("serial", argv)),
+                ),
+                patch.object(
+                    self.gate,
+                    "_run_parallel_checks",
+                    side_effect=lambda argv, *_a: events.append(("parallel", argv)),
+                ),
+            ):
+                status = self.gate.main(
+                    [
+                        "--only",
+                        "wheel",
+                        "--only",
+                        "tests",
+                        "--environment",
+                        str(environment),
+                    ]
+                )
+            self.assertEqual(status, 0)
+            self.assertEqual([event[0] for event in events], ["serial", "parallel"])
+            self.assertIn(self.gate._ADMITTED_RECEIVER_TEST, events[0][1])
+            self.assertEqual([step for step, _ in events[1][1]], ["wheel", "tests"])
+            remaining = events[1][1][1][1]
+            self.assertIn(f"--deselect={self.gate._ADMITTED_RECEIVER_TEST}", remaining)
+            self.assertEqual(tuple(remaining[-4:]), self.gate._TEST_ROOTS)
+
+    def test_failed_live_control_never_starts_either_ladder(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "repo"
+            root.mkdir()
+            environment = root / "env"
+            python = self.gate._environment_python(environment)
+            python.parent.mkdir(parents=True)
+            python.touch()
+            with (
+                patch.object(self.gate, "ROOT", root),
+                patch.object(self.gate, "_template_commands", return_value=[]),
+                patch.object(
+                    self.gate, "_run", side_effect=self.gate.GateFailure("live failure")
+                ),
+                patch.object(self.gate, "_run_parallel_checks") as parallel,
+            ):
+                status = self.gate.main(
+                    [
+                        "--only",
+                        "wheel",
+                        "--only",
+                        "tests",
+                        "--environment",
+                        str(environment),
+                    ]
+                )
+            self.assertEqual(status, 1)
+            parallel.assert_not_called()
 
     def test_live_case_runs_serially_before_remaining_parallel_roots(self):
         with patch.object(self.gate, "_run") as run:

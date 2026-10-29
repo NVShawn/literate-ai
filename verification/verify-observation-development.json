@@ -1,0 +1,48 @@
+{
+  "schema": "literate-ai/verify-observation-development@1",
+  "scope": "Read-only per-verification metadata reuse and native Windows gate scheduling; native release acceptance remains pending",
+  "basis": {
+    "failed_native_source": "0ed46e91eddac3496f110010e059d35b5ae3946c",
+    "whole_gate_budget_seconds": 5400,
+    "wheel_seconds": 5073.0,
+    "installed_html_seconds": 2562.234,
+    "profile_scope": "Retained installed baseline, not new candidate qualification",
+    "profile_authority_graphs": 4,
+    "profile_flavor_catalog_loads": 6,
+    "profile_graph_catalog_loads": 4
+  },
+  "contracts": [
+    "Fresh authority graphs, skill checks and gate ordering remain mandatory",
+    "Only captured immutable Flavor graph metadata is shared within one verification",
+    "Every consumption and successful scope exit revalidate input bytes and membership",
+    "Independent and nested verifications get fresh scopes; rejected drift preserves locks and audit",
+    "Native live dependency control completes before either independent ladder",
+    "Wheel and remaining tests retain full inventory, separate streams and owned tree cleanup",
+    "No timeout increases or new skips"
+  ],
+  "local_checks": {
+    "lineage_observation": {
+      "passed": 17,
+      "failed": 0,
+      "skipped": 0
+    },
+    "native_gate_orchestration": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "html_staleness": {
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0
+    },
+    "project_verify": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "native_speedup_proven": false,
+  "native_release_accepted": false,
+  "goals_removed": []
+}

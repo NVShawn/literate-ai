@@ -1,5 +1,6 @@
 """Operation-local graph metadata preserves fresh authority and exact inputs."""
 
+import json
 import os
 import pickle
 import shutil
@@ -7,6 +8,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import literate_ai.adapters.legacy_generation_catalog as catalog
+import literate_ai.adapters.project_verification as verification
 import literate_ai.project_authority_graph as graph
 from tests.critical import test_current_component_locks as fixtures
 from tests.support.fixtures_test_cli_component_locks import _run
@@ -23,6 +25,98 @@ class LineageFlavorObservationTests(unittest.TestCase):
 
     def capture(self):
         return catalog.LegacyFlavorGraphObservation.capture(self.roots)
+
+    def test_read_only_scopes_share_parsing_but_keep_graphs_and_calls_independent(self):
+        with (
+            patch.object(
+                catalog,
+                "_load_legacy_flavor_entries",
+                wraps=catalog._load_legacy_flavor_entries,
+            ) as load,
+            patch.object(
+                graph, "project_skill_catalog", wraps=graph.project_skill_catalog
+            ) as skills,
+        ):
+            for _ in range(2):
+                with catalog.read_only_flavor_graph_observations():
+                    first = graph.project_authority_graph(
+                        self.root, include_component_locks=False
+                    )
+                    second = graph.project_authority_graph(
+                        self.root, include_component_locks=False
+                    )
+                    self.assertEqual(first, second)
+                    self.assertIsNot(first, second)
+            self.assertEqual(load.call_count, 2)
+            self.assertEqual(skills.call_count, 4)
+            for _ in range(2):
+                graph.project_authority_graph(self.root, include_component_locks=False)
+            self.assertEqual(load.call_count, 4)
+
+    def test_nested_read_only_scopes_do_not_inherit_parent_observations(self):
+        with patch.object(
+            catalog,
+            "_load_legacy_flavor_entries",
+            wraps=catalog._load_legacy_flavor_entries,
+        ) as load:
+            with catalog.read_only_flavor_graph_observations():
+                graph.project_authority_graph(self.root, include_component_locks=False)
+                with catalog.read_only_flavor_graph_observations():
+                    graph.project_authority_graph(
+                        self.root, include_component_locks=False
+                    )
+                graph.project_authority_graph(self.root, include_component_locks=False)
+            self.assertEqual(load.call_count, 2)
+
+    def test_scope_exit_refuses_byte_drift_after_the_last_graph(self):
+        path = self.roots[0] / "os-macos/flavor.md"
+        original = path.read_bytes()
+        info = path.stat()
+        with self.assertRaises(ValueError):
+            with catalog.read_only_flavor_graph_observations():
+                graph.project_authority_graph(self.root, include_component_locks=False)
+                path.write_bytes(original.replace(b"macOS", b"macOs", 1))
+                os.utime(path, ns=(info.st_atime_ns, info.st_mtime_ns))
+        path.write_bytes(original)
+        # A rejected observation must not poison the next independent operation.
+        with catalog.read_only_flavor_graph_observations():
+            graph.project_authority_graph(self.root, include_component_locks=False)
+
+    def test_public_verify_refuses_drift_after_its_last_gate_without_writes(self):
+        manifest = self.root / "literate.project.json"
+        definition = json.loads(manifest.read_text())
+        definition["default_flavor_selectors"] = ["+python", "+macos"]
+        manifest.write_text(json.dumps(definition))
+        status, report, error = _run(
+            ["lock", str(self.component), "--target", "host", "--json"]
+        )
+        self.assertEqual(status, 0, (report, error))
+        baseline, status = verification.observe_project_verification(
+            self.root, gates=("locks",)
+        )
+        self.assertEqual(status, 0, baseline)
+        path = self.roots[0] / "os-macos/flavor.md"
+        original = path.read_bytes()
+        before = {p: p.read_bytes() for p in self.component.glob("component*.json")}
+        observe = verification._GATES["source-intelligence"]
+
+        def changed(root):
+            result = observe(root)
+            path.write_bytes(original + b"\n")
+            return result
+
+        with patch.dict(verification._GATES, {"source-intelligence": changed}):
+            with self.assertRaises(verification.ProjectVerificationError) as refusal:
+                verification.observe_project_verification(
+                    self.root, gates=("locks", "source-intelligence")
+                )
+        self.assertEqual(refusal.exception.code, "inputs.closure_changed")
+        self.assertEqual({p: p.read_bytes() for p in before}, before)
+        path.write_bytes(original)
+        result, status = verification.observe_project_verification(
+            self.root, gates=("locks",)
+        )
+        self.assertEqual(status, 0, result)
 
     def test_raw_and_transported_success_claims_are_not_observations(self):
         with self.assertRaises(TypeError):

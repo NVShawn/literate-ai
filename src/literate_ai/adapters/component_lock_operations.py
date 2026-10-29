@@ -56,13 +56,17 @@ def prepare_component_lock(
     if reuse_lineage_catalog:
         from literate_ai.projects import discover_project
 
-        from .legacy_generation_catalog import LegacyFlavorGraphObservation
+        from .legacy_generation_catalog import (
+            LegacyFlavorGraphObservation,
+            scoped_flavor_graph_observation,
+        )
 
         project = discover_project(component)
         if project is not None:
-            lineage_flavors = LegacyFlavorGraphObservation.capture(
-                project.roots("flavor")
-            )
+            roots = project.roots("flavor")
+            lineage_flavors = scoped_flavor_graph_observation(roots)
+            if lineage_flavors is None:
+                lineage_flavors = LegacyFlavorGraphObservation.capture(roots)
     plan, snapshot = planner.plan_with_snapshot(
         component,
         target_name=target,

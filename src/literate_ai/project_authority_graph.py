@@ -11,6 +11,7 @@ from literate_ai.adapters.legacy_generation_catalog import (
     LegacyFlavorGraphObservation,
     flavor_graph_metadata,
     load_legacy_flavor_catalog_entries,
+    scoped_flavor_graph_observation,
 )
 from literate_ai.adapters.repository_lineage import FilesystemRepositoryLineageStore
 from literate_ai.application.repository_lineage import (
@@ -303,6 +304,8 @@ def project_authority_graph(
     component_by_coordinate: dict[tuple[str, str], str] = {}
     component_inputs: list[tuple[str, tuple[str, ...]]] = []
     flavor_roots = project.roots("flavor")
+    if flavor_observation is None:
+        flavor_observation = scoped_flavor_graph_observation(flavor_roots)
     flavor_metadata = (
         flavor_graph_metadata(load_legacy_flavor_catalog_entries(flavor_roots))
         if flavor_observation is None

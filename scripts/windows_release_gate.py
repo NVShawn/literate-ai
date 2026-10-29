@@ -12,6 +12,7 @@ preflight failure naming what the worker operator must provide.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
@@ -19,6 +20,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from contextlib import ExitStack
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -118,18 +120,17 @@ def _run(argv: list[str], environment: dict[str, str], *, step: str) -> None:
     print(f"[windows-release-gate] {step}: passed in {elapsed}s", flush=True)
 
 
-def _run_tests(
+def _test_commands(
     python: Path,
     test_workers: str,
-    environment: dict[str, str],
     *,
     temporary: Path | None = None,
-) -> None:
+) -> tuple[list[str], list[str]]:
     reports = temporary if temporary is not None else ROOT / "_build"
     test_temporary = temporary if temporary is not None else TEMPORARY
     # Match hosted CI: qualify the unchanged 60-second dependency observation
     # without contention, then run every other test once with the usual workers.
-    _run(
+    return (
         [
             str(python),
             "-m",
@@ -141,11 +142,7 @@ def _run_tests(
             f"--junitxml={reports / 'windows-admitted-receiver.xml'}",
             _ADMITTED_RECEIVER_TEST,
         ],
-        environment,
-        step="tests",
-    )
-    # A fixed base directory avoids pytest-current symlink cleanup failures.
-    _run(
+        # A fixed base directory avoids pytest-current symlink cleanup failures.
         [
             str(python),
             "-m",
@@ -160,9 +157,172 @@ def _run_tests(
             f"--junitxml={reports / 'windows-tests.xml'}",
             *_TEST_ROOTS,
         ],
-        environment,
-        step="tests",
     )
+
+
+def _run_tests(
+    python: Path,
+    test_workers: str,
+    environment: dict[str, str],
+    *,
+    temporary: Path | None = None,
+) -> None:
+    for command in _test_commands(python, test_workers, temporary=temporary):
+        _run(command, environment, step="tests")
+
+
+def _run_parallel_checks(
+    commands: tuple[tuple[str, list[str]], ...],
+    environment: dict[str, str],
+    temporary: Path,
+) -> None:
+    """Run independent checks with owned trees and separate durable streams."""
+
+    def tail(path: Path, limit: int) -> bytes:
+        with path.open("rb") as stream:
+            stream.seek(max(0, path.stat().st_size - limit))
+            return stream.read(limit)
+
+    def log_record(path: Path) -> dict[str, object]:
+        with path.open("rb") as stream:
+            digest = hashlib.file_digest(stream, "sha256").hexdigest()
+        return {"path": path.name, "bytes": path.stat().st_size, "sha256": digest}
+
+    source = str(Path(__file__).resolve().parents[1] / "src")
+    sys.path.insert(0, source)
+    try:
+        from literate_ai.adapters._processes import (
+            create_process_tree_ownership,
+            terminate_process_tree,
+        )
+    finally:
+        sys.path.pop(0)
+    jobs = []
+    started = time.monotonic()
+    with ExitStack() as streams:
+        try:
+            for step, command in commands:
+                owner = create_process_tree_ownership()
+                stdout = temporary / f"{step}.stdout.log"
+                stderr = temporary / f"{step}.stderr.log"
+                job = {
+                    "step": step,
+                    "owner": owner,
+                    "process": None,
+                    "started": time.monotonic(),
+                    "stdout": stdout,
+                    "stderr": stderr,
+                }
+                jobs.append(job)
+                print(
+                    f"[windows-release-gate] {step}: {' '.join(command)}",
+                    flush=True,
+                )
+                try:
+                    process = subprocess.Popen(
+                        command,
+                        cwd=ROOT,
+                        env=environment,
+                        stdin=subprocess.DEVNULL,
+                        stdout=streams.enter_context(stdout.open("wb")),
+                        stderr=streams.enter_context(stderr.open("wb")),
+                        **owner.popen_options,
+                    )
+                except OSError as exc:
+                    raise GateFailure(f"{step} could not start: {exc}") from exc
+                job["process"] = process
+                owner.bind(process.pid)
+            pending = list(jobs)
+            while pending:
+                for job in tuple(pending):
+                    status = job["process"].poll()
+                    if status is None:
+                        continue
+                    job["seconds"] = time.monotonic() - job["started"]
+                    pending.remove(job)
+                    if status:
+                        detail = (
+                            tail(job["stderr"], 2000) + tail(job["stdout"], 5000)
+                        ).decode("utf-8", errors="replace")
+                        raise GateFailure(
+                            f"{job['step']} failed with exit status {status}; "
+                            f"retained logs in {temporary}\n{detail}"
+                        )
+                    print(
+                        f"[windows-release-gate] {job['step']}: "
+                        f"passed in {job['seconds']:.1f}s; logs in {temporary}",
+                        flush=True,
+                    )
+                if pending:
+                    time.sleep(0.1)
+        finally:
+            pending_error = sys.exception()
+            cleanup_errors = []
+            for job in jobs:
+                process = job["process"]
+                try:
+                    if process is not None:
+                        # Also collect descendants of an already exited root.
+                        terminate_process_tree(
+                            process, environment=environment, ownership=job["owner"]
+                        )
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            process.kill()
+                            process.wait(timeout=5)
+                except Exception as exc:
+                    cleanup_errors.append(f"{job['step']}: {type(exc).__name__}: {exc}")
+                finally:
+                    try:
+                        job["owner"].release()
+                    except Exception as exc:
+                        cleanup_errors.append(
+                            f"{job['step']} ownership: {type(exc).__name__}: {exc}"
+                        )
+            try:
+                streams.close()
+            except OSError as exc:
+                cleanup_errors.append(f"log close: {exc}")
+            results = []
+            for job in jobs:
+                process = job["process"]
+                results.append(
+                    {
+                        "step": job["step"],
+                        "exit": None if process is None else process.returncode,
+                        "seconds": job.get(
+                            "seconds", time.monotonic() - job["started"]
+                        ),
+                        "logs": {
+                            name: log_record(job[name])
+                            for name in ("stdout", "stderr")
+                            if job[name].is_file()
+                        },
+                    }
+                )
+            (temporary / "parallel-verification.json").write_text(
+                json.dumps(
+                    {
+                        "schema": "literate-ai/windows-parallel-verification@1",
+                        "passed": bool(results)
+                        and len(results) == len(commands)
+                        and all(item["exit"] == 0 for item in results)
+                        and not cleanup_errors,
+                        "cleanup_errors": cleanup_errors,
+                        "seconds": time.monotonic() - started,
+                        "steps": results,
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            if cleanup_errors:
+                detail = "; ".join(cleanup_errors)
+                if pending_error is not None:
+                    detail = f"{pending_error}; cleanup: {detail}"
+                raise GateFailure(f"parallel verification cleanup failed: {detail}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -284,6 +444,7 @@ def main(argv: list[str] | None = None) -> int:
                     environment,
                     step="openspec",
                 )
+        wheel_command = None
         if "wheel" in selected:
             timing_root = ROOT / "_build"
             timing_root.mkdir(parents=True, exist_ok=True)
@@ -291,17 +452,26 @@ def main(argv: list[str] | None = None) -> int:
                 Path(tempfile.mkdtemp(prefix="wg-", dir=timing_root))
                 / "wheel-timings.json"
             )
-            _run(
-                [
-                    str(python),
-                    "scripts/wheel_smoke.py",
-                    "--timing-report",
-                    str(timing_report),
-                ],
-                environment,
-                step="wheel",
+            wheel_command = [
+                str(python),
+                "scripts/wheel_smoke.py",
+                "--timing-report",
+                str(timing_report),
+            ]
+        if wheel_command is not None and "tests" in selected:
+            serial, remaining = _test_commands(
+                python, args.test_workers, temporary=temporary
             )
-        if "tests" in selected:
+            # The live deadline control completes without either competing ladder.
+            _run(serial, environment, step="tests")
+            _run_parallel_checks(
+                (("wheel", wheel_command), ("tests", remaining)),
+                environment,
+                temporary,
+            )
+        elif wheel_command is not None:
+            _run(wheel_command, environment, step="wheel")
+        elif "tests" in selected:
             _run_tests(python, args.test_workers, environment, temporary=temporary)
     except GateFailure as exc:
         print(f"[windows-release-gate] FAILED: {exc}", file=sys.stderr, flush=True)
