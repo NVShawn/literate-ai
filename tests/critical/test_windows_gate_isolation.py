@@ -179,6 +179,16 @@ class WindowsGateIsolationTests(unittest.TestCase):
         self.assertIn(f"--deselect={self.gate._ADMITTED_RECEIVER_TEST}", parallel)
         self.assertNotIn(self.gate._ADMITTED_RECEIVER_TEST, parallel)
         self.assertEqual(tuple(parallel[-4:]), self.gate._TEST_ROOTS)
+        self.assertIn(
+            f"--basetemp={self.gate.TEMPORARY / 'admitted'}",
+            serial,
+            "the isolated live control must avoid pytest-current cleanup",
+        )
+        serial_base = next(arg for arg in serial if arg.startswith("--basetemp="))
+        parallel_base = next(arg for arg in parallel if arg.startswith("--basetemp="))
+        self.assertTrue(serial_base.endswith(str(Path("admitted"))))
+        self.assertTrue(parallel_base.endswith(str(Path("pytest"))))
+        self.assertNotEqual(serial_base, parallel_base)
         self.assertNotEqual(
             next(arg for arg in serial if arg.startswith("--junitxml=")),
             next(arg for arg in parallel if arg.startswith("--junitxml=")),
@@ -274,6 +284,7 @@ class WindowsGateIsolationTests(unittest.TestCase):
             f"--junitxml={temporary / 'windows-admitted-receiver.xml'}", serial
         )
         self.assertIn(f"--junitxml={temporary / 'windows-tests.xml'}", parallel)
+        self.assertIn(f"--basetemp={temporary / 'admitted'}", serial)
         self.assertIn(f"--basetemp={temporary / 'pytest'}", parallel)
         self.assertEqual(tuple(parallel[-4:]), self.gate._TEST_ROOTS)
         self.assertIn(f"--deselect={self.gate._ADMITTED_RECEIVER_TEST}", parallel)

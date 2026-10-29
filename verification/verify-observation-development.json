@@ -44,5 +44,26 @@
   },
   "native_speedup_proven": false,
   "native_release_accepted": false,
-  "goals_removed": []
+  "goals_removed": [],
+  "native_follow_up": {
+    "candidate_revision": "707108a15e065457573f43fe85f9c755ad879202",
+    "full_gate_passed": false,
+    "terminal_exit": 1,
+    "seconds": 749.75,
+    "stage": "isolated live test pytest session cleanup",
+    "failure": "Windows error 1463 resolving pytest-current; do not enable system symlink policy or omit the test",
+    "test_assertion_result_reached": true,
+    "wheel_started": false,
+    "remaining_suite_started": false,
+    "streams": {
+      "stdout_sha256": "9a028068523559cdf1e8971697db53f0515b364c741d6fd4307a6c1833dc2770",
+      "stderr_sha256": "ab6c6f38d686db1f42dd6ef62850f7b6ac93ed93fb9d480f0727a9bb3fe94c2a"
+    },
+    "repair": "Distinct fixed admitted and pytest base directories within the owned per-attempt temporary tree",
+    "local_checks": {
+      "focused_native_orchestration_passed": 10,
+      "negative_control": "Removing the live-test basetemp makes the deterministic regression fail"
+    },
+    "renewal_required": true
+  }
 }

@@ -30914,10 +30914,20 @@ repair scope and makes no claim that the complete provided native gate passed.
 
 ### [ ] WIN-GATE-001 — Retain native Windows wheel timing evidence
 
+**Native cleanup repair:** Candidate `707108a15` reaches the isolated live test's
+assertion result, then pytest session cleanup raises Windows error 1463 while
+resolving `pytest-current`. The whole gate fails after 749.75 seconds; wheel and
+remaining tests have not started. Give the live test a distinct fixed `--basetemp`,
+as already used by the remaining suite. Preserve failed streams, every test, both
+JUnit reports and all existing bounds. The test's outer fresh-interpreter bound
+is 30 minutes; describing the entire case as a 60-second test was inaccurate.
+Renew full native qualification before claiming this repair or performance accepted.
+
+
 **Current repair under qualification:** Source `0ed46e91` completed the wheel in
 5073.0 seconds but exceeded the unchanged 5400-second whole-gate budget before
 the remaining suite finished. The installed HTML scenario alone took 2562.234
-seconds. After the isolated 60-second live dependency control, run the independent
+seconds. After the isolated live dependency control, run the independent
 wheel and remaining native tests concurrently, retaining their complete separate
 streams and terminating only owned process trees on failure. All existing roots,
 deselection of only the already-executed live case, both JUnit reports and deadlines
