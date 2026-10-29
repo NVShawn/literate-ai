@@ -445,6 +445,7 @@ _GENERATED_SOURCE_BUILD_FAILURE_CODES = frozenset(
         "builder.bazel_analyze_failed",
         "builder.cpp_generated_source_rejected",
         "builder.rust_compile_failed",
+        "builder.rust_javascript_compile_failed",
         "builder.swift_generated_source_rejected",
     }
 )

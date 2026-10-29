@@ -138,6 +138,42 @@ class CandidateDiagnosticExcerptTests(unittest.TestCase):
             excerpt, {"expected": {"cpu_quota": 1}, "observed": {"cpu_quota": 0}}
         )
 
+    def test_rust_js_type_error_feedback_keeps_source_identity_and_redaction(
+        self,
+    ) -> None:
+        # E0308 is the retained release incident; the operator qualification also
+        # reproduces it with rustc. Keep this unit contract compiler-independent.
+        broken = (
+            "fn main() { let _: Option<u16> = Some(1u16).and_then("
+            "|_| { return Err(()); }); }\n"
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            detail = (
+                "error[E0308]: mismatched types\n"
+                f" --> {directory}/main.rs:147:33\n"
+                "expected Option<_>, found Result<_, String>\n"
+            )
+            code = "builder.rust_javascript_compile_failed"
+            failure = GenerationFailure(
+                "generation.lifecycle-step-failed",
+                "generated Rust rejected",
+                _failed_build_run(
+                    {"backend/main.rs": broken, GENERATED_TEST_SUITE_PATH: "{}"},
+                    code=code,
+                ),
+            )
+            failure.__cause__ = BuildError(
+                code, "Rust backend compilation failed: " + detail
+            )
+            rejection = _generated_candidate_rejection(failure, attempt=1)
+        self.assertIsNotNone(rejection)
+        self.assertEqual(rejection["build_failure_code"], code)
+        self.assertEqual(rejection["rejection_kind"], "generated-source-build-rejected")
+        self.assertIn("E0308", rejection["diagnostic_excerpt"])
+        self.assertNotIn(directory, rejection["diagnostic_excerpt"])
+        self.assertTrue(rejection["candidate_tree_identity"].startswith("sha256:"))
+        self.assertTrue(rejection["source_bundle_digest"].startswith("sha256:"))
+
     def test_real_compiler_error_reaches_record_and_repair_feedback(self) -> None:
         compiler = _compiler()
         if compiler is None:
