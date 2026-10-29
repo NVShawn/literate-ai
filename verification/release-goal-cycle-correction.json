@@ -25,5 +25,11 @@
     "https://github.com/jordanhubbard/literate-ai/blob/42e99cddb1dd2d0b37011b997492a62b1d84928d/verification/patch-wheel-manifest-qualification.json",
     "https://github.com/jordanhubbard/literate-ai/blob/42e99cddb1dd2d0b37011b997492a62b1d84928d/verification/patch-host-lifecycle-qualification.json"
   ],
-  "boundary": "The release still requires all 18 goals complete plus final exact-candidate qualification, publication, published verification and synchronization. This correction proves neither native nor software-release success."
+  "boundary": "The original 18 ledger entries are retained. After superseding user approval, publication requires ten included goals complete, eight approved deferrals bound into the future roadmap and manifest, and all final exact-candidate qualification, publication, verification and synchronization gates. The cycle correction itself proves neither native nor software-release success.",
+  "scope_at_cycle_correction": "18 included goals; the cycle correction did not defer or remove any goal",
+  "current_approved_scope": {
+    "included": 10,
+    "deferred": 8,
+    "approval_record": "verification/1.3.1-approved-deferrals.json"
+  }
 }
