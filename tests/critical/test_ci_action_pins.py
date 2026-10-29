@@ -129,7 +129,6 @@ class CiActionPinTests(unittest.TestCase):
                 self.assertFalse(selector.select_freebsd_acl(event, ref, paths))
                 for product in (
                     "src/literate_ai/cli.py",
-                    "labs/00-grumpy-counter/main.js",
                     "verification/another-release.json",
                 ):
                     mixed = paths + (product,)
@@ -142,6 +141,153 @@ class CiActionPinTests(unittest.TestCase):
                         self.assertTrue(
                             selector.select_full_qualification(event, ref, mixed)
                         )
+
+    def test_only_documentation_root_manifest_changes_are_documentation_scope(self):
+        selector = self.selector()
+        before = {
+            "project_id": "test",
+            "documentation_roots": ["docs", "labs"],
+            "component_roots": ["components"],
+        }
+        after = {**before, "documentation_roots": ["docs"]}
+        with mock.patch.dict(
+            selector.os.environ, {"CI_BASE_SHA": "base", "CI_HEAD_SHA": "head"}
+        ):
+            for proposed, expected in (
+                (after, "documentation"),
+                ({**after, "component_roots": ["different"]}, None),
+                ({**after, "project_id": "other"}, None),
+                ({**after, "documentation_roots": []}, None),
+                (before, None),
+            ):
+                with (
+                    self.subTest(proposed=proposed),
+                    mock.patch.object(selector.subprocess, "run") as run,
+                ):
+                    run.side_effect = [
+                        mock.Mock(returncode=0, stdout=json.dumps(m).encode())
+                        for m in (before, proposed)
+                    ]
+                    self.assertEqual(selector._scope("literate.project.json"), expected)
+            with mock.patch.object(
+                selector.subprocess, "run", side_effect=OSError("unavailable")
+            ):
+                self.assertIsNone(selector._scope("literate.project.json"))
+            for malformed in (
+                b"{",
+                b"[]",
+                b'{"documentation_roots":["docs"],"project_id":"a","project_id":"b"}',
+            ):
+                with (
+                    self.subTest(malformed=malformed),
+                    mock.patch.object(selector.subprocess, "run") as run,
+                ):
+                    run.side_effect = [
+                        mock.Mock(returncode=0, stdout=json.dumps(before).encode()),
+                        mock.Mock(returncode=0, stdout=malformed),
+                    ]
+                    self.assertIsNone(selector._scope("literate.project.json"))
+        with mock.patch.dict(
+            selector.os.environ, {"CI_BASE_SHA": "", "CI_HEAD_SHA": ""}
+        ):
+            self.assertIsNone(selector._scope("literate.project.json"))
+
+    def test_lab_changes_select_browser_checks_and_keep_product_changes_broad(self):
+        selector = self.selector()
+        paths = ("labs/00-grumpy-counter/main.js", "labs/scripts/test_lab_media.cjs")
+        for event, ref in (("pull_request", "main"), ("push", "refs/heads/main")):
+            rows = selector.select_matrix(event, ref, paths)["include"]
+            self.assertEqual([r["task"] for r in rows], ["labs"])
+            self.assertFalse(selector.select_full_qualification(event, ref, paths))
+            mixed = paths + ("src/literate_ai/cli.py",)
+            self.assertIn(
+                "conformance",
+                {
+                    r["task"]
+                    for r in selector.select_matrix(event, ref, mixed)["include"]
+                },
+            )
+        workflow = load_yaml_subset((ROOT / ".github/workflows/ci.yml").read_text())
+        steps = [
+            s
+            for s in workflow["jobs"]["checks"]["steps"]
+            if s.get("if") == "matrix.task == 'labs'"
+        ]
+        text = json.dumps(steps)
+        self.assertIn("test_labs_browser.cjs", text)
+        self.assertIn("test_lab_media.cjs", text)
+        self.assertNotIn("make validate", text)
+        self.assertNotIn("wheel-check", text)
+
+    def test_scoped_workflow_steps_do_not_requalify_unchanged_freebsd_job(self):
+        selector = self.selector()
+        # CI selector tests run in ci-policy; the actual native fixture still
+        # requires its target probe.
+        self.assertFalse(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("tests/critical/test_ci_action_pins.py",)
+            )
+        )
+        self.assertTrue(
+            selector.select_freebsd_acl(
+                "pull_request", "main", ("tests/critical/test_retained_posix_acl.py",)
+            )
+        )
+        before = (
+            "jobs:\n  profile:\n    runs-on: ubuntu-latest\n"
+            "  checks:\n    steps:\n      - name: Docs\n"
+            "        if: matrix.task == 'documentation'\n        run: old-check\n"
+            "  freebsd-posix-acl:\n    runs-on: ubuntu-latest\n"
+        )
+        scoped = before.replace("run: old-check", "run: new-check")
+        for after, expected in (
+            (scoped, False),
+            ("permissions:\n  contents: write\n" + scoped, True),
+            (
+                scoped.replace(
+                    "run: new-check", "run: new-check\n        env: &shared {}"
+                ),
+                True,
+            ),
+            (
+                scoped.replace(
+                    "  freebsd-posix-acl:\n    runs-on: ubuntu-latest",
+                    "  freebsd-posix-acl:\n    runs-on: different",
+                ),
+                True,
+            ),
+            (
+                scoped.replace(
+                    "  profile:\n    runs-on: ubuntu-latest",
+                    "  profile:\n    runs-on: different",
+                ),
+                True,
+            ),
+        ):
+            with (
+                self.subTest(after=after),
+                mock.patch.dict(
+                    selector.os.environ, {"CI_BASE_SHA": "base", "CI_HEAD_SHA": "head"}
+                ),
+                mock.patch.object(selector.subprocess, "run") as run,
+            ):
+                run.side_effect = [
+                    mock.Mock(returncode=0, stdout=t.encode()) for t in (before, after)
+                ]
+                self.assertEqual(
+                    selector.select_freebsd_acl(
+                        "pull_request", "main", (".github/workflows/ci.yml",)
+                    ),
+                    expected,
+                )
+        with mock.patch.dict(
+            selector.os.environ, {"CI_BASE_SHA": "", "CI_HEAD_SHA": ""}
+        ):
+            self.assertTrue(
+                selector.select_freebsd_acl(
+                    "pull_request", "main", (".github/workflows/ci.yml",)
+                )
+            )
 
     def test_default_branch_pushes_scope_docs_but_preserve_qualification(self) -> None:
         selector = self.selector()

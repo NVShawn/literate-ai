@@ -51,7 +51,7 @@ closure. Work on `main` does not silently satisfy those patch gates.
 
 ## Learn by making strange things
 
-The [visual labs](../../labs/) are six progressively composed, free-standing examples.
+The [visual labs](https://github.com/jordanhubbard/literate-ai/blob/main/labs) are six progressively composed, free-standing examples.
 They begin with a grumpy counter and end with a component cathedral combining math,
 physics, 3D projection, music, audio, and video capture. Each lab exposes its readable
 lab specification, illustrative lesson flow and exact bundled source beside the

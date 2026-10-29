@@ -2,57 +2,13 @@
   "level": "01",
   "title": "Orbital Teapot (Teapot Pending)",
   "subtitle": "Deterministic gravity circles an aggressively absent household object.",
-  "learning": "Explore composition and state in an authored demonstration. The flow illustrates responsibilities, not resolved Components.",
+  "learning": "Explore deterministic state and reset behavior, then inspect the actual lock and independently checked browser interaction.",
   "stage": "A respectable vacuum with no crockery",
   "media": [
     "html",
     "math",
     "physics"
   ],
-  "nodes": [
-    {
-      "id": "spec",
-      "label": "Lab spec",
-      "detail": "component.md is the authored lab specification. It is documentation, not a resolved canonical Component."
-    },
-    {
-      "id": "physics",
-      "label": "Physics",
-      "detail": "A fixed-step inverse-square integrator owns body state."
-    },
-    {
-      "id": "trail",
-      "label": "Trail view",
-      "detail": "Canvas trails make state and drift visible."
-    },
-    {
-      "id": "control",
-      "label": "choice",
-      "detail": "The gravity slider acts like a replaceable realization choice. This is a runtime control, not a selected canonical Flavor."
-    },
-    {
-      "id": "accept",
-      "label": "Criteria",
-      "detail": "The authored acceptance criteria describe checks to perform; this node is not an independent verifier or acceptance receipt."
-    }
-  ],
-  "edges": [
-    [
-      "spec",
-      "physics"
-    ],
-    [
-      "control",
-      "physics"
-    ],
-    [
-      "physics",
-      "trail"
-    ],
-    [
-      "trail",
-      "accept"
-    ]
-  ],
-  "diagram_kind": "illustrative-lesson-flow"
+  "diagram_kind": "resolved-authority-graph",
+  "graph_source": "project/components/frontend-application/orbital-teapot/component.lock.json"
 }

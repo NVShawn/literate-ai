@@ -1,16 +1,29 @@
-# Lab 00: Grumpy counter
+# Lab 00: The Grumpy Counter
 
-Open [the standalone artifact](index.html). Move the labeled Modulus slider (7–97, initially 37) and watch
-remainder rings rearrange. The full specification defines the layout, controls,
-classification, animation and checks. Prime, composite and neutral-one colors have
-an explicit legend.
+A modular arithmetic creature with strong opinions about composite numbers.
 
-The four nodes are illustrative responsibilities, not four canonical Components.
-A separate panel distinguishes lab behavior from shared support, manual language
-choice and current project registration. The source inspector includes the complete
-Markdown, JSON, JavaScript, CSS, runtime, builder and project/catalog context.
+Open [the offline preview](index.html), or build and run the real Component
+through Literate AI:
 
-Read the [specification](component.md), [lesson data](lab.json) and
-[authored implementation](main.js). Real canonical Flavor/lifecycle composition is
-being added under LAB-AUTHORITY-001; the current bundle is not an accepted generated
-Component artifact.
+```sh
+cd project
+litai doctor
+litai build --update-receipt
+litai run components/frontend-application/grumpy-counter -- --litai-serve 8877
+```
+
+Open `http://127.0.0.1:8877/`; Ctrl+C stops the server. A fresh build may invoke
+your configured coding assistant. [Project instructions](project/README.md) cover
+exact accepted-source reuse, explicit retained-source admission and host Flavor
+selection.
+
+Read [the complete specification](project/components/frontend-application/grumpy-counter/component.md)
+and [the actual lock](project/components/frontend-application/grumpy-counter/component.lock.json).
+The graph distinguishes the real application Component, selected Flavors and
+pinned skills/workflow/routing. Its drawing/audio roles are not separate Components.
+
+Try one behavior change in the specification, relock and inspect the plan before
+rebuilding. Compare the resulting page, tests and independent browser evidence.
+The initial authored source is retained input; it does not claim a model generation
+that did not occur. Progressive multi-Component composition remains open under
+LAB-AUTHORITY-001.

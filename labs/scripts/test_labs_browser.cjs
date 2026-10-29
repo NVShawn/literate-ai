@@ -33,8 +33,8 @@ const evidence = process.env.LAB_EVIDENCE_DIR || path.resolve(root, '../_build/l
       });
       const lab = path.join(root, '00-grumpy-counter');
       await page.goto(pathToFileURL(path.join(lab, 'index.html')).href);
-      assert.match(await page.locator('[data-inventory]').innerText(), /1 authored lab specification · 4 illustrative roles/);
-      assert.equal(await page.locator('[data-spec]').textContent(), fs.readFileSync(path.join(lab, 'component.md'), 'utf8'));
+      assert.match(await page.locator('[data-inventory]').innerText(), /1 resolved Component\(s\) · 3 selected Flavors/);
+      assert.equal(await page.locator('[data-spec]').textContent(), fs.readFileSync(path.join(lab, 'project/components/frontend-application/grumpy-counter/component.md'), 'utf8'));
       const slider = page.getByRole('slider', {name: 'Modulus'});
       assert.equal(await slider.inputValue(), '37');
       assert.equal(await slider.getAttribute('min'), '7');
@@ -72,21 +72,20 @@ const evidence = process.env.LAB_EVIDENCE_DIR || path.resolve(root, '../_build/l
       assert.equal(moved.length, 239);
       assert.deepEqual(moved.map(d => d.color), dots.map(d => d.color));
       assert.notEqual(moved[1].x, dots[1].x);
-      await page.getByRole('button', {name: 'Number goblin'}).click();
-      assert.match(await page.locator('[data-authority]').textContent(), /classifies integers/);
-      await page.getByRole('button', {name: 'Criteria'}).focus();
+      await page.getByRole('button', {name: 'grumpy-counter', exact: true}).click();
+      assert.match(await page.locator('[data-authority]').textContent(), /Component unprompted\/grumpy-counter/);
+      await page.getByRole('button', {name: 'Flavor: javascript', exact: true}).focus();
       await page.keyboard.press('Enter');
-      assert.match(await page.locator('[data-authority]').textContent(), /not an independent verifier/);
+      assert.match(await page.locator('[data-authority]').textContent(), /implementation.language-ecosystem/);
       await page.keyboard.press('Space');
-      assert.equal(await page.getByRole('button', {name: 'Criteria'}).getAttribute('aria-pressed'), 'true');
+      assert.equal(await page.getByRole('button', {name: 'Flavor: javascript', exact: true}).getAttribute('aria-pressed'), 'true');
       const records = await page.evaluate(() => JSON.parse(document.getElementById('lab-config').textContent).sources);
-      assert.equal(records.length, 8);
+      assert.ok(records.length >= 14);
       assert.equal(await page.locator('.harness-card').count(), 6);
-      assert.match(await page.locator('[data-harness]').textContent(), /Flavor selection: none/);
-      assert.match(await page.locator('[data-harness]').textContent(), /not selected for this browser lab/);
-      assert.match(await page.locator('[data-harness]').textContent(), /canonical Component root no/);
-      assert.ok(await page.locator('[data-spec] .spec-heading').count() >= 5);
-      assert.equal(await page.locator('[data-spec] .spec-step').count(), 7);
+      assert.match(await page.locator('[data-harness]').textContent(), /Selected Flavors/);
+      assert.match(await page.locator('[data-harness]').textContent(), /javascript · macos · make/);
+      assert.match(await page.locator('[data-harness]').textContent(), /1 actual locked Component/);
+      assert.ok(await page.locator('[data-spec] .spec-heading').count() >= 3);
       for (const source of records) {
         const bytes = fs.readFileSync(path.resolve(root, '..', source.path));
         assert.equal(source.content, bytes.toString('utf8'));
@@ -108,8 +107,8 @@ const evidence = process.env.LAB_EVIDENCE_DIR || path.resolve(root, '../_build/l
       const page = await context.newPage(), errors = [];
       page.on('pageerror', e => errors.push(String(e)));
       await page.goto(pathToFileURL(path.join(root, name, 'index.html')).href);
-      assert.equal(await page.locator('[data-source-path]').count(), 8);
-      assert.match(await page.locator('[data-inventory]').textContent(), /No resolved Component DAG/);
+      assert.ok(await page.locator('[data-source-path]').count() >= 14);
+      assert.match(await page.locator('[data-inventory]').textContent(), /1 resolved Component/);
       assert.deepEqual(errors, []);
       await context.close();
     }

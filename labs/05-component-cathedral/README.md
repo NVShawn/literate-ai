@@ -1,9 +1,29 @@
-# Lab 05: Cathedral of tiny disasters
+# Lab 05: Cathedral of Tiny Disasters
 
-The final lab composes the earlier lessons into one component-driven instrument.
-Particles orbit a projected sculpture, a scale follows graph selections, and the canvas
-can be captured as video. Nothing contacts the network.
+Math, physics, 3D, music and video collaborate without becoming useful enough to attract procurement.
 
-Read the [Component specification](component.md), inspect the [DAG data](lab.json) and
-[implementation](main.js), then open the [standalone artifact](index.html).
+Open [the offline preview](index.html), or build and run the real Component
+through Literate AI:
 
+```sh
+cd project
+litai doctor
+litai build --update-receipt
+litai run components/frontend-application/component-cathedral -- --litai-serve 8877
+```
+
+Open `http://127.0.0.1:8877/`; Ctrl+C stops the server. A fresh build may invoke
+your configured coding assistant. [Project instructions](project/README.md) cover
+exact accepted-source reuse, explicit retained-source admission and host Flavor
+selection.
+
+Read [the complete specification](project/components/frontend-application/component-cathedral/component.md)
+and [the actual lock](project/components/frontend-application/component-cathedral/component.lock.json).
+The graph distinguishes the real application Component, selected Flavors and
+pinned skills/workflow/routing. Its drawing/audio roles are not separate Components.
+
+Try one behavior change in the specification, relock and inspect the plan before
+rebuilding. Compare the resulting page, tests and independent browser evidence.
+The initial authored source is retained input; it does not claim a model generation
+that did not occur. Progressive multi-Component composition remains open under
+LAB-AUTHORITY-001.

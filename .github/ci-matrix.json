@@ -1,5 +1,14 @@
 [
   {
+    "task": "labs",
+    "name": "Conference labs / source and browser",
+    "os": "ubuntu-latest",
+    "python": "3.13",
+    "group": 0,
+    "pr": false,
+    "scoped": "labs"
+  },
+  {
     "task": "documentation",
     "name": "Documentation and presentation integrity",
     "os": "ubuntu-latest",

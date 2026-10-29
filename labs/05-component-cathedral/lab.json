@@ -2,7 +2,7 @@
   "level": "05",
   "title": "Cathedral of Tiny Disasters",
   "subtitle": "Math, physics, 3D, music and video collaborate without becoming useful enough to attract procurement.",
-  "learning": "Compose the earlier visual responsibilities in an authored demonstration; the flow is not a resolved Component DAG.",
+  "learning": "Explore composed math, projection, audio and video inside one application. Design richer Component boundaries as a separate composition exercise.",
   "stage": "Rose window for improbable machinery",
   "media": [
     "html",
@@ -13,76 +13,6 @@
     "music",
     "video"
   ],
-  "nodes": [
-    {
-      "id": "spec",
-      "label": "Lab spec",
-      "detail": "component.md is the authored lab specification. It is documentation, not a resolved canonical Component."
-    },
-    {
-      "id": "field",
-      "label": "Math field",
-      "detail": "A harmonic field owns color and particle attraction."
-    },
-    {
-      "id": "physics",
-      "label": "Physics",
-      "detail": "Fixed-step particles retain visible state."
-    },
-    {
-      "id": "relic",
-      "label": "3D reliquary",
-      "detail": "Projection realizes a rotating geometric centerpiece."
-    },
-    {
-      "id": "music",
-      "label": "Music choice",
-      "detail": "Optional Web Audio maps field values into a scale. This is a runtime control, not a selected canonical Flavor."
-    },
-    {
-      "id": "video",
-      "label": "Video evidence",
-      "detail": "Optional capture observes the composed canvas."
-    },
-    {
-      "id": "accept",
-      "label": "Criteria",
-      "detail": "The authored acceptance criteria describe checks to perform; this node is not an independent verifier or acceptance receipt."
-    }
-  ],
-  "edges": [
-    [
-      "spec",
-      "field"
-    ],
-    [
-      "field",
-      "physics"
-    ],
-    [
-      "field",
-      "relic"
-    ],
-    [
-      "field",
-      "music"
-    ],
-    [
-      "physics",
-      "video"
-    ],
-    [
-      "relic",
-      "video"
-    ],
-    [
-      "music",
-      "accept"
-    ],
-    [
-      "video",
-      "accept"
-    ]
-  ],
-  "diagram_kind": "illustrative-lesson-flow"
+  "diagram_kind": "resolved-authority-graph",
+  "graph_source": "project/components/frontend-application/component-cathedral/component.lock.json"
 }

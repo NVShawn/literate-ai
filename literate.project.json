@@ -21,8 +21,7 @@
     "routing"
   ],
   "documentation_roots": [
-    "docs",
-    "labs"
+    "docs"
   ],
   "source_intelligence": {
     "schema": "urn:literate-ai:schema:v1:project-source-intelligence-policy",

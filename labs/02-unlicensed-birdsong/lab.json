@@ -2,7 +2,7 @@
   "level": "02",
   "title": "Bureau of Unlicensed Birdsong",
   "subtitle": "A pentatonic permitting office staffed entirely by oscillators.",
-  "learning": "Explore optional, consent-bound audio in an authored demonstration, without claiming a resolved capability or Flavor selection.",
+  "learning": "Keep browser audio permission distinct from Flavor selection: one application Component, explicit host choices and a user-gesture boundary.",
   "stage": "Permit queue for fictional birds",
   "media": [
     "html",
@@ -10,54 +10,6 @@
     "audio",
     "music"
   ],
-  "nodes": [
-    {
-      "id": "spec",
-      "label": "Lab spec",
-      "detail": "component.md is the authored lab specification. It is documentation, not a resolved canonical Component."
-    },
-    {
-      "id": "score",
-      "label": "Score",
-      "detail": "A deterministic pentatonic rule owns note selection."
-    },
-    {
-      "id": "audio",
-      "label": "Audio choice",
-      "detail": "Web Audio realizes sound only after a user gesture. This is a runtime control, not a selected canonical Flavor."
-    },
-    {
-      "id": "view",
-      "label": "Feather view",
-      "detail": "Canvas realizes the same note events visually."
-    },
-    {
-      "id": "accept",
-      "label": "Criteria",
-      "detail": "The authored acceptance criteria describe checks to perform; this node is not an independent verifier or acceptance receipt."
-    }
-  ],
-  "edges": [
-    [
-      "spec",
-      "score"
-    ],
-    [
-      "score",
-      "audio"
-    ],
-    [
-      "score",
-      "view"
-    ],
-    [
-      "audio",
-      "accept"
-    ],
-    [
-      "view",
-      "accept"
-    ]
-  ],
-  "diagram_kind": "illustrative-lesson-flow"
+  "diagram_kind": "resolved-authority-graph",
+  "graph_source": "project/components/frontend-application/unlicensed-birdsong/component.lock.json"
 }

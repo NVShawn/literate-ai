@@ -1,11 +1,6 @@
-# Bureau of unlicensed birdsong
+# Bureau of Unlicensed Birdsong
 
-## Behavior
-
-Generate a bounded pentatonic sequence. Each note produces sound and a visible feather.
-Audio requires explicit user consent and stops on request.
-
-## Acceptance
-
-The visualizer works before audio consent. Start and stop never create overlapping loops.
-
+The canonical behavioral specification is
+[the project Component](project/components/frontend-application/unlicensed-birdsong/component.md).
+This pointer is documentation; the Component lock selects the specification in
+the self-contained project.

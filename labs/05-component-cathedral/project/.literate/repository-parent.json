@@ -1,0 +1,11 @@
+{
+  "schema": "urn:literate-ai:schema:v1:repository-parent-selection",
+  "mode": "inherit",
+  "parents": [
+    {
+      "schema": "urn:literate-ai:schema:v1:repository-parent-reference",
+      "repository_url": "https://github.com/jordanhubbard/literate-ai.git",
+      "requested_revision": "87506c804210c46835723e11d1ca1c6cae0f496c"
+    }
+  ]
+}

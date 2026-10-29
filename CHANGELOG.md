@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add independent 1.3.1 lab projects with real Component/Flavor locks, authored
+  retained inputs and verifier-owned browser contracts. Make `litai build` and
+  `litai run` the attendee path; keep preview assembly in a maintainer guide.
+  Include project inputs in the offline kit and scope lab CI to source/browser
+  checks. Progressive multi-Component curriculum work remains open.
 - Welcome Unprompted AI attendees with a from-zero setup guide, emailed OpenRouter key instructions and accurate assistant choices. Record the published 1.3.1 downloads and the temporary resource-driven Windows matrix suspension, with restoration required next release.
 - Scope conference website scripts and the two 1.3.1 publication records to documentation feedback; preserve broader qualification for product source, lab implementations and unknown records.
 

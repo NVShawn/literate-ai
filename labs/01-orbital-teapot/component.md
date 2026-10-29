@@ -1,11 +1,6 @@
-# Orbital teapot without a teapot
+# Orbital Teapot (Teapot Pending)
 
-## Behavior
-
-Simulate a small gravitational system with a fixed step and a resettable seed. Draw
-trails so accumulated state remains visible. The missing teapot is a documented feature.
-
-## Acceptance
-
-Reset restores the same initial state. Gravity can change without reloading the artifact.
-
+The canonical behavioral specification is
+[the project Component](project/components/frontend-application/orbital-teapot/component.md).
+This pointer is documentation; the Component lock selects the specification in
+the self-contained project.
