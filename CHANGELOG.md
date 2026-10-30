@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Retained remote execution: clean exact controller-owned attempt workspaces even
+  when native build tools create read-only output directories, without following
+  symlinks or broadening cleanup scope.
+
 - Add independent 1.3.1 lab projects with real Component/Flavor locks, authored
   retained inputs and verifier-owned browser contracts. Make `litai build` and
   `litai run` the attendee path; keep preview assembly in a maintainer guide.
