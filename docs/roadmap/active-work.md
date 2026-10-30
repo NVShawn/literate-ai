@@ -31655,3 +31655,18 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Evidence:**
   - [x] Focused transport and retained remote tests pass, including exact keepalive argv and timeout/refusal contracts. The complete `make python-check` run passes 2,435 tests with 73 declared skips and no failures in 713.062 seconds.
   - [ ] The long exact-source KSE lifecycle returns its result, applies the receipt, and litai verify passes the receipt gate.
+
+### [ ] RETAINED-REPO-ROOT-RESULTS-001 — Admit root Repo Tools test result summaries
+
+- **Priority:** P0
+- **Owner:** retained-harness test evidence discovery
+- **Direction:** Retained Repo Tools tests must derive their exact passing count from the authoritative current-run result file whether Repo Tools writes it beneath _build or the default root _testoutput directory.
+- **Conclusion:** Discover only bounded in-project repo_test_results.txt files in the two declared Repo Tools output families, require current-command content changes, and preserve strict all-passing count admission.
+- **Depends on:** RETAINED-SSH-001
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Extend bounded Repo Tools result discovery to root _testoutput without admitting arbitrary output trees or stale summaries.
+- **Evidence:**
+  - [x] Focused root-output, stale-result, symlink-escape, and existing _build result regressions pass on macOS.
+  - [x] The complete Python gate passes 2,437 tests with 73 declared skips and no failures in 723.751 seconds; lint, format, repository-layout, public-export, project validation, lifecycle-driver review, documentation-authority review, and diff checks pass.
+  - [ ] Replay the exact KSE retained lifecycle and require a current receipt.

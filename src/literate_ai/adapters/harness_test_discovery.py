@@ -46,7 +46,10 @@ _ZERO_PATTERNS = (
     re.compile(r"\bcollected\s+0\s+items?\b", re.IGNORECASE),
     re.compile(r"\bRan\s+0\s+tests?\b"),
 )
-_REPO_TEST_RESULTS_GLOB = "_build/**/_testoutput/repo_test_results.txt"
+_REPO_TEST_RESULTS_GLOBS = (
+    "_build/**/_testoutput/repo_test_results.txt",
+    "_testoutput/**/repo_test_results.txt",
+)
 _MAX_REPO_TEST_RESULT_FILES = 64
 _MAX_REPO_TEST_RESULT_BYTES = 2 * 1024 * 1024
 
@@ -165,9 +168,10 @@ def capture_repo_test_result_files(root: Path) -> dict[str, str]:
     """Capture bounded identities for Repo Tools result summaries.
 
     Retained commands can produce substantially more output than the harness wire
-    bound. Repo Tools also persists its authoritative aggregate result beneath the
-    disposable build tree, so capture the pre-run identities and admit only files
-    created or changed by the current command.
+    bound. Repo Tools also persists its authoritative aggregate result beneath a
+    configured build tree or its default root ``_testoutput`` directory, so capture
+    the pre-run identities and admit only files created or changed by the current
+    command.
     """
 
     captured: dict[str, str] = {}
@@ -225,19 +229,21 @@ def observe_repo_test_result_files(
 
 def _repo_test_result_paths(root: Path) -> tuple[Path, ...]:
     paths: list[Path] = []
+    seen: set[Path] = set()
     try:
-        candidates = root.glob(_REPO_TEST_RESULTS_GLOB)
-        for path in candidates:
-            if len(paths) >= _MAX_REPO_TEST_RESULT_FILES:
-                break
-            try:
-                resolved = path.resolve(strict=True)
-                resolved.relative_to(root.resolve())
-            except (OSError, ValueError):
-                continue
-            if path.is_symlink() or not resolved.is_file():
-                continue
-            paths.append(resolved)
+        for pattern in _REPO_TEST_RESULTS_GLOBS:
+            for path in root.glob(pattern):
+                if len(paths) >= _MAX_REPO_TEST_RESULT_FILES:
+                    break
+                try:
+                    resolved = path.resolve(strict=True)
+                    resolved.relative_to(root.resolve())
+                except (OSError, ValueError):
+                    continue
+                if path.is_symlink() or not resolved.is_file() or resolved in seen:
+                    continue
+                seen.add(resolved)
+                paths.append(resolved)
     except OSError:
         return ()
     return tuple(sorted(paths, key=lambda path: path.as_posix()))
