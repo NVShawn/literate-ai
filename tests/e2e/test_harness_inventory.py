@@ -799,11 +799,66 @@ class RepoManConvertSliceTests(unittest.TestCase):
     def test_repo_test_result_file_must_change_during_current_command(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            result_path = (
-                root / "_build/linux-x86_64/release/_testoutput/repo_test_results.txt"
-            )
+            result_path = root / "_testoutput/repo_test_results.txt"
             result_path.parent.mkdir(parents=True)
             result_path.write_text("[OK] All 427 tests processes returned 0.\n")
+            result = _run_harness_command(
+                "test",
+                {"command": "true", "evidence": "repo.toml"},
+                legacy_root=root,
+                timeout_seconds=30,
+            )
+
+        self.assertEqual(result["test_collection"]["state"], "unreported")
+
+    def test_root_repo_test_result_file_supplies_bounded_retained_count(self) -> None:
+        program = (
+            "from pathlib import Path; "
+            "p=Path('_testoutput/repo_test_results.txt'); "
+            "p.parent.mkdir(parents=True); "
+            "p.write_text('[OK] All 211 tests processes returned 0.\\n')"
+        )
+        command = (
+            subprocess.list2cmdline([sys.executable, "-c", program])
+            if os.name == "nt"
+            else shlex.join([sys.executable, "-c", program])
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            result = _run_harness_command(
+                "test",
+                {"command": command, "evidence": "repo.toml"},
+                legacy_root=Path(directory),
+                timeout_seconds=30,
+            )
+
+        self.assertEqual(
+            result["test_collection"],
+            {
+                "state": "nonempty",
+                "total": 211,
+                "passed": 211,
+                "failed": 0,
+                "skipped": 0,
+                "known_failed": 0,
+                "source": "repo-test-result-files",
+                "files": ["_testoutput/repo_test_results.txt"],
+            },
+        )
+
+    @unittest.skipIf(
+        os.name == "nt", "symlink creation requires elevated Windows policy"
+    )
+    def test_root_repo_test_result_symlink_escape_is_not_admitted(self) -> None:
+        with (
+            tempfile.TemporaryDirectory() as directory,
+            tempfile.TemporaryDirectory() as outside,
+        ):
+            root = Path(directory)
+            outside_root = Path(outside)
+            (outside_root / "repo_test_results.txt").write_text(
+                "[OK] All 211 tests processes returned 0.\n"
+            )
+            (root / "_testoutput").symlink_to(outside_root, target_is_directory=True)
             result = _run_harness_command(
                 "test",
                 {"command": "true", "evidence": "repo.toml"},

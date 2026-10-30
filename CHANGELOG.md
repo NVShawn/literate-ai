@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Admit Repo Tools' authoritative current-run test count from either a
+  configured build tree or the default root `_testoutput` directory, while
+  preserving bounded paths, freshness checks, and symlink refusal.
+
 - Keep long SSH and SCP lifecycle channels alive with bounded OpenSSH
   server-alive probes, so otherwise-silent retained build/test/package runs can
   return their exact result instead of losing the controller connection.
