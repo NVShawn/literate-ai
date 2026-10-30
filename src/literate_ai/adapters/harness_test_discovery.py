@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import configparser
 import fnmatch
+import hashlib
 import os
 import re
 import tomllib
@@ -45,6 +46,9 @@ _ZERO_PATTERNS = (
     re.compile(r"\bcollected\s+0\s+items?\b", re.IGNORECASE),
     re.compile(r"\bRan\s+0\s+tests?\b"),
 )
+_REPO_TEST_RESULTS_GLOB = "_build/**/_testoutput/repo_test_results.txt"
+_MAX_REPO_TEST_RESULT_FILES = 64
+_MAX_REPO_TEST_RESULT_BYTES = 2 * 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -155,6 +159,88 @@ def observe_test_collection(phase: str, stdout: bytes, stderr: bytes) -> dict[st
         total = max(int(match.group(1)) for match in collected)
         return _test_observation("nonempty", total=total)
     return _test_observation("unreported")
+
+
+def capture_repo_test_result_files(root: Path) -> dict[str, str]:
+    """Capture bounded identities for Repo Tools result summaries.
+
+    Retained commands can produce substantially more output than the harness wire
+    bound. Repo Tools also persists its authoritative aggregate result beneath the
+    disposable build tree, so capture the pre-run identities and admit only files
+    created or changed by the current command.
+    """
+
+    captured: dict[str, str] = {}
+    resolved_root = root.resolve()
+    for path in _repo_test_result_paths(root):
+        try:
+            payload = path.read_bytes()
+        except OSError:
+            continue
+        if len(payload) > _MAX_REPO_TEST_RESULT_BYTES:
+            continue
+        relative = path.relative_to(resolved_root).as_posix()
+        captured[relative] = hashlib.sha256(payload).hexdigest()
+    return captured
+
+
+def observe_repo_test_result_files(
+    root: Path, before: dict[str, str]
+) -> dict[str, Any]:
+    """Return an exact count from current-command Repo Tools result files."""
+
+    observations: list[tuple[str, dict[str, Any]]] = []
+    resolved_root = root.resolve()
+    for path in _repo_test_result_paths(root):
+        try:
+            payload = path.read_bytes()
+        except OSError:
+            continue
+        if len(payload) > _MAX_REPO_TEST_RESULT_BYTES:
+            continue
+        relative = path.relative_to(resolved_root).as_posix()
+        identity = hashlib.sha256(payload).hexdigest()
+        if before.get(relative) == identity:
+            continue
+        observation = observe_test_collection("test", payload, b"")
+        if (
+            observation.get("state") != "nonempty"
+            or not isinstance(observation.get("total"), int)
+            or observation.get("passed") != observation.get("total")
+            or any(
+                observation.get(name) for name in ("failed", "skipped", "known_failed")
+            )
+        ):
+            continue
+        observations.append((relative, observation))
+    if not observations:
+        return _test_observation("unreported")
+    total = sum(int(observation["total"]) for _, observation in observations)
+    return {
+        **_counted_observation(total, 0, 0, 0),
+        "source": "repo-test-result-files",
+        "files": [relative for relative, _ in observations],
+    }
+
+
+def _repo_test_result_paths(root: Path) -> tuple[Path, ...]:
+    paths: list[Path] = []
+    try:
+        candidates = root.glob(_REPO_TEST_RESULTS_GLOB)
+        for path in candidates:
+            if len(paths) >= _MAX_REPO_TEST_RESULT_FILES:
+                break
+            try:
+                resolved = path.resolve(strict=True)
+                resolved.relative_to(root.resolve())
+            except (OSError, ValueError):
+                continue
+            if path.is_symlink() or not resolved.is_file():
+                continue
+            paths.append(resolved)
+    except OSError:
+        return ()
+    return tuple(sorted(paths, key=lambda path: path.as_posix()))
 
 
 def _test_observation(
