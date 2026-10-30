@@ -16,6 +16,29 @@ from literate_ai.adapters.ssh_transport import (
 
 
 class SshTransportTests(unittest.TestCase):
+    def test_ssh_and_scp_keep_long_control_channels_alive(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.bin"
+            source.write_bytes(b"source")
+            commands = (
+                ssh_arguments("user@host.example", "echo hi", 10),
+                scp_arguments(source, "user@host.example", "/job/source.bin", 10),
+                scp_download_arguments(
+                    "user@host.example",
+                    "/job/remote-evidence.tar.gz",
+                    root / "evidence",
+                    10,
+                ),
+            )
+            for command in commands:
+                with self.subTest(executable=command[0]):
+                    self.assertIn("ConnectTimeout=10", command)
+                    interval = command.index("ServerAliveInterval=30")
+                    count = command.index("ServerAliveCountMax=3")
+                    self.assertEqual(command[interval - 1], "-o")
+                    self.assertEqual(command[count - 1], "-o")
+
     def test_scp_routes_upload_and_download_through_the_selected_ssh_program(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

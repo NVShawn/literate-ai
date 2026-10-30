@@ -23,6 +23,8 @@ MAX_SSH_OUTPUT_BYTES = 1024 * 1024
 MAX_SSH_DIAGNOSTIC_BYTES = 64 * 1024
 SSH_DIAGNOSTIC_TRUNCATION_MARKER = b"[litai:ssh stderr truncated; tail follows]\n"
 _TERMINATE_WAIT_TIMEOUT_SECONDS = 5.0
+_SSH_KEEPALIVE_INTERVAL_SECONDS = 30
+_SSH_KEEPALIVE_COUNT_MAX = 3
 _ENDPOINT = re.compile(r"^[A-Za-z0-9._-]+@[A-Za-z0-9.-]+$")
 _TRANSPORT = re.compile(r"^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$")
 
@@ -174,6 +176,17 @@ def _transport_binary(value: str) -> str:
     return value
 
 
+def _keepalive_arguments() -> tuple[str, ...]:
+    """Keep long, otherwise-silent lifecycle channels alive and bounded."""
+
+    return (
+        "-o",
+        f"ServerAliveInterval={_SSH_KEEPALIVE_INTERVAL_SECONDS}",
+        "-o",
+        f"ServerAliveCountMax={_SSH_KEEPALIVE_COUNT_MAX}",
+    )
+
+
 def ssh_arguments(
     endpoint: str,
     command: str,
@@ -228,6 +241,7 @@ def ssh_arguments(
         "ConnectionAttempts=1",
         "-o",
         f"ConnectTimeout={connect_timeout}",
+        *_keepalive_arguments(),
         _endpoint(endpoint),
         f"bash -lic {shlex.quote(command)}" if login_shell else command,
     )
@@ -265,6 +279,7 @@ def scp_arguments(
         "ConnectionAttempts=1",
         "-o",
         f"ConnectTimeout={connect_timeout}",
+        *_keepalive_arguments(),
         str(selected),
         f"{_endpoint(endpoint)}:{destination}",
     )
@@ -308,6 +323,7 @@ def scp_download_arguments(
         "ConnectionAttempts=1",
         "-o",
         f"ConnectTimeout={connect_timeout}",
+        *_keepalive_arguments(),
         f"{_endpoint(endpoint)}:{source}",
         str(selected),
     )
