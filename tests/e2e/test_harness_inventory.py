@@ -760,6 +760,59 @@ class RepoManConvertSliceTests(unittest.TestCase):
             "sha256:" + hashlib.sha256(f"{secret}\n".encode()).hexdigest(),
         )
 
+    def test_repo_test_result_file_supplies_bounded_retained_count(self) -> None:
+        program = (
+            "from pathlib import Path; "
+            "p=Path('_build/linux-x86_64/release/_testoutput/repo_test_results.txt'); "
+            "p.parent.mkdir(parents=True); "
+            "p.write_text('[OK] All 427 tests processes returned 0.\\n')"
+        )
+        command = (
+            subprocess.list2cmdline([sys.executable, "-c", program])
+            if os.name == "nt"
+            else shlex.join([sys.executable, "-c", program])
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            result = _run_harness_command(
+                "test",
+                {"command": command, "evidence": "repo.toml"},
+                legacy_root=Path(directory),
+                timeout_seconds=30,
+            )
+
+        self.assertEqual(
+            result["test_collection"],
+            {
+                "state": "nonempty",
+                "total": 427,
+                "passed": 427,
+                "failed": 0,
+                "skipped": 0,
+                "known_failed": 0,
+                "source": "repo-test-result-files",
+                "files": [
+                    "_build/linux-x86_64/release/_testoutput/repo_test_results.txt"
+                ],
+            },
+        )
+
+    def test_repo_test_result_file_must_change_during_current_command(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result_path = (
+                root / "_build/linux-x86_64/release/_testoutput/repo_test_results.txt"
+            )
+            result_path.parent.mkdir(parents=True)
+            result_path.write_text("[OK] All 427 tests processes returned 0.\n")
+            result = _run_harness_command(
+                "test",
+                {"command": "true", "evidence": "repo.toml"},
+                legacy_root=root,
+                timeout_seconds=30,
+            )
+
+        self.assertEqual(result["test_collection"]["state"], "unreported")
+
 
 if __name__ == "__main__":
     unittest.main()
