@@ -31624,3 +31624,18 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [x] Integrate pending reviewed updates and publish a reproducible static documentation site with a conference landing page and a dedicated deployment workflow. PRs #158 and #160 are merged; site source `0ef44bcd7282c8d3efb904e9049669b98de0d3a8` deployed successfully in run `40567956679` to https://jordanhubbard.github.io/literate-ai/.
 - **Evidence:**
   - [x] Verify desktop and mobile pages, live deployed links, deck navigation, film/caption downloads and publication status; record any CI still running without making release-success claims. The 442-page build passes 4,149 local-link checks. Live Chrome passes fourteen navigation/interaction checks at widths 1440 and 390, including search, film metadata/captions and lab input; all eight framework-flow diagrams render. The fourteen-slide deck passes desktop/mobile controls and layout checks. Fresh public deck, film, caption and downloaded-kit content hashes match reviewed sources; archive CRC passes. See [publication evidence](../conference/publication.json). Product CI remains separate and was not awaited by explicit user direction; 1.3.1 software qualification and the canonical lab curriculum remain open.
+
+### [ ] RETAINED-CLEANUP-001 — Clean read-only retained remote attempt outputs safely
+
+- **Priority:** P0
+- **Owner:** retained remote lifecycle controller
+- **Direction:** Make remote retained-harness cleanup succeed for legitimate read-only native build outputs without broadening deletion scope.
+- **Conclusion:** Normalize owner write permission only beneath each exact controller-created incoming and workspace path before recursive removal; keep cleanup fail-closed and preserve unrelated worker content.
+- **Depends on:** RETAINED-PROJECT-001
+- **GitHub issue:** [#205](https://github.com/jordanhubbard/literate-ai/issues/205)
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Harden POSIX remote cleanup for nested read-only files and directories while preserving exact quoted targets and symlink-safe scope.
+  - [x] Add focused controller regression coverage for read-only nested output and unrelated-neighbor preservation.
+- **Evidence:**
+  - [ ] Focused retained remote adapter tests pass on macOS; the same exact command cleaned the isolated Linux native attempt while preserving unrelated content; `make python-check` passes 2,432 tests with 73 skips and no failures; lint, format, project validation, and diff checks pass. Require the active installed replay to clean its exact attempt and produce a current retained receipt before closure.

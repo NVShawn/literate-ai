@@ -115,6 +115,44 @@ class RecordingRetainedRunner:
 
 
 class RetainedHarnessRemoteTests(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "retained SSH cleanup requires POSIX")
+    def test_cleanup_removes_read_only_directories_without_following_symlinks(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "attempt root"
+            incoming = root / "incoming"
+            workspace = root / "workspace"
+            neighbor = root / "neighbor"
+            read_only = workspace / "output" / "nested"
+            incoming.mkdir(parents=True)
+            read_only.mkdir(parents=True)
+            neighbor.mkdir(parents=True)
+            (read_only / "artifact").write_text("generated", encoding="utf-8")
+            marker = neighbor / "marker"
+            marker.write_text("preserve", encoding="utf-8")
+            (workspace / "neighbor-link").symlink_to(neighbor, target_is_directory=True)
+            read_only.chmod(0o500)
+            read_only.parent.chmod(0o500)
+
+            completed = subprocess.run(
+                (
+                    "sh",
+                    "-c",
+                    RetainedHarnessSshExecutor._cleanup_command(
+                        str(incoming), str(workspace)
+                    ),
+                ),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertFalse(incoming.exists())
+            self.assertFalse(workspace.exists())
+            self.assertEqual(marker.read_text(encoding="utf-8"), "preserve")
+
     def test_receiver_cli_redacts_private_paths_and_secrets_but_keeps_code(
         self,
     ) -> None:

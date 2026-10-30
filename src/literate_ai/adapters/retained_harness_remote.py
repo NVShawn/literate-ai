@@ -1183,6 +1183,12 @@ class RetainedHarnessSshExecutor:
                 "set -eu",
                 f"incoming={_posix_path(incoming)}",
                 f"workspace={_posix_path(workspace)}",
+                (
+                    'for path in "$incoming" "$workspace"; do '
+                    'if [ -d "$path" ]; then '
+                    'find -P "$path" -type d -exec chmod u+w {} +; '
+                    "fi; done"
+                ),
                 'rm -rf -- "$incoming" "$workspace"',
                 'test ! -e "$incoming"',
                 'test ! -e "$workspace"',
