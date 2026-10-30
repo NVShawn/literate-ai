@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retry one verifier-owned retained wrapper-parity source capture when the
+  pre-dispatch local archive fails transiently. Preserve the successful direct
+  baseline in memory, bound the retry to the same source and process, and keep
+  changed source, invalid scope, transport, and post-dispatch failures closed.
+
 - Admit Repo Tools' authoritative current-run test count from either a
   configured build tree or the default root `_testoutput` directory, while
   preserving bounded paths, freshness checks, and symlink refusal.

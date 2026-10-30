@@ -25,6 +25,7 @@ from literate_ai.adapters.retained_harness_remote import (
     _source_archive,
     execute_retained_harness_receiver,
 )
+from literate_ai.adapters.source_materialization import SourceMaterializationError
 from literate_ai.adapters.ssh_transport import SshProcessResult
 from literate_ai.cli import main
 from literate_ai.contracts import (
@@ -115,6 +116,43 @@ class RecordingRetainedRunner:
 
 
 class RetainedHarnessRemoteTests(unittest.TestCase):
+    def test_source_archive_preserves_retry_classification(self) -> None:
+        for source_code, remote_code in (
+            (
+                "execution.source_capture_failed",
+                "retained_receipt.remote_source_capture_failed",
+            ),
+            (
+                "execution.source_changed",
+                "retained_receipt.remote_source_changed",
+            ),
+            (
+                "execution.source_archive_oversized",
+                "retained_receipt.remote_archive_oversized",
+            ),
+            (
+                "execution.source_entry_limit",
+                "retained_receipt.remote_source_scope_invalid",
+            ),
+        ):
+            with (
+                self.subTest(source_code=source_code),
+                patch(
+                    "literate_ai.adapters.retained_harness_remote."
+                    "write_bounded_source_archive",
+                    side_effect=SourceMaterializationError(
+                        source_code, "fixture failure"
+                    ),
+                ),
+                self.assertRaises(RetainedHarnessRemoteError) as raised,
+            ):
+                _source_archive(
+                    Path("fixture-root"),
+                    {"source_scope": {"paths": ["source.txt"]}},
+                    Path("source.tar.gz"),
+                )
+            self.assertEqual(raised.exception.code, remote_code)
+
     @unittest.skipIf(os.name == "nt", "retained SSH cleanup requires POSIX")
     def test_cleanup_removes_read_only_directories_without_following_symlinks(
         self,

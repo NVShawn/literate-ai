@@ -31651,9 +31651,18 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Completion prerequisites:** none
 - **Implementation:**
   - [x] Add portable ServerAliveInterval and ServerAliveCountMax options to shared SSH/SCP argument construction and update exact-argv regressions.
+  - [x] Retry a transient wrapper-parity source-capture failure in the same
+    readmission process before any parity remote dispatch. Preserve the returned
+    direct baseline in memory, bound the retry count, and never retry a changed,
+    oversized, malformed, or post-dispatch source/transport failure.
   - [ ] Rerun the exact KSE retained build/test/package lifecycle through the corrected transport and admit only the returned current receipt.
 - **Evidence:**
   - [x] Focused transport and retained remote tests pass, including exact keepalive argv and timeout/refusal contracts. The complete `make python-check` run passes 2,435 tests with 73 declared skips and no failures in 713.062 seconds.
+  - [x] Eleven focused readmission and remote regressions prove one pre-dispatch
+    capture retry, bounded repeated failure, exact error classification and no
+    retry for changed, oversized, malformed or transport failures. The complete
+    framework suite passes 2,440 tests with 73 declared skips and no failures in
+    814.798 seconds; the exact KSE receipt gate remains required.
   - [ ] The long exact-source KSE lifecycle returns its result, applies the receipt, and litai verify passes the receipt gate.
 
 ### [ ] RETAINED-REPO-ROOT-RESULTS-001 — Admit root Repo Tools test result summaries
