@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep long SSH and SCP lifecycle channels alive with bounded OpenSSH
+  server-alive probes, so otherwise-silent retained build/test/package runs can
+  return their exact result instead of losing the controller connection.
+
 - Retained remote execution: clean exact controller-owned attempt workspaces even
   when native build tools create read-only output directories, without following
   symlinks or broadening cleanup scope.

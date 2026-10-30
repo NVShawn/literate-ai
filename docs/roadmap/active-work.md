@@ -31639,3 +31639,19 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [x] Add focused controller regression coverage for read-only nested output and unrelated-neighbor preservation.
 - **Evidence:**
   - [ ] Focused retained remote adapter tests pass on macOS; the same exact command cleaned the isolated Linux native attempt while preserving unrelated content; `make python-check` passes 2,432 tests with 73 skips and no failures; lint, format, project validation, and diff checks pass. Require the active installed replay to clean its exact attempt and produce a current retained receipt before closure.
+
+### [ ] RETAINED-SSH-001 — Keep long retained SSH lifecycle control channels alive
+
+- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+- **Priority:** P0
+- **Owner:** shared SSH transport and retained-harness remote execution
+- **Direction:** Long retained build, test, and package runs must return their exact bounded result instead of losing an idle SSH control channel after successful remote execution.
+- **Conclusion:** Add explicit OpenSSH keepalive controls to every shared SSH and SCP argv while preserving noninteractive bounded deadlines, output limits, endpoint validation, and exact receiver result admission. Do not synthesize a receipt from the completed downstream run; rerun it through the repaired transport.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Add portable ServerAliveInterval and ServerAliveCountMax options to shared SSH/SCP argument construction and update exact-argv regressions.
+  - [ ] Rerun the exact KSE retained build/test/package lifecycle through the corrected transport and admit only the returned current receipt.
+- **Evidence:**
+  - [x] Focused transport and retained remote tests pass, including exact keepalive argv and timeout/refusal contracts. The complete `make python-check` run passes 2,435 tests with 73 declared skips and no failures in 713.062 seconds.
+  - [ ] The long exact-source KSE lifecycle returns its result, applies the receipt, and litai verify passes the receipt gate.

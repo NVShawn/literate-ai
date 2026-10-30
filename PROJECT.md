@@ -140,6 +140,9 @@ explicit original-source selections to the same retained lifecycle as
 `rebuild`, preserving reviewed plan/host authorization and distinct receipts.
 Installed original-source compilation, package consumption and full native
 qualification remain separate open requirements.
+RETAINED-SSH-001 keeps those long, otherwise-silent remote lifecycles alive at
+the shared SSH transport layer so successful native work can return its exact
+bounded result; current long-run receipt renewal remains open.
 
 RETAINED-CATALOG-001 (issue #74) extends Goals 1, 4 and 6 with complete
 retained-input ownership by exact canonical Components. Coverage must use the
