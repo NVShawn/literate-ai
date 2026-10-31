@@ -31688,7 +31688,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Conclusion:** Select a compatible invocation and isolation profile from the exact executable capabilities. Current generation and preflight require the v1 --pure and --dir help surface; published v2.2.5 help omits both and defaults to a shared background service. Preserve supported v1 behavior and qualify v2 with a private server, explicit workspace custody, provider credentials, bounded diagnostics, and deny-by-default tools. Supported legacy configuration translation alone does not establish equivalent isolation. The adapter implementation and macOS native checks now cover both interfaces; v2 uses fresh provider state and process environment credentials, while v1 retains saved logins. Broader installed/native qualification remains open; no release target is assigned.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Complete the full local regression on the independently reviewed and re-pinned driver, then qualify installed/native v1 and v2 generation on the remaining supported platforms.
+- **Next action:** Qualify installed/native v1 and v2 generation on the remaining supported platforms, then renew fresh release evidence; local development repair coverage is complete.
 - **Implementation:**
   - [x] First capture pinned v1 and v2 CLI help/configuration contracts and define capability detection, version-specific command construction, and fail-closed diagnostics for unsupported executables.
   - [x] Preserve the v1 invocation and add a qualified v2 invocation with --standalone, supported working-directory and logging controls, and version-appropriate configuration/environment handling; preserve executable identity, detached workspace, permission, and credential boundaries.
@@ -31709,9 +31709,9 @@ a test-owned loopback provider. Run through `make python-check` with
 `LITAI_OPENCODE_V1_BINARY` and `LITAI_OPENCODE_V2_BINARY` bound to exact binaries.
 No paid inference is used. Repository lint/format, host path policy, and layout
 checks pass. Documentation authority review is recorded; `litai verify` passes
-that gate but the project test receipt remains stale. Full local regression, installed/native Linux and Windows generation, and
-release qualification remain separate pending evidence; the independent review
-and re-pin are recorded below. The workflow tracker
+that gate but the project test receipt remains stale. Installed/native Linux and Windows generation and fresh release qualification
+remain separate pending evidence; the independent review, re-pin, and completed
+local development repair are recorded below. The workflow tracker
 survey fails through the configured SSH alias; a read-only GitHub.com survey found
 no overlapping OpenCode PR. Unrelated Cargo and lab-receipt work was retained.
 
@@ -31734,6 +31734,22 @@ and `worker_alignment.py`
 No blocking review findings remain. The five focused security cases and both
 actual native CLI tests pass after the repair, including credential/DB/state
 path isolation before server startup and refused external reads. The driver pin is recorded with `make driver-review-record`; driver review,
-documentation authority review, lint, and formatting checks pass. Full local
-regression is being renewed against the frozen driver; earlier interrupted runs
-are not final qualification.
+documentation authority review, lint, and formatting checks pass. Local regression repair is complete against the frozen driver, as recorded
+below; earlier interrupted runs and repair checkpoints are not release qualification.
+
+Final local development evidence: the checkpointed 2,448-case Python selection
+completes with 2,346 passed, 102 skipped, zero failed and zero known failures.
+The self-hosting replay passes in isolation (all three conformance cases) and
+in the final serial resume. Ten- and four-worker attempts reached that replay's
+300-second subprocess deadline; the final serial case passes without changing
+that bound. The installed rustup Cargo/rustc 1.97.1 toolchain is explicitly
+selected because the ambient Homebrew Cargo launcher cannot load its llhttp
+library; no host toolchain is installed or repaired. The repaired-suite runner
+returns status 2 by design and requires a fresh run from test one for release
+evidence. This is completed development repair coverage, not release attestation.
+Native OpenCode v2 process API-key propagation also succeeds against a loopback
+endpoint with fresh provider state. Driver review, documentation authority,
+repository lint/format, layout, host path policy and diff checks pass. The
+configured project test receipt remains stale; installed/native Linux and
+Windows OpenCode qualification and fresh release evidence remain open. Review:
+[PR #228](https://github.com/jordanhubbard/literate-ai/pull/228).
