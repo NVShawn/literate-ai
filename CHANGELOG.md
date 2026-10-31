@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retry one bounded retained remote cleanup against the same exact
+  controller-owned attempt paths when the first cleanup returns nonzero. Admit
+  the already-returned lifecycle result only after cleanup succeeds, and remain
+  fail-closed after the bounded retry.
+
 - Preserve the direct baseline's exact admitted authored-source paths through
   retained wrapper parity, including tracked source beneath conventionally
   generated directory names, while continuing to exclude new build output.

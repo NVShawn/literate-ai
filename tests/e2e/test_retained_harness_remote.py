@@ -66,11 +66,15 @@ def _phase() -> dict[str, object]:
 
 
 class RecordingRetainedRunner:
-    def __init__(self, *, tamper_worker: bool = False) -> None:
+    def __init__(
+        self, *, tamper_worker: bool = False, cleanup_failures: int = 0
+    ) -> None:
         self.calls: list[tuple[str, ...]] = []
         self.timeouts: list[int] = []
         self.request: RetainedHarnessRemoteRequest | None = None
         self.tamper_worker = tamper_worker
+        self.cleanup_failures = cleanup_failures
+        self.cleanup_calls = 0
 
     def run(self, argv, *, cwd, timeout_seconds):
         del cwd
@@ -85,6 +89,11 @@ class RecordingRetainedRunner:
                 )
             return SshProcessResult(0, b"", b"")
         command = call[-1]
+        if "rm -rf" in command:
+            self.cleanup_calls += 1
+            if self.cleanup_calls <= self.cleanup_failures:
+                return SshProcessResult(1, b"", b"")
+            return SshProcessResult(0, b"", b"")
         if "worker execute-retained" in command:
             assert self.request is not None
             request = self.request
@@ -340,6 +349,30 @@ class RetainedHarnessRemoteTests(unittest.TestCase):
             raised.exception.code, "retained_receipt.remote_identity_mismatch"
         )
         self.assertIn("rm -rf", runner.calls[-1][-1])
+
+    def test_cleanup_retries_one_bounded_exact_attempt_before_admission(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runner = RecordingRetainedRunner(cleanup_failures=1)
+
+            result = self._execute(root, runner)
+
+        self.assertEqual(len(result.phases), 1)
+        self.assertEqual(runner.cleanup_calls, 2)
+        self.assertTrue(all(298 <= timeout <= 300 for timeout in runner.timeouts[-2:]))
+
+    def test_cleanup_remains_fail_closed_after_bounded_retries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runner = RecordingRetainedRunner(cleanup_failures=2)
+            with self.assertRaises(RetainedHarnessRemoteError) as raised:
+                self._execute(root, runner)
+
+        self.assertEqual(
+            raised.exception.code, "retained_receipt.remote_cleanup_failed"
+        )
+        self.assertEqual(runner.cleanup_calls, 2)
+        self.assertTrue(all(298 <= timeout <= 300 for timeout in runner.timeouts[-2:]))
 
     @patch(
         "literate_ai.adapters.retained_harness_remote.platform.system",
