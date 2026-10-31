@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Preserve the direct baseline's exact admitted authored-source paths through
+  retained wrapper parity, including tracked source beneath conventionally
+  generated directory names, while continuing to exclude new build output.
+
 - Retry one verifier-owned retained wrapper-parity source capture when the
   pre-dispatch local archive fails transiently. Preserve the successful direct
   baseline in memory, bound the retry to the same source and process, and keep
