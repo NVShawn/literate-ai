@@ -31642,7 +31642,8 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RETAINED-SSH-001 — Keep long retained SSH lifecycle control channels alive
 
-- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+- **GitHub issues:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22),
+  [#229](https://github.com/jordanhubbard/literate-ai/issues/229)
 - **Priority:** P0
 - **Owner:** shared SSH transport and retained-harness remote execution
 - **Direction:** Long retained build, test, and package runs must return their exact bounded result instead of losing an idle SSH control channel after successful remote execution.
@@ -31655,6 +31656,9 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
     readmission process before any parity remote dispatch. Preserve the returned
     direct baseline in memory, bound the retry count, and never retry a changed,
     oversized, malformed, or post-dispatch source/transport failure.
+  - [x] Preserve the direct baseline's exact admitted authored-source paths when
+    projecting wrapper parity. Do not reclassify tracked source beneath a
+    conventionally generated directory name through non-Git filesystem pruning.
   - [ ] Rerun the exact KSE retained build/test/package lifecycle through the corrected transport and admit only the returned current receipt.
 - **Evidence:**
   - [x] Focused transport and retained remote tests pass, including exact keepalive argv and timeout/refusal contracts. The complete `make python-check` run passes 2,435 tests with 73 declared skips and no failures in 713.062 seconds.
@@ -31663,6 +31667,12 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
     retry for changed, oversized, malformed or transport failures. The complete
     framework suite passes 2,440 tests with 73 declared skips and no failures in
     814.798 seconds; the exact KSE receipt gate remains required.
+  - [x] A focused wrapper-projection regression retains an explicitly admitted
+    `include/build/PreHeaders.h` fixture through remote source archiving while
+    ordinary generated output remains excluded. The complete retained-harness
+    cluster passes 22 tests, lint and format checks pass, and the exact edited
+    source passes all 2,441 `make python-check` tests with 73 declared skips in
+    758.630 seconds.
   - [ ] The long exact-source KSE lifecycle returns its result, applies the receipt, and litai verify passes the receipt gate.
 
 ### [ ] RETAINED-REPO-ROOT-RESULTS-001 — Admit root Repo Tools test result summaries

@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import shutil
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
 from literate_ai.adapters import retained_harness_readmission as readmission
+from literate_ai.adapters import retained_harness_remote as retained_remote
 from literate_ai.adapters.harness_inventory import (
     HARNESS_BASELINE_SCHEMA,
     HARNESS_PARITY_SCHEMA,
@@ -376,6 +378,57 @@ class RetainedHarnessReadmissionTests(unittest.TestCase):
         self.assertTrue(
             all("litai.harness.mk" in item for item in executor.commands[1])
         )
+
+    def test_wrapper_projection_preserves_admitted_generated_name_source_paths(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            source_root = Path(directory).resolve()
+            header = source_root / "legacy/include/build/PreHeaders.h"
+            header.parent.mkdir(parents=True)
+            header.write_text("#pragma once\n", encoding="utf-8")
+            generated = source_root / "legacy/build/generated.o"
+            generated.parent.mkdir(parents=True)
+            generated.write_bytes(b"generated")
+            (source_root / "litai.harness.mk").write_text(
+                "build:\n\ttrue\n",
+                encoding="utf-8",
+            )
+            inventory = {
+                "source_scope": {
+                    "schema": "literate-ai/retained-source-scope@1",
+                    "policy": "git-visible@1",
+                    "paths": ["include/build/PreHeaders.h"],
+                    "paths_identity": canonical_identity(
+                        ["include/build/PreHeaders.h"]
+                    ).uri,
+                    "excluded_roots": [],
+                    "excluded": [],
+                },
+                "stages": [
+                    {
+                        "id": "build",
+                        "command": "./build.sh",
+                        "cwd": ".",
+                        "evidence": "build.sh",
+                        "cost": "host-heavy",
+                    }
+                ],
+            }
+
+            parity = readmission._parity_inventory(inventory, source_root)
+
+            paths = parity["source_scope"]["paths"]
+            self.assertIn("legacy/include/build/PreHeaders.h", paths)
+            self.assertIn("litai.harness.mk", paths)
+            self.assertNotIn("legacy/build/generated.o", paths)
+            archive = source_root / "source.tar.gz"
+            retained_remote._source_archive(source_root, parity, archive)
+            with tarfile.open(archive, "r:gz") as stream:
+                names = stream.getnames()
+            self.assertIn("literate-ai/legacy/include/build/PreHeaders.h", names)
+            self.assertIn("literate-ai/litai.harness.mk", names)
+            self.assertNotIn("literate-ai/legacy/build/generated.o", names)
 
     def test_remote_readmission_retries_only_parity_source_capture(self) -> None:
         self.admit_repo_man_test_stage()

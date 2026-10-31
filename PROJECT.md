@@ -146,8 +146,11 @@ bounded result. The exact KSE direct lifecycle now returns a passing build,
 211-of-211 test result and package, but a transient local wrapper-parity source
 capture discarded that returned baseline before parity dispatch. Readmission
 must retry only a source-capture failure proven to occur before remote dispatch,
-without replaying or caching acceptance evidence; current long-run receipt
-renewal remains open.
+without replaying or caching acceptance evidence. The subsequent wrapper replay
+exposed a distinct scope-projection defect: re-inspecting the copied non-Git tree
+pruned tracked headers beneath an `include/build` source directory. Wrapper
+projection must preserve the exact admitted baseline source paths without
+admitting newly generated output; current long-run receipt renewal remains open.
 RETAINED-REPO-ROOT-RESULTS-001 admits Repo Tools' authoritative current-run
 test summary from either a configured build tree or its default root
 `_testoutput` directory, while retaining bounded path, freshness and symlink

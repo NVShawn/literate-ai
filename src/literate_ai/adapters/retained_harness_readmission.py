@@ -497,7 +497,22 @@ def _parity_inventory(inventory: dict[str, Any], source_root: Path) -> dict[str,
         for stage in stages
     }
     rebound = {**inventory, "stages": stages, "commands": commands}
-    rebound["source_scope"] = inspect_harness(source_root)["source_scope"]
+    source_scope = inventory.get("source_scope")
+    source_paths = source_scope.get("paths") if isinstance(source_scope, dict) else None
+    if not isinstance(source_paths, list) or any(
+        not isinstance(path, str) for path in source_paths
+    ):
+        raise ValueError("retained parity source scope is invalid")
+    # The wrapper projection is intentionally outside Git. Its filesystem scan
+    # still excludes newly generated output, but must not reinterpret paths the
+    # direct Git-visible baseline already admitted (for example include/build/*).
+    rebound["source_scope"] = capture_retained_source_scope(
+        source_root,
+        required_paths=(
+            HARNESS_WRAPPER_FILENAME,
+            *(f"legacy/{path}" for path in source_paths),
+        ),
+    )
     return rebound
 
 
