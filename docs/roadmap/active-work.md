@@ -31685,10 +31685,10 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Priority:** P1
 - **Owner:** Framework core coding-CLI adapter, host-install Flavors, and setup documentation; PROJECT Goals 1, 3, and 4
 - **Direction:** Support both v1 and v2 of the OpenCode command line without requiring existing v1 users to migrate.
-- **Conclusion:** Select a compatible invocation and isolation profile from the exact executable capabilities. Current generation and preflight require the v1 --pure and --dir help surface; published v2.2.5 help omits both and defaults to a shared background service. Preserve supported v1 behavior and qualify v2 with a private server, explicit workspace custody, provider credentials, bounded diagnostics, and deny-by-default tools. Supported legacy configuration translation alone does not establish equivalent isolation. This item records future implementation; it does not claim v2 support or assign a release target.
+- **Conclusion:** Select a compatible invocation and isolation profile from the exact executable capabilities. Current generation and preflight require the v1 --pure and --dir help surface; published v2.2.5 help omits both and defaults to a shared background service. Preserve supported v1 behavior and qualify v2 with a private server, explicit workspace custody, provider credentials, bounded diagnostics, and deny-by-default tools. Supported legacy configuration translation alone does not establish equivalent isolation. The adapter implementation and macOS native checks now cover both interfaces; v2 uses fresh provider state and process environment credentials, while v1 retains saved logins. Broader installed/native qualification remains open; no release target is assigned.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Next action:** Obtain independent driver review, then qualify installed/native v1 and v2 generation on the remaining supported platforms.
+- **Next action:** Complete the full local regression on the independently reviewed and re-pinned driver, then qualify installed/native v1 and v2 generation on the remaining supported platforms.
 - **Implementation:**
   - [x] First capture pinned v1 and v2 CLI help/configuration contracts and define capability detection, version-specific command construction, and fail-closed diagnostics for unsupported executables.
   - [x] Preserve the v1 invocation and add a qualified v2 invocation with --standalone, supported working-directory and logging controls, and version-appropriate configuration/environment handling; preserve executable identity, detached workspace, permission, and credential boundaries.
@@ -31709,8 +31709,31 @@ a test-owned loopback provider. Run through `make python-check` with
 `LITAI_OPENCODE_V1_BINARY` and `LITAI_OPENCODE_V2_BINARY` bound to exact binaries.
 No paid inference is used. Repository lint/format, host path policy, and layout
 checks pass. Documentation authority review is recorded; `litai verify` passes
-that gate but the project test receipt remains stale. Full local regression,
-independent driver review/re-pin, installed/native Linux and Windows generation,
-and release qualification remain separate pending evidence. The workflow tracker
+that gate but the project test receipt remains stale. Full local regression, installed/native Linux and Windows generation, and
+release qualification remain separate pending evidence; the independent review
+and re-pin are recorded below. The workflow tracker
 survey fails through the configured SSH alias; a read-only GitHub.com survey found
 no overlapping OpenCode PR. Unrelated Cargo and lab-receipt work was retained.
+
+Independent review of the initial implementation found that v2 could import
+stored integration/plugin state before the configuration-source probe returned.
+The repair assigns fresh XDG config/data/state/cache roots, an explicit private
+OpenCode database, and private temporary storage before starting any v2 server.
+V2 intentionally uses process environment credentials and does not import saved
+OpenCode logins; v1 saved-login behavior remains unchanged. The isolation-profile
+revision invalidates earlier source-cache bindings. Independent review and renewed native/security checks of this repair pass;
+the exact reviewed hashes and pin qualification are recorded below.
+
+Independent reviewer `/root/opencode_review` approved the repaired TCB, including
+exact SHA-256 identities: `coding_cli.py`
+`62849861405624a3e9beb593ceaa07b05a4a3a7e2b25b16ba4a84190f196ff1f`,
+`user_paths.py`
+`69e9b903047f3f7473cb6db2d2fdc0251d6d268531b09d4f60a3f8b87f1784e8`,
+and `worker_alignment.py`
+`1196f0cde1d3b74350003a50973b9e160456d01d355d71b994b130b6e4b441f4`.
+No blocking review findings remain. The five focused security cases and both
+actual native CLI tests pass after the repair, including credential/DB/state
+path isolation before server startup and refused external reads. The driver pin is recorded with `make driver-review-record`; driver review,
+documentation authority review, lint, and formatting checks pass. Full local
+regression is being renewed against the frozen driver; earlier interrupted runs
+are not final qualification.

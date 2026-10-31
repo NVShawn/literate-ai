@@ -5,6 +5,8 @@
 - Support both OpenCode v1 and v2 coding CLIs. Preserve v1 pure-mode generation;
   detect v2 capabilities and use a private server with native deny-by-default
   permissions, owned configuration verification, and captured server diagnostics.
+  V2 uses fresh provider state and process environment credentials; saved logins
+  remain supported by the v1 path.
   Worker model checks also select v2 standalone mode. Existing host-install v1
   pins remain valid; v2 rejects ambient configuration it cannot isolate.
 

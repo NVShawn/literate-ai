@@ -2247,9 +2247,12 @@ Before supplying a v2 prompt, a second bounded `debug config --standalone` probe
 must confirm only the temporary configuration directory and the exact owned
 configuration document. Ambient integration documents, system/MDM configuration,
 failed probes, and missing capabilities fail as `coding_cli.incompatible`, with
-no fallback to another provider. V2's home discovery override also suppresses
-ambient `~/.agents` skills while leaving provider-managed authentication data
-outside the workspace. The default host-install manifests remain pinned to v1;
+no fallback to another provider. Before any v2 server starts, LitAI also assigns private XDG config/data/state/cache
+roots, a fresh database, a private temporary directory, and a home discovery
+override that suppresses ambient `~/.agents` skills. V2 uses provider credentials
+supplied through the process environment; it does not import saved OpenCode
+logins, sessions, or integration/plugin state. V1 keeps its existing saved-login
+behavior. The default host-install manifests remain pinned to v1;
 using v2 does not require upgrading an existing v1 installation.
 
 The subprocess receives only explicit system launch, proxy/certificate, and
@@ -2262,8 +2265,9 @@ selected provider's supported environment credential (`OPENAI_API_KEY` through
 `codex login --with-access-token`; `CLAUDE_CODE_OAUTH_TOKEN`, `ANTHROPIC_API_KEY`, or
 `ANTHROPIC_AUTH_TOKEN`; `CURSOR_API_KEY`; or an OpenCode-provider credential such as
 `OPENCODE_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, or
-`OPENROUTER_API_KEY`). OpenCode's stored provider login is configured with
-`opencode auth login`. Literate AI forwards allowed values to the selected process but
+`OPENROUTER_API_KEY`). OpenCode v1 can use a stored provider login configured with
+`opencode auth login`. Isolated v2 requires process environment credentials
+(such as `OPENROUTER_API_KEY`); an interactive v2 login is not imported. Literate AI forwards allowed values to the selected process but
 never writes them. `CODEX_API_KEY` remains a forwarded
 compatibility input for custom Codex provider configurations, but it is not the
 documented credential name for the standard Codex login flow.

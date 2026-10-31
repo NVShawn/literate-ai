@@ -107,8 +107,10 @@ assume every OpenCode desktop or older CLI version exposes the same command.
 The development adapter also supports OpenCode v2 with `opencode run --help`
 and private-server automation. That support is separate from the frozen 1.3.1
 conference wheel above. For v2, install `@opencode/cli` following the
-[v2 installation guide](https://opencode.ai/v2/docs/), authenticate with
-`opencode auth login openrouter`, and list models with `opencode models`.
+[v2 installation guide](https://opencode.ai/v2/docs/). List models with
+`opencode models`, then supply the emailed key as `OPENROUTER_API_KEY` in the
+Literate AI terminal. Isolated v2 uses fresh provider state and does not import
+interactive OpenCode logins; keep the key out of project files.
 Literate AI selects the interface automatically; existing v1 users can stay on v1.
 See [coding-CLI configuration](../user/configuration-and-cli.md) for the exact
 capability and isolation checks.

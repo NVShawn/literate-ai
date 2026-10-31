@@ -178,14 +178,19 @@ Claude compatibility discovery disabled, and deny-by-default permissions that en
 only workspace read/edit/list/glob/grep. V1 uses pure-plugin mode and its legacy
 permission map. V2 uses a private server (`--standalone`), native ordered rules,
 and policies denying external plugins, skills, and MCP. Ambient home skill
-discovery is redirected to the temporary config directory. V2 refuses system/MDM
-configuration and requires a bounded `debug config --standalone` probe to confirm
-that no extra configuration documents or altered rules are loaded. Its source-generation process
-runs in a detached temporary workspace, and LitAI materializes only the completely
+discovery is redirected to the temporary config directory. Before any v2 server
+starts, all XDG roots, the database, and temporary storage are also redirected
+to owned temporary directories. This prevents stored integration/plugin code
+from running during configuration inspection. V2 consumes process environment
+credentials and does not import saved OpenCode logins or integration state.
+V2 refuses system/MDM configuration and requires a bounded `debug config --standalone` probe to confirm
+that no extra configuration documents or altered rules are loaded. Its
+source-generation process runs in a detached temporary workspace, and LitAI materializes only the completely
 validated file map into the candidate root. OpenCode's own security model identifies
 permissions as a user-control policy rather than an operating-system sandbox, so the
 recorded isolation profile makes that limitation explicit; provider-managed session and
-authentication state may persist outside the temporary workspace.
+authentication state may persist outside the temporary workspace for v1; v2's
+owned provider state is removed after the invocation.
 Before any prompt or model invocation, a bounded `run --help` probe verifies that
 the exact pinned OpenCode executable exposes the options required by either supported
 major. Both probes omit prompts, model selectors, and forwarded credential values.

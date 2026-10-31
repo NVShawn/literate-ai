@@ -2096,7 +2096,7 @@ _CODING_CLI_ISOLATION = {
         ),
     ),
     "opencode": CodingCliIsolation(
-        "opencode-versioned-detached-workspace-tools-v2",
+        "opencode-versioned-detached-workspace-tools-v3",
         True,
         "provider-tool-policy-on-detached-workspace",
         False,
@@ -4170,10 +4170,10 @@ def _coding_cli_authentication_message(coding_cli: str) -> str:
     if coding_cli == "opencode":
         return (
             "opencode authentication is required. Configure the selected model "
-            "provider on this machine with `opencode auth login` before using "
-            "Literate AI, or pass one of that provider's documented environment "
-            "credentials (for example OPENCODE_API_KEY, OPENAI_API_KEY, "
-            "ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY)."
+            "provider on this machine with `opencode auth login` for v1; "
+            "isolated v2 requires one of the selected provider's documented "
+            "process environment credentials (for example OPENCODE_API_KEY, "
+            "OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY)."
         )
     credentials = ", ".join(_CODING_CLI_DIRECT_CREDENTIAL_ENVIRONMENT[coding_cli])
     return (
@@ -4593,9 +4593,25 @@ def _configure_opencode_interface(
         raise _opencode_managed_config_error()
     environment["OPENCODE_CONFIG_CONTENT"] = _OPENCODE_V2_CONFIG_CONTENT
     environment.pop("OPENCODE_PERMISSION", None)
-    # V2 also discovers ~/.agents independently of its config directory. Its
-    # home override leaves provider-managed data/authentication paths unchanged.
-    environment["OPENCODE_TEST_HOME"] = environment["OPENCODE_CONFIG_DIR"]
+    # Isolate state BEFORE starting even the prompt-free configuration server.
+    # Stored integration documents can authorize plugins before debug config
+    # returns, so inspecting sources after boot is not a sufficient boundary.
+    root = Path(environment["OPENCODE_CONFIG_DIR"])
+    for variable, name in (
+        ("XDG_CONFIG_HOME", "config"),
+        ("XDG_DATA_HOME", "data"),
+        ("XDG_STATE_HOME", "state"),
+        ("XDG_CACHE_HOME", "cache"),
+    ):
+        directory = root / name
+        directory.mkdir()
+        environment[variable] = str(directory)
+    temporary = root / "tmp"
+    temporary.mkdir()
+    environment.update({key: str(temporary) for key in ("TMPDIR", "TMP", "TEMP")})
+    environment["OPENCODE_DB"] = str(root / "opencode.db")
+    # V2 also discovers ~/.agents independently of its config directory.
+    environment["OPENCODE_TEST_HOME"] = str(root)
     environment["OPENCODE_CLI_CONFIG_CONTENT"] = "{}"
     environment["OPENCODE_LOG_LEVEL"] = "error"
     _require_opencode_v2_configuration(selection, workspace, environment)
@@ -4606,9 +4622,9 @@ def _require_opencode_v2_configuration(
 ) -> None:
     """Refuse ambient integration/config documents before supplying a prompt.
 
-    V2 keeps credential and integration state in its provider-managed database.
-    Inspect the actual private server's normalized sources rather than assuming
-    an empty config directory also excludes database-backed configuration.
+    All V2 data and database paths must already be private before this probe.
+    Confirm the native configuration contract without loading ambient sessions,
+    saved credentials, or integration/plugin documents.
     """
     credentials = {name.casefold() for name in _CODING_CLI_AUTH_ENVIRONMENT["opencode"]}
     probe_environment = {

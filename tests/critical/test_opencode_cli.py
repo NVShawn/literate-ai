@@ -73,6 +73,21 @@ class OpenCodeCliTests(unittest.TestCase):
                             self.assertNotIn("OPENAI_API_KEY", env)
                             self.assertNotIn("UNRELATED_SECRET", env)
                             return result(help_output(interface))
+                        if interface == "v2":
+                            owned = Path(env["OPENCODE_CONFIG_DIR"])
+                            for key in (
+                                "XDG_CONFIG_HOME",
+                                "XDG_DATA_HOME",
+                                "XDG_STATE_HOME",
+                                "XDG_CACHE_HOME",
+                                "OPENCODE_DB",
+                                "TMPDIR",
+                                "TMP",
+                                "TEMP",
+                            ):
+                                self.assertTrue(
+                                    Path(env[key]).is_relative_to(owned), key
+                                )
                         if command[1:3] == ["debug", "config"]:
                             self.assertNotIn("OPENAI_API_KEY", env)
                             return result(config_output(env))
@@ -110,6 +125,10 @@ class OpenCodeCliTests(unittest.TestCase):
                             "UNRELATED_SECRET": "private",
                             "OPENCODE_SERVER": "http://ambient.invalid",
                             "OPENCODE_TEST_HOME": "/ambient/home",
+                            "OPENCODE_DB": "/ambient/credentials.db",
+                            "XDG_DATA_HOME": "/ambient/data",
+                            "XDG_STATE_HOME": "/ambient/state",
+                            "XDG_CACHE_HOME": "/ambient/cache",
                         }
                         if task:
                             actual = cli.CodingCliTaskRunner(
