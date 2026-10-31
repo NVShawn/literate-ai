@@ -31690,3 +31690,22 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [x] Focused root-output, stale-result, symlink-escape, and existing _build result regressions pass on macOS.
   - [x] The complete Python gate passes 2,437 tests with 73 declared skips and no failures in 723.751 seconds; lint, format, repository-layout, public-export, project validation, lifecycle-driver review, documentation-authority review, and diff checks pass.
   - [ ] Replay the exact KSE retained lifecycle and require a current receipt.
+
+### [ ] A2A-001 — Guide agents to use connected A2A peers without adding framework orchestration
+
+- **Priority:** P2
+- **Owner:** agent skills, canonical onboarding/templates, and agent-ledger boundary documentation
+- **Direction:** Keep A2A communication managed by the coding-agent host or external orchestrator; teach Literate AI agents to use suitable already-connected A2A agents when delegation is permitted.
+- **Conclusion:** Extend PROJECT.md Goals 1, 2, and 4 through optional agent guidance. The host owns A2A connections, authentication, discovery, conversations, and remote task management; the coordinating agent delegates bounded work and records consequential decisions in the configured tracker. Literate AI retains locked derivation authority, execution authorization, artifact custody, and independent acceptance. No native A2A client/server, discovery service, second scheduler, required A2A dependency, or release commitment is introduced by this item. A future headless dispatch requirement needs a separate proposal through existing provider/dispatch boundaries.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Define the optional A2A policy in docs/architecture/agent-ledger-boundary.md, preserving ADR 0050: forge issues remain the default durable coordination record unless explicitly overridden.
+  - [ ] Add a compact nested agent skill, catalog routing, and canonical initialized-project guidance for host-exposed A2A peers. Use only available, authorized connections; honor delegation restrictions and task/data scope; leave connection setup and protocol operations to the host. The first action is to author this boundary and skill guidance.
+  - [ ] Document bounded delegation inputs and expected deliverables, peer suitability, host-managed timeout/cancellation, and a local continuation path when no suitable peer is available; do not silently broaden scope or duplicate completed remote work.
+  - [ ] Treat peer responses as candidate inputs. Promote requirement/interface/instruction changes only through reviewed, pinned authority; do not introduce hidden generation dependencies, expose dependency-private context, or treat an Agent Card capability claim or completed A2A task as execution permission or passing evidence.
+  - [ ] Preserve exact artifact verification and normal lifecycle gates for returned work. Correlate remote tasks/results in operational records without making conversation or task IDs semantic generation/cache inputs.
+- **Evidence:**
+  - [ ] make skills-check passes and canonical/template guidance remains consistent, with no required A2A SDK, service, credential, endpoint, or project-local connection configuration.
+  - [ ] Review or exercise guidance scenarios for suitable connected peers, no A2A support, unavailable/unsuitable peers, prohibited delegation, and timeout/cancellation; absence of A2A does not prevent ordinary local work.
+  - [ ] Boundary review confirms bounded context sharing, durable tracker handoffs, reviewed authority changes, unchanged generation/cache identity rules, and independent validation of returned artifacts; A2A completion alone never satisfies litai acceptance.

@@ -76,6 +76,13 @@ development (2026-09-10):
 
 ## Current work
 
+A2A-001 extends Goals 1, 2, and 4 with optional guidance for using suitable
+A2A agents already connected through the coding-agent host, when delegation is
+permitted. Connections and agent communication remain host/orchestrator-owned;
+Literate AI retains pinned authority, execution authorization, artifact verification,
+and acceptance. The [roadmap item](docs/roadmap/active-work.md#a2a-001-guide-agents-to-use-connected-a2a-peers-without-adding-framework-orchestration)
+is open, with no release assigned or native A2A implementation implied.
+
 LAB-AUTHORITY-001 extends Goals 2 and 4 with an independent, progressively richer
 canonical lab curriculum. Each lab must use actual Components, selected Flavors,
 locks, skills/workflows and truthful lifecycle evidence from this framework,
