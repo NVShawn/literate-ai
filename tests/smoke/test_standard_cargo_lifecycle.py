@@ -38,6 +38,19 @@ def _identity(label: str):
     return canonical_identity({"standard-cargo-test": label})
 
 
+def _native_tool_binding(name: str) -> LocalComponentToolBinding:
+    executable = shutil.which(name)
+    measured = LocalComponentToolBinding(executable)
+    # Rustup selects its tool from argv[0]. Cargo and rustc proxies can have
+    # identical bytes (or resolve to the same binary) but are distinct commands.
+    return LocalComponentToolBinding(
+        executable,
+        authority_identity=canonical_identity(
+            {"command": executable, "launcher": measured.toolchain_identity.uri}
+        ),
+    )
+
+
 def _commands() -> tuple[ComponentLifecycleCommand, ...]:
     return tuple(
         ComponentLifecycleCommand(
@@ -116,12 +129,14 @@ class StandardCargoLifecycleTests(unittest.TestCase):
         fake_cargo = root / "fake-cargo.py"
         _write_fake_cargo(fake_cargo)
         cargo = (
-            LocalComponentToolBinding(shutil.which("cargo"))
+            _native_tool_binding("cargo")
             if native
             else LocalComponentToolBinding(sys.executable, (str(fake_cargo),))
         )
-        python = LocalComponentToolBinding(
-            shutil.which("rustc") if native else sys.executable
+        python = (
+            _native_tool_binding("rustc")
+            if native
+            else LocalComponentToolBinding(sys.executable)
         )
         resolver = _identity("cargo-resolver")
         provisional = StandardCargoTarget(
@@ -218,6 +233,26 @@ class StandardCargoLifecycleTests(unittest.TestCase):
         index = ports.index(candidate.component_revision, candidate.tree_identity)
         plan = ports.finalize(intent, ports.authorize(intent, index))
         return ports, plan, candidate
+
+    def test_native_fixture_distinguishes_identical_multicall_launchers(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            commands = {}
+            for name in ("cargo", "rustc"):
+                executable = root / name
+                shutil.copy2(sys.executable, executable)
+                commands[name] = str(executable)
+            with patch.object(shutil, "which", side_effect=commands.__getitem__):
+                ports, _plan, _candidate = self._system(root, native=True)
+            self.assertEqual(len(ports.tool_bindings), 2)
+            self.assertEqual(
+                {binding.executable for binding in ports.tool_bindings.values()},
+                set(commands.values()),
+            )
+            for binding in ports.tool_bindings.values():
+                Path(binding.executable).write_bytes(b"changed launcher")
+                with self.assertRaisesRegex(LocalStandardLifecycleError, "changed"):
+                    binding.require_unchanged()
 
     def test_cargo_library_build_exports_immutable_package_tree(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
