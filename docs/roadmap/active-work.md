@@ -31630,15 +31630,16 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Priority:** P0
 - **Owner:** retained remote lifecycle controller
 - **Direction:** Make remote retained-harness cleanup succeed for legitimate read-only native build outputs without broadening deletion scope.
-- **Conclusion:** Normalize owner write permission only beneath each exact controller-created incoming and workspace path before recursive removal; keep cleanup fail-closed and preserve unrelated worker content.
+- **Conclusion:** Normalize owner write permission only beneath each exact controller-created incoming and workspace path before recursive removal. Permit one bounded idempotent retry against those same exact paths when the first cleanup attempt returns nonzero, while keeping final cleanup failure fail-closed and preserving unrelated worker content.
 - **Depends on:** RETAINED-PROJECT-001
 - **GitHub issue:** [#205](https://github.com/jordanhubbard/literate-ai/issues/205)
 - **Completion prerequisites:** none
 - **Implementation:**
   - [x] Harden POSIX remote cleanup for nested read-only files and directories while preserving exact quoted targets and symlink-safe scope.
   - [x] Add focused controller regression coverage for read-only nested output and unrelated-neighbor preservation.
+  - [x] Retry one exact-path cleanup after a nonzero first attempt, preserving the already-returned lifecycle result only when a bounded retry proves cleanup succeeded.
 - **Evidence:**
-  - [ ] Focused retained remote adapter tests pass on macOS; the same exact command cleaned the isolated Linux native attempt while preserving unrelated content; `make python-check` passes 2,432 tests with 73 skips and no failures; lint, format, project validation, and diff checks pass. Require the active installed replay to clean its exact attempt and produce a current retained receipt before closure.
+  - [ ] Eight focused retained remote adapter tests pass on macOS, including successful admission after one failed exact-path cleanup and fail-closed refusal after both bounded attempts fail. `make python-check` passes 2,443 tests with 73 skips and no failures in 785.752 seconds; lint, format, repository-layout, public-export, project validation, and diff checks pass. The 2026-10-31 exact KSE wrapper replay returned `retained_receipt.remote_cleanup_failed` after the first 300-second cleanup budget, while immediate follow-up proved both exact attempt paths absent; require a repaired active installed replay to return and admit the current receipt before closure.
 
 ### [ ] RETAINED-SSH-001 — Keep long retained SSH lifecycle control channels alive
 
