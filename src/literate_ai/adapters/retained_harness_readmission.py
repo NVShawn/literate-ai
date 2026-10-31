@@ -44,6 +44,7 @@ from literate_ai.adapters.retained_harness_receipts import (
     retained_harness_runner_identity,
 )
 from literate_ai.adapters.retained_harness_remote import (
+    RetainedHarnessRemoteError,
     RetainedHarnessSshExecutor,
     retained_harness_runtime_requirements,
 )
@@ -62,6 +63,7 @@ INVENTORY = ".literate/harness-inventory.json"
 BASELINE = ".literate/legacy-harness-baseline.json"
 PARITY = ".literate/legacy-wrapper-parity.json"
 LIFT_SHIFT = ".literate/legacy-lift-shift.json"
+_PARITY_SOURCE_CAPTURE_ATTEMPTS = 2
 
 
 class RetainedHarnessReadmissionError(RuntimeError):
@@ -533,22 +535,38 @@ def _parity_report(
         observed = observe_retained_tree(source_root, parity_inventory["source_scope"])[
             "source_tree"
         ]
-        result = executor.execute(
-            worker,
-            project_id=project_id,
-            project_revision_identity=plan_identity,
-            worker_catalog_identity=worker_catalog_identity,
-            runner_identity=retained_harness_runner_identity(parity_inventory),
-            lifecycle_request_identity=canonical_identity(
-                {"operation": "retained-harness.readmit", "phase": "wrapper"}
-            ),
-            inventory=parity_inventory,
-            inventory_bytes=canonical_json_bytes(parity_inventory),
-            source_root=source_root,
-            source_identity=ContentIdentity.parse_uri(str(observed["identity"])),
-            timeout_seconds=timeout_seconds,
-            cwd=implementation,
-        )
+        source_capture_attempts = 0
+        while True:
+            source_capture_attempts += 1
+            try:
+                result = executor.execute(
+                    worker,
+                    project_id=project_id,
+                    project_revision_identity=plan_identity,
+                    worker_catalog_identity=worker_catalog_identity,
+                    runner_identity=retained_harness_runner_identity(parity_inventory),
+                    lifecycle_request_identity=canonical_identity(
+                        {
+                            "operation": "retained-harness.readmit",
+                            "phase": "wrapper",
+                        }
+                    ),
+                    inventory=parity_inventory,
+                    inventory_bytes=canonical_json_bytes(parity_inventory),
+                    source_root=source_root,
+                    source_identity=ContentIdentity.parse_uri(
+                        str(observed["identity"])
+                    ),
+                    timeout_seconds=timeout_seconds,
+                    cwd=implementation,
+                )
+                break
+            except RetainedHarnessRemoteError as exc:
+                if (
+                    exc.code != "retained_receipt.remote_source_capture_failed"
+                    or source_capture_attempts >= _PARITY_SOURCE_CAPTURE_ATTEMPTS
+                ):
+                    raise
     direct = {
         item["phase"]: item
         for item in baseline["phases"]
@@ -585,6 +603,7 @@ def _parity_report(
         "diagnostic_limit_chars": HARNESS_DIAGNOSTIC_CHARS,
         "phases": phases,
         "phase_count": len(phases),
+        "source_capture_attempts": source_capture_attempts,
         "execution_worker_identity": worker.identity.uri,
         "platform": result.platform,
     }

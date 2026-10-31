@@ -142,7 +142,12 @@ Installed original-source compilation, package consumption and full native
 qualification remain separate open requirements.
 RETAINED-SSH-001 keeps those long, otherwise-silent remote lifecycles alive at
 the shared SSH transport layer so successful native work can return its exact
-bounded result; current long-run receipt renewal remains open.
+bounded result. The exact KSE direct lifecycle now returns a passing build,
+211-of-211 test result and package, but a transient local wrapper-parity source
+capture discarded that returned baseline before parity dispatch. Readmission
+must retry only a source-capture failure proven to occur before remote dispatch,
+without replaying or caching acceptance evidence; current long-run receipt
+renewal remains open.
 RETAINED-REPO-ROOT-RESULTS-001 admits Repo Tools' authoritative current-run
 test summary from either a configured build tree or its default root
 `_testoutput` directory, while retaining bounded path, freshness and symlink

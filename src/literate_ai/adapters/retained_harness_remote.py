@@ -744,6 +744,10 @@ def _source_archive(
             "execution.source_archive_oversized": (
                 "retained_receipt.remote_archive_oversized"
             ),
+            "execution.source_capture_failed": (
+                "retained_receipt.remote_source_capture_failed"
+            ),
+            "execution.source_changed": "retained_receipt.remote_source_changed",
             "execution.source_entry_limit": (
                 "retained_receipt.remote_source_scope_invalid"
             ),
