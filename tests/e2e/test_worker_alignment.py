@@ -370,6 +370,56 @@ class WindowsDefenderExclusionTests(unittest.TestCase):
                     WorkerTemplate.load(template)
 
 
+class OpenCodeModelProbeTests(unittest.TestCase):
+    def test_model_probe_selects_private_v2_server_and_preserves_v1(self):
+        from literate_ai.contracts import (
+            ExecutionRequirements,
+            ExecutionWorker,
+            ExecutionWorkerKind,
+        )
+
+        worker = ExecutionWorker(
+            "fixture",
+            ExecutionWorkerKind.SSH,
+            requirements=ExecutionRequirements(os_family="linux"),
+            endpoint="user@fixture.invalid",
+            workspace="~/litai",
+        )
+        aligner = WorkerAligner(
+            WorkerTemplate({}),
+            UserAlignment(()),
+            coding_cli="opencode",
+            model="provider/model",
+            cwd=Path.cwd(),
+        )
+        for standalone in (False, True):
+            with self.subTest(standalone=standalone):
+                report = worker_alignment.WorkerReport("fixture", "linux")
+                help_output = (
+                    b"  --standalone  private server\n" if standalone else b"  --pure\n"
+                )
+                responses = [
+                    SimpleNamespace(returncode=0, stdout=help_output, stderr=b""),
+                    SimpleNamespace(returncode=0, stdout=b"ok\n", stderr=b""),
+                ]
+                with patch.object(aligner, "_run", side_effect=responses) as run:
+                    aligner._check_model(worker, report)
+                    self.assertEqual(run.call_count, 2)
+                    command = run.call_args.args[1]
+                    self.assertEqual("--standalone" in command, standalone)
+                    self.assertIn("provider/model", command)
+                self.assertEqual(report.findings, [])
+        with patch.object(
+            aligner,
+            "_run",
+            return_value=SimpleNamespace(returncode=1, stdout=b"", stderr=b""),
+        ) as run:
+            report = worker_alignment.WorkerReport("fixture", "linux")
+            aligner._check_model(worker, report)
+            self.assertEqual(run.call_count, 1)
+            self.assertEqual(report.findings[0].state, "failed")
+
+
 if __name__ == "__main__":
     unittest.main()
 

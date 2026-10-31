@@ -55,7 +55,7 @@ TEST_COMPONENT_LOCK_IDENTITY = ContentIdentity.parse_uri("sha256:" + "c" * 64)
 
 
 def _is_opencode_compatibility_probe(command) -> bool:
-    return tuple(command[1:]) == ("--pure", "run", "--help")
+    return tuple(command[1:]) == ("run", "--help")
 
 
 def _compatible_opencode_help_result() -> SimpleNamespace:

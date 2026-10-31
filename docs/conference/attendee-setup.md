@@ -104,6 +104,15 @@ Literate AI 1.3.1 requires the `--pure run` capability. If that probe is rejecte
 update to a compatible OpenCode CLI or use another supported assistant; do not
 assume every OpenCode desktop or older CLI version exposes the same command.
 
+The development adapter also supports OpenCode v2 with `opencode run --help`
+and private-server automation. That support is separate from the frozen 1.3.1
+conference wheel above. For v2, install `@opencode/cli` following the
+[v2 installation guide](https://opencode.ai/v2/docs/), authenticate with
+`opencode auth login openrouter`, and list models with `opencode models`.
+Literate AI selects the interface automatically; existing v1 users can stay on v1.
+See [coding-CLI configuration](../user/configuration-and-cli.md) for the exact
+capability and isolation checks.
+
 ### Claude Code
 
 Install [Claude Code](https://code.claude.com/docs/en/overview). In the terminal you

@@ -76,6 +76,13 @@ development (2026-09-10):
 
 ## Current work
 
+OPENCODE-COMPAT-001 extends Goals 1, 3, and 4 with support for both OpenCode CLI
+majors. Capability selection preserves v1 pure mode and adds v2 private-server
+execution with native permissions and confirmation of the owned configuration.
+Native macOS tests with a loopback model prove file writing and refusal of
+out-of-workspace reads on both majors. Independent driver review and broader
+installed/native qualification remain open in the active queue.
+
 LAB-AUTHORITY-001 extends Goals 2 and 4 with an independent, progressively richer
 canonical lab curriculum. Each lab must use actual Components, selected Flavors,
 locks, skills/workflows and truthful lifecycle evidence from this framework,

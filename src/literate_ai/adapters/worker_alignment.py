@@ -847,8 +847,38 @@ class WorkerAligner:
                 )
             )
             return
-        argv = ("opencode", "run", "-m", str(self.model), _MODEL_PROMPT)
         try:
+            help_result = self._run(
+                worker,
+                _remote_command(worker, ("opencode", "run", "--help")),
+                _PROBE_TIMEOUT_SECONDS,
+            )
+            if help_result.returncode:
+                report.findings.append(
+                    Finding(
+                        "model",
+                        str(self.model),
+                        "failed",
+                        "opencode run help probe failed before model check",
+                    )
+                )
+                return
+            # Alignment intentionally checks the worker's own provider setup.
+            # V2 must launch a private server so process-bound keys are visible.
+            standalone = bool(
+                re.search(
+                    rb"(?m)^[ \t]*--standalone(?:[ =\t,]|$)",
+                    help_result.stdout + b"\n" + help_result.stderr,
+                )
+            )
+            argv = (
+                "opencode",
+                "run",
+                *(("--standalone",) if standalone else ()),
+                "-m",
+                str(self.model),
+                _MODEL_PROMPT,
+            )
             completed = self._run(
                 worker, _remote_command(worker, argv), _MODEL_TIMEOUT_SECONDS
             )

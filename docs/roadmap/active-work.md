@@ -31679,3 +31679,38 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [x] Focused root-output, stale-result, symlink-escape, and existing _build result regressions pass on macOS.
   - [x] The complete Python gate passes 2,437 tests with 73 declared skips and no failures in 723.751 seconds; lint, format, repository-layout, public-export, project validation, lifecycle-driver review, documentation-authority review, and diff checks pass.
   - [ ] Replay the exact KSE retained lifecycle and require a current receipt.
+
+### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
+
+- **Priority:** P1
+- **Owner:** Framework core coding-CLI adapter, host-install Flavors, and setup documentation; PROJECT Goals 1, 3, and 4
+- **Direction:** Support both v1 and v2 of the OpenCode command line without requiring existing v1 users to migrate.
+- **Conclusion:** Select a compatible invocation and isolation profile from the exact executable capabilities. Current generation and preflight require the v1 --pure and --dir help surface; published v2.2.5 help omits both and defaults to a shared background service. Preserve supported v1 behavior and qualify v2 with a private server, explicit workspace custody, provider credentials, bounded diagnostics, and deny-by-default tools. Supported legacy configuration translation alone does not establish equivalent isolation. This item records future implementation; it does not claim v2 support or assign a release target.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Obtain independent driver review, then qualify installed/native v1 and v2 generation on the remaining supported platforms.
+- **Implementation:**
+  - [x] First capture pinned v1 and v2 CLI help/configuration contracts and define capability detection, version-specific command construction, and fail-closed diagnostics for unsupported executables.
+  - [x] Preserve the v1 invocation and add a qualified v2 invocation with --standalone, supported working-directory and logging controls, and version-appropriate configuration/environment handling; preserve executable identity, detached workspace, permission, and credential boundaries.
+  - [x] Review worker model probes and remote invocation paths for both majors; select v2 standalone mode for worker model checks and update attendee/operator guidance. Keep the existing host-install and initialized-template v1 pins unchanged so v1 remains a supported default; neither the adapter nor worker dispatch requires a forced upgrade.
+- **Evidence:**
+  - [x] Regression fixtures for both majors cover preflight acceptance/refusal, exact commands, workspace selection, credentials, configuration and tool isolation, diagnostics, timeouts, and executable drift; existing v1 coverage remains passing.
+  - [ ] Run actual pinned v1 and v2 help probes and authorized isolated generation on supported native hosts; verify v2 private-server credentials and logs, absence of ambient service/configuration leakage, and parity of generated-tree validation. Record exact versions and platform scope before claiming support.
+  - [ ] Verify host-install/template consistency, documentation commands, and required repository checks; leave live or native qualification unchecked until performed.
+
+OPENCODE-COMPAT-001 development evidence: macOS arm64 passes 25 existing critical
+coding-CLI/cache tests, five worker-alignment tests, and the focused version/isolation
+cases. Actual OpenCode 1.18.25 and 2.2.5 both pass
+`tests.e2e.test_opencode_native` against a loopback simulated model: each writes the
+requested JSON response through its real tool runner and refuses an attempted read
+outside the detached task workspace without exposing the sentinel to the model.
+The v2 test first verifies the unmodified production configuration, then adds only
+a test-owned loopback provider. Run through `make python-check` with
+`LITAI_OPENCODE_V1_BINARY` and `LITAI_OPENCODE_V2_BINARY` bound to exact binaries.
+No paid inference is used. Repository lint/format, host path policy, and layout
+checks pass. Documentation authority review is recorded; `litai verify` passes
+that gate but the project test receipt remains stale. Full local regression,
+independent driver review/re-pin, installed/native Linux and Windows generation,
+and release qualification remain separate pending evidence. The workflow tracker
+survey fails through the configured SSH alias; a read-only GitHub.com survey found
+no overlapping OpenCode PR. Unrelated Cargo and lab-receipt work was retained.

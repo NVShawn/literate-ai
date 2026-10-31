@@ -587,8 +587,10 @@ reports only the selected provider and numeric exit status and directs the opera
 that agent's local diagnostics.
 
 Before an OpenCode prompt can leave the workspace, the adapter runs a separate bounded
-`opencode --pure run --help` probe against the exact pinned executable and requires the
-pure-plugin, detached-workspace, agent, and output-format options used by generation.
+`opencode run --help` probe against the exact pinned executable. V1 retains
+`--pure run --dir WORKSPACE`; v2 uses `run --standalone` with the subprocess cwd,
+native ordered permissions, and a second `debug config --standalone` probe that
+rejects extra configuration sources or a changed permission policy.
 The probe has no prompt or model selector. A failed probe or missing option is
 `coding_cli.incompatible` with upgrade guidance; it is distinct from authentication,
 provider execution, and generated-tree admission failures, and an explicit OpenCode
@@ -670,11 +672,13 @@ on non-Windows hosts and is never selected implicitly. Every Codex invocation re
 noninteractive through `--ask-for-approval never`. Claude uses safe mode with only Read,
 Write, and Edit tools, which is a provider tool policy rather than an OS sandbox. Cursor Agent uses
 its provider sandbox but has no enforceable clean-config mode, so ambient configuration
-is explicitly a deferred limitation. OpenCode uses `--pure run` against a detached
-temporary workspace, with project/Claude instructions, plugins, sharing, updates, and
-automatic LSP downloads disabled. Its deny-by-default permission map enables only
-read/edit/list/glob/grep, but OpenCode explicitly does not claim that policy as an OS
-sandbox; LitAI therefore materializes only the validated file map into the real
+is explicitly a deferred limitation. OpenCode uses a detached temporary workspace
+with project/Claude discovery disabled and an owned configuration directory. V1
+uses `--pure run` and legacy permissions; v2 uses `run --standalone`, native
+ordered permissions, and deny policies for external plugins, skills, and MCP.
+V2 refuses system/MDM or ambient integration configuration that prevents the
+owned configuration from being confirmed. Both profiles enable only
+read/edit/list/glob/grep, but OpenCode does not claim that policy as an OS sandbox; LitAI therefore materializes only the validated file map into the real
 candidate root. OpenCode session and authentication state remain provider-managed
 outside that workspace. Network egress, provider internals, authentication
 state, and immutable model weights are not attested for any of these opaque CLIs. Their
