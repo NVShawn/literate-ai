@@ -25,6 +25,7 @@ from literate_ai.adapters.retained_harness_remote import (
     _source_archive,
     execute_retained_harness_receiver,
 )
+from literate_ai.adapters.source_materialization import SourceMaterializationError
 from literate_ai.adapters.ssh_transport import SshProcessResult
 from literate_ai.cli import main
 from literate_ai.contracts import (
@@ -65,11 +66,15 @@ def _phase() -> dict[str, object]:
 
 
 class RecordingRetainedRunner:
-    def __init__(self, *, tamper_worker: bool = False) -> None:
+    def __init__(
+        self, *, tamper_worker: bool = False, cleanup_failures: int = 0
+    ) -> None:
         self.calls: list[tuple[str, ...]] = []
         self.timeouts: list[int] = []
         self.request: RetainedHarnessRemoteRequest | None = None
         self.tamper_worker = tamper_worker
+        self.cleanup_failures = cleanup_failures
+        self.cleanup_calls = 0
 
     def run(self, argv, *, cwd, timeout_seconds):
         del cwd
@@ -84,6 +89,11 @@ class RecordingRetainedRunner:
                 )
             return SshProcessResult(0, b"", b"")
         command = call[-1]
+        if "rm -rf" in command:
+            self.cleanup_calls += 1
+            if self.cleanup_calls <= self.cleanup_failures:
+                return SshProcessResult(1, b"", b"")
+            return SshProcessResult(0, b"", b"")
         if "worker execute-retained" in command:
             assert self.request is not None
             request = self.request
@@ -115,6 +125,81 @@ class RecordingRetainedRunner:
 
 
 class RetainedHarnessRemoteTests(unittest.TestCase):
+    def test_source_archive_preserves_retry_classification(self) -> None:
+        for source_code, remote_code in (
+            (
+                "execution.source_capture_failed",
+                "retained_receipt.remote_source_capture_failed",
+            ),
+            (
+                "execution.source_changed",
+                "retained_receipt.remote_source_changed",
+            ),
+            (
+                "execution.source_archive_oversized",
+                "retained_receipt.remote_archive_oversized",
+            ),
+            (
+                "execution.source_entry_limit",
+                "retained_receipt.remote_source_scope_invalid",
+            ),
+        ):
+            with (
+                self.subTest(source_code=source_code),
+                patch(
+                    "literate_ai.adapters.retained_harness_remote."
+                    "write_bounded_source_archive",
+                    side_effect=SourceMaterializationError(
+                        source_code, "fixture failure"
+                    ),
+                ),
+                self.assertRaises(RetainedHarnessRemoteError) as raised,
+            ):
+                _source_archive(
+                    Path("fixture-root"),
+                    {"source_scope": {"paths": ["source.txt"]}},
+                    Path("source.tar.gz"),
+                )
+            self.assertEqual(raised.exception.code, remote_code)
+
+    @unittest.skipIf(os.name == "nt", "retained SSH cleanup requires POSIX")
+    def test_cleanup_removes_read_only_directories_without_following_symlinks(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "attempt root"
+            incoming = root / "incoming"
+            workspace = root / "workspace"
+            neighbor = root / "neighbor"
+            read_only = workspace / "output" / "nested"
+            incoming.mkdir(parents=True)
+            read_only.mkdir(parents=True)
+            neighbor.mkdir(parents=True)
+            (read_only / "artifact").write_text("generated", encoding="utf-8")
+            marker = neighbor / "marker"
+            marker.write_text("preserve", encoding="utf-8")
+            (workspace / "neighbor-link").symlink_to(neighbor, target_is_directory=True)
+            read_only.chmod(0o500)
+            read_only.parent.chmod(0o500)
+
+            completed = subprocess.run(
+                (
+                    "sh",
+                    "-c",
+                    RetainedHarnessSshExecutor._cleanup_command(
+                        str(incoming), str(workspace)
+                    ),
+                ),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            self.assertFalse(incoming.exists())
+            self.assertFalse(workspace.exists())
+            self.assertEqual(marker.read_text(encoding="utf-8"), "preserve")
+
     def test_receiver_cli_redacts_private_paths_and_secrets_but_keeps_code(
         self,
     ) -> None:
@@ -264,6 +349,30 @@ class RetainedHarnessRemoteTests(unittest.TestCase):
             raised.exception.code, "retained_receipt.remote_identity_mismatch"
         )
         self.assertIn("rm -rf", runner.calls[-1][-1])
+
+    def test_cleanup_retries_one_bounded_exact_attempt_before_admission(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runner = RecordingRetainedRunner(cleanup_failures=1)
+
+            result = self._execute(root, runner)
+
+        self.assertEqual(len(result.phases), 1)
+        self.assertEqual(runner.cleanup_calls, 2)
+        self.assertTrue(all(298 <= timeout <= 300 for timeout in runner.timeouts[-2:]))
+
+    def test_cleanup_remains_fail_closed_after_bounded_retries(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            runner = RecordingRetainedRunner(cleanup_failures=2)
+            with self.assertRaises(RetainedHarnessRemoteError) as raised:
+                self._execute(root, runner)
+
+        self.assertEqual(
+            raised.exception.code, "retained_receipt.remote_cleanup_failed"
+        )
+        self.assertEqual(runner.cleanup_calls, 2)
+        self.assertTrue(all(298 <= timeout <= 300 for timeout in runner.timeouts[-2:]))
 
     @patch(
         "literate_ai.adapters.retained_harness_remote.platform.system",

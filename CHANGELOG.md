@@ -6,6 +6,37 @@
   unchanged source timestamps and verifying retained workspace integrity. Keep
   toolchain/target isolation, fresh dependency evidence and failed-build cleanup.
 
+- Retry one bounded retained remote cleanup against the same exact
+  controller-owned attempt paths when the first cleanup returns nonzero. Admit
+  the already-returned lifecycle result only after cleanup succeeds, and remain
+  fail-closed after the bounded retry.
+
+- Preserve the direct baseline's exact admitted authored-source paths through
+  retained wrapper parity, including tracked source beneath conventionally
+  generated directory names, while continuing to exclude new build output.
+
+- Retry one verifier-owned retained wrapper-parity source capture when the
+  pre-dispatch local archive fails transiently. Preserve the successful direct
+  baseline in memory, bound the retry to the same source and process, and keep
+  changed source, invalid scope, transport, and post-dispatch failures closed.
+
+- Admit Repo Tools' authoritative current-run test count from either a
+  configured build tree or the default root `_testoutput` directory, while
+  preserving bounded paths, freshness checks, and symlink refusal.
+
+- Keep long SSH and SCP lifecycle channels alive with bounded OpenSSH
+  server-alive probes, so otherwise-silent retained build/test/package runs can
+  return their exact result instead of losing the controller connection.
+
+- Retained remote execution: clean exact controller-owned attempt workspaces even
+  when native build tools create read-only output directories, without following
+  symlinks or broadening cleanup scope.
+
+- Add independent 1.3.1 lab projects with real Component/Flavor locks, authored
+  retained inputs and verifier-owned browser contracts. Make `litai build` and
+  `litai run` the attendee path; keep preview assembly in a maintainer guide.
+  Include project inputs in the offline kit and scope lab CI to source/browser
+  checks. Progressive multi-Component curriculum work remains open.
 - Welcome Unprompted AI attendees with a from-zero setup guide, emailed OpenRouter key instructions and accurate assistant choices. Record the published 1.3.1 downloads and the temporary resource-driven Windows matrix suspension, with restoration required next release.
 - Scope conference website scripts and the two 1.3.1 publication records to documentation feedback; preserve broader qualification for product source, lab implementations and unknown records.
 

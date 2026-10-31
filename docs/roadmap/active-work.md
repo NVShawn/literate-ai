@@ -31564,6 +31564,10 @@ No software release or native success is claimed.
 
 **Unprompted AI delivery direction:** Update the labs on main to work as independent Literate AI 1.3.1 projects, with actual canonical authority and verifiable lifecycle boundaries. Give first-time session attendees a stand-alone README welcome and a from-zero checklist covering machines, tools, emailed OpenRouter keys and supported coding assistants. Keep the frozen framework distribution qualification separate from this conference curriculum; qualify the labs using the exact 1.3.1 wheel and do not label browser demos as canonical projects.
 
+**CLI delivery clarification:** Attendees build and run through `litai build` and `litai run`. Python preview-assembly scripts belong in maintainer documentation. The 1.3.1 Windows matrix suspension belongs in the release notes, not the labs README. The first canonical conversion provides one actual application Component and three selected Flavors per lab, with independent browser admission; it does not close the progressively richer multi-Component requirement below.
+
+**1.3.1-compatible delivery evidence:** All six independent application projects pass actual Standard retained-source rebuilds, accepted-only public builds and public `litai run` HTTP serving with byte-identical previews using the published 1.3.1 wheel. Each initial rebuild and accepted-only build passes three tests with no failures/skips, plus independent desktop/mobile browser acceptance. Actual browser checks verify 239 arithmetic dots, real oscillators and audio stop/restart, repeated nonempty four/five-second video downloads and unsupported-capture refusal. See `verification/unprompted-ai-labs-1.3.1.json`. Historical-cache discovery limitations are newly tracked in issues #196/#197 for 1.4; previous evidence is preserved, and this proof uses fresh isolated output roots rather than relaxing admission. The framework documentation root is now `docs`; the labs are independently validated projects, with all guide links still covered by the website verifier.
+
 - **Priority:** P0
 - **Owner:** labs documentation and offline artifact builder
 - **Direction:** The user found that Grumpy Counter graph roles look like real Components while its short specification omits visible UI behavior. https://github.com/jordanhubbard/literate-ai/issues/159
@@ -31632,9 +31636,75 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Implementation:**
   - [x] Implement persistent Cargo workspace and source synchronization with safe path checks. Compatible source revisions share locked intermediates; successful state is sealed over bytes, modes and freshness timestamps, and interrupted/failed work is discarded.
   - [x] Document reuse boundaries and add focused native Cargo and failure/isolation regression coverage. User cache/configuration guides and the root changelog describe local reuse independently of sccache.
-  - [ ] Repair [PR #198](https://github.com/jordanhubbard/literate-ai/pull/198) CI by reviewing the Cargo cache documentation against the implementation and recording the current documentation authority marker. Run `40912720305` failed all three sample-composition cells and the Linux repository self-description test on the same stale marker; no other Python failures were reported.
-  - [ ] Merge current `main` into the contribution branch to resolve GitHub's reported conflicts, preserving both branches' changelog and work-queue entries; refresh documentation review for the integrated authority.
+  - [x] Repair [PR #198](https://github.com/jordanhubbard/literate-ai/pull/198) CI by reviewing the Cargo cache documentation against the implementation and recording the current documentation authority marker. Run `40912720305` failed all three sample-composition cells and the Linux repository self-description test on the same stale marker; no other Python failures were reported.
+  - [x] Merge current `main` into the contribution branch to resolve GitHub's reported conflicts, preserving both branches' changelog and work-queue entries; refresh documentation review for the integrated authority.
+  - [x] Refresh the lifecycle-driver implementation pin after reviewing the integrated Cargo changes; `make driver-review` detects the previously unrecorded Cargo implementation drift. Preserve the existing receipt as historical evidence rather than claiming fresh lifecycle qualification.
 - **Evidence:**
-  - [ ] Re-run all declared `litai verify` gates and the affected project CLI tests; record local results and any gates requiring separate lifecycle evidence. Hosted CI renewal remains separate from local development proof.
+  - [x] Re-run all declared `litai verify` gates and the affected project CLI tests; record local results and any gates requiring separate lifecycle evidence. Local integrated-tree evidence: project validation, documentation review and lifecycle-driver review pass; managed `make python-check` passes all eight project CLI tests and nine Cargo lifecycle tests without skips (native rustup toolchain selected). Host path policy and the contribution diff whitespace check pass. `litai verify` passes authority, skips locks/source-intelligence/HTML because none are selected, and reports the existing stale lifecycle receipt; fresh full lifecycle qualification is not claimed. Start/end peer surveys still fail through the configured GitHub alias; direct read-only GitHub inspection succeeds. Existing unrelated worktrees and untracked local files are preserved. Hosted CI renewal remains separate from local development proof.
   - [x] Focused Standard Cargo tests prove warm freshness, source-edit rebuild, failure cleanup and unsafe-path refusal. All nine `tests.smoke.test_standard_cargo_lifecycle` cases pass on macOS arm64 with native Cargo/rustc 1.97.1: a warm forced artifact miss preserves the executable timestamp, a binary source edit rebuilds it while preserving the unchanged library artifact, and namespace isolation, stale-input removal, tampering/link refusal and interrupted/failed workspace cleanup pass.
   - [x] Run scoped make python-check and lint/format checks; record local-only scope and unavailable tracker survey. Scoped `make python-check` runs pass 63 Standard smoke cases (four expected skips), 33 critical cache cases, and a final nine-case Cargo rerun. Changed Python files pass Ruff lint/format and `git diff --check`; compileall and host path policy pass. Validation explicitly selected the existing rustup toolchain because ambient Homebrew Cargo cannot load its llhttp dependency. Start/end tracker surveys and the read-only GC plan fail through the configured GitHub alias; no peer changes were collected. This is local development evidence, not native cross-platform or release qualification.
+### [ ] RETAINED-CLEANUP-001 — Clean read-only retained remote attempt outputs safely
+
+- **Priority:** P0
+- **Owner:** retained remote lifecycle controller
+- **Direction:** Make remote retained-harness cleanup succeed for legitimate read-only native build outputs without broadening deletion scope.
+- **Conclusion:** Normalize owner write permission only beneath each exact controller-created incoming and workspace path before recursive removal. Permit one bounded idempotent retry against those same exact paths when the first cleanup attempt returns nonzero, while keeping final cleanup failure fail-closed and preserving unrelated worker content.
+- **Depends on:** RETAINED-PROJECT-001
+- **GitHub issue:** [#205](https://github.com/jordanhubbard/literate-ai/issues/205)
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Harden POSIX remote cleanup for nested read-only files and directories while preserving exact quoted targets and symlink-safe scope.
+  - [x] Add focused controller regression coverage for read-only nested output and unrelated-neighbor preservation.
+  - [x] Retry one exact-path cleanup after a nonzero first attempt, preserving the already-returned lifecycle result only when a bounded retry proves cleanup succeeded.
+- **Evidence:**
+  - [ ] Eight focused retained remote adapter tests pass on macOS, including successful admission after one failed exact-path cleanup and fail-closed refusal after both bounded attempts fail. `make python-check` passes 2,443 tests with 73 skips and no failures in 785.752 seconds; lint, format, repository-layout, public-export, project validation, and diff checks pass. The 2026-10-31 exact KSE wrapper replay returned `retained_receipt.remote_cleanup_failed` after the first 300-second cleanup budget, while immediate follow-up proved both exact attempt paths absent; require a repaired active installed replay to return and admit the current receipt before closure.
+
+### [ ] RETAINED-SSH-001 — Keep long retained SSH lifecycle control channels alive
+
+- **GitHub issues:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22),
+  [#229](https://github.com/jordanhubbard/literate-ai/issues/229)
+- **Priority:** P0
+- **Owner:** shared SSH transport and retained-harness remote execution
+- **Direction:** Long retained build, test, and package runs must return their exact bounded result instead of losing an idle SSH control channel after successful remote execution.
+- **Conclusion:** Add explicit OpenSSH keepalive controls to every shared SSH and SCP argv while preserving noninteractive bounded deadlines, output limits, endpoint validation, and exact receiver result admission. Do not synthesize a receipt from the completed downstream run; rerun it through the repaired transport.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Add portable ServerAliveInterval and ServerAliveCountMax options to shared SSH/SCP argument construction and update exact-argv regressions.
+  - [x] Retry a transient wrapper-parity source-capture failure in the same
+    readmission process before any parity remote dispatch. Preserve the returned
+    direct baseline in memory, bound the retry count, and never retry a changed,
+    oversized, malformed, or post-dispatch source/transport failure.
+  - [x] Preserve the direct baseline's exact admitted authored-source paths when
+    projecting wrapper parity. Do not reclassify tracked source beneath a
+    conventionally generated directory name through non-Git filesystem pruning.
+  - [ ] Rerun the exact KSE retained build/test/package lifecycle through the corrected transport and admit only the returned current receipt.
+- **Evidence:**
+  - [x] Focused transport and retained remote tests pass, including exact keepalive argv and timeout/refusal contracts. The complete `make python-check` run passes 2,435 tests with 73 declared skips and no failures in 713.062 seconds.
+  - [x] Eleven focused readmission and remote regressions prove one pre-dispatch
+    capture retry, bounded repeated failure, exact error classification and no
+    retry for changed, oversized, malformed or transport failures. The complete
+    framework suite passes 2,440 tests with 73 declared skips and no failures in
+    814.798 seconds; the exact KSE receipt gate remains required.
+  - [x] A focused wrapper-projection regression retains an explicitly admitted
+    `include/build/PreHeaders.h` fixture through remote source archiving while
+    ordinary generated output remains excluded. The complete retained-harness
+    cluster passes 22 tests, lint and format checks pass, and the exact edited
+    source passes all 2,441 `make python-check` tests with 73 declared skips in
+    758.630 seconds.
+  - [ ] The long exact-source KSE lifecycle returns its result, applies the receipt, and litai verify passes the receipt gate.
+
+### [ ] RETAINED-REPO-ROOT-RESULTS-001 — Admit root Repo Tools test result summaries
+
+- **Priority:** P0
+- **Owner:** retained-harness test evidence discovery
+- **Direction:** Retained Repo Tools tests must derive their exact passing count from the authoritative current-run result file whether Repo Tools writes it beneath _build or the default root _testoutput directory.
+- **Conclusion:** Discover only bounded in-project repo_test_results.txt files in the two declared Repo Tools output families, require current-command content changes, and preserve strict all-passing count admission.
+- **Depends on:** RETAINED-SSH-001
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Extend bounded Repo Tools result discovery to root _testoutput without admitting arbitrary output trees or stale summaries.
+- **Evidence:**
+  - [x] Focused root-output, stale-result, symlink-escape, and existing _build result regressions pass on macOS.
+  - [x] The complete Python gate passes 2,437 tests with 73 declared skips and no failures in 723.751 seconds; lint, format, repository-layout, public-export, project validation, lifecycle-driver review, documentation-authority review, and diff checks pass.
+  - [ ] Replay the exact KSE retained lifecycle and require a current receipt.

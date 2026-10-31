@@ -1,0 +1,58 @@
+{
+  "schema": "literate-ai/browser-interaction-acceptance@1",
+  "specification_set_identity": "sha256:7b58c83b81f0be6fb7b9ca3bbc7e8fb4a6f4bbd402eb4db65ba16d0fcbb17aa4",
+  "process": {
+    "arguments": [
+      "{port}"
+    ],
+    "startup_timeout_seconds": 15,
+    "timeout_seconds": 60,
+    "shutdown_timeout_seconds": 5,
+    "stdout_limit_bytes": 65536,
+    "stderr_limit_bytes": 65536
+  },
+  "readiness_path": "/health",
+  "viewports": [
+    {
+      "label": "desktop",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "label": "mobile",
+      "width": 390,
+      "height": 1000
+    }
+  ],
+  "steps": [
+    {
+      "action": "click",
+      "selector": "button"
+    }
+  ],
+  "postconditions": [
+    {
+      "postcondition_id": "lab-interaction",
+      "kind": "text",
+      "selector": "[data-readout]",
+      "expected": "audio licensed"
+    }
+  ],
+  "required_roles": [
+    {
+      "role": "heading",
+      "name": "Bureau of Unlicensed Birdsong"
+    }
+  ],
+  "required_landmarks": [
+    "main"
+  ],
+  "rejection_classes": [
+    "console-error",
+    "page-error",
+    "failed-request",
+    "http-error"
+  ],
+  "reject_horizontal_overflow": true,
+  "expected_request_count": 0
+}

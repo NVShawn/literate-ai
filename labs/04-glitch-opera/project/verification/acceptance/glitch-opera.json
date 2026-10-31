@@ -1,0 +1,58 @@
+{
+  "schema": "literate-ai/browser-interaction-acceptance@1",
+  "specification_set_identity": "sha256:8b88b9249a7274ff1543631f22a01828c68d81152bb1e0fce4e2ff5125bf827e",
+  "process": {
+    "arguments": [
+      "{port}"
+    ],
+    "startup_timeout_seconds": 15,
+    "timeout_seconds": 60,
+    "shutdown_timeout_seconds": 5,
+    "stdout_limit_bytes": 65536,
+    "stderr_limit_bytes": 65536
+  },
+  "readiness_path": "/health",
+  "viewports": [
+    {
+      "label": "desktop",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "label": "mobile",
+      "width": 390,
+      "height": 1000
+    }
+  ],
+  "steps": [
+    {
+      "action": "click",
+      "selector": "button"
+    }
+  ],
+  "postconditions": [
+    {
+      "postcondition_id": "lab-interaction",
+      "kind": "text",
+      "selector": "[data-readout]",
+      "expected": "drone authorized"
+    }
+  ],
+  "required_roles": [
+    {
+      "role": "heading",
+      "name": "Glitch Opera for One Nervous Rectangle"
+    }
+  ],
+  "required_landmarks": [
+    "main"
+  ],
+  "rejection_classes": [
+    "console-error",
+    "page-error",
+    "failed-request",
+    "http-error"
+  ],
+  "reject_horizontal_overflow": true,
+  "expected_request_count": 0
+}

@@ -87,6 +87,7 @@ MAX_RETAINED_INVENTORY_BYTES = 32 * 1024 * 1024
 MAX_RETAINED_DIAGNOSTIC_CHARS = 32_768
 MAX_RETAINED_PHASES = 128
 _RETAINED_CLEANUP_TIMEOUT_SECONDS = 300
+_RETAINED_CLEANUP_ATTEMPTS = 2
 _RUNTIME_TOOLS_SCHEMA = "literate-ai/retained-runtime-tools@2"
 _NINJA_REQUIREMENT = "ninja==1.13.2"
 _UV_REQUIREMENT = "uv==0.12.12"
@@ -744,6 +745,10 @@ def _source_archive(
             "execution.source_archive_oversized": (
                 "retained_receipt.remote_archive_oversized"
             ),
+            "execution.source_capture_failed": (
+                "retained_receipt.remote_source_capture_failed"
+            ),
+            "execution.source_changed": "retained_receipt.remote_source_changed",
             "execution.source_entry_limit": (
                 "retained_receipt.remote_source_scope_invalid"
             ),
@@ -1025,28 +1030,38 @@ class RetainedHarnessSshExecutor:
             except Exception as exc:
                 primary = exc
             if attempt_owned:
-                cleanup_deadline = _Deadline(
-                    time.monotonic() + _RETAINED_CLEANUP_TIMEOUT_SECONDS,
-                    _RETAINED_CLEANUP_TIMEOUT_SECONDS,
-                )
-                try:
-                    cleaned = self._run(
-                        worker,
-                        self._cleanup_command(incoming, workspace),
-                        cwd,
-                        cleanup_deadline,
-                        require_success=False,
+                cleanup_failure: Exception | None = None
+                for _ in range(_RETAINED_CLEANUP_ATTEMPTS):
+                    cleanup_deadline = _Deadline(
+                        time.monotonic() + _RETAINED_CLEANUP_TIMEOUT_SECONDS,
+                        _RETAINED_CLEANUP_TIMEOUT_SECONDS,
                     )
-                    if cleaned.returncode != 0:
-                        raise RetainedHarnessRemoteError(
+                    try:
+                        cleaned = self._run(
+                            worker,
+                            self._cleanup_command(incoming, workspace),
+                            cwd,
+                            cleanup_deadline,
+                            require_success=False,
+                        )
+                        if cleaned.returncode == 0:
+                            cleanup_failure = None
+                            break
+                        cleanup_failure = RetainedHarnessRemoteError(
                             "retained_receipt.remote_cleanup_failed",
                             "SSH worker did not clean the retained attempt directory",
                         )
-                except Exception as exc:
+                    except Exception as exc:
+                        cleanup_failure = exc
+                if cleanup_failure is not None:
                     raise RetainedHarnessRemoteError(
-                        getattr(exc, "code", "retained_receipt.remote_cleanup_failed"),
                         getattr(
-                            exc,
+                            cleanup_failure,
+                            "code",
+                            "retained_receipt.remote_cleanup_failed",
+                        ),
+                        getattr(
+                            cleanup_failure,
                             "message",
                             "SSH worker did not clean the retained attempt directory",
                         ),
@@ -1183,6 +1198,12 @@ class RetainedHarnessSshExecutor:
                 "set -eu",
                 f"incoming={_posix_path(incoming)}",
                 f"workspace={_posix_path(workspace)}",
+                (
+                    'for path in "$incoming" "$workspace"; do '
+                    'if [ -d "$path" ]; then '
+                    'find -P "$path" -type d -exec chmod u+w {} +; '
+                    "fi; done"
+                ),
                 'rm -rf -- "$incoming" "$workspace"',
                 'test ! -e "$incoming"',
                 'test ! -e "$workspace"',

@@ -44,7 +44,14 @@
       specification.appendChild(span);
     });
     const harness = config.harness;
-    const contexts = [
+    const contexts = config.canonical ? [
+      ['context', 'Canonical project', `${harness.project} ${harness.version}; framework ${harness.framework_version}. All selected project authority is local.`, 'project/literate.project.json'],
+      ['authored', 'Resolved Components', `${harness.component_count} actual locked Component(s). Graph nodes also show Flavors and pinned inputs; they are not all Components.`, `Component lock SHA-256 ${harness.lock_sha256}`],
+      ['authored', 'Selected Flavors', harness.selected_flavors.join(' · '), 'Exact selections from component.lock.json'],
+      ['shared', 'Pinned authoring inputs', 'The lock pins front-end and planning skills, workflow and routing. Select graph nodes or inspect their complete source below.', 'project/skills · project/workflows · project/routing'],
+      ['shared', 'Retained source boundary', 'This initial implementation is authored retained input. HTML assembly does not claim model generation. Rebuild must independently validate and accept it.', 'project/retained-input'],
+      ['context', 'Lifecycle evidence', 'Read project/verification/current.json for the actual qualification result. This preview does not embed or manufacture its future receipt. Changing authority makes old evidence stale.', 'project/verification/current.json']
+    ] : [
       ['authored', 'Language choice', harness.language_selection, 'main.js'],
       ['shared', 'Shared implementation', 'Browser canvas, controls, source inspector and common styling are bundled, authored support.', 'labs/shared/lab-runtime.js · labs/shared/lab.css'],
       ['shared', 'HTML assembly', 'The Python builder inlines authored sources. It does not generate JavaScript from the specification.', 'labs/scripts/build_labs.py'],
@@ -62,9 +69,12 @@
       q('[data-harness]').appendChild(card);
     });
     q('[data-spec-details]').open = config.level === '00';
-    q('[data-inventory]').textContent = `1 authored lab specification · ${config.nodes.length} illustrative roles. No resolved Component DAG is supplied.`;
+    q('[data-inventory]').textContent = config.canonical
+      ? `${harness.component_count} resolved Component(s) · ${harness.selected_flavors.length} selected Flavors · pinned skills/workflow/routing. These are different node kinds.`
+      : `1 authored lab specification · ${config.nodes.length} illustrative roles. No resolved Component DAG is supplied.`;
     const container = q('[data-graph]');
     container.innerHTML = graph(config.nodes, config.edges);
+    if (config.canonical) container.querySelector('svg').setAttribute('aria-label', 'Resolved authority graph');
     function select(event) {
       const node = event.target.closest('.node');
       if (!node) return;
@@ -100,6 +110,14 @@
     const api = {
       ...canvas(), controls: q('[data-controls]'), readout: q('[data-readout]'),
       log: value => q('[data-readout]').textContent = value,
+      status: value => {
+        let status = q('[data-media-status]');
+        if (!status) {
+          status = document.createElement('p'); status.dataset.mediaStatus = '';
+          status.setAttribute('role', 'status'); api.controls.appendChild(status);
+        }
+        status.textContent = value;
+      },
       button: (label, action, secondary = false) => {
         const button = document.createElement('button');
         button.textContent = label;
@@ -108,11 +126,16 @@
         api.controls.appendChild(button);
         return button;
       },
-      slider: (min, max, value, action) => {
+      slider: (min, max, value, action, name = null) => {
         const input = document.createElement('input');
         input.type = 'range'; input.min = min; input.max = max; input.value = value;
+        if (name) input.setAttribute('aria-label', name);
         input.oninput = () => action(+input.value);
-        api.controls.appendChild(input);
+        if (name) {
+          const label = document.createElement('label');
+          label.className = 'range-control'; label.append(document.createTextNode(name), input);
+          api.controls.appendChild(label);
+        } else api.controls.appendChild(input);
         return input;
       },
       audio: () => new (window.AudioContext || window.webkitAudioContext)()

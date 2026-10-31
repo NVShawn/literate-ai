@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import json
 import shutil
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
 from literate_ai.adapters import retained_harness_readmission as readmission
+from literate_ai.adapters import retained_harness_remote as retained_remote
 from literate_ai.adapters.harness_inventory import (
     HARNESS_BASELINE_SCHEMA,
     HARNESS_PARITY_SCHEMA,
@@ -17,7 +19,10 @@ from literate_ai.adapters.harness_inventory import (
 from literate_ai.adapters.retained_harness_receipts import (
     retained_harness_receipt_policy,
 )
-from literate_ai.adapters.retained_harness_remote import RetainedHarnessRemoteResult
+from literate_ai.adapters.retained_harness_remote import (
+    RetainedHarnessRemoteError,
+    RetainedHarnessRemoteResult,
+)
 from literate_ai.contracts import canonical_identity
 from literate_ai.projects import load_project
 from tests.support.fixtures_test_retained_harness_receipts import (
@@ -373,3 +378,245 @@ class RetainedHarnessReadmissionTests(unittest.TestCase):
         self.assertTrue(
             all("litai.harness.mk" in item for item in executor.commands[1])
         )
+
+    def test_wrapper_projection_preserves_admitted_generated_name_source_paths(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            source_root = Path(directory).resolve()
+            header = source_root / "legacy/include/build/PreHeaders.h"
+            header.parent.mkdir(parents=True)
+            header.write_text("#pragma once\n", encoding="utf-8")
+            generated = source_root / "legacy/build/generated.o"
+            generated.parent.mkdir(parents=True)
+            generated.write_bytes(b"generated")
+            (source_root / "litai.harness.mk").write_text(
+                "build:\n\ttrue\n",
+                encoding="utf-8",
+            )
+            inventory = {
+                "source_scope": {
+                    "schema": "literate-ai/retained-source-scope@1",
+                    "policy": "git-visible@1",
+                    "paths": ["include/build/PreHeaders.h"],
+                    "paths_identity": canonical_identity(
+                        ["include/build/PreHeaders.h"]
+                    ).uri,
+                    "excluded_roots": [],
+                    "excluded": [],
+                },
+                "stages": [
+                    {
+                        "id": "build",
+                        "command": "./build.sh",
+                        "cwd": ".",
+                        "evidence": "build.sh",
+                        "cost": "host-heavy",
+                    }
+                ],
+            }
+
+            parity = readmission._parity_inventory(inventory, source_root)
+
+            paths = parity["source_scope"]["paths"]
+            self.assertIn("legacy/include/build/PreHeaders.h", paths)
+            self.assertIn("litai.harness.mk", paths)
+            self.assertNotIn("legacy/build/generated.o", paths)
+            archive = source_root / "source.tar.gz"
+            retained_remote._source_archive(source_root, parity, archive)
+            with tarfile.open(archive, "r:gz") as stream:
+                names = stream.getnames()
+            self.assertIn("literate-ai/legacy/include/build/PreHeaders.h", names)
+            self.assertIn("literate-ai/litai.harness.mk", names)
+            self.assertNotIn("literate-ai/legacy/build/generated.o", names)
+
+    def test_remote_readmission_retries_only_parity_source_capture(self) -> None:
+        self.admit_repo_man_test_stage()
+        worker = _worker()
+        catalog_identity = canonical_identity({"catalog": "fixture"})
+
+        class Executor:
+            def __init__(self) -> None:
+                self.attempts = 0
+                self.parity_failures = 0
+
+            def execute(self, selected_worker, **kwargs):
+                self.attempts += 1
+                inventory = kwargs["inventory"]
+                parity = all(
+                    "litai.harness.mk" in stage["command"]
+                    for stage in inventory["stages"]
+                )
+                if parity and self.parity_failures == 0:
+                    self.parity_failures += 1
+                    raise RetainedHarnessRemoteError(
+                        "retained_receipt.remote_source_capture_failed",
+                        "source projection could not be captured",
+                    )
+                phases = tuple(
+                    {
+                        "phase": stage["id"],
+                        "command": stage["command"],
+                        "exit_code": 0,
+                        "timed_out": False,
+                        "tree": {"identity": "sha256:" + "1" * 64},
+                        "source_tree": {"identity": "sha256:" + "2" * 64},
+                        "test_collection": (
+                            {
+                                "state": "nonempty",
+                                "total": 1,
+                                "passed": 1,
+                                "failed": 0,
+                                "skipped": 0,
+                                "known_failed": 0,
+                            }
+                            if stage["id"].split(".", 1)[0] == "test"
+                            else {
+                                "state": "not-applicable",
+                                "total": None,
+                                "passed": None,
+                                "failed": None,
+                                "skipped": None,
+                                "known_failed": None,
+                            }
+                        ),
+                    }
+                    for stage in inventory["stages"]
+                )
+                return RetainedHarnessRemoteResult(
+                    canonical_identity({"request": self.attempts}),
+                    kwargs["lifecycle_request_identity"],
+                    selected_worker.identity,
+                    canonical_identity(inventory),
+                    kwargs["source_identity"],
+                    {
+                        "operating_system": "linux",
+                        "operating_system_release": "fixture",
+                        "machine": "x86_64",
+                        "python_implementation": "cpython",
+                        "python_version": "3.12",
+                    },
+                    phases,
+                )
+
+        executor = Executor()
+        plan = readmission.plan_retained_harness_readmission(
+            self.root,
+            execution_worker=worker,
+            worker_catalog_identity=catalog_identity,
+            retained_stage_ids=("test",),
+        )
+        result = readmission.apply_retained_harness_readmission(
+            self.root,
+            expected_plan_identity=plan["plan_identity"],
+            acknowledge=True,
+            timeout_seconds=1800,
+            execution_worker=worker,
+            worker_catalog_identity=catalog_identity,
+            retained_stage_ids=("test",),
+            remote_executor=executor,
+        )
+
+        self.assertTrue(result["applied"])
+        self.assertEqual(executor.attempts, 3)
+        self.assertEqual(
+            json.loads((self.root / readmission.PARITY).read_bytes())[
+                "source_capture_attempts"
+            ],
+            2,
+        )
+
+    def test_remote_readmission_bounds_capture_retry_and_preserves_other_errors(
+        self,
+    ) -> None:
+        self.admit_repo_man_test_stage()
+        worker = _worker()
+        catalog_identity = canonical_identity({"catalog": "fixture"})
+
+        for code, expected_attempts in (
+            ("retained_receipt.remote_source_capture_failed", 3),
+            ("retained_receipt.remote_source_changed", 2),
+            ("retained_receipt.remote_archive_oversized", 2),
+            ("retained_receipt.remote_source_scope_invalid", 2),
+            ("retained_receipt.remote_transport_failed", 2),
+        ):
+            with self.subTest(code=code):
+
+                class Executor:
+                    def __init__(self, failure_code: str) -> None:
+                        self.attempts = 0
+                        self.failure_code = failure_code
+
+                    def execute(self, selected_worker, **kwargs):
+                        self.attempts += 1
+                        if self.attempts >= 2:
+                            raise RetainedHarnessRemoteError(
+                                self.failure_code, "fixture failure"
+                            )
+                        inventory = kwargs["inventory"]
+                        phases = tuple(
+                            {
+                                "phase": stage["id"],
+                                "command": stage["command"],
+                                "exit_code": 0,
+                                "timed_out": False,
+                                "tree": {"identity": "sha256:" + "1" * 64},
+                                "source_tree": {"identity": "sha256:" + "2" * 64},
+                                "test_collection": (
+                                    {
+                                        "state": "nonempty",
+                                        "total": 1,
+                                        "passed": 1,
+                                        "failed": 0,
+                                        "skipped": 0,
+                                        "known_failed": 0,
+                                    }
+                                    if stage["id"].split(".", 1)[0] == "test"
+                                    else {
+                                        "state": "not-applicable",
+                                        "total": None,
+                                        "passed": None,
+                                        "failed": None,
+                                        "skipped": None,
+                                        "known_failed": None,
+                                    }
+                                ),
+                            }
+                            for stage in inventory["stages"]
+                        )
+                        return RetainedHarnessRemoteResult(
+                            canonical_identity({"request": self.attempts}),
+                            kwargs["lifecycle_request_identity"],
+                            selected_worker.identity,
+                            canonical_identity(inventory),
+                            kwargs["source_identity"],
+                            {
+                                "operating_system": "linux",
+                                "operating_system_release": "fixture",
+                                "machine": "x86_64",
+                                "python_implementation": "cpython",
+                                "python_version": "3.12",
+                            },
+                            phases,
+                        )
+
+                executor = Executor(code)
+                plan = readmission.plan_retained_harness_readmission(
+                    self.root,
+                    execution_worker=worker,
+                    worker_catalog_identity=catalog_identity,
+                    retained_stage_ids=("test",),
+                )
+                with self.assertRaises(RetainedHarnessRemoteError) as raised:
+                    readmission.apply_retained_harness_readmission(
+                        self.root,
+                        expected_plan_identity=plan["plan_identity"],
+                        acknowledge=True,
+                        timeout_seconds=1800,
+                        execution_worker=worker,
+                        worker_catalog_identity=catalog_identity,
+                        retained_stage_ids=("test",),
+                        remote_executor=executor,
+                    )
+                self.assertEqual(raised.exception.code, code)
+                self.assertEqual(executor.attempts, expected_attempts)

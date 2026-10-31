@@ -1,0 +1,41 @@
+{
+  "schema": "urn:literate-ai:schema:v1:repository-lineage",
+  "selection": {
+    "schema": "urn:literate-ai:schema:v1:repository-parent-selection",
+    "mode": "inherit",
+    "parents": [
+      {
+        "schema": "urn:literate-ai:schema:v1:repository-parent-reference",
+        "repository_url": "https://github.com/jordanhubbard/literate-ai.git",
+        "requested_revision": "87506c804210c46835723e11d1ca1c6cae0f496c"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "schema": "urn:literate-ai:schema:v1:repository-lineage-node",
+      "project_id": "literate-ai",
+      "project_identity": {
+        "schema": "urn:literate-ai:schema:v1:content-identity",
+        "algorithm": "sha256",
+        "digest": "44ba766f953b36b43cdae851bcc72179c82a09dd1ea866b30102ab465f9477d0"
+      },
+      "repository_url": "https://github.com/jordanhubbard/literate-ai.git",
+      "requested_revision": "87506c804210c46835723e11d1ca1c6cae0f496c",
+      "resolved_revision": "87506c804210c46835723e11d1ca1c6cae0f496c",
+      "parent_selection": {
+        "schema": "urn:literate-ai:schema:v1:repository-parent-selection",
+        "mode": "root",
+        "parents": []
+      },
+      "parents": []
+    }
+  ],
+  "selected_parents": [
+    {
+      "schema": "urn:literate-ai:schema:v1:content-identity",
+      "algorithm": "sha256",
+      "digest": "0866afed70801c816f7f887bbff7a677a8b900fd3f773d19577f0b3610a7bb6e"
+    }
+  ]
+}

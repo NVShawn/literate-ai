@@ -21,8 +21,7 @@
     "routing"
   ],
   "documentation_roots": [
-    "docs",
-    "labs"
+    "docs"
   ],
   "source_intelligence": {
     "schema": "urn:literate-ai:schema:v1:project-source-intelligence-policy",
@@ -55,7 +54,7 @@
     "implementation_identity": {
       "schema": "urn:literate-ai:schema:v1:content-identity",
       "algorithm": "sha256",
-      "digest": "6454b967a222d0d32ce2fdf66b705a059978c85698a0f911c2453bf2d4b40606"
+      "digest": "7b8befcaf4b1f8947850ad67cc037f78cfa55e64cc5057fd6f60be1ed0c5e54f"
     },
     "argv": [
       "{python}",

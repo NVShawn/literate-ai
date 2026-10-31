@@ -1,12 +1,6 @@
-# Glitch opera for one nervous rectangle
+# Glitch Opera for One Nervous Rectangle
 
-## Behavior
-
-Synthesize moving frames from deterministic signals, optionally add a user-authorized
-drone, and capture a short WebM clip from the canvas when supported.
-
-## Acceptance
-
-Animation works without media permissions. Capture reports unsupported browsers and
-never starts audio implicitly.
-
+The canonical behavioral specification is
+[the project Component](project/components/frontend-application/glitch-opera/component.md).
+This pointer is documentation; the Component lock selects the specification in
+the self-contained project.

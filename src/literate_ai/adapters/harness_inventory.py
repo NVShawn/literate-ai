@@ -28,7 +28,9 @@ from literate_ai.adapters._processes import (
     terminate_process_tree,
 )
 from literate_ai.adapters.harness_test_discovery import (
+    capture_repo_test_result_files,
     discover_retained_test_command,
+    observe_repo_test_result_files,
     observe_test_collection,
 )
 from literate_ai.adapters.harness_tree import (
@@ -1270,6 +1272,11 @@ def _run_harness_command(
     # root instead of the outer checkout (issue #315).
     environment["CI_PROJECT_DIR"] = str(observed_root)
     environment["OMNI_REPO_ROOT"] = str(observed_root)
+    repo_test_results_before = (
+        capture_repo_test_result_files(observed_root)
+        if phase.split(".", 1)[0] == "test"
+        else {}
+    )
     started = datetime.now(UTC)
     with (
         tempfile.TemporaryFile() as stdout_file,
@@ -1355,6 +1362,14 @@ def _run_harness_command(
     stderr_excerpt = redact_secrets(stderr_excerpt, environment)[:per_stream_limit]
     observed_scope = source_scope or capture_retained_source_scope(observed_root)
     tree_observation = observe_retained_tree(observed_root, observed_scope)
+    test_collection = observe_test_collection(phase, stdout, stderr)
+    if (
+        test_collection.get("state") == "unreported"
+        and phase.split(".", 1)[0] == "test"
+    ):
+        test_collection = observe_repo_test_result_files(
+            observed_root, repo_test_results_before
+        )
     result = {
         "phase": phase,
         "command": command,
@@ -1378,7 +1393,7 @@ def _run_harness_command(
         "duration_milliseconds": max(
             0, int((datetime.now(UTC) - started).total_seconds() * 1000)
         ),
-        "test_collection": observe_test_collection(phase, stdout, stderr),
+        "test_collection": test_collection,
         **tree_observation,
     }
     trace_subprocess(

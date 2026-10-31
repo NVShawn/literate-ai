@@ -1,0 +1,209 @@
+{
+  "schema": "literate-ai/unprompted-lab-qualification@1",
+  "framework_release": "1.3.1",
+  "framework_source": "87506c804210c46835723e11d1ca1c6cae0f496c",
+  "framework_wheel_sha256": "4b075b0b7727a11785a59359ccc3fc2de327baad46ec45350faeb66ddfc14c15",
+  "native_host": "macos-arm64",
+  "source_origin": "authored-retained-source",
+  "model_generation_tested": false,
+  "independent_browser_contract_viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 390,
+      "height": 1000
+    }
+  ],
+  "additional_browser_checks": {
+    "arithmetic_dot_count": 239,
+    "source_integrity_regressions": 5,
+    "media_viewport_cases": 10,
+    "actual_audio_oscillators": true,
+    "repeated_nonempty_canvas_video_downloads": true,
+    "unsupported_capture_negative_control": true
+  },
+  "cache_scope": "Each final seed was admitted, built and run through public 1.3.1 CLI commands in its own fresh BUILD_DIR and OBJ_DIR. Prior caches and failure evidence were retained separately with verified content hashes. Existing cache-history reuse is not claimed.",
+  "known_limits": [
+    "Progressive multi-Component curriculum work remains open under LAB-AUTHORITY-001; each current project has one application Component.",
+    "Project-committed cache discovery and successive retained-seed provider ambiguity are tracked in GitHub issues #196 and #197. The initial seed path uses the default standard-local target and fresh output roots.",
+    "This is macOS native qualification with desktop/mobile browser viewports, not native Windows or Linux lab qualification."
+  ],
+  "labs": [
+    {
+      "lab": "00-grumpy-counter",
+      "project_id": "unprompted-grumpy-counter",
+      "project": "labs/00-grumpy-counter/project",
+      "component_count": 1,
+      "component_lock_sha256": "0c3ab6b023b7154e4781c9f9bbed9c7b88361b0570486577fc1ed74477ba3be8",
+      "selected_flavors": [
+        "javascript",
+        "macos",
+        "make"
+      ],
+      "initial_rebuild_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "accepted_only_build_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "current_receipt_identity": "sha256:5025cffd46c93d178cbb926294cacf7a7d63cd3a055648b64cc5415440e2f67e",
+      "served_preview_sha256": "a2fdcd475ae9afcaa552d480f7965d3c7862af4c06875a62d514b967de766731",
+      "public_cli_build_passed": true,
+      "public_cli_run_http_200": true,
+      "served_bytes_match_preview": true
+    },
+    {
+      "lab": "01-orbital-teapot",
+      "project_id": "unprompted-orbital-teapot",
+      "project": "labs/01-orbital-teapot/project",
+      "component_count": 1,
+      "component_lock_sha256": "ea2022e8ddd50479f17e4299eceddeb124ab4a5749edaedac9cea74585a994a3",
+      "selected_flavors": [
+        "javascript",
+        "macos",
+        "make"
+      ],
+      "initial_rebuild_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "accepted_only_build_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "current_receipt_identity": "sha256:aa4fd8d1fc128ea3d762419bc31a6403a5f1ed12754a1e35f73d6d181201c80c",
+      "served_preview_sha256": "976ec451301b16ac7762120e7ee606a6fca6b3e202551eb7ce6ec899ba8d01ee",
+      "public_cli_build_passed": true,
+      "public_cli_run_http_200": true,
+      "served_bytes_match_preview": true
+    },
+    {
+      "lab": "02-unlicensed-birdsong",
+      "project_id": "unprompted-unlicensed-birdsong",
+      "project": "labs/02-unlicensed-birdsong/project",
+      "component_count": 1,
+      "component_lock_sha256": "08f1c706ffc5dc95d55b0d5e4de3c8db714c9727958da9323e8d1073f00e36ad",
+      "selected_flavors": [
+        "javascript",
+        "macos",
+        "make"
+      ],
+      "initial_rebuild_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "accepted_only_build_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "current_receipt_identity": "sha256:ac0dcf609d6ca7e663b34002b2fb8f54b32c43c5fc24557dee30828f6b0cc81d",
+      "served_preview_sha256": "82837761d29ad9e3e25e42af3691598a9c8a03f987f0b3eb52749b59d1e1e0a1",
+      "public_cli_build_passed": true,
+      "public_cli_run_http_200": true,
+      "served_bytes_match_preview": true
+    },
+    {
+      "lab": "03-impossible-furniture",
+      "project_id": "unprompted-impossible-furniture",
+      "project": "labs/03-impossible-furniture/project",
+      "component_count": 1,
+      "component_lock_sha256": "a209e5c5a0f559667e352d4d708299206e7e720c2ed8eee962e37d35449e40dc",
+      "selected_flavors": [
+        "javascript",
+        "macos",
+        "make"
+      ],
+      "initial_rebuild_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "accepted_only_build_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "current_receipt_identity": "sha256:4a723c7e8a7e5e5b8313bdc8db5cef99d2813b4f11649c6ff3b558a20a393165",
+      "served_preview_sha256": "c43ad30920d61eaba39416ac21b9d24f6657649589878b1675023d4864b0d3d1",
+      "public_cli_build_passed": true,
+      "public_cli_run_http_200": true,
+      "served_bytes_match_preview": true
+    },
+    {
+      "lab": "04-glitch-opera",
+      "project_id": "unprompted-glitch-opera",
+      "project": "labs/04-glitch-opera/project",
+      "component_count": 1,
+      "component_lock_sha256": "5a16adbed11ca9f0a1fc6e3c30a912c37ba78494209ec9330d33e643bfad9991",
+      "selected_flavors": [
+        "javascript",
+        "macos",
+        "make"
+      ],
+      "initial_rebuild_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "accepted_only_build_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "current_receipt_identity": "sha256:9e570e77ce29f5ccfa3bbbd0169743bd476f7031b65bc5c1c74a22b2402f92bf",
+      "served_preview_sha256": "431a8c147fa4cb52cad727c4cbba72f5219216db93b19a8a8bf1c02064b6393c",
+      "public_cli_build_passed": true,
+      "public_cli_run_http_200": true,
+      "served_bytes_match_preview": true
+    },
+    {
+      "lab": "05-component-cathedral",
+      "project_id": "unprompted-component-cathedral",
+      "project": "labs/05-component-cathedral/project",
+      "component_count": 1,
+      "component_lock_sha256": "864a2b1a56564b04236443a97b16dd7025973341bf5fd413e3e650ea9521f296",
+      "selected_flavors": [
+        "javascript",
+        "macos",
+        "make"
+      ],
+      "initial_rebuild_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "accepted_only_build_tests": {
+        "failed": 0,
+        "passed": 3,
+        "skipped": 0,
+        "total": 3
+      },
+      "current_receipt_identity": "sha256:988f802b6cad5e6c40aefb00f65ac8c293d565fbceeb7ea279746fda44e21e3a",
+      "served_preview_sha256": "7a278ec6529648aab16580d70c0ef348b7395564c4aa760efc5b8b386d50d3bc",
+      "public_cli_build_passed": true,
+      "public_cli_run_http_200": true,
+      "served_bytes_match_preview": true
+    }
+  ]
+}

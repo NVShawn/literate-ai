@@ -2,57 +2,13 @@
   "level": "03",
   "title": "Council of Impossible Furniture",
   "subtitle": "A 3D standards committee where every chair fails upward.",
-  "learning": "Explore geometry and projection as separate responsibilities in an authored implementation.",
+  "learning": "Compare a runtime Wobble control with actual language, build and operating-system Flavor selections.",
   "stage": "Minutes from the anti-chair committee",
   "media": [
     "html",
     "math",
     "3d"
   ],
-  "nodes": [
-    {
-      "id": "spec",
-      "label": "Lab spec",
-      "detail": "component.md is the authored lab specification. It is documentation, not a resolved canonical Component."
-    },
-    {
-      "id": "mesh",
-      "label": "Geometry",
-      "detail": "Vertices and edges own the object without owning the camera."
-    },
-    {
-      "id": "project",
-      "label": "Projection",
-      "detail": "A perspective transform maps 3D points into the 2D artifact."
-    },
-    {
-      "id": "view",
-      "label": "Canvas",
-      "detail": "Canvas owns line style and motion."
-    },
-    {
-      "id": "accept",
-      "label": "Criteria",
-      "detail": "The authored acceptance criteria describe checks to perform; this node is not an independent verifier or acceptance receipt."
-    }
-  ],
-  "edges": [
-    [
-      "spec",
-      "mesh"
-    ],
-    [
-      "mesh",
-      "project"
-    ],
-    [
-      "project",
-      "view"
-    ],
-    [
-      "view",
-      "accept"
-    ]
-  ],
-  "diagram_kind": "illustrative-lesson-flow"
+  "diagram_kind": "resolved-authority-graph",
+  "graph_source": "project/components/frontend-application/impossible-furniture/component.lock.json"
 }

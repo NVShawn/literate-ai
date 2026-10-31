@@ -140,6 +140,21 @@ explicit original-source selections to the same retained lifecycle as
 `rebuild`, preserving reviewed plan/host authorization and distinct receipts.
 Installed original-source compilation, package consumption and full native
 qualification remain separate open requirements.
+RETAINED-SSH-001 keeps those long, otherwise-silent remote lifecycles alive at
+the shared SSH transport layer so successful native work can return its exact
+bounded result. The exact KSE direct lifecycle now returns a passing build,
+211-of-211 test result and package, but a transient local wrapper-parity source
+capture discarded that returned baseline before parity dispatch. Readmission
+must retry only a source-capture failure proven to occur before remote dispatch,
+without replaying or caching acceptance evidence. The subsequent wrapper replay
+exposed a distinct scope-projection defect: re-inspecting the copied non-Git tree
+pruned tracked headers beneath an `include/build` source directory. Wrapper
+projection must preserve the exact admitted baseline source paths without
+admitting newly generated output; current long-run receipt renewal remains open.
+RETAINED-REPO-ROOT-RESULTS-001 admits Repo Tools' authoritative current-run
+test summary from either a configured build tree or its default root
+`_testoutput` directory, while retaining bounded path, freshness and symlink
+checks; exact KSE receipt renewal remains required.
 
 RETAINED-CATALOG-001 (issue #74) extends Goals 1, 4 and 6 with complete
 retained-input ownership by exact canonical Components. Coverage must use the
