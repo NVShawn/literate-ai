@@ -31630,19 +31630,21 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Priority:** P0
 - **Owner:** retained remote lifecycle controller
 - **Direction:** Make remote retained-harness cleanup succeed for legitimate read-only native build outputs without broadening deletion scope.
-- **Conclusion:** Normalize owner write permission only beneath each exact controller-created incoming and workspace path before recursive removal; keep cleanup fail-closed and preserve unrelated worker content.
+- **Conclusion:** Normalize owner write permission only beneath each exact controller-created incoming and workspace path before recursive removal. Permit one bounded idempotent retry against those same exact paths when the first cleanup attempt returns nonzero, while keeping final cleanup failure fail-closed and preserving unrelated worker content.
 - **Depends on:** RETAINED-PROJECT-001
 - **GitHub issue:** [#205](https://github.com/jordanhubbard/literate-ai/issues/205)
 - **Completion prerequisites:** none
 - **Implementation:**
   - [x] Harden POSIX remote cleanup for nested read-only files and directories while preserving exact quoted targets and symlink-safe scope.
   - [x] Add focused controller regression coverage for read-only nested output and unrelated-neighbor preservation.
+  - [x] Retry one exact-path cleanup after a nonzero first attempt, preserving the already-returned lifecycle result only when a bounded retry proves cleanup succeeded.
 - **Evidence:**
-  - [ ] Focused retained remote adapter tests pass on macOS; the same exact command cleaned the isolated Linux native attempt while preserving unrelated content; `make python-check` passes 2,432 tests with 73 skips and no failures; lint, format, project validation, and diff checks pass. Require the active installed replay to clean its exact attempt and produce a current retained receipt before closure.
+  - [ ] Eight focused retained remote adapter tests pass on macOS, including successful admission after one failed exact-path cleanup and fail-closed refusal after both bounded attempts fail. `make python-check` passes 2,443 tests with 73 skips and no failures in 785.752 seconds; lint, format, repository-layout, public-export, project validation, and diff checks pass. The 2026-10-31 exact KSE wrapper replay returned `retained_receipt.remote_cleanup_failed` after the first 300-second cleanup budget, while immediate follow-up proved both exact attempt paths absent; require a repaired active installed replay to return and admit the current receipt before closure.
 
 ### [ ] RETAINED-SSH-001 — Keep long retained SSH lifecycle control channels alive
 
-- **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
+- **GitHub issues:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22),
+  [#229](https://github.com/jordanhubbard/literate-ai/issues/229)
 - **Priority:** P0
 - **Owner:** shared SSH transport and retained-harness remote execution
 - **Direction:** Long retained build, test, and package runs must return their exact bounded result instead of losing an idle SSH control channel after successful remote execution.
@@ -31655,6 +31657,9 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
     readmission process before any parity remote dispatch. Preserve the returned
     direct baseline in memory, bound the retry count, and never retry a changed,
     oversized, malformed, or post-dispatch source/transport failure.
+  - [x] Preserve the direct baseline's exact admitted authored-source paths when
+    projecting wrapper parity. Do not reclassify tracked source beneath a
+    conventionally generated directory name through non-Git filesystem pruning.
   - [ ] Rerun the exact KSE retained build/test/package lifecycle through the corrected transport and admit only the returned current receipt.
 - **Evidence:**
   - [x] Focused transport and retained remote tests pass, including exact keepalive argv and timeout/refusal contracts. The complete `make python-check` run passes 2,435 tests with 73 declared skips and no failures in 713.062 seconds.
@@ -31663,6 +31668,12 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
     retry for changed, oversized, malformed or transport failures. The complete
     framework suite passes 2,440 tests with 73 declared skips and no failures in
     814.798 seconds; the exact KSE receipt gate remains required.
+  - [x] A focused wrapper-projection regression retains an explicitly admitted
+    `include/build/PreHeaders.h` fixture through remote source archiving while
+    ordinary generated output remains excluded. The complete retained-harness
+    cluster passes 22 tests, lint and format checks pass, and the exact edited
+    source passes all 2,441 `make python-check` tests with 73 declared skips in
+    758.630 seconds.
   - [ ] The long exact-source KSE lifecycle returns its result, applies the receipt, and litai verify passes the receipt gate.
 
 ### [ ] RETAINED-REPO-ROOT-RESULTS-001 — Admit root Repo Tools test result summaries
@@ -31690,7 +31701,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Completion prerequisites:** none
 - **Next action:** Qualify installed/native v1 and v2 generation on the remaining supported platforms, then renew fresh release evidence; local development repair coverage is complete.
 - **Implementation:**
-  - [ ] Resolve PR #228 conflicts with current `main`, preserving both branches' changelog entries and implementation changes. Recompute reviewed lifecycle-driver and documentation identities for the integrated tree; run focused OpenCode regression and authority checks before pushing.
+  - [x] Resolve PR #228 conflicts with current `main`, preserving both branches' changelog entries and implementation changes. Recompute reviewed lifecycle-driver and documentation identities for the integrated tree; run focused OpenCode regression and authority checks before pushing.
   - [x] First capture pinned v1 and v2 CLI help/configuration contracts and define capability detection, version-specific command construction, and fail-closed diagnostics for unsupported executables.
   - [x] Preserve the v1 invocation and add a qualified v2 invocation with --standalone, supported working-directory and logging controls, and version-appropriate configuration/environment handling; preserve executable identity, detached workspace, permission, and credential boundaries.
   - [x] Review worker model probes and remote invocation paths for both majors; select v2 standalone mode for worker model checks and update attendee/operator guidance. Keep the existing host-install and initialized-template v1 pins unchanged so v1 remains a supported default; neither the adapter nor worker dispatch requires a forced upgrade.
@@ -31754,3 +31765,5 @@ repository lint/format, layout, host path policy and diff checks pass. The
 configured project test receipt remains stale; installed/native Linux and
 Windows OpenCode qualification and fresh release evidence remain open. Review:
 [PR #228](https://github.com/jordanhubbard/literate-ai/pull/228).
+
+PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471fec3a8121185` and preserved both changelog entries. No implementation conflict required editing; all three independently reviewed OpenCode source hashes remain unchanged. Recomputed the combined lifecycle-driver pin and documentation marker; both review checks pass. Managed `make python-check` passes five OpenCode regression tests (two native tests skipped because explicit binaries were not selected) and all eight project CLI tests. Host path policy and diff whitespace checks pass. `litai verify` passes authority, skips the three unselected gates, and retains the existing stale project receipt without claiming new lifecycle qualification. Configured start/end peer surveys still fail through the GitHub alias; direct read-only PR inspection succeeds. Unrelated worktrees remain untouched.

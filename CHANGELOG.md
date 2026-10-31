@@ -9,6 +9,14 @@
   remain supported by the v1 path.
   Worker model checks also select v2 standalone mode. Existing host-install v1
   pins remain valid; v2 rejects ambient configuration it cannot isolate.
+- Retry one bounded retained remote cleanup against the same exact
+  controller-owned attempt paths when the first cleanup returns nonzero. Admit
+  the already-returned lifecycle result only after cleanup succeeds, and remain
+  fail-closed after the bounded retry.
+
+- Preserve the direct baseline's exact admitted authored-source paths through
+  retained wrapper parity, including tracked source beneath conventionally
+  generated directory names, while continuing to exclude new build output.
 
 - Retry one verifier-owned retained wrapper-parity source capture when the
   pre-dispatch local archive fails transiently. Preserve the successful direct
