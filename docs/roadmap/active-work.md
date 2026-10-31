@@ -31690,6 +31690,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Completion prerequisites:** none
 - **Next action:** Qualify installed/native v1 and v2 generation on the remaining supported platforms, then renew fresh release evidence; local development repair coverage is complete.
 - **Implementation:**
+  - [ ] Resolve PR #228 conflicts with current `main`, preserving both branches' changelog entries and implementation changes. Recompute reviewed lifecycle-driver and documentation identities for the integrated tree; run focused OpenCode regression and authority checks before pushing.
   - [x] First capture pinned v1 and v2 CLI help/configuration contracts and define capability detection, version-specific command construction, and fail-closed diagnostics for unsupported executables.
   - [x] Preserve the v1 invocation and add a qualified v2 invocation with --standalone, supported working-directory and logging controls, and version-appropriate configuration/environment handling; preserve executable identity, detached workspace, permission, and credential boundaries.
   - [x] Review worker model probes and remote invocation paths for both majors; select v2 standalone mode for worker model checks and update attendee/operator guidance. Keep the existing host-install and initialized-template v1 pins unchanged so v1 remains a supported default; neither the adapter nor worker dispatch requires a forced upgrade.
