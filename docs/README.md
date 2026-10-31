@@ -10,6 +10,7 @@ includes a two-hour running order.
 
 ## User documentation
 
+- [Skill catalog: what Literate AI has skills for](user/skills.md)
 - [Current features and release posture](user/current-features.md)
 - [Progressive visual labs](https://github.com/jordanhubbard/literate-ai/blob/main/labs/README.md)
 - [Rebuildable instructional videos](user/instructional-videos.md)

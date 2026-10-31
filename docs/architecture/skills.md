@@ -1,5 +1,9 @@
 # Skill architecture
 
+For capabilities by user task and the complete canonical inventory, start with the
+[skill catalog](../user/skills.md). For external composition patterns and prioritized
+adaptations, see the [Google skills assessment](google-skills-assessment.md).
+
 Literate AI uses the word *skill* for two related artifacts with different execution
 boundaries. Keeping them separate is the important part.
 

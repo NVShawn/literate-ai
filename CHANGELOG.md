@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Document all 88 canonical skills in a task-oriented catalog, including document,
+  presentation, host and deployment boundaries; compare Google skills discovery
+  and composition with revision-pinned reuse recommendations.
+
 - Preserve the direct baseline's exact admitted authored-source paths through
   retained wrapper parity, including tracked source beneath conventionally
   generated directory names, while continuing to exclude new build output.

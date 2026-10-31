@@ -60,6 +60,11 @@ goals require a specific unreleased Literate AI capability.
 
 ## Completeness
 
+The [task-oriented skill catalog](docs/user/skills.md) enumerates all 88 canonical
+skills in the reviewed development tree, supporting Goals 1, 2, 5 and 6. The
+[Google skills assessment](docs/architecture/google-skills-assessment.md) records
+composition lessons and proposed adaptations separately from delivered capabilities.
+
 Authored, inheritable framework Component/Flavor inventory reviewed during `1.1.0`
 development (2026-09-10):
 

@@ -31689,3 +31689,30 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [x] Focused root-output, stale-result, symlink-escape, and existing _build result regressions pass on macOS.
   - [x] The complete Python gate passes 2,437 tests with 73 declared skips and no failures in 723.751 seconds; lint, format, repository-layout, public-export, project validation, lifecycle-driver review, documentation-authority review, and diff checks pass.
   - [ ] Replay the exact KSE retained lifecycle and require a current receipt.
+
+<a id="skill-discovery-001"></a>
+
+### [x] SKILL-DISCOVERY-001 — Make skill capabilities discoverable and assess Google composition
+
+- **Priority:** P2
+- **Owner:** documentation
+- **Direction:** Enumerate and classify the skills tree for new users, then check out google/skills and compare useful capabilities and composition techniques.
+- **Conclusion:** Publish a task-oriented complete catalog and a revision-pinned comparative assessment; recommend scoped adaptations without importing third-party execution policy or claiming unqualified capabilities.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Classify every canonical skills/**/SKILL.md and distinguish onboarding, templates, Flavors and delivery boundaries.
+  - [x] Link the catalog from newcomer entry points and document pinned Google evidence, strengths, gaps and prioritized adaptations.
+- **Evidence:**
+  - [x] Verify inventory completeness, counts, local links and comparison source paths against both checkouts.
+  - [x] Pass documentation and changed-skill gates, record the documentation authority marker and review the final diff.
+
+- **Validation:** Exact set comparison covers all 88 canonical paths once and all task-map
+  anchors; Google index entrypoints match its 178 canonical paths, and all 15 cited
+  pinned source paths exist. Local file-link inspection passed before source links
+  were made revision-pinned GitHub links to respect documentation-root boundaries.
+  `make documentation-check skills-check repository-layout-check` passed: 22 tooling
+  tests, 181 rendered diagrams, root skill Tier 1 admission, and layout validation.
+  Documentation graph validation passed; its reviewed authority marker is recorded
+  with this change. The end-of-cycle peer survey found no collectable worktrees;
+  unrelated historical branches and other contributors' reviews remain untouched.
