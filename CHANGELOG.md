@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add opt-in mechanical verification of the remote default-branch README against
+  published GitHub release titles, tags, asset URLs, sizes and SHA-256 digests.
+  Preserve stable release entries during prerelease verification and reject stale
+  or contradictory release claims with expected and observed values.
+
 - Isolate plain Python library acceptance from ambient interpreter/site startup
   and disable bytecode writes; retain separately admitted wheel and SDK drivers.
 

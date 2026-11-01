@@ -31997,7 +31997,17 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Define the marker policy and visible release/asset section, preserve existing policy identities when absent, and implement bounded remote README/provider readback with digest download fallback.
-  - [ ] Add stale title/tag/digest/size, missing/duplicate markers, contradictory latest/current claims, unpublished-provider and prerelease controls plus actual Git-based remote-default-branch coverage.
+  - [x] Define the marker policy and visible release/asset section, preserve existing policy identities when absent, and implement bounded remote README/provider readback with digest download fallback.
+  - [x] Add stale title/tag/digest/size, missing/duplicate markers, contradictory latest/current claims, unpublished-provider and prerelease controls plus actual Git-based remote-default-branch coverage.
 - **Evidence:**
   - [ ] Pass affected release policy/publication regressions, lint/schema/documentation checks, and exact review/main CI before closing this implementation goal. The consuming 1.4 publication and final remote README readback belong to RELEASE-INTEGRATION-005; they remain mandatory release verification, not a circular prepublication prerequisite for this feature.
+
+- **Development evidence (2026-11-01):** The managed Make release regression slice
+  passed 50 tests; focused README and schema checks passed 16. Lint, format, skill
+  admission and repository layout checks pass. A real bare Git remote test reads
+  the default branch at its resolved commit while a local release-branch README
+  remains stale. GitHub transport in that fixture is simulated; it is not hosted
+  release qualification. Live GitHub v1.3.1 provider metadata checks the authored
+  README's nine assets; current remote main correctly refuses the missing new
+  markers until this change lands. Required review/main CI and final 1.4 remote
+  readback are still pending; the goal remains open.

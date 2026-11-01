@@ -92,5 +92,11 @@
   "provider": {
     "kind": "github",
     "repository": "jordanhubbard/literate-ai"
+  },
+  "readme_latest_release": {
+    "schema": "literate-ai/readme-latest-release-policy@1",
+    "path": "README.md",
+    "marker": "litai-latest-release",
+    "include_prereleases": false
   }
 }
