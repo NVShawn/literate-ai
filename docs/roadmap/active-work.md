@@ -31922,6 +31922,13 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Development evidence:** 16 focused coverage tests pass, including real Literate Markdown loading of the explicit JSON supporting artifact, default-v1 refusal rules, prompt privacy, stale interface bindings, and aggregate project-minimum incompatibility. Existing coding-CLI tests (22), source/cache/transfer regressions (28), qualification-capture tests (4), schema tests (2), and remote source materialization (1) pass. Standard smoke selects 75: 74 pass and the existing macOS persistent-service readiness test is explicitly skipped. These are development checks, not installed-child or release acceptance. Next: complete actual singleton execution/evidence and the fresh installed registered-child journey before closure.
+- **Full CI regression and repair:** Linux job `124761763110` in run
+  `41277192275` executed 1,667 cases with one error and 71 platform skips. The
+  linked-SDK fixture's `SimpleNamespace` recipe omitted the new coverage-authority
+  property. Its explicit ordinary-v1 `None` value repairs the fixture without a
+  production fallback or relaxed validator. The same failure reproduced locally;
+  the repaired linked-SDK case and all 16 coverage controls pass. Fresh exact-head
+  CI is still required; the failed predecessor is not green evidence.
 - **Installed development result:** The non-editable wheel from `c6ff2ce4d` executes actual generation, build, one distinct generated invocation and the unchanged independent oracle. Candidate promotion, check/currentness, child `verify`, parent validation and exact recovery audit pass. The fresh fixture declares its native Python profile through reviewed promotion; no runtime Flavor override is needed. Eleven e2e controls pass, including explicit qualified-state and failure-injection fixtures. [Retained development proof](../../verification/zero-argument-installed-development.json) distinguishes those controls from actual lifecycle evidence. Full regression, complete installed-wheel qualification and exact review/main CI remain open.
 
 - **Implementation:**
@@ -32074,3 +32081,22 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   byte accounting and changed-policy refusal. These are controller fixtures, not
   native FreeBSD qualification. Real retained-tree load/memory/lock/validation/
   verify measurements remain required before this issue or release goal closes.
+
+### [ ] HTTP-CACHE-REFERENCE-001 — Provide a bounded reference HTTP shared-cache service
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#236](https://github.com/jordanhubbard/literate-ai/issues/236)
+- **Decision authority:** [Accepted ADR 0044](../decisions/0044-action-dag-and-shared-cache.md); no new package wire or admission authority is introduced.
+
+- **Priority:** P1
+- **Owner:** accepted ADR 0044 shared-cache transport and local quota/retention owners; issue 236
+- **Direction:** Issue 236 requires documented operator cache-server requirements and a reference deployment for the two-worker FreeBSD qualification.
+- **Conclusion:** Implement the accepted GET and conditional-PUT artifact protocol without changing cache manifests or granting acceptance. Reuse the local artifact quota/retention owner for committed entries, bound pending publication bytes and connection work separately, and provide explicit read-only versus writer credentials for one configured namespace/writer group per reference instance. No automatic service installation or public listener; native two-host speedups remain separate required evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Document exact namespace paths, conditional create, immutable conflicts, payload-before-manifest ordering, authentication, TLS termination, read-only policy, quota and retention semantics under ADR 0044.
+  - [ ] Add an explicitly started reference service using existing typed cache configuration and artifact manifests, exact byte verification and finite staging/concurrency/deadline budgets.
+- **Evidence:**
+  - [ ] Run actual loopback HTTP clients for cold/warm/read-only/corrupt cases, identical concurrent writers, conflicting entries, traversal and auth refusal, quotas, expiry and interrupted upload cleanup.
+  - [ ] Retain real two-FreeBSD-worker shared-cache and throughput qualification under issue 236; reference-server tests alone do not complete that issue.
