@@ -1027,6 +1027,16 @@
       "file": "agent-entrypoint-audit.schema.json",
       "root_id": "urn:literate-ai:schema:v2:agent-entrypoint-audit",
       "public_ids": []
+    },
+    {
+      "file": "generated-test-coverage.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:generated-test-coverage-contracts",
+      "public_ids": [
+        "urn:literate-ai:schema:v2:generated-test-suite",
+        "literate-ai/generated-test-coverage-request@1",
+        "literate-ai/public-callable-signature@1",
+        "literate-ai/generated-test-coverage-authority@1"
+      ]
     }
   ]
 }

@@ -20,6 +20,7 @@ from literate_ai.contracts import (
     canonical_json_bytes,
     project_component_lock_managed_graph,
 )
+from literate_ai.generated_test_coverage import GeneratedTestCoverageAuthority
 from literate_ai.models import ModelRouteDecision, StageModelPolicy
 from literate_ai.ports.contracts import (
     AUTHORIZED_EXECUTION_PROFILE,
@@ -46,13 +47,20 @@ class GeneratedTestSuitePolicy:
     recipe_identity: str
     specification_references: tuple[str, ...]
     _acceptance_arguments_json: bytes
+    coverage_authority: GeneratedTestCoverageAuthority | None
 
     def __init__(
         self,
         recipe_identity: str,
         specification_references: tuple[str, ...],
         acceptance_arguments: tuple[object, ...] = (),
+        coverage_authority: GeneratedTestCoverageAuthority | None = None,
     ) -> None:
+        if coverage_authority is not None and not isinstance(
+            coverage_authority, GeneratedTestCoverageAuthority
+        ):
+            raise TypeError("generated test policy requires typed coverage authority")
+        object.__setattr__(self, "coverage_authority", coverage_authority)
         ContentIdentity.parse_uri(recipe_identity)
         references = tuple(specification_references)
         if (
@@ -83,11 +91,15 @@ class GeneratedTestSuitePolicy:
         return canonical_identity(self.to_dict())
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        value = {
             "recipe_identity": self.recipe_identity,
             "specification_references": list(self.specification_references),
             "acceptance_arguments": list(self.acceptance_arguments),
         }
+        if self.coverage_authority is not None:
+            value["schema"] = "literate-ai/generated-test-suite-policy@2"
+            value["coverage"] = self.coverage_authority.to_dict()
+        return value
 
 
 @dataclass(frozen=True, slots=True)

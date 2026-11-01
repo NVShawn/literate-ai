@@ -75,6 +75,23 @@ No source or qualification receipt has been produced by this proposal.
 
 ## Consequences
 
+### Public authoring contract
+
+Select the new mode by including `interfaces/callable.json` in the Component's
+locked local specification artifacts, after the provider's ordinary Markdown
+root. Literate Markdown permits JSON supporting artifacts. Its exact fields are `schema`
+(`literate-ai/generated-test-coverage-request@1`), `mode`
+(`exhaustive-zero-argument`), and `signature`. The signature has exactly
+`schema` (`literate-ai/public-callable-signature@1`), `arity` (integer zero),
+`optional` (false), and `variadic` (false). This reviewed public declaration
+describes the complete callable, not one acceptance invocation. Flavor and
+dependency documents cannot select the mode for the Component.
+
+The v2 suite retains the existing case format with one `example` and an explicit
+suite-level `coverage` descriptor containing the mode and exact public document
+identity. It claims no boundary or invariant cases. Portable source-validation
+inputs use v2 only for this mode; default v1 wire objects remain unchanged.
+
 The framework can represent a real zero-argument API without changing the product to
 satisfy its test generator. Coverage remains truthful and independent acceptance
 remains mandatory. Versioned validation and identity propagation add implementation

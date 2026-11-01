@@ -210,6 +210,7 @@ from literate_ai.contracts.executable_components.commands import (
     LibraryImportSurface,
 )
 from literate_ai.contracts.identity import canonical_identity
+from literate_ai.generated_test_coverage import require_generated_coverage_capacity
 from literate_ai.publication.standard_project import (
     ReleaseBlobReader,
     StandardProjectReleaseResult,
@@ -3068,6 +3069,7 @@ class StandardProjectExecutionRequest:
     worker_source_selectors: StandardSourceSelectorSet | None = None
     directory_custody_identity: ContentIdentity | None = None
     fresh_source: bool = False
+    minimum_test_count: int = 1
 
     def __post_init__(self) -> None:
         if not isinstance(self.planned, PlannedStandardProject):
@@ -3080,6 +3082,8 @@ class StandardProjectExecutionRequest:
             raise ValueError("max_parallelism must be a positive integer")
         if type(self.accepted_source_only) is not bool:
             raise TypeError("accepted_source_only must be a bool")
+        if type(self.minimum_test_count) is not int or self.minimum_test_count < 1:
+            raise ValueError("minimum_test_count must be a positive integer")
         if type(self.fresh_source) is not bool:
             raise TypeError("fresh_source must be a bool")
         if self.fresh_source and (
@@ -3264,6 +3268,13 @@ class FilesystemStandardProjectRuntime:
             request.planned,
             source_root=request.source_root,
             budget=request.budget,
+        )
+        require_generated_coverage_capacity(
+            (
+                getattr(node.recipe, "generated_test_coverage_authority", None)
+                for node in prepared.nodes
+            ),
+            minimum_test_count=request.minimum_test_count,
         )
         if self.context_evidence_recorder is not None:
             self.context_evidence_recorder.start_attempt()

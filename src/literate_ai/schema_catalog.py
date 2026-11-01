@@ -39,6 +39,10 @@ _MAXIMUM_MANIFEST_BYTES = 1024 * 1024
 _COMPATIBILITY_READ_PATH_KEYS = frozenset({"input", "status", "adapter", "output"})
 _COMPATIBILITY_WRITE_CONTRACT_ALLOWLIST = frozenset(
     {
+        "urn:literate-ai:schema:v2:generated-test-suite",
+        "literate-ai/generated-test-coverage-request@1",
+        "literate-ai/public-callable-signature@1",
+        "literate-ai/generated-test-coverage-authority@1",
         "urn:literate-ai:schema:v2:evidence-signer-rule",
         "urn:literate-ai:schema:v2:evidence-revocations",
         "urn:literate-ai:schema:v2:evidence-trust-policy",

@@ -398,6 +398,9 @@ class GenerationOrchestrator:
                     acceptance_arguments=(
                         request.generated_test_suite_policy.acceptance_arguments
                     ),
+                    coverage_authority=(
+                        request.generated_test_suite_policy.coverage_authority
+                    ),
                 )
             except GeneratedTestSuiteError as error:
                 raise GenerationFailure(

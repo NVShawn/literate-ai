@@ -1093,6 +1093,7 @@ class InheritedSessionSourceGenerator(CodingCliSourceGenerator):
             specification_references=recipe.non_acceptance_document_paths,
             acceptance_arguments=_acceptance_argument_vectors(recipe),
             result_shape=_acceptance_result_shape(recipe),
+            coverage_authority=recipe.generated_test_coverage_authority,
         )
         if recipe.managed_sbom_graph is None:
             raise InheritedSessionError(

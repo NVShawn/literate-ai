@@ -83,6 +83,12 @@ from literate_ai.diagnostics import (
     trace_subprocess,
 )
 from literate_ai.evidence_ledger import EvidenceNode, attach_run, bounded_excerpt
+from literate_ai.generated_test_coverage import (
+    COVERAGE_REQUEST_SCHEMA,
+    PUBLIC_CALLABLE_CONTRACT_PATH,
+    ZERO_ARGUMENT_COVERAGE_MODE,
+    GeneratedTestCoverageAuthority,
+)
 from literate_ai.generated_tests import (
     GENERATED_TEST_SUITE_PATH,
     MAJOR_REBUILD_GENERATION_MODE,
@@ -752,6 +758,52 @@ class GenerationRecipe:
                 "generation recipe requires a pinned specification-to-source skill"
             )
 
+        # Establish the complete public domain before generation can be scheduled.
+        _ = self.generated_test_coverage_authority
+
+    @property
+    def generated_test_coverage_authority(
+        self,
+    ) -> GeneratedTestCoverageAuthority | None:
+        documents = tuple(
+            item
+            for item in self.documents
+            if item.path == PUBLIC_CALLABLE_CONTRACT_PATH
+        )
+        if not documents:
+            return None
+        if len(documents) != 1:
+            raise ValueError("generated_tests.ambiguous_public_signature")
+        if len(self.all_required_entrypoints) > 1 or self.deployment_units:
+            raise ValueError("generated_tests.mixed_public_signatures_unsupported")
+        if (
+            self.library_import_surface is not None
+            and len(self.library_import_surface.capabilities) != 1
+        ):
+            raise ValueError("generated_tests.mixed_public_signatures_unsupported")
+        document = documents[0]
+        try:
+            value = json.loads(
+                document.content,
+                object_pairs_hook=_generated_metadata_object,
+                parse_constant=_reject_generated_metadata_constant,
+            )
+        except (ValueError, RecursionError) as exc:
+            raise ValueError("generated_tests.invalid_public_signature") from exc
+        if (
+            not isinstance(value, dict)
+            or set(value) != {"schema", "mode", "signature"}
+            or value["schema"] != COVERAGE_REQUEST_SCHEMA
+            or value["mode"] != ZERO_ARGUMENT_COVERAGE_MODE
+        ):
+            raise ValueError("generated_tests.invalid_public_signature")
+        authority = GeneratedTestCoverageAuthority.from_public_signature(
+            value["signature"], public_interface_identity=document.identity
+        )
+        if any(arguments != [] for arguments in _acceptance_argument_vectors(self)):
+            raise ValueError("generated_tests.coverage_interface_conflict")
+        return authority
+
     @property
     def resolved_skills(self) -> tuple[RecipeSkill, ...]:
         return _resolved_recipe_skills(
@@ -864,6 +916,10 @@ class GenerationRecipe:
             value["native_sdk_dependencies"] = [
                 item.to_dict() for item in self.native_sdk_dependencies
             ]
+        if self.generated_test_coverage_authority is not None:
+            value["generated_test_coverage"] = (
+                self.generated_test_coverage_authority.to_dict()
+            )
         return canonical_identity(value).uri
 
     def model_for(self, coding_cli: str) -> str | None:
@@ -898,6 +954,7 @@ class GenerationRecipe:
         Standalone and legacy callers retain the historical self-contained prompt.
         """
 
+        coverage = self.generated_test_coverage_authority
         sections = [
             "# Literate AI source-generation request",
             "",
@@ -924,11 +981,27 @@ class GenerationRecipe:
             f"Create `{GENERATED_TEST_SUITE_PATH}` from this exact recipe during",
             "this major rebuild. It is required generated source-tree content, not",
             "durable acceptance evidence, and no prior generated suite may be read",
-            "or preserved. The manifest object must have exactly `schema`,",
-            "`recipe_identity`, `generation_mode`, and `cases`; use schema",
-            "`urn:literate-ai:schema:v1:generated-test-suite`, the exact recipe",
-            f"identity `{self.identity}`, and generation mode",
-            f"`{MAJOR_REBUILD_GENERATION_MODE}`.",
+            *(
+                [
+                    "or preserved. Use exactly schema, "
+                    "recipe_identity, generation_mode,",
+                    "coverage, and cases. Schema is",
+                    "urn:literate-ai:schema:v2:generated-test-suite;",
+                    f"recipe_identity is {self.identity};",
+                    "generation_mode is major-rebuild.",
+                    "The exact framework-established coverage descriptor is:",
+                    _prompt_json(canonical_json_bytes(coverage.to_dict())),
+                ]
+                if coverage is not None
+                else [
+                    "or preserved. The manifest object must have exactly `schema`,",
+                    "`recipe_identity`, `generation_mode`, and `cases`; use schema",
+                    "`urn:literate-ai:schema:v1:generated-test-suite`, "
+                    "the exact recipe",
+                    f"identity `{self.identity}`, and generation mode",
+                    f"`{MAJOR_REBUILD_GENERATION_MODE}`.",
+                ]
+            ),
             "Numeric framework metadata values must be signed 64-bit integers:",
             "`-9223372036854775808` through `9223372036854775807`, inclusive.",
             "Floating-point values are forbidden. Choose manifest arguments and",
@@ -936,14 +1009,34 @@ class GenerationRecipe:
             "These bounds apply to framework metadata; implement application behavior",
             "according to the specifications.",
             "",
-            "Generate 3 through 256 cases. Every case must have exactly `case_id`,",
-            "`category`, `specification_refs`, `arguments`, and `expected_result`.",
-            "Case IDs and JSON-array argument vectors must each be unique.",
-            "Prefix every generated case ID with `generated-`; never reuse IDs from",
-            "the acceptance interface or independent verifier cases. Include",
-            "at least one case in each category: `example`, `boundary`, and",
-            "`invariant`. Every case must cite one or more exact current",
-            "non-acceptance recipe documents, chosen only from:",
+            *(
+                [
+                    "Generate exactly one case for the exhaustive "
+                    "zero-argument domain.",
+                    "It has exactly case_id, category, specification_refs, arguments,",
+                    "and expected_result. Use arguments [] and category example.",
+                    "Prefix its unique case_id with generated-. The "
+                    "suite-level coverage",
+                    "descriptor declares exhaustiveness; do not claim boundary or",
+                    "invariant cases or invent arguments. Cite one or "
+                    "more exact current",
+                    "non-acceptance recipe documents, chosen only from:",
+                ]
+                if coverage is not None
+                else [
+                    "Generate 3 through 256 cases. Every case must "
+                    "have exactly `case_id`,",
+                    "`category`, `specification_refs`, `arguments`, "
+                    "and `expected_result`.",
+                    "Case IDs and JSON-array argument vectors must each be unique.",
+                    "Prefix every generated case ID with `generated-`; "
+                    "never reuse IDs from",
+                    "the acceptance interface or independent verifier cases. Include",
+                    "at least one case in each category: `example`, `boundary`, and",
+                    "`invariant`. Every case must cite one or more exact current",
+                    "non-acceptance recipe documents, chosen only from:",
+                ]
+            ),
             *(f"- `{path}`" for path in self.non_acceptance_document_paths),
             "",
             "Copy each `specification_refs` entry from that list byte for byte. Do",
@@ -3413,6 +3506,7 @@ class CodingCliSourceGenerator:
                 specification_references=recipe.non_acceptance_document_paths,
                 acceptance_arguments=_acceptance_argument_vectors(recipe),
                 result_shape=_acceptance_result_shape(recipe),
+                coverage_authority=recipe.generated_test_coverage_authority,
             )
         except GeneratedTestSuiteError as exc:
             raise CodingCliError(exc.code, exc.message) from exc

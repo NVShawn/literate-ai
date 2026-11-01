@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:generated-test-coverage-contracts",
+  "description": "ADR 0051 opt-in closed zero-argument coverage. Structural validity alone cannot establish current pinned public-interface authority; runtime admission requires that external binding. Frozen v1 suites retain their existing rules.",
+  "oneOf": [
+    {
+      "$ref": "urn:literate-ai:schema:v2:generated-test-coverage-contracts#/$defs/suite"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:generated-test-coverage-contracts#/$defs/request"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:generated-test-coverage-contracts#/$defs/signature"
+    },
+    {
+      "$ref": "urn:literate-ai:schema:v2:generated-test-coverage-contracts#/$defs/authority"
+    }
+  ],
+  "$defs": {
+    "signature": {
+      "$id": "literate-ai/public-callable-signature@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "arity",
+        "optional",
+        "variadic"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/public-callable-signature@1"
+        },
+        "arity": {
+          "type": "integer",
+          "const": 0
+        },
+        "optional": {
+          "const": false
+        },
+        "variadic": {
+          "const": false
+        }
+      }
+    },
+    "authority": {
+      "$id": "literate-ai/generated-test-coverage-authority@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "mode",
+        "public_interface_identity"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/generated-test-coverage-authority@1"
+        },
+        "mode": {
+          "const": "exhaustive-zero-argument"
+        },
+        "public_interface_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "request": {
+      "$id": "literate-ai/generated-test-coverage-request@1",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "mode",
+        "signature"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/generated-test-coverage-request@1"
+        },
+        "mode": {
+          "const": "exhaustive-zero-argument"
+        },
+        "signature": {
+          "$ref": "urn:literate-ai:schema:v2:generated-test-coverage-contracts#/$defs/signature"
+        }
+      }
+    },
+    "suite": {
+      "$id": "urn:literate-ai:schema:v2:generated-test-suite",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "recipe_identity",
+        "generation_mode",
+        "coverage",
+        "cases"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:literate-ai:schema:v2:generated-test-suite"
+        },
+        "recipe_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "generation_mode": {
+          "const": "major-rebuild"
+        },
+        "coverage": {
+          "$ref": "urn:literate-ai:schema:v2:generated-test-coverage-contracts#/$defs/authority"
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v1:testing-contracts#/$defs/generatedCase"
+              },
+              {
+                "properties": {
+                  "category": {
+                    "const": "example"
+                  },
+                  "arguments": {
+                    "type": "array",
+                    "maxItems": 0
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

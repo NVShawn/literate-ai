@@ -363,6 +363,12 @@ class FilesystemStandardRebuildAdapter:
                     worker_source_selectors=request.source_selectors,
                     directory_custody_identity=request.directory_custody_identity,
                     fresh_source=self.retained_source is not None,
+                    minimum_test_count=max(
+                        self.binding.policy.minimum_test_count,
+                        self.project.definition.test_receipt_policy.minimum_test_count
+                        if self.project.definition.test_receipt_policy is not None
+                        else 1,
+                    ),
                 ),
             )
         except StandardAcceptedSourceContinuationError as exc:

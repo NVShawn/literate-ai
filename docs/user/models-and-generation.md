@@ -466,11 +466,23 @@ flowchart LR
 ```
 
 `source/tests/manifest.json` is required generated source-tree content. It binds the
-exact recipe identity and `major-rebuild` mode and contains 3–256 cases with unique IDs
+exact recipe identity and `major-rebuild` mode and, by default, contains 3–256 cases with unique IDs
 and JSON argument vectors. At least one `example`, `boundary`, and `invariant` case is
 required. Every case cites current non-acceptance base or selected-Flavor specification
-documents; acceptance argument vectors are forbidden. The generation result binds the
+documents. Inputs must be selected independently; overlapping inputs do not disclose
+private oracle answers or replace independent acceptance. The generation result binds the
 manifest's content identity.
+
+An explicitly pinned local `interfaces/callable.json` may select the versioned
+exhaustive zero-argument mode defined in [ADR 0051](../decisions/0051-zero-argument-generated-test-coverage.md).
+It must declare the complete arity-zero signature with no optional or variadic
+parameters. The framework establishes that authority before generation. The v2
+manifest binds its exact public document identity and contains exactly one `[]`
+invocation with category `example` and an explicit exhaustive coverage descriptor.
+It claims no boundary or invariant counts. Unknown and nonzero domains receive no
+exemption. Project-level case minima remain mandatory; an incompatible aggregate
+minimum fails before generation rather than padding cases. Default v1 contracts
+and identities remain unchanged.
 
 Those tests remain beside the disposable generated implementation only for the current
 build/test attempt. They are never copied into the specification repository, used as

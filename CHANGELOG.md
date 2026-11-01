@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add an explicitly pinned zero-argument public-signature contract and versioned
+  exhaustive generated-test coverage, binding the mode through recipes and source
+  evidence while preserving default v1 diversity and private acceptance answers.
+  Refuse incompatible aggregate project case minima before generation.
+
 - Detect root Cargo workspaces as Rust despite incidental Python/C++ helpers,
   preserve mixed-language observations and propose Cargo packaging.
 - Keep retained conversion locks on the existing pipeline-delegation Flavor,

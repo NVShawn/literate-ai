@@ -31921,6 +31921,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Conclusion:** Implement a versioned, authority-bound singleton coverage mode only for complete public arity-zero signatures. Preserve frozen v1 and ordinary diversity requirements, independent expected-result provenance, exact identity/currentness and all negative controls. Unknown and nonzero finite domains receive no automatic exemption.
 - **Depends on:** none
 - **Completion prerequisites:** none
+- **Development evidence:** 15 focused coverage tests pass, including real Literate Markdown loading of the explicit JSON supporting artifact, default-v1 refusal rules, prompt privacy, stale interface bindings, and aggregate project-minimum incompatibility. Existing coding-CLI tests (22), source/cache/transfer regressions (28), qualification-capture tests (4), schema tests (2), and remote source materialization (1) pass. Standard smoke selects 75: 74 pass and the existing macOS persistent-service readiness test is explicitly skipped. These are development checks, not installed-child or release acceptance. Next: complete actual singleton execution/evidence and the fresh installed registered-child journey before closure.
 - **Implementation:**
   - [ ] Establish authoritative complete zero-argument public signatures and project a versioned mode through recipe, generated manifest validation, cache and lifecycle identities.
   - [ ] Reconcile pinned generation guidance with independently selected overlapping inputs while keeping verifier-owned expected answers private.
