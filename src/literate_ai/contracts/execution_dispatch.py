@@ -1188,6 +1188,7 @@ class ExecutionDispatchRequest:
     accepted_source_provider_identity: ContentIdentity | None = None
     entrypoint: str | None = None
     jobs: int = 1
+    source_cache_entry_identities: tuple[ContentIdentity, ...] = ()
 
     SCHEMA: ClassVar[str] = EXECUTION_DISPATCH_REQUEST_SCHEMA
 
@@ -1337,6 +1338,24 @@ class ExecutionDispatchRequest:
                 "requires accepted_source_only",
             )
 
+        entries = self.source_cache_entry_identities
+        if (
+            not isinstance(entries, tuple)
+            or len(entries) > 64
+            or any(not isinstance(item, ContentIdentity) for item in entries)
+            or entries != tuple(sorted(set(entries), key=lambda item: item.uri))
+            or entries
+            and (
+                not self.accepted_source_only
+                or self.accepted_source_provider_identity is None
+            )
+        ):
+            fail(
+                "ExecutionDispatchRequest.source_cache_entry_identities",
+                "must be sorted unique bounded identities under "
+                "accepted-source provider authority",
+            )
+
     @property
     def identity(self) -> ContentIdentity:
         return canonical_identity(self.to_dict())
@@ -1371,6 +1390,10 @@ class ExecutionDispatchRequest:
             authority["accepted_source_provider_identity"] = (
                 self.accepted_source_provider_identity.to_dict()
             )
+        if self.source_cache_entry_identities:
+            authority["source_cache_entry_identities"] = [
+                item.to_dict() for item in self.source_cache_entry_identities
+            ]
         return canonical_identity(authority)
 
     def to_dict(self) -> dict[str, object]:
@@ -1414,6 +1437,10 @@ class ExecutionDispatchRequest:
             value["accepted_source_provider_identity"] = (
                 self.accepted_source_provider_identity.to_dict()
             )
+        if self.source_cache_entry_identities:
+            value["source_cache_entry_identities"] = [
+                item.to_dict() for item in self.source_cache_entry_identities
+            ]
         if self.entrypoint is not None:
             value["entrypoint"] = self.entrypoint
         # Scheduling is bound to this request, not the shared build-input
@@ -1462,6 +1489,7 @@ class ExecutionDispatchRequest:
                     "accepted_source_provider_identity",
                     "entrypoint",
                     "jobs",
+                    "source_cache_entry_identities",
                 }
             ),
         )
@@ -1558,6 +1586,13 @@ class ExecutionDispatchRequest:
             ),
             optional_string(data.get("entrypoint"), f"{path}.entrypoint"),
             int_value(data.get("jobs", 1), f"{path}.jobs", minimum=1, maximum=256),
+            tuple(
+                _identity(item, f"{path}.source_cache_entry_identities")
+                for item in list_value(
+                    data.get("source_cache_entry_identities", []),
+                    f"{path}.source_cache_entry_identities",
+                )
+            ),
         )
 
 

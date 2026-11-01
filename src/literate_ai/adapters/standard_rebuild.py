@@ -45,6 +45,7 @@ from .action_execution_config import (
     load_action_execution,
 )
 from .cache import FileSystemSourceCache, SourceCacheMaterializer, SourceCacheResolver
+from .cache.standard import StandardSourceCacheRestorationError
 from .command_indexer import CommandGenerationIndexer
 from .generation_preparation import (
     LockedComponentNodePreparationAdapter,
@@ -185,6 +186,12 @@ class FilesystemStandardRebuildAdapter:
         self.project = project
         self.binding = binding
         self.runtime = runtime
+        self.source_cache_entry_identities = tuple(
+            sorted(
+                getattr(runtime.source_cache_restorer, "entry_selections", {}).values(),
+                key=lambda item: item.uri,
+            )
+        )
         self.source_cache_configuration = source_cache_configuration
         self.authority_validator = authority_validator
         self.retained_source = retained_source
@@ -322,6 +329,15 @@ class FilesystemStandardRebuildAdapter:
                 ),
                 "accepted_source_only": request.accepted_source_only,
                 **(
+                    {
+                        "source_cache_entry_identities": [
+                            item.uri for item in self.source_cache_entry_identities
+                        ]
+                    }
+                    if self.source_cache_entry_identities
+                    else {}
+                ),
+                **(
                     {"retained_source_identity": self.retained_source.identity.uri}
                     if self.retained_source is not None
                     else {}
@@ -373,6 +389,10 @@ class FilesystemStandardRebuildAdapter:
             )
         except StandardAcceptedSourceContinuationError as exc:
             raise FilesystemStandardRebuildError(exc.code, exc.message) from exc
+        except StandardSourceCacheRestorationError as exc:
+            raise FilesystemStandardRebuildError(
+                "source-cache.selection-not-applicable", str(exc)
+            ) from exc
         except LocalStandardLifecycleError as exc:
             raise FilesystemStandardRebuildError(
                 getattr(exc, "code", "standard_rebuild.independent_acceptance_failed"),
@@ -441,6 +461,15 @@ class FilesystemStandardRebuildAdapter:
                     "project_revision_identity": project_revision.uri,
                     "component_lock_identities": [snapshot.authority.lock.identity.uri],
                     "configuration": self.source_cache_configuration.to_dict(),
+                    **(
+                        {
+                            "source_cache_entry_identities": [
+                                item.uri for item in self.source_cache_entry_identities
+                            ]
+                        }
+                        if self.source_cache_entry_identities
+                        else {}
+                    ),
                     "invalidation_identity": request.invalidation.identity.uri,
                 }
             )
@@ -593,6 +622,7 @@ def assemble_filesystem_standard_rebuild_adapter(
     pipeline_model: str | None = None,
     accepted_source_provider_id: str | None = None,
     accepted_source_provider_identity: ContentIdentity | None = None,
+    source_cache_entry_identities: tuple[ContentIdentity, ...] = (),
     retained_source: RetainedSourceInput | None = None,
     retained_source_authorization: str | None = None,
     authority_validator: ProjectAuthorityValidator = (
@@ -799,6 +829,43 @@ def assemble_filesystem_standard_rebuild_adapter(
                 "GENERATE/BUILD/TEST/EXECUTE/ACCEPT/LINK/PACKAGE/FINALIZE requires "
                 "explicit worker result transport",
             )
+    from .cache.filesystem import SourceCacheError
+    from .cache.lookup import (
+        readonly_standard_source_caches,
+        verified_source_cache_entries,
+    )
+
+    try:
+        selected_entries = (
+            verified_source_cache_entries(
+                readonly_standard_source_caches(project, source_cache_root),
+                entry_identities=source_cache_entry_identities,
+                component_lock_identity=prepared.locked_authority_snapshot.authority.lock.identity,
+            )
+            if source_cache_entry_identities
+            else ()
+        )
+        entry_selections = {}
+        for entry in selected_entries:
+            key = (
+                entry.derivation.cache_key
+                if hasattr(entry, "derivation")
+                else entry.cache_key
+            )
+            if (
+                key.model_binding.provider_id != accepted_source_provider_id
+                or key.coding_cli_tool_binding_identity
+                != accepted_source_provider_identity
+                or key.identity in entry_selections
+            ):
+                raise SourceCacheError(
+                    "source-cache.selection-conflict",
+                    "explicit entries disagree on provider or select multiple "
+                    "members of one derivation",
+                )
+            entry_selections[key.identity] = entry.identity
+    except SourceCacheError as exc:
+        raise FilesystemStandardRebuildError(exc.code, exc.message) from exc
     retained_review = None
     if accepted_source_provider_id == RETAINED_SOURCE_PROVIDER:
         from .cache.filesystem import SourceCacheError
@@ -813,6 +880,8 @@ def assemble_filesystem_standard_rebuild_adapter(
             retained_review = accepted_retained_source_review_from_caches(
                 readonly_standard_source_caches(project, source_cache_root),
                 accepted_source_provider_identity,
+                entry_identities=source_cache_entry_identities,
+                component_lock_identity=prepared.locked_authority_snapshot.authority.lock.identity,
             )
         except (StandardSourceCacheRestorationError, SourceCacheError) as exc:
             raise FilesystemStandardRebuildError(
@@ -949,6 +1018,7 @@ def assemble_filesystem_standard_rebuild_adapter(
         indexer=indexer,
         materializer=SourceCacheMaterializer(),
         source_admission=source_admission,
+        entry_selections=tuple(entry_selections.items()),
     )
     runtime = compose_filesystem_standard_lifecycle_checkpoints(
         runtime,

@@ -1139,12 +1139,29 @@ Cache-related rebuild flags are part of the lifecycle-request identity:
 - repeated `--source-cache-root BINDING=/absolute/path` supplies every and only
   operator-bound root declared by project configuration.
 
-`--source-cache-entry` and `--source-cache-root` are supported only when the project's
-`lifecycle_driver` binds `external`. A Standard driver keeps BUILD_DIR-backed cache
-custody and rejects both overrides with `rebuild.standard_cache_override_unsupported`;
-its supported equivalent for deterministic reuse of already-accepted source is
-`--from-accepted-source`, which requires exact verifier-admitted source-cache
-membership for every Component instead of selecting an individual entry.
+An external driver supports both overrides. A Standard driver supports
+`--source-cache-entry` together with `--from-accepted-source`; other Standard
+entry overrides and all Standard `--source-cache-root` overrides refuse with
+`rebuild.standard_cache_override_unsupported`. Standard continues to resolve only
+its declared readable targets and the existing default runtime cache.
+
+Standard provider discovery first scopes verified membership to the requested
+Component lock. If successive admitted revisions remain applicable, choose the
+intended immutable entry explicitly rather than deleting history:
+
+```console
+litai build samples/hello-component --from-accepted-source --source-cache-entry sha256:ENTRY_DIGEST
+```
+
+Replace `sha256:ENTRY_DIGEST` with an identity returned in a successful Standard
+rebuild's `source_cache_published_entry_identities`. Up to 64 unique selectors may
+be repeated. Every selected entry must belong to the current locked Component and
+match a current planned derivation; missing, foreign, conflicting or unused
+selectors refuse. Unselected applicable ambiguity still refuses. Selectors bind
+local and remote dispatch, lifecycle/cache-control identities and artifact exports;
+`litai run` reconstructs the saved choice without another command-line selector.
+Every restored source still needs fresh build, tests, execution and independent
+acceptance. Prior receipt contents and timestamps never choose a revision.
 
 `litai rebuild` uses one command with a mandatory two-pass driver handshake. First it
 invokes the content-pinned driver in `plan-derivations` mode, without host-execution

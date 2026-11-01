@@ -175,6 +175,37 @@ class RebuildSourceCachePlanningProtocol:
         return result
 
 
+def parse_source_cache_entry_identities(entry_values, *, force_regeneration=False):
+    try:
+        entries = tuple(
+            sorted(
+                (ContentIdentity.parse_uri(value) for value in entry_values),
+                key=lambda item: item.uri,
+            )
+        )
+    except (TypeError, ValueError) as exc:
+        raise CliFailure(
+            "rebuild.source_cache_entry_invalid",
+            "every explicit source-cache entry must be a sha256 content identity",
+        ) from exc
+    if len(entries) > 64:
+        raise CliFailure(
+            "rebuild.source_cache_entry_invalid",
+            "at most 64 explicit cache entry identities are supported",
+        )
+    if len({item.uri for item in entries}) != len(entries):
+        raise CliFailure(
+            "rebuild.source_cache_entry_duplicate",
+            "explicit source-cache entry identities must be unique",
+        )
+    if force_regeneration and entries:
+        raise CliFailure(
+            "rebuild.source_cache_selection_conflict",
+            "--force-regeneration cannot be combined with --source-cache-entry",
+        )
+    return entries
+
+
 def parse_rebuild_source_cache_inputs(
     project: LoadedProject,
     *,
@@ -194,28 +225,9 @@ def parse_rebuild_source_cache_inputs(
             "rebuild.source_cache_flag_invalid",
             "force regeneration must be a boolean CLI flag",
         )
-    try:
-        entries = tuple(
-            sorted(
-                (ContentIdentity.parse_uri(value) for value in entry_values),
-                key=lambda item: item.uri,
-            )
-        )
-    except (TypeError, ValueError) as exc:
-        raise CliFailure(
-            "rebuild.source_cache_entry_invalid",
-            "every explicit source-cache entry must be a sha256 content identity",
-        ) from exc
-    if len({item.uri for item in entries}) != len(entries):
-        raise CliFailure(
-            "rebuild.source_cache_entry_duplicate",
-            "explicit source-cache entry identities must be unique",
-        )
-    if force_regeneration and entries:
-        raise CliFailure(
-            "rebuild.source_cache_selection_conflict",
-            "--force-regeneration cannot be combined with --source-cache-entry",
-        )
+    entries = parse_source_cache_entry_identities(
+        entry_values, force_regeneration=force_regeneration
+    )
     bindings: dict[str, RebuildSourceCacheOperatorRoot] = {}
     for raw in root_values:
         reference, separator, configured_path = raw.partition("=")

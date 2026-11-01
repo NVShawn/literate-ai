@@ -3285,6 +3285,11 @@ class FilesystemStandardProjectRuntime:
                 request.planned.execution_plan, prepared.nodes_by_revision
             )
         if self.source_cache_restorer is not None and not request.fresh_source:
+            selection_preflight = getattr(
+                self.source_cache_restorer, "require_applicable_selections", None
+            )
+            if callable(selection_preflight):
+                selection_preflight(tuple(prepared.nodes_by_revision.values()))
             regenerate = {item.uri for item in request.invalidation.regenerate}
             for uri, node in prepared.nodes_by_revision.items():
                 if uri in cache_memberships or uri in regenerate:
@@ -3735,6 +3740,7 @@ def compose_filesystem_standard_source_cache(
     indexer: GenerationIndexer,
     materializer: SourceCacheMaterializer | None = None,
     source_admission: Callable | None = None,
+    entry_selections: tuple[tuple[ContentIdentity, ContentIdentity], ...] = (),
 ) -> FilesystemStandardProjectRuntime:
     """Attach complete durable Standard cache custody to an assembled host runtime."""
 
@@ -3767,6 +3773,7 @@ def compose_filesystem_standard_source_cache(
     )
     restorer = FilesystemStandardSourceRestorer(
         resolver=resolver,
+        entry_selections=entry_selections,
         materializer=selected_materializer,
         cache_key=planned_key,
         source_trees=runtime.source_trees,

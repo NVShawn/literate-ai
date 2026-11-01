@@ -687,3 +687,12 @@ before receipt issuance.
 - [`service-stack`](../../samples/service-stack/) demonstrates transitive composition.
 
 Run all four through the [sample ladder](samples.md).
+
+
+For Standard accepted-only continuation, combine `--from-accepted-source` with
+`--source-cache-entry` when applicable retained history contains several revisions.
+Use the actual `source_cache_published_entry_identities` from a successful Standard
+rebuild. Selection reaches provider discovery before ambiguity is decided and is
+revalidated against the current Component lock and exact planned derivation. Cache
+history remains intact, while current acceptance remains mandatory; artifact exports
+retain the choice for `litai run` and remote dispatch authenticates it.

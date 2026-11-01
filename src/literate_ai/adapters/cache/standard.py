@@ -87,7 +87,11 @@ def accepted_retained_source_review(
 
 
 def accepted_retained_source_review_from_caches(
-    caches: tuple[FileSystemSourceCache, ...], tool_binding: ContentIdentity
+    caches: tuple[FileSystemSourceCache, ...],
+    tool_binding: ContentIdentity,
+    *,
+    entry_identities: tuple[ContentIdentity, ...] = (),
+    component_lock_identity: ContentIdentity | None = None,
 ) -> ContentIdentity:
     """Require one exact review across verified declared read-target memberships."""
     try:
@@ -96,8 +100,12 @@ def accepted_retained_source_review_from_caches(
         ):
             raise ValueError("retained lookup requires typed filesystem stores")
         reviews = set()
-        entries = (
-            entry for cache in caches for entry in cache.verified_published_entries()
+        from .lookup import verified_source_cache_entries
+
+        entries = verified_source_cache_entries(
+            caches,
+            entry_identities=entry_identities,
+            component_lock_identity=component_lock_identity,
         )
         for entry in entries:
             key = (
@@ -158,6 +166,7 @@ class FilesystemStandardSourceRestorer:
         source_trees: object | None = None,
         cache_key_recorder: Callable[[Any, SourceDerivationCacheKey], None]
         | None = None,
+        entry_selections: tuple[tuple[ContentIdentity, ContentIdentity], ...] = (),
     ) -> None:
         if not isinstance(resolver, SourceCacheResolver):
             raise TypeError("resolver must be a SourceCacheResolver")
@@ -176,6 +185,33 @@ class FilesystemStandardSourceRestorer:
         self.cache_key = cache_key
         self.source_trees = source_trees
         self.cache_key_recorder = cache_key_recorder
+        if (
+            not isinstance(entry_selections, tuple)
+            or any(
+                not isinstance(item, tuple)
+                or len(item) != 2
+                or any(not isinstance(value, ContentIdentity) for value in item)
+                for item in entry_selections
+            )
+            or len(dict(entry_selections)) != len(entry_selections)
+        ):
+            raise StandardSourceCacheRestorationError(
+                "exact entry selections require one identity per derivation"
+            )
+        self.entry_selections = dict(entry_selections)
+
+    def require_applicable_selections(self, prepared_nodes):
+        if not self.entry_selections:
+            return
+        if self.cache_key is None:
+            raise StandardSourceCacheRestorationError(
+                "explicit entry selection requires prepared derivation keys"
+            )
+        keys = {self.cache_key(node).identity for node in prepared_nodes}
+        if self.entry_selections.keys() - keys:
+            raise StandardSourceCacheRestorationError(
+                "explicit cache entry does not match a current planned derivation"
+            )
 
     def restore(
         self,
@@ -191,6 +227,7 @@ class FilesystemStandardSourceRestorer:
             key,
             force_regeneration=force_regeneration,
             component_lock_identity=component_lock_identity,
+            entry_identity=self.entry_selections.get(key.identity),
         )
         standard = tuple(
             item
@@ -310,6 +347,11 @@ class FilesystemStandardAcceptedSourcePublisher:
             raise TypeError("source admission must be callable")
         self.source_admission = source_admission
         self._prepared_admissions = {}
+        self._published_entry_by_membership = {}
+
+    def published_entry_identity(self, membership_identity):
+        """Report an actual immutable publication, never infer it from a hit."""
+        return self._published_entry_by_membership.get(membership_identity)
 
     def publish_accepted(
         self, publication: StandardAcceptedSourcePublication
@@ -320,6 +362,9 @@ class FilesystemStandardAcceptedSourcePublisher:
             # An explicitly reviewed live retained qualification supersedes its
             # prior exact-key membership. Immutable older evidence is retained.
             self.cache.retire_other_memberships(_key, keep=entry.identity)
+        self._published_entry_by_membership[publication.membership.identity] = (
+            entry.identity
+        )
         return publication.membership.identity
 
     def _build_entry(

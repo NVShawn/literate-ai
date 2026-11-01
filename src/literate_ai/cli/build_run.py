@@ -208,7 +208,11 @@ def _build_from_args(args: Any, *, action: LifecycleDispatchAction) -> dict[str,
         execution_worker=selected_worker,
         force_regeneration=getattr(args, "force_regeneration", False),
         model=getattr(args, "model", None),
-        source_cache_entry=list(getattr(args, "source_cache_entry", None) or []),
+        source_cache_entry=[
+            item.uri for item in dispatch_request.source_cache_entry_identities
+        ]
+        if dispatch_request.accepted_source_only
+        else list(getattr(args, "source_cache_entry", None) or []),
         source_cache_root=[],
         allow_host_execution=True,
         from_accepted_source=bool(getattr(args, "from_accepted_source", False)),
@@ -455,6 +459,9 @@ def run_from_args(args: Any) -> tuple[dict[str, Any], int]:
             **vars(args),
             "model": export.model_selector,
             "from_accepted_source": export.accepted_source_only,
+            "source_cache_entry": [
+                item.uri for item in export.source_cache_entry_identities
+            ],
         }
     )
     dispatch_request = create_execution_dispatch_request(

@@ -62,24 +62,40 @@ class CapturedSourceArchive:
 
 def discover_accepted_source_provider_binding(
     project_root: Path,
+    *,
+    entry_identities: tuple[ContentIdentity, ...] = (),
+    component_lock_identity: ContentIdentity | None = None,
 ) -> tuple[str, ContentIdentity] | None:
     """Recover one portable provider binding from valid transported membership."""
 
     from literate_ai.cache_directories import resolve_cache_directories
 
     root = Path(project_root).resolve(strict=True)
-    from literate_ai.adapters.cache.lookup import readonly_standard_source_caches
+    from literate_ai.adapters.cache.lookup import (
+        readonly_standard_source_caches,
+        verified_source_cache_entries,
+    )
     from literate_ai.projects import discover_project
 
     cache_root = resolve_cache_directories(root).build_dir / "accepted-source-cache"
     try:
         caches = readonly_standard_source_caches(discover_project(root), cache_root)
-        entries = tuple(
-            entry for cache in caches for entry in cache.verified_published_entries()
+        entries = verified_source_cache_entries(
+            caches,
+            entry_identities=entry_identities,
+            component_lock_identity=component_lock_identity,
         )
     except (OSError, SourceCacheError) as exc:
         raise SourceMaterializationError(
-            "execution.accepted_source_cache_invalid",
+            exc.code
+            if isinstance(exc, SourceCacheError)
+            and exc.code
+            in {
+                "source-cache.entry-not-found",
+                "source-cache.selection-invalid",
+                "source-cache.selection-not-applicable",
+            }
+            else "execution.accepted_source_cache_invalid",
             "accepted-source provider binding requires valid cache membership",
         ) from exc
     bindings: set[tuple[str, ContentIdentity]] = set()
