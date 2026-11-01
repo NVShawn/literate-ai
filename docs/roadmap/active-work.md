@@ -31743,7 +31743,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 - **Release target:** 1.4.0
 - **Detailed plan:** [1.4 integration](1.4-integration.md).
-- **Next action in progress:** review and consolidate the existing PR heads; audit the issue backlog against current code and tests.
+- **Next action in progress:** finish current-issue acceptance and native qualification after PRs #237/#238 landed; obtain explicit acceptance for Proposed ADRs before their implementation.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
@@ -31752,7 +31752,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI.
+  - [x] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI. All four reviews are merged; exact head 228c121c passes CI 41282538479 and lands through PR 237 at 48b1e312. Later adoption fixes land through PR 238 at ad979c6e after exact-head CI 41288058754. These are integration results, not release qualification.
   - [ ] Reproduce or audit each issue, implement its owning fix or reviewed resolution, record decisive evidence, and comment and close only after the resolution lands.
   - [ ] Complete all declared 1.4.0 roadmap goals and native platform qualification using aligned workers; retain prior failed evidence.
   - [ ] Regenerate, inspect and publish the declared terminal document pair, then plan, prepare, check, publish and verify 1.4.0 through repository commands.
@@ -31769,6 +31769,8 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   explicitly refuses a release-qualification claim: this ephemeral guest does not
   supply full retained-tree, two-physical-host cache/performance, compiler SDK or
   final candidate acceptance. Later integration changes still require renewal.
+
+- **Cargo design review pending:** [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) records the audited #222–#226 compatibility design. It remains Proposed; no v2 implementation or implementation-subtask acceptance is claimed. Explicit acceptance of ADR 0054 remains required by Accepted ADR 0006.
 
 ### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
 
@@ -31866,7 +31868,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] Review or exercise guidance scenarios for suitable connected peers, no A2A support, unavailable/unsuitable peers, prohibited delegation, and timeout/cancellation; absence of A2A does not prevent ordinary local work.
   - [ ] Boundary review confirms bounded context sharing, durable tracker handoffs, reviewed authority changes, unchanged generation/cache identity rules, and independent validation of returned artifacts; A2A completion alone never satisfies litai acceptance.
 
-### [ ] IGNORE-LIFECYCLE-001 — Keep lifecycle lock state out of initialized and updated Git projects
+### [x] IGNORE-LIFECYCLE-001 — Keep lifecycle lock state out of initialized and updated Git projects
 
 - **Release target:** 1.4.0
 
@@ -31881,9 +31883,9 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Update the canonical project.gitignore and verify actual lifecycle lock/owner paths stay ignored after initialization and update.
 - **Evidence:**
   - [x] Run Git-backed initialized and legacy-overlay update regressions; prove the prior template fails and unrelated files remain visible. The original template fails actual Git check-ignore for lifecycle.lock; both repaired regressions pass without skips, including owner metadata and legacy overlay preservation.
-  - [ ] Land the repair on green CI, comment with the landed evidence and close issue #215.
+  - [x] Land the repair on green CI, comment with the landed evidence and close issue #215. PR 237 lands the fix after exact-head CI 41282538479; current-main Git/native projection controls pass six cases without skips. Issue 215 is closed with comment 6560170174.
 
-### [ ] RUST-IMPORT-DEDUP-001 — Verify overlapping Rust library capabilities without duplicate imports
+### [x] RUST-IMPORT-DEDUP-001 — Verify overlapping Rust library capabilities without duplicate imports
 
 - **Release target:** 1.4.0
 
@@ -31900,7 +31902,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Reproduce E0252 before the fix; prove repeated valid imports pass and a genuinely missing declared symbol still fails.
 
 - **Development evidence:** The native Cargo regression reproduces E0252 before the repair. After exact module/symbol deduplication, all four Standard command projection cases pass without skips, preserving both capability observations and missing-symbol refusal.
-- **Next action:** pass admission/integration CI, land, then comment and close the issue.
+- **Completion evidence:** PR 237 lands the fix after exact-head CI 41282538479. Current-main Git/native command-projection controls pass all six cases without skips; issue 219 is closed with comment 6560170740. No full release qualification is claimed.
 
 ### [ ] RELEASE-README-ORDER-001 — Clarify published README verification order and asset digest provenance
 
