@@ -32164,3 +32164,31 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   gates, preserves the untracked dependency manifest through lift-shift and
   validates the wrapped project. This is source-CLI development evidence; exact
   installed and integration-CI qualification remain open.
+
+### [ ] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#201](https://github.com/jordanhubbard/literate-ai/issues/201)
+
+- **Priority:** P1
+- **Owner:** CLI dispatch read-only performance-span policy; issue 201; PROJECT goal 1
+- **Direction:** Issue 201 reports onboard planning creates _build telemetry in the target, changing quarantine entries and invalidating the reviewed plan identity.
+- **Conclusion:** Use the existing no-write telemetry scope for read-only onboard create/adopt plans, while preserving acknowledged apply telemetry and exact plan-change refusal. Prove unchanged target bytes from the target working directory, stable repeated plan identity, and actual application of that exact reviewed identity; never exclude arbitrary pre-existing build content from conversion custody.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Disable performance-span publication for unapplied onboard plans through the existing null context policy.
+- **Evidence:**
+  - [x] Reproduce target mutation before the fix; prove target snapshots and repeated plan identities stable, exact expect-plan applies, genuine source drift still refuses, and ordinary apply telemetry remains available.
+  - [ ] Run affected CLI/adoption tests and declared review/static gates; require exact integration CI before issue 201 closes.
+
+- **Development evidence:** The regression fails before repair because `_build`
+  and its telemetry records appear after planning. Fifteen onboarding, retained
+  catalog and orchestration controls pass after repair. From the target working
+  directory, repeated adoption plans preserve exact file/mode snapshots and plan
+  identity; the original `--expect-plan` applies successfully and retains apply
+  timing diagnostics. Relative/absolute object-root settings create no output in
+  plan mode; create planning leaves both target and ambient build root absent.
+  Actual source drift still refuses, and pre-existing build content remains in
+  the reviewed quarantine. Exact integration and installed qualification remain
+  required before issue closure.

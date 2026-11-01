@@ -3421,6 +3421,9 @@ def main(
                 getattr(args, "project_command", None) == "retained-scope"
                 or scoped_orchestration
                 or args.command in ("render", "verify")
+                # A read-only onboard plan must not create OBJ_DIR in the tree
+                # it inventories, invalidating its own reviewed plan identity.
+                or (command == "onboard" and not getattr(args, "apply", False))
                 or (
                     command == "onboard"
                     and getattr(args, "root_plan", None) is not None

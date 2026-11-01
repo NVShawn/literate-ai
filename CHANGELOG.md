@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep onboarding plans free of performance-log writes so planning from the
+  target directory preserves its reviewed identity. Retain apply diagnostics,
+  real plan-drift refusal and custody of pre-existing build content.
+
 - Keep retained `implementation/` dependencies and outputs outside Component
   validation and authority/lock discovery. Reuse the bounded catalog boundary,
   preserve nested authored Components and reject actual legacy-only authoring.
