@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shlex
 import shutil
@@ -12,12 +13,14 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from literate_ai.adapters import harness_inventory
 from literate_ai.adapters import project_initialization as initialization
 from literate_ai.adapters.harness_tree import (
     capture_retained_source_scope,
     copy_retained_source_tree,
 )
 from tests.support.fixtures_test_project_cli import invoke
+from tests.support.fixtures_test_retained_harness_receipts import _adapter, _selectors
 from tests.support.symlinks import skip_unless_symlinks_followable
 
 
@@ -249,6 +252,202 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
         self.assertEqual(result["error"]["code"], "project.convert_legacy_gate_failed")
         self.assertEqual(self.snapshot(), before)
         self.assertEqual(self.git("ls-files", "--stage", "-z"), index)
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("make"), "POSIX Make fixture")
+    def test_phase12_failure_restores_original_tree_and_staged_aliases(self):
+        skip_unless_symlinks_followable(self, directory=self.parent)
+        # This order makes the alias dangling during reverse lift-shift moves.
+        (self.root / "Z-source").write_bytes(b"retained alias target")
+        (self.root / "A-link").symlink_to("Z-source")
+        self.git("add", "Z-source", "A-link")
+        before = self.snapshot()
+        index = self.git("ls-files", "--stage", "-z")
+        phases = []
+        parity = harness_inventory.execute_harness_wrapper_parity
+
+        def reject_phase12(*args, **kwargs):
+            phase12 = kwargs["legacy_root"].name == "implementation"
+            phases.append(phase12)
+            result = parity(*args, **kwargs)
+            if phase12:
+                raise harness_inventory.HarnessBaselineError(
+                    "project.convert_wrapper_parity_failed",
+                    "injected Phase 1.2 refusal",
+                    {
+                        "schema": harness_inventory.HARNESS_PARITY_SCHEMA,
+                        "state": "failed",
+                        "phases": [],
+                    },
+                )
+            return result
+
+        with mock.patch.object(
+            harness_inventory,
+            "execute_harness_wrapper_parity",
+            side_effect=reject_phase12,
+        ):
+            status, result = invoke(
+                "onboard",
+                "adopt",
+                str(self.root),
+                "--source-intelligence-provider",
+                "none",
+                "--apply",
+                "--acknowledge",
+                "--run-baseline",
+            )
+        self.assertEqual(status, 2, result)
+        self.assertEqual(
+            result["error"]["code"], "project.convert_wrapper_parity_failed"
+        )
+        self.assertIn("rolled back", result["error"]["message"])
+        self.assertEqual(phases, [False, True])
+        self.assertEqual(self.snapshot(), before)
+        self.assertEqual(self.git("ls-files", "--stage", "-z"), index)
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("make"), "POSIX Make fixture")
+    def test_incomplete_phase12_recovery_retains_source_and_reports_failure(self):
+        parity = harness_inventory.execute_harness_wrapper_parity
+        run = subprocess.run
+
+        def reject_phase12(*args, **kwargs):
+            result = parity(*args, **kwargs)
+            if kwargs["legacy_root"].name == "implementation":
+                raise harness_inventory.HarnessBaselineError(
+                    "project.convert_wrapper_parity_failed",
+                    "injected Phase 1.2 refusal",
+                    {
+                        "schema": harness_inventory.HARNESS_PARITY_SCHEMA,
+                        "state": "failed",
+                        "phases": [],
+                    },
+                )
+            return result
+
+        def refuse_recovery(argv, **kwargs):
+            if (
+                argv[0] == "git"
+                and "mv" in argv
+                and str(argv[-2]).startswith(
+                    "components/legacy-project-wrapper/implementation/"
+                )
+                and str(argv[-1]).startswith("_legacy/")
+            ):
+                return subprocess.CompletedProcess(
+                    argv, 1, b"", b"injected recovery refusal"
+                )
+            return run(argv, **kwargs)
+
+        with (
+            mock.patch.object(
+                harness_inventory,
+                "execute_harness_wrapper_parity",
+                side_effect=reject_phase12,
+            ),
+            mock.patch.object(
+                harness_inventory.subprocess, "run", side_effect=refuse_recovery
+            ),
+        ):
+            status, result = invoke(
+                "onboard",
+                "adopt",
+                str(self.root),
+                "--source-intelligence-provider",
+                "none",
+                "--apply",
+                "--acknowledge",
+                "--run-baseline",
+            )
+        self.assertEqual(status, 2, result)
+        self.assertEqual(result["error"]["code"], "project.convert_rollback_failed")
+        retained = (
+            self.root
+            / "components/legacy-project-wrapper/implementation/src/workspace/tests.py"
+        )
+        self.assertEqual(retained.read_bytes(), b"VALUE = 7\n")
+        self.assertIn(
+            str(retained.relative_to(self.root)).encode(), self.git("ls-files", "-z")
+        )
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("make"), "POSIX Make fixture")
+    def test_unexplained_recovery_content_is_preserved(self):
+        parity = harness_inventory.execute_harness_wrapper_parity
+
+        def reject_with_extra(*args, **kwargs):
+            result = parity(*args, **kwargs)
+            if kwargs["legacy_root"].name == "implementation":
+                (kwargs["legacy_root"] / "recovery-note").write_bytes(
+                    b"keep this operator data"
+                )
+                raise harness_inventory.HarnessBaselineError(
+                    "project.convert_wrapper_parity_failed",
+                    "injected Phase 1.2 refusal",
+                    {
+                        "schema": harness_inventory.HARNESS_PARITY_SCHEMA,
+                        "state": "failed",
+                        "phases": [],
+                    },
+                )
+            return result
+
+        with mock.patch.object(
+            harness_inventory,
+            "execute_harness_wrapper_parity",
+            side_effect=reject_with_extra,
+        ):
+            status, result = invoke(
+                "onboard",
+                "adopt",
+                str(self.root),
+                "--source-intelligence-provider",
+                "none",
+                "--apply",
+                "--acknowledge",
+                "--run-baseline",
+            )
+        self.assertEqual(status, 2, result)
+        self.assertEqual(result["error"]["code"], "project.convert_rollback_failed")
+        note = (
+            self.root / "components/legacy-project-wrapper/implementation/recovery-note"
+        )
+        self.assertEqual(note.read_bytes(), b"keep this operator data")
+        self.assertTrue(list((self.root / "_legacy").glob("*/src/workspace/tests.py")))
+
+    @unittest.skipUnless(os.name != "nt" and shutil.which("make"), "POSIX Make fixture")
+    def test_completed_lift_shift_can_restore_original_git_custody(self):
+        before = self.snapshot()
+        index = self.git("ls-files", "--stage", "-z")
+        result = _adapter().initialize(
+            self.root,
+            flavor_selectors=_selectors(self.root),
+            source_intelligence_provider="none",
+            convert=True,
+            run_baseline=True,
+        )
+        quarantine = result["convert_quarantine"]
+        lift_shift = json.loads(
+            (self.root / ".literate/legacy-lift-shift.json").read_text()
+        )
+        initialization._restore_lift_shift_quarantine(self.root, quarantine, lift_shift)
+        initialization._rollback_converted_tree(self.root, quarantine)
+        self.assertEqual(self.snapshot(), before)
+        self.assertEqual(self.git("ls-files", "--stage", "-z"), index)
+
+    def test_incomplete_quarantine_refuses_before_any_scaffold_deletion(self):
+        quarantine = initialization._quarantine_existing_tree(self.root)
+        legacy = self.root / quarantine["directory"]
+        scaffold = self.root / "scaffold-marker"
+        scaffold.write_bytes(b"preserve recovery state")
+        (legacy / "unexpected").write_bytes(b"operator recovery note")
+        with self.assertRaises(initialization.ProjectInitializationError):
+            initialization._rollback_converted_tree(self.root, quarantine)
+        self.assertEqual(scaffold.read_bytes(), b"preserve recovery state")
+        self.assertEqual(
+            (legacy / "unexpected").read_bytes(), b"operator recovery note"
+        )
+        self.assertEqual(
+            (legacy / "src/workspace/tests.py").read_bytes(), b"VALUE = 7\n"
+        )
 
     @unittest.skipUnless(os.name != "nt" and shutil.which("make"), "POSIX Make fixture")
     def test_public_adoption_executes_test_importing_ignored_tracked_module(self):

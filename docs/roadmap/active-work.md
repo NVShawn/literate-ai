@@ -32234,3 +32234,39 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   an intervening destination collision preserves both copies and reports failure.
   Failed Git rollback retains quarantine/index custody. This is local development
   evidence; exact integration and installed qualification remain required.
+
+### [ ] ADOPT-LIFT-ROLLBACK-001 — Restore original custody after failed lift-shift parity
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#209](https://github.com/jordanhubbard/literate-ai/issues/209)
+
+- **Priority:** P1
+- **Owner:** lift-shift move owner and conversion failure boundary; issue 209; PROJECT goals 1 and 4
+- **Direction:** Issue 209 reports lift-shift failures leave generated scaffold above quarantined source instead of rolling back.
+- **Conclusion:** Recover the lift-shift move journal with link-aware, Git-aware moves, then require every original entry back in quarantine before deleting scaffold and restoring the source root. Refuse failed Git moves and retain unexpected recovery contents rather than recursively deleting them. Keep original failure diagnostics on successful recovery and report explicit recovery failure when custody is incomplete.
+- **Depends on:** ADOPT-GIT-CUSTODY-001
+- **Completion prerequisites:** ADOPT-GIT-CUSTODY-001
+- **Implementation:**
+  - [x] Harden lift-shift forward/reverse moves and recover its journal without deleting unexplained remaining entries.
+  - [x] Roll back failed lift-shift only after checking complete source quarantine custody; preserve an explicit recovery error otherwise.
+- **Evidence:**
+  - [x] Inject a failure at actual Phase 1.2 parity after real baseline and Phase 1.1 work; prove source, relative aliases and staged Git intent restored. Prove incomplete recovery retains originals and reports failure.
+  - [ ] Run adoption, move/custody and harness regressions plus required review/static checks; require exact integration and installed qualification before issue 209 closes.
+
+- **Development evidence:** Three Phase 1.2 fault controls fail before repair and
+  pass after it. The public CLI runs the real baseline and both parity phases
+  before injected rejection; successful recovery restores original bytes, relative
+  alias payloads and staged index entries. Failed Git recovery retains source in
+  implementation and reports `project.convert_rollback_failed`; unexplained
+  recovery notes are preserved instead of recursively removed. A completed
+  lift-shift restores through the actual initialization adapter's move journal;
+  incomplete quarantine refuses before any scaffold deletion. These controls do
+  not claim installed or final-release qualification. Final related regressions
+  and exact integration evidence remain required.
+
+- **Final local checks:** All 49 conversion, Git-boundary, initialization,
+  onboarding, retained-catalog, harness and native Cargo controls pass in the
+  corrected final run. Lint, formatting, repository layout, public export and
+  181 Mermaid render checks pass. Project authority verification passes; the
+  full lifecycle receipt remains stale. Exact integrated and installed
+  qualification are still required before closing the issue or release goal.

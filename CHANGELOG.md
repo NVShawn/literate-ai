@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Restore original source and Git custody after failed lift-shift parity. Require
+  complete quarantine before deleting scaffold, retain unexpected recovery
+  contents, and report incomplete recovery explicitly.
+
 - Preserve ignored tracked files and untracked siblings when adoption quarantines
   partly tracked directories. Keep indexed aliases and staged changes through
   rollback, recognize dangling relative aliases, and refuse failed Git recovery

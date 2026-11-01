@@ -2074,24 +2074,66 @@ def _move_tree_entry(
     *,
     prefer_git: bool,
 ) -> str:
+    if not os.path.lexists(source) or os.path.lexists(destination):
+        raise ValueError("lift-shift move source or destination is unavailable")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    moved_with_git = False
-    if prefer_git and (project_root / ".git").exists():
+    if prefer_git:
+        if not (project_root / ".git").exists():
+            raise ValueError("lift-shift Git custody is unavailable")
         completed = subprocess.run(
             (
                 "git",
+                "--literal-pathspecs",
                 "-C",
                 str(project_root),
                 "mv",
+                "--",
                 source.relative_to(project_root).as_posix(),
                 destination.relative_to(project_root).as_posix(),
             ),
             capture_output=True,
         )
-        moved_with_git = completed.returncode == 0
-    if not moved_with_git:
-        shutil.move(str(source), str(destination))
-    return "git" if moved_with_git else "fs"
+        if completed.returncode != 0:
+            # Git can rename bytes before an index-write failure. Recover that
+            # exact move, or retain it for the caller's explicit recovery error.
+            if os.path.lexists(destination) and not os.path.lexists(source):
+                indexed = subprocess.run(
+                    (
+                        "git",
+                        "--literal-pathspecs",
+                        "-C",
+                        str(project_root),
+                        "ls-files",
+                        "-z",
+                        "--",
+                        destination.relative_to(project_root).as_posix(),
+                    ),
+                    capture_output=True,
+                )
+                if indexed.returncode != 0:
+                    raise ValueError("lift-shift move index state is unavailable")
+                if indexed.stdout.rstrip(b"\0"):
+                    recovered = subprocess.run(
+                        (
+                            "git",
+                            "--literal-pathspecs",
+                            "-C",
+                            str(project_root),
+                            "mv",
+                            "--",
+                            destination.relative_to(project_root).as_posix(),
+                            source.relative_to(project_root).as_posix(),
+                        ),
+                        capture_output=True,
+                    )
+                    if recovered.returncode != 0:
+                        raise ValueError("lift-shift move recovery is incomplete")
+                else:
+                    shutil.move(str(destination), str(source))
+            raise ValueError("lift-shift Git move failed; index custody is required")
+        return "git"
+    shutil.move(str(source), str(destination))
+    return "fs"
 
 
 def render_lift_shift_adr(
@@ -2378,23 +2420,32 @@ def lift_shift_legacy_project(
             diagnostic_limit_chars=diagnostic_limit_chars,
             workspace_links=workspace_links,
         )
-    except Exception:
-        if "original_wrapper" in locals():
-            wrapper.write_text(original_wrapper, encoding="utf-8", newline="\n")
-        for record in reversed(move_records):
-            source = project_root / record["to"]
-            destination = project_root / record["from"]
-            if source.exists():
+        # Only the exact empty quarantine directories are ours to remove.
+        legacy_root.rmdir()
+        legacy_root.parent.rmdir()
+    except Exception as original:
+        try:
+            if "original_wrapper" in locals():
+                wrapper.write_text(original_wrapper, encoding="utf-8", newline="\n")
+            for record in reversed(move_records):
+                source = project_root / record["to"]
+                destination = project_root / record["from"]
                 _move_tree_entry(
                     project_root,
                     source,
                     destination,
                     prefer_git=record["vcs"] == "git",
                 )
-        if implementation.exists():
-            shutil.rmtree(implementation)
+            implementation.rmdir()
+        except Exception as recovery:
+            raise HarnessBaselineError(
+                "project.convert_lift_shift_recovery_failed",
+                f"{getattr(original, 'message', 'lift-shift failed')}; "
+                "lift-shift recovery is incomplete; preserve quarantine and "
+                "implementation contents for recovery",
+                {"schema": "literate-ai/legacy-lift-shift@1", "state": "failed"},
+            ) from recovery
         raise
-    shutil.rmtree(project_root / Path(directory).parts[0])
     baseline_identity = (
         "sha256:"
         + hashlib.sha256(

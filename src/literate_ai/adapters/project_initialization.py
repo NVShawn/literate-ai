@@ -935,6 +935,29 @@ def _rollback_converted_tree(target: Path, quarantine: dict[str, object]) -> Non
             "project.convert_rollback_source_missing",
             "conversion rollback quarantine is unavailable",
         )
+    # Never remove scaffold while any original is still inside it. A failed
+    # lift-shift can leave mixed custody; preserve all bytes for explicit recovery.
+    originals: set[str] = set()
+    for item in moved:
+        if (
+            not isinstance(item, dict)
+            or not isinstance(item.get("from"), str)
+            or not isinstance(item.get("to"), str)
+        ):
+            raise ProjectInitializationError(
+                "project.convert_rollback_manifest_invalid", "invalid rollback move"
+            )
+        originals.add(item["from"])
+        if not os.path.lexists(target / item["to"]):
+            raise ProjectInitializationError(
+                "project.convert_rollback_source_missing",
+                "original custody is incomplete; preserve scaffold and quarantine",
+            )
+    if {path.name for path in aside.iterdir()} != originals:
+        raise ProjectInitializationError(
+            "project.convert_rollback_conflict",
+            "quarantine contains unexplained entries; preserve them for recovery",
+        )
     # Nothing except repository metadata and the quarantine survives rollback.
     legacy_root_name = Path(directory).parts[0]
     for entry in sorted(target.iterdir(), key=lambda item: item.name):
@@ -989,9 +1012,14 @@ def _rollback_converted_tree(target: Path, quarantine: dict[str, object]) -> Non
                 )
         if not restored_with_git:
             shutil.move(str(source), str(destination))
-    legacy_root = target / legacy_root_name
-    if legacy_root.exists():
-        shutil.rmtree(legacy_root)
+    try:
+        aside.rmdir()
+        (target / legacy_root_name).rmdir()
+    except OSError as exc:
+        raise ProjectInitializationError(
+            "project.convert_rollback_conflict",
+            "original entries were restored but quarantine has unexplained contents",
+        ) from exc
 
 
 def _restore_lift_shift_quarantine(
@@ -1000,6 +1028,8 @@ def _restore_lift_shift_quarantine(
     lift_shift: dict[str, object],
 ) -> None:
     """Recreate quarantine custody so the existing conversion rollback can run."""
+
+    from literate_ai.adapters.harness_inventory import _move_tree_entry
 
     directory = quarantine.get("directory")
     moves = lift_shift.get("moves")
@@ -1022,15 +1052,17 @@ def _restore_lift_shift_quarantine(
         source = target.joinpath(*Path(str(item["to"])).parts)
         destination = target.joinpath(*Path(str(item["from"])).parts)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        if not source.exists() or destination.exists():
+        if not os.path.lexists(source) or os.path.lexists(destination):
             raise ProjectInitializationError(
                 "project.convert_rollback_conflict",
                 f"lift-shift rollback cannot restore {item['from']!r}",
             )
-        shutil.move(str(source), str(destination))
+        _move_tree_entry(
+            target, source, destination, prefer_git=item.get("vcs") == "git"
+        )
     implementation = target / "components" / "legacy-project-wrapper" / "implementation"
     if implementation.exists():
-        shutil.rmtree(implementation)
+        implementation.rmdir()
 
 
 # Per-axis default selector applied when init caller declares no Flavor on that axis.
@@ -3237,8 +3269,31 @@ class FilesystemProjectInitializationAdapter:
                     diagnostic_limit_chars=baseline_diagnostic_chars,
                     workspace_links=harness_workspace_links,
                 )
-            except (HarnessBaselineError, HarnessWorkspaceError) as exc:
-                raise ProjectInitializationError(exc.code, exc.message) from exc
+            except Exception as exc:
+                code = getattr(exc, "code", "project.convert_lift_shift_failed")
+                message = getattr(exc, "message", "lift-shift failed")
+                try:
+                    implementation = (
+                        resolved_target
+                        / "components"
+                        / "legacy-project-wrapper"
+                        / "implementation"
+                    )
+                    if os.path.lexists(implementation):
+                        raise ProjectInitializationError(
+                            "project.convert_rollback_conflict",
+                            "lift-shift still retains implementation contents",
+                        )
+                    _rollback_converted_tree(resolved_target, quarantine)
+                except (ProjectInitializationError, OSError) as recovery:
+                    raise ProjectInitializationError(
+                        "project.convert_rollback_failed",
+                        f"{message}; recovery is incomplete. Preserve _legacy and "
+                        "components/legacy-project-wrapper/implementation for recovery",
+                    ) from recovery
+                raise ProjectInitializationError(
+                    code, f"{message}; literate-ai conversion was rolled back"
+                ) from exc
             lift_shift_path = evidence_dir / "legacy-lift-shift.json"
             lift_shift_path.write_bytes(
                 canonical_json_bytes(harness_lift_shift_document) + b"\n"
