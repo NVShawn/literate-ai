@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Worktrees: add internal read-only audit-input capture and private immutable
+  observation journals with interrupted-publication recovery. Preserve source and
+  peer index metadata; full audit and retirement remain pending.
+
 - Worktrees: add bounded read-only ownership discovery for registered checkouts
   and legacy peers. Distinguish independent repositories and unresolved custody,
   preserve operator data, and refuse changes observed during discovery. Full
