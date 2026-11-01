@@ -31,6 +31,11 @@ from literate_ai.adapters.live_test_selection import (
     remote_live_gate_overlay,
     try_resolve_live_test_selection,
 )
+from literate_ai.adapters.release_readme import (
+    ReadmeLatestReleasePolicy,
+    ReleaseReadmeError,
+    verify_remote_release_readme,
+)
 from literate_ai.adapters.ssh_transport import (
     BoundedSshProcessRunner,
     SshTransportError,
@@ -299,6 +304,7 @@ class ReleasePolicy:
     artifact_gate: dict[str, Any] | None = None
     authenticated_receipt: dict[str, Any] | None = None
     qualification: ReleaseQualificationPolicy | None = None
+    readme_latest_release: ReadmeLatestReleasePolicy | None = None
 
     @classmethod
     def from_dict(cls, value: object) -> ReleasePolicy:
@@ -322,6 +328,7 @@ class ReleasePolicy:
         # Optional: the platforms and actions a release must cover, and when CI
         # is required to cover them (see literate_ai.release_qualification).
         qualification_raw = data.pop("qualification", None)
+        readme_raw = data.pop("readme_latest_release", None)
         if authenticated_receipt is not None:
             from literate_ai.adapters.release_evidence import (
                 validate_release_evidence_policy,
@@ -534,6 +541,17 @@ class ReleasePolicy:
                 )
             except ReleaseQualificationError as exc:
                 _fail("release_policy.qualification", str(exc))
+        readme = None
+        if readme_raw is not None:
+            if schema != RELEASE_POLICY_SCHEMA or provider_kind != "github":
+                _fail(
+                    "release_policy.readme_latest_release",
+                    "requires policy @2 and GitHub",
+                )
+            try:
+                readme = ReadmeLatestReleasePolicy.from_dict(readme_raw)
+            except (ValueError, TypeError) as exc:
+                _fail("release_policy.readme_latest_release", str(exc))
         return cls(
             schema,
             version_scheme,
@@ -556,6 +574,7 @@ class ReleasePolicy:
             artifact_gate,
             authenticated_receipt,
             qualification,
+            readme,
         )
 
     @property
@@ -591,6 +610,11 @@ class ReleasePolicy:
             **(
                 {"artifact_gate": self.artifact_gate}
                 if self.artifact_gate is not None
+                else {}
+            ),
+            **(
+                {"readme_latest_release": self.readme_latest_release.to_dict()}
+                if self.readme_latest_release is not None
                 else {}
             ),
             **(
@@ -5251,6 +5275,20 @@ def verify_published_release(project: Path, prepared_path: Path) -> dict[str, ob
             _verify_release_file_assets(
                 root, policy.provider_repository, tag, artifacts
             )
+    if policy.readme_latest_release is not None:
+        assert policy.provider_repository is not None
+        try:
+            verify_remote_release_readme(
+                root,
+                policy.provider_repository,
+                tag=tag,
+                prerelease=_is_prerelease(
+                    str(prepared["version"]), policy.version_scheme
+                ),
+                policy=policy.readme_latest_release,
+            )
+        except ReleaseReadmeError as exc:
+            raise ProjectReleaseError(exc.code, exc.message) from exc
     result: dict[str, object] = {
         "schema": PUBLISHED_VERIFICATION_SCHEMA,
         "prepared_release_identity": prepared["identity"],

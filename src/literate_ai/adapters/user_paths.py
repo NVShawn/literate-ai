@@ -104,6 +104,20 @@ class HostSystemPaths:
     bubblewrap_temporary_root: PurePath | None
 
 
+def opencode_managed_configuration_roots(
+    environment: Mapping[str, str], *, platform: str | None = None
+) -> tuple[Path, Path | None]:
+    """OpenCode's fixed system and MDM discovery roots (not LitAI settings)."""
+    platform = sys.platform if platform is None else platform
+    if platform == "darwin":
+        return Path("/Library/Application Support/opencode"), Path(
+            "/Library/Managed Preferences"
+        )
+    if platform == "win32":
+        return Path(environment.get("ProgramData", "C:/ProgramData")) / "opencode", None
+    return Path("/etc/opencode"), None
+
+
 @dataclass(frozen=True, slots=True)
 class FreeBsdLoaderSystemPaths:
     ldconfig: PurePath

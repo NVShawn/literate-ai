@@ -114,6 +114,54 @@
       },
       {
         "id": "HTML-VERIFY-COST-001"
+      },
+      {
+        "id": "IGNORE-LIFECYCLE-001"
+      },
+      {
+        "id": "RUST-IMPORT-DEDUP-001"
+      },
+      {
+        "id": "RELEASE-README-ORDER-001"
+      },
+      {
+        "id": "ZERO-ARG-COVERAGE-001"
+      },
+      {
+        "id": "RUST-ADOPTION-DETECT-001"
+      },
+      {
+        "id": "RETAINED-BUILD-COREQ-001"
+      },
+      {
+        "id": "RETAINED-OUTPUT-DIAG-001"
+      },
+      {
+        "id": "RELEASE-README-VERIFY-001"
+      },
+      {
+        "id": "NATIVE-PROMOTION-FLAVORS-001"
+      },
+      {
+        "id": "RETAINED-SCALE-LIMITS-001"
+      },
+      {
+        "id": "HTTP-CACHE-REFERENCE-001"
+      },
+      {
+        "id": "HOST-PROBE-ALIAS-001"
+      },
+      {
+        "id": "ADOPT-CATALOG-001"
+      },
+      {
+        "id": "ADOPT-PLAN-READONLY-001"
+      },
+      {
+        "id": "ADOPT-GIT-CUSTODY-001"
+      },
+      {
+        "id": "ADOPT-LIFT-ROLLBACK-001"
       }
     ]
   }

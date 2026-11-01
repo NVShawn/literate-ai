@@ -92,7 +92,8 @@ litai spec derive path/to/source \
 available command in that order is used. `--model MODEL` pins a model for every inverse
 language call.
 Before an OpenCode inverse call, the exact executable must pass LitAI's bounded,
-prompt-free `--pure run --help` capability probe; incompatible releases fail before
+prompt-free `run --help` capability probe for the v1 pure or v2 standalone interface;
+v2 also confirms its isolated configuration before prompting. Incompatible releases fail before
 source evidence or a prompt can leave the process.
 `--model-evidence-byte-budget N` sets the positive UTF-8 evidence-byte ceiling for each
 call; it defaults to 262,144. An individual evidence record above the ceiling is an
@@ -186,8 +187,13 @@ default Flavor selectors and runs the deterministic lock resolver for
 `--qualification-target`. This prevents template-machine defaults from leaking into the
 recovered application and avoids replaying an already-effective selector as a no-op.
 If every recovered Flavor axis has exactly one reviewed candidate,
-the selectors may be omitted and acceptance selects those unique candidates. Ambiguous
-axes require an explicit selection. Locking reads no generated source, invokes no coding
+the selectors may be omitted and acceptance selects those unique candidates. A
+reviewed build-system selection replaces incidental template Bazel. Integrated
+promotion otherwise inherits one unscoped parent build-system preference, with its
+exact authored authority rechecked before publication. Scoped/ambiguous parent
+preferences or customized build authority require an explicit reviewed selection;
+other parent language/platform defaults do not leak into the new application.
+Ambiguous recovered axes require an explicit selection. Locking reads no generated source, invokes no coding
 model, and leaves no implementation source in the project. A one-node inverse writes one
 complete Component definition. A
 multi-node `ComponentGraphDraft` writes one Component per evidence-backed logical node
@@ -289,7 +295,12 @@ that a trimmed value is used for grouping or an identifier does not establish th
 returned value is also trimmed.
 
 The local-host command first requires the canonical `component.lock.json` for `--target`
-and the ordered `--flavor` selectors. It rejects stale authoring, Flavor, specification,
+and its effective defaults plus any ordered selector changes. Acceptance already
+folds selected Flavors into the promoted project's defaults: omit `--flavor` when
+qualifying that accepted configuration. Selectors with no effective selection or
+slot-binding change still fail with `component_lock.flavor_selector_noop`. Supply
+ordered selectors only to request a genuine configuration change and refresh its
+lock first. It rejects stale authoring, Flavor, specification,
 or lock bytes before host execution. Historical v1 decisions remain readable but always
 retain `effective_authority: source-baseline` and `qualification-v2-required`. New runs
 that satisfy every policy condition produce a v3 current qualification record binding

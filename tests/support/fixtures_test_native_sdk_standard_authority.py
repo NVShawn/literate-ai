@@ -127,6 +127,9 @@ class NativeSdkStandardAuthorityTests(unittest.TestCase):
                 )
             ),
             all_documents=(),
+            # This explicit generation fixture keeps ordinary v1 diversity;
+            # it supplies no authoritative zero-argument coverage exemption.
+            generated_test_coverage_authority=None,
         )
         self.candidate = replace(
             self.candidate,

@@ -676,13 +676,39 @@ class StandardCommandProjectionTests(unittest.TestCase):
                 test=False,
             )
             self.assertEqual(imported.returncode, 0, imported.stderr)
+            overlapping = LibraryImportSurface(
+                "rust",
+                surface.package,
+                (
+                    *surface.capabilities,
+                    LibraryCapabilityImport(
+                        "fixture.protocol",
+                        canonical_identity({"interface": "rust-protocol"}),
+                        "fixture_library::logic",
+                        ("value",),
+                    ),
+                ),
+            )
+            shared = self._run_library_driver(
+                _STANDARD_LIBRARY_IMPORT_DRIVER,
+                "rust",
+                cargo,
+                export,
+                overlapping,
+                test=False,
+            )
+            self.assertEqual(shared.returncode, 0, shared.stderr)
+            self.assertEqual(
+                json.loads(shared.stdout)["capabilities"],
+                ["fixture.logic", "fixture.protocol"],
+            )
             library.write_text("pub mod logic { pub const other: u8 = 7; }\n")
             rejected = self._run_library_driver(
                 _STANDARD_LIBRARY_IMPORT_DRIVER,
                 "rust",
                 cargo,
                 export,
-                surface,
+                overlapping,
                 test=False,
             )
             self.assertNotEqual(rejected.returncode, 0)

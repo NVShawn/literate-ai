@@ -31,6 +31,48 @@ verification does not substitute for fresh authentication. Policies without this
 option retain their prior local behavior; repository CI provisioning and enabling
 this required policy for the 1.1 release remain outstanding.
 
+## Published release README verification
+
+The optional policy @2 GitHub `readme_latest_release` declaration makes the remote default branch's
+root README part of `verify-published`. Its exact fields are:
+
+```json
+{
+  "schema": "literate-ai/readme-latest-release-policy@1",
+  "path": "README.md",
+  "marker": "litai-latest-release",
+  "include_prereleases": false
+}
+```
+
+The marker names one `<!-- litai-latest-release:begin -->` /
+`<!-- litai-latest-release:end -->` section. The section contains a `Latest release`
+heading, a link whose label is the published release title, its exact tag, and a
+visible table of every uploaded provider asset with its download URL, byte size
+and SHA-256. The verifier renders this section deterministically from current
+provider metadata; formatting is part of the declared machine-readable contract.
+Provider SHA-256 metadata is authoritative when present. Missing digests require
+fresh downloaded bytes with an exact size check before hashing; malformed digests
+are refused. Another release described as latest/current anywhere in the README
+is a contradiction, even outside the marker section.
+
+Verification reads the forge's actual default branch, resolves its immutable Git
+revision, and reads `README.md` at that revision. Local files and a policy's
+release/development branch cannot substitute for remote readback. Tag, provider
+publication, required assets and collateral are checked first; a stale README
+raises `release.readme_latest_stale` with expected and observed values. Thus the
+first post-publication check may have a README-only failure before the corrective
+README commit lands, but final verification must pass in full.
+
+For a prerelease with `include_prereleases: false`, check the latest published
+stable provider release instead of replacing its entry with the prerelease. If
+there is no stable release, the section must say `No stable release has been
+published.`. Explicit opt-in permits advertising the prepared prerelease.
+Policies without this declaration retain their existing wire identity and manual
+README obligations. This framework enables the policy for 1.4; feature acceptance
+and its fixture checks precede publication, while RELEASE-INTEGRATION-005 owns the
+final 1.4 provider/README readback so the prepublication goal is acyclic.
+
 An optional `artifact_gate` policy runs a declared argv after the release gates and
 requires a fresh manifest under `_build`. It declares `timeout_seconds`, `manifest`,
 and exact `required_roles`. The manifest schema is

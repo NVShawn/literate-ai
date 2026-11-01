@@ -81,6 +81,29 @@ development (2026-09-10):
 
 ## Current work
 
+RELEASE-INTEGRATION-005 executes the user-requested complete outstanding PR/issue
+resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integration.md)
+tracks every initial item, the existing release goals, native qualification and
+publication evidence. All required acceptance remains open until proven.
+
+OPENCODE-COMPAT-001 extends Goals 1, 3, and 4 with support for both OpenCode CLI
+majors. Capability selection preserves v1 pure mode and adds v2 private-server
+execution with native permissions, fresh provider state, process environment
+credentials, and confirmation of the owned configuration.
+Native macOS tests with a loopback model prove file writing and refusal of
+out-of-workspace reads on both majors. Independent driver review has approved
+the provider-state isolation repair; checkpointed local regression repair is
+complete (2,346 passed, 102 skipped).
+Broader installed/native qualification and fresh release evidence remain open
+in the active queue.
+
+A2A-001 extends Goals 1, 2, and 4 with optional guidance for using suitable
+A2A agents already connected through the coding-agent host, when delegation is
+permitted. Connections and agent communication remain host/orchestrator-owned;
+Literate AI retains pinned authority, execution authorization, artifact verification,
+and acceptance. The [roadmap item](docs/roadmap/active-work.md#a2a-001-guide-agents-to-use-connected-a2a-peers-without-adding-framework-orchestration)
+is open, with no release assigned or native A2A implementation implied.
+
 LAB-AUTHORITY-001 extends Goals 2 and 4 with an independent, progressively richer
 canonical lab curriculum. Each lab must use actual Components, selected Flavors,
 locks, skills/workflows and truthful lifecycle evidence from this framework,

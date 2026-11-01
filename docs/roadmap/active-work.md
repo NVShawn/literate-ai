@@ -29090,7 +29090,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 ### [ ] NATIVE-CHILD-UPDATE-001 — Support reviewed updates to registered native child projects
 
 - **GitHub issue:** [#48](https://github.com/jordanhubbard/literate-ai/issues/48)
-- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+- **Current release target:** 1.4.0 (directing-user inclusion of all outstanding issues; prior 1.3 acceptance was incomplete)
 
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
@@ -29102,7 +29102,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-- **Installed journey result and next action:** Both non-editable installations import from site-packages. The public CLI completes reviewed registered rebind, stale-registry refusal without mutation, and reviewed unqualified-child replacement; parent validation passes after each. The retained recovery matches all 313 original files, 244 directories and 2,324,779 bytes against the pre-write plan. Final generation writes no source because the zero-argument public API cannot provide three distinct valid argument vectors. Independent acceptance and remaining refusal/rollback controls are incomplete; no candidate receipt is promoted. See `verification/registered-child-installed-partial.json` and blocking [#132](https://github.com/jordanhubbard/literate-ai/issues/132). Review [proposed ADR 0051](../decisions/0051-zero-argument-generated-test-coverage.md) before changing the coverage contract; retain the unchanged independent oracle and existing zero-argument API.
+- **Installed journey result and next action:** Both non-editable installations import from site-packages. The public CLI completes reviewed registered rebind, stale-registry refusal without mutation, and reviewed unqualified-child replacement; parent validation passes after each. The retained recovery matches all 313 original files, 244 directories and 2,324,779 bytes against the pre-write plan. Final generation writes no source because the zero-argument public API cannot provide three distinct valid argument vectors. Independent acceptance and remaining refusal/rollback controls are incomplete; no candidate receipt is promoted. See `verification/registered-child-installed-partial.json` and blocking [#132](https://github.com/jordanhubbard/literate-ai/issues/132). The directing user accepted [ADR 0051](../decisions/0051-zero-argument-generated-test-coverage.md) on 2026-10-31; its implementation is under qualification; retain the unchanged independent oracle and existing zero-argument API.
 
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
@@ -31625,6 +31625,25 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Evidence:**
   - [x] Verify desktop and mobile pages, live deployed links, deck navigation, film/caption downloads and publication status; record any CI still running without making release-success claims. The 442-page build passes 4,149 local-link checks. Live Chrome passes fourteen navigation/interaction checks at widths 1440 and 390, including search, film metadata/captions and lab input; all eight framework-flow diagrams render. The fourteen-slide deck passes desktop/mobile controls and layout checks. Fresh public deck, film, caption and downloaded-kit content hashes match reviewed sources; archive CRC passes. See [publication evidence](../conference/publication.json). Product CI remains separate and was not awaited by explicit user direction; 1.3.1 software qualification and the canonical lab curriculum remain open.
 
+### [x] CARGO-REUSE-001 — Reuse Cargo target output across Standard builds
+
+- **Priority:** P1
+- **Owner:** framework core; PROJECT Goals 4 and 5
+- **Direction:** Reuse CARGO_TARGET_DIR where compatible to avoid recompiling unchanged Rust dependencies and targets.
+- **Conclusion:** Retain a locked target/toolchain-scoped Cargo workspace, preserve unchanged source timestamps, synchronize additions/deletions, and discard failed workspace state. Keep fresh authorization, lock derivation, dependency evidence, artifact sealing and acceptance.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Implement persistent Cargo workspace and source synchronization with safe path checks. Compatible source revisions share locked intermediates; successful state is sealed over bytes, modes and freshness timestamps, and interrupted/failed work is discarded.
+  - [x] Repair the native fixture's Cargo/rustc binding collision with rustup multicall launchers (CI run `41213808272`). Preserve the selected invocation names while measuring launcher bytes; cover identical launchers locally. Managed `make python-check` passes all ten Cargo cases without skips with the actual rustup proxies selected, including duplicate-launcher registration, drift refusal and real warm/source-edit builds. Ruff lint/format and host path checks pass. Exact-head CI must pass before PR #198 is declared merge-ready; its review status owns that final remote evidence.
+  - [x] Document reuse boundaries and add focused native Cargo and failure/isolation regression coverage. User cache/configuration guides and the root changelog describe local reuse independently of sccache.
+  - [x] Repair [PR #198](https://github.com/jordanhubbard/literate-ai/pull/198) CI by reviewing the Cargo cache documentation against the implementation and recording the current documentation authority marker. Run `40912720305` failed all three sample-composition cells and the Linux repository self-description test on the same stale marker; no other Python failures were reported.
+  - [x] Merge current `main` into the contribution branch to resolve GitHub's reported conflicts, preserving both branches' changelog and work-queue entries; refresh documentation review for the integrated authority.
+  - [x] Refresh the lifecycle-driver implementation pin after reviewing the integrated Cargo changes; `make driver-review` detects the previously unrecorded Cargo implementation drift. Preserve the existing receipt as historical evidence rather than claiming fresh lifecycle qualification.
+- **Evidence:**
+  - [x] Re-run all declared `litai verify` gates and the affected project CLI tests; record local results and any gates requiring separate lifecycle evidence. Local integrated-tree evidence: project validation, documentation review and lifecycle-driver review pass; managed `make python-check` passes all eight project CLI tests and nine Cargo lifecycle tests without skips (native rustup toolchain selected). Host path policy and the contribution diff whitespace check pass. `litai verify` passes authority, skips locks/source-intelligence/HTML because none are selected, and reports the existing stale lifecycle receipt; fresh full lifecycle qualification is not claimed. Start/end peer surveys still fail through the configured GitHub alias; direct read-only GitHub inspection succeeds. Existing unrelated worktrees and untracked local files are preserved. Hosted CI renewal remains separate from local development proof.
+  - [x] Focused Standard Cargo tests prove warm freshness, source-edit rebuild, failure cleanup and unsafe-path refusal. All nine `tests.smoke.test_standard_cargo_lifecycle` cases pass on macOS arm64 with native Cargo/rustc 1.97.1: a warm forced artifact miss preserves the executable timestamp, a binary source edit rebuilds it while preserving the unchanged library artifact, and namespace isolation, stale-input removal, tampering/link refusal and interrupted/failed workspace cleanup pass.
+  - [x] Run scoped make python-check and lint/format checks; record local-only scope and unavailable tracker survey. Scoped `make python-check` runs pass 63 Standard smoke cases (four expected skips), 33 critical cache cases, and a final nine-case Cargo rerun. Changed Python files pass Ruff lint/format and `git diff --check`; compileall and host path policy pass. Validation explicitly selected the existing rustup toolchain because ambient Homebrew Cargo cannot load its llhttp dependency. Start/end tracker surveys and the read-only GC plan fail through the configured GitHub alias; no peer changes were collected. This is local development evidence, not native cross-platform or release qualification.
 ### [ ] RETAINED-CLEANUP-001 — Clean read-only retained remote attempt outputs safely
 
 - **Priority:** P0
@@ -31717,3 +31736,537 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   Documentation graph validation passed; its reviewed authority marker is recorded
   with this change. The end-of-cycle peer survey found no collectable worktrees;
   unrelated historical branches and other contributors' reviews remain untouched.
+
+<a id="release-integration-005"></a>
+
+### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
+
+- **Release target:** 1.4.0
+- **Detailed plan:** [1.4 integration](1.4-integration.md).
+- **Next action in progress:** review and consolidate the existing PR heads; audit the issue backlog against current code and tests.
+
+- **Priority:** P0
+- **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
+- **Direction:** Resolve all outstanding PRs and issues and release 1.4.
+- **Conclusion:** Include the current four reviews and 51 issues, audit their actual implementation and acceptance, preserve all eight existing 1.4 goals, and publish only the exact completely qualified 1.4.0 candidate. No issue or goal is silently deferred or closed from partial evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI.
+  - [ ] Reproduce or audit each issue, implement its owning fix or reviewed resolution, record decisive evidence, and comment and close only after the resolution lands.
+  - [ ] Complete all declared 1.4.0 roadmap goals and native platform qualification using aligned workers; retain prior failed evidence.
+  - [ ] Regenerate, inspect and publish the declared terminal document pair, then plan, prepare, check, publish and verify 1.4.0 through repository commands.
+- **Evidence:**
+  - [ ] Require an empty unresolved tracker/review set, current contribution dispositions, complete release goals and reviewed branch/worktree provenance.
+  - [ ] Require fresh exact-candidate release checks, platform qualification, package manifest and published-provider/tag/README read-back verification.
+
+- **Native SDK development milestone:** Exact source
+  `cc663b3ada3ecdb61477f66a5dd212532b4fc3f2` passes the real installed public CLI
+  SDK microfixture, five publication controls and 40 installed owner controls on
+  unprivileged native FreeBSD 15.1 amd64, with no skips and 510 verified production
+  module bindings. All 44 guest inventory members rehash correctly. Retained
+  [development evidence](../../verification/native-sdk-freebsd-development.json)
+  explicitly refuses a release-qualification claim: this ephemeral guest does not
+  supply full retained-tree, two-physical-host cache/performance, compiler SDK or
+  final candidate acceptance. Later integration changes still require renewal.
+
+### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
+
+- **Priority:** P1
+- **Owner:** Framework core coding-CLI adapter, host-install Flavors, and setup documentation; PROJECT Goals 1, 3, and 4
+- **Direction:** Support both v1 and v2 of the OpenCode command line without requiring existing v1 users to migrate.
+- **Conclusion:** Select a compatible invocation and isolation profile from the exact executable capabilities. Current generation and preflight require the v1 --pure and --dir help surface; published v2.2.5 help omits both and defaults to a shared background service. Preserve supported v1 behavior and qualify v2 with a private server, explicit workspace custody, provider credentials, bounded diagnostics, and deny-by-default tools. Supported legacy configuration translation alone does not establish equivalent isolation. The adapter implementation and macOS native checks now cover both interfaces; v2 uses fresh provider state and process environment credentials, while v1 retains saved logins. Broader installed/native qualification remains open; no release target is assigned.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Qualify installed/native v1 and v2 generation on the remaining supported platforms, then renew fresh release evidence; local development repair coverage is complete.
+- **Implementation:**
+  - [x] Resolve PR #228 conflicts with current `main`, preserving both branches' changelog entries and implementation changes. Recompute reviewed lifecycle-driver and documentation identities for the integrated tree; run focused OpenCode regression and authority checks before pushing.
+  - [x] First capture pinned v1 and v2 CLI help/configuration contracts and define capability detection, version-specific command construction, and fail-closed diagnostics for unsupported executables.
+  - [x] Preserve the v1 invocation and add a qualified v2 invocation with --standalone, supported working-directory and logging controls, and version-appropriate configuration/environment handling; preserve executable identity, detached workspace, permission, and credential boundaries.
+  - [x] Review worker model probes and remote invocation paths for both majors; select v2 standalone mode for worker model checks and update attendee/operator guidance. Keep the existing host-install and initialized-template v1 pins unchanged so v1 remains a supported default; neither the adapter nor worker dispatch requires a forced upgrade.
+- **Evidence:**
+  - [x] Regression fixtures for both majors cover preflight acceptance/refusal, exact commands, workspace selection, credentials, configuration and tool isolation, diagnostics, timeouts, and executable drift; existing v1 coverage remains passing.
+  - [ ] Run actual pinned v1 and v2 help probes and authorized isolated generation on supported native hosts; verify v2 private-server credentials and logs, absence of ambient service/configuration leakage, and parity of generated-tree validation. Record exact versions and platform scope before claiming support.
+  - [ ] Verify host-install/template consistency, documentation commands, and required repository checks; leave live or native qualification unchecked until performed.
+
+OPENCODE-COMPAT-001 development evidence: macOS arm64 passes 25 existing critical
+coding-CLI/cache tests, five worker-alignment tests, and the focused version/isolation
+cases. Actual OpenCode 1.18.25 and 2.2.5 both pass
+`tests.e2e.test_opencode_native` against a loopback simulated model: each writes the
+requested JSON response through its real tool runner and refuses an attempted read
+outside the detached task workspace without exposing the sentinel to the model.
+The v2 test first verifies the unmodified production configuration, then adds only
+a test-owned loopback provider. Run through `make python-check` with
+`LITAI_OPENCODE_V1_BINARY` and `LITAI_OPENCODE_V2_BINARY` bound to exact binaries.
+No paid inference is used. Repository lint/format, host path policy, and layout
+checks pass. Documentation authority review is recorded; `litai verify` passes
+that gate but the project test receipt remains stale. Installed/native Linux and Windows generation and fresh release qualification
+remain separate pending evidence; the independent review, re-pin, and completed
+local development repair are recorded below. The workflow tracker
+survey fails through the configured SSH alias; a read-only GitHub.com survey found
+no overlapping OpenCode PR. Unrelated Cargo and lab-receipt work was retained.
+
+Independent review of the initial implementation found that v2 could import
+stored integration/plugin state before the configuration-source probe returned.
+The repair assigns fresh XDG config/data/state/cache roots, an explicit private
+OpenCode database, and private temporary storage before starting any v2 server.
+V2 intentionally uses process environment credentials and does not import saved
+OpenCode logins; v1 saved-login behavior remains unchanged. The isolation-profile
+revision invalidates earlier source-cache bindings. Independent review and renewed native/security checks of this repair pass;
+the exact reviewed hashes and pin qualification are recorded below.
+
+Independent reviewer `/root/opencode_review` approved the repaired TCB, including
+exact SHA-256 identities: `coding_cli.py`
+`62849861405624a3e9beb593ceaa07b05a4a3a7e2b25b16ba4a84190f196ff1f`,
+`user_paths.py`
+`69e9b903047f3f7473cb6db2d2fdc0251d6d268531b09d4f60a3f8b87f1784e8`,
+and `worker_alignment.py`
+`1196f0cde1d3b74350003a50973b9e160456d01d355d71b994b130b6e4b441f4`.
+No blocking review findings remain. The five focused security cases and both
+actual native CLI tests pass after the repair, including credential/DB/state
+path isolation before server startup and refused external reads. The driver pin is recorded with `make driver-review-record`; driver review,
+documentation authority review, lint, and formatting checks pass. Local regression repair is complete against the frozen driver, as recorded
+below; earlier interrupted runs and repair checkpoints are not release qualification.
+
+Final local development evidence: the checkpointed 2,448-case Python selection
+completes with 2,346 passed, 102 skipped, zero failed and zero known failures.
+The self-hosting replay passes in isolation (all three conformance cases) and
+in the final serial resume. Ten- and four-worker attempts reached that replay's
+300-second subprocess deadline; the final serial case passes without changing
+that bound. The installed rustup Cargo/rustc 1.97.1 toolchain is explicitly
+selected because the ambient Homebrew Cargo launcher cannot load its llhttp
+library; no host toolchain is installed or repaired. The repaired-suite runner
+returns status 2 by design and requires a fresh run from test one for release
+evidence. This is completed development repair coverage, not release attestation.
+Native OpenCode v2 process API-key propagation also succeeds against a loopback
+endpoint with fresh provider state. Driver review, documentation authority,
+repository lint/format, layout, host path policy and diff checks pass. The
+configured project test receipt remains stale; installed/native Linux and
+Windows OpenCode qualification and fresh release evidence remain open. Review:
+[PR #228](https://github.com/jordanhubbard/literate-ai/pull/228).
+
+PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471fec3a8121185` and preserved both changelog entries. No implementation conflict required editing; all three independently reviewed OpenCode source hashes remain unchanged. Recomputed the combined lifecycle-driver pin and documentation marker; both review checks pass. Managed `make python-check` passes five OpenCode regression tests (two native tests skipped because explicit binaries were not selected) and all eight project CLI tests. Host path policy and diff whitespace checks pass. `litai verify` passes authority, skips the three unselected gates, and retains the existing stale project receipt without claiming new lifecycle qualification. Configured start/end peer surveys still fail through the GitHub alias; direct read-only PR inspection succeeds. Unrelated worktrees remain untouched.
+
+### [ ] A2A-001 — Guide agents to use connected A2A peers without adding framework orchestration
+
+- **Priority:** P2
+- **Owner:** agent skills, canonical onboarding/templates, and agent-ledger boundary documentation
+- **Direction:** Keep A2A communication managed by the coding-agent host or external orchestrator; teach Literate AI agents to use suitable already-connected A2A agents when delegation is permitted.
+- **Conclusion:** Extend PROJECT.md Goals 1, 2, and 4 through optional agent guidance. The host owns A2A connections, authentication, discovery, conversations, and remote task management; the coordinating agent delegates bounded work and records consequential decisions in the configured tracker. Literate AI retains locked derivation authority, execution authorization, artifact custody, and independent acceptance. No native A2A client/server, discovery service, second scheduler, required A2A dependency, or release commitment is introduced by this item. A future headless dispatch requirement needs a separate proposal through existing provider/dispatch boundaries.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Define the optional A2A policy in docs/architecture/agent-ledger-boundary.md, preserving ADR 0050: forge issues remain the default durable coordination record unless explicitly overridden.
+  - [ ] Add a compact nested agent skill, catalog routing, and canonical initialized-project guidance for host-exposed A2A peers. Use only available, authorized connections; honor delegation restrictions and task/data scope; leave connection setup and protocol operations to the host. The first action is to author this boundary and skill guidance.
+  - [ ] Document bounded delegation inputs and expected deliverables, peer suitability, host-managed timeout/cancellation, and a local continuation path when no suitable peer is available; do not silently broaden scope or duplicate completed remote work.
+  - [ ] Treat peer responses as candidate inputs. Promote requirement/interface/instruction changes only through reviewed, pinned authority; do not introduce hidden generation dependencies, expose dependency-private context, or treat an Agent Card capability claim or completed A2A task as execution permission or passing evidence.
+  - [ ] Preserve exact artifact verification and normal lifecycle gates for returned work. Correlate remote tasks/results in operational records without making conversation or task IDs semantic generation/cache inputs.
+- **Evidence:**
+  - [ ] make skills-check passes and canonical/template guidance remains consistent, with no required A2A SDK, service, credential, endpoint, or project-local connection configuration.
+  - [ ] Review or exercise guidance scenarios for suitable connected peers, no A2A support, unavailable/unsuitable peers, prohibited delegation, and timeout/cancellation; absence of A2A does not prevent ordinary local work.
+  - [ ] Boundary review confirms bounded context sharing, durable tracker handoffs, reviewed authority changes, unchanged generation/cache identity rules, and independent validation of returned artifacts; A2A completion alone never satisfies litai acceptance.
+
+### [ ] IGNORE-LIFECYCLE-001 — Keep lifecycle lock state out of initialized and updated Git projects
+
+- **Release target:** 1.4.0
+
+- **GitHub issue:** [#215](https://github.com/jordanhubbard/literate-ai/issues/215)
+- **Priority:** P1
+- **Owner:** framework project initialization template and update path; issue 215
+- **Direction:** Issue 215 reports that runtime .litai-locks state is offered for commit after a lifecycle operation.
+- **Conclusion:** Add the owned lifecycle-lock ignore rule to the canonical framework template; exercise real Git ignore behavior on new and three-way-updated projects while preserving custom ignore rules and unrelated files.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Update the canonical project.gitignore and verify actual lifecycle lock/owner paths stay ignored after initialization and update.
+- **Evidence:**
+  - [x] Run Git-backed initialized and legacy-overlay update regressions; prove the prior template fails and unrelated files remain visible. The original template fails actual Git check-ignore for lifecycle.lock; both repaired regressions pass without skips, including owner metadata and legacy overlay preservation.
+  - [ ] Land the repair on green CI, comment with the landed evidence and close issue #215.
+
+### [ ] RUST-IMPORT-DEDUP-001 — Verify overlapping Rust library capabilities without duplicate imports
+
+- **Release target:** 1.4.0
+
+- **GitHub issue:** [#219](https://github.com/jordanhubbard/literate-ai/issues/219)
+- **Priority:** P1
+- **Owner:** Standard library import verifier; issue 219
+- **Direction:** A Rust library can expose the same symbol through several declared capabilities, but the verifier emits duplicate use declarations and rejects the valid library.
+- **Conclusion:** De-duplicate exact module/symbol pairs in the verifier while preserving the complete declared capability observation and compilation failures for missing symbols or conflicting distinct imports.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Exercise an overlapping import surface with the real Cargo verifier, then emit each exact module/symbol pair once.
+- **Evidence:**
+  - [x] Reproduce E0252 before the fix; prove repeated valid imports pass and a genuinely missing declared symbol still fails.
+
+- **Development evidence:** The native Cargo regression reproduces E0252 before the repair. After exact module/symbol deduplication, all four Standard command projection cases pass without skips, preserving both capability observations and missing-symbol refusal.
+- **Next action:** pass admission/integration CI, land, then comment and close the issue.
+
+### [ ] RELEASE-README-ORDER-001 — Clarify published README verification order and asset digest provenance
+
+- **Release target:** 1.4.0
+
+- **GitHub issue:** [#150](https://github.com/jordanhubbard/literate-ai/issues/150)
+- **Priority:** P1
+- **Owner:** release-project agent skill and canonical initialization template; issue 150
+- **Direction:** Avoid the first verify-published/README ordering deadlock and identify the authoritative SHA-256 source.
+- **Conclusion:** Separate initial provider/tag/artifact read-back from final README acceptance; allow only a named README-only finding to remain pending during the first read-back, then require final full verification. Digests come from provider asset metadata or downloaded published bytes.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Update canonical and template release guidance consistently without weakening tag, artifact or final README verification.
+- **Evidence:**
+  - [x] Verify canonical/template equality and pass changed-skill admission with explicit review of both verification phases.
+
+- **Development evidence:** Canonical and initialized release skills remain byte-identical. The initial publication read-back and final README acceptance are distinct; all non-README failures remain blocking. Changed-skill admission passes for canonical and template guidance, including affected nested release deltas.
+- **Next action:** pass admission/integration CI, land, then comment and close the issue.
+
+### [ ] ZERO-ARG-COVERAGE-001 — Implement accepted exhaustive coverage for zero-argument callables
+
+- **Release target:** 1.4.0
+
+- **Priority:** P1
+- **Owner:** generated test contracts, public interface authority, recipe/lifecycle identity and installed native-child qualification; issues 132 and 48
+- **Direction:** The directing user explicitly accepted ADR 0051 for 1.4 on 2026-10-31.
+- **Conclusion:** Implement a versioned, authority-bound singleton coverage mode only for complete public arity-zero signatures. Preserve frozen v1 and ordinary diversity requirements, independent expected-result provenance, exact identity/currentness and all negative controls. Unknown and nonzero finite domains receive no automatic exemption.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Development evidence:** 16 focused coverage tests pass, including real Literate Markdown loading of the explicit JSON supporting artifact, default-v1 refusal rules, prompt privacy, stale interface bindings, and aggregate project-minimum incompatibility. Existing coding-CLI tests (22), source/cache/transfer regressions (28), qualification-capture tests (4), schema tests (2), and remote source materialization (1) pass. Standard smoke selects 75: 74 pass and the existing macOS persistent-service readiness test is explicitly skipped. These are development checks, not installed-child or release acceptance. Next: complete actual singleton execution/evidence and the fresh installed registered-child journey before closure.
+- **Full CI regression and repair:** Linux job `124761763110` in run
+  `41277192275` executed 1,667 cases with one error and 71 platform skips. The
+  linked-SDK fixture's `SimpleNamespace` recipe omitted the new coverage-authority
+  property. Its explicit ordinary-v1 `None` value repairs the fixture without a
+  production fallback or relaxed validator. The same failure reproduced locally;
+  the repaired linked-SDK case and all 16 coverage controls pass. Fresh exact-head
+  CI is still required; the failed predecessor is not green evidence.
+- **Installed development result:** The non-editable wheel from `c6ff2ce4d` executes actual generation, build, one distinct generated invocation and the unchanged independent oracle. Candidate promotion, check/currentness, child `verify`, parent validation and exact recovery audit pass. The fresh fixture declares its native Python profile through reviewed promotion; no runtime Flavor override is needed. Eleven e2e controls pass, including explicit qualified-state and failure-injection fixtures. [Retained development proof](../../verification/zero-argument-installed-development.json) distinguishes those controls from actual lifecycle evidence. Full regression, complete installed-wheel qualification and exact review/main CI remain open.
+
+- **Implementation:**
+  - [x] Establish authoritative complete zero-argument public signatures and project a versioned mode through recipe, generated manifest validation, cache and lifecycle identities.
+  - [x] Reconcile pinned generation guidance with independently selected overlapping inputs while keeping verifier-owned expected answers private.
+  - [ ] Complete the fresh installed registered-child journey and original refusal/recovery controls with its unchanged independent oracle.
+- **Evidence:**
+  - [ ] Pass singleton positive, invented/duplicate/missing input, false exemption, stale authority and private-oracle controls plus unchanged v1/default-domain coverage.
+  - [ ] Pass full regression, installed-wheel qualification and exact review/main CI before claiming issue 132 or dependent issue 48 complete.
+
+### [ ] RUST-ADOPTION-DETECT-001 — Detect Cargo workspaces ahead of incidental helper languages
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#203](https://github.com/jordanhubbard/literate-ai/issues/203)
+- **Priority:** P1
+- **Owner:** read-only harness language inventory and project adoption Flavor inference; issue 203
+- **Direction:** A retained Cargo workspace with Python/C++ helpers is inferred as C++/Python and never proposes its Rust/Cargo packaging Flavors.
+- **Conclusion:** Recognize Rust sources in the bounded conventional inventory, preserve the full detected language union, and use a root Cargo manifest as the primary Rust signal unless the existing root CMake driver takes precedence. Propose Cargo packaging only for the detected primary Cargo/Rust workspace; preserve other build selection behavior.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Exercise the public read-only conversion plan on a mixed Cargo tree and correct source-language/default Flavor inference without executing project source.
+- **Evidence:**
+  - [ ] Reproduce the missing Rust proposal, then verify Rust/Cargo packaging, mixed-language reporting, generated/hidden-tree exclusion, CMake precedence and absence of plan writes.
+
+- **Development evidence:** Three new Rust inventory/plan controls pass, including read-only input preservation, helper-language reporting, hidden/generated exclusion and CMake precedence. The missing Rust marker reproduces before the fix.
+- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+
+### [ ] RETAINED-BUILD-COREQ-001 — Keep retained wrapper locks on their delegation Flavor
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#210](https://github.com/jordanhubbard/literate-ai/issues/210)
+- **Priority:** P1
+- **Owner:** canonical retained-wrapper Component projection and conversion lock construction; issue 210
+- **Direction:** Cargo adoption cannot create the retained wrapper lock because its sole build-system slot cannot accept the Cargo Flavor Rust language co-requisite.
+- **Conclusion:** Bind the already-authored build-legacy-shim Flavor, as retained readmission already does. A retained wrapper delegates the qualified original pipeline; it is not a generated Cargo application. Keep project Rust/Cargo defaults and all original commands while preserving generation Flavor co-requisite enforcement.
+- **Depends on:** RUST-ADOPTION-DETECT-001
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Reproduce native Cargo conversion refusal, then select the canonical delegation Flavor for wrapper and refined retained Components without changing original commands.
+- **Evidence:**
+  - [ ] Run actual offline Cargo conversion and inspect retained wrapper lock/source/baseline evidence; preserve CMake and Elixir adoption behavior and fail-closed unmatched selectors.
+
+- **Development evidence:** A native offline Cargo adoption reproduces the original lock refusal, then completes actual baseline and wrapper parity with the existing legacy-shim build Flavor. Root Rust/Cargo defaults and original source remain intact. Six existing retained receipt cases pass.
+- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+
+### [ ] RETAINED-OUTPUT-DIAG-001 — Distinguish retained command failures from capped diagnostic excerpts
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#180](https://github.com/jordanhubbard/literate-ai/issues/180)
+- **Priority:** P2
+- **Owner:** retained harness diagnostic wording; corrected issue 180
+- **Direction:** Issue 180 retracts the output-budget rejection claim and leaves diagnostic wording for maintainer triage.
+- **Conclusion:** Keep success/failure based on actual process results and exact test evidence. Clarify that recorded excerpts were capped when a failing command emits large output; do not introduce a new acceptance budget or change any limit.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Run genuine Python unittest processes with oversized stdout, preserve successful retained admission, and make nonzero-exit diagnostic wording distinguish the failure from excerpt capping.
+- **Evidence:**
+  - [ ] Verify three actual passing unittest cases remain admitted above the stdout recording cap, a real failing case remains refused, excerpts stay bounded and stream identities remain present.
+
+- **Development evidence:** Two real-process controls pass: three genuine Python unittest cases are admitted above the recorded stdout cap with the exact independently computed full stdout SHA-256; a real failing case stays rejected and names capped excerpts separately from its exit status. Recording and acceptance limits remain unchanged.
+- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+
+### [ ] RELEASE-README-VERIFY-001 — Verify the published release against the remote default-branch README
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#148](https://github.com/jordanhubbard/literate-ai/issues/148)
+- **Priority:** P1
+- **Owner:** release policy and read-only GitHub publication verification; issue 148
+- **Direction:** Issue 148 requires mechanical checks of the latest release title, tag and listed asset size/digests in the remote default-branch root README, preserving stable entries for prereleases.
+- **Conclusion:** Introduce an explicitly declared README marker policy and a deterministic visible Markdown section. Verify current provider metadata and actual remote default-branch bytes after tag/provider checks; fail with expected and observed values on stale or contradictory latest/current release claims. Existing policy documents without the declaration retain compatibility. Enable the policy for this framework release; its final verification must pass after the README update lands.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Define the marker policy and visible release/asset section, preserve existing policy identities when absent, and implement bounded remote README/provider readback with digest download fallback.
+  - [x] Add stale title/tag/digest/size, missing/duplicate markers, contradictory latest/current claims, unpublished-provider and prerelease controls plus actual Git-based remote-default-branch coverage.
+- **Evidence:**
+  - [ ] Pass affected release policy/publication regressions, lint/schema/documentation checks, and exact review/main CI before closing this implementation goal. The consuming 1.4 publication and final remote README readback belong to RELEASE-INTEGRATION-005; they remain mandatory release verification, not a circular prepublication prerequisite for this feature.
+
+- **Development evidence (2026-11-01):** The managed Make release regression slice
+  passed 50 tests; focused README and schema checks passed 16. Lint, format, skill
+  admission and repository layout checks pass. A real bare Git remote test reads
+  the default branch at its resolved commit while a local release-branch README
+  remains stale. GitHub transport in that fixture is simulated; it is not hosted
+  release qualification. Live GitHub v1.3.1 provider metadata checks the authored
+  README's nine assets; current remote main correctly refuses the missing new
+  markers until this change lands. Required review/main CI and final 1.4 remote
+  readback are still pending; the goal remains open.
+
+### [ ] NATIVE-PROMOTION-FLAVORS-001 — Preserve reviewed build-system defaults in native child promotion
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#218](https://github.com/jordanhubbard/literate-ai/issues/218)
+
+- **Priority:** P1
+- **Owner:** source-to-specification promotion and qualification documentation; GitHub issue 218
+- **Direction:** Issue 218 reports Cargo promotion inheriting template Bazel and repeated qualification selectors failing as no-ops.
+- **Conclusion:** Seed build-system defaults from the admitted parent selection or reviewed source build axis; explicit reviewed build selection replaces incidental template Bazel. Keep axis ambiguity and strict selector no-op refusals. Qualification consumes accepted defaults without replaying effective selectors.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Resolve admitted parent build-system selection and explicit reviewed build axes without inheriting unrelated template defaults.
+  - [x] Clarify that qualification omits selectors folded into accepted project defaults; genuine selector changes remain ordered and lock-bound.
+- **Evidence:**
+  - [x] Exercise signed native-child promotion for Cargo and other build axes with real lock resolution, defaults-only qualification lock admission and conflicting-axis refusal.
+  - [ ] Pass affected source promotion and qualification regressions, required review/main CI, and retain honest installed/native qualification boundaries.
+
+- **Development evidence:** Eight current controls pass: signed retained-to-native
+  Make preference inheritance, explicit Rust/Cargo replacing an incidental Make
+  parent and template Bazel, a real native Cargo crate retained receipt followed
+  by Cargo-default inheritance without `-bazel`, conflicting explicit build-axis
+  refusal, parent manifest/Flavor drift and scoped-preference refusal. Exact
+  defaults-only lock admission uses the same reader as qualification; a genuinely
+  redundant ordered selector still refuses. Single replays may change slot binding
+  in the current resolver, so no blanket replay-refusal claim is made. These runs
+  retain source-baseline/drafted authority, not completed regenerative qualification.
+
+- **Regression evidence:** The 12-case arbitrary-source/materialization/locked
+  promotion slice and 11 registered-child replacement controls pass. Lint, format,
+  repository layout, public-export audit and 181 Mermaid renders pass. The native
+  Cargo fixture removes Make and generates its canonical lockfile with Cargo, so
+  a simulated Make test summary cannot stand in for native Cargo execution.
+  Full root test receipt and exact review/main CI remain outstanding.
+
+### [ ] RETAINED-SCALE-LIMITS-001 — Admit explicitly bounded large retained catalogs and input closures
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#234](https://github.com/jordanhubbard/literate-ai/issues/234)
+
+- **Priority:** P1
+- **Owner:** project authority contracts, catalog traversal, pinned-input custody; GitHub issue 234
+- **Direction:** Implement Daemonarchy issue 234 for complete src and ports trees without weakening default resource bounds.
+- **Conclusion:** Add an opt-in versioned scale_limits declaration to the current v2 project contract. Bind exact bounded file, entry and aggregate-byte ceilings to project identity and use them consistently during catalog loading, lock planning, input capture and validation. Keep per-file, path, symlink and default bounds unchanged. Synthetic measurements do not replace real retained FreeBSD evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Define strict integer limits and finite hard caps, preserve absent-policy serialization, and document the policy and compatibility trade-off.
+  - [x] Propagate project limits through catalog traversal, revalidation, lock-input capture and project validation with observed/allowed diagnostics.
+- **Evidence:**
+  - [ ] Prove unchanged default refusals, opt-in loading beyond legacy ceilings, exact-bound refusal and policy drift; run affected schema/lock/validation regressions.
+  - [ ] Measure real retained FreeBSD catalogs: load time, memory, lock resolution, litai verify and project validation before declaring issue 234 complete.
+
+- **Development evidence:** The repaired 32-case lock/project/schema regression
+  slice passes; lint, format, repository layout and 181 Mermaid render checks pass.
+  Six focused filesystem/schema controls pass, including
+  default refusal at 1,025 pinned files, a declared 1,051-Component snapshot and
+  actual lock planning, opt-in traversal beyond 4,096 authority files, exact
+  entry/file/byte boundaries, unchanged absent-policy wire output, duplicate/fork
+  byte accounting and changed-policy refusal. These are controller fixtures, not
+  native FreeBSD qualification. Real retained-tree load/memory/lock/validation/
+  verify measurements remain required before this issue or release goal closes.
+
+### [ ] HTTP-CACHE-REFERENCE-001 — Provide a bounded reference HTTP shared-cache service
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#236](https://github.com/jordanhubbard/literate-ai/issues/236)
+- **Decision authority:** [Accepted ADR 0044](../decisions/0044-action-dag-and-shared-cache.md); no new package wire or admission authority is introduced.
+
+- **Priority:** P1
+- **Owner:** accepted ADR 0044 shared-cache transport and local quota/retention owners; issue 236
+- **Direction:** Issue 236 requires documented operator cache-server requirements and a reference deployment for the two-worker FreeBSD qualification.
+- **Conclusion:** Implement the accepted GET and conditional-PUT artifact protocol without changing cache manifests or granting acceptance. Reuse the local artifact quota/retention owner for committed entries, bound pending publication bytes and connection work separately, and provide explicit read-only versus writer credentials for one configured namespace/writer group per reference instance. No automatic service installation or public listener; native two-host speedups remain separate required evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Document exact namespace paths, conditional create, immutable conflicts, payload-before-manifest ordering, authentication, TLS termination, read-only policy, quota and retention semantics under ADR 0044.
+  - [x] Add an explicitly started reference service using existing typed cache configuration and artifact manifests, exact byte verification and finite staging/concurrency/deadline budgets.
+- **Evidence:**
+  - [x] Run actual loopback HTTP clients for cold/warm/read-only/corrupt cases, identical concurrent writers, conflicting entries, traversal and auth refusal, quotas, expiry and interrupted upload cleanup.
+  - [ ] Retain real two-FreeBSD-worker shared-cache and throughput qualification under issue 236; reference-server tests alone do not complete that issue.
+
+- **Development evidence:** Fifteen reference-server, HTTP-client and local-owner
+  tests pass, including slow-header deadline, framing refusal, hardlink refusal,
+  pending-byte bounds and committed quota/retention. An explicitly invoked module
+  starts with private configuration and returns an authenticated cold miss without
+  request/credential logs. See [the operator guide](../user/reference-http-cache.md)
+  for finite memory/disk headroom, one writer group per instance, per-artifact-
+  namespace committed quotas and separately operated TLS. These are local
+  controller tests; native unit key coverage, remote publication, two-host speedups
+  and exact release qualification remain open.
+
+### [ ] HOST-PROBE-ALIAS-001 — Preserve multicall executable names in host tool probes
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#214](https://github.com/jordanhubbard/literate-ai/issues/214)
+
+- **Priority:** P1
+- **Owner:** host-install capability observation; issue 214; PROJECT goals 1 and 5
+- **Direction:** Issue 214 reports rustc and cargo probes execute the resolved rustup binary and falsely reject working Rust toolchains; rustup-only readiness also needs explicit provenance treatment.
+- **Conclusion:** Preserve the located invocation path instead of dereferencing its final symlink before execution. Prove dispatch with a real multicall fixture and retain finite probes and declared version constraints. Keep current package-manager provenance fail-closed while auditing the explicit rustup-only provider requirement; do not claim the whole issue resolved from probe success.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Preserve located and absolute fallback invocation names; add multicall, missing, failing and incompatible-version controls.
+  - [ ] Resolve the rustup-only provenance requirement through explicit host-install authority rather than bypassing all native package checks.
+- **Evidence:**
+  - [x] Run affected managed host-install tests and real native rustup probes; prove ordinary provenance and version refusals remain intact.
+  - [ ] Require rustup-only readiness evidence and exact integrated CI before issue 214 closes.
+
+- **Development evidence:** Eighteen focused host-install, FreeBSD host-install,
+  uninstall and alias controls pass. Real native rustup proxies report rustc
+  1.95.0 and Cargo 1.95.0 through the selected invocation names and satisfy the
+  declared version constraints. A working compiler without declared native
+  package provenance remains unready. [ADR 0053](../decisions/0053-declared-rustup-host-provenance.md)
+  proposes explicit rustup provider authority and awaits directing-user
+  acceptance before that independent provider extension begins. The issue and
+  1.4 release goal remain open.
+
+### [ ] ADOPT-CATALOG-001 — Keep retained implementation trees outside Component discovery
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#212](https://github.com/jordanhubbard/literate-ai/issues/212)
+
+- **Priority:** P1
+- **Owner:** Component catalog discovery, project validation and authority graph; issue 212; PROJECT goals 1 and 4
+- **Direction:** Issue 212 reports adoption fails when retained dependency files named component.json or component.md are discovered as framework authority.
+- **Conclusion:** Reuse the bounded lock catalog walker and its existing Component-adjacent implementation exclusion in validation and graph/lock discovery. Preserve namespace nesting, standalone implementation-named catalog groups, ordinary legacy migration refusal and authored-file safety. Do not blacklist dependency names globally or reinterpret retained source as authority.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Expose shared bounded Component manifest discovery and use it for validation and Component authority graph/lock candidates.
+- **Evidence:**
+  - [x] Prove real CLI validation ignores retained component.json, component.md and component.lock.json, preserves graph identity, discovers ordinary nested Components and refuses actual legacy-only authoring; run lock/scale/graph regressions.
+  - [ ] Require exact integrated CI and installed adoption qualification before issue 212 closes.
+
+- **Development evidence:** Thirty-seven project CLI, catalog/lock/graph and scale
+  tests pass. A guarded directory-enumeration test proves validation and graph
+  discovery never enter the retained implementation, with unchanged Components
+  and graph output after adding third-party Markdown, legacy JSON and corrupt lock
+  lookalikes. A separate real public `onboard adopt --apply --acknowledge
+  --run-baseline` test passes build, a genuine Python unittest and package/parity
+  gates, preserves the untracked dependency manifest through lift-shift and
+  validates the wrapped project. This is source-CLI development evidence; exact
+  installed and integration-CI qualification remain open.
+
+### [ ] ADOPT-PLAN-READONLY-001 — Keep onboard planning telemetry outside reviewed target mutations
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#201](https://github.com/jordanhubbard/literate-ai/issues/201)
+
+- **Priority:** P1
+- **Owner:** CLI dispatch read-only performance-span policy; issue 201; PROJECT goal 1
+- **Direction:** Issue 201 reports onboard planning creates _build telemetry in the target, changing quarantine entries and invalidating the reviewed plan identity.
+- **Conclusion:** Use the existing no-write telemetry scope for read-only onboard create/adopt plans, while preserving acknowledged apply telemetry and exact plan-change refusal. Prove unchanged target bytes from the target working directory, stable repeated plan identity, and actual application of that exact reviewed identity; never exclude arbitrary pre-existing build content from conversion custody.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Disable performance-span publication for unapplied onboard plans through the existing null context policy.
+- **Evidence:**
+  - [x] Reproduce target mutation before the fix; prove target snapshots and repeated plan identities stable, exact expect-plan applies, genuine source drift still refuses, and ordinary apply telemetry remains available.
+  - [ ] Run affected CLI/adoption tests and declared review/static gates; require exact integration CI before issue 201 closes.
+
+- **Development evidence:** The regression fails before repair because `_build`
+  and its telemetry records appear after planning. Fifteen onboarding, retained
+  catalog and orchestration controls pass after repair. From the target working
+  directory, repeated adoption plans preserve exact file/mode snapshots and plan
+  identity; the original `--expect-plan` applies successfully and retains apply
+  timing diagnostics. Relative/absolute object-root settings create no output in
+  plan mode; create planning leaves both target and ambient build root absent.
+  Actual source drift still refuses, and pre-existing build content remains in
+  the reviewed quarantine. Exact integration and installed qualification remain
+  required before issue closure.
+
+### [ ] ADOPT-GIT-CUSTODY-001 — Preserve tracked ignored files and relative aliases through conversion moves
+
+- **Release target:** 1.4.0
+- **GitHub issues:** [#208](https://github.com/jordanhubbard/literate-ai/issues/208),
+  [#200](https://github.com/jordanhubbard/literate-ai/issues/200)
+
+- **Priority:** P1
+- **Owner:** conversion quarantine and rollback; issues 208 and 200; PROJECT goals 1 and 4
+- **Direction:** Issue 208 loses tracked-but-ignored files when a partly tracked directory takes a filesystem move; issue 200 reports rollback cannot restore relative aliases after their targets move.
+- **Conclusion:** Use Git moves whenever an entry contains indexed paths, preserving untracked siblings and staged intent. Preflight source aliases before mutation, refuse failed tracked moves and undo only completed quarantine moves. Use link-aware existence checks during rollback. Retain exact hierarchy, working bytes and index intent; do not broaden source inclusion or delete unmoved original entries.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Preserve indexed directory and alias moves, and make quarantine move failures restore completed moves without scaffold deletion.
+  - [x] Accept retained dangling relative aliases during ordered rollback while preserving destination collision refusal.
+- **Evidence:**
+  - [x] Reproduce ignored tracked file loss; prove a real conversion baseline sees that source, untracked siblings remain, staged intent survives roundtrip, and forced move failure restores prior entries.
+  - [ ] Run conversion, source-scope and adoption regressions and required review/static gates; require exact integration and installed qualification before issues close.
+
+- **Development evidence:** Before repair, four regression cases produce three
+  failures and one rollback error. After repair, 31 conversion/adoption controls
+  and 13 harness-inventory/native Cargo controls pass without skips. Real public
+  adoption executes a genuine test importing the ignored tracked module and
+  retains that module in the final Git index; untracked siblings remain intact.
+  A genuine failing baseline restores the common `CLAUDE.md -> AGENTS.md` layout
+  and the exact staged index entries. Direct rollback also preserves a staged /
+  working-tree content difference, relative alias payloads and literal Git
+  filenames. Failed moves before and after physical rename recover prior entries;
+  an intervening destination collision preserves both copies and reports failure.
+  Failed Git rollback retains quarantine/index custody. This is local development
+  evidence; exact integration and installed qualification remain required.
+
+### [ ] ADOPT-LIFT-ROLLBACK-001 — Restore original custody after failed lift-shift parity
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#209](https://github.com/jordanhubbard/literate-ai/issues/209)
+
+- **Priority:** P1
+- **Owner:** lift-shift move owner and conversion failure boundary; issue 209; PROJECT goals 1 and 4
+- **Direction:** Issue 209 reports lift-shift failures leave generated scaffold above quarantined source instead of rolling back.
+- **Conclusion:** Recover the lift-shift move journal with link-aware, Git-aware moves, then require every original entry back in quarantine before deleting scaffold and restoring the source root. Refuse failed Git moves and retain unexpected recovery contents rather than recursively deleting them. Keep original failure diagnostics on successful recovery and report explicit recovery failure when custody is incomplete.
+- **Depends on:** ADOPT-GIT-CUSTODY-001
+- **Completion prerequisites:** ADOPT-GIT-CUSTODY-001
+- **Implementation:**
+  - [x] Harden lift-shift forward/reverse moves and recover its journal without deleting unexplained remaining entries.
+  - [x] Roll back failed lift-shift only after checking complete source quarantine custody; preserve an explicit recovery error otherwise.
+- **Evidence:**
+  - [x] Inject a failure at actual Phase 1.2 parity after real baseline and Phase 1.1 work; prove source, relative aliases and staged Git intent restored. Prove incomplete recovery retains originals and reports failure.
+  - [ ] Run adoption, move/custody and harness regressions plus required review/static checks; require exact integration and installed qualification before issue 209 closes.
+
+- **Development evidence:** Three Phase 1.2 fault controls fail before repair and
+  pass after it. The public CLI runs the real baseline and both parity phases
+  before injected rejection; successful recovery restores original bytes, relative
+  alias payloads and staged index entries. Failed Git recovery retains source in
+  implementation and reports `project.convert_rollback_failed`; unexplained
+  recovery notes are preserved instead of recursively removed. A completed
+  lift-shift restores through the actual initialization adapter's move journal;
+  incomplete quarantine refuses before any scaffold deletion. These controls do
+  not claim installed or final-release qualification. Final related regressions
+  and exact integration evidence remain required.
+
+- **Final local checks:** All 49 conversion, Git-boundary, initialization,
+  onboarding, retained-catalog, harness and native Cargo controls pass in the
+  corrected final run. Lint, formatting, repository layout, public export and
+  181 Mermaid render checks pass. Project authority verification passes; the
+  full lifecycle receipt remains stale. Exact integrated and installed
+  qualification are still required before closing the issue or release goal.

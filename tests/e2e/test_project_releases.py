@@ -424,6 +424,92 @@ class ProjectReleaseTests(unittest.TestCase):
                 self.assertEqual(verified["tag"], receipt["tag"])
                 self.assertTrue(verified["remote_tag_annotated"])
                 schemas.validate(verified["schema"], verified)
+                # Exercise the public verifier with the optional README policy.
+                # Real published Git objects above remain mandatory; only GitHub
+                # transport is simulated for this local provider-independent test.
+                from literate_ai.adapters.release_readme import (
+                    ReadmeLatestReleasePolicy,
+                    ReleaseReadmeError,
+                )
+
+                _, old_policy = project_releases.load_release_policy(root)
+                managed_policy = replace(
+                    old_policy,
+                    schema="literate-ai/release-policy@2",
+                    provider_kind="github",
+                    provider_repository="owner/project",
+                    readme_latest_release=ReadmeLatestReleasePolicy("latest-release"),
+                )
+                schemas.validate(managed_policy.schema, managed_policy.to_dict())
+                managed_record = dict(checked_record)
+                managed_record["policy_identity"] = managed_policy.identity
+                calls = []
+
+                def provider_check(*args, **kwargs):
+                    calls.append("provider")
+                    return {
+                        "url": "https://github.com/owner/project/releases/tag/v1.2.4",
+                        "draft": False,
+                        "prerelease": False,
+                        "notes_present": True,
+                        "assets": [],
+                    }
+
+                def readme_check(*args, **kwargs):
+                    self.assertEqual(calls, ["provider"])
+                    self.assertEqual(kwargs["tag"], "v1.2.4")
+                    self.assertFalse(kwargs["prerelease"])
+                    calls.append("readme")
+
+                with (
+                    patch.object(
+                        project_releases,
+                        "load_release_policy",
+                        return_value=(root, managed_policy),
+                    ),
+                    patch.object(
+                        project_releases, "_load_record", return_value=managed_record
+                    ),
+                    patch.object(
+                        project_releases,
+                        "_require_published_github_release",
+                        side_effect=provider_check,
+                    ),
+                    patch.object(
+                        project_releases,
+                        "verify_remote_release_readme",
+                        side_effect=readme_check,
+                    ),
+                ):
+                    managed = verify_published_release(root, prepared_path)
+                self.assertEqual(calls, ["provider", "readme"])
+                schemas.validate(managed["schema"], managed)
+                with (
+                    patch.object(
+                        project_releases,
+                        "load_release_policy",
+                        return_value=(root, managed_policy),
+                    ),
+                    patch.object(
+                        project_releases, "_load_record", return_value=managed_record
+                    ),
+                    patch.object(
+                        project_releases,
+                        "_require_published_github_release",
+                        return_value={"url": "https://example.com"},
+                    ),
+                    patch.object(
+                        project_releases,
+                        "verify_remote_release_readme",
+                        side_effect=ReleaseReadmeError(
+                            "release.readme_latest_stale",
+                            "expected and observed differ",
+                        ),
+                    ),
+                    self.assertRaises(ProjectReleaseError) as stale,
+                ):
+                    verify_published_release(root, prepared_path)
+                self.assertEqual(stale.exception.code, "release.readme_latest_stale")
                 retried = publish_release(
                     root,
                     prepared_path,

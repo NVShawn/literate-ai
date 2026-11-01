@@ -486,6 +486,16 @@
         "allowed_transitions", "gate", "changelog", "tag", "remote", "provider"
       ],
       "properties": {
+        "readme_latest_release": {
+          "type": "object", "additionalProperties": false,
+          "required": ["schema", "path", "marker", "include_prereleases"],
+          "properties": {
+            "schema": {"const": "literate-ai/readme-latest-release-policy@1"},
+            "path": {"const": "README.md"},
+            "marker": {"type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$"},
+            "include_prereleases": {"type": "boolean"}
+          }
+        },
         "artifact_gate": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/artifact_gate"},
         "authenticated_receipt": {"$ref": "urn:literate-ai:schema:v2:project-release-contracts#/$defs/authenticated_receipt"},
         "schema": {"const": "literate-ai/release-policy@2"},

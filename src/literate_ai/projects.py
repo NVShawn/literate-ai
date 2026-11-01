@@ -673,7 +673,18 @@ class PinnedInputClosure:
         self.maximum_file_bytes = maximum_file_bytes
         self.maximum_total_bytes = maximum_total_bytes
         self._entries: dict[tuple[Path, Path], _PinnedInput] = {}
+        self._total_bytes = 0
         self._labels: dict[str, tuple[Path, Path, bytes]] = {}
+
+    @classmethod
+    def for_project(cls, project: object | None) -> PinnedInputClosure:
+        limits = getattr(getattr(project, "definition", None), "scale_limits", None)
+        if limits is None:
+            return cls()
+        return cls(
+            maximum_files=limits.pinned_input_files,
+            maximum_total_bytes=limits.pinned_input_total_bytes,
+        )
 
     def pin(
         self,
@@ -752,7 +763,7 @@ class PinnedInputClosure:
 
     @property
     def total_bytes(self) -> int:
-        return sum(len(item.content) for item in self._entries.values())
+        return self._total_bytes
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -825,14 +836,17 @@ class PinnedInputClosure:
         if prospective_files > self.maximum_files:
             raise PinnedInputClosureError(
                 "inputs.closure_file_limit",
-                "generation authority exceeds the pinned-input file limit",
+                f"pinned-input files: observed {prospective_files}, "
+                f"allowed {self.maximum_files}",
             )
         if prospective_bytes > self.maximum_total_bytes:
             raise PinnedInputClosureError(
                 "inputs.closure_total_size_limit",
-                "generation authority exceeds the pinned-input total-size limit",
+                f"pinned-input bytes: observed {prospective_bytes}, "
+                f"allowed {self.maximum_total_bytes}",
             )
         self._entries[key] = candidate
+        self._total_bytes = prospective_bytes
         for label in candidate.labels:
             self._labels[label] = (
                 candidate.path,

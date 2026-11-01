@@ -236,7 +236,11 @@
     "urn:literate-ai:schema:v2:tree-package-result@1",
     "literate-ai/native-sdk-tree-package-inputs@1",
     "literate-ai/freebsd-tree-pkg-projection@1",
-    "literate-ai/freebsd-tree-pkg-result@1"
+    "literate-ai/freebsd-tree-pkg-result@1",
+    "urn:literate-ai:schema:v2:generated-test-suite",
+    "literate-ai/generated-test-coverage-request@1",
+    "literate-ai/public-callable-signature@1",
+    "literate-ai/generated-test-coverage-authority@1"
   ],
   "read_paths": [
     {

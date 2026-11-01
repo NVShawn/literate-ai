@@ -8233,6 +8233,20 @@ class LocalStandardLifecyclePorts:
                     surface_document,
                     cases_document,
                 )
+            elif oracle.language == "python":
+                # Plain package-tree verifiers have only their sealed export and
+                # the standard library. Wheel and SDK profiles below add their
+                # separately admitted dependency roots through owned drivers.
+                command = (
+                    *binding.command,
+                    "-I",
+                    "-S",
+                    "-B",
+                    str(harness),
+                    str(export),
+                    surface_document,
+                    cases_document,
+                )
             elif oracle.language == "rust":
                 targets = getattr(self, "cargo_targets", {})
                 target = targets.get(component_lock.root_revision.uri)

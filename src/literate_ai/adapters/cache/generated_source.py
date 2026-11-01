@@ -499,6 +499,7 @@ class CachedCodingCliSourceGenerator:
             specification_references=recipe.non_acceptance_document_paths,
             acceptance_arguments=_acceptance_argument_vectors(recipe),
             result_shape=_acceptance_result_shape(recipe),
+            coverage_authority=recipe.generated_test_coverage_authority,
         )
         source_sbom = validate_cyclonedx_bom(
             files[CYCLONEDX_SOURCE_SBOM_PATH],

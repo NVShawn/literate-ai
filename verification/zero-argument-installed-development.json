@@ -1,0 +1,99 @@
+{
+  "schema": "literate-ai/zero-argument-installed-development@1",
+  "source_commit": "c6ff2ce4d7c91cfee0557fc0f1cfe847dfcea57e",
+  "release_qualification": false,
+  "issues": [
+    132,
+    48
+  ],
+  "installed_framework": {
+    "non_editable_site_packages": true,
+    "distribution_identity": "sha256:1d101e9ea8a1de88d4b65f04277c7879db214b3eb683136355609178f61ede29",
+    "build_log_wheel_size": 3857386,
+    "build_log_wheel_sha256": "8eb042085dd60d0ecfb3861e69e93ddd07151cfb5eedbe14da2bbe46c6210e2f",
+    "full_wheel_smoke_claimed": false
+  },
+  "public_api": {
+    "language": "python",
+    "module": "tiny.api",
+    "symbol": "value",
+    "complete_arity": 0
+  },
+  "generated_coverage": {
+    "schema": "urn:literate-ai:schema:v2:generated-test-suite",
+    "mode": "exhaustive-zero-argument",
+    "public_interface_identity": "sha256:4091a654c71123d8f698bdc475f38f36c604f17675841db9756cd63770f44e44",
+    "suite_identity": "sha256:eb7d05f06667b659e532a8661b67819d29bfeb208c3117371b2a81cfae4fa004",
+    "distinct_invocations": [
+      []
+    ],
+    "categories": [
+      "example"
+    ],
+    "manifest_case_count": 1
+  },
+  "independent_oracle": {
+    "harness_identity": "sha256:7ab846fa65ac1ff1816e108d69ec1775333edaa54ccaec67b044a73085381645",
+    "harness_bytes_unchanged": true,
+    "case_arguments": [],
+    "expected_result": 7,
+    "isolated_no_site_startup_and_export_origin_assertions": true
+  },
+  "actual_lifecycle": {
+    "passed": true,
+    "source_generation": [
+      "generated"
+    ],
+    "test_summary": {
+      "failed": 0,
+      "passed": 1,
+      "skipped": 0,
+      "total": 1
+    },
+    "component_lock_identity": "sha256:6e631d4b66373912e3431b667b89899a7a5a2c1d9afc2e079790d782952f0c3b",
+    "receipt_identity": "sha256:eae591e91db0eae4195e33d3d27ed45129b222d17d2e6fd42cd89af764e6875d",
+    "finalized_candidate_identity": "sha256:71831e49f657890b58a72a5a252cc2a561f419aa6c1396ad5ac659effab5842a",
+    "lifecycle_request_identity": "sha256:ffc00398db1998b7dd7c73033dc68d70a6a883fd1de1ca0eda172f8cf975a03b",
+    "lifecycle_result_identity": "sha256:7efa41d756111f1e4f6f136a0b2a4883e4fc783e3fb7db055d07fe4647864856",
+    "source_cache_lifecycle_identity": "sha256:93b52d03b9fb8ce501fce81712627f0758cf4f1dc1a81872f4627eeb6404f547"
+  },
+  "installed_checks": [
+    "native-receipt-update",
+    "native-receipt-check",
+    "native-receipt-current",
+    "native-child-verify",
+    "native-parent-final-validation"
+  ],
+  "registered_updates": {
+    "reviewed_rebind_and_signed_import_map_replacement_passed": true,
+    "stale_registry_refused_without_child_or_registry_mutation": true,
+    "declared_native_python_profile_used_without_runtime_override": true
+  },
+  "recovery": {
+    "complete_old_tree_matches_prewrite_plan": true,
+    "recovery_plan_identity": "sha256:87cea4ac7e0b559f9cc56f9a14275d8325257b083c49a452f9e3c5014ebcd798",
+    "recovery_files": 313,
+    "recovery_directories": 244,
+    "recovery_file_bytes": 2324779
+  },
+  "recovery_metadata": {
+    "prior_parent_configuration_and_registry_hashes_match_reviewed_plan": true,
+    "completion_marker_matches_plan": true
+  },
+  "e2e_controls": {
+    "selected": 11,
+    "passed": 11,
+    "skipped": 0,
+    "failed": 0,
+    "test_module": "tests.e2e.test_native_child_replacement",
+    "qualified_state_control": "Injected typed qualified projection; this development report does not promote regenerative source-authority classification.",
+    "fault_injection": "Registry-write and final-validation failures plus concurrent-edit rollback conflict; actual filesystem and registry preservation checked."
+  },
+  "remaining_gates": [
+    "full current-source regression",
+    "full installed-wheel qualification",
+    "exact review and post-merge main CI",
+    "final release native platform matrix"
+  ],
+  "scope": "Focused actual installed library generation/build/tests/oracle, current receipt, child verification and parent validation; development evidence, not framework or release qualification."
+}

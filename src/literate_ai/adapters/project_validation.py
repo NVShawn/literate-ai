@@ -419,7 +419,7 @@ def _inverse_skill_catalog(project: Any) -> tuple[dict[str, object], ...]:
 def _catalog_file_identities(
     project: Any, catalog: str
 ) -> tuple[dict[str, object], ...]:
-    closure = PinnedInputClosure()
+    closure = PinnedInputClosure.for_project(project)
     report: list[dict[str, object]] = []
     authorities: dict[tuple[Path, Path], str] = {}
     try:
@@ -488,7 +488,7 @@ def _validate_component_authoring(
     *,
     admitted_cache: dict[str, frozenset[Path]] | None = None,
 ) -> dict[str, object]:
-    closure = PinnedInputClosure()
+    closure = PinnedInputClosure.for_project(project)
     try:
         content = closure.pin(
             manifest,
@@ -808,9 +808,23 @@ class FilesystemProjectValidationAdapter:
             _error(exc, "generate.invalid_flavor", "Flavor catalog is invalid")
         components: list[dict[str, object]] = []
         admitted_cache: dict[str, frozenset[Path]] = {}
-        for root in project.roots("component"):
-            authored_directories: set[Path] = set()
-            for manifest in sorted(root.rglob("component.md")):
+        from literate_ai.adapters.component_lock_planning import (
+            ComponentLockPlanningError,
+            component_catalog_manifest_paths,
+        )
+
+        try:
+            manifests = component_catalog_manifest_paths(
+                project.roots("component"),
+                boundary=project.root,
+                scale_limits=project.definition.scale_limits,
+                manifest_names=("component.md", "component.json"),
+            )
+        except ComponentLockPlanningError as exc:
+            raise ProjectValidationError(exc.code, exc.message) from exc
+        authored_directories: set[Path] = set()
+        for manifest in manifests:
+            if manifest.name == "component.md":
                 if manifest.is_symlink() or not manifest.is_file():
                     raise ProjectValidationError(
                         "project.component_invalid",
@@ -822,7 +836,8 @@ class FilesystemProjectValidationAdapter:
                         manifest, project, admitted_cache=admitted_cache
                     )
                 )
-            for manifest in sorted(root.rglob("component.json")):
+        for manifest in manifests:
+            if manifest.name == "component.json":
                 if manifest.parent in authored_directories:
                     continue
                 from literate_ai.compatibility.component_authoring import (

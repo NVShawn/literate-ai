@@ -401,25 +401,31 @@ _LANGUAGE_FLAVOR_BY_MARKER = {
 def detected_language_flavors(
     path: Path, *, languages: set[str] | None = None
 ) -> list[str]:
-    """Return every detected language Flavor, C++ first when both C++ and Python exist.
+    """Return every detected language Flavor with the root build language first.
 
-    Project defaults may select only one language-ecosystem Flavor. Convert planning
-    still lists the full union so operators see mixed trees.
+    A root Cargo workspace stays Rust-primary despite incidental helper sources.
+    Root CMake keeps its existing C++ precedence. Convert planning still lists the
+    full union so operators see mixed trees.
     """
 
     if languages is None:
         languages = source_language_markers(path)
     flavors: list[str] = []
+    cargo_manifest = (path / "Cargo.toml").is_file()
+    if cargo_manifest and not (path / "CMakeLists.txt").exists():
+        flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["rust"])
     if "cpp" in languages or (path / "CMakeLists.txt").exists():
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["cpp"])
     if "python" in languages:
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["python"])
     if "elixir" in languages or (path / "mix.exs").is_file():
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["elixir"])
+    if ("rust" in languages or cargo_manifest) and (
+        _LANGUAGE_FLAVOR_BY_MARKER["rust"] not in flavors
+    ):
+        flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["rust"])
     if flavors:
         return flavors
-    if (path / "Cargo.toml").exists():
-        return [_LANGUAGE_FLAVOR_BY_MARKER["rust"]]
     if (path / "package.json").exists():
         return [_LANGUAGE_FLAVOR_BY_MARKER["javascript"]]
     return []
@@ -459,6 +465,14 @@ def detect_repo_flavors(
         if any((path / m).exists() for m in make_files):
             selectors.append("flavor://literate-ai/build-make")
             covered_axes.add("build.system")
+
+    if (
+        language_flavors
+        and language_flavors[0] == _LANGUAGE_FLAVOR_BY_MARKER["rust"]
+        and "flavor://literate-ai/build-cargo" in selectors
+    ):
+        selectors.append("flavor://literate-ai/package-cargo")
+        covered_axes.add("packaging")
 
     # Apply language/build defaults for uncovered axes
     for axis, default in _FLAVOR_AXIS_DEFAULTS.items():
@@ -749,49 +763,25 @@ CONVERT_QUARANTINE_SCHEMA = "literate-ai/project-convert-quarantine@1"
 CONVERT_LEGACY_DIRECTORY = "_legacy"
 
 
-def _git_entry_is_fully_tracked(target: Path, entry: Path) -> bool:
-    """Return True when every regular file beneath *entry* is git-tracked."""
+def _git_entry_has_tracked_paths(target: Path, entry: Path) -> bool:
+    """Git owns indexed descendants even when untracked siblings also exist."""
 
     relative = entry.relative_to(target).as_posix()
     listed = subprocess.run(
-        ("git", "-C", str(target), "ls-files", "-z", "--", relative),
+        (
+            "git",
+            "--literal-pathspecs",
+            "-C",
+            str(target),
+            "ls-files",
+            "-z",
+            "--",
+            relative,
+        ),
         check=True,
         capture_output=True,
     )
-    tracked = {item for item in listed.stdout.split(b"\0") if item}
-    if not tracked:
-        return False
-    if entry.is_file():
-        return True
-    actual = {
-        item.relative_to(target).as_posix().encode("utf-8")
-        for item in entry.rglob("*")
-        if item.is_file() and not item.is_symlink()
-    }
-    return actual <= tracked
-
-
-def _git_entry_contains_gitlink(target: Path, entry: Path) -> bool:
-    """Return whether a tracked Gitlink is nested beneath *entry*.
-
-    Git can relocate a submodule and repair its administrative metadata with
-    ``git mv``. A filesystem move cannot do that: the nested worktree's
-    ``.git`` file would retain its old relative location. Treat the enclosing
-    legacy entry as a Git move even when its ordinary files are not all tracked
-    by the superproject.
-    """
-
-    relative = entry.relative_to(target).as_posix()
-    completed = subprocess.run(
-        ("git", "-C", str(target), "ls-files", "--stage", "-z", "--", relative),
-        check=True,
-        capture_output=True,
-    )
-    return any(
-        record.partition(b"\t")[0].split(b" ", 1)[0] == b"160000"
-        for record in completed.stdout.split(b"\0")
-        if record
-    )
+    return bool(listed.stdout.rstrip(b"\0"))
 
 
 def _quarantine_existing_tree(target: Path) -> dict[str, object] | None:
@@ -818,50 +808,110 @@ def _quarantine_existing_tree(target: Path) -> dict[str, object] | None:
             "project.convert_quarantine_collision",
             f"quarantine destination {aside} already exists",
         )
-    aside.mkdir(parents=True)
+    # Validate every alias before moving any target it may reference. Git can
+    # relocate indexed directories and aliases along with untracked siblings.
     use_git = (target / ".git").exists()
-    moved: list[dict[str, str]] = []
+    prepared: list[tuple[Path, bool]] = []
     for entry in entries:
         if entry.is_symlink():
             resolved = entry.resolve()
             if target not in resolved.parents and resolved != target:
                 raise ProjectInitializationError(
                     "project.convert_unsafe_entry",
-                    f"refusing to quarantine symlink escaping the project: "
+                    "refusing to quarantine symlink escaping the project: "
                     f"{entry.name}",
                 )
-        destination = aside / entry.name
-        vcs = "fs"
-        if (
-            use_git
-            and not entry.is_symlink()
-            and (
-                _git_entry_is_fully_tracked(target, entry)
-                or _git_entry_contains_gitlink(target, entry)
-            )
-        ):
-            completed = subprocess.run(
-                (
-                    "git",
-                    "-C",
-                    str(target),
-                    "mv",
-                    entry.name,
-                    str(destination.relative_to(target)),
-                ),
-                capture_output=True,
-            )
-            if completed.returncode == 0:
-                vcs = "git"
-        if not destination.exists():
-            shutil.move(str(entry), str(destination))
-        moved.append(
-            {
+        try:
+            tracked = use_git and _git_entry_has_tracked_paths(target, entry)
+        except (OSError, subprocess.SubprocessError) as exc:
+            raise ProjectInitializationError(
+                "project.convert_quarantine_failed",
+                "Git custody could not be inspected before quarantine",
+            ) from exc
+        prepared.append((entry, tracked))
+    legacy_existed = aside.parent.exists()
+    if aside.parent.is_symlink() or (legacy_existed and not aside.parent.is_dir()):
+        raise ProjectInitializationError(
+            "project.convert_quarantine_collision", "quarantine parent is unsafe"
+        )
+    aside.mkdir(parents=True)
+    moved: list[dict[str, str]] = []
+    try:
+        for entry, tracked in prepared:
+            destination = aside / entry.name
+            item = {
                 "from": entry.name,
                 "to": destination.relative_to(target).as_posix(),
-                "vcs": vcs,
+                "vcs": "git" if tracked else "fs",
             }
-        )
+            if tracked:
+                completed = subprocess.run(
+                    (
+                        "git",
+                        "--literal-pathspecs",
+                        "-C",
+                        str(target),
+                        "mv",
+                        "--",
+                        entry.name,
+                        item["to"],
+                    ),
+                    capture_output=True,
+                )
+                if completed.returncode != 0:
+                    # A failed index write may follow a physical rename. Retain
+                    # exactly that move for recovery, using its actual index state.
+                    if os.path.lexists(destination) and not os.path.lexists(entry):
+                        item["vcs"] = (
+                            "git"
+                            if _git_entry_has_tracked_paths(target, destination)
+                            else "fs"
+                        )
+                        moved.append(item)
+                    raise OSError("tracked quarantine move failed")
+            else:
+                shutil.move(str(entry), str(destination))
+            moved.append(item)
+    except (OSError, subprocess.SubprocessError) as exc:
+        # This is a partial quarantine, NOT scaffold rollback: untouched original
+        # root entries must survive. Undo only recorded moves; never delete them.
+        try:
+            for item in reversed(moved):
+                source, destination = target / item["to"], target / item["from"]
+                if not os.path.lexists(source) or os.path.lexists(destination):
+                    raise OSError("quarantine recovery path conflict")
+                if item["vcs"] == "git":
+                    restored = subprocess.run(
+                        (
+                            "git",
+                            "--literal-pathspecs",
+                            "-C",
+                            str(target),
+                            "mv",
+                            "--",
+                            item["to"],
+                            item["from"],
+                        ),
+                        capture_output=True,
+                    )
+                    if restored.returncode != 0:
+                        raise OSError("Git quarantine recovery failed")
+                else:
+                    shutil.move(str(source), str(destination))
+            aside.rmdir()
+            if not legacy_existed:
+                aside.parent.rmdir()
+        except (OSError, subprocess.SubprocessError) as recovery:
+            raise ProjectInitializationError(
+                "project.convert_quarantine_rollback_failed",
+                "quarantine recovery could not complete; preserve the original "
+                f"entries and retained recovery directory {aside.relative_to(target)}",
+            ) from recovery
+        raise ProjectInitializationError(
+            "project.convert_quarantine_failed",
+            "quarantine move failed; completed moves were restored without "
+            "changing untouched original entries",
+        ) from exc
     return {
         "schema": CONVERT_QUARANTINE_SCHEMA,
         "directory": aside.relative_to(target).as_posix(),
@@ -884,6 +934,29 @@ def _rollback_converted_tree(target: Path, quarantine: dict[str, object]) -> Non
         raise ProjectInitializationError(
             "project.convert_rollback_source_missing",
             "conversion rollback quarantine is unavailable",
+        )
+    # Never remove scaffold while any original is still inside it. A failed
+    # lift-shift can leave mixed custody; preserve all bytes for explicit recovery.
+    originals: set[str] = set()
+    for item in moved:
+        if (
+            not isinstance(item, dict)
+            or not isinstance(item.get("from"), str)
+            or not isinstance(item.get("to"), str)
+        ):
+            raise ProjectInitializationError(
+                "project.convert_rollback_manifest_invalid", "invalid rollback move"
+            )
+        originals.add(item["from"])
+        if not os.path.lexists(target / item["to"]):
+            raise ProjectInitializationError(
+                "project.convert_rollback_source_missing",
+                "original custody is incomplete; preserve scaffold and quarantine",
+            )
+    if {path.name for path in aside.iterdir()} != originals:
+        raise ProjectInitializationError(
+            "project.convert_rollback_conflict",
+            "quarantine contains unexplained entries; preserve them for recovery",
         )
     # Nothing except repository metadata and the quarantine survives rollback.
     legacy_root_name = Path(directory).parts[0]
@@ -910,7 +983,7 @@ def _rollback_converted_tree(target: Path, quarantine: dict[str, object]) -> Non
             )
         source = target / quarantined
         destination = target / original
-        if not source.exists() or destination.exists():
+        if not os.path.lexists(source) or os.path.lexists(destination):
             raise ProjectInitializationError(
                 "project.convert_rollback_conflict",
                 f"conversion rollback cannot restore {original!r}",
@@ -918,15 +991,35 @@ def _rollback_converted_tree(target: Path, quarantine: dict[str, object]) -> Non
         restored_with_git = False
         if vcs == "git" and (target / ".git").exists():
             completed = subprocess.run(
-                ("git", "-C", str(target), "mv", quarantined, original),
+                (
+                    "git",
+                    "--literal-pathspecs",
+                    "-C",
+                    str(target),
+                    "mv",
+                    "--",
+                    quarantined,
+                    original,
+                ),
                 capture_output=True,
             )
             restored_with_git = completed.returncode == 0
+            if not restored_with_git:
+                raise ProjectInitializationError(
+                    "project.convert_rollback_failed",
+                    "Git rollback failed; preserve the quarantined original "
+                    "instead of losing its index custody through a filesystem move",
+                )
         if not restored_with_git:
             shutil.move(str(source), str(destination))
-    legacy_root = target / legacy_root_name
-    if legacy_root.exists():
-        shutil.rmtree(legacy_root)
+    try:
+        aside.rmdir()
+        (target / legacy_root_name).rmdir()
+    except OSError as exc:
+        raise ProjectInitializationError(
+            "project.convert_rollback_conflict",
+            "original entries were restored but quarantine has unexplained contents",
+        ) from exc
 
 
 def _restore_lift_shift_quarantine(
@@ -935,6 +1028,8 @@ def _restore_lift_shift_quarantine(
     lift_shift: dict[str, object],
 ) -> None:
     """Recreate quarantine custody so the existing conversion rollback can run."""
+
+    from literate_ai.adapters.harness_inventory import _move_tree_entry
 
     directory = quarantine.get("directory")
     moves = lift_shift.get("moves")
@@ -957,15 +1052,17 @@ def _restore_lift_shift_quarantine(
         source = target.joinpath(*Path(str(item["to"])).parts)
         destination = target.joinpath(*Path(str(item["from"])).parts)
         destination.parent.mkdir(parents=True, exist_ok=True)
-        if not source.exists() or destination.exists():
+        if not os.path.lexists(source) or os.path.lexists(destination):
             raise ProjectInitializationError(
                 "project.convert_rollback_conflict",
                 f"lift-shift rollback cannot restore {item['from']!r}",
             )
-        shutil.move(str(source), str(destination))
+        _move_tree_entry(
+            target, source, destination, prefer_git=item.get("vcs") == "git"
+        )
     implementation = target / "components" / "legacy-project-wrapper" / "implementation"
     if implementation.exists():
-        shutil.rmtree(implementation)
+        implementation.rmdir()
 
 
 # Per-axis default selector applied when init caller declares no Flavor on that axis.
@@ -3172,8 +3269,31 @@ class FilesystemProjectInitializationAdapter:
                     diagnostic_limit_chars=baseline_diagnostic_chars,
                     workspace_links=harness_workspace_links,
                 )
-            except (HarnessBaselineError, HarnessWorkspaceError) as exc:
-                raise ProjectInitializationError(exc.code, exc.message) from exc
+            except Exception as exc:
+                code = getattr(exc, "code", "project.convert_lift_shift_failed")
+                message = getattr(exc, "message", "lift-shift failed")
+                try:
+                    implementation = (
+                        resolved_target
+                        / "components"
+                        / "legacy-project-wrapper"
+                        / "implementation"
+                    )
+                    if os.path.lexists(implementation):
+                        raise ProjectInitializationError(
+                            "project.convert_rollback_conflict",
+                            "lift-shift still retains implementation contents",
+                        )
+                    _rollback_converted_tree(resolved_target, quarantine)
+                except (ProjectInitializationError, OSError) as recovery:
+                    raise ProjectInitializationError(
+                        "project.convert_rollback_failed",
+                        f"{message}; recovery is incomplete. Preserve _legacy and "
+                        "components/legacy-project-wrapper/implementation for recovery",
+                    ) from recovery
+                raise ProjectInitializationError(
+                    code, f"{message}; literate-ai conversion was rolled back"
+                ) from exc
             lift_shift_path = evidence_dir / "legacy-lift-shift.json"
             lift_shift_path.write_bytes(
                 canonical_json_bytes(harness_lift_shift_document) + b"\n"
@@ -3304,11 +3424,7 @@ class FilesystemProjectInitializationAdapter:
                 update_component_lock(
                     resolved_target / "components" / "legacy-project-wrapper",
                     target_name="host",
-                    flavor_selectors=tuple(
-                        selector
-                        for selector in definition.default_flavor_selectors
-                        if "/build-" in selector
-                    ),
+                    flavor_selectors=("+flavor://legacy-adoption/build-legacy-shim",),
                     flavor_roots=(resolved_target / "flavors",),
                 )
             except (
@@ -3334,10 +3450,8 @@ class FilesystemProjectInitializationAdapter:
                     update_component_lock(
                         resolved_target / "components" / name,
                         target_name="host",
-                        flavor_selectors=tuple(
-                            selector
-                            for selector in definition.default_flavor_selectors
-                            if "/build-" in selector
+                        flavor_selectors=(
+                            "+flavor://legacy-adoption/build-legacy-shim",
                         ),
                         flavor_roots=(resolved_target / "flavors",),
                     )

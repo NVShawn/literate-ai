@@ -17,9 +17,11 @@ from literate_ai.contracts import (
     canonical_identity,
     canonical_json_bytes,
 )
+from literate_ai.generated_test_coverage import GeneratedTestCoverageAuthority
 from literate_ai.generated_tests import validate_generated_test_suite
 
 _SCHEMA = "literate-ai/source-evidence-validation@1"
+_V2_SCHEMA = "literate-ai/source-evidence-validation@2"
 _MAX_BYTES = 16 * 1024 * 1024
 _FIELDS = frozenset(
     {
@@ -40,8 +42,13 @@ class SourceEvidenceValidationInputs:
     managed_graph: CycloneDxManagedGraph
     specification_references: tuple[str, ...]
     acceptance_document: bytes
+    coverage_authority: GeneratedTestCoverageAuthority | None = None
 
     def __post_init__(self):
+        if self.coverage_authority is not None and not isinstance(
+            self.coverage_authority, GeneratedTestCoverageAuthority
+        ):
+            raise TypeError("source validation coverage requires typed authority")
         ContentIdentity.parse_uri(self.recipe_identity)
         if not isinstance(self.managed_graph, CycloneDxManagedGraph):
             raise TypeError("source validation requires a managed dependency graph")
@@ -81,23 +88,28 @@ class SourceEvidenceValidationInputs:
                     "result_shape": _acceptance_result_shape(recipe),
                 }
             ),
+            recipe.generated_test_coverage_authority,
         )
 
     def to_dict(self):
-        return {
-            "schema": _SCHEMA,
+        value = {
+            "schema": _SCHEMA if self.coverage_authority is None else _V2_SCHEMA,
             "recipe_identity": self.recipe_identity,
             "managed_graph": self.managed_graph.to_dict(),
             "specification_references": list(self.specification_references),
             "acceptance": json.loads(self.acceptance_document),
         }
+        if self.coverage_authority is not None:
+            value["coverage"] = self.coverage_authority.to_dict()
+        return value
 
     @classmethod
     def from_dict(cls, value):
+        v2 = isinstance(value, dict) and value.get("schema") == _V2_SCHEMA
         if (
             not isinstance(value, dict)
-            or set(value) != _FIELDS
-            or value["schema"] != _SCHEMA
+            or set(value) != (_FIELDS | {"coverage"} if v2 else _FIELDS)
+            or value["schema"] not in {_SCHEMA, _V2_SCHEMA}
             or not isinstance(value["specification_references"], list)
             or len(canonical_json_bytes(value)) > _MAX_BYTES
         ):
@@ -107,6 +119,7 @@ class SourceEvidenceValidationInputs:
             CycloneDxManagedGraph.from_dict(value["managed_graph"]),
             tuple(value["specification_references"]),
             canonical_json_bytes(value["acceptance"]),
+            GeneratedTestCoverageAuthority.from_dict(value["coverage"]) if v2 else None,
         )
 
     @property
@@ -126,5 +139,6 @@ class SourceEvidenceValidationInputs:
             specification_references=self.specification_references,
             acceptance_arguments=acceptance["arguments"],
             result_shape=acceptance["result_shape"],
+            coverage_authority=self.coverage_authority,
         )
         return bom, suite

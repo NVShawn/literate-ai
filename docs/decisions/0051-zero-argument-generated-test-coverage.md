@@ -1,9 +1,10 @@
 # ADR 0051: Exhaustive Generated Coverage for Zero-Argument Callables
 
-- Status: Proposed
+- Status: Accepted
+- Accepted: 2026-10-31; explicit directing-user acceptance for 1.4
 - Date: 2026-10-23
 - Decision owners: literate-ai maintainers
-- Roadmap: pending director review; discovered during NATIVE-CHILD-UPDATE-001
+- Roadmap: ZERO-ARG-COVERAGE-001; discovered during NATIVE-CHILD-UPDATE-001
 - Issue: [#132](https://github.com/jordanhubbard/literate-ai/issues/132), blocking final independent acceptance in [#48](https://github.com/jordanhubbard/literate-ai/issues/48)
 
 ## Context
@@ -25,7 +26,7 @@ silently lowering the global minimum would misrepresent the approved contract.
 A general language for finite input domains would add substantially more scope than
 this demonstrated zero-argument defect requires.
 
-## Proposed decision
+## Decision
 
 Introduce an explicitly versioned generated-test coverage mode for callables whose
 complete, authoritative public invocation signature has arity zero. The framework
@@ -58,10 +59,10 @@ case minima, signature checking, currentness, or tamper controls. If a declared
 project minimum exceeds exhaustive distinct-input coverage, report that incompatibility
 before generation; do not pad counts or promote a partial receipt.
 
-## Proposed acceptance
+## Acceptance
 
-Before implementation, obtain explicit director acceptance under ADR 0006. Then
-record the approved execution tasks through the existing work-record workflow.
+The directing user explicitly accepted this decision under ADR 0006 on 2026-10-31.
+ZERO-ARG-COVERAGE-001 records its approved execution tasks before implementation.
 Deterministic tests must cover the singleton case, rejection of invented arguments,
 duplicate or missing cases, false self-declared exemptions, stale interface/mode
 identities, private-oracle leakage, and unchanged ordinary v1 validation. A two-input
@@ -73,6 +74,23 @@ installed-wheel qualification, ordinary review CI and exact post-merge main CI.
 No source or qualification receipt has been produced by this proposal.
 
 ## Consequences
+
+### Public authoring contract
+
+Select the new mode by including `interfaces/callable.json` in the Component's
+locked local specification artifacts, after the provider's ordinary Markdown
+root. Literate Markdown permits JSON supporting artifacts. Its exact fields are `schema`
+(`literate-ai/generated-test-coverage-request@1`), `mode`
+(`exhaustive-zero-argument`), and `signature`. The signature has exactly
+`schema` (`literate-ai/public-callable-signature@1`), `arity` (integer zero),
+`optional` (false), and `variadic` (false). This reviewed public declaration
+describes the complete callable, not one acceptance invocation. Flavor and
+dependency documents cannot select the mode for the Component.
+
+The v2 suite retains the existing case format with one `example` and an explicit
+suite-level `coverage` descriptor containing the mode and exact public document
+identity. It claims no boundary or invariant cases. Portable source-validation
+inputs use v2 only for this mode; default v1 wire objects remain unchanged.
 
 The framework can represent a real zero-argument API without changing the product to
 satisfy its test generator. Coverage remains truthful and independent acceptance

@@ -9,8 +9,10 @@ from dataclasses import dataclass
 from typing import Any
 
 from literate_ai.contracts import canonical_json_bytes
+from literate_ai.generated_test_coverage import GeneratedTestCoverageAuthority
 
 GENERATED_TEST_SUITE_SCHEMA = "urn:literate-ai:schema:v1:generated-test-suite"
+GENERATED_TEST_SUITE_V2_SCHEMA = "urn:literate-ai:schema:v2:generated-test-suite"
 GENERATED_TEST_SUITE_PATH = "source/tests/manifest.json"
 MAJOR_REBUILD_GENERATION_MODE = "major-rebuild"
 MINIMUM_GENERATED_TEST_CASES = 3
@@ -59,6 +61,7 @@ class ValidatedGeneratedTestSuite:
     case_ids: tuple[str, ...]
     categories: frozenset[str]
     cases: tuple[GeneratedTestCase, ...]
+    coverage_authority: GeneratedTestCoverageAuthority | None = None
 
 
 class _DuplicateObjectKey(ValueError):
@@ -237,6 +240,7 @@ def validate_generated_test_suite(
     specification_references: Iterable[str],
     acceptance_arguments: Iterable[Any] = (),
     result_shape: object | None = None,
+    coverage_authority: GeneratedTestCoverageAuthority | None = None,
 ) -> ValidatedGeneratedTestSuite:
     """Validate one generated suite without reading or mutating external state.
 
@@ -250,11 +254,38 @@ def validate_generated_test_suite(
     """
 
     value, encoded = _decode_document(content)
-    _require_exact_fields(value, _SUITE_FIELDS, path="generated test suite")
-    if value["schema"] != GENERATED_TEST_SUITE_SCHEMA:
+    if coverage_authority is not None and not isinstance(
+        coverage_authority, GeneratedTestCoverageAuthority
+    ):
+        raise GeneratedTestSuiteError(
+            "generated_tests.coverage_authority_invalid",
+            "generated coverage requires current framework-established authority",
+        )
+    exhaustive = value.get("schema") == GENERATED_TEST_SUITE_V2_SCHEMA
+    _require_exact_fields(
+        value,
+        _SUITE_FIELDS | {"coverage"} if exhaustive else _SUITE_FIELDS,
+        path="generated test suite",
+    )
+    if exhaustive and coverage_authority is None:
+        raise GeneratedTestSuiteError(
+            "generated_tests.coverage_not_authorized",
+            "a generated manifest cannot establish its own closed input domain",
+        )
+    expected_schema = (
+        GENERATED_TEST_SUITE_V2_SCHEMA
+        if coverage_authority is not None
+        else GENERATED_TEST_SUITE_SCHEMA
+    )
+    if value["schema"] != expected_schema:
         raise GeneratedTestSuiteError(
             "generated_tests.schema_mismatch",
-            f"generated test suite schema must be {GENERATED_TEST_SUITE_SCHEMA!r}",
+            f"generated test suite schema must be {expected_schema!r}",
+        )
+    if exhaustive and value["coverage"] != coverage_authority.to_dict():
+        raise GeneratedTestSuiteError(
+            "generated_tests.coverage_authority_mismatch",
+            "generated coverage does not match the current public interface authority",
         )
     if value["recipe_identity"] != recipe_identity:
         raise GeneratedTestSuiteError(
@@ -267,16 +298,24 @@ def validate_generated_test_suite(
             "generated test suite generation_mode must be 'major-rebuild'",
         )
     cases = value["cases"]
-    if not isinstance(cases, list) or not (
-        MINIMUM_GENERATED_TEST_CASES <= len(cases) <= MAXIMUM_GENERATED_TEST_CASES
-    ):
+    minimum = 1 if exhaustive else MINIMUM_GENERATED_TEST_CASES
+    maximum = 1 if exhaustive else MAXIMUM_GENERATED_TEST_CASES
+    if not isinstance(cases, list) or not (minimum <= len(cases) <= maximum):
         raise GeneratedTestSuiteError(
             "generated_tests.case_count",
-            "generated test suite must contain between 3 and 256 cases",
+            "exhaustive zero-argument coverage requires exactly one case"
+            if exhaustive
+            else "generated test suite must contain between 3 and 256 cases",
         )
 
     allowed_references = frozenset(specification_references)
     acceptance_vectors = tuple(acceptance_arguments)
+    if exhaustive and any(arguments != [] for arguments in acceptance_vectors):
+        raise GeneratedTestSuiteError(
+            "generated_tests.coverage_interface_conflict",
+            "acceptance invocation signatures contradict the closed "
+            "zero-argument domain",
+        )
     required_signatures = {_signature_identity(item) for item in acceptance_vectors}
     case_ids: list[str] = []
     categories: set[str] = set()
@@ -304,13 +343,15 @@ def validate_generated_test_suite(
         case_ids.append(case_id)
 
         category = case["category"]
-        if (
-            not isinstance(category, str)
-            or category not in REQUIRED_GENERATED_TEST_CATEGORIES
-        ):
+        allowed_categories = (
+            frozenset({"example"}) if exhaustive else REQUIRED_GENERATED_TEST_CATEGORIES
+        )
+        if not isinstance(category, str) or category not in allowed_categories:
             raise GeneratedTestSuiteError(
                 "generated_tests.invalid_category",
-                f"{path}.category must be example, boundary, or invariant",
+                f"{path}.category must be example for exhaustive zero-argument coverage"
+                if exhaustive
+                else f"{path}.category must be example, boundary, or invariant",
             )
         categories.add(category)
 
@@ -340,6 +381,11 @@ def validate_generated_test_suite(
         argument_identity = _argument_identity(
             case["arguments"], path=f"{path}.arguments"
         )
+        if exhaustive and case["arguments"] != []:
+            raise GeneratedTestSuiteError(
+                "generated_tests.arguments_outside_public_domain",
+                "closed zero-argument coverage permits only the empty argument vector",
+            )
         if argument_identity in argument_identities:
             raise GeneratedTestSuiteError(
                 "generated_tests.duplicate_arguments",
@@ -364,7 +410,9 @@ def validate_generated_test_suite(
             )
         )
 
-    missing_categories = REQUIRED_GENERATED_TEST_CATEGORIES - categories
+    missing_categories = (
+        frozenset() if exhaustive else REQUIRED_GENERATED_TEST_CATEGORIES - categories
+    )
     if missing_categories:
         raise GeneratedTestSuiteError(
             "generated_tests.missing_category",
@@ -386,12 +434,14 @@ def validate_generated_test_suite(
         case_ids=tuple(case_ids),
         categories=frozenset(categories),
         cases=tuple(validated_cases),
+        coverage_authority=coverage_authority,
     )
 
 
 __all__ = [
     "GENERATED_TEST_SUITE_PATH",
     "GENERATED_TEST_SUITE_SCHEMA",
+    "GENERATED_TEST_SUITE_V2_SCHEMA",
     "MAJOR_REBUILD_GENERATION_MODE",
     "MAXIMUM_GENERATED_TEST_CASES",
     "MINIMUM_GENERATED_TEST_CASES",

@@ -4,6 +4,10 @@ Local cache readiness and publication are different concerns. A Component can be
 from a local cache without being published, and importing a publication must not trigger
 republishing.
 
+For the explicitly started HTTP artifact service, private credentials, resource
+bounds and TLS-proxy deployment requirements, see
+[the reference HTTP cache operator guide](reference-http-cache.md).
+
 ## Empty-cache operation
 
 Each user may begin with an empty cache. Resolution first works with lightweight
@@ -106,6 +110,17 @@ build whose adapter returns an artifact outside `OBJ_DIR` is copied into the man
 target namespace and rehashed before it can become reusable. Bazel receives persistent
 repository and disk caches beneath `OBJ_DIR`, so a source change invalidates affected
 actions rather than the entire compiler universe.
+
+Standard Cargo builds retain a locked build projection and `CARGO_TARGET_DIR` under
+`OBJ_DIR/cargo-work`. Unchanged source files retain their timestamps; changed and
+removed files are synchronized from the currently admitted tree. Compatible source
+revisions can therefore reuse Cargo intermediates even when the complete artifact
+cache misses, without requiring sccache. Toolchain, target/ABI, provider and
+compiler-cache policy bindings partition these workspaces. Saved workspace contents
+and freshness metadata are verified before reuse; failed builds discard their state.
+Current authorization, lock derivation, dependency evidence and downstream acceptance
+remain required. These mutable intermediates are local disposable state, not published
+artifacts or accepted source.
 
 Build bytes and permission to use them have deliberately different lifetimes. The
 artifact key excludes both the ephemeral authorization ID and the specification

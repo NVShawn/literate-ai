@@ -2,10 +2,88 @@
 
 ## Unreleased
 
+- Restore original source and Git custody after failed lift-shift parity. Require
+  complete quarantine before deleting scaffold, retain unexpected recovery
+  contents, and report incomplete recovery explicitly.
+
+- Preserve ignored tracked files and untracked siblings when adoption quarantines
+  partly tracked directories. Keep indexed aliases and staged changes through
+  rollback, recognize dangling relative aliases, and refuse failed Git recovery
+  without silently losing index custody or deleting untouched source.
+
+- Keep onboarding plans free of performance-log writes so planning from the
+  target directory preserves its reviewed identity. Retain apply diagnostics,
+  real plan-drift refusal and custody of pre-existing build content.
+
+- Keep retained `implementation/` dependencies and outputs outside Component
+  validation and authority/lock discovery. Reuse the bounded catalog boundary,
+  preserve nested authored Components and reject actual legacy-only authoring.
+
+- Preserve multicall invocation names in host tool probes so `rustc` and `cargo`
+  aliases execute their selected tools rather than the resolved rustup manager.
+  Keep declared package provenance and version checks; rustup-only provider
+  readiness remains a separate proposed design.
+
+- Provide an explicitly started loopback reference HTTP artifact cache with
+  separate reader/writer credentials, conditional immutable publication, bounded
+  pending uploads and connection deadlines, and the existing committed-cache
+  quota/retention owner. Document private TLS-proxy deployment and native
+  qualification requirements; cache bytes remain untrusted.
+
+- Keep native child promotion on its reviewed build-system choice or an exact,
+  unambiguous parent preference instead of adding template Bazel alongside it.
+  Preserve conflicting-axis and no-op refusals; clarify that qualification uses
+  accepted defaults without replaying already-folded selectors.
+
+- Add explicit project-specific catalog and pinned-input scale ceilings for large
+  retained trees, preserving ordinary defaults and independent per-file bounds.
+  Bind limits to project authority through loading, lock planning and validation;
+  keep pinned byte accounting linear in admitted files.
+
+- Add opt-in mechanical verification of the remote default-branch README against
+  published GitHub release titles, tags, asset URLs, sizes and SHA-256 digests.
+  Preserve stable release entries during prerelease verification and reject stale
+  or contradictory release claims with expected and observed values.
+
+- Isolate plain Python library acceptance from ambient interpreter/site startup
+  and disable bytecode writes; retain separately admitted wheel and SDK drivers.
+
+- Add an explicitly pinned zero-argument public-signature contract and versioned
+  exhaustive generated-test coverage, binding the mode through recipes and source
+  evidence while preserving default v1 diversity and private acceptance answers.
+  Refuse incompatible aggregate project case minima before generation.
+
+- Detect root Cargo workspaces as Rust despite incidental Python/C++ helpers,
+  preserve mixed-language observations and propose Cargo packaging.
+- Keep retained conversion locks on the existing pipeline-delegation Flavor,
+  preserving original Cargo commands instead of imposing generated-code requirements.
+- Distinguish failing retained commands from capped recorded-output excerpts;
+  oversized successful output remains accepted and its full stream digest retained.
+
+- Verify Rust library symbols shared by multiple capabilities without emitting
+  duplicate imports; retain every declared capability and missing-symbol refusal.
+- Clarify release README update ordering and derive asset digests from published
+  provider metadata or downloaded published bytes before final verification.
+
+- Keep project lifecycle lock and owner files out of Git after initialization
+  and framework updates, while preserving local ignore overlays.
+
 - Document all 88 canonical skills in a task-oriented catalog, including document,
   presentation, host and deployment boundaries; compare Google skills discovery
   and composition with revision-pinned reuse recommendations.
 
+- Reuse compatible Cargo target directories across Standard builds, preserving
+  unchanged source timestamps and verifying retained workspace integrity. Keep
+  toolchain/target isolation, fresh dependency evidence and failed-build cleanup.
+
+
+- Support both OpenCode v1 and v2 coding CLIs. Preserve v1 pure-mode generation;
+  detect v2 capabilities and use a private server with native deny-by-default
+  permissions, owned configuration verification, and captured server diagnostics.
+  V2 uses fresh provider state and process environment credentials; saved logins
+  remain supported by the v1 path.
+  Worker model checks also select v2 standalone mode. Existing host-install v1
+  pins remain valid; v2 rejects ambient configuration it cannot isolate.
 - Retry one bounded retained remote cleanup against the same exact
   controller-owned attempt paths when the first cleanup returns nonzero. Admit
   the already-returned lifecycle result only after cleanup succeeds, and remain

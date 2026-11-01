@@ -85,6 +85,18 @@
       },
       "properties": {
         "schema": {"const": "urn:literate-ai:schema:v2:project-definition"},
+        "scale_limits": {
+          "type": "object", "additionalProperties": false,
+          "required": ["schema", "pinned_input_files", "pinned_input_total_bytes", "catalog_files", "catalog_entries", "catalog_total_bytes"],
+          "properties": {
+            "schema": {"const": "literate-ai/project-scale-limits@1"},
+            "pinned_input_files": {"type": "integer", "minimum": 1, "maximum": 1000000},
+            "pinned_input_total_bytes": {"type": "integer", "minimum": 2097152, "maximum": 4294967296},
+            "catalog_files": {"type": "integer", "minimum": 1, "maximum": 1000000},
+            "catalog_entries": {"type": "integer", "minimum": 1, "maximum": 4000000},
+            "catalog_total_bytes": {"type": "integer", "minimum": 2097152, "maximum": 4294967296}
+          }
+        },
         "project_id": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/text"},
         "version": {"$ref": "urn:literate-ai:schema:v2:project-skill-contracts#/$defs/semver"},
         "profile": {"const": "canonical"},

@@ -173,18 +173,30 @@ diagnostics. This is a structural non-disclosure boundary rather than best-effor
 substitution, because a provider can echo credentials in unrecognized forms.
 Specifications and Flavors must never contain credentials.
 
-OpenCode is invoked with an isolated LitAI configuration directory, pure-plugin mode,
-project and Claude compatibility discovery disabled, and a deny-by-default permission
-map that enables only workspace read/edit/list/glob/grep. Its source-generation process
-runs in a detached temporary workspace, and LitAI materializes only the completely
+OpenCode is invoked with an isolated LitAI configuration directory, project and
+Claude compatibility discovery disabled, and deny-by-default permissions that enable
+only workspace read/edit/list/glob/grep. V1 uses pure-plugin mode and its legacy
+permission map. V2 uses a private server (`--standalone`), native ordered rules,
+and policies denying external plugins, skills, and MCP. Ambient home skill
+discovery is redirected to the temporary config directory. Before any v2 server
+starts, all XDG roots, the database, and temporary storage are also redirected
+to owned temporary directories. This prevents stored integration/plugin code
+from running during configuration inspection. V2 consumes process environment
+credentials and does not import saved OpenCode logins or integration state.
+V2 refuses system/MDM configuration and requires a bounded `debug config --standalone` probe to confirm
+that no extra configuration documents or altered rules are loaded. Its
+source-generation process runs in a detached temporary workspace, and LitAI materializes only the completely
 validated file map into the candidate root. OpenCode's own security model identifies
 permissions as a user-control policy rather than an operating-system sandbox, so the
 recorded isolation profile makes that limitation explicit; provider-managed session and
-authentication state may persist outside the temporary workspace.
-Before any prompt or model invocation, a bounded `--pure run --help` probe verifies that
-the exact pinned OpenCode executable exposes every option required to maintain this
-profile. An incompatible release fails closed with `coding_cli.incompatible`; LitAI does
-not remove `--pure` or fall back to a different provider.
+authentication state may persist outside the temporary workspace for v1; v2's
+owned provider state is removed after the invocation.
+Before any prompt or model invocation, a bounded `run --help` probe verifies that
+the exact pinned OpenCode executable exposes the options required by either supported
+major. Both probes omit prompts, model selectors, and forwarded credential values.
+An incompatible release fails closed with `coding_cli.incompatible` without provider
+fallback. The exact executable digest and the versioned isolation profile participate
+in source-cache identities.
 
 Execution-worker catalogs are private operator configuration, not project authority.
 `--worker-param` values are validated against the selected worker declaration and enter
