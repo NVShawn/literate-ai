@@ -32095,8 +32095,18 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Document exact namespace paths, conditional create, immutable conflicts, payload-before-manifest ordering, authentication, TLS termination, read-only policy, quota and retention semantics under ADR 0044.
-  - [ ] Add an explicitly started reference service using existing typed cache configuration and artifact manifests, exact byte verification and finite staging/concurrency/deadline budgets.
+  - [x] Document exact namespace paths, conditional create, immutable conflicts, payload-before-manifest ordering, authentication, TLS termination, read-only policy, quota and retention semantics under ADR 0044.
+  - [x] Add an explicitly started reference service using existing typed cache configuration and artifact manifests, exact byte verification and finite staging/concurrency/deadline budgets.
 - **Evidence:**
-  - [ ] Run actual loopback HTTP clients for cold/warm/read-only/corrupt cases, identical concurrent writers, conflicting entries, traversal and auth refusal, quotas, expiry and interrupted upload cleanup.
+  - [x] Run actual loopback HTTP clients for cold/warm/read-only/corrupt cases, identical concurrent writers, conflicting entries, traversal and auth refusal, quotas, expiry and interrupted upload cleanup.
   - [ ] Retain real two-FreeBSD-worker shared-cache and throughput qualification under issue 236; reference-server tests alone do not complete that issue.
+
+- **Development evidence:** Fifteen reference-server, HTTP-client and local-owner
+  tests pass, including slow-header deadline, framing refusal, hardlink refusal,
+  pending-byte bounds and committed quota/retention. An explicitly invoked module
+  starts with private configuration and returns an authenticated cold miss without
+  request/credential logs. See [the operator guide](../user/reference-http-cache.md)
+  for finite memory/disk headroom, one writer group per instance, per-artifact-
+  namespace committed quotas and separately operated TLS. These are local
+  controller tests; native unit key coverage, remote publication, two-host speedups
+  and exact release qualification remain open.

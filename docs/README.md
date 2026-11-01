@@ -94,6 +94,7 @@ lists the per-project fields and their defaults.
 - [Source to specification](user/source-to-specification.md)
 - [Model groups, selectors, and generation](user/models-and-generation.md)
 - [Caches, packages, and publication](user/caches-packages-publication.md)
+- [Operate the bounded reference HTTP cache](user/reference-http-cache.md)
 - [Source trust and build security](user/security.md)
 - [Configuration and CLI reference](user/configuration-and-cli.md)
 - [HTML repository explorer](user/html-repository-explorer.md)

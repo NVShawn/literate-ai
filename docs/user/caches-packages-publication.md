@@ -4,6 +4,10 @@ Local cache readiness and publication are different concerns. A Component can be
 from a local cache without being published, and importing a publication must not trigger
 republishing.
 
+For the explicitly started HTTP artifact service, private credentials, resource
+bounds and TLS-proxy deployment requirements, see
+[the reference HTTP cache operator guide](reference-http-cache.md).
+
 ## Empty-cache operation
 
 Each user may begin with an empty cache. Resolution first works with lightweight

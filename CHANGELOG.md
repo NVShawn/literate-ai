@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Provide an explicitly started loopback reference HTTP artifact cache with
+  separate reader/writer credentials, conditional immutable publication, bounded
+  pending uploads and connection deadlines, and the existing committed-cache
+  quota/retention owner. Document private TLS-proxy deployment and native
+  qualification requirements; cache bytes remain untrusted.
+
 - Keep native child promotion on its reviewed build-system choice or an exact,
   unambiguous parent preference instead of adding template Bazel alongside it.
   Preserve conflicting-axis and no-op refusals; clarify that qualification uses
