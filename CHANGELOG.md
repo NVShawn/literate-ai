@@ -6,6 +6,10 @@
   presentation, host and deployment boundaries; compare Google skills discovery
   and composition with revision-pinned reuse recommendations.
 
+- Reuse compatible Cargo target directories across Standard builds, preserving
+  unchanged source timestamps and verifying retained workspace integrity. Keep
+  toolchain/target isolation, fresh dependency evidence and failed-build cleanup.
+
 - Retry one bounded retained remote cleanup against the same exact
   controller-owned attempt paths when the first cleanup returns nonzero. Admit
   the already-returned lifecycle result only after cleanup succeeds, and remain
