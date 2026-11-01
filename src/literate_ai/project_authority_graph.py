@@ -326,6 +326,23 @@ def project_authority_graph(
             )
         except ProjectError as exc:
             raise AuthorityGraphError(exc.code, exc.message) from exc
+
+    def component_manifests(root: Path, name: str) -> tuple[Path, ...]:
+        from literate_ai.adapters.component_lock_planning import (
+            ComponentLockPlanningError,
+            component_catalog_manifest_paths,
+        )
+
+        try:
+            return component_catalog_manifest_paths(
+                (root,),
+                boundary=project.root,
+                scale_limits=project.definition.scale_limits,
+                manifest_names=(name,),
+            )
+        except ComponentLockPlanningError as exc:
+            raise AuthorityGraphError(exc.code, exc.message) from exc
+
     for kind, root_kind, sentinel in _ENTITY_LAYOUT:
         for catalog_root in project.roots(root_kind):
             candidates = (
@@ -335,6 +352,8 @@ def project_authority_graph(
                     if path.is_relative_to(catalog_root.resolve())
                 )
                 if kind == "skill"
+                else component_manifests(catalog_root, sentinel)
+                if kind == "component"
                 else tuple(catalog_root.rglob(sentinel))
             )
             for path in sorted(candidates):
@@ -519,7 +538,7 @@ def project_authority_graph(
                     )
                 )
     for catalog_root in project.roots("component") if include_component_locks else ():
-        for lock_path in sorted(catalog_root.rglob("component.lock.json")):
+        for lock_path in component_manifests(catalog_root, "component.lock.json"):
             try:
                 lock = json.loads(lock_path.read_text(encoding="utf-8"))
                 revisions = {

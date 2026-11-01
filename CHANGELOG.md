@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Keep retained `implementation/` dependencies and outputs outside Component
+  validation and authority/lock discovery. Reuse the bounded catalog boundary,
+  preserve nested authored Components and reject actual legacy-only authoring.
+
 - Preserve multicall invocation names in host tool probes so `rustc` and `cargo`
   aliases execute their selected tools rather than the resolved rustup manager.
   Keep declared package provenance and version checks; rustup-only provider

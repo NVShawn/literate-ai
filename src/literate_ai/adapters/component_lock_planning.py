@@ -809,6 +809,30 @@ def _component_markdown_paths(
     boundary: Path,
     scale_limits: ProjectScaleLimits | None = None,
 ) -> tuple[Path, ...]:
+    return component_catalog_manifest_paths(
+        roots, boundary=boundary, scale_limits=scale_limits
+    )
+
+
+def component_catalog_manifest_paths(
+    roots: tuple[Path, ...],
+    *,
+    boundary: Path,
+    scale_limits: ProjectScaleLimits | None = None,
+    manifest_names: tuple[str, ...] = ("component.md",),
+) -> tuple[Path, ...]:
+    """Discover authored catalog files without entering retained implementations.
+
+    Validation and authority graphs must use the same boundary as lock planning.
+    An implementation-named catalog group without adjacent Component authoring
+    remains traversable; this is not a global directory-name exclusion.
+    """
+    if not manifest_names or not set(manifest_names) <= {
+        "component.md",
+        "component.json",
+        "component.lock.json",
+    }:
+        raise ValueError("unsupported Component catalog manifest names")
     budget = _CatalogBudget(limits=scale_limits)
     paths: set[Path] = set()
     for configured_root in roots:
@@ -839,7 +863,7 @@ def _component_markdown_paths(
                         continue
                     pending.append(candidate)
                     continue
-                if candidate.name == "component.md":
+                if candidate.name in manifest_names:
                     budget.admit_authority_file(metadata)
                     paths.add(candidate)
     return tuple(sorted(paths))

@@ -32137,3 +32137,30 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   proposes explicit rustup provider authority and awaits directing-user
   acceptance before that independent provider extension begins. The issue and
   1.4 release goal remain open.
+
+### [ ] ADOPT-CATALOG-001 — Keep retained implementation trees outside Component discovery
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#212](https://github.com/jordanhubbard/literate-ai/issues/212)
+
+- **Priority:** P1
+- **Owner:** Component catalog discovery, project validation and authority graph; issue 212; PROJECT goals 1 and 4
+- **Direction:** Issue 212 reports adoption fails when retained dependency files named component.json or component.md are discovered as framework authority.
+- **Conclusion:** Reuse the bounded lock catalog walker and its existing Component-adjacent implementation exclusion in validation and graph/lock discovery. Preserve namespace nesting, standalone implementation-named catalog groups, ordinary legacy migration refusal and authored-file safety. Do not blacklist dependency names globally or reinterpret retained source as authority.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Expose shared bounded Component manifest discovery and use it for validation and Component authority graph/lock candidates.
+- **Evidence:**
+  - [x] Prove real CLI validation ignores retained component.json, component.md and component.lock.json, preserves graph identity, discovers ordinary nested Components and refuses actual legacy-only authoring; run lock/scale/graph regressions.
+  - [ ] Require exact integrated CI and installed adoption qualification before issue 212 closes.
+
+- **Development evidence:** Thirty-seven project CLI, catalog/lock/graph and scale
+  tests pass. A guarded directory-enumeration test proves validation and graph
+  discovery never enter the retained implementation, with unchanged Components
+  and graph output after adding third-party Markdown, legacy JSON and corrupt lock
+  lookalikes. A separate real public `onboard adopt --apply --acknowledge
+  --run-baseline` test passes build, a genuine Python unittest and package/parity
+  gates, preserves the untracked dependency manifest through lift-shift and
+  validates the wrapped project. This is source-CLI development evidence; exact
+  installed and integration-CI qualification remain open.

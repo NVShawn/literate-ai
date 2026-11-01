@@ -150,6 +150,9 @@
       },
       {
         "id": "HOST-PROBE-ALIAS-001"
+      },
+      {
+        "id": "ADOPT-CATALOG-001"
       }
     ]
   }
