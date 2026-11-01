@@ -135,6 +135,9 @@
       },
       {
         "id": "RETAINED-OUTPUT-DIAG-001"
+      },
+      {
+        "id": "RELEASE-README-VERIFY-001"
       }
     ]
   }

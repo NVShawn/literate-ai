@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Isolate plain Python library acceptance from ambient interpreter/site startup
+  and disable bytecode writes; retain separately admitted wheel and SDK drivers.
+
 - Add an explicitly pinned zero-argument public-signature contract and versioned
   exhaustive generated-test coverage, binding the mode through recipes and source
   evidence while preserving default v1 diversity and private acceptance answers.

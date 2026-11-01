@@ -31922,6 +31922,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Development evidence:** 16 focused coverage tests pass, including real Literate Markdown loading of the explicit JSON supporting artifact, default-v1 refusal rules, prompt privacy, stale interface bindings, and aggregate project-minimum incompatibility. Existing coding-CLI tests (22), source/cache/transfer regressions (28), qualification-capture tests (4), schema tests (2), and remote source materialization (1) pass. Standard smoke selects 75: 74 pass and the existing macOS persistent-service readiness test is explicitly skipped. These are development checks, not installed-child or release acceptance. Next: complete actual singleton execution/evidence and the fresh installed registered-child journey before closure.
+- **Installed development result:** The current non-editable wheel completes actual generation, build and generated tests for one zero-argument invocation, then the unchanged independent harness refuses the generic Python launcher because it lacks isolated/no-site startup. No candidate receipt exists. The plain Python verifier launch is repaired with isolated/no-site/no-bytecode startup; two real-process controls pass, including wrong-result refusal. Install the reviewed fix non-editably, rebind through the registered-child workflow, then re-run with fresh generated source and all original controls.
 - **Implementation:**
   - [ ] Establish authoritative complete zero-argument public signatures and project a versioned mode through recipe, generated manifest validation, cache and lifecycle identities.
   - [ ] Reconcile pinned generation guidance with independently selected overlapping inputs while keeping verifier-owned expected answers private.
@@ -31983,3 +31984,19 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 - **Development evidence:** Two real-process controls pass: three genuine Python unittest cases are admitted above the recorded stdout cap with the exact independently computed full stdout SHA-256; a real failing case stays rejected and names capped excerpts separately from its exit status. Recording and acceptance limits remain unchanged.
 - **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+
+### [ ] RELEASE-README-VERIFY-001 — Verify the published release against the remote default-branch README
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#148](https://github.com/jordanhubbard/literate-ai/issues/148)
+- **Priority:** P1
+- **Owner:** release policy and read-only GitHub publication verification; issue 148
+- **Direction:** Issue 148 requires mechanical checks of the latest release title, tag and listed asset size/digests in the remote default-branch root README, preserving stable entries for prereleases.
+- **Conclusion:** Introduce an explicitly declared README marker policy and a deterministic visible Markdown section. Verify current provider metadata and actual remote default-branch bytes after tag/provider checks; fail with expected and observed values on stale or contradictory latest/current release claims. Existing policy documents without the declaration retain compatibility. Enable the policy for this framework release; its final verification must pass after the README update lands.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Define the marker policy and visible release/asset section, preserve existing policy identities when absent, and implement bounded remote README/provider readback with digest download fallback.
+  - [ ] Add stale title/tag/digest/size, missing/duplicate markers, contradictory latest/current claims, unpublished-provider and prerelease controls plus actual Git-based remote-default-branch coverage.
+- **Evidence:**
+  - [ ] Pass affected release policy/publication regressions, lint/schema/documentation checks, and exact review/main CI; finish 1.4 with remote README readback matching the published release.
