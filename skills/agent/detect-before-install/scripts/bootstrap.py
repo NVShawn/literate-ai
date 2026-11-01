@@ -41,7 +41,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--profile", choices=("sample-worker",), default="sample-worker"
     )
-    parser.add_argument("--platform", choices=("macos", "linux", "windows"))
+    parser.add_argument("--platform", choices=("macos", "linux", "windows", "freebsd"))
     parser.add_argument("--flavor", action="append", default=[], metavar="SELECTOR")
     parser.add_argument(
         "--coding-cli", choices=("codex", "claude", "cursor-agent", "opencode")
@@ -58,6 +58,8 @@ def _platform_family() -> str:
         return "windows"
     if system == "linux":
         return "linux"
+    if system == "freebsd":
+        return "freebsd"
     raise HostInstallError(
         "host-install.platform-unsupported", f"unsupported worker platform: {system}"
     )
@@ -131,6 +133,9 @@ def _clock_command(
     if platform == "macos":
         executable = shutil.which("sntp", path=path)
         return (executable, "-sS", CLOCK_SYNC_SOURCE) if executable else None
+    if platform == "freebsd":
+        ntpdate = shutil.which("ntpdate", path=path)
+        return (ntpdate, "-u", CLOCK_SYNC_SOURCE) if ntpdate else None
     timedatectl = shutil.which("timedatectl", path=path)
     if timedatectl:
         return (timedatectl, "set-ntp", "true")
@@ -138,9 +143,7 @@ def _clock_command(
     return (ntpdate, "-u", CLOCK_SYNC_SOURCE) if ntpdate else None
 
 
-def _synchronize_clock(
-    platform: str, environment: dict[str, str]
-) -> dict[str, object]:
+def _synchronize_clock(platform: str, environment: dict[str, str]) -> dict[str, object]:
     try:
         offset = _query_ntp_unix(CLOCK_SYNC_SOURCE) - time.time()
     except OSError as exc:
@@ -250,7 +253,17 @@ def main() -> int:
             commands=commands,
         )
     apply_host_install_path(after)
-    clock_sync = _synchronize_clock(platform, environment)
+    clock_sync = (
+        _synchronize_clock(platform, environment)
+        if args.install_missing
+        else {
+            "attempted": False,
+            "commands": [],
+            "detail": "observation-only bootstrap does not synchronize the host clock",
+            "source": CLOCK_SYNC_SOURCE,
+            "status": "skipped",
+        }
+    )
     report = {
         "schema": "literate-ai/host-bootstrap-report@2",
         "platform": platform,
@@ -261,12 +274,8 @@ def main() -> int:
         "commands": commands,
         "before": _observation_map(before),
         "after": _observation_map(after),
-        "missing": [
-            item.requirement.capability for item in after.missing
-        ],
-        "composition_warnings": [
-            item.to_dict() for item in after.sbom.base.warnings
-        ],
+        "missing": [item.requirement.capability for item in after.missing],
+        "composition_warnings": [item.to_dict() for item in after.sbom.base.warnings],
         "clock_sync": clock_sync,
         "path_entries": sorted(
             {
@@ -303,9 +312,7 @@ def _emit_failure(
         "before": _observation_map(before) if before else {},
         "after": _observation_map(before) if before else {},
         "missing": (
-            [item.requirement.capability for item in before.missing]
-            if before
-            else []
+            [item.requirement.capability for item in before.missing] if before else []
         ),
         "error": {"code": error.code, "message": error.message},
         "clock_sync": {"attempted": False, "status": "skipped"},

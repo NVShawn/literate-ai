@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Worker bootstrap: recognize FreeBSD and use its declared native package and
+  coding-agent requirements. Observation-only detection skips clock queries and
+  adjustment; explicit installation retains best-effort native synchronization.
+
+- Accepted-source builds: discover verified retained source in project-declared
+  readable cache targets without creating stores during lookup; preserve membership,
+  uniqueness and write-only policy checks.
+
 - Adoption: show recovery outcomes before verbose failures and retain bounded, redacted private failure reports outside project rollback, without deleting older evidence.
 
 - Adoption: preserve bounded baseline failure diagnostics through onboarding and document explicit external JavaScript dependency bindings for source-only sandboxes.

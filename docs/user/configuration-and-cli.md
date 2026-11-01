@@ -1033,6 +1033,13 @@ external driver documents retain their original canonical wire shape; an explici
 request is rejected before driver binding because its current versioned interface has
 no accepted-source-only authority field.
 
+Local accepted-only builds discover verified membership in the project's declared
+readable cache targets, including project-relative committed caches. Inspection
+never creates a missing store or enables a write-only target for reads. Invalid
+membership, unavailable operator bindings and ambiguous provider bindings remain
+refusals; a copied directory or receipt is not admission authority. The existing
+Standard runtime cache remains the default when using its legacy configuration.
+
 ```text
 compose-and-plan
 resolve-source-cache

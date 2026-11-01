@@ -15,12 +15,22 @@ names are installation hints only and never override a specification or Flavor p
 | Bazel Windows shell | `bash.exe` | n/a | n/a | supplied by `git` |
 | Bazel Windows native runtime | n/a | n/a | n/a | `vcredist140` (VC++ 14 runtime DLLs) |
 
+FreeBSD uses its tuple-specific native `pkg` realization, not the Linux package
+column. Its declared packages include `python312`, `py312-sqlite3`, `git`, `git-lfs`,
+`gmake`, `node24`, `npm-node24`, `rust`, and `cmake-core`, selected by the actual
+Flavor requirements. Its coding-agent realization is native `codex`; an explicitly
+selected unsupported agent refuses rather than changing provider. Native package
+registration and each capability's runtime probe remain required. These mappings
+do not qualify every sample or every FreeBSD architecture.
+
 SSH transport and a system Python capable of launching the compatibility bootstrap are
-the macOS/Linux stage-zero prerequisites. Windows PowerShell installs the pinned Python
+the macOS/Linux/FreeBSD stage-zero prerequisites. Windows PowerShell installs the pinned Python
 runtime when necessary before invoking the shared Python bootstrap. Python 3.11+ is then
 required in the final report. Coding-agent login or an environment token is a separate
 readiness check. Each OS Flavor also requires a best-effort NTP sync to `time.nist.gov`
-during this host-configuration step; a missing client, missing privilege, or failed
+during explicitly requested installation; observation-only detection skips clock
+queries and adjustment. FreeBSD uses its native `ntpdate`, rather than a Linux
+service command. A missing client, missing privilege, or failed
 sync is recorded in `clock_sync` and does not fail sample-worker readiness.
 Browser/toolchain additions remain Flavor-specific unless the sample-worker profile
 begins exercising them unconditionally.

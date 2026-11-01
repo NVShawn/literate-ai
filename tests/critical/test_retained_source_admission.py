@@ -132,6 +132,13 @@ class RetainedSourceAdmissionTests(unittest.TestCase):
             with self.assertRaises((ContractValidationError, TypeError, ValueError)):
                 StandardSourceAdmissionEvidence.from_dict(invalid)
 
+    def test_retained_review_keeps_typed_refusal_for_an_invalid_store(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "not-a-cache"
+            path.write_text("foreign file")
+            with self.assertRaises(StandardSourceCacheRestorationError):
+                accepted_retained_source_review(path, fixtures.identity("tool"))
+
     def test_verified_review_roundtrips_in_the_same_complete_cache_entry(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory).resolve()

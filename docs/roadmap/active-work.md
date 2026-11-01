@@ -28114,6 +28114,20 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 ### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
 
+Worker bootstrap follow-up: the canonical Python bootstrap rejected
+FreeBSD before its existing tuple-specific native pkg provider can observe tools.
+Added actual-platform detection and explicit FreeBSD selection, preserving provider
+selection and unsupported-platform refusals. Detection must not query or adjust
+the host clock; attempt best-effort native synchronization only during explicitly
+requested installation. Cover native-platform mismatch, observation-only missing
+tools, selected-provider refusal and authorized-install composition before native
+qualification. Fifteen bootstrap/native-pkg checks and seven existing host/platform
+checks pass locally (15 additional subtests). These include missing native tools,
+unsupported selected-agent refusal, actual-SBOM composition, platform mismatch,
+clock-free detection and explicit-install delegation. This is portable controller
+evidence, not native bootstrap, worker alignment or installed qualification. Do not
+infer alignment or install authority from a successful probe.
+
 Native receipt qualification exposed a missing `_sqlite3` extension despite a
 working Python command. Declare Python SQLite in the FreeBSD OS Flavor, map it to
 `py312-sqlite3`, and require both native package registration and an in-memory
@@ -31743,7 +31757,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 - **Release target:** 1.4.0
 - **Detailed plan:** [1.4 integration](1.4-integration.md).
-- **Next action in progress:** review and consolidate the existing PR heads; audit the issue backlog against current code and tests.
+- **Next action in progress:** finish current-issue acceptance and native qualification after PRs #237/#238 landed; obtain explicit acceptance for Proposed ADRs before their implementation.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
@@ -31752,7 +31766,7 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI.
+  - [x] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI. All four reviews are merged; exact head 228c121c passes CI 41282538479 and lands through PR 237 at 48b1e312. Later adoption fixes land through PR 238 at ad979c6e after exact-head CI 41288058754. These are integration results, not release qualification.
   - [ ] Reproduce or audit each issue, implement its owning fix or reviewed resolution, record decisive evidence, and comment and close only after the resolution lands.
   - [ ] Complete all declared 1.4.0 roadmap goals and native platform qualification using aligned workers; retain prior failed evidence.
   - [ ] Regenerate, inspect and publish the declared terminal document pair, then plan, prepare, check, publish and verify 1.4.0 through repository commands.
@@ -31769,6 +31783,8 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   explicitly refuses a release-qualification claim: this ephemeral guest does not
   supply full retained-tree, two-physical-host cache/performance, compiler SDK or
   final candidate acceptance. Later integration changes still require renewal.
+
+- **Cargo design review pending:** [ADR 0054](../decisions/0054-reviewed-retained-cargo-compatibility.md) records the audited #222–#226 compatibility design. It remains Proposed; no v2 implementation or implementation-subtask acceptance is claimed. Explicit acceptance of ADR 0054 remains required by Accepted ADR 0006.
 
 ### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
 
@@ -31866,7 +31882,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] Review or exercise guidance scenarios for suitable connected peers, no A2A support, unavailable/unsuitable peers, prohibited delegation, and timeout/cancellation; absence of A2A does not prevent ordinary local work.
   - [ ] Boundary review confirms bounded context sharing, durable tracker handoffs, reviewed authority changes, unchanged generation/cache identity rules, and independent validation of returned artifacts; A2A completion alone never satisfies litai acceptance.
 
-### [ ] IGNORE-LIFECYCLE-001 — Keep lifecycle lock state out of initialized and updated Git projects
+### [x] IGNORE-LIFECYCLE-001 — Keep lifecycle lock state out of initialized and updated Git projects
 
 - **Release target:** 1.4.0
 
@@ -31881,9 +31897,9 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Update the canonical project.gitignore and verify actual lifecycle lock/owner paths stay ignored after initialization and update.
 - **Evidence:**
   - [x] Run Git-backed initialized and legacy-overlay update regressions; prove the prior template fails and unrelated files remain visible. The original template fails actual Git check-ignore for lifecycle.lock; both repaired regressions pass without skips, including owner metadata and legacy overlay preservation.
-  - [ ] Land the repair on green CI, comment with the landed evidence and close issue #215.
+  - [x] Land the repair on green CI, comment with the landed evidence and close issue #215. PR 237 lands the fix after exact-head CI 41282538479; current-main Git/native projection controls pass six cases without skips. Issue 215 is closed with comment 6560170174.
 
-### [ ] RUST-IMPORT-DEDUP-001 — Verify overlapping Rust library capabilities without duplicate imports
+### [x] RUST-IMPORT-DEDUP-001 — Verify overlapping Rust library capabilities without duplicate imports
 
 - **Release target:** 1.4.0
 
@@ -31900,7 +31916,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Reproduce E0252 before the fix; prove repeated valid imports pass and a genuinely missing declared symbol still fails.
 
 - **Development evidence:** The native Cargo regression reproduces E0252 before the repair. After exact module/symbol deduplication, all four Standard command projection cases pass without skips, preserving both capability observations and missing-symbol refusal.
-- **Next action:** pass admission/integration CI, land, then comment and close the issue.
+- **Completion evidence:** PR 237 lands the fix after exact-head CI 41282538479. Current-main Git/native command-projection controls pass all six cases without skips; issue 219 is closed with comment 6560170740. No full release qualification is claimed.
 
 ### [ ] RELEASE-README-ORDER-001 — Clarify published README verification order and asset digest provenance
 
@@ -32218,6 +32234,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Implementation:**
   - [x] Preserve indexed directory and alias moves, and make quarantine move failures restore completed moves without scaffold deletion.
   - [x] Accept retained dangling relative aliases during ordered rollback while preserving destination collision refusal.
+  - [x] Correct Windows fixture byte expectations to compare with the actual original
+        bytes, and prove mixed line endings survive source copying and rollback.
 - **Evidence:**
   - [x] Reproduce ignored tracked file loss; prove a real conversion baseline sees that source, untracked siblings remain, staged intent survives roundtrip, and forced move failure restores prior entries.
   - [ ] Run conversion, source-scope and adoption regressions and required review/static gates; require exact integration and installed qualification before issues close.
@@ -32234,6 +32252,16 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   an intervening destination collision preserves both copies and reports failure.
   Failed Git rollback retains quarantine/index custody. This is local development
   evidence; exact integration and installed qualification remain required.
+
+- **Integrated Windows finding:** Exact-main CI run `41322306715` reports four
+  fixture failures in `test_conversion_tracked_ignored.py`: `write_text` creates
+  native CRLF bytes, but assertions incorrectly require LF. Preserve the actual
+  input bytes in expectations; do not normalize retained source or weaken byte
+  custody. The remaining shard result is 742 passed / 139 skipped; it does not
+  establish a passing Windows gate.
+  The corrected 16-case conversion file passes locally, including explicit mixed
+  LF/CRLF copying, rollback and unchanged staged index; focused lint and formatting
+  pass. Native Windows rerun remains required.
 
 ### [ ] ADOPT-LIFT-ROLLBACK-001 — Restore original custody after failed lift-shift parity
 
@@ -32307,3 +32335,47 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] Run CLI/adoption regressions and review/static checks; require exact integrated qualification before issue closure.
 
 - **Diagnostic implementation checkpoint:** The outer onboarding handler now preserves the finite `CliFailure` budget selected by initialization. The real missing-Node-dependency case retains `ERR_MODULE_NOT_FOUND` and passes. Recovery outcome and the private report locator now precede excerpts for baseline/parity and lift-shift failures. Retention is best-effort, bounded, redacted, and cannot override the original failure; 52 combined regression controls, strict lint, formatting, layout, public export and 181 Mermaid renders pass. Authority passes while the lifecycle receipt remains stale. Exact integration and installed/native qualification remain pending.
+
+### [ ] ACCEPTED-CACHE-DISCOVERY-001 — Resolve accepted-source membership from declared targets and requested authority
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#196](https://github.com/jordanhubbard/literate-ai/issues/196), [#197](https://github.com/jordanhubbard/literate-ai/issues/197)
+- **Owner:** accepted-source discovery, Standard cache composition and execution dispatch; issues 196 and 197; PROJECT Goals 1 and 4
+- **Direction:** Accepted-only builds miss declared project-relative cache targets and globally reject historical provider bindings before considering the requested Component or current authority.
+- **Conclusion:** Reuse declared source-cache root and verified membership owners; preserve default-target behavior, immutable history, exact provenance and the uniqueness gate. Scope lookup to exact requested authority before deciding ambiguity; do not select the newest timestamp or silently retire old memberships. Complete local and remote public build/run qualification before closure.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Resolve all declared readable targets consistently for provider discovery, retained-review recovery, Standard composition and remote materialization; forbid unbound or raw directory fallback.
+  - [ ] Determine exact requested Component/target applicability before provider ambiguity, using existing authenticated current authority or a separately reviewed selector; retain refusal for genuinely ambiguous applicable membership.
+- **Evidence:**
+  - [ ] Execute actual public retained-source admission, accepted-only build and run without coding-agent calls for default and project-relative targets, successive revisions and multiple Components. Verify absent, stale, malformed and ambiguous membership controls and unchanged historical bytes.
+  - [ ] Run focused cache/discovery and installed/native/integrated checks; preserve all remaining 1.4 qualification requirements.
+
+- **Declared-target source checkpoint:** The public CLI regression first admits
+  source to a declared project-relative cache and reproduces
+  `execution.accepted_source_cache_missing` on accepted-only build. Read-only
+  declared-target resolution now serves provider discovery and retained-review
+  recovery in controller and Standard composition. Two public admission/build/run
+  scenarios pass for default and project-relative targets without a coding agent,
+  retaining fresh acceptance, corruption refusal and immutable history controls.
+  Fifteen owner controls pass, including no directory creation/publication during
+  readonly inspection, write-only policy refusal and typed malformed-store errors.
+  The fixture supplies synthetic installed-distribution metadata; execution and
+  lifecycle controls are real, but this is not non-editable installation evidence.
+- **Next unchecked action:** qualify declared-cache transport for ignored project
+  targets and repair exact requested-authority selection before global historical
+  provider ambiguity. Do not close #196/#197 from the local source checkpoint.
+
+- **Successive-revision reproduction:** A real public two-admission fixture now
+  reproduces #197 on the current integration source. The first accepted-only build
+  succeeds; after changing the retained source and completing a fresh reviewed
+  Standard rebuild, two valid immutable memberships remain with distinct retained
+  review/source-semantics and provider-tool identities. The second accepted-only
+  build refuses `execution.accepted_source_provider_ambiguous` before planning.
+  The 53-second diagnostic asserts that the first verified entry is unchanged and
+  retained; no cache deletion, membership rewrite or coding agent supplies a fix.
+  Both revisions satisfy the same Component authority, so a Component-only filter
+  cannot resolve this case. Current authenticated evidence or a reviewed explicit
+  selector is still required; choosing an entry by recency is not a repair.

@@ -801,16 +801,20 @@ def assemble_filesystem_standard_rebuild_adapter(
             )
     retained_review = None
     if accepted_source_provider_id == RETAINED_SOURCE_PROVIDER:
+        from .cache.filesystem import SourceCacheError
         from .cache.standard import (
             StandardSourceCacheRestorationError,
-            accepted_retained_source_review,
+            accepted_retained_source_review_from_caches,
         )
 
         try:
-            retained_review = accepted_retained_source_review(
-                source_cache_root, accepted_source_provider_identity
+            from .cache.lookup import readonly_standard_source_caches
+
+            retained_review = accepted_retained_source_review_from_caches(
+                readonly_standard_source_caches(project, source_cache_root),
+                accepted_source_provider_identity,
             )
-        except StandardSourceCacheRestorationError as exc:
+        except (StandardSourceCacheRestorationError, SourceCacheError) as exc:
             raise FilesystemStandardRebuildError(
                 "standard_rebuild.accepted_retained_binding_invalid", str(exc)
             ) from exc

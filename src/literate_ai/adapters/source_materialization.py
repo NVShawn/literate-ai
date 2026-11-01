@@ -16,7 +16,6 @@ from pathlib import Path
 
 from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.cache.filesystem import (
-    FileSystemSourceCache,
     SourceCacheError,
     _native_filesystem_path,
 )
@@ -68,14 +67,15 @@ def discover_accepted_source_provider_binding(
     from literate_ai.cache_directories import resolve_cache_directories
 
     root = Path(project_root).resolve(strict=True)
+    from literate_ai.adapters.cache.lookup import readonly_standard_source_caches
+    from literate_ai.projects import discover_project
+
     cache_root = resolve_cache_directories(root).build_dir / "accepted-source-cache"
-    if not cache_root.is_dir() or cache_root.is_symlink():
-        return None
     try:
-        cache = FileSystemSourceCache(
-            "dispatch-provider-discovery", cache_root, writable=False
+        caches = readonly_standard_source_caches(discover_project(root), cache_root)
+        entries = tuple(
+            entry for cache in caches for entry in cache.verified_published_entries()
         )
-        entries = cache.verified_published_entries()
     except (OSError, SourceCacheError) as exc:
         raise SourceMaterializationError(
             "execution.accepted_source_cache_invalid",

@@ -432,9 +432,11 @@ def create_execution_dispatch_request(
     accepted_source_provider_binding = None
     accepted_selection = None
     if accepted_source_only:
+        from literate_ai.adapters.cache.filesystem import SourceCacheError
+        from literate_ai.adapters.cache.lookup import readonly_standard_source_caches
         from literate_ai.adapters.cache.standard import (
             StandardSourceCacheRestorationError,
-            accepted_retained_source_review,
+            accepted_retained_source_review_from_caches,
         )
         from literate_ai.adapters.models.coding_cli import (
             CodingCliError,
@@ -454,9 +456,12 @@ def create_execution_dispatch_request(
                 )
             provider, tool_binding = accepted_source_provider_binding
             review = (
-                accepted_retained_source_review(
-                    resolve_cache_directories(project.root).build_dir
-                    / "accepted-source-cache",
+                accepted_retained_source_review_from_caches(
+                    readonly_standard_source_caches(
+                        project,
+                        resolve_cache_directories(project.root).build_dir
+                        / "accepted-source-cache",
+                    ),
                     tool_binding,
                 )
                 if provider == RETAINED_SOURCE_PROVIDER
@@ -467,7 +472,7 @@ def create_execution_dispatch_request(
             ).selection
         except (SourceMaterializationError, CodingCliError) as exc:
             raise CliFailure(exc.code, exc.message) from exc
-        except StandardSourceCacheRestorationError as exc:
+        except (StandardSourceCacheRestorationError, SourceCacheError) as exc:
             raise CliFailure(
                 "execution.accepted_source_cache_invalid", str(exc)
             ) from exc

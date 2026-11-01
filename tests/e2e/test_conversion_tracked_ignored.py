@@ -32,6 +32,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
         self.root = self.parent / "project"
         (self.root / "src/workspace").mkdir(parents=True)
         (self.root / "src/workspace/tests.py").write_text("VALUE = 7\n")
+        self.source_bytes = (self.root / "src/workspace/tests.py").read_bytes()
         (self.root / ".gitignore").write_text("workspace/\n__pycache__/\npackage.zip\n")
         (self.root / "test_main.py").write_text(
             "import unittest\nfrom src.workspace.tests import VALUE\n"
@@ -92,7 +93,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
         sandbox = self.parent / "baseline"
         copy_retained_source_tree(legacy, sandbox, scope)
         self.assertEqual(
-            (sandbox / "src/workspace/tests.py").read_bytes(), b"VALUE = 7\n"
+            (sandbox / "src/workspace/tests.py").read_bytes(), self.source_bytes
         )
         self.assertEqual(
             (legacy / "src/untracked.tmp").read_bytes(), b"untracked operator content"
@@ -101,6 +102,24 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
             (quarantine["directory"] + "/src/workspace/tests.py").encode(),
             self.git("ls-files", "-z"),
         )
+
+    def test_mixed_line_endings_survive_baseline_copy_and_rollback(self):
+        source_bytes = b"VALUE = 7\r\n# LF comment\n# CRLF comment\r\n"
+        (self.root / "src/workspace/tests.py").write_bytes(source_bytes)
+        index = self.git("ls-files", "--stage", "-z")
+        quarantine = initialization._quarantine_existing_tree(self.root)
+        legacy = self.root / quarantine["directory"]
+        scope = capture_retained_source_scope(legacy)
+        sandbox = self.parent / "baseline"
+        copy_retained_source_tree(legacy, sandbox, scope)
+        self.assertEqual(
+            (sandbox / "src/workspace/tests.py").read_bytes(), source_bytes
+        )
+        initialization._rollback_converted_tree(self.root, quarantine)
+        self.assertEqual(
+            (self.root / "src/workspace/tests.py").read_bytes(), source_bytes
+        )
+        self.assertEqual(self.git("ls-files", "--stage", "-z"), index)
 
     def test_failed_tracked_move_restores_only_completed_moves(self):
         before = self.snapshot()
@@ -198,7 +217,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
         self.assertEqual(raised.exception.code, "project.convert_rollback_failed")
         legacy = self.root / quarantine["directory"]
         self.assertEqual(
-            (legacy / "src/workspace/tests.py").read_bytes(), b"VALUE = 7\n"
+            (legacy / "src/workspace/tests.py").read_bytes(), self.source_bytes
         )
         self.assertEqual(self.git("ls-files", "--stage", "-z"), index)
 
@@ -225,7 +244,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
         self.assertEqual(len(retained), 1)
         self.assertEqual(retained[0].read_bytes(), original)
         self.assertEqual(
-            (self.root / "src/workspace/tests.py").read_bytes(), b"VALUE = 7\n"
+            (self.root / "src/workspace/tests.py").read_bytes(), self.source_bytes
         )
 
     @unittest.skipUnless(os.name != "nt" and shutil.which("make"), "POSIX Make fixture")
@@ -364,7 +383,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
             self.root
             / "components/legacy-project-wrapper/implementation/src/workspace/tests.py"
         )
-        self.assertEqual(retained.read_bytes(), b"VALUE = 7\n")
+        self.assertEqual(retained.read_bytes(), self.source_bytes)
         self.assertIn(
             str(retained.relative_to(self.root)).encode(), self.git("ls-files", "-z")
         )
@@ -446,7 +465,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
             (legacy / "unexpected").read_bytes(), b"operator recovery note"
         )
         self.assertEqual(
-            (legacy / "src/workspace/tests.py").read_bytes(), b"VALUE = 7\n"
+            (legacy / "src/workspace/tests.py").read_bytes(), self.source_bytes
         )
 
     @unittest.skipUnless(os.name != "nt" and shutil.which("make"), "POSIX Make fixture")
@@ -464,7 +483,7 @@ class TrackedIgnoredConversionTests(unittest.TestCase):
         self.assertEqual(status, 0, result)
         retained = self.root / "components/legacy-project-wrapper/implementation"
         self.assertEqual(
-            (retained / "src/workspace/tests.py").read_bytes(), b"VALUE = 7\n"
+            (retained / "src/workspace/tests.py").read_bytes(), self.source_bytes
         )
         self.assertEqual(
             (retained / "src/untracked.tmp").read_bytes(), b"untracked operator content"
