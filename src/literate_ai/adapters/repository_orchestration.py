@@ -199,7 +199,7 @@ def _read_document(
         os.close(descriptor)
 
 
-def _require_nonwriting_index(root: Path) -> None:
+def _require_nonwriting_index(root: Path, *, _run_git=None) -> None:
     """Refuse split indexes before Git can freshen their shared-index mtime.
 
     Only locate extension boundaries here; Git still validates admitted indexes.
@@ -207,7 +207,7 @@ def _require_nonwriting_index(root: Path) -> None:
     """
     # Both metadata values come from one fresh, non-index-reading invocation.
     # Keep repeated inventory observations independent; never cache this result.
-    metadata = _git(
+    metadata = (_run_git or _git)(
         root,
         "rev-parse",
         "--path-format=absolute",

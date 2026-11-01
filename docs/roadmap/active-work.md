@@ -22375,6 +22375,15 @@ GitHub CI failure without relaxing identity checks.
         ownership, independent-repository and missing/contradictory registration
         classification, and concurrent-observation refusal. Discovery grants no
         retirement authority; complete audit and journal ownership remain required.
+  - [ ] Capture complete bounded working-file bytes by streaming identity, including
+        ignored/untracked content, links and directories; retain raw index, refs,
+        reflog and all-object inventory observations without running content filters.
+        Bind repeated observations before exposing audit inputs. Activity,
+        normalization and nested-repository checks remain explicit pending gates,
+        never an empty or successful substitute for a complete audit.
+  - [ ] Retain immutable, collision-safe observation journals outside captured source
+        and Git metadata; resume identical observations without overwriting prior
+        evidence, and retain interruption/corruption/changed-input refusals.
   - [ ] Define and enforce canonical project-scoped placement across CLI and initialized/inherited guidance.
   - [ ] Audit legacy worktrees by common-directory identity, preserve or land useful state, and record each terminal disposition.
   - [ ] Make migration resumable and prevent new peer-directory worktrees.
@@ -22414,6 +22423,35 @@ GitHub CI failure without relaxing identity checks.
   HEAD/branch fields are explicitly labelled as registration observations. Full
   audit, journal, disposition, removal and installed/native release qualification
   remain open.
+
+- **Audit-input foundation (2026-11-01):** Internal capture streams regular-file
+  identities, retains ignored/untracked bytes, link targets, directory membership,
+  index, refs, reflog roots and all-object metadata, and requires matching repeated
+  observations. Object enumeration deliberately avoids `git fsck`, which refreshes
+  other worktrees' split-index timestamps. It does not claim reachability analysis
+  or retain Git object bytes. Twenty-two real-Git capture/journal checks pass with
+  11 subtests, including a peer split-index timestamp regression and canonical/peer
+  source isolation. The private observation store retains immutable content-addressed
+  inputs and chained events, atomically advances its head, resumes interrupted
+  publication, and refuses stale owners, collisions, unsafe paths and quotas without
+  evicting earlier evidence. Its location must be outside every registered checkout
+  and shared Git directory. These are internal foundations: normalized working-tree
+  equivalence, nested repository state, complete operation checks, retained objects,
+  link topology, processes and supervisor mounts remain explicit pending gates.
+  Every report and stored event denies completed-audit and retirement authority.
+  Independent reviewer `review_worktree_discovery` approved the six-file snapshot
+  (SHA-256 `bbf7057982eb3fee52ade2143cdd26286c7e1d0a195680b84998dca0a1ca0e2a`)
+  after independently passing the same 22 tests / 11 subtests. Confirmed isolation,
+  peer split-index timestamp and unsafe-path error findings were repaired before
+  approval. The related placement, discovery, orchestration and driver regression
+  group passes 27 tests / 25 subtests. The driver pin is recorded only after this
+  independent review; it does not confer release qualification.
+  Lint, formatting, layout, public-export and current driver/documentation-review
+  gates pass; all 181 Mermaid diagrams render. `litai verify` passes authority
+  but reports the configured lifecycle receipt stale, so overall release readiness
+  is not claimed.
+  Full audit, disposition, migration, removal and installed/native qualification
+  remain unchecked; no checkout was moved or removed.
 
 ### [x] PACKAGE-APT-001 — Construct and independently verify real Debian packages
 
