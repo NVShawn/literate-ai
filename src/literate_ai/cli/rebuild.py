@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import shutil
 import tempfile
+from argparse import Namespace
 from collections.abc import Callable, Mapping, Sequence
 from contextlib import nullcontext
 from pathlib import Path
@@ -13,6 +14,7 @@ from typing import Any
 from literate_ai.adapters.builders import BuildError
 from literate_ai.adapters.component_lock_application import (
     ProjectComponentLockSetError,
+    current_component_lock_identity,
     current_project_component_lock_identities,
     project_component_roots,
 )
@@ -269,6 +271,14 @@ def _aggregate_standard_rebuild_results(
         for key, value in results[0].items()
         if all(key in result and result[key] == value for result in results[1:])
     }
+    if any("source_cache_published_entry_identities" in result for result in results):
+        aggregated["source_cache_published_entry_identities"] = sorted(
+            {
+                entry
+                for result in results
+                for entry in result.get("source_cache_published_entry_identities", ())
+            }
+        )
     aggregated["specification"] = "."
     aggregated["component_lock_identities"] = lock_identities
     aggregated["test_summary"] = _sum_test_summary(
@@ -498,6 +508,53 @@ def _standard_rebuild_from_args(
                         "rebuild.standard_lock_set_changed",
                         "Component lock set changed before execution",
                     )
+            selections_by_component = None
+            if getattr(args, "source_cache_entry", None):
+                from literate_ai.adapters.cache.filesystem import SourceCacheError
+                from literate_ai.adapters.cache.lookup import (
+                    readonly_standard_source_caches,
+                    verified_source_cache_entries,
+                )
+
+                requested = parse_source_cache_entry_identities(
+                    args.source_cache_entry, force_regeneration=args.force_regeneration
+                )
+                selected_directories = cache_directories or _selected_cache_directories(
+                    project.root, args
+                )
+                cache_directories = selected_directories
+                try:
+                    selected_entries = verified_source_cache_entries(
+                        readonly_standard_source_caches(
+                            project,
+                            selected_directories.build_dir / "accepted-source-cache",
+                        ),
+                        entry_identities=requested,
+                    )
+                    root_locks = {
+                        component: current_component_lock_identity(component)
+                        for component in components
+                    }
+                    entries_by_lock = {}
+                    for entry in selected_entries:
+                        lock = (
+                            entry.derivation.component_lock_identity
+                            if hasattr(entry, "derivation")
+                            else entry.component_lock_identity
+                        )
+                        entries_by_lock.setdefault(lock, []).append(entry.identity.uri)
+                    if entries_by_lock.keys() - set(root_locks.values()):
+                        raise SourceCacheError(
+                            "source-cache.selection-not-applicable",
+                            "explicit cache entry lies outside the current "
+                            "project root lock set",
+                        )
+                    selections_by_component = {
+                        component: entries_by_lock.get(lock, [])
+                        for component, lock in root_locks.items()
+                    }
+                except SourceCacheError as exc:
+                    raise CliFailure(exc.code, exc.message) from exc
             for component, label in zip(components, labels, strict=True):
                 override = (
                     None
@@ -508,7 +565,16 @@ def _standard_rebuild_from_args(
                     _standard_rebuild_one_component(
                         project,
                         binding,
-                        args,
+                        args
+                        if selections_by_component is None
+                        else Namespace(
+                            **{
+                                **vars(args),
+                                "source_cache_entry": selections_by_component[
+                                    component
+                                ],
+                            }
+                        ),
                         component,
                         label,
                         cache_directories=cache_directories,

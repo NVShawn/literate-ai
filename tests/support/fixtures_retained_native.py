@@ -21,9 +21,11 @@ from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
 from literate_ai.projects import discover_project
 
 
-def author_retained_native_fixture(project_root: Path, output: Path) -> None:
+def author_retained_native_fixture(
+    project_root: Path, output: Path, *, component_path="samples/hello-component"
+) -> None:
     project = discover_project(project_root)
-    component = project_root / "samples/hello-component"
+    component = project_root / component_path
     prepared = FilesystemLockedGenerationApplicationAdapter().prepare(
         GenerationPreparationRequest(
             component_root=component,

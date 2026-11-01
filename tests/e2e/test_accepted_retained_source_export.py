@@ -275,6 +275,187 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
                 )
             self.assertEqual(len(cache.verified_published_entries()), 2)
 
+    def test_project_root_partitions_exact_entries_across_current_components(self):
+        from pathlib import Path
+
+        from literate_ai.adapters.cache import FileSystemSourceCache
+        from literate_ai.adapters.lifecycle import LocalStandardLifecyclePorts
+        from literate_ai.adapters.project_initialization import (
+            record_project_authority_review,
+        )
+
+        def invoke(specification, *extra):
+            output = io.StringIO()
+            with (
+                patch.dict(os.environ, self.environment),
+                patch(
+                    "literate_ai.cli.rebuild.resolve_standard_project_lifecycle_driver",
+                    lambda driver: resolve_standard_project_lifecycle_driver(
+                        driver, distribution_observer=lambda: self.distribution
+                    ),
+                ),
+                contextlib.redirect_stdout(output),
+                contextlib.redirect_stderr(output),
+            ):
+                status = main(
+                    [
+                        "--json",
+                        "rebuild",
+                        specification,
+                        "--project",
+                        str(self.project),
+                        "--allow-host-execution",
+                        "--update-receipt",
+                        *extra,
+                    ],
+                    stdout=output,
+                    stderr=output,
+                )
+            return status, json.loads(output.getvalue())
+
+        original = self.project / "samples/hello-component"
+        other = self.project / "components/other-component"
+        shutil.copytree(original, other)
+        spec = other / "component.md"
+        spec.write_text(
+            spec.read_text().replace(
+                "namespace: example", "namespace: second-example", 1
+            )
+        )
+        (other / "component.lock.json").unlink(missing_ok=True)
+        with patch.dict(os.environ, self.environment):
+            out = io.StringIO()
+            status = main(["--json", "lock", str(other)], stdout=out, stderr=out)
+        self.assertEqual(status, 0, out.getvalue())
+        # Adding a catalog member changes the resolution audit for existing roots.
+        with patch.dict(os.environ, self.environment):
+            out = io.StringIO()
+            status = main(["--json", "lock", str(original)], stdout=out, stderr=out)
+        self.assertEqual(status, 0, out.getvalue())
+
+        locked = json.loads((other / "component.lock.json").read_text())
+        identity = next(
+            node["revision"]["specification_set_identity"]
+            for node in locked["nodes"]
+            if node["revision"]["coordinate"]["name"] == "other-component"
+        )
+        oracle = json.loads(
+            (self.project / "verification/acceptance/hello-component.json").read_text()
+        )
+        # Independent JSON expectations are unchanged by the new coordinate.
+        oracle["component"] = "other-component"
+        oracle["specification_set_identity"] = (
+            f"{identity['algorithm']}:{identity['digest']}"
+        )
+        (self.project / "verification/acceptance/other-component.json").write_text(
+            json.dumps(oracle, indent=2) + "\n"
+        )
+        record_project_authority_review(self.project)
+        (self.root / "tools/claude").unlink()
+        self.environment["CODING_CLI"] = "no-generation-provider"
+        selected = []
+        cache = FileSystemSourceCache(
+            "project-roots",
+            Path(self.environment["BUILD_DIR"]) / "accepted-source-cache",
+        )
+        with patch(
+            "literate_ai.adapters.models.coding_cli.select_coding_cli",
+            side_effect=AssertionError("project continuation invoked coding agent"),
+        ):
+            for index, component in enumerate(
+                ("samples/hello-component", "components/other-component")
+            ):
+                source = self.root / f"project-retained-{index}"
+                author_retained_native_fixture(
+                    self.project, source, component_path=component
+                )
+                status, review = invoke(
+                    component,
+                    "--retained-source",
+                    str(source),
+                    "--retained-source-plan",
+                )
+                self.assertEqual(status, 0, review)
+                status, admitted = invoke(
+                    component,
+                    "--retained-source",
+                    str(source),
+                    "--authorize-retained-source",
+                    review["result"]["authorization_identity"],
+                )
+                self.assertEqual(status, 0, admitted)
+                selected.extend(
+                    admitted["result"]["source_cache_published_entry_identities"]
+                )
+            self.assertEqual(len(selected), 2)
+            before = {
+                p.relative_to(cache.root): p.read_bytes()
+                for p in cache.root.rglob("*")
+                if p.is_file()
+            }
+            arguments = [
+                value for entry in selected for value in ("--source-cache-entry", entry)
+            ]
+            status, rebuilt = invoke(".", "--from-accepted-source", *arguments)
+            self.assertEqual(status, 0, rebuilt)
+            self.assertEqual(len(rebuilt["result"]["components"]), 2)
+            self.assertEqual(rebuilt["result"]["test_summary"]["total"], 6)
+            self.assertEqual(
+                rebuilt["result"]["source_cache_published_entry_identities"], []
+            )
+            self.assertEqual(
+                before,
+                {
+                    p.relative_to(cache.root): p.read_bytes()
+                    for p in cache.root.rglob("*")
+                    if p.is_file()
+                },
+            )
+            # A selector supplements unique members of other roots; it does not
+            # force every root to receive that same foreign identity.
+            status, partial = invoke(
+                ".", "--from-accepted-source", "--source-cache-entry", selected[0]
+            )
+            self.assertEqual(status, 0, partial)
+            self.assertEqual(len(partial["result"]["components"]), 2)
+            receipt = (self.project / "verification/current.json").read_bytes()
+            with patch.object(
+                LocalStandardLifecyclePorts,
+                "build",
+                side_effect=AssertionError("invalid selector reached host build"),
+            ):
+                status, refused = invoke(
+                    ".",
+                    "--from-accepted-source",
+                    "--source-cache-entry",
+                    "sha256:" + "0" * 64,
+                )
+            self.assertNotEqual(status, 0, refused)
+            self.assertEqual(
+                (self.project / "verification/current.json").read_bytes(), receipt
+            )
+            # A previously valid admission outside the currently selected lock
+            # set is foreign, even though its immutable cache membership remains.
+            lock = other / "component.lock.json"
+            retained_lock = self.root / "other-retained.lock"
+            lock.rename(retained_lock)
+            try:
+                with patch.object(
+                    LocalStandardLifecyclePorts,
+                    "build",
+                    side_effect=AssertionError("foreign selector reached host build"),
+                ):
+                    status, refused = invoke(".", "--from-accepted-source", *arguments)
+                self.assertNotEqual(status, 0, refused)
+                self.assertEqual(
+                    refused["error"]["code"], "source-cache.selection-not-applicable"
+                )
+                self.assertEqual(
+                    (self.project / "verification/current.json").read_bytes(), receipt
+                )
+            finally:
+                retained_lock.rename(lock)
+
     def test_admit_then_build_from_accepted_retained_source_without_agent(self):
         self.exercise_accepted_export(committed_target=False)
 
