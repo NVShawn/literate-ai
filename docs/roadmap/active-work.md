@@ -32309,3 +32309,35 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] Run CLI/adoption regressions and review/static checks; require exact integrated qualification before issue closure.
 
 - **Diagnostic implementation checkpoint:** The outer onboarding handler now preserves the finite `CliFailure` budget selected by initialization. The real missing-Node-dependency case retains `ERR_MODULE_NOT_FOUND` and passes. Recovery outcome and the private report locator now precede excerpts for baseline/parity and lift-shift failures. Retention is best-effort, bounded, redacted, and cannot override the original failure; 52 combined regression controls, strict lint, formatting, layout, public export and 181 Mermaid renders pass. Authority passes while the lifecycle receipt remains stale. Exact integration and installed/native qualification remain pending.
+
+### [ ] ACCEPTED-CACHE-DISCOVERY-001 — Resolve accepted-source membership from declared targets and requested authority
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#196](https://github.com/jordanhubbard/literate-ai/issues/196), [#197](https://github.com/jordanhubbard/literate-ai/issues/197)
+- **Owner:** accepted-source discovery, Standard cache composition and execution dispatch; issues 196 and 197; PROJECT Goals 1 and 4
+- **Direction:** Accepted-only builds miss declared project-relative cache targets and globally reject historical provider bindings before considering the requested Component or current authority.
+- **Conclusion:** Reuse declared source-cache root and verified membership owners; preserve default-target behavior, immutable history, exact provenance and the uniqueness gate. Scope lookup to exact requested authority before deciding ambiguity; do not select the newest timestamp or silently retire old memberships. Complete local and remote public build/run qualification before closure.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Resolve all declared readable targets consistently for provider discovery, retained-review recovery, Standard composition and remote materialization; forbid unbound or raw directory fallback.
+  - [ ] Determine exact requested Component/target applicability before provider ambiguity, using existing authenticated current authority or a separately reviewed selector; retain refusal for genuinely ambiguous applicable membership.
+- **Evidence:**
+  - [ ] Execute actual public retained-source admission, accepted-only build and run without coding-agent calls for default and project-relative targets, successive revisions and multiple Components. Verify absent, stale, malformed and ambiguous membership controls and unchanged historical bytes.
+  - [ ] Run focused cache/discovery and installed/native/integrated checks; preserve all remaining 1.4 qualification requirements.
+
+- **Declared-target source checkpoint:** The public CLI regression first admits
+  source to a declared project-relative cache and reproduces
+  `execution.accepted_source_cache_missing` on accepted-only build. Read-only
+  declared-target resolution now serves provider discovery and retained-review
+  recovery in controller and Standard composition. Two public admission/build/run
+  scenarios pass for default and project-relative targets without a coding agent,
+  retaining fresh acceptance, corruption refusal and immutable history controls.
+  Fifteen owner controls pass, including no directory creation/publication during
+  readonly inspection, write-only policy refusal and typed malformed-store errors.
+  The fixture supplies synthetic installed-distribution metadata; execution and
+  lifecycle controls are real, but this is not non-editable installation evidence.
+- **Next unchecked action:** qualify declared-cache transport for ignored project
+  targets and repair exact requested-authority selection before global historical
+  provider ambiguity. Do not close #196/#197 from the local source checkpoint.

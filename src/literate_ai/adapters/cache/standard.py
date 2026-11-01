@@ -72,11 +72,34 @@ def accepted_retained_source_review(
     """Recover a retained review from verified, portable Standard membership."""
 
     try:
-        cache = FileSystemSourceCache(
-            "accepted-retained-review", cache_root, writable=False
+        return accepted_retained_source_review_from_caches(
+            (
+                FileSystemSourceCache(
+                    "accepted-retained-review", cache_root, writable=False
+                ),
+            ),
+            tool_binding,
         )
+    except (OSError, SourceCacheError, ValueError) as exc:
+        raise StandardSourceCacheRestorationError(
+            "accepted retained lookup requires verified Standard review membership"
+        ) from exc
+
+
+def accepted_retained_source_review_from_caches(
+    caches: tuple[FileSystemSourceCache, ...], tool_binding: ContentIdentity
+) -> ContentIdentity:
+    """Require one exact review across verified declared read-target memberships."""
+    try:
+        if not isinstance(caches, tuple) or any(
+            not isinstance(cache, FileSystemSourceCache) for cache in caches
+        ):
+            raise ValueError("retained lookup requires typed filesystem stores")
         reviews = set()
-        for entry in cache.verified_published_entries():
+        entries = (
+            entry for cache in caches for entry in cache.verified_published_entries()
+        )
+        for entry in entries:
             key = (
                 entry.derivation.cache_key
                 if isinstance(entry, AcceptedSourceCacheEntry)

@@ -426,6 +426,59 @@ class SourceCacheResolverTests(unittest.TestCase):
             )
         self.assertEqual(captured.exception.code, "source-cache.authority-overlap")
 
+    def test_read_only_inspection_of_write_target_never_creates_a_store(self):
+        destination = self.root / "uncreated-cache"
+        target = SourceCacheTarget("local", SourceCacheRootKind.OPERATOR_BOUND, "local")
+        configuration = _configuration(SourceCacheMode.READ_WRITE, target)
+        resolver = SourceCacheResolver.from_configuration(
+            configuration,
+            operator_roots={"local": destination},
+            read_only=True,
+        )
+        self.assertIs(resolver.configuration, configuration)
+        self.assertFalse(resolver.stores["local"].writable)
+        self.assertEqual(resolver.stores["local"].verified_published_entries(), ())
+        self.assertEqual(resolver.resolve(self.key), ())
+        with self.assertRaises(SourceCacheError):
+            resolver.publish(self.entry, caller_cas=self.caller_cas)
+        self.assertFalse(destination.exists())
+        with self.assertRaises(TypeError):
+            SourceCacheResolver.from_configuration(
+                configuration,
+                operator_roots={"local": destination},
+                read_only=1,
+            )
+
+    def test_standard_write_only_lookup_stays_unreadable_without_default_fallback(self):
+        from literate_ai.adapters.cache.lookup import readonly_standard_source_caches
+
+        target = SourceCacheTarget(
+            "committed", SourceCacheRootKind.PROJECT_RELATIVE, "cache"
+        )
+        definition = ProjectDefinition(
+            project_id="lookup",
+            version="1.0.0",
+            profile="canonical",
+            agent_skill="SKILL.md",
+            component_roots=("components",),
+            flavor_roots=("flavors",),
+            skill_roots=("skills",),
+            workflow_roots=("workflows",),
+            routing_roots=(),
+            documentation_roots=("docs",),
+            source_intelligence=_source_intelligence_policy(),
+            source_cache=_configuration(SourceCacheMode.WRITE_ONLY, target),
+        )
+        fallback = self.root / "uncreated-default"
+        self.assertEqual(
+            readonly_standard_source_caches(
+                LoadedProject(self.root, definition), fallback
+            ),
+            (),
+        )
+        self.assertFalse(fallback.exists())
+        self.assertFalse((self.root / "cache").exists())
+
 
 class SourceCacheMaterializerTests(unittest.TestCase):
     def setUp(self) -> None:

@@ -24,8 +24,9 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
     setUp = fixture.ModelFreeRebuildTests.setUp
     rebuild = fixture.ModelFreeRebuildTests.rebuild
 
-    def build(self):
+    def build(self, *, command="build"):
         output = io.StringIO()
+        errors = io.StringIO()
         with (
             patch.dict(os.environ, self.environment),
             patch(
@@ -35,21 +36,41 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
                 ),
             ),
             contextlib.redirect_stdout(output),
-            contextlib.redirect_stderr(output),
+            contextlib.redirect_stderr(errors),
         ):
-            status = main(
-                [
-                    "--json",
-                    "build",
-                    "samples/hello-component",
-                    "--project",
-                    str(self.project),
-                    "--from-accepted-source",
-                ]
-            )
-        return status, json.loads(output.getvalue())
+            arguments = [
+                "--json",
+                command,
+                "samples/hello-component",
+                "--project",
+                str(self.project),
+            ]
+            if command == "build":
+                arguments.append("--from-accepted-source")
+            else:
+                # This retained executable's explicit CLI takes one JSON argument
+                # vector. It does not declare an argument-free application mode.
+                payload = {"name": "Ada"}
+                specification = self.project / "samples/hello-component/component.md"
+                if "| `messages` |" in specification.read_text():
+                    payload["messages"] = ["hello", "world"]
+                arguments.insert(3, json.dumps([payload]))
+            status = main(arguments, stdout=output, stderr=errors)
+        try:
+            return status, json.loads(output.getvalue() or errors.getvalue())
+        except json.JSONDecodeError as exc:
+            raise AssertionError(
+                f"{command} returned {status}: "
+                f"{(output.getvalue() or errors.getvalue())[:1024]!r}"
+            ) from exc
 
     def test_admit_then_build_from_accepted_retained_source_without_agent(self):
+        self.exercise_accepted_export(committed_target=False)
+
+    def test_project_relative_target_admits_then_builds_without_agent(self):
+        self.exercise_accepted_export(committed_target=True)
+
+    def exercise_accepted_export(self, *, committed_target):
         import py_compile
         from pathlib import Path
 
@@ -59,6 +80,43 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
         from literate_ai.adapters.lifecycle.standard_local import (
             LocalStandardLifecycleError,
         )
+
+        cache_root = Path(self.environment["BUILD_DIR"]) / "accepted-source-cache"
+        if committed_target:
+            from literate_ai.contracts import (
+                SourceCacheConfiguration,
+                SourceCacheMode,
+                SourceCacheRootKind,
+                SourceCacheTarget,
+            )
+            from literate_ai.projects import ProjectConfigurationStore
+
+            store = ProjectConfigurationStore(self.project)
+            snapshot = store.read()
+            store.update(
+                snapshot,
+                replace(
+                    snapshot.definition,
+                    source_cache=SourceCacheConfiguration(
+                        mode=SourceCacheMode.READ_WRITE,
+                        targets=(
+                            SourceCacheTarget(
+                                target_id="project-committed",
+                                root_kind=SourceCacheRootKind.PROJECT_RELATIVE,
+                                root_reference="generated/committed-source-cache",
+                            ),
+                        ),
+                        write_target_id="project-committed",
+                        require_unique=True,
+                    ),
+                ),
+            )
+            from literate_ai.adapters.project_initialization import (
+                record_project_authority_review,
+            )
+
+            record_project_authority_review(self.project)
+            cache_root = self.project / "generated/committed-source-cache"
 
         acceptances = []
         original_accept = LocalStandardLifecyclePorts.accept
@@ -94,6 +152,11 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
             self.assertTrue(admitted["result"]["receipt_committed"])
             prior_acceptance_count = len(acceptances)
             status, built = self.build()
+            self.assertEqual(status, 0, built)
+            run_status, ran = self.build(command="run")
+            self.assertEqual(run_status, 0, ran)
+            self.assertEqual(ran["result"]["exit_status"], 0, ran)
+            self.assertIn("greeting", json.loads(ran["result"]["stdout"]))
         self.assertEqual(status, 0, built)
         self.assertEqual(len(acceptances), prior_acceptance_count + 1)
         self.assertNotEqual(acceptances[-1], acceptances[-2])
@@ -131,9 +194,7 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
         )
         self.assertEqual(Path(built["result"]["artifact"]).read_bytes(), prior_artifact)
 
-        cache = FileSystemSourceCache(
-            "upgrade", Path(self.environment["BUILD_DIR"]) / "accepted-source-cache"
-        )
+        cache = FileSystemSourceCache("upgrade", cache_root)
         admitted_entries = cache.verified_published_entries()
         self.assertEqual(len(admitted_entries), 1)
         entry = admitted_entries[0]

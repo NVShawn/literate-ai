@@ -1318,7 +1318,10 @@ class SourceCacheResolver:
         *,
         project: LoadedProject | None = None,
         operator_roots: Mapping[str, Path] | None = None,
+        read_only: bool = False,
     ) -> SourceCacheResolver:
+        if type(read_only) is not bool:
+            raise TypeError("source-cache inspection mode must be boolean")
         if configuration.mode is SourceCacheMode.OFF:
             return cls(configuration, {})
         bindings = {} if operator_roots is None else operator_roots
@@ -1364,7 +1367,8 @@ class SourceCacheResolver:
                 root,
                 protected_paths=protected,
                 writable=(
-                    configuration.mode.can_write
+                    not read_only
+                    and configuration.mode.can_write
                     and target.target_id == configuration.write_target_id
                 ),
             )

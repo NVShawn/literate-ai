@@ -168,6 +168,9 @@
       },
       {
         "id": "ADOPT-FAILURE-DIAGNOSTICS-001"
+      },
+      {
+        "id": "ACCEPTED-CACHE-DISCOVERY-001"
       }
     ]
   }
