@@ -8,6 +8,9 @@ includes a two-hour running order.
 - [Coding CLI release plugins](user/coding-cli-plugins.md)
 - [1.1 SDLC audit and graded concept assessment](roadmap/1.1-sdlc-audit.md)
 
+Large retained native trees can opt into
+[bounded catalog and input-closure scale limits](architecture/large-retained-catalogs.md).
+
 ## User documentation
 
 - [Skill catalog: what Literate AI has skills for](user/skills.md)

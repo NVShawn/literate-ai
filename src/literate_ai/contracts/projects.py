@@ -1095,6 +1095,75 @@ class InstitutionalChannels:
 
 
 @dataclass(frozen=True, slots=True)
+class ProjectScaleLimits:
+    """Explicit finite resource ceilings for an unusually large project."""
+
+    pinned_input_files: int
+    pinned_input_total_bytes: int
+    catalog_files: int
+    catalog_entries: int
+    catalog_total_bytes: int
+
+    def __post_init__(self) -> None:
+        caps = {
+            "pinned_input_files": 1_000_000,
+            "pinned_input_total_bytes": 4 * 1024**3,
+            "catalog_files": 1_000_000,
+            "catalog_entries": 4_000_000,
+            "catalog_total_bytes": 4 * 1024**3,
+        }
+        for name, maximum in caps.items():
+            value = getattr(self, name)
+            minimum = 2 * 1024**2 if name.endswith("bytes") else 1
+            if type(value) is not int or not minimum <= value <= maximum:
+                fail(
+                    f"ProjectScaleLimits.{name}",
+                    f"must be an integer in {minimum}..{maximum}",
+                )
+        if self.catalog_entries < self.catalog_files:
+            fail("ProjectScaleLimits.catalog_entries", "must cover catalog_files")
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "schema": "literate-ai/project-scale-limits@1",
+            "pinned_input_files": self.pinned_input_files,
+            "pinned_input_total_bytes": self.pinned_input_total_bytes,
+            "catalog_files": self.catalog_files,
+            "catalog_entries": self.catalog_entries,
+            "catalog_total_bytes": self.catalog_total_bytes,
+        }
+
+    @classmethod
+    def from_dict(cls, value: Any) -> ProjectScaleLimits:
+        data = contract_fields(
+            value,
+            path="ProjectScaleLimits",
+            schema_uri="literate-ai/project-scale-limits@1",
+            required=frozenset(
+                {
+                    "pinned_input_files",
+                    "pinned_input_total_bytes",
+                    "catalog_files",
+                    "catalog_entries",
+                    "catalog_total_bytes",
+                }
+            ),
+        )
+        return cls(
+            **{
+                key: data[key]
+                for key in (
+                    "pinned_input_files",
+                    "pinned_input_total_bytes",
+                    "catalog_files",
+                    "catalog_entries",
+                    "catalog_total_bytes",
+                )
+            }
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class ProjectDefinition:
     """One explicit project root and its portable catalog boundaries."""
 
@@ -1124,10 +1193,15 @@ class ProjectDefinition:
     repository_policy: RepositoryPolicy = field(default_factory=RepositoryPolicy)
     html_render_requests: tuple[HtmlRenderRequest, ...] = ()
     repository_orchestration: RepositoryOrchestration | None = None
+    scale_limits: ProjectScaleLimits | None = None
 
     SCHEMA: ClassVar[str] = PROJECT_DEFINITION_SCHEMA
 
     def __post_init__(self) -> None:
+        if self.scale_limits is not None and not isinstance(
+            self.scale_limits, ProjectScaleLimits
+        ):
+            fail("ProjectDefinition.scale_limits", "must be ProjectScaleLimits")
         string_value(self.project_id, "ProjectDefinition.project_id")
         semantic_version(self.version, "ProjectDefinition.version")
         string_value(self.profile, "ProjectDefinition.profile")
@@ -1411,6 +1485,8 @@ class ProjectDefinition:
             ]
         if self.repository_orchestration is not None:
             value["repository_orchestration"] = self.repository_orchestration.to_dict()
+        if self.scale_limits is not None:
+            value["scale_limits"] = self.scale_limits.to_dict()
         return value
 
     @classmethod
@@ -1426,6 +1502,8 @@ class ProjectDefinition:
                     f"{path}.agent_skill",
                     "legacy project definitions require root SKILL.md",
                 )
+            if "scale_limits" in value:
+                fail(path, "legacy project definitions do not admit scale limits")
             if "repository_orchestration" in value:
                 fail(
                     path,
@@ -1506,10 +1584,16 @@ class ProjectDefinition:
                     "repository_policy",
                     "html_render_requests",
                     "repository_orchestration",
+                    "scale_limits",
                 }
             ),
         )
         return cls(
+            scale_limits=(
+                ProjectScaleLimits.from_dict(data["scale_limits"])
+                if "scale_limits" in data
+                else None
+            ),
             project_id=string_value(data["project_id"], f"{path}.project_id"),
             version=semantic_version(data["version"], f"{path}.version"),
             profile=string_value(data["profile"], f"{path}.profile"),
@@ -1676,6 +1760,7 @@ __all__ = [
     "PROJECT_TYPES",
     "PROJECT_TYPES_WITH_STARTER",
     "ProjectDefinition",
+    "ProjectScaleLimits",
     "ProjectLifecycleDriver",
     "ProjectLifecycleDriverBinding",
     "ProjectSourceIntelligencePolicy",

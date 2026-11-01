@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Add explicit project-specific catalog and pinned-input scale ceilings for large
+  retained trees, preserving ordinary defaults and independent per-file bounds.
+  Bind limits to project authority through loading, lock planning and validation;
+  keep pinned byte accounting linear in admitted files.
+
 - Add opt-in mechanical verification of the remote default-branch README against
   published GitHub release titles, tags, asset URLs, sizes and SHA-256 digests.
   Preserve stable release entries during prerelease verification and reject stale

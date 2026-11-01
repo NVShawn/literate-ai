@@ -32011,3 +32011,49 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   README's nine assets; current remote main correctly refuses the missing new
   markers until this change lands. Required review/main CI and final 1.4 remote
   readback are still pending; the goal remains open.
+
+### [ ] NATIVE-PROMOTION-FLAVORS-001 — Preserve reviewed build-system defaults in native child promotion
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#218](https://github.com/jordanhubbard/literate-ai/issues/218)
+
+- **Priority:** P1
+- **Owner:** source-to-specification promotion and qualification documentation; GitHub issue 218
+- **Direction:** Issue 218 reports Cargo promotion inheriting template Bazel and repeated qualification selectors failing as no-ops.
+- **Conclusion:** Seed build-system defaults from the admitted parent selection or reviewed source build axis; explicit reviewed build selection replaces incidental template Bazel. Keep axis ambiguity and strict selector no-op refusals. Qualification consumes accepted defaults without replaying effective selectors.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Resolve admitted parent build-system selection and explicit reviewed build axes without inheriting unrelated template defaults.
+  - [ ] Clarify that qualification omits selectors folded into accepted project defaults; genuine selector changes remain ordered and lock-bound.
+- **Evidence:**
+  - [ ] Exercise signed native-child promotion for Cargo and other build axes with real lock resolution, defaults-only qualification lock admission and conflicting-axis refusal.
+  - [ ] Pass affected source promotion and qualification regressions, required review/main CI, and retain honest installed/native qualification boundaries.
+
+### [ ] RETAINED-SCALE-LIMITS-001 — Admit explicitly bounded large retained catalogs and input closures
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#234](https://github.com/jordanhubbard/literate-ai/issues/234)
+
+- **Priority:** P1
+- **Owner:** project authority contracts, catalog traversal, pinned-input custody; GitHub issue 234
+- **Direction:** Implement Daemonarchy issue 234 for complete src and ports trees without weakening default resource bounds.
+- **Conclusion:** Add an opt-in versioned scale_limits declaration to the current v2 project contract. Bind exact bounded file, entry and aggregate-byte ceilings to project identity and use them consistently during catalog loading, lock planning, input capture and validation. Keep per-file, path, symlink and default bounds unchanged. Synthetic measurements do not replace real retained FreeBSD evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Define strict integer limits and finite hard caps, preserve absent-policy serialization, and document the policy and compatibility trade-off.
+  - [x] Propagate project limits through catalog traversal, revalidation, lock-input capture and project validation with observed/allowed diagnostics.
+- **Evidence:**
+  - [ ] Prove unchanged default refusals, opt-in loading beyond legacy ceilings, exact-bound refusal and policy drift; run affected schema/lock/validation regressions.
+  - [ ] Measure real retained FreeBSD catalogs: load time, memory, lock resolution, litai verify and project validation before declaring issue 234 complete.
+
+- **Development evidence:** The repaired 32-case lock/project/schema regression
+  slice passes; lint, format, repository layout and 181 Mermaid render checks pass.
+  Six focused filesystem/schema controls pass, including
+  default refusal at 1,025 pinned files, a declared 1,051-Component snapshot and
+  actual lock planning, opt-in traversal beyond 4,096 authority files, exact
+  entry/file/byte boundaries, unchanged absent-policy wire output, duplicate/fork
+  byte accounting and changed-policy refusal. These are controller fixtures, not
+  native FreeBSD qualification. Real retained-tree load/memory/lock/validation/
+  verify measurements remain required before this issue or release goal closes.

@@ -76,6 +76,7 @@ from literate_ai.contracts.identity import (
     canonical_identity,
     canonical_json_bytes,
 )
+from literate_ai.contracts.projects import ProjectScaleLimits
 from literate_ai.contracts.provider_resolution import (
     ProviderResolution,
     ProviderResolutionError,
@@ -334,8 +335,24 @@ class ComponentCatalogSnapshot:
         flavor_by_identity = {
             item.revision.identity.uri: item for item in self._flavors
         }
-        closure = PinnedInputClosure()
+        closure = PinnedInputClosure.for_project(self.project)
         try:
+            if (
+                self.project is not None
+                and self.project.definition.scale_limits is not None
+            ):
+                observed = ProjectConfigurationStore(self.project.root).read()
+                if observed.definition != self.project.definition:
+                    raise ComponentLockPlanningError(
+                        "component_lock.project_changed",
+                        "project scale authority changed before locked input capture",
+                    )
+                closure.pin(
+                    observed.root / PROJECT_FILENAME,
+                    boundary=observed.root,
+                    label="project-scale-authority",
+                    expected_content=observed.content,
+                )
             closure.pin(
                 lock_path or self.root / "component.lock.json",
                 boundary=lock_boundary or self.boundary,
@@ -446,13 +463,17 @@ class _CatalogBudget:
     entries: int = 0
     files: int = 0
     total_bytes: int = 0
+    limits: ProjectScaleLimits | None = None
 
     def admit_entry(self) -> None:
         self.entries += 1
-        if self.entries > _MAXIMUM_CATALOG_ENTRIES:
+        maximum = (
+            self.limits.catalog_entries if self.limits else _MAXIMUM_CATALOG_ENTRIES
+        )
+        if self.entries > maximum:
             raise ComponentLockPlanningError(
                 "component_lock.catalog_limit",
-                "Component or Flavor catalog contains too many filesystem entries",
+                f"catalog entries: observed {self.entries}, allowed {maximum}",
             )
 
     def admit_authority_file(self, metadata: os.stat_result) -> None:
@@ -463,15 +484,21 @@ class _CatalogBudget:
                 "component_lock.catalog_limit",
                 "Component or Flavor catalog authority file exceeds the byte limit",
             )
-        if self.files > _MAXIMUM_CATALOG_FILES:
+        maximum = self.limits.catalog_files if self.limits else _MAXIMUM_CATALOG_FILES
+        if self.files > maximum:
             raise ComponentLockPlanningError(
                 "component_lock.catalog_limit",
-                "Component or Flavor catalog contains too many authority files",
+                f"catalog authority files: observed {self.files}, allowed {maximum}",
             )
-        if self.total_bytes > _MAXIMUM_CATALOG_TOTAL_BYTES:
+        maximum_bytes = (
+            self.limits.catalog_total_bytes
+            if self.limits
+            else _MAXIMUM_CATALOG_TOTAL_BYTES
+        )
+        if self.total_bytes > maximum_bytes:
             raise ComponentLockPlanningError(
                 "component_lock.catalog_limit",
-                "Component or Flavor catalog exceeds the total byte limit",
+                f"catalog bytes: observed {self.total_bytes}, allowed {maximum_bytes}",
             )
 
 
@@ -730,7 +757,10 @@ class FilesystemComponentLockPlanner:
             code="component_lock.component_unsafe",
         )
         authoring_roots = _component_authoring_roots(root, project)
-        authoring_paths = _component_markdown_paths(authoring_roots, boundary=boundary)
+        scale_limits = project.definition.scale_limits if project is not None else None
+        authoring_paths = _component_markdown_paths(
+            authoring_roots, boundary=boundary, scale_limits=scale_limits
+        )
         loaded_authorings = tuple(
             _load_authoring_entry(path, project_root=boundary)
             for path in authoring_paths
@@ -758,7 +788,9 @@ class FilesystemComponentLockPlanner:
             authoring_paths,
             configured_flavor_roots,
             loaded_authorings,
-            _load_flavors(configured_flavor_roots, boundary=boundary),
+            _load_flavors(
+                configured_flavor_roots, boundary=boundary, scale_limits=scale_limits
+            ),
         )
         snapshot.require_unchanged()
         return snapshot
@@ -772,9 +804,12 @@ def _component_authoring_roots(root: Path, project: Any) -> tuple[Path, ...]:
 
 
 def _component_markdown_paths(
-    roots: tuple[Path, ...], *, boundary: Path
+    roots: tuple[Path, ...],
+    *,
+    boundary: Path,
+    scale_limits: ProjectScaleLimits | None = None,
 ) -> tuple[Path, ...]:
-    budget = _CatalogBudget()
+    budget = _CatalogBudget(limits=scale_limits)
     paths: set[Path] = set()
     for configured_root in roots:
         _require_lexical_directory_safe(
@@ -1037,9 +1072,14 @@ def _provider_satisfies(provider: ComponentAuthoring, requirement: Any) -> bool:
 
 
 def _load_flavors(
-    roots: tuple[Path, ...], *, boundary: Path
+    roots: tuple[Path, ...],
+    *,
+    boundary: Path,
+    scale_limits: ProjectScaleLimits | None = None,
 ) -> tuple[_LoadedFlavor, ...]:
-    paths = _flavor_definition_paths(roots, boundary=boundary)
+    paths = _flavor_definition_paths(
+        roots, boundary=boundary, scale_limits=scale_limits
+    )
     loaded: list[_LoadedFlavor] = []
     for path in paths:
         content = _bounded_bytes(path, code="component_lock.flavor_unavailable")
@@ -1161,9 +1201,12 @@ def _load_flavors(
 
 
 def _flavor_definition_paths(
-    roots: tuple[Path, ...], *, boundary: Path
+    roots: tuple[Path, ...],
+    *,
+    boundary: Path,
+    scale_limits: ProjectScaleLimits | None = None,
 ) -> tuple[Path, ...]:
-    budget = _CatalogBudget()
+    budget = _CatalogBudget(limits=scale_limits)
     paths: set[Path] = set()
     for configured in roots:
         _require_lexical_directory_safe(
@@ -1935,7 +1978,8 @@ def _require_inputs_unchanged(
 ) -> None:
     """Pin every consumed file and recheck catalog membership before returning."""
 
-    closure = PinnedInputClosure()
+    closure = PinnedInputClosure.for_project(project)
+    scale_limits = project.definition.scale_limits if project is not None else None
     try:
         if project is not None:
             try:
@@ -2028,16 +2072,18 @@ def _require_inputs_unchanged(
                     expected_identity=reference.identity,
                 )
         if (
-            _component_markdown_paths(authoring_roots, boundary=boundary)
+            _component_markdown_paths(
+                authoring_roots, boundary=boundary, scale_limits=scale_limits
+            )
             != authoring_paths
         ):
             raise ComponentLockPlanningError(
                 "component_lock.catalog_changed",
                 "Component catalog membership changed during lock planning",
             )
-        if _flavor_definition_paths(flavor_roots, boundary=boundary) != tuple(
-            item.path for item in flavors
-        ):
+        if _flavor_definition_paths(
+            flavor_roots, boundary=boundary, scale_limits=scale_limits
+        ) != tuple(item.path for item in flavors):
             raise ComponentLockPlanningError(
                 "component_lock.catalog_changed",
                 "Flavor catalog membership changed during lock planning",

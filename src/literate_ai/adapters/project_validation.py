@@ -419,7 +419,7 @@ def _inverse_skill_catalog(project: Any) -> tuple[dict[str, object], ...]:
 def _catalog_file_identities(
     project: Any, catalog: str
 ) -> tuple[dict[str, object], ...]:
-    closure = PinnedInputClosure()
+    closure = PinnedInputClosure.for_project(project)
     report: list[dict[str, object]] = []
     authorities: dict[tuple[Path, Path], str] = {}
     try:
@@ -488,7 +488,7 @@ def _validate_component_authoring(
     *,
     admitted_cache: dict[str, frozenset[Path]] | None = None,
 ) -> dict[str, object]:
-    closure = PinnedInputClosure()
+    closure = PinnedInputClosure.for_project(project)
     try:
         content = closure.pin(
             manifest,

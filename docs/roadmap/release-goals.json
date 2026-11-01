@@ -138,6 +138,12 @@
       },
       {
         "id": "RELEASE-README-VERIFY-001"
+      },
+      {
+        "id": "NATIVE-PROMOTION-FLAVORS-001"
+      },
+      {
+        "id": "RETAINED-SCALE-LIMITS-001"
       }
     ]
   }

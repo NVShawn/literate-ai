@@ -1,5 +1,9 @@
 # Configuration and CLI reference
 
+Large retained-tree projects may explicitly declare versioned
+[`scale_limits`](../architecture/large-retained-catalogs.md) in the current project
+manifest. Ordinary projects retain the default catalog and pinned-input limits.
+
 ## Current CLI scope
 
 The installed command is `litai`. There is no `literate` compatibility executable.
