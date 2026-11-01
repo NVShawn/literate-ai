@@ -29090,7 +29090,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 ### [ ] NATIVE-CHILD-UPDATE-001 — Support reviewed updates to registered native child projects
 
 - **GitHub issue:** [#48](https://github.com/jordanhubbard/literate-ai/issues/48)
-- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+- **Current release target:** 1.4.0 (directing-user inclusion of all outstanding issues; prior 1.3 acceptance was incomplete)
 
 - **Priority:** P1
 - **Owner:** framework authority and qualification named by the linked issue
@@ -29102,7 +29102,7 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
 
-- **Installed journey result and next action:** Both non-editable installations import from site-packages. The public CLI completes reviewed registered rebind, stale-registry refusal without mutation, and reviewed unqualified-child replacement; parent validation passes after each. The retained recovery matches all 313 original files, 244 directories and 2,324,779 bytes against the pre-write plan. Final generation writes no source because the zero-argument public API cannot provide three distinct valid argument vectors. Independent acceptance and remaining refusal/rollback controls are incomplete; no candidate receipt is promoted. See `verification/registered-child-installed-partial.json` and blocking [#132](https://github.com/jordanhubbard/literate-ai/issues/132). Review [proposed ADR 0051](../decisions/0051-zero-argument-generated-test-coverage.md) before changing the coverage contract; retain the unchanged independent oracle and existing zero-argument API.
+- **Installed journey result and next action:** Both non-editable installations import from site-packages. The public CLI completes reviewed registered rebind, stale-registry refusal without mutation, and reviewed unqualified-child replacement; parent validation passes after each. The retained recovery matches all 313 original files, 244 directories and 2,324,779 bytes against the pre-write plan. Final generation writes no source because the zero-argument public API cannot provide three distinct valid argument vectors. Independent acceptance and remaining refusal/rollback controls are incomplete; no candidate receipt is promoted. See `verification/registered-child-installed-partial.json` and blocking [#132](https://github.com/jordanhubbard/literate-ai/issues/132). The directing user accepted [ADR 0051](../decisions/0051-zero-argument-generated-test-coverage.md) on 2026-10-31; its implementation is under qualification; retain the unchanged independent oracle and existing zero-argument API.
 
 ### [ ] PYTHON-LIBRARY-001 — Support verified Python wheel dependencies for library Components
 
@@ -31921,7 +31921,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Conclusion:** Implement a versioned, authority-bound singleton coverage mode only for complete public arity-zero signatures. Preserve frozen v1 and ordinary diversity requirements, independent expected-result provenance, exact identity/currentness and all negative controls. Unknown and nonzero finite domains receive no automatic exemption.
 - **Depends on:** none
 - **Completion prerequisites:** none
-- **Development evidence:** 15 focused coverage tests pass, including real Literate Markdown loading of the explicit JSON supporting artifact, default-v1 refusal rules, prompt privacy, stale interface bindings, and aggregate project-minimum incompatibility. Existing coding-CLI tests (22), source/cache/transfer regressions (28), qualification-capture tests (4), schema tests (2), and remote source materialization (1) pass. Standard smoke selects 75: 74 pass and the existing macOS persistent-service readiness test is explicitly skipped. These are development checks, not installed-child or release acceptance. Next: complete actual singleton execution/evidence and the fresh installed registered-child journey before closure.
+- **Development evidence:** 16 focused coverage tests pass, including real Literate Markdown loading of the explicit JSON supporting artifact, default-v1 refusal rules, prompt privacy, stale interface bindings, and aggregate project-minimum incompatibility. Existing coding-CLI tests (22), source/cache/transfer regressions (28), qualification-capture tests (4), schema tests (2), and remote source materialization (1) pass. Standard smoke selects 75: 74 pass and the existing macOS persistent-service readiness test is explicitly skipped. These are development checks, not installed-child or release acceptance. Next: complete actual singleton execution/evidence and the fresh installed registered-child journey before closure.
 - **Implementation:**
   - [ ] Establish authoritative complete zero-argument public signatures and project a versioned mode through recipe, generated manifest validation, cache and lifecycle identities.
   - [ ] Reconcile pinned generation guidance with independently selected overlapping inputs while keeping verifier-owned expected answers private.

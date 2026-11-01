@@ -778,7 +778,14 @@ class GenerationRecipe:
             raise ValueError("generated_tests.mixed_public_signatures_unsupported")
         if (
             self.library_import_surface is not None
-            and len(self.library_import_surface.capabilities) != 1
+            and len(
+                {
+                    (item.module, symbol)
+                    for item in self.library_import_surface.capabilities
+                    for symbol in item.symbols
+                }
+            )
+            != 1
         ):
             raise ValueError("generated_tests.mixed_public_signatures_unsupported")
         document = documents[0]

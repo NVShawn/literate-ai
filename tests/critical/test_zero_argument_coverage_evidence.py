@@ -13,7 +13,12 @@ from literate_ai.adapters.models import RecipeDocument
 from literate_ai.adapters.source_evidence_validation import (
     SourceEvidenceValidationInputs,
 )
-from literate_ai.contracts import CYCLONEDX_SOURCE_SBOM_PATH
+from literate_ai.contracts import (
+    CYCLONEDX_SOURCE_SBOM_PATH,
+    ContentIdentity,
+    LibraryCapabilityImport,
+    LibraryImportSurface,
+)
 from literate_ai.generated_test_coverage import (
     COVERAGE_REQUEST_SCHEMA,
     PUBLIC_CALLABLE_CONTRACT_PATH,
@@ -241,3 +246,28 @@ class ZeroArgumentCoverageEvidenceTests(unittest.TestCase):
                 self.document.identity,
             )
             loaded.require_unchanged(root)
+
+    def test_overlapping_capabilities_of_one_callable_are_not_mixed_signatures(self):
+        def capability(name, symbol="value"):
+            return LibraryCapabilityImport(
+                name,
+                ContentIdentity.parse_uri("sha256:" + "a" * 64),
+                "tiny.api",
+                (symbol,),
+            )
+
+        shared = LibraryImportSurface(
+            "python",
+            "tiny",
+            (
+                capability("first"),
+                capability("second"),
+            ),
+        )
+        selected = replace(self.recipe, library_import_surface=shared)
+        self.assertEqual(selected.generated_test_coverage_authority, self.authority)
+        mixed = replace(
+            shared, capabilities=(capability("first"), capability("second", "other"))
+        )
+        with self.assertRaisesRegex(ValueError, "mixed_public_signatures_unsupported"):
+            replace(self.recipe, library_import_surface=mixed)
