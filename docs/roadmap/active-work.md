@@ -32481,6 +32481,11 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   the unknown-entry refusal code and explicitly disabling inherited-session
   routing. Seven existing wheel-harness checks and global lint/format pass;
   actual installed execution is the next gate.
+  The first actual installed attempt completed retained admissions and reached
+  the expected ambiguous-provider refusal, then failed in the harness because
+  it parsed only stdout while public CLI errors use stderr. The reader now
+  accepts the CLI error stream; this failed attempt remains recorded and does
+  not count as completed installed qualification.
   Source development does not close #196/#197.
 
 - **Exact-selection implementation plan:** Reuse the existing repeated

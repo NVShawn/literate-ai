@@ -58,7 +58,7 @@ def invoke(project: Path, *arguments: str, error: str | None = None) -> dict:
         check=False,
     )
     try:
-        result = json.loads(completed.stdout)
+        result = json.loads(completed.stdout or completed.stderr)
     except json.JSONDecodeError as exc:
         raise RuntimeError(
             f"installed continuation returned non-JSON: {completed.stderr[-2000:]}"
