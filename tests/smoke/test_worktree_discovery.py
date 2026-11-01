@@ -8,6 +8,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -301,6 +302,40 @@ class WorktreeDiscoveryTests(unittest.TestCase):
                 with self.assertRaises(orchestration.OrchestrationInventoryError):
                     orchestration._git(self.root, "status", timeout_seconds=timeout)
                 run.assert_not_called()
+
+    @unittest.skipUnless(hasattr(os, "mkfifo"), "native POSIX FIFO replacement")
+    def test_marker_replaced_by_fifo_refuses_without_blocking(self):
+        marker = self.parent / "custody-pointer"
+        marker.write_text("target\n")
+        source = r"""
+import os, sys
+from pathlib import Path
+from unittest.mock import patch
+from literate_ai.adapters.project_worktree_discovery import _Observation
+from literate_ai.adapters.project_worktrees import ProjectWorktreeError
+marker = Path(sys.argv[1])
+original = os.open
+def replaced(path, flags, *args, **kwargs):
+    if Path(path) == marker:
+        marker.unlink()
+        os.mkfifo(marker)
+    return original(path, flags, *args, **kwargs)
+try:
+    with patch.object(os, "open", replaced):
+        _Observation().pointer(marker)
+except ProjectWorktreeError:
+    print("refused")
+else:
+    raise AssertionError("FIFO replacement supplied pointer custody")
+"""
+        completed = subprocess.run(
+            (sys.executable, "-c", source, str(marker)),
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=True,
+        )
+        self.assertEqual(completed.stdout.strip(), "refused")
 
 
 if __name__ == "__main__":

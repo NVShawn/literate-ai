@@ -20,7 +20,11 @@ from .project_worktrees import (
     ProjectWorktreeLocation,
     resolve_project_worktree_location,
 )
-from .repository_orchestration import OrchestrationInventoryError, _git
+from .repository_orchestration import (
+    OrchestrationInventoryError,
+    _git,
+    _read_document,
+)
 from .repository_refresh_worktrees import (
     RegisteredRefreshWorktree,
     parse_refresh_worktrees,
@@ -166,27 +170,20 @@ class _Observation:
     def pointer(self, path: Path, *, prefix: bytes = b"") -> Path | None:
         if not self.remember(path):
             return None
-        signature = self.nodes[path]
-        if not stat.S_ISREG(signature[2]) or path_is_link_or_reparse(path):
-            raise ProjectWorktreeError("Git custody pointer must be a regular file")
-        if signature[3] > _MAX_MARKER_BYTES:
-            raise ProjectWorktreeError("Git custody pointer exceeds its byte bound")
-        descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
-        with os.fdopen(descriptor, "rb") as stream:
-            opened = os.fstat(stream.fileno())
-            if signature != (
-                opened.st_dev,
-                opened.st_ino,
-                opened.st_mode,
-                opened.st_size,
-                opened.st_mtime_ns,
-                opened.st_ctime_ns,
-            ):
-                raise ProjectWorktreeError("Git custody pointer changed while opened")
-            content = stream.read(_MAX_MARKER_BYTES + 1)
+        try:
+            # The shared reader rejects FIFO replacement without blocking and
+            # handles Windows pathname/descriptor ctime differences correctly.
+            content = _read_document(
+                path,
+                label="Git custody pointer",
+                error_suffix="worktree_pointer_invalid",
+                maximum_bytes=_MAX_MARKER_BYTES,
+            )
+        except OrchestrationInventoryError as exc:
+            raise ProjectWorktreeError(
+                "Git custody pointer could not be captured within its bounds"
+            ) from exc
         self.remember(path)
-        if len(content) > _MAX_MARKER_BYTES:
-            raise ProjectWorktreeError("Git custody pointer exceeds its byte bound")
         payload = content.rstrip(b"\r\n")
         if (
             not payload.startswith(prefix)
