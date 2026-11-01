@@ -116,7 +116,16 @@
         "id": "HTML-VERIFY-COST-001"
       },
       {
-        "id": "RELEASE-INTEGRATION-005"
+        "id": "IGNORE-LIFECYCLE-001"
+      },
+      {
+        "id": "RUST-IMPORT-DEDUP-001"
+      },
+      {
+        "id": "RELEASE-README-ORDER-001"
+      },
+      {
+        "id": "ZERO-ARG-COVERAGE-001"
       }
     ]
   }

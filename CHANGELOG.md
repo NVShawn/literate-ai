@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Verify Rust library symbols shared by multiple capabilities without emitting
+  duplicate imports; retain every declared capability and missing-symbol refusal.
+- Clarify release README update ordering and derive asset digests from published
+  provider metadata or downloaded published bytes before final verification.
+
+- Keep project lifecycle lock and owner files out of Git after initialization
+  and framework updates, while preserving local ignore overlays.
+
 - Document all 88 canonical skills in a task-oriented catalog, including document,
   presentation, host and deployment boundaries; compare Google skills discovery
   and composition with revision-pinned reuse recommendations.

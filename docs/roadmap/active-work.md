@@ -31855,3 +31855,76 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] make skills-check passes and canonical/template guidance remains consistent, with no required A2A SDK, service, credential, endpoint, or project-local connection configuration.
   - [ ] Review or exercise guidance scenarios for suitable connected peers, no A2A support, unavailable/unsuitable peers, prohibited delegation, and timeout/cancellation; absence of A2A does not prevent ordinary local work.
   - [ ] Boundary review confirms bounded context sharing, durable tracker handoffs, reviewed authority changes, unchanged generation/cache identity rules, and independent validation of returned artifacts; A2A completion alone never satisfies litai acceptance.
+
+### [ ] IGNORE-LIFECYCLE-001 — Keep lifecycle lock state out of initialized and updated Git projects
+
+- **Release target:** 1.4.0
+
+- **GitHub issue:** [#215](https://github.com/jordanhubbard/literate-ai/issues/215)
+- **Priority:** P1
+- **Owner:** framework project initialization template and update path; issue 215
+- **Direction:** Issue 215 reports that runtime .litai-locks state is offered for commit after a lifecycle operation.
+- **Conclusion:** Add the owned lifecycle-lock ignore rule to the canonical framework template; exercise real Git ignore behavior on new and three-way-updated projects while preserving custom ignore rules and unrelated files.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Update the canonical project.gitignore and verify actual lifecycle lock/owner paths stay ignored after initialization and update.
+- **Evidence:**
+  - [x] Run Git-backed initialized and legacy-overlay update regressions; prove the prior template fails and unrelated files remain visible. The original template fails actual Git check-ignore for lifecycle.lock; both repaired regressions pass without skips, including owner metadata and legacy overlay preservation.
+  - [ ] Land the repair on green CI, comment with the landed evidence and close issue #215.
+
+### [ ] RUST-IMPORT-DEDUP-001 — Verify overlapping Rust library capabilities without duplicate imports
+
+- **Release target:** 1.4.0
+
+- **GitHub issue:** [#219](https://github.com/jordanhubbard/literate-ai/issues/219)
+- **Priority:** P1
+- **Owner:** Standard library import verifier; issue 219
+- **Direction:** A Rust library can expose the same symbol through several declared capabilities, but the verifier emits duplicate use declarations and rejects the valid library.
+- **Conclusion:** De-duplicate exact module/symbol pairs in the verifier while preserving the complete declared capability observation and compilation failures for missing symbols or conflicting distinct imports.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Exercise an overlapping import surface with the real Cargo verifier, then emit each exact module/symbol pair once.
+- **Evidence:**
+  - [x] Reproduce E0252 before the fix; prove repeated valid imports pass and a genuinely missing declared symbol still fails.
+
+- **Development evidence:** The native Cargo regression reproduces E0252 before the repair. After exact module/symbol deduplication, all four Standard command projection cases pass without skips, preserving both capability observations and missing-symbol refusal.
+- **Next action:** pass admission/integration CI, land, then comment and close the issue.
+
+### [ ] RELEASE-README-ORDER-001 — Clarify published README verification order and asset digest provenance
+
+- **Release target:** 1.4.0
+
+- **GitHub issue:** [#150](https://github.com/jordanhubbard/literate-ai/issues/150)
+- **Priority:** P1
+- **Owner:** release-project agent skill and canonical initialization template; issue 150
+- **Direction:** Avoid the first verify-published/README ordering deadlock and identify the authoritative SHA-256 source.
+- **Conclusion:** Separate initial provider/tag/artifact read-back from final README acceptance; allow only a named README-only finding to remain pending during the first read-back, then require final full verification. Digests come from provider asset metadata or downloaded published bytes.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Update canonical and template release guidance consistently without weakening tag, artifact or final README verification.
+- **Evidence:**
+  - [x] Verify canonical/template equality and pass changed-skill admission with explicit review of both verification phases.
+
+- **Development evidence:** Canonical and initialized release skills remain byte-identical. The initial publication read-back and final README acceptance are distinct; all non-README failures remain blocking. Changed-skill admission passes for canonical and template guidance, including affected nested release deltas.
+- **Next action:** pass admission/integration CI, land, then comment and close the issue.
+
+### [ ] ZERO-ARG-COVERAGE-001 — Implement accepted exhaustive coverage for zero-argument callables
+
+- **Release target:** 1.4.0
+
+- **Priority:** P1
+- **Owner:** generated test contracts, public interface authority, recipe/lifecycle identity and installed native-child qualification; issues 132 and 48
+- **Direction:** The directing user explicitly accepted ADR 0051 for 1.4 on 2026-10-31.
+- **Conclusion:** Implement a versioned, authority-bound singleton coverage mode only for complete public arity-zero signatures. Preserve frozen v1 and ordinary diversity requirements, independent expected-result provenance, exact identity/currentness and all negative controls. Unknown and nonzero finite domains receive no automatic exemption.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Establish authoritative complete zero-argument public signatures and project a versioned mode through recipe, generated manifest validation, cache and lifecycle identities.
+  - [ ] Reconcile pinned generation guidance with independently selected overlapping inputs while keeping verifier-owned expected answers private.
+  - [ ] Complete the fresh installed registered-child journey and original refusal/recovery controls with its unchanged independent oracle.
+- **Evidence:**
+  - [ ] Pass singleton positive, invented/duplicate/missing input, false exemption, stale authority and private-oracle controls plus unchanged v1/default-domain coverage.
+  - [ ] Pass full regression, installed-wheel qualification and exact review/main CI before claiming issue 132 or dependent issue 48 complete.

@@ -824,9 +824,13 @@ elif language == "rust":
     temporary = pathlib.Path(tempfile.mkdtemp(prefix="litai-library-import-"))
     try:
         uses = []
+        imported_symbols = set()
         for capability in surface["capabilities"]:
             for symbol in capability["symbols"]:
-                uses.append("use " + capability["module"] + "::" + symbol + ";")
+                imported_symbol = (capability["module"], symbol)
+                if imported_symbol not in imported_symbols:
+                    uses.append("use " + capability["module"] + "::" + symbol + ";")
+                    imported_symbols.add(imported_symbol)
             observed.append(capability["capability"])
         (temporary / "src").mkdir()
         dependency_path = json.dumps(str((export / manifest).parent))
