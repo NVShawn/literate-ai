@@ -81,6 +81,11 @@ development (2026-09-10):
 
 ## Current work
 
+RELEASE-INTEGRATION-005 executes the user-requested complete outstanding PR/issue
+resolution and 1.4.0 release. The [integration plan](docs/roadmap/1.4-integration.md)
+tracks every initial item, the existing release goals, native qualification and
+publication evidence. All required acceptance remains open until proven.
+
 LAB-AUTHORITY-001 extends Goals 2 and 4 with an independent, progressively richer
 canonical lab curriculum. Each lab must use actual Components, selected Flavors,
 locks, skills/workflows and truthful lifecycle evidence from this framework,

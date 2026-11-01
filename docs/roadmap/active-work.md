@@ -31717,3 +31717,26 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   Documentation graph validation passed; its reviewed authority marker is recorded
   with this change. The end-of-cycle peer survey found no collectable worktrees;
   unrelated historical branches and other contributors' reviews remain untouched.
+
+<a id="release-integration-005"></a>
+
+### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
+
+- **Release target:** 1.4.0
+- **Detailed plan:** [1.4 integration](1.4-integration.md).
+- **Next action in progress:** review and consolidate the existing PR heads; audit the issue backlog against current code and tests.
+
+- **Priority:** P0
+- **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
+- **Direction:** Resolve all outstanding PRs and issues and release 1.4.
+- **Conclusion:** Include the current four reviews and 51 issues, audit their actual implementation and acceptance, preserve all eight existing 1.4 goals, and publish only the exact completely qualified 1.4.0 candidate. No issue or goal is silently deferred or closed from partial evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI.
+  - [ ] Reproduce or audit each issue, implement its owning fix or reviewed resolution, record decisive evidence, and comment and close only after the resolution lands.
+  - [ ] Complete all declared 1.4.0 roadmap goals and native platform qualification using aligned workers; retain prior failed evidence.
+  - [ ] Regenerate, inspect and publish the declared terminal document pair, then plan, prepare, check, publish and verify 1.4.0 through repository commands.
+- **Evidence:**
+  - [ ] Require an empty unresolved tracker/review set, current contribution dispositions, complete release goals and reviewed branch/worktree provenance.
+  - [ ] Require fresh exact-candidate release checks, platform qualification, package manifest and published-provider/tag/README read-back verification.
