@@ -437,6 +437,10 @@ def init_project_from_args(args) -> dict[str, Any]:
         if convert and exc.code in {
             "project.convert_ci_failed",
             "project.convert_legacy_gate_failed",
+            "project.convert_wrapper_parity_failed",
+            "project.convert_lift_shift_failed",
+            "project.convert_lift_shift_recovery_failed",
+            "project.convert_rollback_failed",
         }:
             raise CliFailure(
                 exc.code,

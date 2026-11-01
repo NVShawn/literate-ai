@@ -28,6 +28,7 @@ from literate_ai.adapters.component_locks import ComponentLockStoreError
 from literate_ai.adapters.component_resolution_audits import (
     ComponentResolutionAuditStoreError,
 )
+from literate_ai.adapters.conversion_failure_evidence import conversion_failure_message
 from literate_ai.adapters.harness_inventory import (
     HARNESS_COMMAND_TIMEOUT_SECONDS,
     HARNESS_DIAGNOSTIC_CHARS,
@@ -3218,19 +3219,29 @@ class FilesystemProjectInitializationAdapter:
                     canonical_json_bytes(harness_parity_document) + b"\n"
                 )
             except (HarnessBaselineError, HarnessWorkspaceError) as exc:
-                # Preserve digest-only failure evidence in the raised error, but leave
-                # no Literate AI files behind: conversion is transactional at this
-                # gate and returns the project to its exact pre-conversion layout.
+                # Restore project custody, retaining bounded private diagnostics
+                # outside the rollback target. Retention failure never overrides
+                # the original failure or claims that recovery succeeded.
                 try:
                     _rollback_converted_tree(resolved_target, quarantine)
-                except ProjectInitializationError as rollback_error:
+                except (ProjectInitializationError, OSError) as rollback_error:
                     raise ProjectInitializationError(
                         "project.convert_rollback_failed",
-                        f"{exc.message}; rollback also failed: {rollback_error}",
+                        conversion_failure_message(
+                            resolved_target,
+                            exc,
+                            recovery="incomplete",
+                            outcome="rollback also failed; recovery is incomplete",
+                        ),
                     ) from rollback_error
                 raise ProjectInitializationError(
                     exc.code,
-                    f"{exc.message}; literate-ai conversion was rolled back",
+                    conversion_failure_message(
+                        resolved_target,
+                        exc,
+                        recovery="rolled-back",
+                        outcome="literate-ai conversion was rolled back",
+                    ),
                 ) from exc
         ProjectConfigurationStore(resolved_target).create(definition)
         created: list[str] = [PROJECT_FILENAME]
@@ -3271,7 +3282,6 @@ class FilesystemProjectInitializationAdapter:
                 )
             except Exception as exc:
                 code = getattr(exc, "code", "project.convert_lift_shift_failed")
-                message = getattr(exc, "message", "lift-shift failed")
                 try:
                     implementation = (
                         resolved_target
@@ -3288,11 +3298,25 @@ class FilesystemProjectInitializationAdapter:
                 except (ProjectInitializationError, OSError) as recovery:
                     raise ProjectInitializationError(
                         "project.convert_rollback_failed",
-                        f"{message}; recovery is incomplete. Preserve _legacy and "
-                        "components/legacy-project-wrapper/implementation for recovery",
+                        conversion_failure_message(
+                            resolved_target,
+                            exc,
+                            recovery="incomplete",
+                            outcome=(
+                                "recovery is incomplete. Preserve _legacy and "
+                                "components/legacy-project-wrapper/implementation "
+                                "for recovery"
+                            ),
+                        ),
                     ) from recovery
                 raise ProjectInitializationError(
-                    code, f"{message}; literate-ai conversion was rolled back"
+                    code,
+                    conversion_failure_message(
+                        resolved_target,
+                        exc,
+                        recovery="rolled-back",
+                        outcome="literate-ai conversion was rolled back",
+                    ),
                 ) from exc
             lift_shift_path = evidence_dir / "legacy-lift-shift.json"
             lift_shift_path.write_bytes(

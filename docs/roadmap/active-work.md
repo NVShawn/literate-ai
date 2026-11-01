@@ -32300,10 +32300,10 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Preserve explicit CliFailure limits and apply conversion diagnostic allowance to recovery errors; prioritize recovery outcome before stream excerpts.
-  - [ ] Retain a finite private failure summary and bounded per-phase excerpts/digests outside rollback scope, and identify the report in the diagnostic; refuse new retention when the owned store reaches its cap.
+  - [x] Preserve explicit CliFailure limits and apply conversion diagnostic allowance to recovery errors; prioritize recovery outcome before stream excerpts.
+  - [x] Retain a finite private failure summary and bounded per-phase excerpts/digests outside rollback scope, and identify the report in the diagnostic; refuse new retention when the owned store reaches its cap. The cooperative private store caps reports at 512 KiB, 128 reports and 16 MiB total, without evicting existing evidence.
 - **Evidence:**
-  - [ ] Use real baseline failures with warning-heavy stderr, stdout test failures and rollback failures; prove selected markers, outcome, finite output, redaction and private report survival.
+  - [x] Use real baseline failures with warning-heavy stderr, stdout test failures and rollback failures; prove selected markers, outcome, finite output, redaction and private report survival. Six controls pass, including concurrent quota enforcement, unsafe/overlapping store refusal and both typed and OS rollback failures.
   - [ ] Run CLI/adoption regressions and review/static checks; require exact integrated qualification before issue closure.
 
-- **Diagnostic implementation checkpoint:** The outer onboarding handler now preserves the finite `CliFailure` budget selected by initialization. The real missing-Node-dependency case retains `ERR_MODULE_NOT_FOUND` and passes; early recovery outcome and private retained failure summaries remain the next unchecked work.
+- **Diagnostic implementation checkpoint:** The outer onboarding handler now preserves the finite `CliFailure` budget selected by initialization. The real missing-Node-dependency case retains `ERR_MODULE_NOT_FOUND` and passes. Recovery outcome and the private report locator now precede excerpts for baseline/parity and lift-shift failures. Retention is best-effort, bounded, redacted, and cannot override the original failure; 52 combined regression controls, strict lint, formatting, layout, public export and 181 Mermaid renders pass. Authority passes while the lifecycle receipt remains stale. Exact integration and installed/native qualification remain pending.
