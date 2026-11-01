@@ -90,6 +90,7 @@ litai project parent-readme
 litai project tracker inspect
 litai project peer-work
 litai project worktree location
+litai project worktree discover
 litai project parent checkout
 litai project ci-plan
 litai project guidance
@@ -546,6 +547,7 @@ root-integration acceptance still remain.
 | `make runner-review` / `make runner-review-record` | Report the exact sample test-runner source-closure drift, then explicitly record its reviewed identity. |
 | `project peer-work gc [--apply --authorize-delete]` | Plan safe local branch/worktree collection by default; apply only after exact-marker, PR, ancestry, protected-branch, and cleanliness checks pass. |
 | `project worktree location [PATH]` | Resolve the canonical repository-owned `.worktrees/` root from exact Git common-directory and registered-checkout custody. |
+| `project worktree discover [PATH] [--maximum-peer-entries N]` | Read-only classification of registered checkouts and immediate canonical-checkout peers using actual Git common-directory ownership. Defaults to 256 peer entries, with a hard ceiling of 4096 and one bounded observation deadline. Distinguishes independent repositories, external registrations, missing checkouts, and contradictory or unverifiable custody. Refuses observation drift; does not audit source/history/processes, authorize retirement, create directories, move checkouts, prune registration, or delete data. |
 | `project parent checkout URL[#REVISION] [--project PATH] [--repository-fetch-*-seconds N]` | Clone or update a parent under `parents/<id>/` with submodules and Git LFS under the shared progress-aware Git deadline policy. Not lineage resolution. |
 | `project ci-plan [PATH] [--mode shard\|impact\|compose]` | Detect test frameworks and emit a fail-closed shard and impact-selection plan. Unavailable mechanisms are named; missing impact maps select the full suite. |
 | `project source-intelligence sync [PATH] [--binary COMMAND]` | Synchronize and verify the bounded project-local artifact for an explicitly configured external provider. |

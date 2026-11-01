@@ -171,6 +171,9 @@
       },
       {
         "id": "ACCEPTED-CACHE-DISCOVERY-001"
+      },
+      {
+        "id": "WORKTREE-002"
       }
     ]
   }

@@ -1442,7 +1442,23 @@ def project_worktree_from_args(args) -> dict[str, Any]:
         resolve_project_worktree_location,
     )
 
-    if getattr(args, "worktree_action", None) != "location":
+    action = getattr(args, "worktree_action", None)
+    if action == "discover":
+        from literate_ai.adapters.project_worktree_discovery import (
+            discover_project_worktrees,
+        )
+
+        try:
+            discovered = discover_project_worktrees(
+                Path(args.path), maximum_peer_entries=args.maximum_peer_entries
+            )
+        except ProjectWorktreeError as exc:
+            raise CliFailure("project.worktree_discovery_invalid", str(exc)) from None
+        return {
+            **discovered.to_dict(),
+            "discovery_identity": discovered.identity.uri,
+        }
+    if action != "location":
         raise CliFailure("cli.usage", "a project worktree action is required")
     try:
         location = resolve_project_worktree_location(Path(args.path))

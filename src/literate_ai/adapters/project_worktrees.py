@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import os
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -29,9 +30,13 @@ class ProjectWorktreeError(ValueError):
     """Git custody cannot establish a safe project-scoped worktree location."""
 
 
-def _git_text(root: Path, *arguments: str) -> str:
+def _git_text(
+    root: Path,
+    *arguments: str,
+    run_git: Callable[..., bytes] | None = None,
+) -> str:
     try:
-        return _git(root, *arguments).decode("utf-8").strip()
+        return (run_git or _git)(root, *arguments).decode("utf-8").strip()
     except (OrchestrationInventoryError, UnicodeDecodeError) as exc:
         raise ProjectWorktreeError("Git worktree custody observation failed") from exc
 
@@ -84,15 +89,22 @@ class ProjectWorktreeReservation:
         self.release()
 
 
-def resolve_project_worktree_location(repository: Path) -> ProjectWorktreeLocation:
+def resolve_project_worktree_location(
+    repository: Path, *, _git_command: Callable[..., bytes] | None = None
+) -> ProjectWorktreeLocation:
     """Resolve the one in-repository placement root from exact Git custody."""
 
     supplied = Path(repository)
     try:
-        requested = Path(_git_text(supplied, "rev-parse", "--show-toplevel")).resolve(
-            strict=True
-        )
-        if _git_text(requested, "rev-parse", "--is-bare-repository") != "false":
+        requested = Path(
+            _git_text(supplied, "rev-parse", "--show-toplevel", run_git=_git_command)
+        ).resolve(strict=True)
+        if (
+            _git_text(
+                requested, "rev-parse", "--is-bare-repository", run_git=_git_command
+            )
+            != "false"
+        ):
             raise ProjectWorktreeError("bare repositories have no worktree placement")
         common = Path(
             _git_text(
@@ -100,6 +112,7 @@ def resolve_project_worktree_location(repository: Path) -> ProjectWorktreeLocati
                 "rev-parse",
                 "--path-format=absolute",
                 "--git-common-dir",
+                run_git=_git_command,
             )
         ).resolve(strict=True)
     except (OSError, UnsafeFilesystemPathError) as exc:
@@ -112,7 +125,7 @@ def resolve_project_worktree_location(repository: Path) -> ProjectWorktreeLocati
     if path_is_link_or_reparse(canonical) or path_is_link_or_reparse(common):
         raise ProjectWorktreeError("canonical Git custody cannot traverse a link")
     try:
-        raw = _git(requested, "worktree", "list", "--porcelain", "-z")
+        raw = (_git_command or _git)(requested, "worktree", "list", "--porcelain", "-z")
         registrations = parse_refresh_worktrees(raw)
     except OrchestrationInventoryError as exc:
         raise ProjectWorktreeError("registered worktree listing is invalid") from exc

@@ -2101,7 +2101,7 @@ def _parser() -> JsonArgumentParser:
     project_peer_work.add_argument("--authorize-delete", action="store_true")
     project_worktree = project_commands.add_parser(
         "worktree",
-        help="resolve the canonical project-scoped linked-worktree location",
+        help="resolve worktree placement or discover ownership without mutation",
     )
     project_worktree_commands = project_worktree.add_subparsers(
         dest="worktree_action",
@@ -2110,6 +2110,17 @@ def _parser() -> JsonArgumentParser:
     )
     project_worktree_location = project_worktree_commands.add_parser("location")
     project_worktree_location.add_argument("path", nargs="?", default=".")
+    project_worktree_discover = project_worktree_commands.add_parser(
+        "discover",
+        help="classify registered worktrees and immediate peers; never remove them",
+    )
+    project_worktree_discover.add_argument("path", nargs="?", default=".")
+    project_worktree_discover.add_argument(
+        "--maximum-peer-entries",
+        type=int,
+        default=256,
+        help="maximum immediate parent entries to inspect (1–4096; default 256)",
+    )
     project_tracker = project_commands.add_parser(
         "tracker",
         help="classify the issue tracker from Git remotes and name gh or glab",

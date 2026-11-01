@@ -22363,6 +22363,7 @@ GitHub CI failure without relaxing identity checks.
 
 - **Design review:** [ADR 0046](../decisions/0046-project-scoped-worktree-lifecycle.md), Accepted 2026-09-25.
 - **Priority:** P1 (partial placement slice in 1.2; remaining migration contract deferred to 1.3)
+- **Release target:** 1.4.0
 - **GitHub issue:** [#7](https://github.com/jordanhubbard/literate-ai/issues/7) (migrated from NVIDIA-dev/literate-ai#483)
 - **Owner:** project worktree placement, peer survey, and evidence-preserving retirement
 - **Direction:** Define one discoverable in-repository worktree location and migrate legacy peer-directory worktrees without losing useful commits, untracked data, locks, sessions, submodule state, or qualification evidence.
@@ -22370,6 +22371,10 @@ GitHub CI failure without relaxing identity checks.
 - **Depends on:** none
 - **Implementation:**
   - [x] Obtain explicit maintainer acceptance of ADR 0046 before implementing its placement, migration-journal, or removal design.
+  - [ ] Add bounded read-only registered/peer discovery with exact common-directory
+        ownership, independent-repository and missing/contradictory registration
+        classification, and concurrent-observation refusal. Discovery grants no
+        retirement authority; complete audit and journal ownership remain required.
   - [ ] Define and enforce canonical project-scoped placement across CLI and initialized/inherited guidance.
   - [ ] Audit legacy worktrees by common-directory identity, preserve or land useful state, and record each terminal disposition.
   - [ ] Make migration resumable and prevent new peer-directory worktrees.
@@ -22386,6 +22391,24 @@ GitHub CI failure without relaxing identity checks.
   Issue #483 records the explicit 1.3 disposition; the read-only release audit found
   no legacy candidate eligible for removal without the missing retained journal and
   revalidation contract.
+
+- **Current execution:** Issue #7 is included in the directing user's complete 1.4
+  resolution request. Its historical 1.3 deferral above remains history, not a new
+  deferral. Implementing read-only discovery first under accepted ADR 0046; do not
+  remove or relocate any existing checkout as part of that observation. Explicit
+  user placement overrides remain authoritative for this session's task worktrees.
+- **Discovery development evidence:** Twenty real-Git placement, discovery and
+  orchestration checks pass with 19 subtests. Coverage includes independent and
+  bare repositories, external/locked/detached registrations, dirty/staged/ignored
+  bytes, missing/prunable targets, unregistered shared Git directories, contradictory
+  ownership, link-like peers, peer/HEAD/metadata drift and finite entry/path/time
+  bounds. An actual macOS command reports 32 external worktrees, three project
+  worktrees and 79 independent repositories, without moving or pruning anything.
+  Lint, formatting, layout, public-export and documentation checks pass. The
+  lifecycle-driver TCB gate correctly reports stale source; its pin is not advanced
+  without the author-independent review required by CONTRIBUTING.md. That review
+  is requested, not yet obtained. Full audit, journal, disposition, removal and
+  installed/native release qualification remain open.
 
 ### [x] PACKAGE-APT-001 — Construct and independently verify real Debian packages
 

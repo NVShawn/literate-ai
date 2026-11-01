@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Worktrees: add bounded read-only ownership discovery for registered checkouts
+  and legacy peers. Distinguish independent repositories and unresolved custody,
+  preserve operator data, and refuse changes observed during discovery. Full
+  migration audit and retirement remain separate requirements.
+
 - Worker bootstrap: recognize FreeBSD and use its declared native package and
   coding-agent requirements. Observation-only detection skips clock queries and
   adjustment; explicit installation retains best-effort native synchronization.
