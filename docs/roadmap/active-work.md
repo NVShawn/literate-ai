@@ -32220,6 +32220,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Implementation:**
   - [x] Preserve indexed directory and alias moves, and make quarantine move failures restore completed moves without scaffold deletion.
   - [x] Accept retained dangling relative aliases during ordered rollback while preserving destination collision refusal.
+  - [x] Correct Windows fixture byte expectations to compare with the actual original
+        bytes, and prove mixed line endings survive source copying and rollback.
 - **Evidence:**
   - [x] Reproduce ignored tracked file loss; prove a real conversion baseline sees that source, untracked siblings remain, staged intent survives roundtrip, and forced move failure restores prior entries.
   - [ ] Run conversion, source-scope and adoption regressions and required review/static gates; require exact integration and installed qualification before issues close.
@@ -32236,6 +32238,16 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   an intervening destination collision preserves both copies and reports failure.
   Failed Git rollback retains quarantine/index custody. This is local development
   evidence; exact integration and installed qualification remain required.
+
+- **Integrated Windows finding:** Exact-main CI run `41322306715` reports four
+  fixture failures in `test_conversion_tracked_ignored.py`: `write_text` creates
+  native CRLF bytes, but assertions incorrectly require LF. Preserve the actual
+  input bytes in expectations; do not normalize retained source or weaken byte
+  custody. The remaining shard result is 742 passed / 139 skipped; it does not
+  establish a passing Windows gate.
+  The corrected 16-case conversion file passes locally, including explicit mixed
+  LF/CRLF copying, rollback and unchanged staged index; focused lint and formatting
+  pass. Native Windows rerun remains required.
 
 ### [ ] ADOPT-LIFT-ROLLBACK-001 — Restore original custody after failed lift-shift parity
 
