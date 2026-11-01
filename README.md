@@ -167,6 +167,15 @@ generation identity. Unchanged accepted source can be reused from `BUILD_DIR`; u
 source and toolchain inputs can reuse build results from `OBJ_DIR`. Removing either cache
 changes cost, not meaning or reconstructability.
 
+## What does Literate AI have skills for?
+
+Browse the [complete skill catalog](docs/user/skills.md) for development, portable
+code generation, source analysis, documents and presentations, instructional videos,
+OS preparation, testing, packaging and releases. It maps user tasks to all 88
+canonical skills and explains which capabilities require selected Flavors or
+separate qualification. The [Google skills assessment](docs/architecture/google-skills-assessment.md)
+compares discovery, composition and useful adaptations.
+
 ## What is first class
 
 - **Components** define behavior, contracts, composition, and acceptance criteria.

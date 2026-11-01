@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Document all 88 canonical skills in a task-oriented catalog, including document,
+  presentation, host and deployment boundaries; compare Google skills discovery
+  and composition with revision-pinned reuse recommendations.
+
 - Retry one bounded retained remote cleanup against the same exact
   controller-owned attempt paths when the first cleanup returns nonzero. Admit
   the already-returned lifecycle result only after cleanup succeeds, and remain

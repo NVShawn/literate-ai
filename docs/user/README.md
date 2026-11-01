@@ -118,6 +118,11 @@ authority-graph view, not a general source-code browser.
 3. Read [product integration, migration, and rollback](ova-and-migration.md) for the
    application-specific adapter and compatibility-reader boundary.
 
+## Skills by task
+
+Browse the [complete skill catalog](skills.md) for development, generation, source
+analysis, documents, presentations, video, host preparation and release operations.
+
 ## Reference
 
 - [Current features and release posture](current-features.md)
