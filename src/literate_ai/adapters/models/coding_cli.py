@@ -39,7 +39,10 @@ from literate_ai.adapters.model_selection_stack import (
     explicit_stack_model,
 )
 from literate_ai.adapters.models.native_sdk_recipe import RecipeNativeSdkDependency
-from literate_ai.adapters.user_paths import resolve_host_system_paths
+from literate_ai.adapters.user_paths import (
+    opencode_managed_configuration_roots,
+    resolve_host_system_paths,
+)
 from literate_ai.application.flavor_selection import (
     FlavorSelectionError,
 )
@@ -112,8 +115,16 @@ DEFAULT_MAXIMUM_CLI_STDERR_BYTES = 1024 * 1024
 DEFAULT_MAXIMUM_GENERATION_CLI_STDERR_BYTES = DEFAULT_MAXIMUM_GENERATED_BYTES
 _OPENCODE_PREFLIGHT_TIMEOUT_SECONDS = 15
 _OPENCODE_PREFLIGHT_OUTPUT_BYTES = 256 * 1024
-_OPENCODE_PREFLIGHT_COMMAND = ("--pure", "run", "--help")
+_OPENCODE_PREFLIGHT_COMMAND = ("run", "--help")
 _OPENCODE_REQUIRED_HELP_OPTIONS = (b"--pure", b"--dir", b"--agent", b"--format")
+_OPENCODE_V2_HELP_OPTIONS = (
+    b"--standalone",
+    b"--agent",
+    b"--format",
+    b"--model",
+    b"--print-logs",
+    b"--log-level",
+)
 _PIPE_READ_BYTES = 64 * 1024
 _ACCEPTED_SOURCE_LOOKUP_ONLY_EXECUTABLE = "/accepted-source-lookup-only"
 _OPENCODE_PERMISSION = json.dumps(
@@ -145,6 +156,28 @@ _OPENCODE_CONFIG_CONTENT = json.dumps(
     sort_keys=True,
     separators=(",", ":"),
 )
+# V2 uses ordered native rules. Keep permissions explicit even for tools that V2
+# otherwise allows by default, and prevent ambient MCP/skill/plugin extensions.
+_OPENCODE_V2_CONFIG_CONTENT = json.dumps(
+    {
+        "update": "disable",
+        "instructions": [],
+        "mcp": {"servers": {}},
+        "plugins": [],
+        "providers": {},
+        "permissions": [
+            {"action": action, "resource": "*", "effect": effect}
+            for action, effect in json.loads(_OPENCODE_PERMISSION).items()
+        ],
+        "policies": [
+            {"action": action, "resource": "*", "effect": "deny"}
+            for action in ("mcp.use", "skill.use", "plugin.use")
+        ],
+    },
+    sort_keys=True,
+    separators=(",", ":"),
+)
+
 RecipeSkill = ResolvedSpecificationToSourceSkill
 
 
@@ -2063,7 +2096,7 @@ _CODING_CLI_ISOLATION = {
         ),
     ),
     "opencode": CodingCliIsolation(
-        "opencode-pure-detached-workspace-tools-v1",
+        "opencode-versioned-detached-workspace-tools-v3",
         True,
         "provider-tool-policy-on-detached-workspace",
         False,
@@ -2462,12 +2495,6 @@ class CodingCliTaskRunner:
                 "its framework instructions, and write only the requested strict JSON "
                 "object to .literate-ai-task-response.json."
             )
-            command = _coding_cli_command(
-                self.selection,
-                workspace,
-                model=model,
-                prompt=instruction,
-            )
             with (
                 log_operation(
                     "coding_task", cli=self.selection.name, model=model or ""
@@ -2479,10 +2506,20 @@ class CodingCliTaskRunner:
                 ) as process_environment,
             ):
                 try:
-                    _require_coding_cli_compatible(
+                    interface = _require_coding_cli_compatible(
                         self.selection,
                         workspace=workspace,
                         environment=process_environment,
+                    )
+                    _configure_opencode_interface(
+                        process_environment, interface, self.selection, workspace
+                    )
+                    command = _coding_cli_command(
+                        self.selection,
+                        workspace,
+                        model=model,
+                        prompt=instruction,
+                        opencode_interface=interface,
                     )
                     completed = _run_bounded(
                         command,
@@ -2765,6 +2802,7 @@ def _coding_cli_command(
     *,
     model: str | None,
     prompt: str,
+    opencode_interface: str | None = None,
 ) -> list[str]:
     executable = selection.executable
     if selection.name == "codex":
@@ -2816,27 +2854,38 @@ def _coding_cli_command(
             str(workspace),
         ]
     else:
-        command = [
-            executable,
-            "--pure",
-            "run",
-            # Without --print-logs, opencode emits only a generic
-            # "Unexpected server error. Check server logs for details." on a
-            # failure and writes the real cause (e.g. ProviderModelNotFoundError
-            # for a mis-qualified model id) solely to its server log, which this
-            # subprocess never captures. Route that log to stderr at ERROR level
-            # so the actual error reaches the captured failure output and
-            # _coding_cli_failure_detail can excerpt it.
-            "--print-logs",
-            "--log-level",
-            "ERROR",
-            "--dir",
-            str(workspace),
-            "--agent",
-            "build",
-            "--format",
-            "default",
-        ]
+        if opencode_interface == "v2":
+            # The subprocess cwd selects the project. A private server inherits
+            # this invocation's credentials/configuration and owns its log stream.
+            command = [
+                executable,
+                "run",
+                "--standalone",
+                "--print-logs",
+                "--log-level",
+                "error",
+                "--agent",
+                "build",
+                "--format",
+                "default",
+            ]
+        elif opencode_interface in (None, "v1"):
+            command = [
+                executable,
+                "--pure",
+                "run",
+                "--print-logs",
+                "--log-level",
+                "ERROR",
+                "--dir",
+                str(workspace),
+                "--agent",
+                "build",
+                "--format",
+                "default",
+            ]
+        else:
+            raise _opencode_incompatible_error()
     if model is not None:
         command.extend(("--model", model))
     command.append(prompt)
@@ -3204,7 +3253,6 @@ class CodingCliSourceGenerator:
         model = explicit_stack_model()
         if model is None:
             model = recipe.model_for(self.selection.name)
-        command = self._command(workspace, model)
         with (
             log_operation("coding_session", cli=self.selection.name, model=model or ""),
             _coding_cli_process_environment(
@@ -3214,11 +3262,15 @@ class CodingCliSourceGenerator:
             ) as process_environment,
         ):
             try:
-                _require_coding_cli_compatible(
+                interface = _require_coding_cli_compatible(
                     self.selection,
                     workspace=workspace,
                     environment=process_environment,
                 )
+                _configure_opencode_interface(
+                    process_environment, interface, self.selection, workspace
+                )
+                command = self._command(workspace, model, opencode_interface=interface)
                 completed = _run_bounded(
                     command,
                     cwd=workspace,
@@ -3478,7 +3530,13 @@ class CodingCliSourceGenerator:
             )
         )
 
-    def _command(self, workspace: Path, model: str | None) -> list[str]:
+    def _command(
+        self,
+        workspace: Path,
+        model: str | None,
+        *,
+        opencode_interface: str | None = None,
+    ) -> list[str]:
         prompt = (
             "Read .literate-ai-generation-request.md and perform exactly that "
             "source-generation task."
@@ -3488,6 +3546,7 @@ class CodingCliSourceGenerator:
             workspace,
             model=model,
             prompt=prompt,
+            opencode_interface=opencode_interface,
         )
 
     def _collect(
@@ -3671,6 +3730,7 @@ _COMMON_SUBPROCESS_ENVIRONMENT = frozenset(
         "NO_PROXY",
         "PATH",
         "PATHEXT",
+        "ProgramData",
         "REQUESTS_CA_BUNDLE",
         "SSL_CERT_DIR",
         "SSL_CERT_FILE",
@@ -4110,10 +4170,10 @@ def _coding_cli_authentication_message(coding_cli: str) -> str:
     if coding_cli == "opencode":
         return (
             "opencode authentication is required. Configure the selected model "
-            "provider on this machine with `opencode auth login` before using "
-            "Literate AI, or pass one of that provider's documented environment "
-            "credentials (for example OPENCODE_API_KEY, OPENAI_API_KEY, "
-            "ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY)."
+            "provider on this machine with `opencode auth login` for v1; "
+            "isolated v2 requires one of the selected provider's documented "
+            "process environment credentials (for example OPENCODE_API_KEY, "
+            "OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY, or OPENROUTER_API_KEY)."
         )
     credentials = ", ".join(_CODING_CLI_DIRECT_CREDENTIAL_ENVIRONMENT[coding_cli])
     return (
@@ -4462,8 +4522,8 @@ def _require_coding_cli_compatible(
     *,
     workspace: Path,
     environment: Mapping[str, str],
-) -> None:
-    """Reject OpenCode command surfaces that cannot honor LitAI's isolation profile."""
+) -> str | None:
+    """Probe the exact launcher without a prompt or provider credentials."""
 
     if selection.name != "opencode":
         return
@@ -4492,22 +4552,134 @@ def _require_coding_cli_compatible(
     finally:
         selection.require_unchanged()
     help_output = completed.stdout + b"\n" + completed.stderr
-    if completed.returncode != 0 or any(
-        re.search(
-            rb"(?m)^[ \t]*" + re.escape(option) + rb"(?:[ =\t,]|$)",
-            help_output,
+
+    def advertises(options: tuple[bytes, ...]) -> bool:
+        return all(
+            re.search(
+                rb"(?m)^[ \t]*" + re.escape(option) + rb"(?:[ =\t,]|$)",
+                help_output,
+            )
+            is not None
+            for option in options
         )
-        is None
-        for option in _OPENCODE_REQUIRED_HELP_OPTIONS
+
+    if completed.returncode == 0:
+        if advertises(_OPENCODE_REQUIRED_HELP_OPTIONS):
+            return "v1"
+        if advertises(_OPENCODE_V2_HELP_OPTIONS):
+            return "v2"
+    raise _opencode_incompatible_error()
+
+
+def _configure_opencode_interface(
+    environment: dict[str, str],
+    interface: str | None,
+    selection: CodingCliSelection,
+    workspace: Path,
+) -> None:
+    if interface != "v2":
+        return
+    # The public V2 CLI has no switch to suppress system/MDM configuration,
+    # whose settings outrank inline configuration. Refuse rather than silently
+    # allow those sources to weaken the owned tool policy.
+    managed, preferences = opencode_managed_configuration_roots(environment)
+    if managed.exists() or (
+        preferences is not None
+        and (
+            (preferences / "ai.opencode.managed.plist").exists()
+            or any(preferences.glob("*/ai.opencode.managed.plist"))
+        )
     ):
-        raise _opencode_incompatible_error()
+        raise _opencode_managed_config_error()
+    environment["OPENCODE_CONFIG_CONTENT"] = _OPENCODE_V2_CONFIG_CONTENT
+    environment.pop("OPENCODE_PERMISSION", None)
+    # Isolate state BEFORE starting even the prompt-free configuration server.
+    # Stored integration documents can authorize plugins before debug config
+    # returns, so inspecting sources after boot is not a sufficient boundary.
+    root = Path(environment["OPENCODE_CONFIG_DIR"])
+    for variable, name in (
+        ("XDG_CONFIG_HOME", "config"),
+        ("XDG_DATA_HOME", "data"),
+        ("XDG_STATE_HOME", "state"),
+        ("XDG_CACHE_HOME", "cache"),
+    ):
+        directory = root / name
+        directory.mkdir()
+        environment[variable] = str(directory)
+    temporary = root / "tmp"
+    temporary.mkdir()
+    environment.update({key: str(temporary) for key in ("TMPDIR", "TMP", "TEMP")})
+    environment["OPENCODE_DB"] = str(root / "opencode.db")
+    # V2 also discovers ~/.agents independently of its config directory.
+    environment["OPENCODE_TEST_HOME"] = str(root)
+    environment["OPENCODE_CLI_CONFIG_CONTENT"] = "{}"
+    environment["OPENCODE_LOG_LEVEL"] = "error"
+    _require_opencode_v2_configuration(selection, workspace, environment)
+
+
+def _require_opencode_v2_configuration(
+    selection: CodingCliSelection, workspace: Path, environment: Mapping[str, str]
+) -> None:
+    """Refuse ambient integration/config documents before supplying a prompt.
+
+    All V2 data and database paths must already be private before this probe.
+    Confirm the native configuration contract without loading ambient sessions,
+    saved credentials, or integration/plugin documents.
+    """
+    credentials = {name.casefold() for name in _CODING_CLI_AUTH_ENVIRONMENT["opencode"]}
+    probe_environment = {
+        key: value
+        for key, value in environment.items()
+        if key.casefold() not in credentials
+    }
+    selection.require_unchanged()
+    try:
+        result = _run_bounded(
+            [selection.executable, "debug", "config", "--standalone"],
+            cwd=workspace,
+            environment=probe_environment,
+            timeout_seconds=_OPENCODE_PREFLIGHT_TIMEOUT_SECONDS,
+            maximum_stdout_bytes=_OPENCODE_PREFLIGHT_OUTPUT_BYTES,
+            maximum_stderr_bytes=_OPENCODE_PREFLIGHT_OUTPUT_BYTES,
+        )
+        entries = json.loads(result.stdout)
+        # The public V2 normalization omits an empty MCP server map.
+        expected = json.loads(_OPENCODE_V2_CONFIG_CONTENT)
+        expected.pop("mcp")
+        valid = (
+            result.returncode == 0
+            and isinstance(entries, list)
+            and len(entries) == 2
+            and entries[0]
+            == {"type": "directory", "path": environment["OPENCODE_CONFIG_DIR"]}
+            and entries[1] == {"type": "document", "info": expected}
+        )
+    except (CodingCliError, OSError, ValueError, TypeError):
+        raise _opencode_incompatible_error() from None
+    finally:
+        selection.require_unchanged()
+    if not valid:
+        raise CodingCliError(
+            "coding_cli.incompatible",
+            "OpenCode v2 did not confirm the isolated configuration; ambient "
+            "configuration or an unsupported configuration contract was detected",
+        )
+
+
+def _opencode_managed_config_error() -> CodingCliError:
+    return CodingCliError(
+        "coding_cli.incompatible",
+        "OpenCode v2 system or managed configuration prevents clean isolated "
+        "generation; use a host without that configuration or a supported v1 CLI",
+    )
 
 
 def _opencode_incompatible_error() -> CodingCliError:
     return CodingCliError(
         "coding_cli.incompatible",
-        "selected opencode executable does not provide Literate AI's required "
-        "`--pure run` non-interactive interface; upgrade OpenCode and retry",
+        "selected opencode executable must provide either the v1 `--pure run` "
+        "interface or the v2 `run --standalone` interface; install a supported "
+        "OpenCode v1 or v2 release and retry",
     )
 
 

@@ -92,7 +92,8 @@ litai spec derive path/to/source \
 available command in that order is used. `--model MODEL` pins a model for every inverse
 language call.
 Before an OpenCode inverse call, the exact executable must pass LitAI's bounded,
-prompt-free `--pure run --help` capability probe; incompatible releases fail before
+prompt-free `run --help` capability probe for the v1 pure or v2 standalone interface;
+v2 also confirms its isolated configuration before prompting. Incompatible releases fail before
 source evidence or a prompt can leave the process.
 `--model-evidence-byte-budget N` sets the positive UTF-8 evidence-byte ceiling for each
 call; it defaults to 262,144. An individual evidence record above the ceiling is an

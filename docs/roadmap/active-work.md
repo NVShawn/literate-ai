@@ -31759,3 +31759,80 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 - **Evidence:**
   - [ ] Require an empty unresolved tracker/review set, current contribution dispositions, complete release goals and reviewed branch/worktree provenance.
   - [ ] Require fresh exact-candidate release checks, platform qualification, package manifest and published-provider/tag/README read-back verification.
+
+### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
+
+- **Priority:** P1
+- **Owner:** Framework core coding-CLI adapter, host-install Flavors, and setup documentation; PROJECT Goals 1, 3, and 4
+- **Direction:** Support both v1 and v2 of the OpenCode command line without requiring existing v1 users to migrate.
+- **Conclusion:** Select a compatible invocation and isolation profile from the exact executable capabilities. Current generation and preflight require the v1 --pure and --dir help surface; published v2.2.5 help omits both and defaults to a shared background service. Preserve supported v1 behavior and qualify v2 with a private server, explicit workspace custody, provider credentials, bounded diagnostics, and deny-by-default tools. Supported legacy configuration translation alone does not establish equivalent isolation. The adapter implementation and macOS native checks now cover both interfaces; v2 uses fresh provider state and process environment credentials, while v1 retains saved logins. Broader installed/native qualification remains open; no release target is assigned.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Next action:** Qualify installed/native v1 and v2 generation on the remaining supported platforms, then renew fresh release evidence; local development repair coverage is complete.
+- **Implementation:**
+  - [x] Resolve PR #228 conflicts with current `main`, preserving both branches' changelog entries and implementation changes. Recompute reviewed lifecycle-driver and documentation identities for the integrated tree; run focused OpenCode regression and authority checks before pushing.
+  - [x] First capture pinned v1 and v2 CLI help/configuration contracts and define capability detection, version-specific command construction, and fail-closed diagnostics for unsupported executables.
+  - [x] Preserve the v1 invocation and add a qualified v2 invocation with --standalone, supported working-directory and logging controls, and version-appropriate configuration/environment handling; preserve executable identity, detached workspace, permission, and credential boundaries.
+  - [x] Review worker model probes and remote invocation paths for both majors; select v2 standalone mode for worker model checks and update attendee/operator guidance. Keep the existing host-install and initialized-template v1 pins unchanged so v1 remains a supported default; neither the adapter nor worker dispatch requires a forced upgrade.
+- **Evidence:**
+  - [x] Regression fixtures for both majors cover preflight acceptance/refusal, exact commands, workspace selection, credentials, configuration and tool isolation, diagnostics, timeouts, and executable drift; existing v1 coverage remains passing.
+  - [ ] Run actual pinned v1 and v2 help probes and authorized isolated generation on supported native hosts; verify v2 private-server credentials and logs, absence of ambient service/configuration leakage, and parity of generated-tree validation. Record exact versions and platform scope before claiming support.
+  - [ ] Verify host-install/template consistency, documentation commands, and required repository checks; leave live or native qualification unchecked until performed.
+
+OPENCODE-COMPAT-001 development evidence: macOS arm64 passes 25 existing critical
+coding-CLI/cache tests, five worker-alignment tests, and the focused version/isolation
+cases. Actual OpenCode 1.18.25 and 2.2.5 both pass
+`tests.e2e.test_opencode_native` against a loopback simulated model: each writes the
+requested JSON response through its real tool runner and refuses an attempted read
+outside the detached task workspace without exposing the sentinel to the model.
+The v2 test first verifies the unmodified production configuration, then adds only
+a test-owned loopback provider. Run through `make python-check` with
+`LITAI_OPENCODE_V1_BINARY` and `LITAI_OPENCODE_V2_BINARY` bound to exact binaries.
+No paid inference is used. Repository lint/format, host path policy, and layout
+checks pass. Documentation authority review is recorded; `litai verify` passes
+that gate but the project test receipt remains stale. Installed/native Linux and Windows generation and fresh release qualification
+remain separate pending evidence; the independent review, re-pin, and completed
+local development repair are recorded below. The workflow tracker
+survey fails through the configured SSH alias; a read-only GitHub.com survey found
+no overlapping OpenCode PR. Unrelated Cargo and lab-receipt work was retained.
+
+Independent review of the initial implementation found that v2 could import
+stored integration/plugin state before the configuration-source probe returned.
+The repair assigns fresh XDG config/data/state/cache roots, an explicit private
+OpenCode database, and private temporary storage before starting any v2 server.
+V2 intentionally uses process environment credentials and does not import saved
+OpenCode logins; v1 saved-login behavior remains unchanged. The isolation-profile
+revision invalidates earlier source-cache bindings. Independent review and renewed native/security checks of this repair pass;
+the exact reviewed hashes and pin qualification are recorded below.
+
+Independent reviewer `/root/opencode_review` approved the repaired TCB, including
+exact SHA-256 identities: `coding_cli.py`
+`62849861405624a3e9beb593ceaa07b05a4a3a7e2b25b16ba4a84190f196ff1f`,
+`user_paths.py`
+`69e9b903047f3f7473cb6db2d2fdc0251d6d268531b09d4f60a3f8b87f1784e8`,
+and `worker_alignment.py`
+`1196f0cde1d3b74350003a50973b9e160456d01d355d71b994b130b6e4b441f4`.
+No blocking review findings remain. The five focused security cases and both
+actual native CLI tests pass after the repair, including credential/DB/state
+path isolation before server startup and refused external reads. The driver pin is recorded with `make driver-review-record`; driver review,
+documentation authority review, lint, and formatting checks pass. Local regression repair is complete against the frozen driver, as recorded
+below; earlier interrupted runs and repair checkpoints are not release qualification.
+
+Final local development evidence: the checkpointed 2,448-case Python selection
+completes with 2,346 passed, 102 skipped, zero failed and zero known failures.
+The self-hosting replay passes in isolation (all three conformance cases) and
+in the final serial resume. Ten- and four-worker attempts reached that replay's
+300-second subprocess deadline; the final serial case passes without changing
+that bound. The installed rustup Cargo/rustc 1.97.1 toolchain is explicitly
+selected because the ambient Homebrew Cargo launcher cannot load its llhttp
+library; no host toolchain is installed or repaired. The repaired-suite runner
+returns status 2 by design and requires a fresh run from test one for release
+evidence. This is completed development repair coverage, not release attestation.
+Native OpenCode v2 process API-key propagation also succeeds against a loopback
+endpoint with fresh provider state. Driver review, documentation authority,
+repository lint/format, layout, host path policy and diff checks pass. The
+configured project test receipt remains stale; installed/native Linux and
+Windows OpenCode qualification and fresh release evidence remain open. Review:
+[PR #228](https://github.com/jordanhubbard/literate-ai/pull/228).
+
+PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471fec3a8121185` and preserved both changelog entries. No implementation conflict required editing; all three independently reviewed OpenCode source hashes remain unchanged. Recomputed the combined lifecycle-driver pin and documentation marker; both review checks pass. Managed `make python-check` passes five OpenCode regression tests (two native tests skipped because explicit binaries were not selected) and all eight project CLI tests. Host path policy and diff whitespace checks pass. `litai verify` passes authority, skips the three unselected gates, and retains the existing stale project receipt without claiming new lifecycle qualification. Configured start/end peer surveys still fail through the GitHub alias; direct read-only PR inspection succeeds. Unrelated worktrees remain untouched.
