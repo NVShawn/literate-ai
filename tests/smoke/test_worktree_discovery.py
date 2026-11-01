@@ -128,7 +128,7 @@ class WorktreeDiscoveryTests(unittest.TestCase):
         entry = self.entries(discovery.discover_project_worktrees(self.root))[outside]
         self.assertEqual(entry.classification, "registered-external-worktree")
         self.assertTrue(entry.locked)
-        self.assertIsNone(entry.reference)
+        self.assertIsNone(entry.registered_reference)
         self.assertTrue(outside.exists())
 
     def test_missing_registration_target_remains_reported_without_pruning(self):
@@ -158,6 +158,41 @@ class WorktreeDiscoveryTests(unittest.TestCase):
         (linked / ".git").write_text(f"gitdir: {foreign / '.git'}\n")
         entry = self.entries(discovery.discover_project_worktrees(self.root))[linked]
         self.assertEqual(entry.classification, "contradictory-registration")
+
+    def test_same_common_directory_pointer_swap_is_contradictory(self):
+        first = self.linked(self.parent / "first")
+        second = self.linked(self.parent / "second")
+        (first / ".git").write_bytes((second / ".git").read_bytes())
+        entries = self.entries(discovery.discover_project_worktrees(self.root))
+        self.assertEqual(entries[first].classification, "contradictory-registration")
+        self.assertEqual(entries[second].classification, "legacy-peer-worktree")
+        wire = entries[first].to_dict()
+        self.assertIn("registered_commit", wire)
+        self.assertNotIn("commit", wire)
+
+    def test_custody_byte_bound_inside_common_is_not_an_inspection_fallback(self):
+        original = discovery._Observation
+        for with_peer in (False, True):
+            if with_peer:
+                self.initialize(self.parent / "independent")
+            observed = []
+
+            class TrackingObservation(original):
+                def __init__(self, instances=observed):
+                    super().__init__()
+                    instances.append(self)
+
+            with mock.patch.object(discovery, "_Observation", TrackingObservation):
+                discovery.discover_project_worktrees(self.root)
+            limit = observed[0].path_bytes - 1
+            with (
+                self.subTest(with_peer=with_peer),
+                mock.patch.object(discovery, "_MAX_PATH_BYTES", limit),
+            ):
+                with self.assertRaisesRegex(
+                    ProjectWorktreeError, "custody paths.*byte bound"
+                ):
+                    discovery.discover_project_worktrees(self.root)
 
     def test_link_like_peer_is_reported_without_following_it(self):
         skip_unless_symlinks_followable(self, directory=self.parent)

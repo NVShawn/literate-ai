@@ -29,6 +29,7 @@ from .repository_refresh_worktrees import (
 _MAX_PEER_ENTRIES = 4096
 _DEFAULT_PEER_ENTRIES = 256
 _MAX_PATH_BYTES = 512 * 1024
+_MAX_MARKER_BYTES = 4096
 _DISCOVERY_SECONDS = 60.0
 
 
@@ -37,8 +38,8 @@ class WorktreeDiscoveryEntry:
     path: Path
     classification: str
     registered: bool
-    commit: str | None = None
-    reference: str | None = None
+    registered_commit: str | None = None
+    registered_reference: str | None = None
     locked: bool = False
     prunable: bool = False
     common_directory: Path | None = None
@@ -48,8 +49,8 @@ class WorktreeDiscoveryEntry:
             "path": str(self.path),
             "classification": self.classification,
             "registered": self.registered,
-            "commit": self.commit,
-            "reference": self.reference,
+            "registered_commit": self.registered_commit,
+            "registered_reference": self.registered_reference,
             "locked": self.locked,
             "prunable": self.prunable,
             "common_directory": str(self.common_directory)
@@ -91,6 +92,29 @@ def _node(path: Path) -> tuple[int, ...]:
         if stat.S_ISDIR(observed.st_mode)
         else (*node, observed.st_size, observed.st_mtime_ns, observed.st_ctime_ns)
     )
+
+
+@dataclass(frozen=True, slots=True)
+class _GitCustody:
+    common_directory: Path
+    administration_directory: Path
+    checkout_pointer: Path | None
+    administration_backlink: Path | None
+
+    def owns_registration(self, path: Path, canonical: Path) -> bool:
+        if path == canonical:
+            return (
+                self.checkout_pointer == path / ".git"
+                and self.administration_directory
+                == self.common_directory
+                == path / ".git"
+            )
+        return (
+            self.checkout_pointer == self.administration_directory
+            and self.administration_directory.parent
+            == self.common_directory / "worktrees"
+            and self.administration_backlink == path / ".git"
+        )
 
 
 class _Observation:
@@ -139,7 +163,43 @@ class _Observation:
         self.remaining()
         return result
 
-    def common(self, path: Path, *, bare: bool = False) -> Path:
+    def pointer(self, path: Path, *, prefix: bytes = b"") -> Path | None:
+        if not self.remember(path):
+            return None
+        signature = self.nodes[path]
+        if not stat.S_ISREG(signature[2]) or path_is_link_or_reparse(path):
+            raise ProjectWorktreeError("Git custody pointer must be a regular file")
+        if signature[3] > _MAX_MARKER_BYTES:
+            raise ProjectWorktreeError("Git custody pointer exceeds its byte bound")
+        descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        with os.fdopen(descriptor, "rb") as stream:
+            opened = os.fstat(stream.fileno())
+            if signature != (
+                opened.st_dev,
+                opened.st_ino,
+                opened.st_mode,
+                opened.st_size,
+                opened.st_mtime_ns,
+                opened.st_ctime_ns,
+            ):
+                raise ProjectWorktreeError("Git custody pointer changed while opened")
+            content = stream.read(_MAX_MARKER_BYTES + 1)
+        self.remember(path)
+        if len(content) > _MAX_MARKER_BYTES:
+            raise ProjectWorktreeError("Git custody pointer exceeds its byte bound")
+        payload = content.rstrip(b"\r\n")
+        if (
+            not payload.startswith(prefix)
+            or not payload[len(prefix) :]
+            or b"\0" in payload
+        ):
+            raise ProjectWorktreeError("Git custody pointer is invalid")
+        target = Path(os.fsdecode(payload[len(prefix) :]))
+        return Path(
+            os.path.abspath(target if target.is_absolute() else path.parent / target)
+        )
+
+    def common(self, path: Path, *, bare: bool = False) -> _GitCustody:
         require_safe_directory(path)
         marker = path / ".git"
         self.remember(marker)
@@ -149,6 +209,7 @@ class _Observation:
             self.git(path, "rev-parse", "--absolute-git-dir").decode("utf-8").strip()
         )
         require_safe_directory(administration)
+        administration = administration.resolve(strict=True)
         self.remember(administration)
         for name in ("commondir", "gitdir", "config", "config.worktree"):
             self.remember(administration / name)
@@ -172,7 +233,16 @@ class _Observation:
         common = common.resolve(strict=True)
         self.remember(common)
         self.remember(common / "config")
-        return common
+        pointer = (
+            self.pointer(marker, prefix=b"gitdir: ")
+            if marker.is_file()
+            else marker
+            if marker.is_dir()
+            else None
+        )
+        return _GitCustody(
+            common, administration, pointer, self.pointer(administration / "gitdir")
+        )
 
     def revalidate(self) -> None:
         self.remaining()
@@ -215,11 +285,21 @@ def _registered_entry(
         classification = "unsafe-registered-checkout"
     else:
         try:
-            common = observation.common(path)
-        except (OSError, ValueError):
+            custody = observation.common(path)
+            common = custody.common_directory
+        except ProjectWorktreeError:
+            raise
+        except (
+            OSError,
+            UnsafeFilesystemPathError,
+            OrchestrationInventoryError,
+            UnicodeError,
+        ):
             classification = "unverifiable-registration"
         else:
-            if common != location.common_directory:
+            if common != location.common_directory or not custody.owns_registration(
+                path, location.canonical_checkout
+            ):
                 classification = "contradictory-registration"
             elif path == location.canonical_checkout:
                 classification = "canonical-checkout"
@@ -262,8 +342,15 @@ def _peer_entry(
             observation.remember(path / name)
     common = None
     try:
-        common = observation.common(path, bare=bare)
-    except (OSError, ValueError):
+        common = observation.common(path, bare=bare).common_directory
+    except ProjectWorktreeError:
+        raise
+    except (
+        OSError,
+        UnsafeFilesystemPathError,
+        OrchestrationInventoryError,
+        UnicodeError,
+    ):
         classification = "unverifiable-peer-repository"
     else:
         classification = (
