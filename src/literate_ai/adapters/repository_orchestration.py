@@ -11,6 +11,7 @@ import os
 import re
 import stat
 from dataclasses import asdict, dataclass
+from math import isfinite
 from pathlib import Path
 
 from literate_ai._filesystem import (
@@ -69,7 +70,14 @@ class GitlinkInventory:
         return canonical_identity(self.to_dict()).uri
 
 
-def _git(root: Path, *arguments: str) -> bytes:
+def _git(root: Path, *arguments: str, timeout_seconds: float = 60) -> bytes:
+    if (
+        isinstance(timeout_seconds, bool)
+        or not isinstance(timeout_seconds, (int, float))
+        or not isfinite(timeout_seconds)
+        or not 0 < timeout_seconds <= 60
+    ):
+        _fail("inspection_failed", "Git observation timeout must be within 60 seconds")
     # Ambient Git selectors must not redirect observation to a different index,
     # worktree, object store, or global command/configuration injection.
     environment = {
@@ -92,7 +100,7 @@ def _git(root: Path, *arguments: str) -> bytes:
             # sustained filesystem pressure for hours. Preserve the bounded
             # observation while allowing a delayed read-only Git process to
             # complete instead of turning runner contention into data drift.
-            timeout_seconds=60,
+            timeout_seconds=timeout_seconds,
             stdout_limit_bytes=8 * 1024 * 1024,
             stderr_limit_bytes=64 * 1024,
             error_prefix="orchestration.git",
