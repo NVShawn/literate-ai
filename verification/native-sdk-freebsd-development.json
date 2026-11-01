@@ -1,0 +1,68 @@
+{
+  "schema": "literate-ai/native-sdk-development-evidence@1",
+  "release_qualification": false,
+  "candidate_revision": "cc663b3ada3ecdb61477f66a5dd212532b4fc3f2",
+  "qualification_harness_revision": "cc663b3ada3ecdb61477f66a5dd212532b4fc3f2",
+  "workflow_run": 41277871319,
+  "workflow_url": "https://github.com/jordanhubbard/literate-ai/actions/runs/41277871319",
+  "artifact": {
+    "id": 13072583631,
+    "name": "freebsd-native-sdk-qualification",
+    "provider_archive_digest": "sha256:b2fdce0750827f6c93129cf1843c3dc9f8978b3668ecd9d302e733e2f401fb20"
+  },
+  "retained_result_sha256": "d86328f1e6c02498dabb22fb726cfa508ecc2a4c325b73c368d28ffe4bc9b7f5",
+  "guest_inventory_members_verified": 44,
+  "wheel": {
+    "revision": "cc663b3ada3ecdb61477f66a5dd212532b4fc3f2",
+    "wheel": "literate_ai-1.4.0-py3-none-any.whl",
+    "qualification_harness_revision": "cc663b3ada3ecdb61477f66a5dd212532b4fc3f2",
+    "sha256": "ab7655ecd052517ac0ee1b2c706e32b678e963a81fa9ecf89e728cf2f52001c7",
+    "test_source_sha256": "37a6e0a64fb8369d1b6e7e290d7f6a54890951eb2a5dd323c4b10e6f3176cc8f"
+  },
+  "installed_distribution_identity": "sha256:ea7f9fae9876753c3cc8b31dfee30560d82eef0ade835d3aa34fd716384b6919",
+  "platform": {
+    "system": "FreeBSD",
+    "release": "15.1-RELEASE-p3",
+    "machine": "amd64",
+    "python": "3.12.14",
+    "unprivileged": true
+  },
+  "publication_preflight": {
+    "selected": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "installed_owner_controls": {
+    "selected": 40,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "production_modules_verified": 510
+  },
+  "installed_owner_controls_seconds": 1272.596,
+  "canonical_cli": {
+    "stage": "complete-local-runtime",
+    "canonical_installed_cli_qualified": true,
+    "consumer_rpath": false,
+    "without_loader_exit_code": 1,
+    "reviewed_loader_required": true,
+    "compiler_sdk_admitted": false,
+    "product_receipt": false,
+    "iso_created": false,
+    "release_acceptance": false
+  },
+  "canonical_cli_test_doubles": false,
+  "installed_owner_controls_may_use_test_doubles": true,
+  "guest_exit_code": 0,
+  "collection_complete": true,
+  "scope": "Installed public CLI SDK microfixture and installed owner controls",
+  "execution_environment": "Ephemeral native FreeBSD VM on hosted Linux",
+  "remaining": [
+    "Exact final 1.4 source qualification",
+    "Full retained native source/ports scale and memory measurements",
+    "Per-unit native package and real remote worker LINK qualification",
+    "Two physical FreeBSD workers and shared-cache performance",
+    "Compiler SDK/product admission and final release acceptance"
+  ]
+}

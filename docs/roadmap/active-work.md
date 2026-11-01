@@ -31760,6 +31760,16 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
   - [ ] Require an empty unresolved tracker/review set, current contribution dispositions, complete release goals and reviewed branch/worktree provenance.
   - [ ] Require fresh exact-candidate release checks, platform qualification, package manifest and published-provider/tag/README read-back verification.
 
+- **Native SDK development milestone:** Exact source
+  `cc663b3ada3ecdb61477f66a5dd212532b4fc3f2` passes the real installed public CLI
+  SDK microfixture, five publication controls and 40 installed owner controls on
+  unprivileged native FreeBSD 15.1 amd64, with no skips and 510 verified production
+  module bindings. All 44 guest inventory members rehash correctly. Retained
+  [development evidence](../../verification/native-sdk-freebsd-development.json)
+  explicitly refuses a release-qualification claim: this ephemeral guest does not
+  supply full retained-tree, two-physical-host cache/performance, compiler SDK or
+  final candidate acceptance. Later integration changes still require renewal.
+
 ### [ ] OPENCODE-COMPAT-001 — Support both OpenCode v1 and v2 command-line interfaces
 
 - **Priority:** P1
