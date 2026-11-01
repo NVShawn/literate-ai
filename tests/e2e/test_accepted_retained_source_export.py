@@ -70,7 +70,10 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
     def test_project_relative_target_admits_then_builds_without_agent(self):
         self.exercise_accepted_export(committed_target=True)
 
-    def exercise_accepted_export(self, *, committed_target):
+    def test_ignored_project_target_survives_materialization_without_agent(self):
+        self.exercise_accepted_export(committed_target=True, materialize=True)
+
+    def exercise_accepted_export(self, *, committed_target, materialize=False):
         import py_compile
         from pathlib import Path
 
@@ -118,6 +121,17 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
             record_project_authority_review(self.project)
             cache_root = self.project / "generated/committed-source-cache"
 
+            if materialize:
+                import subprocess
+
+                subprocess.run(["git", "init", "-q", str(self.project)], check=True)
+                (self.project / ".gitignore").write_text(
+                    "generated/committed-source-cache/\nprivate-ignored/\n"
+                )
+                private = self.project / "private-ignored"
+                private.mkdir()
+                (private / "operator.txt").write_text("not cache transport input")
+
         acceptances = []
         original_accept = LocalStandardLifecyclePorts.accept
 
@@ -150,6 +164,60 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
             self.assertEqual(status, 0, admitted)
             self.assertTrue(admitted["result"]["passed"])
             self.assertTrue(admitted["result"]["receipt_committed"])
+            if materialize:
+                from literate_ai.adapters.source_materialization import (
+                    capture_source_archive,
+                )
+                from literate_ai.contracts import LifecycleDispatchAction
+                from literate_ai.remote_source_guard import extract_source_archive
+                from tests.support.fixtures_test_remote_execution import request
+
+                original_project = self.project
+                before_cache = {
+                    item.relative_to(cache_root): item.read_bytes()
+                    for item in cache_root.rglob("*")
+                    if item.is_file()
+                }
+                staging = self.root / "transport"
+                staging.mkdir()
+                with patch.dict(os.environ, self.environment):
+                    captured = capture_source_archive(
+                        self.project,
+                        replace(
+                            request(LifecycleDispatchAction.BUILD),
+                            accepted_source_only=True,
+                        ),
+                        directory=staging,
+                    )
+                destination = self.root / "received"
+                extract_source_archive(
+                    captured.path,
+                    destination,
+                    captured.materialization.source_tree_identity.uri,
+                )
+                self.project = destination / "literate-ai"
+                cache_root = self.project / "generated/committed-source-cache"
+                self.assertTrue(
+                    cache_root.is_dir(), "ignored declared cache was omitted"
+                )
+                self.assertFalse((self.project / "private-ignored").exists())
+                self.assertEqual(
+                    before_cache,
+                    {
+                        item.relative_to(cache_root): item.read_bytes()
+                        for item in cache_root.rglob("*")
+                        if item.is_file()
+                    },
+                )
+                controller_cache = original_project / "generated/committed-source-cache"
+                self.assertEqual(
+                    before_cache,
+                    {
+                        item.relative_to(controller_cache): item.read_bytes()
+                        for item in controller_cache.rglob("*")
+                        if item.is_file()
+                    },
+                )
             prior_acceptance_count = len(acceptances)
             status, built = self.build()
             self.assertEqual(status, 0, built)
