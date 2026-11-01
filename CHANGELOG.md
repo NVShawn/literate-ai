@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Accepted-source transport: include declared readable project-relative caches in
+  the authenticated source archive even when Git ignores them. Preserve cache
+  roots, read policy and fresh acceptance without invoking a coding agent.
+
 - Worktrees: add internal read-only audit-input capture and private immutable
   observation journals with interrupted-publication recovery. Preserve source and
   peer index metadata; full audit and retirement remain pending.

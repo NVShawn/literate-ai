@@ -14,6 +14,7 @@ import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
+from literate_ai._filesystem import stat_is_link_or_reparse
 from literate_ai.adapters._processes import run_with_tree_kill
 from literate_ai.adapters.cache.filesystem import (
     SourceCacheError,
@@ -421,12 +422,16 @@ def _cache_paths(root: Path) -> tuple[str, ...]:
     paths: list[str] = []
     for current, directories, files in os.walk(root, followlinks=False):
         current_path = Path(current)
-        directories[:] = sorted(
-            name for name in directories if not (current_path / name).is_symlink()
-        )
+        for name in directories:
+            if stat_is_link_or_reparse((current_path / name).lstat()):
+                raise SourceMaterializationError(
+                    "execution.accepted_source_cache_capture_failed",
+                    "accepted-source-cache must not contain directory symlinks",
+                )
+        directories[:] = sorted(directories)
         for name in sorted(files):
             candidate = current_path / name
-            if candidate.is_symlink():
+            if stat_is_link_or_reparse(candidate.lstat()):
                 raise SourceMaterializationError(
                     "execution.accepted_source_cache_capture_failed",
                     "accepted-source-cache must not contain symlinks",
@@ -503,6 +508,57 @@ def capture_accepted_source_cache_archive(
     )
 
 
+def _project_cache_projection(root: Path):
+    """Include only declared readable managed roots, without creating stores.
+
+    Cache bytes remain untrusted membership on the receiver. The enclosing source
+    manifest authenticates transport, not prior acceptance. Ordinary Git/exclusion
+    rules do not decide whether explicitly declared cache roots are available.
+    """
+    from literate_ai.adapters.cache.lookup import readonly_standard_source_caches
+    from literate_ai.cache_directories import resolve_cache_directories
+    from literate_ai.contracts import SourceCacheMode, SourceCacheRootKind
+    from literate_ai.projects import ProjectError, discover_project
+
+    try:
+        project = discover_project(root)
+        configuration = None if project is None else project.definition.source_cache
+        if configuration is None or configuration.mode is SourceCacheMode.OFF:
+            return (), (), ()
+        targets = {
+            target.target_id: target
+            for target in configuration.targets
+            if target.root_kind is SourceCacheRootKind.PROJECT_RELATIVE
+        }
+        if not targets:
+            return (), (), ()
+        excluded = tuple(target.root_reference for target in targets.values())
+        paths, snapshots = [], []
+        runtime = resolve_cache_directories(root).build_dir / "accepted-source-cache"
+        for cache in readonly_standard_source_caches(project, runtime):
+            target = targets.get(cache.target_id)
+            if target is None:
+                continue  # Runtime/operator-bound stores have separate transport.
+            memberships = tuple(
+                sorted(
+                    entry.identity.uri for entry in cache.verified_published_entries()
+                )
+            )
+            selected = (
+                _cache_paths(Path(_native_filesystem_path(cache.root)))
+                if cache.available
+                else ()
+            )
+            paths.extend(f"{target.root_reference}/{path}" for path in selected)
+            snapshots.append((target.target_id, memberships, selected))
+        return tuple(sorted(set(paths))), excluded, tuple(snapshots)
+    except (OSError, SourceCacheError, ProjectError) as exc:
+        raise SourceMaterializationError(
+            "execution.accepted_source_cache_invalid",
+            "project cache transport requires verified declared read targets",
+        ) from exc
+
+
 def capture_source_archive(
     project_root: Path,
     request: ExecutionDispatchRequest,
@@ -526,6 +582,16 @@ def capture_source_archive(
     paths = _git_paths(root, excluded_directories)
     if paths is None:
         paths = _filesystem_paths(root, excluded_directories)
+    project_cache_projection = None
+    if request.accepted_source_only:
+        project_cache_projection = _project_cache_projection(root)
+        cache_paths, cache_roots, _snapshots = project_cache_projection
+        paths = tuple(
+            sorted(
+                set(path for path in paths if not _is_excluded_path(path, cache_roots))
+                | set(cache_paths)
+            )
+        )
     try:
         before = (
             source_paths_identity(root, paths) if paths else source_tree_identity(root)
@@ -538,7 +604,11 @@ def capture_source_archive(
         raise SourceMaterializationError(
             "execution.source_capture_failed", "project source could not be captured"
         ) from exc
-    if before != after:
+    if (
+        before != after
+        or project_cache_projection is not None
+        and _project_cache_projection(root) != project_cache_projection
+    ):
         raise SourceMaterializationError(
             "execution.source_changed", "project source changed while captured"
         )

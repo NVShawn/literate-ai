@@ -32439,6 +32439,34 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   readonly inspection, write-only policy refusal and typed malformed-store errors.
   The fixture supplies synthetic installed-distribution metadata; execution and
   lifecycle controls are real, but this is not non-editable installation evidence.
+- **Ignored-target transport plan:** Extend the authenticated project-source
+  projection to include files from declared readable project-relative cache stores
+  even when Git ignores them or ordinary operational exclusions omit them. Reuse
+  read-only target resolution and existing cache membership verification; preserve
+  project-relative roots on extraction and the existing archive wire shape.
+  Default runtime cache transport remains separately bound. Refuse link-like cache
+  paths and changed membership/file inventories; never create source-side stores
+  or infer a new operator root. Prove a public admission/materialization/build/run
+  round trip with no coding agent, unchanged controller cache bytes, and absent,
+  malformed and write-only controls. This does not solve historical ambiguity.
+- **Ignored-target transport development evidence:** A real public retained
+  admission followed by Git-ignored project-cache materialization first failed
+  because the cache root was omitted. The repaired archive preserves that root
+  and completes accepted-only build/run without a coding agent, with fresh
+  acceptance and unchanged controller-cache bytes. Unrelated ignored operator
+  files are excluded. All three public default/project-relative/materialized
+  admission/build/run scenarios pass. Twenty-one cache, materialization, retirement and remote
+  transport controls pass with four subtests; the focused Make Python gate also
+  passes. Missing stores remain absent, write-only roots are excluded, malformed
+  stores refuse, and source-side cache files are unchanged. Independent reviewer
+  `review_pr239` approved source blob `49794f36c823258c8f2ce5107f59022f315c2189`
+  and both changed test modules before the driver pin was updated. This is source
+  and extracted-project development evidence, not native SSH or installed-wheel
+  qualification, and it does not solve #197.
+  Final lint, formatting, layout, public-export, driver and documentation reviews
+  pass; 181 Mermaid diagrams render. Authority passes while the configured
+  lifecycle receipt remains stale. Integrated and installed/native qualification
+  and historical-membership selection remain release blockers.
 - **Next unchecked action:** qualify declared-cache transport for ignored project
   targets and repair exact requested-authority selection before global historical
   provider ambiguity. Do not close #196/#197 from the local source checkpoint.
