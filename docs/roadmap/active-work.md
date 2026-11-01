@@ -32529,7 +32529,10 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   cache-continuation result as not qualified and preserves every existing Windows
   wheel check. Windows cache-specific evidence, installed multi-Component root
   selection, native SSH and final integrated release qualification remain open.
-  The complete local Python suite is still running; this source has not landed.
+  The complete local Python suite passed: 2,604 tests in 5,647.412 seconds,
+  with 75 platform/opt-in skips. This is the installed-cache continuation source,
+  not the later unit-package implementation or final integrated release evidence;
+  it has not landed yet.
   Independent reviewer `review_pr239` approved the final portability adjustment
   (wheel harness SHA-256 `7e1712b25d4f4ae20efe5f99ca7e0bb74f3b80abba2f25e530b44e07e7e554dd`).
   The actual scenario helper is byte-identical to the installed-qualified source;
