@@ -1698,6 +1698,28 @@ def _main() -> int:
                 cwd=root,
             ).stdout
         )
+        # This new public fixture builds with GNU Make. Native Windows wheel
+        # checks do not require Make/POSIX tooling, so retain their existing
+        # contract and report this separate acceptance gap explicitly.
+        cache_continuation = {
+            "qualified": False,
+            "platform": sys.platform,
+            "reason": "public retained fixture requires GNU Make on a POSIX host",
+        }
+        if os.name == "posix":
+            cache_continuation = json.loads(
+                run(
+                    str(python),
+                    "-I",
+                    str(
+                        repository / "scripts" / "installed_cache_continuation_smoke.py"
+                    ),
+                    str(root / "cache-continuation"),
+                    standard_binding["distribution"],
+                    cwd=root,
+                ).stdout
+            )
+            cache_continuation.update(qualified=True, platform=sys.platform)
         worker_litai, worker_runtime = bootstrap_real_worker_runtime(
             root, wheel_files[0], standard_binding["distribution"]
         )
@@ -2462,6 +2484,7 @@ def _main() -> int:
                     },
                     "starter_recipe_identity": planned["result"]["recipe_identity"],
                     "source_admission_lifecycle": source_admission_lifecycle,
+                    "cache_continuation": cache_continuation,
                     "standard_binding": standard_binding,
                     "standard_binding_tamper_code": tamper_code,
                 },

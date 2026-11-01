@@ -1,0 +1,70 @@
+{
+  "implementation_sha256": "2b1e0ce24bfc81f26294291190720dffc8dd86ce66c17cf7c34e826095fb7ce9",
+  "observed_at": "2026-11-01T19:16:06.686243+00:00",
+  "published_release": {
+    "assets": [
+      {
+        "digest": "sha256:5534ac41d04003526e114b71b2501661999f90365323a627a2132602c7f826b0",
+        "name": "eight-hours-to-make-coffee-poster.png",
+        "size": 95639,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee-poster.png"
+      },
+      {
+        "digest": "sha256:d01ce010654c55d6a1b3de16fa3cd8d640b758fe3559783236cfc9754e7d8e97",
+        "name": "eight-hours-to-make-coffee.mp4",
+        "size": 23051695,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.mp4"
+      },
+      {
+        "digest": "sha256:d0628463c74bc3a7b931d2777d05730a01c93e66da28d6e58db73f2fc62f291e",
+        "name": "eight-hours-to-make-coffee.srt",
+        "size": 14814,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.srt"
+      },
+      {
+        "digest": "sha256:0e6cbde161e0fe0e059cc61828366d06392d02ea08c9bb01983050932e1d1d16",
+        "name": "eight-hours-to-make-coffee.vtt",
+        "size": 14573,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/eight-hours-to-make-coffee.vtt"
+      },
+      {
+        "digest": "sha256:5243a93edda7a81c4ab93c3fb6268a208eafc3515872086ef95fd0c1b0d9b509",
+        "name": "literate-ai-1.3.1-conference-deck.html",
+        "size": 1353967,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate-ai-1.3.1-conference-deck.html"
+      },
+      {
+        "digest": "sha256:5d2ec41961624b26fa0ce66e6935117eda80f02dce949fe40bc6c3cc5d15e9ca",
+        "name": "literate-ai-1.3.1-release-briefing.pptx",
+        "size": 161540,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate-ai-1.3.1-release-briefing.pptx"
+      },
+      {
+        "digest": "sha256:55f52a2917b58fdf62d3b56b4a1c4736cc9ee3bb96ffef7240f6c17c0201f123",
+        "name": "literate_ai-1.3.1-claude-plugin.zip",
+        "size": 5544988,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate_ai-1.3.1-claude-plugin.zip"
+      },
+      {
+        "digest": "sha256:d68e001020dc64735797b8f6241ffd7271be5912ddd9882e7b2ab75687dcb1aa",
+        "name": "literate_ai-1.3.1-codex-plugin.zip",
+        "size": 5545400,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate_ai-1.3.1-codex-plugin.zip"
+      },
+      {
+        "digest": "sha256:4b075b0b7727a11785a59359ccc3fc2de327baad46ec45350faeb66ddfc14c15",
+        "name": "literate_ai-1.3.1-py3-none-any.whl",
+        "size": 3817215,
+        "url": "https://github.com/jordanhubbard/literate-ai/releases/download/v1.3.1/literate_ai-1.3.1-py3-none-any.whl"
+      }
+    ],
+    "tag": "v1.3.1",
+    "title": "v1.3.1",
+    "url": "https://github.com/jordanhubbard/literate-ai/releases/tag/v1.3.1"
+  },
+  "remote_default_branch": "main",
+  "remote_default_revision": "ad979c6e67f74acbc914a2c387a86b00f06ade65",
+  "scope": "Live current-stable README/provider readback only; not a prepared 1.4 release or final main CI qualification",
+  "verifier": "verify_remote_release_readme",
+  "verifier_passed": true
+}

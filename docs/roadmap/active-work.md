@@ -29244,17 +29244,36 @@ projects under #22, typed SSH custody under #69, or a downstream release.
 ### [ ] HOST-WINARM-001 — Add native Windows ARM64 host-install realization
 
 - **GitHub issue:** [#43](https://github.com/jordanhubbard/literate-ai/issues/43)
-- **Current release target:** 1.3.0 (2026-10-18 reconciliation)
+- **Release target:** 1.4.0
+- **Historical target:** 1.3.0 (2026-10-18 reconciliation); current 1.4 integration includes all original open issues by directing-user authorization.
 
 - **Priority:** P1
-- **Owner:** framework authority and qualification named by the linked issue
+- **Owner:** Windows OS Flavor host-install realization and target-aware installer observations
 - **Direction:** Add native Windows ARM64 host-install realization
-- **Conclusion:** Include in 1.3. Preserve the issue acceptance contract and fail-closed authority boundaries. Detailed implementation follows inspection of the owning code.
+- **Conclusion:** Add a verified ARM64 tuple using existing package/archive realizations. Preserve current required-capability closure and x86-64 behavior; report unavailable optional capabilities truthfully. Native readiness must inspect actual executable/runtime architecture, not infer it from versions, package registration or the host CPU.
 - **Depends on:** none
 - **Implementation:**
   - [ ] Implement the linked issue contract without relaxing existing validation
 - **Evidence:**
   - [ ] Run the issue acceptance cases and required integration qualification before closing
+
+- **Reviewed execution plan:** Independent reviewer `review_worktree_discovery`
+  confirms the existing model can express the tuple without a new realization
+  kind. The current observer checks versions/DLL existence but not PE machine
+  architecture, so an ARM-only installer flag cannot prevent an existing emulated
+  x64 command from being accepted. Add bounded target-aware observation of the
+  interpreter, executable and required runtime companions before native readiness.
+  Preserve proven ready tools; incompatible/emulated tools must be rejected or
+  explicitly reported rather than silently replaced. Verify vendor ARM mappings
+  and archive payloads independently, including all Codex helper processes.
+  Unsupported optional capabilities must fail existing closure when selected.
+  Official Codex 0.153.0 ARM64 Windows package metadata supplies SHA-256
+  `c65f36a29f7ddfba6848fc9ddbaa7cb257f0c315d6e5d7fa54d9045df41d3573`;
+  downloading/rehashing and native execution are still required. GitHub offers
+  native Windows ARM64 runners, but availability is not platform qualification.
+  Next: implement target-aware observation and the independently verified leaf;
+  qualify selection, ready-tool preservation, missing/foreign-architecture refusal
+  and the actual native runner without changing x86-64 behavior.
 
 ### [x] REFRESH-PERFORMANCE-001 — Repository refresh input checks re-walk gitlink inventory with thousands of git launches
 
@@ -32116,9 +32135,19 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   the default branch at its resolved commit while a local release-branch README
   remains stale. GitHub transport in that fixture is simulated; it is not hosted
   release qualification. Live GitHub v1.3.1 provider metadata checks the authored
-  README's nine assets; current remote main correctly refuses the missing new
-  markers until this change lands. Required review/main CI and final 1.4 remote
+  README's nine assets; at that checkpoint remote main correctly refused the
+  missing new markers before the change landed. Required review/main CI and final 1.4 remote
   readback are still pending; the goal remains open.
+- **Current live provider/default-branch evidence:** The production read-back
+  owner passes against actual GitHub main
+  `ad979c6e67f74acbc914a2c387a86b00f06ade65`, which now contains the managed
+  README section. Its v1.3.1 title, tag and all nine published asset sizes and
+  SHA-256 values match the provider. No GitHub transport or README bytes were
+  replaced for this check. [Retained current-stable readback](../../verification/release-readme-current-stable-development.json)
+  supersedes the historical missing-marker observation above. This checks the
+  existing stable release, not a prepared or published 1.4 release. Exact
+  integration/main CI remains the next implementation gate; final 1.4 publication
+  and remote read-back remain consuming-release requirements.
 
 ### [ ] NATIVE-PROMOTION-FLAVORS-001 — Preserve reviewed build-system defaults in native child promotion
 
@@ -32469,6 +32498,46 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   and historical-membership selection remain release blockers.
 - **Next unchecked action:** complete exact integrated and installed/native
   qualification for declared-cache transport and Component/project-root selection.
+- **Installed continuation execution plan:** Extend the canonical wheel harness
+  with actual installed-distribution observation and public retained admission,
+  accepted-only build and run. Exercise default and declared project-relative
+  targets, successive admitted revisions, exact selection and ambiguous/unknown
+  refusal while retaining historical cache bytes. Reuse test-owned untrusted
+  source authoring only; never replace installed metadata or lifecycle owners.
+  Native transport and final integrated release acceptance remain required.
+  Independent reviewer `review_pr239` approved the harness source after correcting
+  the unknown-entry refusal code and explicitly disabling inherited-session
+  routing. Seven existing wheel-harness checks and global lint/format pass;
+  actual installed execution was the next gate at that source-review checkpoint.
+  The first actual installed attempt completed retained admissions and reached
+  the expected ambiguous-provider refusal, then failed in the harness because
+  it parsed only stdout while public CLI errors use stderr. The reader now
+  accepts the CLI error stream; this failed attempt remains recorded and does
+  not count as completed installed qualification.
+- **Actual installed macOS continuation evidence:** Canonical `make wheel-check`
+  passes at exact source `2cd027f14` with non-editable 1.4.0 wheel
+  `sha256:e20d3ec807386f51480c63a66b933a77dd6a0eb48665cac2f97a36c3505a7c49`.
+  Both default and declared project-relative targets complete two public retained
+  admissions, refuse unselected ambiguity and an unknown identity, then build
+  and run both exact revisions. Exported checked-hash Python bytes match each
+  independently compiled revision; historical cache bytes and refusal receipts
+  are unchanged. The real installed distribution is
+  `sha256:fdb060917e6c2963e9dd335b98086e443b051900895a92f34fe83908ac242afc`
+  with 1,257 members. No synthetic distribution, lifecycle or acceptance owner
+  supplies this result. The first failed harness attempt remains recorded above.
+  This new fixture uses GNU Make/POSIX tooling; native Windows reports its
+  cache-continuation result as not qualified and preserves every existing Windows
+  wheel check. Windows cache-specific evidence, installed multi-Component root
+  selection, native SSH and final integrated release qualification remain open.
+  The complete local Python suite passed: 2,604 tests in 5,647.412 seconds,
+  with 75 platform/opt-in skips. This is the installed-cache continuation source,
+  not the later unit-package implementation or final integrated release evidence;
+  it has not landed yet.
+  Independent reviewer `review_pr239` approved the final portability adjustment
+  (wheel harness SHA-256 `7e1712b25d4f4ae20efe5f99ca7e0bb74f3b80abba2f25e530b44e07e7e554dd`).
+  The actual scenario helper is byte-identical to the installed-qualified source;
+  all seven existing wheel-harness checks pass again with a separate checkpoint
+  so the ongoing complete suite retains its own evidence.
   Source development does not close #196/#197.
 
 - **Exact-selection implementation plan:** Reuse the existing repeated
