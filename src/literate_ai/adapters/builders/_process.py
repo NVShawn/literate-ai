@@ -10,6 +10,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import BinaryIO
 
 from literate_ai.diagnostics import inherited_verbose_environment, trace_subprocess
 
@@ -56,8 +57,14 @@ def run_bounded_process(
     input_limit_bytes: int = 64 * 1024,
     interrupt_guard: Callable[[], None] | None = None,
     terminate_descendants: bool = False,
+    stdout_sink: BinaryIO | None = None,
 ) -> BoundedProcessResult:
-    """Drain compiler streams concurrently and kill its process tree on failure."""
+    """Drain bounded streams and kill the owned process tree on failure.
+
+    An explicit caller-owned binary stdout sink avoids retaining archive bytes
+    in memory. Its written bytes count against the same stdout limit; stdout in
+    the result is empty in that mode. The caller owns flush/close and publication.
+    """
 
     if timeout_seconds <= 0:
         raise ValueError("tool process timeout must be positive")
@@ -79,6 +86,8 @@ def run_bounded_process(
         raise ValueError("tool process input exceeds its configured byte limit")
     if interrupt_guard is not None:
         interrupt_guard()
+    if stdout_sink is not None and not stdout_sink.writable():
+        raise ValueError("tool stdout sink must be writable")
     ownership = create_process_tree_ownership()
     child_environment = inherited_verbose_environment(environment)
     started_monotonic = clock()
@@ -110,6 +119,7 @@ def run_bounded_process(
         "stderr": (process.stderr, stderr_limit_bytes),
     }
     buffers = {name: bytearray() for name in streams}
+    counts = dict.fromkeys(streams, 0)
     overflow = threading.Event()
     read_errors: list[OSError | ValueError] = []
     state_lock = threading.Lock()
@@ -138,25 +148,43 @@ def run_bounded_process(
         )
         writer.start()
 
+    def retain(name: str, chunk: bytes) -> None:
+        if name == "stdout" and stdout_sink is not None:
+            remaining = memoryview(chunk)
+            while remaining:
+                try:
+                    written = stdout_sink.write(remaining)
+                except Exception as exc:
+                    # A callback failure must reach the supervising thread even
+                    # when the child already exited successfully. Never let a
+                    # reader-thread traceback turn lost archive bytes into zero.
+                    raise OSError("tool stdout sink write failed") from exc
+                if type(written) is not int or not 0 < written <= len(remaining):
+                    raise OSError("tool stdout sink stopped accepting bytes")
+                remaining = remaining[written:]
+        else:
+            buffers[name].extend(chunk)
+        counts[name] += len(chunk)
+
     def drain(name: str) -> None:
         stream, limit = streams[name]
         try:
             while True:
-                remaining = limit - len(buffers[name])
+                remaining = limit - counts[name]
                 read_available = getattr(stream, "read1", stream.read)
                 chunk = read_available(min(_PIPE_READ_BYTES, remaining + 1))
                 if not chunk:
                     return
                 if len(chunk) > remaining:
                     if remaining > 0:
-                        buffers[name].extend(chunk[:remaining])
+                        retain(name, chunk[:remaining])
                     with state_lock:
                         last_activity[0] = clock()
                     overflow.set()
                     if process.poll() is None:
                         _terminate_process_tree(process, ownership=ownership)
                     return
-                buffers[name].extend(chunk)
+                retain(name, chunk)
                 with state_lock:
                     last_activity[0] = clock()
         except (OSError, ValueError) as exc:

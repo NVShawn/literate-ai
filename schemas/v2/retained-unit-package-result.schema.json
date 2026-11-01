@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:retained-unit-package-result-contracts",
+  "$ref": "urn:literate-ai:schema:v2:retained-unit-package-result-contracts#/$defs/result",
+  "$defs": {
+    "result": {
+      "$id": "literate-ai/retained-unit-package-result@1",
+      "description": "Native archive assertion bound to exact unit/set/graph/tool identities. Checked archive and composed-set verification plus current live scope are still required; parsed results grant no admission.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authority_mode",
+        "release_authorized",
+        "unit_plan_identity",
+        "package_set_plan_identity",
+        "definition_identity",
+        "graph_identity",
+        "packager_identity",
+        "tool_identity",
+        "archive"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-result@1"
+        },
+        "authority_mode": {
+          "const": "retained-project"
+        },
+        "release_authorized": {
+          "const": false
+        },
+        "unit_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "package_set_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "definition_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "graph_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "packager_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "tool_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "archive": {
+          "allOf": [
+            {
+              "$ref": "urn:literate-ai:schema:v1:blob-ref"
+            },
+            {
+              "properties": {
+                "media_type": {
+                  "const": "application/vnd.freebsd.pkg"
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 9223372036854775807
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

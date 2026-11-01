@@ -288,6 +288,14 @@ class RetainedProjectNativeSdkInputs:
             raise ValueError("retained.sdk.final-check-retention-mismatch")
         return identity
 
+    def require_package_scope_current(self):
+        """Recheck real producer/runtime/LINK owners without minting from JSON."""
+        self.require_unchanged()
+        if len(self._last_scopes) != len(self.executions):
+            raise ValueError("retained.sdk.completed-command-authority-required")
+        for scope in self._last_scopes:
+            scope.require_current()
+
     @contextmanager
     def command_scope(self, argv, *, action_identity, **arguments):
         self.require_unchanged()

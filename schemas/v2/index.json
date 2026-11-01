@@ -418,9 +418,7 @@
     {
       "file": "standard-accepted-source-cache-entry.schema.json",
       "root_id": "urn:literate-ai:schema:v2:standard-accepted-source-cache-entry",
-      "public_ids": [
-        "urn:literate-ai:schema:v2:standard-accepted-source-cache-entry"
-      ]
+      "public_ids": []
     },
     {
       "file": "model-routing-v2.schema.json",
@@ -607,7 +605,6 @@
       "file": "standard-lifecycle-policy.schema.json",
       "root_id": "urn:literate-ai:schema:v2:standard-lifecycle-policy",
       "public_ids": [
-        "urn:literate-ai:schema:v2:standard-lifecycle-policy",
         "urn:literate-ai:schema:v2:standard-lifecycle-extension-evidence"
       ]
     },
@@ -632,8 +629,7 @@
       "root_id": "urn:literate-ai:schema:v2:standard-toolchain-closure",
       "public_ids": [
         "urn:literate-ai:schema:v2:standard-component-command-authority",
-        "urn:literate-ai:schema:v2:standard-provider-artifact-binding",
-        "urn:literate-ai:schema:v2:standard-toolchain-closure"
+        "urn:literate-ai:schema:v2:standard-provider-artifact-binding"
       ]
     },
     {
@@ -974,23 +970,17 @@
     {
       "file": "standard-plan-action.schema.json",
       "root_id": "urn:literate-ai:schema:v2:standard-plan-action-inputs",
-      "public_ids": [
-        "urn:literate-ai:schema:v2:standard-plan-action-inputs"
-      ]
+      "public_ids": []
     },
     {
       "file": "standard-build-intent-action.schema.json",
       "root_id": "urn:literate-ai:schema:v2:standard-build-intent-action-inputs",
-      "public_ids": [
-        "urn:literate-ai:schema:v2:standard-build-intent-action-inputs"
-      ]
+      "public_ids": []
     },
     {
       "file": "standard-authorization-action.schema.json",
       "root_id": "urn:literate-ai:schema:v2:standard-authorization-action-inputs",
-      "public_ids": [
-        "urn:literate-ai:schema:v2:standard-authorization-action-inputs"
-      ]
+      "public_ids": []
     },
     {
       "file": "retained-project-tree.schema.json",
@@ -1036,6 +1026,82 @@
         "literate-ai/generated-test-coverage-request@1",
         "literate-ai/public-callable-signature@1",
         "literate-ai/generated-test-coverage-authority@1"
+      ]
+    },
+    {
+      "file": "native-tree-index.schema.json",
+      "root_id": "literate-ai/native-tree-index@1",
+      "public_ids": []
+    },
+    {
+      "file": "native-tree-shard.schema.json",
+      "root_id": "literate-ai/native-tree-shard@1",
+      "public_ids": []
+    },
+    {
+      "file": "retained-unit-package-definition.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-definition-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-definition@1"
+      ]
+    },
+    {
+      "file": "retained-unit-package-graph-index.schema.json",
+      "root_id": "literate-ai/retained-unit-package-graph-index@1",
+      "public_ids": []
+    },
+    {
+      "file": "retained-unit-package-graph-shard.schema.json",
+      "root_id": "literate-ai/retained-unit-package-graph-shard@1",
+      "public_ids": []
+    },
+    {
+      "file": "retained-unit-package-plan.schema.json",
+      "root_id": "literate-ai/retained-unit-package-plan@1",
+      "public_ids": []
+    },
+    {
+      "file": "retained-unit-package-result.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-result-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-result@1"
+      ]
+    },
+    {
+      "file": "retained-unit-package-set-plan.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-set-plan-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-set-plan@1"
+      ]
+    },
+    {
+      "file": "freebsd-composed-tree-packaging.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:freebsd-composed-tree-packaging-contracts",
+      "public_ids": [
+        "literate-ai/freebsd-composed-tree-pkg-projection@1",
+        "literate-ai/freebsd-composed-tree-policy@1",
+        "literate-ai/freebsd-retained-unit-parameters@1"
+      ]
+    },
+    {
+      "file": "retained-unit-package-request.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-request-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-request@1"
+      ]
+    },
+    {
+      "file": "retained-unit-package-result-shard.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-result-shard-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-result-shard@1"
+      ]
+    },
+    {
+      "file": "retained-unit-package-set-result.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-set-result-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-set-result@1"
       ]
     }
   ]

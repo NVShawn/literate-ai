@@ -15,11 +15,19 @@ from pathlib import Path
 from unittest import mock
 
 from literate_ai.adapters import freebsd_tree_packaging as tree_pkg
+from literate_ai.adapters.freebsd_composed_tree_packaging import (
+    inspect_freebsd_composed_package_set,
+    verify_freebsd_composed_package_set,
+)
 from literate_ai.adapters.freebsd_packaging import FreeBsdPkgToolBinding
 from literate_ai.adapters.native_sdk_tree_custody import capture_native_sdk_tree
+from literate_ai.adapters.retained_unit_results import (
+    read_retained_unit_results,
+    retain_retained_unit_results,
+)
 from literate_ai.adapters.tree_packaging import verify_tree_package_stage
 from literate_ai.application.packaging import PackagingError
-from literate_ai.contracts import BlobRef, canonical_identity
+from literate_ai.contracts import BlobRef, canonical_identity, canonical_json_bytes
 from literate_ai.contracts.executable_components.packages import (
     PackageFileKind,
     PackageInput,
@@ -31,12 +39,18 @@ from literate_ai.contracts.native_sdk_trees import NativeSdkAlias, NativeSdkTree
 from literate_ai.contracts.native_sdks import NativeSdkFile
 from literate_ai.contracts.package_tree_inputs import PackageTreeInput
 from literate_ai.contracts.retained_project import RetainedProjectLimits
+from literate_ai.contracts.retained_unit_results import RetainedUnitPackageResultShard
 from literate_ai.contracts.tree_packages import TreePackagePlan, TreePackageResult
 from tests.critical import test_tree_packages as tree_fixture
 from tests.support import fixtures_test_package_adapters as package_fixture
+from tests.support.fixtures_retained_unit_archives import (
+    archive_assertion,
+    composed_fixture,
+)
 from tests.support.fixtures_test_executable_component_v2_schemas import (
     _official_validator,
 )
+from tests.support.fixtures_test_freebsd_package_elf import freebsd_package_elf
 
 
 class FreeBsdTreePackageCodecTests(unittest.TestCase):
@@ -187,6 +201,148 @@ class FreeBsdTreePackageCodecTests(unittest.TestCase):
 
 @unittest.skipIf(os.name == "nt", "Native tree pkg custody requires POSIX")
 class FreeBsdTreePackageTests(unittest.TestCase):
+    def test_composed_archive_bytes_require_real_dependency_and_provenance_payloads(
+        self,
+    ):
+        projection, definitions = composed_fixture(
+            self.plan.trees[0].tree, self.store, self.tool
+        )
+        results = tuple(
+            archive_assertion(projection, value.identity, self.store)
+            for value in projection.graph.partition.definitions
+        )
+
+        def inspect(values=results):
+            return inspect_freebsd_composed_package_set(
+                projection, values, store=self.store, object_root=self.work
+            )
+
+        self.assertEqual(inspect(), results)
+        base = len(
+            canonical_json_bytes(
+                {"schema": RetainedUnitPackageResultShard.SCHEMA, "results": []}
+            )
+        )
+        descriptor_bytes = base + max(
+            len(canonical_json_bytes(value.to_dict())) for value in results
+        )
+        reference = retain_retained_unit_results(
+            projection,
+            results,
+            self.store,
+            max_descriptor_bytes=descriptor_bytes,
+            max_descriptor_total_bytes=16384,
+            max_index_bytes=4096,
+            max_metadata_memory_bytes=1024**2,
+        )
+        index, reopened = read_retained_unit_results(projection, reference, self.store)
+        self.assertEqual(len(index.shards), 2)
+        self.assertEqual(inspect(reopened), results)
+        # An overfull first descriptor exhausts the exact result count. Refuse
+        # before accessing a deliberately nonexistent later descriptor.
+        combined = self.store.put_manifest(
+            RetainedUnitPackageResultShard(results).to_dict(),
+            media_type="application/json",
+        )
+        missing = BlobRef("f" * 64, 1, media_type="application/json")
+        forged = index.to_dict()
+        forged["shards"] = [
+            value.to_dict()
+            for value in sorted((combined, missing), key=lambda ref: ref.digest)
+        ]
+        forged["max_descriptor_bytes"] = combined.size
+        altered_index = self.store.put_manifest(forged, media_type="application/json")
+        with self.assertRaisesRegex(ValueError, "result-actual-count-exceeds-index"):
+            read_retained_unit_results(projection, altered_index, self.store)
+        # These portable format assertions are not native tool execution or a
+        # retained producer. The native front door must retain its platform gate.
+        if platform.system().casefold() != "freebsd":
+            with self.assertRaisesRegex(PackagingError, "requires FreeBSD"):
+                verify_freebsd_composed_package_set(
+                    projection, results, store=self.store, object_root=self.work
+                )
+        with self.assertRaisesRegex(PackagingError, "exactly one result"):
+            inspect(
+                tuple(
+                    value
+                    for value in results
+                    if value.definition_identity != definitions["physical"].identity
+                )
+            )
+
+        def flatten(entries):
+            for member, body in entries:
+                if member.islnk():
+                    member.type, member.linkname = tarfile.REGTYPE, ""
+                    body = b"compiler"
+                    member.size = len(body)
+                yield member, body
+
+        def wrong_target(entries):
+            for member, body in entries:
+                if member.islnk():
+                    member.linkname = "/foreign/cc"
+                yield member, body
+
+        def wrong_license(entries):
+            for member, body in entries:
+                if member.name.endswith("/license.json"):
+                    body = b"x" * len(body)
+                yield member, body
+
+        for mutation, expected in (
+            (flatten, "topology"),
+            (wrong_target, "topology"),
+            (wrong_license, "physical bytes"),
+        ):
+            altered = archive_assertion(
+                projection, definitions["aliases"].identity, self.store, mutate=mutation
+            )
+            values = tuple(
+                altered
+                if value.definition_identity == altered.definition_identity
+                else value
+                for value in results
+            )
+            with (
+                self.subTest(mutation=mutation.__name__),
+                self.assertRaisesRegex(PackagingError, expected),
+            ):
+                inspect(values)
+        altered = replace(results[0], tool_identity=canonical_identity("foreign tool"))
+        with self.assertRaisesRegex(PackagingError, "another plan/graph/provider/tool"):
+            inspect((altered, *results[1:]))
+        small, _ = composed_fixture(
+            self.plan.trees[0].tree, self.store, self.tool, record_cache_bytes=1
+        )
+        small_results = tuple(
+            archive_assertion(small, value.identity, self.store)
+            for value in small.graph.partition.definitions
+        )
+        with self.assertRaisesRegex(PackagingError, "verified-record cache budget"):
+            inspect_freebsd_composed_package_set(
+                small, small_results, store=self.store, object_root=self.work
+            )
+        # A malicious set cannot accumulate distinct ELF imports beyond its
+        # already bounded native manifests while waiting for final comparison.
+        tree = self.plan.trees[0].tree
+        elf = self.store.put_bytes(freebsd_package_elf())
+        changed = replace(
+            tree,
+            files=tuple(replace(value, blob=elf) for value in tree.files),
+        )
+        undeclared, _ = composed_fixture(changed, self.store, self.tool)
+        elf_results = tuple(
+            archive_assertion(undeclared, value.identity, self.store)
+            for value in undeclared.graph.partition.definitions
+        )
+        with self.assertRaisesRegex(PackagingError, "undeclared shared-library"):
+            inspect_freebsd_composed_package_set(
+                undeclared, elf_results, store=self.store, object_root=self.work
+            )
+        self.assertEqual(inspect(), results)
+        self.assertEqual(list(self.work.iterdir()), [])
+
     def setUp(self):
         fixture = tree_fixture.TreePackageTests()
         fixture.setUp()

@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest import mock
 
 from literate_ai.adapters import native_sdk_tree_custody as custody
+from literate_ai.adapters.native_tree_shards import read_native_tree, retain_native_tree
 from literate_ai.contracts.executable_components.commands import (
     LibraryCapabilityImport,
     LibraryImportSurface,
@@ -22,12 +23,164 @@ from literate_ai.contracts.identity import (
     canonical_identity,
 )
 from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeBuildLayout
+from literate_ai.contracts.native_tree_shards import NativeTreeIndex, NativeTreeShard
 from literate_ai.contracts.retained_project import RetainedProjectLimits
 from literate_ai.storage.cas import FileSystemCAS
 
 
 @unittest.skipIf(os.name == "nt", "Symbolic SDK tree custody requires POSIX")
 class NativeSdkTreeCustodyTests(unittest.TestCase):
+    def test_composed_capture_budget_refusal_leaves_cas_unchanged(self):
+        for policy in (
+            {"max_metadata_memory_bytes": 100000},
+            {"max_descriptor_total_bytes": 100},
+        ):
+            with self.subTest(policy=policy):
+                with self.assertRaisesRegex(ValueError, "policy-exceeded"):
+                    custody.capture_composed_native_tree(
+                        self.source,
+                        store=self.store,
+                        limits=self.limits,
+                        max_descriptor_bytes=384,
+                        max_index_bytes=4096,
+                        **policy,
+                    )
+        self.assertFalse(any(path.is_file() for path in self.store.root.rglob("*")))
+
+    def test_composed_understated_count_stops_before_reading_next_shard(self):
+        shards = (
+            NativeTreeShard(("a", "b"), (), ()),
+            NativeTreeShard(("c", "d"), (), ()),
+        )
+        references = tuple(
+            sorted(
+                (
+                    self.store.put_manifest(
+                        shard.to_dict(), media_type="application/json"
+                    )
+                    for shard in shards
+                ),
+                key=lambda ref: ref.digest,
+            )
+        )
+        index = NativeTreeIndex(references, 1, 0, self.limits)
+        reference = self.store.put_manifest(
+            index.to_dict(), media_type="application/json"
+        )
+        # Leave the first descriptor valid and remove the second. An eager read
+        # would fail with missing CAS content instead of the declared-count error.
+        self.store.path_for(references[1]).unlink()
+        with self.assertRaisesRegex(ValueError, "declared-totals-exceeded"):
+            read_native_tree(
+                reference,
+                self.store,
+                expected_identity=index.identity,
+                limits=self.limits,
+                maximum_descriptor_bytes=index.max_descriptor_bytes,
+                maximum_descriptor_total_bytes=index.max_descriptor_total_bytes,
+                maximum_index_bytes=index.max_index_bytes,
+                maximum_metadata_memory_bytes=index.max_metadata_memory_bytes,
+            )
+
+    def test_composed_shards_restore_links_after_source_retirement(self):
+        (self.source / "empty").mkdir()
+        tree = custody.capture_composed_native_tree(
+            self.source,
+            store=self.store,
+            limits=self.limits,
+            max_descriptor_bytes=384,
+            max_descriptor_total_bytes=65536,
+            max_index_bytes=4096,
+            max_metadata_memory_bytes=1024 * 1024,
+        )
+        self.assertGreater(len(tree.shards), 1)
+        reference = retain_native_tree(tree, self.store)
+
+        def reopen():
+            return read_native_tree(
+                reference,
+                self.store,
+                expected_identity=tree.identity,
+                limits=self.limits,
+                maximum_descriptor_bytes=384,
+                maximum_descriptor_total_bytes=65536,
+                maximum_index_bytes=4096,
+                maximum_metadata_memory_bytes=1024 * 1024,
+            )
+
+        reopened = reopen()
+        shutil.rmtree(self.source)
+        placed = custody.materialize_composed_native_tree(
+            reopened,
+            expected_identity=tree.identity,
+            store=self.store,
+            limits=self.limits,
+            parent=self.parent,
+        )
+        self.assertEqual(os.readlink(placed / "headers"), "include")
+        self.assertEqual(os.readlink(placed / "bin/public"), "clang")
+        self.assertEqual((placed / "headers/header.h").read_bytes(), b"header bytes")
+        self.assertEqual((placed / "bin/public").read_bytes(), b"compiler bytes")
+        self.assertTrue((placed / "empty").is_dir())
+        self.assertEqual(
+            (placed / "bin/cc").stat().st_ino, (placed / "bin/clang").stat().st_ino
+        )
+        self.assertEqual(
+            reopened.resolve_all(("headers/header.h", "bin/public")),
+            ("include/header.h", "bin/cc"),
+        )
+        descriptor = self.store.path_for(tree.index.shards[0])
+        descriptor.write_bytes(b"{}")
+        from literate_ai.storage.cas import BlobIntegrityError
+
+        with self.assertRaises(BlobIntegrityError):
+            reopen()
+        self.assertEqual((placed / "headers/header.h").read_bytes(), b"header bytes")
+
+    def test_composed_index_bound_precedes_invalid_json_decoding(self):
+        reference = self.store.put_bytes(
+            b"not-json" * 1024, media_type="application/json"
+        )
+        with self.assertRaisesRegex(ValueError, "raw-document-bound"):
+            read_native_tree(
+                reference,
+                self.store,
+                expected_identity=ContentIdentity.parse_uri(reference.identity),
+                limits=self.limits,
+                maximum_descriptor_bytes=384,
+                maximum_descriptor_total_bytes=65536,
+                maximum_index_bytes=4096,
+                maximum_metadata_memory_bytes=1024 * 1024,
+            )
+        self.assertEqual(self.store.get_bytes(reference), b"not-json" * 1024)
+
+    def test_composed_capture_exceeds_frozen_standalone_tree_bound(self):
+        self.limits = RetainedProjectLimits(18000, 1024, 2 * 1024 * 1024)
+        for index in range(17000):
+            (self.source / f"item-{index:05d}").write_bytes(b"x")
+        with self.assertRaisesRegex(ValueError, "entry bound"):
+            self.capture()
+        tree = custody.capture_composed_native_tree(
+            self.source,
+            store=self.store,
+            limits=self.limits,
+            max_descriptor_bytes=512 * 1024,
+            max_descriptor_total_bytes=16 * 1024 * 1024,
+            max_index_bytes=65536,
+            max_metadata_memory_bytes=128 * 1024 * 1024,
+        )
+        self.assertEqual(len(tree.files), 17002)
+        shutil.rmtree(self.source)
+        placed = custody.materialize_composed_native_tree(
+            tree,
+            expected_identity=tree.identity,
+            store=self.store,
+            limits=self.limits,
+            parent=self.parent,
+        )
+        self.assertEqual((placed / "item-16999").read_bytes(), b"x")
+        self.assertEqual((placed / "bin/public").read_bytes(), b"compiler bytes")
+
     def setUp(self) -> None:
         temporary = tempfile.TemporaryDirectory(prefix="sdk-tree-")
         self.addCleanup(temporary.cleanup)

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "literate-ai/retained-unit-package-plan@1",
+  "description": "Opt-in unit plan binding a complete selected set and bounded graph indexes; no installation, promotion or release authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "authority_mode",
+    "release_authorized",
+    "definition",
+    "package_set_plan_identity",
+    "ownership_index",
+    "dependency_index",
+    "packager_identity",
+    "tool_identity"
+  ],
+  "properties": {
+    "schema": {
+      "const": "literate-ai/retained-unit-package-plan@1"
+    },
+    "authority_mode": {
+      "const": "retained-project"
+    },
+    "release_authorized": {
+      "const": false
+    },
+    "definition": {
+      "$ref": "urn:literate-ai:schema:v2:retained-unit-package-definition-contracts#/$defs/definition"
+    },
+    "package_set_plan_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "ownership_index": {
+      "allOf": [
+        {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        {
+          "properties": {
+            "media_type": {
+              "const": "application/json"
+            },
+            "size": {
+              "minimum": 1,
+              "maximum": 8388608
+            }
+          }
+        }
+      ]
+    },
+    "dependency_index": {
+      "allOf": [
+        {
+          "$ref": "urn:literate-ai:schema:v1:blob-ref"
+        },
+        {
+          "properties": {
+            "media_type": {
+              "const": "application/json"
+            },
+            "size": {
+              "minimum": 1,
+              "maximum": 8388608
+            }
+          }
+        }
+      ]
+    },
+    "packager_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "tool_identity": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

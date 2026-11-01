@@ -22,6 +22,7 @@ from literate_ai.adapters.retained_project_inputs import (
     _stream,
 )
 from literate_ai.application.packaging import PackagingError
+from literate_ai.contracts.composed_tree_packages import ComposedTreePackageProjection
 from literate_ai.contracts.identity import canonical_identity
 from literate_ai.contracts.tree_packages import (
     TreePackagePlan,
@@ -105,23 +106,69 @@ def verify_tree_package_stage(plan, root):
     """Check exact current inventory, physical bytes and complete inode groups."""
     if not isinstance(plan, TreePackagePlan):
         raise TypeError("Tree package stage requires explicit tree plan")
+    return _verify_tree_package_members(
+        project_tree_package_members(plan.base, plan.trees), root, plan.limits
+    )
+
+
+def verify_composed_tree_package_stage(projection, root):
+    """Check the complete selected stage, never an isolated dangling unit."""
+    if not isinstance(projection, ComposedTreePackageProjection):
+        raise TypeError(
+            "Composed package stage requires explicit selected-set projection"
+        )
+    return _verify_tree_package_members(
+        projection.members, root, projection.partition.tree.index.limits
+    )
+
+
+def materialize_composed_tree_package_set(
+    projection, *, expected_tree_identity, store, parent
+):
+    """Reconstruct exact physical topology without granting live owner authority."""
+    from literate_ai.adapters.native_sdk_tree_custody import (
+        materialize_composed_native_tree,
+    )
+
+    if not isinstance(projection, ComposedTreePackageProjection):
+        raise TypeError(
+            "Composed package stage requires explicit selected-set projection"
+        )
+    tree = projection.partition.tree
+    root = materialize_composed_native_tree(
+        tree,
+        expected_identity=expected_tree_identity,
+        store=store,
+        limits=tree.index.limits,
+        parent=parent,
+    )
+    owned = directory_node(root)
+    try:
+        verify_composed_tree_package_stage(projection, root)
+        return root
+    except BaseException:
+        if root.exists() and directory_node(root) == owned:
+            _remove_tree(root)
+        raise
+
+
+def _verify_tree_package_members(members, root, limits):
     if os.name == "nt":
         raise PackagingError("Tree package custody requires a POSIX worker")
     root = Path(root).absolute()
     require_safe_directory(root)
-    members = project_tree_package_members(plan.base, plan.trees)
     roots = tuple(sorted({v.path.split("/", 1)[0] for v in members}))
     files = tuple(v.path for v in members if v.kind != "directory")
     directories = tuple(v.path for v in members if v.kind == "directory")
     with _directory_access(root) as access:
 
         def inventory():
-            if _top_names(root, access, plan.limits.max_entries) != roots:
+            if _top_names(root, access, limits.max_entries) != roots:
                 raise PackagingError("Tree package top-level inventory changed")
             return _inventory(
                 root,
                 roots,
-                plan.limits.max_entries,
+                limits.max_entries,
                 allow_internal_symlinks=True,
                 access=access,
             )

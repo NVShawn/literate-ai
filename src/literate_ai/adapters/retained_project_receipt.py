@@ -110,11 +110,24 @@ class AdmittedRetainedProject:
     implement. No package format, installation or release is authorized here.
     """
 
-    def __init__(self, receipt, run, store, source, current_plan, *, _seal=None):
+    def __init__(
+        self,
+        receipt,
+        run,
+        store,
+        source,
+        current_plan,
+        *,
+        _seal=None,
+        native_package_scope=None,
+    ):
         if _seal is not _LOCAL_ADMISSION:
             raise ValueError("retained.receipt.live-admission-required")
         self.receipt, self.run, self.store = receipt, run, store
         self.source, self.current_plan = source, current_plan
+        if native_package_scope is not None and not callable(native_package_scope):
+            raise TypeError("retained.receipt.live-native-scope-required")
+        self._native_package_scope = native_package_scope
 
     def require_current(self):
         plan = self.run.source_bom.plan
@@ -177,9 +190,30 @@ class AdmittedRetainedProject:
             self.source,
             self.current_plan,
             _seal=_LOCAL_ADMISSION,
+            native_package_scope=self._native_package_scope,
         )
         result.require_current()
         return result
+
+    def require_native_package_scope(self):
+        """Keep SDK producer/runtime/LINK capabilities live for native packaging."""
+        self.require_current()
+        required = (
+            bool(self.run.resolved_bom.sdk_dependencies)
+            or any(
+                member.role in {"sdk", "sdk-policy"}
+                for member in self.run.source_bom.manifest.members
+            )
+            or any(
+                node.revision.repository_sources
+                for lock in self.run.source_bom.component_locks
+                for node in lock.nodes
+            )
+        )
+        if required:
+            if self._native_package_scope is None:
+                raise ValueError("retained.receipt.live-sdk-package-scope-required")
+            self._native_package_scope()
 
     @property
     def payload_manifest(self):
@@ -383,6 +417,11 @@ def _admit_retained_project(workspace, store, *, worker_evidence=None):
         workspace.source,
         workspace.current_plan,
         _seal=_LOCAL_ADMISSION,
+        native_package_scope=(
+            workspace._native_sdks.require_package_scope_current
+            if workspace._native_sdks is not None
+            else None
+        ),
     )
     admission.require_current()
     return admission

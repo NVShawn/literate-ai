@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:literate-ai:schema:v2:retained-unit-package-set-result-contracts",
+  "$ref": "urn:literate-ai:schema:v2:retained-unit-package-set-result-contracts#/$defs/set_result",
+  "$defs": {
+    "set_result": {
+      "$id": "literate-ai/retained-unit-package-set-result@1",
+      "description": "Content-addressed bounded result index, bound to one exact selected graph/provider/tool. A decoded assertion is not native, retained producer, runtime, LINK, install or release admission. Reference ordering, cumulative byte/count limits and complete membership are checked by the canonical reader.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authority_mode",
+        "release_authorized",
+        "package_set_plan_identity",
+        "graph_identity",
+        "packager_identity",
+        "tool_identity",
+        "shards",
+        "unit_count",
+        "archive_bytes",
+        "max_descriptor_bytes",
+        "max_descriptor_total_bytes",
+        "max_index_bytes",
+        "max_metadata_memory_bytes"
+      ],
+      "properties": {
+        "schema": {
+          "const": "literate-ai/retained-unit-package-set-result@1"
+        },
+        "authority_mode": {
+          "const": "retained-project"
+        },
+        "release_authorized": {
+          "const": false
+        },
+        "package_set_plan_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "graph_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "packager_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "tool_identity": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "shards": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:literate-ai:schema:v1:blob-ref"
+              },
+              {
+                "properties": {
+                  "media_type": {
+                    "const": "application/json"
+                  },
+                  "size": {
+                    "minimum": 1,
+                    "maximum": 8388608
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "unit_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "archive_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "max_descriptor_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8388608
+        },
+        "max_descriptor_total_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "max_index_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2097152
+        },
+        "max_metadata_memory_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 17179869184
+        }
+      }
+    }
+  }
+}

@@ -24,6 +24,41 @@ class TreePackageMember:
     target: str | None = None
 
 
+def _project_tree_members(tree, prefix):
+    """One canonical entry projection shared by standalone/composed geometry."""
+
+    def placed(path):
+        return prefix + "/" + path if prefix else path
+
+    entries = {}
+    if prefix:
+        entries[prefix] = TreePackageMember(prefix, "directory", 0o755)
+    for directory in tree.directories:
+        path = placed(directory)
+        entries[path] = TreePackageMember(path, "directory", 0o755)
+    files = {item.path: item for item in tree.files}
+    for item in tree.files:
+        path = placed(item.path)
+        entries[path] = TreePackageMember(
+            path, "file", 0o755 if item.executable else 0o644, item.blob
+        )
+    for alias in tree.aliases:
+        path = placed(alias.path)
+        if alias.kind == "hardlink":
+            item = files[alias.target]
+            entries[path] = TreePackageMember(
+                path,
+                "hardlink",
+                0o755 if item.executable else 0o644,
+                target=placed(alias.target),
+            )
+        else:
+            entries[path] = TreePackageMember(
+                path, "symlink", 0o777, target=alias.target
+            )
+    return entries
+
+
 def project_tree_package_members(base, trees):
     entries = {}
     executable = {value.path for value in base.entrypoints}
@@ -35,30 +70,7 @@ def project_tree_package_members(base, trees):
             item.blob,
         )
     for value in trees:
-        entries[value.prefix] = TreePackageMember(value.prefix, "directory", 0o755)
-        for directory in value.tree.directories:
-            path = value.prefix + "/" + directory
-            entries[path] = TreePackageMember(path, "directory", 0o755)
-        files = {item.path: item for item in value.tree.files}
-        for item in value.tree.files:
-            path = value.prefix + "/" + item.path
-            entries[path] = TreePackageMember(
-                path, "file", 0o755 if item.executable else 0o644, item.blob
-            )
-        for alias in value.tree.aliases:
-            path = value.prefix + "/" + alias.path
-            if alias.kind == "hardlink":
-                item = files[alias.target]
-                entries[path] = TreePackageMember(
-                    path,
-                    "hardlink",
-                    0o755 if item.executable else 0o644,
-                    target=value.prefix + "/" + alias.target,
-                )
-            else:
-                entries[path] = TreePackageMember(
-                    path, "symlink", 0o777, target=alias.target
-                )
+        entries.update(_project_tree_members(value.tree, value.prefix))
     for path in tuple(entries):
         parent = path.rpartition("/")[0]
         while parent:

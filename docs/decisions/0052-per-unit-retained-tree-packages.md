@@ -1,9 +1,9 @@
 # ADR 0052: Per-Unit Retained Tree Packages and Verified Worker Transport
 
-- Status: Proposed — directing-user review pending; no implementation authorized by this ADR yet
+- Status: Accepted — directing user explicitly approved ADR 0052 and directed immediate implementation of issue #235 on 2026-11-01
 - Date: 2026-10-31
 - Decision owners: literate-ai maintainers
-- Roadmap: [RELEASE-INTEGRATION-005](../roadmap/1.4-integration.md); concrete implementation subtasks follow acceptance
+- Roadmap: [RETAINED-UNIT-PACKAGE-001](../roadmap/active-work.md), prioritized by [RELEASE-INTEGRATION-005](../roadmap/1.4-integration.md)
 - Release target: 1.4.0, already included by the directing user
 - Issues: [#235](https://github.com/jordanhubbard/literate-ai/issues/235), [#93](https://github.com/jordanhubbard/literate-ai/issues/93), [#74](https://github.com/jordanhubbard/literate-ai/issues/74)
 - Governance: [ADR 0006](0006-significant-feature-request-governance.md)
@@ -23,7 +23,7 @@ and independent native archive verification already own faithful topology. Their
 decoders do not grant producer, runtime, PACKAGE or release authority. The missing
 worker integration must retain those boundaries, including a real LINK proof.
 
-## Proposed decision
+## Decision
 
 1. **Explicit opt-in, versioned retained origin.** Add new per-unit and package-set
    plan/result contracts, beginning with
@@ -100,9 +100,11 @@ worker integration must retain those boundaries, including a real LINK proof.
 
 ## Acceptance and qualification
 
-After explicit human acceptance, record concrete implementation subtasks through
-`litai work record`, with links back to this decision and existing
-NATIVE-TREE-WIRE-001. The accepted 1.4 scope includes every item below:
+The directing user explicitly accepted this decision on 2026-11-01:
+“Approve ADR 0052 and implement #235 now.” Concrete implementation subtasks are
+recorded through `litai work record` in RETAINED-UNIT-PACKAGE-001, linked to this
+decision and existing NATIVE-TREE-WIRE-001. The accepted 1.4 scope includes every
+item below:
 
 - Versioned schema/codec checks, exact legacy identity compatibility and selected
   aggregate-versus-unit behavior; malformed, rehashed and over-budget inputs refuse.

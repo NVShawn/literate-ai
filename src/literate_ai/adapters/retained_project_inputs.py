@@ -433,6 +433,7 @@ def _inventory(
     *,
     allow_internal_symlinks: bool = False,
     access=None,
+    observe=None,
 ) -> tuple[tuple[str, ...], tuple[str, ...]]:
     names: list[str] = []
     directories: list[str] = []
@@ -450,6 +451,8 @@ def _inventory(
             metadata = path.lstat()
         else:
             metadata = access.metadata(path)
+        if observe is not None:
+            observe(name, metadata)
         if stat.S_ISLNK(metadata.st_mode) and allow_internal_symlinks:
             names.append(name)
             return  # The link is an input; never traverse its target.

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "literate-ai/native-tree-shard@1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "directories",
+    "files",
+    "aliases",
+    "case_sensitive"
+  ],
+  "properties": {
+    "schema": {
+      "const": "literate-ai/native-tree-shard@1"
+    },
+    "directories": {
+      "type": "array",
+      "maxItems": 16384,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/path"
+      }
+    },
+    "files": {
+      "type": "array",
+      "maxItems": 16384,
+      "items": {
+        "$ref": "urn:literate-ai:schema:v2:native-sdk-contracts#/$defs/file"
+      }
+    },
+    "aliases": {
+      "type": "array",
+      "maxItems": 16384,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "target",
+          "kind"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/path"
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "kind": {
+            "enum": [
+              "symlink",
+              "hardlink"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "hardlink"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "target": {
+                  "$ref": "urn:literate-ai:schema:v2:component-artifact-contracts#/$defs/path"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "case_sensitive": {
+      "type": "boolean"
+    }
+  },
+  "description": "Bounded canonical tree entries; a shard is not standalone alias closure or admission. Complete composition enforces namespace, ancestors, counts and resource policy."
+}
