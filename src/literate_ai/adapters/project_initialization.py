@@ -401,25 +401,31 @@ _LANGUAGE_FLAVOR_BY_MARKER = {
 def detected_language_flavors(
     path: Path, *, languages: set[str] | None = None
 ) -> list[str]:
-    """Return every detected language Flavor, C++ first when both C++ and Python exist.
+    """Return every detected language Flavor with the root build language first.
 
-    Project defaults may select only one language-ecosystem Flavor. Convert planning
-    still lists the full union so operators see mixed trees.
+    A root Cargo workspace stays Rust-primary despite incidental helper sources.
+    Root CMake keeps its existing C++ precedence. Convert planning still lists the
+    full union so operators see mixed trees.
     """
 
     if languages is None:
         languages = source_language_markers(path)
     flavors: list[str] = []
+    cargo_manifest = (path / "Cargo.toml").is_file()
+    if cargo_manifest and not (path / "CMakeLists.txt").exists():
+        flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["rust"])
     if "cpp" in languages or (path / "CMakeLists.txt").exists():
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["cpp"])
     if "python" in languages:
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["python"])
     if "elixir" in languages or (path / "mix.exs").is_file():
         flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["elixir"])
+    if ("rust" in languages or cargo_manifest) and (
+        _LANGUAGE_FLAVOR_BY_MARKER["rust"] not in flavors
+    ):
+        flavors.append(_LANGUAGE_FLAVOR_BY_MARKER["rust"])
     if flavors:
         return flavors
-    if (path / "Cargo.toml").exists():
-        return [_LANGUAGE_FLAVOR_BY_MARKER["rust"]]
     if (path / "package.json").exists():
         return [_LANGUAGE_FLAVOR_BY_MARKER["javascript"]]
     return []
@@ -459,6 +465,14 @@ def detect_repo_flavors(
         if any((path / m).exists() for m in make_files):
             selectors.append("flavor://literate-ai/build-make")
             covered_axes.add("build.system")
+
+    if (
+        language_flavors
+        and language_flavors[0] == _LANGUAGE_FLAVOR_BY_MARKER["rust"]
+        and "flavor://literate-ai/build-cargo" in selectors
+    ):
+        selectors.append("flavor://literate-ai/package-cargo")
+        covered_axes.add("packaging")
 
     # Apply language/build defaults for uncovered axes
     for axis, default in _FLAVOR_AXIS_DEFAULTS.items():
@@ -3304,11 +3318,7 @@ class FilesystemProjectInitializationAdapter:
                 update_component_lock(
                     resolved_target / "components" / "legacy-project-wrapper",
                     target_name="host",
-                    flavor_selectors=tuple(
-                        selector
-                        for selector in definition.default_flavor_selectors
-                        if "/build-" in selector
-                    ),
+                    flavor_selectors=("+flavor://legacy-adoption/build-legacy-shim",),
                     flavor_roots=(resolved_target / "flavors",),
                 )
             except (
@@ -3334,10 +3344,8 @@ class FilesystemProjectInitializationAdapter:
                     update_component_lock(
                         resolved_target / "components" / name,
                         target_name="host",
-                        flavor_selectors=tuple(
-                            selector
-                            for selector in definition.default_flavor_selectors
-                            if "/build-" in selector
+                        flavor_selectors=(
+                            "+flavor://legacy-adoption/build-legacy-shim",
                         ),
                         flavor_roots=(resolved_target / "flavors",),
                     )

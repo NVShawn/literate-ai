@@ -126,6 +126,15 @@
       },
       {
         "id": "ZERO-ARG-COVERAGE-001"
+      },
+      {
+        "id": "RUST-ADOPTION-DETECT-001"
+      },
+      {
+        "id": "RETAINED-BUILD-COREQ-001"
+      },
+      {
+        "id": "RETAINED-OUTPUT-DIAG-001"
       }
     ]
   }

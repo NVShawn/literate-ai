@@ -31928,3 +31928,57 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Evidence:**
   - [ ] Pass singleton positive, invented/duplicate/missing input, false exemption, stale authority and private-oracle controls plus unchanged v1/default-domain coverage.
   - [ ] Pass full regression, installed-wheel qualification and exact review/main CI before claiming issue 132 or dependent issue 48 complete.
+
+### [ ] RUST-ADOPTION-DETECT-001 — Detect Cargo workspaces ahead of incidental helper languages
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#203](https://github.com/jordanhubbard/literate-ai/issues/203)
+- **Priority:** P1
+- **Owner:** read-only harness language inventory and project adoption Flavor inference; issue 203
+- **Direction:** A retained Cargo workspace with Python/C++ helpers is inferred as C++/Python and never proposes its Rust/Cargo packaging Flavors.
+- **Conclusion:** Recognize Rust sources in the bounded conventional inventory, preserve the full detected language union, and use a root Cargo manifest as the primary Rust signal unless the existing root CMake driver takes precedence. Propose Cargo packaging only for the detected primary Cargo/Rust workspace; preserve other build selection behavior.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Exercise the public read-only conversion plan on a mixed Cargo tree and correct source-language/default Flavor inference without executing project source.
+- **Evidence:**
+  - [ ] Reproduce the missing Rust proposal, then verify Rust/Cargo packaging, mixed-language reporting, generated/hidden-tree exclusion, CMake precedence and absence of plan writes.
+
+- **Development evidence:** Three new Rust inventory/plan controls pass, including read-only input preservation, helper-language reporting, hidden/generated exclusion and CMake precedence. The missing Rust marker reproduces before the fix.
+- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+
+### [ ] RETAINED-BUILD-COREQ-001 — Keep retained wrapper locks on their delegation Flavor
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#210](https://github.com/jordanhubbard/literate-ai/issues/210)
+- **Priority:** P1
+- **Owner:** canonical retained-wrapper Component projection and conversion lock construction; issue 210
+- **Direction:** Cargo adoption cannot create the retained wrapper lock because its sole build-system slot cannot accept the Cargo Flavor Rust language co-requisite.
+- **Conclusion:** Bind the already-authored build-legacy-shim Flavor, as retained readmission already does. A retained wrapper delegates the qualified original pipeline; it is not a generated Cargo application. Keep project Rust/Cargo defaults and all original commands while preserving generation Flavor co-requisite enforcement.
+- **Depends on:** RUST-ADOPTION-DETECT-001
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Reproduce native Cargo conversion refusal, then select the canonical delegation Flavor for wrapper and refined retained Components without changing original commands.
+- **Evidence:**
+  - [ ] Run actual offline Cargo conversion and inspect retained wrapper lock/source/baseline evidence; preserve CMake and Elixir adoption behavior and fail-closed unmatched selectors.
+
+- **Development evidence:** A native offline Cargo adoption reproduces the original lock refusal, then completes actual baseline and wrapper parity with the existing legacy-shim build Flavor. Root Rust/Cargo defaults and original source remain intact. Six existing retained receipt cases pass.
+- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+
+### [ ] RETAINED-OUTPUT-DIAG-001 — Distinguish retained command failures from capped diagnostic excerpts
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#180](https://github.com/jordanhubbard/literate-ai/issues/180)
+- **Priority:** P2
+- **Owner:** retained harness diagnostic wording; corrected issue 180
+- **Direction:** Issue 180 retracts the output-budget rejection claim and leaves diagnostic wording for maintainer triage.
+- **Conclusion:** Keep success/failure based on actual process results and exact test evidence. Clarify that recorded excerpts were capped when a failing command emits large output; do not introduce a new acceptance budget or change any limit.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Run genuine Python unittest processes with oversized stdout, preserve successful retained admission, and make nonzero-exit diagnostic wording distinguish the failure from excerpt capping.
+- **Evidence:**
+  - [ ] Verify three actual passing unittest cases remain admitted above the stdout recording cap, a real failing case remains refused, excerpts stay bounded and stream identities remain present.
+
+- **Development evidence:** Two real-process controls pass: three genuine Python unittest cases are admitted above the recorded stdout cap with the exact independently computed full stdout SHA-256; a real failing case stays rejected and names capped excerpts separately from its exit status. Recording and acceptance limits remain unchanged.
+- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.

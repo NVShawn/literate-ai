@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Detect root Cargo workspaces as Rust despite incidental Python/C++ helpers,
+  preserve mixed-language observations and propose Cargo packaging.
+- Keep retained conversion locks on the existing pipeline-delegation Flavor,
+  preserving original Cargo commands instead of imposing generated-code requirements.
+- Distinguish failing retained commands from capped recorded-output excerpts;
+  oversized successful output remains accepted and its full stream digest retained.
+
 - Verify Rust library symbols shared by multiple capabilities without emitting
   duplicate imports; retain every declared capability and missing-symbol refusal.
 - Clarify release README update ordering and derive asset digests from published

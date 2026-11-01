@@ -282,8 +282,8 @@ def _gate_failure_message(stage_id: str, result: dict[str, object]) -> str:
         )
     elif not result.get("output_within_limits", True):
         headline = (
-            f"legacy {stage_id} gate failed with status {status} and exceeded its "
-            "bounded output policy "
+            f"legacy {stage_id} gate failed with status {status}; "
+            "recorded-output excerpts were capped "
             f"(stdout {result.get('stdout_size')}/{result.get('stdout_limit_bytes')} "
             f"bytes, stderr {result.get('stderr_size')}/"
             f"{result.get('stderr_limit_bytes')} bytes; {command})"
@@ -479,7 +479,9 @@ def source_language_markers(root: Path) -> set[str]:
                 found.add("cpp")
             elif lower.endswith((".ex", ".exs")):
                 found.add("elixir")
-        if {"python", "cpp", "elixir"} <= found:
+            elif lower.endswith(".rs"):
+                found.add("rust")
+        if {"python", "cpp", "elixir", "rust"} <= found:
             break
     return found
 
