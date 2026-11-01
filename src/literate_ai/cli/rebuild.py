@@ -106,6 +106,7 @@ from .errors import CLI_ERROR_MESSAGE_CHARS, CliFailure
 from .rebuild_cache import (
     RebuildSourceCacheProtocolError,
     parse_rebuild_source_cache_inputs,
+    parse_source_cache_entry_identities,
     prepare_rebuild_source_cache_planning_protocol,
     prepare_rebuild_source_cache_protocol,
     publish_rebuild_source_cache_offer,
@@ -408,14 +409,16 @@ def _standard_rebuild_from_args(
 ) -> dict[str, object]:
     """Route the ordinary command through the public in-process Standard adapter."""
 
-    if args.source_cache_entry or args.source_cache_root:
+    if (
+        args.source_cache_root
+        or args.source_cache_entry
+        and not getattr(args, "from_accepted_source", False)
+    ):
         raise CliFailure(
             "rebuild.standard_cache_override_unsupported",
-            "the Standard driver uses BUILD_DIR-backed cache custody; per-command "
-            "--source-cache-entry and --source-cache-root overrides are only "
-            "supported for an external lifecycle driver. For deterministic "
-            "Standard reuse of already-accepted source, use "
-            "--from-accepted-source instead",
+            "Standard --source-cache-entry requires --from-accepted-source; "
+            "--source-cache-root remains supported only for an external "
+            "lifecycle driver",
         )
     specification, specification_label = _specification(project, args.specification)
     if specification.is_file():
@@ -693,6 +696,44 @@ def _standard_rebuild_one_component(
             getattr(exc, "code", "rebuild.standard_preparation_failed"),
             getattr(exc, "message", str(exc)),
         ) from exc
+    entry_identities = parse_source_cache_entry_identities(
+        getattr(args, "source_cache_entry", ()) or (),
+        force_regeneration=args.force_regeneration,
+    )
+    accepted_provider = getattr(args, "accepted_source_provider_id", None)
+    accepted_provider_identity = getattr(
+        args, "accepted_source_provider_identity", None
+    )
+    if getattr(args, "from_accepted_source", False):
+        from literate_ai.adapters.source_materialization import (
+            SourceMaterializationError,
+            discover_accepted_source_provider_binding,
+        )
+
+        try:
+            current_provider = discover_accepted_source_provider_binding(
+                project.root,
+                entry_identities=entry_identities,
+                component_lock_identity=prepared.locked_authority_snapshot.authority.lock.identity,
+            )
+            if current_provider is None:
+                raise CliFailure(
+                    "execution.accepted_source_cache_missing",
+                    "accepted-source rebuild requires applicable verified "
+                    "cache membership",
+                )
+            if accepted_provider is not None and current_provider != (
+                accepted_provider,
+                accepted_provider_identity,
+            ):
+                raise CliFailure(
+                    "execution.accepted_source_provider_changed",
+                    "current cache membership does not match dispatch "
+                    "provider authority",
+                )
+            accepted_provider, accepted_provider_identity = current_provider
+        except SourceMaterializationError as exc:
+            raise CliFailure(exc.code, exc.message) from exc
     selected_worker = getattr(args, "execution_worker", None)
     retained_source = None
     if getattr(args, "retained_source", None):
@@ -803,12 +844,9 @@ def _standard_rebuild_one_component(
                         prepared.locked_authority_snapshot.authority.lock,
                     ),
                     pipeline_model=getattr(args, "model", None),
-                    accepted_source_provider_id=getattr(
-                        args, "accepted_source_provider_id", None
-                    ),
-                    accepted_source_provider_identity=getattr(
-                        args, "accepted_source_provider_identity", None
-                    ),
+                    source_cache_entry_identities=entry_identities,
+                    accepted_source_provider_id=accepted_provider,
+                    accepted_source_provider_identity=accepted_provider_identity,
                     **(
                         {
                             "retained_source": retained_source,
@@ -930,7 +968,28 @@ def _standard_rebuild_one_component(
                     artifact = execution_command.cwd
                 if candidate is not None:
                     _write_standard_candidate(candidate, rebuilt.finalized_receipt)
+                application_lifecycle = getattr(
+                    getattr(adapter.runtime, "application", None), "lifecycle", None
+                )
+                publication_entry = getattr(
+                    getattr(application_lifecycle, "source_cache_publisher", None),
+                    "published_entry_identity",
+                    None,
+                )
+                published_entries = set()
+                for node in rebuilt.execution.lifecycle.node_results:
+                    if getattr(
+                        node, "source_cache_publication_identity", None
+                    ) is not None and callable(publication_entry):
+                        entry = publication_entry(
+                            node.source_cache_publication_identity
+                        )
+                        if entry is not None:
+                            published_entries.add(entry.uri)
                 result: dict[str, object] = {
+                    "source_cache_published_entry_identities": sorted(
+                        published_entries
+                    ),
                     "schema": PROJECT_REBUILD_RESULT_SCHEMA,
                     "passed": True,
                     "driver": "standard",

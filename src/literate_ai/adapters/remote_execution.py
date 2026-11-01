@@ -141,6 +141,7 @@ class RemoteLifecycleRebuilder(Protocol):
         accepted_source_provider_id: str | None,
         accepted_source_provider_identity: ContentIdentity | None,
         jobs: int,
+        source_cache_entry_identities: tuple[ContentIdentity, ...] = (),
     ) -> dict[str, object]: ...
 
 
@@ -1090,6 +1091,11 @@ def execute_remote_request(
             accepted_source_provider_id=request.accepted_source_provider_id,
             accepted_source_provider_identity=(
                 request.accepted_source_provider_identity
+            ),
+            **(
+                {"source_cache_entry_identities": request.source_cache_entry_identities}
+                if request.source_cache_entry_identities
+                else {}
             ),
         )
         try:

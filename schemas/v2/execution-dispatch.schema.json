@@ -360,6 +360,10 @@
         },
         "verbose": {"type": "boolean"},
         "accepted_source_only": {"type": "boolean"},
+        "source_cache_entry_identities": {
+          "type": "array", "maxItems": 64, "uniqueItems": true,
+          "items": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+        },
         "accepted_source_provider_id": {
           "type": ["string", "null"],
           "pattern": "^[a-z0-9][a-z0-9._-]*$"
@@ -371,7 +375,21 @@
           ]
         },
         "entrypoint": {"type": "string", "minLength": 1, "maxLength": 4096, "pattern": "^[^\\u0000]+$"}
-      }
+      },
+      "allOf": [{
+        "if": {
+          "required": ["source_cache_entry_identities"],
+          "properties": {"source_cache_entry_identities": {"minItems": 1}}
+        },
+        "then": {
+          "required": ["accepted_source_only", "accepted_source_provider_id", "accepted_source_provider_identity"],
+          "properties": {
+            "accepted_source_only": {"const": true},
+            "accepted_source_provider_id": {"type": "string"},
+            "accepted_source_provider_identity": {"$ref": "urn:literate-ai:schema:v1:content-identity"}
+          }
+        }
+      }]
     },
     "observed_environment": {
       "$id": "urn:literate-ai:schema:v2:observed-execution-environment",

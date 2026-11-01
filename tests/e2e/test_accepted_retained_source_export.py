@@ -24,7 +24,7 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
     setUp = fixture.ModelFreeRebuildTests.setUp
     rebuild = fixture.ModelFreeRebuildTests.rebuild
 
-    def build(self, *, command="build"):
+    def build(self, *, command="build", cache_entries=()):
         output = io.StringIO()
         errors = io.StringIO()
         with (
@@ -47,6 +47,8 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
             ]
             if command == "build":
                 arguments.append("--from-accepted-source")
+                for entry in cache_entries:
+                    arguments.extend(("--source-cache-entry", entry))
             else:
                 # This retained executable's explicit CLI takes one JSON argument
                 # vector. It does not declare an argument-free application mode.
@@ -63,6 +65,215 @@ class AcceptedRetainedSourceExportTests(unittest.TestCase):
                 f"{command} returned {status}: "
                 f"{(output.getvalue() or errors.getvalue())[:1024]!r}"
             ) from exc
+
+    def test_exact_entry_selection_preserves_successive_admitted_revisions(self):
+        import py_compile
+        from pathlib import Path
+
+        from literate_ai.adapters.cache import FileSystemSourceCache
+
+        source = self.root / "retained"
+        author_retained_native_fixture(self.project, source)
+        (self.root / "tools/claude").unlink()
+        self.environment["CODING_CLI"] = "no-generation-provider"
+        cache = FileSystemSourceCache(
+            "history", Path(self.environment["BUILD_DIR"]) / "accepted-source-cache"
+        )
+        admitted, expected = [], []
+        with patch(
+            "literate_ai.adapters.models.coding_cli.select_coding_cli",
+            side_effect=AssertionError("accepted source invoked coding agent"),
+        ):
+            for revision in range(2):
+                if revision:
+                    with (source / "main.py").open("a") as stream:
+                        stream.write(
+                            "\n# independently reviewed second retained revision\n"
+                        )
+                compiled = self.root / f"expected-{revision}.pyc"
+                py_compile.compile(
+                    str(source / "main.py"),
+                    cfile=str(compiled),
+                    dfile="main.py",
+                    doraise=True,
+                    invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH,
+                )
+                expected.append(compiled.read_bytes())
+                status, review = self.rebuild(
+                    "--retained-source", str(source), "--retained-source-plan"
+                )
+                self.assertEqual(status, 0, review)
+                status, result = self.rebuild(
+                    "--retained-source",
+                    str(source),
+                    "--authorize-retained-source",
+                    review["result"]["authorization_identity"],
+                )
+                self.assertEqual(status, 0, result)
+                entries = cache.verified_published_entries()
+                fresh = [entry for entry in entries if entry not in admitted]
+                self.assertEqual(len(fresh), 1)
+                self.assertEqual(
+                    result["result"]["source_cache_published_entry_identities"],
+                    [fresh[0].identity.uri],
+                )
+                admitted.extend(fresh)
+                status, built = self.build()
+                if revision == 0:
+                    self.assertEqual(status, 0, built)
+                else:
+                    self.assertNotEqual(status, 0, built)
+                    self.assertEqual(
+                        built["error"]["code"],
+                        "execution.accepted_source_provider_ambiguous",
+                    )
+            for index in (1, 0):
+                status, built = self.build(
+                    cache_entries=(admitted[index].identity.uri,)
+                )
+                self.assertEqual(status, 0, built)
+                self.assertEqual(
+                    Path(built["result"]["artifact"]).read_bytes(), expected[index]
+                )
+                status, ran = self.build(command="run")
+                self.assertEqual(status, 0, ran)
+                self.assertEqual(ran["result"]["exit_status"], 0)
+                record = Path(built["result"]["artifact"]).parent / "execution.json"
+                original_record = record.read_bytes()
+                tampered = json.loads(original_record)
+                tampered["source_cache_entry_identities"] = [
+                    admitted[1 - index].identity.uri
+                ]
+                try:
+                    record.write_text(json.dumps(tampered))
+                    status, refused = self.build(command="run")
+                    self.assertNotEqual(status, 0, refused)
+                    self.assertEqual(
+                        refused["error"]["code"], "artifact_export.authority_stale"
+                    )
+                finally:
+                    record.write_bytes(original_record)
+            receipt = (self.project / "verification/current.json").read_bytes()
+            for choices in (
+                ("sha256:" + "0" * 64,),
+                ("invalid",),
+                (admitted[0].identity.uri,) * 2,
+                tuple(entry.identity.uri for entry in admitted),
+            ):
+                with self.subTest(selection=choices):
+                    status, refused = self.build(cache_entries=choices)
+                    self.assertNotEqual(status, 0, refused)
+                    self.assertEqual(
+                        (self.project / "verification/current.json").read_bytes(),
+                        receipt,
+                    )
+            self.assertEqual(
+                sorted(
+                    entry.identity.uri for entry in cache.verified_published_entries()
+                ),
+                sorted(entry.identity.uri for entry in admitted),
+            )
+
+    def test_other_component_lock_does_not_create_provider_ambiguity(self):
+        from pathlib import Path
+
+        from literate_ai.adapters.cache import FileSystemSourceCache
+        from literate_ai.adapters.project_initialization import (
+            record_project_authority_review,
+        )
+
+        original = self.project
+        (self.root / "tools/claude").unlink()
+        self.environment["CODING_CLI"] = "no-generation-provider"
+        cache = FileSystemSourceCache(
+            "multiple-components",
+            Path(self.environment["BUILD_DIR"]) / "accepted-source-cache",
+        )
+        entries = []
+        with patch(
+            "literate_ai.adapters.models.coding_cli.select_coding_cli",
+            side_effect=AssertionError("accepted source invoked coding agent"),
+        ):
+            for index in range(2):
+                if index:
+                    self.project = self.root / "other-project"
+                    shutil.copytree(original, self.project)
+                    component = self.project / "samples/hello-component"
+                    spec = component / "component.md"
+                    text = spec.read_text()
+                    self.assertIn("namespace: example", text)
+                    spec.write_text(
+                        text.replace(
+                            "namespace: example", "namespace: other-samples", 1
+                        )
+                    )
+                    (component / "component.lock.json").unlink(missing_ok=True)
+                    output = io.StringIO()
+                    with patch.dict(os.environ, self.environment):
+                        status = main(
+                            ["--json", "lock", str(component)],
+                            stdout=output,
+                            stderr=output,
+                        )
+                    self.assertEqual(status, 0, output.getvalue())
+                    # Only the namespace changed; independently reviewed JSON
+                    # expectations remain identical and bind the new specification.
+                    locked = json.loads((component / "component.lock.json").read_text())
+                    specification = next(
+                        node["revision"]["specification_set_identity"]
+                        for node in locked["nodes"]
+                        if node["revision"]["coordinate"]["name"] == "hello-component"
+                    )
+                    oracle = (
+                        self.project / "verification/acceptance/hello-component.json"
+                    )
+                    cases = json.loads(oracle.read_text())
+                    cases["specification_set_identity"] = (
+                        f"{specification['algorithm']}:{specification['digest']}"
+                    )
+                    oracle.write_text(json.dumps(cases, indent=2) + "\n")
+                    record_project_authority_review(self.project)
+                source = self.root / f"retained-{index}"
+                author_retained_native_fixture(self.project, source)
+                status, review = self.rebuild(
+                    "--retained-source", str(source), "--retained-source-plan"
+                )
+                self.assertEqual(status, 0, review)
+                status, admitted = self.rebuild(
+                    "--retained-source",
+                    str(source),
+                    "--authorize-retained-source",
+                    review["result"]["authorization_identity"],
+                )
+                self.assertEqual(status, 0, admitted)
+                selected = [
+                    entry
+                    for entry in cache.verified_published_entries()
+                    if entry not in entries
+                ]
+                self.assertEqual(len(selected), 1)
+                entries.extend(selected)
+            self.assertNotEqual(
+                entries[0].derivation.component_lock_identity,
+                entries[1].derivation.component_lock_identity,
+            )
+            for project, foreign in (
+                (original, entries[1]),
+                (self.project, entries[0]),
+            ):
+                self.project = project
+                status, result = self.build()
+                self.assertEqual(status, 0, result)
+                receipt = (project / "verification/current.json").read_bytes()
+                status, refused = self.build(cache_entries=(foreign.identity.uri,))
+                self.assertNotEqual(status, 0, refused)
+                self.assertEqual(
+                    refused["error"]["code"], "source-cache.selection-not-applicable"
+                )
+                self.assertEqual(
+                    (project / "verification/current.json").read_bytes(), receipt
+                )
+            self.assertEqual(len(cache.verified_published_entries()), 2)
 
     def test_admit_then_build_from_accepted_retained_source_without_agent(self):
         self.exercise_accepted_export(committed_target=False)

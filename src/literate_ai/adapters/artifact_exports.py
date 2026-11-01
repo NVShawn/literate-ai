@@ -217,8 +217,23 @@ class ArtifactExport:
     model_selector: str | None = None
     accepted_source_only: bool = False
     library_product: LibraryArtifactProduct | None = None
+    source_cache_entry_identities: tuple[ContentIdentity, ...] = ()
 
     def __post_init__(self) -> None:
+        selected = self.source_cache_entry_identities
+        if (
+            not isinstance(selected, tuple)
+            or len(selected) > 64
+            or any(not isinstance(item, ContentIdentity) for item in selected)
+            or selected != tuple(sorted(set(selected), key=lambda item: item.uri))
+            or selected
+            and not self.accepted_source_only
+        ):
+            raise ArtifactExportError(
+                "artifact_export.invalid",
+                "source-cache selectors require bounded sorted identities "
+                "in accepted-only mode",
+            )
         if self.library_product is not None:
             if not isinstance(self.library_product, LibraryArtifactProduct) or any(
                 (
@@ -303,6 +318,10 @@ class ArtifactExport:
         # Preserve the non-default mode so run can reconstruct the build authority.
         if self.accepted_source_only:
             value["accepted_source_only"] = True
+        if self.source_cache_entry_identities:
+            value["source_cache_entry_identities"] = [
+                item.uri for item in self.source_cache_entry_identities
+            ]
         if self.library_product is not None:
             value["library_artifact"] = self.library_product.to_dict()
             value["library_identity"] = self.library_identity.uri
@@ -499,6 +518,7 @@ def record_artifact_export(
         execution_identity,
         model_selector=dispatch_request.model_selector,
         accepted_source_only=dispatch_request.accepted_source_only,
+        source_cache_entry_identities=dispatch_request.source_cache_entry_identities,
     )
     (destination / EXPORT_RECORD).write_text(
         json.dumps(export.to_dict(), indent=2) + "\n", encoding="utf-8"
@@ -552,6 +572,7 @@ def _record_library_export(
             {},
             model_selector=request.model_selector,
             accepted_source_only=request.accepted_source_only,
+            source_cache_entry_identities=request.source_cache_entry_identities,
             library_product=product,
         )
         descriptor, name = tempfile.mkstemp(
@@ -631,6 +652,7 @@ def record_remote_artifact_export(
         {},
         model_selector=dispatch_request.model_selector,
         accepted_source_only=dispatch_request.accepted_source_only,
+        source_cache_entry_identities=dispatch_request.source_cache_entry_identities,
         library_product=library_product,
     )
     destination = export_root(project_root.resolve(), build_dir) / _component_key(
@@ -696,6 +718,7 @@ def load_artifact_export(
         "execution_identity",
         "model_selector",
         "accepted_source_only",
+        "source_cache_entry_identities",
         "library_artifact",
         "library_identity",
     }
@@ -718,6 +741,8 @@ def load_artifact_export(
         or any(not isinstance(item, str) or not item for item in value["argv"])
         or not isinstance(value.get("environment"), dict)
         or not isinstance(value.get("accepted_source_only", False), bool)
+        or not isinstance(value.get("source_cache_entry_identities", []), list)
+        or len(value.get("source_cache_entry_identities", [])) > 64
         or any(
             not isinstance(name, str) or not isinstance(environment_value, str)
             for name, environment_value in value["environment"].items()
@@ -728,6 +753,10 @@ def load_artifact_export(
             f"artifact export for {key!r} violates its closed schema",
         )
     try:
+        selected_cache_entries = tuple(
+            ContentIdentity.parse_uri(item)
+            for item in value.get("source_cache_entry_identities", [])
+        )
         library_product = (
             LibraryArtifactProduct.from_dict(value["library_artifact"])
             if "library_artifact" in value
@@ -835,6 +864,7 @@ def load_artifact_export(
         value.get("model_selector"),
         value.get("accepted_source_only", False),
         library_product,
+        selected_cache_entries,
     )
     if library_product is not None:
         if value["library_identity"] != export.library_identity.uri:

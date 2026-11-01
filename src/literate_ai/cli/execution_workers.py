@@ -415,7 +415,7 @@ def create_execution_dispatch_request(
     )
     from literate_ai.projects import ProjectError, discover_project
 
-    from .generation import plan_from_args
+    from .generation import _prepare_generation, plan_from_args
 
     component_root = (project_root / component).resolve()
     target_profile = getattr(args, "target", "host")
@@ -429,7 +429,28 @@ def create_execution_dispatch_request(
         component_root, tuple(getattr(args, "flavor", ()) or ())
     )
     accepted_source_only = bool(getattr(args, "from_accepted_source", False))
-    accepted_source_provider_binding = None
+    from .rebuild_cache import parse_source_cache_entry_identities
+
+    entry_identities = parse_source_cache_entry_identities(
+        getattr(args, "source_cache_entry", ()) or (),
+        force_regeneration=bool(getattr(args, "force_regeneration", False)),
+    )
+    if entry_identities and not accepted_source_only:
+        # External-driver selection remains owned by rebuild's existing protocol.
+        entry_identities = ()
+    planning_args = Namespace(
+        specification=str(component_root),
+        recipe_id=None,
+        target=target_profile,
+        flavor=list(getattr(args, "flavor", ()) or ()),
+        flavor_root=[],
+        model=getattr(args, "model", None),
+        accepted_source_selection=None,
+    )
+    prepared_authority = (
+        _prepare_generation(planning_args) if accepted_source_only else None
+    )
+    accepted_binding = None
     accepted_selection = None
     if accepted_source_only:
         from literate_ai.adapters.cache.filesystem import SourceCacheError
@@ -446,15 +467,17 @@ def create_execution_dispatch_request(
         from literate_ai.contracts.model_scopes import RETAINED_SOURCE_PROVIDER
 
         try:
-            accepted_source_provider_binding = (
-                discover_accepted_source_provider_binding(project.root)
+            accepted_binding = discover_accepted_source_provider_binding(
+                project.root,
+                entry_identities=entry_identities,
+                component_lock_identity=prepared_authority.locked_authority_snapshot.authority.lock.identity,
             )
-            if accepted_source_provider_binding is None:
+            if accepted_binding is None:
                 raise CliFailure(
                     "execution.accepted_source_cache_missing",
                     "accepted-source build requires valid cache membership",
                 )
-            provider, tool_binding = accepted_source_provider_binding
+            provider, tool_binding = accepted_binding
             review = (
                 accepted_retained_source_review_from_caches(
                     readonly_standard_source_caches(
@@ -463,6 +486,8 @@ def create_execution_dispatch_request(
                         / "accepted-source-cache",
                     ),
                     tool_binding,
+                    entry_identities=entry_identities,
+                    component_lock_identity=prepared_authority.locked_authority_snapshot.authority.lock.identity,
                 )
                 if provider == RETAINED_SOURCE_PROVIDER
                 else None
@@ -476,17 +501,8 @@ def create_execution_dispatch_request(
             raise CliFailure(
                 "execution.accepted_source_cache_invalid", str(exc)
             ) from exc
-    plan = plan_from_args(
-        Namespace(
-            specification=str(component_root),
-            recipe_id=None,
-            target=target_profile,
-            flavor=list(getattr(args, "flavor", ()) or ()),
-            flavor_root=[],
-            model=getattr(args, "model", None),
-            accepted_source_selection=accepted_selection,
-        )
-    )
+    planning_args.accepted_source_selection = accepted_selection
+    plan = plan_from_args(planning_args, _prepared=prepared_authority)
     try:
         index = require_lifecycle_project_index(
             project.root,
@@ -587,16 +603,13 @@ def create_execution_dispatch_request(
             verbose=bool(getattr(args, "verbose", False)),
             accepted_source_only=accepted_source_only,
             accepted_source_provider_id=(
-                None
-                if accepted_source_provider_binding is None
-                else accepted_source_provider_binding[0]
+                None if accepted_binding is None else accepted_binding[0]
             ),
             accepted_source_provider_identity=(
-                None
-                if accepted_source_provider_binding is None
-                else accepted_source_provider_binding[1]
+                None if accepted_binding is None else accepted_binding[1]
             ),
             entrypoint=entrypoint,
+            source_cache_entry_identities=entry_identities,
         )
     except CliFailure:
         raise

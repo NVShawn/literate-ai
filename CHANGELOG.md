@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Accepted-source continuation: scope provider discovery to the requested Component
+  lock and honor existing exact cache-entry selectors before ambiguity rejection.
+  Authenticate the choice through dispatch, fresh acceptance and artifact/run
+  replay while preserving historical memberships.
+
 - Accepted-source transport: include declared readable project-relative caches in
   the authenticated source archive even when Git ignores them. Preserve cache
   roots, read policy and fresh acceptance without invoking a coding agent.

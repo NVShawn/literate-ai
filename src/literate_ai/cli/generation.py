@@ -184,24 +184,34 @@ def _input_closure_report(closure: PinnedInputClosure) -> dict[str, object]:
     }
 
 
-def plan_from_args(args) -> dict[str, Any]:
+def plan_from_args(args, *, _prepared=None) -> dict[str, Any]:
     """Resolve and verify every input without invoking a coding CLI."""
     from .repository_locks import repository_plan_from_args, selected_repository_root
 
     root = selected_repository_root(args, Path(args.specification))
     if root is not None:
+        if _prepared is not None:
+            raise CliFailure(
+                "generation.prepared_scope_invalid",
+                "a prepared Component cannot plan a repository root",
+            )
         return repository_plan_from_args(args, root)
 
     from literate_ai.diagnostics import debug_stage
 
     with debug_stage("plan", specification=str(getattr(args, "specification", ""))):
-        return _plan_from_args_body(args)
+        return _plan_from_args_body(args, _prepared=_prepared)
 
 
-def _plan_from_args_body(args) -> dict[str, Any]:
+def _plan_from_args_body(args, *, _prepared=None) -> dict[str, Any]:
     """Resolve and verify every input without invoking a coding CLI."""
 
-    prepared = _prepare_generation(args)
+    prepared = _prepare_generation(args) if _prepared is None else _prepared
+    if not isinstance(prepared, PreparedLockedGeneration):
+        raise CliFailure(
+            "generation.prepared_scope_invalid",
+            "planning requires live prepared Component authority",
+        )
     recipe = prepared.recipe
     accepted_selection = getattr(args, "accepted_source_selection", None)
     if accepted_selection is not None:

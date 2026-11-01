@@ -201,10 +201,29 @@ class RemoteExecutionTests(unittest.TestCase):
             project.mkdir()
             staging.mkdir()
             (project / "component.md").write_text("# app\n", encoding="utf-8")
-            build_request = request(LifecycleDispatchAction.BUILD)
+            build_request = replace(
+                request(LifecycleDispatchAction.BUILD),
+                accepted_source_only=True,
+                accepted_source_provider_id="reviewed-provider",
+                accepted_source_provider_identity=identity("7"),
+                source_cache_entry_identities=(identity("8"),),
+            )
+            from tests.support.fixtures_test_schema_catalog import SchemaCatalog
+
+            SchemaCatalog().validate(build_request.SCHEMA, build_request.to_dict())
+            build_request = type(build_request).from_dict(build_request.to_dict())
+            changed = replace(
+                build_request, source_cache_entry_identities=(identity("9"),)
+            )
+            self.assertNotEqual(
+                changed.authority_identity, build_request.authority_identity
+            )
             captured = capture_source_archive(project, build_request, directory=staging)
 
             def rebuild(**values):
+                self.assertEqual(
+                    values["source_cache_entry_identities"], (identity("8"),)
+                )
                 custody = values["custody"]
                 custody.runtime_root.mkdir()
                 artifact = custody.runtime_root / "app.bin"
@@ -219,6 +238,20 @@ class RemoteExecutionTests(unittest.TestCase):
                     "runtime_root": str(custody.runtime_root),
                 }
 
+            with self.assertRaises(RemoteExecutionError) as wrong_selection:
+                materialize_and_execute(
+                    worker(),
+                    changed,
+                    captured.materialization,
+                    archive=captured.path,
+                    workspace=root / "changed-selection",
+                    cas_root=root / "rejected-cas",
+                    rebuild=rebuild,
+                )
+            self.assertEqual(
+                wrong_selection.exception.code,
+                "execution.remote_materialization_mismatch",
+            )
             bundle = staging / "remote-evidence.tar.gz"
             with patch(
                 "literate_ai.adapters.remote_execution.probe_worker_capabilities",

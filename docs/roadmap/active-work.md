@@ -32467,9 +32467,47 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   pass; 181 Mermaid diagrams render. Authority passes while the configured
   lifecycle receipt remains stale. Integrated and installed/native qualification
   and historical-membership selection remain release blockers.
-- **Next unchecked action:** qualify declared-cache transport for ignored project
-  targets and repair exact requested-authority selection before global historical
-  provider ambiguity. Do not close #196/#197 from the local source checkpoint.
+- **Next unchecked action:** distribute explicit selectors correctly across
+  whole-project Standard rebuild roots, then complete exact integrated and
+  installed/native qualification for declared-cache transport and selection.
+  Per-Component source development does not close #196/#197.
+
+- **Exact-selection implementation plan:** Reuse the existing repeated
+  `--source-cache-entry` selector for Standard accepted-only continuation. Resolve
+  the current locked Component authority before provider discovery, filter
+  unrelated locks, and require every explicit identity to be verified and
+  applicable. Bind sorted identities into dispatch authority and preserve them
+  through local and remote Standard composition. Select through the existing
+  exact-entry resolver and reject conflicting or unused selections before host
+  lifecycle execution. Preserve unselected ambiguity, all historical memberships,
+  current acceptance and default single-entry behavior. Raw root overrides remain
+  unsupported; no timestamp or unauthenticated receipt chooses a revision.
+- **Per-Component exact-selection development evidence:** The existing entry
+  selector now reaches verified discovery before provider ambiguity and is bound
+  into dispatch, Standard lifecycle/cache-control identities, and artifact exports
+  for `run` replay. The current locked preparation scopes discovery without a
+  duplicate preparation pass. Explicit identity/key matching reuses the cache
+  resolver and refuses missing, foreign, conflicting or inapplicable selections
+  before host lifecycle execution. Standard rebuild output exposes only actual
+  published entry IDs so the selector needs no private cache inspection.
+  A public test admits two successive retained revisions, preserves their initial
+  memberships, refuses unselected ambiguity, and builds/runs either exact revision
+  without a coding agent with byte-exact checked-hash Python artifacts. Invalid,
+  unknown, duplicate and conflicting IDs preserve the receipt; changed export
+  selectors refuse stale run authority. A second real admission under a distinct
+  Component namespace shares the cache and proves current-lock discovery plus
+  foreign-selection refusal. Its namespace-only change retains the reviewed JSON
+  expectations and explicitly rebinds them to the new specification.
+  Independent reviewer `review_pr239` approved final source/schema/test diff
+  SHA-256 `2b9ca5444b17cc0c78fcc1b00186f290e35005a92d6750cce4ec1b364af0293a`
+  against `db09bf919` after repairing a fixture namespace typo and preserving the
+  existing optional-publisher adapter boundary. The reviewer ran no tests; live
+  logs separately prove both public scenarios. The complete public Make module
+  passes all five cases in 222 seconds; 32 related protocol/cache/CLI checks pass
+  with 30 subtests. Lint, formatting, layout, public export, current driver and
+  documentation reviews pass, and 181 Mermaid diagrams render. Authority passes
+  while the configured lifecycle receipt remains stale. Whole-project selector
+  distribution and installed/native/integrated qualification remain unchecked.
 
 - **Successive-revision reproduction:** A real public two-admission fixture now
   reproduces #197 on the current integration source. The first accepted-only build

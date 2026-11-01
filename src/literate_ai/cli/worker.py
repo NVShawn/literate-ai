@@ -441,6 +441,7 @@ def _execute_from_args(args: Any) -> tuple[dict[str, object], int]:
         accepted_source_provider_id: str | None,
         accepted_source_provider_identity: ContentIdentity | None,
         jobs: int,
+        source_cache_entry_identities: tuple[ContentIdentity, ...] = (),
     ) -> dict[str, object]:
         return rebuild_from_args(
             Namespace(
@@ -456,7 +457,7 @@ def _execute_from_args(args: Any) -> tuple[dict[str, object], int]:
                 execution_worker=None,
                 force_regeneration=False,
                 model=model_selector,
-                source_cache_entry=None,
+                source_cache_entry=[item.uri for item in source_cache_entry_identities],
                 source_cache_root=[],
                 allow_host_execution=True,
                 from_accepted_source=accepted_source_only,
