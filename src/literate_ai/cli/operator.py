@@ -414,6 +414,9 @@ def onboard_from_args(args: Namespace) -> dict[str, Any]:
                 },
             }
         return result
+    except CliFailure:
+        # The initialization owner already selected a finite diagnostic budget.
+        raise
     except (
         IntentRefinementError,
         OperatorAdoptionError,

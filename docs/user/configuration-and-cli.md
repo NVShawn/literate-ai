@@ -1380,6 +1380,21 @@ worker identities. The manifest configures
 That `policy-unconfigured` state is valid while onboarding, but no candidate can be
 accepted or current until the project declares who may issue one and what it must prove.
 
+For a Node/polyglot example, see [retained JavaScript dependencies](getting-started.md#retained-javascript-dependencies).
+
+Failed adoption baseline/parity checks report the rollback outcome before command
+excerpts. When private retention is available, the diagnostic identifies a report
+under the user state root's `adoption-failures` directory (`litai config paths`
+shows that root). Reports retain bounded, redacted excerpts and stream digests,
+not full output or an acceptance receipt. Each report is capped at 512 KiB, with
+at most eight phases and 4,096 characters per stream excerpt. The store accepts
+at most 128 reports / 16 MiB; it refuses new retention when full and never removes
+older evidence automatically. An unavailable, unsafe or project-overlapping state
+path leaves the original conversion failure authoritative and reports retention
+as unavailable. Private reports survive project rollback; they are not portable
+release evidence.
+
+
 Conversion derives repository policy from an explicit `--default-branch` first, then
 the current branch's configured upstream, then remote HEAD and bounded local fallbacks.
 That ordering also applies to linked and absorbed worktrees whose `.git` boundary is a

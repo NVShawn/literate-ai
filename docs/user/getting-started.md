@@ -142,6 +142,37 @@ The transition is explicit: `wrapped` → `retained` → `drafted` → `qualifie
 Original source remains release authority until regenerative qualification is current;
 onboard never treats a wrapped repository as specification-authoritative.
 
+### Retained JavaScript dependencies
+
+Adoption baseline and parity checks run in disposable source-only sandboxes.
+An ignored `node_modules` directory in your checkout is absent there, so a
+polyglot project's Node helper can fail with `ERR_MODULE_NOT_FOUND` even when
+its checkout tests pass. No dependencies are installed automatically.
+
+Prepare a separately managed dependency directory using your project's lockfile
+and installation workflow. Keep it outside, and disjoint from, the project tree.
+Bind it explicitly when running adoption:
+
+```console
+litai onboard adopt path/to/existing --apply --acknowledge --run-baseline --harness-workspace-link node_modules=/absolute/dependency-cache/node_modules
+```
+
+The binding creates a `node_modules` sibling of the disposable source tree;
+Node's parent-directory lookup can then resolve imported packages. This is a
+local execution binding to an existing writable directory, not a hermetic package
+installation or a change in source authority. Use a platform-appropriate absolute
+path on Windows. A binding does not fix packages absent from that directory.
+
+Repeat the same destination binding on subsequent retained qualification runs:
+
+```console
+litai project test-receipt run-retained /tmp/retained.json --project path/to/existing --harness-workspace-link node_modules=/absolute/dependency-cache/node_modules
+```
+
+Portable evidence records the destination name, not the private host locator.
+Missing or extra destinations fail qualification. See
+[workspace-link configuration](configuration-and-cli.md) for binding constraints.
+
 ### Plan a Git-submodule orchestration project
 
 To preserve independently owned child repositories in place, use the explicit
