@@ -1155,13 +1155,20 @@ litai build samples/hello-component --from-accepted-source --source-cache-entry 
 
 Replace `sha256:ENTRY_DIGEST` with an identity returned in a successful Standard
 rebuild's `source_cache_published_entry_identities`. Up to 64 unique selectors may
-be repeated. Every selected entry must belong to the current locked Component and
+be repeated. Every selected entry must belong to a current requested Component lock and
 match a current planned derivation; missing, foreign, conflicting or unused
 selectors refuse. Unselected applicable ambiguity still refuses. Selectors bind
 local and remote dispatch, lifecycle/cache-control identities and artifact exports;
 `litai run` reconstructs the saved choice without another command-line selector.
 Every restored source still needs fresh build, tests, execution and independent
 acceptance. Prior receipt contents and timestamps never choose a revision.
+
+For `litai rebuild . --from-accepted-source`, selectors are partitioned across the
+complete current project lock set before any root executes. IDs outside that set
+refuse. Selecting one root does not force its entries onto other roots: their unique
+applicable members remain available. Whole-project results retain the union of
+actual `source_cache_published_entry_identities`; cache hits do not count as new
+publications.
 
 `litai rebuild` uses one command with a mandatory two-pass driver handshake. First it
 invokes the content-pinned driver in `plan-derivations` mode, without host-execution

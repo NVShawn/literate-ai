@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Whole-project continuation: distribute exact accepted-source selectors to their
+  current Component roots, reject foreign selections before execution, and retain
+  aggregate publication IDs while preserving cache history.
+
 - Accepted-source continuation: scope provider discovery to the requested Component
   lock and honor existing exact cache-entry selectors before ambiguity rejection.
   Authenticate the choice through dispatch, fresh acceptance and artifact/run

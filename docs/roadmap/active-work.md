@@ -32467,10 +32467,9 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   pass; 181 Mermaid diagrams render. Authority passes while the configured
   lifecycle receipt remains stale. Integrated and installed/native qualification
   and historical-membership selection remain release blockers.
-- **Next unchecked action:** distribute explicit selectors correctly across
-  whole-project Standard rebuild roots, then complete exact integrated and
-  installed/native qualification for declared-cache transport and selection.
-  Per-Component source development does not close #196/#197.
+- **Next unchecked action:** complete exact integrated and installed/native
+  qualification for declared-cache transport and Component/project-root selection.
+  Source development does not close #196/#197.
 
 - **Exact-selection implementation plan:** Reuse the existing repeated
   `--source-cache-entry` selector for Standard accepted-only continuation. Resolve
@@ -32482,6 +32481,30 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   lifecycle execution. Preserve unselected ambiguity, all historical memberships,
   current acceptance and default single-entry behavior. Raw root overrides remain
   unsupported; no timestamp or unauthenticated receipt chooses a revision.
+- **Whole-project selector execution plan:** Validate explicit entry IDs once
+  against readable verified membership and the complete current root lock set.
+  Partition selectors by each current Component lock before invoking its Standard
+  lifecycle; an ID outside the requested project lock set must refuse before any
+  root executes. Preserve ordinary per-derivation selection and defaults, retain
+  aggregate actual publication IDs, and exercise a real two-Component project-root
+  rebuild with fresh retained admissions and no coding agent.
+- **Whole-project development evidence:** A real two-Component retained-source
+  fixture reproduces the foreign-selector failure before the fix (26 seconds).
+  The repaired project-root rebuild partitions both verified identities by current
+  lock, completes six aggregate tests without a coding agent, and leaves cache
+  bytes unchanged. Partial selection still restores unique unselected roots.
+  Unknown IDs and a valid historical entry outside the now-selected lock set refuse
+  before host build and preserve the committed receipt. The strengthened public
+  case passes in 56 seconds; 19 CLI/protocol/remote regressions pass with 28 subtests.
+  Independent reviewer `review_pr239` approved production and both fixture/test
+  files against `a5b8f021c`, diff SHA-256
+  `76141c5d950efec58451013fa1f4dedfd2e3f16ba9afd17ffd57107d85b3ba40`.
+  This is source development with synthetic distribution metadata; exact installed,
+  native and integrated qualification remains required before issue closure.
+  All six public cases pass through the Make Python gate in 268 seconds. Lint,
+  formatting, layout, public export, driver and documentation reviews pass; all
+  181 Mermaid diagrams render. Authority passes while the lifecycle receipt is
+  stale, so no full release-readiness claim follows from these checks.
 - **Per-Component exact-selection development evidence:** The existing entry
   selector now reaches verified discovery before provider ambiguity and is bound
   into dispatch, Standard lifecycle/cache-control identities, and artifact exports
@@ -32506,8 +32529,9 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   passes all five cases in 222 seconds; 32 related protocol/cache/CLI checks pass
   with 30 subtests. Lint, formatting, layout, public export, current driver and
   documentation reviews pass, and 181 Mermaid diagrams render. Authority passes
-  while the configured lifecycle receipt remains stale. Whole-project selector
-  distribution and installed/native/integrated qualification remain unchecked.
+  while the configured lifecycle receipt remained stale. At that checkpoint,
+  whole-project selector distribution and installed/native/integrated qualification
+  remained unchecked; the development evidence above extends that source scope.
 
 - **Successive-revision reproduction:** A real public two-admission fixture now
   reproduces #197 on the current integration source. The first accepted-only build
