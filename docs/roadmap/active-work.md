@@ -22371,7 +22371,7 @@ GitHub CI failure without relaxing identity checks.
 - **Depends on:** none
 - **Implementation:**
   - [x] Obtain explicit maintainer acceptance of ADR 0046 before implementing its placement, migration-journal, or removal design.
-  - [ ] Add bounded read-only registered/peer discovery with exact common-directory
+  - [x] Add bounded read-only registered/peer discovery with exact common-directory
         ownership, independent-repository and missing/contradictory registration
         classification, and concurrent-observation refusal. Discovery grants no
         retirement authority; complete audit and journal ownership remain required.
@@ -22397,18 +22397,23 @@ GitHub CI failure without relaxing identity checks.
   deferral. Implementing read-only discovery first under accepted ADR 0046; do not
   remove or relocate any existing checkout as part of that observation. Explicit
   user placement overrides remain authoritative for this session's task worktrees.
-- **Discovery development evidence:** Twenty real-Git placement, discovery and
-  orchestration checks pass with 19 subtests. Coverage includes independent and
+- **Discovery development evidence:** Twenty-three real-Git placement, discovery and
+  orchestration checks pass with 21 subtests. Coverage includes independent and
   bare repositories, external/locked/detached registrations, dirty/staged/ignored
   bytes, missing/prunable targets, unregistered shared Git directories, contradictory
   ownership, link-like peers, peer/HEAD/metadata drift and finite entry/path/time
   bounds. An actual macOS command reports 32 external worktrees, three project
   worktrees and 79 independent repositories, without moving or pruning anything.
   Lint, formatting, layout, public-export and documentation checks pass. The
-  lifecycle-driver TCB gate correctly reports stale source; its pin is not advanced
-  without the author-independent review required by CONTRIBUTING.md. That review
-  is requested, not yet obtained. Full audit, journal, disposition, removal and
-  installed/native release qualification remain open.
+  lifecycle-driver TCB gate initially refused stale source. Independent reviewer
+  `review_worktree_discovery` found three P2 defects: missing bidirectional
+  administration ownership, swallowed custody-budget refusal and a FIFO open race.
+  All three are repaired. The reviewer approved exact source `d7f3894f3` and
+  independently passed 17 tests / 17 subtests before the TCB pin was recorded.
+  Pointer reads reuse the shared nonblocking, descriptor-checked owner, and registry
+  HEAD/branch fields are explicitly labelled as registration observations. Full
+  audit, journal, disposition, removal and installed/native release qualification
+  remain open.
 
 ### [x] PACKAGE-APT-001 — Construct and independently verify real Debian packages
 
@@ -31941,7 +31946,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Development evidence:** The native Cargo regression reproduces E0252 before the repair. After exact module/symbol deduplication, all four Standard command projection cases pass without skips, preserving both capability observations and missing-symbol refusal.
 - **Completion evidence:** PR 237 lands the fix after exact-head CI 41282538479. Current-main Git/native command-projection controls pass all six cases without skips; issue 219 is closed with comment 6560170740. No full release qualification is claimed.
 
-### [ ] RELEASE-README-ORDER-001 — Clarify published README verification order and asset digest provenance
+### [x] RELEASE-README-ORDER-001 — Clarify published README verification order and asset digest provenance
 
 - **Release target:** 1.4.0
 
@@ -31958,7 +31963,16 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Verify canonical/template equality and pass changed-skill admission with explicit review of both verification phases.
 
 - **Development evidence:** Canonical and initialized release skills remain byte-identical. The initial publication read-back and final README acceptance are distinct; all non-README failures remain blocking. Changed-skill admission passes for canonical and template guidance, including affected nested release deltas.
-- **Next action:** pass admission/integration CI, land, then comment and close the issue.
+- **Closure evidence:** Independent reviewer `review_pr239` approved the narrow
+  ordering and digest-source requirement at landed main `ad979c6e67f74acbc914a2c387a86b00f06ade65`,
+  including the inherited verify-published guidance. Canonical/template bytes are
+  identical (SHA-256 `8466b8caf4412bdbba8c1df6091230fc12d59128cdaca7dfb0deb31c9ec1df5a`)
+  and exactly match successful integration CI `41282538479` source
+  `228c121c044842df7341dd3b82683e79c8b7d563`. The initial read-back permits only a
+  named README finding; all final checks and published-asset digest provenance
+  remain mandatory. This completes the documentation requirement; unrelated
+  platform and full release qualification remain open. Publish this closure record,
+  then comment and close the forge issue.
 
 ### [ ] ZERO-ARG-COVERAGE-001 — Implement accepted exhaustive coverage for zero-argument callables
 
