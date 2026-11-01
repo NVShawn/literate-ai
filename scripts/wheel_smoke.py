@@ -1698,6 +1698,16 @@ def _main() -> int:
                 cwd=root,
             ).stdout
         )
+        cache_continuation = json.loads(
+            run(
+                str(python),
+                "-I",
+                str(repository / "scripts" / "installed_cache_continuation_smoke.py"),
+                str(root / "cache-continuation"),
+                standard_binding["distribution"],
+                cwd=root,
+            ).stdout
+        )
         worker_litai, worker_runtime = bootstrap_real_worker_runtime(
             root, wheel_files[0], standard_binding["distribution"]
         )
@@ -2462,6 +2472,7 @@ def _main() -> int:
                     },
                     "starter_recipe_identity": planned["result"]["recipe_identity"],
                     "source_admission_lifecycle": source_admission_lifecycle,
+                    "cache_continuation": cache_continuation,
                     "standard_binding": standard_binding,
                     "standard_binding_tamper_code": tamper_code,
                 },

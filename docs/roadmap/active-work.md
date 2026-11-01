@@ -32469,6 +32469,18 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   and historical-membership selection remain release blockers.
 - **Next unchecked action:** complete exact integrated and installed/native
   qualification for declared-cache transport and Component/project-root selection.
+- **Installed continuation execution plan:** Extend the canonical wheel harness
+  with actual installed-distribution observation and public retained admission,
+  accepted-only build and run. Exercise default and declared project-relative
+  targets, successive admitted revisions, exact selection and ambiguous/unknown
+  refusal while retaining historical cache bytes. Reuse test-owned untrusted
+  source authoring only; never replace installed metadata or lifecycle owners.
+  This qualification is in progress; native transport and final integrated
+  release acceptance remain required.
+  Independent reviewer `review_pr239` approved the harness source after correcting
+  the unknown-entry refusal code and explicitly disabling inherited-session
+  routing. Seven existing wheel-harness checks and global lint/format pass;
+  actual installed execution is the next gate.
   Source development does not close #196/#197.
 
 - **Exact-selection implementation plan:** Reuse the existing repeated
