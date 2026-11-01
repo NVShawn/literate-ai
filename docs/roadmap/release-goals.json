@@ -147,6 +147,9 @@
       },
       {
         "id": "HTTP-CACHE-REFERENCE-001"
+      },
+      {
+        "id": "HOST-PROBE-ALIAS-001"
       }
     ]
   }

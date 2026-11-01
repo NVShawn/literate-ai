@@ -32110,3 +32110,30 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   namespace committed quotas and separately operated TLS. These are local
   controller tests; native unit key coverage, remote publication, two-host speedups
   and exact release qualification remain open.
+
+### [ ] HOST-PROBE-ALIAS-001 — Preserve multicall executable names in host tool probes
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#214](https://github.com/jordanhubbard/literate-ai/issues/214)
+
+- **Priority:** P1
+- **Owner:** host-install capability observation; issue 214; PROJECT goals 1 and 5
+- **Direction:** Issue 214 reports rustc and cargo probes execute the resolved rustup binary and falsely reject working Rust toolchains; rustup-only readiness also needs explicit provenance treatment.
+- **Conclusion:** Preserve the located invocation path instead of dereferencing its final symlink before execution. Prove dispatch with a real multicall fixture and retain finite probes and declared version constraints. Keep current package-manager provenance fail-closed while auditing the explicit rustup-only provider requirement; do not claim the whole issue resolved from probe success.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Preserve located and absolute fallback invocation names; add multicall, missing, failing and incompatible-version controls.
+  - [ ] Resolve the rustup-only provenance requirement through explicit host-install authority rather than bypassing all native package checks.
+- **Evidence:**
+  - [x] Run affected managed host-install tests and real native rustup probes; prove ordinary provenance and version refusals remain intact.
+  - [ ] Require rustup-only readiness evidence and exact integrated CI before issue 214 closes.
+
+- **Development evidence:** Eighteen focused host-install, FreeBSD host-install,
+  uninstall and alias controls pass. Real native rustup proxies report rustc
+  1.95.0 and Cargo 1.95.0 through the selected invocation names and satisfy the
+  declared version constraints. A working compiler without declared native
+  package provenance remains unready. [ADR 0053](../decisions/0053-declared-rustup-host-provenance.md)
+  proposes explicit rustup provider authority and awaits directing-user
+  acceptance before that independent provider extension begins. The issue and
+  1.4 release goal remain open.

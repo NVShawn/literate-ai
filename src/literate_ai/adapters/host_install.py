@@ -1262,10 +1262,12 @@ def _locate_candidate(
         candidate = _expand_environment_candidate(raw_candidate, environment)
         located = locator(candidate, environment.get("PATH"))
         if located is not None:
-            return Path(located).resolve()
+            # Multicall launchers (notably rustup) dispatch on the invocation
+            # name. Resolving a cargo/rustc alias here runs a different command.
+            return Path(located).absolute()
         path = Path(candidate)
         if path.is_absolute() and path.is_file():
-            return path.resolve()
+            return path
     return None
 
 

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Preserve multicall invocation names in host tool probes so `rustc` and `cargo`
+  aliases execute their selected tools rather than the resolved rustup manager.
+  Keep declared package provenance and version checks; rustup-only provider
+  readiness remains a separate proposed design.
+
 - Provide an explicitly started loopback reference HTTP artifact cache with
   separate reader/writer credentials, conditional immutable publication, bounded
   pending uploads and connection deadlines, and the existing committed-cache
