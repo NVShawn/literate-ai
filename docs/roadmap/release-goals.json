@@ -162,6 +162,12 @@
       },
       {
         "id": "ADOPT-LIFT-ROLLBACK-001"
+      },
+      {
+        "id": "ADOPT-JS-DEPS-001"
+      },
+      {
+        "id": "ADOPT-FAILURE-DIAGNOSTICS-001"
       }
     ]
   }

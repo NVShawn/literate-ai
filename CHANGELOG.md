@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Adoption: preserve bounded baseline failure diagnostics through onboarding and document explicit external JavaScript dependency bindings for source-only sandboxes.
+
 - Restore original source and Git custody after failed lift-shift parity. Require
   complete quarantine before deleting scaffold, retain unexpected recovery
   contents, and report incomplete recovery explicitly.

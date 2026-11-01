@@ -1380,6 +1380,8 @@ worker identities. The manifest configures
 That `policy-unconfigured` state is valid while onboarding, but no candidate can be
 accepted or current until the project declares who may issue one and what it must prove.
 
+For a Node/polyglot example, see [retained JavaScript dependencies](getting-started.md#retained-javascript-dependencies).
+
 Conversion derives repository policy from an explicit `--default-branch` first, then
 the current branch's configured upstream, then remote HEAD and bounded local fallbacks.
 That ordering also applies to linked and absorbed worktrees whose `.git` boundary is a

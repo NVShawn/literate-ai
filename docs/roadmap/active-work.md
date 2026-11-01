@@ -32270,3 +32270,40 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   181 Mermaid render checks pass. Project authority verification passes; the
   full lifecycle receipt remains stale. Exact integrated and installed
   qualification are still required before closing the issue or release goal.
+
+### [ ] ADOPT-JS-DEPS-001 — Document explicit JavaScript dependencies for retained adoption sandboxes
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#204](https://github.com/jordanhubbard/literate-ai/issues/204)
+- **Owner:** adoption documentation and public workspace-link interface; issue 204; PROJECT goal 1
+- **Direction:** Issue 204 says source-only baseline sandboxes omit installed node_modules and the existing explicit workspace-link workaround is hard to discover.
+- **Conclusion:** Document the supported external node_modules sibling binding beside the adoption command, including Node parent resolution, private locator handling, repeat binding on retained runs and no implicit install or source-authority transfer. Prove the real public CLI baseline fails without dependencies and succeeds with the explicit binding; retain source-only sandbox policy.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Add the JavaScript/polyglot dependency example to the adoption guide and cross-link it from workspace-link guidance.
+- **Evidence:**
+  - [x] Execute real Node module import through an acknowledged public adoption: missing binding fails and rolls back; explicit external sibling binding passes baseline/parity and preserves source. Check portable evidence contains no host locators. Both native Node public-CLI cases pass; seven related operator/output/failure controls also pass.
+  - [ ] Run affected CLI/adoption controls and documentation/static gates; require exact integration and installed qualification before issue closure.
+
+- **Local validation:** Nine focused CLI/adoption/output controls, strict lint, formatting, layout, public export and 181 Mermaid renders pass. Authority verification passes; the lifecycle receipt is stale. Exact integration and installed qualification remain open.
+
+### [ ] ADOPT-FAILURE-DIAGNOSTICS-001 — Preserve bounded adoption failure diagnostics and recovery outcome
+
+- **Priority:** P1
+- **Release target:** 1.4.0
+- **GitHub issue:** [#202](https://github.com/jordanhubbard/literate-ai/issues/202)
+- **Owner:** conversion diagnostics, CLI error translation and private failure evidence; issue 202; PROJECT goal 1
+- **Direction:** Issue 202 reports the 512-character outer CLI cap hides test failures and rollback outcomes, and rollback removes the fuller baseline record.
+- **Conclusion:** Preserve existing finite diagnostic budgets through outer onboarding translation, put recovery outcome before excerpts, and retain bounded private failure evidence outside the converted project. Preserve redaction and output limits; do not retain unlimited streams, transfer acceptance or delete existing evidence.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [ ] Preserve explicit CliFailure limits and apply conversion diagnostic allowance to recovery errors; prioritize recovery outcome before stream excerpts.
+  - [ ] Retain a finite private failure summary and bounded per-phase excerpts/digests outside rollback scope, and identify the report in the diagnostic; refuse new retention when the owned store reaches its cap.
+- **Evidence:**
+  - [ ] Use real baseline failures with warning-heavy stderr, stdout test failures and rollback failures; prove selected markers, outcome, finite output, redaction and private report survival.
+  - [ ] Run CLI/adoption regressions and review/static checks; require exact integrated qualification before issue closure.
+
+- **Diagnostic implementation checkpoint:** The outer onboarding handler now preserves the finite `CliFailure` budget selected by initialization. The real missing-Node-dependency case retains `ERR_MODULE_NOT_FOUND` and passes; early recovery outcome and private retained failure summaries remain the next unchecked work.
