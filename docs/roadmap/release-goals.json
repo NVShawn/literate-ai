@@ -156,6 +156,9 @@
       },
       {
         "id": "ADOPT-PLAN-READONLY-001"
+      },
+      {
+        "id": "ADOPT-GIT-CUSTODY-001"
       }
     ]
   }

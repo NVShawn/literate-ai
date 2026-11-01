@@ -32202,3 +32202,35 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   Actual source drift still refuses, and pre-existing build content remains in
   the reviewed quarantine. Exact integration and installed qualification remain
   required before issue closure.
+
+### [ ] ADOPT-GIT-CUSTODY-001 — Preserve tracked ignored files and relative aliases through conversion moves
+
+- **Release target:** 1.4.0
+- **GitHub issues:** [#208](https://github.com/jordanhubbard/literate-ai/issues/208),
+  [#200](https://github.com/jordanhubbard/literate-ai/issues/200)
+
+- **Priority:** P1
+- **Owner:** conversion quarantine and rollback; issues 208 and 200; PROJECT goals 1 and 4
+- **Direction:** Issue 208 loses tracked-but-ignored files when a partly tracked directory takes a filesystem move; issue 200 reports rollback cannot restore relative aliases after their targets move.
+- **Conclusion:** Use Git moves whenever an entry contains indexed paths, preserving untracked siblings and staged intent. Preflight source aliases before mutation, refuse failed tracked moves and undo only completed quarantine moves. Use link-aware existence checks during rollback. Retain exact hierarchy, working bytes and index intent; do not broaden source inclusion or delete unmoved original entries.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Preserve indexed directory and alias moves, and make quarantine move failures restore completed moves without scaffold deletion.
+  - [x] Accept retained dangling relative aliases during ordered rollback while preserving destination collision refusal.
+- **Evidence:**
+  - [x] Reproduce ignored tracked file loss; prove a real conversion baseline sees that source, untracked siblings remain, staged intent survives roundtrip, and forced move failure restores prior entries.
+  - [ ] Run conversion, source-scope and adoption regressions and required review/static gates; require exact integration and installed qualification before issues close.
+
+- **Development evidence:** Before repair, four regression cases produce three
+  failures and one rollback error. After repair, 31 conversion/adoption controls
+  and 13 harness-inventory/native Cargo controls pass without skips. Real public
+  adoption executes a genuine test importing the ignored tracked module and
+  retains that module in the final Git index; untracked siblings remain intact.
+  A genuine failing baseline restores the common `CLAUDE.md -> AGENTS.md` layout
+  and the exact staged index entries. Direct rollback also preserves a staged /
+  working-tree content difference, relative alias payloads and literal Git
+  filenames. Failed moves before and after physical rename recover prior entries;
+  an intervening destination collision preserves both copies and reports failure.
+  Failed Git rollback retains quarantine/index custody. This is local development
+  evidence; exact integration and installed qualification remain required.

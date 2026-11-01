@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Preserve ignored tracked files and untracked siblings when adoption quarantines
+  partly tracked directories. Keep indexed aliases and staged changes through
+  rollback, recognize dangling relative aliases, and refuse failed Git recovery
+  without silently losing index custody or deleting untouched source.
+
 - Keep onboarding plans free of performance-log writes so planning from the
   target directory preserves its reviewed identity. Retain apply diagnostics,
   real plan-drift refusal and custody of pre-existing build content.
