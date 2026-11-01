@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Keep native child promotion on its reviewed build-system choice or an exact,
+  unambiguous parent preference instead of adding template Bazel alongside it.
+  Preserve conflicting-axis and no-op refusals; clarify that qualification uses
+  accepted defaults without replaying already-folded selectors.
+
 - Add explicit project-specific catalog and pinned-input scale ceilings for large
   retained trees, preserving ordinary defaults and independent per-file bounds.
   Bind limits to project authority through loading, lock planning and validation;

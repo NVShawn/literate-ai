@@ -32024,11 +32024,28 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Resolve admitted parent build-system selection and explicit reviewed build axes without inheriting unrelated template defaults.
-  - [ ] Clarify that qualification omits selectors folded into accepted project defaults; genuine selector changes remain ordered and lock-bound.
+  - [x] Resolve admitted parent build-system selection and explicit reviewed build axes without inheriting unrelated template defaults.
+  - [x] Clarify that qualification omits selectors folded into accepted project defaults; genuine selector changes remain ordered and lock-bound.
 - **Evidence:**
-  - [ ] Exercise signed native-child promotion for Cargo and other build axes with real lock resolution, defaults-only qualification lock admission and conflicting-axis refusal.
+  - [x] Exercise signed native-child promotion for Cargo and other build axes with real lock resolution, defaults-only qualification lock admission and conflicting-axis refusal.
   - [ ] Pass affected source promotion and qualification regressions, required review/main CI, and retain honest installed/native qualification boundaries.
+
+- **Development evidence:** Eight current controls pass: signed retained-to-native
+  Make preference inheritance, explicit Rust/Cargo replacing an incidental Make
+  parent and template Bazel, a real native Cargo crate retained receipt followed
+  by Cargo-default inheritance without `-bazel`, conflicting explicit build-axis
+  refusal, parent manifest/Flavor drift and scoped-preference refusal. Exact
+  defaults-only lock admission uses the same reader as qualification; a genuinely
+  redundant ordered selector still refuses. Single replays may change slot binding
+  in the current resolver, so no blanket replay-refusal claim is made. These runs
+  retain source-baseline/drafted authority, not completed regenerative qualification.
+
+- **Regression evidence:** The 12-case arbitrary-source/materialization/locked
+  promotion slice and 11 registered-child replacement controls pass. Lint, format,
+  repository layout, public-export audit and 181 Mermaid renders pass. The native
+  Cargo fixture removes Make and generates its canonical lockfile with Cargo, so
+  a simulated Make test summary cannot stand in for native Cargo execution.
+  Full root test receipt and exact review/main CI remain outstanding.
 
 ### [ ] RETAINED-SCALE-LIMITS-001 — Admit explicitly bounded large retained catalogs and input closures
 

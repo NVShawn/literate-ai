@@ -1074,6 +1074,102 @@ def _flavor_markdown(draft: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _inherited_promotion_build(project):
+    """Recover one exact unscoped parent preference, never a template guess."""
+    if project is None:
+        return None, None
+    from literate_ai.adapters.component_lock_planning import (
+        ComponentLockPlanningError,
+        _load_flavors,
+        _resolve_path,
+    )
+    from literate_ai.application.flavor_selection import (
+        FlavorSelectionError,
+        apply_flavor_selectors,
+        flavor_candidate_aliases,
+        parse_flavor_selector_body,
+        parse_scoped_flavor_selector,
+    )
+    from literate_ai.projects import PinnedInputClosure
+
+    snapshot = ProjectConfigurationStore(project.root).read()
+    if snapshot.definition != project.definition:
+        raise CliFailure(
+            "promotion.parent_changed", "parent project changed during promotion"
+        )
+    guard = PinnedInputClosure.for_project(project)
+    guard.pin(
+        project.root / "literate.project.json",
+        boundary=project.root,
+        label="promotion-parent",
+        expected_content=snapshot.content,
+    )
+    try:
+        catalog = tuple(
+            item
+            for item in _load_flavors(
+                project.roots("flavor"),
+                boundary=project.root,
+                scale_limits=project.definition.scale_limits,
+            )
+            if item.selection.axis == "build.system"
+        )
+        candidates = tuple(item.selection for item in catalog)
+        aliases = {
+            alias
+            for candidate in candidates
+            for alias in flavor_candidate_aliases(candidate)
+        }
+        requested = []
+        for raw in project.definition.default_flavor_selectors:
+            coordinate, effective = parse_scoped_flavor_selector(raw)
+            slot, alias = parse_flavor_selector_body(effective[1:])
+            if alias not in aliases:
+                continue
+            if coordinate is not None or slot is not None:
+                raise CliFailure(
+                    "promotion.qualification_flavor_required",
+                    "scoped parent build defaults require an explicit "
+                    "promotion build selection",
+                )
+            requested.append(effective)
+        for values in project.definition.component_flavor_selectors.values():
+            for raw in values:
+                _, alias = parse_flavor_selector_body(raw[1:])
+                if alias in aliases:
+                    raise CliFailure(
+                        "promotion.qualification_flavor_required",
+                        "Component-specific parent build defaults require an "
+                        "explicit promotion build selection",
+                    )
+        selected = apply_flavor_selectors(candidates, requested)
+        if not selected:
+            return None, guard
+        entry = next(item for item in catalog if item.selection == selected[0])
+        guard.pin(
+            entry.path,
+            boundary=project.root,
+            label="parent-build-authoring",
+            expected_identity=entry.source_identity,
+        )
+        references = (
+            *entry.definition.specification_fragments,
+            *entry.definition.authoring_inputs,
+            *(value.content for value in entry.definition.contributions),
+        )
+        for index, reference in enumerate(references):
+            guard.pin(
+                _resolve_path(entry.path.parent, reference.uri, boundary=project.root),
+                boundary=project.root,
+                label=f"parent-build-input:{index}",
+                expected_identity=reference.identity,
+            )
+        guard.require_unchanged()
+        return entry, guard
+    except (ComponentLockPlanningError, FlavorSelectionError) as exc:
+        raise CliFailure(exc.code, exc.message) from exc
+
+
 def _create_promoted_project(
     *,
     accepted_root: Path,
@@ -1089,6 +1185,7 @@ def _create_promoted_project(
     translation: object | None,
     inverse_evidence_custody: object | None,
     parent_selection: RepositoryParentSelection | None,
+    promotion_parent=None,
 ) -> dict[str, object]:
     """Create one complete, disposable-source-ready project from an accepted set."""
 
@@ -1157,8 +1254,16 @@ def _create_promoted_project(
             "flavor://literate-ai/build-bazel",
             f"flavor://literate-ai/os-{host_flavor}",
         }
-        for selector in qualification_flavors:
-            if not selector.startswith("+"):
+        bootstrap_selectors = (
+            *qualification_flavors,
+            *(
+                promotion_parent.definition.default_flavor_selectors
+                if promotion_parent is not None
+                else ()
+            ),
+        )
+        for selector in bootstrap_selectors:
+            if "::" in selector or not selector.startswith("+"):
                 continue
             selected = canonical_flavor_selector(selector)[1:]
             if selected in KNOWN_FLAVOR_SELECTORS:
@@ -1684,7 +1789,47 @@ def _create_promoted_project(
         # requested additions/removals into a final positive default set once, then
         # let every later lock/generate/qualify command consume those defaults
         # without replaying selectors and tripping the strict no-op guard.
-        promoted_defaults = {"+flavor://literate-ai/build-bazel"}
+        inherited_build_guard = None
+        if "build.system" in selected_axes:
+            promoted_defaults = set()
+        else:
+            inherited, inherited_build_guard = _inherited_promotion_build(
+                promotion_parent
+            )
+            if inherited is None:
+                promoted_defaults = {"+flavor://literate-ai/build-bazel"}
+            else:
+                inherited_selector = "+" + inherited.selection.coordinate_uri
+                inherited_path = (
+                    staging
+                    / "flavors"
+                    / flavor_selector_directory(inherited_selector)
+                    / "flavor.md"
+                )
+                if not inherited_path.is_file():
+                    raise CliFailure(
+                        "promotion.parent_build_unavailable",
+                        "parent build Flavor must be available in the "
+                        "reviewed promotion inputs",
+                    )
+                parent_doc, parent_body = parse_authoring_markdown(
+                    inherited.path.read_bytes(), source="parent build Flavor"
+                )
+                child_doc, child_body = parse_authoring_markdown(
+                    inherited_path.read_bytes(), source="promoted build Flavor"
+                )
+                parent_doc, child_doc = dict(parent_doc), dict(child_doc)
+                # Capability scope is deliberately rebound to the promoted graph;
+                # every other authored field and narrative must stay exact.
+                parent_doc.pop("applicable_capabilities", None)
+                child_doc.pop("applicable_capabilities", None)
+                if parent_doc != child_doc or parent_body != child_body:
+                    raise CliFailure(
+                        "promotion.parent_build_unavailable",
+                        "changed parent build authority requires an "
+                        "explicit reviewed promotion Flavor",
+                    )
+                promoted_defaults = {inherited_selector}
         for selector in selected_qualification_flavors:
             operation = selector[:1]
             value = selector[1:]
@@ -1993,6 +2138,20 @@ def _create_promoted_project(
         review_path.write_text(updated_content, encoding="utf-8", newline="\n")
 
         validate_project_from_args(Namespace(path=str(staging)))
+        if inherited_build_guard is not None:
+            inherited_build_guard.require_unchanged()
+            # Re-resolve membership/aliases as well as captured bytes: a new
+            # conflicting parent Flavor must not race child publication.
+            current_build, current_guard = _inherited_promotion_build(promotion_parent)
+            if current_guard is not None:
+                current_guard.require_unchanged()
+            if (None if inherited is None else inherited.revision.identity) != (
+                None if current_build is None else current_build.revision.identity
+            ):
+                raise CliFailure(
+                    "promotion.parent_changed",
+                    "parent build selection changed during promotion",
+                )
         os.replace(staging, project_target)
     except BaseException:
         if staging.exists():
@@ -3368,6 +3527,7 @@ def _spec_from_args(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
                         translation=translation,
                         inverse_evidence_custody=inverse_evidence_custody,
                         parent_selection=parent_selection,
+                        promotion_parent=integration_project,
                     )
 
                 if replacement_plan is not None:
