@@ -1,6 +1,6 @@
 ---
 name: detect-before-install
-description: Detect and bootstrap missing Literate AI host prerequisites on vanilla macOS, Linux, or Windows workers. Use when preparing a new worker, diagnosing a missing compiler/build/coding CLI, or running the cross-platform matrix on a host whose tools have not yet been provisioned.
+description: Detect and bootstrap missing Literate AI host prerequisites on vanilla macOS, Linux, Windows, or FreeBSD workers. Use when preparing a new worker, diagnosing a missing compiler/build/coding CLI, or running the cross-platform matrix on a host whose tools have not yet been provisioned.
 metadata:
   author: Literate AI maintainers <literate-ai-maintainers@users.noreply.github.com>
 ---
@@ -12,7 +12,7 @@ bootstrap. Never infer that a previous image or interactive session installed th
 
 ## Workflow
 
-1. On Windows, run `scripts/bootstrap.ps1`; on macOS or Linux, run
+1. On Windows, run `scripts/bootstrap.ps1`; on macOS, Linux, or FreeBSD, run
    `scripts/bootstrap.py --profile sample-worker`. Both report missing commands without
    changing the host. The Windows launcher treats the Store application alias as absent
    unless it executes as Python 3.11+.
@@ -32,7 +32,9 @@ bootstrap. Never infer that a previous image or interactive session installed th
    Never report a partial bootstrap as ready. Clock synchronization to `time.nist.gov` is
    attempted in the same host-configuration step and recorded under `clock_sync`; a
    failed or skipped attempt is logged on stderr and must not by itself mark the report
-   `passed` false.
+   `passed` false. Observation-only detection records clock synchronization as skipped;
+   it performs no clock query or adjustment. Synchronization is attempted only with
+   the explicitly authorized installation option.
 5. Authenticate the selected coding CLI separately. Installation never fabricates,
    copies, or logs credentials.
 
@@ -79,5 +81,10 @@ skill to create or select that private matrix.
   On macOS, an absent Homebrew is installed as a pinned Git checkout in
   `/opt/homebrew` using system Git and noninteractive `sudo`; no downloaded installer
   script is executed. Refuse to overwrite an existing nonfunctional prefix.
+- On FreeBSD, use the existing tuple-specific native `pkg` realization and its exact
+  package/probe checks. Only Codex currently has a declared native coding-agent
+  realization; an explicitly selected unsupported agent must refuse, without silently
+  selecting Codex. Use `ntpdate` for authorized best-effort clock synchronization;
+  do not assume Linux `timedatectl` exists.
 - Do not upgrade tools that already satisfy command discovery. Version constraints are
   applied later by the selected specification and Flavors.

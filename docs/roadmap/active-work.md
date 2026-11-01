@@ -28114,6 +28114,20 @@ unchanged revision 2.0 s (ubuntu-24.04) and 8.5 s (windows-11); one new commit
 
 ### [ ] FREEBSD-001 — Add first-class FreeBSD native workers and targets
 
+Worker bootstrap follow-up: the canonical Python bootstrap rejected
+FreeBSD before its existing tuple-specific native pkg provider can observe tools.
+Added actual-platform detection and explicit FreeBSD selection, preserving provider
+selection and unsupported-platform refusals. Detection must not query or adjust
+the host clock; attempt best-effort native synchronization only during explicitly
+requested installation. Cover native-platform mismatch, observation-only missing
+tools, selected-provider refusal and authorized-install composition before native
+qualification. Fifteen bootstrap/native-pkg checks and seven existing host/platform
+checks pass locally (15 additional subtests). These include missing native tools,
+unsupported selected-agent refusal, actual-SBOM composition, platform mismatch,
+clock-free detection and explicit-install delegation. This is portable controller
+evidence, not native bootstrap, worker alignment or installed qualification. Do not
+infer alignment or install authority from a successful probe.
+
 Native receipt qualification exposed a missing `_sqlite3` extension despite a
 working Python command. Declare Python SQLite in the FreeBSD OS Flavor, map it to
 `py312-sqlite3`, and require both native package registration and an in-memory
@@ -32353,3 +32367,15 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Next unchecked action:** qualify declared-cache transport for ignored project
   targets and repair exact requested-authority selection before global historical
   provider ambiguity. Do not close #196/#197 from the local source checkpoint.
+
+- **Successive-revision reproduction:** A real public two-admission fixture now
+  reproduces #197 on the current integration source. The first accepted-only build
+  succeeds; after changing the retained source and completing a fresh reviewed
+  Standard rebuild, two valid immutable memberships remain with distinct retained
+  review/source-semantics and provider-tool identities. The second accepted-only
+  build refuses `execution.accepted_source_provider_ambiguous` before planning.
+  The 53-second diagnostic asserts that the first verified entry is unchanged and
+  retained; no cache deletion, membership rewrite or coding agent supplies a fix.
+  Both revisions satisfy the same Component authority, so a Component-only filter
+  cannot resolve this case. Current authenticated evidence or a reviewed explicit
+  selector is still required; choosing an entry by recency is not a repair.
