@@ -13,6 +13,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import BinaryIO
@@ -40,10 +41,14 @@ class NativeTarToolBinding:
 
     @property
     def environment(self):
+        # FreeBSD libarchive converts PAX UTF-8 paths through the process locale;
+        # its ASCII C locale rejects valid retained filenames before rewriting.
+        # The native output still undergoes exact independent path verification.
+        locale = "C.UTF-8" if sys.platform.startswith("freebsd") else "C"
         return {
             "PATH": str(self.executable.parent),
-            "LC_ALL": "C",
-            "LANG": "C",
+            "LC_ALL": locale,
+            "LANG": locale,
             "TZ": "UTC",
         }
 
