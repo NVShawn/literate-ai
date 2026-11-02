@@ -34,6 +34,7 @@ from literate_ai.application.action_dag_scheduler import (
     LifecycleActionWorker,
 )
 from literate_ai.contracts import canonical_identity, canonical_json_bytes
+from literate_ai.retained_package_receiver import CONFIG_SCHEMA, _Registration
 
 
 @unittest.skipUnless(
@@ -63,6 +64,47 @@ class FreeBsdAttemptOwnershipTests(unittest.TestCase):
             cleanup_verified = False
             dispatch, deadline, registration = self.dispatch_request()
             config_path = root / "private-receiver.json"
+
+            def refuse_prelaunch():
+                raise RuntimeError("fixture admission revoked before launch")
+
+            with self.assertRaisesRegex(RuntimeError, "before launch"):
+                with reserve_retained_receiver_attempt(
+                    config_path,
+                    dispatch,
+                    registration,
+                    deadline,
+                    preflight=refuse_prelaunch,
+                ):
+                    self.fail("refused preflight published an owned attempt")
+            self.assertFalse((root / "private-receiver.json.attempt").exists())
+            never_started = root / "never-started.pid"
+            with reserve_retained_receiver_attempt(
+                config_path, dispatch, registration, deadline
+            ) as attempt:
+                try:
+                    run_owned_freebsd_attempt(
+                        [
+                            sys.executable,
+                            "-c",
+                            f"open({str(never_started)!r},'w').write('started')",
+                        ],
+                        **options,
+                        expires_at=datetime.now(UTC) + timedelta(seconds=20),
+                        admission_guard=refuse_prelaunch,
+                    )
+                except FreeBsdOwnedAttemptError as exc:
+                    cleanup_verified = exc.cleanup_verified
+                    self.assertIsNone(exc.guardian_pid)
+                    self.assertEqual(exc.reason, "prelaunch-admission-revoked")
+                    self.assertFalse(exc.quarantine_required)
+                    attempt.retain_diagnostic(exc)
+                    attempt.release_before_native_start(exc)
+                else:
+                    self.fail("refused initial admission launched native work")
+            self.assertFalse(never_started.exists())
+            self.assertFalse((root / "private-receiver.json.attempt").exists())
+            cleanup_verified = False
             with reserve_retained_receiver_attempt(
                 config_path, dispatch, registration, deadline
             ) as attempt:
@@ -123,21 +165,43 @@ class FreeBsdAttemptOwnershipTests(unittest.TestCase):
                         self.fail("child cancellation returned a result")
                 self.assertFalse((root / "private-receiver.json.attempt").exists())
             diagnostics = tuple(root.glob("private-receiver.json.attempt.*.json"))
-            self.assertEqual(len(diagnostics), 2)
+            self.assertEqual(len(diagnostics), 3)
             self.assertTrue(
                 all(json.loads(p.read_bytes())["cleanup_verified"] for p in diagnostics)
             )
             child_pid = root / "nested.pid"
+            for directory in ("project", "build/retained-project-cas", "objects"):
+                (root / directory).mkdir(parents=True)
+            worker_config = root / "workers.json"
+            worker_config.write_text("{}")
+            registration_document = {
+                "schema": CONFIG_SCHEMA,
+                "project": str(root / "project"),
+                "worker_config": str(worker_config),
+                "worker": "native-fixture",
+                "target": "host",
+                "retained_project": "retained.json",
+                "retained_project_profile": "profile.json",
+                "policy": "policy.json",
+                "tools": "tools.json",
+                "authorization_identity": registration.uri,
+                "build_dir": str(root / "build"),
+                "obj_dir": str(root / "objects"),
+                "child_environment": options["environment"],
+            }
+            config_path.write_bytes(canonical_json_bytes(registration_document))
+            private_registration = _Registration(config_path)
             sleeper = root / "sleeper.py"
             sleeper.write_text(
                 "import os,sys,time\n"
                 "open(sys.argv[1],'w').write(str(os.getpid()))\n"
+                # A real owned descendant revokes its private registration.
+                f"open({str(config_path)!r},'w').write('{{}}')\n"
                 "time.sleep(60)\n"
             )
 
             def current():
-                if child_pid.exists():
-                    raise RuntimeError("fixture admission was revoked")
+                private_registration.require_unchanged()
 
             cleanup_verified = False
             try:

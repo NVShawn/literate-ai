@@ -1,7 +1,8 @@
 """Crash-retained local reservation for one registered native receiver attempt.
 
 Only the actual parent may release its own exact marker after native empty-subtree
-proof. Existing marker bytes are never parsed into ownership or cleared by age,
+proof or a proven refusal before native launch. Existing marker bytes are never
+parsed into ownership or cleared by age,
 PID disappearance, a timeout, a new registration, or controller transport exit.
 """
 
@@ -83,6 +84,21 @@ class _OwnedReceiverAttempt:
         self.path.unlink()
         self.released = True
 
+    def release_before_native_start(self, error):
+        """Release this parent's marker only for a canonical prelaunch refusal."""
+        from literate_ai.adapters.freebsd_owned_attempt import FreeBsdOwnedAttemptError
+
+        if (
+            not isinstance(error, FreeBsdOwnedAttemptError)
+            or error.guardian_pid is not None
+            or error.cleanup_verified is not True
+            or error.reason not in {"prelaunch-admission-revoked", "cancelled"}
+        ):
+            raise ValueError("retained.receiver.proven-prelaunch-refusal-required")
+        self.require_current()
+        self.path.unlink()
+        self.released = True
+
     def retain_diagnostic(self, error):
         """Bounded recovery facts, not a termination or fresh-execution grant."""
         self.require_current()
@@ -116,13 +132,20 @@ class _OwnedReceiverAttempt:
 
 
 @contextmanager
-def reserve_retained_receiver_attempt(config_path, request, registration, deadline):
+def reserve_retained_receiver_attempt(
+    config_path, request, registration, deadline, *, preflight=None
+):
+    if preflight is not None and not callable(preflight):
+        raise TypeError("retained.receiver.preflight-must-be-callable")
     path = config_path.with_name(config_path.name + ".attempt")
     lock = config_path.with_name(config_path.name + ".attempt.lock")
     # The marker survives process death; the advisory lock serializes publication
     # and release but is never itself interpreted as evidence of native cleanup.
     with exclusive_cache_lock(lock, timeout_seconds=min(10, deadline.remaining())):
         deadline.remaining()
+        if preflight is not None:
+            preflight()
+            deadline.remaining()
         owned = _OwnedReceiverAttempt(path, request, registration)
         try:
             yield owned

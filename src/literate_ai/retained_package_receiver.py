@@ -278,13 +278,21 @@ def _main(argv=None):
             request, deadline, _records, worker.worker.identity, capability
         )
         with reserve_retained_receiver_attempt(
-            config.path, request, config.identity, deadline
+            config.path,
+            request,
+            config.identity,
+            deadline,
+            preflight=worker.require_current,
         ) as attempt:
 
             def current_attempt():
                 attempt.require_current()
-                worker.require_current()
+                config.require_unchanged()
 
+            # Full intent admission brackets execution. The child independently
+            # checks live authority at its execution boundaries; the parent's
+            # frequent supervision polls retain the attempt and registration
+            # fences without repeatedly reconstructing the entire public plan.
             try:
                 result = run_owned_freebsd_attempt(
                     [
@@ -315,7 +323,10 @@ def _main(argv=None):
                     # A failed diagnostic write cannot erase genuine native
                     # empty-subtree proof or strand a proven-clean reservation.
                     if exc.cleanup_verified:
-                        attempt.release_after_native_empty()
+                        if exc.guardian_pid is None:
+                            attempt.release_before_native_start(exc)
+                        else:
+                            attempt.release_after_native_empty()
                 raise
             else:
                 attempt.release_after_native_empty()

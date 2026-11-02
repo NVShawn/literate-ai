@@ -31122,6 +31122,16 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 
 ### [ ] RETAINED-OBSERVATION-PERF-001 — Bound retained authority and native observation cost
 
+The 1.4 receiver follow-up removes repeated full public-plan reconstruction from
+the parent's supervision loop. Full worker admission runs under the reservation
+lock before marker publication; frequent polls retain exact attempt and private
+registration checks. The child's authority, SDK, LINK and capability checks and
+the final full worker/deadline checks remain in place. A canonical refusal before
+guardian creation releases only that parent's proven never-started reservation;
+started jobs still require native empty-subtree proof. Native mutation controls,
+independent review, complete regression and measured public PACKAGE comparison
+remain required before this follow-up is qualified.
+
 - **GitHub issue:** [#117](https://github.com/jordanhubbard/literate-ai/issues/117)
 
 - **Release target:** 1.4.0

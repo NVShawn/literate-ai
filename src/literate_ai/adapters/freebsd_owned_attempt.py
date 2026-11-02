@@ -271,8 +271,16 @@ def run_owned_freebsd_attempt(
     }
     raw = json.dumps(document, separators=(",", ":")).encode()
     _request, _payload, expiry, deadline = protocol._request(raw)
-    admission_guard()
-    if cancelled():
+    try:
+        admission_guard()
+        is_cancelled = cancelled()
+    except BaseException as exc:
+        # No control pipe, guardian or native child exists at this boundary.
+        # Preserve that fact so the reserving parent can safely refuse launch.
+        raise FreeBsdOwnedAttemptError(
+            "prelaunch-admission-revoked", guardian_pid=None, cleanup_verified=True
+        ) from exc
+    if is_cancelled:
         raise FreeBsdOwnedAttemptError(
             "cancelled", guardian_pid=None, cleanup_verified=True
         )
