@@ -467,6 +467,32 @@ def main(
                         "action_package.worker_mismatch", "receiver binding changed"
                     )
 
+            def measure_package():
+                return _measure_capability(deadline, expected_worker, **describe)
+
+            if (
+                isinstance(package_worker, ConfiguredRetainedUnitPackageWorker)
+                and package_worker.poll_guard is not None
+                and all(
+                    value is None
+                    for key, value in describe["workers"].items()
+                    if key != "package_worker"
+                )
+            ):
+                from literate_ai.adapters.retained_package_capability import (
+                    bind_retained_package_capability_probe,
+                )
+
+                measure_package = bind_retained_package_capability_probe(
+                    package_worker,
+                    request,
+                    deadline,
+                    records,
+                    expected_worker,
+                    capability,
+                    package_current,
+                    http_source=source is not None,
+                )
             result = package_worker.execute(
                 request,
                 deadline,
@@ -478,9 +504,7 @@ def main(
                 **(
                     {
                         "capability_identity": capability,
-                        "measure_capability": lambda: _measure_capability(
-                            deadline, expected_worker, **describe
-                        ),
+                        "measure_capability": measure_package,
                     }
                     if isinstance(package_worker, ConfiguredRetainedUnitPackageWorker)
                     else {}

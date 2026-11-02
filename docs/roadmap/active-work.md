@@ -31122,6 +31122,25 @@ The dependency correction passed all three unchanged self-hosting checks (0 skip
 
 ### [ ] RETAINED-OBSERVATION-PERF-001 — Bound retained authority and native observation cost
 
+The subsequent exact installed native attempt still reaches the unchanged
+3,600-second deadline before PACKAGE/LINK admission. Its correlated native
+diagnostic proves cleanup, no quarantine and canonical reservation release; the
+failed result remains retained. A bounded read-only frame-location sample places
+the child in SDK acceptance teardown, rebuilding the public plan during receiver
+capability refresh. Source inspection confirms three full checks per refresh:
+the context registration guard plus both sides of legacy capability description.
+
+The child follow-up uses a sealed immutable canonical probe bound to the same
+private worker, request, registration, catalog, input, deadline, capability and
+environment guard. Each invocation measures the actual receiver and freshly
+validates full intent afterward, with cheap registration/owned-child checks
+around it. No success observation is cached. Unbound callbacks and overriding
+probe subclasses keep full outer checks; legacy description is unchanged. Five
+focused controls pass, including real subprocess authority revocation after
+entering the action for canonical, cached and lookalike callbacks. Independent
+source review approves this boundary. Complete regression, exact installed native
+comparison and successful PACKAGE/LINK remain required.
+
 The 1.4 receiver follow-up removes repeated full public-plan reconstruction from
 the parent's supervision loop. Full worker admission runs under the reservation
 lock before marker publication; frequent polls retain exact attempt and private
@@ -32893,7 +32912,7 @@ The installed native retry has acquired the 144 MiB SDK and produced application
 link, test and documentation outputs; final SSH PACKAGE/LINK admission remains
 unproven. Exact-main qualification run `41412564494` is still pending.
 
-### [ ] SOURCE-SCAN-DUPLICATES-001 — Scan identical source content without duplicate finding identities
+### [x] SOURCE-SCAN-DUPLICATES-001 — Scan identical source content without duplicate finding identities
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#249](https://github.com/jordanhubbard/literate-ai/issues/249)
@@ -32907,13 +32926,20 @@ unproven. Exact-main qualification run `41412564494` is still pending.
 - **Implementation:**
   - [x] Deduplicate exact content-rule-occurrence findings before constructing the report.
 - **Evidence:**
-  - [ ] Public scanner controls preserve deterministic identities, distinct findings and blocking policy; independent review and full framework gates pass.
+  - [x] Public scanner controls preserve deterministic identities, distinct findings and blocking policy; independent review and full framework gates pass.
 
 The public scanner regression passes all three controls. Independent reviewer
 `native_transport_review` approved the content/rule/occurrence deduplication and
 unchanged identity and policy semantics (scanner SHA-256
 `76da2fdb4b89383e39465f6c9fb02130115afe93ddff041dc643da56daff98b8`).
-Canonical driver and documentation reviews are current. Full regression is pending.
+Canonical driver and documentation reviews are current. The complete integrated
+gate passes 2,555 cases with 79 declared skips and zero failures. The exact
+installed FreeBSD PR-head wheel passes all three public scanner controls without
+skips. [PR #251](https://github.com/jordanhubbard/literate-ai/pull/251) merges the
+reviewed source; exact main `75e50c041cb6c139e303cacd04f652bc5eb9a3b1`
+[CI run 41436786502](https://github.com/jordanhubbard/literate-ai/actions/runs/41436786502)
+passes all 27 jobs. Issue #249 is closed for this scanner defect only; native
+PACKAGE/LINK and release qualification retain their separate acceptance gates.
 
 ### [ ] DIAGNOSTIC-CACHE-CUSTODY-001 — Coordinate diagnostic output with canonical object-cache ownership
 

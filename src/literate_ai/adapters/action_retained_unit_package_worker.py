@@ -66,6 +66,7 @@ class ConfiguredRetainedUnitPackageWorker:
     execution_request_bytes: bytes
     run_retained: object
     require_current: object
+    poll_guard: object = None
 
     def __post_init__(self):
         if (
@@ -86,6 +87,8 @@ class ConfiguredRetainedUnitPackageWorker:
             <= MAX_RETAINED_PACKAGE_INTENT_BYTES
             or not callable(self.run_retained)
             or not callable(self.require_current)
+            or self.poll_guard is not None
+            and not callable(self.poll_guard)
         ):
             raise TypeError("retained.unit.private-package-registration-required")
 
@@ -158,6 +161,31 @@ class ConfiguredRetainedUnitPackageWorker:
             deadline.remaining()
 
         current()
+        from literate_ai.adapters.retained_package_capability import (
+            RegisteredRetainedPackageCapabilityProbe,
+        )
+
+        registration_guard = current
+        if type(measure_capability) is RegisteredRetainedPackageCapabilityProbe:
+            measure_capability.require_binding(
+                self,
+                request,
+                deadline,
+                expected_worker_identity,
+                capability_identity,
+                admission_guard,
+            )
+
+            def registration_guard():
+                deadline.remaining()
+                if cancelled():
+                    raise ActionWireError(
+                        "retained_unit_package.cancelled",
+                        "retained PACKAGE was cancelled",
+                    )
+                measure_capability.require_registered_current()
+                deadline.remaining()
+
         context = _admit_retained_receiver_context(
             request,
             deadline,
@@ -165,7 +193,7 @@ class ConfiguredRetainedUnitPackageWorker:
             catalog_identity=self.catalog_identity,
             retained_plan_identity=self.retained_plan_identity,
             capability_identity=capability_identity,
-            registration_guard=current,
+            registration_guard=registration_guard,
             measure_capability=measure_capability,
             cancelled=cancelled,
         )
