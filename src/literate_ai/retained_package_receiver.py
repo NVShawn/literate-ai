@@ -28,6 +28,9 @@ from literate_ai.adapters.freebsd_owned_attempt import (
     OwnedFreeBsdChild,
     run_owned_freebsd_attempt,
 )
+from literate_ai.adapters.locked_generation_authority import (
+    read_only_component_catalog_observations,
+)
 from literate_ai.adapters.retained_receiver_attempt import (
     reserve_retained_receiver_attempt,
 )
@@ -38,6 +41,7 @@ from literate_ai.cli.retained_unit_execution import (
 from literate_ai.cli.retained_unit_package import _project_context
 from literate_ai.contracts import ContentIdentity, ExecutionWorkerKind
 from literate_ai.contracts.paths import canonical_relative_posix_path
+from literate_ai.projects import read_only_project_configuration_parses
 
 CONFIG_SCHEMA = "literate-ai/retained-unit-package-receiver@1"
 _FIELDS = {
@@ -206,6 +210,14 @@ def _receive(config, mode, *, owned_child=None):
 
 
 def main(argv=None):
+    with (
+        read_only_component_catalog_observations(),
+        read_only_project_configuration_parses(),
+    ):
+        return _main(argv)
+
+
+def _main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--child", action="store_true")

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import tempfile
 import unittest
 from datetime import UTC, datetime, timedelta
@@ -19,7 +20,13 @@ from literate_ai.cache_directories import (
     resolve_cache_directories,
 )
 from literate_ai.contracts import canonical_identity
+from literate_ai.perf import (
+    PerformanceRecorder,
+    performance_log_directories,
+    read_performance_spans,
+)
 from literate_ai.security import BuildAuthorization, BuildRequest, SecurityProfile
+from tests.support.fixtures_test_project_cli import invoke
 
 
 class _Builder:
@@ -137,6 +144,203 @@ def _write_project_manifest(
 
 
 class CacheDirectoryTests(unittest.TestCase):
+    def test_diagnostic_state_accepts_parent_alias_but_refuses_leaf_redirection(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary).resolve()
+            project = parent / "project"
+            project.mkdir()
+            _write_project_manifest(project)
+            before = {p.name: p.read_bytes() for p in project.iterdir()}
+            real = parent / "operator"
+            real.mkdir()
+            alias = parent / "parent-alias"
+            try:
+                alias.symlink_to(real, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"host cannot create directory aliases: {exc}")
+            objects = parent / "objects"
+            with mock.patch.dict(
+                "os.environ",
+                {"OBJ_DIR": str(objects), "LITAI_STATE_DIR": str(alias / "state")},
+            ):
+                code, result = invoke("--json", "status", "--project", str(project))
+                self.assertEqual(code, 0, result)
+                self.assertEqual(len(read_performance_spans(objects)), 1)
+                leaf = parent / "state-alias"
+                leaf.symlink_to(real / "state", target_is_directory=True)
+                with mock.patch.dict("os.environ", {"LITAI_STATE_DIR": str(leaf)}):
+                    code, result = invoke("--json", "status", "--project", str(project))
+                    self.assertEqual(code, 0, result)
+                self.assertEqual(len(read_performance_spans(objects)), 1)
+                self.assertFalse(objects.exists())
+                self.assertEqual(
+                    {p.name: p.read_bytes() for p in project.iterdir()}, before
+                )
+
+    def test_diagnostic_run_id_and_leaf_cannot_redirect_writes_to_source(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary).resolve()
+            project = parent / "project"
+            project.mkdir()
+            source = project / "keep"
+            source.write_bytes(b"source bytes")
+            with mock.patch.dict(
+                "os.environ", {"LITAI_STATE_DIR": str(parent / "state")}
+            ):
+                for run_id in ("../keep", str(source), "..\\keep", "CON"):
+                    with self.subTest(run_id=run_id):
+                        recorder = PerformanceRecorder(
+                            build_root=parent / "objects",
+                            project_root=project,
+                            run_id=run_id,
+                        )
+                        with recorder.span(
+                            "test", target_kind="test", target_id="refusal"
+                        ):
+                            pass
+                recorder = PerformanceRecorder(
+                    build_root=parent / "objects",
+                    project_root=project,
+                    run_id="redirect",
+                )
+                recorder.log_path.parent.mkdir(parents=True)
+                for kind in ("hardlink", "symlink"):
+                    with self.subTest(kind=kind):
+                        try:
+                            if kind == "hardlink":
+                                os.link(source, recorder.log_path)
+                            else:
+                                recorder.log_path.symlink_to(source)
+                        except OSError:
+                            if os.name == "nt":
+                                continue
+                            raise
+                        try:
+                            with recorder.span(
+                                "test", target_kind="test", target_id=kind
+                            ):
+                                pass
+                            self.assertEqual(source.read_bytes(), b"source bytes")
+                        finally:
+                            recorder.log_path.unlink()
+                self.assertEqual(source.read_bytes(), b"source bytes")
+                self.assertFalse((parent / "objects").exists())
+
+    def test_unavailable_diagnostic_state_cannot_mutate_observed_project_or_cache(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary).resolve()
+            project = parent / "project"
+            project.mkdir()
+            _write_project_manifest(project)
+            before = {p.name: p.read_bytes() for p in project.iterdir()}
+            objects = parent / "objects"
+            blocked = parent / "not-a-directory"
+            blocked.write_bytes(b"operator data")
+            states = [project / "state", objects / "state", blocked]
+            if os.name != "nt":
+                loop = parent / "loop"
+                loop.symlink_to(loop)
+                states.append(loop)
+            for state in states:
+                with (
+                    self.subTest(state=state.name),
+                    mock.patch.dict(
+                        "os.environ",
+                        {"OBJ_DIR": str(objects), "LITAI_STATE_DIR": str(state)},
+                    ),
+                ):
+                    code, result = invoke("--json", "status", "--project", str(project))
+                    self.assertEqual(code, 0, result)
+                    self.assertFalse(objects.exists())
+                    self.assertEqual(
+                        {p.name: p.read_bytes() for p in project.iterdir()}, before
+                    )
+                    self.assertEqual(blocked.read_bytes(), b"operator data")
+
+    def test_cli_diagnostics_preserve_fresh_and_foreign_cache_custody(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary).resolve()
+            project = parent / "project"
+            project.mkdir()
+            _write_project_manifest(project)
+            before = {p.name: p.read_bytes() for p in project.iterdir()}
+            objects = parent / "objects"
+            selected = parent / "selected"
+            with mock.patch.dict(
+                "os.environ",
+                {"OBJ_DIR": str(objects), "LITAI_STATE_DIR": str(parent / "state")},
+            ):
+                code, result = invoke("--json", "status", "--project", str(project))
+                self.assertEqual(code, 0, result)
+                self.assertFalse(objects.exists())
+                self.assertEqual(
+                    {p.name: p.read_bytes() for p in project.iterdir()}, before
+                )
+                self.assertEqual(len(read_performance_spans(objects)), 1)
+                # A typed refusal must retain timing under the explicitly selected
+                # root, even when OBJ_DIR names a different root.
+                code, result = invoke(
+                    "--json",
+                    "package",
+                    "retained-units",
+                    "execute",
+                    "--project",
+                    str(project),
+                    "--obj-dir",
+                    str(selected),
+                    "--retained-project",
+                    "missing.json",
+                    "--retained-project-profile",
+                    "missing.json",
+                    "--policy",
+                    "missing.json",
+                    "--tools",
+                    "missing.json",
+                    "--authorize-retained-project",
+                    "sha256:" + "a" * 64,
+                    "--authorize-unit-packages",
+                    "sha256:" + "b" * 64,
+                )
+                self.assertEqual(code, 2, result)
+                self.assertNotEqual(result["error"]["code"], "cli.usage")
+                failed = read_performance_spans(selected)
+                self.assertEqual(len(failed), 1)
+                self.assertFalse(failed[0].ok)
+                self.assertTrue(failed[0].error_code)
+                self.assertFalse(selected.exists())
+                self.assertEqual(len(read_performance_spans(objects)), 1)
+                ensure_cache_directory(objects, kind="object", project_root=project)
+                # Existing cache-local logs remain visible, and literal-directory
+                # reports do not accidentally merge another namespace.
+                legacy, current = performance_log_directories(selected)
+                legacy.mkdir(parents=True)
+                (legacy / "old.jsonl").write_text(
+                    json.dumps(failed[0].to_dict()) + "\nmalformed\n{}\n",
+                    encoding="utf-8",
+                )
+                self.assertEqual(len(read_performance_spans(selected)), 2)
+                code, report = invoke("--json", "perf", "show", "--dir", str(current))
+                self.assertEqual(code, 0, report)
+                self.assertEqual(report["result"]["span_count"], 1)
+                self.assertEqual(report["result"]["log_directories"], [str(current)])
+                foreign = parent / "foreign"
+                foreign.mkdir()
+                (foreign / "keep").write_bytes(b"operator data")
+                with mock.patch.dict("os.environ", {"OBJ_DIR": str(foreign)}):
+                    code, result = invoke("--json", "status", "--project", str(project))
+                self.assertEqual(code, 0, result)
+                self.assertEqual(list(foreign.iterdir()), [foreign / "keep"])
+                self.assertEqual(len(read_performance_spans(foreign)), 1)
+                with self.assertRaisesRegex(CacheDirectoryError, "unmarked"):
+                    ensure_cache_directory(foreign, kind="object", project_root=project)
+                self.assertEqual((foreign / "keep").read_bytes(), b"operator data")
+                retained_spans = read_performance_spans(objects)
+                clean_cache_directories(project, environment={"OBJ_DIR": str(objects)})
+                self.assertFalse(objects.exists())
+                self.assertEqual(read_performance_spans(objects), retained_spans)
+
     def test_clean_refuses_an_unmarked_preexisting_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             project = Path(temporary).resolve()

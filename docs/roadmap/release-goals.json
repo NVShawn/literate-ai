@@ -183,6 +183,12 @@
       },
       {
         "id": "ORIGINAL-ADOPT-001"
+      },
+      {
+        "id": "SOURCE-SCAN-DUPLICATES-001"
+      },
+      {
+        "id": "DIAGNOSTIC-CACHE-CUSTODY-001"
       }
     ]
   }

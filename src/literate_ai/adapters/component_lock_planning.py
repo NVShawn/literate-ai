@@ -10,7 +10,7 @@ import tempfile
 import urllib.error
 import urllib.request
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -744,6 +744,7 @@ class FilesystemComponentLockPlanner:
         component_root: Path,
         *,
         flavor_roots: tuple[Path, ...] = (),
+        prior_catalog: ComponentCatalogSnapshot | None = None,
     ) -> ComponentCatalogSnapshot:
         """Load and immediately revalidate one safe reusable catalog snapshot."""
 
@@ -757,6 +758,22 @@ class FilesystemComponentLockPlanner:
             code="component_lock.component_unsafe",
         )
         authoring_roots = _component_authoring_roots(root, project)
+        configured_flavor_roots = flavor_roots
+        if not configured_flavor_roots and project is not None:
+            configured_flavor_roots = project.roots("flavor")
+        if (
+            prior_catalog is not None
+            and prior_catalog.project == project
+            and prior_catalog.boundary == boundary
+            and prior_catalog.authoring_roots == authoring_roots
+            and prior_catalog.flavor_roots == configured_flavor_roots
+        ):
+            # Reuse parsing only after fresh context discovery. The canonical
+            # owner still checks every captured byte and catalog member.
+            snapshot = replace(prior_catalog, root=root)
+            _ = snapshot.root_authoring
+            snapshot.require_unchanged()
+            return snapshot
         scale_limits = project.definition.scale_limits if project is not None else None
         authoring_paths = _component_markdown_paths(
             authoring_roots, boundary=boundary, scale_limits=scale_limits
@@ -777,9 +794,6 @@ class FilesystemComponentLockPlanner:
                 "component_lock.component_missing",
                 "Component directory must contain a matching component.md",
             )
-        configured_flavor_roots = flavor_roots
-        if not configured_flavor_roots and project is not None:
-            configured_flavor_roots = project.roots("flavor")
         snapshot = ComponentCatalogSnapshot(
             root,
             boundary,

@@ -7,11 +7,16 @@ import hashlib
 import json
 import os
 import stat
+import sys
 import tempfile
+import threading
 import time
 from collections.abc import Iterator
 from contextlib import contextmanager
-from dataclasses import dataclass
+from contextvars import ContextVar
+from copy import deepcopy
+from dataclasses import dataclass, fields, is_dataclass
+from enum import Enum
 from pathlib import Path
 
 from literate_ai._cache_lock import _is_windows, _windows_identity_matches
@@ -64,6 +69,85 @@ class ProjectError(ValueError):
         self.code = code
         self.message = message
         super().__init__(message)
+
+
+_PROJECT_PARSE_MAX_ENTRIES = 16
+_PROJECT_PARSE_MAX_BYTES = 2 * 1024 * 1024
+_PROJECT_PARSE_MAX_NODES = 4096
+
+
+def _project_parse_size(content: bytes, definition: ProjectDefinition) -> int | None:
+    """Bound encoded and decoded template storage; unknown shapes bypass reuse."""
+    pending: list[object] = [content, definition]
+    seen: set[int] = set()
+    total = 0
+    while pending:
+        item = pending.pop()
+        if id(item) in seen:
+            continue
+        seen.add(id(item))
+        total += sys.getsizeof(item)
+        if total > _PROJECT_PARSE_MAX_BYTES or len(seen) > _PROJECT_PARSE_MAX_NODES:
+            return None
+        if is_dataclass(item) and not isinstance(item, type):
+            pending.extend(getattr(item, field.name) for field in fields(item))
+        elif isinstance(item, dict):
+            pending.extend(item.keys())
+            pending.extend(item.values())
+        elif isinstance(item, (tuple, list, set, frozenset)):
+            pending.extend(item)
+        elif isinstance(item, Enum):
+            pending.append(item.value)
+        elif item is not None and not isinstance(item, (str, bytes, int, float, bool)):
+            return None
+        if len(pending) + len(seen) > _PROJECT_PARSE_MAX_NODES:
+            return None
+    return total
+
+
+class _ProjectConfigurationParses:
+    def __init__(self) -> None:
+        self.templates: dict[bytes, ProjectDefinition] = {}
+        self.retained_bytes = 4096  # Bounded map, lock and accounting overhead.
+        self.lock = threading.Lock()
+
+    def parse(self, content: bytes) -> ProjectDefinition:
+        with self.lock:
+            return self._parse(content)
+
+    def _parse(self, content: bytes) -> ProjectDefinition:
+        if content in self.templates:
+            return deepcopy(self.templates[content])
+        definition = parse_project_configuration(content)
+        if len(self.templates) < _PROJECT_PARSE_MAX_ENTRIES:
+            size = _project_parse_size(content, definition)
+            if (
+                size is not None
+                and self.retained_bytes + size <= _PROJECT_PARSE_MAX_BYTES
+            ):
+                self.templates[content] = definition
+                self.retained_bytes += size
+                # Neither the first nor a later caller receives the private template.
+                return deepcopy(definition)
+        return definition
+
+
+_PROJECT_CONFIGURATION_PARSES: ContextVar[_ProjectConfigurationParses | None] = (
+    ContextVar("read_only_project_configuration_parses", default=None)
+)
+
+
+@contextmanager
+def read_only_project_configuration_parses() -> Iterator[None]:
+    """Share private parsing templates, never file reads or currentness decisions."""
+    if _PROJECT_CONFIGURATION_PARSES.get() is not None:
+        yield
+        return
+    token = _PROJECT_CONFIGURATION_PARSES.set(_ProjectConfigurationParses())
+    try:
+        yield
+    finally:
+        _PROJECT_CONFIGURATION_PARSES.reset(token)
 
 
 def parse_project_configuration(content: bytes) -> ProjectDefinition:
@@ -131,8 +215,13 @@ class ProjectConfigurationStore:
         root = self._root()
         path = root / PROJECT_FILENAME
         content = self._read_manifest(path)
+        parses = _PROJECT_CONFIGURATION_PARSES.get()
         return ProjectConfigurationSnapshot(
-            root, parse_project_configuration(content), content
+            root,
+            parse_project_configuration(content)
+            if parses is None
+            else parses.parse(content),
+            content,
         )
 
     @classmethod

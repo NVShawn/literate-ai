@@ -108,7 +108,9 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                 "retained-receiver",
                 ExecutionWorkerKind.SSH,
                 endpoint="fixture@127.0.0.1",
-                workspace=str(workspace),
+                # Remote descriptor paths use POSIX syntax on every controller.
+                # The receiver's actual local storage is supplied separately.
+                workspace="/retained-workspace",
             )
             identity = canonical_identity("retained-scope-fixture")
             intent = retained_unit_package_input({"authorization": identity.uri})

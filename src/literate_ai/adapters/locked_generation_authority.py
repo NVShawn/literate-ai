@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -35,6 +38,28 @@ from literate_ai.contracts.component_locking import (
 from literate_ai.contracts.identity import ContentIdentity, ContentReference
 from literate_ai.projects import PinnedInputClosure, PinnedInputClosureError
 from literate_ai.storage import FileSystemCAS
+
+_catalog_observations: ContextVar[
+    dict[tuple[Path, tuple[Path, ...]], ComponentCatalogSnapshot] | None
+] = ContextVar("read_only_component_catalog_observations", default=None)
+
+
+@contextmanager
+def read_only_component_catalog_observations() -> Iterator[None]:
+    """Share parsing within one request; every load still fully revalidates.
+
+    These are parsed observations, not cached currentness decisions or grants.
+    Owning execution boundaries retain their existing final authority checks.
+    """
+
+    if _catalog_observations.get() is not None:
+        yield
+        return
+    token = _catalog_observations.set({})
+    try:
+        yield
+    finally:
+        _catalog_observations.reset(token)
 
 
 class LockedGenerationAuthorityReaderError(RuntimeError):
@@ -183,11 +208,35 @@ class FilesystemLockedGenerationAuthorityReader:
         component_root: Path,
         *,
         flavor_roots: tuple[Path, ...] = (),
+        prior_catalog: ComponentCatalogSnapshot | None = None,
     ) -> ComponentCatalogSnapshot:
         """Capture one exact filesystem catalog without resolving policy."""
 
         try:
-            return self._planner.snapshot(component_root, flavor_roots=flavor_roots)
+            observations = (
+                _catalog_observations.get()
+                if type(self._planner) is FilesystemComponentLockPlanner
+                else None
+            )
+            key = (
+                Path(component_root).absolute(),
+                tuple(Path(root).absolute() for root in flavor_roots),
+            )
+            if observations is not None:
+                prior_catalog = observations.get(key, prior_catalog)
+            if prior_catalog is None:
+                result = self._planner.snapshot(
+                    component_root, flavor_roots=flavor_roots
+                )
+            else:
+                result = self._planner.snapshot(
+                    component_root,
+                    flavor_roots=flavor_roots,
+                    prior_catalog=prior_catalog,
+                )
+            if observations is not None:
+                observations[key] = result
+            return result
         except (ComponentLockPlanningError, PinnedInputClosureError) as exc:
             code = getattr(exc, "code", "component_lock.stale")
             message = getattr(exc, "message", str(exc))

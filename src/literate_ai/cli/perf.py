@@ -1,4 +1,4 @@
-"""``litai perf``: report recorded per-step timing from the disposable build root."""
+"""``litai perf``: report timing keyed by the selected object root."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ from typing import Any
 from literate_ai.cache_directories import CacheDirectoryError, resolve_cache_directories
 from literate_ai.perf import (
     PerformanceSpan,
+    performance_log_directories,
     read_performance_spans,
     read_performance_spans_from_directory,
 )
@@ -132,6 +133,14 @@ def _handle_show(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
     return {
         "schema": PERF_SUMMARY_SCHEMA,
         "build_root": str(source),
+        "log_directories": [
+            str(path)
+            for path in (
+                (source,)
+                if getattr(args, "dir", None) is not None
+                else performance_log_directories(source)
+            )
+        ],
         "group_by": args.group_by,
         "span_count": len(spans),
         "groups": groups,

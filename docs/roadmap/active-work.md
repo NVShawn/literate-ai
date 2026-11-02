@@ -29377,6 +29377,13 @@ small-fixture snapshot custody; it is not a full source-tree snapshot, canonical
 native catalog registration or Component action/package/lifecycle acceptance.
 Full-suite, installed and native qualification remain separate gates.
 
+A lock-reader test exposed an additional full-catalog graph case: declaring two
+Component directories directly as separate catalog roots gives both the local
+name `.` and makes lock planning refuse duplicate graph node IDs. The reader
+performance regression uses two real Components beneath one common catalog
+root; it does not repair or claim support for the separate-root graph case.
+Retain that case for the canonical catalog integration under issue #74.
+
 ### [x] RECEIPT-REFRESH-001 — Refresh the current project test receipt through the complete lifecycle
 
 - **Priority:** P1
@@ -31300,6 +31307,85 @@ The first failed directory, source checkout and installed wheel stay retained.
 
 **#129 qualified read-only catalog reuse:** Exact source `74417e1a` passes the full 2,265-case source suite (2,194 passed, 71 existing skips, zero failures), all installed-wheel assertions, 14 focused cases including actual in-operation mutations, and the forced lifecycle with 229 passing checks and no skips. The generated suite count is producer-bound; the declared conformance inventory and minimums are unchanged. Supported receipt update/check/require-current and all-gate verify pass on the metadata-only consolidated tree. The native Windows public lock check returns identical passing reports across both installations and restores its fixture; three-call medians are 35.172 seconds baseline and 28.187 candidate, with cache/order variation. Catalog captures fall from five to two; all ten input revalidations and four current authority-graph observations remain. See `verification/lock-check-catalog-qualification.json`. The next action is ordinary review CI and landing of this scoped improvement, then complete unchanged provided-worker native renewal before closing #129. No generator-diversity exemption, dependency, release, or native admission is claimed.
 
+The installed FreeBSD SSH per-unit PACKAGE retry now captures an actual Python
+frame chain during native SDK setup: `SDKRuntime.require_current` reaches the
+retained receiver capability measurement, which reconstructs the public execution
+plan, current project Component locks and full Flavor catalog. The native parent
+also invokes the complete worker currentness check while supervising the child.
+This demonstrates repeated catalog reconstruction at nested owning boundaries,
+not resource exhaustion or a proven formatting bottleneck. Retain the same
+one-hour execution deadline; design operation-scoped observation ownership that
+rechecks current bytes, membership, nearest-project context and revocation before
+using any retained authority. The active retry has produced real application,
+link, test and documentation outputs but has not earned final package admission.
+Next in progress: the lock-set reader reconstructs the entire catalog for each
+selected Component and across repeated receiver guard calls. A read-only profile
+of the actual frozen qualification fixture finds one selected lock, ten authored
+Components and one complete Flavor construction per call (0.488 instrumented
+seconds on the controller). Lock-set-only reuse therefore cannot improve that
+fixture. Extend parsed-catalog reuse to the receiver's request scope, with fresh
+direct-path, nearest-project, boundary and configured-root discovery on every
+access, plus unchanged full current byte/membership and selected lock/input
+checks. Clear parsed observations at scope exit; retain no cached success or
+cross-request authority. A context change forces fresh construction, and changed
+captured content refuses. Measure repeated public read construction counts and
+actual elapsed time before claiming native throughput or PACKAGE/LINK admission.
+The qualification deadline remains unchanged.
+
+The unchanged installed SSH retry reached the 3600-second action bound and
+returned `action_wire.expired` after 3604.533 seconds. Its native guardian
+diagnostic reports deadline refusal with `cleanup_verified: true` and no
+quarantine requirement; the receiver released its own reservation. Application,
+link, test and documentation outputs are partial evidence only. No PACKAGE or
+LINK admission was earned.
+
+The new request-scoped parsed-catalog candidate passes eleven real lock/catalog
+controls in 3.383 seconds, including changed Flavor bytes, added catalog members,
+redirected Flavor files, a newly invalid nearest project and selected-source
+drift. Independent source review preserves all owning checks. Three public
+lock-set reads of the exact frozen qualification inputs construct the Flavor
+catalog once instead of three times and load ten authorings instead of thirty;
+all six full catalog validation passes and the returned lock identity remain
+unchanged. Instrumented controller elapsed times are 1.691 and 1.321 seconds.
+These scoped measurements are not native throughput or release qualification.
+
+The scoped candidate also passes all 34 selected package/worker custody controls
+in 129.756 seconds, with two declared actual-FreeBSD-only skips. The eleven
+lock/catalog controls pass with selected-source mutation exercised inside the
+request scope. Canonical driver/documentation records are current after the
+independent source review. The complete fresh regression is next; neither
+controller controls nor source-import diagnostics qualify a native release.
+
+Next in progress: consolidate the independently reviewed scanner, diagnostic and
+parsed-catalog changes into one qualification candidate. The complete installed
+native receiver-plan profile takes 8.267 instrumented seconds: two project
+authority validations consume 4.846 cumulative seconds, four legacy Flavor
+loads consume 3.378 seconds, four distribution observations consume 1.615
+seconds, and 1007 project-definition decodes consume 1.146 seconds. These costs
+overlap; they are not additive.
+
+Add bounded, request-scoped exact-byte project-definition parse reuse only if
+measurement shows a benefit. Every store read must still perform its complete
+bounded filesystem/identity checks. Keep private successful templates isolated
+with deep copies on every returned read; frozen project definitions contain a
+mutable selector dictionary. Limit retained entry count and encoded plus decoded
+object storage; bypass the memo on pressure without changing admission limits.
+Changed or invalid bytes, narrower store limits, nearest-marker changes and
+redirected files must never hit stale authority. Final combined review, complete
+regression and native PACKAGE/LINK qualification remain required.
+
+The combined candidate's 25 selected scanner, cache, lock and configuration
+controls pass in 9.171 seconds; the five final project-configuration controls
+pass in 0.034 seconds. Independent reviewer `native_transport_review` approved
+the combined source and private-template isolation, followed by the portable
+receiver test correction. Canonical combined driver/documentation records are
+current. In 1000 instrumented controller store reads, parse calls fall from
+1000 to one while all 1000 bounded manifest reads and root checks remain; content
+identity is identical. Timings are 0.781 and 0.304 seconds. The 16-entry, 2 MiB
+template memo includes decoded-object accounting and a bounded bookkeeping
+reserve; it is not a whole-process memory claim. Complete combined regression,
+Windows portability evidence and installed native PACKAGE/LINK remain pending.
+
 ### [x] RETAINED-PACKAGE-CONCURRENCY-001 — Diagnose parallel retained-package ancestor replacement
 
 - **GitHub issue:** [#140](https://github.com/jordanhubbard/literate-ai/issues/140)
@@ -32755,6 +32841,14 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] A complete real tree beyond the former input ceiling remains within declared entry/byte/unit/edge/decode/staging/transfer bounds and retains measured resource evidence.
   - [ ] Legacy aggregate identity/behavior controls, relevant complete regression, installed/native qualification and exact review/main CI pass; issue 235 remains open until decisive proof and green landing.
 
+The exact-main Windows/Python 3.12 first shard in CI `41412564494` fails its
+retained receiver scope control before dispatch: the fixture puts a native
+Windows temporary path in an SSH worker's POSIX workspace descriptor. Keep the
+remote logical workspace POSIX and the receiver's actual temporary storage
+native. Preserve all no-execution/no-CAS-write assertions and the strict SSH
+workspace contract; do not skip the security control on Windows. Include this
+fixture correction in the combined candidate and rerun native Windows evidence.
+
 ### [ ] SDK-ADMISSION-LIMITS-001 — Admit modern SDK source sizes with explicit headroom
 
 - **Release target:** 1.4.0
@@ -32770,7 +32864,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Exercise a real source-built SDK above the former per-file and total bounds while preserving changed-source refusal.
 - **Evidence:**
   - [x] Pass the actual native SDK build, relocation and execution regression with a 144 MiB source resource and existing mutation controls.
-  - [ ] Obtain independent source review and pass full source, driver and documentation gates before commit and push.
+  - [x] Obtain independent source review and pass full source, driver and documentation gates before commit and push.
   - [ ] Install the exact new wheel and renew native source admission and SSH PACKAGE/LINK qualification; no failed setup is passing evidence.
 
 The source SDK regression passes both real-build and changed-source controls
@@ -32781,3 +32875,80 @@ unchanged security/custody checks. These byte quotas are not low-memory
 qualification. Full regression and exact installed/native renewal remain open.
 The reviewed original-adoption diagnostic-isolation repair is included in this
 batch so its full snapshot checks run with the SDK changes.
+
+Merged via [PR #248](https://github.com/jordanhubbard/literate-ai/pull/248) at
+`9213b250eceaa1eaaba03ceb8da3978391078413`. The complete source gate passes
+2546 tests with 79 declared skips; exact PR CI run `41402132846` passes.
+The installed native retry has acquired the 144 MiB SDK and produced application,
+link, test and documentation outputs; final SSH PACKAGE/LINK admission remains
+unproven. Exact-main qualification run `41412564494` is still pending.
+
+### [ ] SOURCE-SCAN-DUPLICATES-001 — Scan identical source content without duplicate finding identities
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#249](https://github.com/jordanhubbard/literate-ai/issues/249)
+
+- **Priority:** P1
+- **Owner:** Framework source security scanner
+- **Direction:** Accept issue 249 for release 1.4 and preserve source scanning across duplicate content paths.
+- **Conclusion:** Finding identities are content-addressed. Emit each content, rule and occurrence once with its deterministic first applicable path; retain distinct findings and blocking severity without changing valid existing identities.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Deduplicate exact content-rule-occurrence findings before constructing the report.
+- **Evidence:**
+  - [ ] Public scanner controls preserve deterministic identities, distinct findings and blocking policy; independent review and full framework gates pass.
+
+The public scanner regression passes all three controls. Independent reviewer
+`native_transport_review` approved the content/rule/occurrence deduplication and
+unchanged identity and policy semantics (scanner SHA-256
+`76da2fdb4b89383e39465f6c9fb02130115afe93ddff041dc643da56daff98b8`).
+Canonical driver and documentation reviews are current. Full regression is pending.
+
+### [ ] DIAGNOSTIC-CACHE-CUSTODY-001 — Coordinate diagnostic output with canonical object-cache ownership
+
+- **Release target:** 1.4.0
+- **GitHub issue:** [#250](https://github.com/jordanhubbard/literate-ai/issues/250)
+
+- **Priority:** P1
+- **Owner:** Framework diagnostics and cache-directory custody; PROJECT goals 1 and 4
+- **Direction:** Accept issue 250 for release 1.4 and ensure diagnostics cannot prevent first execution with a fresh custom object root.
+- **Conclusion:** Write new spans only to canonical operator state, keyed by the exact selected object root; merge legacy object-root logs when reading. Preserve first-command/refusal diagnostics, explicit selection and read-only project snapshots without changing cache ownership or lock protocols.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Resolve telemetry roots with explicit request precedence and use an operator-state sink without mutating observed projects or caches.
+- **Evidence:**
+  - [ ] A public plan followed by first execution reuses a fresh custom object root; unrelated unmarked roots, symlink redirection and read-only source drift controls still refuse; independent review and full gates pass.
+
+Current diagnosis: diagnostic-only directory creation precedes the canonical
+object-cache marker and makes custom roots nonempty. Calling the existing
+initializer also creates project-local lock files, which would invalidate
+read-only original-adoption snapshots when diagnostics were directed outside
+the project. Resolve this ownership interaction before implementation.
+
+Independent design review selected an operator-state-only sink for new spans.
+This avoids cache lock migration and the nested-cache removal race of adjacent
+locks. Readers retain legacy object-root logs; current operator-state namespace
+selection remains diagnostic scope rather than authority. Literal-directory
+reporting supports archived logs. No cache adoption rule changes.
+
+The final reviewed source passes 32 focused cases in 33.100 seconds across
+cache custody, read-only onboard planning, original adoption and non-host lock
+health. These include retained first-command/refusal diagnostics, explicit root
+precedence, legacy and literal-directory reports, cleanup survival, source
+snapshot preservation and rejected redirected/unsafe log sinks. Reviewer
+`native_transport_review` approved the final scanner-independent source, including
+Python 3.12 resolution-loop refusal, portable run IDs and native file identity
+checks. Full regression and platform qualification remain pending.
+
+The first combined full gate stops at the onboarding timing assertion after
+1720 passing cases (2633 selected; one failure and 75 declared skips recorded).
+A focused parallel-runner reproduction fails the same control in 13.018 seconds.
+The isolated runner supplies an operator-state directory under macOS `/var`,
+whose system ancestor aliases `/private/var`; strict directory traversal refuses
+the unresolved ancestor and drops the timing span. Resolve the configured state
+root's parent once while retaining and rejecting redirected state-root leaves.
+Keep canonical overlap checks and all safe-directory/append guards. Add a real
+ancestor-alias positive control plus explicit leaf-alias refusal, then renew
+independent review and the complete combined gate from test one.
