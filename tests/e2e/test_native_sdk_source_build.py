@@ -32,6 +32,8 @@ from tests.support.fixtures_test_repository_sources import source_intelligence_p
 
 
 class NativeSdkSourceBuildTests(unittest.TestCase):
+    source_payload_bytes = 144 * 1024 * 1024
+
     @classmethod
     def setUpClass(cls):
         # The recipe fixture (vendor Git repository plus locked component) is
@@ -42,6 +44,7 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
             "test_selected_flavor_recipe_drives_real_native_build_and_relocation"
         )
         cls.addClassCleanup(recipe_fixture.doCleanups)
+        recipe_fixture.source_payload_bytes = cls.source_payload_bytes
         recipe_fixture.setUp()
         cls.fixture = recipe_fixture.fixture
         cls.snapshot = recipe_fixture.snapshot()
@@ -138,6 +141,12 @@ class NativeSdkSourceBuildTests(unittest.TestCase):
             (cached_source / "vendor_math.c").read_bytes(),
             (self.fixture.source / "vendor_math.c").read_bytes(),
         )
+        resource = cached_source / "sdk-resource.dat"
+        self.assertEqual(resource.stat().st_size, self.source_payload_bytes)
+        marker = b"retained SDK resource\n"
+        with resource.open("rb") as stream:
+            stream.seek(-len(marker), os.SEEK_END)
+            self.assertEqual(stream.read(), marker)
 
         # The acquired checkout has already been deleted. Remove the origin too.
         self.fixture.remove_source()

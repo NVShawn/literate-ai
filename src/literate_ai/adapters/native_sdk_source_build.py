@@ -194,9 +194,9 @@ class NativeSdkSourceBuildService:
             raise ValueError("SDK inspection requires the actual locked source capture")
         self.authority_files.require_unchanged()
         files = PinnedInputClosure(
-            maximum_files=16384,
-            maximum_file_bytes=16 * 1024 * 1024,
-            maximum_total_bytes=128 * 1024 * 1024,
+            maximum_files=1_000_000,
+            maximum_file_bytes=1024 * 1024 * 1024,
+            maximum_total_bytes=16 * 1024 * 1024 * 1024,
         )
         modules = []
         inventory = []

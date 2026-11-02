@@ -29,6 +29,11 @@ class OriginalProjectAdoptionTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name).resolve() / "project"
+        # Diagnostics must not enter the tree whose complete bytes we compare.
+        self.diagnostics = self.root.parent / "diagnostics"
+        self.enterContext(
+            mock.patch.dict(os.environ, {"OBJ_DIR": str(self.diagnostics)})
+        )
         initialize_root(self.root)
         self.source = self.root / "usr.bin" / "sample" / "sample.c"
         self.source.parent.mkdir(parents=True)
@@ -90,6 +95,12 @@ class OriginalProjectAdoptionTests(unittest.TestCase):
         self.assertNotEqual(code, 0)
         self.assertIn("review is stale", refused["error"]["message"])
         self.assertEqual(self.snapshot(), before_review)
+        self.assertTrue(
+            any(
+                span.stage == "cli.project.adopt-original" and not span.ok
+                for span in read_performance_spans(self.diagnostics)
+            )
+        )
         code, reviewed = invoke(
             "project", "documentation-review", str(self.root), "--record"
         )

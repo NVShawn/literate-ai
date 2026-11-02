@@ -29547,6 +29547,7 @@ Evidence: [exact wheel and native migration checkpoint](../../verification/stand
 
 ### [ ] ORIGINAL-ADOPT-001 — Bind original project authority without relocating source
 
+- **Release target:** 1.4.0
 - **GitHub issue:** [#22](https://github.com/jordanhubbard/literate-ai/issues/22)
 
 - **Priority:** P0
@@ -29557,11 +29558,13 @@ Evidence: [exact wheel and native migration checkpoint](../../verification/stand
 - **Implementation:**
   - [x] Define original initial authority semantics without changing existing wrapped/retained/drafted/qualified wire identities.
   - [x] Expose a reviewed in-place original-source plan/apply command over an already-authored canonical project; bind project authority and clean Git commit/tree without executing its build.
+  - [x] Isolate disposable CLI telemetry outside original-adoption test projects while retaining complete source snapshots and refusal diagnostics.
 - **Evidence:**
   - [x] Prove preserved source files, exact metadata-only writes, stale-plan refusal, collision/dirty/unsafe-root refusal and permanent refusal of regenerative conversion transitions.
   - [x] Run existing adoption and retained planning regression gates.
   - [ ] Run full regression and native/installed renewal gates.
   - [x] Initialize an actual native source project only after authoring and validation.
+  - [ ] Reproduce the telemetry collision, pass the complete original-adoption module, and complete a fresh full gate and exact-head CI for the fixture repair.
 
 **Partial evidence:** The managed Python gate passes all 22 adoption checks,
 including nine real Git/worktree and public-command original-adoption checks.
@@ -29598,6 +29601,22 @@ and proves the fixture still starts no maintenance/GC child. All ten original
 adoption checks pass; ordinary cleanup and source-integrity assertions remain
 strict. This test-only repair changes no production execution policy. Full
 renewal is still required; none of the interrupted runs is counted as passing.
+
+The separate Windows-identity source renewal failed after 2,315 tests
+(2,239 passed, one failure, 75 skipped): a deliberately refused public adoption
+plan appended disposable performance telemetry inside the complete source snapshot.
+The same refusal reproduces on integrated main before repair. Independent review
+identified test diagnostic-output isolation as the owner; production adoption and
+telemetry contracts stay unchanged. Preserve both failed runs. The fixture repair
+must retain the whole-project byte comparison and verify refusal telemetry outside
+that tree, then pass fresh module, full-suite and integration gates.
+
+All 12 original-adoption checks now pass with diagnostic output explicitly
+outside each test project. Complete project snapshots remain unchanged, and the
+refused custom-skill plan still records a failed `cli.project.adopt-original`
+span. Independent reviewer `review_pr239` approved the test isolation and exact
+stage assertion. A fresh full gate and exact-head CI remain required; the earlier
+failed and incomplete runs are not passing evidence.
 
 ### [x] LOCK-TARGET-001 — Verify the committed Component target
 
@@ -32735,3 +32754,30 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [ ] A real remote FreeBSD PACKAGE action carries live LINK and current producer/runtime scope; corrupted returned archives, changed custody and failed transport refuse canonical admission.
   - [ ] A complete real tree beyond the former input ceiling remains within declared entry/byte/unit/edge/decode/staging/transfer bounds and retains measured resource evidence.
   - [ ] Legacy aggregate identity/behavior controls, relevant complete regression, installed/native qualification and exact review/main CI pass; issue 235 remains open until decisive proof and green landing.
+
+### [ ] SDK-ADMISSION-LIMITS-001 — Admit modern SDK source sizes with explicit headroom
+
+- **Release target:** 1.4.0
+
+- **Priority:** P0
+- **Owner:** Native SDK source admission; PROJECT goals 1 and 4
+- **Direction:** Increase SDK admission limits with generous margin for the SDKs being handled during release 1.4 qualification.
+- **Conclusion:** Raise only the native SDK source closure to 1000000 files, 1 GiB per file and 16 GiB total. Preserve finite quotas, source identities, scanning, policy approval, custody and mutation refusal; do not widen general authoring-input bounds.
+- **Depends on:** none
+- **Completion prerequisites:** none
+- **Implementation:**
+  - [x] Increase the SDK source closure bounds and document their scope.
+  - [x] Exercise a real source-built SDK above the former per-file and total bounds while preserving changed-source refusal.
+- **Evidence:**
+  - [x] Pass the actual native SDK build, relocation and execution regression with a 144 MiB source resource and existing mutation controls.
+  - [ ] Obtain independent source review and pass full source, driver and documentation gates before commit and push.
+  - [ ] Install the exact new wheel and renew native source admission and SSH PACKAGE/LINK qualification; no failed setup is passing evidence.
+
+The source SDK regression passes both real-build and changed-source controls
+with a 144 MiB resource (55.807 seconds, zero skips). The admitted cache retains
+its full length and end marker; relocated native execution still returns 4.5.
+Independent reviewer `native_transport_review` approved the SDK-only bounds and
+unchanged security/custody checks. These byte quotas are not low-memory
+qualification. Full regression and exact installed/native renewal remain open.
+The reviewed original-adoption diagnostic-isolation repair is included in this
+batch so its full snapshot checks run with the SDK changes.

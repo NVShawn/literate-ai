@@ -60,6 +60,7 @@ class NativeSdkRecipeTests(unittest.TestCase):
             "test_real_repository_pipeline_retains_native_sdk_for_relocation"
         )
         self.addCleanup(self.fixture.doCleanups)
+        self.fixture.source_payload_bytes = getattr(self, "source_payload_bytes", 0)
         self.fixture.setUp()
         self.component, self.flavors = _fixture(self.fixture.root / "project")
         host_os = self.fixture.layout.operating_system

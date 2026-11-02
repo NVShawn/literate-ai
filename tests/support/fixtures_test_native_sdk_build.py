@@ -71,6 +71,13 @@ class NativeSdkBuildTests(unittest.TestCase):
         fixture = Path(__file__).resolve().parents[1] / "fixtures/native_sdk"
         shutil.copytree(fixture, self.source, dirs_exist_ok=True)
         (self.source / ".gitignore").write_text("_build/\n")
+        source_payload_bytes = getattr(self, "source_payload_bytes", 0)
+        if source_payload_bytes:
+            marker = b"retained SDK resource\n"
+            with (self.source / "sdk-resource.dat").open("wb") as resource:
+                resource.truncate(source_payload_bytes)
+                resource.seek(source_payload_bytes - len(marker))
+                resource.write(marker)
         for args in (
             ("init", "--quiet"),
             ("add", "."),
