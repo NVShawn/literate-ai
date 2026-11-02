@@ -314,7 +314,14 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
             args = (
                 requirement.install_arguments or sbom.package_manager.install_arguments
             )
-            self.assertEqual(args[args.index("--architecture") + 1], "arm64")
+            if requirement.manager_package == "Microsoft.VisualStudio.2022.BuildTools":
+                self.assertNotIn("--architecture", args)
+                self.assertIn(
+                    "Microsoft.VisualStudio.Component.VC.Tools.ARM64",
+                    args[args.index("--override") + 1],
+                )
+            else:
+                self.assertEqual(args[args.index("--architecture") + 1], "arm64")
         self.assertEqual(
             {
                 p.manager_package
@@ -510,10 +517,18 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
             environment, locator, runner, installs = self.ports(
                 directory, missing_compiler=True
             )
-            for consent in ("no", "yes"):
+            for consent, install_status in (("no", 1), ("yes", 1), ("yes", 0)):
                 environment["LITAI_INSTALL_DEPENDENCIES"] = consent
+                previous_installs = len(installs)
+
+                def installer(argv, *, status=install_status, **kwargs):
+                    result = runner(argv, **kwargs)
+                    if len(argv) > 1 and argv[1] == "install":
+                        return subprocess.CompletedProcess(argv, status, "", "")
+                    return result
+
                 with (
-                    self.subTest(consent=consent),
+                    self.subTest(consent=consent, install_status=install_status),
                     self.assertRaises(host_install.HostInstallError) as raised,
                 ):
                     host_install.ensure_host_install_dependencies(
@@ -522,7 +537,7 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
                         flavor_names=self.flavors,
                         environment=environment,
                         locator=locator,
-                        runner=runner,
+                        runner=installer,
                         interactive=False,
                         managed_tool_root=Path(directory) / "managed",
                         downloader=lambda *a: self.fail(
@@ -535,9 +550,9 @@ class WindowsArm64HostInstallTests(unittest.TestCase):
                     )
                     self.assertEqual(installs, [])
                 else:
-                    self.assertEqual(len(installs), 1)
-                    args = installs[0]
-                    self.assertEqual(args[args.index("--architecture") + 1], "arm64")
+                    self.assertEqual(len(installs), previous_installs + 1)
+                    args = installs[-1]
+                    self.assertNotIn("--architecture", args)
                     self.assertIn(
                         "Microsoft.VisualStudio.Component.VC.Tools.ARM64",
                         args[args.index("--override") + 1],
