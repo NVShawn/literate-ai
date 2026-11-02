@@ -19,12 +19,16 @@ from literate_ai.adapters.retained_project_inputs import verify_retained_project
 from literate_ai.adapters.retained_project_metadata import (
     read_retained_project_document,
 )
+from literate_ai.adapters.retained_sdk_command_context import EXECUTION_SCHEMA
 from literate_ai.contracts import (
     ComponentLock,
+    ContentIdentity,
     canonical_identity,
     canonical_json_bytes,
 )
 from literate_ai.contracts.native_sdk_tree_products import NativeSdkTreeSnapshot
+from literate_ai.contracts.native_sdks import NativeSdkSnapshot
+from literate_ai.contracts.paths import canonical_relative_posix_paths
 from literate_ai.contracts.retained_project import (
     RetainedProjectManifest,
     RetainedProjectMember,
@@ -53,6 +57,94 @@ def read_retained_sdk_policy(root, manifest, locks):
     )
     policy.require_locks(locks)
     return policy
+
+
+def require_retained_sdk_product_placement(manifest, placements):
+    """Check portable product topology; no worker path or live owner is restored.
+
+    Callers own exact selected policy/lock/snapshot joins. This shared pure check
+    then binds every file, alias and directory to the retained SDK-role inventory.
+    """
+    if (
+        type(placements) is not tuple
+        or len(placements) > 100_000
+        or any(
+            type(pair) is not tuple
+            or len(pair) != 2
+            or not isinstance(pair[1], (NativeSdkSnapshot, NativeSdkTreeSnapshot))
+            for pair in placements
+        )
+    ):
+        raise TypeError("retained.sdk.bounded-product-placements-required")
+    if not isinstance(manifest, RetainedProjectManifest):
+        raise TypeError("retained.sdk.typed-manifest-required")
+    canonical_relative_posix_paths(
+        (prefix for prefix, _snapshot in placements), label="retained SDK placement"
+    )
+    expected = {}
+    expected_directories = set()
+    for prefix, sdk in placements:
+        expected_directories.add(prefix)
+        if isinstance(sdk, NativeSdkTreeSnapshot):
+            if manifest.tree_policy is None or (
+                sdk.tree.case_sensitive and not manifest.tree_policy.case_sensitive
+            ):
+                raise ValueError("retained.sdk.selected-tree-policy-required")
+            expected_directories.update(
+                prefix + "/" + path for path in sdk.tree.directories
+            )
+        for item in sdk.files:
+            path = prefix + "/" + item.path
+            expected[path] = RetainedProjectMember(
+                path,
+                item.blob.size,
+                0o755 if item.executable else 0o644,
+                item.blob.digest,
+                "sdk",
+            )
+            directory = path.rpartition("/")[0]
+            while directory != prefix:
+                expected_directories.add(directory)
+                directory = directory.rpartition("/")[0]
+        if isinstance(sdk, NativeSdkTreeSnapshot):
+            physical = {item.path: item for item in sdk.files}
+            for alias in sdk.tree.aliases:
+                path = prefix + "/" + alias.path
+                if alias.kind == "hardlink":
+                    item = physical[alias.target]
+                    expected[path] = RetainedProjectMember(
+                        path,
+                        item.blob.size,
+                        0o755 if item.executable else 0o644,
+                        item.blob.digest,
+                        "sdk",
+                        hardlink_target=prefix + "/" + alias.target,
+                    )
+                else:
+                    content = alias.target.encode("utf-8")
+                    expected[path] = RetainedProjectMember(
+                        path,
+                        len(content),
+                        0o120000,
+                        hashlib.sha256(content).hexdigest(),
+                        "sdk",
+                        symlink_target=alias.target,
+                    )
+    sdk_members = {m.path: m for m in manifest.members if m.role == "sdk"}
+    if set(sdk_members) != set(expected):
+        raise ValueError("retained.sdk.complete-sdk-file-closure-required")
+    if sdk_members != expected:
+        raise ValueError("retained.sdk.product-file-mismatch")
+    prefixes = {prefix for prefix, _snapshot in placements}
+    if (
+        any(
+            _inside_prefix(m.path, prefixes) and m.path not in expected
+            for m in manifest.members
+        )
+        or {p for p in manifest.directories if _inside_prefix(p, prefixes)}
+        != expected_directories
+    ):
+        raise ValueError("retained.sdk.product-directory-closure-mismatch")
 
 
 @dataclass(frozen=True, slots=True)
@@ -126,72 +218,13 @@ class RetainedProjectNativeSdkInputs:
             }
         if set(selected) != set(self._prefixes):
             raise ValueError("retained.sdk.complete-product-bindings-required")
-        expected = {}
-        expected_directories = set()
-        for key, binding in selected.items():
-            prefix = self._prefixes[key]
-            sdk = binding.build.product.snapshot
-            expected_directories.add(prefix)
-            if isinstance(sdk, NativeSdkTreeSnapshot):
-                if manifest.tree_policy is None or (
-                    sdk.tree.case_sensitive and not manifest.tree_policy.case_sensitive
-                ):
-                    raise ValueError("retained.sdk.selected-tree-policy-required")
-                expected_directories.update(
-                    prefix + "/" + path for path in sdk.tree.directories
-                )
-            for item in sdk.files:
-                path = prefix + "/" + item.path
-                expected[path] = RetainedProjectMember(
-                    path,
-                    item.blob.size,
-                    0o755 if item.executable else 0o644,
-                    item.blob.digest,
-                    "sdk",
-                )
-                directory = path.rpartition("/")[0]
-                while directory != prefix:
-                    expected_directories.add(directory)
-                    directory = directory.rpartition("/")[0]
-            if isinstance(sdk, NativeSdkTreeSnapshot):
-                physical = {item.path: item for item in sdk.files}
-                for alias in sdk.tree.aliases:
-                    path = prefix + "/" + alias.path
-                    if alias.kind == "hardlink":
-                        item = physical[alias.target]
-                        expected[path] = RetainedProjectMember(
-                            path,
-                            item.blob.size,
-                            0o755 if item.executable else 0o644,
-                            item.blob.digest,
-                            "sdk",
-                            hardlink_target=prefix + "/" + alias.target,
-                        )
-                    else:
-                        content = alias.target.encode("utf-8")
-                        expected[path] = RetainedProjectMember(
-                            path,
-                            len(content),
-                            0o120000,
-                            hashlib.sha256(content).hexdigest(),
-                            "sdk",
-                            symlink_target=alias.target,
-                        )
-        sdk_members = {m.path: m for m in manifest.members if m.role == "sdk"}
-        if set(sdk_members) != set(expected):
-            raise ValueError("retained.sdk.complete-sdk-file-closure-required")
-        if sdk_members != expected:
-            raise ValueError("retained.sdk.product-file-mismatch")
-        prefixes = set(self._prefixes.values())
-        if (
-            any(
-                _inside_prefix(m.path, prefixes) and m.path not in expected
-                for m in manifest.members
-            )
-            or {p for p in manifest.directories if _inside_prefix(p, prefixes)}
-            != expected_directories
-        ):
-            raise ValueError("retained.sdk.product-directory-closure-mismatch")
+        require_retained_sdk_product_placement(
+            manifest,
+            tuple(
+                (self._prefixes[key], binding.build.product.snapshot)
+                for key, binding in selected.items()
+            ),
+        )
         require_safe_directory(parent)
         self.executions = []
         # Materialize and inspect through the existing producer owner, then bind
@@ -223,8 +256,13 @@ class RetainedProjectNativeSdkInputs:
                         )
                         for value in values
                     )
-                    for value in placed:
-                        owner.reobserve_runtime(value)
+                    placed = tuple(
+                        replace(
+                            value,
+                            runtime_observation=owner.retain_runtime_observation(value),
+                        )
+                        for value in placed
+                    )
                     content = canonical_json_bytes(
                         _manifest_document(revision, target, placed, Path(parent))
                     )
@@ -297,10 +335,58 @@ class RetainedProjectNativeSdkInputs:
             scope.require_current()
 
     @contextmanager
-    def command_scope(self, argv, *, action_identity, **arguments):
+    def command_scope(
+        self, argv, *, action_identity, command_context=None, **arguments
+    ):
         self.require_unchanged()
         expected_argv = tuple(argv)
         expected_environment = dict(arguments["environment"])
+        if command_context is not None:
+            import json
+
+            context = json.loads(canonical_json_bytes(command_context))
+            if (
+                context["argv"] != list(expected_argv)
+                or context["environment"] != expected_environment
+                or context["cwd"] != str(arguments["cwd"])
+            ):
+                raise ValueError("retained.sdk.command-context-launch-differs")
+            original_record = arguments["record"]
+            runtime_observations = {
+                execution.manifest_identity: [
+                    {
+                        "input_identity": value.binding.identity.to_dict(),
+                        "logical_root": str(value.root),
+                        "observation_root": str(value.root.resolve(strict=True)),
+                        "observation": value.runtime_observation.to_dict(),
+                    }
+                    for value in execution.values
+                ]
+                for execution in self.executions
+            }
+
+            def record(document):
+                if document.get("schema") in {
+                    "literate-ai/native-sdk-command-execution@2",
+                    "literate-ai/native-sdk-command-execution@4",
+                }:
+                    document = {
+                        **document,
+                        "schema": EXECUTION_SCHEMA,
+                        "retained_command_context": context,
+                        "retained_sdk_runtime_observations": runtime_observations[
+                            ContentIdentity.from_dict(document["manifest_identity"])
+                        ],
+                    }
+                    identity = original_record(document)
+                    if identity != canonical_identity(document):
+                        raise ValueError(
+                            "retained.sdk.command-context-retention-differs"
+                        )
+                    return identity
+                return original_record(document)
+
+            arguments["record"] = record
         with ExitStack() as stack:
             scopes = tuple(
                 stack.enter_context(

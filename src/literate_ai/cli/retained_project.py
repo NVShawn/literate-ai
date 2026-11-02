@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 from pathlib import Path
 from typing import Any
 
 from literate_ai._filesystem import path_is_link_or_reparse
+from literate_ai.adapters.retained_project_inputs import _stream
 from literate_ai.adapters.retained_project_planning import (
     plan_retained_project_with_graph,
 )
@@ -58,70 +60,73 @@ def _unique_object(items: list[tuple[str, object]]) -> dict[str, object]:
     return result
 
 
-def _document(path: Path) -> tuple[bytes, object]:
+def _document(path: Path, *, maximum_bytes=64 * 1024**2) -> tuple[bytes, object]:
     if path.absolute() != path.resolve(strict=True) or path_is_link_or_reparse(path):
         raise ValueError("Retained authority may not use redirected paths")
-    with path.open("rb") as stream:
-        content = stream.read(64 * 1024 * 1024 + 1)
-    if len(content) > 64 * 1024 * 1024:
-        raise ValueError("Retained authority document exceeds metadata bound")
+    if type(maximum_bytes) is not int or not 1 <= maximum_bytes <= 64 * 1024**2:
+        raise ValueError("Retained authority requires a bounded document read")
+    buffer = io.BytesIO()
+    _stream(path.parent, path.name, maximum_bytes, output=buffer)
+    content = buffer.getvalue()
     return content, json.loads(content, object_pairs_hook=_unique_object)
+
+
+def current_retained_project_authority(project: Any, binding: Any, args: Any):
+    """Return the existing read-only re-planner shared by retained front doors."""
+    if not args.retained_project_profile:
+        raise ValueError("Retained-project mode requires an explicit locked profile")
+    if (
+        getattr(args, "retained_source", None)
+        or getattr(args, "from_accepted_source", False)
+        or args.force_regeneration
+        or getattr(args, "update_receipt", False)
+    ):
+        raise ValueError(
+            "Retained authority cannot replace existing source/receipt modes"
+        )
+    overrides = [
+        "--" + key.replace("_", "-")
+        for key in ("flavor", "model", "jobs", "source_cache_entry")
+        if getattr(args, key, None) is not None
+        and (key in {"model", "jobs"} or getattr(args, key))
+    ]
+    if overrides:
+        raise ValueError(
+            "Retained-project execution uses its locked profile; unsupported "
+            "overrides: " + ", ".join(overrides)
+        )
+    if args.specification != ".":
+        raise ValueError("Retained-project admission requires the complete project")
+    profile_path = project.root / args.retained_project_profile
+
+    def current_authority():
+        _manifest_bytes, manifest_data = _document(project.root / args.retained_project)
+        profile_bytes, profile_data = _document(profile_path)
+        manifest = RetainedProjectManifest.from_dict(manifest_data)
+        profile = RetainedProjectProfile.from_dict(profile_data)
+        worker = select_execution_worker(
+            args, project_root=project.root, target_profile=args.target
+        )
+        planning = plan_retained_project_with_graph(
+            project,
+            binding,
+            manifest,
+            profile,
+            worker_identity=worker.worker.identity,
+            target=args.target,
+            profile_path=profile_path,
+            profile_bytes=profile_bytes,
+        )
+        return manifest, worker, planning
+
+    return current_authority
 
 
 def retained_project_from_args(
     project: Any, binding: Any, args: Any
 ) -> dict[str, object]:
     try:
-        if not args.retained_project_profile:
-            raise ValueError(
-                "Retained-project mode requires an explicit locked profile"
-            )
-        if (
-            getattr(args, "retained_source", None)
-            or getattr(args, "from_accepted_source", False)
-            or args.force_regeneration
-            or getattr(args, "update_receipt", False)
-        ):
-            raise ValueError(
-                "Retained authority cannot replace existing source/receipt modes"
-            )
-        overrides = [
-            "--" + key.replace("_", "-")
-            for key in ("flavor", "model", "jobs", "source_cache_entry")
-            if getattr(args, key, None) is not None
-            and (key in {"model", "jobs"} or getattr(args, key))
-        ]
-        if overrides:
-            raise ValueError(
-                "Retained-project execution uses its locked profile; unsupported "
-                "overrides: " + ", ".join(overrides)
-            )
-        if args.specification != ".":
-            raise ValueError("Retained-project admission requires the complete project")
-        profile_path = project.root / args.retained_project_profile
-
-        def current_authority():
-            _manifest_bytes, manifest_data = _document(
-                project.root / args.retained_project
-            )
-            profile_bytes, profile_data = _document(profile_path)
-            manifest = RetainedProjectManifest.from_dict(manifest_data)
-            profile = RetainedProjectProfile.from_dict(profile_data)
-            worker = select_execution_worker(
-                args, project_root=project.root, target_profile=args.target
-            )
-            planning = plan_retained_project_with_graph(
-                project,
-                binding,
-                manifest,
-                profile,
-                worker_identity=worker.worker.identity,
-                target=args.target,
-                profile_path=profile_path,
-                profile_bytes=profile_bytes,
-            )
-            return manifest, worker, planning
-
+        current_authority = current_retained_project_authority(project, binding, args)
         manifest, worker, planning = current_authority()
         plan = planning.plan
         if args.retained_project_plan:

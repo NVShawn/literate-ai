@@ -70,7 +70,7 @@ class PublicRetainedSdkRuntimeTests(unittest.TestCase):
     ):
         args, kwargs = self.public_runtime_arguments()
         with patch(
-            "literate_ai.adapters.retained_project_sdk_runtime.project_component_roots",
+            "literate_ai.adapters.retained_sdk_authority.project_component_roots",
             return_value=(self.sdk_fixture.recipe_fixture.component,),
         ):
             admission, workspace = execute_local_retained_project(*args, **kwargs)
@@ -91,7 +91,7 @@ class PublicRetainedSdkRuntimeTests(unittest.TestCase):
         sdk_commands = [
             r
             for r in evidence
-            if r.get("schema") == "literate-ai/native-sdk-command-execution@2"
+            if r.get("schema") == "literate-ai/native-sdk-command-execution@5"
         ]
         self.assertEqual(len(sdk_commands), 6)
         self.assertTrue(
@@ -118,7 +118,7 @@ class PublicRetainedSdkRuntimeTests(unittest.TestCase):
         )
         with (
             patch(
-                "literate_ai.adapters.retained_project_sdk_runtime.project_component_roots",
+                "literate_ai.adapters.retained_sdk_authority.project_component_roots",
                 return_value=(self.sdk_fixture.recipe_fixture.component,),
             ),
             patch(
@@ -135,7 +135,7 @@ class PublicRetainedSdkRuntimeTests(unittest.TestCase):
         )
         with (
             patch(
-                "literate_ai.adapters.retained_project_sdk_runtime.project_component_roots",
+                "literate_ai.adapters.retained_sdk_authority.project_component_roots",
                 return_value=(self.sdk_fixture.recipe_fixture.component,),
             ),
             patch.object(execution, "run_bounded_process") as consumer,
@@ -169,7 +169,7 @@ class PublicRetainedSdkRuntimeTests(unittest.TestCase):
 
         with (
             patch(
-                "literate_ai.adapters.retained_project_sdk_runtime.project_component_roots",
+                "literate_ai.adapters.retained_sdk_authority.project_component_roots",
                 return_value=(self.sdk_fixture.recipe_fixture.component,),
             ),
             patch.object(RetainedProjectSdkRuntime, "authorize", authorize),
@@ -204,7 +204,7 @@ class PublicRetainedSdkRuntimeTests(unittest.TestCase):
 
         with (
             patch(
-                "literate_ai.adapters.retained_project_sdk_runtime.project_component_roots",
+                "literate_ai.adapters.retained_sdk_authority.project_component_roots",
                 return_value=(self.sdk_fixture.recipe_fixture.component,),
             ),
             patch.object(NativeSdkProjectAcquisition, "__call__", acquire_then_change),

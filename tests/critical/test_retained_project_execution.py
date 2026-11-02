@@ -75,6 +75,22 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             "#include <sys/stat.h>\n"
             "#include <unistd.h>\n"
             "#include <dlfcn.h>\n"
+            "static int tree_exports(const char *binary) {\n"
+            " char *root = strdup(binary); if (!root) return 80;\n"
+            " char *slash = strrchr(root, '/');\n"
+            " if (!slash) { free(root); return 81; }\n"
+            " *slash = 0; size_t size = strlen(root) + 32;\n"
+            " char *path = malloc(size); if (!path) { free(root); return 82; }\n"
+            ' snprintf(path, size, "%s/z-hardlink", root);\n'
+            " int rc = link(binary, path);\n"
+            ' snprintf(path, size, "%s/z-link", root);\n'
+            ' if (!rc) rc = symlink("app.bin", path);\n'
+            ' snprintf(path, size, "%s/empty", root);\n'
+            " if (!rc) rc = mkdir(path, 0755);\n"
+            ' snprintf(path, size, "%s/z-directory", root);\n'
+            ' if (!rc) rc = symlink("empty", path);\n'
+            " free(path); free(root); return rc ? 83 : 0;\n"
+            "}\n"
             "int main(int n, char **v) {\n"
             ' if (getenv("LITAI_FIXTURE_SECRET")) return 99;\n'
             " if (n < 2) return 2;\n"
@@ -122,8 +138,9 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             " }\n"
             " if (n < 3) return 2;\n"
             ' if (!strcmp(v[1], "export") || !strcmp(v[1], "export-nested")\n'
-            '     || !strcmp(v[1], "export-visible")) {\n'
-            '  if (strcmp(v[1], "export")) {\n'
+            '     || !strcmp(v[1], "export-visible")\n'
+            '     || !strcmp(v[1], "export-tree")) {\n'
+            '  if (strcmp(v[1], "export") && strcmp(v[1], "export-tree")) {\n'
             "   char *dir = strdup(v[2]); if (!dir) return 14;\n"
             "   char *slash = strrchr(dir, '/'); if (!slash) return 15;\n"
             '   *slash = 0; int mode = !strcmp(v[1], "export-visible") ? 0755 : 0700;\n'
@@ -134,7 +151,8 @@ class RetainedProjectExecutionTests(unittest.TestCase):
             "  int c; while ((c = fgetc(in)) != EOF)\n"
             "    if (fputc(c, out) == EOF) return 11;\n"
             "  if (ferror(in) || fclose(out) || fclose(in)) return 12;\n"
-            "  return chmod(v[2], 0755) ? 13 : 0;\n"
+            "  if (chmod(v[2], 0755)) return 13;\n"
+            '  return !strcmp(v[1], "export-tree") ? tree_exports(v[2]) : 0;\n'
             " }\n"
             ' if (!strcmp(v[1], "extra") && n == 4) {\n'
             '  FILE *f = fopen(v[3], "wb"); if (!f) return 5;\n'

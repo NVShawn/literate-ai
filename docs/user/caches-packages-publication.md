@@ -575,6 +575,36 @@ enable the public retained-project execution path, infer per-unit runtime
 package coordinates, install packages or authorize publication. Existing ZIP
 wire identities and its selected-provider checks are unchanged.
 
+### Opt-in retained unit packages under development
+
+The separate `litai package retained-units` path preserves explicit file, alias
+and empty-directory ownership across a selected package set. Locked
+`*.package-unit.json` supporting specifications name output ownership, package
+coordinates, typed dependencies and the source license. Source inventory limits
+do not expand package budgets; supply the versioned package policy explicitly.
+
+`observe-tools` reports actual native FreeBSD pkg/libarchive bindings. An
+`execution-plan` combines those observations and the package policy with the
+current retained lifecycle plan and worker selection, without running it. Review
+both the retained plan identity and the returned package authorization identity.
+`execute` requires both exact identities and `--allow-host-execution`, then runs
+the original retained lifecycle and constructs the selected native package set
+from fresh admission with current SDK and LINK owners. Admission finalizes its
+secondary views before packaging reads the sealed CAS payload. Changed plans, worker
+selection or native tools refuse. This execution currently requires local native
+FreeBSD; authenticated remote execution remains unfinished.
+
+Execution returns the fresh retained receipt, a planning-evidence reference, the
+LINK proof assertion and the package-set result reference in its CAS. Subsequent
+`plan` and `inspect` use `--receipt`, `--planning-evidence` and `--custody-root`
+alongside the current retained manifest/profile and explicit policy/tool files.
+`inspect` additionally takes `--result` and stages bounded archive inspection in
+`OBJ_DIR`. These historical assertions grant no live admission. Independent
+historical native verification/readmission, installed public-path qualification,
+the remote round trip and the large real-tree qualification remain open in
+[RETAINED-UNIT-PACKAGE-001](../roadmap/active-work.md#retained-unit-package-001-deliver-per-unit-retained-tree-packages-and-verified-freebsd-transport).
+Package execution does not install, publish or authorize a release.
+
 ## Publication
 
 Publication is an explicit, resumable operation over exact immutable objects. A

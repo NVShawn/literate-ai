@@ -4,14 +4,11 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
-from literate_ai.adapters.component_lock_application import project_component_roots
-from literate_ai.adapters.locked_generation_authority import (
-    FilesystemLockedGenerationAuthorityReader,
-)
 from literate_ai.adapters.native_sdk_acquisition import NativeSdkProjectAcquisition
 from literate_ai.adapters.native_sdk_consumer import NativeSdkConsumerInputs
 from literate_ai.adapters.native_sdk_recipes import select_native_sdk_recipes
 from literate_ai.adapters.retained_project_sdks import read_retained_sdk_policy
+from literate_ai.adapters.retained_sdk_authority import current_retained_sdk_snapshots
 from literate_ai.contracts import ContentIdentity, canonical_identity
 from literate_ai.contracts.retained_project_sdks import (
     RetainedProjectSdkSelectionPolicy,
@@ -83,37 +80,7 @@ class RetainedProjectSdkRuntime:
         return self.revocations
 
     def _snapshots(self):
-        reader = FilesystemLockedGenerationAuthorityReader()
-        expected = {lock.identity: lock for lock in self.locks}
-        selected = {}
-        for root in project_component_roots(self.project):
-            if not (root / "component.lock.json").exists():
-                continue
-            # Read the persisted target before resolving its current exact graph.
-            from literate_ai.adapters.component_locks import ComponentLockStore
-
-            catalog = reader.load_catalog(
-                root, flavor_roots=self.project.roots("flavor")
-            )
-            lock = ComponentLockStore(root).read_from_catalog(
-                authorings=catalog.authorings
-            )
-            snapshot = reader.resolve(
-                catalog,
-                target_name=lock.target_name,
-                flavor_selectors=self.project.flavor_selectors_for(root, ()),
-            )
-            snapshot.require_unchanged()
-            identity = snapshot.authority.lock.identity
-            if (
-                expected.get(identity) != snapshot.authority.lock
-                or identity in selected
-            ):
-                raise ValueError("retained.sdk.current-lock-set-changed")
-            selected[identity] = snapshot
-        if set(selected) != set(expected):
-            raise ValueError("retained.sdk.complete-lock-snapshots-required")
-        return tuple(selected[lock.identity] for lock in self.locks)
+        return current_retained_sdk_snapshots(self.project, self.locks)
 
     def acquire(self):
         if self._started:

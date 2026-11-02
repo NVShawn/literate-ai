@@ -50,9 +50,16 @@ def _under(path, roots):
 
 
 def _payload_manifest(run):
-    selected = set(run.source_bom.plan.profile.package_inventory)
-    members = tuple(m for m in run.output_manifest.members if _under(m.path, selected))
-    directories = {d for d in run.output_manifest.directories if _under(d, selected)}
+    return select_retained_package_payload(
+        run.output_manifest, run.source_bom.plan.profile
+    )
+
+
+def select_retained_package_payload(output_manifest, profile):
+    """Pure canonical payload selection; observations do not grant admission."""
+    selected = set(profile.package_inventory)
+    members = tuple(m for m in output_manifest.members if _under(m.path, selected))
+    directories = {d for d in output_manifest.directories if _under(d, selected)}
     for path in (*[m.path for m in members], *tuple(directories)):
         parent = path.rpartition("/")[0]
         while parent:
@@ -64,9 +71,9 @@ def _payload_manifest(run):
     return RetainedProjectManifest(
         roots,
         members,
-        run.output_manifest.limits,
+        output_manifest.limits,
         tuple(sorted(directories)),
-        tree_policy=run.output_manifest.tree_policy,
+        tree_policy=output_manifest.tree_policy,
     )
 
 
@@ -306,19 +313,32 @@ def _admit_retained_project(workspace, store, *, worker_evidence=None):
     def document(value, expected=None):
         return remember(canonical_json_bytes(value), expected=expected)
 
-    if worker_evidence is not None:
+    if (
+        worker_evidence is not None
+        or getattr(workspace, "_receiver_context", None) is not None
+    ):
         from literate_ai.adapters.retained_project_platform import (
+            RetainedReceiverPlatform,
             require_retained_worker_evidence,
         )
         from literate_ai.contracts.retained_project_worker import (
             RetainedLocalWorkerEvidence,
         )
 
-        if not isinstance(worker_evidence, RetainedLocalWorkerEvidence):
+        if isinstance(worker_evidence, RetainedReceiverPlatform):
+            if (
+                getattr(workspace, "_receiver_context", None)
+                is not worker_evidence.context
+                or worker_evidence.locks != run.source_bom.component_locks
+            ):
+                raise TypeError("retained.receipt.live-receiver-workspace-required")
+            worker_evidence.require_plan(plan)
+        elif isinstance(worker_evidence, RetainedLocalWorkerEvidence):
+            require_retained_worker_evidence(
+                worker_evidence, plan, run.source_bom.component_locks
+            )
+        else:
             raise TypeError("retained.receipt.typed-worker-evidence-required")
-        require_retained_worker_evidence(
-            worker_evidence, plan, run.source_bom.component_locks
-        )
         document(worker_evidence.to_dict(), worker_evidence.identity)
 
     roots = {

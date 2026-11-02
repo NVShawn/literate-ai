@@ -22,9 +22,11 @@ from literate_ai.adapters.freebsd_composed_tree_packaging import (
 )
 from literate_ai.adapters.freebsd_package_elf import inspect_freebsd_package_elf
 from literate_ai.adapters.native_tar_archives import rewrite_native_tar
-from literate_ai.adapters.native_tree_shards import retain_native_tree
 from literate_ai.adapters.retained_project_inputs import _stream
-from literate_ai.adapters.retained_unit_graphs import retain_retained_unit_graph
+from literate_ai.adapters.retained_unit_link import (
+    RetainedUnitLinkHandoff,
+    link_retained_unit_packages,
+)
 from literate_ai.application.packaging import PackagingError
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.identity import canonical_json_bytes
@@ -183,7 +185,7 @@ def _write_unit_tar(projection, identity, expected, store, work, maximum):
     return source, BlobRef(digest, size, media_type="application/x-tar")
 
 
-def construct_retained_unit_archives(owner, *, object_root):
+def construct_retained_unit_archives(owner, *, object_root, link_handoff=None):
     """Construct the full selected set; parsed plans cannot enter this path."""
     from literate_ai.adapters.retained_project_unit_packages import (
         RetainedProjectUnitPackages,
@@ -191,6 +193,10 @@ def construct_retained_unit_archives(owner, *, object_root):
 
     if not isinstance(owner, RetainedProjectUnitPackages):
         raise TypeError("Native unit production requires the live retained owner")
+    if link_handoff is not None and not isinstance(
+        link_handoff, RetainedUnitLinkHandoff
+    ):
+        raise TypeError("retained.unit.live-link-handoff-required")
     if platform.system().casefold() != "freebsd":
         raise PackagingError("Native unit package production requires FreeBSD")
     owner.require_current()
@@ -203,34 +209,26 @@ def construct_retained_unit_archives(owner, *, object_root):
     if 4096 * projection.graph.index.unit_count > projection.max_provider_memory_bytes:
         raise PackagingError("Native unit result inventory exceeds memory policy")
     for identity in projection._definitions:
-        expected = projection.unit_members(identity)
+        expected, expansion = projection.unit_geometry(identity)
         largest = max(
             (item.blob.size for item in expected.values() if item.blob is not None),
             default=0,
         )
         if (
             max(
-                projection.unit_expansion_limit(identity)
-                + largest
-                + projection.set_plan.max_archive_bytes,
+                expansion + largest + projection.set_plan.max_archive_bytes,
                 2 * projection.set_plan.max_archive_bytes,
             )
             > projection.set_plan.max_staging_bytes
         ):
             raise PackagingError("Native unit construction exceeds staging budget")
-    # These are immutable retained assertions, not a success/admission record.
-    for reference, content in owner._metadata.items():
-        if store.put_bytes(content, media_type=reference.media_type) != reference:
-            raise PackagingError("Native unit metadata identity changed")
-    if (
-        retain_native_tree(projection.graph.tree, store)
-        != projection.set_plan.tree_index
-        or retain_retained_unit_graph(projection.graph, store)
-        != projection.set_plan.graph_index
-    ):
-        raise PackagingError("Native unit graph/tree retention changed")
+    if link_handoff is None:
+        link_handoff = link_retained_unit_packages(owner)
+    else:
+        link_handoff.require_current(owner)
     results, total = [], 0
     for identity in projection.graph.partition.verification_order():
+        members, expansion = projection.unit_geometry(identity)
         remaining = min(
             projection.set_plan.max_archive_bytes,
             projection.set_plan.max_total_archive_bytes - total,
@@ -249,10 +247,10 @@ def construct_retained_unit_archives(owner, *, object_root):
             source, reference = _write_unit_tar(
                 projection,
                 identity,
-                projection.unit_members(identity),
+                members,
                 store,
                 work,
-                projection.unit_expansion_limit(identity),
+                expansion,
             )
             destination = work / "unit.pkg"
             with destination.open("x+b") as output:
@@ -261,9 +259,9 @@ def construct_retained_unit_archives(owner, *, object_root):
                     source,
                     reference,
                     output,
-                    maximum_input_bytes=projection.unit_expansion_limit(identity),
+                    maximum_input_bytes=expansion,
                     maximum_output_bytes=remaining,
-                    maximum_expanded_bytes=projection.unit_expansion_limit(identity),
+                    maximum_expanded_bytes=expansion,
                 )
             size = destination.stat().st_size
             if not 0 < size <= remaining:
@@ -297,8 +295,7 @@ def construct_retained_unit_archives(owner, *, object_root):
     verify_freebsd_composed_package_set(
         projection, results, store=store, object_root=parent
     )
-    owner.require_current()
-    owner.admission.require_native_package_scope()
+    link_handoff.require_current(owner)
     owner.pkg_tool.require_unchanged()
     owner.tar_tool.require_current()
     return results

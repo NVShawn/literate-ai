@@ -1030,8 +1030,10 @@
     },
     {
       "file": "native-tree-index.schema.json",
-      "root_id": "literate-ai/native-tree-index@1",
-      "public_ids": []
+      "root_id": "urn:literate-ai:schema:v2:native-tree-index-contracts",
+      "public_ids": [
+        "literate-ai/native-tree-index@1"
+      ]
     },
     {
       "file": "native-tree-shard.schema.json",
@@ -1047,8 +1049,10 @@
     },
     {
       "file": "retained-unit-package-graph-index.schema.json",
-      "root_id": "literate-ai/retained-unit-package-graph-index@1",
-      "public_ids": []
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-graph-index-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-graph-index@1"
+      ]
     },
     {
       "file": "retained-unit-package-graph-shard.schema.json",
@@ -1057,8 +1061,10 @@
     },
     {
       "file": "retained-unit-package-plan.schema.json",
-      "root_id": "literate-ai/retained-unit-package-plan@1",
-      "public_ids": []
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-plan-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-plan@1"
+      ]
     },
     {
       "file": "retained-unit-package-result.schema.json",
@@ -1102,6 +1108,19 @@
       "root_id": "urn:literate-ai:schema:v2:retained-unit-package-set-result-contracts",
       "public_ids": [
         "literate-ai/retained-unit-package-set-result@1"
+      ]
+    },
+    {
+      "file": "retained-unit-package-operator.schema.json",
+      "root_id": "urn:literate-ai:schema:v2:retained-unit-package-operator-contracts",
+      "public_ids": [
+        "literate-ai/retained-unit-package-policy@1",
+        "literate-ai/retained-unit-native-tool-observations@1",
+        "literate-ai/retained-unit-package-planning-evidence@1",
+        "literate-ai/retained-unit-package-inspection@1",
+        "literate-ai/retained-unit-link-proof@1",
+        "literate-ai/retained-unit-package-execution-plan@1",
+        "literate-ai/retained-unit-package-execution@1"
       ]
     }
   ]

@@ -290,9 +290,20 @@ def observe_retained_export_dependencies(
     """Observe sealed exports; an explicitly data-only closure may have no images."""
     verify_retained_project_inputs(root, manifest)
     root_ref = retained_project_bom_ref(plan.identity)
-    observation = _observer((), environment).observe(
-        {"artifact_path": str(root)}, root_ref=root_ref
-    )
+    observation = _observer(
+        (),
+        environment,
+        artifact_files=(
+            tuple(
+                Path(root) / member.path
+                for member in manifest.members
+                if member.symlink_target is None
+                and is_host_native_executable(Path(root) / member.path)
+            )
+            if manifest.tree_policy is not None
+            else None
+        ),
+    ).observe({"artifact_path": str(root)}, root_ref=root_ref)
     if (
         allow_empty
         and isinstance(observation, HostDependencyObservation)

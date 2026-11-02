@@ -1,6 +1,7 @@
-"""Local retained orchestration through the existing live execution/admission owners.
+"""Retained orchestration through the existing live execution/admission owners.
 
-This owner grants no regenerative, remote-worker, package or publication authority.
+Local execution or a live attested receiver context selects the execution boundary.
+This owner grants no regenerative, package or publication authority.
 It preserves the private run on success and failure for operator inspection.
 """
 
@@ -15,7 +16,10 @@ from literate_ai.adapters.retained_project_execution import (
     RetainedProjectExecutionError,
     RetainedProjectExecutionWorkspace,
 )
-from literate_ai.adapters.retained_project_platform import RetainedLocalPlatform
+from literate_ai.adapters.retained_project_platform import (
+    RetainedLocalPlatform,
+    RetainedReceiverPlatform,
+)
 from literate_ai.adapters.retained_project_receipt import admit_retained_project
 from literate_ai.adapters.user_paths import resolve_user_paths
 from literate_ai.cache_directories import (
@@ -80,6 +84,7 @@ def execute_local_retained_project(
     operator_environment=None,
     sdk_project=None,
     sdk_binding=None,
+    consume_admission=None,
 ):
     """Run one reviewed local plan and return its live retained admission.
 
@@ -87,11 +92,72 @@ def execute_local_retained_project(
     Existing workspace guards continue to require selected SDK producer owners;
     this local entry cannot substitute ambient SDK discovery for those bindings.
     """
+    return _execute_retained_project(
+        source,
+        manifest,
+        planning,
+        component_locks=component_locks,
+        worker=worker,
+        current_plan=current_plan,
+        test_receipt_policy=test_receipt_policy,
+        cache_directories=cache_directories,
+        authorization=authorization,
+        allow_host_execution=allow_host_execution,
+        operator_environment=operator_environment,
+        sdk_project=sdk_project,
+        sdk_binding=sdk_binding,
+        consume_admission=consume_admission,
+    )
+
+
+def execute_receiver_retained_project(
+    source, manifest, planning, *, receiver_context, **options
+):
+    """Execute on the observed receiver while retaining its original SSH identity.
+
+    The private receiver registration owns options and current re-planning. A
+    parsed receipt or a LOCAL replacement worker cannot select this entry.
+    """
+    from literate_ai.adapters.retained_receiver_context import RetainedReceiverContext
+
+    if not isinstance(receiver_context, RetainedReceiverContext):
+        raise TypeError("retained.receiver.live-measured-context-required")
+    receiver_context.require_plan(planning.plan)
+    return _execute_retained_project(
+        source,
+        manifest,
+        planning,
+        worker=receiver_context.worker,
+        receiver_context=receiver_context,
+        **options,
+    )
+
+
+def _execute_retained_project(
+    source,
+    manifest,
+    planning,
+    *,
+    component_locks,
+    worker,
+    current_plan,
+    test_receipt_policy,
+    cache_directories,
+    authorization,
+    allow_host_execution,
+    operator_environment=None,
+    sdk_project=None,
+    sdk_binding=None,
+    consume_admission=None,
+    receiver_context=None,
+):
     plan = planning.plan
+    if consume_admission is not None and not callable(consume_admission):
+        raise TypeError("retained.execution.admission-consumer-required")
     plan.require_authorization(authorization)
     if allow_host_execution is not True:
         raise RetainedProjectExecutionError("retained.execution.authorization-required")
-    if worker.kind is not ExecutionWorkerKind.LOCAL:
+    if receiver_context is None and worker.kind is not ExecutionWorkerKind.LOCAL:
         raise RetainedProjectExecutionError(
             "retained.execution.worker-runtime-unavailable"
         )
@@ -129,7 +195,11 @@ def execute_local_retained_project(
                 "retained.secondary.allocated-parent-overlaps-or-redirects"
             )
         require_safe_directory(prefix)
-    platform = RetainedLocalPlatform(worker, component_locks, plan)
+    platform = (
+        RetainedLocalPlatform(worker, component_locks, plan)
+        if receiver_context is None
+        else RetainedReceiverPlatform(receiver_context, component_locks, plan)
+    )
     platform.require_current()
 
     def current_local_plan():
@@ -248,6 +318,7 @@ def execute_local_retained_project(
         managed_graph=planning.managed_sbom_graph,
         component_locks=component_locks,
         allocation_owner=allocation,
+        receiver_context=receiver_context,
         **sdk_arguments,
     )
     try:
@@ -257,6 +328,12 @@ def execute_local_retained_project(
             workspace, store, worker_evidence=platform.evidence()
         )
         admission.require_current()
+        if consume_admission is not None:
+            # Framework composition supplies this callable, never serialized
+            # input. Secondary views were finalized by admission; consumers use
+            # sealed CAS payloads and revalidate genuine SDK/package owners.
+            consume_admission(admission, workspace)
+            admission.require_current()
         return admission, workspace
     except Exception as exc:
         raise RetainedProjectExecutionError(

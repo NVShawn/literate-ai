@@ -29,11 +29,18 @@ from literate_ai.contracts import (
     WorkerHardwareObservationCatalog,
     canonical_json_bytes,
 )
+from literate_ai.contracts.execution_dispatch import _identifier
 from literate_ai.diagnostics import redact_secrets
 
 MAX_PROBE_OUTPUT_BYTES = 256 * 1024
 DEFAULT_PROBE_TIMEOUT_SECONDS = 20
 MAX_PROBE_DIAGNOSTIC_CHARS = 4096
+_HOST_FAMILIES = {
+    "Darwin": "macos",
+    "FreeBSD": "freebsd",
+    "Linux": "linux",
+    "Windows": "windows",
+}
 
 
 class WorkerCapabilityProbeError(RuntimeError):
@@ -212,9 +219,15 @@ def _json_probe(
     timeout: int,
     os_family: str,
 ) -> dict[str, object]:
+    return _decode_json_probe(
+        _invoke(worker, _probe_command(script, os_family), runner, timeout), os_family
+    )
+
+
+def _probe_command(script: str, os_family: str) -> tuple[str, ...]:
     if os_family == "windows":
         encoded = base64.b64encode(script.encode("utf-16-le")).decode("ascii")
-        argv = (
+        return (
             "powershell.exe",
             "-NoLogo",
             "-NoProfile",
@@ -222,11 +235,11 @@ def _json_probe(
             "-EncodedCommand",
             encoded,
         )
-    else:
-        argv = ("sh", "-c", script)
-    raw = _text(
-        _invoke(worker, argv, runner, timeout), label=f"{os_family} hardware probe"
-    )
+    return ("sh", "-c", script)
+
+
+def _decode_json_probe(result, os_family: str) -> dict[str, object]:
+    raw = _text(result, label=f"{os_family} hardware probe")
     # Parse one complete object while tolerating PowerShell's trailing CLIXML progress
     # stream. This also admits pretty-printed multi-line system_profiler JSON.
     start = raw.find("{")
@@ -357,12 +370,7 @@ def _probe_worker_capabilities(
     family = worker.requirements.os_family
     if family is None:
         family = (
-            {
-                "Darwin": "macos",
-                "FreeBSD": "freebsd",
-                "Linux": "linux",
-                "Windows": "windows",
-            }.get(platform.system())
+            _HOST_FAMILIES.get(platform.system())
             if worker.kind is ExecutionWorkerKind.LOCAL
             else None
         )
@@ -382,6 +390,62 @@ def _probe_worker_capabilities(
         timeout_seconds,
         family,
     )
+    return _hardware_observation(worker.worker_id, family, value, observed_at)
+
+
+def observe_receiver_host(
+    worker_id: str,
+    *,
+    runner: ProbeRunner = _run,
+    timeout_seconds: int = DEFAULT_PROBE_TIMEOUT_SECONDS,
+    observed_at: str | None = None,
+) -> WorkerHardwareObservation:
+    """Observe this actual host without constructing or routing an execution worker.
+
+    The ID only labels observed facts. It neither authenticates a receiver nor
+    satisfies a selected worker's authored requirements. The authenticated action
+    owner must bind the observations to its unchanged worker and locked target.
+    """
+    try:
+        _identifier(worker_id, "receiver.worker_id")
+        if type(timeout_seconds) is not int or not 1 <= timeout_seconds <= 3600:
+            raise WorkerCapabilityProbeError(
+                "worker.probe_timeout_invalid", "receiver probe timeout is unbounded"
+            )
+        family = _HOST_FAMILIES.get(platform.system())
+        if family is None:
+            raise WorkerCapabilityProbeError(
+                "worker.probe_os_required", "receiver host OS is unsupported"
+            )
+        script = {
+            "freebsd": _FREEBSD_SCRIPT,
+            "linux": _LINUX_SCRIPT,
+            "macos": _MACOS_SCRIPT,
+            "windows": _WINDOWS_SCRIPT,
+        }[family]
+        value = _decode_json_probe(
+            runner(_probe_command(script, family), timeout_seconds), family
+        )
+        return _hardware_observation(worker_id, family, value, observed_at)
+    except WorkerCapabilityProbeError as exc:
+        if exc.worker_id is not None:
+            raise
+        raise WorkerCapabilityProbeError(
+            exc.code, exc.message, worker_id=worker_id
+        ) from exc
+    except ContractValidationError as exc:
+        raise WorkerCapabilityProbeError(
+            "worker.probe_invalid", str(exc), worker_id=worker_id
+        ) from exc
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise WorkerCapabilityProbeError(
+            "worker.probe_transport_failed",
+            "receiver host probe failed",
+            worker_id=worker_id,
+        ) from exc
+
+
+def _hardware_observation(worker_id, family, value, observed_at):
     devices: list[ObservedGpuDevice] = []
     if family == "macos":
         records = (
@@ -415,7 +479,7 @@ def _probe_worker_capabilities(
     )
     try:
         return WorkerHardwareObservation(
-            worker.worker_id,
+            worker_id,
             stamp,
             family,
             str(value["os_name"]),

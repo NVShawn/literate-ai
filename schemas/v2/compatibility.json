@@ -254,7 +254,14 @@
     "literate-ai/freebsd-retained-unit-parameters@1",
     "literate-ai/retained-unit-package-request@1",
     "literate-ai/retained-unit-package-result-shard@1",
-    "literate-ai/retained-unit-package-set-result@1"
+    "literate-ai/retained-unit-package-set-result@1",
+    "literate-ai/retained-unit-package-policy@1",
+    "literate-ai/retained-unit-native-tool-observations@1",
+    "literate-ai/retained-unit-package-planning-evidence@1",
+    "literate-ai/retained-unit-package-inspection@1",
+    "literate-ai/retained-unit-link-proof@1",
+    "literate-ai/retained-unit-package-execution-plan@1",
+    "literate-ai/retained-unit-package-execution@1"
   ],
   "read_paths": [
     {

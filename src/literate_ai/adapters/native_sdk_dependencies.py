@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
 from literate_ai.adapters.dependencies.types import HostDependencyObservation
@@ -143,14 +143,63 @@ def merge_native_sdk_dependencies(
 def project_native_sdk_dependencies(
     binding: NativeSdkConsumerInput, *, root: Path, runtime: dict[str, object]
 ) -> NativeSdkDependencyEvidence:
-    """Project an observed materialization, preserving every native dependency.
-
-    The consumer-input service owns producer and byte verification. This pure
-    projection cannot authenticate caller-supplied SDK or runtime records.
-    """
+    """Project a live owner's actual observed materialization, including aliases."""
     built = binding.build
-    sdk = built.product.snapshot
-    layout = built.selection.recipe.layout
+    resolution = built.resolution
+    lock = resolution.lock
+    source_resolution = CycloneDxRepositorySourceResolution(
+        repository_dependency_identity(lock.dependency),
+        lock.resolved_commit,
+        lock.identity,
+        lock.source_snapshot,
+        lock.source_tree,
+        lock.resolver,
+        resolution.index_binding.identity,
+        resolution.admission.identity,
+        resolution.cache_record,
+    )
+    return project_native_sdk_dependency_assertions(
+        input_identity=binding.identity,
+        snapshot=built.product.snapshot,
+        operating_system=built.selection.recipe.layout.operating_system,
+        architecture=built.selection.recipe.layout.architecture,
+        consumer_revision=built.selection.component_revision,
+        source_resolution=source_resolution,
+        source_admission_identity=resolution.admission.identity,
+        root=root.resolve(strict=True),
+        runtime=runtime,
+    )
+
+
+def project_native_sdk_dependency_assertions(
+    *,
+    input_identity,
+    snapshot,
+    operating_system,
+    architecture,
+    consumer_revision,
+    source_resolution,
+    source_admission_identity,
+    root,
+    runtime,
+):
+    """Normalize historical records using a caller-owned explicit path value.
+
+    No path is opened or resolved here. Decoded source/runtime records remain
+    assertions and never become a source producer or SDK execution owner.
+    """
+    if (
+        not isinstance(root, PurePath)
+        or not root.is_absolute()
+        or ".." in root.parts
+        or not isinstance(input_identity, ContentIdentity)
+        or not isinstance(consumer_revision, ContentIdentity)
+        or not isinstance(source_resolution, CycloneDxRepositorySourceResolution)
+        or source_resolution.source_lock_identity != snapshot.source_lock_identity
+        or source_resolution.admission_identity != source_admission_identity
+    ):
+        raise ValueError("SDK dependency projection requires exact portable assertions")
+    sdk = snapshot
     if (
         runtime.get("schema")
         != (
@@ -160,8 +209,8 @@ def project_native_sdk_dependencies(
         )
         or runtime.get("snapshot_identity") != sdk.identity.to_dict()
         or runtime.get("target_identity") != sdk.target_identity.to_dict()
-        or runtime.get("operating_system") != layout.operating_system
-        or runtime.get("architecture") != layout.architecture
+        or runtime.get("operating_system") != operating_system
+        or runtime.get("architecture") != architecture
     ):
         raise ValueError("SDK dependency observation differs from the bound product")
     raw_components = runtime.get("components")
@@ -171,13 +220,13 @@ def project_native_sdk_dependencies(
         isinstance(value, list) for value in (raw_components, raw_edges, libraries)
     ):
         raise ValueError("SDK dependency observation must contain a complete graph")
-    package_ref = f"urn:literate-ai:native-sdk:{binding.identity.digest}"
+    package_ref = f"urn:literate-ai:native-sdk:{input_identity.digest}"
     original_root = sdk.identity.uri
     refs = {original_root: package_ref}
     components: dict[str, dict[str, object]] = {}
     relative_by_ref = {}
     files = {item.path: item.blob for item in sdk.files}
-    exact_root = root.resolve(strict=True)
+    exact_root = root
     root_prefix = exact_root.as_posix() + "/"
     native_prefix = str(exact_root) + ("\\" if "\\" in str(exact_root) else "/")
     path_property = {
@@ -185,7 +234,7 @@ def project_native_sdk_dependencies(
         "linux": "literate-ai:elf-path",
         "macos": "literate-ai:macho-path",
         "windows": "literate-ai:pe-path",
-    }[layout.operating_system]
+    }[operating_system]
     for raw in raw_components:
         if not isinstance(raw, dict):
             raise ValueError("SDK dependency component must be an object")
@@ -251,7 +300,7 @@ def project_native_sdk_dependencies(
         if component["bom-ref"] in components:
             raise ValueError("SDK dependency image references collide after projection")
         components[component["bom-ref"]] = component
-    if layout.operating_system == "freebsd":
+    if operating_system == "freebsd":
         native_refs = frozenset(
             raw["bom-ref"]
             for raw in raw_components
@@ -338,28 +387,15 @@ def project_native_sdk_dependencies(
             pending.extend(graph[current] - seen)
     if seen != set(refs):
         raise ValueError("SDK dependency graph contains disconnected components")
-    resolution = built.resolution
-    lock = resolution.lock
-    source_resolution = CycloneDxRepositorySourceResolution(
-        repository_dependency_identity(lock.dependency),
-        lock.resolved_commit,
-        lock.identity,
-        lock.source_snapshot,
-        lock.source_tree,
-        lock.resolver,
-        resolution.index_binding.identity,
-        resolution.admission.identity,
-        resolution.cache_record,
-    )
     metadata = {
-        "input": binding.identity,
+        "input": input_identity,
         "snapshot": sdk.identity,
         "recipe": sdk.recipe_identity,
         "target": sdk.target_identity,
         "license": sdk.license_identity,
         "import-surface": sdk.import_surface.identity,
-        "source-lock": lock.identity,
-        "source-admission": resolution.admission.identity,
+        "source-lock": sdk.source_lock_identity,
+        "source-admission": source_admission_identity,
         "source-resolution": source_resolution.identity,
     }
     components[package_ref] = {
@@ -402,7 +438,7 @@ def project_native_sdk_dependencies(
                 ),
             )
         )
-    edges.add((component_bom_ref(built.selection.component_revision), package_ref))
+    edges.add((component_bom_ref(consumer_revision), package_ref))
     edges.add(
         (
             package_ref,
@@ -410,7 +446,7 @@ def project_native_sdk_dependencies(
         )
     )
     return NativeSdkDependencyEvidence(
-        binding.identity,
+        input_identity,
         source_resolution,
         canonical_json_bytes([components[ref] for ref in sorted(components)]),
         tuple(sorted(edges)),

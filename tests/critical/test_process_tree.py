@@ -1,15 +1,450 @@
 from __future__ import annotations
 
+import json
 import os
+import shutil
+import signal
 import subprocess
 import sys
 import tempfile
 import time
 import unittest
+from contextlib import contextmanager
+from datetime import UTC, datetime, timedelta
+from importlib.resources import files
 from pathlib import Path
 from unittest import mock
 
 from literate_ai.adapters import _processes
+from literate_ai.adapters.action_dispatch_wire import (
+    ActionDispatchDeadline,
+    encode_action_request,
+)
+from literate_ai.adapters.freebsd_owned_attempt import (
+    FreeBsdOwnedAttemptError,
+    run_owned_freebsd_attempt,
+)
+from literate_ai.adapters.retained_receiver_attempt import (
+    reserve_retained_receiver_attempt,
+)
+from literate_ai.application.action_dag_scheduler import (
+    LifecycleActionDispatchRequest,
+    LifecycleActionKind,
+    LifecycleActionNode,
+    LifecycleActionWorker,
+)
+from literate_ai.contracts import canonical_identity, canonical_json_bytes
+
+
+@unittest.skipUnless(
+    sys.platform.startswith("freebsd"), "requires native FreeBSD reaper"
+)
+class FreeBsdAttemptOwnershipTests(unittest.TestCase):
+    """Real kernel ownership must reach nested sessions and survive parent loss."""
+
+    def test_parent_boundary_preserves_failure_status_and_cleans_revoked_nested_job(
+        self,
+    ):
+        root = Path(tempfile.mkdtemp(prefix="freebsd-owned-parent-test-")).resolve()
+        cleanup_verified = True
+        options = {
+            "cwd": root,
+            "staging_root": root,
+            "environment": {
+                "PATH": os.environ["PATH"],
+                "HOME": str(root),
+                "TMPDIR": str(root),
+                "LC_ALL": "C",
+            },
+            "stdout_limit_bytes": 4096,
+            "stderr_limit_bytes": 4096,
+        }
+        try:
+            cleanup_verified = False
+            dispatch, deadline, registration = self.dispatch_request()
+            config_path = root / "private-receiver.json"
+            with reserve_retained_receiver_attempt(
+                config_path, dispatch, registration, deadline
+            ) as attempt:
+                result = run_owned_freebsd_attempt(
+                    [
+                        sys.executable,
+                        "-c",
+                        "import sys;"
+                        "from literate_ai.adapters import "
+                        "freebsd_owned_attempt as owned;"
+                        "owned.OwnedFreeBsdChild().require_current();"
+                        "sys.stdout.buffer.write(sys.stdin.buffer.read());"
+                        "sys.stderr.write('owned');sys.exit(17)",
+                    ],
+                    **options,
+                    input_bytes=b"owned-input\x00",
+                    expires_at=datetime.now(UTC) + timedelta(seconds=20),
+                    admission_guard=lambda: None,
+                )
+                attempt.release_after_native_empty()
+            self.assertFalse((root / "private-receiver.json.attempt").exists())
+            cleanup_verified = True
+            self.assertEqual(result.returncode, 17, result.stderr)
+            self.assertEqual(result.stdout, b"owned-input\x00")
+            self.assertEqual(result.stderr, b"owned")
+            # Cancellation remains sticky when the requesting child exits zero
+            # before the guardian polls its pipe, and also kills a blocked job.
+            for after in ("sys.exit(0)", "time.sleep(60)"):
+                cleanup_verified = False
+                with reserve_retained_receiver_attempt(
+                    config_path, dispatch, registration, deadline
+                ) as attempt:
+                    try:
+                        run_owned_freebsd_attempt(
+                            [
+                                sys.executable,
+                                "-c",
+                                "import sys,time;"
+                                "from literate_ai.adapters import "
+                                "freebsd_owned_attempt as owned;"
+                                "owned.OwnedFreeBsdChild().cancel();" + after,
+                            ],
+                            **options,
+                            expires_at=datetime.now(UTC) + timedelta(seconds=20),
+                            admission_guard=lambda: None,
+                        )
+                    except FreeBsdOwnedAttemptError as exc:
+                        cleanup_verified = exc.cleanup_verified
+                        try:
+                            attempt.retain_diagnostic(exc)
+                        finally:
+                            if exc.cleanup_verified:
+                                attempt.release_after_native_empty()
+                        self.assertEqual(exc.reason, "cancelled")
+                        self.assertTrue(exc.cleanup_verified)
+                        self.assertFalse(exc.quarantine_required)
+                    else:
+                        self.fail("child cancellation returned a result")
+                self.assertFalse((root / "private-receiver.json.attempt").exists())
+            diagnostics = tuple(root.glob("private-receiver.json.attempt.*.json"))
+            self.assertEqual(len(diagnostics), 2)
+            self.assertTrue(
+                all(json.loads(p.read_bytes())["cleanup_verified"] for p in diagnostics)
+            )
+            child_pid = root / "nested.pid"
+            sleeper = root / "sleeper.py"
+            sleeper.write_text(
+                "import os,sys,time\n"
+                "open(sys.argv[1],'w').write(str(os.getpid()))\n"
+                "time.sleep(60)\n"
+            )
+
+            def current():
+                if child_pid.exists():
+                    raise RuntimeError("fixture admission was revoked")
+
+            cleanup_verified = False
+            try:
+                run_owned_freebsd_attempt(
+                    [
+                        sys.executable,
+                        "-c",
+                        "import subprocess,sys,time;"
+                        "subprocess.Popen(sys.argv[1:],start_new_session=True);"
+                        "time.sleep(60)",
+                        sys.executable,
+                        str(sleeper),
+                        str(child_pid),
+                    ],
+                    **options,
+                    expires_at=datetime.now(UTC) + timedelta(seconds=20),
+                    admission_guard=current,
+                )
+            except FreeBsdOwnedAttemptError as exc:
+                cleanup_verified = exc.cleanup_verified
+                self.assertEqual(exc.reason, "admission-revoked")
+                self.assertTrue(exc.cleanup_verified)
+                self.assertFalse(exc.quarantine_required)
+            else:
+                self.fail("revoked admission returned a result")
+            with self.assertRaises(ProcessLookupError):
+                os.kill(int(child_pid.read_text()), 0)
+        finally:
+            if cleanup_verified:
+                shutil.rmtree(root)
+            else:
+                raise RuntimeError(
+                    f"native ownership unproven; fixture retained at {root}"
+                )
+
+    def test_owned_attempt_cleans_nested_sessions_and_preserves_unrelated_process(self):
+        with self.fixture() as (root, processes, guardians):
+            supervisor = Path(
+                str(files("literate_ai").joinpath("freebsd_attempt_supervisor.py"))
+            )
+            unrelated = subprocess.Popen(
+                [sys.executable, "-c", "import time;time.sleep(60)"]
+            )
+            processes.append(unrelated)
+            sleeper = root / "sleeper.py"
+            sleeper.write_text(
+                "import os,sys,time\n"
+                "open(sys.argv[1],'w').write(str(os.getpid()))\n"
+                "time.sleep(60)\n"
+            )
+            nested = root / "nested.py"
+            nested.write_text(
+                "import os,sys\n"
+                "from pathlib import Path\n"
+                "from literate_ai.adapters.builders._process "
+                "import run_bounded_process\n"
+                "run_bounded_process(sys.argv[1:],cwd=Path.cwd(),environment=os.environ,"
+                "timeout_seconds=45,stdout_limit_bytes=1024,stderr_limit_bytes=1024,"
+                "error_prefix='fixture.nested',terminate_descendants=True)\n"
+            )
+            orphan = root / "orphan.py"
+            orphan.write_text(
+                "import os,sys,time\n"
+                "child=os.fork()\n"
+                "if child==0:\n"
+                " os.setsid()\n"
+                " if os.fork():os._exit(0)\n"
+                " for fd in (0,1,2):\n"
+                "  try:os.close(fd)\n"
+                "  except OSError:pass\n"
+                " open(sys.argv[1],'w').write(str(os.getpid()))\n"
+                " time.sleep(60)\n"
+                " os._exit(0)\n"
+                "os.waitpid(child,0)\n"
+                "while not os.path.exists(sys.argv[1]):time.sleep(.01)\n"
+            )
+            for label, command, seconds, expected in (
+                (
+                    "nested",
+                    [
+                        sys.executable,
+                        str(nested),
+                        sys.executable,
+                        str(sleeper),
+                        str(root / "nested.pid"),
+                    ],
+                    8,
+                    "deadline",
+                ),
+                (
+                    "orphan",
+                    [sys.executable, str(orphan), str(root / "orphan.pid")],
+                    20,
+                    "completed",
+                ),
+            ):
+                with self.subTest(case=label):
+                    request = self.request(root, command, seconds)
+                    read_end, write_end = os.pipe()
+                    try:
+                        process = subprocess.Popen(
+                            [
+                                sys.executable,
+                                str(supervisor),
+                                "--control-fd",
+                                str(read_end),
+                            ],
+                            pass_fds=(read_end,),
+                            start_new_session=True,
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                        )
+                        guardians.append((process, None))
+                        output, errors = process.communicate(
+                            json.dumps(request).encode(), timeout=40
+                        )
+                    finally:
+                        os.close(read_end)
+                        os.close(write_end)
+                    self.assertTrue(output, errors.decode(errors="replace"))
+                    response = json.loads(output)
+                    self.assertEqual(response["nonce"], request["nonce"])
+                    self.assertEqual(response["reason"], expected)
+                    self.assertTrue(response["cleanup"]["empty"])
+                    self.assertEqual(response["cleanup"]["signal_failures"], 0)
+                    self.assertEqual(response["cleanup"]["descendants"], 0)
+                    pid = int((root / (label + ".pid")).read_text())
+                    with self.assertRaises(ProcessLookupError):
+                        os.kill(pid, 0)
+                    self.assertIsNone(unrelated.poll())
+
+    def test_parent_disappearance_cancels_and_drains_the_owned_attempt(self):
+        with self.fixture() as (root, processes, guardians):
+            supervisor = str(
+                files("literate_ai").joinpath("freebsd_attempt_supervisor.py")
+            )
+            child_pid = root / "owned.pid"
+            request = self.request(
+                root,
+                [
+                    sys.executable,
+                    "-c",
+                    "import os,sys,time;"
+                    "open(sys.argv[1],'w').write(str(os.getpid()));time.sleep(60)",
+                    str(child_pid),
+                ],
+                30,
+            )
+            request_file = root / "request.json"
+            request_file.write_text(json.dumps(request))
+            output_file = root / "response.json"
+            guardians.append((None, output_file))
+            driver = root / "driver.py"
+            dispatch, deadline, registration = self.dispatch_request()
+            config_path = root / "private-receiver.json"
+            wire_path = root / "dispatch.json"
+            wire_path.write_bytes(
+                encode_action_request(
+                    dispatch,
+                    deadline,
+                    {
+                        dispatch.action.payload_identity: canonical_json_bytes(
+                            "native-receiver-attempt-fixture"
+                        )
+                    },
+                )
+            )
+            driver.write_text(
+                "import os,subprocess,sys,time\n"
+                "from pathlib import Path\n"
+                "from literate_ai.adapters.action_dispatch_wire "
+                "import decode_attested_action_request\n"
+                "from literate_ai.adapters.retained_receiver_attempt "
+                "import reserve_retained_receiver_attempt\n"
+                "from literate_ai.contracts import ContentIdentity\n"
+                f"request,deadline,_,_=decode_attested_action_request(Path({str(wire_path)!r}).read_bytes())\n"
+                f"reservation=reserve_retained_receiver_attempt(Path({str(config_path)!r}),request,ContentIdentity.parse_uri({registration.uri!r}),deadline)\n"
+                "reservation.__enter__()\n"
+                "r,w=os.pipe()\n"
+                f"p=subprocess.Popen([sys.executable,{supervisor!r},'--control-fd',str(r)],"
+                f"pass_fds=(r,),start_new_session=True,stdin=open({str(request_file)!r},'rb'),"
+                f"stdout=open({str(output_file)!r},'wb'),"
+                f"stderr=open({str(root / 'guardian.stderr')!r},'wb'))\n"
+                f"open({str(root / 'guardian.pid')!r},'w').write(str(p.pid))\n"
+                "os.close(r)\n"
+                "time.sleep(60)\n"
+            )
+            parent = subprocess.Popen([sys.executable, str(driver)])
+            processes.append(parent)
+            until = time.monotonic() + 15
+            while not child_pid.exists() and time.monotonic() < until:
+                time.sleep(0.02)
+            self.assertTrue(child_pid.exists())
+            parent.kill()
+            parent.wait(timeout=5)
+            until = time.monotonic() + 15
+            while time.monotonic() < until:
+                if output_file.exists() and output_file.read_bytes().endswith(b"\n"):
+                    break
+                time.sleep(0.02)
+            response = json.loads(output_file.read_bytes())
+            self.assertEqual(response["nonce"], request["nonce"])
+            self.assertEqual(response["reason"], "cancelled")
+            self.assertTrue(response["cleanup"]["empty"])
+            self.assertEqual(response["cleanup"]["signal_failures"], 0)
+            with self.assertRaises(ProcessLookupError):
+                os.kill(int(child_pid.read_text()), 0)
+            # The original parent died without receiving its native empty proof.
+            # A new process must not infer authority from the saved response or
+            # disappearance of the old PID and silently reuse that reservation.
+            marker = root / "private-receiver.json.attempt"
+            retained = marker.read_bytes()
+            with self.assertRaises(FileExistsError):
+                with reserve_retained_receiver_attempt(
+                    config_path, dispatch, registration, deadline
+                ):
+                    self.fail("parent-loss reservation was silently recovered")
+            self.assertEqual(marker.read_bytes(), retained)
+
+    @staticmethod
+    def dispatch_request():
+        identity = canonical_identity("native-receiver-attempt-fixture")
+        worker = LifecycleActionWorker("native-fixture", identity, identity, identity)
+        node = LifecycleActionNode(
+            "native-fixture-package",
+            identity,
+            LifecycleActionKind.PACKAGE,
+            identity,
+            (),
+            (worker.worker_id,),
+        )
+        deadline = ActionDispatchDeadline(datetime.now(UTC) + timedelta(seconds=60))
+        request = LifecycleActionDispatchRequest(
+            identity, node, worker, 0, (), deadline.identity
+        )
+        return request, deadline, identity
+
+    @staticmethod
+    def request(root, command, seconds):
+        return {
+            "schema": "literate-ai/freebsd-owned-attempt-request@1",
+            "nonce": "0123456789abcdef" * 2,
+            "command": command,
+            "cwd": str(root),
+            "staging_root": str(root),
+            "environment": {
+                "PATH": os.environ["PATH"],
+                "HOME": str(root),
+                "TMPDIR": str(root),
+                "LC_ALL": "C",
+            },
+            "input": None,
+            "expires_at": (datetime.now(UTC) + timedelta(seconds=seconds)).isoformat(),
+            "stdout_limit_bytes": 4096,
+            "stderr_limit_bytes": 4096,
+            "cleanup_timeout_milliseconds": 10000,
+        }
+
+    @contextmanager
+    def fixture(self):
+        root = Path(tempfile.mkdtemp(prefix="freebsd-reaper-test-")).resolve()
+        processes, guardians = [], []
+        try:
+            yield root, processes, guardians
+        finally:
+            errors = []
+            for process in processes:
+                self.stop_fixture_process(process)
+            for process, response_path in guardians:
+                try:
+                    if process is not None:
+                        if process.poll() is None:
+                            process.send_signal(signal.SIGTERM)
+                        output, _errors = process.communicate(timeout=15)
+                        response_path = root / f"guardian-{process.pid}-final.json"
+                        response_path.write_bytes(output)
+                    else:
+                        until = time.monotonic() + 15
+                        while time.monotonic() < until:
+                            if (
+                                response_path.exists()
+                                and response_path.read_bytes().endswith(b"\n")
+                            ):
+                                break
+                            time.sleep(0.02)
+                    response = json.loads(response_path.read_bytes())
+                    if response.get("cleanup", {}).get("empty") is not True:
+                        raise RuntimeError("native subtree emptiness unproven")
+                except Exception as exc:
+                    errors.append(type(exc).__name__)
+            if errors:
+                raise RuntimeError(
+                    "native guardian cleanup unproven; "
+                    f"fixture retained at {root}: {errors}"
+                )
+            shutil.rmtree(root)
+
+    @staticmethod
+    def stop_fixture_process(process):
+        if process.poll() is None:
+            process.send_signal(signal.SIGTERM)
+            try:
+                process.wait(timeout=15)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
 
 
 class _Process:

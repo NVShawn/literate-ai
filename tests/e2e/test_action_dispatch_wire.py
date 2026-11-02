@@ -212,6 +212,50 @@ class CommandActionDispatchTests(unittest.TestCase):
                 self.assertEqual(len(self.admissions), probes)
                 self.assertEqual(len(boundaries), 2 if mode == "attest" else 1)
 
+        # The retained PACKAGE consumer requires the measured boundary itself;
+        # a successful legacy response must not enter the result store here.
+        for mode in ("attest", "ok"):
+            with self.subTest(required_attestation=mode):
+                self.results.clear()
+                self.admissions.clear()
+                boundaries.clear()
+                dispatcher, request = self.dispatcher(mode, attested_boundary=boundary)
+                if mode == "attest":
+                    outcome, content = dispatcher.dispatch_attested_record(request)
+                    self.assertEqual(self.results[outcome.result_identity], content)
+                    self.assertEqual(
+                        json.loads(content)["input"],
+                        request.action.payload_identity.uri,
+                    )
+                    # A completed transport does not erase cancellation before
+                    # the following metadata/archive import has been admitted.
+                    dispatcher.validate_request_state(request)
+                    dispatcher.cancel(request)
+                    with self.assertRaises(ActionWireError) as cancelled:
+                        dispatcher.validate_request_state(request)
+                    self.assertEqual(
+                        cancelled.exception.code, "action_dispatch.cancelled"
+                    )
+                else:
+                    with self.assertRaises(ActionWireError) as failed:
+                        dispatcher.dispatch_attested_record(request)
+                    self.assertEqual(
+                        failed.exception.code, "action_dispatch.attestation_required"
+                    )
+                    self.assertEqual(
+                        failed.exception.unknown_ownership_request, request
+                    )
+                    self.assertEqual(self.results, {})
+                self.assertEqual(self.admissions, [])
+                self.assertEqual(len(boundaries), 2 if mode == "attest" else 1)
+        self.results.clear()
+        dispatcher, request = self.dispatcher()
+        with self.assertRaises(ActionWireError) as failed:
+            dispatcher.dispatch_attested_record(request)
+        self.assertEqual(failed.exception.code, "action_dispatch.attestation_required")
+        self.assertFalse(hasattr(failed.exception, "unknown_ownership_request"))
+        self.assertEqual(self.results, {})
+
     def test_corrupt_worker_result_never_enters_result_store(self):
         dispatcher, request = self.dispatcher("corrupt")
         with self.assertRaisesRegex(ActionWireError, "content identity"):

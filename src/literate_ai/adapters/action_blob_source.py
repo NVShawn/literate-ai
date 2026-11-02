@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 from http.client import HTTPException
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -74,10 +75,54 @@ class HttpActionBlobSource:
         self.opener = None
 
     def fetch(self, reference: BlobRef) -> bytes:
-        if not isinstance(reference, BlobRef) or reference.size > MAX_SOURCE_BYTES:
+        output = io.BytesIO()
+        self.copy_to(
+            reference,
+            output,
+            maximum_bytes=MAX_SOURCE_BYTES,
+            admission_guard=lambda: None,
+        )
+        return output.getvalue()
+
+    def copy_to(
+        self,
+        reference: BlobRef,
+        output,
+        *,
+        maximum_bytes: int,
+        admission_guard,
+        cancelled=lambda: False,
+    ) -> int:
+        """Stream an explicitly bounded blob into caller-owned private staging.
+
+        This method grants no admission and never publishes a destination path.
+        The caller discards staging on failure and independently verifies the
+        complete artifact before any live PACKAGE admission. Legacy fetch keeps
+        its original source-byte ceiling.
+        """
+        if (
+            type(maximum_bytes) is not int
+            or not 1 <= maximum_bytes <= 2**63 - 1
+            or not callable(admission_guard)
+            or not callable(cancelled)
+            or not callable(getattr(output, "write", None))
+        ):
+            raise TypeError("streamed CAS requires finite policy, sink and live guard")
+        if not isinstance(reference, BlobRef) or reference.size > maximum_bytes:
             raise ActionWireError(
                 "action_source.blob_invalid", "source blob exceeds its bound"
             )
+
+        def current():
+            self.deadline.remaining()
+            if cancelled():
+                raise ActionWireError(
+                    "action_source.cancelled", "source CAS retrieval was cancelled"
+                )
+            admission_guard()
+            self.deadline.remaining()
+
+        current()
         headers = {"Accept-Encoding": "identity"}
         if self.bearer_token is not None:
             headers["Authorization"] = "Bearer " + self.bearer_token
@@ -112,31 +157,38 @@ class HttpActionBlobSource:
                     raise ActionWireError(
                         "action_source.size_mismatch", "source CAS size mismatch"
                     )
-                content = bytearray()
+                count = 0
                 digest = hashlib.sha256()
                 while True:
-                    self.deadline.remaining()
-                    chunk = response.read1(
-                        min(64 * 1024, reference.size - len(content) + 1)
-                    )
+                    current()
+                    chunk = response.read1(min(64 * 1024, reference.size - count + 1))
                     if not chunk:
                         break
-                    content.extend(chunk)
-                    if len(content) > reference.size:
+                    count += len(chunk)
+                    if count > reference.size:
                         raise ActionWireError(
                             "action_source.size_mismatch", "source CAS size mismatch"
                         )
                     digest.update(chunk)
-                self.deadline.remaining()
-                if (
-                    len(content) != reference.size
-                    or digest.hexdigest() != reference.digest
-                ):
+                    remaining = memoryview(chunk)
+                    while remaining:
+                        current()
+                        written = output.write(remaining)
+                        if type(written) is not int or not 1 <= written <= len(
+                            remaining
+                        ):
+                            raise ActionWireError(
+                                "action_source.sink_invalid",
+                                "source CAS staging write was incomplete",
+                            )
+                        remaining = remaining[written:]
+                current()
+                if count != reference.size or digest.hexdigest() != reference.digest:
                     raise ActionWireError(
                         "action_source.digest_mismatch",
                         "source CAS bytes differ from manifest",
                     )
-                return bytes(content)
+                return count
         except (HTTPError, URLError, HTTPException, OSError, ValueError) as exc:
             if isinstance(exc, HTTPError):
                 exc.close()

@@ -38,6 +38,7 @@ def action_receiver_command(
         "--describe-tool-dependencies",
         "--verify-tool-selectors",
         "--describe-finalize-grant",
+        "--read-return-blob",
     ):
         raise ActionWireError(
             "action_transport.mode_invalid", "unsupported receiver mode"

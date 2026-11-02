@@ -322,6 +322,10 @@ class NativeSdkConsumerInputs:
 
     def reobserve_runtime(self, value: MaterializedNativeSdkInput) -> None:
         """Recheck SDK bytes and the native dependency graph at a launch boundary."""
+        self.retain_runtime_observation(value)
+
+    def retain_runtime_observation(self, value: MaterializedNativeSdkInput) -> BlobRef:
+        """Return immutable observation bytes after the same genuine live checks."""
         self.require_unchanged()
         for service, binding in self._inputs:
             if binding != value.binding:
@@ -342,7 +346,7 @@ class NativeSdkConsumerInputs:
             )
             if evidence.identity != value.dependencies.identity:
                 raise ValueError("SDK runtime dependencies changed before execution")
-            return
+            return observed
         raise ValueError("SDK runtime input is not bound to this consumer owner")
 
     def require_execution_authorized(
