@@ -44,6 +44,16 @@ owner controls still run unprivileged. Private-inspector owner tests use a mocke
 workspace and do not prove native private allocation; the separate disabled-UFS
 refusal and enabled-UFS acceptance requirements remain unchanged.
 
+## SDK source admission bounds
+
+Native SDK source admission accepts at most 1,000,000 files, 1 GiB per file
+and 16 GiB in total. These finite SDK-specific bounds provide headroom for large
+source trees and resources. The source closure retains admitted bytes in memory;
+size the worker for the selected source tree. General authoring-input limits and independently
+selected retained-tree/package policies remain unchanged. Source capture,
+identity verification, security scanning, build authorization and changed-source
+refusal still apply to every admitted file.
+
 ## Run and inspect
 
 Push the candidate first, then supply its complete 40-character commit ID:

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Tests: isolate original-adoption CLI diagnostics while preserving complete
+  project snapshots and recorded refusal telemetry.
+
+- Native SDK source admission: allow up to 1,000,000 files, 1 GiB per file and
+  16 GiB total while preserving source identity, security and custody checks.
+
 - Retained packaging foundation: add bounded canonical tree shards and explicit
   unit ownership with typed dependencies. Preserve composed link topology and
   shared structural directories without copying another unit's payload. Public
