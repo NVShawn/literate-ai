@@ -21,6 +21,7 @@ from literate_ai.adapters.action_capabilities import (
 from literate_ai.adapters.action_dispatch_wire import (
     ActionDispatchDeadline,
     ActionWireError,
+    decode_attested_action_response,
     encode_action_request,
     record_identity,
 )
@@ -104,6 +105,8 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
             workspace = root / "workspace"
             workspace.mkdir()
             touched = root / "executed"
+            authority = root / "authority"
+            authority.write_bytes(b"approved")
             worker = ExecutionWorker(
                 "retained-receiver",
                 ExecutionWorkerKind.SSH,
@@ -124,6 +127,8 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                         "cas": str(cas.root),
                         "workspace": str(workspace),
                         "touched": str(touched),
+                        "authority": str(authority),
+                        "custom_measurement": False,
                     }
                 )
             )
@@ -134,15 +139,44 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                 "from literate_ai.action_worker import main\n"
                 "from literate_ai.adapters.action_retained_unit_package_worker "
                 "import ConfiguredRetainedUnitPackageWorker\n"
+                "from literate_ai.adapters.retained_package_capability "
+                "import RegisteredRetainedPackageCapabilityProbe\n"
                 "from literate_ai.contracts import ContentIdentity\n"
                 "from literate_ai.contracts.execution_dispatch import ExecutionWorker\n"
                 "v=json.loads(Path(sys.argv[1]).read_text())\n"
+                "registered=Path(sys.argv[1]).read_bytes()\n"
+                "def registered_current():\n"
+                " if Path(sys.argv[1]).read_bytes()!=registered:"
+                "raise RuntimeError('registration changed')\n"
+                "def full_current():\n"
+                " registered_current()\n"
+                " if Path(v['authority']).read_bytes()!=b'approved':"
+                "raise RuntimeError('authority changed')\n"
+                "def run(context):\n"
+                " Path(v['touched']).write_text('entered')\n"
+                " context.require_current()\n"
+                " Path(v['authority']).write_bytes(b'changed')\n"
+                " context.require_current()\n"
+                " Path(v['touched']).write_text('unsafe completion')\n"
+                " raise RuntimeError('revoked authority reached completion')\n"
+                "class CustomMeasurementsWorker(ConfiguredRetainedUnitPackageWorker):\n"
+                " def execute(self,*args,**kwargs):\n"
+                "  observed=kwargs['measure_capability']()\n"
+                "  class PretendProbe(RegisteredRetainedPackageCapabilityProbe):\n"
+                "   def __init__(self):pass\n"
+                "   def require_binding(self,*args):pass\n"
+                "   def require_registered_current(self):pass\n"
+                "   def __call__(self):return observed\n"
+                "  kwargs['measure_capability']=(PretendProbe() "
+                "if v['custom_measurement']=='subclass' else lambda:observed)\n"
+                "  return super().execute(*args,**kwargs)\n"
                 "i=ContentIdentity.parse_uri(v['identity'])\n"
-                "worker=ConfiguredRetainedUnitPackageWorker("
+                "Worker=CustomMeasurementsWorker if v['custom_measurement'] "
+                "else ConfiguredRetainedUnitPackageWorker\n"
+                "worker=Worker("
                 "ExecutionWorker.from_dict(v['worker']),i,i,i,i,"
                 "v['input'].encode(),"
-                "lambda context:Path(v['touched']).write_text('ran'),"
-                "lambda:None)\n"
+                "run,full_current,poll_guard=registered_current)\n"
                 "raise SystemExit(main(['--cas',v['cas'],'--workspace',v['workspace'],"
                 "*sys.argv[2:]],package_worker=worker))\n"
             )
@@ -201,5 +235,44 @@ class RetainedPackageReceiverScopeTests(unittest.TestCase):
                     self.assertEqual(result.returncode, 2, result.stderr)
                     self.assertEqual(result.stdout, b"")
                     self.assertFalse(touched.exists())
+                    self.assertEqual(tuple(cas.iter_refs()), before)
+                    self.assertEqual(tuple(workspace.iterdir()), ())
+            # Matching cached capability data from a custom callback cannot
+            # replace full authority freshness. Both real receiver paths refuse
+            # an authority change made during the registered action.
+            for custom in (False, True, "subclass"):
+                with self.subTest(custom_measurement=custom):
+                    private = json.loads(settings.read_text())
+                    private["custom_measurement"] = custom
+                    settings.write_text(json.dumps(private))
+                    authority.write_bytes(b"approved")
+                    if touched.exists():
+                        touched.unlink()
+                    request = LifecycleActionDispatchRequest(
+                        identity, node, route, 0, (), deadline.identity, (payload,)
+                    )
+                    result = subprocess.run(
+                        command,
+                        input=encode_action_request(
+                            request,
+                            deadline,
+                            {payload: intent},
+                            capability=observed.capability_identity,
+                        ),
+                        capture_output=True,
+                        env=environment,
+                        timeout=30,
+                    )
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    outcome, record, attested = decode_attested_action_response(
+                        result.stdout, request
+                    )
+                    self.assertEqual(
+                        outcome.failure_code, "action_source.custody_unavailable"
+                    )
+                    self.assertIsNone(outcome.result_identity)
+                    self.assertIsNone(record)
+                    self.assertIsNone(attested)
+                    self.assertEqual(touched.read_text(), "entered")
                     self.assertEqual(tuple(cas.iter_refs()), before)
                     self.assertEqual(tuple(workspace.iterdir()), ())

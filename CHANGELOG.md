@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Retained PACKAGE capability refresh: bind canonical measurement to the exact
+  private action and perform fresh full intent validation once per refresh.
+  Registration and native ownership checks bracket measurement; custom callbacks
+  and lookalike probe subclasses retain the original full validation path.
+
 - Retained PACKAGE supervision: check the attempt and private registration during
   frequent parent polls; retain full intent validation before native launch and
   final admission, plus the child's live authority checks. Prelaunch refusals

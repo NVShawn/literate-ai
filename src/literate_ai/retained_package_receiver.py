@@ -159,10 +159,13 @@ def _configured_worker(config, *, owned_child=None):
     ):
         raise ValueError("retained.receiver.original-ssh-plan-required")
 
-    def current():
+    def registered_current():
         config.require_unchanged()
         if owned_child is not None:
             owned_child.require_current()
+
+    def current():
+        registered_current()
         fresh, code = execute_retained_unit_package_from_args(config.args)
         if code != 0 or fresh != preview:
             raise ValueError("retained.receiver.authorized-intent-changed")
@@ -194,6 +197,7 @@ def _configured_worker(config, *, owned_child=None):
         retained_unit_package_input(preview["request"]),
         run,
         current,
+        poll_guard=registered_current,
     )
 
 
