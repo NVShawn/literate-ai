@@ -1,0 +1,34 @@
+{
+  "schema": "literate-ai/issue-resolution-evidence@1",
+  "issue": 210,
+  "source_commit": "761bcec2b",
+  "qualified_commit": "75e50c041cb6c139e303cacd04f652bc5eb9a3b1",
+  "ci_url": "https://github.com/jordanhubbard/literate-ai/actions/runs/41436786502",
+  "ci_jobs_passed": 27,
+  "source_and_test_equivalence": {
+    "src/literate_ai/adapters/harness_inventory.py": "70b19b1b33b2beb5f2fe440ab220af5c0fd521eef344645fc6e2fcf5650e8829",
+    "src/literate_ai/adapters/project_initialization.py": "08d152c09026aa1d2e8d3b34d577c7c27821a44eaf2134192fcaf9712ae083c7",
+    "tests/smoke/test_rust_adoption_detection.py": "9c28a2c299cc7917b324cf79a1763f3147af2908a07e5d0efe53f75f195abeab",
+    "tests/smoke/test_cargo_wrapper_adoption.py": "b3fb5a303eb05d0057c713a309dfedd136c5a989128778bee0a1c0766492f8cb"
+  },
+  "installed_distribution_identity": "sha256:6cdf52e870da6beddceb37a772908ac17c72c1ff70ffb311ea3e5f81f5baf68d",
+  "focused_tests": {
+    "passed": 4,
+    "skipped": 0,
+    "failed": 0,
+    "surface": "canonical initializer through test adapter; not a separate public CLI journey",
+    "log_sha256": "5a8a37e7af3d818cfdd4a7fa2a579627b4929f00c3e1eb6da1ae1f1d203ce0b6"
+  },
+  "independent_reviewer": "review_pr239",
+  "functional_resolution": {
+    "wrapper_build_flavor": "legacy-shim",
+    "refined_monorepo_build_flavor": "legacy-shim",
+    "project_rust_cargo_defaults_preserved": true,
+    "native_offline_cargo_baseline": "passed",
+    "native_offline_cargo_parity": "passed"
+  },
+  "public_cli_journey_claimed": false,
+  "latest_main_qualification_claimed": false,
+  "release_complete": false,
+  "observed_main": "0d7f0c5c87182ff2390982c1cee9377968f65dd6"
+}

@@ -464,7 +464,7 @@ def has_bazel_markers(root: Path) -> bool:
 def source_language_markers(root: Path) -> set[str]:
     """Return detected source languages without requiring a full-tree count."""
 
-    found: set[str] = set()
+    found: set[str] = {"javascript"} if _regular_file(root / "package.json") else set()
     for _dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [
             name
@@ -481,7 +481,9 @@ def source_language_markers(root: Path) -> set[str]:
                 found.add("elixir")
             elif lower.endswith(".rs"):
                 found.add("rust")
-        if {"python", "cpp", "elixir", "rust"} <= found:
+            elif lower.endswith((".js", ".jsx", ".mjs", ".cjs")):
+                found.add("javascript")
+        if {"python", "cpp", "elixir", "rust", "javascript"} <= found:
             break
     return found
 

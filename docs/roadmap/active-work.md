@@ -31974,16 +31974,20 @@ feedback. Canonical curriculum and generated lifecycle admission remain open.
 
 ### [ ] RELEASE-INTEGRATION-005 — Resolve the outstanding tracker backlog and publish 1.4.0
 
-- **Release target:** 1.4.0
+- **Release execution:** 1.4.0 (publication and postpublication closure)
 - **Detailed plan:** [1.4 integration](1.4-integration.md).
-- **Next action in progress:** finish current-issue acceptance and native qualification after PRs #237/#238 landed; obtain explicit acceptance for Proposed ADRs before their implementation.
+- **Phase boundary:** This umbrella remains open through publication and read-back.
+  All 1.4.0 readiness goals, issue/review closure, native qualification and release
+  checks remain prerequisites through the release policy. Its own publication
+  outcome is recorded after synchronization rather than required before publication.
+- **Next action in progress:** qualify the combined current fixes from PRs #254/#255/#256/#257, preserve the live native PACKAGE candidate unchanged, and finish all remaining issue, native and release gates. Proposed ADRs still require explicit acceptance before implementation.
 
 - **Priority:** P0
 - **Owner:** framework integration and release engineering; PROJECT Goals 1, 3, 4, 5 and 6
 - **Direction:** Resolve all outstanding PRs and issues and release 1.4.
 - **Conclusion:** Include the current four reviews and 51 issues, audit their actual implementation and acceptance, preserve all eight existing 1.4 goals, and publish only the exact completely qualified 1.4.0 candidate. No issue or goal is silently deferred or closed from partial evidence.
 - **Depends on:** none
-- **Completion prerequisites:** none
+- **Completion prerequisites:** release:1.4.0:synchronized
 - **Implementation:**
   - [x] Review and consolidate PRs 198, 228, 232 and 233; preserve all source, authority and roadmap changes and pass exact integration CI. All four reviews are merged; exact head 228c121c passes CI 41282538479 and lands through PR 237 at 48b1e312. Later adoption fixes land through PR 238 at ad979c6e after exact-head CI 41288058754. These are integration results, not release qualification.
   - [ ] Reproduce or audit each issue, implement its owning fix or reviewed resolution, record decisive evidence, and comment and close only after the resolution lands.
@@ -32199,19 +32203,22 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **GitHub issue:** [#203](https://github.com/jordanhubbard/literate-ai/issues/203)
 - **Priority:** P1
 - **Owner:** read-only harness language inventory and project adoption Flavor inference; issue 203
+- **Remaining issue scope:** The original report also names a pnpm workspace omitted from the language union and proposed Flavors. Preserve JavaScript alongside Rust and helper languages without executing source or replacing the primary Cargo build/package selection.
 - **Direction:** A retained Cargo workspace with Python/C++ helpers is inferred as C++/Python and never proposes its Rust/Cargo packaging Flavors.
 - **Conclusion:** Recognize Rust sources in the bounded conventional inventory, preserve the full detected language union, and use a root Cargo manifest as the primary Rust signal unless the existing root CMake driver takes precedence. Propose Cargo packaging only for the detected primary Cargo/Rust workspace; preserve other build selection behavior.
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
   - [ ] Exercise the public read-only conversion plan on a mixed Cargo tree and correct source-language/default Flavor inference without executing project source.
+  - [ ] Include root Node package manifests and conventional JavaScript sources in mixed-language discovery; preserve Cargo/CMake precedence and generated/hidden-tree exclusion.
 - **Evidence:**
   - [ ] Reproduce the missing Rust proposal, then verify Rust/Cargo packaging, mixed-language reporting, generated/hidden-tree exclusion, CMake precedence and absence of plan writes.
 
 - **Development evidence:** Three new Rust inventory/plan controls pass, including read-only input preservation, helper-language reporting, hidden/generated exclusion and CMake precedence. The missing Rust marker reproduces before the fix.
+- **Remaining Node scope evidence:** The extended mixed Rust/pnpm plan reproduces missing JavaScript before the correction. Four focused plan/native Cargo controls now pass without skips, including manifest-only and source-only JavaScript discovery, CMake precedence and unchanged input bytes. Independent source review approves the correction; full regression and exact qualification remain pending.
 - **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
 
-### [ ] RETAINED-BUILD-COREQ-001 — Keep retained wrapper locks on their delegation Flavor
+### [x] RETAINED-BUILD-COREQ-001 — Keep retained wrapper locks on their delegation Flavor
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#210](https://github.com/jordanhubbard/literate-ai/issues/210)
@@ -32222,14 +32229,14 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** RUST-ADOPTION-DETECT-001
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Reproduce native Cargo conversion refusal, then select the canonical delegation Flavor for wrapper and refined retained Components without changing original commands.
+  - [x] Reproduce native Cargo conversion refusal, then select the canonical delegation Flavor for wrapper and refined retained Components without changing original commands.
 - **Evidence:**
-  - [ ] Run actual offline Cargo conversion and inspect retained wrapper lock/source/baseline evidence; preserve CMake and Elixir adoption behavior and fail-closed unmatched selectors.
+  - [x] Run actual offline Cargo conversion and inspect retained wrapper lock/source/baseline evidence; preserve CMake and Elixir adoption behavior and fail-closed unmatched selectors.
 
 - **Development evidence:** A native offline Cargo adoption reproduces the original lock refusal, then completes actual baseline and wrapper parity with the existing legacy-shim build Flavor. Root Rust/Cargo defaults and original source remain intact. Six existing retained receipt cases pass.
-- **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+- **Resolution evidence:** The landed shim selection is byte-identical across the installed runtime, observed main `0d7f0c5` and exact green CI head with all 27 jobs passed. Four installed-runtime controls pass without skips, including actual offline Cargo baseline/parity and the shim lock. Independent review confirms both wrapper and refined-monorepo paths. [Functional closure evidence](../../verification/cargo-adoption-lock-resolution.json); [issue resolution](https://github.com/jordanhubbard/literate-ai/issues/210#issuecomment-6580472246). This is not a separate public CLI journey or completion of latest-main/release qualification.
 
-### [ ] RETAINED-OUTPUT-DIAG-001 — Distinguish retained command failures from capped diagnostic excerpts
+### [x] RETAINED-OUTPUT-DIAG-001 — Distinguish retained command failures from capped diagnostic excerpts
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#180](https://github.com/jordanhubbard/literate-ai/issues/180)
@@ -32240,12 +32247,14 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 - **Depends on:** none
 - **Completion prerequisites:** none
 - **Implementation:**
-  - [ ] Run genuine Python unittest processes with oversized stdout, preserve successful retained admission, and make nonzero-exit diagnostic wording distinguish the failure from excerpt capping.
+  - [x] Run genuine Python unittest processes with oversized stdout, preserve successful retained admission, and make nonzero-exit diagnostic wording distinguish the failure from excerpt capping.
 - **Evidence:**
-  - [ ] Verify three actual passing unittest cases remain admitted above the stdout recording cap, a real failing case remains refused, excerpts stay bounded and stream identities remain present.
+  - [x] Verify three actual passing unittest cases remain admitted above the stdout recording cap, a real failing case remains refused, excerpts stay bounded and stream identities remain present.
 
 - **Development evidence:** Two real-process controls pass: three genuine Python unittest cases are admitted above the recorded stdout cap with the exact independently computed full stdout SHA-256; a real failing case stays rejected and names capped excerpts separately from its exit status. Recording and acceptance limits remain unchanged.
 - **Next action:** finish affected regression and admission, land on green, then comment and close the issue.
+
+- **Reviewed integration closure:** All 27 jobs at qualified `bc6ce1bd` pass, and the landed wording/tests are unchanged at observed main `1abbf13`. Independent review confirms corrected issue scope and both real-process stdout/failure controls. [Functional evidence](../../verification/retained-output-diagnostics-resolution.json); [issue outcome](https://github.com/jordanhubbard/literate-ai/issues/180#issuecomment-6581853621). Current integration and overall release qualification remain separate.
 
 ### [ ] RELEASE-README-VERIFY-001 — Verify the published release against the remote default-branch README
 
@@ -32457,7 +32466,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   the reviewed quarantine. Exact integration and installed qualification remain
   required before issue closure.
 
-### [ ] ADOPT-GIT-CUSTODY-001 — Preserve tracked ignored files and relative aliases through conversion moves
+### [x] ADOPT-GIT-CUSTODY-001 — Preserve tracked ignored files and relative aliases through conversion moves
 
 - **Release target:** 1.4.0
 - **GitHub issues:** [#208](https://github.com/jordanhubbard/literate-ai/issues/208),
@@ -32476,7 +32485,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
         bytes, and prove mixed line endings survive source copying and rollback.
 - **Evidence:**
   - [x] Reproduce ignored tracked file loss; prove a real conversion baseline sees that source, untracked siblings remain, staged intent survives roundtrip, and forced move failure restores prior entries.
-  - [ ] Run conversion, source-scope and adoption regressions and required review/static gates; require exact integration and installed qualification before issues close.
+  - [x] Run conversion, source-scope and adoption regressions and required review/static gates; require exact integration and installed qualification before issues close.
 
 - **Development evidence:** Before repair, four regression cases produce three
   failures and one rollback error. After repair, 31 conversion/adoption controls
@@ -32501,7 +32510,9 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   LF/CRLF copying, rollback and unchanged staged index; focused lint and formatting
   pass. Native Windows rerun remains required.
 
-### [ ] ADOPT-LIFT-ROLLBACK-001 — Restore original custody after failed lift-shift parity
+- **Reviewed integration closure:** The four unconditional custody cases that failed in Windows run `41322306715`, plus the mixed-line-ending regression, pass in the complete Windows shards of qualified run `41450986972`; all 27 jobs pass. Qualified `bc6ce1bd` and observed main `1abbf13` have identical repair/tests. POSIX public-CLI controls and installed-wheel adoption also pass. This supersedes the earlier pending Windows rerun note; it does not claim Windows Phase 1.2 fault execution. [Bounded evidence](../../verification/lift-shift-recovery-resolution.json).
+
+### [x] ADOPT-LIFT-ROLLBACK-001 — Restore original custody after failed lift-shift parity
 
 - **Release target:** 1.4.0
 - **GitHub issue:** [#209](https://github.com/jordanhubbard/literate-ai/issues/209)
@@ -32517,7 +32528,7 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   - [x] Roll back failed lift-shift only after checking complete source quarantine custody; preserve an explicit recovery error otherwise.
 - **Evidence:**
   - [x] Inject a failure at actual Phase 1.2 parity after real baseline and Phase 1.1 work; prove source, relative aliases and staged Git intent restored. Prove incomplete recovery retains originals and reports failure.
-  - [ ] Run adoption, move/custody and harness regressions plus required review/static checks; require exact integration and installed qualification before issue 209 closes.
+  - [x] Run adoption, move/custody and harness regressions plus required review/static checks; require exact integration and installed qualification before issue 209 closes.
 
 - **Development evidence:** Three Phase 1.2 fault controls fail before repair and
   pass after it. The public CLI runs the real baseline and both parity phases
@@ -32536,6 +32547,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
   181 Mermaid render checks pass. Project authority verification passes; the
   full lifecycle receipt remains stale. Exact integrated and installed
   qualification are still required before closing the issue or release goal.
+
+- **Reviewed integration closure:** The required adoption/custody regression and integrated installed qualification pass at `bc6ce1bd`, with unchanged repair/tests at observed main `1abbf13`. Independent review verifies exact Phase 1.2 fault recovery and preservation controls; prerequisite ADOPT-GIT-CUSTODY-001 is satisfied by the recorded Windows custody rerun, not removed. [Functional evidence](../../verification/lift-shift-recovery-resolution.json); [issue outcome](https://github.com/jordanhubbard/literate-ai/issues/209#issuecomment-6581866830). This does not claim a dedicated unmodified installed failure reproduction or Windows Phase 1.2 CLI execution.
 
 ### [ ] ADOPT-JS-DEPS-001 — Document explicit JavaScript dependencies for retained adoption sandboxes
 

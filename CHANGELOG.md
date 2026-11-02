@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Adoption: include Node manifests and JavaScript sources in mixed-language plans,
+  including Rust/pnpm workspaces, while preserving primary Cargo/CMake selection.
+
 - Retained PACKAGE diagnostics: preserve authenticated worker failure frames and
   completed native guardian responses before reservation release. Bounded failure
   locations omit exception arguments and host paths; recovery records remain
