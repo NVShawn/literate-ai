@@ -180,6 +180,7 @@ def execute_and_import_retained_unit_package(
     sdk_snapshots=lambda: (),
     cancelled=lambda: False,
     verification_selection=None,
+    specification_context=lambda: None,
 ):
     """Dispatch through live worker admission and import only its exact result.
 
@@ -194,7 +195,8 @@ def execute_and_import_retained_unit_package(
         or not isinstance(policy, RetainedUnitPackagePolicy)
         or not isinstance(store, FileSystemCAS)
         or not all(
-            callable(value) for value in (source_guard, sdk_snapshots, cancelled)
+            callable(value)
+            for value in (source_guard, sdk_snapshots, cancelled, specification_context)
         )
     ):
         raise TypeError("retained.unit.live-controller-context-required")
@@ -409,7 +411,11 @@ def execute_and_import_retained_unit_package(
         current_sdk_snapshots=sdk_snapshots(),
     )
     projection = plan_retained_unit_packages(
-        inputs, pkg_tool=pkg_tool, tar_tool=tar_tool, **policy.owner_arguments()
+        inputs,
+        pkg_tool=pkg_tool,
+        tar_tool=tar_tool,
+        specification_context=specification_context(),
+        **policy.owner_arguments(),
     )
     _require(
         projection.set_plan.identity.uri == execution["set_plan_identity"]

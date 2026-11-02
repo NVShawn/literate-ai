@@ -75,7 +75,16 @@ def current_project_component_locks(
     evidence, so an absent lock is not itself an invalid catalog entry.
     """
 
-    locks: list[ComponentLock] = []
+    return tuple(
+        lock for lock, _catalog in current_project_component_lock_bindings(project)
+    )
+
+
+def current_project_component_lock_bindings(
+    project: LoadedProject,
+) -> tuple[tuple[ComponentLock, ComponentCatalogSnapshot], ...]:
+    """Preserve each verified selection's canonical source-reference context."""
+    bindings: list[tuple[ComponentLock, ComponentCatalogSnapshot]] = []
     reader = FilesystemLockedGenerationAuthorityReader()
     catalog = None
     try:
@@ -91,7 +100,7 @@ def current_project_component_locks(
                     "project Component lock set could not be inspected",
                 ) from exc
             lock, catalog = _read_current_component_lock(component, reader, catalog)
-            locks.append(lock)
+            bindings.append((lock, catalog))
     except ProjectComponentLockSetError:
         raise
     except (
@@ -103,13 +112,13 @@ def current_project_component_locks(
             getattr(exc, "code", "component_lock.project_lock_set_invalid"),
             getattr(exc, "message", str(exc)),
         ) from exc
-    result = tuple(sorted(locks, key=lambda item: item.identity.uri))
+    result = tuple(sorted(bindings, key=lambda item: item[0].identity.uri))
     if not result:
         raise ProjectComponentLockSetError(
             "component_lock.missing",
             "project has no persisted Component locks",
         )
-    if len({item.identity.uri for item in result}) != len(result):
+    if len({item[0].identity.uri for item in result}) != len(result):
         raise ProjectComponentLockSetError(
             "component_lock.project_lock_set_ambiguous",
             "project Component lock identities must be unique",

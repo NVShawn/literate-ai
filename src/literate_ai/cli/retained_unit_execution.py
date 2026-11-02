@@ -22,6 +22,9 @@ from literate_ai.adapters.retained_project_unit_packages import (
 )
 from literate_ai.adapters.retained_unit_link import link_retained_unit_packages
 from literate_ai.adapters.retained_unit_results import read_retained_unit_results
+from literate_ai.adapters.retained_unit_specifications import (
+    bind_retained_unit_specifications,
+)
 from literate_ai.adapters.retained_unit_tool_observations import (
     retained_unit_tool_observations,
 )
@@ -59,6 +62,14 @@ def execute_retained_unit_package_from_args(
     )
     manifest, selected, planning = authority()
     plan = planning.plan
+    specification_context = bind_retained_unit_specifications(
+        project,
+        project.root,
+        manifest,
+        current_project_component_locks(project),
+        maximum_units=policy.max_units,
+        maximum_memory_bytes=policy.max_provider_memory_bytes,
+    )
     verifying = args.retained_unit_command in {"verify-plan", "verify"}
     if verifying:
         from .retained_unit_verification import verification_selection_from_args
@@ -171,7 +182,11 @@ def execute_retained_unit_package_from_args(
         if current_plan() != plan:
             raise ValueError("retained.unit.execution-authority-changed")
         owner = RetainedProjectUnitPackages(
-            admission, pkg_tool=pkg_tool, tar_tool=tar_tool, **policy.owner_arguments()
+            admission,
+            pkg_tool=pkg_tool,
+            tar_tool=tar_tool,
+            specification_context=specification_context,
+            **policy.owner_arguments(),
         )
         evidence = owner.retain_planning_evidence()
         handoff = link_retained_unit_packages(owner)

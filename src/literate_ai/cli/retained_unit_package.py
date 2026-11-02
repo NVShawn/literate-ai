@@ -19,6 +19,9 @@ from literate_ai.adapters.retained_unit_inspection import (
     retained_unit_metadata_reference,
 )
 from literate_ai.adapters.retained_unit_results import read_retained_unit_results
+from literate_ai.adapters.retained_unit_specifications import (
+    bind_retained_unit_specifications,
+)
 from literate_ai.adapters.retained_unit_tool_observations import (
     parse_retained_unit_tool_observations,
     retained_unit_tool_observations,
@@ -91,7 +94,18 @@ def _read_context(args):
         maximum_metadata_memory_bytes=policy.max_provider_memory_bytes,
     )
     projection = plan_retained_unit_packages(
-        inputs, pkg_tool=pkg_tool, tar_tool=tar_tool, **policy.owner_arguments()
+        inputs,
+        pkg_tool=pkg_tool,
+        tar_tool=tar_tool,
+        specification_context=bind_retained_unit_specifications(
+            project,
+            inputs.source,
+            inputs.source_manifest,
+            inputs.component_locks,
+            maximum_units=policy.max_units,
+            maximum_memory_bytes=policy.max_provider_memory_bytes,
+        ),
+        **policy.owner_arguments(),
     )
     return project, inputs, projection, policy, observations, authority
 

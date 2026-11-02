@@ -31,6 +31,10 @@ from literate_ai.adapters.retained_project_receipt import (
     select_retained_package_payload,
 )
 from literate_ai.adapters.retained_unit_graphs import prepare_retained_unit_graph
+from literate_ai.adapters.retained_unit_specifications import (
+    UNIT_REQUEST_SUFFIX,
+    RetainedUnitSpecificationContext,
+)
 from literate_ai.contracts.blobs import BlobRef
 from literate_ai.contracts.component_locking import ComponentLock
 from literate_ai.contracts.executable_components.packages import (
@@ -66,8 +70,6 @@ from literate_ai.contracts.retained_unit_packages import (
 from literate_ai.contracts.retained_unit_partition import RetainedUnitPartition
 from literate_ai.contracts.retained_unit_requests import RetainedUnitPackageRequest
 from literate_ai.storage.cas import FileSystemCAS
-
-UNIT_REQUEST_SUFFIX = ".package-unit.json"
 
 
 def _reference(content, media_type="application/json"):
@@ -153,6 +155,7 @@ class _RetainedUnitPackagePlanner:
         max_provider_metadata_bytes=64 * 1024**2,
         max_provider_memory_bytes=256 * 1024**2,
         max_verified_record_cache_bytes=1024**3,
+        specification_context=None,
     ):
         if not isinstance(inputs, RetainedUnitPackagePlanningInputs):
             raise TypeError("retained.unit.typed-planning-inputs-required")
@@ -161,6 +164,11 @@ class _RetainedUnitPackagePlanner:
         ):
             raise TypeError("retained.unit.explicit-package-limits-required")
         self.inputs, self.pkg_tool, self.tar_tool = inputs, pkg_tool, tar_tool
+        if specification_context is not None and not isinstance(
+            specification_context, RetainedUnitSpecificationContext
+        ):
+            raise TypeError("retained.unit.current-reference-context-required")
+        self.specification_context = specification_context
         composed_freebsd_tool_identity(pkg_tool, tar_tool)
         self.limits, self.per_unit_limits = limits, per_unit_limits
         self.max_units, self.max_dependencies, self.max_metadata_bytes = (
@@ -275,6 +283,14 @@ class _RetainedUnitPackagePlanner:
     def _requests(self, members):
         wanted = {}
         memory = 128 * len(members)
+        context = self.specification_context
+        if context is not None:
+            context.require_current(
+                self.inputs.source,
+                self.inputs.source_manifest,
+                self.inputs.component_locks,
+            )
+            memory += context.memory_bytes
         self._lock_ids = {}
         for lock in self.inputs.component_locks:
             node = next(
@@ -292,15 +308,18 @@ class _RetainedUnitPackagePlanner:
                     raise ValueError(
                         "retained.unit.request-index-memory-policy-exceeded"
                     )
-                wanted.setdefault((spec.uri, spec.identity.digest), []).append(
+                if not spec.uri.endswith(UNIT_REQUEST_SUFFIX):
+                    continue
+                source_path = (
+                    spec.uri if context is None else context.path_for(lock, spec)
+                )
+                wanted.setdefault((source_path, spec.identity.digest), []).append(
                     (lock, node.revision, spec)
                 )
         result, total = [], 0
         self._spec_members = {}
         for member in members.values():
             key = (member.path, member.sha256)
-            if key in wanted and member.symlink_target is None:
-                self._spec_members[key] = member
             if not member.path.endswith(UNIT_REQUEST_SUFFIX) or key not in wanted:
                 continue
             if (
@@ -310,6 +329,7 @@ class _RetainedUnitPackagePlanner:
             ):
                 raise ValueError("retained.unit.locked-regular-request-required")
             for lock, revision, spec in wanted[key]:
+                self._spec_members[(lock.identity, spec.uri, spec.identity)] = member
                 total += member.size
                 if (
                     len(result) >= self.max_units
@@ -351,6 +371,11 @@ class _RetainedUnitPackagePlanner:
         source = inputs.source_manifest
         if (
             128 * len(source.members)
+            + (
+                self.specification_context.memory_bytes
+                if self.specification_context
+                else 0
+            )
             > self.provider_policy["max_provider_memory_bytes"]
         ):
             raise ValueError("retained.unit.source-index-memory-policy-exceeded")
@@ -421,7 +446,7 @@ class _RetainedUnitPackagePlanner:
             # do not duplicate all sibling unit declarations into every archive.
             for spec_identity in (request_identity,):
                 member = self._spec_members.get(
-                    (request_spec.uri, spec_identity.digest)
+                    (lock_identity, request_spec.uri, spec_identity)
                 )
                 if member is None:
                     raise ValueError("retained.unit.locked-specification-bytes-missing")

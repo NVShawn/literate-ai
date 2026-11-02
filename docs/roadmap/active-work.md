@@ -32805,6 +32805,8 @@ PR #228 conflict-resolution evidence: merged main `9550a17743cf983a790dd22de471f
 
 ### [ ] RETAINED-UNIT-PACKAGE-001 — Deliver per-unit retained tree packages and verified FreeBSD transport
 
+- **2026-11-02 nested-source qualification correction:** The exact installed SDK-currentness candidate reaches per-unit planning in the actual authenticated FreeBSD round trip, then refuses with `retained.unit.locked-package-unit-specifications-required` after 2,559.261 seconds. Native empty-subtree cleanup is verified; no PACKAGE/LINK admission or downstream unblock is claimed. Locked specification references are Component-relative, while retained source members are project-relative. Qualify references through the already selected canonical catalog at each public planning/execution boundary, preserve the explicit standalone root-reference contract, and carry the exact qualified member association into package evidence. Basename, suffix, digest-only and failed-lookup fallbacks are not acceptable. Add actual nested public-lock/retained-package coverage with an identical-byte misplaced declaration, then renew source review, complete regression, installed/native PACKAGE/LINK and required negative controls.
+
 - **Priority:** P0
 - **Release target:** 1.4.0
 - **GitHub issue:** [#235](https://github.com/jordanhubbard/literate-ai/issues/235)

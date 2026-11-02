@@ -127,6 +127,7 @@ class _LoadedFlavor:
     revision: FlavorRevision
     selection: FlavorSelectionCandidate
     source_identity: ContentIdentity
+    source_size: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -134,6 +135,7 @@ class _LoadedAuthoring:
     root: Path
     authoring: ComponentAuthoring
     source_identity: ContentIdentity
+    source_size: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -221,6 +223,17 @@ class ComponentCatalogSnapshot:
                 "component_lock.stale", "selected Component authoring changed"
             )
         return content
+
+    def retained_memory_estimate(self) -> int:
+        """Conservatively account for retaining this parsed catalog graph.
+
+        Discovery remains subject to project catalog policy. A longer-lived
+        consumer additionally charges the decoded graph against its own budget.
+        """
+        return sum(
+            8192 + 16 * entry.source_size
+            for entry in (*self._authorings, *self._flavors)
+        )
 
     def component_content(
         self, authoring_identity: ContentIdentity, reference: ContentReference
@@ -897,7 +910,9 @@ def _load_authoring_entry(path: Path, *, project_root: Path) -> _LoadedAuthoring
         raise ComponentLockPlanningError(
             "component_lock.authoring_invalid", "component.md is invalid"
         ) from exc
-    return _LoadedAuthoring(path.parent, authoring, _bytes_identity(content))
+    return _LoadedAuthoring(
+        path.parent, authoring, _bytes_identity(content), len(content)
+    )
 
 
 def _component_closure(
@@ -1228,6 +1243,7 @@ def _load_flavors(
                     coordinate_uri=definition.coordinate.uri,
                 ),
                 source_identity,
+                len(content),
             )
         )
     aliases = [item.selection.flavor_id for item in loaded]
